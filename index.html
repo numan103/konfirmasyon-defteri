@@ -383,6 +383,7 @@
     font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--text-2); cursor: pointer;
   }
   .auth-tabs button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(23,25,35,0.08); }
+  .auth-tabs.hidden + #auth-form { margin-top: 22px; }
   .auth-field { margin-bottom: 12px; }
   .auth-field label {
     display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
@@ -400,7 +401,10 @@
   }
   .auth-submit:hover { background: #4c4cc4; }
   .auth-submit:disabled { opacity: 0.6; cursor: default; }
-  .auth-msg { font-size: 12.5px; line-height: 1.5; margin-top: 12px; min-height: 16px; text-align: center; }
+  .auth-alt { display: flex; justify-content: center; gap: 14px; margin-top: 12px; }
+  .auth-link { background: transparent; border: none; color: var(--acc); font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 2px; }
+  .auth-link:hover { text-decoration: underline; }
+  .auth-msg { font-size: 12.5px; line-height: 1.5; margin-top: 10px; min-height: 16px; text-align: center; }
   .auth-msg.err { color: var(--red); }
   .auth-msg.ok { color: var(--green); }
   .hidden { display: none !important; }
@@ -414,6 +418,89 @@
     color: var(--text-2); cursor: pointer;
   }
   .user-badge .logout:hover { background: var(--acc-soft); border-color: var(--acc); color: var(--acc); }
+  /* --- Tanıtım (landing) sayfası --- */
+  #landing { display: none; position: fixed; inset: 0; z-index: 150; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #landing.open { display: block; }
+  .lp-nav { max-width: 1000px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .lp-brand { display: flex; align-items: center; gap: 11px; }
+  .lp-brand .logo-mark { width: 38px; height: 38px; border-radius: 10px; background: var(--acc); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+  .lp-brand h1 { font-size: 17px; font-weight: 700; }
+  .lp-brand .sub { font-size: 11.5px; color: var(--text-3); font-weight: 500; }
+  .nav-login { background: var(--acc); border: none; color: #fff; border-radius: 10px; padding: 9px 18px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+  .nav-login:hover { background: #4c4cc4; }
+  .lp-hero { max-width: 780px; margin: 0 auto; padding: 46px 20px 26px; text-align: center; }
+  .lp-badge { display: inline-block; font-size: 12px; font-weight: 600; color: var(--acc); background: var(--acc-soft); padding: 6px 13px; border-radius: 999px; margin-bottom: 20px; }
+  .lp-hero h2 { font-size: clamp(28px, 6vw, 44px); line-height: 1.12; letter-spacing: -0.02em; font-weight: 700; margin-bottom: 16px; }
+  .lp-hero > p { font-size: clamp(15px, 2.4vw, 18px); color: var(--text-2); line-height: 1.6; max-width: 620px; margin: 0 auto 28px; }
+  .lp-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .lp-cta button { border-radius: 11px; padding: 13px 26px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .lp-cta .primary { background: var(--acc); border: none; color: #fff; }
+  .lp-cta .primary:hover { background: #4c4cc4; }
+  .lp-cta .ghost { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+  .lp-cta .ghost:hover { border-color: var(--acc); color: var(--acc); }
+  .lp-features { max-width: 1000px; margin: 0 auto; padding: 26px 20px 56px; display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 720px) { .lp-features { grid-template-columns: 1fr 1fr; } }
+  .lp-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+  .lp-card .ic { width: 42px; height: 42px; border-radius: 11px; background: var(--acc-soft); display: flex; align-items: center; justify-content: center; font-size: 21px; margin-bottom: 12px; }
+  .lp-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .lp-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+  .lp-foot { text-align: center; padding: 22px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); }
+  /* Landing ürün görseli (mockup) */
+  .lp-shot-wrap { max-width: 720px; margin: 6px auto 0; padding: 0 20px; }
+  .lp-shot { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 44px rgba(23,25,35,0.13); overflow: hidden; }
+  .shot-bar { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--border); background: #fafbfe; }
+  .shot-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .shot-bar span:nth-child(1) { background: #ff5f57; }
+  .shot-bar span:nth-child(2) { background: #febc2e; }
+  .shot-bar span:nth-child(3) { background: #28c840; }
+  .shot-body { padding: 18px; text-align: left; }
+  .shot-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+  .shot-seg { display: flex; gap: 4px; background: #f2f3f8; padding: 4px; border-radius: 9px; }
+  .shot-seg span, .shot-seg b { font-size: 12px; padding: 5px 12px; border-radius: 6px; color: var(--text-2); font-weight: 600; }
+  .shot-seg b { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.07); }
+  .shot-main { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .shot-gauge { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 0 auto; }
+  .ring { width: 118px; height: 118px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: conic-gradient(var(--green) 87%, var(--green-soft) 0); position: relative; }
+  .ring::after { content: ''; position: absolute; inset: 11px; border-radius: 50%; background: var(--card); }
+  .ring-num { position: relative; font-size: 33px; font-weight: 700; line-height: 1; z-index: 1; }
+  .ring-lbl { position: relative; font-size: 11px; color: var(--text-3); z-index: 1; }
+  .verdict { font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
+  .verdict.ap { background: var(--green-soft); color: var(--green); }
+  .shot-crits { flex: 1; min-width: 210px; display: flex; flex-direction: column; gap: 8px; }
+  .crit { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--text); background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
+  .crit i { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 11px; font-weight: 700; flex: 0 0 auto; }
+  .crit.on i { background: var(--green-soft); color: var(--green); }
+  .crit.off { color: var(--text-3); }
+  .crit.off i { background: var(--border); color: var(--text-3); }
+  .crit em { margin-left: auto; font-style: normal; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); font-weight: 700; }
+  /* Landing — bölüm başlıkları */
+  .lp-section-head { max-width: 1000px; margin: 0 auto; padding: 44px 20px 4px; text-align: center; }
+  .lp-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--acc); }
+  .lp-section-head h3 { font-size: clamp(22px, 4vw, 30px); font-weight: 700; letter-spacing: -0.01em; margin-top: 8px; }
+  .lp-section-head > p { font-size: 15px; color: var(--text-2); max-width: 560px; margin: 10px auto 0; line-height: 1.55; }
+  /* Nasıl çalışır — adımlar */
+  .lp-steps { max-width: 1000px; margin: 0 auto; padding: 24px 20px 8px; display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 720px) { .lp-steps { grid-template-columns: repeat(3, 1fr); } }
+  .lp-step { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; }
+  .lp-step .num { width: 34px; height: 34px; border-radius: 10px; background: var(--acc); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .lp-step h4 { font-size: 15.5px; font-weight: 700; margin-bottom: 6px; }
+  .lp-step p { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+  /* Rakam kutucukları */
+  .lp-stats { max-width: 1000px; margin: 0 auto; padding: 18px 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 720px) { .lp-stats { grid-template-columns: repeat(4, 1fr); } }
+  .lp-stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; text-align: center; }
+  .lp-stat b { display: block; font-size: 22px; font-weight: 700; color: var(--acc); margin-bottom: 3px; }
+  .lp-stat span { font-size: 12.5px; color: var(--text-2); }
+  /* Kapanış çağrısı */
+  .lp-cta-band { max-width: 1000px; margin: 34px auto 0; padding: 0 20px; }
+  .lp-cta-inner { background: linear-gradient(135deg, var(--acc), #403aa0); border-radius: 20px; padding: 42px 28px; text-align: center; color: #fff; }
+  .lp-cta-inner h3 { font-size: clamp(22px, 4vw, 30px); font-weight: 700; margin-bottom: 10px; }
+  .lp-cta-inner p { font-size: 15px; opacity: 0.9; margin-bottom: 22px; }
+  .lp-cta-inner button { background: #fff; color: var(--acc); border: none; border-radius: 11px; padding: 13px 30px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .lp-cta-inner button:hover { opacity: 0.92; }
+  #auth-gate .auth-box { position: relative; }
+  .auth-x { position: absolute; top: 12px; right: 14px; background: transparent; border: none; font-size: 22px; line-height: 1; color: var(--text-3); cursor: pointer; padding: 4px; }
+  .auth-x:hover { color: var(--text); }
   .daily-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 820px) { .daily-grid { grid-template-columns: 1fr 1fr; } .dg-full { grid-column: 1 / -1; } }
   .fbox label {
@@ -554,13 +641,121 @@
 </style>
 </head>
 <body>
+<div id="landing">
+  <nav class="lp-nav">
+    <div class="lp-brand">
+      <div class="logo-mark">A</div>
+      <div>
+        <h1>Alfa Traders</h1>
+        <div class="sub">Trader'lar için Disiplin Aracı</div>
+      </div>
+    </div>
+    <button class="nav-login" id="nav-login" type="button">Giriş yap</button>
+  </nav>
+  <section class="lp-hero">
+    <span class="lp-badge">Alfa trader'lar için disiplin aracı</span>
+    <h2>İşlem kaliteni puanla,<br>disiplinini koru.</h2>
+    <p>Alfa Traders; her işlemden önce setup'ını objektif kriterlerle puanlayan, günlük bias planını tutan ve psikolojini kontrol altında tutan kişisel trade defterin. Duyguyla değil, sistemle işlem yap.</p>
+    <div class="lp-cta">
+      <button class="primary" id="hero-register" type="button">Ücretsiz kayıt ol</button>
+      <button class="ghost" id="hero-login" type="button">Giriş yap</button>
+    </div>
+  </section>
+  <div class="lp-shot-wrap">
+    <div class="lp-shot">
+      <div class="shot-bar"><span></span><span></span><span></span></div>
+      <div class="shot-body">
+        <div class="shot-head">
+          <div class="shot-seg"><b>BTC</b><span>XAU</span></div>
+          <div class="shot-seg"><b>LONG</b><span>SHORT</span></div>
+        </div>
+        <div class="shot-main">
+          <div class="shot-gauge">
+            <div class="ring"><div class="ring-num">87</div><div class="ring-lbl">puan</div></div>
+            <div class="verdict ap">A+ · Yüksek kalite</div>
+          </div>
+          <div class="shot-crits">
+            <div class="crit on"><i>✓</i> Spot CVD işlem yönünde <em>veri</em></div>
+            <div class="crit on"><i>✓</i> Key levelda <em>teknik</em></div>
+            <div class="crit on"><i>✓</i> Manipülasyon gerçekleşti <em>teknik</em></div>
+            <div class="crit on"><i>✓</i> Planlanmış entry <em>pozisyon</em></div>
+            <div class="crit off"><i>·</i> FOMO — hareket kaçıyor hissi <em>duygu</em></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="lp-section-head">
+    <div class="lp-eyebrow">Nasıl çalışır</div>
+    <h3>Üç adımda disiplinli işlem</h3>
+    <p>Duygularınla değil, önceden belirlediğin kurallarla işlem aç. Sistem senin yerine soğukkanlı kalsın.</p>
+  </div>
+  <div class="lp-steps">
+    <div class="lp-step">
+      <div class="num">1</div>
+      <h4>Kriterleri işaretle</h4>
+      <p>İşlemden önce setup kriterlerini tek tek işaretle: veri, teknik, pozisyon ve psikoloji başlıklarında.</p>
+    </div>
+    <div class="lp-step">
+      <div class="num">2</div>
+      <h4>Puanını gör</h4>
+      <p>Sistem anında bir kalite skoru ve A+ / B kararı üretir. Skor düşükse sistem seni uyarır — zayıf setup'a girme.</p>
+    </div>
+    <div class="lp-step">
+      <div class="num">3</div>
+      <h4>Kaydet & öğren</h4>
+      <p>İşlemi sonucuyla (R) defterine geç. Zamanla hangi setup'ın işe yaradığını, nerede hata yaptığını net gör.</p>
+    </div>
+  </div>
+  <div class="lp-section-head">
+    <div class="lp-eyebrow">Neler sunuyor?</div>
+    <h3>Tek yerde tüm disiplin araçların</h3>
+  </div>
+  <section class="lp-features">
+    <div class="lp-card">
+      <div class="ic">🎯</div>
+      <h3>Setup Kalite Skoru</h3>
+      <p>İşlemden önce kriterleri işaretle; sistem sana A+ / B puanı versin. Zayıf setup'ları daha girmeden gör, sadece yüksek kaliteli işlemlere odaklan.</p>
+    </div>
+    <div class="lp-card">
+      <div class="ic">🧭</div>
+      <h3>Daily Bias Planı</h3>
+      <p>Sabah senaryonu, anti-tezini ve setup planını yaz. Gün sonunda plana ne kadar uyduğunu değerlendir, tutarlılığını ölç.</p>
+    </div>
+    <div class="lp-card">
+      <div class="ic">📓</div>
+      <h3>İşlem Defteri & İstatistik</h3>
+      <p>Her işlemi yön, strateji ve sonuç (R) ile kaydet. Geçmişini, hangi setup'ın işe yaradığını ve nerede hata yaptığını net gör.</p>
+    </div>
+    <div class="lp-card">
+      <div class="ic">🧠</div>
+      <h3>Psikoloji Kilidi</h3>
+      <p>Yorgunluk, FOMO, revenge gibi durumlar puanını düşürür ve sistemi kilitler. Kötü anında kötü işlem açmanı engeller.</p>
+    </div>
+  </section>
+  <div class="lp-stats">
+    <div class="lp-stat"><b>4</b><span>Kriter kategorisi</span></div>
+    <div class="lp-stat"><b>A+ · B</b><span>Kalite kararı</span></div>
+    <div class="lp-stat"><b>∞</b><span>İşlem &amp; enstrüman</span></div>
+    <div class="lp-stat"><b>Ücretsiz</b><span>Cihazlar arası senkron</span></div>
+  </div>
+  <div class="lp-cta-band">
+    <div class="lp-cta-inner">
+      <h3>Bir sonraki işlemin daha disiplinli olsun</h3>
+      <p>Hesabını oluştur, defterin her cihazdan seninle olsun. Saniyeler sürer.</p>
+      <button id="cta-register" type="button">Ücretsiz kayıt ol</button>
+    </div>
+  </div>
+  <div class="lp-foot">Alfa Traders · Alfa trader'lar için disiplin aracı · Verilerin sana özel, hesabında güvende.</div>
+</div>
 <div id="auth-gate">
   <div class="auth-box">
+    <button class="auth-x" id="auth-close" type="button" aria-label="Kapat">&times;</button>
     <div class="auth-brand">
       <div class="logo-mark">A</div>
       <div>
         <h1>Alfa Traders</h1>
-        <div class="sub">Setup Kalitesi · Daily Bias</div>
+        <div class="sub">Trader'lar için Disiplin Aracı</div>
       </div>
     </div>
     <div class="auth-tabs">
@@ -572,15 +767,19 @@
         <label for="au-name">İsim</label>
         <input type="text" id="au-name" placeholder="Adın" autocomplete="name" maxlength="40">
       </div>
-      <div class="auth-field">
+      <div class="auth-field" id="f-email">
         <label for="au-email">E-posta</label>
-        <input type="email" id="au-email" placeholder="ornek@mail.com" autocomplete="email" required>
+        <input type="email" id="au-email" placeholder="ornek@mail.com" autocomplete="email">
       </div>
-      <div class="auth-field">
+      <div class="auth-field" id="f-pass">
         <label for="au-pass">Şifre</label>
-        <input type="password" id="au-pass" placeholder="En az 6 karakter" autocomplete="current-password" minlength="6" required>
+        <input type="password" id="au-pass" placeholder="En az 6 karakter" autocomplete="current-password" minlength="6">
       </div>
       <button type="submit" class="auth-submit" id="au-submit">Giriş yap</button>
+      <div class="auth-alt">
+        <button type="button" class="auth-link" id="forgot-link">Şifreni mi unuttun?</button>
+        <button type="button" class="auth-link hidden" id="back-login">← Girişe dön</button>
+      </div>
       <div class="auth-msg" id="au-msg"></div>
     </form>
   </div>
@@ -592,7 +791,7 @@
         <div class="logo-mark">A</div>
         <div>
           <h1>Alfa Traders</h1>
-          <div class="sub">Setup Kalitesi · Daily Bias</div>
+          <div class="sub">Trader'lar için Disiplin Aracı</div>
         </div>
       </div>
       <div class="user-badge hidden" id="user-badge">
@@ -2968,6 +3167,8 @@ async function bootApp(opts) {
 
 function showGate() { document.getElementById('auth-gate').classList.add('open'); }
 function hideGate() { document.getElementById('auth-gate').classList.remove('open'); }
+function showLanding() { document.getElementById('landing').classList.add('open'); }
+function hideLanding() { document.getElementById('landing').classList.remove('open'); }
 
 function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
@@ -3004,6 +3205,7 @@ async function onAuthed(user) {
   document.getElementById('user-name').textContent = nm;
   document.getElementById('user-badge').classList.remove('hidden');
   hideGate();
+  hideLanding();
   const wrap = document.querySelector('.wrap');
   if (wrap) wrap.classList.remove('hidden');
   await bootApp({ seed: false });
@@ -3024,39 +3226,81 @@ function bootAuth() {
   AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const $ = id => document.getElementById(id);
   let mode = 'login';
+  // Şifre sıfırlama bağlantısıyla mı gelindi? (URL'de recovery işareti)
+  let recovering = /type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search);
   const msg = (t, cls) => { const el = $('au-msg'); el.textContent = t; el.className = 'auth-msg' + (cls ? ' ' + cls : ''); };
+  // Modlar: login | register | reset (sıfırlama isteği) | newpass (yeni şifre belirle)
   const setMode = m => {
     mode = m;
-    $('tab-login').classList.toggle('on', m === 'login');
-    $('tab-register').classList.toggle('on', m === 'register');
-    $('f-name').classList.toggle('hidden', m !== 'register');
-    $('au-submit').textContent = m === 'login' ? 'Giriş yap' : 'Kayıt ol';
-    $('au-pass').setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
+    const isLogin = m === 'login', isReg = m === 'register', isReset = m === 'reset', isNew = m === 'newpass';
+    $('tab-login').classList.toggle('on', isLogin);
+    $('tab-register').classList.toggle('on', isReg);
+    document.querySelector('.auth-tabs').classList.toggle('hidden', isReset || isNew);
+    $('f-name').classList.toggle('hidden', !isReg);
+    $('f-email').classList.toggle('hidden', isNew);   // yeni şifre modunda e-posta yok
+    $('f-pass').classList.toggle('hidden', isReset);  // sıfırlama isteğinde şifre yok
+    $('forgot-link').classList.toggle('hidden', !isLogin);
+    $('back-login').classList.toggle('hidden', !isReset);
+    $('au-submit').textContent = isReg ? 'Kayıt ol' : isReset ? 'Sıfırlama bağlantısı gönder' : isNew ? 'Şifreyi güncelle' : 'Giriş yap';
+    $('au-pass').setAttribute('autocomplete', (isReg || isNew) ? 'new-password' : 'current-password');
+    $('au-pass').setAttribute('placeholder', isNew ? 'Yeni şifre (en az 6 karakter)' : 'En az 6 karakter');
     msg('', '');
   };
   $('tab-login').addEventListener('click', () => setMode('login'));
   $('tab-register').addEventListener('click', () => setMode('register'));
+  $('forgot-link').addEventListener('click', () => setMode('reset'));
+  $('back-login').addEventListener('click', () => setMode('login'));
+  // Tanıtım sayfası -> giriş penceresi
+  const openAuth = m => { hideLanding(); showGate(); setMode(m); };
+  $('nav-login').addEventListener('click', () => openAuth('login'));
+  $('hero-login').addEventListener('click', () => openAuth('login'));
+  $('hero-register').addEventListener('click', () => openAuth('register'));
+  $('cta-register').addEventListener('click', () => openAuth('register'));
+  $('auth-close').addEventListener('click', () => { hideGate(); showLanding(); });
   $('btn-logout').addEventListener('click', async () => {
     try { await pushCloud(); } catch (e) {}
     try { await AUTH.client.auth.signOut(); } catch (e) {}
     location.reload();
+  });
+  // Şifre sıfırlama bağlantısına tıklayınca Supabase bu olayı tetikler
+  AUTH.client.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      recovering = true;
+      hideLanding(); showGate(); setMode('newpass');
+    }
   });
   $('auth-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = $('au-email').value.trim();
     const pass = $('au-pass').value;
     const name = $('au-name').value.trim();
-    if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
-    if (mode === 'register' && !name) { msg('Lütfen isminizi yazın.', 'err'); return; }
     $('au-submit').disabled = true;
     try {
-      if (mode === 'register') {
+      if (mode === 'reset') {
+        if (!email) { msg('E-postanı yaz.', 'err'); return; }
+        const redirectTo = window.location.origin + window.location.pathname;
+        const { error } = await AUTH.client.auth.resetPasswordForEmail(email, { redirectTo });
+        if (error) throw error;
+        msg('Sıfırlama bağlantısı e-postana gönderildi. Gelen kutunu (ve spam) kontrol et.', 'ok');
+      } else if (mode === 'newpass') {
+        if (pass.length < 6) { msg('Yeni şifre en az 6 karakter olmalı.', 'err'); return; }
+        const { error } = await AUTH.client.auth.updateUser({ password: pass });
+        if (error) throw error;
+        recovering = false;
+        try { history.replaceState(null, '', window.location.pathname); } catch (e2) {}
+        msg('Şifren güncellendi, giriş yapılıyor…', 'ok');
+        const { data } = await AUTH.client.auth.getUser();
+        if (data && data.user) await onAuthed(data.user);
+      } else if (mode === 'register') {
+        if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
+        if (!name) { msg('Lütfen isminizi yazın.', 'err'); return; }
         const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name } } });
         if (error) throw error;
         if (data && data.session && data.user) { await onAuthed(data.user); return; }
         msg('Kayıt alındı. E-posta onayı gerekiyorsa gelen kutunu kontrol et, sonra giriş yap.', 'ok');
         setMode('login');
       } else {
+        if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
         const { data, error } = await AUTH.client.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;
         await onAuthed(data.user);
@@ -3067,19 +3311,20 @@ function bootAuth() {
       $('au-submit').disabled = false;
     }
   });
-  // Mevcut oturum var mı? Varsa doğrudan gir.
+  // Mevcut oturum var mı? Sıfırlama akışındaysak yeni şifre ekranını göster.
   AUTH.client.auth.getSession()
     .then(({ data }) => {
+      if (recovering) { hideLanding(); showGate(); setMode('newpass'); return; }
       if (data && data.session && data.session.user) onAuthed(data.session.user);
-      else showGate();
+      else showLanding();
     })
-    .catch(() => showGate());
+    .catch(() => { if (recovering) { showGate(); setMode('newpass'); } else showLanding(); });
 }
 
 if (AUTH_ENABLED) {
   const wrap = document.querySelector('.wrap');
   if (wrap) wrap.classList.add('hidden');
-  showGate();
+  showLanding();
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
