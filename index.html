@@ -1,0 +1,2827 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alfa Traders — Setup Kalitesi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5fa;
+    --card: #ffffff;
+    --border: #e6e8f0;
+    --text: #1a1d29;
+    --text-2: #5b6172;
+    --text-3: #9aa0b4;
+    --acc: #5b5bd6;
+    --acc-soft: #eeeefb;
+    --green: #16a34a;
+    --green-soft: #e8f7ee;
+    --amber: #d97706;
+    --amber-soft: #fdf3e3;
+    --red: #dc2626;
+    --red-soft: #fdeaea;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(23,25,35,0.05), 0 4px 16px rgba(23,25,35,0.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100vh; padding-bottom: 40px; font-size: 14px;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
+
+  .tophead { padding: 18px 0 4px; }
+  .tophead-inner { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 42px; height: 42px; border-radius: 12px; flex: none;
+    background: linear-gradient(135deg, #5b5bd6, #7c5cf0);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; letter-spacing: 0.02em;
+    box-shadow: 0 4px 14px rgba(91,91,214,0.35);
+  }
+  .tophead h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.01em; color: var(--text); }
+  .tophead .sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; margin-top: 1px; }
+
+  .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0 4px; }
+  .seg { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 3px 3px; box-shadow: var(--shadow); flex-wrap: wrap; }
+  .seg button {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px;
+    padding: 8px 16px; background: transparent; border: none; border-radius: 999px;
+    color: var(--text-3); cursor: pointer; transition: all 0.15s ease;
+  }
+  .seg button.on-gold { color: #fff; background: var(--acc); }
+  .seg button.on-long { color: #fff; background: var(--green); }
+  .seg button.on-short { color: #fff; background: var(--red); }
+  .seg button.addp { font-size: 15px; padding: 8px 13px; color: var(--acc); }
+  .seg button.pair-tab { position: relative; display: inline-flex; align-items: center; padding: 8px 16px; }
+  .pair-x {
+    position: absolute; top: 1px; right: 3px;
+    display: none; align-items: center; justify-content: center;
+    min-width: 14px; height: 14px; padding: 0 3px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; line-height: 1;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text-3); opacity: 0.85; cursor: pointer;
+  }
+  .seg button.pair-tab:hover .pair-x,
+  .seg button.pair-tab.on-gold .pair-x { display: inline-flex; }
+  .pair-x.armed { display: inline-flex; background: var(--red); color: #fff; border-color: var(--red); opacity: 1; top: 0; right: 1px; padding: 0 4px; font-size: 9px; }
+  .pair-tab.on-gold .pair-x { background: rgba(255,255,255,0.9); color: var(--acc); border-color: transparent; }
+  .pair-x:hover { opacity: 1; background: var(--red); color: #fff; border-color: var(--red); }
+
+  #pair-add { display: none; justify-content: center; gap: 8px; margin: 10px 0 0; }
+  #pair-add.open { display: flex; flex-wrap: wrap; }
+  #pair-add input {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 14px; padding: 9px 12px; width: 180px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  #pair-add input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+
+  .board { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 14px; }
+  @media (min-width: 820px) {
+    .board { grid-template-columns: 1fr 360px 1fr; align-items: start; }
+    .col-c { order: 2; } .col-l { order: 1; } .col-r { order: 3; }
+  }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 16px 16px 12px;
+  }
+  .panel h2 {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--text-3); text-transform: uppercase;
+    padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .panel h2 .n {
+    font-weight: 600; font-size: 11.5px; color: var(--acc);
+    background: var(--acc-soft); border-radius: 999px; padding: 2px 9px; letter-spacing: 0;
+  }
+
+  #list-veri, #list-teknik, #list-pozisyon, #list-duygu {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
+    gap: 7px; padding-top: 2px;
+  }
+  .crit {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 10px; cursor: pointer; user-select: none;
+    border: 1.5px solid var(--border); border-radius: 10px; background: #fbfbfd;
+    transition: all 0.12s ease;
+  }
+  .crit:hover { border-color: #cdd2e0; }
+  .crit.on.pos { border-color: var(--green); background: var(--green-soft); }
+  .crit.on.neg { border-color: var(--red); background: var(--red-soft); }
+  .crit .box {
+    width: 17px; height: 17px; flex: none; border: 1.5px solid #cdd2e0; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: transparent; transition: all 0.12s ease;
+    background: var(--card);
+  }
+  .crit.on.pos .box { border-color: var(--green); background: var(--green); color: #fff; }
+  .crit.on.neg .box { border-color: var(--red); background: var(--red); color: #fff; }
+  .crit .name { flex: 1; font-size: 12.5px; color: var(--text-2); line-height: 1.3; font-weight: 500; }
+  .crit.on .name { color: var(--text); font-weight: 600; }
+  .crit .pts {
+    font-size: 11.5px; font-weight: 700; color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .crit.on.pos .pts { color: var(--green); }
+  .crit.on.neg .pts { color: var(--red); }
+
+  .gauge-panel { text-align: center; padding: 20px 14px 16px; }
+  svg.dial { width: 100%; max-width: 316px; height: auto; }
+  .score-num { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 52px; fill: var(--text); }
+  .score-pct { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 20px; fill: var(--text-3); }
+  .dial-dir { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.22em; fill: var(--text-3); }
+  #verdict {
+    display: inline-block; font-weight: 700; font-size: 13.5px; letter-spacing: 0.06em;
+    margin-top: 12px; border-radius: 999px; padding: 7px 16px;
+  }
+  .v-a { color: var(--green); background: var(--green-soft); }
+  .v-b { color: var(--amber); background: var(--amber-soft); }
+  .v-no { color: var(--red); background: var(--red-soft); }
+  #risk-line { font-size: 13px; color: var(--text-2); margin-top: 8px; }
+  .zones { display: flex; justify-content: center; gap: 16px; margin-top: 12px; font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .zones i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  .subbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+    text-align: left;
+  }
+  .subbar .sb-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-3); text-transform: uppercase; flex: none; }
+  .chiprow { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+  .chip {
+    font-size: 12px; font-weight: 600; color: var(--text-2);
+    background: #f1f2f8; border: 1.5px solid transparent; border-radius: 999px;
+    padding: 5px 12px; cursor: pointer; user-select: none; transition: all 0.12s ease;
+  }
+  .chip:hover { border-color: #cdd2e0; }
+  .chip.on { color: #fff; background: var(--acc); }
+  .chip.add { color: var(--acc); background: var(--acc-soft); font-weight: 700; }
+  .chip-input {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; padding: 5px 10px; width: 150px;
+    border: 1.5px solid var(--acc); border-radius: 999px; background: var(--card); color: var(--text);
+  }
+  .chip-input:focus { outline: none; }
+
+  .mx-grid { display: grid; grid-template-columns: 52px repeat(2, 1fr); gap: 5px; margin-bottom: 8px; }
+  .mx-grid .mx-h { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-3); text-transform: uppercase; align-self: center; }
+  .mx-grid .mx-d { font-size: 12.5px; font-weight: 700; color: var(--text); align-self: center; }
+  .mx-grid select {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; padding: 6px 4px; text-align: center;
+  }
+  .mx-grid select.mx-a { color: var(--green); background: var(--green-soft); border-color: transparent; }
+  .mx-grid select.mx-b { color: var(--amber); background: var(--amber-soft); border-color: transparent; }
+  .mx-grid select.mx-y { color: var(--red); background: var(--red-soft); border-color: transparent; }
+
+  .actions { display: flex; gap: 10px; margin-top: 14px; justify-content: center; flex-wrap: wrap; }
+  button.btn {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13.5px;
+    padding: 10px 20px; cursor: pointer; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text-2);
+    box-shadow: var(--shadow); transition: all 0.12s ease;
+  }
+  button.btn:hover { border-color: #cdd2e0; }
+  button.btn.solid { background: var(--acc); border-color: var(--acc); color: #fff; }
+  button.btn.solid:hover { background: #4c4cc4; }
+  button.btn.danger { color: var(--red); }
+  button.btn:disabled { opacity: 0.4; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+  #editor { display: none; margin-top: 12px; }
+  #editor.open { display: block; }
+  .edit-head {
+    display: grid; grid-template-columns: 26px 1fr 92px 56px 56px 28px; gap: 6px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-3);
+    text-transform: uppercase; padding: 6px 8px 6px;
+  }
+  .edit-head span:nth-child(n+2) { text-align: center; }
+  .edit-row {
+    display: grid; grid-template-columns: 26px 1fr 92px 56px 56px 28px; gap: 6px; align-items: center;
+    background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px;
+    padding: 7px 8px; margin-bottom: 6px;
+  }
+  .edit-row input, .edit-row select, .th-row input {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px; padding: 7px 8px;
+  }
+  .edit-row input[type="number"] { text-align: center; padding: 7px 4px; }
+  .edit-row select { font-size: 12.5px; }
+  .edit-row input:focus, .edit-row select:focus, .th-row input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .edit-row .del { background: none; border: none; color: var(--text-3); font-size: 17px; cursor: pointer; }
+  .edit-row .del:hover { color: var(--red); }
+  .edit-row .handle {
+    display: flex; align-items: center; justify-content: center;
+    color: #c3c8d8; font-size: 15px; letter-spacing: 1px;
+    cursor: grab; touch-action: none; user-select: none;
+    padding: 8px 0; border-radius: 7px;
+  }
+  .edit-row .handle:hover { color: var(--acc); background: var(--acc-soft); }
+  .edit-row.dragging {
+    opacity: 0.92; background: var(--acc-soft);
+    border-color: var(--acc); box-shadow: 0 8px 22px rgba(91,91,214,0.25);
+    position: relative; z-index: 5;
+  }
+  .edit-row.dragging .handle { cursor: grabbing; }
+  .th-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; font-size: 13.5px; color: var(--text-2); }
+  .th-row .lbl { flex: 1; } .th-row input { width: 70px; text-align: center; }
+  .hint { font-size: 12.5px; color: var(--text-3); margin-top: 10px; line-height: 1.6; }
+  #save-note, #daily-note { font-size: 12.5px; color: var(--green); margin-top: 8px; min-height: 16px; text-align: center; font-weight: 500; }
+
+  .daily { margin-top: 14px; }
+  .daily-top { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 4px 0 12px; }
+  .daily-top input[type="date"], .daily-top input[type="text"] {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13.5px; padding: 8px 11px;
+  }
+  .daily-top input[type="text"] { width: 110px; text-transform: uppercase; }
+  .daily-top .bias-seg { display: flex; background: #f1f2f8; border-radius: 999px; padding: 3px; }
+  .daily-top .bias-seg button {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px;
+    padding: 7px 13px; background: transparent; border: none; border-radius: 999px;
+    color: var(--text-3); cursor: pointer;
+  }
+  .daily-top .bias-seg button.on-bull { color: #fff; background: var(--green); }
+  .daily-top .bias-seg button.on-bear { color: #fff; background: var(--red); }
+  .daily-top .bias-seg button.on-neut { color: #fff; background: var(--amber); }
+  .sent-seg { display: flex; gap: 6px; }
+  .sent-seg button {
+    flex: 1; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12.5px;
+    padding: 9px 10px; background: #f1f2f8; border: 1px solid transparent; border-radius: 10px;
+    color: var(--text-3); cursor: pointer;
+  }
+  .sent-seg button.on-l { color: #fff; background: var(--green); }
+  .sent-seg button.on-s { color: #fff; background: var(--red); }
+  .sent-note { font-size: 12px; color: var(--text-3); margin-top: 8px; min-height: 16px; }
+  .sent-note.plus { color: var(--green); font-weight: 600; }
+  .sent-note.minus { color: var(--red); font-weight: 600; }
+  .ls-add { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ls-add input {
+    flex: 1; min-width: 140px; background: #f8f9fc; border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 11px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+  }
+  .ls-add input:first-child { flex: 3; min-width: 220px; }
+  .ls-sub {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-3);
+    text-transform: uppercase; margin: 12px 0 6px;
+  }
+  .ls-row {
+    display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px;
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; background: #fff;
+  }
+  .ls-row .txt { flex: 1; font-size: 13px; color: var(--text); line-height: 1.45; }
+  .ls-row .src { display: inline-block; font-size: 11px; color: var(--text-3); font-weight: 600; margin-left: 6px; }
+  .ls-row .meta { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+  .ls-row button {
+    background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-3);
+    padding: 5px 9px; cursor: pointer; flex-shrink: 0;
+  }
+  .ls-row button.star.on { color: var(--amber); border-color: var(--amber); background: var(--amber-soft); }
+  .ls-row button.yes { color: var(--green); }
+  .ls-row button.yes.on { color: #fff; background: var(--green); border-color: var(--green); }
+  .ls-row button.no { color: var(--red); }
+  .ls-row button.no.on { color: #fff; background: var(--red); border-color: var(--red); }
+  .ls-row .adh { font-size: 11px; font-weight: 700; flex-shrink: 0; align-self: center; }
+  .ls-row .adh.g { color: var(--green); } .ls-row .adh.a { color: var(--amber); } .ls-row .adh.r { color: var(--red); }
+  .emo-band { margin-bottom: 12px; }
+  .date-field { display: flex; flex-direction: column; gap: 3px; margin-right: 4px; }
+  .date-field label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-3); text-transform: uppercase; }
+  .date-field input {
+    width: 72px; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px;
+    padding: 8px 10px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); text-align: center;
+  }
+  .date-field input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .emo-band .panel { border-color: var(--border); }
+  .emo-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .emo-chip {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--text-2);
+    background: #f8f9fc; border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .emo-chip .tick { color: var(--text-3); font-size: 11px; }
+  .emo-chip.on { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+  .emo-chip.on .tick { color: var(--red); }
+  .emo-band .panel { padding: 12px 14px; }
+  .emo-band h2 { margin-bottom: 8px; }
+  .emo-lock { display: none; }
+  body.emo-locked .emo-band .panel { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-soft); }
+  body.emo-locked .emo-lock {
+    display: block; margin-top: 8px; background: var(--red-soft); color: var(--red);
+    border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-align: center;
+  }
+  body.emo-locked .board .col-l, body.emo-locked .board .col-r {
+    opacity: 0.38; filter: grayscale(0.5); pointer-events: none;
+  }
+  body.emo-locked .gauge-panel { box-shadow: 0 0 0 2px var(--red-soft); }
+  .gauge-panel .mood { margin-top: 10px; }
+  .mood-pen[hidden] { display: none; }
+  .intent { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .intent-q { font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+  .intent-seg { display: flex; gap: 6px; }
+  .intent-seg button {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--text-3);
+    background: #f1f2f8; border: 1px solid transparent; border-radius: 999px; padding: 6px 14px; cursor: pointer;
+  }
+  .intent-seg button.on-good { color: #fff; background: var(--green); }
+  .intent-seg button.on-bad { color: #fff; background: var(--red); }
+  .td-stars { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .td-stars .sl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-3); text-transform: uppercase; }
+  .star-row { display: flex; gap: 3px; }
+  .star-row button {
+    background: transparent; border: none; cursor: pointer; font-size: 20px; line-height: 1;
+    color: var(--border); padding: 0 1px;
+  }
+  .star-row button.lit { color: var(--amber); }
+  .star-cap { font-size: 11.5px; color: var(--text-3); }
+  #share-modal {
+    display: none; position: fixed; inset: 0; z-index: 60; background: rgba(20,22,31,0.55);
+    padding: 18px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  #share-modal.open { display: block; }
+  #share-modal .sh-box {
+    max-width: 460px; margin: 0 auto; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;
+  }
+  #share-modal h2 { display: flex; justify-content: space-between; align-items: center; }
+  .sh-x { background: transparent; border: none; font-size: 24px; line-height: 1; color: var(--text-3); cursor: pointer; }
+  #sh-img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border); display: block; }
+  .sh-tip { font-size: 12px; color: var(--text-2); background: var(--acc-soft); border-radius: 9px; padding: 8px 10px; margin-top: 8px; line-height: 1.45; }
+  .sh-opts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+  .sh-opts label { font-size: 12.5px; color: var(--text-2); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .sh-opts input[type="text"] {
+    flex: 1; min-width: 120px; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px;
+    padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text);
+  }
+  .daily-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 820px) { .daily-grid { grid-template-columns: 1fr 1fr; } .dg-full { grid-column: 1 / -1; } }
+  .fbox label {
+    display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--text-3); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .fbox textarea {
+    width: 100%; min-height: 78px; resize: vertical;
+    background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; padding: 10px 12px;
+  }
+  .fbox textarea:focus, .daily-top input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .plan-inline { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
+  .plan-inline .daily-top { margin: 0 0 8px; }
+  .plan-inline .fbox { margin: 0; }
+  .plan-inline .fbox + .fbox { margin-top: 8px; }
+  .plan-inline textarea { min-height: 60px; }
+  .fbox textarea::placeholder { color: #b4b9ca; }
+
+  .trade-row {
+    display: flex; flex-wrap: wrap; gap: 7px 10px; align-items: center;
+    background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 11px; margin-bottom: 6px; font-size: 12.5px;
+  }
+  .trade-row .when { color: var(--text-3); font-weight: 500; min-width: 96px; }
+  .trade-row .pd { font-weight: 600; color: var(--text); }
+  .trade-row .pd.dl { color: var(--green); } .trade-row .pd.ds { color: var(--red); }
+  .trade-row .sc {
+    font-weight: 700; border-radius: 999px; padding: 2px 10px; font-size: 12px;
+  }
+  .trade-row .sc.a { color: var(--green); background: var(--green-soft); }
+  .trade-row .sc.b { color: var(--amber); background: var(--amber-soft); }
+  .trade-row .sc.no { color: var(--red); background: var(--red-soft); }
+  .trade-row .crits { flex: 1; min-width: 140px; color: var(--text-3); font-size: 11.5px; line-height: 1.4; }
+  .trade-row .rwrap { display: flex; align-items: center; gap: 5px; color: var(--text-3); font-weight: 600; font-size: 11px; }
+  .trade-row input.rin {
+    width: 64px; text-align: center;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px; padding: 5px 4px;
+  }
+  .trade-row input.rin:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .trade-row .del { background: none; border: none; color: var(--text-3); font-size: 16px; cursor: pointer; }
+  .trade-row .del:hover { color: var(--red); }
+  #trade-stats { font-size: 12.5px; color: var(--text-2); margin: 2px 0 10px; line-height: 1.6; }
+  #trade-stats b { color: var(--text); }
+  .trade-row { cursor: pointer; }
+  .trade-row .crits { flex: 1; min-width: 110px; color: var(--acc); font-size: 11.5px; font-weight: 600; }
+  .trade-detail {
+    display: none; width: 100%; border-top: 1px dashed var(--border);
+    margin-top: 4px; padding-top: 8px;
+  }
+  .trade-row.open .trade-detail { display: block; }
+  .td-item { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12.5px; }
+  .td-item .mk { width: 16px; text-align: center; font-weight: 700; }
+  .td-item.yes .mk { color: var(--green); }
+  .td-item.no .mk { color: #c3c8d8; }
+  .td-item.yes { color: var(--text); }
+  .td-item.no { color: var(--text-3); }
+  .td-item .tp { margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--text-3); }
+
+  .an-row {
+    display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center;
+    padding: 8px 6px; border-bottom: 1px solid var(--border); font-size: 12.5px;
+  }
+  .an-row:last-child { border-bottom: none; }
+  .an-row .nm { flex: 1; min-width: 150px; font-weight: 600; color: var(--text); }
+  .an-row .st { color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .an-row .df { font-weight: 700; border-radius: 999px; padding: 2px 10px; font-size: 12px; }
+  .an-row .df.pos { color: var(--green); background: var(--green-soft); }
+  .an-row .df.neg { color: var(--red); background: var(--red-soft); }
+  .an-row .df.neu { color: var(--text-3); background: #f1f2f8; }
+  .an-row .few { font-size: 10.5px; color: var(--amber); background: var(--amber-soft); border-radius: 999px; padding: 2px 8px; font-weight: 600; }
+
+  .trade-row .strat {
+    font-size: 11px; font-weight: 600; color: var(--acc);
+    background: var(--acc-soft); border-radius: 999px; padding: 2px 9px;
+  }
+  .trade-row .sc .ov { font-size: 10px; }
+  .td-form {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    margin-top: 8px; padding-top: 9px; border-top: 1px dashed var(--border);
+  }
+  .td-form label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-3); text-transform: uppercase; }
+  .td-form select, .td-form input {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px; padding: 6px 8px;
+  }
+  .td-form input { min-width: 170px; flex: 1; }
+  .td-form select:focus, .td-form input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+
+  .mood { display: flex; align-items: center; gap: 8px; padding: 0; border: none; margin: 0; }
+  .mood-end { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-3); flex-shrink: 0; }
+  .mood-end.r { color: var(--amber); }
+  .mood .mood-range { flex: 1; margin: 0; }
+  input.mood-range {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 6px;
+    background: linear-gradient(90deg, #5b7bd6 0%, #9fb3e8 28%, #16a34a 42%, #16a34a 58%, #eab308 72%, #dc2626 100%);
+    outline: none; cursor: pointer;
+  }
+  input.mood-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.25); cursor: grab;
+  }
+  input.mood-range::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.25); cursor: grab;
+  }
+  .mood-state { font-weight: 700; font-size: 11px; border-radius: 999px; padding: 2px 9px; flex-shrink: 0; min-width: 30px; text-align: center; }
+  .ms-fear { color: #3d5aa8; background: #e8edf9; }
+  .ms-neut { color: var(--green); background: var(--green-soft); }
+  .ms-greed { color: var(--amber); background: var(--amber-soft); }
+  .ms-ext { color: var(--red); background: var(--red-soft); }
+  .mood-pen { font-size: 12px; font-weight: 600; color: var(--text-3); }
+  .mood-pen.on { color: var(--red); }
+  .tf-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+  .tf {
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-3);
+    background: #f1f2f8; border: 1px solid transparent; border-radius: 999px; padding: 6px 13px; cursor: pointer;
+  }
+  .tf.on { color: #fff; background: var(--acc); }
+  .collapse-h { cursor: pointer; user-select: none; display: flex; align-items: center; }
+  .collapse-h .caret { margin-left: auto; font-size: 13px; color: var(--text-3); transition: transform 0.15s; }
+  .collapse-h.open .caret { transform: rotate(180deg); }
+  .emo-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .emo-head-right { display: flex; align-items: center; gap: 8px; }
+  .emo-head-right input[type="date"] {
+    background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px;
+    padding: 6px 9px; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text);
+  }
+  .emo-head-right .bias-seg { display: flex; background: #f1f2f8; border-radius: 999px; padding: 3px; }
+  .emo-head-right .bias-seg button {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px;
+    padding: 6px 13px; background: transparent; border: none; border-radius: 999px;
+    color: var(--text-3); cursor: pointer;
+  }
+  .emo-head-right .bias-seg button.on-bull { color: #fff; background: var(--green); }
+  .emo-head-right .bias-seg button.on-bear { color: #fff; background: var(--red); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tophead">
+    <div class="tophead-inner">
+      <div class="logo-mark">A</div>
+      <div>
+        <h1>Alfa Traders</h1>
+        <div class="sub">Setup Kalitesi · Daily Bias</div>
+      </div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="seg" id="pair-seg"></div>
+    <div class="seg">
+      <button id="btn-long">LONG</button>
+      <button id="btn-short">SHORT</button>
+    </div>
+  </div>
+  <div id="pair-add">
+    <input type="text" id="pair-name" placeholder="PAIR ADI (ör. EUR)" maxlength="12">
+    <button class="btn solid" id="pair-confirm">Ekle</button>
+    <button class="btn" id="pair-cancel">Vazgeç</button>
+  </div>
+
+  <div class="emo-band" id="emo-band">
+    <div class="panel">
+      <div class="emo-head">
+        <h2 style="margin:0;"><span>Duygusal Durum</span><span class="n" id="n-duygu"></span></h2>
+        <div class="emo-head-right">
+          <input type="date" id="d-date" aria-label="Tarih">
+          <div class="bias-seg" role="tablist" aria-label="HTF Bias">
+            <button id="d-bull">BULLISH</button>
+            <button id="d-bear">BEARISH</button>
+          </div>
+        </div>
+      </div>
+      <div id="list-duygu" class="emo-grid"></div>
+      <div class="emo-lock" id="emo-lock">SİSTEM KİLİTLİ</div>
+      <div class="plan-inline">
+        <input type="hidden" id="d-pair">
+        <div class="fbox">
+          <label for="d-sabah">Sabah bağlamı</label>
+          <textarea id="d-sabah" placeholder="Piyasa nerede uyandı, gece ne oldu, bugünün ana hikâyesi ne?"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="col-c">
+      <div class="panel gauge-panel">
+        <svg class="dial" viewBox="0 0 260 260" role="img" aria-label="Konfirmasyon skoru">
+          <g id="slices"></g>
+          <text id="score-txt" class="score-num" x="130" y="140" text-anchor="middle">0<tspan class="score-pct" dx="2">%</tspan></text>
+          <text id="dial-dir" class="dial-dir" x="130" y="166" text-anchor="middle"></text>
+        </svg>
+        <div><span id="verdict" class="v-no">ANLAŞMA YOK</span></div>
+        <div id="risk-line">Kadran karar verir, sen değil.</div>
+        <div class="mood">
+          <span class="mood-end">KORKU</span>
+          <input type="range" class="mood-range" id="mood-range" min="-10" max="10" step="1" value="0" aria-label="Duygu ibresi: korku ile coşku arası">
+          <span class="mood-end r">COŞKU</span>
+          <span class="mood-state ms-neut" id="mood-state">0</span>
+          <span class="mood-pen" id="mood-pen" hidden></span>
+        </div>
+
+        <div class="intent">
+          <span class="intent-q">Şu an neyi tradeliyorum?</span>
+          <div class="intent-seg">
+            <button id="intent-setup">Setup'ı</button>
+            <button id="intent-emo">Duygumu</button>
+          </div>
+        </div>
+
+        <div class="subbar">
+          <span class="sb-lbl">Seans</span>
+          <div class="chiprow" id="sess-chips"></div>
+        </div>
+        <div class="subbar">
+          <span class="sb-lbl">Strateji</span>
+          <div class="chiprow" id="strat-chips"></div>
+        </div>
+        <div class="subbar">
+          <span class="sb-lbl">Gün</span>
+          <div class="chiprow" id="day-chips"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-l">
+      <div class="panel" style="margin-bottom:12px;">
+        <h2><span>Veri Kriterleri</span><span class="n" id="n-veri"></span></h2>
+        <div id="list-veri"></div>
+      </div>
+      <div class="panel" style="margin-bottom:12px;">
+        <h2><span>Teknik Kriterler</span><span class="n" id="n-teknik"></span></h2>
+        <div id="list-teknik"></div>
+        <div class="plan-inline">
+          <div class="fbox">
+            <label for="d-senaryo">Senaryo · bunu ne bozar</label>
+            <textarea id="d-senaryo" placeholder="2 cümle: beklediğim akış + invalidation."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2><span>Pozisyon Yönetimi</span><span class="n" id="n-pozisyon"></span></h2>
+        <div id="list-pozisyon"></div>
+        <div class="plan-inline">
+          <div class="fbox">
+            <label for="d-anti">Anti senaryo · beni stop etmek isteyen senaryo</label>
+            <textarea id="d-anti" placeholder="Karşı taraf ne görüyor? Hangi akış gelirse stopum avlanır — likidite nerede, hangi seviyeye sweep gelir?"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-r">
+      <div class="panel" style="margin-bottom:12px;">
+        <h2><span>Pozisyon Esnasında</span><span class="n" id="n-pos"></span></h2>
+        <div id="list-pos"></div>
+        <div class="sent-note" id="pos-verdict"></div>
+      </div>
+      <div class="panel" id="sent-panel">
+        <h2><span>Piyasa Duyarlılığı</span><span class="n" id="n-sent"></span></h2>
+        <div class="sent-seg">
+          <button id="sent-long">Çoğunluk LONG düşünüyor</button>
+          <button id="sent-short">Çoğunluk SHORT düşünüyor</button>
+        </div>
+        <div class="sent-note" id="sent-note">Kalabalık nerede? Seçim yapmazsan skora etkisi yok.</div>
+      </div>
+      <div class="panel" style="margin-top:12px;">
+        <h2><span>Günlük Plan · Gün Sonu</span><span class="n" id="daily-status"></span></h2>
+        <div class="plan-inline">
+          <div class="fbox">
+            <label for="d-gunsonu">Gün sonu · plana uydu mu · saptıysam neden · yarın için tek düzeltme</label>
+            <textarea id="d-gunsonu" placeholder="Akşam doldurulur. İlk emir, sabah blokları dolmadan konmaz."></textarea>
+          </div>
+        </div>
+        <div class="actions" style="justify-content:flex-start;">
+          <button class="btn solid" id="d-save">Planı İşle</button>
+          <button class="btn" id="d-clear">Temizle</button>
+        </div>
+        <div id="daily-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <div class="date-field">
+      <label for="trade-date">İşlem tarihi</label>
+      <input type="text" id="trade-date" placeholder="bugün" maxlength="5" inputmode="numeric" aria-label="İşlem tarihi GG/AA">
+    </div>
+    <button class="btn solid" id="btn-logtrade">İşlemi Kaydet</button>
+    <button class="btn" id="btn-share">Görsel Paylaş</button>
+    <button class="btn" id="btn-reset">Yeni İşlem</button>
+    <button class="btn" id="btn-edit">Defteri Düzenle</button>
+  </div>
+
+  <div class="daily">
+    <div class="panel">
+      <h2><span>İşlem Kaydı</span><span class="n" id="trade-count"></span></h2>
+      <div class="tf-row" id="trade-filter">
+        <button class="tf on" data-f="all">Tümü</button>
+        <button class="tf" data-f="today">Bugün</button>
+        <button class="tf" data-f="week">Bu hafta</button>
+        <button class="tf" data-f="month">Bu ay</button>
+        <button class="tf" data-f="pair">Bu parite</button>
+      </div>
+      <div id="trade-stats"></div>
+      <div id="trade-list"></div>
+      <div class="actions" style="justify-content:flex-start;">
+        <button class="btn" id="btn-export">Veriyi Dışa Aktar</button>
+        <button class="btn" id="btn-copy" style="display:none;">Kopyala</button>
+      </div>
+      <textarea id="export-box" readonly style="display:none; width:100%; min-height:160px; margin-top:10px; background:#f8f9fc; border:1px solid var(--border); border-radius:10px; font-family:monospace; font-size:11px; padding:10px; color:var(--text);"></textarea>
+      <div id="export-note" class="hint" style="display:none; margin-top:6px;">Tümünü kopyala ve analiz için Claude'a yapıştır.</div>
+    </div>
+  </div>
+
+  <div class="daily">
+    <div class="panel">
+      <h2 class="collapse-h" id="an-head"><span>Kriter Analizi</span><span class="n" id="an-count"></span><span class="caret" id="an-caret">▾</span></h2>
+      <div id="an-body" class="collapse-body" style="display:none;">
+        <div id="an-hint" class="hint" style="margin-top:0; margin-bottom:8px;"></div>
+        <div id="an-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="daily">
+    <div class="panel">
+      <h2><span>Ders Defteri</span><span class="n" id="ls-count"></span></h2>
+      <div class="ls-add">
+        <input type="text" id="ls-text" placeholder="Bugün ne öğrendin? (tek cümle, uygulanabilir olsun)" maxlength="200">
+        <input type="text" id="ls-src" placeholder="Kaynak (Alex G, Hougaard...)" maxlength="40">
+        <button class="btn solid" id="ls-btn-add">Ekle</button>
+      </div>
+      <div id="ls-today-wrap">
+        <h3 class="ls-sub">Takipteki ilkeler — bugün uyguladın mı?</h3>
+        <div id="ls-today"></div>
+      </div>
+      <h3 class="ls-sub collapse-h" id="ls-arch-head">Arşiv <span class="caret" id="ls-caret">▾</span></h3>
+      <div id="ls-list" class="collapse-body" style="display:none;"></div>
+      <p class="hint">En fazla 3 ders aynı anda takipte olur (⭐). Takipteki ders her gün "uyguladın mı?" diye sorar; uyum yüzdesi birikir. Kendini kanıtlayan dersi mezun et: kalıcı kurala ya da checklist kriterine dönüştür, takipten çıkar. Defter dolu olsun, takip dar olsun.</p>
+    </div>
+  </div>
+
+  <div id="share-modal">
+    <div class="sh-box">
+      <h2><span>Paylaşım Kartı</span><button class="sh-x" id="sh-close" aria-label="Kapat">×</button></h2>
+      <canvas id="sh-canvas" width="1080" height="1350" style="display:none;"></canvas>
+      <img id="sh-img" alt="Paylaşım kartı önizlemesi">
+      <div class="sh-tip" id="sh-tip">Görsele <b>uzun bas</b> → “Görseli kopyala” ya da “Paylaş”. En kestirme yol bu.</div>
+      <div class="sh-opts">
+        <label><input type="checkbox" id="sh-crits" checked> Konfluens listesi</label>
+        <label><input type="checkbox" id="sh-plan" checked> Plan (senaryo/anti)</label>
+        <label><input type="checkbox" id="sh-r"> Sonuç (R)</label>
+        <label><input type="checkbox" id="sh-sent" checked> Duyarlılık</label>
+        <input type="text" id="sh-tag" maxlength="28" placeholder="Alt yazı">
+      </div>
+      <div class="actions">
+        <button class="btn solid" id="sh-copy">Kopyala</button>
+        <button class="btn" id="sh-send">Paylaş</button>
+        <button class="btn" id="sh-dl">İndir</button>
+      </div>
+      <div id="sh-note" class="hint" style="margin-top:6px;"></div>
+    </div>
+  </div>
+
+  <div id="editor">
+    <div class="panel">
+      <h2><span>Kriterler — <span id="edit-pair-lbl"></span></span></h2>
+      <div class="edit-head"><span></span><span>Gözlem</span><span>Panel</span><span>Long</span><span>Short</span><span></span></div>
+      <div id="edit-list"></div>
+      <button class="btn" id="btn-add" style="width:100%;">+ Kriter Ekle</button>
+
+      <h2 style="margin-top:16px;"><span>Gün &amp; Seans Kalitesi</span></h2>
+      <div class="mx-grid" id="mx-grid"></div>
+      <p class="hint" style="margin-top:0;">Her hücre o gün + seansta alınabilecek en yüksek kararı belirler: A+ = sınır yok, B = skor A+ olsa bile karar B'ye iner, YOK = o dilimde işlem kapalı. Değişiklikler anında kaydedilir.</p>
+
+      <h2 style="margin-top:16px;"><span>Eşikler</span></h2>
+      <div class="th-row"><span class="lbl">A+ alt sınırı (%) — 1R</span><input type="number" id="th-a" min="1" max="100" step="1"></div>
+      <div class="th-row"><span class="lbl">B alt sınırı (%) — 0.3R</span><input type="number" id="th-b" min="0" max="99" step="1"></div>
+      <p class="hint">Her pair'in kendi kriterleri, puanları ve eşikleri var; düzenleme yalnızca seçili pair'e işlenir. Üstteki + ile yeni pair eklersin — yeni pair, o an açık olan pair'in kriterlerinin kopyasıyla başlar. Puanlar yön bazlı ve eksi olabilir. Skor = seçili yön için işaretli puanların toplamı (0–100).</p>
+
+      <div class="actions">
+        <button class="btn solid" id="btn-save">Deftere İşle</button>
+        <button class="btn danger" id="btn-defaults">Kriterleri Sıfırla</button>
+        <button class="btn danger" id="btn-delpair">Bu Pair'i Sil</button>
+      </div>
+      <h2 style="margin-top:16px;"><span>Yedek</span></h2>
+      <div class="actions">
+        <button class="btn" id="btn-backup">Yedek Al (JSON)</button>
+        <button class="btn" id="btn-restore">Yedek Yükle</button>
+        <button class="btn" id="btn-mergeseed">Eksik Kayıtları İçeri Al</button>
+        <input type="file" id="restore-file" accept=".json,application/json" style="display:none;">
+      </div>
+      <p class="hint">Yedek Al: ayarlar, tüm günlük planlar ve işlem kayıtları tek JSON dosyasına iner. Yedek Yükle: dosyayı seçtiğinde her şey geri gelir — Claude artifact'i, GitHub Pages ya da yerel dosya fark etmez. Haftada bir yedek almayı alışkanlık yap.</p>
+      <div id="save-note"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'konfirmasyon-defteri-v3';
+// 12–17 Temmuz arası artifact verisinin gömülü yedeği — yalnızca depo boşsa yüklenir
+const SEED = {"exported": "2026-07-18T13:07:40.649Z", "config": {"pairs": {"BTC": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}, "XAU": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}}, "strategies": ["Breaker", "Breaker Traps", "LHPB", "Monday Manipulation", "Asia Range", "IFVG", "0.382", "Friday Manipulation"], "matrix": {"Paz": {"London": "B", "NY": "B"}, "Pzt": {"London": "A+", "NY": "B"}, "Sal": {"London": "A+", "NY": "A+"}, "Çar": {"London": "A+", "NY": "A+"}, "Per": {"London": "A+", "NY": "A+"}, "Cum": {"London": "A+", "NY": "A+"}, "Cmt": {"London": "A+", "NY": "A+"}}, "migr2": true, "migr3": true, "migr4": true}, "trades": [{"id": 1785138660000, "date": "22/07", "time": "19:51", "pair": "BTC", "dir": "LONG", "score": 100, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "İşlem trend yönünde", "p": 10}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Çar", "sess": "NY", "cell": "A+", "cap": false, "strat": "0.382", "sent": "SHORT", "r": "-1"}, {"id": 1784305032899, "date": "17/07", "time": "19:17", "pair": "BTC", "dir": "SHORT", "score": 75, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Key levelda", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Cum", "sess": "NY", "cell": "A+", "cap": false, "strat": "Friday Manipulation", "r": "-1"}, {"id": 1784227494999, "date": "16/07", "time": "21:44", "pair": "BTC", "dir": "SHORT", "score": 87, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["İşlem trend yönünde", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Per", "sess": "NY", "cell": "A+", "cap": false, "strat": "Breaker", "r": ""}, {"id": 1784016989916, "date": "14/07", "time": "11:16", "pair": "BTC", "dir": "SHORT", "score": 65, "verdict": "B", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Key levelda", "p": 10}, {"n": "Planlanmış entry", "p": 31}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Long & Shorts Ratio işlem yönünde", "Bid & Ask Delta işlem yönünde", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Sal", "sess": "London", "cell": "A+", "cap": false, "strat": "Asia Range", "r": "-0.3"}, {"id": 1783955071586, "date": "13/07", "time": "18:04", "pair": "BTC", "dir": "SHORT", "score": 73, "verdict": "B", "crits": [{"n": "Spot CVD düşüyor", "p": 8}, {"n": "Open Interest yüksek / artıyor", "p": 7}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 5}, {"n": "Key levelda", "p": 11}, {"n": "Planlanmış entry", "p": 30}, {"n": "TP/SL paylaşımdan önce girildi", "p": 6}], "miss": ["Spot CVD yükseliyor", "Long & Shorts Ratio aşırı long", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "r": "-0.15", "override": true, "strat": "Sunday Market Structure "}, {"id": 1783882244056, "date": "12/07", "time": "21:50", "pair": "BTC", "dir": "SHORT", "score": 82, "verdict": "B", "crits": ["Spot CVD düşüyor", "Long & Shorts Ratio aşırı long", "Futures CVD işlem yönünde", "Bid & Ask Delta işlem yönünde", "Key levelda", "Manipülasyon gerçekleşti", "Planlanmış entry", "TP/SL paylaşımdan önce girildi"], "r": "1.2", "override": true, "strat": "Monday Morning Manipulation"}], "dailyPlans": {"2026-07-12": {"bias": "BEARISH", "pair": "BTC", "sabah": "abd iranı vurabilir ", "senaryo": "fiyat en azından bi 61k civarına gitmesi gerektiğini düşünüyorum. Eğer fiyat 65k üstüne çıkarsa bozulur", "anti": "şuanda markette hala hacim yok likiditie alımı yapılmış gibi geldi ama aslında gelmedi, orayı bir hacimle manipüle edebilir ve stop olabilirsin.", "setup": "", "gunsonu": "plana uydum tek yaptığım hata 2R da tp girmemekti, işlem tam hedefe giderken ufak bi pips ile geri döndü hala bekliyorum ayrıca iyi yaptığım şey erken entry stop atmamaktı gece açılışıyla fiyat yukarıyı avlamış ve düşmüş. "}, "2026-07-13": {"bias": "BEARISH", "pair": "BTC", "sabah": "iran her an saldırabilir manipülasyon saatleri sabah 13:46", "senaryo": "4h pin bar bıraktık üstünü avladık fiyat aşağı doğru düştü demekki güçsüz görünüyor. \n\n63.5k üstünde kapatırsa bu düşüncem bozulur. ", "anti": "Aşağı düştü shortlayalım diyen early shortçuları avlamak isteyip tekrar 63.250'yi avlayabilirler ny açılışıyla ama neden bunu yapsınlar. ", "setup": "", "gunsonu": "fiyat hedefine ulaştı high avalamadan eğer dar stoplu işlem açsaydım minimum 0.9r poz vardı ama asıl target aşağı açık likidite olduğu için açık HL yaptıktan sonra geri döndü 0.5r'dan poz döndü. Bu arada riskim 0.3r pzt sabah olduğu için riskli zaman dilimi."}, "2026-07-14": {"bias": "BULLISH", "pair": "BTC", "sabah": "15:30'da tüfe var. ", "senaryo": "fiyatın 61.5k civarına düşeceğini düşünüyorum. Yükselecekse bile en azından 62.2k dan yükselmeli (VAL) \n\n\nFiyat 62.9k üstünde saatlik kapanış yaparsa bias bozulur.\n\n\nsaat 16:11 şuan fiyat yukarıyı avladı, hem sr bölgesine geri çekilip daha sonra yukarıdaki likiditeleri avlayabilir veriler beni doğruluyor. \n\nEğer fiyat 62.7k altında 1h kapanışlar yaparsa uza. ", "anti": "fiyat iç yapıda değişim gerçekleştirdi, o sebeple önce monday high alabilir. \n\nsaat:16:18Fiyat haberle yükseldi bu yüzden tam tersi yönlü düşebilir ters bir haberle", "setup": "ya 16:30 dan sonraki harekete göre girersin ya da fiyatın 61.5k sonrası yapacağı harekete bakarsın. \n\n\n16:18Fiyat 63k'daki sr bölgesine geri çekilirse 0.382 işlemini alırsın.", "gunsonu": "işlem 1.78RR verdiği için ve aleyhime ilerlediği için işlemden çıkıp tekrar 2RR olacak şekilde girdim. \n\nHaber geldi fiyat bi anda stop oldu işlemler. "}, "2026-07-16": {"bias": "BEARISH", "pair": "BTC", "sabah": "haber yok fiyat bearish", "senaryo": "fiyat yukarıyı avladı market yapısı değişti hedefler aşağısı \n\nfiyat 65.6k üstü kapatırsa", "anti": "herkes buradan short düşünüyor, range çok bariz trend bullish orderbook seviyeleri var.", "setup": "breaker+range", "gunsonu": "plana uydum genel olarak, sadece 2. işlem intraday alınabilirdi 2R veriyordu riski artırmamak için almadım ama tp oldu."}, "2026-07-17": {"bias": "BEARISH", "pair": "BTC", "sabah": "", "senaryo": "fiyat 63.3k manipüle edip altında kapanışlar yaparsa cuma 18:00'dan sonra shortla. ", "anti": "fiyatta hacim artıyor, çoğu kişi shortta range için fiyatı yükseltebilirler. ", "setup": "cuma akşamı 18:00 civarı manipülasyonu tradele.", "gunsonu": "evet manipülasyonu bekledim ve ifvg ile işleme dahil oldum ama stop oldum."}, "2026-07-22": {"bias": "BULLISH", "pair": "BTC", "sabah": "Olumlu bir haber gelebilir", "senaryo": "Fiyat eğer 65.7k civarı 2 adet kötü mum atarsa düşebilir", "anti": "Impulsive entry almak isteyen beni ve htf ciddi bir direnç noktasında olduğu için efloud beni stoplayabilir", "setup": "Breaker / 0.382", "gunsonu": ""}}};
+const CATS = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duygu' };
+
+// Depolama katmanı: Claude içinde açılırsa window.storage (kalıcı bulut),
+// kendi tarayıcında / GitHub Pages'te açılırsa localStorage (cihazda kalıcı).
+const store = {
+  async get(k) {
+    if (window.storage && window.storage.get) {
+      try { const r = await window.storage.get(k); return r && r.value ? r.value : null; }
+      catch (e) { /* anahtar yok ya da erişilemedi */ }
+    }
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  },
+  async set(k, v) {
+    let ok = false;
+    if (window.storage && window.storage.set) {
+      try { await window.storage.set(k, v); ok = true; } catch (e) { /* devam */ }
+    }
+    if (!ok) { try { localStorage.setItem(k, v); ok = true; } catch (e) { /* hafızada kalır */ } }
+    return ok;
+  },
+  async list(prefix) {
+    if (window.storage && window.storage.list) {
+      try { const r = await window.storage.list(prefix); return (r && r.keys) ? r.keys : []; }
+      catch (e) { /* devam */ }
+    }
+    try { return Object.keys(localStorage).filter(k => k.indexOf(prefix) === 0); }
+    catch (e) { return []; }
+  }
+};
+
+function defaultPair() {
+  return {
+    thresholds: { aplus: 70, b: 50 },
+    criteria: [
+      { name: 'Spot CVD işlem yönünde', cat: 'veri', l: 8, s: 8 },
+      { name: 'Open Interest işlem yönünde', cat: 'veri', l: 6, s: 6 },
+      { name: 'Long & Shorts Ratio işlem yönünde', cat: 'veri', l: 5, s: 5 },
+      { name: 'Futures CVD işlem yönünde', cat: 'veri', l: 6, s: 6 },
+      { name: 'Bid & Ask Delta işlem yönünde', cat: 'veri', l: 4, s: 4 },
+      { name: 'Orderbook kümelenmesi destekliyor', cat: 'veri', l: 2, s: 2 },
+      { name: 'İşlem trend yönünde', cat: 'teknik', l: 10, s: 10 },
+      { name: 'Key levelda', cat: 'teknik', l: 10, s: 10 },
+      { name: 'Manipülasyon gerçekleşti', cat: 'teknik', l: 8, s: 8 },
+      { name: 'Bias flip', cat: 'teknik', l: 3, s: 3 },
+      { name: 'Planlanmış entry', cat: 'pozisyon', l: 31, s: 31 },
+      { name: '16:30 sonrası', cat: 'pozisyon', l: 3, s: 3 },
+      { name: 'TP/SL paylaşımdan önce girildi', cat: 'pozisyon', l: 4, s: 4 },
+      { name: 'Uykusuz / yorgunum', cat: 'duygu', l: -8, s: -8 },
+      { name: 'Stresliyim (trade dışı kaynak)', cat: 'duygu', l: -6, s: -6 },
+      { name: 'Aşırı yoğun / bölünmüş dikkat', cat: 'duygu', l: -6, s: -6 },
+      { name: 'Az önce stop oldum — revenge penceresi', cat: 'duygu', l: -12, s: -12 },
+      { name: 'FOMO — hareket kaçıyor hissi', cat: 'duygu', l: -12, s: -12 }
+    ]
+  };
+}
+
+function defaultXauPair() {
+  return {
+    thresholds: { aplus: 70, b: 50 },
+    criteria: [
+      // VERİ — gold'da orderflow konfluensi yok; sadece kırmızı haber cezası
+      { name: 'Kırmızı haber var / yaklaşıyor', cat: 'veri', l: -15, s: -15 },
+      // TEKNİK — gold'un çekirdeği burada (7 kalem toplamı = 70, tam A+ eşiği)
+      { name: 'Manipülasyon kesin', cat: 'teknik', l: 14, s: 14 },
+      { name: 'Likidite alındı', cat: 'teknik', l: 14, s: 14 },
+      { name: 'Daily / 4H OTE bölgesinde', cat: 'teknik', l: 10, s: 10 },
+      { name: 'Daily / 4H arz-talep bölgesinde', cat: 'teknik', l: 10, s: 10 },
+      { name: 'Yapı net', cat: 'teknik', l: 8, s: 8 },
+      { name: 'Günlük / 4H / 1H mum uyumlu', cat: 'teknik', l: 8, s: 8 },
+      { name: 'Manipülasyon saatinde', cat: 'teknik', l: 6, s: 6 },
+      // POZİSYON — planlı giriş otoritesi + iki ceza
+      { name: 'Entry sabah yazılan Daily Bias planından geliyor (seans içinde üretilmedi)', cat: 'pozisyon', l: 20, s: 20 },
+      { name: 'Peş peşe 2. kez aynı bölgeden giriyorum', cat: 'pozisyon', l: -12, s: -12 },
+      { name: 'Daily plana zıt işlem', cat: 'pozisyon', l: -15, s: -15 },
+      // DUYGU — cezalar (kilit)
+      { name: 'Uykusuz / yorgunum', cat: 'duygu', l: -8, s: -8 },
+      { name: 'Stresliyim (trade dışı kaynak)', cat: 'duygu', l: -6, s: -6 },
+      { name: 'Az önce stop oldum — revenge penceresi', cat: 'duygu', l: -12, s: -12 },
+      { name: 'FOMO — hareket kaçıyor hissi', cat: 'duygu', l: -12, s: -12 }
+    ]
+  };
+}
+
+let config = { pairs: { BTC: defaultPair(), XAU: defaultXauPair() } };
+let pair = 'BTC';
+let direction = 'LONG';
+let checked = new Set();
+
+const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+const SESSIONS = ['London', 'NY'];
+let session = 'London';
+let strat = '';
+
+function pairDays(p) {
+  const isGold = p === 'XAU' || p.indexOf('XAU') !== -1 || p.indexOf('GOLD') !== -1;
+  return isGold ? ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'] : ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+}
+function pairSessions(p) {
+  const isGold = p === 'XAU' || p.indexOf('XAU') !== -1 || p.indexOf('GOLD') !== -1;
+  return isGold ? ['—'] : ['London', 'NY'];
+}
+function defaultStrategiesFor(p) {
+  const isGold = p === 'XAU' || p.indexOf('XAU') !== -1 || p.indexOf('GOLD') !== -1;
+  return isGold
+    ? ['Breaker', 'Breaker Traps', 'LHPB/LLPB', 'IFVG']
+    : ['Breaker', 'LHPB', 'Monday Manipulation', 'Asia Range', 'IFVG', '0.382'];
+}
+function defaultStrategies() { return defaultStrategiesFor('BTC'); }
+function defaultMatrixFor(p) {
+  const m = {};
+  pairDays(p).forEach(d => {
+    m[d] = {};
+    pairSessions(p).forEach(sess => {
+      // gold: pazartesi tavanı B (A+ olamaz); geri kalan A+
+      m[d][sess] = (p !== 'BTC' && d === 'Pzt') ? 'B' : 'A+';
+    });
+  });
+  return m;
+}
+function defaultMatrix() { return defaultMatrixFor('BTC'); }
+function stratsFor(p) {
+  if (!config.stratByPair) config.stratByPair = {};
+  if (!Array.isArray(config.stratByPair[p])) config.stratByPair[p] = defaultStrategiesFor(p).slice();
+  return config.stratByPair[p];
+}
+function matrixFor(p) {
+  if (!config.matrixByPair) config.matrixByPair = {};
+  if (!config.matrixByPair[p]) config.matrixByPair[p] = defaultMatrixFor(p);
+  // eksik gün/seans tamamla
+  pairDays(p).forEach(d => {
+    if (!config.matrixByPair[p][d]) config.matrixByPair[p][d] = {};
+    pairSessions(p).forEach(sess => {
+      if (!config.matrixByPair[p][d][sess]) {
+        config.matrixByPair[p][d][sess] = (p !== 'BTC' && d === 'Pzt') ? 'B' : 'A+';
+      }
+    });
+  });
+  return config.matrixByPair[p];
+}
+function ensureConfigShape() {
+  if (!Array.isArray(config.strategies)) config.strategies = defaultStrategies();
+  if (!config.matrix) config.matrix = defaultMatrix();
+  if (!config.migr2) {
+    const old = ['WOS', 'Breaker Trap v2', 'Contrarian Short'];
+    config.strategies = config.strategies.filter(s => !old.includes(s));
+    config.matrix = defaultMatrix();
+    config.migr2 = true;
+  }
+  if (!config.migr3) {
+    // hazır strateji listesi öne eklenir, kullanıcının kendi ekledikleri korunur
+    const mine = defaultStrategies();
+    const extras = config.strategies.filter(s => !mine.includes(s));
+    config.strategies = mine.concat(extras);
+    config.migr3 = true;
+  }
+  if (!config.migr4) {
+    // kriter varsayılanları otomatik yenilenir; kullanıcının kendi eklediği satırlar korunur
+    const oldNames = [
+      'Spot CVD yükseliyor', 'Spot CVD düşüyor', 'Open Interest yüksek / artıyor',
+      'Long & Shorts Ratio aşırı long'
+    ];
+    Object.keys(config.pairs).forEach(p => {
+      const defs = defaultPair().criteria;
+      const known = new Set(defs.map(c => c.name).concat(oldNames));
+      const customs = (config.pairs[p].criteria || []).filter(c => c && c.name && !known.has(c.name));
+      const th = config.pairs[p].thresholds || { aplus: 70, b: 50 };
+      config.pairs[p] = { thresholds: th, criteria: defs.concat(customs) };
+    });
+    config.migr4 = true;
+  }
+  if (!config.migr5) {
+    // XAU (ve GOLD adlı pairler) kripto kriterlerinden altına özel sete geçirilir;
+    // kullanıcının kendi eklediği satırlar korunur
+    const cryptoNames = new Set(defaultPair().criteria.map(c => c.name));
+    const xauNames = new Set(defaultXauPair().criteria.map(c => c.name));
+    Object.keys(config.pairs).forEach(p => {
+      if (p !== 'XAU' && p.indexOf('GOLD') === -1 && p.indexOf('XAU') === -1) return;
+      const defs = defaultXauPair().criteria;
+      const customs = (config.pairs[p].criteria || [])
+        .filter(c => c && c.name && !cryptoNames.has(c.name) && !xauNames.has(c.name));
+      const th = config.pairs[p].thresholds || { aplus: 70, b: 50 };
+      config.pairs[p] = { thresholds: th, criteria: defs.concat(customs) };
+    });
+    config.migr5 = true;
+  }
+  if (!config.migr6) {
+    // Breaker Traps stratejisi emekli edildi — chip listesinden düşer, eski işlem kayıtları etkilenmez
+    config.strategies = (config.strategies || []).filter(s => s !== 'Breaker Traps');
+    config.migr6 = true;
+  }
+  if (!config.migr7) {
+    // Duygu paneli kilit moduna geçti; 'PnL paylaştım' pozisyon-esnası paneline taşındı
+    Object.keys(config.pairs).forEach(p => {
+      config.pairs[p].criteria = (config.pairs[p].criteria || [])
+        .filter(c => c.name !== 'PnL paylaştım / coşku halindeyim');
+    });
+    config.migr7 = true;
+  }
+  if (!config.migr8) {
+    // XAU profili yeniden tasarlandı (gold-spesifik teknik + ceza seti); kullanıcının kendi eklediği satırlar korunur
+    const oldXauNames = new Set([
+      'DXY işlem yönünü destekliyor', 'Futures CVD işlem yönünde', 'Open Interest işlem yönünde',
+      'Takvim temiz — kırmızı haber yok / geçti', 'İşlem HTF trend yönünde', 'HTF key levelda (H4 / Daily)',
+      'Likidite süpürüldü (stop hunt / manipülasyon)', 'LHPB/LLPB kapanış teyidi geldi',
+      'Order önceden yerleştirildi — tipi ve seviyesi kontrol edildi', 'London / NY kill zone içinde',
+      'Rejim Değişim Testi geçti (Kural VIII — LONG şartı)'
+    ]);
+    const newXauNames = new Set(defaultXauPair().criteria.map(c => c.name));
+    Object.keys(config.pairs).forEach(p => {
+      if (p !== 'XAU' && p.indexOf('XAU') === -1 && p.indexOf('GOLD') === -1) return;
+      const customs = (config.pairs[p].criteria || [])
+        .filter(c => c && c.name && !oldXauNames.has(c.name) && !newXauNames.has(c.name));
+      const th = config.pairs[p].thresholds || { aplus: 70, b: 50 };
+      config.pairs[p] = { thresholds: th, criteria: defaultXauPair().criteria.concat(customs) };
+    });
+    config.migr8 = true;
+  }
+  if (!config.migr9) {
+    // strateji & matris pariteye özel hale geldi; eski ortak değerler BTC'ye taşınır, XAU kendi setine kurulur
+    config.stratByPair = config.stratByPair || {};
+    config.matrixByPair = config.matrixByPair || {};
+    if (Array.isArray(config.strategies)) {
+      const mine = defaultStrategiesFor('BTC');
+      const extras = config.strategies.filter(x => !mine.includes(x));
+      config.stratByPair.BTC = mine.concat(extras);
+    }
+    if (config.matrix) config.matrixByPair.BTC = config.matrix;
+    Object.keys(config.pairs).forEach(p => {
+      if (p === 'BTC') return;
+      config.stratByPair[p] = defaultStrategiesFor(p).slice();
+      config.matrixByPair[p] = defaultMatrixFor(p);
+    });
+    config.migr9 = true;
+  }
+  if (!config.migr10) {
+    // Gold teknik setine OTE + arz-talep kalemleri eklendi, teknik puanlar yeniden dengelendi (7 kalem = 70)
+    const newTech = {
+      'Manipülasyon kesin': 12, 'Likidite alındı': 12, 'Yapı net': 10,
+      'Daily / 4H OTE bölgesinde': 10, 'Daily / 4H arz-talep bölgesinde': 10,
+      'Günlük / 4H / 1H mum bakıldı': 8, 'Manipülasyon saatinde': 8
+    };
+    const goldDefNames = new Set(defaultXauPair().criteria.map(c => c.name));
+    Object.keys(config.pairs).forEach(p => {
+      if (p !== 'XAU' && p.indexOf('XAU') === -1 && p.indexOf('GOLD') === -1) return;
+      const crit = config.pairs[p].criteria || [];
+      // mevcut teknik kalemlerin puanını güncelle
+      crit.forEach(c => { if (c.cat === 'teknik' && newTech[c.name] !== undefined) { c.l = newTech[c.name]; c.s = newTech[c.name]; } });
+      // eksik yeni teknik kalemleri, son teknik kalemin ardına ekle
+      ['Daily / 4H OTE bölgesinde', 'Daily / 4H arz-talep bölgesinde'].forEach(nm => {
+        if (!crit.some(c => c.name === nm)) {
+          let lastTech = -1;
+          crit.forEach((c, i) => { if (c.cat === 'teknik') lastTech = i; });
+          const row = { name: nm, cat: 'teknik', l: newTech[nm], s: newTech[nm] };
+          if (lastTech >= 0) crit.splice(lastTech + 1, 0, row); else crit.push(row);
+        }
+      });
+      config.pairs[p].criteria = crit;
+    });
+    config.migr10 = true;
+  }
+  if (!config.migr11) {
+    const newTech = {
+      'Manipülasyon kesin': 14, 'Likidite alındı': 14,
+      'Daily / 4H OTE bölgesinde': 10, 'Daily / 4H arz-talep bölgesinde': 10,
+      'Yapı net': 8, 'Günlük / 4H / 1H mum uyumlu': 8, 'Manipülasyon saatinde': 6
+    };
+    const dropEmo = new Set(['Önceki işlemi kaçırdım — telafi hissi var', 'Bugün aynı bias ile 2. kez giriyorum']);
+    Object.keys(config.pairs).forEach(p => {
+      if (p !== 'XAU' && p.indexOf('XAU') === -1 && p.indexOf('GOLD') === -1) return;
+      let crit = config.pairs[p].criteria || [];
+      // mum kriterini yeniden adlandır
+      crit.forEach(c => { if (c.name === 'Günlük / 4H / 1H mum bakıldı') c.name = 'Günlük / 4H / 1H mum uyumlu'; });
+      // teknik puanları güncelle
+      crit.forEach(c => { if (c.cat === 'teknik' && newTech[c.name] !== undefined) { c.l = newTech[c.name]; c.s = newTech[c.name]; } });
+      // iki duygu kalemini çıkar
+      crit = crit.filter(c => !dropEmo.has(c.name));
+      config.pairs[p].criteria = crit;
+    });
+    // gold strateji listesinden 0.382 ve Monday Manipulation çıkar
+    if (config.stratByPair) {
+      Object.keys(config.stratByPair).forEach(p => {
+        if (p !== 'XAU' && p.indexOf('XAU') === -1 && p.indexOf('GOLD') === -1) return;
+        config.stratByPair[p] = (config.stratByPair[p] || []).filter(s => s !== '0.382' && s !== 'Monday Manipulation');
+      });
+    }
+    config.migr11 = true;
+  }
+  Object.keys(config.pairs || { BTC: 1 }).forEach(p => { stratsFor(p); matrixFor(p); });
+  if (config.matrix) DAYS.forEach(d => {
+    if (!config.matrix[d]) config.matrix[d] = { London: 'A+', NY: 'A+' };
+    SESSIONS.forEach(s => { if (!config.matrix[d][s]) config.matrix[d][s] = 'A+'; });
+    delete config.matrix[d].Asya;
+  });
+}
+function todayName() { return DAYS[new Date().getDay()]; }
+let selDay = 'Pzt';
+function curSessions() { return pairSessions(pair); }
+function curDays() { return pairDays(pair); }
+function currentCell() {
+  const mx = matrixFor(pair);
+  const sess = curSessions().length === 1 ? curSessions()[0] : session;
+  if (!mx[selDay] || mx[selDay][sess] === undefined) return 'A+';
+  return mx[selDay][sess];
+}
+function autoSession() {
+  const d = new Date(); const m = d.getHours() * 60 + d.getMinutes();
+  return m < 990 ? 'London' : 'NY'; // 16:30 öncesi London, sonrası NY
+}
+
+const SLICES = 36, CX = 130, CY = 130, R_OUT = 124, R_IN = 92;
+
+function polar(r, deg) {
+  const rad = (deg - 90) * Math.PI / 180;
+  return [CX + r * Math.cos(rad), CY + r * Math.sin(rad)];
+}
+function slicePath(a0, a1) {
+  const large = (a1 - a0) > 180 ? 1 : 0;
+  const [x0o, y0o] = polar(R_OUT, a0), [x1o, y1o] = polar(R_OUT, a1);
+  const [x0i, y0i] = polar(R_IN, a0), [x1i, y1i] = polar(R_IN, a1);
+  return `M ${x0o} ${y0o} A ${R_OUT} ${R_OUT} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${R_IN} ${R_IN} 0 ${large} 0 ${x0i} ${y0i} Z`;
+}
+function cfg() { return config.pairs[pair]; }
+function zoneColor(pct, lit) {
+  const a = cfg().thresholds.aplus, b = cfg().thresholds.b;
+  if (pct >= a) return lit ? '#16a34a' : '#e4f3ea';
+  if (pct >= b) return lit ? '#d97706' : '#f7ecd9';
+  return lit ? '#dc2626' : '#f6e2e2';
+}
+function renderGauge(score) {
+  const g = document.getElementById('slices');
+  g.innerHTML = '';
+  const gap = 1.8, step = 360 / SLICES;
+  for (let i = 0; i < SLICES; i++) {
+    const a0 = i * step + gap / 2, a1 = (i + 1) * step - gap / 2;
+    const mid = (i + 0.5) / SLICES * 100;
+    const isLit = ((i + 1) / SLICES * 100) <= score + 0.001;
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', slicePath(a0, a1));
+    p.setAttribute('fill', zoneColor(mid, isLit));
+    g.appendChild(p);
+  }
+}
+function ptsFor(c) { return direction === 'LONG' ? Number(c.l) || 0 : Number(c.s) || 0; }
+
+let mood = 0;
+let sent = ''; // '' | 'LONG' | 'SHORT' — kalabalığın yönü
+let intent = ''; // '' | 'setup' | 'emo' — giriş niyeti
+const SENT_PTS = 6;
+
+function renderIntent() {
+  const bs = document.getElementById('intent-setup');
+  const be = document.getElementById('intent-emo');
+  bs.className = intent === 'setup' ? 'on-good' : '';
+  be.className = intent === 'emo' ? 'on-bad' : '';
+}
+
+function sentPts() {
+  const isGold = pair === 'XAU' || pair.indexOf('XAU') !== -1 || pair.indexOf('GOLD') !== -1;
+  if (isGold || !sent) return 0;
+  return sent === direction ? -SENT_PTS : SENT_PTS;
+}
+// ——— Pozisyon Esnasında: müdahale filtresi ———
+// valid=true satırlar plan gereği çıkış sebebidir; diğerleri dürtüdür, kapatma gerekçesi değildir
+const POS_ITEMS_BTC = [
+  { name: 'İnvalidasyon gerçekleşti — senaryo bozuldu', valid: true },
+  { name: 'Planda yazılı haber riski geldi / yaklaşıyor', valid: true },
+  { name: 'Fiyat istediğim gibi gitmiyor (invalidasyon yok)', valid: false },
+  { name: 'PnL paylaştım', valid: false },
+  { name: "TP'nin ucundan geri döndü — kapat dürtüsü", valid: false },
+  { name: "Breakeven'a çekme dürtüsü", valid: false },
+  { name: 'Her muma tepki veriyorum — ekrandan kalk', valid: false }
+];
+// Gold: soru formatlı kontrol listesi — invalidasyon çıkış sebebi, gerisi "doğru yaptın mı" denetimi
+const POS_ITEMS_XAU = [
+  { name: 'İnvalidasyon gerçekleşti mi?', valid: true },
+  { name: 'TP doğru şekilde mi uzatıldı?', valid: false },
+  { name: 'Murphy yasası doğru hesaplandı mı?', valid: false },
+  { name: 'Geceye bırakılan işlem mantıklı mı?', valid: false },
+  { name: 'TP ucundan dönen işlem kapandı mı?', valid: false }
+];
+function posItems() {
+  const isGold = pair === 'XAU' || pair.indexOf('XAU') !== -1 || pair.indexOf('GOLD') !== -1;
+  return isGold ? POS_ITEMS_XAU : POS_ITEMS_BTC;
+}
+let posChecked = new Set();
+
+function renderPos() {
+  const box = document.getElementById('list-pos');
+  box.innerHTML = '';
+  const items = posItems();
+  items.forEach((it, i) => {
+    const row = document.createElement('div');
+    row.className = 'crit' + (posChecked.has(i) ? (it.valid ? ' on pos' : ' on neg') : '');
+    row.setAttribute('role', 'checkbox');
+    row.setAttribute('aria-checked', posChecked.has(i));
+    row.setAttribute('tabindex', '0');
+    const b = document.createElement('span'); b.className = 'box'; b.textContent = '✓';
+    const nm = document.createElement('span'); nm.className = 'name'; nm.textContent = it.name;
+    const pt = document.createElement('span'); pt.className = 'pts'; pt.textContent = it.valid ? 'ÇIKIŞ' : 'DÜRTÜ';
+    row.appendChild(b); row.appendChild(nm); row.appendChild(pt);
+    const toggle = () => { posChecked.has(i) ? posChecked.delete(i) : posChecked.add(i); renderPos(); };
+    row.addEventListener('click', toggle);
+    row.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } });
+    box.appendChild(row);
+  });
+  const anyValid = items.some((it, i) => it.valid && posChecked.has(i));
+  const anyImpulse = items.some((it, i) => !it.valid && posChecked.has(i));
+  const v = document.getElementById('pos-verdict');
+  const n = document.getElementById('n-pos');
+  if (anyValid) {
+    v.textContent = 'İŞLEMİ KAPAT — plan gereği çıkış. Bu müdahale değil, uygulamadır.';
+    v.className = 'sent-note plus'; n.textContent = 'KAPAT';
+  } else if (anyImpulse) {
+    v.textContent = 'KAPATMA — invalidasyon yok, bu his sinyal değil. Elini klavyeden çek; dürtüyü Notion Müdahale kolonuna logla.';
+    v.className = 'sent-note minus'; n.textContent = 'DOKUNMA';
+  } else {
+    v.textContent = 'Pozisyondayken bir dürtü geldiğinde önce buraya işaretle — kapatma kararı klavyeden önce buradan geçsin.';
+    v.className = 'sent-note'; n.textContent = '';
+  }
+}
+
+function renderSent() {
+  const bl = document.getElementById('sent-long');
+  const bs = document.getElementById('sent-short');
+  bl.className = sent === 'LONG' ? 'on-l' : '';
+  bs.className = sent === 'SHORT' ? 'on-s' : '';
+  const note = document.getElementById('sent-note');
+  const n = document.getElementById('n-sent');
+  const p = sentPts();
+  if (!sent) {
+    note.textContent = 'Kalabalık nerede? Seçim yapmazsan skora etkisi yok.';
+    note.className = 'sent-note'; n.textContent = '';
+  } else if (p > 0) {
+    note.textContent = 'Kalabalık karşında — ters bias konfluensi: +' + SENT_PTS;
+    note.className = 'sent-note plus'; n.textContent = '+' + SENT_PTS;
+  } else {
+    note.textContent = 'Kalabalıkla aynı yöndesin — likidite sensin: −' + SENT_PTS;
+    note.className = 'sent-note minus'; n.textContent = '−' + SENT_PTS;
+  }
+}
+function moodLabel(v) {
+  if (v <= -7) return ['KORKU', 'ms-ext'];
+  if (v <= -3) return ['TEDİRGİN', 'ms-fear'];
+  if (v <= 2) return ['NÖTR', 'ms-neut'];
+  if (v <= 6) return ['İŞTAHLI', 'ms-greed'];
+  return ['COŞKU', 'ms-ext'];
+}
+function renderMood() {
+  const [lbl, cls] = moodLabel(mood);
+  const st = document.getElementById('mood-state');
+  st.textContent = lbl + ' · ' + (mood > 0 ? '+' : '') + mood;
+  st.className = 'mood-state ' + cls;
+  const pe = document.getElementById('mood-pen');
+  const neutral = Math.abs(mood) <= 2;
+  pe.textContent = neutral ? 'nötr bölge ✓' : 'nötr değilsin — girmeden önce nötrleşmeyi bekle';
+  pe.className = 'mood-pen' + (neutral ? '' : ' on');
+}
+
+function computeScore() {
+  let sum = sentPts();
+  cfg().criteria.forEach((c, i) => {
+    if (c.cat === 'duygu') return; // duygu puan değil kilittir
+    if (checked.has(i)) sum += ptsFor(c);
+  });
+  return Math.max(0, Math.min(100, sum));
+}
+function emoLocked() {
+  let locked = false;
+  cfg().criteria.forEach((c, i) => { if (c.cat === 'duygu' && checked.has(i)) locked = true; });
+  return locked;
+}
+function intentLocked() { return intent === 'emo'; }
+function entryLocked() { return emoLocked() || intentLocked(); }
+
+function renderChips() {
+  const sessions = curSessions();
+  const sessWrap = document.getElementById('sess-wrap') || document.getElementById('sess-chips').parentElement;
+  const sc = document.getElementById('sess-chips');
+  sc.innerHTML = '';
+  const noSess = sessions.length === 1 && sessions[0] === '—';
+  if (sessWrap) sessWrap.style.display = noSess ? 'none' : '';
+  if (noSess) { session = '—'; }
+  else {
+    if (!sessions.includes(session)) session = sessions[0];
+    sessions.forEach(s => {
+      const c = document.createElement('span');
+      c.className = 'chip' + (session === s ? ' on' : '');
+      c.textContent = s;
+      c.addEventListener('click', () => { session = s; render(); });
+      sc.appendChild(c);
+    });
+  }
+
+  const days = curDays();
+  if (!days.includes(selDay)) selDay = days.includes(todayName()) ? todayName() : days[0];
+  const dc = document.getElementById('day-chips');
+  dc.innerHTML = '';
+  days.forEach(d => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (selDay === d ? ' on' : '');
+    c.textContent = d;
+    c.addEventListener('click', () => { selDay = d; render(); });
+    dc.appendChild(c);
+  });
+
+  const st = document.getElementById('strat-chips');
+  st.innerHTML = '';
+  const strategies = stratsFor(pair);
+  if (strategies.length === 0) {
+    const ph = document.createElement('span');
+    ph.style.cssText = 'font-size:12px;color:var(--text-3);align-self:center;';
+    ph.textContent = 'Henüz strateji yok — + ile ekle';
+    st.appendChild(ph);
+  }
+  strategies.forEach(s => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (strat === s ? ' on' : '');
+    c.textContent = s;
+    c.addEventListener('click', () => { strat = (strat === s ? '' : s); renderChips(); });
+    st.appendChild(c);
+  });
+  const add = document.createElement('span');
+  add.className = 'chip add'; add.textContent = '+';
+  add.setAttribute('role', 'button'); add.setAttribute('aria-label', 'Yeni strateji ekle');
+  add.addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.className = 'chip-input'; inp.placeholder = 'Strateji adı';
+    const commit = () => {
+      const name = inp.value.trim();
+      if (name && !stratsFor(pair).includes(name)) {
+        stratsFor(pair).push(name);
+        strat = name;
+        saveConfig();
+      }
+      renderChips();
+    };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') renderChips(); });
+    inp.addEventListener('blur', commit);
+    st.replaceChild(inp, add);
+    inp.focus();
+  });
+  st.appendChild(add);
+}
+
+function renderMatrix() {
+  const g = document.getElementById('mx-grid');
+  const sessions = curSessions();
+  const mx = matrixFor(pair);
+  const noSess = sessions.length === 1 && sessions[0] === '—';
+  g.style.gridTemplateColumns = '64px repeat(' + sessions.length + ', 1fr)';
+  g.innerHTML = '<span></span>' + sessions.map(s => '<span class="mx-h">' + (noSess ? 'Tavan' : s) + '</span>').join('');
+  const gold = pair !== 'BTC';
+  const order = gold ? ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'] : ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  order.forEach(d => {
+    const dl = document.createElement('span');
+    dl.className = 'mx-d'; dl.textContent = d;
+    g.appendChild(dl);
+    sessions.forEach(s => {
+      const sel = document.createElement('select');
+      // gold pazartesi: A+ seçilemez
+      const opts = (gold && d === 'Pzt') ? ['B', 'YOK'] : ['A+', 'B', 'YOK'];
+      opts.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        if (mx[d][s] === v) o.selected = true;
+        sel.appendChild(o);
+      });
+      const paint = () => {
+        sel.className = 'mx-' + (sel.value === 'A+' ? 'a' : sel.value === 'B' ? 'b' : 'y');
+      };
+      paint();
+      sel.addEventListener('change', () => {
+        mx[d][s] = sel.value;
+        paint(); render(); saveConfig();
+      });
+      g.appendChild(sel);
+    });
+  });
+}
+
+let pendingDel = null;
+function deletePair(p) {
+  const keys = Object.keys(config.pairs);
+  if (keys.length <= 1) return;
+  if (pendingDel !== p) {
+    // ilk tık: onay bekle
+    pendingDel = p;
+    renderPairs();
+    setTimeout(() => { if (pendingDel === p) { pendingDel = null; renderPairs(); } }, 4000);
+    return;
+  }
+  // ikinci tık: sil
+  pendingDel = null;
+  delete config.pairs[p];
+  if (config.stratByPair) delete config.stratByPair[p];
+  if (config.matrixByPair) delete config.matrixByPair[p];
+  if (pair === p) pair = Object.keys(config.pairs)[0];
+  checked = new Set();
+  saveConfig();
+  renderPairs(); renderCriteria(); render(); renderMatrix(); applyPairPanels(); renderSent(); renderPos();
+  if (document.getElementById('editor').classList.contains('open')) renderEditor();
+}
+
+function renderPairs() {
+  const seg = document.getElementById('pair-seg');
+  seg.innerHTML = '';
+  const multi = Object.keys(config.pairs).length > 1;
+  Object.keys(config.pairs).forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'pair-tab' + (p === pair ? ' on-gold' : '');
+    const lbl = document.createElement('span');
+    lbl.textContent = p;
+    lbl.addEventListener('click', () => switchPair(p));
+    b.appendChild(lbl);
+    if (multi) {
+      const x = document.createElement('span');
+      const armed = pendingDel === p;
+      x.className = 'pair-x' + (armed ? ' armed' : '');
+      x.textContent = armed ? 'sil?' : '×';
+      x.setAttribute('role', 'button');
+      x.setAttribute('aria-label', p + ' paritesini sil');
+      x.addEventListener('click', e => { e.stopPropagation(); deletePair(p); });
+      b.appendChild(x);
+    }
+    seg.appendChild(b);
+  });
+  const add = document.createElement('button');
+  add.className = 'addp'; add.textContent = '+';
+  add.setAttribute('aria-label', 'Yeni pair ekle');
+  add.addEventListener('click', () => {
+    document.getElementById('pair-add').classList.toggle('open');
+    document.getElementById('pair-name').focus();
+  });
+  seg.appendChild(add);
+}
+
+function render() {
+  const s = computeScore();
+  const { aplus: a, b } = cfg().thresholds;
+  document.getElementById('score-txt').innerHTML = Math.round(s) + '<tspan class="score-pct" dx="2">%</tspan>';
+  document.getElementById('dial-dir').textContent = pair + ' · ' + direction;
+  renderGauge(s);
+
+  const v = document.getElementById('verdict'), risk = document.getElementById('risk-line');
+  const cell = currentCell();
+  const gold = pair !== 'BTC';
+  const sessLabel = (curSessions().length === 1) ? '' : ' ' + session;
+  const base = s >= a ? 'A+' : s >= b ? 'B' : 'YOK';
+  const vd = verdictOf(s, cfg().thresholds);
+  const goldMon = gold && selDay === 'Pzt';
+  if (vd === 'A+') {
+    v.textContent = 'A+ SETUP — TAM RİSK'; v.className = 'v-a';
+    risk.textContent = gold ? 'Risk: 0.5R (gold sabit).' : 'Risk: 1R';
+  }
+  else if (vd === 'B') {
+    v.textContent = 'B SETUP — TEMKİNLİ'; v.className = 'v-b';
+    if (goldMon) {
+      risk.textContent = 'Pazartesi (gold): A+ olamaz · 0.5R · GÜNDE TEK İŞLEM.';
+    } else if (gold) {
+      risk.textContent = 'Risk: 0.5R (gold sabit).';
+    } else {
+      risk.textContent = (base === 'A+' && cell === 'B')
+        ? 'Gün/Seans kalitesi: ' + selDay + sessLabel + ' = B → skor A+ olsa da max B · 0.3R.'
+        : 'Risk: 0.3R · Küçük gir ya da hiç girme.';
+    }
+  }
+  else {
+    if (intentLocked()) {
+      v.textContent = 'DUYGU İLE GİRİŞ — İŞLEM YASAK'; v.className = 'v-no';
+      risk.textContent = 'Girişte "Duygumu" seçtin. Setup tradelemiyorsan işlem alınmaz. Niyetini "Setup\'ı" yap ya da bu işlemi geç.';
+    } else if (emoLocked()) {
+      v.textContent = 'DUYGU KİLİDİ — İŞLEM YASAK'; v.className = 'v-no';
+      risk.textContent = 'İşaretli duygu varken skor kaç olursa olsun işlem alınmaz. Önce nötrleş, sonra tekrar skorla.';
+    } else {
+      v.textContent = 'ANLAŞMA YOK'; v.className = 'v-no';
+      risk.textContent = (cell === 'YOK')
+        ? 'Bu dilim işleme kapalı: ' + selDay + sessLabel + ' = YOK.'
+        : 'Eşik altı — bu masadan kalkıyoruz.';
+    }
+  }
+  renderChips();
+  document.body.classList.toggle('emo-locked', entryLocked());
+  const elock = document.getElementById('emo-lock');
+  if (elock) elock.textContent = intentLocked() ? 'DUYGU İLE GİRİŞ — KİLİTLİ' : 'SİSTEM KİLİTLİ';
+
+  document.getElementById('btn-long').className = direction === 'LONG' ? 'on-long' : '';
+  document.getElementById('btn-short').className = direction === 'SHORT' ? 'on-short' : '';
+  renderPairs();
+}
+
+const EMO_SHORT = {
+  'Uykusuz / yorgunum': 'Uykusuz',
+  'Stresliyim (trade dışı kaynak)': 'Stresli',
+  'Aşırı yoğun / bölünmüş dikkat': 'Dağınık',
+  'Az önce stop oldum — revenge penceresi': 'Revenge',
+  'FOMO — hareket kaçıyor hissi': 'FOMO',
+  'Önceki işlemi kaçırdım — telafi hissi var': 'Telafi',
+  'Bugün aynı bias ile 2. kez giriyorum': '2. giriş'
+};
+function emoShort(name) {
+  if (EMO_SHORT[name]) return EMO_SHORT[name];
+  const w = name.split(/[\s\/—(,]+/)[0];
+  return w.length > 12 ? w.slice(0, 12) : w;
+}
+
+function renderCriteria() {
+  const lists = { veri: [], teknik: [], pozisyon: [], duygu: [] };
+  cfg().criteria.forEach((c, i) => {
+    if (ptsFor(c) === 0) return; // bu yön için anlamsız kriterler gizlenir
+    (lists[c.cat] || lists.teknik).push([c, i]);
+  });
+  Object.keys(lists).forEach(cat => {
+    const box = document.getElementById('list-' + cat);
+    box.innerHTML = '';
+    let n = 0;
+    if (cat === 'duygu') {
+      lists.duygu.forEach(([c, i]) => {
+        if (checked.has(i)) n++;
+        const chip = document.createElement('button');
+        chip.className = 'emo-chip' + (checked.has(i) ? ' on' : '');
+        chip.type = 'button';
+        chip.title = c.name;
+        chip.setAttribute('aria-pressed', checked.has(i));
+        const tk = document.createElement('span'); tk.className = 'tick'; tk.textContent = checked.has(i) ? '✓' : '○';
+        const lb = document.createElement('span'); lb.textContent = emoShort(c.name);
+        chip.appendChild(tk); chip.appendChild(lb);
+        chip.addEventListener('click', () => {
+          checked.has(i) ? checked.delete(i) : checked.add(i); renderCriteria(); render();
+        });
+        box.appendChild(chip);
+      });
+      document.getElementById('n-duygu').textContent = n > 0 ? 'KİLİT' : '';
+      return;
+    }
+    lists[cat].forEach(([c, i]) => {
+      const pts = ptsFor(c);
+      if (checked.has(i)) n++;
+      const row = document.createElement('div');
+      row.className = 'crit' + (checked.has(i) ? (pts >= 0 ? ' on pos' : ' on neg') : '');
+      row.setAttribute('role', 'checkbox');
+      row.setAttribute('aria-checked', checked.has(i));
+      row.setAttribute('tabindex', '0');
+      const b = document.createElement('span'); b.className = 'box'; b.textContent = '✓';
+      const nm = document.createElement('span'); nm.className = 'name'; nm.textContent = c.name;
+      const pt = document.createElement('span'); pt.className = 'pts';
+      pt.textContent = (pts > 0 ? '+' : '') + pts;
+      row.appendChild(b); row.appendChild(nm); row.appendChild(pt);
+      const toggle = () => { checked.has(i) ? checked.delete(i) : checked.add(i); renderCriteria(); render(); };
+      row.addEventListener('click', toggle);
+      row.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } });
+      box.appendChild(row);
+    });
+    document.getElementById('n-' + cat).textContent =
+      lists[cat].length === 0 ? '—' : n + '/' + lists[cat].length;
+  });
+}
+
+function startDrag(e, row) {
+  e.preventDefault();
+  const list = document.getElementById('edit-list');
+  row.classList.add('dragging');
+  row.setPointerCapture && e.target.setPointerCapture(e.pointerId);
+
+  const move = ev => {
+    const y = ev.clientY;
+    const others = [...list.querySelectorAll('.edit-row')].filter(r => r !== row);
+    for (const other of others) {
+      const rect = other.getBoundingClientRect();
+      if (y > rect.top && y < rect.bottom) {
+        if (y < rect.top + rect.height / 2) list.insertBefore(row, other);
+        else list.insertBefore(row, other.nextSibling);
+        break;
+      }
+    }
+  };
+  const up = () => {
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.removeEventListener('pointercancel', up);
+    row.classList.remove('dragging');
+    cfg().criteria = [...list.querySelectorAll('.edit-row')].map(r => r._crit);
+    checked = new Set();
+    renderEditor(); renderCriteria(); render();
+  };
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+  document.addEventListener('pointercancel', up);
+}
+
+function renderEditor() {
+  document.getElementById('edit-pair-lbl').textContent = pair;
+  document.getElementById('btn-delpair').disabled = Object.keys(config.pairs).length <= 1;
+  const list = document.getElementById('edit-list');
+  list.innerHTML = '';
+  cfg().criteria.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'edit-row';
+    const name = document.createElement('input');
+    name.type = 'text'; name.value = c.name; name.placeholder = 'Gözlem';
+    name.addEventListener('input', () => { c.name = name.value; });
+    const sel = document.createElement('select');
+    Object.keys(CATS).forEach(k => {
+      const o = document.createElement('option'); o.value = k; o.textContent = CATS[k];
+      if (c.cat === k) o.selected = true; sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => { c.cat = sel.value; });
+    const l = document.createElement('input');
+    l.type = 'number'; l.step = '1'; l.value = c.l; l.setAttribute('aria-label', 'Long puanı');
+    l.addEventListener('input', () => { c.l = Number(l.value) || 0; });
+    const sIn = document.createElement('input');
+    sIn.type = 'number'; sIn.step = '1'; sIn.value = c.s; sIn.setAttribute('aria-label', 'Short puanı');
+    sIn.addEventListener('input', () => { c.s = Number(sIn.value) || 0; });
+    const handle = document.createElement('span');
+    handle.className = 'handle'; handle.textContent = '⠿';
+    handle.setAttribute('aria-label', 'Sürükleyerek taşı');
+    handle.addEventListener('pointerdown', e => startDrag(e, row));
+    const del = document.createElement('button');
+    del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Sil');
+    del.addEventListener('click', () => {
+      cfg().criteria.splice(i, 1); checked = new Set();
+      renderEditor(); renderCriteria(); render();
+    });
+    row._crit = c;
+    row.appendChild(handle); row.appendChild(name); row.appendChild(sel); row.appendChild(l); row.appendChild(sIn); row.appendChild(del);
+    list.appendChild(row);
+  });
+  document.getElementById('th-a').value = cfg().thresholds.aplus;
+  document.getElementById('th-b').value = cfg().thresholds.b;
+}
+
+async function saveConfig() {
+  const note = document.getElementById('save-note');
+  const ok = await store.set(STORAGE_KEY, JSON.stringify(config));
+  note.textContent = ok ? 'Deftere işlendi.' : 'Kayıt yapılamadı; bu oturumda geçerli.';
+  setTimeout(() => { note.textContent = ''; }, 4000);
+}
+async function loadConfig() {
+  try {
+    const val = await store.get(STORAGE_KEY);
+    if (val) {
+      const p = JSON.parse(val);
+      if (p && p.pairs && Object.keys(p.pairs).length > 0) {
+        config = p;
+        pair = Object.keys(p.pairs)[0];
+      }
+    }
+  } catch (e) { /* ilk açılış */ }
+}
+
+function switchPair(p) {
+  pair = p; checked = new Set();
+  sent = ''; posChecked = new Set();
+  intent = ''; mood = 0;
+  const mr = document.getElementById('mood-range'); if (mr) mr.value = 0;
+  if (typeof renderMood === 'function') renderMood();
+  if (typeof renderIntent === 'function') renderIntent();
+  renderCriteria(); render(); renderSent(); renderPos(); applyPairPanels(); renderMatrix();
+  // paritenin pair alanını otomatik doldur, sonra o paritenin planını yükle
+  const pf = document.getElementById('d-pair'); if (pf) pf.value = p;
+  loadDaily();
+  if (document.getElementById('editor').classList.contains('open')) renderEditor();
+}
+
+function applyPairPanels() {
+  const isGold = pair === 'XAU' || pair.indexOf('XAU') !== -1 || pair.indexOf('GOLD') !== -1;
+  const sp = document.getElementById('sent-panel');
+  if (sp) sp.style.display = isGold ? 'none' : '';
+}
+
+function addPair() {
+  const inp = document.getElementById('pair-name');
+  const name = inp.value.trim().toUpperCase().replace(/[^A-Z0-9/]/g, '').slice(0, 12);
+  if (!name) return;
+  if (!config.pairs[name]) {
+    config.pairs[name] = JSON.parse(JSON.stringify(cfg()));
+  }
+  inp.value = '';
+  document.getElementById('pair-add').classList.remove('open');
+  switchPair(name);
+  saveConfig();
+}
+
+const DAILY_PREFIX = 'defter-daily:';
+let dailyBias = '';
+
+function dailyKey() {
+  const date = document.getElementById('d-date').value;
+  // BTC: eski tarih-bazlı anahtar (geriye dönük uyum). Diğer pariteler: pair ekli anahtar.
+  return pair === 'BTC' ? DAILY_PREFIX + date : DAILY_PREFIX + date + ':' + pair;
+}
+function setBias(b) {
+  dailyBias = b;
+  document.getElementById('d-bull').className = b === 'BULLISH' ? 'on-bull' : '';
+  document.getElementById('d-bear').className = b === 'BEARISH' ? 'on-bear' : '';
+}
+function collectDaily() {
+  return {
+    bias: dailyBias,
+    pair: document.getElementById('d-pair').value,
+    sabah: document.getElementById('d-sabah').value,
+    senaryo: document.getElementById('d-senaryo').value,
+    anti: document.getElementById('d-anti').value,
+    gunsonu: document.getElementById('d-gunsonu').value
+  };
+}
+function fillDaily(d) {
+  setBias(d && d.bias || '');
+  document.getElementById('d-pair').value = (d && d.pair) || pair;
+  document.getElementById('d-sabah').value = d && d.sabah || '';
+  document.getElementById('d-senaryo').value = d && d.senaryo || '';
+  document.getElementById('d-anti').value = d && d.anti || '';
+  document.getElementById('d-gunsonu').value = d && d.gunsonu || '';
+}
+async function loadDaily() {
+  const status = document.getElementById('daily-status');
+  try {
+    const val = await store.get(dailyKey());
+    if (val) { fillDaily(JSON.parse(val)); status.textContent = 'kayıtlı'; }
+    else { fillDaily(null); status.textContent = 'boş'; }
+  } catch (e) { fillDaily(null); status.textContent = 'boş'; }
+}
+async function saveDaily() {
+  const note = document.getElementById('daily-note');
+  const ok = await store.set(dailyKey(), JSON.stringify(collectDaily()));
+  note.textContent = ok ? 'Plan deftere işlendi.' : 'Kayıt yapılamadı; bu oturumda geçerli.';
+  if (ok) document.getElementById('daily-status').textContent = 'kayıtlı';
+  setTimeout(() => { note.textContent = ''; }, 4000);
+}
+
+const TRADES_KEY = 'defter-trades-v1';
+let trades = [];
+
+function verdictOf(score, th) {
+  if (entryLocked()) return 'YOK';
+  let base = score >= th.aplus ? 'A+' : score >= th.b ? 'B' : 'YOK';
+  const cell = currentCell();
+  if (cell === 'YOK') return 'YOK';
+  if (cell === 'B' && base === 'A+') return 'B';
+  return base;
+}
+async function loadTrades() {
+  try {
+    const val = await store.get(TRADES_KEY);
+    if (val) { const t = JSON.parse(val); if (Array.isArray(t)) trades = t; }
+  } catch (e) { /* ilk açılış */ }
+}
+async function saveTrades() { await store.set(TRADES_KEY, JSON.stringify(trades)); }
+
+// ——— Ders Defteri ———
+const LESSONS_KEY = 'defter-lessons-v1';
+let lessonsData = { lessons: [], log: {} };
+
+function lsToday() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+async function loadLessons() {
+  try {
+    const raw = await store.get(LESSONS_KEY);
+    if (raw) { lessonsData = JSON.parse(raw); }
+  } catch (e) { /* boş başla */ }
+  if (!Array.isArray(lessonsData.lessons)) lessonsData.lessons = [];
+  if (!lessonsData.log || typeof lessonsData.log !== 'object') lessonsData.log = {};
+  if (lessonsData.lessons.length === 0) {
+    // başlangıç dersleri
+    const base = Date.now();
+    lessonsData.lessons.push({
+      id: base, text: 'Kural ihlalinin acı verici bir bedeli olsun — ihlal asla bedava kalmasın.',
+      src: 'Alex G', added: lsToday(), active: false
+    });
+    lessonsData.lessons.push({
+      id: base + 1, text: '2 ardışık stop sonrası: yalnızca A+ & HTF bölge ya da kesin pattern; risk tam boy, gerisi pas. (Durma değil, filtreyi sık.)',
+      src: 'Recovery', added: lsToday(), active: true
+    });
+    lessonsData.lessons.push({
+      id: base + 2, text: 'Pazartesi 21:00\'da fiyat rölantideyse ve düşmediyse, o gün manipülasyon gelmez — zorlama.',
+      src: 'Pzt gözlemi', added: lsToday(), active: true
+    });
+    await saveLessons();
+  }
+}
+async function saveLessons() { await store.set(LESSONS_KEY, JSON.stringify(lessonsData)); }
+
+function lsAdherence(id) {
+  const days = Object.keys(lessonsData.log).sort().slice(-14);
+  let y = 0, t = 0;
+  days.forEach(d => {
+    const v = lessonsData.log[d] && lessonsData.log[d][id];
+    if (v === true) { y++; t++; } else if (v === false) { t++; }
+  });
+  return t === 0 ? null : Math.round((y / t) * 100);
+}
+
+function renderLessons() {
+  const actives = lessonsData.lessons.filter(l => l.active);
+  const today = lsToday();
+  const tw = document.getElementById('ls-today');
+  tw.innerHTML = '';
+  if (actives.length === 0) {
+    tw.innerHTML = '<p class="hint" style="margin:0;">Takipte ders yok — arşivden ⭐ ile en fazla 3 ders seç.</p>';
+  }
+  actives.forEach(l => {
+    const v = lessonsData.log[today] ? lessonsData.log[today][l.id] : undefined;
+    const row = document.createElement('div'); row.className = 'ls-row';
+    const tx = document.createElement('div'); tx.className = 'txt';
+    tx.textContent = l.text;
+    if (l.src) { const sp = document.createElement('span'); sp.className = 'src'; sp.textContent = '· ' + l.src; tx.appendChild(sp); }
+    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = 'Bugün uyguladın mı?';
+    tx.appendChild(meta);
+    const yes = document.createElement('button'); yes.className = 'yes' + (v === true ? ' on' : ''); yes.textContent = '✓ Evet';
+    const no = document.createElement('button'); no.className = 'no' + (v === false ? ' on' : ''); no.textContent = '✗ Hayır';
+    const mark = async val => {
+      if (!lessonsData.log[today]) lessonsData.log[today] = {};
+      lessonsData.log[today][l.id] = (lessonsData.log[today][l.id] === val ? undefined : val);
+      if (lessonsData.log[today][l.id] === undefined) delete lessonsData.log[today][l.id];
+      await saveLessons(); renderLessons();
+    };
+    yes.addEventListener('click', () => mark(true));
+    no.addEventListener('click', () => mark(false));
+    row.appendChild(tx); row.appendChild(yes); row.appendChild(no);
+    tw.appendChild(row);
+  });
+
+  const lw = document.getElementById('ls-list');
+  lw.innerHTML = '';
+  const sorted = lessonsData.lessons.slice().filter(l => !l.active).sort((a, b) => b.id - a.id);
+  if (sorted.length === 0) {
+    lw.innerHTML = '<p class="hint" style="margin:0;">Arşiv boş — takipten çıkardığın ya da henüz takibe almadığın dersler burada birikir.</p>';
+  }
+  sorted.forEach(l => {
+    const row = document.createElement('div'); row.className = 'ls-row';
+    const tx = document.createElement('div'); tx.className = 'txt';
+    tx.textContent = l.text;
+    if (l.src) { const sp = document.createElement('span'); sp.className = 'src'; sp.textContent = '· ' + l.src; tx.appendChild(sp); }
+    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = l.added || '';
+    tx.appendChild(meta);
+    const adh = lsAdherence(l.id);
+    if (l.active && adh !== null) {
+      const a = document.createElement('span');
+      a.className = 'adh ' + (adh >= 70 ? 'g' : adh >= 40 ? 'a' : 'r');
+      a.textContent = '%' + adh;
+      row.appendChild(tx); row.appendChild(a);
+    } else { row.appendChild(tx); }
+    const star = document.createElement('button');
+    star.className = 'star' + (l.active ? ' on' : '');
+    star.textContent = l.active ? '⭐ Takipte' : '☆ Takibe al';
+    star.addEventListener('click', async () => {
+      if (!l.active && lessonsData.lessons.filter(x => x.active).length >= 3) {
+        star.textContent = 'Önce birini mezun et'; setTimeout(renderLessons, 1600); return;
+      }
+      l.active = !l.active; await saveLessons(); renderLessons();
+    });
+    const del = document.createElement('button'); del.textContent = '×';
+    del.setAttribute('aria-label', 'Dersi sil');
+    del.addEventListener('click', async () => {
+      lessonsData.lessons = lessonsData.lessons.filter(x => x.id !== l.id);
+      await saveLessons(); renderLessons();
+    });
+    row.appendChild(star); row.appendChild(del);
+    lw.appendChild(row);
+  });
+  document.getElementById('ls-count').textContent =
+    lessonsData.lessons.length + ' ders · ' + actives.length + '/3 takipte';
+}
+
+async function addLesson() {
+  const t = document.getElementById('ls-text');
+  const s = document.getElementById('ls-src');
+  const text = (t.value || '').trim();
+  if (!text) { t.focus(); return; }
+  const activeCount = lessonsData.lessons.filter(x => x.active).length;
+  lessonsData.lessons.push({
+    id: Date.now(), text: text, src: (s.value || '').trim(),
+    added: lsToday(), active: activeCount < 3
+  });
+  t.value = ''; s.value = '';
+  await saveLessons(); renderLessons();
+}
+
+// ——— Paylaşım Kartı ———
+const SH_COL = { 'A+': '#22c55e', 'B': '#f59e0b', 'YOK': '#ef4444' };
+let shData = null;
+
+function shRound(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+function shSpaced(ctx, text, x, y, sp) {
+  let cx = x;
+  for (const ch of text) { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + sp; }
+  return cx - x - sp;
+}
+function shSpacedW(ctx, text, sp) {
+  let w = 0;
+  for (const ch of text) { w += ctx.measureText(ch).width + sp; }
+  return w - sp;
+}
+function shClip(ctx, text, max) {
+  if (ctx.measureText(text).width <= max) return text;
+  let t = text;
+  while (t.length > 3 && ctx.measureText(t + '…').width > max) t = t.slice(0, -1);
+  return t + '…';
+}
+function shWrap(ctx, text, max, maxLines) {
+  const words = String(text).replace(/\s+/g, ' ').trim().split(' ');
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > max && line) {
+      lines.push(line); line = w;
+      if (lines.length === maxLines) break;
+    } else { line = test; }
+  }
+  if (lines.length < maxLines && line) lines.push(line);
+  if (lines.length === maxLines) {
+    // son satırı kırp
+    let last = lines[maxLines - 1];
+    const consumed = lines.join(' ');
+    if (consumed.length < String(text).replace(/\s+/g, ' ').trim().length) {
+      lines[maxLines - 1] = shClip(ctx, last + ' …', max);
+    }
+  }
+  return lines;
+}
+
+function currentShareData() {
+  const sc = computeScore();
+  const vd = verdictOf(sc, cfg().thresholds);
+  const names = [];
+  cfg().criteria.forEach((c, i) => {
+    if (checked.has(i) && c.cat !== 'duygu' && ptsFor(c) > 0) names.push(c.name);
+  });
+  const d = new Date();
+  const p2 = n => String(n).padStart(2, '0');
+  return {
+    pair: pair, dir: direction, score: Math.round(sc), verdict: vd,
+    day: selDay, sess: session, strat: strat, sent: sent, crits: names,
+    r: '', emoBlock: entryLocked(),
+    bias: dailyBias || '',
+    senaryo: (document.getElementById('d-senaryo').value || '').trim(),
+    anti: (document.getElementById('d-anti').value || '').trim(),
+    when: p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear() + '  ' + p2(d.getHours()) + ':' + p2(d.getMinutes())
+  };
+}
+function tradeShareData(t) {
+  return {
+    pair: t.pair, dir: t.dir, score: t.score, verdict: t.verdict,
+    day: t.day || '', sess: t.sess || '', strat: t.strat || '', sent: t.sent || '',
+    crits: critNames(t), r: t.r || '', emoBlock: !!t.emoBlock,
+    bias: '', senaryo: '', anti: '', _tradeDate: t.date || '',
+    when: t.date + '  ' + t.time
+  };
+}
+// işlem tarihinden (GG/AA) o günün plan anahtarını bul ve planı karta ekle
+async function attachPlanToShare(data) {
+  if (!data._tradeDate) return;
+  const parts = data._tradeDate.split('/');
+  if (parts.length !== 2) return;
+  const dd = parts[0].padStart(2, '0'), mm = parts[1].padStart(2, '0');
+  const base = DAILY_PREFIX + '2026-' + mm + '-' + dd;
+  const tp = data.pair || 'BTC';
+  const key = tp === 'BTC' ? base : base + ':' + tp;
+  try {
+    const raw = await store.get(key);
+    if (raw) {
+      const p = JSON.parse(raw);
+      data.bias = p.bias || '';
+      data.senaryo = (p.senaryo || '').trim();
+      data.anti = (p.anti || '').trim();
+    }
+  } catch (e) { /* plan yoksa boş kalır */ }
+}
+
+function drawShareCard() {
+  const d = shData; if (!d) return;
+  const showC = document.getElementById('sh-crits').checked;
+  const showR = document.getElementById('sh-r').checked && d.r !== '' && !isNaN(Number(d.r));
+  const showS = document.getElementById('sh-sent').checked && !!d.sent;
+  const showPbox = document.getElementById('sh-plan');
+  const showP = showPbox && showPbox.checked && ((d.senaryo && d.senaryo.length) || (d.anti && d.anti.length) || (d.bias && d.bias.length));
+  const tag = (document.getElementById('sh-tag').value || 'ALFA TRADERS').toUpperCase();
+
+  const acc = d.emoBlock ? SH_COL['YOK'] : (SH_COL[d.verdict] || SH_COL['YOK']);
+  const crits = showC ? d.crits.slice(0, 11) : [];
+  const extra = showC ? Math.max(0, d.crits.length - crits.length) : 0;
+
+  const W = 1080, M = 84;
+  // plan satırlarını önden ölç (yükseklik için)
+  let planBlocks = [];
+  if (showP) {
+    const meas = document.createElement('canvas').getContext('2d');
+    meas.font = '500 25px Inter, sans-serif';
+    const tw2 = W - M * 2 - 40;
+    if (d.senaryo) planBlocks.push({ label: 'SENARYO', lines: shWrap(meas, d.senaryo, tw2, 3) });
+    if (d.anti) planBlocks.push({ label: 'ANTİ SENARYO', lines: shWrap(meas, d.anti, tw2, 3) });
+  }
+  let planH = 0;
+  if (showP) {
+    planH = 24; // üst boşluk
+    planBlocks.forEach(b => { planH += 34 + b.lines.length * 34 + 12; });
+  }
+
+  let H = 940;
+  if (showC) H += 70 + crits.length * 50 + (extra ? 46 : 0);
+  if (showS) H += 54;
+  if (showR) H += 74;
+  if (d.emoBlock) H += 96;
+  H += planH;
+
+  const cv = document.getElementById('sh-canvas');
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  c.textBaseline = 'alphabetic';
+
+  c.fillStyle = '#12141c'; c.fillRect(0, 0, W, H);
+  c.fillStyle = acc; c.fillRect(0, 0, W, 8);
+
+  // başlık
+  c.fillStyle = '#6d7488'; c.font = '600 24px Inter, sans-serif';
+  shSpaced(c, 'KONFİRMASYON DEFTERİ', M, 112, 4);
+  c.font = '500 24px Inter, sans-serif'; c.textAlign = 'right';
+  c.fillText(d.when, W - M, 112); c.textAlign = 'left';
+  c.strokeStyle = '#232735'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(M, 146); c.lineTo(W - M, 146); c.stroke();
+
+  // kadran
+  const cx = W / 2, cy = 400, R = 158, LW = 30;
+  c.lineWidth = LW; c.lineCap = 'round';
+  c.strokeStyle = '#232735';
+  c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.stroke();
+  const frac = Math.max(0, Math.min(100, d.score)) / 100;
+  if (frac > 0) {
+    c.strokeStyle = acc;
+    c.beginPath(); c.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); c.stroke();
+  }
+  c.textAlign = 'center';
+  c.fillStyle = '#ffffff'; c.font = '800 128px Inter, sans-serif';
+  c.fillText(d.score + '%', cx, cy + 30);
+  c.fillStyle = '#6d7488'; c.font = '700 22px Inter, sans-serif';
+  const lw = shSpacedW(c, 'KONFLUENS SKORU', 5);
+  shSpaced(c, 'KONFLUENS SKORU', cx - lw / 2, cy + 82, 5);
+  c.textAlign = 'left';
+
+  let y = 640;
+
+  // karar rozeti
+  const vtxt = d.emoBlock ? 'DUYGU KİLİDİ — İŞLEM YASAK'
+    : d.verdict === 'A+' ? 'A+ SETUP · TAM RİSK'
+    : d.verdict === 'B' ? 'B SETUP · TEMKİNLİ' : 'ANLAŞMA YOK';
+  c.font = '700 34px Inter, sans-serif';
+  const pw = c.measureText(vtxt).width + 76;
+  c.globalAlpha = 0.14; c.fillStyle = acc;
+  shRound(c, cx - pw / 2, y - 50, pw, 74, 37); c.fill(); c.globalAlpha = 1;
+  c.fillStyle = acc; c.textAlign = 'center';
+  c.fillText(vtxt, cx, y);
+  c.textAlign = 'left';
+  y += 78;
+
+  // meta çipleri
+  const chips = [d.pair + ' · ' + d.dir];
+  if (d.bias) chips.push(d.bias);
+  if (d.day && d.sess) chips.push(d.day + ' · ' + d.sess);
+  if (d.strat && d.strat.trim() !== '') chips.push(d.strat.trim());
+  c.font = '600 26px Inter, sans-serif';
+  let tw = 0; const cwArr = chips.map(t => { const w = c.measureText(t).width + 44; tw += w + 12; return w; });
+  let x = cx - (tw - 12) / 2;
+  chips.forEach((t, i) => {
+    c.fillStyle = '#1b1e29'; shRound(c, x, y - 34, cwArr[i], 54, 27); c.fill();
+    c.fillStyle = i === 0 ? (d.dir === 'LONG' ? '#22c55e' : '#ef4444') : '#aab1c6';
+    c.textAlign = 'center'; c.fillText(t, x + cwArr[i] / 2, y); c.textAlign = 'left';
+    x += cwArr[i] + 12;
+  });
+  y += 74;
+
+  if (d.emoBlock) {
+    c.fillStyle = '#2a1416'; shRound(c, M, y - 40, W - M * 2, 72, 14); c.fill();
+    c.fillStyle = '#ef4444'; c.font = '700 26px Inter, sans-serif'; c.textAlign = 'center';
+    c.fillText('Duygu kilidi aktifken skor geçersizdir.', cx, y + 4);
+    c.textAlign = 'left'; y += 96;
+  }
+
+  if (showS) {
+    const contra = d.sent !== d.dir;
+    c.font = '600 26px Inter, sans-serif'; c.textAlign = 'center';
+    c.fillStyle = contra ? '#22c55e' : '#ef4444';
+    c.fillText('Kalabalık ' + d.sent + ' · ' + (contra ? 'ters bias konfluensi' : 'kalabalıkla aynı yön'), cx, y);
+    c.textAlign = 'left'; y += 54;
+  }
+
+  if (showR) {
+    const rv = Number(d.r);
+    c.fillStyle = rv >= 0 ? '#22c55e' : '#ef4444';
+    c.font = '800 46px Inter, sans-serif'; c.textAlign = 'center';
+    c.fillText((rv > 0 ? '+' : '') + rv + 'R', cx, y + 10);
+    c.textAlign = 'left'; y += 74;
+  }
+
+  if (showC) {
+    c.fillStyle = '#6d7488'; c.font = '700 22px Inter, sans-serif';
+    shSpaced(c, 'KONFLUENS', M, y, 5);
+    y += 46;
+    c.font = '500 27px Inter, sans-serif';
+    crits.forEach(n => {
+      c.fillStyle = acc; c.font = '700 26px Inter, sans-serif';
+      c.fillText('✓', M, y);
+      c.fillStyle = '#dfe3ee'; c.font = '500 27px Inter, sans-serif';
+      c.fillText(shClip(c, n, W - M * 2 - 46), M + 42, y);
+      y += 50;
+    });
+    if (extra) {
+      c.fillStyle = '#6d7488'; c.font = '500 25px Inter, sans-serif';
+      c.fillText('+' + extra + ' kriter daha', M + 42, y); y += 46;
+    }
+  }
+
+  if (showP && planBlocks.length) {
+    y += 8;
+    c.strokeStyle = '#232735'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(M, y - 16); c.lineTo(W - M, y - 16); c.stroke();
+    planBlocks.forEach(b => {
+      c.fillStyle = b.label === 'ANTİ SENARYO' ? '#ef8c8c' : '#8ab4f8';
+      c.font = '700 20px Inter, sans-serif';
+      shSpaced(c, b.label, M, y + 8, 4);
+      y += 34;
+      c.fillStyle = '#cbd0dd'; c.font = '500 25px Inter, sans-serif';
+      b.lines.forEach(ln => { c.fillText(ln, M + 20, y + 4); y += 34; });
+      y += 12;
+    });
+  }
+
+  // alt bar
+  c.strokeStyle = '#232735'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(M, H - 96); c.lineTo(W - M, H - 96); c.stroke();
+  c.fillStyle = '#8b92a8'; c.font = '700 24px Inter, sans-serif';
+  shSpaced(c, tag, M, H - 46, 4);
+  c.fillStyle = '#4d5364'; c.font = '500 22px Inter, sans-serif'; c.textAlign = 'right';
+  c.fillText('süreç · skor · disiplin', W - M, H - 46); c.textAlign = 'left';
+
+  try { document.getElementById('sh-img').src = cv.toDataURL('image/png'); } catch (e) { /* yoksay */ }
+}
+
+function shBlob() {
+  return new Promise(res => document.getElementById('sh-canvas').toBlob(res, 'image/png'));
+}
+function shNote(msg) {
+  const n = document.getElementById('sh-note');
+  n.textContent = msg; setTimeout(() => { if (n.textContent === msg) n.textContent = ''; }, 4000);
+}
+function shName() {
+  return 'alfa-' + (shData ? shData.pair.toLowerCase() + '-' + shData.dir.toLowerCase() : 'setup') + '.png';
+}
+async function shShare() {
+  try {
+    const b = await shBlob();
+    const f = new File([b], shName(), { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) {
+      await navigator.share({ files: [f] });
+    } else {
+      const tip = document.getElementById('sh-tip');
+      tip.style.background = 'var(--amber-soft)';
+      tip.innerHTML = 'Sistem paylaşımı bu ortamda kapalı. <b>Görsele uzun bas → Paylaş</b> ya da İndir kullan. Uygulamayı ayrı sekmede (GitHub Pages / indirilmiş dosya) açarsan bu buton da çalışır.';
+      shNote('Bu ortamda sistem paylaşımı kapalı — uzun basma yolunu kullan.');
+    }
+  } catch (e) { if (e && e.name !== 'AbortError') shNote('Paylaşılamadı — görsele uzun bas ya da İndir kullan.'); }
+}
+async function shDownload() {
+  const b = await shBlob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = shName();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+async function shCopy() {
+  // 1. deneme: söz (promise) ile ClipboardItem — kullanıcı hareketi korunur (Safari/Chrome)
+  try {
+    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': shBlob() })]);
+      shNote('Görsel panoya kopyalandı — sohbete yapıştırabilirsin.');
+      return;
+    }
+  } catch (e) { /* 2. denemeye geç */ }
+  // 2. deneme: blob hazırlayıp yaz
+  try {
+    const b = await shBlob();
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
+    shNote('Görsel panoya kopyalandı — sohbete yapıştırabilirsin.');
+    return;
+  } catch (e) { /* 3. yola geç */ }
+  // 3. yol: pano bu ortamda kapalı — uzun basma yönlendirmesi
+  const tip = document.getElementById('sh-tip');
+  tip.style.background = 'var(--amber-soft)';
+  tip.innerHTML = 'Pano bu ortamda kapalı (uygulama çerçeve içinde çalışıyor). <b>Görsele uzun bas → Görseli kopyala / Paylaş</b>, ya da İndir de galerinden gönder.';
+  shNote('Panoya yazma izni yok — yukarıdaki yolu kullan.');
+}
+function openShare(data) {
+  shData = data;
+  const rBox = document.getElementById('sh-r');
+  const has = data.r !== '' && !isNaN(Number(data.r));
+  rBox.disabled = !has; if (!has) rBox.checked = false;
+  const sBox = document.getElementById('sh-sent');
+  sBox.disabled = !data.sent;
+  const tip = document.getElementById('sh-tip');
+  tip.style.background = '';
+  tip.innerHTML = 'Görsele <b>uzun bas</b> → “Görseli kopyala” ya da “Paylaş”. En kestirme yol bu.';
+  const sendBtn = document.getElementById('sh-send');
+  const canShare = !!(navigator.share && navigator.canShare);
+  sendBtn.style.opacity = canShare ? '1' : '0.5';
+  sendBtn.title = canShare ? '' : 'Bu ortamda kapalı olabilir';
+  document.getElementById('share-modal').classList.add('open');
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawShareCard);
+  drawShareCard();
+}
+
+async function exportBackup() {
+  const dump = { app: 'konfirmasyon-defteri', ver: 1, exported: new Date().toISOString(), keys: {} };
+  const collect = async k => {
+    const v = await store.get(k);
+    if (v !== null && v !== undefined) dump.keys[k] = v;
+  };
+  await collect(STORAGE_KEY);
+  await collect(TRADES_KEY);
+  await collect(LESSONS_KEY);
+  const dailyKeys = await store.list(DAILY_PREFIX);
+  for (const k of dailyKeys) await collect(k);
+  const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'konfirmasyon-defteri-yedek-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  const note = document.getElementById('save-note');
+  note.textContent = 'Yedek indirildi (' + Object.keys(dump.keys).length + ' kayıt).';
+  setTimeout(() => { note.textContent = ''; }, 5000);
+}
+
+async function applyDump(dump) {
+  // Yeni format: { keys: {...} } — eski format: { config, trades, dailyPlans }
+  let n = 0;
+  if (dump && dump.keys && typeof dump.keys === 'object') {
+    for (const k of Object.keys(dump.keys)) {
+      if (k !== STORAGE_KEY && k !== TRADES_KEY && k !== LESSONS_KEY && k.indexOf(DAILY_PREFIX) !== 0) continue;
+      await store.set(k, dump.keys[k]); n++;
+    }
+    return n;
+  }
+  if (dump && (dump.config || dump.trades || dump.dailyPlans)) {
+    if (dump.config) { await store.set(STORAGE_KEY, JSON.stringify(dump.config)); n++; }
+    if (Array.isArray(dump.trades)) { await store.set(TRADES_KEY, JSON.stringify(dump.trades)); n++; }
+    if (dump.dailyPlans && typeof dump.dailyPlans === 'object') {
+      for (const d of Object.keys(dump.dailyPlans)) {
+        await store.set(DAILY_PREFIX + d, JSON.stringify(dump.dailyPlans[d])); n++;
+      }
+    }
+    return n;
+  }
+  throw new Error('format');
+}
+
+async function mergeSeed() {
+  const note = document.getElementById('save-note');
+  if (typeof SEED === 'undefined' || !SEED) { note.textContent = 'Gömülü kayıt yok.'; return; }
+  let added = 0;
+  // günlük planlar — sadece o tarih yoksa ekle
+  const plans = (SEED.dailyPlans && typeof SEED.dailyPlans === 'object') ? SEED.dailyPlans : {};
+  for (const d of Object.keys(plans)) {
+    const key = DAILY_PREFIX + d;
+    const existing = await store.get(key);
+    if (!existing) { await store.set(key, JSON.stringify(plans[d])); added++; }
+  }
+  // işlemler — aynı id yoksa ekle
+  const seedTrades = Array.isArray(SEED.trades) ? SEED.trades : [];
+  const haveIds = new Set(trades.map(t => t.id));
+  let tradeAdded = 0;
+  seedTrades.forEach(t => { if (!haveIds.has(t.id)) { trades.push(t); haveIds.add(t.id); tradeAdded++; } });
+  if (tradeAdded) {
+    trades.sort((a, b) => (b.id || 0) - (a.id || 0));
+    await saveTrades(); renderTrades();
+  }
+  added += tradeAdded;
+  await loadDaily();
+  note.textContent = added ? ('Eklendi: ' + tradeAdded + ' işlem, ' + (added - tradeAdded) + ' plan. Mevcut kayıtlara dokunulmadı.')
+                           : 'Zaten güncel — eklenecek eksik kayıt yok.';
+  setTimeout(() => { note.textContent = ''; }, 6000);
+}
+
+async function seedIfEmpty() {
+  if (typeof SEED === 'undefined' || !SEED) return;
+  try {
+    const hasCfg = await store.get(STORAGE_KEY);
+    const hasTrades = await store.get(TRADES_KEY);
+    if (hasCfg || hasTrades) return; // dolu depoya asla dokunma
+    await applyDump(SEED);
+  } catch (e) { /* seed başarısızsa boş başla */ }
+}
+
+async function importBackup(file) {
+  const note = document.getElementById('save-note');
+  try {
+    const text = await file.text();
+    const dump = JSON.parse(text);
+    const n = await applyDump(dump);
+    await loadConfig(); ensureConfigShape(); await loadTrades();
+    await loadLessons(); renderLessons();
+    checked = new Set();
+    renderCriteria(); render(); renderMatrix(); renderTrades(); loadDaily();
+    if (document.getElementById('editor').classList.contains('open')) renderEditor();
+    note.textContent = 'Yedek yüklendi (' + n + ' kayıt geri geldi).';
+  } catch (e) {
+    note.textContent = 'Yedek okunamadı — dosya bu uygulamanın yedeği mi?';
+  }
+  setTimeout(() => { note.textContent = ''; }, 5000);
+}
+let openTrades = new Set();
+
+function logTrade() {
+  const note = document.getElementById('daily-note');
+  if (intentLocked()) {
+    note.textContent = 'İşlem açılamaz — girişte "Duygumu" seçili. Setup tradelemiyorsan bu işlemi geç.';
+    note.style.color = 'var(--red)';
+    setTimeout(() => { note.style.color = ''; }, 6000);
+    return;
+  }
+  const s = computeScore();
+  const crits = [], miss = [];
+  cfg().criteria.forEach((c, i) => {
+    if (checked.has(i)) crits.push({ n: c.name, p: ptsFor(c) });
+    else miss.push(c.name);
+  });
+  const now = new Date();
+
+  // tarih kutusu: boşsa bugün, doluysa GG/AA
+  let date = now.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' });
+  let day = selDay;
+  const di = document.getElementById('trade-date');
+  const raw = (di.value || '').trim();
+  if (raw) {
+    if (!/^\d{1,2}\/\d{1,2}$/.test(raw)) {
+      note.textContent = 'Tarih biçimi GG/AA olmalı (ör. 22/07) — ya da boş bırak, bugünü alsın.';
+      setTimeout(() => { note.textContent = ''; }, 5000);
+      di.focus(); return;
+    }
+    const [d, m] = raw.split('/');
+    date = d.padStart(2, '0') + '/' + m.padStart(2, '0');
+    const jsDay = new Date(2026, parseInt(m, 10) - 1, parseInt(d, 10)).getDay();
+    const dayMap = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    if (!isNaN(jsDay)) day = dayMap[jsDay];
+  }
+
+  // Gold pazartesi: günde tek işlem. Aynı gün ikinci gold işlemi uyarı ister.
+  const isGold = pair === 'XAU' || pair.indexOf('XAU') !== -1 || pair.indexOf('GOLD') !== -1;
+  if (isGold && day === 'Pzt') {
+    const sameDay = trades.filter(t => {
+      const tg = t.pair === 'XAU' || (t.pair || '').indexOf('XAU') !== -1 || (t.pair || '').indexOf('GOLD') !== -1;
+      return tg && t.date === date;
+    }).length;
+    if (sameDay >= 1 && !window.__mondayOverride) {
+      window.__mondayOverride = true;
+      note.textContent = 'DUR — gold pazartesi kuralı: günde tek işlem. Bu ikinci işlem. Yine de kaydetmek için tekrar bas.';
+      note.style.color = 'var(--red)';
+      setTimeout(() => { note.style.color = ''; window.__mondayOverride = false; }, 8000);
+      return;
+    }
+    window.__mondayOverride = false;
+  }
+  trades.unshift({
+    id: now.getTime(),
+    date: date,
+    time: now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+    pair: pair, dir: direction,
+    score: Math.round(s),
+    verdict: verdictOf(s, cfg().thresholds),
+    crits: crits, miss: miss, mood: mood, day: day, sess: session, cell: currentCell(),
+    cap: (s >= cfg().thresholds.aplus && currentCell() !== 'A+'), strat: strat, sent: sent,
+    emoBlock: emoLocked(), intent: intent, stars: 0, r: ''
+  });
+  saveTrades(); renderTrades();
+  di.value = '';
+  note.textContent = 'İşlem kaydedildi — sonucu belli olunca R kolonunu doldur.';
+  setTimeout(() => { note.textContent = ''; }, 4000);
+}
+
+function critNames(t) {
+  return (t.crits || []).map(c => typeof c === 'string' ? c : c.n);
+}
+
+let tradeFilter = 'all';
+function tradeDateObj(t) {
+  // t.date "GG/AA" → 2026 yılı varsayımıyla Date
+  const p = (t.date || '').split('/');
+  if (p.length !== 2) return null;
+  const d = parseInt(p[0], 10), m = parseInt(p[1], 10);
+  if (isNaN(d) || isNaN(m)) return null;
+  return new Date(2026, m - 1, d);
+}
+function passesFilter(t) {
+  if (tradeFilter === 'all') return true;
+  if (tradeFilter === 'pair') return t.pair === pair;
+  const td = tradeDateObj(t);
+  if (!td) return false;
+  const now = new Date();
+  if (tradeFilter === 'today') {
+    return td.getDate() === now.getDate() && td.getMonth() === now.getMonth();
+  }
+  if (tradeFilter === 'month') {
+    return td.getMonth() === now.getMonth();
+  }
+  if (tradeFilter === 'week') {
+    // haftanın pazartesisi
+    const day = (now.getDay() + 6) % 7; // Pzt=0
+    const monday = new Date(now); monday.setDate(now.getDate() - day); monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6); sunday.setHours(23, 59, 59, 999);
+    return td >= monday && td <= sunday;
+  }
+  return true;
+}
+
+function renderTrades() {
+  const list = document.getElementById('trade-list');
+  const stats = document.getElementById('trade-stats');
+  document.getElementById('trade-count').textContent = trades.length;
+  list.innerHTML = '';
+
+  const shown = trades.filter(passesFilter);
+  const withR = shown.filter(t => t.r !== '' && !isNaN(Number(t.r)));
+  if (withR.length > 0) {
+    const grp = {};
+    withR.forEach(t => {
+      if (!grp[t.verdict]) grp[t.verdict] = { n: 0, sum: 0 };
+      grp[t.verdict].n++; grp[t.verdict].sum += Number(t.r);
+    });
+    const parts = Object.keys(grp).map(v => {
+      const g = grp[v];
+      return '<b>' + v + '</b> (' + g.n + ' işlem): toplam ' + g.sum.toFixed(2) + 'R, ort ' + (g.sum / g.n).toFixed(2) + 'R';
+    });
+    stats.innerHTML = 'Skor × sonuç: ' + parts.join(' · ');
+  } else {
+    stats.textContent = shown.length > 0
+      ? 'Sonuçlanan işlemlerin R değerini gir — skor dilimlerinin gerçek performansı burada birikecek.'
+      : (trades.length > 0 ? 'Bu filtrede işlem yok.' : 'Henüz kayıt yok. Kriterleri tikleyip "İşlemi Kaydet" de.');
+  }
+
+  shown.slice(0, 60).forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'trade-row';
+    const when = document.createElement('span');
+    when.className = 'when'; when.textContent = t.date + ' ' + t.time;
+    when.title = 'Tarihi düzenlemek için tıkla';
+    when.style.cursor = 'pointer';
+    when.addEventListener('click', async e => {
+      e.stopPropagation();
+      const cur = t.date || '';
+      const inp = prompt('İşlem tarihi (GG/AA):', cur);
+      if (inp === null) return;
+      const v = inp.trim();
+      if (!/^\d{1,2}\/\d{1,2}$/.test(v)) { alert('Biçim GG/AA olmalı, ör. 22/07'); return; }
+      const [d, m] = v.split('/');
+      t.date = d.padStart(2, '0') + '/' + m.padStart(2, '0');
+      // gün-seans hücresini de tarihe göre güncelle
+      const jsDay = new Date(2026, parseInt(m, 10) - 1, parseInt(d, 10)).getDay();
+      const dayMap = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+      if (!isNaN(jsDay)) t.day = dayMap[jsDay];
+      await saveTrades(); renderTrades();
+    });
+    const pd = document.createElement('span');
+    pd.className = 'pd ' + (t.dir === 'LONG' ? 'dl' : 'ds');
+    pd.textContent = t.pair + ' ' + t.dir;
+    const sc = document.createElement('span');
+    sc.className = 'sc ' + (t.verdict === 'A+' ? 'a' : t.verdict === 'B' ? 'b' : 'no');
+    sc.innerHTML = '%' + t.score + ' · ' + t.verdict + (t.override ? ' <span class="ov">✎</span>' : '');
+    const crits = document.createElement('span');
+    crits.className = 'crits';
+    crits.textContent = critNames(t).length + ' kriter ' + (openTrades.has(t.id) ? '▴' : '▾');
+    let stratChip = null;
+    if (t.strat && t.strat.trim() !== '') {
+      stratChip = document.createElement('span');
+      stratChip.className = 'strat';
+      stratChip.textContent = t.strat;
+    }
+    const rwrap = document.createElement('span');
+    rwrap.className = 'rwrap';
+    const rlbl = document.createElement('span'); rlbl.textContent = 'R';
+    const rin = document.createElement('input');
+    rin.className = 'rin'; rin.type = 'number'; rin.step = '0.05'; rin.placeholder = '—';
+    rin.value = t.r;
+    rin.setAttribute('aria-label', 'Sonuç (R)');
+    rin.addEventListener('click', e => e.stopPropagation());
+    rin.addEventListener('change', () => {
+      t.r = rin.value;
+      saveTrades(); renderTrades();
+    });
+    rwrap.appendChild(rlbl); rwrap.appendChild(rin);
+    const del = document.createElement('button');
+    del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Kaydı sil');
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      trades = trades.filter(x => x.id !== t.id);
+      saveTrades(); renderTrades();
+    });
+
+    const detail = document.createElement('div');
+    detail.className = 'trade-detail';
+    if (typeof t.mood === 'number') {
+      const [mlbl] = moodLabel(t.mood);
+      const mi = document.createElement('div');
+      mi.className = 'td-item ' + (Math.abs(t.mood) <= 2 ? 'yes' : 'no');
+      mi.innerHTML = '<span class="mk">◈</span><span></span>';
+      mi.children[1].textContent = 'Duygu ibresi: ' + mlbl + ' (' + (t.mood > 0 ? '+' : '') + t.mood + ')';
+      detail.appendChild(mi);
+    }
+    if (t.sess) {
+      const si = document.createElement('div');
+      si.className = 'td-item yes';
+      si.innerHTML = '<span class="mk">◉</span><span></span>';
+      si.children[1].textContent = 'Seans: ' + (t.day ? t.day + ' ' : '') + t.sess + (t.cell ? ' · hücre kalitesi: ' + t.cell : '');
+      detail.appendChild(si);
+    }
+    if (t.sent) {
+      const se = document.createElement('div');
+      const contra = t.sent !== t.dir;
+      se.className = 'td-item ' + (contra ? 'yes' : 'no');
+      se.innerHTML = '<span class="mk">⇄</span><span></span>';
+      se.children[1].textContent = 'Duyarlılık: çoğunluk ' + t.sent + ' — ' + (contra ? 'ters bias konfluensi (+' + SENT_PTS + ')' : 'kalabalıkla aynı yön (−' + SENT_PTS + ')');
+      detail.appendChild(se);
+    }
+    if (t.cap) {
+      const ci = document.createElement('div');
+      ci.className = 'td-item no';
+      ci.innerHTML = '<span class="mk">◷</span><span></span>';
+      ci.children[1].textContent = 'Gün/Seans kuralı uygulandı: skor A+ bölgesinde, karar hücre kalitesiyle sınırlandı.';
+      detail.appendChild(ci);
+    }
+    (t.crits || []).forEach(c => {
+      const name = typeof c === 'string' ? c : c.n;
+      const pts = typeof c === 'string' ? null : c.p;
+      const it = document.createElement('div');
+      it.className = 'td-item yes';
+      it.innerHTML = '<span class="mk">✓</span><span></span>' + (pts !== null ? '<span class="tp"></span>' : '');
+      it.children[1].textContent = name;
+      if (pts !== null) it.children[2].textContent = (pts > 0 ? '+' : '') + pts;
+      detail.appendChild(it);
+    });
+    (t.miss || []).forEach(name => {
+      const it = document.createElement('div');
+      it.className = 'td-item no';
+      it.innerHTML = '<span class="mk">○</span><span></span>';
+      it.children[1].textContent = name;
+      detail.appendChild(it);
+    });
+
+    const form = document.createElement('div');
+    form.className = 'td-form';
+    form.addEventListener('click', e => e.stopPropagation());
+    const vlbl = document.createElement('label'); vlbl.textContent = 'Karar';
+    const vsel = document.createElement('select');
+    ['A+', 'B', 'YOK'].forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      if (t.verdict === v) o.selected = true;
+      vsel.appendChild(o);
+    });
+    vsel.addEventListener('change', () => {
+      t.verdict = vsel.value;
+      t.override = true;
+      saveTrades(); renderTrades();
+    });
+    const slbl = document.createElement('label'); slbl.textContent = 'Strateji';
+    const sinp = document.createElement('input');
+    sinp.type = 'text'; sinp.placeholder = 'ör. Breaker Trap v2, WOS, Contrarian Short...';
+    sinp.value = t.strat || '';
+    sinp.addEventListener('change', () => {
+      t.strat = sinp.value;
+      saveTrades(); renderTrades();
+    });
+    form.appendChild(vlbl); form.appendChild(vsel);
+    form.appendChild(slbl); form.appendChild(sinp);
+    detail.appendChild(form);
+
+    // Akşam: karar/süreç yıldızı (serbest, 1-5)
+    const starWrap = document.createElement('div');
+    starWrap.className = 'td-stars';
+    starWrap.addEventListener('click', e => e.stopPropagation());
+    const sl = document.createElement('span'); sl.className = 'sl'; sl.textContent = 'Karar';
+    const srow = document.createElement('div'); srow.className = 'star-row';
+    const cap = document.createElement('span'); cap.className = 'star-cap';
+    const STAR_CAP = { 0: 'akşam doldur', 1: 'kötü karar · kötü süreç', 2: 'zayıf', 3: 'idare eder', 4: 'iyi', 5: 'iyi karar · iyi süreç' };
+    const paintStars = () => {
+      const val = t.stars || 0;
+      [...srow.children].forEach((b, i) => { b.className = i < val ? 'lit' : ''; b.textContent = i < val ? '★' : '☆'; });
+      cap.textContent = STAR_CAP[val];
+    };
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', i + ' yıldız');
+      b.addEventListener('click', () => {
+        t.stars = (t.stars === i ? 0 : i); // aynıya basınca sıfırla
+        saveTrades(); paintStars();
+      });
+      srow.appendChild(b);
+    }
+    paintStars();
+    starWrap.appendChild(sl); starWrap.appendChild(srow); starWrap.appendChild(cap);
+
+    // giriş niyeti rozeti (varsa)
+    if (t.intent) {
+      const ib = document.createElement('span');
+      ib.className = 'star-cap';
+      ib.style.marginLeft = 'auto';
+      ib.style.fontWeight = '700';
+      ib.style.color = t.intent === 'setup' ? 'var(--green)' : 'var(--red)';
+      ib.textContent = t.intent === 'setup' ? "Girişte: Setup'ı" : 'Girişte: Duygumu';
+      starWrap.appendChild(ib);
+    }
+    detail.appendChild(starWrap);
+
+    if (openTrades.has(t.id)) row.classList.add('open');
+    row.addEventListener('click', () => {
+      if (openTrades.has(t.id)) openTrades.delete(t.id); else openTrades.add(t.id);
+      row.classList.toggle('open');
+      crits.textContent = critNames(t).length + ' kriter ' + (row.classList.contains('open') ? '▴' : '▾');
+    });
+
+    const shb = document.createElement('button');
+    shb.className = 'del'; shb.textContent = '⤴'; shb.setAttribute('aria-label', 'Bu işlemi görsel olarak paylaş');
+    shb.addEventListener('click', async e => {
+      e.stopPropagation();
+      const data = tradeShareData(t);
+      await attachPlanToShare(data);
+      openShare(data);
+    });
+
+    row.appendChild(when); row.appendChild(pd); row.appendChild(sc);
+    if (stratChip) row.appendChild(stratChip);
+    row.appendChild(crits); row.appendChild(rwrap); row.appendChild(shb); row.appendChild(del);
+    row.appendChild(detail);
+    list.appendChild(row);
+  });
+
+  renderAnalysis();
+}
+
+function renderAnalysis() {
+  const list = document.getElementById('an-list');
+  const hint = document.getElementById('an-hint');
+  const count = document.getElementById('an-count');
+  list.innerHTML = '';
+
+  const withR = trades.filter(t => t.r !== '' && !isNaN(Number(t.r)));
+  count.textContent = withR.length + ' sonuçlu işlem';
+  if (withR.length < 5) {
+    hint.textContent = 'Kriter bazlı analiz için en az 5 sonuçlu (R girilmiş) işlem gerekli. Kayıtlar biriktikçe her kriterin "varken / yokken" ortalama R farkı burada görünecek — hangi konfirmasyonun gerçekten çalıştığını bu tablo söyleyecek.';
+    return;
+  }
+  hint.textContent = 'Fark = kriter işaretliyken ort R − işaretli değilken ort R. Pozitif fark: kriter edge katıyor. 5\'ten az örnekli satırlara güvenme, "az örnek" rozetine dikkat.';
+
+  const names = new Set();
+  withR.forEach(t => critNames(t).forEach(n => names.add(n)));
+
+  const stats = [];
+  names.forEach(n => {
+    const withC = withR.filter(t => critNames(t).includes(n));
+    const withoutC = withR.filter(t => !critNames(t).includes(n));
+    if (withC.length === 0) return;
+    const avgW = withC.reduce((s, t) => s + Number(t.r), 0) / withC.length;
+    const avgWo = withoutC.length > 0 ? withoutC.reduce((s, t) => s + Number(t.r), 0) / withoutC.length : null;
+    stats.push({ n, cnt: withC.length, avgW, avgWo, diff: avgWo === null ? null : avgW - avgWo });
+  });
+  stats.sort((a, b) => (b.diff === null ? -Infinity : b.diff) - (a.diff === null ? -Infinity : a.diff));
+
+  stats.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'an-row';
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = s.n;
+    const st = document.createElement('span'); st.className = 'st';
+    st.textContent = s.cnt + ' işlemde ✓ · varken ort ' + s.avgW.toFixed(2) + 'R' +
+      (s.avgWo === null ? '' : ' · yokken ort ' + s.avgWo.toFixed(2) + 'R');
+    const df = document.createElement('span');
+    if (s.diff === null) { df.className = 'df neu'; df.textContent = '—'; }
+    else {
+      df.className = 'df ' + (s.diff > 0.05 ? 'pos' : s.diff < -0.05 ? 'neg' : 'neu');
+      df.textContent = (s.diff > 0 ? '+' : '') + s.diff.toFixed(2) + 'R';
+    }
+    row.appendChild(nm); row.appendChild(st); row.appendChild(df);
+    if (s.cnt < 5) {
+      const few = document.createElement('span');
+      few.className = 'few'; few.textContent = 'az örnek';
+      row.appendChild(few);
+    }
+    list.appendChild(row);
+  });
+}
+
+async function exportData() {
+  const dailies = {};
+  try {
+    const keys = await store.list(DAILY_PREFIX);
+    for (const k of keys) {
+      try { const v = await store.get(k); if (v) dailies[k.replace(DAILY_PREFIX, '')] = JSON.parse(v); }
+      catch (e) { /* atla */ }
+    }
+  } catch (e) { /* atla */ }
+  const payload = {
+    exported: new Date().toISOString(),
+    config: config,
+    trades: trades,
+    dailyPlans: dailies
+  };
+  const box = document.getElementById('export-box');
+  box.value = JSON.stringify(payload, null, 1);
+  box.style.display = 'block';
+  document.getElementById('export-note').style.display = 'block';
+  document.getElementById('btn-copy').style.display = 'inline-block';
+  box.focus(); box.select();
+}
+
+function init() {
+  ensureConfigShape();
+  session = autoSession();
+  selDay = todayName();
+  const today = new Date();
+  const iso = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+  const dateInp = document.getElementById('d-date');
+  dateInp.value = iso;
+  dateInp.addEventListener('change', loadDaily);
+  document.getElementById('d-bull').addEventListener('click', () => setBias(dailyBias === 'BULLISH' ? '' : 'BULLISH'));
+  document.getElementById('d-bear').addEventListener('click', () => setBias(dailyBias === 'BEARISH' ? '' : 'BEARISH'));
+  document.getElementById('d-save').addEventListener('click', saveDaily);
+  document.getElementById('d-clear').addEventListener('click', () => { fillDaily(null); });
+  document.getElementById('d-pair').addEventListener('focus', function () {
+    if (!this.value) this.value = pair;
+  });
+  loadDaily();
+
+  document.getElementById('mood-range').addEventListener('input', e => {
+    mood = Number(e.target.value) || 0;
+    renderMood(); render();
+  });
+  renderMood();
+
+  document.getElementById('btn-export').addEventListener('click', exportData);
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    const box = document.getElementById('export-box');
+    box.focus(); box.select();
+    try { navigator.clipboard.writeText(box.value); } catch (e) { document.execCommand && document.execCommand('copy'); }
+    document.getElementById('export-note').textContent = 'Kopyalandı ✓ — şimdi Claude\'a yapıştır.';
+  });
+
+  document.getElementById('btn-logtrade').addEventListener('click', logTrade);
+  const anHead = document.getElementById('an-head');
+  if (anHead) anHead.addEventListener('click', () => {
+    const body = document.getElementById('an-body');
+    const open = body.style.display === 'none';
+    body.style.display = open ? '' : 'none';
+    anHead.classList.toggle('open', open);
+  });
+  const lsArch = document.getElementById('ls-arch-head');
+  if (lsArch) lsArch.addEventListener('click', () => {
+    const body = document.getElementById('ls-list');
+    const open = body.style.display === 'none';
+    body.style.display = open ? '' : 'none';
+    lsArch.classList.toggle('open', open);
+  });
+  document.querySelectorAll('#trade-filter .tf').forEach(b => {
+    b.addEventListener('click', () => {
+      tradeFilter = b.getAttribute('data-f');
+      document.querySelectorAll('#trade-filter .tf').forEach(x => x.classList.toggle('on', x === b));
+      renderTrades();
+    });
+  });
+  document.getElementById('btn-share').addEventListener('click', () => openShare(currentShareData()));
+  document.getElementById('sh-close').addEventListener('click', () => document.getElementById('share-modal').classList.remove('open'));
+  document.getElementById('share-modal').addEventListener('click', e => {
+    if (e.target.id === 'share-modal') document.getElementById('share-modal').classList.remove('open');
+  });
+  ['sh-crits', 'sh-plan', 'sh-r', 'sh-sent'].forEach(id => document.getElementById(id).addEventListener('change', drawShareCard));
+  document.getElementById('sh-tag').addEventListener('input', drawShareCard);
+  document.getElementById('sh-send').addEventListener('click', shShare);
+  document.getElementById('sh-dl').addEventListener('click', shDownload);
+  document.getElementById('sh-copy').addEventListener('click', shCopy);
+  loadTrades().then(renderTrades).catch(renderTrades);
+  loadLessons().then(renderLessons).catch(renderLessons);
+  document.getElementById('ls-btn-add').addEventListener('click', addLesson);
+  document.getElementById('ls-text').addEventListener('keydown', e => { if (e.key === 'Enter') addLesson(); });
+
+  document.getElementById('btn-long').addEventListener('click', () => { direction = 'LONG'; renderCriteria(); renderSent(); render(); });
+  document.getElementById('btn-short').addEventListener('click', () => { direction = 'SHORT'; renderCriteria(); renderSent(); render(); });
+  document.getElementById('sent-long').addEventListener('click', () => {
+    sent = (sent === 'LONG' ? '' : 'LONG'); renderSent(); render();
+  });
+  document.getElementById('sent-short').addEventListener('click', () => {
+    sent = (sent === 'SHORT' ? '' : 'SHORT'); renderSent(); render();
+  });
+  renderSent();
+  renderPos();
+  applyPairPanels();
+  document.getElementById('intent-setup').addEventListener('click', () => {
+    intent = (intent === 'setup' ? '' : 'setup'); renderIntent(); render();
+  });
+  document.getElementById('intent-emo').addEventListener('click', () => {
+    intent = (intent === 'emo' ? '' : 'emo'); renderIntent(); render();
+  });
+  renderIntent();
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    checked = new Set();
+    mood = 0; document.getElementById('mood-range').value = 0; renderMood();
+    sent = ''; renderSent();
+    posChecked = new Set(); renderPos();
+    intent = ''; renderIntent();
+    strat = '';
+    selDay = todayName();
+    renderCriteria(); render();
+  });
+  document.getElementById('pair-confirm').addEventListener('click', addPair);
+  document.getElementById('pair-name').addEventListener('keydown', e => { if (e.key === 'Enter') addPair(); });
+  document.getElementById('pair-cancel').addEventListener('click', () => {
+    document.getElementById('pair-add').classList.remove('open');
+    document.getElementById('pair-name').value = '';
+  });
+  document.getElementById('btn-edit').addEventListener('click', () => {
+    const ed = document.getElementById('editor');
+    ed.classList.toggle('open');
+    if (ed.classList.contains('open')) { renderEditor(); renderMatrix(); }
+  });
+  document.getElementById('btn-add').addEventListener('click', () => {
+    cfg().criteria.push({ name: '', cat: 'teknik', l: 0, s: 0 });
+    renderEditor();
+  });
+  document.getElementById('th-a').addEventListener('input', e => { cfg().thresholds.aplus = Number(e.target.value) || 70; render(); });
+  document.getElementById('th-b').addEventListener('input', e => { cfg().thresholds.b = Number(e.target.value) || 50; render(); });
+  document.getElementById('btn-save').addEventListener('click', () => {
+    cfg().criteria = cfg().criteria.filter(c => c.name.trim() !== '');
+    renderEditor(); renderCriteria(); render(); saveConfig();
+  });
+  document.getElementById('btn-defaults').addEventListener('click', () => {
+    const isGold = pair === 'XAU' || pair.indexOf('XAU') !== -1 || pair.indexOf('GOLD') !== -1;
+    config.pairs[pair] = isGold ? defaultXauPair() : defaultPair();
+    checked = new Set();
+    renderEditor(); renderCriteria(); render(); saveConfig();
+  });
+  document.getElementById('btn-backup').addEventListener('click', exportBackup);
+  document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
+  document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
+  document.getElementById('restore-file').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) importBackup(f);
+    e.target.value = '';
+  });
+  document.getElementById('btn-delpair').addEventListener('click', () => {
+    deletePair(pair);
+  });
+  renderCriteria(); render();
+}
+seedIfEmpty().then(loadConfig).then(init).catch(init);
+</script>
+</body>
+</html>
