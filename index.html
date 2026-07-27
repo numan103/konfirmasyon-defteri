@@ -6,6 +6,7 @@
 <title>Alfa Traders — Setup Kalitesi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #f4f5fa;
@@ -358,6 +359,61 @@
     flex: 1; min-width: 120px; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px;
     padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--text);
   }
+  /* --- Giriş / Kayıt ekranı --- */
+  #auth-gate {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--bg); padding: 20px; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #auth-gate.open { display: flex; align-items: center; justify-content: center; }
+  .auth-box {
+    width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 24px;
+  }
+  .auth-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 4px; }
+  .auth-brand .logo-mark {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--acc); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px;
+  }
+  .auth-brand h1 { font-size: 18px; font-weight: 700; }
+  .auth-brand .sub { font-size: 12px; color: var(--text-3); font-weight: 500; }
+  .auth-tabs { display: flex; gap: 6px; margin: 20px 0 16px; background: #f2f3f8; padding: 4px; border-radius: 11px; }
+  .auth-tabs button {
+    flex: 1; border: none; background: transparent; padding: 9px 0; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--text-2); cursor: pointer;
+  }
+  .auth-tabs button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(23,25,35,0.08); }
+  .auth-field { margin-bottom: 12px; }
+  .auth-field label {
+    display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--text-3); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .auth-field input {
+    width: 100%; background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text);
+  }
+  .auth-field input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .auth-submit {
+    width: 100%; background: var(--acc); border: none; color: #fff; border-radius: 10px;
+    padding: 12px 0; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
+    cursor: pointer; margin-top: 4px;
+  }
+  .auth-submit:hover { background: #4c4cc4; }
+  .auth-submit:disabled { opacity: 0.6; cursor: default; }
+  .auth-msg { font-size: 12.5px; line-height: 1.5; margin-top: 12px; min-height: 16px; text-align: center; }
+  .auth-msg.err { color: var(--red); }
+  .auth-msg.ok { color: var(--green); }
+  .hidden { display: none !important; }
+  /* Başlıktaki kullanıcı rozeti */
+  .tophead-inner { justify-content: space-between; }
+  .user-badge { display: flex; align-items: center; gap: 9px; }
+  .user-badge .uname { font-size: 13px; font-weight: 600; color: var(--text-2); }
+  .user-badge .logout {
+    background: transparent; border: 1px solid var(--border); border-radius: 9px;
+    padding: 6px 11px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: var(--text-2); cursor: pointer;
+  }
+  .user-badge .logout:hover { background: var(--acc-soft); border-color: var(--acc); color: var(--acc); }
   .daily-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 820px) { .daily-grid { grid-template-columns: 1fr 1fr; } .dg-full { grid-column: 1 / -1; } }
   .fbox label {
@@ -498,13 +554,50 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="tophead">
-    <div class="tophead-inner">
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-brand">
       <div class="logo-mark">A</div>
       <div>
         <h1>Alfa Traders</h1>
         <div class="sub">Setup Kalitesi · Daily Bias</div>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <button id="tab-login" class="on" type="button">Giriş yap</button>
+      <button id="tab-register" type="button">Kayıt ol</button>
+    </div>
+    <form id="auth-form" autocomplete="on">
+      <div class="auth-field hidden" id="f-name">
+        <label for="au-name">İsim</label>
+        <input type="text" id="au-name" placeholder="Adın" autocomplete="name" maxlength="40">
+      </div>
+      <div class="auth-field">
+        <label for="au-email">E-posta</label>
+        <input type="email" id="au-email" placeholder="ornek@mail.com" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label for="au-pass">Şifre</label>
+        <input type="password" id="au-pass" placeholder="En az 6 karakter" autocomplete="current-password" minlength="6" required>
+      </div>
+      <button type="submit" class="auth-submit" id="au-submit">Giriş yap</button>
+      <div class="auth-msg" id="au-msg"></div>
+    </form>
+  </div>
+</div>
+<div class="wrap">
+  <div class="tophead">
+    <div class="tophead-inner">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="logo-mark">A</div>
+        <div>
+          <h1>Alfa Traders</h1>
+          <div class="sub">Setup Kalitesi · Daily Bias</div>
+        </div>
+      </div>
+      <div class="user-badge hidden" id="user-badge">
+        <span class="uname" id="user-name"></span>
+        <button class="logout" id="btn-logout">Çıkış</button>
       </div>
     </div>
   </div>
@@ -766,10 +859,45 @@ const STORAGE_KEY = 'konfirmasyon-defteri-v3';
 const SEED = {"exported": "2026-07-18T13:07:40.649Z", "config": {"pairs": {"BTC": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}, "XAU": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}}, "strategies": ["Breaker", "Breaker Traps", "LHPB", "Monday Manipulation", "Asia Range", "IFVG", "0.382", "Friday Manipulation"], "matrix": {"Paz": {"London": "B", "NY": "B"}, "Pzt": {"London": "A+", "NY": "B"}, "Sal": {"London": "A+", "NY": "A+"}, "Çar": {"London": "A+", "NY": "A+"}, "Per": {"London": "A+", "NY": "A+"}, "Cum": {"London": "A+", "NY": "A+"}, "Cmt": {"London": "A+", "NY": "A+"}}, "migr2": true, "migr3": true, "migr4": true}, "trades": [{"id": 1785138660000, "date": "22/07", "time": "19:51", "pair": "BTC", "dir": "LONG", "score": 100, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "İşlem trend yönünde", "p": 10}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Çar", "sess": "NY", "cell": "A+", "cap": false, "strat": "0.382", "sent": "SHORT", "r": "-1"}, {"id": 1784305032899, "date": "17/07", "time": "19:17", "pair": "BTC", "dir": "SHORT", "score": 75, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Key levelda", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Cum", "sess": "NY", "cell": "A+", "cap": false, "strat": "Friday Manipulation", "r": "-1"}, {"id": 1784227494999, "date": "16/07", "time": "21:44", "pair": "BTC", "dir": "SHORT", "score": 87, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["İşlem trend yönünde", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Per", "sess": "NY", "cell": "A+", "cap": false, "strat": "Breaker", "r": ""}, {"id": 1784016989916, "date": "14/07", "time": "11:16", "pair": "BTC", "dir": "SHORT", "score": 65, "verdict": "B", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Key levelda", "p": 10}, {"n": "Planlanmış entry", "p": 31}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Long & Shorts Ratio işlem yönünde", "Bid & Ask Delta işlem yönünde", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Sal", "sess": "London", "cell": "A+", "cap": false, "strat": "Asia Range", "r": "-0.3"}, {"id": 1783955071586, "date": "13/07", "time": "18:04", "pair": "BTC", "dir": "SHORT", "score": 73, "verdict": "B", "crits": [{"n": "Spot CVD düşüyor", "p": 8}, {"n": "Open Interest yüksek / artıyor", "p": 7}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 5}, {"n": "Key levelda", "p": 11}, {"n": "Planlanmış entry", "p": 30}, {"n": "TP/SL paylaşımdan önce girildi", "p": 6}], "miss": ["Spot CVD yükseliyor", "Long & Shorts Ratio aşırı long", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "r": "-0.15", "override": true, "strat": "Sunday Market Structure "}, {"id": 1783882244056, "date": "12/07", "time": "21:50", "pair": "BTC", "dir": "SHORT", "score": 82, "verdict": "B", "crits": ["Spot CVD düşüyor", "Long & Shorts Ratio aşırı long", "Futures CVD işlem yönünde", "Bid & Ask Delta işlem yönünde", "Key levelda", "Manipülasyon gerçekleşti", "Planlanmış entry", "TP/SL paylaşımdan önce girildi"], "r": "1.2", "override": true, "strat": "Monday Morning Manipulation"}], "dailyPlans": {"2026-07-12": {"bias": "BEARISH", "pair": "BTC", "sabah": "abd iranı vurabilir ", "senaryo": "fiyat en azından bi 61k civarına gitmesi gerektiğini düşünüyorum. Eğer fiyat 65k üstüne çıkarsa bozulur", "anti": "şuanda markette hala hacim yok likiditie alımı yapılmış gibi geldi ama aslında gelmedi, orayı bir hacimle manipüle edebilir ve stop olabilirsin.", "setup": "", "gunsonu": "plana uydum tek yaptığım hata 2R da tp girmemekti, işlem tam hedefe giderken ufak bi pips ile geri döndü hala bekliyorum ayrıca iyi yaptığım şey erken entry stop atmamaktı gece açılışıyla fiyat yukarıyı avlamış ve düşmüş. "}, "2026-07-13": {"bias": "BEARISH", "pair": "BTC", "sabah": "iran her an saldırabilir manipülasyon saatleri sabah 13:46", "senaryo": "4h pin bar bıraktık üstünü avladık fiyat aşağı doğru düştü demekki güçsüz görünüyor. \n\n63.5k üstünde kapatırsa bu düşüncem bozulur. ", "anti": "Aşağı düştü shortlayalım diyen early shortçuları avlamak isteyip tekrar 63.250'yi avlayabilirler ny açılışıyla ama neden bunu yapsınlar. ", "setup": "", "gunsonu": "fiyat hedefine ulaştı high avalamadan eğer dar stoplu işlem açsaydım minimum 0.9r poz vardı ama asıl target aşağı açık likidite olduğu için açık HL yaptıktan sonra geri döndü 0.5r'dan poz döndü. Bu arada riskim 0.3r pzt sabah olduğu için riskli zaman dilimi."}, "2026-07-14": {"bias": "BULLISH", "pair": "BTC", "sabah": "15:30'da tüfe var. ", "senaryo": "fiyatın 61.5k civarına düşeceğini düşünüyorum. Yükselecekse bile en azından 62.2k dan yükselmeli (VAL) \n\n\nFiyat 62.9k üstünde saatlik kapanış yaparsa bias bozulur.\n\n\nsaat 16:11 şuan fiyat yukarıyı avladı, hem sr bölgesine geri çekilip daha sonra yukarıdaki likiditeleri avlayabilir veriler beni doğruluyor. \n\nEğer fiyat 62.7k altında 1h kapanışlar yaparsa uza. ", "anti": "fiyat iç yapıda değişim gerçekleştirdi, o sebeple önce monday high alabilir. \n\nsaat:16:18Fiyat haberle yükseldi bu yüzden tam tersi yönlü düşebilir ters bir haberle", "setup": "ya 16:30 dan sonraki harekete göre girersin ya da fiyatın 61.5k sonrası yapacağı harekete bakarsın. \n\n\n16:18Fiyat 63k'daki sr bölgesine geri çekilirse 0.382 işlemini alırsın.", "gunsonu": "işlem 1.78RR verdiği için ve aleyhime ilerlediği için işlemden çıkıp tekrar 2RR olacak şekilde girdim. \n\nHaber geldi fiyat bi anda stop oldu işlemler. "}, "2026-07-16": {"bias": "BEARISH", "pair": "BTC", "sabah": "haber yok fiyat bearish", "senaryo": "fiyat yukarıyı avladı market yapısı değişti hedefler aşağısı \n\nfiyat 65.6k üstü kapatırsa", "anti": "herkes buradan short düşünüyor, range çok bariz trend bullish orderbook seviyeleri var.", "setup": "breaker+range", "gunsonu": "plana uydum genel olarak, sadece 2. işlem intraday alınabilirdi 2R veriyordu riski artırmamak için almadım ama tp oldu."}, "2026-07-17": {"bias": "BEARISH", "pair": "BTC", "sabah": "", "senaryo": "fiyat 63.3k manipüle edip altında kapanışlar yaparsa cuma 18:00'dan sonra shortla. ", "anti": "fiyatta hacim artıyor, çoğu kişi shortta range için fiyatı yükseltebilirler. ", "setup": "cuma akşamı 18:00 civarı manipülasyonu tradele.", "gunsonu": "evet manipülasyonu bekledim ve ifvg ile işleme dahil oldum ama stop oldum."}, "2026-07-22": {"bias": "BULLISH", "pair": "BTC", "sabah": "Olumlu bir haber gelebilir", "senaryo": "Fiyat eğer 65.7k civarı 2 adet kötü mum atarsa düşebilir", "anti": "Impulsive entry almak isteyen beni ve htf ciddi bir direnç noktasında olduğu için efloud beni stoplayabilir", "setup": "Breaker / 0.382", "gunsonu": ""}}};
 const CATS = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duygu' };
 
-// Depolama katmanı: Claude içinde açılırsa window.storage (kalıcı bulut),
-// kendi tarayıcında / GitHub Pages'te açılırsa localStorage (cihazda kalıcı).
+// ============ Kimlik + Bulut Yapılandırması (Supabase) ============
+// Aşağıdaki iki değeri kendi Supabase projenden alıp yapıştır.
+// Boş bırakılırsa uygulama eskisi gibi YALNIZCA bu cihazda (yerel) çalışır — hiçbir şey bozulmaz.
+const SUPABASE_URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
+
+const AUTH = {
+  client: null,
+  user: null,      // giriş yapılınca Supabase kullanıcı nesnesi
+  cloud: {},       // bu kullanıcının tüm anahtar->değer haritası (bellek içi ayna)
+  ns: '',          // localStorage için kullanıcıya özel önek
+  syncTimer: null
+};
+const AUTH_ENABLED = /^https?:\/\//.test(SUPABASE_URL)
+  && SUPABASE_ANON_KEY.length > 20
+  && typeof window !== 'undefined' && window.supabase && window.supabase.createClient;
+
+function scheduleCloudSync() {
+  if (!AUTH.user) return;
+  clearTimeout(AUTH.syncTimer);
+  AUTH.syncTimer = setTimeout(pushCloud, 700);
+}
+async function pushCloud() {
+  if (!AUTH.user || !AUTH.client) return;
+  try {
+    await AUTH.client.from('journals').upsert({
+      user_id: AUTH.user.id,
+      data: AUTH.cloud,
+      updated_at: new Date().toISOString()
+    });
+  } catch (e) { /* çevrimdışı olabilir; yerel ayna korunur */ }
+}
+
+// Depolama katmanı:
+//  - Giriş yapılmışsa  -> veriler AUTH.cloud haritasında tutulur ve Supabase'e senkronlanır (cihazlar arası).
+//  - Giriş yoksa       -> eski davranış: window.storage (Claude) ya da localStorage (bu cihaz).
 const store = {
   async get(k) {
+    if (AUTH.user) return (k in AUTH.cloud) ? AUTH.cloud[k] : null;
     if (window.storage && window.storage.get) {
       try { const r = await window.storage.get(k); return r && r.value ? r.value : null; }
       catch (e) { /* anahtar yok ya da erişilemedi */ }
@@ -777,6 +905,12 @@ const store = {
     try { return localStorage.getItem(k); } catch (e) { return null; }
   },
   async set(k, v) {
+    if (AUTH.user) {
+      AUTH.cloud[k] = v;
+      try { localStorage.setItem(AUTH.ns + k, v); } catch (e) { /* ayna dolabilir */ }
+      scheduleCloudSync();
+      return true;
+    }
     let ok = false;
     if (window.storage && window.storage.set) {
       try { await window.storage.set(k, v); ok = true; } catch (e) { /* devam */ }
@@ -785,6 +919,7 @@ const store = {
     return ok;
   },
   async list(prefix) {
+    if (AUTH.user) return Object.keys(AUTH.cloud).filter(k => k.indexOf(prefix) === 0);
     if (window.storage && window.storage.list) {
       try { const r = await window.storage.list(prefix); return (r && r.keys) ? r.keys : []; }
       catch (e) { /* devam */ }
@@ -2821,7 +2956,135 @@ function init() {
   });
   renderCriteria(); render();
 }
-seedIfEmpty().then(loadConfig).then(init).catch(init);
+// ============ Açılış + Giriş/Kayıt akışı ============
+let APP_BOOTED = false;
+async function bootApp(opts) {
+  if (APP_BOOTED) return;
+  APP_BOOTED = true;
+  if (opts && opts.seed) { try { await seedIfEmpty(); } catch (e) { /* boş başla */ } }
+  try { await loadConfig(); } catch (e) { /* devam */ }
+  try { init(); } catch (e) { /* devam */ }
+}
+
+function showGate() { document.getElementById('auth-gate').classList.add('open'); }
+function hideGate() { document.getElementById('auth-gate').classList.remove('open'); }
+
+function migrateLegacyLocal() {
+  // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
+  try {
+    Object.keys(localStorage).forEach(k => {
+      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k.indexOf(DAILY_PREFIX) === 0);
+      if (keep && !(k in AUTH.cloud)) AUTH.cloud[k] = localStorage.getItem(k);
+    });
+  } catch (e) { /* erişilemedi */ }
+}
+
+async function onAuthed(user) {
+  AUTH.user = user;
+  AUTH.ns = 'u:' + user.id + ':';
+  // Buluttan bu kullanıcının verisini çek
+  let data = null;
+  try {
+    const res = await AUTH.client.from('journals').select('data').eq('user_id', user.id).maybeSingle();
+    if (res && res.data && res.data.data && typeof res.data.data === 'object') data = res.data.data;
+  } catch (e) { /* çevrimdışı — yerel aynadan devam */ }
+  if (!data) {
+    data = {};
+    try {
+      Object.keys(localStorage).forEach(k => {
+        if (k.indexOf(AUTH.ns) === 0) data[k.slice(AUTH.ns.length)] = localStorage.getItem(k);
+      });
+    } catch (e) { /* yok */ }
+  }
+  AUTH.cloud = data;
+  // İlk kez ve boşsa: bu cihazdaki eski (hesapsız) verileri hesaba taşı
+  if (Object.keys(AUTH.cloud).length === 0) migrateLegacyLocal();
+
+  const nm = (user.user_metadata && user.user_metadata.name) || (user.email || '').split('@')[0];
+  document.getElementById('user-name').textContent = nm;
+  document.getElementById('user-badge').classList.remove('hidden');
+  hideGate();
+  const wrap = document.querySelector('.wrap');
+  if (wrap) wrap.classList.remove('hidden');
+  await bootApp({ seed: false });
+  scheduleCloudSync();
+}
+
+function authError(err) {
+  const m = (err && err.message) ? err.message : '';
+  if (/Invalid login/i.test(m)) return 'E-posta veya şifre hatalı.';
+  if (/already registered/i.test(m)) return 'Bu e-posta zaten kayıtlı. Giriş yapmayı dene.';
+  if (/Email not confirmed/i.test(m)) return 'E-postan henüz onaylanmamış. Gelen kutunu kontrol et.';
+  if (/least 6/i.test(m)) return 'Şifre en az 6 karakter olmalı.';
+  if (/rate limit|too many/i.test(m)) return 'Çok fazla deneme oldu, biraz bekle.';
+  return m || 'Bir hata oldu, tekrar dene.';
+}
+
+function bootAuth() {
+  AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const $ = id => document.getElementById(id);
+  let mode = 'login';
+  const msg = (t, cls) => { const el = $('au-msg'); el.textContent = t; el.className = 'auth-msg' + (cls ? ' ' + cls : ''); };
+  const setMode = m => {
+    mode = m;
+    $('tab-login').classList.toggle('on', m === 'login');
+    $('tab-register').classList.toggle('on', m === 'register');
+    $('f-name').classList.toggle('hidden', m !== 'register');
+    $('au-submit').textContent = m === 'login' ? 'Giriş yap' : 'Kayıt ol';
+    $('au-pass').setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
+    msg('', '');
+  };
+  $('tab-login').addEventListener('click', () => setMode('login'));
+  $('tab-register').addEventListener('click', () => setMode('register'));
+  $('btn-logout').addEventListener('click', async () => {
+    try { await pushCloud(); } catch (e) {}
+    try { await AUTH.client.auth.signOut(); } catch (e) {}
+    location.reload();
+  });
+  $('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = $('au-email').value.trim();
+    const pass = $('au-pass').value;
+    const name = $('au-name').value.trim();
+    if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
+    if (mode === 'register' && !name) { msg('Lütfen isminizi yazın.', 'err'); return; }
+    $('au-submit').disabled = true;
+    try {
+      if (mode === 'register') {
+        const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name } } });
+        if (error) throw error;
+        if (data && data.session && data.user) { await onAuthed(data.user); return; }
+        msg('Kayıt alındı. E-posta onayı gerekiyorsa gelen kutunu kontrol et, sonra giriş yap.', 'ok');
+        setMode('login');
+      } else {
+        const { data, error } = await AUTH.client.auth.signInWithPassword({ email, password: pass });
+        if (error) throw error;
+        await onAuthed(data.user);
+      }
+    } catch (err) {
+      msg(authError(err), 'err');
+    } finally {
+      $('au-submit').disabled = false;
+    }
+  });
+  // Mevcut oturum var mı? Varsa doğrudan gir.
+  AUTH.client.auth.getSession()
+    .then(({ data }) => {
+      if (data && data.session && data.session.user) onAuthed(data.session.user);
+      else showGate();
+    })
+    .catch(() => showGate());
+}
+
+if (AUTH_ENABLED) {
+  const wrap = document.querySelector('.wrap');
+  if (wrap) wrap.classList.add('hidden');
+  showGate();
+  bootAuth();
+} else {
+  // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
+  seedIfEmpty().then(loadConfig).then(init).catch(init);
+}
 </script>
 </body>
 </html>
