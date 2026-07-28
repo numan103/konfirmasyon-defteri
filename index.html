@@ -775,20 +775,85 @@
   .eg-brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 6px 2px 2px; }
   .eg-brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, #5b5bd6, #7c5cf0); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .eg-brand-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; }
-  .eg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 18px; margin-top: 4px; }
-  @media (max-width: 640px) { .eg-grid { grid-template-columns: 1fr; } }
-  .eg-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--card); box-shadow: var(--shadow); display: flex; flex-direction: column; }
-  .eg-embed { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0d0f16; }
+  /* kurs düzeni: solda konular, sağda büyük oynatıcı */
+  .eg-course { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
+  @media (max-width: 820px) { .eg-course { grid-template-columns: 1fr; } }
+  .eg-list-panel { position: sticky; top: 14px; }
+  .eg-list { display: flex; flex-direction: column; gap: 6px; max-height: 64vh; overflow-y: auto; }
+  .eg-item { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+  .eg-item:hover { border-color: var(--acc); background: var(--acc-soft); }
+  .eg-item.on { border-color: var(--acc); background: var(--acc-soft); box-shadow: inset 3px 0 0 var(--acc); }
+  .eg-item-idx { flex: none; width: 22px; height: 22px; border-radius: 6px; background: var(--bg); color: var(--text-3); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+  .eg-item.on .eg-item-idx { background: var(--acc); color: #fff; }
+  .eg-item-t { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .eg-item-tag { flex: none; font-size: 9px; font-weight: 800; letter-spacing: .04em; color: var(--acc); background: #fff; border: 1px solid var(--border); border-radius: 5px; padding: 2px 5px; text-transform: uppercase; }
+  .eg-item-tag.muted { color: var(--text-3); }
+  .eg-item-edit, .eg-item-del { flex: none; width: 22px; height: 22px; border: none; background: transparent; color: var(--text-3); font-size: 14px; line-height: 1; cursor: pointer; border-radius: 6px; opacity: 0; transition: opacity .15s ease; }
+  .eg-item-del { font-size: 16px; }
+  .eg-item:hover .eg-item-edit, .eg-item:hover .eg-item-del, .eg-item.on .eg-item-edit, .eg-item.on .eg-item-del { opacity: 1; }
+  .eg-item-edit:hover { background: var(--acc-soft); color: var(--acc); }
+  .eg-item-del:hover { background: var(--red-soft); color: var(--red); }
+  .eg-embed-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 20px; text-align: center; }
+  .eg-ph-txt { color: #aeb4c7; font-size: 13.5px; font-weight: 500; }
+  .eg-form-h { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text); }
+  /* konu satırı sayaç rozeti */
+  .eg-count { flex: none; font-size: 9.5px; font-weight: 700; color: var(--text-3); background: var(--bg); border-radius: 999px; padding: 2px 7px; font-variant-numeric: tabular-nums; }
+  .eg-count.has { color: var(--acc); background: var(--acc-soft); }
+  /* başlık satırı + kalem */
+  .eg-now-title-row { display: flex; align-items: flex-start; gap: 8px; }
+  .eg-now-title-row .eg-now-title { flex: 1; }
+  .eg-mini-edit { flex: none; width: 26px; height: 26px; border: 1px solid var(--border); background: var(--card); color: var(--text-3); border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .15s ease; }
+  .eg-mini-edit:hover { border-color: var(--acc); color: var(--acc); background: var(--acc-soft); }
+  /* videolar alt-listesi */
+  .eg-vids { margin-top: 14px; }
+  .eg-vids-h { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .eg-vid-add { background: var(--acc-soft); border: none; border-radius: 8px; padding: 5px 11px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; color: var(--acc); cursor: pointer; text-transform: none; letter-spacing: 0; }
+  .eg-vid-add:hover { background: #e2e2fb; }
+  .eg-vid-list { display: flex; flex-direction: column; gap: 5px; }
+  .eg-vid-row { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 9px; background: #fbfbfd; cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+  .eg-vid-row:hover { border-color: var(--acc); background: var(--acc-soft); }
+  .eg-vid-row.on { border-color: var(--acc); background: var(--acc-soft); box-shadow: inset 3px 0 0 var(--acc); }
+  .eg-vid-idx { flex: none; width: 20px; height: 20px; border-radius: 5px; background: var(--bg); color: var(--text-3); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+  .eg-vid-row.on .eg-vid-idx { background: var(--acc); color: #fff; }
+  .eg-vid-t { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .eg-vid-row .eg-item-tag { padding: 1px 5px; }
+  .eg-vid-edit, .eg-vid-del { flex: none; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-3); font-size: 13px; line-height: 1; cursor: pointer; border-radius: 5px; opacity: 0; transition: opacity .15s ease; }
+  .eg-vid-del { font-size: 15px; }
+  .eg-vid-row:hover .eg-vid-edit, .eg-vid-row:hover .eg-vid-del, .eg-vid-row.on .eg-vid-edit, .eg-vid-row.on .eg-vid-del { opacity: 1; }
+  .eg-vid-edit:hover { background: #fff; color: var(--acc); }
+  .eg-vid-del:hover { background: var(--red-soft); color: var(--red); }
+  .eg-vid-empty { font-size: 12px; color: var(--text-3); padding: 6px 2px; }
+  /* tamamlandı işareti */
+  .eg-check { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #cdd2e0; background: var(--card); color: transparent; font-size: 11px; font-weight: 800; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s ease; padding: 0; }
+  .eg-check:hover { border-color: var(--green); }
+  .eg-check.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .eg-vid-row.done .eg-vid-t { color: var(--text-3); }
+  .eg-count.done { color: var(--green); background: var(--green-soft); }
+  .eg-count.all { color: #fff; background: var(--green); }
+  .eg-progress { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; color: var(--text-3); text-transform: none; }
+  .eg-progress b { color: var(--green); }
+  .eg-done-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; border: 1.5px solid var(--green); background: var(--green-soft); color: var(--green); border-radius: 10px; padding: 9px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+  .eg-done-btn:hover { background: #d9f2e2; }
+  .eg-done-btn.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .eg-done-btn.pop { animation: egPop .45s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes egPop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .eg-done-btn.pop { animation: none; } }
+  .eg-cheer { margin-left: 8px; font-size: 12.5px; font-weight: 700; color: var(--green); opacity: 0; }
+  .eg-cheer.show { animation: egCheer 1.6s ease; }
+  @keyframes egCheer { 0% { opacity: 0; transform: translateY(4px); } 15% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .eg-cheer.show { animation: none; opacity: 1; } }
+  .eg-empty-list { font-size: 12.5px; color: var(--text-3); padding: 14px 6px; line-height: 1.55; }
+  .eg-embed { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0d0f16; border-radius: 12px; overflow: hidden; }
   .eg-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  .eg-card-body { padding: 11px 13px 13px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-  .eg-card-title { font-family: var(--font-display); font-size: 13.5px; font-weight: 600; line-height: 1.35; color: var(--text); word-break: break-word; }
-  .eg-card-link { display: inline-block; margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--acc); text-decoration: none; }
+  .eg-now { margin-top: 12px; }
+  .eg-now-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; line-height: 1.3; color: var(--text); text-wrap: balance; }
+  .eg-card-link { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--acc); text-decoration: none; }
   .eg-card-link:hover { text-decoration: underline; }
-  .eg-del { flex: none; width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-3); font-size: 15px; line-height: 1; cursor: pointer; transition: all .15s ease; }
-  .eg-del:hover { background: var(--red-soft); color: var(--red); border-color: var(--red-soft); }
-  .eg-notes { width: 100%; min-height: 68px; resize: vertical; background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; color: var(--text); }
+  .eg-note-row { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .eg-note-lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); display: flex; align-items: center; gap: 8px; }
+  .eg-notes { width: 100%; min-height: 64px; resize: vertical; background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; color: var(--text); }
   .eg-notes:focus { outline: none; border-color: var(--acc); }
-  .eg-save { font-size: 11px; font-weight: 600; color: var(--green); opacity: 0; transition: opacity .2s ease; text-transform: none; letter-spacing: 0; }
+  .eg-save { font-size: 10.5px; font-weight: 600; color: var(--green); opacity: 0; transition: opacity .2s ease; text-transform: none; letter-spacing: 0; }
   .eg-save.show { opacity: 1; }
   .eg-form { max-width: 520px; margin: 16px auto 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
   .eg-form input { width: 100%; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px; padding: 10px 11px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text); }
@@ -1295,30 +1360,52 @@
   <div id="page-egitim" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-name">Alfa Edu</span>
-      <span class="eg-brand-sub">Düzeye göre video eğitim + kişisel notların</span>
+      <span class="eg-brand-sub">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin.</span>
     </div>
     <div class="controls">
-      <div class="seg" id="eg-level-seg">
-        <button data-lv="baslangic" class="on-gold" type="button">Başlangıç</button>
-        <button data-lv="orta" type="button">Orta</button>
-        <button data-lv="ileri" type="button">İleri</button>
+      <div class="seg" id="eg-sec-seg">
+        <button data-sec="teknik" class="on-gold" type="button">Teknik Analiz</button>
+        <button data-sec="temel" type="button">Temel Analiz</button>
+        <button data-sec="psikoloji" type="button">Trade Psikolojisi</button>
+        <button data-sec="islem" type="button">İşlem &amp; Backtest</button>
+        <button data-sec="ileri" type="button">İleri Düzey</button>
       </div>
     </div>
-    <div class="panel">
-      <h2 class="cat-h2"><span id="eg-level-title">Başlangıç Düzey</span><button type="button" class="cat-edit" id="eg-add">+ Video ekle</button></h2>
-      <div class="cat-edit-hint" id="eg-hint">YouTube video bağlantısını yapıştır, altında notlarını tut. Videolar ve notlar hesabına kaydedilir.</div>
-      <div id="eg-videos"></div>
-      <div id="eg-empty" class="data-empty">Bu düzeyde henüz video yok. “+ Video ekle” ile başla.</div>
-    </div>
-    <div class="panel">
-      <h2 class="cat-h2"><span>Notlarım — <span id="eg-notes-lvl">Başlangıç</span></span><span class="eg-save" id="eg-notes-status"></span></h2>
-      <textarea id="eg-notes" class="eg-notes" placeholder="Bu düzeyle ilgili notların, çıkarımların, özetlerin…"></textarea>
+    <div class="eg-course">
+      <aside class="panel eg-list-panel">
+        <h2 class="cat-h2"><span>Konular</span><span class="eg-progress" id="eg-progress"></span><button type="button" class="cat-edit" id="eg-load" title="Alfa Traders eğitim içeriğini yükle">↺ Listeyi yükle</button><button type="button" class="cat-edit" id="eg-add-topic">+ Konu</button></h2>
+        <div id="eg-list" class="eg-list"></div>
+        <div id="eg-empty" class="eg-empty-list">Bu bölümde konu yok. “+ Konu” ile ekle ya da “↺ Listeyi yükle” ile hazır içeriği getir.</div>
+      </aside>
+      <section class="panel eg-player-panel">
+        <div id="eg-player-wrap">
+          <div class="eg-embed" id="eg-embed"></div>
+          <div class="eg-now">
+            <div class="eg-now-title-row">
+              <div class="eg-now-title" id="eg-now-title">—</div>
+              <button class="eg-mini-edit" id="eg-topic-edit" type="button" title="Konu başlığını düzenle">✎</button>
+            </div>
+            <a class="eg-card-link" id="eg-now-link" href="#" target="_blank" rel="noopener noreferrer">YouTube'da aç ↗</a>
+            <div><button type="button" class="eg-done-btn" id="eg-done"><span id="eg-done-txt">İzledim</span></button><span class="eg-cheer" id="eg-cheer">Tebrikler! 🎉</span></div>
+          </div>
+          <div class="eg-vids">
+            <div class="eg-vids-h"><span>Videolar</span><button type="button" class="eg-vid-add" id="eg-add-vid">+ Video ekle</button></div>
+            <div id="eg-vid-list" class="eg-vid-list"></div>
+          </div>
+          <div class="eg-note-row">
+            <label class="eg-note-lbl" for="eg-notes">Konu notların <span class="eg-save" id="eg-notes-status"></span></label>
+            <textarea id="eg-notes" class="eg-notes" placeholder="Kısa not: çıkarımlar, dakikalar, tekrar izlenecek yerler…"></textarea>
+          </div>
+        </div>
+        <div id="eg-player-empty" class="data-empty">Soldan bir konu seç — videoları burada büyük ekranda açılsın.</div>
+      </section>
     </div>
     <div id="eg-add-form" class="eg-form hidden">
-      <input type="text" id="eg-in-title" placeholder="Video başlığı (ör. Order Block nedir?)" maxlength="120">
-      <input type="text" id="eg-in-url" placeholder="YouTube bağlantısı (youtube.com/watch?v=… veya youtu.be/…)">
+      <div class="eg-form-h" id="eg-form-title">Yeni</div>
+      <input type="text" id="eg-in-title" placeholder="Başlık" maxlength="140">
+      <input type="text" id="eg-in-url" placeholder="YouTube video ya da oynatma listesi bağlantısı">
       <div class="eg-form-btns">
-        <button class="btn solid" id="eg-in-save" type="button">Ekle</button>
+        <button class="btn solid" id="eg-in-save" type="button">Kaydet</button>
         <button class="btn" id="eg-in-cancel" type="button">Vazgeç</button>
       </div>
       <div class="eg-form-err" id="eg-in-err"></div>
@@ -3916,12 +4003,106 @@ function bindReviewPage() {
   window.addEventListener('resize', () => { if (currentPage === 'review') updateRRcum(); });
 }
 
-// ============ Eğitim İçeriği ============
+// ============ Eğitim İçeriği (Alfa Edu) ============
 const EGITIM_KEY = 'defter-egitim-v1';
-const EG_LEVELS = { baslangic: 'Başlangıç', orta: 'Orta', ileri: 'İleri' };
-let egitimData = { videos: { baslangic: [], orta: [], ileri: [] }, notes: { baslangic: '', orta: '', ileri: '' } };
-let egLevel = 'baslangic';
+const EG_SECTIONS = { teknik: 'Teknik Analiz', temel: 'Temel Analiz', psikoloji: 'Trade Psikolojisi', islem: 'İşlem & Backtest', ileri: 'İleri Düzey' };
+const EG_SEED_PLAYLIST = 'PLSvAYYLAIh0PKVsqa7LqR6R1oU_qn8DEe';
+const EG_SEED_VER = 3;
+// Alfa Traders içeriği — bölüm → konu → video başlıkları (linkleri kullanıcı ekler).
+const EG_SEED = {
+  teknik: [
+    { title: 'Market Yapısı', videos: [
+      { title: 'Market Yapısı -1 / Price Action' },
+      { title: 'Market Yapısı -2 (Örnekler)' },
+      { title: 'Detaylı Market Yapısı -3 / PDArray - BOS - MSB' },
+      { title: 'İleri Düzey Market Yapısı / Teknik Analize Giriş' },
+    ] },
+    { title: 'Destek & Direnç', videos: [ { title: 'Destek ve Direnç Nasıl Belirlenir?' } ] },
+    { title: 'Likidite', videos: [
+      { title: 'Likidite / Price Action Eğitimi' },
+      { title: 'Likidite -3 / Teknik Analize Giriş' },
+      { title: 'Manipülasyon ve Likidite / Alfa Trading Bootcamp 3' },
+      { title: 'Supply / Demand / Likidite / Key Levels - Ders 9' },
+    ] },
+    { title: 'Formasyonlar', videos: [ { title: 'Formasyonlar / OBO-TOBO' } ] },
+    { title: 'Key Levels (Kurumsal Seviyeler)', videos: [ { title: 'Kurumsal Seviyeler (Key Levels)' } ] },
+    { title: 'Order Block', videos: [ { title: 'Order Block - Price Action Eğitimi' } ] },
+    { title: 'Breaker Block', videos: [
+      { title: 'Breaker Blok - Price Action' },
+      { title: 'Breaker Blok +7.7R - Backtest #11' },
+    ] },
+    { title: 'Trendler', videos: [ { title: 'Trendleri Anlamak - Price Action' } ] },
+    { title: 'Wyckoff & Hacim', videos: [
+      { title: 'Wyckoff Birikim-Dağıtım Aşamaları' },
+      { title: 'Hacim Nedir? SHP ve Wyckoff Kullanımı' },
+    ] },
+    { title: 'Marketi Anlamak', videos: [
+      { title: 'Marketi Anlamak - Basit Ama Etkili Bilgiler' },
+      { title: "30 Dk'da Price Action" },
+      { title: 'Price HTF Nasıl Trade Edilir?' },
+    ] },
+  ],
+  temel: [],
+  psikoloji: [
+    { title: 'Trader / Market Maker Gibi Düşünmek', videos: [
+      { title: 'Trader Gibi Düşünmek - Trade Psikolojisi' },
+      { title: 'Market Maker Gibi Düşünmek - Trade Psikolojisi 2' },
+    ] },
+    { title: 'Nasıl Başarılı Bir Trader Olunur?', videos: [
+      { title: 'Zihinsel Özellikler' },
+      { title: 'Hatalar' },
+      { title: 'Alfa Trader Kitap Notları' },
+      { title: 'Adım Adım' },
+      { title: 'Adım Adım 2 (Gerçekçi Senaryo)' },
+    ] },
+    { title: 'Başarısız Traderların Ortak Özellikleri', videos: [
+      { title: 'Başarısız Traderlar -1' },
+      { title: 'Başarısız Traderlar -2' },
+    ] },
+    { title: 'Değişim', videos: [ { title: 'Başarılı Trader Olmak İçin Değiştirmen Gereken 5 Şey' } ] },
+  ],
+  islem: [
+    { title: 'Trade Örnekleri', videos: [
+      { title: 'Bitcoin Swing Short İşlemi (Price Action)' },
+      { title: 'BTC HTF Swing Short - Price Action' },
+      { title: 'BTC HTF Swing Short Pozisyon Yönetimi (+4R)' },
+      { title: 'Bugün Aldığım İşlemler - Price Action' },
+    ] },
+    { title: 'Haftalık İşlemler', videos: [
+      { title: 'Haftalık Performans Değerlendirmesi (Bitcoin)' },
+      { title: 'Bu Hafta Aldığım İşlemler (+10R)' },
+      { title: 'Bu Hafta Aldığım İşlemler (14-18 Nisan)' },
+      { title: 'Bu Hafta Aldığım İşlemler (21-25 Nisan)' },
+      { title: '9-13 Haziran Bitcoin Nasıl Trade Edilir?' },
+    ] },
+    { title: 'Günlük Plan & Rutin', videos: [
+      { title: 'Detaylı Günlük İşlem Planı (Bitcoin +4R)' },
+      { title: 'Nasıl Daha İyi Trade Ederim? - Rutin, Plan, Takip' },
+    ] },
+    { title: 'Backtest', videos: [
+      { title: 'SHP ile Backtest' },
+      { title: 'LTF Stratejileri Backtest 6 Gün 11R' },
+      { title: 'Price Action ile USDT.D Anlamak (1) - Backtest 13' },
+      { title: 'Price Action ile USDT.D Anlamak -2' },
+      { title: 'LTF Stratejileri (Backtest 14) - 11R' },
+    ] },
+  ],
+  ileri: [
+    { title: 'İleri Düzey Trade Eğitimi', videos: [
+      { title: 'İleri Düzey Trade Eğitimi -1' },
+      { title: 'İleri Düzey Trade Eğitimi -2 / İşlem Stratejisi Nasıl Kurulur' },
+      { title: 'İleri Düzey Trade Eğitimi -4 / Manipülasyon (Bitcoin & Altcoin)' },
+    ] },
+    { title: 'Stratejiler', videos: [
+      { title: 'LTF İşleme Giriş Stratejileri' },
+      { title: 'Alex G Swing Trade Stratejisi -1' },
+    ] },
+  ],
+};
+let egitimData = { sections: {}, sel: {}, selVid: {}, seedVer: 0 };
+let egSec = 'teknik';
 let egSaveTimer = null;
+let egForm = { mode: null, topicId: null, vidId: null };
 
 async function loadEgitim() {
   try {
@@ -3929,16 +4110,62 @@ async function loadEgitim() {
     if (raw) egitimData = JSON.parse(raw);
   } catch (e) { /* boş başla */ }
   if (!egitimData || typeof egitimData !== 'object') egitimData = {};
-  if (!egitimData.videos || typeof egitimData.videos !== 'object') egitimData.videos = {};
-  if (!egitimData.notes || typeof egitimData.notes !== 'object') egitimData.notes = {};
-  Object.keys(EG_LEVELS).forEach(lv => {
-    if (!Array.isArray(egitimData.videos[lv])) egitimData.videos[lv] = [];
-    if (typeof egitimData.notes[lv] !== 'string') egitimData.notes[lv] = '';
+  // Eski düz model (videos.baslangic/orta/ileri) -> yeni bölüm/konu/video yapısı
+  if (egitimData.videos && !egitimData.sections) {
+    egitimData.sections = {};
+    Object.keys(EG_SECTIONS).forEach(s => { egitimData.sections[s] = []; });
+    ['baslangic', 'orta', 'ileri'].forEach(lv => {
+      (egitimData.videos[lv] || []).forEach(old => {
+        if (!old || !old.url) return; // linksiz eski placeholder'ları at
+        egitimData.sections.teknik.push({
+          id: rid(), title: old.title || 'Konu', note: old.note || '',
+          videos: [{ id: rid(), title: old.title || 'Video', url: old.url }]
+        });
+      });
+    });
+    delete egitimData.videos;
+    egitimData.sel = {}; egitimData.selVid = {};
+  }
+  if (!egitimData.sections || typeof egitimData.sections !== 'object') egitimData.sections = {};
+  if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
+  if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
+  Object.keys(EG_SECTIONS).forEach(s => {
+    if (!Array.isArray(egitimData.sections[s])) egitimData.sections[s] = [];
+    egitimData.sections[s].forEach(t => {
+      if (typeof t.note !== 'string') t.note = '';
+      if (!Array.isArray(t.videos)) t.videos = [];
+      t.videos.forEach(v => { if (typeof v.done !== 'boolean') v.done = false; });
+    });
   });
+  if (typeof egitimData.seedVer !== 'number') egitimData.seedVer = 0;
+  const total = Object.keys(EG_SECTIONS).reduce((n, s) => n + egitimData.sections[s].length, 0);
+  if (egitimData.seedVer < EG_SEED_VER || total === 0) {
+    egMergeSeed();
+    egitimData.seedVer = EG_SEED_VER;
+    await saveEgitim();
+  }
 }
 async function saveEgitim() { await store.set(EGITIM_KEY, JSON.stringify(egitimData)); }
 
-// YouTube bağlantısından video kimliğini çıkarır (watch, youtu.be, embed, shorts).
+// Hazır içeriği yapıya ekler (var olan konu/videoyu çoğaltmadan). Eklenen sayısını döndürür.
+function egMergeSeed() {
+  let added = 0;
+  Object.keys(EG_SECTIONS).forEach(sec => {
+    if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
+    (EG_SEED[sec] || []).forEach(st => {
+      let topic = egitimData.sections[sec].find(t => (t.title || '').trim().toLowerCase() === st.title.trim().toLowerCase());
+      if (!topic) { topic = { id: rid(), title: st.title, note: '', videos: [] }; egitimData.sections[sec].push(topic); added++; }
+      const existV = new Set((topic.videos || []).map(v => (v.title || '').trim().toLowerCase()));
+      (st.videos || []).forEach(sv => {
+        if (existV.has(sv.title.trim().toLowerCase())) return;
+        topic.videos.push({ id: rid(), title: sv.title, url: '' }); added++;
+      });
+    });
+  });
+  return added;
+}
+
+// --- YouTube yardımcıları ---
 function ytId(url) {
   if (!url) return '';
   const s = String(url).trim();
@@ -3950,64 +4177,194 @@ function ytId(url) {
     /(?:youtube\.com\/live\/)([\w-]{11})/,
   ];
   for (const re of patterns) { const m = s.match(re); if (m) return m[1]; }
-  if (/^[\w-]{11}$/.test(s)) return s; // düz kimlik yapıştırıldıysa
+  if (/^[\w-]{11}$/.test(s)) return s;
   return '';
+}
+function ytListId(url) {
+  if (!url) return '';
+  const m = String(url).match(/[?&]list=([\w-]+)/);
+  return m ? m[1] : '';
+}
+function egKind(v) {
+  if (ytId(v.url)) return 'video';
+  if (ytListId(v.url)) return 'playlist';
+  return 'invalid';
+}
+function egEmbedSrc(v) {
+  const vid = ytId(v.url);
+  if (vid) { const lst = ytListId(v.url); return 'https://www.youtube-nocookie.com/embed/' + vid + (lst ? ('?list=' + lst) : ''); }
+  const pid = ytListId(v.url);
+  if (pid) return 'https://www.youtube-nocookie.com/embed/videoseries?list=' + pid;
+  return '';
+}
+function egWatchHref(v) {
+  const vid = ytId(v.url);
+  if (vid) return 'https://www.youtube.com/watch?v=' + vid;
+  const pid = ytListId(v.url);
+  if (pid) return 'https://www.youtube.com/playlist?list=' + pid;
+  return v.url || '#';
+}
+
+function egTopics() { return egitimData.sections[egSec] || []; }
+function egCurTopic() {
+  const list = egTopics();
+  if (!list.length) return null;
+  let sel = list.find(t => t.id === egitimData.sel[egSec]);
+  if (!sel) { sel = list[0]; egitimData.sel[egSec] = sel.id; }
+  return sel;
+}
+function egCurVid(topic) {
+  if (!topic || !topic.videos || !topic.videos.length) return null;
+  let v = topic.videos.find(x => x.id === egitimData.selVid[topic.id]);
+  if (!v) { v = topic.videos[0]; egitimData.selVid[topic.id] = v.id; }
+  return v;
 }
 
 function renderEgitim() {
-  const list = egitimData.videos[egLevel] || [];
-  document.getElementById('eg-level-title').textContent = EG_LEVELS[egLevel] + ' Düzey';
-  document.getElementById('eg-notes-lvl').textContent = EG_LEVELS[egLevel];
-  // seg aktif durumu
-  document.querySelectorAll('#eg-level-seg button').forEach(b => {
-    b.classList.toggle('on-gold', b.getAttribute('data-lv') === egLevel);
+  document.querySelectorAll('#eg-sec-seg button').forEach(b => {
+    b.classList.toggle('on-gold', b.getAttribute('data-sec') === egSec);
   });
-  // videolar
-  const wrap = document.getElementById('eg-videos');
-  wrap.innerHTML = '';
-  const grid = document.createElement('div'); grid.className = 'eg-grid';
-  list.forEach(v => {
-    const id = ytId(v.url);
-    const card = document.createElement('div'); card.className = 'eg-card';
-    const embed = document.createElement('div'); embed.className = 'eg-embed';
-    if (id) {
-      const ifr = document.createElement('iframe');
-      ifr.src = 'https://www.youtube-nocookie.com/embed/' + id;
-      ifr.title = v.title || 'video';
-      ifr.loading = 'lazy';
-      ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      ifr.setAttribute('allowfullscreen', '');
-      embed.appendChild(ifr);
-    }
-    card.appendChild(embed);
-    const body = document.createElement('div'); body.className = 'eg-card-body';
-    const info = document.createElement('div');
-    const title = document.createElement('div'); title.className = 'eg-card-title';
-    title.textContent = v.title || '(başlıksız video)';
-    info.appendChild(title);
-    const link = document.createElement('a'); link.className = 'eg-card-link';
-    link.href = id ? ('https://www.youtube.com/watch?v=' + id) : v.url;
-    link.target = '_blank'; link.rel = 'noopener noreferrer';
-    link.textContent = id ? "YouTube'da aç ↗" : 'Bağlantı geçersiz';
-    info.appendChild(link);
-    body.appendChild(info);
-    const del = document.createElement('button'); del.className = 'eg-del'; del.type = 'button';
-    del.textContent = '×'; del.title = 'Videoyu sil';
-    del.addEventListener('click', async () => {
-      if (!confirm('Bu videoyu silmek istediğine emin misin?')) return;
-      egitimData.videos[egLevel] = egitimData.videos[egLevel].filter(x => x.id !== v.id);
+  const topics = egTopics();
+  const cur = egCurTopic();
+  // ---- Sol: konular ----
+  const listBox = document.getElementById('eg-list');
+  listBox.innerHTML = '';
+  topics.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'eg-item' + (cur && t.id === cur.id ? ' on' : '');
+    const idx = document.createElement('span'); idx.className = 'eg-item-idx'; idx.textContent = (i + 1);
+    row.appendChild(idx);
+    const tt = document.createElement('span'); tt.className = 'eg-item-t'; tt.textContent = t.title || '(başlıksız)';
+    row.appendChild(tt);
+    const total = (t.videos || []).length;
+    const done = (t.videos || []).filter(v => v.done).length;
+    const cnt = document.createElement('span');
+    cnt.className = 'eg-count' + (total && done === total ? ' all' : (done ? ' done' : ''));
+    cnt.textContent = (total && done === total) ? ('✓ ' + total) : (done + '/' + total);
+    cnt.title = total + ' video, ' + done + ' izlendi';
+    row.appendChild(cnt);
+    const edit = document.createElement('button'); edit.className = 'eg-item-edit'; edit.type = 'button';
+    edit.textContent = '✎'; edit.title = 'Konu adını düzenle';
+    edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('topic-edit', { topicId: t.id }, { title: t.title }); });
+    row.appendChild(edit);
+    const del = document.createElement('button'); del.className = 'eg-item-del'; del.type = 'button';
+    del.textContent = '×'; del.title = 'Konuyu sil';
+    del.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!confirm('“' + (t.title || 'Bu konu') + '” ve içindeki videolar silinsin mi?')) return;
+      egitimData.sections[egSec] = egitimData.sections[egSec].filter(x => x.id !== t.id);
+      if (egitimData.sel[egSec] === t.id) egitimData.sel[egSec] = null;
       await saveEgitim(); renderEgitim();
     });
-    body.appendChild(del);
-    card.appendChild(body);
-    grid.appendChild(card);
+    row.appendChild(del);
+    row.addEventListener('click', async () => {
+      if (egitimData.sel[egSec] === t.id) return;
+      egitimData.sel[egSec] = t.id; await saveEgitim(); renderEgitim();
+    });
+    listBox.appendChild(row);
   });
-  wrap.appendChild(grid);
-  document.getElementById('eg-empty').style.display = list.length ? 'none' : 'block';
-  // notlar
-  const ta = document.getElementById('eg-notes');
-  ta.value = egitimData.notes[egLevel] || '';
+  document.getElementById('eg-empty').style.display = topics.length ? 'none' : 'block';
+  // bölüm ilerlemesi (izlenen / toplam)
+  let secTot = 0, secDone = 0;
+  topics.forEach(t => (t.videos || []).forEach(v => { secTot++; if (v.done) secDone++; }));
+  document.getElementById('eg-progress').innerHTML = secTot ? ('İzlenen <b>' + secDone + '</b>/' + secTot) : '';
+  // ---- Sağ: oynatıcı ----
+  const wrap = document.getElementById('eg-player-wrap');
+  const empty = document.getElementById('eg-player-empty');
+  if (!cur) { wrap.style.display = 'none'; empty.style.display = 'block'; return; }
+  wrap.style.display = 'block'; empty.style.display = 'none';
+  const vids = cur.videos || [];
+  const curVid = egCurVid(cur);
+  // embed
+  const embed = document.getElementById('eg-embed');
+  embed.innerHTML = '';
+  const src = curVid ? egEmbedSrc(curVid) : '';
+  if (src) {
+    const ifr = document.createElement('iframe');
+    ifr.src = src; ifr.title = (curVid.title || cur.title || 'video');
+    ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+    ifr.setAttribute('allowfullscreen', '');
+    embed.appendChild(ifr);
+  } else {
+    const ph = document.createElement('div'); ph.className = 'eg-embed-ph';
+    const txt = document.createElement('div'); txt.className = 'eg-ph-txt';
+    txt.textContent = vids.length ? 'Bu videoya henüz YouTube bağlantısı eklenmedi.' : 'Bu konuda henüz video yok.';
+    ph.appendChild(txt);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
+    if (vids.length && curVid) { btn.textContent = '＋ Bağlantı ekle'; btn.addEventListener('click', () => egOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url })); }
+    else { btn.textContent = '＋ Video ekle'; btn.addEventListener('click', () => egOpenForm('video-add', { topicId: cur.id }, null)); }
+    ph.appendChild(btn);
+    embed.appendChild(ph);
+  }
+  // başlık = konu adı
+  document.getElementById('eg-now-title').textContent = cur.title || '(başlıksız)';
+  const link = document.getElementById('eg-now-link');
+  if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
+  else { link.style.display = 'none'; }
+  // İzledim butonu (mevcut video)
+  const doneBtn = document.getElementById('eg-done');
+  if (curVid) {
+    doneBtn.style.display = '';
+    doneBtn.classList.toggle('on', !!curVid.done);
+    document.getElementById('eg-done-txt').textContent = curVid.done ? '✓ İzlendi' : 'İzledim';
+  } else { doneBtn.style.display = 'none'; }
+  // videolar alt-listesi
+  const vlist = document.getElementById('eg-vid-list');
+  vlist.innerHTML = '';
+  if (!vids.length) {
+    const e = document.createElement('div'); e.className = 'eg-vid-empty'; e.textContent = 'Henüz video yok — “+ Video ekle” ile bağla.';
+    vlist.appendChild(e);
+  }
+  vids.forEach((v, i) => {
+    const kind = egKind(v);
+    const row = document.createElement('div');
+    row.className = 'eg-vid-row' + (curVid && v.id === curVid.id ? ' on' : '') + (v.done ? ' done' : '');
+    const chk = document.createElement('button'); chk.className = 'eg-check' + (v.done ? ' on' : ''); chk.type = 'button';
+    chk.textContent = '✓'; chk.title = v.done ? 'İzlendi — geri al' : 'İzlendi olarak işaretle';
+    chk.addEventListener('click', async (e) => { e.stopPropagation(); v.done = !v.done; await saveEgitim(); renderEgitim(); });
+    row.appendChild(chk);
+    const idx = document.createElement('span'); idx.className = 'eg-vid-idx'; idx.textContent = (i + 1);
+    row.appendChild(idx);
+    const t = document.createElement('span'); t.className = 'eg-vid-t'; t.textContent = v.title || '(başlıksız)';
+    row.appendChild(t);
+    if (kind === 'playlist') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = 'Liste'; row.appendChild(tag); }
+    else if (kind === 'invalid') { const tag = document.createElement('span'); tag.className = 'eg-item-tag muted'; tag.textContent = 'Link yok'; row.appendChild(tag); }
+    const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'Videoyu düzenle';
+    edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url }); });
+    row.appendChild(edit);
+    const del = document.createElement('button'); del.className = 'eg-vid-del'; del.type = 'button'; del.textContent = '×'; del.title = 'Videoyu sil';
+    del.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      cur.videos = cur.videos.filter(x => x.id !== v.id);
+      if (egitimData.selVid[cur.id] === v.id) egitimData.selVid[cur.id] = null;
+      await saveEgitim(); renderEgitim();
+    });
+    row.appendChild(del);
+    row.addEventListener('click', async () => {
+      if (egitimData.selVid[cur.id] === v.id) return;
+      egitimData.selVid[cur.id] = v.id; await saveEgitim(); renderEgitim();
+    });
+    vlist.appendChild(row);
+  });
+  // not (konu bazlı)
+  document.getElementById('eg-notes').value = cur.note || '';
 }
+
+function egOpenForm(mode, ids, prefill) {
+  const g = id => document.getElementById(id);
+  egForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null };
+  const isVideo = (mode === 'video-add' || mode === 'video-edit');
+  g('eg-in-title').value = (prefill && prefill.title) || '';
+  g('eg-in-url').value = (prefill && prefill.url) || '';
+  g('eg-in-url').style.display = isVideo ? '' : 'none';
+  g('eg-in-err').textContent = '';
+  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Video ekle', 'video-edit': 'Videoyu düzenle' };
+  g('eg-form-title').textContent = titles[mode] || 'Düzenle';
+  g('eg-in-title').setAttribute('placeholder', isVideo ? 'Video başlığı (ör. Market Yapısı -1)' : 'Konu başlığı (ör. Market Yapısı)');
+  g('eg-add-form').classList.remove('hidden');
+  g('eg-in-title').focus();
+}
+function egCloseForm() { egForm = { mode: null, topicId: null, vidId: null }; document.getElementById('eg-add-form').classList.add('hidden'); }
 
 function egFlashSaved() {
   const s = document.getElementById('eg-notes-status');
@@ -4020,28 +4377,67 @@ function egFlashSaved() {
 function bindEgitimPage() {
   const g = id => document.getElementById(id);
   g('tab-egitim').addEventListener('click', () => showPage('egitim'));
-  document.querySelectorAll('#eg-level-seg button').forEach(b => {
-    b.addEventListener('click', () => { egLevel = b.getAttribute('data-lv'); renderEgitim(); });
+  document.querySelectorAll('#eg-sec-seg button').forEach(b => {
+    b.addEventListener('click', () => { egSec = b.getAttribute('data-sec'); egCloseForm(); renderEgitim(); });
   });
-  // video ekleme formu
-  const form = g('eg-add-form');
-  const showForm = show => {
-    form.classList.toggle('hidden', !show);
-    if (show) { g('eg-in-title').value = ''; g('eg-in-url').value = ''; g('eg-in-err').textContent = ''; g('eg-in-title').focus(); }
-  };
-  g('eg-add').addEventListener('click', () => showForm(form.classList.contains('hidden')));
-  g('eg-in-cancel').addEventListener('click', () => showForm(false));
+  // hazır içeriği yükle (birleştir)
+  g('eg-load').addEventListener('click', async () => {
+    const added = egMergeSeed();
+    await saveEgitim(); renderEgitim();
+    if (added === 0) alert('Tüm hazır içerik zaten listede.');
+  });
+  // konu ekle
+  g('eg-add-topic').addEventListener('click', () => {
+    if (g('eg-add-form').classList.contains('hidden')) egOpenForm('topic-add', null, null); else egCloseForm();
+  });
+  // İzledim / bitirdim işareti (mevcut video)
+  g('eg-done').addEventListener('click', async () => {
+    const t = egCurTopic(); if (!t) return;
+    const v = egCurVid(t); if (!v) return;
+    v.done = !v.done;
+    await saveEgitim(); renderEgitim();
+    if (v.done) {
+      const btn = g('eg-done'); btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+      const ch = g('eg-cheer'); ch.classList.remove('show'); void ch.offsetWidth; ch.classList.add('show');
+    }
+  });
+  // konu adı düzenle (oynatıcı üstündeki kalem)
+  g('eg-topic-edit').addEventListener('click', () => { const t = egCurTopic(); if (t) egOpenForm('topic-edit', { topicId: t.id }, { title: t.title }); });
+  // video ekle (oynatıcı içindeki buton)
+  g('eg-add-vid').addEventListener('click', () => { const t = egCurTopic(); if (t) egOpenForm('video-add', { topicId: t.id }, null); });
+  // form kaydet
+  g('eg-in-cancel').addEventListener('click', () => egCloseForm());
   g('eg-in-save').addEventListener('click', async () => {
     const title = g('eg-in-title').value.trim();
     const url = g('eg-in-url').value.trim();
-    if (!ytId(url)) { g('eg-in-err').textContent = 'Geçerli bir YouTube bağlantısı gir.'; return; }
-    egitimData.videos[egLevel].push({ id: rid(), title: title || 'Video', url: url });
-    await saveEgitim(); showForm(false); renderEgitim();
+    const mode = egForm.mode;
+    const isVideo = (mode === 'video-add' || mode === 'video-edit');
+    if (isVideo && url && !ytId(url) && !ytListId(url)) {
+      g('eg-in-err').textContent = 'Geçerli bir YouTube video ya da oynatma listesi bağlantısı gir (ya da boş bırak).';
+      return;
+    }
+    const secList = egitimData.sections[egSec];
+    if (mode === 'topic-add') {
+      const t = { id: rid(), title: title || 'Konu', note: '', videos: [] };
+      secList.push(t); egitimData.sel[egSec] = t.id;
+    } else if (mode === 'topic-edit') {
+      const t = secList.find(x => x.id === egForm.topicId); if (t) t.title = title || t.title || 'Konu';
+    } else if (mode === 'video-add') {
+      const t = secList.find(x => x.id === egForm.topicId);
+      if (t) { const v = { id: rid(), title: title || (ytListId(url) && !ytId(url) ? 'Oynatma listesi' : 'Video'), url: url }; t.videos.push(v); egitimData.selVid[t.id] = v.id; egitimData.sel[egSec] = t.id; }
+    } else if (mode === 'video-edit') {
+      const t = secList.find(x => x.id === egForm.topicId);
+      const v = t && t.videos.find(x => x.id === egForm.vidId);
+      if (v) { v.title = title || v.title || 'Video'; v.url = url; egitimData.selVid[t.id] = v.id; }
+    }
+    await saveEgitim(); egCloseForm(); renderEgitim();
   });
   g('eg-in-url').addEventListener('keydown', e => { if (e.key === 'Enter') g('eg-in-save').click(); });
-  // notlar — yazdıkça kaydet (debounce)
+  g('eg-in-title').addEventListener('keydown', e => { if (e.key === 'Enter' && g('eg-in-url').style.display === 'none') g('eg-in-save').click(); });
+  // not — yazdıkça konuya kaydet (debounce)
   g('eg-notes').addEventListener('input', e => {
-    egitimData.notes[egLevel] = e.target.value;
+    const t = egCurTopic(); if (!t) return;
+    t.note = e.target.value;
     clearTimeout(egSaveTimer);
     egSaveTimer = setTimeout(async () => { await saveEgitim(); egFlashSaved(); }, 600);
   });
