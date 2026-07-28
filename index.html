@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alfa Traders — Setup Kalitesi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -25,6 +25,7 @@
     --red-soft: #fdeaea;
     --radius: 14px;
     --shadow: 0 1px 3px rgba(23,25,35,0.05), 0 4px 16px rgba(23,25,35,0.05);
+    --font-display: 'Sora', 'Inter', sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -132,15 +133,22 @@
   }
   .ce-add:hover { background: #e6e6fb; }
   /* --- Navbar --- */
-  .navbar { display: flex; align-items: center; gap: 20px; padding: 16px 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
-  .nav-brand { display: flex; align-items: center; gap: 10px; }
-  .nav-brand .logo-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--acc); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
-  .nav-brand span { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
-  .nav-links { display: flex; gap: 4px; }
-  .nav-link { background: transparent; border: none; padding: 9px 15px; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-2); cursor: pointer; transition: all .12s ease; }
-  .nav-link:hover { background: var(--acc-soft); color: var(--acc); }
-  .nav-link.on { background: var(--acc); color: #fff; }
+  .navbar { display: flex; align-items: center; gap: 18px; padding: 18px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
+  .nav-brand { display: flex; align-items: center; gap: 11px; }
+  .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
+  .logo-mark svg { width: 62%; height: 62%; display: block; }
+  .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; color: var(--text); }
+  .nav-links { display: flex; gap: 2px; }
+  .nav-link { position: relative; background: transparent; border: none; padding: 9px 16px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
+  .nav-link:hover { background: rgba(91,91,214,0.07); color: var(--text); }
+  .nav-link:active { transform: scale(0.97); }
+  .nav-link.on { background: var(--acc-soft); color: var(--acc); }
+  .nav-link.on:hover { background: var(--acc-soft); color: var(--acc); }
   .navbar .user-badge { margin-left: auto; }
+  /* Yumuşak sayfa geçişi */
+  @keyframes pageIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+  .page-anim { animation: pageIn .3s cubic-bezier(0.22, 0.61, 0.36, 1); }
+  @media (prefers-reduced-motion: reduce) { .page-anim { animation: none; } }
   /* --- Trade Günlüğü pano düzeni --- */
   .data-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 900px) {
@@ -183,6 +191,48 @@
   .dr-del:hover { background: #fbdcdc; }
   .cat-edit.danger-edit { color: var(--red); border-color: var(--red-soft); }
   .cat-edit.danger-edit:hover { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+  /* --- Haftalık Değerlendirme --- */
+  .rv-perf { margin-bottom: 14px; }
+  .rv-totals { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 6px; }
+  .rv-total { display: flex; flex-direction: column; gap: 3px; }
+  .t-lbl { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+  .t-val { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--text); }
+  .t-val.pos { color: var(--green); }
+  .t-val.neg { color: var(--red); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot-tot { background: var(--acc); }
+  .dot-krip { background: #f59e0b; }
+  .dot-fx { background: #0ea5e9; }
+  #rv-chart-wrap { width: 100%; overflow: hidden; margin-top: 4px; }
+  #rv-chart { width: 100%; display: block; }
+  .rv-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 22px 10px; }
+  .rv-inputs { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 10px; padding-top: 12px; border-top: 1px dashed var(--border); }
+  .rv-inputs label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+  .rv-inputs label span { color: var(--text-3); font-weight: 500; }
+  .rv-inputs input { width: 84px; background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text); }
+  .rv-inputs input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .rv-head { display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; }
+  .rv-nav { width: 38px; height: 38px; border: 1px solid var(--border); background: var(--card); border-radius: 9px; font-size: 15px; color: var(--text-2); cursor: pointer; }
+  .rv-nav:hover { border-color: var(--acc); color: var(--acc); }
+  .rv-week { font-size: 16px; font-weight: 700; color: var(--text); }
+  .rv-today { margin-left: auto; background: transparent; border: 1px solid var(--border); border-radius: 9px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
+  .rv-today:hover { border-color: var(--acc); color: var(--acc); }
+  .rv-metric { margin-bottom: 18px; }
+  .rv-mhead { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .rv-mlabel { flex: 1; min-width: 0; background: transparent; border: none; border-bottom: 1px solid transparent; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); padding: 2px 0; }
+  .rv-mlabel:focus { outline: none; border-bottom-color: var(--acc); }
+  .rv-mval { font-size: 13px; font-weight: 700; color: var(--acc); min-width: 38px; text-align: right; }
+  .rv-bar { height: 8px; background: #eceef5; border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
+  .rv-bar-fill { height: 100%; background: linear-gradient(90deg, var(--acc), #8a8aec); border-radius: 99px; }
+  .rv-range { width: 100%; accent-color: var(--acc); cursor: pointer; }
+  .rv-section { margin-bottom: 14px; }
+  .rv-shead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .rv-stitle { flex: 1; min-width: 0; background: transparent; border: none; border-bottom: 1px solid transparent; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); padding: 2px 0; }
+  .rv-stitle:focus { outline: none; border-bottom-color: var(--acc); color: var(--text); }
+  .rv-ta { width: 100%; min-height: 68px; resize: vertical; background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.55; padding: 10px 12px; }
+  .rv-ta:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .rv-del { width: 26px; height: 26px; flex: 0 0 auto; background: var(--red-soft); border: none; border-radius: 7px; color: var(--red); font-size: 15px; line-height: 1; cursor: pointer; }
+  .rv-del:hover { background: #fbdcdc; }
 
   #list-veri, #list-teknik, #list-pozisyon, #list-duygu {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
@@ -505,7 +555,7 @@
   #landing.open { display: block; }
   .lp-nav { max-width: 1000px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
   .lp-brand { display: flex; align-items: center; gap: 11px; }
-  .lp-brand .logo-mark { width: 38px; height: 38px; border-radius: 10px; background: var(--acc); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+  .lp-brand .logo-mark { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .lp-brand h1 { font-size: 17px; font-weight: 700; }
   .lp-brand .sub { font-size: 11.5px; color: var(--text-3); font-weight: 500; }
   .nav-login { background: var(--acc); border: none; color: #fff; border-radius: 10px; padding: 9px 18px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; }
@@ -726,7 +776,7 @@
 <div id="landing">
   <nav class="lp-nav">
     <div class="lp-brand">
-      <div class="logo-mark">A</div>
+      <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 L16 5.5 L26.5 26.5" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 23 Q16 17 25.5 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></div>
       <div>
         <h1>Alfa Traders</h1>
         <div class="sub">Trader'lar için Disiplin Aracı</div>
@@ -834,7 +884,7 @@
   <div class="auth-box">
     <button class="auth-x" id="auth-close" type="button" aria-label="Kapat">&times;</button>
     <div class="auth-brand">
-      <div class="logo-mark">A</div>
+      <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 L16 5.5 L26.5 26.5" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 23 Q16 17 25.5 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></div>
       <div>
         <h1>Alfa Traders</h1>
         <div class="sub">Trader'lar için Disiplin Aracı</div>
@@ -869,12 +919,13 @@
 <div class="wrap">
   <nav class="navbar">
     <div class="nav-brand">
-      <div class="logo-mark">A</div>
+      <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 L16 5.5 L26.5 26.5" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 23 Q16 17 25.5 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></div>
       <span>Alfa Traders</span>
     </div>
     <div class="nav-links">
       <button id="tab-defter" class="nav-link on" type="button">Alfa-Check List</button>
       <button id="tab-data" class="nav-link" type="button">Trade Günlüğü</button>
+      <button id="tab-review" class="nav-link" type="button">Haftalık Değerlendirme</button>
     </div>
     <div class="user-badge hidden" id="user-badge">
       <span class="uname" id="user-name"></span>
@@ -1175,6 +1226,42 @@
           <h2><span>Kümülatif PnL (R)</span><span class="n" id="data-eq-total"></span></h2>
           <div id="data-chart-wrap"><canvas id="data-chart"></canvas></div>
           <div class="data-empty" id="data-empty">Henüz veri yok. Soldan işlem ekle, Check List'ten aktar ya da CSV yükle.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-review" class="hidden">
+    <div class="rv-head">
+      <button class="rv-nav" id="rv-prev" type="button">◀</button>
+      <div class="rv-week" id="rv-week">—</div>
+      <button class="rv-nav" id="rv-next" type="button">▶</button>
+      <button class="rv-today" id="rv-today" type="button">Bu hafta</button>
+    </div>
+    <div class="panel rv-perf">
+      <div class="rv-totals">
+        <div class="rv-total"><span class="t-lbl"><i class="dot dot-tot"></i>Toplam RR</span><span class="t-val" id="rr-tot-cum">0.00R</span></div>
+        <div class="rv-total"><span class="t-lbl"><i class="dot dot-krip"></i>Kripto</span><span class="t-val" id="rr-krip-cum">0.00R</span></div>
+        <div class="rv-total"><span class="t-lbl"><i class="dot dot-fx"></i>FX</span><span class="t-val" id="rr-fx-cum">0.00R</span></div>
+      </div>
+      <div id="rv-chart-wrap"><canvas id="rv-chart"></canvas></div>
+      <div class="rv-empty" id="rv-empty">Haftalık RR girdikçe kümülatif eğri burada oluşur.</div>
+      <div class="rv-inputs">
+        <label>Kripto <span>bu hafta</span> <input type="number" step="0.1" id="rr-krip-in" placeholder="0"> R</label>
+        <label>FX <span>bu hafta</span> <input type="number" step="0.1" id="rr-fx-in" placeholder="0"> R</label>
+      </div>
+    </div>
+    <div class="data-grid">
+      <div class="data-main">
+        <div class="panel">
+          <h2 class="cat-h2"><span>Haftalık Değerlendirme</span><button type="button" class="cat-edit" id="rv-add-section">+ Bölüm ekle</button></h2>
+          <div id="rv-sections"></div>
+        </div>
+      </div>
+      <div class="data-side">
+        <div class="panel">
+          <h2 class="cat-h2"><span>Bu Hafta — Ölçütler</span><button type="button" class="cat-edit" id="rv-add-metric">+ Ölçüt</button></h2>
+          <div id="rv-metrics"></div>
         </div>
       </div>
     </div>
@@ -3344,6 +3431,7 @@ function init() {
     if (btn) btn.addEventListener('click', () => toggleCatEdit(cat));
   });
   bindDataPage();
+  bindReviewPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
   document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
@@ -3373,11 +3461,16 @@ async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)
 
 function showPage(name) {
   currentPage = name;
-  document.getElementById('page-defter').classList.toggle('hidden', name !== 'defter');
-  document.getElementById('page-data').classList.toggle('hidden', name !== 'data');
-  document.getElementById('tab-defter').classList.toggle('on', name === 'defter');
-  document.getElementById('tab-data').classList.toggle('on', name === 'data');
+  ['defter', 'data', 'review'].forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.toggle('hidden', name !== p);
+    const tb = document.getElementById('tab-' + p);
+    if (tb) tb.classList.toggle('on', name === p);
+  });
+  const shown = document.getElementById('page-' + name);
+  if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   if (name === 'data') renderData();
+  if (name === 'review') renderReview();
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -3585,6 +3678,184 @@ function bindDataPage() {
   window.addEventListener('resize', () => { if (currentPage === 'data') drawEquity(sortedData()); });
 }
 
+// ============ Haftalık Değerlendirme ============
+const REVIEW_KEY = 'defter-reviews-v1';
+const REVIEW_CFG_KEY = 'defter-review-cfg-v1';
+let reviews = {};
+let reviewCfg = null;
+let reviewWeek = null;
+let reviewSaveTimer = null;
+
+function rid() { return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function defaultReviewCfg() {
+  return {
+    sections: [
+      { id: 's1', title: 'Bu hafta nasıl geçti?' },
+      { id: 's2', title: 'Kripto' },
+      { id: 's3', title: 'FX' },
+      { id: 's4', title: 'Hatalar' },
+      { id: 's5', title: 'Değiştirmen gereken ilk hatan' },
+      { id: 's6', title: 'Öğrenilenler' },
+      { id: 's7', title: 'Yapılacaklar' },
+      { id: 's8', title: "Edge'ini öldüren şeyler" }
+    ],
+    metrics: [
+      { id: 'm1', title: 'Kurallarıma uydum' },
+      { id: 'm2', title: 'Duygusal durum' },
+      { id: 'm3', title: 'Disiplin' }
+    ]
+  };
+}
+async function loadReviews() {
+  try { const a = await store.get(REVIEW_KEY); reviews = a ? JSON.parse(a) : {}; } catch (e) { reviews = {}; }
+  if (!reviews || typeof reviews !== 'object') reviews = {};
+  try { const b = await store.get(REVIEW_CFG_KEY); reviewCfg = b ? JSON.parse(b) : defaultReviewCfg(); } catch (e) { reviewCfg = defaultReviewCfg(); }
+  if (!reviewCfg || !Array.isArray(reviewCfg.sections)) reviewCfg = defaultReviewCfg();
+  if (!Array.isArray(reviewCfg.metrics)) reviewCfg.metrics = defaultReviewCfg().metrics;
+  reviewWeek = mondayOf(new Date());
+}
+function scheduleSaveReviews() { clearTimeout(reviewSaveTimer); reviewSaveTimer = setTimeout(saveReviews, 600); }
+async function saveReviews() { await store.set(REVIEW_KEY, JSON.stringify(reviews)); }
+async function saveReviewCfg() { await store.set(REVIEW_CFG_KEY, JSON.stringify(reviewCfg)); }
+
+function mondayOf(d) { const x = new Date(d); const off = (x.getDay() + 6) % 7; x.setDate(x.getDate() - off); x.setHours(0, 0, 0, 0); return x; }
+function weekKeyOf(d) { const m = mondayOf(d); return m.getFullYear() + '-' + String(m.getMonth() + 1).padStart(2, '0') + '-' + String(m.getDate()).padStart(2, '0'); }
+function weekLabel(d) {
+  const mon = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const m = mondayOf(d), e = new Date(m); e.setDate(e.getDate() + 6);
+  return m.getDate() + ' ' + mon[m.getMonth()] + ' – ' + e.getDate() + ' ' + mon[e.getMonth()] + ' ' + e.getFullYear();
+}
+function ensureWeek(wk) {
+  if (!reviews[wk]) reviews[wk] = { notes: {}, bars: {}, rr: {} };
+  if (!reviews[wk].notes) reviews[wk].notes = {};
+  if (!reviews[wk].bars) reviews[wk].bars = {};
+  if (!reviews[wk].rr) reviews[wk].rr = {};
+  return reviews[wk];
+}
+function updateRRcum() {
+  const keys = Object.keys(reviews).filter(k => {
+    const r = reviews[k] && reviews[k].rr;
+    return r && (r.kripto != null || r.fx != null);
+  }).sort();
+  let cK = 0, cF = 0;
+  const sK = [0], sF = [0], sT = [0];
+  keys.forEach(k => {
+    const r = reviews[k].rr || {};
+    cK += dnum(r.kripto); cF += dnum(r.fx);
+    sK.push(cK); sF.push(cF); sT.push(cK + cF);
+  });
+  const setCum = (id, v) => {
+    const el = document.getElementById(id); if (!el) return;
+    el.textContent = (v > 0 ? '+' : '') + v.toFixed(2) + 'R';
+    el.className = 't-val ' + (v >= 0 ? 'pos' : 'neg');
+  };
+  setCum('rr-krip-cum', cK); setCum('rr-fx-cum', cF); setCum('rr-tot-cum', cK + cF);
+  const hasData = keys.length > 0;
+  const empty = document.getElementById('rv-empty'); if (empty) empty.style.display = hasData ? 'none' : 'block';
+  const wrap = document.getElementById('rv-chart-wrap'); if (wrap) wrap.style.display = hasData ? 'block' : 'none';
+  if (hasData) drawReviewChart([sT, sK, sF]);
+}
+
+function drawReviewChart(series) {
+  const cv = document.getElementById('rv-chart');
+  const wrap = document.getElementById('rv-chart-wrap');
+  if (!cv || !wrap) return;
+  const W = wrap.clientWidth || 600, H = 220;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const all = series.reduce((a, s) => a.concat(s), []);
+  const min = Math.min(0, ...all), max = Math.max(0, ...all);
+  const pad = 12, range = (max - min) || 1, n = series[0].length;
+  const x = i => pad + (W - 2 * pad) * (i / (n - 1 || 1));
+  const y = v => (H - pad) - (H - 2 * pad) * ((v - min) / range);
+  ctx.strokeStyle = '#e6e8f0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad, y(0)); ctx.lineTo(W - pad, y(0)); ctx.stroke();
+  const colors = ['#5b5bd6', '#f59e0b', '#0ea5e9']; // Toplam, Kripto, FX
+  const widths = [2.6, 2, 2];
+  const tot = series[0];
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(91,91,214,0.16)'); grad.addColorStop(1, 'rgba(91,91,214,0)');
+  ctx.beginPath(); ctx.moveTo(x(0), y(tot[0]));
+  tot.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+  ctx.lineTo(x(n - 1), y(0)); ctx.lineTo(x(0), y(0)); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  series.forEach((s, idx) => {
+    ctx.beginPath(); s.forEach((v, i) => i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v)));
+    ctx.strokeStyle = colors[idx]; ctx.lineWidth = widths[idx]; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x(n - 1), y(s[n - 1]), idx === 0 ? 3.6 : 3, 0, Math.PI * 2); ctx.fillStyle = colors[idx]; ctx.fill();
+  });
+}
+
+function renderReview() {
+  if (!reviewCfg) reviewCfg = defaultReviewCfg();
+  if (!reviewWeek) reviewWeek = mondayOf(new Date());
+  const wk = weekKeyOf(reviewWeek);
+  document.getElementById('rv-week').textContent = weekLabel(reviewWeek);
+  const data = reviews[wk] || { notes: {}, bars: {}, rr: {} };
+  const rr = (data.rr && typeof data.rr === 'object') ? data.rr : {};
+  const kIn = document.getElementById('rr-krip-in'); if (kIn) kIn.value = (rr.kripto != null) ? rr.kripto : '';
+  const fIn = document.getElementById('rr-fx-in'); if (fIn) fIn.value = (rr.fx != null) ? rr.fx : '';
+  updateRRcum();
+
+  const mBox = document.getElementById('rv-metrics');
+  mBox.innerHTML = '';
+  reviewCfg.metrics.forEach(m => {
+    const val = (data.bars && data.bars[m.id] != null) ? data.bars[m.id] : 50;
+    const wrap = document.createElement('div'); wrap.className = 'rv-metric';
+    const head = document.createElement('div'); head.className = 'rv-mhead';
+    const lbl = document.createElement('input'); lbl.className = 'rv-mlabel'; lbl.value = m.title; lbl.placeholder = 'Ölçüt adı';
+    lbl.addEventListener('input', () => { m.title = lbl.value; });
+    lbl.addEventListener('change', saveReviewCfg);
+    const valSpan = document.createElement('span'); valSpan.className = 'rv-mval'; valSpan.textContent = val + '%';
+    const del = document.createElement('button'); del.className = 'rv-del'; del.type = 'button'; del.textContent = '×'; del.title = 'Sil';
+    del.addEventListener('click', () => { reviewCfg.metrics = reviewCfg.metrics.filter(x => x.id !== m.id); saveReviewCfg(); renderReview(); });
+    head.appendChild(lbl); head.appendChild(valSpan); head.appendChild(del);
+    const bar = document.createElement('div'); bar.className = 'rv-bar';
+    const fill = document.createElement('div'); fill.className = 'rv-bar-fill'; fill.style.width = val + '%'; bar.appendChild(fill);
+    const range = document.createElement('input'); range.type = 'range'; range.min = '0'; range.max = '100'; range.step = '5'; range.value = val; range.className = 'rv-range';
+    range.addEventListener('input', () => { valSpan.textContent = range.value + '%'; fill.style.width = range.value + '%'; ensureWeek(wk).bars[m.id] = Number(range.value); scheduleSaveReviews(); });
+    wrap.appendChild(head); wrap.appendChild(bar); wrap.appendChild(range);
+    mBox.appendChild(wrap);
+  });
+
+  const sBox = document.getElementById('rv-sections');
+  sBox.innerHTML = '';
+  reviewCfg.sections.forEach(sec => {
+    const val = (data.notes && data.notes[sec.id]) || '';
+    const wrap = document.createElement('div'); wrap.className = 'rv-section';
+    const head = document.createElement('div'); head.className = 'rv-shead';
+    const title = document.createElement('input'); title.className = 'rv-stitle'; title.value = sec.title; title.placeholder = 'Bölüm başlığı';
+    title.addEventListener('input', () => { sec.title = title.value; });
+    title.addEventListener('change', saveReviewCfg);
+    const del = document.createElement('button'); del.className = 'rv-del'; del.type = 'button'; del.textContent = '×'; del.title = 'Sil';
+    del.addEventListener('click', () => { reviewCfg.sections = reviewCfg.sections.filter(x => x.id !== sec.id); saveReviewCfg(); renderReview(); });
+    head.appendChild(title); head.appendChild(del);
+    const ta = document.createElement('textarea'); ta.className = 'rv-ta'; ta.value = val; ta.placeholder = 'Bu hafta için notların…';
+    ta.addEventListener('input', () => { ensureWeek(wk).notes[sec.id] = ta.value; scheduleSaveReviews(); });
+    wrap.appendChild(head); wrap.appendChild(ta);
+    sBox.appendChild(wrap);
+  });
+}
+
+function bindReviewPage() {
+  const g = id => document.getElementById(id);
+  g('tab-review').addEventListener('click', () => showPage('review'));
+  g('rv-prev').addEventListener('click', () => { reviewWeek = new Date(reviewWeek.getTime() - 7 * 864e5); renderReview(); });
+  g('rv-next').addEventListener('click', () => { reviewWeek = new Date(reviewWeek.getTime() + 7 * 864e5); renderReview(); });
+  g('rv-today').addEventListener('click', () => { reviewWeek = mondayOf(new Date()); renderReview(); });
+  g('rv-add-section').addEventListener('click', () => { reviewCfg.sections.push({ id: rid(), title: '' }); saveReviewCfg(); renderReview(); });
+  g('rv-add-metric').addEventListener('click', () => { reviewCfg.metrics.push({ id: rid(), title: 'Yeni ölçüt' }); saveReviewCfg(); renderReview(); });
+  const saveRR = (which, val) => {
+    const wk = weekKeyOf(reviewWeek);
+    ensureWeek(wk).rr[which] = (val === '') ? null : dnum(val);
+    scheduleSaveReviews(); updateRRcum();
+  };
+  g('rr-krip-in').addEventListener('input', e => saveRR('kripto', e.target.value));
+  g('rr-fx-in').addEventListener('input', e => saveRR('fx', e.target.value));
+  window.addEventListener('resize', () => { if (currentPage === 'review') updateRRcum(); });
+}
+
 // ============ Açılış + Giriş/Kayıt akışı ============
 let APP_BOOTED = false;
 async function bootApp(opts) {
@@ -3593,6 +3864,7 @@ async function bootApp(opts) {
   if (opts && opts.seed) { try { await seedIfEmpty(); } catch (e) { /* boş başla */ } }
   try { await loadConfig(); } catch (e) { /* devam */ }
   try { await loadData(); } catch (e) { /* devam */ }
+  try { await loadReviews(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
 }
 
@@ -3759,7 +4031,7 @@ if (AUTH_ENABLED) {
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
-  seedIfEmpty().then(loadConfig).then(loadData).then(init).catch(init);
+  seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(init).catch(init);
 }
 </script>
 </body>
