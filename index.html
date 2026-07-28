@@ -770,6 +770,31 @@
   }
   .emo-head-right .bias-seg button.on-bull { color: #fff; background: var(--green); }
   .emo-head-right .bias-seg button.on-bear { color: #fff; background: var(--red); }
+
+  /* ===== Eğitim (Alfa Edu) ===== */
+  .eg-brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 6px 2px 2px; }
+  .eg-brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, #5b5bd6, #7c5cf0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .eg-brand-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; }
+  .eg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 18px; margin-top: 4px; }
+  @media (max-width: 640px) { .eg-grid { grid-template-columns: 1fr; } }
+  .eg-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--card); box-shadow: var(--shadow); display: flex; flex-direction: column; }
+  .eg-embed { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0d0f16; }
+  .eg-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .eg-card-body { padding: 11px 13px 13px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .eg-card-title { font-family: var(--font-display); font-size: 13.5px; font-weight: 600; line-height: 1.35; color: var(--text); word-break: break-word; }
+  .eg-card-link { display: inline-block; margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--acc); text-decoration: none; }
+  .eg-card-link:hover { text-decoration: underline; }
+  .eg-del { flex: none; width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-3); font-size: 15px; line-height: 1; cursor: pointer; transition: all .15s ease; }
+  .eg-del:hover { background: var(--red-soft); color: var(--red); border-color: var(--red-soft); }
+  .eg-notes { width: 100%; min-height: 68px; resize: vertical; background: #f8f9fc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; color: var(--text); }
+  .eg-notes:focus { outline: none; border-color: var(--acc); }
+  .eg-save { font-size: 11px; font-weight: 600; color: var(--green); opacity: 0; transition: opacity .2s ease; text-transform: none; letter-spacing: 0; }
+  .eg-save.show { opacity: 1; }
+  .eg-form { max-width: 520px; margin: 16px auto 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .eg-form input { width: 100%; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px; padding: 10px 11px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text); }
+  .eg-form input:focus { outline: none; border-color: var(--acc); }
+  .eg-form-btns { display: flex; gap: 8px; }
+  .eg-form-err { font-size: 12px; color: var(--red); min-height: 14px; }
 </style>
 </head>
 <body>
@@ -926,6 +951,7 @@
       <button id="tab-defter" class="nav-link on" type="button">Alfa-Check List</button>
       <button id="tab-data" class="nav-link" type="button">Trade Günlüğü</button>
       <button id="tab-review" class="nav-link" type="button">Haftalık Değerlendirme</button>
+      <button id="tab-egitim" class="nav-link" type="button">Alfa Edu</button>
     </div>
     <div class="user-badge hidden" id="user-badge">
       <span class="uname" id="user-name"></span>
@@ -1264,6 +1290,38 @@
           <div id="rv-metrics"></div>
         </div>
       </div>
+    </div>
+  </div>
+  <div id="page-egitim" class="hidden">
+    <div class="eg-brand">
+      <span class="eg-brand-name">Alfa Edu</span>
+      <span class="eg-brand-sub">Düzeye göre video eğitim + kişisel notların</span>
+    </div>
+    <div class="controls">
+      <div class="seg" id="eg-level-seg">
+        <button data-lv="baslangic" class="on-gold" type="button">Başlangıç</button>
+        <button data-lv="orta" type="button">Orta</button>
+        <button data-lv="ileri" type="button">İleri</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="cat-h2"><span id="eg-level-title">Başlangıç Düzey</span><button type="button" class="cat-edit" id="eg-add">+ Video ekle</button></h2>
+      <div class="cat-edit-hint" id="eg-hint">YouTube video bağlantısını yapıştır, altında notlarını tut. Videolar ve notlar hesabına kaydedilir.</div>
+      <div id="eg-videos"></div>
+      <div id="eg-empty" class="data-empty">Bu düzeyde henüz video yok. “+ Video ekle” ile başla.</div>
+    </div>
+    <div class="panel">
+      <h2 class="cat-h2"><span>Notlarım — <span id="eg-notes-lvl">Başlangıç</span></span><span class="eg-save" id="eg-notes-status"></span></h2>
+      <textarea id="eg-notes" class="eg-notes" placeholder="Bu düzeyle ilgili notların, çıkarımların, özetlerin…"></textarea>
+    </div>
+    <div id="eg-add-form" class="eg-form hidden">
+      <input type="text" id="eg-in-title" placeholder="Video başlığı (ör. Order Block nedir?)" maxlength="120">
+      <input type="text" id="eg-in-url" placeholder="YouTube bağlantısı (youtube.com/watch?v=… veya youtu.be/…)">
+      <div class="eg-form-btns">
+        <button class="btn solid" id="eg-in-save" type="button">Ekle</button>
+        <button class="btn" id="eg-in-cancel" type="button">Vazgeç</button>
+      </div>
+      <div class="eg-form-err" id="eg-in-err"></div>
     </div>
   </div>
 </div>
@@ -3432,6 +3490,7 @@ function init() {
   });
   bindDataPage();
   bindReviewPage();
+  bindEgitimPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
   document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
@@ -3461,7 +3520,7 @@ async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)
 
 function showPage(name) {
   currentPage = name;
-  ['defter', 'data', 'review'].forEach(p => {
+  ['defter', 'data', 'review', 'egitim'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
     const tb = document.getElementById('tab-' + p);
@@ -3471,6 +3530,7 @@ function showPage(name) {
   if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   if (name === 'data') renderData();
   if (name === 'review') renderReview();
+  if (name === 'egitim') renderEgitim();
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -3856,6 +3916,137 @@ function bindReviewPage() {
   window.addEventListener('resize', () => { if (currentPage === 'review') updateRRcum(); });
 }
 
+// ============ Eğitim İçeriği ============
+const EGITIM_KEY = 'defter-egitim-v1';
+const EG_LEVELS = { baslangic: 'Başlangıç', orta: 'Orta', ileri: 'İleri' };
+let egitimData = { videos: { baslangic: [], orta: [], ileri: [] }, notes: { baslangic: '', orta: '', ileri: '' } };
+let egLevel = 'baslangic';
+let egSaveTimer = null;
+
+async function loadEgitim() {
+  try {
+    const raw = await store.get(EGITIM_KEY);
+    if (raw) egitimData = JSON.parse(raw);
+  } catch (e) { /* boş başla */ }
+  if (!egitimData || typeof egitimData !== 'object') egitimData = {};
+  if (!egitimData.videos || typeof egitimData.videos !== 'object') egitimData.videos = {};
+  if (!egitimData.notes || typeof egitimData.notes !== 'object') egitimData.notes = {};
+  Object.keys(EG_LEVELS).forEach(lv => {
+    if (!Array.isArray(egitimData.videos[lv])) egitimData.videos[lv] = [];
+    if (typeof egitimData.notes[lv] !== 'string') egitimData.notes[lv] = '';
+  });
+}
+async function saveEgitim() { await store.set(EGITIM_KEY, JSON.stringify(egitimData)); }
+
+// YouTube bağlantısından video kimliğini çıkarır (watch, youtu.be, embed, shorts).
+function ytId(url) {
+  if (!url) return '';
+  const s = String(url).trim();
+  const patterns = [
+    /(?:youtube\.com\/watch\?(?:.*&)?v=)([\w-]{11})/,
+    /(?:youtu\.be\/)([\w-]{11})/,
+    /(?:youtube\.com\/embed\/)([\w-]{11})/,
+    /(?:youtube\.com\/shorts\/)([\w-]{11})/,
+    /(?:youtube\.com\/live\/)([\w-]{11})/,
+  ];
+  for (const re of patterns) { const m = s.match(re); if (m) return m[1]; }
+  if (/^[\w-]{11}$/.test(s)) return s; // düz kimlik yapıştırıldıysa
+  return '';
+}
+
+function renderEgitim() {
+  const list = egitimData.videos[egLevel] || [];
+  document.getElementById('eg-level-title').textContent = EG_LEVELS[egLevel] + ' Düzey';
+  document.getElementById('eg-notes-lvl').textContent = EG_LEVELS[egLevel];
+  // seg aktif durumu
+  document.querySelectorAll('#eg-level-seg button').forEach(b => {
+    b.classList.toggle('on-gold', b.getAttribute('data-lv') === egLevel);
+  });
+  // videolar
+  const wrap = document.getElementById('eg-videos');
+  wrap.innerHTML = '';
+  const grid = document.createElement('div'); grid.className = 'eg-grid';
+  list.forEach(v => {
+    const id = ytId(v.url);
+    const card = document.createElement('div'); card.className = 'eg-card';
+    const embed = document.createElement('div'); embed.className = 'eg-embed';
+    if (id) {
+      const ifr = document.createElement('iframe');
+      ifr.src = 'https://www.youtube-nocookie.com/embed/' + id;
+      ifr.title = v.title || 'video';
+      ifr.loading = 'lazy';
+      ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      ifr.setAttribute('allowfullscreen', '');
+      embed.appendChild(ifr);
+    }
+    card.appendChild(embed);
+    const body = document.createElement('div'); body.className = 'eg-card-body';
+    const info = document.createElement('div');
+    const title = document.createElement('div'); title.className = 'eg-card-title';
+    title.textContent = v.title || '(başlıksız video)';
+    info.appendChild(title);
+    const link = document.createElement('a'); link.className = 'eg-card-link';
+    link.href = id ? ('https://www.youtube.com/watch?v=' + id) : v.url;
+    link.target = '_blank'; link.rel = 'noopener noreferrer';
+    link.textContent = id ? "YouTube'da aç ↗" : 'Bağlantı geçersiz';
+    info.appendChild(link);
+    body.appendChild(info);
+    const del = document.createElement('button'); del.className = 'eg-del'; del.type = 'button';
+    del.textContent = '×'; del.title = 'Videoyu sil';
+    del.addEventListener('click', async () => {
+      if (!confirm('Bu videoyu silmek istediğine emin misin?')) return;
+      egitimData.videos[egLevel] = egitimData.videos[egLevel].filter(x => x.id !== v.id);
+      await saveEgitim(); renderEgitim();
+    });
+    body.appendChild(del);
+    card.appendChild(body);
+    grid.appendChild(card);
+  });
+  wrap.appendChild(grid);
+  document.getElementById('eg-empty').style.display = list.length ? 'none' : 'block';
+  // notlar
+  const ta = document.getElementById('eg-notes');
+  ta.value = egitimData.notes[egLevel] || '';
+}
+
+function egFlashSaved() {
+  const s = document.getElementById('eg-notes-status');
+  if (!s) return;
+  s.textContent = 'kaydedildi ✓'; s.classList.add('show');
+  clearTimeout(egFlashSaved._t);
+  egFlashSaved._t = setTimeout(() => s.classList.remove('show'), 1400);
+}
+
+function bindEgitimPage() {
+  const g = id => document.getElementById(id);
+  g('tab-egitim').addEventListener('click', () => showPage('egitim'));
+  document.querySelectorAll('#eg-level-seg button').forEach(b => {
+    b.addEventListener('click', () => { egLevel = b.getAttribute('data-lv'); renderEgitim(); });
+  });
+  // video ekleme formu
+  const form = g('eg-add-form');
+  const showForm = show => {
+    form.classList.toggle('hidden', !show);
+    if (show) { g('eg-in-title').value = ''; g('eg-in-url').value = ''; g('eg-in-err').textContent = ''; g('eg-in-title').focus(); }
+  };
+  g('eg-add').addEventListener('click', () => showForm(form.classList.contains('hidden')));
+  g('eg-in-cancel').addEventListener('click', () => showForm(false));
+  g('eg-in-save').addEventListener('click', async () => {
+    const title = g('eg-in-title').value.trim();
+    const url = g('eg-in-url').value.trim();
+    if (!ytId(url)) { g('eg-in-err').textContent = 'Geçerli bir YouTube bağlantısı gir.'; return; }
+    egitimData.videos[egLevel].push({ id: rid(), title: title || 'Video', url: url });
+    await saveEgitim(); showForm(false); renderEgitim();
+  });
+  g('eg-in-url').addEventListener('keydown', e => { if (e.key === 'Enter') g('eg-in-save').click(); });
+  // notlar — yazdıkça kaydet (debounce)
+  g('eg-notes').addEventListener('input', e => {
+    egitimData.notes[egLevel] = e.target.value;
+    clearTimeout(egSaveTimer);
+    egSaveTimer = setTimeout(async () => { await saveEgitim(); egFlashSaved(); }, 600);
+  });
+}
+
 // ============ Açılış + Giriş/Kayıt akışı ============
 let APP_BOOTED = false;
 async function bootApp(opts) {
@@ -3865,6 +4056,7 @@ async function bootApp(opts) {
   try { await loadConfig(); } catch (e) { /* devam */ }
   try { await loadData(); } catch (e) { /* devam */ }
   try { await loadReviews(); } catch (e) { /* devam */ }
+  try { await loadEgitim(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
 }
 
@@ -3877,7 +4069,7 @@ function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
   try {
     Object.keys(localStorage).forEach(k => {
-      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k.indexOf(DAILY_PREFIX) === 0);
+      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k.indexOf(DAILY_PREFIX) === 0);
       if (keep && !(k in AUTH.cloud)) AUTH.cloud[k] = localStorage.getItem(k);
     });
   } catch (e) { /* erişilemedi */ }
@@ -4031,7 +4223,7 @@ if (AUTH_ENABLED) {
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
-  seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(init).catch(init);
+  seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(loadEgitim).then(init).catch(init);
 }
 </script>
 </body>
