@@ -101,6 +101,88 @@
     font-weight: 600; font-size: 11.5px; color: var(--acc);
     background: var(--acc-soft); border-radius: 999px; padding: 2px 9px; letter-spacing: 0;
   }
+  /* Kategori başlığı — satır içi düzenle */
+  .cat-h2 { justify-content: flex-start !important; gap: 8px; align-items: center !important; }
+  .cat-edit {
+    margin-left: auto; background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    padding: 4px 10px; font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.04em; color: var(--text-2); cursor: pointer; text-transform: none;
+  }
+  .cat-edit:hover { border-color: var(--acc); color: var(--acc); }
+  .cat-edit.on { background: var(--acc); border-color: var(--acc); color: #fff; }
+  .cat-edit-hint { font-size: 11px; color: var(--text-3); margin-bottom: 8px; line-height: 1.4; }
+  .crit-edit { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .ce-name {
+    flex: 1; min-width: 0; background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+  }
+  .ce-pt {
+    width: 56px; flex: 0 0 auto; background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 6px; font-family: 'Inter', sans-serif; font-size: 13px; text-align: center; color: var(--text);
+  }
+  .ce-name:focus, .ce-pt:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .ce-del {
+    width: 32px; height: 35px; flex: 0 0 auto; background: var(--red-soft); border: none; border-radius: 8px;
+    color: var(--red); font-size: 19px; line-height: 1; cursor: pointer;
+  }
+  .ce-del:hover { background: #fbdcdc; }
+  .ce-add {
+    margin-top: 4px; width: 100%; background: var(--acc-soft); border: 1px dashed var(--acc); border-radius: 9px;
+    padding: 9px; color: var(--acc); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .ce-add:hover { background: #e6e6fb; }
+  /* --- Navbar --- */
+  .navbar { display: flex; align-items: center; gap: 20px; padding: 16px 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-brand .logo-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--acc); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .nav-brand span { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { background: transparent; border: none; padding: 9px 15px; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-2); cursor: pointer; transition: all .12s ease; }
+  .nav-link:hover { background: var(--acc-soft); color: var(--acc); }
+  .nav-link.on { background: var(--acc); color: #fff; }
+  .navbar .user-badge { margin-left: auto; }
+  /* --- Trade Günlüğü pano düzeni --- */
+  .data-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 900px) {
+    .data-grid { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; }
+    .data-side { position: sticky; top: 16px; }
+  }
+  /* --- Data Takibi --- */
+  .data-kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; }
+  @media (min-width: 720px) { .data-kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+  .kpi .k-lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+  .kpi .k-val { font-size: 23px; font-weight: 700; margin-top: 4px; }
+  .kpi .k-val.pos { color: var(--green); }
+  .kpi .k-val.neg { color: var(--red); }
+  .kpi .k-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+  #data-chart-wrap { width: 100%; overflow: hidden; }
+  #data-chart { width: 100%; display: block; }
+  .data-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 26px 10px; }
+  .data-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (min-width: 720px) { .data-form { grid-template-columns: repeat(4, 1fr); } }
+  .data-form input { width: 100%; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text); }
+  .data-form input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .df-full { grid-column: 1 / -1; }
+  .df-seg { display: flex; gap: 4px; background: #f2f3f8; padding: 4px; border-radius: 9px; }
+  .df-seg button { flex: 1; border: none; background: transparent; border-radius: 6px; padding: 7px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--text-2); cursor: pointer; }
+  .df-seg button.on { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .df-seg button.long.on { color: var(--green); }
+  .df-seg button.short.on { color: var(--red); }
+  .data-row { display: grid; grid-template-columns: 56px 1fr 52px 58px 62px 30px; gap: 8px; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .data-row.head { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1.5px solid var(--border); }
+  .dr-pair { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dr-dir { font-size: 11px; font-weight: 700; }
+  .dr-dir.long { color: var(--green); }
+  .dr-dir.short { color: var(--red); }
+  .dr-r { text-align: right; font-weight: 700; }
+  .dr-r.pos { color: var(--green); }
+  .dr-r.neg { color: var(--red); }
+  .dr-cum { text-align: right; color: var(--text-2); }
+  .dr-del { background: var(--red-soft); border: none; border-radius: 7px; color: var(--red); font-size: 16px; line-height: 1; padding: 4px 0; cursor: pointer; }
+  .dr-del:hover { background: #fbdcdc; }
+  .cat-edit.danger-edit { color: var(--red); border-color: var(--red-soft); }
+  .cat-edit.danger-edit:hover { background: var(--red-soft); border-color: var(--red); color: var(--red); }
 
   #list-veri, #list-teknik, #list-pozisyon, #list-duygu {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
@@ -785,21 +867,21 @@
   </div>
 </div>
 <div class="wrap">
-  <div class="tophead">
-    <div class="tophead-inner">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="logo-mark">A</div>
-        <div>
-          <h1>Alfa Traders</h1>
-          <div class="sub">Trader'lar için Disiplin Aracı</div>
-        </div>
-      </div>
-      <div class="user-badge hidden" id="user-badge">
-        <span class="uname" id="user-name"></span>
-        <button class="logout" id="btn-logout">Çıkış</button>
-      </div>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="logo-mark">A</div>
+      <span>Alfa Traders</span>
     </div>
-  </div>
+    <div class="nav-links">
+      <button id="tab-defter" class="nav-link on" type="button">Alfa-Check List</button>
+      <button id="tab-data" class="nav-link" type="button">Trade Günlüğü</button>
+    </div>
+    <div class="user-badge hidden" id="user-badge">
+      <span class="uname" id="user-name"></span>
+      <button class="logout" id="btn-logout">Çıkış</button>
+    </div>
+  </nav>
+  <div id="page-defter">
   <div class="controls">
     <div class="seg" id="pair-seg"></div>
     <div class="seg">
@@ -816,7 +898,7 @@
   <div class="emo-band" id="emo-band">
     <div class="panel">
       <div class="emo-head">
-        <h2 style="margin:0;"><span>Duygusal Durum</span><span class="n" id="n-duygu"></span></h2>
+        <h2 class="cat-h2" style="margin:0;"><span>Duygusal Durum</span><span class="n" id="n-duygu"></span><button type="button" class="cat-edit" id="catedit-duygu">✎ Düzenle</button></h2>
         <div class="emo-head-right">
           <input type="date" id="d-date" aria-label="Tarih">
           <div class="bias-seg" role="tablist" aria-label="HTF Bias">
@@ -880,11 +962,11 @@
 
     <div class="col-l">
       <div class="panel" style="margin-bottom:12px;">
-        <h2><span>Veri Kriterleri</span><span class="n" id="n-veri"></span></h2>
+        <h2 class="cat-h2"><span>Veri Kriterleri</span><span class="n" id="n-veri"></span><button type="button" class="cat-edit" id="catedit-veri">✎ Düzenle</button></h2>
         <div id="list-veri"></div>
       </div>
       <div class="panel" style="margin-bottom:12px;">
-        <h2><span>Teknik Kriterler</span><span class="n" id="n-teknik"></span></h2>
+        <h2 class="cat-h2"><span>Teknik Kriterler</span><span class="n" id="n-teknik"></span><button type="button" class="cat-edit" id="catedit-teknik">✎ Düzenle</button></h2>
         <div id="list-teknik"></div>
         <div class="plan-inline">
           <div class="fbox">
@@ -894,7 +976,7 @@
         </div>
       </div>
       <div class="panel">
-        <h2><span>Pozisyon Yönetimi</span><span class="n" id="n-pozisyon"></span></h2>
+        <h2 class="cat-h2"><span>Pozisyon Yönetimi</span><span class="n" id="n-pozisyon"></span><button type="button" class="cat-edit" id="catedit-pozisyon">✎ Düzenle</button></h2>
         <div id="list-pozisyon"></div>
         <div class="plan-inline">
           <div class="fbox">
@@ -1050,12 +1132,59 @@
       <div id="save-note"></div>
     </div>
   </div>
+  </div><!-- /page-defter -->
+
+  <div id="page-data" class="hidden">
+    <div class="data-kpis" id="data-kpis"></div>
+    <div class="data-grid">
+      <div class="data-main">
+        <div class="panel" style="margin-bottom:14px;">
+          <h2><span>İşlem Ekle</span></h2>
+          <div class="data-form">
+            <input type="date" id="df-date" aria-label="Tarih">
+            <input type="text" id="df-pair" placeholder="Parite (BTC, XAU…)" maxlength="12">
+            <div class="df-seg">
+              <button type="button" class="long on" id="df-long">LONG</button>
+              <button type="button" class="short" id="df-short">SHORT</button>
+            </div>
+            <input type="number" step="0.01" id="df-r" placeholder="R (ör. 1.5 / -1)">
+            <input type="number" step="0.01" id="df-pnl" placeholder="PnL $ (ops.)">
+            <input type="text" id="df-strat" placeholder="Strateji (ops.)">
+            <input type="text" id="df-note" class="df-full" placeholder="Not (opsiyonel)">
+            <button class="btn solid df-full" id="df-add">Ekle</button>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:14px;">
+          <h2><span>İçe Aktar</span></h2>
+          <div class="actions" style="justify-content:flex-start;">
+            <button class="btn" id="data-import-defter">Check List işlemlerini aktar</button>
+            <button class="btn solid" id="data-notion">⬇ Notion'dan çek</button>
+            <button class="btn" id="data-csv-btn">CSV yükle (broker/MetaTrader)</button>
+            <input type="file" id="data-csv-file" accept=".csv,text/csv" style="display:none;">
+          </div>
+          <p class="hint">Alfa-Check List'te kaydettiğin işlemler R sonuçlarıyla buraya gelir. CSV: broker/MetaTrader geçmişini dışa aktar (date, symbol, type, profit sütunları) ve yükle.</p>
+          <div id="data-note" class="hint"></div>
+        </div>
+        <div class="panel">
+          <h2 class="cat-h2"><span>Tüm İşlemler</span><span class="n" id="data-count"></span><button type="button" class="cat-edit danger-edit" id="data-clear">Tümünü temizle</button></h2>
+          <div id="data-table"></div>
+        </div>
+      </div>
+      <div class="data-side">
+        <div class="panel">
+          <h2><span>Kümülatif PnL (R)</span><span class="n" id="data-eq-total"></span></h2>
+          <div id="data-chart-wrap"><canvas id="data-chart"></canvas></div>
+          <div class="data-empty" id="data-empty">Henüz veri yok. Soldan işlem ekle, Check List'ten aktar ya da CSV yükle.</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 const STORAGE_KEY = 'konfirmasyon-defteri-v3';
 // 12–17 Temmuz arası artifact verisinin gömülü yedeği — yalnızca depo boşsa yüklenir
-const SEED = {"exported": "2026-07-18T13:07:40.649Z", "config": {"pairs": {"BTC": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}, "XAU": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}}, "strategies": ["Breaker", "Breaker Traps", "LHPB", "Monday Manipulation", "Asia Range", "IFVG", "0.382", "Friday Manipulation"], "matrix": {"Paz": {"London": "B", "NY": "B"}, "Pzt": {"London": "A+", "NY": "B"}, "Sal": {"London": "A+", "NY": "A+"}, "Çar": {"London": "A+", "NY": "A+"}, "Per": {"London": "A+", "NY": "A+"}, "Cum": {"London": "A+", "NY": "A+"}, "Cmt": {"London": "A+", "NY": "A+"}}, "migr2": true, "migr3": true, "migr4": true}, "trades": [{"id": 1785138660000, "date": "22/07", "time": "19:51", "pair": "BTC", "dir": "LONG", "score": 100, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "İşlem trend yönünde", "p": 10}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Çar", "sess": "NY", "cell": "A+", "cap": false, "strat": "0.382", "sent": "SHORT", "r": "-1"}, {"id": 1784305032899, "date": "17/07", "time": "19:17", "pair": "BTC", "dir": "SHORT", "score": 75, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Key levelda", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Cum", "sess": "NY", "cell": "A+", "cap": false, "strat": "Friday Manipulation", "r": "-1"}, {"id": 1784227494999, "date": "16/07", "time": "21:44", "pair": "BTC", "dir": "SHORT", "score": 87, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["İşlem trend yönünde", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Per", "sess": "NY", "cell": "A+", "cap": false, "strat": "Breaker", "r": ""}, {"id": 1784016989916, "date": "14/07", "time": "11:16", "pair": "BTC", "dir": "SHORT", "score": 65, "verdict": "B", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Key levelda", "p": 10}, {"n": "Planlanmış entry", "p": 31}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Long & Shorts Ratio işlem yönünde", "Bid & Ask Delta işlem yönünde", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Sal", "sess": "London", "cell": "A+", "cap": false, "strat": "Asia Range", "r": "-0.3"}, {"id": 1783955071586, "date": "13/07", "time": "18:04", "pair": "BTC", "dir": "SHORT", "score": 73, "verdict": "B", "crits": [{"n": "Spot CVD düşüyor", "p": 8}, {"n": "Open Interest yüksek / artıyor", "p": 7}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 5}, {"n": "Key levelda", "p": 11}, {"n": "Planlanmış entry", "p": 30}, {"n": "TP/SL paylaşımdan önce girildi", "p": 6}], "miss": ["Spot CVD yükseliyor", "Long & Shorts Ratio aşırı long", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "r": "-0.15", "override": true, "strat": "Sunday Market Structure "}, {"id": 1783882244056, "date": "12/07", "time": "21:50", "pair": "BTC", "dir": "SHORT", "score": 82, "verdict": "B", "crits": ["Spot CVD düşüyor", "Long & Shorts Ratio aşırı long", "Futures CVD işlem yönünde", "Bid & Ask Delta işlem yönünde", "Key levelda", "Manipülasyon gerçekleşti", "Planlanmış entry", "TP/SL paylaşımdan önce girildi"], "r": "1.2", "override": true, "strat": "Monday Morning Manipulation"}], "dailyPlans": {"2026-07-12": {"bias": "BEARISH", "pair": "BTC", "sabah": "abd iranı vurabilir ", "senaryo": "fiyat en azından bi 61k civarına gitmesi gerektiğini düşünüyorum. Eğer fiyat 65k üstüne çıkarsa bozulur", "anti": "şuanda markette hala hacim yok likiditie alımı yapılmış gibi geldi ama aslında gelmedi, orayı bir hacimle manipüle edebilir ve stop olabilirsin.", "setup": "", "gunsonu": "plana uydum tek yaptığım hata 2R da tp girmemekti, işlem tam hedefe giderken ufak bi pips ile geri döndü hala bekliyorum ayrıca iyi yaptığım şey erken entry stop atmamaktı gece açılışıyla fiyat yukarıyı avlamış ve düşmüş. "}, "2026-07-13": {"bias": "BEARISH", "pair": "BTC", "sabah": "iran her an saldırabilir manipülasyon saatleri sabah 13:46", "senaryo": "4h pin bar bıraktık üstünü avladık fiyat aşağı doğru düştü demekki güçsüz görünüyor. \n\n63.5k üstünde kapatırsa bu düşüncem bozulur. ", "anti": "Aşağı düştü shortlayalım diyen early shortçuları avlamak isteyip tekrar 63.250'yi avlayabilirler ny açılışıyla ama neden bunu yapsınlar. ", "setup": "", "gunsonu": "fiyat hedefine ulaştı high avalamadan eğer dar stoplu işlem açsaydım minimum 0.9r poz vardı ama asıl target aşağı açık likidite olduğu için açık HL yaptıktan sonra geri döndü 0.5r'dan poz döndü. Bu arada riskim 0.3r pzt sabah olduğu için riskli zaman dilimi."}, "2026-07-14": {"bias": "BULLISH", "pair": "BTC", "sabah": "15:30'da tüfe var. ", "senaryo": "fiyatın 61.5k civarına düşeceğini düşünüyorum. Yükselecekse bile en azından 62.2k dan yükselmeli (VAL) \n\n\nFiyat 62.9k üstünde saatlik kapanış yaparsa bias bozulur.\n\n\nsaat 16:11 şuan fiyat yukarıyı avladı, hem sr bölgesine geri çekilip daha sonra yukarıdaki likiditeleri avlayabilir veriler beni doğruluyor. \n\nEğer fiyat 62.7k altında 1h kapanışlar yaparsa uza. ", "anti": "fiyat iç yapıda değişim gerçekleştirdi, o sebeple önce monday high alabilir. \n\nsaat:16:18Fiyat haberle yükseldi bu yüzden tam tersi yönlü düşebilir ters bir haberle", "setup": "ya 16:30 dan sonraki harekete göre girersin ya da fiyatın 61.5k sonrası yapacağı harekete bakarsın. \n\n\n16:18Fiyat 63k'daki sr bölgesine geri çekilirse 0.382 işlemini alırsın.", "gunsonu": "işlem 1.78RR verdiği için ve aleyhime ilerlediği için işlemden çıkıp tekrar 2RR olacak şekilde girdim. \n\nHaber geldi fiyat bi anda stop oldu işlemler. "}, "2026-07-16": {"bias": "BEARISH", "pair": "BTC", "sabah": "haber yok fiyat bearish", "senaryo": "fiyat yukarıyı avladı market yapısı değişti hedefler aşağısı \n\nfiyat 65.6k üstü kapatırsa", "anti": "herkes buradan short düşünüyor, range çok bariz trend bullish orderbook seviyeleri var.", "setup": "breaker+range", "gunsonu": "plana uydum genel olarak, sadece 2. işlem intraday alınabilirdi 2R veriyordu riski artırmamak için almadım ama tp oldu."}, "2026-07-17": {"bias": "BEARISH", "pair": "BTC", "sabah": "", "senaryo": "fiyat 63.3k manipüle edip altında kapanışlar yaparsa cuma 18:00'dan sonra shortla. ", "anti": "fiyatta hacim artıyor, çoğu kişi shortta range için fiyatı yükseltebilirler. ", "setup": "cuma akşamı 18:00 civarı manipülasyonu tradele.", "gunsonu": "evet manipülasyonu bekledim ve ifvg ile işleme dahil oldum ama stop oldum."}, "2026-07-22": {"bias": "BULLISH", "pair": "BTC", "sabah": "Olumlu bir haber gelebilir", "senaryo": "Fiyat eğer 65.7k civarı 2 adet kötü mum atarsa düşebilir", "anti": "Impulsive entry almak isteyen beni ve htf ciddi bir direnç noktasında olduğu için efloud beni stoplayabilir", "setup": "Breaker / 0.382", "gunsonu": ""}}};
+const SEED = {"exported": "2026-07-18T13:07:40.649Z", "config": {"pairs": {"BTC": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}, "XAU": {"thresholds": {"aplus": 70, "b": 50}, "criteria": [{"name": "Spot CVD işlem yönünde", "cat": "veri", "l": 8, "s": 8}, {"name": "Open Interest işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Long & Shorts Ratio işlem yönünde", "cat": "veri", "l": 5, "s": 5}, {"name": "Futures CVD işlem yönünde", "cat": "veri", "l": 6, "s": 6}, {"name": "Bid & Ask Delta işlem yönünde", "cat": "veri", "l": 4, "s": 4}, {"name": "Orderbook kümelenmesi destekliyor", "cat": "veri", "l": 2, "s": 2}, {"name": "İşlem trend yönünde", "cat": "teknik", "l": 10, "s": 10}, {"name": "Key levelda", "cat": "teknik", "l": 10, "s": 10}, {"name": "Manipülasyon gerçekleşti", "cat": "teknik", "l": 8, "s": 8}, {"name": "Bias flip", "cat": "teknik", "l": 3, "s": 3}, {"name": "Planlanmış entry", "cat": "pozisyon", "l": 31, "s": 31}, {"name": "16:30 sonrası", "cat": "pozisyon", "l": 3, "s": 3}, {"name": "TP/SL paylaşımdan önce girildi", "cat": "pozisyon", "l": 4, "s": 4}, {"name": "Uykusuz / yorgunum", "cat": "duygu", "l": -8, "s": -8}, {"name": "Stresliyim (trade dışı kaynak)", "cat": "duygu", "l": -6, "s": -6}, {"name": "Aşırı yoğun / bölünmüş dikkat", "cat": "duygu", "l": -6, "s": -6}, {"name": "Az önce stop oldum — revenge penceresi", "cat": "duygu", "l": -12, "s": -12}, {"name": "FOMO — hareket kaçıyor hissi", "cat": "duygu", "l": -12, "s": -12}, {"name": "PnL paylaştım / coşku halindeyim", "cat": "duygu", "l": -8, "s": -8}]}}, "strategies": ["Breaker", "Breaker Traps", "LHPB", "Monday Manipulation", "Asia Range", "IFVG", "0.382", "Friday Manipulation"], "matrix": {"Paz": {"London": "B", "NY": "B"}, "Pzt": {"London": "A+", "NY": "B"}, "Sal": {"London": "A+", "NY": "A+"}, "Çar": {"London": "A+", "NY": "A+"}, "Per": {"London": "A+", "NY": "A+"}, "Cum": {"London": "A+", "NY": "A+"}, "Cmt": {"London": "A+", "NY": "A+"}}, "migr2": true, "migr3": true, "migr4": true}, "trades": [{"id":1785301800000,"date":"28/07","time":"21:30","pair":"BTC","dir":"LONG","score":0,"verdict":"A+","crits":[],"miss":[],"mood":0,"day":"Sal","sess":"London","cell":"","cap":false,"strat":"Monday Manipulation","sent":"","r":"0","override":true}, {"id":1785204240000,"date":"27/07","time":"14:04","pair":"BTC","dir":"LONG","score":86,"verdict":"B","crits":[{"n":"Spot CVD işlem yönünde","p":8},{"n":"Open Interest işlem yönünde","p":6},{"n":"Long & Shorts Ratio işlem yönünde","p":5},{"n":"Futures CVD işlem yönünde","p":6},{"n":"Bid & Ask Delta işlem yönünde","p":4},{"n":"Orderbook kümelenmesi destekliyor","p":2},{"n":"İşlem trend yönünde","p":10},{"n":"Key levelda","p":10},{"n":"Planlanmış entry","p":31},{"n":"TP/SL paylaşımdan önce girildi","p":4}],"miss":["Manipülasyon gerçekleşti","Bias flip","16:30 sonrası","Uykusuz / yorgunum","Stresliyim (trade dışı kaynak)","Aşırı yoğun / bölünmüş dikkat","Az önce stop oldum — revenge penceresi","FOMO — hareket kaçıyor hissi","PnL paylaştım / coşku halindeyim"],"mood":0,"day":"Pzt","sess":"London","cell":"B","cap":false,"strat":"IFVG","sent":"","r":"-0.33"}, {"id": 1785138660000, "date": "22/07", "time": "19:51", "pair": "BTC", "dir": "LONG", "score": 100, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "İşlem trend yönünde", "p": 10}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Çar", "sess": "NY", "cell": "A+", "cap": false, "strat": "0.382", "sent": "SHORT", "r": "-1"}, {"id": 1784305032899, "date": "17/07", "time": "19:17", "pair": "BTC", "dir": "SHORT", "score": 75, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Key levelda", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Cum", "sess": "NY", "cell": "A+", "cap": false, "strat": "Friday Manipulation", "r": "-1"}, {"id": 1784227494999, "date": "16/07", "time": "21:44", "pair": "BTC", "dir": "SHORT", "score": 87, "verdict": "A+", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Long & Shorts Ratio işlem yönünde", "p": 5}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 4}, {"n": "Orderbook kümelenmesi destekliyor", "p": 2}, {"n": "Key levelda", "p": 10}, {"n": "Manipülasyon gerçekleşti", "p": 8}, {"n": "Planlanmış entry", "p": 31}, {"n": "16:30 sonrası", "p": 3}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["İşlem trend yönünde", "Bias flip", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Per", "sess": "NY", "cell": "A+", "cap": false, "strat": "Breaker", "r": ""}, {"id": 1784016989916, "date": "14/07", "time": "11:16", "pair": "BTC", "dir": "SHORT", "score": 65, "verdict": "B", "crits": [{"n": "Spot CVD işlem yönünde", "p": 8}, {"n": "Open Interest işlem yönünde", "p": 6}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Key levelda", "p": 10}, {"n": "Planlanmış entry", "p": 31}, {"n": "TP/SL paylaşımdan önce girildi", "p": 4}], "miss": ["Long & Shorts Ratio işlem yönünde", "Bid & Ask Delta işlem yönünde", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "mood": 0, "day": "Sal", "sess": "London", "cell": "A+", "cap": false, "strat": "Asia Range", "r": "-0.3"}, {"id": 1783955071586, "date": "13/07", "time": "18:04", "pair": "BTC", "dir": "SHORT", "score": 73, "verdict": "B", "crits": [{"n": "Spot CVD düşüyor", "p": 8}, {"n": "Open Interest yüksek / artıyor", "p": 7}, {"n": "Futures CVD işlem yönünde", "p": 6}, {"n": "Bid & Ask Delta işlem yönünde", "p": 5}, {"n": "Key levelda", "p": 11}, {"n": "Planlanmış entry", "p": 30}, {"n": "TP/SL paylaşımdan önce girildi", "p": 6}], "miss": ["Spot CVD yükseliyor", "Long & Shorts Ratio aşırı long", "Orderbook kümelenmesi destekliyor", "İşlem trend yönünde", "Manipülasyon gerçekleşti", "Bias flip", "16:30 sonrası", "Uykusuz / yorgunum", "Stresliyim (trade dışı kaynak)", "Aşırı yoğun / bölünmüş dikkat", "Az önce stop oldum — revenge penceresi", "FOMO — hareket kaçıyor hissi", "PnL paylaştım / coşku halindeyim"], "r": "-0.15", "override": true, "strat": "Sunday Market Structure "}, {"id": 1783882244056, "date": "12/07", "time": "21:50", "pair": "BTC", "dir": "SHORT", "score": 82, "verdict": "B", "crits": ["Spot CVD düşüyor", "Long & Shorts Ratio aşırı long", "Futures CVD işlem yönünde", "Bid & Ask Delta işlem yönünde", "Key levelda", "Manipülasyon gerçekleşti", "Planlanmış entry", "TP/SL paylaşımdan önce girildi"], "r": "1.2", "override": true, "strat": "Monday Morning Manipulation"}], "dailyPlans": {"2026-07-27":{"bias":"BULLISH","pair":"BTC","sabah":"","senaryo":"fiyatın trend yönlü en azından 65.8k'ya kadar yükseleceğini düşünüyorum.","anti":"fiyat haftayı yükselişle açtı önce late longcuları avlayıp sonra yükseltebilir.","setup":"IFVG","gunsonu":""},"2026-07-28":{"bias":"BULLISH","pair":"BTC","sabah":"","senaryo":"","anti":"","setup":"Monday Manipulation","gunsonu":"saat 21:30 civarında hala yükselemeyen fiyat düşer diye işlemi kapattım yarın fiyat düşmüştü."},"2026-07-12": {"bias": "BEARISH", "pair": "BTC", "sabah": "abd iranı vurabilir ", "senaryo": "fiyat en azından bi 61k civarına gitmesi gerektiğini düşünüyorum. Eğer fiyat 65k üstüne çıkarsa bozulur", "anti": "şuanda markette hala hacim yok likiditie alımı yapılmış gibi geldi ama aslında gelmedi, orayı bir hacimle manipüle edebilir ve stop olabilirsin.", "setup": "", "gunsonu": "plana uydum tek yaptığım hata 2R da tp girmemekti, işlem tam hedefe giderken ufak bi pips ile geri döndü hala bekliyorum ayrıca iyi yaptığım şey erken entry stop atmamaktı gece açılışıyla fiyat yukarıyı avlamış ve düşmüş. "}, "2026-07-13": {"bias": "BEARISH", "pair": "BTC", "sabah": "iran her an saldırabilir manipülasyon saatleri sabah 13:46", "senaryo": "4h pin bar bıraktık üstünü avladık fiyat aşağı doğru düştü demekki güçsüz görünüyor. \n\n63.5k üstünde kapatırsa bu düşüncem bozulur. ", "anti": "Aşağı düştü shortlayalım diyen early shortçuları avlamak isteyip tekrar 63.250'yi avlayabilirler ny açılışıyla ama neden bunu yapsınlar. ", "setup": "", "gunsonu": "fiyat hedefine ulaştı high avalamadan eğer dar stoplu işlem açsaydım minimum 0.9r poz vardı ama asıl target aşağı açık likidite olduğu için açık HL yaptıktan sonra geri döndü 0.5r'dan poz döndü. Bu arada riskim 0.3r pzt sabah olduğu için riskli zaman dilimi."}, "2026-07-14": {"bias": "BULLISH", "pair": "BTC", "sabah": "15:30'da tüfe var. ", "senaryo": "fiyatın 61.5k civarına düşeceğini düşünüyorum. Yükselecekse bile en azından 62.2k dan yükselmeli (VAL) \n\n\nFiyat 62.9k üstünde saatlik kapanış yaparsa bias bozulur.\n\n\nsaat 16:11 şuan fiyat yukarıyı avladı, hem sr bölgesine geri çekilip daha sonra yukarıdaki likiditeleri avlayabilir veriler beni doğruluyor. \n\nEğer fiyat 62.7k altında 1h kapanışlar yaparsa uza. ", "anti": "fiyat iç yapıda değişim gerçekleştirdi, o sebeple önce monday high alabilir. \n\nsaat:16:18Fiyat haberle yükseldi bu yüzden tam tersi yönlü düşebilir ters bir haberle", "setup": "ya 16:30 dan sonraki harekete göre girersin ya da fiyatın 61.5k sonrası yapacağı harekete bakarsın. \n\n\n16:18Fiyat 63k'daki sr bölgesine geri çekilirse 0.382 işlemini alırsın.", "gunsonu": "işlem 1.78RR verdiği için ve aleyhime ilerlediği için işlemden çıkıp tekrar 2RR olacak şekilde girdim. \n\nHaber geldi fiyat bi anda stop oldu işlemler. "}, "2026-07-16": {"bias": "BEARISH", "pair": "BTC", "sabah": "haber yok fiyat bearish", "senaryo": "fiyat yukarıyı avladı market yapısı değişti hedefler aşağısı \n\nfiyat 65.6k üstü kapatırsa", "anti": "herkes buradan short düşünüyor, range çok bariz trend bullish orderbook seviyeleri var.", "setup": "breaker+range", "gunsonu": "plana uydum genel olarak, sadece 2. işlem intraday alınabilirdi 2R veriyordu riski artırmamak için almadım ama tp oldu."}, "2026-07-17": {"bias": "BEARISH", "pair": "BTC", "sabah": "", "senaryo": "fiyat 63.3k manipüle edip altında kapanışlar yaparsa cuma 18:00'dan sonra shortla. ", "anti": "fiyatta hacim artıyor, çoğu kişi shortta range için fiyatı yükseltebilirler. ", "setup": "cuma akşamı 18:00 civarı manipülasyonu tradele.", "gunsonu": "evet manipülasyonu bekledim ve ifvg ile işleme dahil oldum ama stop oldum."}, "2026-07-22": {"bias": "BULLISH", "pair": "BTC", "sabah": "Olumlu bir haber gelebilir", "senaryo": "Fiyat eğer 65.7k civarı 2 adet kötü mum atarsa düşebilir", "anti": "Impulsive entry almak isteyen beni ve htf ciddi bir direnç noktasında olduğu için efloud beni stoplayabilir", "setup": "Breaker / 0.382", "gunsonu": ""}}};
 const CATS = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duygu' };
 
 // ============ Kimlik + Bulut Yapılandırması (Supabase) ============
@@ -1803,6 +1932,68 @@ function emoShort(name) {
   return w.length > 12 ? w.slice(0, 12) : w;
 }
 
+// ---- Satır içi kategori düzenleyici ----
+let editCat = null;
+function updateCatEditBtns() {
+  ['veri', 'teknik', 'pozisyon', 'duygu'].forEach(cat => {
+    const btn = document.getElementById('catedit-' + cat);
+    if (!btn) return;
+    const on = editCat === cat;
+    btn.textContent = on ? '✓ Bitti' : '✎ Düzenle';
+    btn.classList.toggle('on', on);
+  });
+}
+function toggleCatEdit(cat) {
+  const wasOpen = editCat;
+  if (wasOpen) {
+    // Açık düzenlemeyi kapat: boş isimli kriterleri at + kaydet
+    cfg().criteria = cfg().criteria.filter(c => c.name.trim() !== '');
+    saveConfig();
+  }
+  editCat = (wasOpen === cat) ? null : cat;
+  checked = new Set();
+  renderCriteria(); render();
+}
+function renderCatEditor(cat, box) {
+  box.innerHTML = '';
+  const hint = document.createElement('div');
+  hint.className = 'cat-edit-hint';
+  hint.textContent = 'Adı yaz · sağdaki kutu = puan (önem) · × ile sil · en altta yeni ekle. Değişiklikler hesabına kaydolur.';
+  box.appendChild(hint);
+  cfg().criteria.forEach(c => {
+    if (c.cat !== cat) return;
+    const row = document.createElement('div');
+    row.className = 'crit-edit';
+    const name = document.createElement('input');
+    name.type = 'text'; name.className = 'ce-name'; name.value = c.name; name.placeholder = 'Kriter adı';
+    name.addEventListener('input', () => { c.name = name.value; });
+    name.addEventListener('change', saveConfig);
+    const pt = document.createElement('input');
+    pt.type = 'number'; pt.className = 'ce-pt'; pt.step = '1'; pt.title = 'Puan'; pt.value = c.l;
+    pt.addEventListener('input', () => { const v = Number(pt.value) || 0; c.l = v; c.s = v; render(); });
+    pt.addEventListener('change', saveConfig);
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'ce-del'; del.textContent = '×'; del.title = 'Sil';
+    del.addEventListener('click', () => {
+      const idx = cfg().criteria.indexOf(c);
+      if (idx > -1) cfg().criteria.splice(idx, 1);
+      checked = new Set();
+      saveConfig(); renderCriteria(); render();
+    });
+    row.appendChild(name); row.appendChild(pt); row.appendChild(del);
+    box.appendChild(row);
+  });
+  const add = document.createElement('button');
+  add.type = 'button'; add.className = 'ce-add'; add.textContent = '+ Kriter ekle';
+  add.addEventListener('click', () => {
+    cfg().criteria.push({ name: '', cat, l: 5, s: 5 });
+    renderCriteria();
+    const inputs = box.querySelectorAll('.ce-name');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+  box.appendChild(add);
+}
+
 function renderCriteria() {
   const lists = { veri: [], teknik: [], pozisyon: [], duygu: [] };
   cfg().criteria.forEach((c, i) => {
@@ -1812,6 +2003,11 @@ function renderCriteria() {
   Object.keys(lists).forEach(cat => {
     const box = document.getElementById('list-' + cat);
     box.innerHTML = '';
+    if (editCat === cat) {
+      renderCatEditor(cat, box);
+      const nb = document.getElementById('n-' + cat); if (nb) nb.textContent = '';
+      return;
+    }
     let n = 0;
     if (cat === 'duygu') {
       lists.duygu.forEach(([c, i]) => {
@@ -1853,6 +2049,7 @@ function renderCriteria() {
     document.getElementById('n-' + cat).textContent =
       lists[cat].length === 0 ? '—' : n + '/' + lists[cat].length;
   });
+  updateCatEditBtns();
 }
 
 function startDrag(e, row) {
@@ -3142,6 +3339,11 @@ function init() {
     checked = new Set();
     renderEditor(); renderCriteria(); render(); saveConfig();
   });
+  ['veri', 'teknik', 'pozisyon', 'duygu'].forEach(cat => {
+    const btn = document.getElementById('catedit-' + cat);
+    if (btn) btn.addEventListener('click', () => toggleCatEdit(cat));
+  });
+  bindDataPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
   document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
@@ -3155,6 +3357,234 @@ function init() {
   });
   renderCriteria(); render();
 }
+// ============ Data Takibi ============
+const DATA_KEY = 'defter-data-v1';
+let dataTrades = [];
+let dfDir = 'LONG';
+let currentPage = 'defter';
+function dnum(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+async function loadData() {
+  try { const raw = await store.get(DATA_KEY); dataTrades = raw ? JSON.parse(raw) : []; }
+  catch (e) { dataTrades = []; }
+  if (!Array.isArray(dataTrades)) dataTrades = [];
+}
+async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
+
+function showPage(name) {
+  currentPage = name;
+  document.getElementById('page-defter').classList.toggle('hidden', name !== 'defter');
+  document.getElementById('page-data').classList.toggle('hidden', name !== 'data');
+  document.getElementById('tab-defter').classList.toggle('on', name === 'defter');
+  document.getElementById('tab-data').classList.toggle('on', name === 'data');
+  if (name === 'data') renderData();
+}
+
+function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
+
+function renderData() {
+  const rows = sortedData();
+  const n = rows.length;
+  const totR = rows.reduce((s, t) => s + dnum(t.r), 0);
+  const totP = rows.reduce((s, t) => s + dnum(t.pnl), 0);
+  const wins = rows.filter(t => dnum(t.r) > 0).length;
+  const wr = n ? Math.round(wins / n * 100) : 0;
+  const avg = n ? totR / n : 0;
+  const hasMoney = rows.some(t => t.pnl !== null && t.pnl !== undefined && t.pnl !== '');
+  const kpis = document.getElementById('data-kpis');
+  kpis.innerHTML = '';
+  const addK = (lbl, val, cls, sub) => {
+    const d = document.createElement('div'); d.className = 'kpi';
+    d.innerHTML = '<div class="k-lbl">' + lbl + '</div><div class="k-val ' + (cls || '') + '">' + val + '</div>' + (sub ? '<div class="k-sub">' + sub + '</div>' : '');
+    kpis.appendChild(d);
+  };
+  addK('Toplam işlem', n, '', wins + ' kazanan');
+  addK('Toplam R', (totR > 0 ? '+' : '') + totR.toFixed(2), totR >= 0 ? 'pos' : 'neg', hasMoney ? ('PnL: ' + (totP > 0 ? '+' : '') + totP.toFixed(0) + '$') : '');
+  addK('Win rate', wr + '%', '', wins + '/' + n);
+  addK('Ortalama R', (avg > 0 ? '+' : '') + avg.toFixed(2), avg >= 0 ? 'pos' : 'neg', 'işlem başına');
+  document.getElementById('data-eq-total').textContent = n ? ((totR > 0 ? '+' : '') + totR.toFixed(2) + ' R') : '';
+  document.getElementById('data-empty').style.display = n ? 'none' : 'block';
+  drawEquity(rows);
+
+  const tb = document.getElementById('data-table');
+  tb.innerHTML = '';
+  const head = document.createElement('div'); head.className = 'data-row head';
+  head.innerHTML = '<span>Tarih</span><span>Parite</span><span>Yön</span><span style="text-align:right;">R</span><span style="text-align:right;">Kümül.</span><span></span>';
+  tb.appendChild(head);
+  let cum = 0;
+  const withCum = rows.map(t => { cum += dnum(t.r); return Object.assign({}, t, { _cum: cum }); });
+  withCum.slice().reverse().forEach(t => {
+    const r = dnum(t.r);
+    const row = document.createElement('div'); row.className = 'data-row';
+    row.innerHTML =
+      '<span>' + (t.date || '') + '</span>' +
+      '<span class="dr-pair" title="' + (t.strat || '') + (t.note ? ' · ' + t.note : '') + '">' + (t.pair || '—') + '</span>' +
+      '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '">' + (t.dir || '') + '</span>' +
+      '<span class="dr-r ' + (r >= 0 ? 'pos' : 'neg') + '">' + (r > 0 ? '+' : '') + r.toFixed(2) + '</span>' +
+      '<span class="dr-cum">' + (t._cum > 0 ? '+' : '') + t._cum.toFixed(2) + '</span>';
+    const del = document.createElement('button'); del.className = 'dr-del'; del.type = 'button'; del.textContent = '×';
+    del.addEventListener('click', async () => { dataTrades = dataTrades.filter(x => x.id !== t.id); await saveData(); renderData(); });
+    row.appendChild(del);
+    tb.appendChild(row);
+  });
+  document.getElementById('data-count').textContent = n ? (n + ' işlem') : '';
+}
+
+function drawEquity(rows) {
+  const cv = document.getElementById('data-chart');
+  const wrap = document.getElementById('data-chart-wrap');
+  if (!cv || !wrap) return;
+  const W = wrap.clientWidth || 600, H = 210;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  if (!rows.length) return;
+  let cum = 0; const pts = [0]; rows.forEach(t => { cum += dnum(t.r); pts.push(cum); });
+  const min = Math.min(0, ...pts), max = Math.max(0, ...pts);
+  const pad = 12, range = (max - min) || 1;
+  const x = i => pad + (W - 2 * pad) * (i / (pts.length - 1 || 1));
+  const y = v => (H - pad) - (H - 2 * pad) * ((v - min) / range);
+  ctx.strokeStyle = '#e6e8f0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad, y(0)); ctx.lineTo(W - pad, y(0)); ctx.stroke();
+  const up = pts[pts.length - 1] >= 0;
+  const col = up ? '#16a34a' : '#dc2626';
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, up ? 'rgba(22,163,74,0.20)' : 'rgba(220,38,38,0.20)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.beginPath(); ctx.moveTo(x(0), y(pts[0]));
+  pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+  ctx.lineTo(x(pts.length - 1), y(0)); ctx.lineTo(x(0), y(0)); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.beginPath(); pts.forEach((v, i) => i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v)));
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x(pts.length - 1), y(pts[pts.length - 1]), 3.5, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+}
+
+async function addDataTrade() {
+  const g = id => document.getElementById(id);
+  const dateVal = g('df-date').value;
+  const pair = (g('df-pair').value || '').trim().toUpperCase();
+  const rVal = g('df-r').value;
+  const pnlVal = g('df-pnl').value;
+  if (!pair && rVal === '' && pnlVal === '') { g('data-note') && (document.getElementById('data-note').textContent = ''); return; }
+  const ts = dateVal ? Date.parse(dateVal) : Date.now();
+  const disp = dateVal ? (dateVal.slice(8, 10) + '/' + dateVal.slice(5, 7)) : (() => { const d = new Date(); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); })();
+  dataTrades.push({
+    id: Date.now() + Math.random(), ts, date: disp, pair, dir: dfDir,
+    r: dnum(rVal), pnl: pnlVal === '' ? null : dnum(pnlVal),
+    strat: (g('df-strat').value || '').trim(), note: (g('df-note').value || '').trim()
+  });
+  await saveData();
+  g('df-pair').value = ''; g('df-r').value = ''; g('df-pnl').value = ''; g('df-strat').value = ''; g('df-note').value = '';
+  renderData();
+}
+
+async function importFromDefter() {
+  const note = document.getElementById('data-note');
+  if (!Array.isArray(trades) || !trades.length) { note.textContent = 'Deftere kayıtlı işlem yok.'; return; }
+  const existTs = new Set(dataTrades.map(t => t.ts));
+  let added = 0;
+  trades.forEach(t => {
+    if (existTs.has(t.id)) return;
+    dataTrades.push({ id: Date.now() + Math.random() + added, ts: t.id, date: t.date || '', pair: t.pair || '', dir: t.dir || 'LONG', r: dnum(t.r), pnl: null, strat: t.strat || '', note: '' });
+    added++;
+  });
+  await saveData(); renderData();
+  note.textContent = added ? (added + ' işlem defterden aktarıldı.') : 'Zaten güncel — aktarılacak yeni işlem yok.';
+}
+
+function csvDisp(s) { const d = new Date(Date.parse(s)); if (isNaN(d.getTime())) return String(s).slice(0, 10); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); }
+function importCsv(file) {
+  const note = document.getElementById('data-note');
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const text = String(reader.result || '');
+      const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+      if (lines.length < 2) throw new Error('boş');
+      const delim = ((lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length) ? ';' : (lines[0].indexOf('\t') > -1 ? '\t' : ',');
+      const header = lines[0].split(delim).map(h => h.trim().toLowerCase());
+      const find = (...keys) => header.findIndex(h => keys.some(k => h.indexOf(k) > -1));
+      const iDate = find('date', 'tarih', 'time', 'zaman');
+      const iSym = find('symbol', 'pair', 'parite', 'enstr', 'item');
+      const iType = find('type', 'side', 'yön', 'direction', 'position', 'işlem');
+      const iProfit = find('profit', 'pnl', 'kar', 'kazanç', 'net');
+      const iR = find('rr', 'r multiple', 'risk');
+      let added = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const c = lines[i].split(delim).map(x => x.trim().replace(/^"|"$/g, ''));
+        const rawDate = iDate > -1 ? c[iDate] : '';
+        const ts = rawDate ? (Date.parse(rawDate) || (Date.now() + i)) : (Date.now() + i);
+        const typ = (iType > -1 ? c[iType] : '').toLowerCase();
+        const dir = /sell|short/.test(typ) ? 'SHORT' : 'LONG';
+        const pnl = iProfit > -1 ? dnum((c[iProfit] || '').replace(/[^0-9.\-,]/g, '').replace(',', '.')) : null;
+        const rr = iR > -1 ? dnum(c[iR]) : 0;
+        dataTrades.push({ id: Date.now() + Math.random() + i, ts, date: rawDate ? csvDisp(rawDate) : '', pair: (iSym > -1 ? c[iSym] : '').toUpperCase(), dir, r: rr, pnl, strat: '', note: 'CSV' });
+        added++;
+      }
+      await saveData(); renderData();
+      note.textContent = added + ' satır içe aktarıldı.';
+    } catch (e) {
+      note.textContent = 'CSV okunamadı — sütun başlıkları (date, symbol, type, profit) olan bir dosya dene.';
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function importFromNotion() {
+  const note = document.getElementById('data-note');
+  const btn = document.getElementById('data-notion');
+  note.textContent = 'Notion\'dan çekiliyor…';
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch('/api/notion-trades');
+    let j = {};
+    try { j = await r.json(); } catch (e) { throw new Error('Sunucu yanıtı okunamadı (arka uç yüklü mü?)'); }
+    if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status));
+    const incoming = Array.isArray(j.trades) ? j.trades : [];
+    const existTs = new Set(dataTrades.map(t => t.ts));
+    let added = 0;
+    incoming.forEach(t => {
+      if (t.ts && existTs.has(t.ts)) return;
+      dataTrades.push({
+        id: Date.now() + Math.random() + added,
+        ts: t.ts || (Date.now() + added),
+        date: t.date ? (t.date.slice(8, 10) + '/' + t.date.slice(5, 7)) : '',
+        pair: (t.pair || '').toUpperCase(), dir: t.dir || 'LONG',
+        r: dnum(t.r), pnl: null, strat: t.strat || '', note: 'Notion'
+      });
+      added++;
+    });
+    await saveData(); renderData();
+    note.textContent = added ? (added + ' işlem Notion\'dan çekildi.') : 'Zaten güncel — yeni işlem yok.';
+  } catch (e) {
+    note.textContent = 'Notion\'dan çekilemedi: ' + ((e && e.message) || e) + ' — Vercel\'de arka uç ve NOTION_TOKEN ayarlı mı?';
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function bindDataPage() {
+  const g = id => document.getElementById(id);
+  const nb = g('data-notion'); if (nb) nb.addEventListener('click', importFromNotion);
+  g('tab-defter').addEventListener('click', () => showPage('defter'));
+  g('tab-data').addEventListener('click', () => showPage('data'));
+  g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
+  g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
+  g('df-add').addEventListener('click', addDataTrade);
+  g('data-import-defter').addEventListener('click', importFromDefter);
+  g('data-clear').addEventListener('click', async () => {
+    if (!dataTrades.length) return;
+    if (!confirm('Data Takibi\'ndeki tüm işlemler silinecek. Emin misin? (Konfirmasyon Defteri etkilenmez)')) return;
+    dataTrades = [];
+    await saveData(); renderData();
+    document.getElementById('data-note').textContent = 'Tüm işlemler silindi.';
+  });
+  g('data-csv-btn').addEventListener('click', () => g('data-csv-file').click());
+  g('data-csv-file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importCsv(f); e.target.value = ''; });
+  window.addEventListener('resize', () => { if (currentPage === 'data') drawEquity(sortedData()); });
+}
+
 // ============ Açılış + Giriş/Kayıt akışı ============
 let APP_BOOTED = false;
 async function bootApp(opts) {
@@ -3162,6 +3592,7 @@ async function bootApp(opts) {
   APP_BOOTED = true;
   if (opts && opts.seed) { try { await seedIfEmpty(); } catch (e) { /* boş başla */ } }
   try { await loadConfig(); } catch (e) { /* devam */ }
+  try { await loadData(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
 }
 
@@ -3328,7 +3759,7 @@ if (AUTH_ENABLED) {
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
-  seedIfEmpty().then(loadConfig).then(init).catch(init);
+  seedIfEmpty().then(loadConfig).then(loadData).then(init).catch(init);
 }
 </script>
 </body>
