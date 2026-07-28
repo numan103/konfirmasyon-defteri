@@ -1136,7 +1136,7 @@
       <img id="sh-img" alt="Paylaşım kartı önizlemesi">
       <div class="sh-tip" id="sh-tip">Görsele <b>uzun bas</b> → “Görseli kopyala” ya da “Paylaş”. En kestirme yol bu.</div>
       <div class="sh-opts">
-        <label><input type="checkbox" id="sh-crits" checked> Konfluens listesi</label>
+        <label><input type="checkbox" id="sh-crits" checked> Kriter listesi</label>
         <label><input type="checkbox" id="sh-plan" checked> Plan (senaryo/anti)</label>
         <label><input type="checkbox" id="sh-r"> Sonuç (R)</label>
         <label><input type="checkbox" id="sh-sent" checked> Duyarlılık</label>
@@ -2516,15 +2516,18 @@ function shWrap(ctx, text, max, maxLines) {
 function currentShareData() {
   const sc = computeScore();
   const vd = verdictOf(sc, cfg().thresholds);
-  const names = [];
+  const names = [], pens = [];
   cfg().criteria.forEach((c, i) => {
-    if (checked.has(i) && c.cat !== 'duygu' && ptsFor(c) > 0) names.push(c.name);
+    if (!checked.has(i)) return;
+    const p = ptsFor(c);
+    if (c.cat === 'duygu' || p < 0) pens.push(c.name);
+    else if (p > 0) names.push(c.name);
   });
   const d = new Date();
   const p2 = n => String(n).padStart(2, '0');
   return {
     pair: pair, dir: direction, score: Math.round(sc), verdict: vd,
-    day: selDay, sess: session, strat: strat, sent: sent, crits: names,
+    day: selDay, sess: session, strat: strat, sent: sent, crits: names, pens: pens,
     r: '', emoBlock: entryLocked(),
     bias: dailyBias || '',
     senaryo: (document.getElementById('d-senaryo').value || '').trim(),
@@ -2533,10 +2536,13 @@ function currentShareData() {
   };
 }
 function tradeShareData(t) {
+  const entries = critEntries(t);
   return {
     pair: t.pair, dir: t.dir, score: t.score, verdict: t.verdict,
     day: t.day || '', sess: t.sess || '', strat: t.strat || '', sent: t.sent || '',
-    crits: critNames(t), r: t.r || '', emoBlock: !!t.emoBlock,
+    crits: entries.filter(e => e.cat !== 'duygu' && e.p > 0).map(e => e.n),
+    pens: entries.filter(e => e.cat === 'duygu' || e.p < 0).map(e => e.n),
+    r: t.r || '', emoBlock: !!t.emoBlock,
     bias: '', senaryo: '', anti: '', _tradeDate: t.date || '',
     when: t.date + '  ' + t.time
   };
@@ -2573,6 +2579,8 @@ function drawShareCard() {
   const acc = d.emoBlock ? SH_COL['YOK'] : (SH_COL[d.verdict] || SH_COL['YOK']);
   const crits = showC ? d.crits.slice(0, 11) : [];
   const extra = showC ? Math.max(0, d.crits.length - crits.length) : 0;
+  const pens = showC ? (d.pens || []).slice(0, 8) : [];
+  const penExtra = showC ? Math.max(0, (d.pens || []).length - pens.length) : 0;
 
   const W = 1080, M = 84;
   // plan satırlarını önden ölç (yükseklik için)
@@ -2591,7 +2599,8 @@ function drawShareCard() {
   }
 
   let H = 940;
-  if (showC) H += 70 + crits.length * 50 + (extra ? 46 : 0);
+  if (crits.length) H += 70 + crits.length * 50 + (extra ? 46 : 0);
+  if (pens.length) H += 70 + pens.length * 50 + (penExtra ? 46 : 0) + (crits.length ? 14 : 0);
   if (showS) H += 54;
   if (showR) H += 74;
   if (d.emoBlock) H += 96;
@@ -2626,9 +2635,12 @@ function drawShareCard() {
   c.textAlign = 'center';
   c.fillStyle = '#ffffff'; c.font = '800 128px Inter, sans-serif';
   c.fillText(d.score + '%', cx, cy + 30);
-  c.fillStyle = '#6d7488'; c.font = '700 22px Inter, sans-serif';
-  const lw = shSpacedW(c, 'KONFLUENS SKORU', 5);
-  shSpaced(c, 'KONFLUENS SKORU', cx - lw / 2, cy + 82, 5);
+  // etiket iki satır: tek satır halka bandının içine sığmıyor ve üstüne biniyor
+  c.fillStyle = '#6d7488'; c.font = '700 20px Inter, sans-serif';
+  [['KONFLUENS', 74], ['SKORU', 104]].forEach(([txt, dy]) => {
+    const lw = shSpacedW(c, txt, 5);
+    shSpaced(c, txt, cx - lw / 2, cy + dy, 5);
+  });
   c.textAlign = 'left';
 
   let y = 640;
@@ -2685,7 +2697,7 @@ function drawShareCard() {
     c.textAlign = 'left'; y += 74;
   }
 
-  if (showC) {
+  if (crits.length) {
     c.fillStyle = '#6d7488'; c.font = '700 22px Inter, sans-serif';
     shSpaced(c, 'KONFLUENS', M, y, 5);
     y += 46;
@@ -2700,6 +2712,24 @@ function drawShareCard() {
     if (extra) {
       c.fillStyle = '#6d7488'; c.font = '500 25px Inter, sans-serif';
       c.fillText('+' + extra + ' kriter daha', M + 42, y); y += 46;
+    }
+  }
+
+  if (pens.length) {
+    if (crits.length) y += 14;
+    c.fillStyle = '#6d7488'; c.font = '700 22px Inter, sans-serif';
+    shSpaced(c, 'CEZA / KİLİT', M, y, 5);
+    y += 46;
+    pens.forEach(n => {
+      c.fillStyle = '#ef4444'; c.font = '700 26px Inter, sans-serif';
+      c.fillText('✕', M, y);
+      c.fillStyle = '#dfe3ee'; c.font = '500 27px Inter, sans-serif';
+      c.fillText(shClip(c, n, W - M * 2 - 46), M + 42, y);
+      y += 50;
+    });
+    if (penExtra) {
+      c.fillStyle = '#6d7488'; c.font = '500 25px Inter, sans-serif';
+      c.fillText('+' + penExtra + ' kalem daha', M + 42, y); y += 46;
     }
   }
 
@@ -2972,6 +3002,18 @@ function logTrade() {
 function critNames(t) {
   return (t.crits || []).map(c => typeof c === 'string' ? c : c.n);
 }
+// kayıtlı kriterleri puan + kategoriyle çöz: eski kayıtlarda yalnızca isim olabilir
+function critEntries(t) {
+  const defs = (config.pairs[t.pair] && config.pairs[t.pair].criteria) || [];
+  const dirKey = t.dir === 'SHORT' ? 's' : 'l';
+  return (t.crits || []).map(c => {
+    const n = typeof c === 'string' ? c : c.n;
+    const def = defs.find(x => x.name === n);
+    const stored = (typeof c === 'object' && c && c.p !== undefined && c.p !== null) ? Number(c.p) : NaN;
+    const p = isNaN(stored) ? (def ? Number(def[dirKey]) || 0 : 0) : stored;
+    return { n: n, p: p, cat: def ? def.cat : '' };
+  });
+}
 
 let tradeFilter = 'all';
 function tradeDateObj(t) {
@@ -3122,9 +3164,10 @@ function renderTrades() {
     (t.crits || []).forEach(c => {
       const name = typeof c === 'string' ? c : c.n;
       const pts = typeof c === 'string' ? null : c.p;
+      const penal = pts !== null && pts < 0;
       const it = document.createElement('div');
-      it.className = 'td-item yes';
-      it.innerHTML = '<span class="mk">✓</span><span></span>' + (pts !== null ? '<span class="tp"></span>' : '');
+      it.className = 'td-item ' + (penal ? 'no' : 'yes');
+      it.innerHTML = '<span class="mk">' + (penal ? '✕' : '✓') + '</span><span></span>' + (pts !== null ? '<span class="tp"></span>' : '');
       it.children[1].textContent = name;
       if (pts !== null) it.children[2].textContent = (pts > 0 ? '+' : '') + pts;
       detail.appendChild(it);
@@ -3169,7 +3212,7 @@ function renderTrades() {
     const starWrap = document.createElement('div');
     starWrap.className = 'td-stars';
     starWrap.addEventListener('click', e => e.stopPropagation());
-    const sl = document.createElement('span'); sl.className = 'sl'; sl.textContent = 'Karar';
+    const sl = document.createElement('span'); sl.className = 'sl'; sl.textContent = 'Karar kalitesi';
     const srow = document.createElement('div'); srow.className = 'star-row';
     const cap = document.createElement('span'); cap.className = 'star-cap';
     const STAR_CAP = { 0: 'akşam doldur', 1: 'kötü karar · kötü süreç', 2: 'zayıf', 3: 'idare eder', 4: 'iyi', 5: 'iyi karar · iyi süreç' };
