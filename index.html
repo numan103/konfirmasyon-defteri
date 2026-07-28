@@ -145,6 +145,107 @@
   .nav-link.on { background: var(--acc-soft); color: var(--acc); }
   .nav-link.on:hover { background: var(--acc-soft); color: var(--acc); }
   .navbar .user-badge { margin-left: auto; }
+  /* --- AlfaNews --- */
+  .news-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin:4px 0 16px; }
+  .news-kicker { font-size:11px; font-weight:800; letter-spacing:.16em; color:var(--acc); text-transform:uppercase; }
+  .news-title { font-family:var(--font-display); font-size:clamp(30px,5vw,48px); letter-spacing:-.055em; line-height:1; margin-top:5px; }
+  .news-date { color:var(--text-3); font-size:12px; font-weight:600; padding-bottom:4px; white-space:nowrap; }
+  .news-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:14px; }
+  .news-feature { min-height:300px; padding:26px; border:0; overflow:hidden; position:relative; color:#fff; background:linear-gradient(135deg,#29256f 0%,#5b5bd6 58%,#9a8df5 100%); }
+  .news-feature:after { content:''; position:absolute; width:270px; height:270px; border:1px solid rgba(255,255,255,.24); border-radius:50%; right:-78px; bottom:-126px; box-shadow:0 0 0 34px rgba(255,255,255,.07),0 0 0 68px rgba(255,255,255,.05); }
+  .news-feature > * { position:relative; z-index:1; }
+  .news-label { display:inline-block; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.23); border-radius:999px; padding:5px 10px; font-size:10px; letter-spacing:.1em; font-weight:800; text-transform:uppercase; }
+  .news-feature h2 { font-family:var(--font-display); font-size:clamp(24px,3vw,34px); max-width:570px; line-height:1.14; letter-spacing:-.035em; margin:20px 0 12px; }
+  .news-feature p { max-width:540px; line-height:1.6; color:rgba(255,255,255,.82); font-size:14px; }
+  .news-byline { margin-top:25px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+  .news-side { display:grid; gap:14px; }
+  .news-card { padding:19px; }
+  .news-card h3 { font-family:var(--font-display); font-size:17px; letter-spacing:-.025em; margin:7px 0; }
+  .news-card p { color:var(--text-2); font-size:13px; line-height:1.55; }
+  .news-tag { color:var(--acc); font-size:10px; font-weight:800; letter-spacing:.11em; text-transform:uppercase; }
+  .news-score { font-family:var(--font-display); color:var(--acc); font-size:31px; line-height:1; margin-top:9px; }
+  .news-score small { color:var(--text-3); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; }
+  .news-lower { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; }
+  .news-list { list-style:none; display:grid; gap:11px; margin-top:13px; }
+  .news-list li { display:flex; gap:9px; color:var(--text-2); font-size:13px; line-height:1.42; }
+  .news-list i { width:7px; height:7px; border-radius:50%; flex:none; margin-top:5px; background:var(--acc); }
+  .news-quote { background:#17192a; color:#fff; border:0; }
+  .news-quote p { color:#d7d8e4; font-family:var(--font-display); font-size:17px; line-height:1.45; letter-spacing:-.02em; margin-top:12px; }
+  .news-quote .news-tag { color:#aaa8ff; }
+  .news-crew { margin-top:14px; }
+  .news-crew-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:0 2px 10px; }
+  .news-crew-head h2 { font-family:var(--font-display); font-size:20px; letter-spacing:-.03em; }
+  .news-crew-head p { color:var(--text-3); font-size:12px; }
+  .analyst-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .analyst-card { padding:0; overflow:hidden; }
+  .analyst-top { display:flex; align-items:center; gap:11px; padding:15px 16px 12px; border-bottom:1px solid var(--border); }
+  .analyst-photo { width:52px; height:52px; flex:none; border-radius:50%; background-image:url('file:///C:/Users/Pc/Documents/Codex/2026-07-28/en/outputs/alfanews-analysts.png'); background-size:227px 517px; background-repeat:no-repeat; box-shadow:0 0 0 3px var(--acc-soft); }
+  .analyst-photo.endy { background-position:-2px -62px; } .analyst-photo.hellinsnow { background-position:-2px -117px; }
+  .analyst-photo.sepho { background-position:-2px -173px; } .analyst-photo.felu { background-position:-2px -229px; }
+  .analyst-photo.fjor { background-position:-2px -285px; } .analyst-photo.yecair { background-position:-2px -341px; }
+  .analyst-name { font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-.02em; }
+  .analyst-role { color:var(--acc); font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; margin-top:3px; }
+  .analyst-body { padding:14px 16px 17px; }
+  .analyst-body p { color:var(--text-2); font-size:13px; line-height:1.55; }
+  .analyst-foot { color:var(--text-3); font-size:11px; font-weight:600; margin-top:11px; }
+  /* AlfaNews dergi düzeni */
+  #page-news > .news-grid, #page-news > .news-lower, #page-news > .news-crew { display:none; }
+  .mag-cover { position:relative; display:grid; grid-template-columns:1.06fr .94fr; gap:22px; overflow:hidden; min-height:315px; padding:24px; border-radius:20px; color:#fff; background:linear-gradient(135deg,#10111f 0%,#282453 100%); }
+  .mag-cover:after { content:'ALFA'; position:absolute; left:20px; bottom:-36px; font-family:var(--font-display); font-size:150px; font-weight:800; line-height:1; letter-spacing:-.09em; color:rgba(255,255,255,.045); }
+  .mag-cover > * { position:relative; z-index:1; }
+  .mag-meta { display:flex; justify-content:space-between; gap:12px; color:#c3c1fd; font-size:11px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+  .mag-logo { display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-size:clamp(37px,6vw,62px); line-height:.91; letter-spacing:-.075em; margin:39px 0 10px; }
+  .mag-logo-mark { display:flex; align-items:center; justify-content:center; width:52px; height:52px; border:1px solid rgba(255,255,255,.38); border-radius:15px; background:rgba(255,255,255,.11); box-shadow:0 10px 30px rgba(0,0,0,.22); }
+  .mag-logo-mark svg { width:31px; height:31px; }
+  .mag-cover h2 { max-width:500px; font-family:var(--font-display); font-size:clamp(18px,2.4vw,26px); letter-spacing:-.035em; line-height:1.15; }
+  .mag-cover p { max-width:450px; color:#d6d5ef; font-size:13px; line-height:1.5; margin-top:9px; }
+  .mag-cover-visual { position:relative; min-height:260px; overflow:hidden; border-radius:13px; background:linear-gradient(140deg,#8077e8,#282355 58%,#16172b); }
+  .mag-cover-visual img { display:block; width:100%; height:100%; object-fit:cover; }
+  .mag-cover-placeholder { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:end; padding:19px; background:radial-gradient(circle at 72% 22%,rgba(255,255,255,.35) 0,transparent 16%),linear-gradient(155deg,transparent 20%,rgba(8,8,23,.8) 100%); }
+  .mag-cover-placeholder b { font-family:var(--font-display); font-size:20px; letter-spacing:-.03em; }
+  .mag-cover-placeholder span { margin-top:5px; color:#d5d3ff; font-size:11px; font-weight:600; }
+  .mag-cover-upload { position:absolute; z-index:2; top:10px; right:10px; cursor:pointer; background:rgba(16,17,31,.78); border:1px solid rgba(255,255,255,.26); border-radius:999px; color:#fff; padding:7px 10px; font-size:11px; font-weight:700; }
+  .mag-cover-upload input { display:none; }
+  .mag-toc { margin:20px 0 32px; }
+  .mag-toc-title { font-family:var(--font-display); font-size:25px; letter-spacing:-.04em; margin-bottom:10px; }
+  .mag-toc-list { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .mag-toc-list a { display:flex; align-items:flex-start; gap:12px; min-height:105px; padding:17px; text-decoration:none; color:var(--text-2); border:1px solid var(--border); border-radius:14px; background:var(--card); box-shadow:var(--shadow); }
+  .mag-toc-list a b { color:var(--acc); font-family:var(--font-display); font-size:21px; }
+  .mag-toc-list a span { display:block; color:var(--text); font-family:var(--font-display); font-size:17px; letter-spacing:-.025em; }
+  .mag-toc-list a small { display:block; color:var(--text-3); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; line-height:1.55; margin-top:5px; }
+  .mag-section { scroll-margin-top:16px; margin-top:30px; }
+  .mag-section-head { display:flex; align-items:baseline; gap:10px; border-bottom:2px solid var(--text); padding-bottom:9px; margin-bottom:14px; }
+  .mag-section-head b { color:var(--acc); font-size:11px; letter-spacing:.13em; }
+  .mag-section-head h2 { font-family:var(--font-display); font-size:25px; letter-spacing:-.04em; }
+  .mag-section-head span { margin-left:auto; color:var(--text-3); font-size:11px; font-weight:600; }
+  .mag-articles { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .mag-article { overflow:hidden; padding:0; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; }
+  .mag-article:hover { transform:translateY(-3px); box-shadow:0 10px 25px rgba(27,29,50,.12); }
+  .mag-article img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; background:#151725; }
+  .mag-article-body { padding:16px; }
+  .mag-article-meta { color:var(--acc); font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+  .mag-article h3 { font-family:var(--font-display); font-size:19px; letter-spacing:-.03em; line-height:1.16; margin:7px 0 8px; }
+  .mag-article p { color:var(--text-2); font-size:13px; line-height:1.55; white-space:pre-wrap; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
+  .mag-by { display:flex; align-items:center; gap:7px; color:var(--text-3); font-size:11px; font-weight:600; margin-top:13px; }
+  .mag-dot { width:6px; height:6px; border-radius:50%; background:var(--acc); }
+  .mag-compose { margin-top:30px; padding:20px; }
+  .mag-compose h2 { font-family:var(--font-display); font-size:20px; letter-spacing:-.03em; }
+  .mag-compose .hint { margin:5px 0 14px; }
+  .mag-form { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .mag-form input, .mag-form select, .mag-form textarea { width:100%; font:inherit; color:var(--text); background:#f8f9fc; border:1px solid var(--border); border-radius:9px; padding:10px; }
+  .mag-form textarea { min-height:115px; resize:vertical; grid-column:1/-1; line-height:1.5; }
+  .mag-form .mag-full { grid-column:1/-1; }
+  .mag-form input:focus, .mag-form select:focus, .mag-form textarea:focus { outline:2px solid var(--acc); border-color:transparent; }
+  #mag-reader { position:fixed; z-index:120; inset:0; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(14,16,28,.72); backdrop-filter:blur(8px); }
+  #mag-reader.open { display:flex; }
+  .mag-reader-box { position:relative; width:min(860px,100%); max-height:min(88vh,900px); overflow:auto; background:var(--card); border-radius:18px; box-shadow:0 25px 80px rgba(0,0,0,.35); }
+  .mag-reader-close { position:absolute; z-index:2; top:13px; right:13px; width:35px; height:35px; border:none; border-radius:50%; background:rgba(20,22,35,.78); color:#fff; font-size:21px; cursor:pointer; }
+  .mag-reader-box img { display:block; width:100%; max-height:56vh; object-fit:contain; background:#151725; }
+  .mag-reader-body { padding:24px; }
+  .mag-reader-body h2 { font-family:var(--font-display); font-size:clamp(25px,4vw,36px); line-height:1.1; letter-spacing:-.045em; margin:7px 0 14px; }
+  .mag-reader-body p { color:var(--text-2); line-height:1.7; white-space:pre-wrap; }
+  @media (max-width:780px) { .mag-cover { grid-template-columns:1fr; min-height:0; padding:20px; } .mag-cover-visual { min-height:190px; } .mag-logo { margin-top:37px; } .mag-toc-list { grid-template-columns:1fr; } .mag-articles { grid-template-columns:1fr; } .mag-form { grid-template-columns:1fr; } }
+  @media (max-width:780px) { .news-head { align-items:flex-start; flex-direction:column; } .news-grid,.news-lower { grid-template-columns:1fr; } .analyst-grid { grid-template-columns:1fr; } .news-feature { min-height:270px; } }
   /* Yumuşak sayfa geçişi */
   @keyframes pageIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
   .page-anim { animation: pageIn .3s cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -1017,6 +1118,7 @@
       <button id="tab-data" class="nav-link" type="button">Trade Günlüğü</button>
       <button id="tab-review" class="nav-link" type="button">Haftalık Değerlendirme</button>
       <button id="tab-egitim" class="nav-link" type="button">Alfa Edu</button>
+      <button id="tab-news" class="nav-link" type="button">AlfaNews</button>
     </div>
     <div class="user-badge hidden" id="user-badge">
       <span class="uname" id="user-name"></span>
@@ -1356,6 +1458,159 @@
         </div>
       </div>
     </div>
+  </div>
+  <div id="page-news" class="hidden">
+    <header class="news-head">
+      <div>
+        <div class="news-kicker">Alfa Traders'ın haftalık dergisi</div>
+        <h1 class="news-title">AlfaNews</h1>
+      </div>
+      <div class="news-date" id="news-date">Haftalık sayı</div>
+    </header>
+
+    <section class="mag-cover">
+      <div>
+        <div class="mag-meta"><span>Alfa Traders presents</span><span id="mag-issue-date">Haftalık piyasa dergisi</span></div>
+        <div class="mag-logo"><span class="mag-logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></span>AlfaNews</div>
+        <h2>Piyasaya dair Alfa'lar, haberler, piyasa analizi, trade psikolojisi ve eğitim.</h2>
+        <p>Haftanın ana gündemini özetle oku; her başlığın içinde detaylı analizlere geç.</p>
+      </div>
+      <div class="mag-cover-visual">
+        <img id="mag-cover-image" alt="Haftanın AlfaNews kapak görseli" style="display:none;">
+        <div class="mag-cover-placeholder" id="mag-cover-placeholder"><b>Haftanın ana gündemi</b><span>Kapak görselini seçerek bu sayıyı kişiselleştir.</span></div>
+        <label class="mag-cover-upload">Kapak görseli seç<input id="mag-cover-file" type="file" accept="image/*"></label>
+      </div>
+    </section>
+    <nav class="mag-toc" aria-label="AlfaNews içindekiler">
+      <div class="mag-toc-title">Bu sayıda</div>
+      <div class="mag-toc-list">
+        <a href="#mag-macro"><b>01</b><span>Temel Analiz<small>Makro görünüm<br>Haber akışı · ekonomik takvim</small></span></a>
+        <a href="#mag-market"><b>02</b><span>BTC &amp; ETH<small>Bitcoin analizi<br>Ethereum analizi</small></span></a>
+        <a href="#mag-market"><b>03</b><span>Altcoinler &amp; Totaller<small>Altcoin piyasası<br>TOTAL · TOTAL2 · TOTAL3</small></span></a>
+        <a href="#mag-market"><b>04</b><span>Gold &amp; FX<small>GOLD · EUR · GBP<br>Önemli seviyeler ve senaryolar</small></span></a>
+        <a href="#mag-technical"><b>05</b><span>Trade Psikolojisi<small>Disiplin · FOMO · risk yönetimi</small></span></a>
+        <a href="#mag-edu"><b>06</b><span>Eğitim<small>1. Teknik Analiz<br>2. Temel Analiz<br>3. Trade Psikolojisi</small></span></a>
+      </div>
+    </nav>
+
+    <section class="mag-section" id="mag-macro">
+      <div class="mag-section-head"><b>01</b><h2>Temel Analiz</h2><span>Makro, ekonomi ve haber akışı</span></div>
+      <div class="mag-articles" id="mag-macro-list"></div>
+    </section>
+    <section class="mag-section" id="mag-market">
+      <div class="mag-section-head"><b>02</b><h2>Piyasa Analizleri</h2><span>Grafikler, senaryolar, riskler</span></div>
+      <div class="mag-articles" id="mag-market-list">
+        <article class="panel mag-article">
+          <img src="file:///C:/Users/Pc/Documents/Codex/2026-07-28/en/outputs/alfanews-btc-outlook.png" alt="BTCUSDT TradingView analizi">
+          <div class="mag-article-body"><div class="mag-article-meta">Piyasa Analizi · Bitcoin</div><h3>Likidite alanı ve iki yönlü senaryo</h3><p>Fiyatın işaretli bölgede vereceği kabul, bir sonraki hareketin kalitesini belirleyecek. Yukarı senaryoda devam için yapı teyidi; aşağı senaryoda ise bölge altı kapanış takip edilmeli.</p><div class="mag-by"><i class="mag-dot"></i> Trader Ahmet · Gold &amp; Bitcoin</div></div>
+        </article>
+      </div>
+    </section>
+    <section class="mag-section" id="mag-technical">
+      <div class="mag-section-head"><b>03</b><h2>Teknik Analiz</h2><span>Seviye, yapı ve veri</span></div>
+      <div class="mag-articles" id="mag-technical-list"></div>
+    </section>
+    <section class="mag-section" id="mag-edu">
+      <div class="mag-section-head"><b>04</b><h2>Eğitim</h2><span>Uygulanabilir trade notları</span></div>
+      <div class="mag-articles" id="mag-edu-list"></div>
+    </section>
+
+    <section class="panel mag-compose">
+      <h2>Yeni yazı ekle</h2><p class="hint">Görselini yükle, analizini yaz ve doğru dergi bölümünde yayınla.</p>
+      <div class="mag-form">
+        <input id="mag-title" type="text" maxlength="120" placeholder="Yazı başlığı">
+        <select id="mag-author"><option>Trader Ahmet</option><option>Endy</option><option>Sepho</option><option>FE LU</option><option>Fjor</option><option>Alfa Traders</option></select>
+        <select id="mag-category"><option value="market">Piyasa Analizi</option><option value="macro">Makro</option><option value="technical">Teknik Analiz</option><option value="edu">Eğitim</option></select>
+        <input id="mag-image" type="file" accept="image/*">
+        <textarea id="mag-copy" placeholder="Analizini yaz: ana fikir, seviyeler, iki yönlü senaryo ve riskler..."></textarea>
+        <button id="mag-publish" type="button" class="btn solid mag-full">Dergide yayınla</button>
+      </div>
+      <div id="mag-note" class="hint" style="margin-top:9px;"></div>
+    </section>
+
+    <div id="mag-reader" aria-hidden="true">
+      <article class="mag-reader-box" role="dialog" aria-modal="true" aria-label="AlfaNews analiz detayı">
+        <button type="button" class="mag-reader-close" id="mag-reader-close" aria-label="Kapat">×</button>
+        <img id="mag-reader-img" alt="">
+        <div class="mag-reader-body"><div class="mag-article-meta" id="mag-reader-meta"></div><h2 id="mag-reader-title"></h2><p id="mag-reader-copy"></p><div class="mag-by" id="mag-reader-by"></div></div>
+      </article>
+    </div>
+
+    <div class="news-grid">
+      <article class="panel news-feature">
+        <span class="news-label">Haftanın ana tezi</span>
+        <h2>Önce likiditeyi, sonra yönü oku.</h2>
+        <p>Bu hafta odağımız tahmin etmek değil: fiyatın önemli seviyelerde nasıl kabul gördüğünü izlemek. Sweep sonrası kapanış ve devam akışı olmadan pozisyon almak, plan yerine heyecanı trade etmektir.</p>
+        <div class="news-byline">AlfaNews Editör Masası · Haftalık piyasa notu</div>
+      </article>
+      <aside class="news-side">
+        <article class="panel news-card">
+          <div class="news-tag">Piyasa rejimi</div>
+          <h3>Sabır bir setup'tır</h3>
+          <p>Range içindeyse kenarları, trend içindeyse geri çekilmeyi bekle. Ortada kalmak zorunda değilsin.</p>
+        </article>
+        <article class="panel news-card">
+          <div class="news-tag">Haftanın odağı</div>
+          <div class="news-score">1 <small>tek kural</small></div>
+          <h3>İşleme girmeden invalidation yaz.</h3>
+          <p>Geçersiz kılan seviyeyi yazamıyorsan, trade fikri henüz net değildir.</p>
+        </article>
+      </aside>
+    </div>
+
+    <div class="news-lower">
+      <article class="panel news-card">
+        <div class="news-tag">BTC · senaryo çerçevesi</div>
+        <h3>Range dışı kabulü bekle</h3>
+        <ul class="news-list">
+          <li><i></i><span>Likidite süpürülmesinden sonra yönlü kapanış ara.</span></li>
+          <li><i></i><span>İlk hareketi değil, geri testteki kabulü değerlendir.</span></li>
+          <li><i></i><span>Risk: haber kaynaklı ani volatilite ve falso kırılım.</span></li>
+        </ul>
+      </article>
+      <article class="panel news-card">
+        <div class="news-tag">XAU · senaryo çerçevesi</div>
+        <h3>Seviye + zaman birleşimi</h3>
+        <ul class="news-list">
+          <li><i></i><span>HTF arz-talep bölgesinde tepki kalitesini izle.</span></li>
+          <li><i></i><span>Veri saatlerinde ilk fitile tepki vermek yerine yapının oturmasını bekle.</span></li>
+          <li><i></i><span>Risk: kırmızı haber öncesi pozisyon büyütmek.</span></li>
+        </ul>
+      </article>
+      <article class="panel news-quote">
+        <div class="news-tag">Editör notu</div>
+        <p>“İyi trade, çok işlem yapmak değil; yalnızca planın sana izin verdiği işlemi almaktır.”</p>
+        <div class="news-byline">Bu sayıyı haftalık değerlendirmenden sonra tekrar oku.</div>
+      </article>
+    </div>
+    <section class="news-crew">
+      <div class="news-crew-head">
+        <div><div class="news-kicker">AlfaNews uzman masası</div><h2>Haftanın analizleri</h2></div>
+        <p>Her analist kendi çerçevesinden konuşur.</p>
+      </div>
+      <div class="analyst-grid">
+        <article class="panel analyst-card">
+          <div class="analyst-top"><div class="analyst-photo"></div><div><div class="analyst-name">Trader Ahmet</div><div class="analyst-role">Gold &amp; Bitcoin</div></div></div>
+          <div class="analyst-body"><p>Gold ve BTC'de yönü fiyat tahminiyle değil; likidite süpürülmesi sonrası kabul ve devam akışıyla belirle.</p><div class="analyst-foot">Odak: Gold · BTC · likidite</div></div>
+        </article>
+        <article class="panel analyst-card">
+          <div class="analyst-top"><div class="analyst-photo endy"></div><div><div class="analyst-name">Endy</div><div class="analyst-role">On-chain &amp; Veriler</div></div></div>
+          <div class="analyst-body"><p>Akıştaki güç, fiyat hareketini desteklemiyorsa önce verinin nerede ayrıştığını ara; tek metrikle karar verme.</p><div class="analyst-foot">Odak: CVD · OI · spot akışı</div></div>
+        </article>
+        <article class="panel analyst-card">
+          <div class="analyst-top"><div class="analyst-photo sepho"></div><div><div class="analyst-name">Sepho</div><div class="analyst-role">Gold &amp; Bitcoin</div></div></div>
+          <div class="analyst-body"><p>Gold ve BTC'de seviye tek başına yeterli değil. Veri saati ve ilk reaksiyonun ardından gelen kabul, işlemin kalitesini belirler.</p><div class="analyst-foot">Odak: Gold · BTC · HTF seviye</div></div>
+        </article>
+        <article class="panel analyst-card">
+          <div class="analyst-top"><div class="analyst-photo felu"></div><div><div class="analyst-name">FE LU</div><div class="analyst-role">Önemli Seviyeler</div></div></div>
+          <div class="analyst-body"><p>Seviyeyi çizmek kolaydır; fiyatın o seviyede bıraktığı kapanış, fitil ve yeniden test ise gerçek bilgidir.</p><div class="analyst-foot">Odak: arz-talep · OTE · retest</div></div>
+        </article>
+        <article class="panel analyst-card">
+          <div class="analyst-top"><div class="analyst-photo fjor"></div><div><div class="analyst-name">Fjor</div><div class="analyst-role">Totaller &amp; İlgili Pairler</div></div></div>
+          <div class="analyst-body"><p>BTC total market yapısını ve ilgili pairleri birlikte oku. Total yönü desteklemiyorsa tekil pair'de agresif taraf tutma.</p><div class="analyst-foot">Odak: TOTAL · TOTAL2 · TOTAL3 · pair korelasyonu</div></div>
+        </article>
+      </div>
+    </section>
   </div>
   <div id="page-egitim" class="hidden">
     <div class="eg-brand">
@@ -3576,6 +3831,7 @@ function init() {
     if (btn) btn.addEventListener('click', () => toggleCatEdit(cat));
   });
   bindDataPage();
+  bindNewsPage();
   bindReviewPage();
   bindEgitimPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
@@ -3596,7 +3852,67 @@ const DATA_KEY = 'defter-data-v1';
 let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'defter';
+const NEWS_KEY = 'alfanews-posts-v1';
+let newsPosts = [];
 function dnum(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+async function loadNews() {
+  try { const raw = await store.get(NEWS_KEY); newsPosts = raw ? JSON.parse(raw) : []; }
+  catch (e) { newsPosts = []; }
+  if (!Array.isArray(newsPosts)) newsPosts = [];
+}
+async function saveNews() { await store.set(NEWS_KEY, JSON.stringify(newsPosts)); }
+function newsEsc(v) { const d = document.createElement('div'); d.textContent = String(v || ''); return d.innerHTML; }
+function newsArticle(post) {
+  const img = post.image ? '<img src="' + post.image + '" alt="' + newsEsc(post.title) + '">' : '';
+  return '<article class="panel mag-article">' + img + '<div class="mag-article-body"><div class="mag-article-meta">' + newsEsc(post.categoryLabel) + '</div><h3>' + newsEsc(post.title) + '</h3><p>' + newsEsc(post.copy) + '</p><div class="mag-by"><i class="mag-dot"></i> ' + newsEsc(post.author) + ' · AlfaNews</div></div></article>';
+}
+function renderNewsPosts() {
+  const buckets = { macro: 'mag-macro-list', market: 'mag-market-list', technical: 'mag-technical-list', edu: 'mag-edu-list' };
+  Object.keys(buckets).forEach(k => {
+    const box = document.getElementById(buckets[k]); if (!box) return;
+    if (k !== 'market') box.innerHTML = '';
+    newsPosts.filter(p => p.category === k).slice().reverse().forEach(p => box.insertAdjacentHTML('beforeend', newsArticle(p)));
+  });
+}
+async function publishNews() {
+  const title = document.getElementById('mag-title').value.trim();
+  const copy = document.getElementById('mag-copy').value.trim();
+  const category = document.getElementById('mag-category').value;
+  const author = document.getElementById('mag-author').value;
+  const note = document.getElementById('mag-note');
+  if (!title || !copy) { note.textContent = 'Başlık ve analiz metni gerekli.'; return; }
+  const file = document.getElementById('mag-image').files[0];
+  let image = '';
+  if (file) image = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(file); });
+  const labels = { macro: 'Makro', market: 'Piyasa Analizi', technical: 'Teknik Analiz', edu: 'Eğitim' };
+  newsPosts.push({ id: Date.now(), title, copy, category, categoryLabel: labels[category], author, image });
+  await saveNews(); renderNewsPosts();
+  document.getElementById('mag-title').value = ''; document.getElementById('mag-copy').value = ''; document.getElementById('mag-image').value = '';
+  note.textContent = "Yazı AlfaNews'te yayınlandı.";
+}
+function openNewsReader(card) {
+  const r = document.getElementById('mag-reader'); if (!r) return;
+  const image = card.querySelector('img');
+  const img = document.getElementById('mag-reader-img');
+  img.style.display = image ? 'block' : 'none';
+  if (image) { img.src = image.src; img.alt = image.alt || ''; }
+  document.getElementById('mag-reader-meta').textContent = (card.querySelector('.mag-article-meta') || {}).textContent || '';
+  document.getElementById('mag-reader-title').textContent = (card.querySelector('h3') || {}).textContent || '';
+  document.getElementById('mag-reader-copy').textContent = (card.querySelector('p') || {}).textContent || '';
+  document.getElementById('mag-reader-by').innerHTML = '<i class="mag-dot"></i> ' + newsEsc(((card.querySelector('.mag-by') || {}).textContent || '').trim());
+  r.classList.add('open'); r.setAttribute('aria-hidden', 'false');
+}
+function closeNewsReader() { const r = document.getElementById('mag-reader'); if (r) { r.classList.remove('open'); r.setAttribute('aria-hidden', 'true'); } }
+function bindNewsPage() {
+  const b = document.getElementById('mag-publish');
+  if (b) b.addEventListener('click', () => publishNews().catch(() => { document.getElementById('mag-note').textContent = 'Görsel yüklenemedi; daha küçük bir dosya dene.'; }));
+  const page = document.getElementById('page-news');
+  if (page) page.addEventListener('click', e => { const card = e.target.closest('.mag-article'); if (card) openNewsReader(card); });
+  const reader = document.getElementById('mag-reader');
+  if (reader) reader.addEventListener('click', e => { if (e.target === reader || e.target.id === 'mag-reader-close') closeNewsReader(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNewsReader(); });
+}
 
 async function loadData() {
   try { const raw = await store.get(DATA_KEY); dataTrades = raw ? JSON.parse(raw) : []; }
@@ -3607,7 +3923,7 @@ async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)
 
 function showPage(name) {
   currentPage = name;
-  ['defter', 'data', 'review', 'egitim'].forEach(p => {
+  ['defter', 'data', 'review', 'news', 'egitim'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
     const tb = document.getElementById('tab-' + p);
@@ -3617,7 +3933,23 @@ function showPage(name) {
   if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   if (name === 'data') renderData();
   if (name === 'review') renderReview();
+  if (name === 'news') renderNews();
   if (name === 'egitim') renderEgitim();
+}
+
+function renderNews() {
+  const el = document.getElementById('news-date');
+  if (!el) return;
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+  el.textContent = fmt(monday) + ' – ' + fmt(sunday) + ' · Haftalık sayı';
+  const issue = document.getElementById('mag-issue-date');
+  if (issue) issue.textContent = fmt(monday) + ' – ' + fmt(sunday) + ' · Sayı 01';
+  renderNewsPosts();
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -3809,6 +4141,7 @@ function bindDataPage() {
   const nb = g('data-notion'); if (nb) nb.addEventListener('click', importFromNotion);
   g('tab-defter').addEventListener('click', () => showPage('defter'));
   g('tab-data').addEventListener('click', () => showPage('data'));
+  g('tab-news').addEventListener('click', () => showPage('news'));
   g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
   g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
   g('df-add').addEventListener('click', addDataTrade);
@@ -4451,6 +4784,7 @@ async function bootApp(opts) {
   if (opts && opts.seed) { try { await seedIfEmpty(); } catch (e) { /* boş başla */ } }
   try { await loadConfig(); } catch (e) { /* devam */ }
   try { await loadData(); } catch (e) { /* devam */ }
+  try { await loadNews(); } catch (e) { /* devam */ }
   try { await loadReviews(); } catch (e) { /* devam */ }
   try { await loadEgitim(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
@@ -4465,7 +4799,7 @@ function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
   try {
     Object.keys(localStorage).forEach(k => {
-      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k.indexOf(DAILY_PREFIX) === 0);
+      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === NEWS_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k.indexOf(DAILY_PREFIX) === 0);
       if (keep && !(k in AUTH.cloud)) AUTH.cloud[k] = localStorage.getItem(k);
     });
   } catch (e) { /* erişilemedi */ }
