@@ -3883,6 +3883,7 @@ function init() {
   });
   renderCriteria(); render();
 }
+function dnum(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
 // ============ Data Takibi ============
 const DATA_KEY = 'defter-data-v1';
 let dataTrades = [];
