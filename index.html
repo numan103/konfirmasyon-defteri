@@ -140,7 +140,7 @@
   }
   .ce-add:hover { background: #e6e6fb; }
   /* --- Navbar --- */
-  .navbar { display: flex; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 40; background: rgba(244,245,250,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .navbar { display: flex; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; background: rgba(244,245,250,.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .nav-brand { display: flex; align-items: center; gap: 11px; cursor: pointer; text-decoration: none; color: inherit; }
   .nav-brand:hover { opacity: .8; }
   a.nav-link { text-decoration: none; color: var(--text-2); }
@@ -158,8 +158,10 @@
   .nav-drop .drop-btn { cursor: default; display: inline-flex; align-items: center; gap: 2px; padding: 9px 16px; border-radius: 10px; }
   .nav-drop .drop-btn:hover { background: rgba(91,91,214,0.07); color: var(--text); }
   .nav-drop.on .drop-btn { background: var(--acc-soft); color: var(--acc); }
-  .nav-drop .drop-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; box-shadow: 0 12px 30px rgba(23,25,35,0.16); }
+  .nav-drop .drop-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: #ffffff; border: 1px solid #d4d8e6; border-radius: 12px; padding: 7px; min-width: 210px; z-index: 300; box-shadow: 0 20px 46px rgba(23,25,35,0.26), 0 2px 8px rgba(23,25,35,0.10); }
   .nav-drop .drop-menu::before { content: ''; position: absolute; top: -12px; left: 0; right: 0; height: 12px; }
+  .nav-drop .drop-menu .nav-link { padding: 10px 14px; border-radius: 8px; }
+  .nav-drop .drop-menu .nav-link:hover { background: var(--acc-soft); color: var(--acc); }
   .nav-drop.open .drop-menu { display: flex; flex-direction: column; gap: 2px; }
   .nav-drop .drop-menu .nav-link { display: block; white-space: nowrap; }
   .nav-drop.on > .drop-btn { background: var(--acc-soft); color: var(--acc); }
