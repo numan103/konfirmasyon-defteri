@@ -57,12 +57,17 @@ export default async function handler(req, res) {
       })
     });
 
+    if (!r.ok) {
+      const errText = await r.text();
+      return res.json({ reply: 'HF hatası (' + r.status + '): ' + errText.substring(0, 200) });
+    }
+
     const data = await r.json();
     const reply = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
     if (reply) return res.json({ reply: reply.trim() });
     const errMsg = typeof data === 'object' ? (data.error || JSON.stringify(data)) : 'Hata';
     return res.json({ reply: 'Cevap alınamadı: ' + errMsg });
   } catch (e) {
-    return res.json({ reply: 'Bağlantı hatası.' });
+    return res.json({ reply: 'Bağlantı hatası: ' + e.message });
   }
 }
