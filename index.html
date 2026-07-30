@@ -1183,18 +1183,23 @@
 .bas-success .icon { font-size: 40px; margin-bottom: 12px; }
 .bas-success h3 { font-size: 18px; margin: 0 0 6px; }
 .bas-success p { color: var(--text-2); font-size: 13px; margin: 0; }
-.bas-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
-.bas-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; transition: border-color .2s, transform .2s; }
+.bas-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.bas-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; transition: border-color .2s, transform .2s; cursor: pointer; text-decoration: none; display: block; color: inherit; }
 .bas-card:hover { border-color: var(--acc); transform: translateY(-2px); }
 .bas-card .icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px; }
 .bas-card h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
 .bas-card p { font-size: 12.5px; color: var(--text-3); margin: 0 0 16px; line-height: 1.45; }
-.bas-card .btn { display: inline-block; padding: 10px 24px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; transition: all .15s; cursor: pointer; border: none; }
+.bas-card .btn { display: inline-block; padding: 10px 24px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; transition: all .15s; cursor: pointer; border: none; pointer-events: auto; }
 .bas-card .btn-primary { background: var(--acc); color: #fff; }
 .bas-card .btn-primary:hover { opacity: .85; }
 .bas-card .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
 .bas-card .btn-outline:hover { border-color: var(--acc); color: var(--acc); }
-@media (max-width: 640px) { .bas-cards { grid-template-columns: 1fr; } .bas-panel { padding: 20px 16px; } }
+.bas-card .btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.bas-form-wrap { display: none; }
+.bas-form-wrap.open { display: block; }
+@keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.bas-form-wrap.open .bas-panel { animation: basFadeIn .25s ease; }
+@media (max-width: 768px) { .bas-grid { grid-template-columns: 1fr; } .bas-panel { padding: 20px 16px; } }
 </style>
 </head>
 <body>
@@ -1910,70 +1915,83 @@
         <h1>Başvuru</h1>
         <p>Alfa Traders ailesine katıl. Trader başvurusu yap, private işlem grubuna katıl veya mentorship programına başvur.</p>
       </div>
-      <div class="bas-panel" id="bas-form">
-        <h2>Alfa Trader Başvurusu</h2>
-        <p class="hint">Deneyimli, uyumlu ve Alfa ruhunu taşıyan traderlar arıyoruz. Tüm zorunlu alanları doldurun.</p>
-        <div class="bas-field">
-          <label>Kaç yıldır trade ediyorsunuz? <span class="req">*</span></label>
-          <div class="bas-options">
-            <div class="bas-option"><input type="radio" name="q1" id="q1a" value="+1 yıl" required><label for="q1a">+1 yıl</label></div>
-            <div class="bas-option"><input type="radio" name="q1" id="q1b" value="Size uygun değil."><label for="q1b">Size uygun değil.</label></div>
-          </div>
+      <div class="bas-grid">
+        <div class="bas-card" onclick="toggleBasForm()">
+          <div class="icon" style="background:var(--acc-soft);color:var(--acc);">⚡</div>
+          <h3>Deneyimli Alfa Trader</h3>
+          <p>Trader alımı başvuru formu. Deneyimli, uyumlu ve Alfa ruhunu taşıyan traderlar arıyoruz.</p>
+          <span class="btn btn-primary" id="bas-form-btn">Formu Aç</span>
         </div>
-        <div class="bas-field">
-          <label>Teknik/Temel/Trade Psikolojisi konularında bilgi düzeyiniz nedir? <span class="req">*</span></label>
-          <div class="bas-options">
-            <div class="bas-option"><input type="radio" name="q2" id="q2a" value="İleri düzey"><label for="q2a">İleri düzey</label></div>
-            <div class="bas-option"><input type="radio" name="q2" id="q2b" value="Size uygun değil."><label for="q2b">Size uygun değil.</label></div>
-          </div>
-        </div>
-        <div class="bas-field">
-          <label>Grupta günde +3 saat aktif olmayı, günlük biaslarınızı işlemlerinizi ve piyasa bakışlarınızı paylaşmayı kabul ediyor musunuz? <span class="req">*</span></label>
-          <div class="bas-options">
-            <div class="bas-option"><input type="radio" name="q3" id="q3a" value="Evet"><label for="q3a">Evet</label></div>
-            <div class="bas-option"><input type="radio" name="q3" id="q3b" value="Size uygun değil."><label for="q3b">Size uygun değil.</label></div>
-          </div>
-        </div>
-        <div class="bas-field">
-          <label>Grup içinde saygılı, seviyeli ve anlayışlı olacağınızı, ego, hırs gibi duyguları bir kenara bırakarak ekip ruhunu güçlendireceğinizi taahhüt ediyor musunuz? <span class="req">*</span></label>
-          <div class="bas-options">
-            <div class="bas-option"><input type="radio" name="q4" id="q4a" value="Evet, uyumlu bir şekilde çalışırım."><label for="q4a">Evet, uyumlu bir şekilde çalışırım.</label></div>
-            <div class="bas-option"><input type="radio" name="q4" id="q4b" value="Size uygun değil."><label for="q4b">Size uygun değil.</label></div>
-          </div>
-        </div>
-        <div class="bas-field">
-          <label>Son payoutunuz, kümülatif pnl'iniz <span class="req">*</span></label>
-          <p class="hint" style="margin:-4px 0 8px;font-size:12px;">Tradingview'e kopyalayıp fotoğraf linki olarak paylaşabilirsiniz.</p>
-          <textarea id="q5" rows="3" placeholder="Son payout ve kümülatif PnL bilgileriniz..." required></textarea>
-        </div>
-        <div class="bas-field">
-          <label>Son aldığınız işlemin görselini ve açıklamasını paylaşınız. <span class="req">*</span></label>
-          <textarea id="q6" rows="3" placeholder="İşlem görseli linki + açıklama..." required></textarea>
-        </div>
-        <div class="bas-field">
-          <label>Aklınıza takılan bir soru olursa aşağıdan sorabilirsiniz.</label>
-          <textarea id="q7" rows="2" placeholder="Varsa sorularınız..."></textarea>
-        </div>
-        <div class="bas-field">
-          <label>Size nasıl ulaşacağız? (Telegram & X hesabınız) <span class="req">*</span></label>
-          <textarea id="q8" rows="2" placeholder="Telegram ve X (Twitter) kullanıcı adlarınız..." required></textarea>
-        </div>
-        <button class="bas-submit" id="bas-submit" onclick="submitBasvuru()">Başvuruyu Gönder</button>
-        <div id="bas-result" style="display:none;margin-top:16px;text-align:center;font-size:13px;"></div>
-      </div>
-      <div class="bas-cards">
-        <div class="bas-card">
-          <div class="icon" style="background:var(--acc-soft);color:var(--acc);">💬</div>
-          <h3>Alfa Traders Private İşlem Grubu</h3>
+        <a class="bas-card" href="https://t.me/alfatraderspublic" target="_blank" rel="noopener">
+          <div class="icon" style="background:rgba(52,175,235,.15);color:#34afeb;">💬</div>
+          <h3>Private İşlem Grubu</h3>
           <p>Günlük işlem paylaşımları, canlı yayınlar ve verified trader analizleri. Aktif ve uyumlu bir topluluk.</p>
-          <a class="btn btn-primary" href="https://t.me/alfatraderspublic" target="_blank" rel="noopener">Telegram'a Katıl</a>
-        </div>
+          <span class="btn btn-primary">Telegram'a Katıl</span>
+        </a>
         <div class="bas-card">
           <div class="icon" style="background:rgba(250,204,21,.15);color:#facc15;">🎓</div>
-          <h3>Alfa Traders Mentorship</h3>
+          <h3>Mentorship</h3>
           <p>Bire bir coaching, trade psikolojisi ve strateji geliştirme. Referans linki ile katılım veya form ile başvuru.</p>
-          <a class="btn btn-outline" href="#" id="bas-ref-link" target="_blank" rel="noopener" style="margin-right:8px;">Referans ile Katıl</a>
-          <a class="btn btn-primary" href="https://forms.gle/f479yHx2d37amDne7" target="_blank" rel="noopener">Başvuru Formu</a>
+          <div class="btns">
+            <a class="btn btn-outline" href="#" id="bas-ref-link" target="_blank" rel="noopener">Bybit ile Katıl</a>
+            <a class="btn btn-outline" href="#" id="bas-ref-okx" target="_blank" rel="noopener">OKX ile Katıl</a>
+            <a class="btn btn-primary" href="https://forms.gle/f479yHx2d37amDne7" target="_blank" rel="noopener">Başvuru Formu</a>
+          </div>
+        </div>
+      </div>
+      <div class="bas-form-wrap" id="bas-form-wrap">
+        <div class="bas-panel" id="bas-form">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div><h2 style="margin:0;">Alfa Trader Başvurusu</h2><p class="hint" style="margin:2px 0 0;">Tüm zorunlu alanları doldurun.</p></div>
+            <button onclick="toggleBasForm()" style="background:none;border:1px solid var(--border);color:var(--text-2);border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+          </div>
+          <div class="bas-field">
+            <label>Kaç yıldır trade ediyorsunuz? <span class="req">*</span></label>
+            <div class="bas-options">
+              <div class="bas-option"><input type="radio" name="q1" id="q1a" value="+1 yıl" required><label for="q1a">+1 yıl</label></div>
+              <div class="bas-option"><input type="radio" name="q1" id="q1b" value="Size uygun değil."><label for="q1b">Size uygun değil.</label></div>
+            </div>
+          </div>
+          <div class="bas-field">
+            <label>Teknik/Temel/Trade Psikolojisi konularında bilgi düzeyiniz nedir? <span class="req">*</span></label>
+            <div class="bas-options">
+              <div class="bas-option"><input type="radio" name="q2" id="q2a" value="İleri düzey"><label for="q2a">İleri düzey</label></div>
+              <div class="bas-option"><input type="radio" name="q2" id="q2b" value="Size uygun değil."><label for="q2b">Size uygun değil.</label></div>
+            </div>
+          </div>
+          <div class="bas-field">
+            <label>Grupta günde +3 saat aktif olmayı, günlük biaslarınızı, işlemlerinizi ve piyasa bakışlarınızı paylaşmayı kabul ediyor musunuz? <span class="req">*</span></label>
+            <div class="bas-options">
+              <div class="bas-option"><input type="radio" name="q3" id="q3a" value="Evet"><label for="q3a">Evet</label></div>
+              <div class="bas-option"><input type="radio" name="q3" id="q3b" value="Size uygun değil."><label for="q3b">Size uygun değil.</label></div>
+            </div>
+          </div>
+          <div class="bas-field">
+            <label>Grup içinde saygılı, seviyeli ve anlayışlı olacağınızı; ego, hırs gibi duyguları bir kenara bırakarak ekip ruhunu güçlendireceğinizi taahhüt ediyor musunuz? <span class="req">*</span></label>
+            <div class="bas-options">
+              <div class="bas-option"><input type="radio" name="q4" id="q4a" value="Evet, uyumlu bir şekilde çalışırım."><label for="q4a">Evet, uyumlu bir şekilde çalışırım.</label></div>
+              <div class="bas-option"><input type="radio" name="q4" id="q4b" value="Size uygun değil."><label for="q4b">Size uygun değil.</label></div>
+            </div>
+          </div>
+          <div class="bas-field">
+            <label>Son payoutunuz, kümülatif pnl'iniz <span class="req">*</span></label>
+            <p class="hint" style="margin:-4px 0 8px;font-size:12px;">Tradingview'e kopyalayıp fotoğraf linki olarak paylaşabilirsiniz.</p>
+            <textarea id="q5" rows="3" placeholder="Son payout ve kümülatif PnL bilgileriniz..." required></textarea>
+          </div>
+          <div class="bas-field">
+            <label>Son aldığınız işlemin görselini ve açıklamasını paylaşınız. <span class="req">*</span></label>
+            <textarea id="q6" rows="3" placeholder="İşlem görseli linki + açıklama..." required></textarea>
+          </div>
+          <div class="bas-field">
+            <label>Aklınıza takılan bir soru olursa aşağıdan sorabilirsiniz.</label>
+            <textarea id="q7" rows="2" placeholder="Varsa sorularınız..."></textarea>
+          </div>
+          <div class="bas-field">
+            <label>Size nasıl ulaşacağız? (Telegram & X hesabınız) <span class="req">*</span></label>
+            <textarea id="q8" rows="2" placeholder="Telegram ve X (Twitter) kullanıcı adlarınız..." required></textarea>
+          </div>
+          <button class="bas-submit" id="bas-submit" onclick="submitBasvuru()">Başvuruyu Gönder</button>
+          <div id="bas-result" style="display:none;margin-top:16px;text-align:center;font-size:13px;"></div>
         </div>
       </div>
     </div>
@@ -1987,7 +2005,8 @@ const SOCIAL = {
   telegram: 'https://t.me/alfatraderspublic',
   x: 'https://x.com/traderahmet_',
   youtube: 'https://www.youtube.com/@cryptotraderahmet',
-  referral: '', // Borsa referans linki (örn: Binance, Bybit, BingX)
+  referral: 'https://partner.bybit.com/b/cryptoahmet',
+  referralOkx: 'https://www.okx.com/join/CRYPTOAHMET',
 };
 function applySocial() {
   const set = (ids, url) => {
@@ -2005,6 +2024,11 @@ function applySocial() {
   if (refEl) {
     if (SOCIAL.referral) { refEl.href = SOCIAL.referral; refEl.style.display = ''; }
     else { refEl.style.display = 'none'; }
+  }
+  const refOkx = document.getElementById('bas-ref-okx');
+  if (refOkx) {
+    if (SOCIAL.referralOkx) { refOkx.href = SOCIAL.referralOkx; refOkx.style.display = ''; }
+    else { refOkx.style.display = 'none'; }
   }
 }
 if (typeof document !== 'undefined') {
@@ -5906,6 +5930,19 @@ if (AUTH_ENABLED) {
   setTimeout(handleNotionHash, 1000);
 }
 // ============ Başvuru Formu ============
+function toggleBasForm() {
+  const w = document.getElementById('bas-form-wrap');
+  const btn = document.getElementById('bas-form-btn');
+  if (!w) return;
+  const open = !w.classList.contains('open');
+  w.classList.toggle('open', open);
+  if (btn) btn.textContent = open ? 'Formu Kapat' : 'Formu Aç';
+  if (!open) {
+    document.querySelectorAll('#bas-form textarea').forEach(el => el.value = '');
+    document.querySelectorAll('#bas-form input[type="radio"]').forEach(el => el.checked = false);
+    document.getElementById('bas-result').style.display = 'none';
+  }
+}
 function submitBasvuru() {
   const btn = document.getElementById('bas-submit');
   const result = document.getElementById('bas-result');
@@ -5940,6 +5977,7 @@ function submitBasvuru() {
     document.querySelectorAll('#bas-form textarea').forEach(el => el.value = '');
     document.querySelectorAll('#bas-form input[type="radio"]').forEach(el => el.checked = false);
     btn.textContent = 'Başvuruyu Gönder'; btn.disabled = false;
+    setTimeout(() => { toggleBasForm(); }, 2500);
   }
 }
 </script>
