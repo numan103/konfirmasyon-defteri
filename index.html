@@ -1963,6 +1963,10 @@
           <div class="form" id="senior-form">
             <input type="text" id="sf-name" placeholder="Adın / Nick" />
             <div class="row">
+              <input type="text" id="sf-tg" placeholder="Telegram kullanıcı adın" />
+              <input type="text" id="sf-x" placeholder="X hesabın (opsiyonel)" />
+            </div>
+            <div class="row">
               <select id="sf-exp"><option value="">Tecrübe</option><option>&lt;1 yıl</option><option>1-2 yıl</option><option>2-4 yıl</option><option>4+ yıl</option></select>
               <select id="sf-market"><option value="">Piyasa</option><option>Kripto</option><option>Forex</option><option>Hisse</option><option>Birden fazla</option></select>
             </div>
@@ -1974,6 +1978,11 @@
               <select id="sf-level"><option value="">Seviye</option><option>Başlangıç</option><option>Orta</option><option>İleri</option><option>Profesyonel</option></select>
               <select id="sf-pnl"><option value="">Son 6 ay</option><option>Düzenli kazanç</option><option>Zarardayım</option><option>Başa baş</option><option>Yeni başladım</option></select>
             </div>
+            <div class="row">
+              <input type="text" id="sf-pnl2" placeholder="2 aylık kümülatif PnL ($)" />
+              <input type="text" id="sf-payout" placeholder="Son 2 payout ($)" />
+            </div>
+            <textarea id="sf-lasttrade" placeholder="Son aldığın işlem ve açıklaması (parite, yön, entry, result)"></textarea>
             <textarea id="sf-why" placeholder="Neden Alfa Traders'a katılmak istiyorsun?"></textarea>
             <button class="path-btn" id="sf-submit" onclick="submitSeniorForm()">Başvur →</button>
             <div class="result" id="sf-result"></div>
@@ -6020,18 +6029,23 @@ function submitSeniorForm() {
   const btn = document.getElementById('sf-submit');
   const result = document.getElementById('sf-result');
   const name = document.getElementById('sf-name').value.trim();
+  const tg = document.getElementById('sf-tg').value.trim();
+  const x = document.getElementById('sf-x').value.trim();
   const exp = document.getElementById('sf-exp').value;
   const market = document.getElementById('sf-market').value;
   const freq = document.getElementById('sf-freq').value;
   const method = document.getElementById('sf-method').value;
   const level = document.getElementById('sf-level').value;
   const pnl = document.getElementById('sf-pnl').value;
+  const pnl2 = document.getElementById('sf-pnl2').value.trim();
+  const payout = document.getElementById('sf-payout').value.trim();
+  const lasttrade = document.getElementById('sf-lasttrade').value.trim();
   const why = document.getElementById('sf-why').value.trim();
-  if (!name || !exp || !market || !freq || !method || !level || !pnl || !why) { result.textContent = 'Tüm alanları doldur.'; result.style.display = 'block'; return; }
+  if (!name || !tg || !exp || !market || !freq || !method || !level || !pnl || !why) { result.textContent = 'Ad, Telegram, tecrübe, piyasa, sıklık, analiz, seviye, son 6 ay ve neden zorunlu.'; result.style.display = 'block'; return; }
   if (!BAS_GS_URL) { result.textContent = 'Google Sheets bağlantısı henüz ayarlanmadı.'; result.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Gönderiliyor...';
   result.style.display = 'none';
-  const payload = { name, exp, market, freq, method, level, pnl, why, date: new Date().toISOString() };
+  const payload = { name, tg, x, exp, market, freq, method, level, pnl, pnl2, payout, lasttrade, why, date: new Date().toISOString() };
   fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     .then(() => { result.textContent = '✅ Başvurun alındı! Seni takip edeceğiz.'; result.style.display = 'block'; result.style.color = '#22c55e'; document.getElementById('senior-form').querySelectorAll('input, select, textarea').forEach(el => el.value = ''); })
     .catch(() => { result.textContent = 'Gönderme hatası. Tekrar dene.'; result.style.display = 'block'; result.style.color = '#ef4444'; })
