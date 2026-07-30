@@ -1279,8 +1279,8 @@
 #ca-main { flex:1; display:flex; flex-direction:column; min-width:0; }
 #ca-msgs { flex:1; overflow-y:auto; max-height:380px; display:flex; flex-direction:column; gap:8px; padding:4px; }
 .ca-msg { padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; max-width:85%; }
-.ca-msg.u { align-self:flex-end; background:var(--acc); color:#fff; border-bottom-right-radius:4px; }
-.ca-msg.a { align-self:flex-start; background:var(--bg); color:var(--text); border:1px solid var(--border); border-bottom-left-radius:4px; }
+.ca-msg.u { align-self:flex-start; background:var(--bg); color:var(--text); border:1px solid var(--border); border-bottom-left-radius:4px; }
+.ca-msg.a { align-self:flex-end; background:var(--acc); color:#fff; border-bottom-right-radius:4px; }
 .ca-msg .ca-meta { font-size:10px; color:var(--text-3); display:flex; gap:8px; }
 .ca-msg.u .ca-meta { color:rgba(255,255,255,.7); }
 .ca-conv.on .ca-conv-h .ca-badge { background: rgba(255,255,255,.3); }
@@ -6063,11 +6063,21 @@ function chatSid() {
   return s;
 }
 function loadChat() {
-  try { const d = localStorage.getItem(CHAT_KEY); if (d) chatHistory = JSON.parse(d); } catch(e) { chatHistory = []; }
+  try {
+    const d = localStorage.getItem(CHAT_KEY);
+    if (d) {
+      chatHistory = JSON.parse(d);
+      // 30 dk'dan eski konuşmaları temizle
+      const last = chatHistory[chatHistory.length - 1];
+      if (last && last.time && (Date.now() - new Date(last.time).getTime() > 1800000)) {
+        chatHistory = [];
+      }
+    } else { chatHistory = []; }
+  } catch(e) { chatHistory = []; }
   if (!chatHistory.length) {
     chatHistory = [
-      { role: 'bot', text: 'Merhaba! 👋 Alfa Traders\'a hoş geldin. Sana nasıl yardımcı olabilirim?' },
-      { role: 'bot', text: '📌 Sık sorulanlar:\n• Borsaya kayıt → Bybit / OKX linkleri\n• Topluluk → Telegram grubu\n• Eğitim → Alfa Edu\n• Başvuru → Deneyimli formu\nDetay için sorunu yaz, ekibimiz yanıtlasın.' },
+      { role: 'bot', text: 'Merhaba! 👋 Alfa Traders\'a hoş geldin. Sana nasıl yardımcı olabilirim?', time: new Date().toISOString() },
+      { role: 'bot', text: '📌 Sık sorulanlar:\n• Borsaya kayıt → Bybit / OKX linkleri\n• Topluluk → Telegram grubu\n• Eğitim → Alfa Edu\n• Başvuru → Deneyimli formu\nDetay için sorunu yaz, ekibimiz yanıtlasın.', time: new Date().toISOString() },
     ];
     saveChat();
   }
@@ -6120,6 +6130,16 @@ function requestLiveSupport() {
   body.innerHTML = `<div class="chat-live-form"><div class="clf-title">👤 Canlı destek için bilgilerin:</div><input type="text" id="clf-name" placeholder="Adın Soyadın" /><input type="email" id="clf-email" placeholder="E-posta (opsiyonel)" /><button class="clf-btn" onclick="submitLiveSupport()">Bağlan</button></div>`;
   body.scrollTop = body.scrollHeight;
 }
+function caDelete(sid) {
+  if (!confirm('Bu konuşmayı tamamen sil? Tüm mesajlar kalıcı olarak gider.')) return;
+  // Önce yerelden sil, sonra API'a bildir
+  if (caSelectedSid === sid) { caSelectedSid = null; document.getElementById('ca-msgs').innerHTML = ''; document.getElementById('ca-reply-box').classList.add('hidden'); }
+  caAllMsgs = caAllMsgs.filter(m => m.sessionId !== sid);
+  caReadSessions.delete(sid);
+  updateChatBadge();
+  renderAdminChat();
+  fetch(CHAT_API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) }).catch(() => {});
+}
 function submitLiveSupport() {
   const name = document.getElementById('clf-name').value.trim();
   if (!name) { alert('Lütfen adını ve soyadını gir.'); return; }
@@ -6128,8 +6148,8 @@ function submitLiveSupport() {
   let text = '👤 Canlı destek istiyorum.';
   if (name) text += '\nİsim: ' + name;
   if (email) text += '\nE-posta: ' + email;
-  chatHistory.push({ role: 'user', text });
-  chatHistory.push({ role: 'admin', text: '📞 Canlı destek talebin alındı. En kısa sürede sana dönüş yapacağız.' });
+  chatHistory.push({ role: 'user', text, time: new Date().toISOString() });
+  chatHistory.push({ role: 'admin', text: '📞 Canlı destek talebin alındı. En kısa sürede sana dönüş yapacağız.', time: new Date().toISOString() });
   saveChat(); renderChat();
   const sid = chatSid();
   fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text: 'Canlı destek talebi - ' + name + (email ? ' (' + email + ')' : '') }) }).catch(() => {});
@@ -6140,7 +6160,7 @@ function sendChatMsg() {
   const text = input.value.trim();
   if (!text) return;
   input.value = '';
-  chatHistory.push({ role: 'user', text });
+  chatHistory.push({ role: 'user', text, time: new Date().toISOString() });
   saveChat(); renderChat();
   const sid = chatSid();
   fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text }) }).catch(() => {});
@@ -6183,7 +6203,12 @@ function startChatPoll() {
     if (!p || !p.classList.contains('open')) return;
     const sid = chatSid();
     fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
-      const adminMsgs = msgs.filter(m => m.sessionId === sid && m.role === 'admin');
+      const myMsgs = msgs.filter(m => m.sessionId === sid);
+      // Session silinmişse (admin tarafından) local history'i temizle
+      if (!myMsgs.length && chatHistory.some(h => h.role === 'admin')) {
+        chatHistory = []; saveChat(); renderChat(); return;
+      }
+      const adminMsgs = myMsgs.filter(m => m.role === 'admin');
       let added = false;
       adminMsgs.forEach(m => {
         if (!chatHistory.some(h => h.time === m.time && h.role === 'admin')) {
@@ -6285,12 +6310,6 @@ function caSelect(sid) {
   document.querySelectorAll('.ca-item').forEach(c => c.classList.toggle('on', c.dataset.sid === sid));
   const sessions = {}; caAllMsgs.forEach(m => { if (!sessions[m.sessionId]) sessions[m.sessionId] = []; sessions[m.sessionId].push(m); });
   showSessionMsgs(sessions, document.getElementById('ca-reply-box'), document.getElementById('ca-msgs'));
-}
-function caDelete(sid) {
-  if (!confirm('Bu konuşmayı sil? Tüm mesajları kalıcı olarak gider.')) return;
-  fetch(CHAT_API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) })
-    .then(() => { if (caSelectedSid === sid) caSelectedSid = null; renderAdminChat(); })
-    .catch(() => { alert('Silme hatası'); });
 }
 function startAdminChatPoll() {
   clearInterval(caPollTimer);
