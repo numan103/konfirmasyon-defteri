@@ -10,47 +10,59 @@ Topluluk hakkında bilgiler:
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
 - Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)`;
 
+const HF_MODEL = 'mistralai/Mistral-7B-Instruct-v0.3';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') {
-    const k = process.env.GEMINI_API_KEY || '';
-    return res.json({ key: k.substring(0, 8) + '...', len: k.length });
-  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const { message } = req.body || {};
   if (!message) return res.status(400).json({ reply: 'Mesaj girmelisin.' });
 
-  const API_KEY = process.env.GEMINI_API_KEY;
+  const API_KEY = process.env.GEMINI_API_KEY || process.env.HF_API_KEY;
   if (!API_KEY) {
     return res.json({ reply: '🤖 AI henüz aktif değil. Sorunu kaydettim, ekibimiz dönecek.' });
   }
 
+  const isGemini = API_KEY.startsWith('AIzaSy');
+
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
-      {
+    if (isGemini) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [
             { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-            { role: 'model', parts: [{ text: 'Anlaşıldı, Alfa Traders asistanı olarak yardımcı olacağım.' }] },
+            { role: 'model', parts: [{ text: 'Anlaşıldı.' }] },
             { role: 'user', parts: [{ text: message }] }
           ],
           generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
         })
-      }
-    );
+      });
+      const data = await r.json();
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (reply) return res.json({ reply });
+      return res.json({ reply: 'Üzgünüm, cevap veremiyorum.' });
+    }
 
-    const data = await response.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (reply) return res.json({ reply });
-    const errMsg = data?.error?.message || 'no error';
-    return res.json({ reply: errMsg });
+    const r = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        inputs: `<s>[INST] ${SYSTEM_PROMPT}\n\nKullanıcı: ${message} [/INST]`,
+        parameters: { max_new_tokens: 300, temperature: 0.7, return_full_text: false }
+      })
+    });
+
+    const data = await r.json();
+    const reply = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+    if (reply) return res.json({ reply: reply.trim() });
+    const errMsg = typeof data === 'object' ? (data.error || JSON.stringify(data)) : 'Hata';
+    return res.json({ reply: 'Cevap alınamadı: ' + errMsg });
   } catch (e) {
-    return res.json({ reply: 'Bağlantı hatası. Lütfen tekrar dene.' });
+    return res.json({ reply: 'Bağlantı hatası.' });
   }
 }
