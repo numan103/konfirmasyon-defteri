@@ -1221,8 +1221,7 @@
 /* Kümülatif PnL sayacı */
 .cum-pnl-wrap { margin: 26px auto 0; display: inline-block; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px 32px 18px; box-shadow: var(--shadow); }
 .cum-pnl-lbl { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; color: var(--green); text-transform: uppercase; margin-bottom: 8px; }
-.cum-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex: none; animation: cumPulse 1.6s ease-in-out infinite; }
-@keyframes cumPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.75)} }
+.cum-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex: none; }
 .cum-pnl-val { font-family: var(--font-display); font-size: clamp(34px, 9vw, 56px); font-weight: 800; letter-spacing: -.05em; color: var(--green); line-height: 1; font-variant-numeric: tabular-nums; }
 .cum-pnl-sub { font-size: 11.5px; color: var(--text-3); font-weight: 500; margin-top: 5px; }
 .cum-chart { width: min(340px, 74vw); margin: 16px auto 2px; }
@@ -2196,7 +2195,7 @@
         <div class="cum-pnl-wrap">
           <div class="cum-pnl-lbl"><span class="cum-live-dot"></span>Topluluk Kümülatif PnL</div>
           <div class="cum-pnl-val" id="cum-pnl-val">+0.0R</div>
-          <div class="cum-pnl-sub">2026 · Ocak'tan bu yana toplam R</div>
+          <div class="cum-pnl-sub">Ocak – Temmuz 2026 · toplam R</div>
           <div class="cum-chart" id="cum-chart">
             <svg id="cum-svg" viewBox="0 0 320 132" preserveAspectRatio="none" aria-hidden="true">
               <defs>
