@@ -5638,49 +5638,61 @@ async function loadEgitim() {
     const r = await fetch('/api/edu-shared');
     if (r.ok) sharedData = await r.json();
   } catch (e) { /* */ }
+  const isAdmin = AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL;
+  // Kullanıcının kendi seçimlerini (sel/selVid) korumak için önce local'den al
+  let localSel = {}, localSelVid = {};
   try {
     const raw = await store.get(EGITIM_KEY);
-    if (raw) egitimData = JSON.parse(raw);
+    if (raw) { const p = JSON.parse(raw); localSel = p.sel || {}; localSelVid = p.selVid || {}; }
   } catch (e) { /* */ }
-  if (!egitimData || typeof egitimData !== 'object') egitimData = {};
-  if (!egitimData.sections || typeof egitimData.sections !== 'object') egitimData.sections = {};
+  if (sharedData && sharedData.sections && !isAdmin) {
+    // Admin değilse: shared verisi local'in üstüne yazsın (silinenler de gitsin)
+    egitimData = JSON.parse(JSON.stringify(sharedData));
+    egitimData.sel = localSel;
+    egitimData.selVid = localSelVid;
+  } else {
+    try {
+      const raw = await store.get(EGITIM_KEY);
+      if (raw) egitimData = JSON.parse(raw);
+    } catch (e) { /* */ }
+    if (!egitimData || typeof egitimData !== 'object') egitimData = {};
+    if (!egitimData.sections || typeof egitimData.sections !== 'object') egitimData.sections = {};
+    if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
+    if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
+    // shared'dan gelen konuları local'e ekle (yoksa)
+    if (sharedData && sharedData.sections) {
+      Object.keys(EG_SECTIONS).forEach(sec => {
+        const arr = sharedData.sections[sec] || [];
+        if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
+        const localIds = new Set(egitimData.sections[sec].map(t => t.id));
+        arr.forEach(t => {
+          if (!localIds.has(t.id)) {
+            if (sec === 'teknik' && !t.level) t.level = 'temel';
+            egitimData.sections[sec].push(t);
+          }
+        });
+      });
+    }
+  }
   if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
   if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
-  // shared'dan gelen konuları local'e ekle (yoksa)
-  if (sharedData && sharedData.sections) {
-    Object.keys(EG_SECTIONS).forEach(sec => {
-      const arr = sharedData.sections[sec] || [];
-      if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
-      const localIds = new Set(egitimData.sections[sec].map(t => t.id));
-      arr.forEach(t => {
-        if (!localIds.has(t.id)) {
-          if (sec === 'teknik' && !t.level) t.level = 'temel';
-          egitimData.sections[sec].push(t);
-        }
-      });
-    });
-  }
-  // shared'a push et (local'de shared'da olmayan konu varsa)
-  const hasLocal = Object.keys(EG_SECTIONS).some(sec => {
-    const sharedIds = new Set((sharedData?.sections?.[sec] || []).map(t => t.id));
-    return (egitimData.sections[sec] || []).some(t => !sharedIds.has(t.id));
-  });
-  if (hasLocal) await saveEgitim();
 }
 async function saveEgitim() {
   await store.set(EGITIM_KEY, JSON.stringify(egitimData));
-  // shared API'ya TÜM veriyi gönder (full replace — herkes görsün)
-  try {
-    const payload = { sections: {} };
-    Object.keys(EG_SECTIONS).forEach(sec => {
-      payload.sections[sec] = (egitimData.sections[sec] || []).filter(t => t.videos?.some(v => v.url));
-    });
-    const res = await fetch('/api/edu-shared', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) egShared = JSON.parse(JSON.stringify(payload));
-  } catch (e) { /* shared sync hatası — sadece local devam */ }
+  // Sadece admin shared'a yazsın, herkes okusun
+  if (AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL) {
+    try {
+      const payload = { sections: {} };
+      Object.keys(EG_SECTIONS).forEach(sec => {
+        payload.sections[sec] = (egitimData.sections[sec] || []).filter(t => t.videos?.some(v => v.url));
+      });
+      const res = await fetch('/api/edu-shared', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) egShared = JSON.parse(JSON.stringify(payload));
+    } catch (e) { /* shared sync hatası — sadece local devam */ }
+  }
 }
 
 // --- YouTube yardımcıları ---
