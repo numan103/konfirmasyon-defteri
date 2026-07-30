@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     try {
       const url = await getUrl();
       if (!url) return res.status(200).json([]);
-      const r = await fetch(url);
+      const r = await fetch(url + '?t=' + Date.now());
       if (!r.ok) return res.status(200).json([]);
       return res.status(200).json(await r.json());
     } catch { return res.status(200).json([]); }
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       let msgs = [];
       const url = await getUrl();
       if (url) {
-        try { const r = await fetch(url); if (r.ok) msgs = await r.json(); } catch {}
+        try { const r = await fetch(url + '?t=' + Date.now()); if (r.ok) msgs = await r.json(); } catch {}
       }
       msgs.push({ sessionId, role, text, time: new Date().toISOString() });
       const result = await put(BLOB_PATH, JSON.stringify(msgs), { access: 'public', addRandomSuffix: false, allowOverwrite: true });
