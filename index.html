@@ -6155,7 +6155,7 @@ function startChatPoll() {
     const p = document.getElementById('chat-popup');
     if (!p || !p.classList.contains('open')) return;
     const sid = chatSid();
-    fetch(CHAT_API).then(r => r.json()).then(msgs => {
+    fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
       const adminMsgs = msgs.filter(m => m.sessionId === sid && m.role === 'admin');
       let added = false;
       adminMsgs.forEach(m => {
@@ -6182,7 +6182,7 @@ let caAllMsgs = [];
 let caSelectedSid = null;
 let caPollTimer = null;
 function renderAdminChat() {
-  fetch(CHAT_API).then(r => r.json()).then(msgs => {
+  fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
     caAllMsgs = msgs || [];
     const convs = document.getElementById('ca-convs');
     const empty = document.getElementById('ca-empty');
