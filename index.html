@@ -29,8 +29,13 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif; color: var(--text);
     min-height: 100vh; padding-bottom: 40px; font-size: 14px;
+    background:
+      radial-gradient(820px 480px at 100% -6%, rgba(123,120,245,.12), transparent 55%),
+      radial-gradient(680px 460px at -5% 2%, rgba(22,163,74,.06), transparent 52%),
+      var(--bg);
+    background-attachment: fixed;
   }
   .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
 
@@ -141,7 +146,7 @@
   a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
-  .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; color: var(--text); }
+  .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; background: linear-gradient(120deg, var(--text) 35%, var(--acc)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   .nav-links { display: flex; gap: 2px; overflow: visible; }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-link { position: relative; background: transparent; border: none; padding: 9px 16px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
@@ -153,7 +158,8 @@
   .nav-drop .drop-btn { cursor: default; display: inline-flex; align-items: center; gap: 2px; padding: 9px 16px; border-radius: 10px; }
   .nav-drop .drop-btn:hover { background: rgba(91,91,214,0.07); color: var(--text); }
   .nav-drop.on .drop-btn { background: var(--acc-soft); color: var(--acc); }
-  .nav-drop .drop-menu { display: none; position: absolute; top: calc(100% + 20px); left: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .nav-drop .drop-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; box-shadow: 0 12px 30px rgba(23,25,35,0.16); }
+  .nav-drop .drop-menu::before { content: ''; position: absolute; top: -12px; left: 0; right: 0; height: 12px; }
   .nav-drop.open .drop-menu { display: flex; flex-direction: column; gap: 2px; }
   .nav-drop .drop-menu .nav-link { display: block; white-space: nowrap; }
   .nav-drop.on > .drop-btn { background: var(--acc-soft); color: var(--acc); }
@@ -1096,9 +1102,9 @@
   .emo-head-right .bias-seg button.on-bear { color: #fff; background: var(--red); }
 
   /* ===== Eğitim (Alfa Edu) ===== */
-  .eg-brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 6px 2px 2px; }
+  .eg-brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 15px 18px; margin-bottom: 14px; border-radius: 14px; border: 1px solid var(--border); border-left: 3px solid var(--acc); background: linear-gradient(115deg, rgba(123,120,245,.11), rgba(124,92,240,.03) 55%, transparent); box-shadow: 0 4px 18px rgba(23,25,35,.04); }
   .eg-brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, #5b5bd6, #7c5cf0); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .eg-brand-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; }
+  .eg-brand-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; }
   /* kurs düzeni: solda konular, sağda büyük oynatıcı */
   .eg-course { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
   @media (max-width: 820px) { .eg-course { grid-template-columns: 1fr; } }
@@ -1963,6 +1969,7 @@
     </div>
   </div>
   <div id="page-defter">
+    <div class="eg-brand"><span class="eg-brand-name">Alfa-Check List</span><span class="eg-brand-sub">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
   <div class="controls">
     <div class="seg" id="pair-seg"></div>
     <div class="seg">
@@ -2223,6 +2230,7 @@
     </div>
   </div>
   <div id="page-data" class="hidden">
+    <div class="eg-brand"><span class="eg-brand-name">Trade Günlüğü</span><span class="eg-brand-sub">İşlemlerini kaydet, kümülatif R eğrisini izle.</span></div>
     <div class="data-kpis" id="data-kpis"></div>
     <div class="panel" style="margin-bottom:14px;">
       <h2><span>+ Yeni İşlem</span></h2>
@@ -2307,6 +2315,7 @@
   </div>
 
   <div id="page-review" class="hidden">
+    <div class="eg-brand"><span class="eg-brand-name">Haftalık Değerlendirme</span><span class="eg-brand-sub">Haftalık RR gir, kümülatif eğrini ve retrospektini izle.</span></div>
     <div class="rv-head">
       <button class="rv-nav" id="rv-prev" type="button">◀</button>
       <div class="rv-week" id="rv-week">—</div>
@@ -2346,6 +2355,7 @@
     </div>
   </div>
   <div id="page-news" class="hidden">
+    <div class="eg-brand"><span class="eg-brand-name">AlfaNews</span><span class="eg-brand-sub">Dergi formatında analist içerikleri ve piyasa içgörüleri.</span></div>
     <div class="mag-wrap">
       <div class="mag-toolbar">
         <div class="mag-brand2">AlfaNews<button type="button" class="mag-key" id="mag-key" title="Yönetici anahtarı (yakında)" aria-label="Yönetici anahtarı">🔑</button><span class="mag-adminbadge" id="mag-adminbadge">Düzenleme modu</span></div>
