@@ -1158,48 +1158,61 @@
   .cv-bgup { position: absolute; left: 26px; bottom: 20px; z-index: 3; font-size: 11px; font-weight: 700; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
   .cv-bgup:hover { background: rgba(255,255,255,.28); } .cv-bgup input { display: none; }
 /* Başvuru Sayfası */
-.bas-page { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
-.bas-hero { text-align: center; padding: 40px 20px; margin-bottom: 32px; }
-.bas-hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -.3px; margin: 0 0 8px; background: linear-gradient(135deg, var(--acc), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.bas-hero p { color: var(--text-2); font-size: 14px; max-width: 500px; margin: 0 auto; line-height: 1.5; }
-.bas-panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; }
-.bas-panel h2 { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
-.bas-panel .hint { font-size: 12.5px; color: var(--text-3); margin: 0 0 20px; }
-.bas-field { margin-bottom: 20px; }
-.bas-field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-.bas-field label .req { color: var(--red); }
-.bas-options { display: flex; gap: 10px; flex-wrap: wrap; }
-.bas-option { position: relative; }
-.bas-option input { position: absolute; opacity: 0; }
-.bas-option label { display: block; padding: 8px 18px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all .15s; background: var(--bg); color: var(--text-2); margin: 0; }
-.bas-option input:checked+label { border-color: var(--acc); background: var(--acc-soft); color: var(--acc); }
-.bas-option label:hover { border-color: var(--acc); }
-.bas-field textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px; transition: border-color .15s; box-sizing: border-box; }
-.bas-field textarea:focus { outline: none; border-color: var(--acc); }
-.bas-submit { width: 100%; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--acc), #7c3aed); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .15s; letter-spacing: .2px; }
-.bas-submit:hover { opacity: .85; }
-.bas-submit:disabled { opacity: .5; cursor: default; }
-.bas-success { text-align: center; padding: 32px 20px; }
-.bas-success .icon { font-size: 40px; margin-bottom: 12px; }
-.bas-success h3 { font-size: 18px; margin: 0 0 6px; }
-.bas-success p { color: var(--text-2); font-size: 13px; margin: 0; }
-.bas-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.bas-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; transition: border-color .2s, transform .2s; cursor: pointer; text-decoration: none; display: block; color: inherit; }
-.bas-card:hover { border-color: var(--acc); transform: translateY(-2px); }
-.bas-card .icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px; }
-.bas-card h3 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
-.bas-card p { font-size: 12.5px; color: var(--text-3); margin: 0 0 16px; line-height: 1.45; }
-.bas-card .btn { display: inline-block; padding: 10px 24px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; transition: all .15s; cursor: pointer; border: none; pointer-events: auto; }
-.bas-card .btn-primary { background: var(--acc); color: #fff; }
-.bas-card .btn-primary:hover { opacity: .85; }
-.bas-card .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
-.bas-card .btn-outline:hover { border-color: var(--acc); color: var(--acc); }
-.bas-card .btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-.bas-form-wrap { display: none; }
-.bas-form-wrap.open { display: block; }
+.bas-page { max-width: 780px; margin: 0 auto; padding: 24px 16px 60px; }
+.bas-hero { text-align: center; padding: 48px 20px 40px; position: relative; }
+.bas-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; background: radial-gradient(circle, var(--acc-soft) 0%, transparent 70%); opacity: .5; pointer-events: none; }
+.bas-hero .mark { width: 56px; height: 56px; margin: 0 auto 16px; background: linear-gradient(135deg, var(--acc), #7c3aed); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; box-shadow: 0 8px 32px rgba(123,120,245,.3); }
+.bas-hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -.4px; margin: 0 0 12px; background: linear-gradient(135deg, var(--acc), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.bas-hero p { color: var(--text-2); font-size: 14px; max-width: 520px; margin: 0 auto 24px; line-height: 1.6; }
+.bas-cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 36px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--acc), #7c3aed); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 4px 20px rgba(123,120,245,.3); }
+.bas-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(123,120,245,.4); }
+.bas-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; }
+.bas-modal.open { display: flex; }
+.bas-modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 360px; width: 90%; text-align: center; animation: basFadeIn .2s ease; }
+.bas-modal-box h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+.bas-modal-box p { color: var(--text-3); font-size: 12.5px; margin: 0 0 20px; }
+.bas-modal-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-2); font-size: 18px; cursor: pointer; padding: 4px; }
+.ref-links { display: flex; flex-direction: column; gap: 10px; }
+.ref-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; transition: opacity .15s; border: 1.5px solid var(--border); color: var(--text); background: var(--bg); }
+.ref-btn:hover { opacity: .8; }
+.ref-btn .badge { font-size: 18px; }
+.bas-feed { margin-top: 8px; }
+.bas-feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.bas-feed-header h2 { font-size: 17px; font-weight: 700; margin: 0; }
+.bas-feed-header .btn { padding: 8px 18px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.bas-feed-header .btn:hover { border-color: var(--acc); color: var(--acc); }
+.bas-post { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; transition: border-color .15s; }
+.bas-post:hover { border-color: var(--acc-soft); }
+.bas-post-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bas-post .badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; padding: 3px 10px; border-radius: 6px; }
+.bas-post .badge.trade { background: rgba(52,175,235,.15); color: #34afeb; }
+.bas-post .badge.topic { background: rgba(250,204,21,.15); color: #facc15; }
+.bas-post .badge.edu { background: rgba(123,120,245,.15); color: var(--acc); }
+.bas-post .badge.announce { background: rgba(34,197,94,.15); color: #22c55e; }
+.bas-post .date { font-size: 11px; color: var(--text-3); }
+.bas-post h4 { font-size: 14px; font-weight: 700; margin: 0 0 6px; }
+.bas-post .content { font-size: 13px; color: var(--text-2); line-height: 1.5; white-space: pre-wrap; }
+.bas-post .author { font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
+.bas-post .pin { color: #facc15; font-size: 12px; margin-left: auto; }
+.bas-add-wrap { display: none; margin-bottom: 16px; }
+.bas-add-wrap.open { display: block; }
+.bas-add { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.bas-add h3 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+.bas-add select, .bas-add input, .bas-add textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; }
+.bas-add select:focus, .bas-add input:focus, .bas-add textarea:focus { outline: none; border-color: var(--acc); }
+.bas-add textarea { min-height: 70px; resize: vertical; }
+.bas-add .row { display: flex; gap: 8px; }
+.bas-add .row select { flex: 0 0 130px; }
+.bas-add .row input { flex: 1; }
+.bas-add .btns { display: flex; gap: 8px; }
+.bas-add .btns button { padding: 8px 20px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: none; transition: opacity .15s; }
+.bas-add .btns .save { background: var(--acc); color: #fff; }
+.bas-add .btns .save:hover { opacity: .85; }
+.bas-add .btns .cancel { background: transparent; border: 1.5px solid var(--border); color: var(--text-2); }
+.bas-add .btns .cancel:hover { border-color: var(--text-3); }
+.bas-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.bas-form-wrap.open .bas-panel { animation: basFadeIn .25s ease; }
-@media (max-width: 768px) { .bas-grid { grid-template-columns: 1fr; } .bas-panel { padding: 20px 16px; } }
+@media (max-width: 640px) { .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 32px 12px 28px; } .bas-hero h1 { font-size: 26px; } }
 </style>
 </head>
 <body>
@@ -1383,7 +1396,7 @@
           <a href="?page=news" class="nav-link" id="tab-news" data-nav>Dergi</a>
         </div>
       </div>
-      <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav>Başvuru</a>
+      <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav>Alfa Trader Ol</a>
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl">İletişim</span>
@@ -1412,7 +1425,7 @@
         <a href="?page=onchain" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/s57QXY641cY/download?force=true" alt="" onload="this.style.display='block'" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg></div><h2>Onchain Verileri</h2><p>Coinglass Supercharts — Funding / CVD / OI. Notion OAuth ile trade senkronu.</p></a>
         <a href="?page=news" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/WYd_PkCa1BY/download?force=true" alt="" onload="this.style.display='block'" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 12h16M12 4v16"/></svg></div><h2>AlfaNews</h2><p>Dergi formatında analizler. Analist yönetimi, sayfa düzeni, görsel büyütme. Admin paneli ile içerik yönetimi.</p></a>
         <a href="?page=calendar" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/BJ6w75UwMf8/download?force=true" alt="" onload="this.style.display='block'" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div><h2>Ekonomik Takvim</h2><p>3 yıldız haberler — Investing.com ekonomik takvimi. Yüksek etkili makro verileri.</p></a>
-        <a href="?page=basvuru" class="home-card" data-nav><div class="preview" style="background: linear-gradient(135deg, var(--acc), #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(255,255,255,.9);">📋</div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/></svg></div><h2>Başvuru</h2><p>Alfa Trader başvurusu, private işlem grubu ve mentorship programına katılım.</p></a>
+        <a href="?page=basvuru" class="home-card" data-nav><div class="preview" style="background: linear-gradient(135deg, var(--acc), #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(255,255,255,.9);">▲</div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z"/></svg></div><h2>Alfa Trader Ol</h2><p>Topluluk akışı, işlemler, konular ve hayat boyu öğrenme ortamı. Referans ile katıl.</p></a>
       </div>
       <div class="home-tips">
         <h2>💡 Verimli Kullanım İpuçları</h2>
@@ -1910,88 +1923,49 @@
     </div>
   </div>
   <div id="page-basvuru" class="hidden">
-    <div class="bas-page" id="basvuru-app">
+    <div class="bas-page">
       <div class="bas-hero">
-        <h1>Başvuru</h1>
-        <p>Alfa Traders ailesine katıl. Trader başvurusu yap, private işlem grubuna katıl veya mentorship programına başvur.</p>
+        <div class="mark">▲</div>
+        <h1>Alfa Trader Ol</h1>
+        <p>Hayat boyu öğrenme, disiplinli trading ve güçlü bir topluluk. Referans linklerinden birini kullanarak borsaya kaydol, ekibin parçası ol. İşlemler, konular ve içerikler burada.</p>
+        <button class="bas-cta" onclick="showRefModal()">🚀 Alfa Trader Ol</button>
       </div>
-      <div class="bas-grid">
-        <div class="bas-card" onclick="toggleBasForm()">
-          <div class="icon" style="background:var(--acc-soft);color:var(--acc);">⚡</div>
-          <h3>Deneyimli Alfa Trader</h3>
-          <p>Trader alımı başvuru formu. Deneyimli, uyumlu ve Alfa ruhunu taşıyan traderlar arıyoruz.</p>
-          <span class="btn btn-primary" id="bas-form-btn">Formu Aç</span>
+
+      <div class="bas-feed" id="bas-feed">
+        <div class="bas-feed-header">
+          <h2>Topluluk Akışı</h2>
+          <button class="btn" onclick="toggleAddPost()" id="feed-add-btn">+ Paylaş</button>
         </div>
-        <a class="bas-card" href="https://t.me/alfatraderspublic" target="_blank" rel="noopener">
-          <div class="icon" style="background:rgba(52,175,235,.15);color:#34afeb;">💬</div>
-          <h3>Private İşlem Grubu</h3>
-          <p>Günlük işlem paylaşımları, canlı yayınlar ve verified trader analizleri. Aktif ve uyumlu bir topluluk.</p>
-          <span class="btn btn-primary">Telegram'a Katıl</span>
-        </a>
-        <div class="bas-card">
-          <div class="icon" style="background:rgba(250,204,21,.15);color:#facc15;">🎓</div>
-          <h3>Mentorship</h3>
-          <p>Bire bir coaching, trade psikolojisi ve strateji geliştirme. Referans linki ile katılım veya form ile başvuru.</p>
-          <div class="btns">
-            <a class="btn btn-outline" href="#" id="bas-ref-link" target="_blank" rel="noopener">Bybit ile Katıl</a>
-            <a class="btn btn-outline" href="#" id="bas-ref-okx" target="_blank" rel="noopener">OKX ile Katıl</a>
-            <a class="btn btn-primary" href="https://forms.gle/f479yHx2d37amDne7" target="_blank" rel="noopener">Başvuru Formu</a>
+        <div class="bas-add-wrap" id="bas-add-wrap">
+          <div class="bas-add">
+            <h3>Yeni Paylaşım</h3>
+            <div class="row">
+              <select id="feed-type"><option value="trade">İşlem</option><option value="topic">Konu</option><option value="edu">Eğitim</option><option value="announce">Duyuru</option></select>
+              <input id="feed-title" placeholder="Başlık" />
+            </div>
+            <textarea id="feed-content" placeholder="İçerik..."></textarea>
+            <div class="row">
+              <input id="feed-author" placeholder="İsim" />
+              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2);flex:none;"><input type="checkbox" id="feed-pin" /> Sabitle</label>
+            </div>
+            <div class="btns">
+              <button class="save" onclick="addFeedPost()">Paylaş</button>
+              <button class="cancel" onclick="toggleAddPost()">İptal</button>
+            </div>
           </div>
         </div>
+        <div id="bas-feed-list"></div>
       </div>
-      <div class="bas-form-wrap" id="bas-form-wrap">
-        <div class="bas-panel" id="bas-form">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div><h2 style="margin:0;">Alfa Trader Başvurusu</h2><p class="hint" style="margin:2px 0 0;">Tüm zorunlu alanları doldurun.</p></div>
-            <button onclick="toggleBasForm()" style="background:none;border:1px solid var(--border);color:var(--text-2);border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-          </div>
-          <div class="bas-field">
-            <label>Kaç yıldır trade ediyorsunuz? <span class="req">*</span></label>
-            <div class="bas-options">
-              <div class="bas-option"><input type="radio" name="q1" id="q1a" value="+1 yıl" required><label for="q1a">+1 yıl</label></div>
-              <div class="bas-option"><input type="radio" name="q1" id="q1b" value="Size uygun değil."><label for="q1b">Size uygun değil.</label></div>
-            </div>
-          </div>
-          <div class="bas-field">
-            <label>Teknik/Temel/Trade Psikolojisi konularında bilgi düzeyiniz nedir? <span class="req">*</span></label>
-            <div class="bas-options">
-              <div class="bas-option"><input type="radio" name="q2" id="q2a" value="İleri düzey"><label for="q2a">İleri düzey</label></div>
-              <div class="bas-option"><input type="radio" name="q2" id="q2b" value="Size uygun değil."><label for="q2b">Size uygun değil.</label></div>
-            </div>
-          </div>
-          <div class="bas-field">
-            <label>Grupta günde +3 saat aktif olmayı, günlük biaslarınızı, işlemlerinizi ve piyasa bakışlarınızı paylaşmayı kabul ediyor musunuz? <span class="req">*</span></label>
-            <div class="bas-options">
-              <div class="bas-option"><input type="radio" name="q3" id="q3a" value="Evet"><label for="q3a">Evet</label></div>
-              <div class="bas-option"><input type="radio" name="q3" id="q3b" value="Size uygun değil."><label for="q3b">Size uygun değil.</label></div>
-            </div>
-          </div>
-          <div class="bas-field">
-            <label>Grup içinde saygılı, seviyeli ve anlayışlı olacağınızı; ego, hırs gibi duyguları bir kenara bırakarak ekip ruhunu güçlendireceğinizi taahhüt ediyor musunuz? <span class="req">*</span></label>
-            <div class="bas-options">
-              <div class="bas-option"><input type="radio" name="q4" id="q4a" value="Evet, uyumlu bir şekilde çalışırım."><label for="q4a">Evet, uyumlu bir şekilde çalışırım.</label></div>
-              <div class="bas-option"><input type="radio" name="q4" id="q4b" value="Size uygun değil."><label for="q4b">Size uygun değil.</label></div>
-            </div>
-          </div>
-          <div class="bas-field">
-            <label>Son payoutunuz, kümülatif pnl'iniz <span class="req">*</span></label>
-            <p class="hint" style="margin:-4px 0 8px;font-size:12px;">Tradingview'e kopyalayıp fotoğraf linki olarak paylaşabilirsiniz.</p>
-            <textarea id="q5" rows="3" placeholder="Son payout ve kümülatif PnL bilgileriniz..." required></textarea>
-          </div>
-          <div class="bas-field">
-            <label>Son aldığınız işlemin görselini ve açıklamasını paylaşınız. <span class="req">*</span></label>
-            <textarea id="q6" rows="3" placeholder="İşlem görseli linki + açıklama..." required></textarea>
-          </div>
-          <div class="bas-field">
-            <label>Aklınıza takılan bir soru olursa aşağıdan sorabilirsiniz.</label>
-            <textarea id="q7" rows="2" placeholder="Varsa sorularınız..."></textarea>
-          </div>
-          <div class="bas-field">
-            <label>Size nasıl ulaşacağız? (Telegram & X hesabınız) <span class="req">*</span></label>
-            <textarea id="q8" rows="2" placeholder="Telegram ve X (Twitter) kullanıcı adlarınız..." required></textarea>
-          </div>
-          <button class="bas-submit" id="bas-submit" onclick="submitBasvuru()">Başvuruyu Gönder</button>
-          <div id="bas-result" style="display:none;margin-top:16px;text-align:center;font-size:13px;"></div>
+    </div>
+
+    <div class="bas-modal" id="ref-modal">
+      <div class="bas-modal-box" style="position:relative;">
+        <button class="bas-modal-close" onclick="hideRefModal()">✕</button>
+        <h3>Bir borsa seçerek katıl</h3>
+        <p>Referans linki ile kaydol, Alfa Traders ekibine katıl.</p>
+        <div class="ref-links">
+          <a class="ref-btn" href="#" id="bas-ref-link" target="_blank" rel="noopener"><span class="badge">💎</span> Bybit ile Katıl</a>
+          <a class="ref-btn" href="#" id="bas-ref-okx" target="_blank" rel="noopener"><span class="badge">🔶</span> OKX ile Katıl</a>
         </div>
       </div>
     </div>
@@ -2020,16 +1994,13 @@ function applySocial() {
   set(['nc-tg', 'lps-tg'], SOCIAL.telegram);
   set(['nc-x', 'lps-x'], SOCIAL.x);
   set(['nc-yt', 'lps-yt'], SOCIAL.youtube);
-  const refEl = document.getElementById('bas-ref-link');
-  if (refEl) {
-    if (SOCIAL.referral) { refEl.href = SOCIAL.referral; refEl.style.display = ''; }
-    else { refEl.style.display = 'none'; }
-  }
-  const refOkx = document.getElementById('bas-ref-okx');
-  if (refOkx) {
-    if (SOCIAL.referralOkx) { refOkx.href = SOCIAL.referralOkx; refOkx.style.display = ''; }
-    else { refOkx.style.display = 'none'; }
-  }
+  ['bas-ref-link', 'bas-ref-okx'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const key = id === 'bas-ref-link' ? 'referral' : 'referralOkx';
+    if (SOCIAL[key]) { el.href = SOCIAL[key]; el.style.display = ''; }
+    else { el.style.display = 'none'; }
+  });
 }
 if (typeof document !== 'undefined') {
   if (document.readyState !== 'loading') applySocial();
@@ -4621,6 +4592,7 @@ function showPage(name) {
   if (name === 'news') renderNews();
   if (name === 'egitim') renderEgitim();
   if (name === 'indicators') renderIndicators();
+  if (name === 'basvuru') renderFeed();
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -5929,57 +5901,89 @@ if (AUTH_ENABLED) {
   // OAuth olmayan modda da hash kontrolü
   setTimeout(handleNotionHash, 1000);
 }
-// ============ Başvuru Formu ============
-function toggleBasForm() {
-  const w = document.getElementById('bas-form-wrap');
-  const btn = document.getElementById('bas-form-btn');
+// ============ Alfa Trader Ol — Topluluk Akışı ============
+const BAS_FEED_KEY = 'alfa-feed-v1';
+let basFeed = [];
+function loadFeed() {
+  try { const d = localStorage.getItem(BAS_FEED_KEY); if (d) basFeed = JSON.parse(d); } catch (e) { basFeed = []; }
+  if (!basFeed.length) {
+    basFeed = [
+      { id: 'f1', type: 'announce', title: 'Alfa Traders Topluluğuna Hoş Geldiniz', content: 'Burası hayat boyu öğrenme ve disiplinli trading ortamı. İşlemlerimizi, analizlerimizi ve bilgi birikimimizi paylaşıyoruz. Referans linki ile katıl, ekibin parçası ol.', author: 'Alfa Ekibi', date: new Date().toISOString(), pin: true },
+      { id: 'f2', type: 'trade', title: 'BTC Long — TP +2.8R', content: '4H likidite alımı + CVD divergance + Orderbook desteği. Entry: 68450, TP1: 69100 (%50), TP2: 69800 (%50), SL: 67900.', author: 'traderahmet', date: new Date(Date.now() - 864e5).toISOString(), pin: false },
+      { id: 'f3', type: 'topic', title: 'Haftalık Piyasa Değerlendirmesi', content: 'BTC bu hafta 67-69k aralığında sıkıştı. 70k üzerinde hacimli kapanış alırsak yeni ATH denemesi beklerim. Altcoinlerde ETH ve SOL relative strength gösteriyor.', author: 'traderahmet', date: new Date(Date.now() - 2 * 864e5).toISOString(), pin: false },
+      { id: 'f4', type: 'edu', title: 'CVD Divergance Nasıl Okunur?', content: 'Fiyat yeni dip yaparken Spot CVD yükseliyorsa = bullish divergence. Alçalan trendde CVD önden dönüş sinyali verir. Daily timeframe en güvenilir sinyali verir.', author: 'Alfa Edu', date: new Date(Date.now() - 3 * 864e5).toISOString(), pin: false },
+    ];
+    saveFeed();
+  }
+}
+function saveFeed() {
+  try { localStorage.setItem(BAS_FEED_KEY, JSON.stringify(basFeed)); } catch (e) {}
+}
+function renderFeed() {
+  const list = document.getElementById('bas-feed-list');
+  if (!list) return;
+  const sorted = [...basFeed].sort((a, b) => {
+    if (a.pin && !b.pin) return -1;
+    if (!a.pin && b.pin) return 1;
+    return new Date(b.date) - new Date(a.date);
+  });
+  if (!sorted.length) {
+    list.innerHTML = '<div class="bas-empty">Henüz paylaşım yok. İlk paylaşımı sen yap!</div>';
+    return;
+  }
+  const LABELS = { trade: 'İşlem', topic: 'Konu', edu: 'Eğitim', announce: 'Duyuru' };
+  list.innerHTML = sorted.map(p => `<div class="bas-post">
+    <div class="bas-post-head">
+      <span class="badge ${p.type}">${LABELS[p.type] || p.type}</span>
+      <span class="date">${fmtDate(p.date)}</span>
+      ${p.pin ? '<span class="pin">📌</span>' : ''}
+    </div>
+    <h4>${esc(p.title)}</h4>
+    <div class="content">${esc(p.content)}</div>
+    <div class="author">— ${esc(p.author || 'Anonim')}</div>
+  </div>`).join('');
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtDate(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 864e5;
+  if (diff < 1) return 'Bugün';
+  if (diff < 2) return 'Dün';
+  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function toggleAddPost() {
+  const w = document.getElementById('bas-add-wrap');
+  const btn = document.getElementById('feed-add-btn');
   if (!w) return;
   const open = !w.classList.contains('open');
   w.classList.toggle('open', open);
-  if (btn) btn.textContent = open ? 'Formu Kapat' : 'Formu Aç';
-  if (!open) {
-    document.querySelectorAll('#bas-form textarea').forEach(el => el.value = '');
-    document.querySelectorAll('#bas-form input[type="radio"]').forEach(el => el.checked = false);
-    document.getElementById('bas-result').style.display = 'none';
-  }
+  if (btn) btn.textContent = open ? 'İptal' : '+ Paylaş';
 }
-function submitBasvuru() {
-  const btn = document.getElementById('bas-submit');
-  const result = document.getElementById('bas-result');
-  result.style.display = 'none';
-  const q1 = document.querySelector('input[name="q1"]:checked');
-  const q2 = document.querySelector('input[name="q2"]:checked');
-  const q3 = document.querySelector('input[name="q3"]:checked');
-  const q4 = document.querySelector('input[name="q4"]:checked');
-  const q5 = document.getElementById('q5');
-  const q6 = document.getElementById('q6');
-  const q7 = document.getElementById('q7');
-  const q8 = document.getElementById('q8');
-  if (!q1 || !q2 || !q3 || !q4 || !q5.value.trim() || !q6.value.trim() || !q8.value.trim()) {
-    result.style.display = 'block'; result.style.color = 'var(--red)'; result.textContent = 'Lütfen tüm zorunlu alanları doldurun.'; return;
-  }
-  btn.disabled = true; btn.textContent = 'Gönderiliyor...';
-  const data = new URLSearchParams();
-  data.append('entry.1932669350', q1.value);
-  data.append('entry.536734793', q2.value);
-  data.append('entry.1410816221', q3.value);
-  data.append('entry.1917596572', q4.value);
-  data.append('entry.75672480', q5.value);
-  data.append('entry.894591430', q6.value);
-  data.append('entry.783215654', q7.value);
-  data.append('entry.1609836368', q8.value);
-  data.append('fvv', '1'); data.append('pageHistory', '0'); data.append('fbzx', '-1784986499742399897');
-  fetch('https://docs.google.com/forms/d/e/1FAIpQLSezcJIDtHSUVnaOzq00rEiR-RHP6bf0S1ZwX-cBZIJVvEh4lw/formResponse', {
-    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data
-  }).then(() => done()).catch(() => done());
-  function done() {
-    result.style.display = 'block'; result.style.color = 'var(--green)'; result.innerHTML = '✓ Başvurunuz başarıyla alındı! Ekibimiz en kısa sürede sizinle iletişime geçecek.';
-    document.querySelectorAll('#bas-form textarea').forEach(el => el.value = '');
-    document.querySelectorAll('#bas-form input[type="radio"]').forEach(el => el.checked = false);
-    btn.textContent = 'Başvuruyu Gönder'; btn.disabled = false;
-    setTimeout(() => { toggleBasForm(); }, 2500);
-  }
+function addFeedPost() {
+  const type = document.getElementById('feed-type').value;
+  const title = document.getElementById('feed-title').value.trim();
+  const content = document.getElementById('feed-content').value.trim();
+  const author = document.getElementById('feed-author').value.trim() || 'Alfa Trader';
+  const pin = document.getElementById('feed-pin').checked;
+  if (!title || !content) { alert('Başlık ve içerik zorunlu.'); return; }
+  basFeed.push({ id: 'f' + Date.now(), type, title, content, author, date: new Date().toISOString(), pin });
+  saveFeed(); renderFeed();
+  document.getElementById('feed-title').value = '';
+  document.getElementById('feed-content').value = '';
+  document.getElementById('feed-author').value = '';
+  document.getElementById('feed-pin').checked = false;
+  toggleAddPost();
 }
+function showRefModal() { document.getElementById('ref-modal').classList.add('open'); }
+function hideRefModal() { document.getElementById('ref-modal').classList.remove('open'); }
+document.addEventListener('click', e => {
+  const m = document.getElementById('ref-modal');
+  if (m && e.target === m) hideRefModal();
+});
+loadFeed();
+document.addEventListener('DOMContentLoaded', renderFeed);
+setTimeout(renderFeed, 100);
 </script>
 </body>
 </html>
