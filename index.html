@@ -165,6 +165,8 @@
   /* İletişim (navbar sağ üst) */
   .nav-contact { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .nav-contact .nc-lbl { font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: var(--text-3); }
+  .nav-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; line-height: 1; vertical-align: middle; margin-left: 2px; }
+  .nav-badge.hidden { display: none; }
   .soc-link { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; transition: all .15s ease; }
   .soc-link svg { width: 16px; height: 16px; display: block; }
   .soc-link:hover { color: #fff; border-color: transparent; transform: translateY(-1px); }
@@ -1454,7 +1456,7 @@
         </div>
       </div>
       <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav>Alfa Trader Ol</a>
-      <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" data-nav>Canlı Destek</a>
+      <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" data-nav>Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge">0</span></a>
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl">İletişim</span>
@@ -6181,9 +6183,17 @@ function getAutoReply(t) {
 let caAllMsgs = [];
 let caSelectedSid = null;
 let caPollTimer = null;
+function updateChatBadge(count) {
+  const badge = document.getElementById('chat-unread-badge');
+  if (!badge) return;
+  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.classList.remove('hidden'); }
+  else { badge.classList.add('hidden'); }
+}
 function renderAdminChat() {
   fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
     caAllMsgs = msgs || [];
+    const totalUnread = caAllMsgs.filter(m => m.role === 'user').length;
+    updateChatBadge(totalUnread);
     const convs = document.getElementById('ca-convs');
     const empty = document.getElementById('ca-empty');
     if (!convs) return;
@@ -6224,6 +6234,13 @@ function startAdminChatPoll() {
     renderAdminChat();
   }, 3000);
 }
+// Nav'da bildirim rozetini güncelle (her 10 sn'de bir)
+setInterval(() => {
+  fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
+    const u = msgs.filter(m => m.role === 'user').length;
+    updateChatBadge(u);
+  }).catch(() => {});
+}, 10000);
 // ============ Günün Sözü Ticker ============
 const QUOTES = [
   { text: 'Planlı trade gir, plansız trade girme. Setup yoksa işlem yok.', author: 'Alfa Disiplin' },
