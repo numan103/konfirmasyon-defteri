@@ -10,7 +10,7 @@ Topluluk hakkında bilgiler:
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
 - Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)`;
 
-const GROQ_MODEL = 'llama3-8b-8192';
+const GROQ_MODEL = 'llama-3.1-8b-instant';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export default async function handler(req, res) {
@@ -23,11 +23,9 @@ export default async function handler(req, res) {
   if (!message) return res.status(400).json({ reply: 'Mesaj girmelisin.' });
 
   const API_KEY = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
-  const keyExists = !!process.env.GEMINI_API_KEY;
   if (!API_KEY) {
-    return res.json({ reply: null, d: 'nokey. gemini=' + (process.env.GEMINI_API_KEY ? 'y' : 'n') + ' groq=' + (process.env.GROQ_API_KEY ? 'y' : 'n') });
+    return res.json({ reply: null });
   }
-  const keyPrefix = API_KEY.substring(0, 6);
 
   try {
     const r = await fetch(GROQ_URL, {
@@ -44,16 +42,13 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!r.ok) {
-      const t = await r.text().catch(() => '');
-      return res.json({ reply: null, d: `http${r.status} ${t.substring(0,120)}` });
-    }
+    if (!r.ok) return res.json({ reply: null });
 
     const data = await r.json();
     const reply = data?.choices?.[0]?.message?.content;
-    if (reply) return res.json({ reply, d: 'ok' });
-    return res.json({ reply: null, d: 'noreply ' + JSON.stringify(data).substring(0,100) });
+    if (reply) return res.json({ reply });
+    return res.json({ reply: null });
   } catch (e) {
-    return res.json({ reply: null, d: 'ex ' + e.constructor.name + ' ' + e.message.substring(0,80) });
+    return res.json({ reply: null });
   }
 }
