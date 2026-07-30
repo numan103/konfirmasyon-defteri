@@ -2381,6 +2381,8 @@
     <div class="eg-brand">
       <span class="eg-brand-name">Alfa Edu</span>
       <span class="eg-brand-sub">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin.</span>
+      <span id="eg-publish-st" style="font-size:12px;font-weight:600;margin-left:auto;"></span>
+      <button class="btn solid" id="eg-publish-btn" type="button" style="display:none;">🌐 Herkese Yayınla</button>
     </div>
     <div class="controls">
       <div class="seg" id="eg-sec-seg">
@@ -6109,16 +6111,24 @@ async function saveEgitim() {
   if (AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL) {
     try {
       const payload = { sections: {} };
+      let topicCount = 0, videoCount = 0;
       Object.keys(EG_SECTIONS).forEach(sec => {
-        payload.sections[sec] = (egitimData.sections[sec] || []).filter(t => t.title || t.videos?.length);
+        const list = (egitimData.sections[sec] || []).filter(t => t.title || t.videos?.length);
+        payload.sections[sec] = list;
+        topicCount += list.length;
+        list.forEach(t => { videoCount += (t.videos || []).filter(v => v.url).length; });
       });
       const res = await fetch('/api/edu-shared', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (res.ok) egShared = JSON.parse(JSON.stringify(payload));
-    } catch (e) { /* shared sync hatası — sadece local devam */ }
+      if (res.ok) { egShared = JSON.parse(JSON.stringify(payload)); return { ok: true, topics: topicCount, videos: videoCount }; }
+      let msg = 'HTTP ' + res.status;
+      try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (e) {}
+      return { ok: false, error: msg };
+    } catch (e) { return { ok: false, error: (e && e.message) || 'ağ hatası' }; }
   }
+  return { ok: true, local: true };
 }
 
 // --- YouTube yardımcıları ---
@@ -6424,6 +6434,19 @@ function bindEgitimPage() {
     }
     await saveEgitim(); egCloseForm(); renderEgitim();
   });
+  const egPubBtn = g('eg-publish-btn');
+  if (egPubBtn) egPubBtn.addEventListener('click', async () => {
+    const st = g('eg-publish-st');
+    egPubBtn.disabled = true; const orig = egPubBtn.textContent; egPubBtn.textContent = 'Yayınlanıyor…';
+    if (st) { st.textContent = ''; }
+    const r = await saveEgitim();
+    egPubBtn.disabled = false; egPubBtn.textContent = orig;
+    if (st) {
+      if (r && r.ok && !r.local) { st.textContent = '✓ ' + r.topics + ' konu · ' + r.videos + ' video herkese yayınlandı'; st.style.color = 'var(--green)'; }
+      else if (r && r.local) { st.textContent = 'Sadece admin yayınlayabilir.'; st.style.color = 'var(--text-3)'; }
+      else { st.textContent = '✗ Yayınlanamadı: ' + ((r && r.error) || 'bilinmeyen hata'); st.style.color = 'var(--red)'; }
+    }
+  });
   g('eg-in-url').addEventListener('keydown', e => { if (e.key === 'Enter') g('eg-in-save').click(); });
   g('eg-in-title').addEventListener('keydown', e => { if (e.key === 'Enter' && g('eg-in-url').style.display === 'none') g('eg-in-save').click(); });
   // not — yazdıkça konuya kaydet (debounce)
@@ -6574,6 +6597,8 @@ async function onAuthed(user) {
   const isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
   const adminTab = document.getElementById('tab-chat-admin');
   if (adminTab) adminTab.style.display = isAdmin ? '' : 'none';
+  const egPubBtn = document.getElementById('eg-publish-btn');
+  if (egPubBtn) egPubBtn.style.display = isAdmin ? '' : 'none';
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
