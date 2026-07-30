@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   const API_KEY = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
   if (!API_KEY) {
-    return res.json({ reply: null });
+    return res.json({ reply: null, d: 'no-key' });
   }
 
   try {
@@ -42,13 +42,16 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!r.ok) return res.json({ reply: null });
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      return res.json({ reply: null, d: 'http-' + r.status + ': ' + t.substring(0, 100) });
+    }
 
     const data = await r.json();
     const reply = data?.choices?.[0]?.message?.content;
-    if (reply) return res.json({ reply });
-    return res.json({ reply: null });
+    if (reply) return res.json({ reply, d: 'ok' });
+    return res.json({ reply: null, d: 'no-reply: ' + JSON.stringify(data).substring(0, 100) });
   } catch (e) {
-    return res.json({ reply: null });
+    return res.json({ reply: null, d: 'err: ' + e.message.substring(0, 100) });
   }
 }
