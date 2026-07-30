@@ -5645,7 +5645,8 @@ async function loadEgitim() {
     const raw = await store.get(EGITIM_KEY);
     if (raw) { const p = JSON.parse(raw); localSel = p.sel || {}; localSelVid = p.selVid || {}; }
   } catch (e) { /* */ }
-  if (sharedData && sharedData.sections && !isAdmin) {
+  const sharedHasContent = sharedData && sharedData.sections && Object.values(sharedData.sections).some(arr => arr && arr.length > 0);
+  if (sharedHasContent && !isAdmin) {
     // Admin değilse: shared verisi local'in üstüne yazsın (silinenler de gitsin)
     egitimData = JSON.parse(JSON.stringify(sharedData));
     egitimData.sel = localSel;
@@ -5676,6 +5677,10 @@ async function loadEgitim() {
   }
   if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
   if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
+  // Adminse ve shared boşsa mevcut local veriyi shared'a ata
+  if (isAdmin && !sharedHasContent && Object.values(egitimData.sections).some(arr => arr && arr.length > 0)) {
+    await saveEgitim();
+  }
 }
 async function saveEgitim() {
   await store.set(EGITIM_KEY, JSON.stringify(egitimData));
