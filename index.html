@@ -6076,6 +6076,7 @@ function submitSeniorForm() {
     .catch(() => { result.textContent = 'Gönderme hatası. Tekrar dene.'; result.style.display = 'block'; result.style.color = '#ef4444'; })
     .finally(() => { btn.disabled = false; btn.textContent = 'Başvur →'; });
 }
+</script>
 <button class="chat-bubble" id="chat-btn" onclick="toggleChat()">💬</button>
 <div class="chat-popup" id="chat-popup">
   <div class="chat-head">
