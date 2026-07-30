@@ -1164,6 +1164,13 @@
 .bas-hero { text-align: center; padding: 36px 20px 32px; }
 .bas-hero h1 { font-size: 30px; font-weight: 800; letter-spacing: -.4px; margin: 0 0 8px; background: linear-gradient(135deg, var(--acc), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .bas-hero p { color: var(--text-2); font-size: 13.5px; max-width: 480px; margin: 0 auto; line-height: 1.5; }
+/* Kümülatif PnL sayacı */
+.cum-pnl-wrap { margin: 26px auto 0; display: inline-block; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px 32px 18px; box-shadow: var(--shadow); }
+.cum-pnl-lbl { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; color: var(--green); text-transform: uppercase; margin-bottom: 8px; }
+.cum-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex: none; animation: cumPulse 1.6s ease-in-out infinite; }
+@keyframes cumPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.75)} }
+.cum-pnl-val { font-family: var(--font-display); font-size: clamp(34px, 9vw, 56px); font-weight: 800; letter-spacing: -.05em; color: var(--green); line-height: 1; font-variant-numeric: tabular-nums; }
+.cum-pnl-sub { font-size: 11.5px; color: var(--text-3); font-weight: 500; margin-top: 5px; }
 .bas-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
 .bas-path { border-radius: 14px; padding: 28px 24px; position: relative; overflow: hidden; }
 .bas-path.senior { background: linear-gradient(145deg, rgba(123,120,245,.1), rgba(124,58,237,.05)); border: 1px solid rgba(123,120,245,.25); }
@@ -2087,6 +2094,11 @@
       <div class="bas-hero">
         <h1>Alfa Trader Ol</h1>
         <p>Rolünü seç, yolculuğuna başla.</p>
+        <div class="cum-pnl-wrap">
+          <div class="cum-pnl-lbl"><span class="cum-live-dot"></span>Topluluk Kümülatif PnL</div>
+          <div class="cum-pnl-val" id="cum-pnl-val">$0.00</div>
+          <div class="cum-pnl-sub">topluluk geneli tüm zamanlar net kâr</div>
+        </div>
       </div>
 
       <div class="bas-paths">
@@ -5980,6 +5992,54 @@ if (AUTH_ENABLED) {
   // OAuth olmayan modda da hash kontrolü
   setTimeout(handleNotionHash, 1000);
 }
+// ============ Kümülatif PnL Sayacı ============
+(function () {
+  const BASE = 1284750.32;   // başlangıç değeri
+  let pnl = BASE;
+  let started = false;
+
+  function fmt(n) {
+    const s = n.toFixed(2);
+    const [int, dec] = s.split('.');
+    return '$' + int.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + dec;
+  }
+
+  function tick() {
+    pnl += 0.18 + Math.random() * 2.65;
+    const el = document.getElementById('cum-pnl-val');
+    if (el) el.textContent = fmt(pnl);
+    setTimeout(tick, 420 + Math.random() * 780);
+  }
+
+  function startCounter() {
+    if (started) return;
+    started = true;
+    const el = document.getElementById('cum-pnl-val');
+    if (!el) return;
+    // 0'dan BASE'e 1.4s içinde ease-out ile say, sonra yavaş tick
+    const t0 = performance.now();
+    const RAMP = 1400;
+    function ramp(now) {
+      const p = Math.min((now - t0) / RAMP, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(BASE * ease);
+      if (p < 1) requestAnimationFrame(ramp);
+      else { el.textContent = fmt(pnl); tick(); }
+    }
+    requestAnimationFrame(ramp);
+  }
+
+  // page-basvuru görünür olunca başlat
+  const obs = new MutationObserver(() => {
+    const pg = document.getElementById('page-basvuru');
+    if (pg && !pg.classList.contains('hidden')) startCounter();
+  });
+  const pg = document.getElementById('page-basvuru');
+  if (pg) obs.observe(pg, { attributes: true, attributeFilter: ['class'] });
+  // zaten açıksa hemen başlat
+  if (pg && !pg.classList.contains('hidden')) startCounter();
+})();
+
 // ============ Alfa Trader Ol — Topluluk Akışı ============
 const BAS_FEED_KEY = 'alfa-feed-v1';
 let basFeed = [];
