@@ -1229,10 +1229,10 @@
 .bas-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
-.home-ticker { margin: 0 auto 18px; max-width: 660px; padding: 8px 16px; background: rgba(123,120,245,0.07); border: 1px solid rgba(123,120,245,0.15); border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-2); line-height: 1.45; }
-.home-ticker .tq { flex: 1; font-style: italic; }
-.home-ticker .ta { flex: none; font-size: 10.5px; color: var(--acc); white-space: nowrap; margin-left: auto; font-weight: 600; }
-@media (max-width: 640px) { .home-ticker { font-size: 11.5px; padding: 6px 12px; } .home-ticker .ta { display: none; } }
+.home-ticker { position: relative; z-index: 50; padding: 6px 20px; background: linear-gradient(90deg, rgba(123,120,245,0.08), rgba(124,58,237,0.05)); border-bottom: 1px solid rgba(123,120,245,0.12); display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-2); line-height: 1.45; }
+.home-ticker .tq { flex: 1; font-style: italic; text-align: center; }
+.home-ticker .ta { flex: none; font-size: 10px; color: var(--acc); white-space: nowrap; font-weight: 600; }
+@media (max-width: 640px) { .home-ticker { font-size: 11px; padding: 5px 12px; } .home-ticker .ta { display: none; } }
 .chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--acc), #7c3aed); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(123,120,245,.35); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
 .chat-bubble:hover { transform: scale(1.08); }
 .chat-popup { position: fixed; bottom: 88px; right: 24px; z-index: 1000; width: 340px; max-width: calc(100vw - 48px); height: 460px; max-height: calc(100vh - 140px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.15); display: none; flex-direction: column; overflow: hidden; animation: basFadeIn .2s ease; }
@@ -1461,12 +1461,12 @@
       <button class="logout" id="btn-logout">Çıkış</button>
     </div>
   </nav>
+  <div class="home-ticker" id="home-ticker">
+    <span class="tq" id="ticker-text">Yükleniyor...</span>
+    <span class="ta" id="ticker-author"></span>
+  </div>
   <div id="page-home" class="hidden">
     <div class="home-wrap">
-      <div class="home-ticker" id="home-ticker">
-        <span class="tq" id="ticker-text">Yükleniyor...</span>
-        <span class="ta" id="ticker-author"></span>
-      </div>
       <div class="home-hero">
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
         <h1>Alfa Traders</h1>
