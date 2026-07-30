@@ -4149,6 +4149,8 @@ function renderTrades() {
     form.appendChild(slbl); form.appendChild(sinp);
     detail.appendChild(form);
 
+    // Akşam: karar/süreç yıldızı (serbest, 1-5)
+    const starWrap = document.createElement('div');
     // Günlük plan notları
     if (t.sabah || t.senaryo || t.anti || t.gunsonu) {
       const planDiv = document.createElement('div');
@@ -4160,9 +4162,6 @@ function renderTrades() {
       if (t.gunsonu) { const r = document.createElement('div'); r.className = 'td-item yes'; r.innerHTML = '<span class="mk">◷</span><span></span>'; r.children[1].textContent = 'Gün sonu: ' + t.gunsonu; planDiv.appendChild(r); }
       starWrap.insertAdjacentElement('beforebegin', planDiv);
     }
-
-    // Akşam: karar/süreç yıldızı (serbest, 1-5)
-    const starWrap = document.createElement('div');
     starWrap.className = 'td-stars';
     starWrap.addEventListener('click', e => e.stopPropagation());
     const sl = document.createElement('span'); sl.className = 'sl'; sl.textContent = 'Karar';
