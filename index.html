@@ -1810,7 +1810,7 @@
       <p class="hint">Her pair'in kendi kriterleri, puanları ve eşikleri var; düzenleme yalnızca seçili pair'e işlenir. Üstteki + ile yeni pair eklersin — yeni pair, o an açık olan pair'in kriterlerinin kopyasıyla başlar. Puanlar yön bazlı ve eksi olabilir. Skor = seçili yön için işaretli puanların toplamı (0–100).</p>
 
       <div class="actions">
-        <button class="btn solid" id="btn-save">Deftere İşle</button>
+        <button class="btn solid" id="btn-save">Kriterleri Kaydet</button>
         <button class="btn danger" id="btn-defaults">Kriterleri Sıfırla</button>
         <button class="btn danger" id="btn-delpair">Bu Pair'i Sil</button>
       </div>
@@ -2270,7 +2270,11 @@ async function pushCloud() {
 //  - Giriş yoksa       -> eski davranış: window.storage (Claude) ya da localStorage (bu cihaz).
 const store = {
   async get(k) {
-    if (AUTH.user) return (k in AUTH.cloud) ? AUTH.cloud[k] : null;
+    if (AUTH.user) {
+      if (k in AUTH.cloud) return AUTH.cloud[k];
+      try { const v = localStorage.getItem(AUTH.ns + k); if (v !== null) return v; } catch (e) {}
+      return null;
+    }
     if (window.storage && window.storage.get) {
       try { const r = await window.storage.get(k); return r && r.value ? r.value : null; }
       catch (e) { /* anahtar yok ya da erişilemedi */ }
@@ -3286,7 +3290,10 @@ async function loadTrades() {
     if (val) { const t = JSON.parse(val); if (Array.isArray(t)) trades = t; }
   } catch (e) { /* ilk açılış */ }
 }
-async function saveTrades() { await store.set(TRADES_KEY, JSON.stringify(trades)); }
+async function saveTrades() {
+  try { await store.set(TRADES_KEY, JSON.stringify(trades)); }
+  catch (e) { console.error('saveTrades hatası:', e); }
+}
 
 // ——— Ders Defteri ———
 const LESSONS_KEY = 'defter-lessons-v1';
@@ -3863,6 +3870,7 @@ let openTrades = new Set();
 
 function logTrade() {
   const note = document.getElementById('daily-note');
+  try {
   if (intentLocked()) {
     note.textContent = 'İşlem açılamaz — girişte "Duygumu" seçili. Setup tradelemiyorsan bu işlemi geç.';
     note.style.color = 'var(--red)';
@@ -3935,6 +3943,12 @@ function logTrade() {
   const noteText = [nt.sabah ? 'Sabah: ' + nt.sabah : '', nt.senaryo ? 'Senaryo: ' + nt.senaryo : '', nt.anti ? 'Anti: ' + nt.anti : '', nt.gunsonu ? 'Gün Sonu: ' + nt.gunsonu : ''].filter(Boolean).join('\n');
   const ntrade = { id: nt.id, ts: nt.id, date: nt.date, pair: nt.pair, dir: nt.dir, r: nt.r, strat: nt.strat, note: noteText || '', stars: nt.stars };
   fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) }).catch(() => {});
+  } catch (e) {
+    console.error('logTrade hatası:', e);
+    note.textContent = 'İşlem kaydedilemedi: ' + e.message;
+    note.style.color = 'var(--red)';
+    setTimeout(() => { note.textContent = ''; }, 6000);
+  }
 }
 
 function critNames(t) {
