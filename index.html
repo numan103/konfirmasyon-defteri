@@ -6150,6 +6150,10 @@ function sendChatMsg() {
   if (!text) return;
   input.value = '';
   chatHistory.push({ role: 'user', text, time: new Date().toISOString() });
+  // Kullanıcı canlı destek istiyorsa direkt butonu göster (AI yanıtını bekleme)
+  if (/canlı destek|müşteri temsilcisi|gerçek kişi|biriyle görüş|temsilci|operatör|yetkili|insanla konuş/i.test(text) && !chatLiveRequested) {
+    chatFallbackCount = Math.max(chatFallbackCount, 2);
+  }
   saveChat(); renderChat();
   // Sadece canlı destek aktifken admin API'ına gönder
   if (chatLiveRequested) {
@@ -6168,9 +6172,7 @@ function sendChatMsg() {
       let reply = data.reply || getAutoReply(text);
       const isFallback = !data.reply || getAutoReply(text).includes('cevap veremedi');
       if (isFallback) chatFallbackCount++;
-      if (chatFallbackCount >= 3 && !chatLiveRequested) {
-        reply += '\n\n😕 Hâlâ cevap bulamadıysan aşağıdaki "Canlı Destek" butonuna tıkla, bir yetkili sana yardımcı olsun.';
-      }
+      // Buton zaten gösterilecekse gereksiz yere tekrar mesaj ekleme
       const idx = chatHistory.findIndex(m => m._id === thinkId);
       if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
       else { chatHistory.push({ role: 'bot', text: reply }); }
@@ -6179,9 +6181,7 @@ function sendChatMsg() {
     .catch(() => {
       const reply = getAutoReply(text);
       chatFallbackCount++;
-      if (chatFallbackCount >= 3 && !chatLiveRequested) {
-        reply += '\n\n😕 Hâlâ cevap bulamadıysan aşağıdaki "Canlı Destek" butonuna tıkla, bir yetkili sana yardımcı olsun.';
-      }
+      // Buton zaten gösterilecekse gereksiz yere tekrar mesaj ekleme
       const idx = chatHistory.findIndex(m => m._id === thinkId);
       if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
       saveChat(); renderChat();
