@@ -1251,6 +1251,12 @@
 .chat-foot button { padding: 10px 16px; border: none; border-radius: 8px; background: var(--acc); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; flex: none; }
 .chat-foot button:hover { opacity: .85; }
 @media (max-width: 480px) { .chat-popup { right: 12px; bottom: 80px; width: calc(100vw - 24px); height: 60vh; } }
+.chat-close-overlay { position:absolute; inset:0; z-index:10; background:rgba(0,0,0,.35); border-radius:16px; display:none; align-items:center; justify-content:center; }
+.chat-close-overlay.open { display:flex; }
+.chat-close-box { background:var(--card); border-radius:14px; padding:20px; width:260px; display:flex; flex-direction:column; gap:8px; box-shadow:0 8px 32px rgba(0,0,0,.2); }
+.chat-close-title { font-size:14px; font-weight:700; margin-bottom:4px; text-align:center; }
+.chat-live-btn { text-align:center; padding:8px 14px; border-radius:8px; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; font-size:12px; font-weight:600; cursor:pointer; border:none; }
+.chat-live-btn:hover { opacity:.88; }
 /* Admin Chat */
 .ca-msg { display:flex; flex-direction:column; gap:4px; padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; background:var(--bg); border:1px solid var(--border); }
 .ca-msg .ca-meta { font-size:10px; color:var(--text-3); display:flex; gap:8px; }
@@ -6007,6 +6013,14 @@ function submitSeniorForm() {
     <input type="text" id="chat-input" placeholder="Mesajını yaz..." onkeydown="if(event.key==='Enter') sendChatMsg()" />
     <button onclick="sendChatMsg()">Gönder</button>
   </div>
+  <div class="chat-close-overlay" id="chat-close-overlay">
+    <div class="chat-close-box">
+      <div class="chat-close-title">Sohbeti kapat</div>
+      <button class="btn solid" onclick="chatEndSession()">🗑 Konuşmayı Sonlandır</button>
+      <button class="btn" onclick="chatCloseKeep()">💬 Devam Et</button>
+      <button class="btn" onclick="chatCloseKeep()">✕ Kapat</button>
+    </div>
+  </div>
 </div>
 <script>
 // ============ Junior UID Kayıt ============
@@ -6021,9 +6035,11 @@ function submitJuniorUid() {
     .catch(() => { r.textContent = 'Hata oluştu, tekrar dene.'; r.style.display = 'block'; r.style.color = '#ef4444'; });
 }
 // ============ Chat Widget ============
-const CHAT_KEY = 'alfa-chat-v2';
+const CHAT_KEY = 'alfa-chat-v3';
 const CHAT_API = '/api/chat-admin';
 let chatHistory = [];
+let chatFallbackCount = 0;
+let chatLiveRequested = false;
 function chatSid() {
   let s = localStorage.getItem('alfa-chat-sid');
   if (!s) { s = Date.now().toString(36) + Math.random().toString(36).slice(2,9); localStorage.setItem('alfa-chat-sid', s); }
@@ -6038,21 +6054,58 @@ function loadChat() {
     ];
     saveChat();
   }
+  chatFallbackCount = 0;
+  chatLiveRequested = false;
 }
 function saveChat() { try { localStorage.setItem(CHAT_KEY, JSON.stringify(chatHistory)); } catch(e) {} }
 function toggleChat() {
   const p = document.getElementById('chat-popup');
   if (!p) return;
-  const open = !p.classList.contains('open');
-  p.classList.toggle('open', open);
-  document.getElementById('chat-btn').textContent = open ? '✕' : '💬';
-  if (open) { renderChat(); setTimeout(() => document.getElementById('chat-input').focus(), 100); }
+  const isOpen = p.classList.contains('open');
+  // closing → show options
+  if (isOpen) {
+    showChatCloseOptions();
+    return;
+  }
+  // opening
+  p.classList.add('open');
+  document.getElementById('chat-btn').textContent = '✕';
+  renderChat();
+  setTimeout(() => document.getElementById('chat-input').focus(), 100);
+}
+function showChatCloseOptions() {
+  const overlay = document.getElementById('chat-close-overlay');
+  if (overlay) overlay.classList.add('open');
+}
+function chatEndSession() {
+  chatHistory = [];
+  chatFallbackCount = 0;
+  chatLiveRequested = false;
+  saveChat();
+  document.getElementById('chat-close-overlay').classList.remove('open');
+  document.getElementById('chat-popup').classList.remove('open');
+  document.getElementById('chat-btn').textContent = '💬';
+}
+function chatCloseKeep() {
+  document.getElementById('chat-close-overlay').classList.remove('open');
+  document.getElementById('chat-popup').classList.remove('open');
+  document.getElementById('chat-btn').textContent = '💬';
 }
 function renderChat() {
   const body = document.getElementById('chat-body');
   if (!body) return;
-  body.innerHTML = chatHistory.map(m => `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`).join('');
+  const liveBtn = chatHistory.length >= 2 && !chatLiveRequested ? `<div class="chat-live-btn" onclick="requestLiveSupport()">👤 Canlı Destek</div>` : '';
+  body.innerHTML = chatHistory.map(m => `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`).join('') + liveBtn;
   body.scrollTop = body.scrollHeight;
+}
+function requestLiveSupport() {
+  chatLiveRequested = true;
+  const text = '👤 Canlı destek istiyorum.';
+  chatHistory.push({ role: 'user', text });
+  chatHistory.push({ role: 'admin', text: '📞 Canlı destek talebin alındı. En kısa sürede sana dönüş yapacağız.' });
+  saveChat(); renderChat();
+  const sid = chatSid();
+  fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text: 'Canlı destek talebi' }) }).catch(() => {});
 }
 const AI_URL = '/api/ai';
 function sendChatMsg() {
@@ -6073,7 +6126,12 @@ function sendChatMsg() {
   fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text }) })
     .then(r => r.json())
     .then(data => {
-      const reply = data.reply || getAutoReply(text);
+      let reply = data.reply || getAutoReply(text);
+      const isFallback = !data.reply || getAutoReply(text).includes('cevap veremedi');
+      if (isFallback) chatFallbackCount++;
+      if (chatFallbackCount >= 3 && !chatLiveRequested) {
+        reply += '\n\n😕 Hâlâ cevap bulamadıysan aşağıdaki "Canlı Destek" butonuna tıkla, bir yetkili sana yardımcı olsun.';
+      }
       const idx = chatHistory.findIndex(m => m._id === thinkId);
       if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
       else { chatHistory.push({ role: 'bot', text: reply }); }
@@ -6081,6 +6139,10 @@ function sendChatMsg() {
     })
     .catch(() => {
       const reply = getAutoReply(text);
+      chatFallbackCount++;
+      if (chatFallbackCount >= 3 && !chatLiveRequested) {
+        reply += '\n\n😕 Hâlâ cevap bulamadıysan aşağıdaki "Canlı Destek" butonuna tıkla, bir yetkili sana yardımcı olsun.';
+      }
       const idx = chatHistory.findIndex(m => m._id === thinkId);
       if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
       saveChat(); renderChat();
@@ -6097,7 +6159,7 @@ function startChatPoll() {
       const adminMsgs = msgs.filter(m => m.sessionId === sid && m.role === 'admin');
       let added = false;
       adminMsgs.forEach(m => {
-        if (!chatHistory.some(h => h.text === m.text && h.time === m.time && h.role === 'admin')) {
+        if (!chatHistory.some(h => h.time === m.time && h.role === 'admin')) {
           chatHistory.push({ role: 'admin', text: m.text, time: m.time }); added = true;
         }
       });
@@ -6113,7 +6175,7 @@ function getAutoReply(t) {
   if (/eğitim|edu|öğren|video|ders|kurs/i.test(s)) return '📚 Ana menüde "Alfa Edu" bölümüne bak — teknik analiz, temel analiz, psikoloji ve onchain dersleri var.';
   if (/topluluk|grup|telegram|sohbet/i.test(s)) return '💬 Telegram: https://t.me/alfatraderspublic';
   if (/işlem|trade|analiz|piyasa|grafik/i.test(s)) return 'Topluluk akışında işlem ve analiz paylaşımlarını bulabilirsin.';
-  return '🤖 AI cevap veremedi. Sorun kaydedildi, ekibimiz dönecek.';
+  return '🤖 Cevap veremedim.';
 }
 // ============ Admin Chat Paneli ============
 let caAllMsgs = [];
