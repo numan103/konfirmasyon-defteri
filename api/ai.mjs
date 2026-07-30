@@ -10,6 +10,9 @@ Topluluk hakkında bilgiler:
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
 - Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)`;
 
+const GROQ_MODEL = 'mixtral-8x7b-32768';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -19,29 +22,31 @@ export default async function handler(req, res) {
   const { message } = req.body || {};
   if (!message) return res.status(400).json({ reply: 'Mesaj girmelisin.' });
 
-  const API_KEY = process.env.GEMINI_API_KEY;
-  if (!API_KEY || !API_KEY.startsWith('AIzaSy')) {
+  const API_KEY = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
+  if (!API_KEY) {
     return res.json({ reply: null });
   }
 
   try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+    const r = await fetch(GROQ_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-          { role: 'model', parts: [{ text: 'Anlaşıldı.' }] },
-          { role: 'user', parts: [{ text: message }] }
+        model: GROQ_MODEL,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: message }
         ],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
+        temperature: 0.7,
+        max_tokens: 300
       })
     });
 
+    if (!r.ok) return res.json({ reply: null });
+
     const data = await r.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const reply = data?.choices?.[0]?.message?.content;
     if (reply) return res.json({ reply });
-    if (data?.error?.message?.includes('quota') || data?.error?.message?.includes('Quota')) return res.json({ reply: null });
     return res.json({ reply: null });
   } catch (e) {
     return res.json({ reply: null });
