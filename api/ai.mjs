@@ -10,7 +10,7 @@ Topluluk hakkında bilgiler:
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
 - Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)`;
 
-const GROQ_MODEL = 'mixtral-8x7b-32768';
+const GROQ_MODEL = 'llama3-8b-8192';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export default async function handler(req, res) {
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   const API_KEY = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
   if (!API_KEY) {
-    return res.json({ reply: null, d: 'no-key' });
+    return res.json({ reply: null });
   }
 
   try {
@@ -42,16 +42,13 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!r.ok) {
-      const t = await r.text().catch(() => '');
-      return res.json({ reply: null, d: 'http-' + r.status + ': ' + t.substring(0, 100) });
-    }
+    if (!r.ok) return res.json({ reply: null });
 
     const data = await r.json();
     const reply = data?.choices?.[0]?.message?.content;
-    if (reply) return res.json({ reply, d: 'ok' });
-    return res.json({ reply: null, d: 'no-reply: ' + JSON.stringify(data).substring(0, 100) });
+    if (reply) return res.json({ reply });
+    return res.json({ reply: null });
   } catch (e) {
-    return res.json({ reply: null, d: 'err: ' + e.message.substring(0, 100) });
+    return res.json({ reply: null });
   }
 }
