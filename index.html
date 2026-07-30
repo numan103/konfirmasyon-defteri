@@ -5639,12 +5639,12 @@ async function loadEgitim() {
     if (r.ok) sharedData = await r.json();
   } catch (e) { /* */ }
   const isAdmin = AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL;
+  // Eski namespace'siz localStorage verisini de dene (admin giriş yapınca kayboluyor)
+  let rawLocal = await store.get(EGITIM_KEY);
+  if (!rawLocal) { try { rawLocal = localStorage.getItem(EGITIM_KEY); } catch (e) {} }
   // Kullanıcının kendi seçimlerini (sel/selVid) korumak için önce local'den al
   let localSel = {}, localSelVid = {};
-  try {
-    const raw = await store.get(EGITIM_KEY);
-    if (raw) { const p = JSON.parse(raw); localSel = p.sel || {}; localSelVid = p.selVid || {}; }
-  } catch (e) { /* */ }
+  if (rawLocal) { try { const p = JSON.parse(rawLocal); localSel = p.sel || {}; localSelVid = p.selVid || {}; } catch (e) {} }
   const sharedHasContent = sharedData && sharedData.sections && Object.values(sharedData.sections).some(arr => arr && arr.length > 0);
   if (sharedHasContent && !isAdmin) {
     // Admin değilse: shared verisi local'in üstüne yazsın (silinenler de gitsin)
@@ -5653,8 +5653,7 @@ async function loadEgitim() {
     egitimData.selVid = localSelVid;
   } else {
     try {
-      const raw = await store.get(EGITIM_KEY);
-      if (raw) egitimData = JSON.parse(raw);
+      if (rawLocal) egitimData = JSON.parse(rawLocal);
     } catch (e) { /* */ }
     if (!egitimData || typeof egitimData !== 'object') egitimData = {};
     if (!egitimData.sections || typeof egitimData.sections !== 'object') egitimData.sections = {};
@@ -5677,9 +5676,11 @@ async function loadEgitim() {
   }
   if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
   if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
-  // Adminse ve shared boşsa mevcut local veriyi shared'a ata
-  if (isAdmin && !sharedHasContent && Object.values(egitimData.sections).some(arr => arr && arr.length > 0)) {
-    await saveEgitim();
+  // Adminse veriyi shared'a ata (hem ilk seferde hem de her yüklemede)
+  if (isAdmin && Object.values(egitimData.sections).some(arr => arr && arr.length > 0)) {
+    try {
+      await saveEgitim();
+    } catch (e) { console.error('Edu shared sync hatası:', e); }
   }
 }
 async function saveEgitim() {
@@ -5689,7 +5690,7 @@ async function saveEgitim() {
     try {
       const payload = { sections: {} };
       Object.keys(EG_SECTIONS).forEach(sec => {
-        payload.sections[sec] = (egitimData.sections[sec] || []).filter(t => t.videos?.some(v => v.url));
+        payload.sections[sec] = (egitimData.sections[sec] || []).filter(t => t.title || t.videos?.length);
       });
       const res = await fetch('/api/edu-shared', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
