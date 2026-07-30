@@ -49,8 +49,8 @@ export default async function handler(req, res) {
     }
 
     const targetUrl = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
-    if (!API_KEY.startsWith('hf_')) return res.json({ reply: 'HF token hatalı (hf_ ile başlamalı). Mevcut: ' + API_KEY.substring(0, 8) + '...' });
-    const r = await fetch(targetUrl, {
+    if (!API_KEY.startsWith('hf_')) return res.json({ reply: 'Token hatası: ' + API_KEY.substring(0, 10) + '...' });
+    const r = await fetch(targetUrl, { signal: AbortSignal.timeout(8000) });
       method: 'POST',
       headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
