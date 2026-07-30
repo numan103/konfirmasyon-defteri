@@ -356,6 +356,24 @@
   .df-pg { padding:4px 10px; border:1px solid var(--border); border-radius:6px; background:none; cursor:pointer; font-size:12px; color:var(--text-2); font-weight:600; }
   .df-pg.on { background:var(--acc); color:#fff; border-color:var(--acc); }
   .df-pg:hover:not(.on) { background:var(--bg); }
+  .df-toggle { font-size:10px; color:var(--text-3); transition:transform .2s; margin-left:4px; cursor:pointer; }
+  .df-toggle.open { transform:rotate(180deg); }
+  #df-table-wrap { display:none; }
+  #df-table-wrap.open { display:block; }
+  #data-ai-body { display:none; }
+  #data-ai-body.open { display:block; padding-top:10px; }
+  .ai-coach-msg { max-height:360px; overflow-y:auto; margin-bottom:8px; padding:12px 14px; background:var(--bg); border-radius:10px; min-height:60px; font-size:13px; line-height:1.7; white-space:pre-wrap; }
+  .ai-coach-placeholder { color:var(--text-3); font-style:italic; text-align:center; padding:20px 0; white-space:normal; }
+  .ai-coach-controls { display:flex; gap:6px; }
+  .ai-coach-controls select { flex:1; padding:7px 8px; border:1px solid var(--border); border-radius:7px; background:var(--card); color:var(--text); font-size:12px; }
+  .ai-coach-controls button { white-space:nowrap; font-size:12px; }
+  .ai-coach-section { margin-bottom:12px; }
+  .ai-coach-section h4 { font-size:12px; font-weight:700; color:var(--acc); margin:0 0 4px; }
+  .ai-coach-section .stat-row { display:flex; justify-content:space-between; padding:2px 0; font-size:12px; border-bottom:1px solid var(--border); }
+  .ai-coach-section .stat-row .lbl { color:var(--text-3); }
+  .ai-coach-section .stat-row .val { font-weight:600; }
+  .ai-coach-section .stat-row .val.pos { color:var(--green); }
+  .ai-coach-section .stat-row .val.neg { color:var(--red); }
   .df-seg { display: flex; gap: 4px; background: #f2f3f8; padding: 4px; border-radius: 9px; }
   .df-seg button { flex: 1; border: none; background: transparent; border-radius: 6px; padding: 7px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--text-2); cursor: pointer; }
   .df-seg button.on { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
@@ -1887,26 +1905,35 @@
       <div id="data-note" class="hint"></div>
     </div>
     <div class="panel">
-      <h2 class="cat-h2"><span>Tüm İşlemler</span><span class="n" id="data-count"></span>
+      <h2 class="cat-h2" onclick="document.getElementById('df-table-wrap').classList.toggle('open');this.querySelector('.df-toggle').classList.toggle('open');" style="cursor:pointer;">
+        <span>Tüm İşlemler</span><span class="n" id="data-count"></span>
         <div class="df-pages" id="df-pages"></div>
-        <button type="button" class="cat-edit danger-edit" id="data-clear">Tümünü temizle</button>
+        <span class="df-toggle open">▼</span>
+        <button type="button" class="cat-edit danger-edit" id="data-clear" onclick="event.stopPropagation()">Tümünü temizle</button>
       </h2>
-      <div id="data-table"></div>
-      <div class="df-pages-bottom" id="df-pages-bottom"></div>
+      <div id="df-table-wrap" class="open">
+        <div id="data-table"></div>
+        <div class="df-pages-bottom" id="df-pages-bottom"></div>
+      </div>
     </div>
     <div class="panel" id="data-ai-panel">
-      <h2 class="cat-h2"><span>🧠 İşlemleri YZ ile Tartış</span></h2>
-      <div id="data-ai-body" style="font-size:13px;color:var(--text-2);">
-        <p style="margin-bottom:8px;">İşlemlerini seçip analiz ettir, zayıf/ güçlü yönlerini keşfet.</p>
-        <div id="data-ai-msgs" style="max-height:260px;overflow-y:auto;margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px;min-height:60px;"></div>
-        <div style="display:flex;gap:6px;">
-          <select id="data-ai-focus" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;">
+      <h2 class="cat-h2" onclick="document.getElementById('data-ai-body').classList.toggle('open');this.querySelector('.df-toggle').classList.toggle('open');" style="cursor:pointer;">
+        <span>🧠 Trading Coach — YZ Analiz</span>
+        <span class="df-toggle open">▼</span>
+      </h2>
+      <div id="data-ai-body" class="open" style="font-size:13px;color:var(--text-2);">
+        <div class="ai-coach-msg" id="data-ai-msgs">
+          <div class="ai-coach-placeholder">İşlemlerini analiz etmek için bir filtre seç ve "Analiz Et" butonuna bas.<br>YZ; strateji bazında performans, varyans, notlarını ve genel trading kaliteni değerlendirir.</div>
+        </div>
+        <div class="ai-coach-controls">
+          <select id="data-ai-focus">
             <option value="all">Tüm işlemleri analiz et</option>
             <option value="wins">Sadece kazananları</option>
             <option value="losses">Sadece kaybedenleri</option>
             <option value="recent">Son 20 işlemi</option>
+            <option value="strat">Strateji bazında karşılaştır</option>
           </select>
-          <button class="btn solid" id="data-ai-btn" style="font-size:12px;white-space:nowrap;">Analiz Et</button>
+          <button class="btn solid" id="data-ai-btn">🎯 Analiz Et</button>
         </div>
       </div>
     </div>
@@ -5288,24 +5315,117 @@ function bindDataPage() {
       reader.readAsDataURL(blob);
     });
   });
-  // AI analiz
+  // AI Trading Coach analiz
   const aiBtn = document.getElementById('data-ai-btn');
   if (aiBtn) {
     aiBtn.addEventListener('click', async () => {
       const focus = document.getElementById('data-ai-focus').value;
       let rows = sortedData();
+      const allRows = rows;
       if (focus === 'wins') rows = rows.filter(t => dnum(t.r) > 0);
       else if (focus === 'losses') rows = rows.filter(t => dnum(t.r) <= 0);
       else if (focus === 'recent') rows = rows.slice(-20);
-      const summary = rows.map(t => `${t.pair||'?'} ${t.dir||''} R:${dnum(t.r).toFixed(2)}${t.strat ? ' '+t.strat : ''}`).join('\n');
+      else if (focus === 'strat') rows = allRows; // hepsini al, strat bazlı yap
+
+      const n = rows.length;
+      if (!n) { document.getElementById('data-ai-msgs').innerHTML = '<div class="ai-coach-placeholder">Seçilen filtrelere uygun işlem bulunamadı.</div>'; return; }
+
+      // İstatistik hesapla
+      const rVals = rows.map(t => dnum(t.r));
+      const sumR = rVals.reduce((a, b) => a + b, 0);
+      const avgR = sumR / n;
+      const wins = rVals.filter(r => r > 0).length;
+      const losses = rVals.filter(r => r <= 0).length;
+      const wr = wins / n * 100;
+      const posR = rVals.filter(r => r > 0);
+      const negR = rVals.filter(r => r <= 0);
+      const avgWin = posR.length ? posR.reduce((a, b) => a + b, 0) / posR.length : 0;
+      const avgLoss = negR.length ? negR.reduce((a, b) => a + b, 0) / negR.length : 0;
+      const profitFactor = Math.abs(avgLoss) > 0 ? (avgWin * wins) / (Math.abs(avgLoss) * losses) : (avgWin > 0 ? 999 : 0);
+      const variance = rVals.reduce((s, v) => s + (v - avgR) ** 2, 0) / n;
+      const stdDev = Math.sqrt(variance);
+      const sharpe = stdDev > 0 ? avgR / stdDev * Math.sqrt(252) : 0; // günlük değil ama oranlama
+
+      // Maksimum drawdown
+      let cum = 0, peak = 0, maxDd = 0;
+      rVals.forEach(r => { cum += r; if (cum > peak) peak = cum; const dd = (peak - cum) / (Math.abs(peak) || 1); if (dd > maxDd) maxDd = dd; });
+
+      // Strateji bazında
+      const strats = {};
+      rows.forEach(t => {
+        const s = (t.strat || 'Belirtilmemiş').trim();
+        if (!strats[s]) strats[s] = { count: 0, wins: 0, sumR: 0, notes: [] };
+        strats[s].count++;
+        strats[s].sumR += dnum(t.r);
+        if (dnum(t.r) > 0) strats[s].wins++;
+        if (t.note) strats[s].notes.push(t.note);
+      });
+      const stratSummary = Object.entries(strats).map(([s, d]) =>
+        `${s}: ${d.count} işlem, WR ${(d.wins/d.count*100).toFixed(0)}%, toplam R ${d.sumR.toFixed(2)}, notlar: ${d.notes.length ? d.notes.join(' | ') : 'yok'}`
+      ).join('\n');
+
+      // Kriter ortalamaları
+      const critAvg = {};
+      if (rows.some(t => t.criteria)) {
+        ['setup','entry','exit','risk','psycho'].forEach(k => {
+          const vals = rows.filter(t => t.criteria && t.criteria[k] > 0).map(t => t.criteria[k]);
+          critAvg[k] = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
+        });
+      }
+
+      // Consecutive wins/losses
+      let maxConW = 0, maxConL = 0, curW = 0, curL = 0;
+      rVals.forEach(r => {
+        if (r > 0) { curW++; curL = 0; if (curW > maxConW) maxConW = curW; }
+        else { curL++; curW = 0; if (curL > maxConL) maxConL = curL; }
+      });
+
+      // Son işlem notları (son 10)
+      const recentNotes = rows.slice(-10).filter(t => t.note).map(t => `[${t.pair}] ${t.note}`).join('\n');
+
+      const statsBlock =
+        `📊 TEMEL İSTATİSTİKLER
+Toplam İşlem: ${n}
+Win Rate: ${wr.toFixed(1)}% (${wins}W / ${losses}L)
+Toplam R: ${sumR.toFixed(2)}
+Ortalama R: ${avgR.toFixed(2)}
+Ortalama Kazanç: ${avgWin.toFixed(2)}R
+Ortalama Kayıp: ${avgLoss.toFixed(2)}R
+Profit Factor: ${profitFactor.toFixed(2)}
+Standart Sapma: ${stdDev.toFixed(2)}
+Sharpe Oranı (yıllık.): ${sharpe.toFixed(2)}
+Maksimum Drawdown: ${(maxDd * 100).toFixed(1)}%
+En Uzun Kazanç Serisi: ${maxConW}
+En Uzun Kayıp Serisi: ${maxConL}
+
+📋 STRATEJİ BAZINDA PERFORMANS
+${stratSummary || 'Strateji bilgisi yok.'}
+
+${Object.keys(critAvg).length ? `📏 KRİTER ORTALAMALARI (1-10)
+Setup: ${critAvg.setup || '—'} | Entry: ${critAvg.entry || '—'} | Exit: ${critAvg.exit || '—'} | Risk: ${critAvg.risk || '—'} | Psikoloji: ${critAvg.psycho || '—'}` : ''}
+
+${recentNotes ? `📝 İŞLEM NOTLARI (son 10)
+${recentNotes}` : 'Not bulunamadı.'}
+
+Yukarıdaki verilere göre bana bir trading coach gibi analiz ver:
+1. Genel performans değerlendirmesi
+2. Zayıf yönlerim ve iyileştirme alanları
+3. Güçlü yönlerim
+4. Strateji bazında hangisi daha iyi gidiyor, neden?
+5. Varyans ve risk yönetimi değerlendirmesi
+6. Somut öneriler (bir sonraki hafta için)`;
+
       const msgDiv = document.getElementById('data-ai-msgs');
-      msgDiv.innerHTML = '<div style="color:var(--text-3);">🤔 Analiz ediliyor...</div>';
+      msgDiv.innerHTML = '<div class="ai-coach-placeholder">🤔 Analiz ediliyor...</div>';
       try {
-        const resp = await fetch('/api/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Şu işlemleri analiz et:\n${summary}\n\nGenel performans değerlendirmesi, zayıf/güçlü yönler, iyileştirme önerileri ver.` }) });
+        const resp = await fetch('/api/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Bir trading coach gibi davran. İşlem verilerim şu:\n\n${statsBlock}` }) });
         const data = await resp.json();
-        msgDiv.innerHTML = '<div style="white-space:pre-wrap;line-height:1.6;">' + esc(data.reply || 'Cevap alınamadı.') + '</div>';
+        const reply = data.reply || 'Cevap alınamadı.';
+        // Format response with coach styling
+        const formatted = reply.replace(/^(\d+\.\s+\*\*.*)/gm, '<div class="ai-coach-section"><h4>$1</h4>').replace(/(\*\*.*\*\*)/g, '<strong>$1</strong>');
+        msgDiv.innerHTML = '<div class="ai-coach-msg" style="max-height:none;margin:0;">' + esc(reply).replace(/\n/g, '<br>') + '</div>';
       } catch(e) {
-        msgDiv.innerHTML = '<div style="color:var(--red);">Analiz hatası: ' + e.message + '</div>';
+        msgDiv.innerHTML = '<div style="color:var(--red);padding:12px;">Analiz hatası: ' + esc(e.message) + '</div>';
       }
     });
   }
