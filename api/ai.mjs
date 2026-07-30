@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,7 +44,8 @@ export default async function handler(req, res) {
     const data = await response.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (reply) return res.json({ reply });
-    return res.json({ reply: 'Anlayamadım, tekrar dener misin?' });
+    const errMsg = data?.error?.message || 'Bilinmeyen hata';
+    return res.json({ reply: 'Üzgünüm, şu anda cevap veremiyorum. (' + errMsg + ')' });
   } catch (e) {
     return res.json({ reply: 'Bağlantı hatası. Lütfen tekrar dene.' });
   }
