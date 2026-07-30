@@ -833,7 +833,11 @@
   .lp-card-body { padding: 14px 16px 17px; }
   .lp-card-body h3 { font-size: 15px; font-weight: 700; margin: 0 0 4px; display: flex; align-items: center; gap: 6px; }
   .lp-card-body p { font-size: 12.5px; color: var(--text-2); line-height: 1.45; margin: 0; }
-  .lp-foot { text-align: center; padding: 22px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); }
+  .lp-quote { max-width: 720px; margin: 56px auto 8px; padding: 0 24px; text-align: center; position: relative; }
+  .lp-quote-mark { display: block; font-family: Georgia, serif; font-size: 68px; line-height: .6; color: var(--acc); opacity: .5; margin-bottom: 6px; }
+  .lp-quote p { font-size: clamp(20px, 3.6vw, 30px); font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: var(--text); font-style: italic; margin: 0 0 16px; }
+  .lp-quote cite { font-style: normal; font-size: 13.5px; font-weight: 700; letter-spacing: .04em; color: var(--acc); text-transform: uppercase; }
+  .lp-foot { text-align: center; padding: 22px; margin-top: 40px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); }
   /* Landing ürün görseli (mockup) */
   .lp-shot-wrap { max-width: 720px; margin: 6px auto 0; padding: 0 20px; }
   .lp-shot { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 44px rgba(23,25,35,0.13); overflow: hidden; }
@@ -1418,63 +1422,18 @@
     </div>
   </nav>
   <section class="lp-hero">
-    <span class="lp-badge">Trader'lar için hepsi bir arada disiplin platformu</span>
-    <h2>İşlem kaliteni puanla,<br>disiplinini koru.</h2>
-    <p>Setup kalite skorundan trade defterine, video eğitiminden onchain verilere ve trader topluluğuna kadar — disiplinli işlem için ihtiyacın olan her şey tek çatı altında. Duyguyla değil, sistemle işlem yap.</p>
+    <span class="lp-badge">Trader'lar için hepsi bir arada platform</span>
+    <h2>Öğren, uygula,<br>disiplinini koru.</h2>
+    <p>Video eğitim, trade defteri, onchain veriler, indikatörler ve trader topluluğu — bir trader'ın ihtiyacı olan her şey tek çatı altında. Duyguyla değil, sistemle işlem yap.</p>
     <div class="lp-cta">
       <button class="primary" id="hero-register" type="button">Ücretsiz kayıt ol</button>
       <button class="ghost" id="hero-login" type="button">Giriş yap</button>
     </div>
   </section>
-  <div class="lp-shot-wrap">
-    <div class="lp-shot">
-      <div class="shot-bar"><span></span><span></span><span></span></div>
-      <div class="shot-body">
-        <div class="shot-head">
-          <div class="shot-seg"><b>BTC</b><span>XAU</span></div>
-          <div class="shot-seg"><b>LONG</b><span>SHORT</span></div>
-        </div>
-        <div class="shot-main">
-          <div class="shot-gauge">
-            <div class="ring"><div class="ring-num">87</div><div class="ring-lbl">puan</div></div>
-            <div class="verdict ap">A+ · Yüksek kalite</div>
-          </div>
-          <div class="shot-crits">
-            <div class="crit on"><i>✓</i> Spot CVD işlem yönünde <em>veri</em></div>
-            <div class="crit on"><i>✓</i> Key levelda <em>teknik</em></div>
-            <div class="crit on"><i>✓</i> Manipülasyon gerçekleşti <em>teknik</em></div>
-            <div class="crit on"><i>✓</i> Planlanmış entry <em>pozisyon</em></div>
-            <div class="crit off"><i>·</i> FOMO — hareket kaçıyor hissi <em>duygu</em></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="lp-section-head">
-    <div class="lp-eyebrow">Nasıl çalışır</div>
-    <h3>Üç adımda disiplinli işlem</h3>
-    <p>Duygularınla değil, önceden belirlediğin kurallarla işlem aç. Sistem senin yerine soğukkanlı kalsın.</p>
-  </div>
-  <div class="lp-steps">
-    <div class="lp-step">
-      <div class="num">1</div>
-      <h4>Kriterleri işaretle</h4>
-      <p>İşlemden önce setup kriterlerini tek tek işaretle: veri, teknik, pozisyon ve psikoloji başlıklarında.</p>
-    </div>
-    <div class="lp-step">
-      <div class="num">2</div>
-      <h4>Puanını gör</h4>
-      <p>Sistem anında bir kalite skoru ve A+ / B kararı üretir. Skor düşükse sistem seni uyarır — zayıf setup'a girme.</p>
-    </div>
-    <div class="lp-step">
-      <div class="num">3</div>
-      <h4>Kaydet & öğren</h4>
-      <p>İşlemi sonucuyla (R) defterine geç. Zamanla hangi setup'ın işe yaradığını, nerede hata yaptığını net gör.</p>
-    </div>
-  </div>
-  <div class="lp-section-head">
-    <div class="lp-eyebrow">Neler sunuyor?</div>
-    <h3>Tek yerde tüm disiplin araçların</h3>
+    <div class="lp-eyebrow">Neler var?</div>
+    <h3>Bir trader'ın ihtiyacı olan her şey</h3>
+    <p>Eğitimden analize, defterden topluluğa — hepsi tek platformda.</p>
   </div>
   <section class="lp-features">
     <!-- 1. Setup Kalite Skoru -->
@@ -1639,6 +1598,11 @@
     <a class="tg" id="lps-tg" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
     <a class="x" id="lps-x" href="#" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.06l-4.74-6.2L5.6 21H2.6l7-8L2.2 3h6.2l4.3 5.68L17.5 3zm-1.05 16.2h1.66L7.63 4.7H5.85z"/></svg></a>
     <a class="yt" id="lps-yt" href="#" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 7.5c-.26-1-.9-1.6-1.9-1.8C19.3 5.3 12 5.3 12 5.3s-7.3 0-9.1.4C1.9 5.9 1.26 6.5 1 7.5.6 9.3.6 12 .6 12s0 2.7.4 4.5c.26 1 .9 1.6 1.9 1.8 1.8.4 9.1.4 9.1.4s7.3 0 9.1-.4c1-.2 1.64-.8 1.9-1.8.4-1.8.4-4.5.4-4.5s0-2.7-.4-4.5zM9.75 15.3V8.7l6.3 3.3z"/></svg></a>
+  </div>
+  <div class="lp-quote">
+    <span class="lp-quote-mark">“</span>
+    <p>Kazan ya da kaybet, herkes piyasadan istediğini alır.</p>
+    <cite>— Ed Seykota</cite>
   </div>
   <div class="lp-foot">Alfa Traders · Alfa trader'lar için disiplin aracı · Verilerin sana özel, hesabında güvende.</div>
 </div>
