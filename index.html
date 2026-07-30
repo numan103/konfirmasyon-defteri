@@ -134,16 +134,33 @@
   .ce-add:hover { background: #e6e6fb; }
   /* --- Navbar --- */
   .navbar { display: flex; align-items: center; gap: 18px; padding: 18px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
-  .nav-brand { display: flex; align-items: center; gap: 11px; }
+  .nav-brand { display: flex; align-items: center; gap: 11px; cursor: pointer; text-decoration: none; color: inherit; }
+  .nav-brand:hover { opacity: .8; }
+  a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
   .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; color: var(--text); }
-  .nav-links { display: flex; gap: 2px; }
+  .nav-links { display: flex; gap: 2px; overflow: visible; }
+  .nav-links::-webkit-scrollbar { display: none; }
   .nav-link { position: relative; background: transparent; border: none; padding: 9px 16px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
   .nav-link:hover { background: rgba(91,91,214,0.07); color: var(--text); }
   .nav-link:active { transform: scale(0.97); }
   .nav-link.on { background: var(--acc-soft); color: var(--acc); }
   .nav-link.on:hover { background: var(--acc-soft); color: var(--acc); }
+  .nav-drop { position: relative; display: inline-flex; align-items: center; }
+  .nav-drop .drop-btn { cursor: default; display: inline-flex; align-items: center; gap: 2px; padding: 9px 16px; border-radius: 10px; }
+  .nav-drop .drop-btn:hover { background: rgba(91,91,214,0.07); color: var(--text); }
+  .nav-drop.on .drop-btn { background: var(--acc-soft); color: var(--acc); }
+  .nav-drop .drop-menu { display: none; position: absolute; top: calc(100% + 20px); left: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .nav-drop.open .drop-menu { display: flex; flex-direction: column; gap: 2px; }
+  .nav-drop .drop-menu .nav-link { display: block; white-space: nowrap; }
+  .nav-drop.on > .drop-btn { background: var(--acc-soft); color: var(--acc); }
+  @media (max-width: 680px) {
+    .nav-links { overflow-x: auto; }
+    .nav-drop { position: static; }
+    .nav-drop .drop-menu { position: static; box-shadow: none; border: none; padding: 0 0 0 16px; min-width: auto; }
+    .nav-drop.open .drop-menu { display: flex; }
+  }
   .navbar .user-badge { margin-left: 12px; }
   /* İletişim (navbar sağ üst) */
   .nav-contact { margin-left: auto; display: flex; align-items: center; gap: 8px; }
@@ -268,6 +285,27 @@
   @keyframes pageIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
   .page-anim { animation: pageIn .3s cubic-bezier(0.22, 0.61, 0.36, 1); }
   @media (prefers-reduced-motion: reduce) { .page-anim { animation: none; } }
+  /* --- Ana Menü --- */
+  .home-wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+  .home-hero { text-align: center; margin-bottom: 32px; }
+  .home-logo { width: 52px; height: 52px; margin: 0 auto 12px; }
+  .home-logo svg { width: 100%; height: 100%; }
+  .home-hero h1 { font-size: 28px; font-weight: 800; margin: 0; letter-spacing: -.03em; }
+  .home-sub { color: var(--text-3); font-size: 14px; margin: 4px 0 0; }
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 12px; margin-bottom: 32px; }
+  .home-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; text-decoration: none; color: inherit; transition: border-color .15s, box-shadow .15s; display: block; }
+  .home-card:hover { border-color: var(--acc); box-shadow: 0 2px 12px rgba(79,69,216,.12); }
+  .hc-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--bg-2); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: var(--acc); }
+  .hc-icon svg { width: 20px; height: 20px; }
+  .home-card h2 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+  .home-card p { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin: 0; }
+  .home-card .preview { width: 100%; aspect-ratio: 16/9; border-radius: 8px; margin-bottom: 12px; background: var(--acc-soft); display: flex; align-items: center; justify-content: center; color: var(--acc); font-size: 11px; font-weight: 500; overflow: hidden; }
+  .home-card .preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .home-tips { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .home-tips h2 { font-size: 16px; margin: 0 0 12px; }
+  .home-tips ul { margin: 0; padding: 0 0 0 18px; }
+  .home-tips li { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 8px; }
+  .home-tips li strong { color: var(--text); }
   /* --- Trade Günlüğü pano düzeni --- */
   .data-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 900px) {
@@ -296,7 +334,7 @@
   .df-seg button.on { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
   .df-seg button.long.on { color: var(--green); }
   .df-seg button.short.on { color: var(--red); }
-  .data-row { display: grid; grid-template-columns: 56px 1fr 52px 58px 62px 30px; gap: 8px; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .data-row { display: grid; grid-template-columns: 56px 1fr 52px 72px 58px 62px 30px; gap: 8px; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--border); font-size: 13px; }
   .data-row.head { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1.5px solid var(--border); }
   .dr-pair { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dr-dir { font-size: 11px; font-weight: 700; }
@@ -308,6 +346,21 @@
   .dr-cum { text-align: right; color: var(--text-2); }
   .dr-del { background: var(--red-soft); border: none; border-radius: 7px; color: var(--red); font-size: 16px; line-height: 1; padding: 4px 0; cursor: pointer; }
   .dr-del:hover { background: #fbdcdc; }
+  .dr-note-icon { font-size: 12px; margin-right: 2px; }
+  .data-row.has-note:hover { background: var(--bg-2); }
+  .note-popup { position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center; }
+  .note-popup-overlay { position:absolute;inset:0;background:rgba(0,0,0,.4); }
+  .note-popup-content { position:relative;background:var(--card);border-radius:14px;padding:28px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25); }
+  .note-popup-x { position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-2);line-height:1; }
+  .np-header { display:flex;align-items:center;gap:10px;margin-bottom:12px; }
+  .np-pair { font-size:20px;font-weight:700; }
+  .np-dir { font-size:12px;font-weight:700;padding:2px 10px;border-radius:6px; }
+  .np-dir.long { background:var(--green-soft);color:var(--green); }
+  .np-dir.short { background:var(--red-soft);color:var(--red); }
+  .np-meta { display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;color:var(--text-2);margin-bottom:14px;padding:10px;background:var(--bg-2);border-radius:8px; }
+  .np-meta .pos { color:var(--green);font-weight:700; }
+  .np-meta .neg { color:var(--red);font-weight:700; }
+  .np-note { font-size:14px;line-height:1.6;padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--acc); }
   .cat-edit.danger-edit { color: var(--red); border-color: var(--red-soft); }
   .cat-edit.danger-edit:hover { background: var(--red-soft); border-color: var(--red); color: var(--red); }
   /* --- Haftalık Değerlendirme --- */
@@ -917,6 +970,10 @@
   .eg-form-h { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text); }
   /* konu satırı sayaç rozeti */
   .eg-count { flex: none; font-size: 9.5px; font-weight: 700; color: var(--text-3); background: var(--bg); border-radius: 999px; padding: 2px 7px; font-variant-numeric: tabular-nums; }
+  .eg-level-badge { flex: none; width:18px;height:18px;border-radius:4px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-left:4px; }
+  .eg-level-badge.temel { background:#dbeafe;color:#1d4ed8; }
+  .eg-level-badge.orta { background:#fef3c7;color:#b45309; }
+  .eg-level-badge.ileri { background:#fce4ec;color:#be123c; }
   .eg-count.has { color: var(--acc); background: var(--acc-soft); }
   /* başlık satırı + kalem */
   .eg-now-title-row { display: flex; align-items: flex-start; gap: 8px; }
@@ -936,9 +993,9 @@
   .eg-vid-row.on .eg-vid-idx { background: var(--acc); color: #fff; }
   .eg-vid-t { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .eg-vid-row .eg-item-tag { padding: 1px 5px; }
-  .eg-vid-edit, .eg-vid-del { flex: none; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-3); font-size: 13px; line-height: 1; cursor: pointer; border-radius: 5px; opacity: 0; transition: opacity .15s ease; }
+  .eg-vid-edit, .eg-vid-del, .eg-vid-move { flex: none; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-3); font-size: 13px; line-height: 1; cursor: pointer; border-radius: 5px; opacity: 0; transition: opacity .15s ease; }
   .eg-vid-del { font-size: 15px; }
-  .eg-vid-row:hover .eg-vid-edit, .eg-vid-row:hover .eg-vid-del, .eg-vid-row.on .eg-vid-edit, .eg-vid-row.on .eg-vid-del { opacity: 1; }
+  .eg-vid-row:hover .eg-vid-edit, .eg-vid-row:hover .eg-vid-del, .eg-vid-row:hover .eg-vid-move, .eg-vid-row.on .eg-vid-edit, .eg-vid-row.on .eg-vid-del, .eg-vid-row.on .eg-vid-move { opacity: 1; }
   .eg-vid-edit:hover { background: #fff; color: var(--acc); }
   .eg-vid-del:hover { background: var(--red-soft); color: var(--red); }
   .eg-vid-empty { font-size: 12px; color: var(--text-3); padding: 6px 2px; }
@@ -979,6 +1036,11 @@
   .eg-form input:focus { outline: none; border-color: var(--acc); }
   .eg-form-btns { display: flex; gap: 8px; }
   .eg-form-err { font-size: 12px; color: var(--red); min-height: 14px; }
+  .eg-level-picker { display:flex;flex-direction:column;gap:4px;padding:6px 0; }
+  .eg-level-picker .seg { display:flex;gap:4px; }
+  .eg-level-picker .seg button { flex:1;border:1px solid var(--border);background:var(--bg);border-radius:8px;padding:6px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer; }
+  .eg-level-picker .seg button.on-gold { background:var(--acc);border-color:var(--acc);color:#fff; }
+  #eg-level-seg .seg button.on-gold { background:var(--acc);border-color:var(--acc);color:#fff; }
   /* ===== AlfaNews — dergi flipbook ===== */
   .mag-wrap { max-width: 760px; margin: 6px auto 0; }
   .mag-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -1249,16 +1311,35 @@
 </div>
 <div class="wrap">
   <nav class="navbar">
-    <div class="nav-brand">
+    <a href="?page=home" class="nav-brand" id="nav-home" data-nav>
       <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 L16 5.5 L26.5 26.5" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 23 Q16 17 25.5 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></div>
       <span>Alfa Traders</span>
-    </div>
+    </a>
     <div class="nav-links">
-      <button id="tab-defter" class="nav-link on" type="button">Alfa-Check List</button>
-      <button id="tab-data" class="nav-link" type="button">Trade Günlüğü</button>
-      <button id="tab-review" class="nav-link" type="button">Haftalık Değerlendirme</button>
-      <button id="tab-egitim" class="nav-link" type="button">Alfa Edu</button>
-      <button id="tab-news" class="nav-link" type="button">AlfaNews</button>
+      <a href="?page=home" class="nav-link" id="tab-home" data-nav>Ana Menü</a>
+      <div class="nav-drop">
+        <a class="nav-link drop-btn">Trader ▾</a>
+        <div class="drop-menu">
+          <a href="?page=defter" class="nav-link" id="tab-defter" data-nav>Check List</a>
+          <a href="?page=data" class="nav-link" id="tab-data" data-nav>Trade Günlüğü</a>
+          <a href="?page=onchain" class="nav-link" id="tab-onchain" data-nav>Onchain</a>
+          <a href="?page=review" class="nav-link" id="tab-review" data-nav>Haftalık Değerlendirme</a>
+        </div>
+      </div>
+      <div class="nav-drop">
+        <a class="nav-link drop-btn">Edu ▾</a>
+        <div class="drop-menu">
+          <a href="?page=egitim" class="nav-link" id="tab-egitim" data-nav>Alfa Edu</a>
+          <a href="?page=indicators" class="nav-link" id="tab-indicators" data-nav>İndikatörler</a>
+        </div>
+      </div>
+      <div class="nav-drop">
+        <a class="nav-link drop-btn">AlfaNews ▾</a>
+        <div class="drop-menu">
+          <a href="?page=calendar" class="nav-link" id="tab-calendar" data-nav>Ekonomik Takvim</a>
+          <a href="?page=news" class="nav-link" id="tab-news" data-nav>Dergi</a>
+        </div>
+      </div>
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl">İletişim</span>
@@ -1271,6 +1352,36 @@
       <button class="logout" id="btn-logout">Çıkış</button>
     </div>
   </nav>
+  <div id="page-home" class="hidden">
+    <div class="home-wrap">
+      <div class="home-hero">
+        <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+        <h1>Alfa Traders</h1>
+        <p class="home-sub">Trader'lar için disiplin, analiz ve öğrenme platformu</p>
+      </div>
+      <div class="home-grid">
+        <a href="?page=defter" class="home-card" data-nav><div class="preview"><img src="https://i.imgur.com/xZmCzHN.png" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h6M8 16h4"/></svg></div><h2>Alfa-Check List</h2><p>Pair bazlı kriter listesi. Her işlem öncesi puanla, kararını ver. Günlük plan & seans kalitesi. Eşiklerle otomatik karar.</p></a>
+        <a href="?page=data" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/9PwLeZA-RGc/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg></div><h2>Trade Günlüğü</h2><p>İşlemlerini kaydet, kümülatif R eğrisini izle. Notion ile senkronize et (OAuth). CSV yükle, otomatik birleştir.</p></a>
+        <a href="?page=review" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/mcSDtbWXUZU/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z"/></svg></div><h2>Haftalık Değerlendirme</h2><p>Haftalık RR girişi, kümülatif eğri. Değerlendirme bölümleri ve ölçütlerle kişisel retrospect.</p></a>
+        <a href="?page=egitim" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/NUSfVaxv3O0/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><h2>Alfa Edu</h2><p>Bölüm → konu → video. Teknik analiz (temel/orta/ileri), temel analiz, psikoloji, işlem, onchain.</p></a>
+        <a href="?page=indicators" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/XrIfY_4cK1w/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 20h20M4 16l4-8 4 4 4-6 4 8"/></svg></div><h2>İndikatörler</h2><p>Aggr Trade Workspace, Alfa Levels, Flow — indikatör açıklama, kurulum ve kullanım.</p></a>
+        <a href="?page=onchain" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/s57QXY641cY/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg></div><h2>Onchain Verileri</h2><p>Coinglass Supercharts — Funding / CVD / OI. Notion OAuth ile trade senkronu.</p></a>
+        <a href="?page=news" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/WYd_PkCa1BY/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 12h16M12 4v16"/></svg></div><h2>AlfaNews</h2><p>Dergi formatında analizler. Analist yönetimi, sayfa düzeni, görsel büyütme. Admin paneli ile içerik yönetimi.</p></a>
+        <a href="?page=calendar" class="home-card" data-nav><div class="preview"><img src="https://unsplash.com/photos/BJ6w75UwMf8/download?force=true" alt="" style="display:none" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div><h2>Ekonomik Takvim</h2><p>3 yıldız haberler — Investing.com ekonomik takvimi. Yüksek etkili makro verileri.</p></a>
+      </div>
+      <div class="home-tips">
+        <h2>💡 Verimli Kullanım İpuçları</h2>
+        <ul>
+          <li><strong>Alfa-Check List</strong> — Her işlem öncesi pair'ini seç, kriterleri puanla. Eşikler otomatik karar versin. Seans kalitesini gir, günlük plan yap.</li>
+          <li><strong>Trade Günlüğü</strong> — İşlem sonrası R değerini gir. Notion'a bağlanıp otomatik çek. CSV yükleme ile broker geçmişini içe aktar. Kümülatif eğriyi takip et.</li>
+          <li><strong>Haftalık Değerlendirme</strong> — Her hafta kripto/fx RR'yi gir. Değerlendirme bölümleri ekle, ölçütler belirle. trendini izle.</li>
+          <li><strong>Alfa Edu</strong> — Bölüm seç (Teknik Analiz'de Temel/Orta/İleri seviye filtresi var), konu aç, video ekle. İzledim işaretle.</li>
+          <li><strong>Onchain</strong> — Coinglass Supercharts tek sayfada. Onchain Analizi eğitim bölümü de eklendi.</li>
+          <li><strong>Notion Senkronu</strong> — "Notion'a Bağlan" ile OAuth yap, database ID'lerini ayarlardan gir. Tek tuşla trade'lerini çek.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
   <div id="page-defter">
   <div class="controls">
     <div class="seg" id="pair-seg"></div>
@@ -1524,6 +1635,13 @@
   </div>
   </div><!-- /page-defter -->
 
+  <div id="note-popup" class="note-popup hidden">
+    <div class="note-popup-overlay" id="note-popup-close"></div>
+    <div class="note-popup-content">
+      <button class="note-popup-x" id="note-popup-close-btn">×</button>
+      <div id="note-popup-body"></div>
+    </div>
+  </div>
   <div id="page-data" class="hidden">
     <div class="data-kpis" id="data-kpis"></div>
     <div class="data-grid">
@@ -1549,14 +1667,24 @@
           <div class="actions" style="justify-content:flex-start;">
             <button class="btn" id="data-import-defter">Check List işlemlerini aktar</button>
             <button class="btn solid" id="data-notion">⬇ Notion'dan çek</button>
+            <button class="btn" id="data-notion-oauth">🔗 Notion'a Bağlan</button>
             <button class="btn" id="data-csv-btn">CSV yükle (broker/MetaTrader)</button>
             <input type="file" id="data-csv-file" accept=".csv,text/csv" style="display:none;">
           </div>
+          <details style="margin-top:8px;font-size:13px;">
+            <summary style="cursor:pointer;color:var(--text-2);font-weight:600;">⚙ Notion Database Ayarları</summary>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding:12px;background:var(--bg-2);border-radius:8px;">
+              <label style="font-size:12px;">Kripto DB ID <input type="text" id="ndb-kripto" placeholder="380f561953ab8088b5f9ffd53a397de9" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
+              <label style="font-size:12px;">Fx DB ID <input type="text" id="ndb-fx" placeholder="380f561953ab80938bdbfc07fcef2de1" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
+              <button class="btn" id="ndb-save" style="grid-column:1/-1;">Kaydet</button>
+              <span id="ndb-note" class="hint" style="grid-column:1/-1;"></span>
+            </div>
+          </details>
           <p class="hint">Alfa-Check List'te kaydettiğin işlemler R sonuçlarıyla buraya gelir. CSV: broker/MetaTrader geçmişini dışa aktar (date, symbol, type, profit sütunları) ve yükle.</p>
           <div id="data-note" class="hint"></div>
         </div>
         <div class="panel">
-          <h2 class="cat-h2"><span>Tüm İşlemler</span><span class="n" id="data-count"></span><button type="button" class="cat-edit danger-edit" id="data-clear">Tümünü temizle</button></h2>
+          <h2 class="cat-h2"><span>Tüm İşlemler</span><span class="n" id="data-count"></span><button type="button" class="cat-edit" id="data-merge" title="Aynı parite+tarih+yön olan kısmi pozları birleştir">⊞ Birleştir</button><button type="button" class="cat-edit danger-edit" id="data-clear">Tümünü temizle</button></h2>
           <div id="data-table"></div>
         </div>
       </div>
@@ -1636,7 +1764,13 @@
         <button data-sec="temel" type="button">Temel Analiz</button>
         <button data-sec="psikoloji" type="button">Trade Psikolojisi</button>
         <button data-sec="islem" type="button">İşlem &amp; Backtest</button>
-        <button data-sec="ileri" type="button">İleri Düzey</button>
+        <button data-sec="onchain" type="button">Onchain</button>
+      </div>
+      <div class="seg" id="eg-level-seg" style="margin-top:6px;display:none;">
+        <button data-level="temel" class="on-gold" type="button">Temel</button>
+        <button data-level="orta" type="button">Orta</button>
+        <button data-level="ileri" type="button">İleri</button>
+        <button data-level="all" type="button">Tümü</button>
       </div>
     </div>
     <div class="eg-course">
@@ -1672,11 +1806,62 @@
       <div class="eg-form-h" id="eg-form-title">Yeni</div>
       <input type="text" id="eg-in-title" placeholder="Başlık" maxlength="140">
       <input type="text" id="eg-in-url" placeholder="YouTube video ya da oynatma listesi bağlantısı">
+      <div class="eg-level-picker" id="eg-level-picker" style="display:none;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-3);">Seviye</label>
+        <div class="seg">
+          <button data-lv="temel" type="button" class="on-gold">Temel</button>
+          <button data-lv="orta" type="button">Orta</button>
+          <button data-lv="ileri" type="button">İleri</button>
+        </div>
+      </div>
       <div class="eg-form-btns">
         <button class="btn solid" id="eg-in-save" type="button">Kaydet</button>
         <button class="btn" id="eg-in-cancel" type="button">Vazgeç</button>
       </div>
       <div class="eg-form-err" id="eg-in-err"></div>
+    </div>
+  </div>
+  <div id="page-indicators" class="hidden">
+    <div class="eg-brand">
+      <span class="eg-brand-name">İndikatörler</span>
+      <span class="eg-brand-sub">Aggr Trade Workspace · Alfa Levels · Flow — açıklama, örnek, video, backtest</span>
+    </div>
+    <div id="ind-content" style="max-width:800px;margin:0 auto;padding:24px 16px;">
+      <div id="ind-ind-list"></div>
+    </div>
+  </div>
+  <div id="page-onchain" class="hidden">
+    <div class="eg-brand">
+      <span class="eg-brand-name">Onchain Verileri</span>
+      <span class="eg-brand-sub">Coinglass Supercharts — Funding / CVD / OI</span>
+    </div>
+    <div id="onchain-grid" style="display:grid;gap:16px;padding:16px;max-width:1400px;margin:0 auto;">
+      <div class="panel">
+        <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span>Coinglass Supercharts — Funding / CVD / OI</span>
+          <a href="https://www.coinglass.com/tv/tr/Binance_BTCUSDT" target="_blank" rel="noopener noreferrer" class="btn" style="font-size:12px;padding:4px 12px;margin-left:auto;">Yeni Sekmede Aç ↗</a>
+        </h2>
+        <iframe src="https://www.coinglass.com/tv/tr/Binance_BTCUSDT" style="width:100%;height:600px;border:none;border-radius:10px;background:var(--bg);" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+      </div>
+      <div class="panel" style="text-align:center;">
+        <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
+          <span>Aggr Trade — BTC CVD + Spot/Perp Delta + CB Premium</span>
+        </h2>
+        <p style="padding:8px 0 16px;color:var(--text-2);font-size:13px;">Bu site iframe'i engelliyor. Yeni sekmede açın:</p>
+        <a href="https://aggr.trade/btc-cvd-spot-perp-delta-cb-premium" target="_blank" rel="noopener noreferrer" class="btn" style="font-size:14px;padding:10px 24px;">Aç ↗</a>
+      </div>
+    </div>
+  </div>
+  <div id="page-calendar" class="hidden">
+    <div class="eg-brand">
+      <span class="eg-brand-name">Ekonomik Takvim</span>
+      <span class="eg-brand-sub">3 yıldız haberler — yüksek etkili makro verileri ve merkez bankası kararları</span>
+    </div>
+    <div id="cal-wrap" style="max-width:1200px;margin:0 auto;padding:16px;">
+      <div class="panel">
+        <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=3" style="width:100%;height:700px;border:none;border-radius:10px;background:var(--bg);" loading="lazy"></iframe>
+      </div>
+      <p class="hint" style="margin-top:8px;">Yalnızca yüksek etkili (3 yıldız) haberler gösterilir. Kaynak: Investing.com.</p>
     </div>
   </div>
 </div>
@@ -3397,12 +3582,21 @@ function logTrade() {
     verdict: verdictOf(s, cfg().thresholds),
     crits: crits, miss: miss, mood: mood, day: day, sess: session, cell: currentCell(),
     cap: (s >= cfg().thresholds.aplus && currentCell() !== 'A+'), strat: strat, sent: sent,
-    emoBlock: emoLocked(), intent: intent, stars: 0, r: ''
+    emoBlock: emoLocked(), intent: intent, stars: 0, r: '',
+    sabah: document.getElementById('d-sabah').value,
+    senaryo: document.getElementById('d-senaryo').value,
+    anti: document.getElementById('d-anti').value,
+    gunsonu: document.getElementById('d-gunsonu').value
   });
   saveTrades(); renderTrades();
   di.value = '';
   note.textContent = 'İşlem kaydedildi — sonucu belli olunca R kolonunu doldur.';
   setTimeout(() => { note.textContent = ''; }, 4000);
+  // Notion'a senkron et
+  const nt = trades[0];
+  const noteText = [nt.sabah ? 'Sabah: ' + nt.sabah : '', nt.senaryo ? 'Senaryo: ' + nt.senaryo : '', nt.anti ? 'Anti: ' + nt.anti : '', nt.gunsonu ? 'Gün Sonu: ' + nt.gunsonu : ''].filter(Boolean).join('\n');
+  const ntrade = { id: nt.id, ts: nt.id, date: nt.date, pair: nt.pair, dir: nt.dir, r: nt.r, strat: nt.strat, note: noteText || '', stars: nt.stars };
+  fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) }).catch(() => {});
 }
 
 function critNames(t) {
@@ -3513,6 +3707,8 @@ function renderTrades() {
     rin.addEventListener('change', () => {
       t.r = rin.value;
       saveTrades(); renderTrades();
+      const nt = { id: t.id, ts: t.id, date: t.date, pair: t.pair, dir: t.dir, r: t.r, strat: t.strat, note: '', stars: t.stars };
+      fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nt) }).catch(() => {});
     });
     rwrap.appendChild(rlbl); rwrap.appendChild(rin);
     const del = document.createElement('button');
@@ -3600,6 +3796,18 @@ function renderTrades() {
     form.appendChild(vlbl); form.appendChild(vsel);
     form.appendChild(slbl); form.appendChild(sinp);
     detail.appendChild(form);
+
+    // Günlük plan notları
+    if (t.sabah || t.senaryo || t.anti || t.gunsonu) {
+      const planDiv = document.createElement('div');
+      planDiv.style.cssText = 'border-top:1px solid var(--border);margin-top:10px;padding-top:10px;';
+      planDiv.addEventListener('click', e => e.stopPropagation());
+      if (t.sabah) { const r = document.createElement('div'); r.className = 'td-item yes'; r.innerHTML = '<span class="mk">☀</span><span></span>'; r.children[1].textContent = t.sabah; planDiv.appendChild(r); }
+      if (t.senaryo) { const r = document.createElement('div'); r.className = 'td-item yes'; r.innerHTML = '<span class="mk">→</span><span></span>'; r.children[1].textContent = 'Senaryo: ' + t.senaryo; planDiv.appendChild(r); }
+      if (t.anti) { const r = document.createElement('div'); r.className = 'td-item yes'; r.innerHTML = '<span class="mk">←</span><span></span>'; r.children[1].textContent = 'Anti: ' + t.anti; planDiv.appendChild(r); }
+      if (t.gunsonu) { const r = document.createElement('div'); r.className = 'td-item yes'; r.innerHTML = '<span class="mk">◷</span><span></span>'; r.children[1].textContent = 'Gün sonu: ' + t.gunsonu; planDiv.appendChild(r); }
+      starWrap.insertAdjacentElement('beforebegin', planDiv);
+    }
 
     // Akşam: karar/süreç yıldızı (serbest, 1-5)
     const starWrap = document.createElement('div');
@@ -3870,6 +4078,8 @@ function init() {
   bindNewsPage();
   bindReviewPage();
   bindEgitimPage();
+  bindIndicatorsPage();
+  bindOnchainPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
   document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
@@ -3882,6 +4092,33 @@ function init() {
     deletePair(pair);
   });
   renderCriteria(); render();
+  // Nav dropdown — hover (desktop) & click toggle (mobile)
+  document.querySelectorAll('.nav-drop').forEach(d => {
+    const btn = d.querySelector('.drop-btn');
+    let hoverTimer;
+    const isMobile = () => window.innerWidth <= 680;
+    d.addEventListener('mouseenter', () => { if (!isMobile()) { clearTimeout(hoverTimer); d.classList.add('open'); } });
+    d.addEventListener('mouseleave', () => { if (!isMobile()) { hoverTimer = setTimeout(() => d.classList.remove('open'), 100); } });
+    btn.addEventListener('click', (e) => { e.preventDefault(); if (isMobile()) d.classList.toggle('open'); });
+    d.querySelectorAll('.drop-menu .nav-link').forEach(l => {
+      l.addEventListener('click', () => d.classList.remove('open'));
+    });
+  });
+  // Global nav link handling (SPA intercept, sağ tık açma)
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.button !== 0) return;
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      e.preventDefault();
+      const href = el.getAttribute('href');
+      if (!href) return;
+      const m = href.match(/[?&]page=(\w+)/);
+      if (m) showPage(m[1]);
+    });
+  });
+  // Sayfa yüklendiğinde ?page= parametresini oku
+  const pm = window.location.search.match(/[?&]page=(\w+)/);
+  if (pm) showPage(pm[1]);
 }
 function dnum(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
 // ============ Data Takibi ============
@@ -4194,7 +4431,6 @@ function magZoomClose() { const z = document.getElementById('mag-zoom'); if (z) 
 
 function bindNewsPage() {
   const g = id => document.getElementById(id);
-  g('tab-news').addEventListener('click', () => showPage('news'));
   const nx = g('mag-next'), pv = g('mag-prev'); if (nx) nx.addEventListener('click', magNext); if (pv) pv.addEventListener('click', magPrev);
   const addb = g('mag-addentry'); if (addb) addb.addEventListener('click', magAddEntry);
   const aub = g('mag-authors'); if (aub) aub.addEventListener('click', () => { magRosterOpen = !magRosterOpen; aub.classList.toggle('on', magRosterOpen); renderRoster(); });
@@ -4222,11 +4458,17 @@ async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)
 
 function showPage(name) {
   currentPage = name;
-  ['defter', 'data', 'review', 'news', 'egitim'].forEach(p => {
+  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar'];
+  pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
     const tb = document.getElementById('tab-' + p);
     if (tb) tb.classList.toggle('on', name === p);
+  });
+  // highlight parent dropdown when child active, close all dropdowns
+  document.querySelectorAll('.nav-drop').forEach(d => {
+    d.classList.toggle('on', !!d.querySelector('.nav-link.on'));
+    d.classList.remove('open');
   });
   const shown = document.getElementById('page-' + name);
   if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
@@ -4234,6 +4476,7 @@ function showPage(name) {
   if (name === 'review') renderReview();
   if (name === 'news') renderNews();
   if (name === 'egitim') renderEgitim();
+  if (name === 'indicators') renderIndicators();
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -4265,26 +4508,72 @@ function renderData() {
   const tb = document.getElementById('data-table');
   tb.innerHTML = '';
   const head = document.createElement('div'); head.className = 'data-row head';
-  head.innerHTML = '<span>Tarih</span><span>Parite</span><span>Yön</span><span style="text-align:right;">R</span><span style="text-align:right;">Kümül.</span><span></span>';
+  head.innerHTML = '<span>Tarih</span><span>Parite</span><span>Yön</span><span>Strateji / Not</span><span style="text-align:right;">R</span><span style="text-align:right;">Kümül.</span><span></span>';
   tb.appendChild(head);
   let cum = 0;
   const withCum = rows.map(t => { cum += dnum(t.r); return Object.assign({}, t, { _cum: cum }); });
   withCum.slice().reverse().forEach(t => {
     const r = dnum(t.r);
-    const row = document.createElement('div'); row.className = 'data-row';
+    const stratDisplay = (t.strat || '').trim().slice(0, 14);
+    const noteFull = (t.note || '').trim();
+    const noteShort = noteFull.slice(0, 28);
+    const hasNote = noteFull.length > 0;
+    const noteIcon = hasNote ? '<span class="dr-note-icon" title="Not var">📝</span>' : '';
+    const extra = (stratDisplay ? stratDisplay : '') + (hasNote ? (stratDisplay ? ' · ' : '') + noteShort : '');
+    const row = document.createElement('div'); row.className = 'data-row' + (hasNote ? ' has-note' : '');
     row.innerHTML =
       '<span>' + (t.date || '') + '</span>' +
-      '<span class="dr-pair" title="' + (t.strat || '') + (t.note ? ' · ' + t.note : '') + '">' + (t.pair || '—') + '</span>' +
+      '<span class="dr-pair">' + (t.pair || '—') + '</span>' +
       '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '">' + (t.dir || '') + '</span>' +
+      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (t.strat||'') + (hasNote ? ' - ' + noteFull : '') + '">' + noteIcon + (extra || '—') + '</span>' +
       '<span class="dr-r ' + (r >= 0 ? 'pos' : 'neg') + '">' + (r > 0 ? '+' : '') + r.toFixed(2) + '</span>' +
       '<span class="dr-cum">' + (t._cum > 0 ? '+' : '') + t._cum.toFixed(2) + '</span>';
+    if (hasNote) {
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', e => {
+        if (e.target.closest('.dr-del')) return;
+        showNotePopup(t);
+      });
+    }
     const del = document.createElement('button'); del.className = 'dr-del'; del.type = 'button'; del.textContent = '×';
-    del.addEventListener('click', async () => { dataTrades = dataTrades.filter(x => x.id !== t.id); await saveData(); renderData(); });
+    del.addEventListener('click', async (e) => { e.stopPropagation(); dataTrades = dataTrades.filter(x => x.id !== t.id); await saveData(); renderData(); });
     row.appendChild(del);
     tb.appendChild(row);
   });
   document.getElementById('data-count').textContent = n ? (n + ' işlem') : '';
 }
+
+function showNotePopup(t) {
+  const body = document.getElementById('note-popup-body');
+  const popup = document.getElementById('note-popup');
+  const pair = t.pair || '—';
+  const dir = t.dir || '';
+  const date = t.date || '—';
+  const r = dnum(t.r);
+  const note = (t.note || '').trim();
+  const strat = (t.strat || '').trim();
+  const market = t.market || '';
+  const source = t._source || 'manuel';
+  body.innerHTML =
+    '<div class="np-header"><span class="np-pair">' + pair + '</span><span class="np-dir ' + dir.toLowerCase() + '">' + dir + '</span></div>' +
+    '<div class="np-meta">' +
+      '<span><strong>Tarih:</strong> ' + date + '</span>' +
+      '<span><strong>R:</strong> <span class="' + (r >= 0 ? 'pos' : 'neg') + '">' + (r > 0 ? '+' : '') + r.toFixed(2) + '</span></span>' +
+      (strat ? '<span><strong>Strateji:</strong> ' + strat + '</span>' : '') +
+      (market ? '<span><strong>Market:</strong> ' + market + '</span>' : '') +
+      '<span><strong>Kaynak:</strong> ' + (source === 'Notion' ? 'Notion senkron' : 'Manuel') + '</span>' +
+    '</div>' +
+    (note ? '<div class="np-note"><strong>Not:</strong><p>' + note.replace(/\n/g, '<br>') + '</p></div>' : '<div class="np-note" style="color:var(--text-3);font-style:italic;">Not eklenmemiş.</div>');
+  popup.classList.remove('hidden');
+}
+function closeNotePopup() {
+  document.getElementById('note-popup').classList.add('hidden');
+}
+document.addEventListener('click', e => {
+  const p = document.getElementById('note-popup');
+  if (p && e.target.closest('#note-popup-close, #note-popup-close-btn, .note-popup-overlay')) closeNotePopup();
+  if (p && !e.target.closest('.note-popup-content') && !e.target.closest('.data-row.has-note') && p.classList.contains('hidden') === false) closeNotePopup();
+});
 
 function drawEquity(rows) {
   const cv = document.getElementById('data-chart');
@@ -4350,6 +4639,21 @@ async function importFromDefter() {
 }
 
 function csvDisp(s) { const d = new Date(Date.parse(s)); if (isNaN(d.getTime())) return String(s).slice(0, 10); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); }
+function mergeCsvPartials(rows) {
+  const groups = {};
+  rows.forEach(t => {
+    const key = (t.pair||'')+'|'+(t.date||'')+'|'+(t.dir||'');
+    if (!groups[key]) { groups[key] = Object.assign({}, t, { _mergeCount: 1 }); }
+    else {
+      groups[key].r += t.r;
+      if (t.pnl != null) groups[key].pnl = (groups[key].pnl || 0) + t.pnl;
+      groups[key]._mergeCount++;
+    }
+  });
+  const merged = Object.values(groups);
+  const total = rows.length, after = merged.length;
+  return { merged, mergedCount: total - after, total };
+}
 function importCsv(file) {
   const note = document.getElementById('data-note');
   const reader = new FileReader();
@@ -4366,7 +4670,7 @@ function importCsv(file) {
       const iType = find('type', 'side', 'yön', 'direction', 'position', 'işlem');
       const iProfit = find('profit', 'pnl', 'kar', 'kazanç', 'net');
       const iR = find('rr', 'r multiple', 'risk');
-      let added = 0;
+      let added = [];
       for (let i = 1; i < lines.length; i++) {
         const c = lines[i].split(delim).map(x => x.trim().replace(/^"|"$/g, ''));
         const rawDate = iDate > -1 ? c[iDate] : '';
@@ -4375,11 +4679,26 @@ function importCsv(file) {
         const dir = /sell|short/.test(typ) ? 'SHORT' : 'LONG';
         const pnl = iProfit > -1 ? dnum((c[iProfit] || '').replace(/[^0-9.\-,]/g, '').replace(',', '.')) : null;
         const rr = iR > -1 ? dnum(c[iR]) : 0;
-        dataTrades.push({ id: Date.now() + Math.random() + i, ts, date: rawDate ? csvDisp(rawDate) : '', pair: (iSym > -1 ? c[iSym] : '').toUpperCase(), dir, r: rr, pnl, strat: '', note: 'CSV' });
-        added++;
+        added.push({ id: Date.now() + Math.random() + i, ts, date: rawDate ? csvDisp(rawDate) : '', pair: (iSym > -1 ? c[iSym] : '').toUpperCase(), dir, r: rr, pnl, strat: '', note: 'CSV' });
       }
+      // Aynı pair+date+dir olan kısmi pozları otomatik birleştir (kaldıraç yetmediği için bölünen pozlar)
+      const { merged, mergedCount, total } = mergeCsvPartials(added);
+      // Mevcut veriyle de çakışma kontrolü (r dahil)
+      const existKey = new Set(dataTrades.map(t => (t.pair||'')+'|'+(t.date||'')+'|'+(t.dir||'')+'|'+dnum(t.r)));
+      let actuallyAdded = 0;
+      merged.forEach(t => {
+        const key = (t.pair||'')+'|'+(t.date||'')+'|'+(t.dir||'')+'|'+dnum(t.r);
+        if (existKey.has(key)) return;
+        existKey.add(key);
+        dataTrades.push(t);
+        actuallyAdded++;
+      });
       await saveData(); renderData();
-      note.textContent = added + ' satır içe aktarıldı.';
+      const parts = [];
+      parts.push(total + ' satır okundu');
+      if (mergedCount > 0) parts.push(mergedCount + ' kısmi poz birleştirildi');
+      parts.push(actuallyAdded + ' yeni işlem eklendi');
+      note.textContent = parts.join(' · ');
     } catch (e) {
       note.textContent = 'CSV okunamadı — sütun başlıkları (date, symbol, type, profit) olan bir dosya dene.';
     }
@@ -4387,45 +4706,114 @@ function importCsv(file) {
   reader.readAsText(file);
 }
 
+function getNotionDbIds() {
+  const k = typeof store !== 'undefined' ? store : null;
+  let kid = '', fid = '';
+  try { kid = localStorage.getItem('ndb_kripto') || ''; } catch (e) {}
+  try { fid = localStorage.getItem('ndb_fx') || ''; } catch (e) {}
+  if (typeof AUTH !== 'undefined' && AUTH.cloud) {
+    if (AUTH.cloud.ndb_kripto) kid = AUTH.cloud.ndb_kripto;
+    if (AUTH.cloud.ndb_fx) fid = AUTH.cloud.ndb_fx;
+  }
+  return { kripto: kid.trim(), fx: fid.trim() };
+}
+function saveNotionDbIds(kripto, fx) {
+  if (typeof AUTH !== 'undefined' && AUTH.cloud) { AUTH.cloud.ndb_kripto = kripto; AUTH.cloud.ndb_fx = fx; scheduleCloudSync(); }
+  try { localStorage.setItem('ndb_kripto', kripto); } catch (e) {}
+  try { localStorage.setItem('ndb_fx', fx); } catch (e) {}
+}
+
 async function importFromNotion() {
   const note = document.getElementById('data-note');
   const btn = document.getElementById('data-notion');
   note.textContent = 'Notion\'dan çekiliyor…';
   if (btn) btn.disabled = true;
+  const nt = getNotionToken();
+  const dbs = getNotionDbIds();
+  let url = '/api/notion-trades' + (nt ? '?token=' + encodeURIComponent(nt) : '');
+  if (dbs.kripto || dbs.fx) {
+    url += (nt ? '&' : '?') + 'dbs=' + encodeURIComponent(JSON.stringify(dbs));
+  }
   try {
-    const r = await fetch('/api/notion-trades');
+    const r = await fetch(url);
     let j = {};
     try { j = await r.json(); } catch (e) { throw new Error('Sunucu yanıtı okunamadı (arka uç yüklü mü?)'); }
     if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status));
     const incoming = Array.isArray(j.trades) ? j.trades : [];
-    const existTs = new Set(dataTrades.map(t => t.ts));
+    dataTrades = dataTrades.filter(t => t.note !== 'Notion' && t._source !== 'Notion');
+    const existIds = new Set(dataTrades.map(t => t.notionId).filter(Boolean));
     let added = 0;
     incoming.forEach(t => {
-      if (t.ts && existTs.has(t.ts)) return;
+      if (t.notionId && existIds.has(t.notionId)) return;
+      existIds.add(t.notionId);
       dataTrades.push({
         id: Date.now() + Math.random() + added,
+        notionId: t.notionId || null,
         ts: t.ts || (Date.now() + added),
         date: t.date ? (t.date.slice(8, 10) + '/' + t.date.slice(5, 7)) : '',
         pair: (t.pair || '').toUpperCase(), dir: t.dir || 'LONG',
-        r: dnum(t.r), pnl: null, strat: t.strat || '', note: 'Notion'
+        r: dnum(t.r), pnl: null, strat: t.strat || '', note: t.note || '', _source: 'Notion'
       });
       added++;
     });
     await saveData(); renderData();
-    note.textContent = added ? (added + ' işlem Notion\'dan çekildi.') : 'Zaten güncel — yeni işlem yok.';
+    note.textContent = added + ' işlem Notion\'dan çekildi.';
   } catch (e) {
-    note.textContent = 'Notion\'dan çekilemedi: ' + ((e && e.message) || e) + ' — Vercel\'de arka uç ve NOTION_TOKEN ayarlı mı?';
+    note.textContent = 'Notion\'dan çekilemedi: ' + ((e && e.message) || e);
   } finally {
     if (btn) btn.disabled = false;
   }
 }
 
+function getNotionToken() {
+  try { const v = localStorage.getItem('notion_oauth_token'); if (v && v.length > 20) return v; } catch (e) {}
+  if (typeof AUTH !== 'undefined' && AUTH.cloud && AUTH.cloud.notion_oauth_token) return AUTH.cloud.notion_oauth_token;
+  return null;
+}
+function setNotionToken(token) {
+  if (typeof AUTH !== 'undefined' && AUTH.cloud) { AUTH.cloud.notion_oauth_token = token; scheduleCloudSync(); }
+  try { localStorage.setItem('notion_oauth_token', token); } catch (e) {}
+}
+function handleNotionHash() {
+  try {
+    const h = window.location.hash;
+    if (h.startsWith('#notion-token=')) {
+      const token = decodeURIComponent(h.slice(14));
+      setNotionToken(token);
+      window.location.hash = '';
+      const note = document.getElementById('data-note');
+      if (note) note.textContent = '✅ Notion hesabın bağlandı! Veriler çekiliyor…';
+      setTimeout(importFromNotion, 500);
+    } else if (h.startsWith('#notion-error=')) {
+      const err = decodeURIComponent(h.slice(14));
+      window.location.hash = '';
+      const note = document.getElementById('data-note');
+      if (note) note.textContent = '❌ Notion bağlantı hatası: ' + err;
+    }
+  } catch (e) { /* hash hatası */ }
+}
+
 function bindDataPage() {
   const g = id => document.getElementById(id);
   const nb = g('data-notion'); if (nb) nb.addEventListener('click', importFromNotion);
-  g('tab-defter').addEventListener('click', () => showPage('defter'));
-  g('tab-data').addEventListener('click', () => showPage('data'));
-  g('tab-news').addEventListener('click', () => showPage('news'));
+  const no = g('data-notion-oauth');
+  if (no) no.addEventListener('click', () => {
+    const state = (typeof AUTH !== 'undefined' && AUTH.user) ? AUTH.user.id : '';
+    window.location.href = '/api/notion-auth' + (state ? '?state=' + encodeURIComponent(state) : '');
+  });
+  // Notion DB ID yükleme
+  (function loadNdb() {
+    const dbs = getNotionDbIds();
+    const ki = g('ndb-kripto'); if (ki) ki.value = dbs.kripto;
+    const fi = g('ndb-fx'); if (fi) fi.value = dbs.fx;
+  })();
+  const ns = g('ndb-save');
+  if (ns) ns.addEventListener('click', () => {
+    const ki = g('ndb-kripto'), fi = g('ndb-fx');
+    saveNotionDbIds(ki ? ki.value.trim() : '', fi ? fi.value.trim() : '');
+    const nn = g('ndb-note');
+    if (nn) { nn.textContent = '✅ Database ID\'ler kaydedildi.'; setTimeout(() => { nn.textContent = ''; }, 2000); }
+  });
   g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
   g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
   g('df-add').addEventListener('click', addDataTrade);
@@ -4436,6 +4824,14 @@ function bindDataPage() {
     dataTrades = [];
     await saveData(); renderData();
     document.getElementById('data-note').textContent = 'Tüm işlemler silindi.';
+  });
+  g('data-merge').addEventListener('click', async () => {
+    if (dataTrades.length < 2) { document.getElementById('data-note').textContent = 'Birleştirilecek en az 2 işlem gerekli.'; return; }
+    const { merged, mergedCount } = mergeCsvPartials(dataTrades);
+    if (!mergedCount) { document.getElementById('data-note').textContent = 'Birleştirilecek aynı parite+tarih+yön grubu bulunamadı.'; return; }
+    dataTrades = merged;
+    await saveData(); renderData();
+    document.getElementById('data-note').textContent = mergedCount + ' kısmi poz birleştirildi. (' + dataTrades.length + ' işlem kaldı)';
   });
   g('data-csv-btn').addEventListener('click', () => g('data-csv-file').click());
   g('data-csv-file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importCsv(f); e.target.value = ''; });
@@ -4604,7 +5000,6 @@ function renderReview() {
 
 function bindReviewPage() {
   const g = id => document.getElementById(id);
-  g('tab-review').addEventListener('click', () => showPage('review'));
   g('rv-prev').addEventListener('click', () => { reviewWeek = new Date(reviewWeek.getTime() - 7 * 864e5); renderReview(); });
   g('rv-next').addEventListener('click', () => { reviewWeek = new Date(reviewWeek.getTime() + 7 * 864e5); renderReview(); });
   g('rv-today').addEventListener('click', () => { reviewWeek = mondayOf(new Date()); renderReview(); });
@@ -4622,41 +5017,55 @@ function bindReviewPage() {
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
 const EGITIM_KEY = 'defter-egitim-v1';
-const EG_SECTIONS = { teknik: 'Teknik Analiz', temel: 'Temel Analiz', psikoloji: 'Trade Psikolojisi', islem: 'İşlem & Backtest', ileri: 'İleri Düzey' };
+const EG_SECTIONS = { teknik: 'Teknik Analiz', temel: 'Temel Analiz', psikoloji: 'Trade Psikolojisi', islem: 'İşlem & Backtest', onchain: 'Onchain Analizi' };
+const EG_LEVELS = ['temel', 'orta', 'ileri'];
 const EG_SEED_PLAYLIST = 'PLSvAYYLAIh0PKVsqa7LqR6R1oU_qn8DEe';
-const EG_SEED_VER = 3;
+const EG_SEED_VER = 4;
 // Alfa Traders içeriği — bölüm → konu → video başlıkları (linkleri kullanıcı ekler).
 const EG_SEED = {
   teknik: [
-    { title: 'Market Yapısı', videos: [
+    { title: 'Market Yapısı', level: 'temel', videos: [
       { title: 'Market Yapısı -1 / Price Action' },
       { title: 'Market Yapısı -2 (Örnekler)' },
       { title: 'Detaylı Market Yapısı -3 / PDArray - BOS - MSB' },
-      { title: 'İleri Düzey Market Yapısı / Teknik Analize Giriş' },
     ] },
-    { title: 'Destek & Direnç', videos: [ { title: 'Destek ve Direnç Nasıl Belirlenir?' } ] },
-    { title: 'Likidite', videos: [
+    { title: 'Destek & Direnç', level: 'temel', videos: [ { title: 'Destek ve Direnç Nasıl Belirlenir?' } ] },
+    { title: 'Likidite (Temel)', level: 'temel', videos: [
       { title: 'Likidite / Price Action Eğitimi' },
       { title: 'Likidite -3 / Teknik Analize Giriş' },
+    ] },
+    { title: 'Formasyonlar', level: 'temel', videos: [ { title: 'Formasyonlar / OBO-TOBO' } ] },
+    { title: 'Trendler', level: 'temel', videos: [ { title: 'Trendleri Anlamak - Price Action' } ] },
+    { title: 'Manipülasyon & Likidite', level: 'orta', videos: [
       { title: 'Manipülasyon ve Likidite / Alfa Trading Bootcamp 3' },
       { title: 'Supply / Demand / Likidite / Key Levels - Ders 9' },
     ] },
-    { title: 'Formasyonlar', videos: [ { title: 'Formasyonlar / OBO-TOBO' } ] },
-    { title: 'Key Levels (Kurumsal Seviyeler)', videos: [ { title: 'Kurumsal Seviyeler (Key Levels)' } ] },
-    { title: 'Order Block', videos: [ { title: 'Order Block - Price Action Eğitimi' } ] },
-    { title: 'Breaker Block', videos: [
+    { title: 'Key Levels (Kurumsal Seviyeler)', level: 'orta', videos: [ { title: 'Kurumsal Seviyeler (Key Levels)' } ] },
+    { title: 'Order Block', level: 'orta', videos: [ { title: 'Order Block - Price Action Eğitimi' } ] },
+    { title: 'Breaker Block', level: 'orta', videos: [
       { title: 'Breaker Blok - Price Action' },
       { title: 'Breaker Blok +7.7R - Backtest #11' },
     ] },
-    { title: 'Trendler', videos: [ { title: 'Trendleri Anlamak - Price Action' } ] },
-    { title: 'Wyckoff & Hacim', videos: [
-      { title: 'Wyckoff Birikim-Dağıtım Aşamaları' },
-      { title: 'Hacim Nedir? SHP ve Wyckoff Kullanımı' },
-    ] },
-    { title: 'Marketi Anlamak', videos: [
+    { title: 'Marketi Anlamak', level: 'orta', videos: [
       { title: 'Marketi Anlamak - Basit Ama Etkili Bilgiler' },
       { title: "30 Dk'da Price Action" },
       { title: 'Price HTF Nasıl Trade Edilir?' },
+    ] },
+    { title: 'İleri Düzey Market Yapısı', level: 'ileri', videos: [
+      { title: 'İleri Düzey Market Yapısı / Teknik Analize Giriş' },
+    ] },
+    { title: 'Wyckoff & Hacim', level: 'ileri', videos: [
+      { title: 'Wyckoff Birikim-Dağıtım Aşamaları' },
+      { title: 'Hacim Nedir? SHP ve Wyckoff Kullanımı' },
+    ] },
+    { title: 'İleri Düzey Trade Eğitimi', level: 'ileri', videos: [
+      { title: 'İleri Düzey Trade Eğitimi -1' },
+      { title: 'İleri Düzey Trade Eğitimi -2 / İşlem Stratejisi Nasıl Kurulur' },
+      { title: 'İleri Düzey Trade Eğitimi -4 / Manipülasyon (Bitcoin & Altcoin)' },
+    ] },
+    { title: 'Stratejiler', level: 'ileri', videos: [
+      { title: 'LTF İşleme Giriş Stratejileri' },
+      { title: 'Alex G Swing Trade Stratejisi -1' },
     ] },
   ],
   temel: [],
@@ -4704,65 +5113,89 @@ const EG_SEED = {
       { title: 'LTF Stratejileri (Backtest 14) - 11R' },
     ] },
   ],
-  ileri: [
-    { title: 'İleri Düzey Trade Eğitimi', videos: [
-      { title: 'İleri Düzey Trade Eğitimi -1' },
-      { title: 'İleri Düzey Trade Eğitimi -2 / İşlem Stratejisi Nasıl Kurulur' },
-      { title: 'İleri Düzey Trade Eğitimi -4 / Manipülasyon (Bitcoin & Altcoin)' },
+  onchain: [
+    { title: 'Open Interest (OI)', videos: [
+      { title: 'OI Nedir? Nasıl Yorumlanır?' },
+      { title: 'OI ve Fiyat İlişkisi' },
     ] },
-    { title: 'Stratejiler', videos: [
-      { title: 'LTF İşleme Giriş Stratejileri' },
-      { title: 'Alex G Swing Trade Stratejisi -1' },
+    { title: 'Funding Rate', videos: [
+      { title: 'Funding Rate Nasıl Okunur?' },
+      { title: 'Long/Short Oranları' },
+    ] },
+    { title: 'CVD & Orderflow', videos: [
+      { title: 'CVD (Cumulative Volume Delta) Nedir?' },
+    ] },
+    { title: 'Liquidations', videos: [
+      { title: 'Likitasyon Haritası Nasıl Okunur?' },
     ] },
   ],
 };
 let egitimData = { sections: {}, sel: {}, selVid: {}, seedVer: 0 };
 let egSec = 'teknik';
+let egLevel = 'temel';
+let egShared = null;
 let egSaveTimer = null;
 let egForm = { mode: null, topicId: null, vidId: null };
 
 async function loadEgitim() {
+  // shared API ana kaynak, localStorage yedek
+  let sharedData = null;
+  try {
+    const r = await fetch('/api/edu-shared');
+    if (r.ok) sharedData = await r.json();
+  } catch (e) { /* */ }
   try {
     const raw = await store.get(EGITIM_KEY);
     if (raw) egitimData = JSON.parse(raw);
-  } catch (e) { /* boş başla */ }
+  } catch (e) { /* */ }
   if (!egitimData || typeof egitimData !== 'object') egitimData = {};
-  // Eski düz model (videos.baslangic/orta/ileri) -> yeni bölüm/konu/video yapısı
-  if (egitimData.videos && !egitimData.sections) {
-    egitimData.sections = {};
-    Object.keys(EG_SECTIONS).forEach(s => { egitimData.sections[s] = []; });
-    ['baslangic', 'orta', 'ileri'].forEach(lv => {
-      (egitimData.videos[lv] || []).forEach(old => {
-        if (!old || !old.url) return; // linksiz eski placeholder'ları at
-        egitimData.sections.teknik.push({
-          id: rid(), title: old.title || 'Konu', note: old.note || '',
-          videos: [{ id: rid(), title: old.title || 'Video', url: old.url }]
-        });
-      });
-    });
-    delete egitimData.videos;
-    egitimData.sel = {}; egitimData.selVid = {};
-  }
   if (!egitimData.sections || typeof egitimData.sections !== 'object') egitimData.sections = {};
   if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
   if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
-  Object.keys(EG_SECTIONS).forEach(s => {
-    if (!Array.isArray(egitimData.sections[s])) egitimData.sections[s] = [];
-    egitimData.sections[s].forEach(t => {
-      if (typeof t.note !== 'string') t.note = '';
-      if (!Array.isArray(t.videos)) t.videos = [];
-      t.videos.forEach(v => { if (typeof v.done !== 'boolean') v.done = false; });
-    });
-  });
+  // seed verisini yükle (ilk defa gelenler için)
   if (typeof egitimData.seedVer !== 'number') egitimData.seedVer = 0;
-  const total = Object.keys(EG_SECTIONS).reduce((n, s) => n + egitimData.sections[s].length, 0);
+  const total = Object.keys(EG_SECTIONS).reduce((n, s) => n + (egitimData.sections[s] || []).length, 0);
   if (egitimData.seedVer < EG_SEED_VER || total === 0) {
     egMergeSeed();
     egitimData.seedVer = EG_SEED_VER;
-    await saveEgitim();
+    await store.set(EGITIM_KEY, JSON.stringify(egitimData));
   }
+  // shared'dan gelen konuları local'e ekle (yoksa)
+  if (sharedData && sharedData.sections) {
+    Object.keys(EG_SECTIONS).forEach(sec => {
+      const arr = sharedData.sections[sec] || [];
+      if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
+      const localIds = new Set(egitimData.sections[sec].map(t => t.id));
+      arr.forEach(t => {
+        if (!localIds.has(t.id)) {
+          if (sec === 'teknik' && !t.level) t.level = 'temel';
+          egitimData.sections[sec].push(t);
+        }
+      });
+    });
+  }
+  // shared'a push et (local'de shared'da olmayan konu varsa)
+  const hasLocal = Object.keys(EG_SECTIONS).some(sec => {
+    const sharedIds = new Set((sharedData?.sections?.[sec] || []).map(t => t.id));
+    return (egitimData.sections[sec] || []).some(t => !sharedIds.has(t.id));
+  });
+  if (hasLocal) await saveEgitim();
 }
-async function saveEgitim() { await store.set(EGITIM_KEY, JSON.stringify(egitimData)); }
+async function saveEgitim() {
+  await store.set(EGITIM_KEY, JSON.stringify(egitimData));
+  // shared API'ya TÜM veriyi gönder (full replace — herkes görsün)
+  try {
+    const payload = { sections: {} };
+    Object.keys(EG_SECTIONS).forEach(sec => {
+      payload.sections[sec] = (egitimData.sections[sec] || []).filter(t => t.videos?.some(v => v.url));
+    });
+    const res = await fetch('/api/edu-shared', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) egShared = JSON.parse(JSON.stringify(payload));
+  } catch (e) { /* shared sync hatası — sadece local devam */ }
+}
 
 // Hazır içeriği yapıya ekler (var olan konu/videoyu çoğaltmadan). Eklenen sayısını döndürür.
 function egMergeSeed() {
@@ -4771,7 +5204,7 @@ function egMergeSeed() {
     if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
     (EG_SEED[sec] || []).forEach(st => {
       let topic = egitimData.sections[sec].find(t => (t.title || '').trim().toLowerCase() === st.title.trim().toLowerCase());
-      if (!topic) { topic = { id: rid(), title: st.title, note: '', videos: [] }; egitimData.sections[sec].push(topic); added++; }
+      if (!topic) { topic = { id: rid(), title: st.title, note: '', videos: [], level: st.level || 'temel' }; egitimData.sections[sec].push(topic); added++; }
       const existV = new Set((topic.videos || []).map(v => (v.title || '').trim().toLowerCase()));
       (st.videos || []).forEach(sv => {
         if (existV.has(sv.title.trim().toLowerCase())) return;
@@ -4822,7 +5255,11 @@ function egWatchHref(v) {
   return v.url || '#';
 }
 
-function egTopics() { return egitimData.sections[egSec] || []; }
+function egTopics() {
+  const all = egitimData.sections[egSec] || [];
+  if (egSec !== 'teknik' || egLevel === 'all') return all;
+  return all.filter(t => t.level === egLevel);
+}
 function egCurTopic() {
   const list = egTopics();
   if (!list.length) return null;
@@ -4841,6 +5278,11 @@ function renderEgitim() {
   document.querySelectorAll('#eg-sec-seg button').forEach(b => {
     b.classList.toggle('on-gold', b.getAttribute('data-sec') === egSec);
   });
+  const levelSeg = document.getElementById('eg-level-seg');
+  if (levelSeg) levelSeg.style.display = egSec === 'teknik' ? 'flex' : 'none';
+  document.querySelectorAll('#eg-level-seg button').forEach(b => {
+    b.classList.toggle('on-gold', b.getAttribute('data-level') === egLevel);
+  });
   const topics = egTopics();
   const cur = egCurTopic();
   // ---- Sol: konular ----
@@ -4853,6 +5295,10 @@ function renderEgitim() {
     row.appendChild(idx);
     const tt = document.createElement('span'); tt.className = 'eg-item-t'; tt.textContent = t.title || '(başlıksız)';
     row.appendChild(tt);
+    if (egSec === 'teknik' && t.level) {
+      const lb = document.createElement('span'); lb.className = 'eg-level-badge ' + t.level; lb.textContent = t.level === 'temel' ? 'T' : t.level === 'orta' ? 'O' : 'İ'; lb.title = t.level === 'temel' ? 'Temel' : t.level === 'orta' ? 'Orta' : 'İleri';
+      row.appendChild(lb);
+    }
     const total = (t.videos || []).length;
     const done = (t.videos || []).filter(v => v.done).length;
     const cnt = document.createElement('span');
@@ -4862,7 +5308,7 @@ function renderEgitim() {
     row.appendChild(cnt);
     const edit = document.createElement('button'); edit.className = 'eg-item-edit'; edit.type = 'button';
     edit.textContent = '✎'; edit.title = 'Konu adını düzenle';
-    edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('topic-edit', { topicId: t.id }, { title: t.title }); });
+    edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('topic-edit', { topicId: t.id }, { title: t.title, level: t.level }); });
     row.appendChild(edit);
     const del = document.createElement('button'); del.className = 'eg-item-del'; del.type = 'button';
     del.textContent = '×'; del.title = 'Konuyu sil';
@@ -4946,6 +5392,13 @@ function renderEgitim() {
     row.appendChild(t);
     if (kind === 'playlist') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = 'Liste'; row.appendChild(tag); }
     else if (kind === 'invalid') { const tag = document.createElement('span'); tag.className = 'eg-item-tag muted'; tag.textContent = 'Link yok'; row.appendChild(tag); }
+    // yukarı/aşağı taşıma
+    const up = document.createElement('button'); up.className = 'eg-vid-move'; up.type = 'button'; up.textContent = '▲'; up.title = 'Yukarı taşı';
+    up.addEventListener('click', async (e) => { e.stopPropagation(); if (i === 0) return; [cur.videos[i - 1], cur.videos[i]] = [cur.videos[i], cur.videos[i - 1]]; await saveEgitim(); renderEgitim(); });
+    row.appendChild(up);
+    const dn = document.createElement('button'); dn.className = 'eg-vid-move'; dn.type = 'button'; dn.textContent = '▼'; dn.title = 'Aşağı taşı';
+    dn.addEventListener('click', async (e) => { e.stopPropagation(); if (i === vids.length - 1) return; [cur.videos[i], cur.videos[i + 1]] = [cur.videos[i + 1], cur.videos[i]]; await saveEgitim(); renderEgitim(); });
+    row.appendChild(dn);
     const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'Videoyu düzenle';
     edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url }); });
     row.appendChild(edit);
@@ -4978,6 +5431,16 @@ function egOpenForm(mode, ids, prefill) {
   const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Video ekle', 'video-edit': 'Videoyu düzenle' };
   g('eg-form-title').textContent = titles[mode] || 'Düzenle';
   g('eg-in-title').setAttribute('placeholder', isVideo ? 'Video başlığı (ör. Market Yapısı -1)' : 'Konu başlığı (ör. Market Yapısı)');
+  // Seviye seçici (sadece teknik bölümünde konu ekleme/düzenleme)
+  const lp = g('eg-level-picker');
+  const isTopicMode = (mode === 'topic-add' || mode === 'topic-edit');
+  if (lp) {
+    lp.style.display = (egSec === 'teknik' && isTopicMode) ? 'block' : 'none';
+    if (egSec === 'teknik' && isTopicMode) {
+      const curLevel = (prefill && prefill.level) || egLevel || 'temel';
+      lp.querySelectorAll('[data-lv]').forEach(b => b.classList.toggle('on-gold', b.getAttribute('data-lv') === curLevel));
+    }
+  }
   g('eg-add-form').classList.remove('hidden');
   g('eg-in-title').focus();
 }
@@ -4993,9 +5456,11 @@ function egFlashSaved() {
 
 function bindEgitimPage() {
   const g = id => document.getElementById(id);
-  g('tab-egitim').addEventListener('click', () => showPage('egitim'));
   document.querySelectorAll('#eg-sec-seg button').forEach(b => {
-    b.addEventListener('click', () => { egSec = b.getAttribute('data-sec'); egCloseForm(); renderEgitim(); });
+    b.addEventListener('click', () => { egSec = b.getAttribute('data-sec'); egLevel = 'temel'; egCloseForm(); renderEgitim(); });
+  });
+  document.querySelectorAll('#eg-level-seg button').forEach(b => {
+    b.addEventListener('click', () => { egLevel = b.getAttribute('data-level'); renderEgitim(); });
   });
   // hazır içeriği yükle (birleştir)
   g('eg-load').addEventListener('click', async () => {
@@ -5006,6 +5471,12 @@ function bindEgitimPage() {
   // konu ekle
   g('eg-add-topic').addEventListener('click', () => {
     if (g('eg-add-form').classList.contains('hidden')) egOpenForm('topic-add', null, null); else egCloseForm();
+  });
+  // Seviye seçici tıklama (form içinde)
+  document.querySelectorAll('#eg-level-picker [data-lv]').forEach(b => {
+    b.addEventListener('click', () => {
+      b.parentElement.querySelectorAll('[data-lv]').forEach(x => x.classList.toggle('on-gold', x === b));
+    });
   });
   // İzledim / bitirdim işareti (mevcut video)
   g('eg-done').addEventListener('click', async () => {
@@ -5019,7 +5490,7 @@ function bindEgitimPage() {
     }
   });
   // konu adı düzenle (oynatıcı üstündeki kalem)
-  g('eg-topic-edit').addEventListener('click', () => { const t = egCurTopic(); if (t) egOpenForm('topic-edit', { topicId: t.id }, { title: t.title }); });
+  g('eg-topic-edit').addEventListener('click', () => { const t = egCurTopic(); if (t) egOpenForm('topic-edit', { topicId: t.id }, { title: t.title, level: t.level }); });
   // video ekle (oynatıcı içindeki buton)
   g('eg-add-vid').addEventListener('click', () => { const t = egCurTopic(); if (t) egOpenForm('video-add', { topicId: t.id }, null); });
   // form kaydet
@@ -5034,11 +5505,15 @@ function bindEgitimPage() {
       return;
     }
     const secList = egitimData.sections[egSec];
+    // Seviye seçici (teknik bölümü)
+    let pickedLevel = 'temel';
+    const lvBtn = document.querySelector('#eg-level-picker [data-lv].on-gold');
+    if (lvBtn) pickedLevel = lvBtn.getAttribute('data-lv');
     if (mode === 'topic-add') {
-      const t = { id: rid(), title: title || 'Konu', note: '', videos: [] };
+      const t = { id: rid(), title: title || 'Konu', note: '', videos: [], level: (egSec === 'teknik' ? pickedLevel : 'temel') };
       secList.push(t); egitimData.sel[egSec] = t.id;
     } else if (mode === 'topic-edit') {
-      const t = secList.find(x => x.id === egForm.topicId); if (t) t.title = title || t.title || 'Konu';
+      const t = secList.find(x => x.id === egForm.topicId); if (t) { t.title = title || t.title || 'Konu'; if (egSec === 'teknik') t.level = pickedLevel; }
     } else if (mode === 'video-add') {
       const t = secList.find(x => x.id === egForm.topicId);
       if (t) { const v = { id: rid(), title: title || (ytListId(url) && !ytId(url) ? 'Oynatma listesi' : 'Video'), url: url }; t.videos.push(v); egitimData.selVid[t.id] = v.id; egitimData.sel[egSec] = t.id; }
@@ -5058,6 +5533,74 @@ function bindEgitimPage() {
     clearTimeout(egSaveTimer);
     egSaveTimer = setTimeout(async () => { await saveEgitim(); egFlashSaved(); }, 600);
   });
+}
+
+// ============ İndikatörler ============
+const INDICATORS = [
+  {
+    id: 'aggr-workspace',
+    name: 'Aggr Trade — BTC CVD + Spot/Perp Delta + CB Premium',
+    tagline: 'aggr.trade için hazır workspace — BTC spot CVD, aggregate perp delta, Coinbase Premium ve daha fazlası tek ekranda.',
+    sections: [
+      { type: 'html', content: '<p><strong>Aggr Trade</strong> — gerçek zamanlı CVD, delta ve premium verilerini tek workspace\'te toplayan ücretsiz bir platform. Aşağıdaki dosyayı indirip aggr.trade\'e yükleyerek kullanabilirsiniz.</p>' },
+      { type: 'html', content: '<h3>📥 Workspace\'i İndir</h3><p><a href="/workspace-btc-cvd.json" download style="display:inline-block;background:var(--acc);color:#fff;padding:10px 20px;border-radius:10px;font-weight:600;text-decoration:none;">📥 BTC Workspace JSON\'u İndir</a></p>' },
+      { type: 'html', content: '<h3>📖 Kullanım</h3><ol><li><a href="https://aggr.trade" target="_blank" rel="noopener noreferrer">aggr.trade</a> sitesine gidin</li><li>Sağ üstteki menüden <strong>Workspace → Import</strong> seçeneğine tıklayın</li><li>İndirdiğiniz JSON dosyasını seçin</li><li>Workspace otomatik yüklenecek. BTC CVD, Spot Delta, Perp Delta ve CB Premium panellerini göreceksiniz.</li></ol>' },
+      { type: 'html', content: '<h3>📊 Panel İçeriği</h3><ul><li><strong>Coinbase CVD</strong> — Coinbase agresif alış-satış hacim farkı</li><li><strong>Binance Spot CVD</strong> — Binance spot agresif alış-satış hacim farkı</li><li><strong>Binance Futures CVD</strong> — Binance futures agresif alış-satış hacim farkı</li><li><strong>Aggregate Spot Delta</strong> — Tüm borsaların spot delta toplamı</li><li><strong>Aggregate Perp Delta</strong> — Tüm borsaların perpetual delta toplamı</li><li><strong>Coinbase Premium</strong> — Coinbase ile Binance spot arası fiyat farkı</li></ul>' },
+    ],
+  },
+  {
+    id: 'alfa-levels',
+    name: 'Alfa Levels',
+    tagline: 'Dinamik destek/direnç seviyeleri — likidite bölgeleri, order blokları ve iç yapı.',
+    sections: [
+      { type: 'html', content: '<p><strong>Alfa Levels</strong> — Intraday ve swing için önemli bölgeleri gösteren indikatör.</p>' },
+      { type: 'html', content: '<h3>📐 Bileşenler</h3><ul><li>Intraday ve Swing important areas</li><li>Tom Dante\'s ATR</li><li>EMA/SMA vs. trend following</li><li>Daily Open</li><li>Weekly Open</li><li>NYMO</li><li>Asia Low / High</li><li>Monday Range</li><li>Monthly Open</li><li>Yearly Open</li><li>Previous Monthly Open</li></ul>' },
+      { type: 'html', content: '<h3>🔗 TradingView</h3><p><a href="https://tr.tradingview.com/script/AK4RibWy/" target="_blank" rel="noopener noreferrer" style="color:var(--acc);font-weight:600;">Alfa Levels — TradingView&apos;de aç</a></p>' },
+      { type: 'html', content: '<h3>📖 Kullanım Videosu</h3><p style="color:var(--text-3);font-style:italic;">Video henüz eklenmedi — yakında.</p>' },
+      { type: 'html', content: '<h3>📊 Backtest</h3><p style="color:var(--text-3);font-style:italic;">Backtest sonuçları henüz eklenmedi.</p>' },
+    ],
+  },
+  {
+    id: 'alfa-flow',
+    name: 'Flow (Alfa Flow)',
+    tagline: 'Spot CVD + Delta divergence — emir akışındaki gizli dönüşleri yakala.',
+    sections: [
+      { type: 'html', content: '<p><strong>Alfa Flow</strong>, spot Cumulative Volume Delta (CVD) ve futures delta divergencelarını analiz ederek piyasadaki gizli arz/talep dengesizliğini tespit eder. Fiyat bir yöne giderken akış tersini söylüyorsa, dönüş yakındır.</p>' },
+      { type: 'html', content: '<h3>🔍 Nasıl Çalışır</h3><ul><li><strong>Spot CVD</strong>: Borsadaki alıcı-satıcı hacim farkı. CVD yükseliyorsa agresif alım var (bullish), düşüyorsa agresif satım var (bearish)</li><li><strong>Delta Divergence</strong>: Fiyat yeni bir tepe yaparken CVD tepe yapmıyorsa = bearish divergence. Tam tersi = bullish divergence.</li><li><strong>Akış Konfluensi</strong>: Alfa Levels’daki bir bölge + CVD divergence’ı aynı anda işaret ediyorsa işlem kalitesi yükselir.</li></ul>' },
+      { type: 'html', content: '<h3>📖 Kullanım</h3><ol><li>Grafikte Spot CVD indikatörünü aç (TradingView’da “CVD” veya “Cumulative Volume Delta”)</li><li>Fiyat bir likidite bölgesine yaklaşırken CVD’ye bak: divergence var mı?</li><li>Divergence + Alfa Levels konfluensi = yüksek kaliteli setup</li><li>Divergence yoksa veya akış fiyatla aynı yöndeyse işlemi ele — akışa ters trade daha güvenlidir</li></ol>' },
+      { type: 'html', content: '<h3>🎥 Video</h3><p style="color:var(--text-3);font-style:italic;">Video henüz eklenmedi — yakında.</p>' },
+      { type: 'html', content: '<h3>📊 Backtest</h3><p style="color:var(--text-3);font-style:italic;">Backtest sonuçları henüz eklenmedi.</p>' },
+    ],
+  },
+];
+
+function renderIndicators() {
+  const el = document.getElementById('ind-ind-list');
+  if (!el) return;
+  el.innerHTML = '';
+  INDICATORS.forEach(ind => {
+    const card = document.createElement('div');
+    card.style = 'background:var(--bg-2);border-radius:14px;padding:20px;margin-bottom:20px;';
+    card.innerHTML = '<h2 style="margin:0 0 4px;">' + ind.name + '</h2><p style="margin:0 0 16px;color:var(--text-2);">' + ind.tagline + '</p>';
+    const body = document.createElement('div');
+    ind.sections.forEach(s => {
+      const d = document.createElement('div');
+      if (s.type === 'html') d.innerHTML = s.content;
+      else d.textContent = s.content || '';
+      d.style = 'margin-bottom:14px;font-size:14px;line-height:1.65;';
+      body.appendChild(d);
+    });
+    card.appendChild(body);
+    el.appendChild(card);
+  });
+}
+
+function bindIndicatorsPage() {
+  const g = id => document.getElementById(id);
+}
+
+function bindOnchainPage() {
+  const g = id => document.getElementById(id);
 }
 
 // ============ Açılış + Giriş/Kayıt akışı ============
@@ -5119,6 +5662,7 @@ async function onAuthed(user) {
   if (wrap) wrap.classList.remove('hidden');
   await bootApp({ seed: false });
   scheduleCloudSync();
+  handleNotionHash();
 }
 
 function authError(err) {
@@ -5238,6 +5782,8 @@ if (AUTH_ENABLED) {
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
   seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(loadEgitim).then(loadNews).then(init).catch(init);
+  // OAuth olmayan modda da hash kontrolü
+  setTimeout(handleNotionHash, 1000);
 }
 </script>
 </body>

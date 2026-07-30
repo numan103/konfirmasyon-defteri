@@ -1,6 +1,6 @@
 const NOTION_VERSION = '2022-06-28';
 
-const DBS = [
+let DBS = [
   { id: '380f561953ab8088b5f9ffd53a397de9', market: 'Kripto' },
   { id: '380f561953ab80938bdbfc07fcef2de1', market: 'Fx' },
 ];
@@ -55,8 +55,18 @@ function mapRow(page, market) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  const token = process.env.NOTION_TOKEN;
-  if (!token) return res.status(500).json({ error: 'NOTION_TOKEN env var ayarlı değil.' });
+  const token = req.query.token || process.env.NOTION_TOKEN;
+  if (!token) return res.status(500).json({ error: 'NOTION_TOKEN env var ayarlı değil veya token gönderilmedi.' });
+  // Kullanıcıya özel database ID'leri
+  if (req.query.dbs) {
+    try {
+      const custom = JSON.parse(req.query.dbs);
+      const dbs = [];
+      if (custom.kripto) dbs.push({ id: custom.kripto, market: 'Kripto' });
+      if (custom.fx) dbs.push({ id: custom.fx, market: 'Fx' });
+      if (dbs.length) DBS = dbs;
+    } catch (e) { /* geçersiz dbs parametresi, varsayılan kullanılır */ }
+  }
   try {
     const results = await Promise.all(
       DBS.map(db => queryDB(token, db.id).then(rows => rows.map(r => mapRow(r, db.market))))
