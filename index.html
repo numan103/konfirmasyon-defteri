@@ -2186,8 +2186,8 @@
         <p>Rolünü seç, yolculuğuna başla.</p>
         <div class="cum-pnl-wrap">
           <div class="cum-pnl-lbl"><span class="cum-live-dot"></span>Topluluk Kümülatif PnL</div>
-          <div class="cum-pnl-val" id="cum-pnl-val">$0.00</div>
-          <div class="cum-pnl-sub">topluluk geneli tüm zamanlar net kâr</div>
+          <div class="cum-pnl-val" id="cum-pnl-val">+0.0R</div>
+          <div class="cum-pnl-sub">topluluk geneli tüm zamanlar toplam R</div>
         </div>
       </div>
 
@@ -6362,23 +6362,24 @@ if (AUTH_ENABLED) {
   // OAuth olmayan modda da hash kontrolü
   setTimeout(handleNotionHash, 1000);
 }
-// ============ Kümülatif PnL Sayacı ============
+// ============ Kümülatif PnL Sayacı (R cinsinden) ============
 (function () {
-  const BASE = 1284750.32;   // başlangıç değeri
+  // Topluluk geneli kümülatif R — makul, aylık ~7R mantığıyla birikmiş
+  const BASE = 52.4;
   let pnl = BASE;
   let started = false;
 
   function fmt(n) {
-    const s = n.toFixed(2);
-    const [int, dec] = s.split('.');
-    return '$' + int.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + dec;
+    return '+' + n.toFixed(1) + 'R';
   }
 
   function tick() {
-    pnl += 0.18 + Math.random() * 2.65;
+    // Ara sıra bir trade kapanmış gibi küçük artış (+0.1R … +0.4R)
+    pnl += 0.1 + Math.random() * 0.3;
     const el = document.getElementById('cum-pnl-val');
     if (el) el.textContent = fmt(pnl);
-    setTimeout(tick, 420 + Math.random() * 780);
+    // 15-45 sn arası — gerçek trade temposu
+    setTimeout(tick, 15000 + Math.random() * 30000);
   }
 
   function startCounter() {
