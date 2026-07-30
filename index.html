@@ -1253,10 +1253,8 @@
 .chat-foot button { padding: 10px 16px; border: none; border-radius: 8px; background: var(--acc); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; flex: none; }
 .chat-foot button:hover { opacity: .85; }
 @media (max-width: 480px) { .chat-popup { right: 12px; bottom: 80px; width: calc(100vw - 24px); height: 60vh; } }
-.chat-close-overlay { position:absolute; inset:0; z-index:10; background:rgba(0,0,0,.35); border-radius:16px; display:none; align-items:center; justify-content:center; }
-.chat-close-overlay.open { display:flex; }
-.chat-close-box { background:var(--card); border-radius:14px; padding:20px; width:260px; display:flex; flex-direction:column; gap:8px; box-shadow:0 8px 32px rgba(0,0,0,.2); }
-.chat-close-title { font-size:14px; font-weight:700; margin-bottom:4px; text-align:center; }
+.chat-clear { text-align:center; padding:6px; font-size:11px; color:var(--muted); cursor:pointer; border-top:1px solid var(--border); flex:none; transition:color .15s; }
+.chat-clear:hover { color:#ef4444; }
 .chat-live-btn { text-align:center; padding:8px 14px; border-radius:8px; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; font-size:12px; font-weight:600; cursor:pointer; border:none; }
 .chat-live-btn:hover { opacity:.88; }
 .chat-live-form { padding:12px; display:flex; flex-direction:column; gap:8px; }
@@ -6022,22 +6020,14 @@ function submitSeniorForm() {
   <div class="chat-head">
     <span class="ico">🤝</span>
     <span>Alfa Destek</span>
-    <button class="close menu-btn" onclick="showChatCloseOptions()">⋮</button>
     <button class="close" onclick="closeChat()">✕</button>
   </div>
   <div class="chat-body" id="chat-body"></div>
-  <div class="chat-foot">
+  <div class="chat-foot" id="chat-foot">
     <input type="text" id="chat-input" placeholder="Mesajını yaz..." onkeydown="if(event.key==='Enter') sendChatMsg()" />
     <button onclick="sendChatMsg()">Gönder</button>
   </div>
-  <div class="chat-close-overlay" id="chat-close-overlay">
-    <div class="chat-close-box">
-      <div class="chat-close-title">Sohbeti kapat</div>
-      <button class="btn solid" onclick="chatEndSession()">🗑 Konuşmayı Sonlandır</button>
-      <button class="btn" onclick="chatCloseKeep()">💬 Devam Et</button>
-      <button class="btn" onclick="chatCloseKeep()">✕ Kapat</button>
-    </div>
-  </div>
+  <div class="chat-clear" onclick="chatEndSession()" id="chat-clear-btn" title="Sohbeti temizle">Sohbeti Temizle</div>
 </div>
 <script>
 // ============ Junior UID Kayıt ============
@@ -6097,24 +6087,15 @@ function toggleChat() {
 }
 function closeChat() {
   document.getElementById('chat-popup').classList.remove('open');
-  document.getElementById('chat-close-overlay').classList.remove('open');
   document.getElementById('chat-btn').textContent = '💬';
 }
-function showChatCloseOptions() {
-  const overlay = document.getElementById('chat-close-overlay');
-  if (overlay) overlay.classList.add('open');
-}
 function chatEndSession() {
+  if (!chatHistory.length) return;
+  if (!confirm('Sohbet geçmişini temizle? Tüm konuşma silinir.')) return;
   chatHistory = [];
   chatFallbackCount = 0;
   chatLiveRequested = false;
   saveChat();
-  document.getElementById('chat-close-overlay').classList.remove('open');
-  document.getElementById('chat-popup').classList.remove('open');
-  document.getElementById('chat-btn').textContent = '💬';
-}
-function chatCloseKeep() {
-  document.getElementById('chat-close-overlay').classList.remove('open');
   document.getElementById('chat-popup').classList.remove('open');
   document.getElementById('chat-btn').textContent = '💬';
 }
@@ -6127,7 +6108,8 @@ function renderChat() {
 }
 function requestLiveSupport() {
   const body = document.getElementById('chat-body');
-  body.innerHTML = `<div class="chat-live-form"><div class="clf-title">👤 Canlı destek için bilgilerin:</div><input type="text" id="clf-name" placeholder="Adın Soyadın" /><input type="email" id="clf-email" placeholder="E-posta (opsiyonel)" /><button class="clf-btn" onclick="submitLiveSupport()">Bağlan</button></div>`;
+  const saved = getChatUserInfo();
+  body.innerHTML = `<div class="chat-live-form"><div class="clf-title">👤 Canlı destek için bilgilerin:</div><input type="text" id="clf-firstname" placeholder="Adın" value="${esc(saved.firstName)}" /><input type="text" id="clf-lastname" placeholder="Soyadın" value="${esc(saved.lastName)}" /><input type="email" id="clf-email" placeholder="E-posta" value="${esc(saved.email)}" /><button class="clf-btn" onclick="submitLiveSupport()">Bağlan</button></div>`;
   body.scrollTop = body.scrollHeight;
 }
 function caDelete(sid) {
@@ -6140,19 +6122,26 @@ function caDelete(sid) {
   renderAdminChat();
   fetch(CHAT_API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) }).catch(() => {});
 }
+function getChatUserInfo() {
+  try { return JSON.parse(localStorage.getItem('alfa-chat-user')) || { firstName:'', lastName:'', email:'' }; } catch(e) { return { firstName:'', lastName:'', email:'' }; }
+}
+function saveChatUserInfo(firstName, lastName, email) {
+  try { localStorage.setItem('alfa-chat-user', JSON.stringify({ firstName, lastName, email })); } catch(e) {}
+}
 function submitLiveSupport() {
-  const name = document.getElementById('clf-name').value.trim();
-  if (!name) { alert('Lütfen adını ve soyadını gir.'); return; }
+  const firstName = document.getElementById('clf-firstname').value.trim();
+  const lastName = document.getElementById('clf-lastname').value.trim();
   const email = document.getElementById('clf-email').value.trim();
+  if (!firstName || !lastName) { alert('Lütfen adını ve soyadını gir.'); return; }
+  saveChatUserInfo(firstName, lastName, email);
   chatLiveRequested = true;
-  let text = '👤 Canlı destek istiyorum.';
-  if (name) text += '\nİsim: ' + name;
-  if (email) text += '\nE-posta: ' + email;
-  chatHistory.push({ role: 'user', text, time: new Date().toISOString() });
+  const fullName = firstName + ' ' + lastName;
+  const msg = '👤 Canlı destek istiyorum.\nİsim: ' + fullName + '\nE-posta: ' + (email || 'belirtilmedi');
+  chatHistory.push({ role: 'user', text: msg, time: new Date().toISOString() });
   chatHistory.push({ role: 'admin', text: '📞 Canlı destek talebin alındı. En kısa sürede sana dönüş yapacağız.', time: new Date().toISOString() });
   saveChat(); renderChat();
   const sid = chatSid();
-  fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text: 'Canlı destek talebi - ' + name + (email ? ' (' + email + ')' : '') }) }).catch(() => {});
+  fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', name: fullName, text: 'Canlı destek talebi - ' + fullName + (email ? ' (' + email + ')' : '') }) }).catch(() => {});
 }
 const AI_URL = '/api/ai';
 function sendChatMsg() {
@@ -6162,8 +6151,11 @@ function sendChatMsg() {
   input.value = '';
   chatHistory.push({ role: 'user', text, time: new Date().toISOString() });
   saveChat(); renderChat();
-  const sid = chatSid();
-  fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text }) }).catch(() => {});
+  // Sadece canlı destek aktifken admin API'ına gönder
+  if (chatLiveRequested) {
+    const sid = chatSid();
+    fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text }) }).catch(() => {});
+  }
   if (BAS_GS_URL) {
     fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'chat', message: text, date: new Date().toISOString() }) }).catch(() => {});
   }
@@ -6287,8 +6279,10 @@ function renderAdminChat() {
       const unread = !caReadSessions.has(sid) && ms.some(m => m.role === 'user');
       const preview = last.text.substring(0, 30) + (last.text.length > 30 ? '...' : '');
       const time = new Date(last.time).toLocaleString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-      const name = last.name || sid.substring(0, 6);
-      return `<div class="ca-item${caSelectedSid === sid ? ' on' : ''}" data-sid="${sid}"><div onclick="caSelect('${sid}')" style="flex:1;cursor:pointer;">${esc(name)}${unread ? '<span class="ca-badge">!</span>' : ''}<div class="ca-meta">${esc(preview)} · ${time}</div></div><span class="ca-del" onclick="event.stopPropagation();caDelete('${sid}')" title="Konuşmayı kapat">✕</span></div>`;
+      // Kullanıcı adını bul: name field'ı varsa kullan, yoksa ilk mesajdan çıkar
+      const firstMsg = sessions[sid].find(m => m.role === 'user');
+      const userName = last.name || (firstMsg && firstMsg.name) || (firstMsg && firstMsg.text.match(/Canlı destek talebi - (.+?)(?:$|\s*\()/)?.[1]) || sid.substring(0, 6);
+      return `<div class="ca-item${caSelectedSid === sid ? ' on' : ''}" data-sid="${sid}"><div onclick="caSelect('${sid}')" style="flex:1;cursor:pointer;">${esc(userName)}${unread ? '<span class="ca-badge">!</span>' : ''}<div class="ca-meta">${esc(preview)} · ${time}</div></div><span class="ca-del" onclick="event.stopPropagation();caDelete('${sid}')" title="Konuşmayı kapat">✕</span></div>`;
     }).join('');
     // İlk seferde son konuşmayı seç
     if (!caSelectedSid || !sessions[caSelectedSid]) caSelectedSid = sids[sids.length - 1];
