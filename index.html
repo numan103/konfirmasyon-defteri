@@ -3234,6 +3234,7 @@ async function loadLessons() {
     });
     await saveLessons();
   }
+  showDailyQuote();
 }
 async function saveLessons() { await store.set(LESSONS_KEY, JSON.stringify(lessonsData)); }
 
@@ -4724,6 +4725,7 @@ function showPage(name) {
   });
   const shown = document.getElementById('page-' + name);
   if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
+  document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   if (name === 'data') renderData();
   if (name === 'review') renderReview();
   if (name === 'news') renderNews();
@@ -6338,56 +6340,24 @@ setInterval(() => {
     updateChatBadge();
   }).catch(() => {});
 }, 8000);
-// ============ Günün Sözü Ticker ============
-const QUOTES = [
-  { text: 'Planlı trade gir, plansız trade girme. Setup yoksa işlem yok.', author: 'Alfa Disiplin' },
-  { text: 'Stop loss olmayan trade batık gemidir.', author: 'Risk Yönetimi' },
-  { text: 'FOMO anında en pahalı alışverişi yaparsın.', author: 'Trade Psikolojisi' },
-  { text: 'Veri konuşur, hislerin susar.', author: 'Alfa Analiz' },
-  { text: 'Kaybetmeyi yönetebilen kazanmayı da yönetir.', author: 'Risk Yönetimi' },
-  { text: 'İyi bir trade planı, iyi bir entryden daha değerlidir.', author: 'Alfa Edu' },
-  { text: 'Piyasa haklıdır, sen değil.', author: 'Alfa Disiplin' },
-  { text: 'Disiplin motivasyondan daha güçlüdür.', author: 'Trade Psikolojisi' },
-  { text: 'Her kayıp bir derstir, her ders bir kazançtır.', author: 'Alfa Retrospect' },
-  { text: 'Trend dostundur, ona karşı durma.', author: 'Teknik Analiz' },
-  { text: 'Küçük kayıplar büyük dersler getirir.', author: 'Alfa Deneyim' },
-  { text: 'Setup yoksa trade yok. Beklemek de bir stratejidir.', author: 'Alfa Disiplin' },
-  { text: 'Duygularını yönetemeyen riskini yönetemez.', author: 'Trade Psikolojisi' },
-  { text: 'Veriye güven, duyguya değil.', author: 'Alfa Analiz' },
-  { text: 'Düşük timeframe gürültüdür, yüksek timeframe gerçektir.', author: 'Teknik Analiz' },
-  { text: 'Her işlem senin kararın, senin sorumluluğun.', author: 'Alfa Trader' },
-  { text: 'Backtest geçmeyen strateji canlıda kazandırmaz.', author: 'Backtest' },
-  { text: 'Plan yap, plana bağlı kal, sonucu değerlendir.', author: 'Alfa Süreç' },
-  { text: 'Trade\'in en önemli kuralı: hayatta kalmak.', author: 'Paul Tudor Jones' },
-  { text: 'Piyasalar asla yanlış değildir, görüşler yanlış olabilir.', author: 'Jesse Livermore' },
-  { text: 'Kâr eden pozisyonlara ekleme yap, kaybedenleri hemen kes.', author: 'Ed Seykota' },
-  { text: 'Risk yönetimi olmadan trading bir kumardır.', author: 'Larry Hite' },
-  { text: 'Büyük para büyük sabırla gelir.', author: 'Richard Dennis' },
-  { text: 'Trend senin dostun, rüzgarı arkana al.', author: 'Edwin Lefèvre' },
-  { text: 'Kaybetmeyi bilmeyen kazanmayı hak etmez.', author: 'Mark Douglas' },
-  { text: 'Stratejisiz piyasaya giren kaybetmeye mahkumdur.', author: 'Alexander Elder' },
-  { text: 'Piyasayı kontrol edemezsin, sadece kendini kontrol edebilirsin.', author: 'Brett Steenbarger' },
-  { text: 'Küçük düşünürsen küçük kazanırsın, büyük düşünürsen büyük.', author: 'Marty Schwartz' },
-  { text: 'İyi trader plan yapar, kötü trader plana ihtiyacı olmadığını düşünür.', author: 'Alfa Disiplin' },
-  { text: 'Bir kayıp sadece bir kayıptır, bir felaket değil.', author: 'Michael Marcus' },
-  { text: 'Piyasada disiplin her şeyden önce gelir.', author: 'Tom Basso' },
-  { text: 'Sessiz ve sabırlı ol, piyasa kapıyı çalacaktır.', author: 'Peter Brandt' },
-  { text: 'Trading bir sprint değil, maratondur.', author: 'Alfa Trader' },
-  { text: 'En iyi sinyal, senin sinyalin değil, piyasanın verdiği sinyaldir.', author: 'Alfa Analiz' },
-  { text: 'Fiyatın nereye gideceğini bilmek zorunda değilsin, sadece ne yapacağını bil.', author: 'Alfa Disiplin' },
-  { text: 'Güvende kal ve trende karşı koyma.', author: 'Turtle Trader' },
-  { text: 'Kötü bir trade planı, hiç plan olmamasından iyidir.', author: 'Alfa Edu' },
-  { text: 'Beklemek bir eylemsizlik değil, bir stratejidir.', author: 'Alfa Disiplin' },
-];
+// ============ Günün Sözü Ticker (Ders Defteri'nden) ============
 function showDailyQuote() {
-  const today = new Date();
-  const start = new Date(today.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((today - start) / 864e5);
-  const q = QUOTES[dayOfYear % QUOTES.length];
   const el = document.getElementById('ticker-text');
   const au = document.getElementById('ticker-author');
-  if (el) el.textContent = '\u201c' + q.text + '\u201d';
-  if (au) au.textContent = '\u2014 ' + q.author;
+  if (!el) return;
+  let text = '', author = '';
+  const active = lessonsData?.lessons?.filter(l => l.active) || [];
+  if (active.length > 0) {
+    // Ders Defteri'ndeki aktif derslerden rastgele birini seç
+    const pick = active[Math.floor(Math.random() * active.length)];
+    text = pick.text; author = pick.src || 'Ders Defteri';
+  } else {
+    // Hiç aktif ders yoksa fallback
+    text = 'Ders Defteri\'ne bir not ekle, burada görünsün.';
+    author = 'Alfa Traders';
+  }
+  el.textContent = '\u201c' + text + '\u201d';
+  if (au) au.textContent = '\u2014 ' + author;
 }
 showDailyQuote();
 loadChat();
