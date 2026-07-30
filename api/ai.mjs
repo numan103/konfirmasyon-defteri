@@ -10,8 +10,6 @@ Topluluk hakkında bilgiler:
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
 - Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)`;
 
-const HF_MODEL = 'gpt2';
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -21,55 +19,31 @@ export default async function handler(req, res) {
   const { message } = req.body || {};
   if (!message) return res.status(400).json({ reply: 'Mesaj girmelisin.' });
 
-  const API_KEY = process.env.GEMINI_API_KEY || process.env.HF_API_KEY;
-  if (!API_KEY) {
-    return res.json({ reply: '🤖 AI henüz aktif değil. Sorunu kaydettim, ekibimiz dönecek.' });
+  const API_KEY = process.env.GEMINI_API_KEY;
+  if (!API_KEY || !API_KEY.startsWith('AIzaSy')) {
+    return res.json({ reply: null });
   }
 
-  const isGemini = API_KEY.startsWith('AIzaSy');
-
   try {
-    if (isGemini) {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-            { role: 'model', parts: [{ text: 'Anlaşıldı.' }] },
-            { role: 'user', parts: [{ text: message }] }
-          ],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
-        })
-      });
-      const data = await r.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (reply) return res.json({ reply });
-      return res.json({ reply: 'Üzgünüm, cevap veremiyorum.' });
-    }
-
-    const targetUrl = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
-    if (!API_KEY.startsWith('hf_')) return res.json({ reply: 'Token hatası: ' + API_KEY.substring(0, 10) + '...' });
-    const r = await fetch(targetUrl, { signal: AbortSignal.timeout(8000) });
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        inputs: `<s>[INST] ${SYSTEM_PROMPT}\n\nKullanıcı: ${message} [/INST]`,
-        parameters: { max_new_tokens: 300, temperature: 0.7, return_full_text: false }
+        contents: [
+          { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+          { role: 'model', parts: [{ text: 'Anlaşıldı.' }] },
+          { role: 'user', parts: [{ text: message }] }
+        ],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
       })
     });
 
-    if (!r.ok) {
-      const errText = await r.text();
-      return res.json({ reply: 'HF hatası (' + r.status + '): ' + errText.substring(0, 200) });
-    }
-
     const data = await r.json();
-    const reply = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
-    if (reply) return res.json({ reply: reply.trim() });
-    const errMsg = typeof data === 'object' ? (data.error || JSON.stringify(data)) : 'Hata';
-    return res.json({ reply: 'Cevap alınamadı: ' + errMsg });
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (reply) return res.json({ reply });
+    if (data?.error?.message?.includes('quota') || data?.error?.message?.includes('Quota')) return res.json({ reply: null });
+    return res.json({ reply: null });
   } catch (e) {
-    return res.json({ reply: 'Hata: ' + e.constructor.name + ' - ' + e.message.substring(0, 150) });
+    return res.json({ reply: null });
   }
 }
