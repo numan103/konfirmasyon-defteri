@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   const API_KEY = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
   if (!API_KEY) {
-    return res.json({ reply: null });
+    return res.json({ reply: 'DEBUG: no key, GEMINI_API_KEY=' + (process.env.GEMINI_API_KEY ? 'set' : 'unset') + ' GROQ_API_KEY=' + (process.env.GROQ_API_KEY ? 'set' : 'unset') });
   }
 
   try {
