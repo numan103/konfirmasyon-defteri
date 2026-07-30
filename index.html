@@ -1229,6 +1229,11 @@
 .bas-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
+.home-ticker { margin: 0 auto 24px; max-width: 660px; padding: 10px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); line-height: 1.4; min-height: 20px; }
+.home-ticker .ti { flex: none; font-size: 16px; }
+.home-ticker .tq { flex: 1; }
+.home-ticker .ta { flex: none; font-size: 11px; color: var(--text-3); white-space: nowrap; margin-left: auto; }
+@media (max-width: 640px) { .home-ticker { font-size: 12px; padding: 8px 12px; } .home-ticker .ta { display: none; } }
 .chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--acc), #7c3aed); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(123,120,245,.35); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
 .chat-bubble:hover { transform: scale(1.08); }
 .chat-popup { position: fixed; bottom: 88px; right: 24px; z-index: 1000; width: 340px; max-width: calc(100vw - 48px); height: 460px; max-height: calc(100vh - 140px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.15); display: none; flex-direction: column; overflow: hidden; animation: basFadeIn .2s ease; }
@@ -1448,6 +1453,11 @@
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
         <h1>Alfa Traders</h1>
         <p class="home-sub">Trader'lar için disiplin, analiz ve öğrenme platformu</p>
+      </div>
+      <div class="home-ticker" id="home-ticker">
+        <span class="ti">💡</span>
+        <span class="tq" id="ticker-text">Yükleniyor...</span>
+        <span class="ta" id="ticker-author"></span>
       </div>
       <div class="home-grid">
         <a href="?page=defter" class="home-card" data-nav><div class="preview"><img src="https://i.imgur.com/xZmCzHN.png" alt="" onload="this.style.display='block'" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h6M8 16h4"/></svg></div><h2>Alfa-Check List</h2><p>Pair bazlı kriter listesi. Her işlem öncesi puanla, kararını ver. Günlük plan & seans kalitesi. Eşiklerle otomatik karar.</p></a>
@@ -6130,6 +6140,7 @@ function renderChat() {
   body.innerHTML = chatHistory.map(m => `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`).join('');
   body.scrollTop = body.scrollHeight;
 }
+const AI_URL = '/api/ai';
 function sendChatMsg() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
@@ -6137,23 +6148,69 @@ function sendChatMsg() {
   input.value = '';
   chatHistory.push({ role: 'user', text });
   saveChat(); renderChat();
-  const reply = getAutoReply(text);
-  setTimeout(() => { chatHistory.push({ role: 'bot', text: reply }); saveChat(); renderChat(); }, 500 + Math.random() * 500);
+  const thinkId = Date.now();
+  chatHistory.push({ role: 'bot', text: '🤔 Düşünüyorum...', _id: thinkId });
+  saveChat(); renderChat();
+  fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text }) })
+    .then(r => r.json())
+    .then(data => {
+      const reply = data.reply || getAutoReply(text);
+      const idx = chatHistory.findIndex(m => m._id === thinkId);
+      if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
+      else { chatHistory.push({ role: 'bot', text: reply }); }
+      saveChat(); renderChat();
+    })
+    .catch(() => {
+      const reply = getAutoReply(text);
+      const idx = chatHistory.findIndex(m => m._id === thinkId);
+      if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
+      saveChat(); renderChat();
+    });
   if (BAS_GS_URL) {
     fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'chat', message: text, date: new Date().toISOString() }) }).catch(() => {});
   }
 }
 function getAutoReply(t) {
   const s = t.toLowerCase();
-  if (/merhaba|selam|hey|iyi günler/i.test(s)) return 'Merhaba! 👋 Size nasıl yardımcı olabilirim?';
-  if (/kayıt|kaydol|nasıl.*katıl|referans|üye/i.test(s)) return 'Bybit veya OKX referans linklerinden birini kullanarak kaydolabilirsin. Ardından UID\'ni girerek topluluğa katılabilirsin. İkisi de sayfanın üst kısmındaki "Yeni Başlayan" kartında yer alıyor.';
-  if (/eğitim|edu|öğren|video|ders|kurs/i.test(s)) return '📚 Ana menüdeki "Alfa Edu" bölümünde teknik analiz, temel analiz, trade psikolojisi ve onchain analizi dersleri var. Bölümleri gez, video dersleri izle.';
-  if (/topluluk|grup|telegram|sohbet|channel/i.test(s)) return '💬 Telegram grubumuz: https://t.me/alfatraderspublic\nBurada trader\'larla buluşuyor, işlem ve analiz paylaşıyoruz.';
-  if (/iletişim|ulaş|destek|yardım|soru/i.test(s)) return 'Sorunu kaydettim ✅ Ekibimiz en kısa sürede sana dönüş yapacak. Acil durumlarda Telegram grubumuzdan da ulaşabilirsin.';
-  if (/işlem|trade|pozisyon|analiz|piyasa|grafik/i.test(s)) return 'Topluluk akışında işlem ve analiz paylaşımlarını bulabilirsin. Deneyimli trader\'lar için başvuru formu da sayfada mevcut.';
-  if (/form|başvuru|deneyimli/i.test(s)) return 'Deneyimli trader başvurusu için sayfadaki "Deneyimli Alfa Trader" kartındaki formu doldur. Google Sheets üzerinden takip ediyoruz.';
-  return 'Sorunu kaydettim ✅ Ekibimiz en kısa sürede sana dönüş yapacak. Acil durumlarda Telegram\'dan ulaşabilirsin: https://t.me/alfatraderspublic';
+  if (/merhaba|selam|hey|iyi günler/i.test(s)) return 'Merhaba! 👋 Nasıl yardımcı olabilirim?';
+  if (/kayıt|kaydol|nasıl.*katıl|referans|üye/i.test(s)) return 'Bybit veya OKX referans linklerinden birini kullanarak kaydolabilirsin. UID\'ni girip topluluğa katılabilirsin.';
+  if (/eğitim|edu|öğren|video|ders|kurs/i.test(s)) return '📚 Ana menüde "Alfa Edu" bölümüne bak — teknik analiz, temel analiz, psikoloji ve onchain dersleri var.';
+  if (/topluluk|grup|telegram|sohbet/i.test(s)) return '💬 Telegram: https://t.me/alfatraderspublic';
+  if (/işlem|trade|analiz|piyasa|grafik/i.test(s)) return 'Topluluk akışında işlem ve analiz paylaşımlarını bulabilirsin.';
+  return '🤖 AI cevap veremedi. Sorun kaydedildi, ekibimiz dönecek.';
 }
+// ============ Günün Sözü Ticker ============
+const QUOTES = [
+  { text: 'Planlı trade gir, plansız trade girme. Setup yoksa işlem yok.', author: 'Alfa Disiplin' },
+  { text: 'Stop loss olmayan trade batık gemidir.', author: 'Risk Yönetimi' },
+  { text: 'FOMO anında en pahalı alışverişi yaparsın.', author: 'Trade Psikolojisi' },
+  { text: 'Veri konuşur, hislerin susar.', author: 'Alfa Analiz' },
+  { text: 'Kaybetmeyi yönetebilen kazanmayı da yönetir.', author: 'Risk Yönetimi' },
+  { text: 'İyi bir trade planı, iyi bir entryden daha değerlidir.', author: 'Alfa Edu' },
+  { text: 'Piyasa haklıdır, sen değil.', author: 'Alfa Disiplin' },
+  { text: 'Disiplin motivasyondan daha güçlüdür.', author: 'Trade Psikolojisi' },
+  { text: 'Her kayıp bir derstir, her ders bir kazançtır.', author: 'Alfa Retrospect' },
+  { text: 'Trend dostundur, ona karşı durma.', author: 'Teknik Analiz' },
+  { text: 'Küçük kayıplar büyük dersler getirir.', author: 'Alfa Deneyim' },
+  { text: 'Setup yoksa trade yok. Beklemek de bir stratejidir.', author: 'Alfa Disiplin' },
+  { text: 'Duygularını yönetemeyen riskini yönetemez.', author: 'Trade Psikolojisi' },
+  { text: 'Veriye güven, duyguya değil.', author: 'Alfa Analiz' },
+  { text: 'Düşük timeframe gürültüdür, yüksek timeframe gerçektir.', author: 'Teknik Analiz' },
+  { text: 'Her işlem senin kararın, senin sorumluluğun.', author: 'Alfa Trader' },
+  { text: 'Backtest geçmeyen strateji canlıda kazandırmaz.', author: 'Backtest' },
+  { text: 'Plan yap, plana bağlı kal, sonucu değerlendir.', author: 'Alfa Süreç' },
+];
+let tickerIdx = Math.floor(Math.random() * QUOTES.length);
+function nextQuote() {
+  const q = QUOTES[tickerIdx % QUOTES.length];
+  const el = document.getElementById('ticker-text');
+  const au = document.getElementById('ticker-author');
+  if (el) el.textContent = '\u201c' + q.text + '\u201d';
+  if (au) au.textContent = '\u2014 ' + q.author;
+  tickerIdx = (tickerIdx + 1) % QUOTES.length;
+}
+nextQuote();
+setInterval(nextQuote, 8000);
 loadChat();
 loadFeed();
 document.addEventListener('DOMContentLoaded', renderFeed);
