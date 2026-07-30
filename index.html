@@ -1267,13 +1267,15 @@
 /* Admin Chat */
 #ca-wrap { display:flex; gap:12px; min-height:420px; }
 #ca-list { width:220px; flex:none; display:flex; flex-direction:column; gap:4px; overflow-y:auto; max-height:480px; }
-#ca-list .ca-item { padding:10px 12px; border-radius:8px; background:var(--card); border:1px solid var(--border); cursor:pointer; font-size:12px; line-height:1.4; }
+#ca-list .ca-item { padding:10px 12px; border-radius:8px; background:var(--card); border:1px solid var(--border); font-size:12px; line-height:1.4; display:flex; align-items:center; gap:4px; }
 #ca-list .ca-item:hover { background:var(--bg-2); }
 #ca-list .ca-item.on { background:var(--acc); color:#fff; border-color:var(--acc); }
 #ca-list .ca-item .ca-badge { background:var(--acc); color:#fff; border-radius:999px; padding:1px 7px; font-size:9px; font-weight:700; margin-left:6px; }
 #ca-list .ca-item.on .ca-badge { background:rgba(255,255,255,.3); }
 #ca-list .ca-item .ca-meta { font-size:10px; color:var(--text-3); margin-top:2px; }
 #ca-list .ca-item.on .ca-meta { color:rgba(255,255,255,.7); }
+#ca-list .ca-item .ca-del { font-size:11px; color:var(--text-3); cursor:pointer; padding:2px 4px; border-radius:4px; flex:none; align-self:flex-start; }
+#ca-list .ca-item .ca-del:hover { background:var(--red); color:#fff; }
 #ca-main { flex:1; display:flex; flex-direction:column; min-width:0; }
 #ca-msgs { flex:1; overflow-y:auto; max-height:380px; display:flex; flex-direction:column; gap:8px; padding:4px; }
 .ca-msg { padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; max-width:85%; }
@@ -5778,6 +5780,10 @@ async function onAuthed(user) {
   const nm = (user.user_metadata && user.user_metadata.name) || (user.email || '').split('@')[0];
   document.getElementById('user-name').textContent = nm;
   document.getElementById('user-badge').classList.remove('hidden');
+  // Admin kontrolü: sadece admin görebilir
+  const isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
+  const adminTab = document.getElementById('tab-chat-admin');
+  if (adminTab) adminTab.style.display = isAdmin ? '' : 'none';
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
@@ -6235,7 +6241,7 @@ function renderAdminChat() {
     const empty = document.getElementById('ca-empty');
     const replyBox = document.getElementById('ca-reply-box');
     if (!list) return;
-    // Sadece değişiklik varsa yeniden render et
+    // Değişiklik yoksa sadece badge güncelle
     if (!changed && caSelectedSid) { if (replyBox) replyBox.classList.remove('hidden'); return; }
     const sessions = {};
     caAllMsgs.forEach(m => {
@@ -6245,12 +6251,11 @@ function renderAdminChat() {
     const sids = Object.keys(sessions);
     if (!sids.length) {
       list.innerHTML = '<div style="color:var(--text-3);font-size:12px;padding:20px;text-align:center;">Henüz mesaj yok.</div>';
-      if (msgsDiv) msgsDiv.innerHTML = '';
-      if (empty) empty.style.display = 'block';
-      if (replyBox) replyBox.classList.add('hidden');
+      if (msgsDiv) msgsDiv.innerHTML = ''; empty.style.display = 'block'; replyBox.classList.add('hidden');
       return;
     }
-    if (empty) empty.style.display = 'none';
+    empty.style.display = 'none';
+    // Sol liste
     list.innerHTML = sids.map(sid => {
       const ms = sessions[sid];
       const last = ms[ms.length - 1];
@@ -6258,26 +6263,34 @@ function renderAdminChat() {
       const preview = last.text.substring(0, 30) + (last.text.length > 30 ? '...' : '');
       const time = new Date(last.time).toLocaleString('tr-TR', {hour:'2-digit',minute:'2-digit'});
       const name = last.name || sid.substring(0, 6);
-      return `<div class="ca-item${caSelectedSid === sid ? ' on' : ''}" data-sid="${sid}" onclick="caSelect('${sid}')">${esc(name)}${unread ? '<span class="ca-badge">!</span>' : ''}<div class="ca-meta">${esc(preview)} · ${time}</div></div>`;
+      return `<div class="ca-item${caSelectedSid === sid ? ' on' : ''}" data-sid="${sid}"><div onclick="caSelect('${sid}')" style="flex:1;cursor:pointer;">${esc(name)}${unread ? '<span class="ca-badge">!</span>' : ''}<div class="ca-meta">${esc(preview)} · ${time}</div></div><span class="ca-del" onclick="event.stopPropagation();caDelete('${sid}')" title="Konuşmayı kapat">✕</span></div>`;
     }).join('');
-    if (caSelectedSid && sessions[caSelectedSid]) {
-      caReadSessions.add(caSelectedSid);
-      const ms = sessions[caSelectedSid];
-      msgsDiv.innerHTML = ms.map(m => `<div class="ca-msg ${m.role === 'user' ? 'u' : 'a'}"><div class="ca-meta">${m.role === 'user' ? 'Kullanıcı' : 'Admin'} · ${new Date(m.time).toLocaleString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</div><div>${esc(m.text)}</div></div>`).join('');
-      msgsDiv.scrollTop = msgsDiv.scrollHeight;
-      replyBox.classList.remove('hidden');
-      updateChatBadge();
-    } else {
-      msgsDiv.innerHTML = '';
-      if (sids.length && !caSelectedSid) caSelect(sids[sids.length - 1]);
-    }
+    // İlk seferde son konuşmayı seç
+    if (!caSelectedSid || !sessions[caSelectedSid]) caSelectedSid = sids[sids.length - 1];
+    showSessionMsgs(sessions, replyBox, msgsDiv);
   }).catch(() => {});
+}
+function showSessionMsgs(sessions, replyBox, msgsDiv) {
+  if (!caSelectedSid || !sessions || !sessions[caSelectedSid]) return;
+  caReadSessions.add(caSelectedSid);
+  const ms = sessions[caSelectedSid];
+  msgsDiv.innerHTML = ms.map(m => `<div class="ca-msg ${m.role === 'user' ? 'u' : 'a'}"><div class="ca-meta">${m.role === 'user' ? 'Kullanıcı' : 'Admin'} · ${new Date(m.time).toLocaleString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</div><div>${esc(m.text)}</div></div>`).join('');
+  msgsDiv.scrollTop = msgsDiv.scrollHeight;
+  replyBox.classList.remove('hidden');
+  updateChatBadge();
 }
 function caSelect(sid) {
   caSelectedSid = sid;
   caReadSessions.add(sid);
   document.querySelectorAll('.ca-item').forEach(c => c.classList.toggle('on', c.dataset.sid === sid));
-  renderAdminChat();
+  const sessions = {}; caAllMsgs.forEach(m => { if (!sessions[m.sessionId]) sessions[m.sessionId] = []; sessions[m.sessionId].push(m); });
+  showSessionMsgs(sessions, document.getElementById('ca-reply-box'), document.getElementById('ca-msgs'));
+}
+function caDelete(sid) {
+  if (!confirm('Bu konuşmayı sil? Tüm mesajları kalıcı olarak gider.')) return;
+  fetch(CHAT_API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) })
+    .then(() => { if (caSelectedSid === sid) caSelectedSid = null; renderAdminChat(); })
+    .catch(() => { alert('Silme hatası'); });
 }
 function startAdminChatPoll() {
   clearInterval(caPollTimer);

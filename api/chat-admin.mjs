@@ -1,8 +1,8 @@
-import { put, list } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(503).json({ error: 'BLOB token not set.' });
 
@@ -24,6 +24,22 @@ export default async function handler(req, res) {
       const path = 'chat/' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
       await put(path, JSON.stringify(msg), { access: 'public', addRandomSuffix: false });
       return res.status(200).json({ ok: true });
+    } catch (e) {
+      return res.status(200).json({ ok: false, error: e.message });
+    }
+  }
+
+  if (req.method === 'DELETE') {
+    const { sessionId } = req.body || {};
+    if (!sessionId) return res.status(400).json({ error: 'sessionId required' });
+    try {
+      const { blobs } = await list({ prefix: 'chat/' });
+      const toDelete = [];
+      for (const b of blobs) {
+        try { const r = await fetch(b.url, { cache: 'no-store' }); if (r.ok) { const data = await r.json(); if (data.sessionId === sessionId) toDelete.push(b.url); } } catch {}
+      }
+      await Promise.all(toDelete.map(url => del(url)));
+      return res.status(200).json({ deleted: toDelete.length });
     } catch (e) {
       return res.status(200).json({ ok: false, error: e.message });
     }
