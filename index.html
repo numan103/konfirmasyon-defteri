@@ -1158,24 +1158,40 @@
   .cv-bgup { position: absolute; left: 26px; bottom: 20px; z-index: 3; font-size: 11px; font-weight: 700; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
   .cv-bgup:hover { background: rgba(255,255,255,.28); } .cv-bgup input { display: none; }
 /* Başvuru Sayfası */
-.bas-page { max-width: 780px; margin: 0 auto; padding: 24px 16px 60px; }
-.bas-hero { text-align: center; padding: 48px 20px 40px; position: relative; }
-.bas-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 160px; height: 160px; background: radial-gradient(circle, var(--acc-soft) 0%, transparent 70%); opacity: .5; pointer-events: none; }
-.bas-hero .mark { width: 56px; height: 56px; margin: 0 auto 16px; background: linear-gradient(135deg, var(--acc), #7c3aed); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; box-shadow: 0 8px 32px rgba(123,120,245,.3); }
-.bas-hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -.4px; margin: 0 0 12px; background: linear-gradient(135deg, var(--acc), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.bas-hero p { color: var(--text-2); font-size: 14px; max-width: 520px; margin: 0 auto 24px; line-height: 1.6; }
-.bas-cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 36px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--acc), #7c3aed); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 4px 20px rgba(123,120,245,.3); }
-.bas-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(123,120,245,.4); }
-.bas-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center; }
-.bas-modal.open { display: flex; }
-.bas-modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 360px; width: 90%; text-align: center; animation: basFadeIn .2s ease; }
-.bas-modal-box h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
-.bas-modal-box p { color: var(--text-3); font-size: 12.5px; margin: 0 0 20px; }
-.bas-modal-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-2); font-size: 18px; cursor: pointer; padding: 4px; }
-.ref-links { display: flex; flex-direction: column; gap: 10px; }
-.ref-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; transition: opacity .15s; border: 1.5px solid var(--border); color: var(--text); background: var(--bg); }
-.ref-btn:hover { opacity: .8; }
-.ref-btn .badge { font-size: 18px; }
+.bas-page { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+.bas-hero { text-align: center; padding: 36px 20px 32px; }
+.bas-hero h1 { font-size: 30px; font-weight: 800; letter-spacing: -.4px; margin: 0 0 8px; background: linear-gradient(135deg, var(--acc), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.bas-hero p { color: var(--text-2); font-size: 13.5px; max-width: 480px; margin: 0 auto; line-height: 1.5; }
+.bas-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
+.bas-path { border-radius: 14px; padding: 28px 24px; position: relative; overflow: hidden; }
+.bas-path.senior { background: linear-gradient(145deg, rgba(123,120,245,.1), rgba(124,58,237,.05)); border: 1px solid rgba(123,120,245,.25); }
+.bas-path.junior { background: linear-gradient(145deg, rgba(249,115,22,.08), rgba(234,88,12,.04)); border: 1px solid rgba(249,115,22,.2); }
+.bas-path .path-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+.bas-path.senior .path-icon { background: rgba(123,120,245,.2); color: var(--acc); }
+.bas-path.junior .path-icon { background: rgba(249,115,22,.2); color: #f97316; }
+.bas-path h2 { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+.bas-path .sub { font-size: 12.5px; color: var(--text-3); margin: 0 0 16px; line-height: 1.45; }
+.bas-path .form { display: flex; flex-direction: column; gap: 10px; }
+.bas-path .form .row { display: flex; gap: 8px; }
+.bas-path .form .row > * { flex: 1; }
+.bas-path .form select, .bas-path .form input, .bas-path .form textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 12.5px; font-family: inherit; box-sizing: border-box; transition: border-color .15s; }
+.bas-path .form select:focus, .bas-path .form input:focus, .bas-path .form textarea:focus { outline: none; border-color: var(--acc); }
+.bas-path .form textarea { min-height: 60px; resize: vertical; }
+.bas-path .form .radio-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.bas-path .form .radio-group label { padding: 5px 14px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 11.5px; font-weight: 500; cursor: pointer; transition: all .12s; background: var(--bg); color: var(--text-2); }
+.bas-path .form .radio-group input { display: none; }
+.bas-path .form .radio-group input:checked+label { border-color: var(--acc); background: var(--acc-soft); color: var(--acc); }
+.bas-path .form .radio-group label:hover { border-color: var(--acc); }
+.bas-path .path-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s; color: #fff; text-decoration: none; }
+.bas-path.senior .path-btn { background: linear-gradient(135deg, var(--acc), #7c3aed); }
+.bas-path.junior .path-btn { background: linear-gradient(135deg, #f97316, #ea580c); }
+.bas-path .path-btn:hover { opacity: .85; }
+.bas-path .path-btn:disabled { opacity: .5; cursor: default; }
+.bas-path .result { display: none; font-size: 12px; text-align: center; margin-top: 8px; }
+.bas-path .ref-links { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.bas-path .ref-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; transition: opacity .15s; color: var(--text); background: var(--bg); border: 1.5px solid var(--border); }
+.bas-path .ref-btn:hover { opacity: .8; }
+.bas-path .ref-btn .ico { font-size: 16px; }
 .bas-feed { margin-top: 8px; }
 .bas-feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .bas-feed-header h2 { font-size: 17px; font-weight: 700; margin: 0; }
@@ -1212,7 +1228,7 @@
 .bas-add .btns .cancel:hover { border-color: var(--text-3); }
 .bas-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 640px) { .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 32px 12px 28px; } .bas-hero h1 { font-size: 26px; } }
+@media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
 </style>
 </head>
 <body>
@@ -1925,10 +1941,44 @@
   <div id="page-basvuru" class="hidden">
     <div class="bas-page">
       <div class="bas-hero">
-        <div class="mark">▲</div>
         <h1>Alfa Trader Ol</h1>
-        <p>Hayat boyu öğrenme, disiplinli trading ve güçlü bir topluluk. Referans linklerinden birini kullanarak borsaya kaydol, ekibin parçası ol. İşlemler, konular ve içerikler burada.</p>
-        <button class="bas-cta" onclick="showRefModal()">🚀 Alfa Trader Ol</button>
+        <p>Rolünü seç, yolculuğuna başla.</p>
+      </div>
+
+      <div class="bas-paths">
+        <div class="bas-path junior">
+          <div class="path-icon">🟠</div>
+          <h2>Yeni Başlayan Alfa Trader</h2>
+          <p class="sub">Henüz aktif trading tecrüben yok ya da çok az. Referans linklerinden birini kullanarak borsaya kaydol, öğrenmeye ve işlem almaya başla.</p>
+          <div class="ref-links">
+            <a class="ref-btn" href="#" target="_blank" rel="noopener" id="bas-ref-link"><span class="ico">💎</span> Bybit ile Katıl</a>
+            <a class="ref-btn" href="#" target="_blank" rel="noopener" id="bas-ref-okx"><span class="ico">🔶</span> OKX ile Katıl</a>
+          </div>
+        </div>
+
+        <div class="bas-path senior">
+          <div class="path-icon">🟣</div>
+          <h2>Deneyimli Alfa Trader</h2>
+          <p class="sub">Aktif trader, piyasa tecrüben var, bilgi birikimini ekiple paylaşmak istiyorsun. Formu doldur, seni takip edelim.</p>
+          <div class="form" id="senior-form">
+            <input type="text" id="sf-name" placeholder="Adın / Nick" />
+            <div class="row">
+              <select id="sf-exp"><option value="">Tecrübe</option><option>&lt;1 yıl</option><option>1-2 yıl</option><option>2-4 yıl</option><option>4+ yıl</option></select>
+              <select id="sf-market"><option value="">Piyasa</option><option>Kripto</option><option>Forex</option><option>Hisse</option><option>Birden fazla</option></select>
+            </div>
+            <div class="row">
+              <select id="sf-freq"><option value="">Sıklık</option><option>Scamper</option><option>Günlük</option><option>Swing</option><option>Pozisyon</option></select>
+              <select id="sf-method"><option value="">Analiz</option><option>Teknik</option><option>Temel</option><option>Karma</option><option>Price Action</option></select>
+            </div>
+            <div class="row">
+              <select id="sf-level"><option value="">Seviye</option><option>Başlangıç</option><option>Orta</option><option>İleri</option><option>Profesyonel</option></select>
+              <select id="sf-pnl"><option value="">Son 6 ay</option><option>Düzenli kazanç</option><option>Zarardayım</option><option>Başa baş</option><option>Yeni başladım</option></select>
+            </div>
+            <textarea id="sf-why" placeholder="Neden Alfa Traders'a katılmak istiyorsun?"></textarea>
+            <button class="path-btn" id="sf-submit" onclick="submitSeniorForm()">Başvur →</button>
+            <div class="result" id="sf-result"></div>
+          </div>
+        </div>
       </div>
 
       <div class="bas-feed" id="bas-feed">
@@ -1955,18 +2005,6 @@
           </div>
         </div>
         <div id="bas-feed-list"></div>
-      </div>
-    </div>
-
-    <div class="bas-modal" id="ref-modal">
-      <div class="bas-modal-box" style="position:relative;">
-        <button class="bas-modal-close" onclick="hideRefModal()">✕</button>
-        <h3>Bir borsa seçerek katıl</h3>
-        <p>Referans linki ile kaydol, Alfa Traders ekibine katıl.</p>
-        <div class="ref-links">
-          <a class="ref-btn" href="#" id="bas-ref-link" target="_blank" rel="noopener"><span class="badge">💎</span> Bybit ile Katıl</a>
-          <a class="ref-btn" href="#" id="bas-ref-okx" target="_blank" rel="noopener"><span class="badge">🔶</span> OKX ile Katıl</a>
-        </div>
       </div>
     </div>
   </div>
@@ -5975,12 +6013,30 @@ function addFeedPost() {
   document.getElementById('feed-pin').checked = false;
   toggleAddPost();
 }
-function showRefModal() { document.getElementById('ref-modal').classList.add('open'); }
-function hideRefModal() { document.getElementById('ref-modal').classList.remove('open'); }
-document.addEventListener('click', e => {
-  const m = document.getElementById('ref-modal');
-  if (m && e.target === m) hideRefModal();
-});
+// ============ Deneyimli Alfa Trader — Form → Google Sheets ============
+// 📌 Buraya Google Apps Script Web App URL'ni ekle:
+const BAS_GS_URL = '';
+function submitSeniorForm() {
+  const btn = document.getElementById('sf-submit');
+  const result = document.getElementById('sf-result');
+  const name = document.getElementById('sf-name').value.trim();
+  const exp = document.getElementById('sf-exp').value;
+  const market = document.getElementById('sf-market').value;
+  const freq = document.getElementById('sf-freq').value;
+  const method = document.getElementById('sf-method').value;
+  const level = document.getElementById('sf-level').value;
+  const pnl = document.getElementById('sf-pnl').value;
+  const why = document.getElementById('sf-why').value.trim();
+  if (!name || !exp || !market || !freq || !method || !level || !pnl || !why) { result.textContent = 'Tüm alanları doldur.'; result.style.display = 'block'; return; }
+  if (!BAS_GS_URL) { result.textContent = 'Google Sheets bağlantısı henüz ayarlanmadı.'; result.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Gönderiliyor...';
+  result.style.display = 'none';
+  const payload = { name, exp, market, freq, method, level, pnl, why, date: new Date().toISOString() };
+  fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    .then(() => { result.textContent = '✅ Başvurun alındı! Seni takip edeceğiz.'; result.style.display = 'block'; result.style.color = '#22c55e'; document.getElementById('senior-form').querySelectorAll('input, select, textarea').forEach(el => el.value = ''); })
+    .catch(() => { result.textContent = 'Gönderme hatası. Tekrar dene.'; result.style.display = 'block'; result.style.color = '#ef4444'; })
+    .finally(() => { btn.disabled = false; btn.textContent = 'Başvur →'; });
+}
 loadFeed();
 document.addEventListener('DOMContentLoaded', renderFeed);
 setTimeout(renderFeed, 100);
