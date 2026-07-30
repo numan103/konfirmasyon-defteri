@@ -17,7 +17,8 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { sessionId, role, text } = req.body || {};
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const { sessionId, role, text } = body;
     if (!sessionId || !role || !text) return res.status(400).json({ error: 'sessionId, role, text required' });
     try {
       const msg = { sessionId, role, text, time: new Date().toISOString() };
@@ -30,7 +31,8 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
-    const { sessionId } = req.body || {};
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const { sessionId } = body;
     if (!sessionId) return res.status(400).json({ error: 'sessionId required' });
     try {
       const { blobs } = await list({ prefix: 'chat/' });
