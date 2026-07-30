@@ -48,7 +48,9 @@ export default async function handler(req, res) {
       return res.json({ reply: 'Üzgünüm, cevap veremiyorum.' });
     }
 
-    const r = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+    const targetUrl = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
+    if (!API_KEY.startsWith('hf_')) return res.json({ reply: 'HF token hatalı (hf_ ile başlamalı). Mevcut: ' + API_KEY.substring(0, 8) + '...' });
+    const r = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -68,6 +70,6 @@ export default async function handler(req, res) {
     const errMsg = typeof data === 'object' ? (data.error || JSON.stringify(data)) : 'Hata';
     return res.json({ reply: 'Cevap alınamadı: ' + errMsg });
   } catch (e) {
-    return res.json({ reply: 'Bağlantı hatası: ' + e.message });
+    return res.json({ reply: 'Hata: ' + e.constructor.name + ' - ' + e.message.substring(0, 150) });
   }
 }
