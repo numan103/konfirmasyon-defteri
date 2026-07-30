@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1229,11 +1229,10 @@
 .bas-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
-.home-ticker { margin: 0 auto 24px; max-width: 660px; padding: 10px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); line-height: 1.4; min-height: 20px; }
-.home-ticker .ti { flex: none; font-size: 16px; }
-.home-ticker .tq { flex: 1; }
-.home-ticker .ta { flex: none; font-size: 11px; color: var(--text-3); white-space: nowrap; margin-left: auto; }
-@media (max-width: 640px) { .home-ticker { font-size: 12px; padding: 8px 12px; } .home-ticker .ta { display: none; } }
+.home-ticker { margin: 0 auto 18px; max-width: 660px; padding: 8px 16px; background: rgba(123,120,245,0.07); border: 1px solid rgba(123,120,245,0.15); border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-2); line-height: 1.45; }
+.home-ticker .tq { flex: 1; font-style: italic; }
+.home-ticker .ta { flex: none; font-size: 10.5px; color: var(--acc); white-space: nowrap; margin-left: auto; font-weight: 600; }
+@media (max-width: 640px) { .home-ticker { font-size: 11.5px; padding: 6px 12px; } .home-ticker .ta { display: none; } }
 .chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--acc), #7c3aed); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(123,120,245,.35); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
 .chat-bubble:hover { transform: scale(1.08); }
 .chat-popup { position: fixed; bottom: 88px; right: 24px; z-index: 1000; width: 340px; max-width: calc(100vw - 48px); height: 460px; max-height: calc(100vh - 140px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.15); display: none; flex-direction: column; overflow: hidden; animation: basFadeIn .2s ease; }
@@ -1245,12 +1244,26 @@
 .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; animation: basFadeIn .15s ease; }
 .chat-msg.bot { align-self: flex-start; background: var(--bg); color: var(--text); border-bottom-left-radius: 4px; }
 .chat-msg.user { align-self: flex-end; background: var(--acc); color: #fff; border-bottom-right-radius: 4px; }
+.chat-msg.admin { align-self: flex-start; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border-bottom-left-radius: 4px; }
 .chat-foot { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex: none; }
 .chat-foot input { flex: 1; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit; }
 .chat-foot input:focus { outline: none; border-color: var(--acc); }
 .chat-foot button { padding: 10px 16px; border: none; border-radius: 8px; background: var(--acc); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; flex: none; }
 .chat-foot button:hover { opacity: .85; }
 @media (max-width: 480px) { .chat-popup { right: 12px; bottom: 80px; width: calc(100vw - 24px); height: 60vh; } }
+/* Admin Chat */
+.ca-msg { display:flex; flex-direction:column; gap:4px; padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; background:var(--bg); border:1px solid var(--border); }
+.ca-msg .ca-meta { font-size:10px; color:var(--text-3); display:flex; gap:8px; }
+.ca-msg .ca-meta .ca-tag { font-weight:700; }
+.ca-msg .ca-meta .ca-tag.u { color:var(--acc); }
+.ca-msg .ca-meta .ca-tag.a { color:#7c3aed; }
+.ca-conv { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--card); }
+.ca-conv-h { padding:10px 14px; background:var(--bg); cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:600; }
+.ca-conv-h:hover { background:var(--bg-2); }
+.ca-conv-h .ca-badge { background:var(--acc); color:#fff; border-radius:999px; padding:1px 8px; font-size:10px; font-weight:700; }
+.ca-conv-body { padding:10px 14px; display:flex; flex-direction:column; gap:6px; }
+.ca-conv.on .ca-conv-h { background: var(--acc); color: #fff; }
+.ca-conv.on .ca-conv-h .ca-badge { background: rgba(255,255,255,.3); }
 </style>
 </head>
 <body>
@@ -1431,6 +1444,7 @@
         <a class="nav-link drop-btn">AlfaNews ▾</a>
         <div class="drop-menu">
           <a href="?page=calendar" class="nav-link" id="tab-calendar" data-nav>Ekonomik Takvim</a>
+          <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" data-nav>Canlı Destek</a>
           <a href="?page=news" class="nav-link" id="tab-news" data-nav>Dergi</a>
         </div>
       </div>
@@ -1449,15 +1463,14 @@
   </nav>
   <div id="page-home" class="hidden">
     <div class="home-wrap">
+      <div class="home-ticker" id="home-ticker">
+        <span class="tq" id="ticker-text">Yükleniyor...</span>
+        <span class="ta" id="ticker-author"></span>
+      </div>
       <div class="home-hero">
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
         <h1>Alfa Traders</h1>
         <p class="home-sub">Trader'lar için disiplin, analiz ve öğrenme platformu</p>
-      </div>
-      <div class="home-ticker" id="home-ticker">
-        <span class="ti">💡</span>
-        <span class="tq" id="ticker-text">Yükleniyor...</span>
-        <span class="ta" id="ticker-author"></span>
       </div>
       <div class="home-grid">
         <a href="?page=defter" class="home-card" data-nav><div class="preview"><img src="https://i.imgur.com/xZmCzHN.png" alt="" onload="this.style.display='block'" onerror="this.style.display='none';this.parentElement.textContent='Önizleme'"></div><div class="hc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h6M8 16h4"/></svg></div><h2>Alfa-Check List</h2><p>Pair bazlı kriter listesi. Her işlem öncesi puanla, kararını ver. Günlük plan & seans kalitesi. Eşiklerle otomatik karar.</p></a>
@@ -1876,9 +1889,9 @@
     </div>
     <div class="eg-course">
       <aside class="panel eg-list-panel">
-        <h2 class="cat-h2"><span>Konular</span><span class="eg-progress" id="eg-progress"></span><button type="button" class="cat-edit" id="eg-load" title="Alfa Traders eğitim içeriğini yükle">↺ Listeyi yükle</button><button type="button" class="cat-edit" id="eg-add-topic">+ Konu</button></h2>
+            <h2 class="cat-h2"><span>Konular</span><span class="eg-progress" id="eg-progress"></span><button type="button" class="cat-edit" id="eg-add-topic">+ Konu</button></h2>
         <div id="eg-list" class="eg-list"></div>
-        <div id="eg-empty" class="eg-empty-list">Bu bölümde konu yok. “+ Konu” ile ekle ya da “↺ Listeyi yükle” ile hazır içeriği getir.</div>
+        <div id="eg-empty" class="eg-empty-list">Bu bölümde konu yok. &quot;+ Konu&quot; ile ekle.</div>
       </aside>
       <section class="panel eg-player-panel">
         <div id="eg-player-wrap">
@@ -1963,6 +1976,22 @@
         <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=3" style="width:100%;height:700px;border:none;border-radius:10px;background:var(--bg);" loading="lazy"></iframe>
       </div>
       <p class="hint" style="margin-top:8px;">Yalnızca yüksek etkili (3 yıldız) haberler gösterilir. Kaynak: Investing.com.</p>
+    </div>
+  </div>
+  <div id="page-chat-admin" class="hidden">
+    <div class="panel" style="max-width:860px;margin:0 auto;">
+      <h2 style="margin:0 0 8px;">Canlı Destek — Admin Paneli</h2>
+      <p class="hint" style="margin:0 0 16px;">Ziyaretçilerden gelen mesajları gör, yanıtla. Yanıtların anında kullanıcının sohbetinde görünür.</p>
+      <div id="ca-convs" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <div id="ca-empty" style="color:var(--text-3);font-size:13px;padding:20px 0;text-align:center;">Henüz mesaj yok.</div>
+      <div id="ca-reply-box" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Seçili kullanıcıya yanıt yaz:</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="ca-input" placeholder="Yanıtını yaz..." style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;">
+          <button class="btn solid" id="ca-send" type="button">Gönder</button>
+          <button class="btn" id="ca-close" type="button">Kapat</button>
+        </div>
+      </div>
     </div>
   </div>
   <div id="page-basvuru" class="hidden">
@@ -4273,9 +4302,10 @@ function init() {
   });
   bindDataPage();
   bindNewsPage();
-  bindReviewPage();
+  bindDataPage();
   bindEgitimPage();
   bindIndicatorsPage();
+  bindAdminChat();
   bindOnchainPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
@@ -4675,6 +4705,7 @@ function showPage(name) {
   if (name === 'egitim') renderEgitim();
   if (name === 'indicators') renderIndicators();
   if (name === 'basvuru') renderFeed();
+  if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -5218,116 +5249,8 @@ const EGITIM_KEY = 'defter-egitim-v1';
 const EG_SECTIONS = { teknik: 'Teknik Analiz', temel: 'Temel Analiz', psikoloji: 'Trade Psikolojisi', islem: 'İşlem & Backtest', onchain: 'Onchain Analizi' };
 const EG_LEVELS = ['temel', 'orta', 'ileri'];
 const EG_SEED_PLAYLIST = 'PLSvAYYLAIh0PKVsqa7LqR6R1oU_qn8DEe';
-const EG_SEED_VER = 4;
-// Alfa Traders içeriği — bölüm → konu → video başlıkları (linkleri kullanıcı ekler).
-const EG_SEED = {
-  teknik: [
-    { title: 'Market Yapısı', level: 'temel', videos: [
-      { title: 'Market Yapısı -1 / Price Action' },
-      { title: 'Market Yapısı -2 (Örnekler)' },
-      { title: 'Detaylı Market Yapısı -3 / PDArray - BOS - MSB' },
-    ] },
-    { title: 'Destek & Direnç', level: 'temel', videos: [ { title: 'Destek ve Direnç Nasıl Belirlenir?' } ] },
-    { title: 'Likidite (Temel)', level: 'temel', videos: [
-      { title: 'Likidite / Price Action Eğitimi' },
-      { title: 'Likidite -3 / Teknik Analize Giriş' },
-    ] },
-    { title: 'Formasyonlar', level: 'temel', videos: [ { title: 'Formasyonlar / OBO-TOBO' } ] },
-    { title: 'Trendler', level: 'temel', videos: [ { title: 'Trendleri Anlamak - Price Action' } ] },
-    { title: 'Manipülasyon & Likidite', level: 'orta', videos: [
-      { title: 'Manipülasyon ve Likidite / Alfa Trading Bootcamp 3' },
-      { title: 'Supply / Demand / Likidite / Key Levels - Ders 9' },
-    ] },
-    { title: 'Key Levels (Kurumsal Seviyeler)', level: 'orta', videos: [ { title: 'Kurumsal Seviyeler (Key Levels)' } ] },
-    { title: 'Order Block', level: 'orta', videos: [ { title: 'Order Block - Price Action Eğitimi' } ] },
-    { title: 'Breaker Block', level: 'orta', videos: [
-      { title: 'Breaker Blok - Price Action' },
-      { title: 'Breaker Blok +7.7R - Backtest #11' },
-    ] },
-    { title: 'Marketi Anlamak', level: 'orta', videos: [
-      { title: 'Marketi Anlamak - Basit Ama Etkili Bilgiler' },
-      { title: "30 Dk'da Price Action" },
-      { title: 'Price HTF Nasıl Trade Edilir?' },
-    ] },
-    { title: 'İleri Düzey Market Yapısı', level: 'ileri', videos: [
-      { title: 'İleri Düzey Market Yapısı / Teknik Analize Giriş' },
-    ] },
-    { title: 'Wyckoff & Hacim', level: 'ileri', videos: [
-      { title: 'Wyckoff Birikim-Dağıtım Aşamaları' },
-      { title: 'Hacim Nedir? SHP ve Wyckoff Kullanımı' },
-    ] },
-    { title: 'İleri Düzey Trade Eğitimi', level: 'ileri', videos: [
-      { title: 'İleri Düzey Trade Eğitimi -1' },
-      { title: 'İleri Düzey Trade Eğitimi -2 / İşlem Stratejisi Nasıl Kurulur' },
-      { title: 'İleri Düzey Trade Eğitimi -4 / Manipülasyon (Bitcoin & Altcoin)' },
-    ] },
-    { title: 'Stratejiler', level: 'ileri', videos: [
-      { title: 'LTF İşleme Giriş Stratejileri' },
-      { title: 'Alex G Swing Trade Stratejisi -1' },
-    ] },
-  ],
-  temel: [],
-  psikoloji: [
-    { title: 'Trader / Market Maker Gibi Düşünmek', videos: [
-      { title: 'Trader Gibi Düşünmek - Trade Psikolojisi' },
-      { title: 'Market Maker Gibi Düşünmek - Trade Psikolojisi 2' },
-    ] },
-    { title: 'Nasıl Başarılı Bir Trader Olunur?', videos: [
-      { title: 'Zihinsel Özellikler' },
-      { title: 'Hatalar' },
-      { title: 'Alfa Trader Kitap Notları' },
-      { title: 'Adım Adım' },
-      { title: 'Adım Adım 2 (Gerçekçi Senaryo)' },
-    ] },
-    { title: 'Başarısız Traderların Ortak Özellikleri', videos: [
-      { title: 'Başarısız Traderlar -1' },
-      { title: 'Başarısız Traderlar -2' },
-    ] },
-    { title: 'Değişim', videos: [ { title: 'Başarılı Trader Olmak İçin Değiştirmen Gereken 5 Şey' } ] },
-  ],
-  islem: [
-    { title: 'Trade Örnekleri', videos: [
-      { title: 'Bitcoin Swing Short İşlemi (Price Action)' },
-      { title: 'BTC HTF Swing Short - Price Action' },
-      { title: 'BTC HTF Swing Short Pozisyon Yönetimi (+4R)' },
-      { title: 'Bugün Aldığım İşlemler - Price Action' },
-    ] },
-    { title: 'Haftalık İşlemler', videos: [
-      { title: 'Haftalık Performans Değerlendirmesi (Bitcoin)' },
-      { title: 'Bu Hafta Aldığım İşlemler (+10R)' },
-      { title: 'Bu Hafta Aldığım İşlemler (14-18 Nisan)' },
-      { title: 'Bu Hafta Aldığım İşlemler (21-25 Nisan)' },
-      { title: '9-13 Haziran Bitcoin Nasıl Trade Edilir?' },
-    ] },
-    { title: 'Günlük Plan & Rutin', videos: [
-      { title: 'Detaylı Günlük İşlem Planı (Bitcoin +4R)' },
-      { title: 'Nasıl Daha İyi Trade Ederim? - Rutin, Plan, Takip' },
-    ] },
-    { title: 'Backtest', videos: [
-      { title: 'SHP ile Backtest' },
-      { title: 'LTF Stratejileri Backtest 6 Gün 11R' },
-      { title: 'Price Action ile USDT.D Anlamak (1) - Backtest 13' },
-      { title: 'Price Action ile USDT.D Anlamak -2' },
-      { title: 'LTF Stratejileri (Backtest 14) - 11R' },
-    ] },
-  ],
-  onchain: [
-    { title: 'Open Interest (OI)', videos: [
-      { title: 'OI Nedir? Nasıl Yorumlanır?' },
-      { title: 'OI ve Fiyat İlişkisi' },
-    ] },
-    { title: 'Funding Rate', videos: [
-      { title: 'Funding Rate Nasıl Okunur?' },
-      { title: 'Long/Short Oranları' },
-    ] },
-    { title: 'CVD & Orderflow', videos: [
-      { title: 'CVD (Cumulative Volume Delta) Nedir?' },
-    ] },
-    { title: 'Liquidations', videos: [
-      { title: 'Likitasyon Haritası Nasıl Okunur?' },
-    ] },
-  ],
-};
+const EG_SEED_VER = 5;
+const EG_SEED = {};
 let egitimData = { sections: {}, sel: {}, selVid: {}, seedVer: 0 };
 let egSec = 'teknik';
 let egLevel = 'temel';
@@ -5350,14 +5273,6 @@ async function loadEgitim() {
   if (!egitimData.sections || typeof egitimData.sections !== 'object') egitimData.sections = {};
   if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
   if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
-  // seed verisini yükle (ilk defa gelenler için)
-  if (typeof egitimData.seedVer !== 'number') egitimData.seedVer = 0;
-  const total = Object.keys(EG_SECTIONS).reduce((n, s) => n + (egitimData.sections[s] || []).length, 0);
-  if (egitimData.seedVer < EG_SEED_VER || total === 0) {
-    egMergeSeed();
-    egitimData.seedVer = EG_SEED_VER;
-    await store.set(EGITIM_KEY, JSON.stringify(egitimData));
-  }
   // shared'dan gelen konuları local'e ekle (yoksa)
   if (sharedData && sharedData.sections) {
     Object.keys(EG_SECTIONS).forEach(sec => {
@@ -5393,24 +5308,6 @@ async function saveEgitim() {
     });
     if (res.ok) egShared = JSON.parse(JSON.stringify(payload));
   } catch (e) { /* shared sync hatası — sadece local devam */ }
-}
-
-// Hazır içeriği yapıya ekler (var olan konu/videoyu çoğaltmadan). Eklenen sayısını döndürür.
-function egMergeSeed() {
-  let added = 0;
-  Object.keys(EG_SECTIONS).forEach(sec => {
-    if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
-    (EG_SEED[sec] || []).forEach(st => {
-      let topic = egitimData.sections[sec].find(t => (t.title || '').trim().toLowerCase() === st.title.trim().toLowerCase());
-      if (!topic) { topic = { id: rid(), title: st.title, note: '', videos: [], level: st.level || 'temel' }; egitimData.sections[sec].push(topic); added++; }
-      const existV = new Set((topic.videos || []).map(v => (v.title || '').trim().toLowerCase()));
-      (st.videos || []).forEach(sv => {
-        if (existV.has(sv.title.trim().toLowerCase())) return;
-        topic.videos.push({ id: rid(), title: sv.title, url: '' }); added++;
-      });
-    });
-  });
-  return added;
 }
 
 // --- YouTube yardımcıları ---
@@ -5660,12 +5557,6 @@ function bindEgitimPage() {
   document.querySelectorAll('#eg-level-seg button').forEach(b => {
     b.addEventListener('click', () => { egLevel = b.getAttribute('data-level'); renderEgitim(); });
   });
-  // hazır içeriği yükle (birleştir)
-  g('eg-load').addEventListener('click', async () => {
-    const added = egMergeSeed();
-    await saveEgitim(); renderEgitim();
-    if (added === 0) alert('Tüm hazır içerik zaten listede.');
-  });
   // konu ekle
   g('eg-add-topic').addEventListener('click', () => {
     if (g('eg-add-form').classList.contains('hidden')) egOpenForm('topic-add', null, null); else egCloseForm();
@@ -5799,6 +5690,23 @@ function bindIndicatorsPage() {
 
 function bindOnchainPage() {
   const g = id => document.getElementById(id);
+}
+function bindAdminChat() {
+  const g = id => document.getElementById(id);
+  g('ca-send').addEventListener('click', () => {
+    const input = g('ca-input');
+    const text = input.value.trim();
+    if (!text || !caSelectedSid) return;
+    input.value = '';
+    fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: caSelectedSid, role: 'admin', text }) })
+      .then(() => renderAdminChat())
+      .catch(() => {});
+  });
+  g('ca-input').addEventListener('keydown', e => { if (e.key === 'Enter') g('ca-send').click(); });
+  g('ca-close').addEventListener('click', () => {
+    caSelectedSid = null;
+    g('ca-reply-box').classList.add('hidden');
+  });
 }
 
 // ============ Açılış + Giriş/Kayıt akışı ============
@@ -6114,7 +6022,13 @@ function submitJuniorUid() {
 }
 // ============ Chat Widget ============
 const CHAT_KEY = 'alfa-chat-v2';
+const CHAT_API = '/api/chat-admin';
 let chatHistory = [];
+function chatSid() {
+  let s = localStorage.getItem('alfa-chat-sid');
+  if (!s) { s = Date.now().toString(36) + Math.random().toString(36).slice(2,9); localStorage.setItem('alfa-chat-sid', s); }
+  return s;
+}
 function loadChat() {
   try { const d = localStorage.getItem(CHAT_KEY); if (d) chatHistory = JSON.parse(d); } catch(e) { chatHistory = []; }
   if (!chatHistory.length) {
@@ -6148,6 +6062,11 @@ function sendChatMsg() {
   input.value = '';
   chatHistory.push({ role: 'user', text });
   saveChat(); renderChat();
+  const sid = chatSid();
+  fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text }) }).catch(() => {});
+  if (BAS_GS_URL) {
+    fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'chat', message: text, date: new Date().toISOString() }) }).catch(() => {});
+  }
   const thinkId = Date.now();
   chatHistory.push({ role: 'bot', text: '🤔 Düşünüyorum...', _id: thinkId });
   saveChat(); renderChat();
@@ -6166,10 +6085,27 @@ function sendChatMsg() {
       if (idx !== -1) { chatHistory[idx] = { role: 'bot', text: reply }; }
       saveChat(); renderChat();
     });
-  if (BAS_GS_URL) {
-    fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'chat', message: text, date: new Date().toISOString() }) }).catch(() => {});
-  }
 }
+let chatPoll = null;
+function startChatPoll() {
+  clearInterval(chatPoll);
+  chatPoll = setInterval(() => {
+    const p = document.getElementById('chat-popup');
+    if (!p || !p.classList.contains('open')) return;
+    const sid = chatSid();
+    fetch(CHAT_API).then(r => r.json()).then(msgs => {
+      const adminMsgs = msgs.filter(m => m.sessionId === sid && m.role === 'admin');
+      let added = false;
+      adminMsgs.forEach(m => {
+        if (!chatHistory.some(h => h.text === m.text && h.time === m.time && h.role === 'admin')) {
+          chatHistory.push({ role: 'admin', text: m.text, time: m.time }); added = true;
+        }
+      });
+      if (added) { saveChat(); renderChat(); }
+    }).catch(() => {});
+  }, 4000);
+}
+startChatPoll();
 function getAutoReply(t) {
   const s = t.toLowerCase();
   if (/merhaba|selam|hey|iyi günler/i.test(s)) return 'Merhaba! 👋 Nasıl yardımcı olabilirim?';
@@ -6178,6 +6114,53 @@ function getAutoReply(t) {
   if (/topluluk|grup|telegram|sohbet/i.test(s)) return '💬 Telegram: https://t.me/alfatraderspublic';
   if (/işlem|trade|analiz|piyasa|grafik/i.test(s)) return 'Topluluk akışında işlem ve analiz paylaşımlarını bulabilirsin.';
   return '🤖 AI cevap veremedi. Sorun kaydedildi, ekibimiz dönecek.';
+}
+// ============ Admin Chat Paneli ============
+let caAllMsgs = [];
+let caSelectedSid = null;
+let caPollTimer = null;
+function renderAdminChat() {
+  fetch(CHAT_API).then(r => r.json()).then(msgs => {
+    caAllMsgs = msgs || [];
+    const convs = document.getElementById('ca-convs');
+    const empty = document.getElementById('ca-empty');
+    if (!convs) return;
+    const sessions = {};
+    caAllMsgs.forEach(m => {
+      if (!sessions[m.sessionId]) sessions[m.sessionId] = [];
+      sessions[m.sessionId].push(m);
+    });
+    const sids = Object.keys(sessions);
+    if (!sids.length) { convs.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
+    if (empty) empty.style.display = 'none';
+    convs.innerHTML = sids.map(sid => {
+      const ms = sessions[sid];
+      const last = ms[ms.length - 1];
+      const unread = ms.filter(m => m.role === 'user').length;
+      const preview = last.text.substring(0, 60) + (last.text.length > 60 ? '...' : '');
+      return `<div class="ca-conv${caSelectedSid === sid ? ' on' : ''}" data-sid="${sid}">
+        <div class="ca-conv-h" onclick="caSelect('${sid}')">
+          <span>${esc(sid.substring(0, 8))}... ${unread ? '<span class="ca-badge">' + unread + '</span>' : ''}</span>
+          <span style="font-size:10px;color:var(--text-3);">${new Date(last.time).toLocaleString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div class="ca-conv-body">${ms.map(m => `<div class="ca-msg"><div class="ca-meta"><span class="ca-tag ${m.role === 'user' ? 'u' : 'a'}">${m.role === 'user' ? 'Kullanıcı' : 'Admin'}</span><span>${new Date(m.time).toLocaleString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</span></div><div>${esc(m.text)}</div></div>`).join('')}</div>
+      </div>`;
+    }).join('');
+    if (!caSelectedSid && sids.length) caSelect(sids[sids.length - 1]);
+  }).catch(() => {});
+}
+function caSelect(sid) {
+  caSelectedSid = sid;
+  document.querySelectorAll('.ca-conv').forEach(c => c.classList.toggle('on', c.dataset.sid === sid));
+  document.getElementById('ca-reply-box').classList.remove('hidden');
+}
+function startAdminChatPoll() {
+  clearInterval(caPollTimer);
+  caPollTimer = setInterval(() => {
+    const p = document.getElementById('page-chat-admin');
+    if (!p || p.classList.contains('hidden')) return;
+    renderAdminChat();
+  }, 3000);
 }
 // ============ Günün Sözü Ticker ============
 const QUOTES = [
@@ -6199,18 +6182,38 @@ const QUOTES = [
   { text: 'Her işlem senin kararın, senin sorumluluğun.', author: 'Alfa Trader' },
   { text: 'Backtest geçmeyen strateji canlıda kazandırmaz.', author: 'Backtest' },
   { text: 'Plan yap, plana bağlı kal, sonucu değerlendir.', author: 'Alfa Süreç' },
+  { text: 'Trade\'in en önemli kuralı: hayatta kalmak.', author: 'Paul Tudor Jones' },
+  { text: 'Piyasalar asla yanlış değildir, görüşler yanlış olabilir.', author: 'Jesse Livermore' },
+  { text: 'Kâr eden pozisyonlara ekleme yap, kaybedenleri hemen kes.', author: 'Ed Seykota' },
+  { text: 'Risk yönetimi olmadan trading bir kumardır.', author: 'Larry Hite' },
+  { text: 'Büyük para büyük sabırla gelir.', author: 'Richard Dennis' },
+  { text: 'Trend senin dostun, rüzgarı arkana al.', author: 'Edwin Lefèvre' },
+  { text: 'Kaybetmeyi bilmeyen kazanmayı hak etmez.', author: 'Mark Douglas' },
+  { text: 'Stratejisiz piyasaya giren kaybetmeye mahkumdur.', author: 'Alexander Elder' },
+  { text: 'Piyasayı kontrol edemezsin, sadece kendini kontrol edebilirsin.', author: 'Brett Steenbarger' },
+  { text: 'Küçük düşünürsen küçük kazanırsın, büyük düşünürsen büyük.', author: 'Marty Schwartz' },
+  { text: 'İyi trader plan yapar, kötü trader plana ihtiyacı olmadığını düşünür.', author: 'Alfa Disiplin' },
+  { text: 'Bir kayıp sadece bir kayıptır, bir felaket değil.', author: 'Michael Marcus' },
+  { text: 'Piyasada disiplin her şeyden önce gelir.', author: 'Tom Basso' },
+  { text: 'Sessiz ve sabırlı ol, piyasa kapıyı çalacaktır.', author: 'Peter Brandt' },
+  { text: 'Trading bir sprint değil, maratondur.', author: 'Alfa Trader' },
+  { text: 'En iyi sinyal, senin sinyalin değil, piyasanın verdiği sinyaldir.', author: 'Alfa Analiz' },
+  { text: 'Fiyatın nereye gideceğini bilmek zorunda değilsin, sadece ne yapacağını bil.', author: 'Alfa Disiplin' },
+  { text: 'Güvende kal ve trende karşı koyma.', author: 'Turtle Trader' },
+  { text: 'Kötü bir trade planı, hiç plan olmamasından iyidir.', author: 'Alfa Edu' },
+  { text: 'Beklemek bir eylemsizlik değil, bir stratejidir.', author: 'Alfa Disiplin' },
 ];
-let tickerIdx = Math.floor(Math.random() * QUOTES.length);
-function nextQuote() {
-  const q = QUOTES[tickerIdx % QUOTES.length];
+function showDailyQuote() {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((today - start) / 864e5);
+  const q = QUOTES[dayOfYear % QUOTES.length];
   const el = document.getElementById('ticker-text');
   const au = document.getElementById('ticker-author');
   if (el) el.textContent = '\u201c' + q.text + '\u201d';
   if (au) au.textContent = '\u2014 ' + q.author;
-  tickerIdx = (tickerIdx + 1) % QUOTES.length;
 }
-nextQuote();
-setInterval(nextQuote, 8000);
+showDailyQuote();
 loadChat();
 loadFeed();
 document.addEventListener('DOMContentLoaded', renderFeed);
