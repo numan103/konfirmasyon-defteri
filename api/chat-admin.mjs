@@ -1,6 +1,6 @@
 import { put, list } from '@vercel/blob';
 
-const BLOB_PATH = 'chat-v3.json';
+const BLOB_PATH = 'chat-v4';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         try { const r = await fetch(url); if (r.ok) msgs = await r.json(); } catch {}
       }
       msgs.push({ sessionId, role, text, time: new Date().toISOString() });
-      const result = await put(BLOB_PATH, JSON.stringify(msgs), { access: 'public', addRandomSuffix: false });
+      const result = await put(BLOB_PATH, JSON.stringify(msgs), { access: 'public', addRandomSuffix: false, allowOverwrite: true });
       return res.status(200).json({ ok: true, count: msgs.length, url: result.url.substring(0, 60) });
     } catch (e) {
       return res.status(200).json({ ok: false, error: e.message });
