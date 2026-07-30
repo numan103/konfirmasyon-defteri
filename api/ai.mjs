@@ -10,7 +10,7 @@ Topluluk hakkında bilgiler:
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
 - Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)`;
 
-const HF_MODEL = 'TinyLlama/TinyLlama-1.1B-Chat-v1.0';
+const HF_MODEL = 'gpt2';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
