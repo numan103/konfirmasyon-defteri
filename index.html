@@ -4693,7 +4693,7 @@ async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)
 
 function showPage(name) {
   currentPage = name;
-  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru'];
+  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
