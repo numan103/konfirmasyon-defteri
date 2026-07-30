@@ -14,6 +14,15 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET') {
+    const API_KEY = process.env.GEMINI_API_KEY;
+    if (!API_KEY) return res.json({ status: 'no_key' });
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1/models?key=${API_KEY}`);
+      const d = await r.json();
+      return res.json({ models: (d.models || []).map(m => m.name) });
+    } catch (e) { return res.json({ error: e.message }); }
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const { message } = req.body || {};
