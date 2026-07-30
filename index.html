@@ -326,19 +326,19 @@
   #data-chart-wrap { width: 100%; overflow: hidden; }
   #data-chart { width: 100%; display: block; }
   .data-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 26px 10px; }
-  .df-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:10px 14px; background:var(--bg-2); border-radius:10px; font-size:14px; font-weight:600; }
-  .df-header:hover { background:var(--border); }
-  .df-arrow { transition:transform .2s; }
-  .df-body.open .df-arrow { transform:rotate(180deg); }
-  .df-body { display:none; padding:14px 0 0; }
-  .df-body.open { display:block; }
-  .data-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  @media (min-width: 720px) { .data-form { grid-template-columns: repeat(4, 1fr); } }
-  .data-form input { width: 100%; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text); }
-  .data-form input:focus, .data-form textarea:focus { outline: 2px solid var(--acc); border-color: transparent; }
-  .data-form textarea { width:100%; background:#f8f9fc; border:1px solid var(--border); border-radius:9px; padding:9px 10px; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--text); resize:vertical; }
-  .df-full { grid-column: 1 / -1; }
-  .df-crits { display:flex; flex-wrap:wrap; gap:8px 16px; padding:8px 0; grid-column:1/-1; }
+  .df-form { padding:4px 0; }
+  .df-row { display:flex; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid var(--border); }
+  .df-row .df-lbl { flex:none; width:72px; font-size:11.5px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.04em; }
+  .df-row input, .df-row textarea { flex:1; border:none; background:transparent; padding:6px 4px; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--text); outline:none; }
+  .df-row textarea { resize:vertical; min-height:40px; }
+  .df-row-note { align-items:flex-start; }
+  .df-detail-toggle { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px; color:var(--acc); font-weight:600; padding:6px 0; }
+  .df-detail-toggle:hover { opacity:.8; }
+  .df-arrow { font-size:10px; transition:transform .2s; }
+  .df-arrow.open { transform:rotate(90deg); }
+  #df-detail { display:none; padding:6px 0; }
+  #df-detail.open { display:block; }
+  .df-crits { display:flex; flex-wrap:wrap; gap:8px 16px; padding:8px 0; border-bottom:1px solid var(--border); }
   .df-crits label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--text-2); flex:1; min-width:100px; }
   .crit-range { flex:1; height:6px; -webkit-appearance:none; appearance:none; border-radius:3px; background:var(--border); outline:none; cursor:pointer; }
   .crit-range::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--acc); cursor:pointer; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.15); }
@@ -1843,44 +1843,39 @@
   <div id="page-data" class="hidden">
     <div class="data-kpis" id="data-kpis"></div>
     <div class="panel" style="margin-bottom:14px;">
-      <div class="df-header" onclick="document.getElementById('df-body').classList.toggle('open')">
-        <span>+ Yeni İşlem Ekle</span>
-        <span class="df-arrow">▼</span>
-      </div>
-      <div class="df-body" id="df-body">
-        <div class="data-form">
-          <input type="date" id="df-entry-date" aria-label="Giriş tarihi">
-          <input type="date" id="df-exit-date" aria-label="Çıkış tarihi">
-          <input type="text" id="df-pair" placeholder="Parite (BTC, XAU…)" maxlength="12">
-          <div class="df-seg">
-            <button type="button" class="long on" id="df-long">LONG</button>
-            <button type="button" class="short" id="df-short">SHORT</button>
+      <h2><span>+ Yeni İşlem</span></h2>
+      <div class="df-form" id="df-form">
+        <div class="df-row"><span class="df-lbl">Tarih</span><input type="date" id="df-date"></div>
+        <div class="df-row"><span class="df-lbl">Parite</span><input type="text" id="df-pair" placeholder="BTC, XAU…" maxlength="12"></div>
+        <div class="df-row"><span class="df-lbl">Yön</span><div class="df-seg"><button type="button" class="long on" id="df-long">LONG</button><button type="button" class="short" id="df-short">SHORT</button></div></div>
+        <div class="df-row"><span class="df-lbl">R</span><input type="number" step="0.01" id="df-r" placeholder="2.5 / -1.0"></div>
+        <div class="df-row"><span class="df-lbl">Strateji</span><input type="text" id="df-strat" placeholder="Breaker, FVG…"></div>
+        <div class="df-row df-row-note"><span class="df-lbl">Not</span><textarea id="df-note" placeholder="İşlemle ilgili notların…" rows="2"></textarea></div>
+        <div class="df-detail-toggle" onclick="document.getElementById('df-detail').classList.toggle('open');this.querySelector('.df-arrow').classList.toggle('open');">
+          <span class="df-arrow">▶</span> Detay (fiyat, stop, resim, kriter)
+        </div>
+        <div id="df-detail">
+          <div class="df-row"><span class="df-lbl">Giriş</span><input type="number" step="0.00001" id="df-entry-price" placeholder="Opsiyonel"></div>
+          <div class="df-row"><span class="df-lbl">Çıkış</span><input type="number" step="0.00001" id="df-exit-price" placeholder="Opsiyonel"></div>
+          <div class="df-row"><span class="df-lbl">Stop</span><input type="number" step="0.00001" id="df-stop" placeholder="Opsiyonel"></div>
+          <div class="df-row"><span class="df-lbl">TP</span><input type="number" step="0.00001" id="df-target" placeholder="Opsiyonel"></div>
+          <div class="df-row"><span class="df-lbl">Adet</span><input type="number" step="0.001" id="df-size" placeholder="Opsiyonel"></div>
+          <div class="df-crits">
+            <label>Setup <input type="range" id="df-c-setup" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-setup-v">0</span></label>
+            <label>Entry <input type="range" id="df-c-entry" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-entry-v">0</span></label>
+            <label>Exit <input type="range" id="df-c-exit" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-exit-v">0</span></label>
+            <label>Risk <input type="range" id="df-c-risk" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-risk-v">0</span></label>
+            <label>Psikoloji <input type="range" id="df-c-psycho" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-psycho-v">0</span></label>
           </div>
-          <input type="number" step="0.01" id="df-entry-price" placeholder="Giriş fiyatı">
-          <input type="number" step="0.01" id="df-exit-price" placeholder="Çıkış fiyatı">
-          <input type="number" step="0.001" id="df-size" placeholder="Pozisyon büyüklüğü">
-          <input type="number" step="0.01" id="df-risk" placeholder="Risk $ (R'nin değeri)">
-          <input type="number" step="0.01" id="df-r" placeholder="R (ör. 2.5 / -1)">
-          <input type="number" step="0.01" id="df-stop" placeholder="Stop loss">
-          <input type="number" step="0.01" id="df-target" placeholder="Take profit">
-          <input type="text" id="df-strat" placeholder="Strateji">
-        </div>
-        <div class="df-crits">
-          <label>Setup <input type="range" id="df-c-setup" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-setup-v">0</span></label>
-          <label>Entry <input type="range" id="df-c-entry" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-entry-v">0</span></label>
-          <label>Exit <input type="range" id="df-c-exit" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-exit-v">0</span></label>
-          <label>Risk <input type="range" id="df-c-risk" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-risk-v">0</span></label>
-          <label>Psikoloji <input type="range" id="df-c-psycho" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-psycho-v">0</span></label>
-        </div>
-        <textarea id="df-note" class="df-full" placeholder="İşlem notu (opsiyonel)" rows="2"></textarea>
-        <div class="df-imgs" id="df-imgs-area">
-          <div class="df-img-drop" id="df-img-drop">
-            <span>📷 Resim sürükle/bırak veya Ctrl+V yapıştır</span>
-            <input type="file" id="df-img-file" accept="image/*" multiple style="display:none">
+          <div class="df-imgs" id="df-imgs-area">
+            <div class="df-img-drop" id="df-img-drop">
+              <span>📷 Resim sürükle/bırak veya Ctrl+V yapıştır</span>
+              <input type="file" id="df-img-file" accept="image/*" multiple style="display:none">
+            </div>
+            <div class="df-img-previews" id="df-img-previews"></div>
           </div>
-          <div class="df-img-previews" id="df-img-previews"></div>
         </div>
-        <button class="btn solid df-full" id="df-add">İşlemi Kaydet</button>
+        <button class="btn solid df-full" id="df-add" style="margin-top:8px;">İşlemi Kaydet</button>
       </div>
     </div>
     <div class="panel" style="margin-bottom:14px;">
@@ -4893,7 +4888,7 @@ function renderData() {
     const r = dnum(t.r);
     const row = document.createElement('div'); row.className = 'data-row';
     row.innerHTML =
-      '<span style="font-size:10px;color:var(--text-3);">' + (t.entryDate ? t.entryDate.slice(8,10)+'/'+t.entryDate.slice(5,7) : t.date || '') + '</span>' +
+      '<span style="font-size:10px;color:var(--text-3);">' + (t.date ? t.date.slice(8,10)+'/'+t.date.slice(5,7) : '') + '</span>' +
       '<span class="dr-pair">' + (t.pair || '—') + '</span>' +
       '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '" style="text-align:center;font-size:11px;">' + (t.dir || '') + '</span>' +
       '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ((t.strat||'').slice(0,10) || '—') + '</span>' +
@@ -4906,14 +4901,12 @@ function renderData() {
     // Detail panel
     const detail = document.createElement('div'); detail.className = 'dr-detail';
     let detailHtml = '<div class="dr-detail-grid">';
-    if (t.entryDate) detailHtml += '<div class="item"><span class="lbl">Giriş</span><span class="val">' + t.entryDate + '</span></div>';
-    if (t.exitDate) detailHtml += '<div class="item"><span class="lbl">Çıkış</span><span class="val">' + t.exitDate + '</span></div>';
-    if (t.entryPrice) detailHtml += '<div class="item"><span class="lbl">Giriş fiyat</span><span class="val">' + t.entryPrice + '</span></div>';
-    if (t.exitPrice) detailHtml += '<div class="item"><span class="lbl">Çıkış fiyat</span><span class="val">' + t.exitPrice + '</span></div>';
-    if (t.size) detailHtml += '<div class="item"><span class="lbl">Pozisyon</span><span class="val">' + t.size + '</span></div>';
-    if (t.risk) detailHtml += '<div class="item"><span class="lbl">Risk $</span><span class="val">' + t.risk + '</span></div>';
+    if (t.date) detailHtml += '<div class="item"><span class="lbl">Tarih</span><span class="val">' + t.date + '</span></div>';
+    if (t.entryPrice) detailHtml += '<div class="item"><span class="lbl">Giriş</span><span class="val">' + t.entryPrice + '</span></div>';
+    if (t.exitPrice) detailHtml += '<div class="item"><span class="lbl">Çıkış</span><span class="val">' + t.exitPrice + '</span></div>';
     if (t.stop) detailHtml += '<div class="item"><span class="lbl">Stop</span><span class="val">' + t.stop + '</span></div>';
     if (t.target) detailHtml += '<div class="item"><span class="lbl">TP</span><span class="val">' + t.target + '</span></div>';
+    if (t.size) detailHtml += '<div class="item"><span class="lbl">Adet</span><span class="val">' + t.size + '</span></div>';
     detailHtml += '<div class="item"><span class="lbl">R</span><span class="val '+ (r>=0?'pos':'neg') + '">' + (r>0?'+':'') + r.toFixed(2) + '</span></div>';
     detailHtml += '</div>';
     // Criteria bars
@@ -5033,17 +5026,15 @@ async function addDataTrade() {
   const pair = (g('df-pair').value || '').trim().toUpperCase();
   const rVal = g('df-r').value;
   if (!pair || rVal === '') { g('data-note').textContent = 'Lütfen parite ve R değerini gir.'; return; }
-  const ts = g('df-entry-date').value ? Date.parse(g('df-entry-date').value) : Date.now();
-  const entryDate = g('df-entry-date').value || '';
-  const exitDate = g('df-exit-date').value || '';
+  const dateVal = g('df-date').value;
+  const ts = dateVal ? Date.parse(dateVal) : Date.now();
   dataTrades.push({
     id: Date.now() + Math.random(), ts,
-    entryDate, exitDate,
+    date: dateVal || '',
     pair, dir: dfDir,
     entryPrice: dnum(g('df-entry-price').value),
     exitPrice: dnum(g('df-exit-price').value),
     size: dnum(g('df-size').value),
-    risk: dnum(g('df-risk').value),
     r: dnum(rVal),
     stop: dnum(g('df-stop').value),
     target: dnum(g('df-target').value),
@@ -5059,8 +5050,8 @@ async function addDataTrade() {
     images: dfImages.slice()
   });
   await saveData();
-  ['df-pair','df-entry-price','df-exit-price','df-size','df-risk','df-r','df-stop','df-target','df-strat','df-note'].forEach(id => g(id).value = '');
-  g('df-entry-date').value = ''; g('df-exit-date').value = '';
+  g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-strat').value = ''; g('df-note').value = '';
+  g('df-entry-price').value = ''; g('df-exit-price').value = ''; g('df-size').value = ''; g('df-stop').value = ''; g('df-target').value = '';
   document.querySelectorAll('.crit-range').forEach(r => { r.value = 0; r.dispatchEvent(new Event('input')); });
   dfImages = []; renderDfPreviews();
   dfDataPage = Math.ceil(dataTrades.length / DF_PP);
