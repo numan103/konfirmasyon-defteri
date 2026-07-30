@@ -823,12 +823,16 @@
   .lp-cta .primary:hover { background: #4c4cc4; }
   .lp-cta .ghost { background: var(--card); border: 1px solid var(--border); color: var(--text); }
   .lp-cta .ghost:hover { border-color: var(--acc); color: var(--acc); }
-  .lp-features { max-width: 1000px; margin: 0 auto; padding: 26px 20px 56px; display: grid; grid-template-columns: 1fr; gap: 14px; }
-  @media (min-width: 720px) { .lp-features { grid-template-columns: 1fr 1fr; } }
-  .lp-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
-  .lp-card .ic { width: 42px; height: 42px; border-radius: 11px; background: var(--acc-soft); display: flex; align-items: center; justify-content: center; font-size: 21px; margin-bottom: 12px; }
-  .lp-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .lp-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+  .lp-features { max-width: 1040px; margin: 0 auto; padding: 26px 20px 56px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 640px) { .lp-features { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 940px) { .lp-features { grid-template-columns: 1fr 1fr 1fr; } }
+  .lp-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 0; overflow: hidden; transition: transform .16s ease, box-shadow .16s ease; }
+  .lp-card:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(23,25,35,.13); }
+  .lp-visual { height: 128px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  .lp-visual svg { width: 100%; height: 100%; display: block; }
+  .lp-card-body { padding: 14px 16px 17px; }
+  .lp-card-body h3 { font-size: 15px; font-weight: 700; margin: 0 0 4px; display: flex; align-items: center; gap: 6px; }
+  .lp-card-body p { font-size: 12.5px; color: var(--text-2); line-height: 1.45; margin: 0; }
   .lp-foot { text-align: center; padding: 22px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); }
   /* Landing ürün görseli (mockup) */
   .lp-shot-wrap { max-width: 720px; margin: 6px auto 0; padding: 0 20px; }
@@ -1473,49 +1477,152 @@
     <h3>Tek yerde tüm disiplin araçların</h3>
   </div>
   <section class="lp-features">
+    <!-- 1. Setup Kalite Skoru -->
     <div class="lp-card">
-      <div class="ic">🎯</div>
-      <h3>Setup Kalite Skoru</h3>
-      <p>İşlemden önce kriterleri işaretle; sistem sana A+ / B puanı versin. Zayıf setup'ları daha girmeden gör, sadece yüksek kaliteli işlemlere odaklan.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv1)"/>
+          <circle cx="132" cy="64" r="38" fill="none" stroke="var(--border)" stroke-width="10"/>
+          <circle cx="132" cy="64" r="38" fill="none" stroke="var(--green)" stroke-width="10" stroke-linecap="round" stroke-dasharray="208 239" transform="rotate(-90 132 64)"/>
+          <text x="132" y="62" text-anchor="middle" font-size="27" font-weight="800" fill="var(--text)">87</text>
+          <text x="132" y="78" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-3)">PUAN</text>
+          <rect x="186" y="52" width="46" height="24" rx="12" fill="var(--green)"/>
+          <text x="209" y="68" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">A+</text>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>🎯 Setup Kalite Skoru</h3><p>Kriterleri işaretle, anında A+ / B kalite puanı al.</p></div>
     </div>
+    <!-- 2. Bias & Psikoloji -->
     <div class="lp-card">
-      <div class="ic">🧭</div>
-      <h3>Daily Bias & Psikoloji Kilidi</h3>
-      <p>Sabah senaryonu ve anti-tezini yaz. FOMO, yorgunluk, revenge gibi durumlar puanını düşürür ve sistemi kilitler — kötü anında kötü işlem açmanı engeller.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv2)"/>
+          <path d="M120 62 v-9 a30 30 0 0 1 60 0 v9" fill="none" stroke="var(--acc)" stroke-width="8"/>
+          <rect x="112" y="60" width="76" height="52" rx="10" fill="var(--acc)"/>
+          <circle cx="150" cy="82" r="8" fill="#fff"/>
+          <rect x="146" y="84" width="8" height="16" rx="4" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>🧭 Bias & Psikoloji Kilidi</h3><p>Kötü anında FOMO ve revenge'i sistem kilitler.</p></div>
     </div>
+    <!-- 3. Trade Defteri -->
     <div class="lp-card">
-      <div class="ic">📓</div>
-      <h3>Trade Defteri & İstatistik</h3>
-      <p>Her işlemi yön, strateji ve sonuç (R) ile kaydet. Notion ile otomatik senkron, kümülatif R eğrisi, CSV içe aktarma. Hangi setup işe yarıyor net gör.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".14"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv3)"/>
+          <path d="M22,98 62,84 102,92 142,60 182,68 222,40 278,26 L278,116 L22,116 Z" fill="var(--green)" opacity=".13"/>
+          <polyline points="22,98 62,84 102,92 142,60 182,68 222,40 278,26" fill="none" stroke="var(--green)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="278" cy="26" r="5" fill="var(--green)"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>📓 Trade Defteri & İstatistik</h3><p>Notion senkronu + kümülatif R eğrisi tek yerde.</p></div>
     </div>
+    <!-- 4. Haftalık Değerlendirme -->
     <div class="lp-card">
-      <div class="ic">📈</div>
-      <h3>Haftalık Değerlendirme</h3>
-      <p>Her hafta kripto/FX RR'ini gir, kümülatif eğrini izle. Kendi ölçütlerinle kişisel retrospekt yap, tutarlılığını haftadan haftaya ölç.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv4)"/>
+          <line x1="30" y1="102" x2="270" y2="102" stroke="var(--border)" stroke-width="2"/>
+          <rect x="46" y="70" width="26" height="32" rx="5" fill="var(--acc)" opacity=".45"/>
+          <rect x="92" y="52" width="26" height="50" rx="5" fill="var(--acc)" opacity=".62"/>
+          <rect x="138" y="60" width="26" height="42" rx="5" fill="var(--acc)" opacity=".5"/>
+          <rect x="184" y="36" width="26" height="66" rx="5" fill="var(--acc)"/>
+          <rect x="230" y="46" width="26" height="56" rx="5" fill="var(--acc)" opacity=".78"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>📈 Haftalık Değerlendirme</h3><p>Haftalık RR gir, trendini ve retrospektini izle.</p></div>
     </div>
+    <!-- 5. Alfa Edu -->
     <div class="lp-card">
-      <div class="ic">🎓</div>
-      <h3>Alfa Edu — Video Eğitim</h3>
-      <p>Teknik analiz (temel/orta/ileri), temel analiz, psikoloji, işlem & backtest ve onchain bölümleri. Bölüm → konu → video akışıyla sıfırdan öğren.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv5)"/>
+          <rect x="30" y="30" width="118" height="68" rx="10" fill="var(--acc)" opacity=".16"/>
+          <circle cx="89" cy="64" r="20" fill="var(--acc)"/>
+          <path d="M83 54 l14 10 -14 10 z" fill="#fff"/>
+          <rect x="170" y="42" width="100" height="11" rx="5.5" fill="var(--acc)" opacity=".55"/>
+          <rect x="170" y="61" width="80" height="11" rx="5.5" fill="var(--border)"/>
+          <rect x="170" y="80" width="92" height="11" rx="5.5" fill="var(--border)"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>🎓 Alfa Edu — Video Eğitim</h3><p>Teknikten psikolojiye, bölüm → konu → video.</p></div>
     </div>
+    <!-- 6. İndikatörler & Onchain -->
     <div class="lp-card">
-      <div class="ic">📊</div>
-      <h3>İndikatörler & Onchain</h3>
-      <p>Aggr Trade workspace, Alfa Levels ve Flow indikatörleri. Coinglass Supercharts ile funding, CVD ve open interest verileri tek ekranda.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv6)"/>
+          <g stroke="var(--green)" stroke-width="2.4"><line x1="52" y1="30" x2="52" y2="98"/></g>
+          <rect x="46" y="44" width="12" height="40" rx="2" fill="var(--green)"/>
+          <g stroke="#f2555a" stroke-width="2.4"><line x1="92" y1="40" x2="92" y2="104"/></g>
+          <rect x="86" y="56" width="12" height="34" rx="2" fill="#f2555a"/>
+          <g stroke="var(--green)" stroke-width="2.4"><line x1="132" y1="34" x2="132" y2="92"/></g>
+          <rect x="126" y="48" width="12" height="30" rx="2" fill="var(--green)"/>
+          <g stroke="var(--green)" stroke-width="2.4"><line x1="172" y1="24" x2="172" y2="82"/></g>
+          <rect x="166" y="34" width="12" height="36" rx="2" fill="var(--green)"/>
+          <g stroke="#f2555a" stroke-width="2.4"><line x1="212" y1="30" x2="212" y2="88"/></g>
+          <rect x="206" y="40" width="12" height="30" rx="2" fill="#f2555a"/>
+          <g stroke="var(--green)" stroke-width="2.4"><line x1="252" y1="20" x2="252" y2="74"/></g>
+          <rect x="246" y="28" width="12" height="32" rx="2" fill="var(--green)"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>📊 İndikatörler & Onchain</h3><p>Aggr, Alfa Levels, Flow + Coinglass funding/CVD.</p></div>
     </div>
+    <!-- 7. AlfaNews & Takvim -->
     <div class="lp-card">
-      <div class="ic">📰</div>
-      <h3>AlfaNews & Ekonomik Takvim</h3>
-      <p>Dergi formatında analist içerikleri ve 3 yıldızlı yüksek etkili makro haberler. Piyasayı hareket ettiren verileri kaçırma.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv7)"/>
+          <rect x="40" y="28" width="220" height="72" rx="9" fill="var(--card)" stroke="var(--border)"/>
+          <rect x="54" y="42" width="70" height="44" rx="6" fill="var(--acc)" opacity=".22"/>
+          <rect x="138" y="44" width="108" height="9" rx="4.5" fill="var(--text-3)" opacity=".5"/>
+          <rect x="138" y="60" width="90" height="8" rx="4" fill="var(--border)"/>
+          <rect x="138" y="74" width="100" height="8" rx="4" fill="var(--border)"/>
+          <path d="M232 30 l3 6 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1 z" fill="#f5a623"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>📰 AlfaNews & Takvim</h3><p>Dergi analizleri + 3 yıldız makro haberler.</p></div>
     </div>
+    <!-- 8. Alfa Trader Ol -->
     <div class="lp-card">
-      <div class="ic">🤝</div>
-      <h3>Alfa Trader Ol — Topluluk</h3>
-      <p>Topluluk akışı, kümülatif PnL performansı ve hayat boyu öğrenme ortamı. Referansla katıl, disiplinli trader'larla birlikte geliş.</p>
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv8)"/>
+          <circle cx="112" cy="58" r="21" fill="var(--acc)" stroke="var(--card)" stroke-width="4"/>
+          <circle cx="150" cy="58" r="21" fill="#7c3aed" stroke="var(--card)" stroke-width="4"/>
+          <circle cx="188" cy="58" r="21" fill="var(--green)" stroke="var(--card)" stroke-width="4"/>
+          <rect x="120" y="88" width="60" height="24" rx="12" fill="var(--green)"/>
+          <text x="150" y="105" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">+52R</text>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>🤝 Alfa Trader Ol — Topluluk</h3><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
+    </div>
+    <!-- 9. AI Asistan -->
+    <div class="lp-card">
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".11"/><stop offset="1" stop-color="var(--acc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv9)"/>
+          <rect x="40" y="34" width="130" height="30" rx="15" fill="var(--card)" stroke="var(--border)"/>
+          <circle cx="60" cy="49" r="3.5" fill="var(--text-3)"/><circle cx="74" cy="49" r="3.5" fill="var(--text-3)"/><circle cx="88" cy="49" r="3.5" fill="var(--text-3)"/>
+          <rect x="120" y="74" width="140" height="30" rx="15" fill="var(--acc)"/>
+          <rect x="136" y="86" width="70" height="6" rx="3" fill="#fff" opacity=".85"/>
+          <rect x="212" y="86" width="34" height="6" rx="3" fill="#fff" opacity=".55"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>🤖 AI Asistan</h3><p>Takıldığın yeri sor, anında trade odaklı yanıt al.</p></div>
     </div>
   </section>
   <div class="lp-stats">
-    <div class="lp-stat"><b>8+</b><span>Araç &amp; modül</span></div>
+    <div class="lp-stat"><b>10+</b><span>Araç &amp; modül</span></div>
     <div class="lp-stat"><b>A+ · B</b><span>Kalite kararı</span></div>
     <div class="lp-stat"><b>Notion</b><span>Otomatik senkron</span></div>
     <div class="lp-stat"><b>Ücretsiz</b><span>Cihazlar arası erişim</span></div>
