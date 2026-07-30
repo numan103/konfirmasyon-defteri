@@ -1255,6 +1255,12 @@
 @media (max-width: 480px) { .chat-popup { right: 12px; bottom: 80px; width: calc(100vw - 24px); height: 60vh; } }
 .chat-clear { text-align:center; padding:6px; font-size:11px; color:var(--muted); cursor:pointer; border-top:1px solid var(--border); flex:none; transition:color .15s; }
 .chat-clear:hover { color:#ef4444; }
+.chat-options { padding:16px; display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; min-height:260px; }
+.co-title { font-size:14px; font-weight:600; text-align:center; margin-bottom:4px; }
+.co-btn { width:100%; padding:14px; border-radius:12px; background:var(--bg); border:1.5px solid var(--border); font-size:13px; font-weight:600; cursor:pointer; text-align:center; transition:all .15s; }
+.co-btn:hover { border-color:var(--acc); background:var(--card); }
+.co-live { background:linear-gradient(135deg,var(--acc),#7c3aed); color:#fff; border:none; }
+.co-live:hover { opacity:.88; }
 .chat-live-btn { text-align:center; padding:8px 14px; border-radius:8px; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; font-size:12px; font-weight:600; cursor:pointer; border:none; }
 .chat-live-btn:hover { opacity:.88; }
 .chat-live-form { padding:12px; display:flex; flex-direction:column; gap:8px; }
@@ -6057,20 +6063,12 @@ function loadChat() {
     const d = localStorage.getItem(CHAT_KEY);
     if (d) {
       chatHistory = JSON.parse(d);
-      // 30 dk'dan eski konuşmaları temizle
       const last = chatHistory[chatHistory.length - 1];
       if (last && last.time && (Date.now() - new Date(last.time).getTime() > 1800000)) {
         chatHistory = [];
       }
     } else { chatHistory = []; }
   } catch(e) { chatHistory = []; }
-  if (!chatHistory.length) {
-    chatHistory = [
-      { role: 'bot', text: 'Merhaba! 👋 Alfa Traders\'a hoş geldin. Sana nasıl yardımcı olabilirim?', time: new Date().toISOString() },
-      { role: 'bot', text: '📌 Sık sorulanlar:\n• Borsaya kayıt → Bybit / OKX linkleri\n• Topluluk → Telegram grubu\n• Eğitim → Alfa Edu\n• Başvuru → Deneyimli formu\nDetay için sorunu yaz, ekibimiz yanıtlasın.', time: new Date().toISOString() },
-    ];
-    saveChat();
-  }
   chatFallbackCount = 0;
   chatLiveRequested = false;
 }
@@ -6090,21 +6088,41 @@ function closeChat() {
   document.getElementById('chat-btn').textContent = '💬';
 }
 function chatEndSession() {
-  if (!chatHistory.length) return;
-  if (!confirm('Sohbet geçmişini temizle? Tüm konuşma silinir.')) return;
+  if (chatLiveRequested) {
+    if (!confirm('Canlı desteği sonlandır? Konuşma geçmişin silinir.')) return;
+  } else if (!chatHistory.length) {
+    return;
+  } else {
+    if (!confirm('Sohbet geçmişini temizle? Tüm konuşma silinir.')) return;
+  }
   chatHistory = [];
   chatFallbackCount = 0;
   chatLiveRequested = false;
   saveChat();
-  document.getElementById('chat-popup').classList.remove('open');
-  document.getElementById('chat-btn').textContent = '💬';
+  renderChat();
 }
 function renderChat() {
   const body = document.getElementById('chat-body');
   if (!body) return;
+  if (!chatHistory.length && !chatLiveRequested) {
+    body.innerHTML =
+      `<div class="chat-options"><div class="co-title">👋 Alfa Traders'a hoş geldin! Nasıl yardımcı olabilirim?</div><div class="co-btn" onclick="chatStartAI()">🤖 Yapay Zekâ ile Hızlı Çözüm</div><div class="co-btn co-live" onclick="chatStartLive()">👤 Canlı Bir Kişiyle Konuş</div></div>`;
+    body.scrollTop = body.scrollHeight;
+    return;
+  }
   const liveBtn = chatFallbackCount >= 2 && !chatLiveRequested ? `<div class="chat-live-btn" onclick="requestLiveSupport()">👤 Canlı Destek</div>` : '';
   body.innerHTML = chatHistory.map(m => `<div class="chat-msg ${m.role}">${esc(m.text)}</div>`).join('') + liveBtn;
   body.scrollTop = body.scrollHeight;
+}
+function chatStartAI() {
+  chatHistory = [
+    { role: 'bot', text: 'Harika! Sana nasıl yardımcı olabilirim? Sorunu yaz, hemen cevaplayayım.', time: new Date().toISOString() },
+  ];
+  saveChat(); renderChat();
+  setTimeout(() => document.getElementById('chat-input').focus(), 100);
+}
+function chatStartLive() {
+  requestLiveSupport();
 }
 function requestLiveSupport() {
   const body = document.getElementById('chat-body');
