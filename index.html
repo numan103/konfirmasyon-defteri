@@ -1225,6 +1225,15 @@
 @keyframes cumPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.75)} }
 .cum-pnl-val { font-family: var(--font-display); font-size: clamp(34px, 9vw, 56px); font-weight: 800; letter-spacing: -.05em; color: var(--green); line-height: 1; font-variant-numeric: tabular-nums; }
 .cum-pnl-sub { font-size: 11.5px; color: var(--text-3); font-weight: 500; margin-top: 5px; }
+.cum-chart { width: min(340px, 74vw); margin: 16px auto 2px; }
+.cum-chart svg { width: 100%; height: 132px; display: block; overflow: visible; }
+.cum-zero { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+.cum-area { opacity: 0; transition: opacity .6s ease .5s; }
+.cum-chart.drawn .cum-area { opacity: 1; }
+.cum-line { stroke: var(--green); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.cum-dot-end { fill: var(--green); opacity: 0; transition: opacity .3s ease; }
+.cum-dot-end.on { opacity: 1; }
+.cum-months { display: flex; justify-content: space-between; margin-top: 6px; font-size: 9.5px; font-weight: 600; color: var(--text-3); letter-spacing: .02em; }
 .bas-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
 .bas-path { border-radius: 14px; padding: 28px 24px; position: relative; overflow: hidden; }
 .bas-path.senior { background: linear-gradient(145deg, rgba(123,120,245,.1), rgba(124,58,237,.05)); border: 1px solid rgba(123,120,245,.25); }
@@ -2187,7 +2196,22 @@
         <div class="cum-pnl-wrap">
           <div class="cum-pnl-lbl"><span class="cum-live-dot"></span>Topluluk Kümülatif PnL</div>
           <div class="cum-pnl-val" id="cum-pnl-val">+0.0R</div>
-          <div class="cum-pnl-sub">topluluk geneli tüm zamanlar toplam R</div>
+          <div class="cum-pnl-sub">2026 · Ocak'tan bu yana toplam R</div>
+          <div class="cum-chart" id="cum-chart">
+            <svg id="cum-svg" viewBox="0 0 320 132" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="cumFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--green)" stop-opacity="0.28"/>
+                  <stop offset="100%" stop-color="var(--green)" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line id="cum-zero" class="cum-zero" x1="0" x2="320" y1="0" y2="0"/>
+              <path id="cum-area" class="cum-area" d="" fill="url(#cumFill)"/>
+              <path id="cum-line" class="cum-line" d="" fill="none"/>
+              <circle id="cum-dot-end" class="cum-dot-end" r="4"/>
+            </svg>
+            <div class="cum-months" id="cum-months"></div>
+          </div>
         </div>
       </div>
 
@@ -6362,40 +6386,82 @@ if (AUTH_ENABLED) {
   // OAuth olmayan modda da hash kontrolü
   setTimeout(handleNotionHash, 1000);
 }
-// ============ Kümülatif PnL Sayacı (R cinsinden) ============
+// ============ Kümülatif PnL Grafiği (R cinsinden) ============
 (function () {
-  // Topluluk geneli kümülatif R — makul, aylık ~7R mantığıyla birikmiş
-  const BASE = 52.4;
-  let pnl = BASE;
+  // 2026 aylık kümülatif R — Ocak dip, Şub-Mar toparlanma, Nis düşüş,
+  // May-Haz güçlü yükseliş, Tem yatay → toplam +52R
+  const MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem'];
+  const CUM    = [ -8,    10,    25,    19,    31,    50,    52  ];
+  const TOTAL  = CUM[CUM.length - 1];
   let started = false;
 
+  // SVG çizim alanı (viewBox 320×132)
+  const PADX = 6, TOP = 12, BOT = 120;
+  const minV = Math.min(...CUM), maxV = Math.max(...CUM);
+  const range = (maxV - minV) || 1;
+  const X = i => PADX + i * ((320 - PADX * 2) / (CUM.length - 1));
+  const Y = v => BOT - ((v - minV) / range) * (BOT - TOP);
+
   function fmt(n) {
-    return '+' + n.toFixed(1) + 'R';
+    return (n >= 0 ? '+' : '') + n.toFixed(1) + 'R';
   }
 
-  function tick() {
-    // Ara sıra bir trade kapanmış gibi küçük artış (+0.1R … +0.4R)
-    pnl += 0.1 + Math.random() * 0.3;
-    const el = document.getElementById('cum-pnl-val');
-    if (el) el.textContent = fmt(pnl);
-    // 15-45 sn arası — gerçek trade temposu
-    setTimeout(tick, 15000 + Math.random() * 30000);
+  function buildPaths() {
+    let line = '';
+    CUM.forEach((v, i) => { line += (i === 0 ? 'M' : 'L') + X(i).toFixed(1) + ',' + Y(v).toFixed(1) + ' '; });
+    const area = line + 'L' + X(CUM.length - 1).toFixed(1) + ',' + BOT + ' L' + X(0).toFixed(1) + ',' + BOT + ' Z';
+    return { line: line.trim(), area };
   }
 
-  function startCounter() {
+  function drawMonths() {
+    const box = document.getElementById('cum-months');
+    if (!box || box.children.length) return;
+    MONTHS.forEach(m => { const s = document.createElement('span'); s.textContent = m; box.appendChild(s); });
+  }
+
+  function startChart() {
     if (started) return;
+    const svg = document.getElementById('cum-svg');
+    const valEl = document.getElementById('cum-pnl-val');
+    if (!svg || !valEl) return;
     started = true;
-    const el = document.getElementById('cum-pnl-val');
-    if (!el) return;
-    // 0'dan BASE'e 1.4s içinde ease-out ile say, sonra yavaş tick
+
+    drawMonths();
+    const { line, area } = buildPaths();
+    const lineEl = document.getElementById('cum-line');
+    const areaEl = document.getElementById('cum-area');
+    const zeroEl = document.getElementById('cum-zero');
+    const dotEl  = document.getElementById('cum-dot-end');
+
+    // sıfır çizgisi
+    const yz = Y(0);
+    zeroEl.setAttribute('y1', yz); zeroEl.setAttribute('y2', yz);
+
+    lineEl.setAttribute('d', line);
+    areaEl.setAttribute('d', area);
+    dotEl.setAttribute('cx', X(CUM.length - 1));
+    dotEl.setAttribute('cy', Y(TOTAL));
+
+    // çizgiyi soldan sağa çiz (stroke-dashoffset)
+    const len = lineEl.getTotalLength();
+    lineEl.style.strokeDasharray = len;
+    lineEl.style.strokeDashoffset = len;
+    // reflow
+    void lineEl.getBoundingClientRect();
+    const DUR = 1600;
+    lineEl.style.transition = 'stroke-dashoffset ' + DUR + 'ms cubic-bezier(.22,.61,.36,1)';
+    lineEl.style.strokeDashoffset = '0';
+    document.getElementById('cum-chart').classList.add('drawn');
+    setTimeout(() => dotEl.classList.add('on'), DUR - 200);
+
+    // değeri 0 → TOTAL say
     const t0 = performance.now();
-    const RAMP = 1400;
     function ramp(now) {
-      const p = Math.min((now - t0) / RAMP, 1);
+      const p = Math.min((now - t0) / DUR, 1);
       const ease = 1 - Math.pow(1 - p, 3);
-      el.textContent = fmt(BASE * ease);
+      valEl.textContent = fmt(TOTAL * ease);
       if (p < 1) requestAnimationFrame(ramp);
-      else { el.textContent = fmt(pnl); tick(); }
+      else valEl.textContent = fmt(TOTAL);
     }
     requestAnimationFrame(ramp);
   }
@@ -6403,12 +6469,11 @@ if (AUTH_ENABLED) {
   // page-basvuru görünür olunca başlat
   const obs = new MutationObserver(() => {
     const pg = document.getElementById('page-basvuru');
-    if (pg && !pg.classList.contains('hidden')) startCounter();
+    if (pg && !pg.classList.contains('hidden')) startChart();
   });
   const pg = document.getElementById('page-basvuru');
   if (pg) obs.observe(pg, { attributes: true, attributeFilter: ['class'] });
-  // zaten açıksa hemen başlat
-  if (pg && !pg.classList.contains('hidden')) startCounter();
+  if (pg && !pg.classList.contains('hidden')) startChart();
 })();
 
 // ============ Alfa Trader Ol — Topluluk Akışı ============
