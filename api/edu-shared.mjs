@@ -1,23 +1,32 @@
-import { put, list } from '@vercel/blob';
+// Alfa Edu paylaşılan içerik — Supabase database (Vercel Blob yerine)
+// Tek satırlık bir tabloda (edu_shared) tüm eğitim JSON'u tutulur.
+const SUPABASE_URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
+const ROW_ID = 'v1';
 
-const BLOB_PATH = 'edu-shared-v1.json';
+const sbHeaders = {
+  apikey: SUPABASE_KEY,
+  Authorization: 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+};
 
-async function readBlob() {
-  try {
-    const { blobs } = await list();
-    const blob = blobs.find(b => b.pathname === BLOB_PATH);
-    if (!blob) return null;
-    const res = await fetch(blob.url);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch { return null; }
+async function readData() {
+  const url = `${SUPABASE_URL}/rest/v1/edu_shared?id=eq.${ROW_ID}&select=data`;
+  const res = await fetch(url, { headers: sbHeaders });
+  if (!res.ok) return { error: `Supabase read ${res.status}: ${await res.text()}` };
+  const rows = await res.json();
+  return { data: (rows && rows[0] && rows[0].data) || null };
 }
 
-async function writeBlob(data) {
-  try {
-    await put(BLOB_PATH, JSON.stringify(data), { access: 'public', addRandomSuffix: false });
-    return true;
-  } catch { return false; }
+async function writeData(data) {
+  const url = `${SUPABASE_URL}/rest/v1/edu_shared`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { ...sbHeaders, Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify({ id: ROW_ID, data }),
+  });
+  if (!res.ok) return { error: `Supabase write ${res.status}: ${await res.text()}` };
+  return { ok: true };
 }
 
 export default async function handler(req, res) {
@@ -25,22 +34,20 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return res.status(503).json({ error: 'BLOB_READ_WRITE_TOKEN not set.' });
-  }
-
   if (req.method === 'GET') {
-    const data = await readBlob();
-    return res.status(200).json(data || { sections: {}, sel: {}, selVid: {} });
+    const r = await readData();
+    if (r.error) return res.status(200).json({ sections: {}, sel: {}, selVid: {}, _warn: r.error });
+    return res.status(200).json(r.data || { sections: {}, sel: {}, selVid: {} });
   }
 
   // POST: full replace — body tüm veriyi içerir
   if (req.method === 'POST') {
-    const body = req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     if (!body || !body.sections) {
       return res.status(400).json({ error: 'Missing sections in body' });
     }
-    await writeBlob(body);
+    const r = await writeData(body);
+    if (r.error) return res.status(500).json({ error: r.error });
     return res.status(200).json({ ok: true });
   }
 
