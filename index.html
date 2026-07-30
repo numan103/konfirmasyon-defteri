@@ -1456,7 +1456,7 @@
         </div>
       </div>
       <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav>Alfa Trader Ol</a>
-      <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" data-nav>Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge">0</span></a>
+      <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" onclick="event.preventDefault();void showPage('chat-admin')">Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge">0</span></a>
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl">İletişim</span>
@@ -1990,6 +1990,7 @@
     <div class="panel" style="max-width:860px;margin:0 auto;">
       <h2 style="margin:0 0 8px;">Canlı Destek — Admin Paneli</h2>
       <p class="hint" style="margin:0 0 16px;">Ziyaretçilerden gelen mesajları gör, yanıtla. Yanıtların anında kullanıcının sohbetinde görünür.</p>
+      <div id="ca-status" style="font-size:12px;color:var(--text-3);padding:0 0 10px;display:none;"></div>
       <div id="ca-convs" style="display:flex;flex-direction:column;gap:10px;"></div>
       <div id="ca-empty" style="color:var(--text-3);font-size:13px;padding:20px 0;text-align:center;">Henüz mesaj yok.</div>
       <div id="ca-reply-box" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
@@ -6190,20 +6191,23 @@ function updateChatBadge(count) {
   else { badge.classList.add('hidden'); }
 }
 function renderAdminChat() {
-  fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
+  const status = document.getElementById('ca-status');
+  if (status) { status.textContent = 'Yükleniyor...'; status.style.display = 'block'; }
+  fetch(CHAT_API + '?t=' + Date.now()).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(msgs => {
     caAllMsgs = msgs || [];
     const totalUnread = caAllMsgs.filter(m => m.role === 'user').length;
     updateChatBadge(totalUnread);
     const convs = document.getElementById('ca-convs');
     const empty = document.getElementById('ca-empty');
-    if (!convs) return;
+    if (!convs) { if (status) { status.textContent = 'Hata: ca-convs bulunamadı'; } return; }
+    if (status) { status.style.display = 'none'; }
     const sessions = {};
     caAllMsgs.forEach(m => {
       if (!sessions[m.sessionId]) sessions[m.sessionId] = [];
       sessions[m.sessionId].push(m);
     });
     const sids = Object.keys(sessions);
-    if (!sids.length) { convs.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
+    if (!sids.length) { convs.innerHTML = ''; if (empty) empty.style.display = 'block'; if (status) { status.style.display = 'none'; } return; }
     if (empty) empty.style.display = 'none';
     convs.innerHTML = sids.map(sid => {
       const ms = sessions[sid];
@@ -6219,7 +6223,9 @@ function renderAdminChat() {
       </div>`;
     }).join('');
     if (!caSelectedSid && sids.length) caSelect(sids[sids.length - 1]);
-  }).catch(() => {});
+  }).catch(e => {
+    if (status) { status.textContent = 'API hatası: ' + e.message; }
+  });
 }
 function caSelect(sid) {
   caSelectedSid = sid;
