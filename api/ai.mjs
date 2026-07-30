@@ -14,6 +14,10 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET') {
+    const k = process.env.GEMINI_API_KEY || '';
+    return res.json({ key: k.substring(0, 8) + '...', len: k.length });
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const { message } = req.body || {};
@@ -44,9 +48,8 @@ export default async function handler(req, res) {
     const data = await response.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (reply) return res.json({ reply });
-    const errMsg = data?.error?.message || '';
-    if (errMsg.includes('quota') || errMsg.includes('Quota')) return res.json({ reply: '⚠️ AI kotası doldu, biraz sonra tekrar dene. (Ücretsiz API limiti)' });
-    return res.json({ reply: 'Üzgünüm, şu anda cevap veremiyorum.' });
+    const errMsg = data?.error?.message || 'no error';
+    return res.json({ reply: errMsg });
   } catch (e) {
     return res.json({ reply: 'Bağlantı hatası. Lütfen tekrar dene.' });
   }
