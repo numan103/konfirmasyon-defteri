@@ -326,18 +326,58 @@
   #data-chart-wrap { width: 100%; overflow: hidden; }
   #data-chart { width: 100%; display: block; }
   .data-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 26px 10px; }
+  .df-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:10px 14px; background:var(--bg-2); border-radius:10px; font-size:14px; font-weight:600; }
+  .df-header:hover { background:var(--border); }
+  .df-arrow { transition:transform .2s; }
+  .df-body.open .df-arrow { transform:rotate(180deg); }
+  .df-body { display:none; padding:14px 0 0; }
+  .df-body.open { display:block; }
   .data-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media (min-width: 720px) { .data-form { grid-template-columns: repeat(4, 1fr); } }
   .data-form input { width: 100%; background: #f8f9fc; border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text); }
-  .data-form input:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .data-form input:focus, .data-form textarea:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  .data-form textarea { width:100%; background:#f8f9fc; border:1px solid var(--border); border-radius:9px; padding:9px 10px; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--text); resize:vertical; }
   .df-full { grid-column: 1 / -1; }
+  .df-crits { display:flex; flex-wrap:wrap; gap:8px 16px; padding:8px 0; grid-column:1/-1; }
+  .df-crits label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--text-2); flex:1; min-width:100px; }
+  .crit-range { flex:1; height:6px; -webkit-appearance:none; appearance:none; border-radius:3px; background:var(--border); outline:none; cursor:pointer; }
+  .crit-range::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--acc); cursor:pointer; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.15); }
+  .crit-val { font-size:13px; font-weight:700; color:var(--acc); min-width:18px; text-align:center; }
+  .df-imgs { grid-column:1/-1; }
+  .df-img-drop { border:2px dashed var(--border); border-radius:10px; padding:16px; text-align:center; cursor:pointer; font-size:12px; color:var(--text-3); transition:border-color .15s; }
+  .df-img-drop:hover, .df-img-drop.drag { border-color:var(--acc); background:var(--acc-soft); }
+  .df-img-previews { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .df-img-previews .thmb { position:relative; width:60px; height:60px; border-radius:6px; overflow:hidden; border:1px solid var(--border); }
+  .df-img-previews .thmb img { width:100%; height:100%; object-fit:cover; }
+  .df-img-previews .thmb .del { position:absolute; top:-4px; right:-4px; width:18px; height:18px; border-radius:50%; background:var(--red); color:#fff; border:none; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .df-pages, .df-pages-bottom { display:inline-flex; gap:4px; align-items:center; }
+  .df-pages { margin-left:auto; }
+  .df-pages-bottom { justify-content:center; margin-top:10px; }
+  .df-pg { padding:4px 10px; border:1px solid var(--border); border-radius:6px; background:none; cursor:pointer; font-size:12px; color:var(--text-2); font-weight:600; }
+  .df-pg.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .df-pg:hover:not(.on) { background:var(--bg); }
   .df-seg { display: flex; gap: 4px; background: #f2f3f8; padding: 4px; border-radius: 9px; }
   .df-seg button { flex: 1; border: none; background: transparent; border-radius: 6px; padding: 7px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--text-2); cursor: pointer; }
   .df-seg button.on { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
   .df-seg button.long.on { color: var(--green); }
   .df-seg button.short.on { color: var(--red); }
-  .data-row { display: grid; grid-template-columns: 56px 1fr 52px 72px 58px 62px 30px; gap: 8px; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .data-row.head { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1.5px solid var(--border); }
+  .data-row { display: grid; grid-template-columns: 50px 1fr 44px 52px 52px 44px 20px; gap: 4px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-size: 12.5px; cursor:pointer; transition:background .1s; }
+  .data-row:hover { background:var(--bg-2); }
+  .data-row.detail-open { background:var(--bg-2); border-radius:6px; margin-bottom:4px; border-bottom-color:transparent; }
+  .data-row.head { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1.5px solid var(--border); cursor:default; }
+  .data-row.head:hover { background:transparent; }
+  .dr-detail { display:none; grid-column:1/-1; padding:10px 4px 4px; border-top:1px dashed var(--border); margin-top:4px; }
+  .data-row.detail-open .dr-detail { display:block; }
+  .dr-detail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:4px 12px; font-size:12px; }
+  .dr-detail-grid .item { display:flex; justify-content:space-between; padding:2px 0; }
+  .dr-detail-grid .item .lbl { color:var(--text-3); }
+  .dr-detail-grid .item .val { font-weight:600; }
+  .dr-imgs { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+  .dr-imgs img { width:48px; height:48px; border-radius:4px; object-fit:cover; cursor:pointer; border:1px solid var(--border); }
+  .dr-crit-bars { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+  .dr-crit-bar { display:flex; align-items:center; gap:4px; font-size:10px; }
+  .dr-crit-bar .bar { width:40px; height:6px; border-radius:3px; background:var(--border); position:relative; }
+  .dr-crit-bar .bar .fill { height:100%; border-radius:3px; background:var(--acc); }
   .dr-pair { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dr-dir { font-size: 11px; font-weight: 700; }
   .dr-dir.long { color: var(--green); }
@@ -379,6 +419,8 @@
   .dot-fx { background: #0ea5e9; }
   #rv-chart-wrap { width: 100%; overflow: hidden; margin-top: 4px; }
   #rv-chart { width: 100%; display: block; }
+  #rv-eq-wrap { width:100%; overflow:hidden; }
+  #rv-eq-chart { width:100%; display:block; }
   .rv-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 22px 10px; }
   .rv-inputs { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 10px; padding-top: 12px; border-top: 1px dashed var(--border); }
   .rv-inputs label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-2); }
@@ -1782,55 +1824,89 @@
   </div>
   <div id="page-data" class="hidden">
     <div class="data-kpis" id="data-kpis"></div>
-    <div class="data-grid">
-      <div class="data-main">
-        <div class="panel" style="margin-bottom:14px;">
-          <h2><span>İşlem Ekle</span></h2>
-          <div class="data-form">
-            <input type="date" id="df-date" aria-label="Tarih">
-            <input type="text" id="df-pair" placeholder="Parite (BTC, XAU…)" maxlength="12">
-            <div class="df-seg">
-              <button type="button" class="long on" id="df-long">LONG</button>
-              <button type="button" class="short" id="df-short">SHORT</button>
-            </div>
-            <input type="number" step="0.01" id="df-r" placeholder="R (ör. 1.5 / -1)">
-            <input type="number" step="0.01" id="df-pnl" placeholder="PnL $ (ops.)">
-            <input type="text" id="df-strat" placeholder="Strateji (ops.)">
-            <input type="text" id="df-note" class="df-full" placeholder="Not (opsiyonel)">
-            <button class="btn solid df-full" id="df-add">Ekle</button>
-          </div>
-        </div>
-        <div class="panel" style="margin-bottom:14px;">
-          <h2><span>İçe Aktar</span></h2>
-          <div class="actions" style="justify-content:flex-start;">
-            <button class="btn" id="data-import-defter">Check List işlemlerini aktar</button>
-            <button class="btn solid" id="data-notion">⬇ Notion'dan çek</button>
-            <button class="btn" id="data-notion-oauth">🔗 Notion'a Bağlan</button>
-            <button class="btn" id="data-csv-btn">CSV yükle (broker/MetaTrader)</button>
-            <input type="file" id="data-csv-file" accept=".csv,text/csv" style="display:none;">
-          </div>
-          <details style="margin-top:8px;font-size:13px;">
-            <summary style="cursor:pointer;color:var(--text-2);font-weight:600;">⚙ Notion Database Ayarları</summary>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding:12px;background:var(--bg-2);border-radius:8px;">
-              <label style="font-size:12px;">Kripto DB ID <input type="text" id="ndb-kripto" placeholder="380f561953ab8088b5f9ffd53a397de9" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
-              <label style="font-size:12px;">Fx DB ID <input type="text" id="ndb-fx" placeholder="380f561953ab80938bdbfc07fcef2de1" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
-              <button class="btn" id="ndb-save" style="grid-column:1/-1;">Kaydet</button>
-              <span id="ndb-note" class="hint" style="grid-column:1/-1;"></span>
-            </div>
-          </details>
-          <p class="hint">Alfa-Check List'te kaydettiğin işlemler R sonuçlarıyla buraya gelir. CSV: broker/MetaTrader geçmişini dışa aktar (date, symbol, type, profit sütunları) ve yükle.</p>
-          <div id="data-note" class="hint"></div>
-        </div>
-        <div class="panel">
-          <h2 class="cat-h2"><span>Tüm İşlemler</span><span class="n" id="data-count"></span><button type="button" class="cat-edit" id="data-merge" title="Aynı parite+tarih+yön olan kısmi pozları birleştir">⊞ Birleştir</button><button type="button" class="cat-edit danger-edit" id="data-clear">Tümünü temizle</button></h2>
-          <div id="data-table"></div>
-        </div>
+    <div class="panel" style="margin-bottom:14px;">
+      <div class="df-header" onclick="document.getElementById('df-body').classList.toggle('open')">
+        <span>+ Yeni İşlem Ekle</span>
+        <span class="df-arrow">▼</span>
       </div>
-      <div class="data-side">
-        <div class="panel">
-          <h2><span>Kümülatif PnL (R)</span><span class="n" id="data-eq-total"></span></h2>
-          <div id="data-chart-wrap"><canvas id="data-chart"></canvas></div>
-          <div class="data-empty" id="data-empty">Henüz veri yok. Soldan işlem ekle, Check List'ten aktar ya da CSV yükle.</div>
+      <div class="df-body" id="df-body">
+        <div class="data-form">
+          <input type="date" id="df-entry-date" aria-label="Giriş tarihi">
+          <input type="date" id="df-exit-date" aria-label="Çıkış tarihi">
+          <input type="text" id="df-pair" placeholder="Parite (BTC, XAU…)" maxlength="12">
+          <div class="df-seg">
+            <button type="button" class="long on" id="df-long">LONG</button>
+            <button type="button" class="short" id="df-short">SHORT</button>
+          </div>
+          <input type="number" step="0.01" id="df-entry-price" placeholder="Giriş fiyatı">
+          <input type="number" step="0.01" id="df-exit-price" placeholder="Çıkış fiyatı">
+          <input type="number" step="0.001" id="df-size" placeholder="Pozisyon büyüklüğü">
+          <input type="number" step="0.01" id="df-risk" placeholder="Risk $ (R'nin değeri)">
+          <input type="number" step="0.01" id="df-r" placeholder="R (ör. 2.5 / -1)">
+          <input type="number" step="0.01" id="df-stop" placeholder="Stop loss">
+          <input type="number" step="0.01" id="df-target" placeholder="Take profit">
+          <input type="text" id="df-strat" placeholder="Strateji">
+        </div>
+        <div class="df-crits">
+          <label>Setup <input type="range" id="df-c-setup" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-setup-v">0</span></label>
+          <label>Entry <input type="range" id="df-c-entry" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-entry-v">0</span></label>
+          <label>Exit <input type="range" id="df-c-exit" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-exit-v">0</span></label>
+          <label>Risk <input type="range" id="df-c-risk" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-risk-v">0</span></label>
+          <label>Psikoloji <input type="range" id="df-c-psycho" min="0" max="10" value="0" class="crit-range"><span class="crit-val" id="df-c-psycho-v">0</span></label>
+        </div>
+        <textarea id="df-note" class="df-full" placeholder="İşlem notu (opsiyonel)" rows="2"></textarea>
+        <div class="df-imgs" id="df-imgs-area">
+          <div class="df-img-drop" id="df-img-drop">
+            <span>📷 Resim sürükle/bırak veya Ctrl+V yapıştır</span>
+            <input type="file" id="df-img-file" accept="image/*" multiple style="display:none">
+          </div>
+          <div class="df-img-previews" id="df-img-previews"></div>
+        </div>
+        <button class="btn solid df-full" id="df-add">İşlemi Kaydet</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:14px;">
+      <h2><span>İçe Aktar</span></h2>
+      <div class="actions" style="justify-content:flex-start;flex-wrap:wrap;">
+        <button class="btn" id="data-import-defter">Check List işlemlerini aktar</button>
+        <button class="btn solid" id="data-notion">⬇ Notion'dan çek</button>
+        <button class="btn" id="data-notion-oauth">🔗 Notion'a Bağlan</button>
+        <button class="btn" id="data-csv-btn">CSV yükle (broker/MetaTrader)</button>
+        <input type="file" id="data-csv-file" accept=".csv,text/csv" style="display:none;">
+      </div>
+      <details style="margin-top:8px;font-size:13px;">
+        <summary style="cursor:pointer;color:var(--text-2);font-weight:600;">⚙ Notion Database Ayarları</summary>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding:12px;background:var(--bg-2);border-radius:8px;">
+          <label style="font-size:12px;">Kripto DB ID <input type="text" id="ndb-kripto" placeholder="380f561953ab8088b5f9ffd53a397de9" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
+          <label style="font-size:12px;">Fx DB ID <input type="text" id="ndb-fx" placeholder="380f561953ab80938bdbfc07fcef2de1" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
+          <button class="btn" id="ndb-save" style="grid-column:1/-1;">Kaydet</button>
+          <span id="ndb-note" class="hint" style="grid-column:1/-1;"></span>
+        </div>
+      </details>
+      <p class="hint">Alfa-Check List işlemleri R sonuçlarıyla buraya gelir. CSV: broker geçmişini yükle (date, symbol, type, profit).</p>
+      <div id="data-note" class="hint"></div>
+    </div>
+    <div class="panel">
+      <h2 class="cat-h2"><span>Tüm İşlemler</span><span class="n" id="data-count"></span>
+        <div class="df-pages" id="df-pages"></div>
+        <button type="button" class="cat-edit danger-edit" id="data-clear">Tümünü temizle</button>
+      </h2>
+      <div id="data-table"></div>
+      <div class="df-pages-bottom" id="df-pages-bottom"></div>
+    </div>
+    <div class="panel" id="data-ai-panel">
+      <h2 class="cat-h2"><span>🧠 İşlemleri YZ ile Tartış</span></h2>
+      <div id="data-ai-body" style="font-size:13px;color:var(--text-2);">
+        <p style="margin-bottom:8px;">İşlemlerini seçip analiz ettir, zayıf/ güçlü yönlerini keşfet.</p>
+        <div id="data-ai-msgs" style="max-height:260px;overflow-y:auto;margin-bottom:8px;padding:8px;background:var(--bg);border-radius:8px;min-height:60px;"></div>
+        <div style="display:flex;gap:6px;">
+          <select id="data-ai-focus" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;">
+            <option value="all">Tüm işlemleri analiz et</option>
+            <option value="wins">Sadece kazananları</option>
+            <option value="losses">Sadece kaybedenleri</option>
+            <option value="recent">Son 20 işlemi</option>
+          </select>
+          <button class="btn solid" id="data-ai-btn" style="font-size:12px;white-space:nowrap;">Analiz Et</button>
         </div>
       </div>
     </div>
@@ -1855,6 +1931,10 @@
         <label>Kripto <span>bu hafta</span> <input type="number" step="0.1" id="rr-krip-in" placeholder="0"> R</label>
         <label>FX <span>bu hafta</span> <input type="number" step="0.1" id="rr-fx-in" placeholder="0"> R</label>
       </div>
+    </div>
+    <div class="panel" style="margin-bottom:14px;">
+      <h2><span>📈 Trade Günlüğü Kümülatif PnL (R)</span><span class="n" id="rv-eq-total"></span></h2>
+      <div id="rv-eq-wrap"><canvas id="rv-eq-chart"></canvas></div>
     </div>
     <div class="data-grid">
       <div class="data-main">
@@ -4741,11 +4821,9 @@ function renderData() {
   const rows = sortedData();
   const n = rows.length;
   const totR = rows.reduce((s, t) => s + dnum(t.r), 0);
-  const totP = rows.reduce((s, t) => s + dnum(t.pnl), 0);
   const wins = rows.filter(t => dnum(t.r) > 0).length;
   const wr = n ? Math.round(wins / n * 100) : 0;
   const avg = n ? totR / n : 0;
-  const hasMoney = rows.some(t => t.pnl !== null && t.pnl !== undefined && t.pnl !== '');
   const kpis = document.getElementById('data-kpis');
   kpis.innerHTML = '';
   const addK = (lbl, val, cls, sub) => {
@@ -4754,49 +4832,89 @@ function renderData() {
     kpis.appendChild(d);
   };
   addK('Toplam işlem', n, '', wins + ' kazanan');
-  addK('Toplam R', (totR > 0 ? '+' : '') + totR.toFixed(2), totR >= 0 ? 'pos' : 'neg', hasMoney ? ('PnL: ' + (totP > 0 ? '+' : '') + totP.toFixed(0) + '$') : '');
+  addK('Toplam R', (totR > 0 ? '+' : '') + totR.toFixed(2), totR >= 0 ? 'pos' : 'neg', '');
   addK('Win rate', wr + '%', '', wins + '/' + n);
   addK('Ortalama R', (avg > 0 ? '+' : '') + avg.toFixed(2), avg >= 0 ? 'pos' : 'neg', 'işlem başına');
-  document.getElementById('data-eq-total').textContent = n ? ((totR > 0 ? '+' : '') + totR.toFixed(2) + ' R') : '';
-  document.getElementById('data-empty').style.display = n ? 'none' : 'block';
-  drawEquity(rows);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(n / DF_PP));
+  if (dfDataPage > totalPages) dfDataPage = totalPages;
+  const start = (dfDataPage - 1) * DF_PP;
+  const pageRows = rows.slice(start, start + DF_PP);
+
+  function renderPageNav(containerId) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    c.innerHTML = '';
+    if (totalPages <= 1) return;
+    for (let i = 1; i <= totalPages; i++) {
+      const b = document.createElement('button'); b.className = 'df-pg' + (i === dfDataPage ? ' on' : ''); b.textContent = i;
+      b.onclick = () => { dfDataPage = i; renderData(); };
+      c.appendChild(b);
+    }
+  }
+  renderPageNav('df-pages');
+  renderPageNav('df-pages-bottom');
 
   const tb = document.getElementById('data-table');
   tb.innerHTML = '';
   const head = document.createElement('div'); head.className = 'data-row head';
-  head.innerHTML = '<span>Tarih</span><span>Parite</span><span>Yön</span><span>Strateji / Not</span><span style="text-align:right;">R</span><span style="text-align:right;">Kümül.</span><span></span>';
+  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite</span><span style="text-align:center;">Yön</span><span>Strat</span><span style="text-align:right;">R</span><span style="text-align:right;">Detay</span><span></span>';
   tb.appendChild(head);
-  let cum = 0;
-  const withCum = rows.map(t => { cum += dnum(t.r); return Object.assign({}, t, { _cum: cum }); });
-  withCum.slice().reverse().forEach(t => {
+
+  pageRows.forEach(t => {
     const r = dnum(t.r);
-    const stratDisplay = (t.strat || '').trim().slice(0, 14);
-    const noteFull = (t.note || '').trim();
-    const noteShort = noteFull.slice(0, 28);
-    const hasNote = noteFull.length > 0;
-    const noteIcon = hasNote ? '<span class="dr-note-icon" title="Not var">📝</span>' : '';
-    const extra = (stratDisplay ? stratDisplay : '') + (hasNote ? (stratDisplay ? ' · ' : '') + noteShort : '');
-    const row = document.createElement('div'); row.className = 'data-row' + (hasNote ? ' has-note' : '');
+    const row = document.createElement('div'); row.className = 'data-row';
     row.innerHTML =
-      '<span>' + (t.date || '') + '</span>' +
+      '<span style="font-size:10px;color:var(--text-3);">' + (t.entryDate ? t.entryDate.slice(8,10)+'/'+t.entryDate.slice(5,7) : t.date || '') + '</span>' +
       '<span class="dr-pair">' + (t.pair || '—') + '</span>' +
-      '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '">' + (t.dir || '') + '</span>' +
-      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (t.strat||'') + (hasNote ? ' - ' + noteFull : '') + '">' + noteIcon + (extra || '—') + '</span>' +
-      '<span class="dr-r ' + (r >= 0 ? 'pos' : 'neg') + '">' + (r > 0 ? '+' : '') + r.toFixed(2) + '</span>' +
-      '<span class="dr-cum">' + (t._cum > 0 ? '+' : '') + t._cum.toFixed(2) + '</span>';
-    if (hasNote) {
-      row.style.cursor = 'pointer';
-      row.addEventListener('click', e => {
-        if (e.target.closest('.dr-del')) return;
-        showNotePopup(t);
-      });
-    }
+      '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '" style="text-align:center;font-size:11px;">' + (t.dir || '') + '</span>' +
+      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ((t.strat||'').slice(0,10) || '—') + '</span>' +
+      '<span class="dr-r ' + (r >= 0 ? 'pos' : 'neg') + '" style="text-align:right;font-weight:700;">' + (r > 0 ? '+' : '') + r.toFixed(2) + '</span>' +
+      '<span style="text-align:right;font-size:11px;color:var(--text-3);cursor:pointer;">▼</span>';
     const del = document.createElement('button'); del.className = 'dr-del'; del.type = 'button'; del.textContent = '×';
     del.addEventListener('click', async (e) => { e.stopPropagation(); dataTrades = dataTrades.filter(x => x.id !== t.id); await saveData(); renderData(); });
     row.appendChild(del);
+
+    // Detail panel
+    const detail = document.createElement('div'); detail.className = 'dr-detail';
+    let detailHtml = '<div class="dr-detail-grid">';
+    if (t.entryDate) detailHtml += '<div class="item"><span class="lbl">Giriş</span><span class="val">' + t.entryDate + '</span></div>';
+    if (t.exitDate) detailHtml += '<div class="item"><span class="lbl">Çıkış</span><span class="val">' + t.exitDate + '</span></div>';
+    if (t.entryPrice) detailHtml += '<div class="item"><span class="lbl">Giriş fiyat</span><span class="val">' + t.entryPrice + '</span></div>';
+    if (t.exitPrice) detailHtml += '<div class="item"><span class="lbl">Çıkış fiyat</span><span class="val">' + t.exitPrice + '</span></div>';
+    if (t.size) detailHtml += '<div class="item"><span class="lbl">Pozisyon</span><span class="val">' + t.size + '</span></div>';
+    if (t.risk) detailHtml += '<div class="item"><span class="lbl">Risk $</span><span class="val">' + t.risk + '</span></div>';
+    if (t.stop) detailHtml += '<div class="item"><span class="lbl">Stop</span><span class="val">' + t.stop + '</span></div>';
+    if (t.target) detailHtml += '<div class="item"><span class="lbl">TP</span><span class="val">' + t.target + '</span></div>';
+    detailHtml += '<div class="item"><span class="lbl">R</span><span class="val '+ (r>=0?'pos':'neg') + '">' + (r>0?'+':'') + r.toFixed(2) + '</span></div>';
+    detailHtml += '</div>';
+    // Criteria bars
+    if (t.criteria) {
+      detailHtml += '<div class="dr-crit-bars">';
+      const cl = { setup:'Setup', entry:'Entry', exit:'Exit', risk:'Risk', psycho:'Psi' };
+      Object.keys(cl).forEach(k => {
+        const v = t.criteria[k] || 0;
+        detailHtml += '<div class="dr-crit-bar"><span>' + cl[k] + ' ' + v + '</span><div class="bar"><div class="fill" style="width:' + (v/10*100) + '%"></div></div></div>';
+      });
+      detailHtml += '</div>';
+    }
+    if (t.note) detailHtml += '<div style="font-size:12px;color:var(--text-2);margin-top:4px;padding:6px;background:var(--bg);border-radius:6px;">' + esc(t.note) + '</div>';
+    if (t.images && t.images.length) {
+      detailHtml += '<div class="dr-imgs">';
+      t.images.forEach(url => { detailHtml += '<img src="' + url + '" onclick="window.open(\'' + url + '\')">'; });
+      detailHtml += '</div>';
+    }
+    detail.innerHTML = detailHtml;
+    row.appendChild(detail);
+
+    row.addEventListener('click', e => {
+      if (e.target.closest('.dr-del')) return;
+      row.classList.toggle('detail-open');
+    });
     tb.appendChild(row);
   });
-  document.getElementById('data-count').textContent = n ? (n + ' işlem') : '';
+  document.getElementById('data-count').textContent = n ? (n + ' işlem · sayfa ' + dfDataPage + '/' + totalPages) : 'Henüz işlem yok.';
 }
 
 function showNotePopup(t) {
@@ -4861,22 +4979,65 @@ function drawEquity(rows) {
   ctx.beginPath(); ctx.arc(x(pts.length - 1), y(pts[pts.length - 1]), 3.5, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
 }
 
+let dfImages = [];
+let dfDataPage = 1;
+const DF_PP = 20;
+function dfAddImg(dataUrl) {
+  dfImages.push(dataUrl);
+  const p = document.getElementById('df-img-previews');
+  const d = document.createElement('div'); d.className = 'thmb';
+  d.innerHTML = '<img src="' + dataUrl + '"><button class="del" data-i="' + (dfImages.length - 1) + '">×</button>';
+  d.querySelector('.del').onclick = () => { dfImages.splice(parseInt(d.querySelector('.del').dataset.i), 1); renderDfPreviews(); };
+  p.appendChild(d);
+}
+function renderDfPreviews() {
+  const p = document.getElementById('df-img-previews');
+  if (!p) return;
+  p.innerHTML = '';
+  dfImages.forEach((url, i) => {
+    const d = document.createElement('div'); d.className = 'thmb';
+    d.innerHTML = '<img src="' + url + '"><button class="del" data-i="' + i + '">×</button>';
+    d.querySelector('.del').onclick = () => { dfImages.splice(i, 1); renderDfPreviews(); };
+    p.appendChild(d);
+  });
+}
 async function addDataTrade() {
   const g = id => document.getElementById(id);
-  const dateVal = g('df-date').value;
   const pair = (g('df-pair').value || '').trim().toUpperCase();
   const rVal = g('df-r').value;
-  const pnlVal = g('df-pnl').value;
-  if (!pair && rVal === '' && pnlVal === '') { g('data-note') && (document.getElementById('data-note').textContent = ''); return; }
-  const ts = dateVal ? Date.parse(dateVal) : Date.now();
-  const disp = dateVal ? (dateVal.slice(8, 10) + '/' + dateVal.slice(5, 7)) : (() => { const d = new Date(); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); })();
+  if (!pair || rVal === '') { g('data-note').textContent = 'Lütfen parite ve R değerini gir.'; return; }
+  const ts = g('df-entry-date').value ? Date.parse(g('df-entry-date').value) : Date.now();
+  const entryDate = g('df-entry-date').value || '';
+  const exitDate = g('df-exit-date').value || '';
   dataTrades.push({
-    id: Date.now() + Math.random(), ts, date: disp, pair, dir: dfDir,
-    r: dnum(rVal), pnl: pnlVal === '' ? null : dnum(pnlVal),
-    strat: (g('df-strat').value || '').trim(), note: (g('df-note').value || '').trim()
+    id: Date.now() + Math.random(), ts,
+    entryDate, exitDate,
+    pair, dir: dfDir,
+    entryPrice: dnum(g('df-entry-price').value),
+    exitPrice: dnum(g('df-exit-price').value),
+    size: dnum(g('df-size').value),
+    risk: dnum(g('df-risk').value),
+    r: dnum(rVal),
+    stop: dnum(g('df-stop').value),
+    target: dnum(g('df-target').value),
+    strat: (g('df-strat').value || '').trim(),
+    criteria: {
+      setup: parseInt(g('df-c-setup').value) || 0,
+      entry: parseInt(g('df-c-entry').value) || 0,
+      exit: parseInt(g('df-c-exit').value) || 0,
+      risk: parseInt(g('df-c-risk').value) || 0,
+      psycho: parseInt(g('df-c-psycho').value) || 0
+    },
+    note: (g('df-note').value || '').trim(),
+    images: dfImages.slice()
   });
   await saveData();
-  g('df-pair').value = ''; g('df-r').value = ''; g('df-pnl').value = ''; g('df-strat').value = ''; g('df-note').value = '';
+  ['df-pair','df-entry-price','df-exit-price','df-size','df-risk','df-r','df-stop','df-target','df-strat','df-note'].forEach(id => g(id).value = '');
+  g('df-entry-date').value = ''; g('df-exit-date').value = '';
+  document.querySelectorAll('.crit-range').forEach(r => { r.value = 0; r.dispatchEvent(new Event('input')); });
+  dfImages = []; renderDfPreviews();
+  dfDataPage = Math.ceil(dataTrades.length / DF_PP);
+  g('data-note').textContent = '✅ İşlem kaydedildi.';
   renderData();
 }
 
@@ -5081,17 +5242,73 @@ function bindDataPage() {
     await saveData(); renderData();
     document.getElementById('data-note').textContent = 'Tüm işlemler silindi.';
   });
-  g('data-merge').addEventListener('click', async () => {
-    if (dataTrades.length < 2) { document.getElementById('data-note').textContent = 'Birleştirilecek en az 2 işlem gerekli.'; return; }
-    const { merged, mergedCount } = mergeCsvPartials(dataTrades);
-    if (!mergedCount) { document.getElementById('data-note').textContent = 'Birleştirilecek aynı parite+tarih+yön grubu bulunamadı.'; return; }
-    dataTrades = merged;
-    await saveData(); renderData();
-    document.getElementById('data-note').textContent = mergedCount + ' kısmi poz birleştirildi. (' + dataTrades.length + ' işlem kaldı)';
-  });
+
   g('data-csv-btn').addEventListener('click', () => g('data-csv-file').click());
   g('data-csv-file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importCsv(f); e.target.value = ''; });
-  window.addEventListener('resize', () => { if (currentPage === 'data') drawEquity(sortedData()); });
+  // Kriter slider canlı gösterim
+  document.querySelectorAll('.crit-range').forEach(r => {
+    r.addEventListener('input', () => {
+      const v = document.getElementById(r.id + '-v');
+      if (v) v.textContent = r.value;
+    });
+  });
+  // Resim sürükle/bırak
+  const dropArea = g('df-img-drop');
+  if (dropArea) {
+    dropArea.addEventListener('click', () => g('df-img-file').click());
+    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('drag'); });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag'));
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault(); dropArea.classList.remove('drag');
+      Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).forEach(f => {
+        const reader = new FileReader();
+        reader.onload = ev => dfAddImg(ev.target.result);
+        reader.readAsDataURL(f);
+      });
+    });
+    g('df-img-file').addEventListener('change', e => {
+      Array.from(e.target.files).forEach(f => {
+        const reader = new FileReader();
+        reader.onload = ev => dfAddImg(ev.target.result);
+        reader.readAsDataURL(f);
+      });
+      e.target.value = '';
+    });
+  }
+  // Ctrl+V resim yapıştır
+  document.addEventListener('paste', e => {
+    if (currentPage !== 'data') return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    Array.from(items).filter(item => item.type.startsWith('image/')).forEach(item => {
+      const blob = item.getAsFile();
+      if (!blob) return;
+      const reader = new FileReader();
+      reader.onload = ev => dfAddImg(ev.target.result);
+      reader.readAsDataURL(blob);
+    });
+  });
+  // AI analiz
+  const aiBtn = document.getElementById('data-ai-btn');
+  if (aiBtn) {
+    aiBtn.addEventListener('click', async () => {
+      const focus = document.getElementById('data-ai-focus').value;
+      let rows = sortedData();
+      if (focus === 'wins') rows = rows.filter(t => dnum(t.r) > 0);
+      else if (focus === 'losses') rows = rows.filter(t => dnum(t.r) <= 0);
+      else if (focus === 'recent') rows = rows.slice(-20);
+      const summary = rows.map(t => `${t.pair||'?'} ${t.dir||''} R:${dnum(t.r).toFixed(2)}${t.strat ? ' '+t.strat : ''}`).join('\n');
+      const msgDiv = document.getElementById('data-ai-msgs');
+      msgDiv.innerHTML = '<div style="color:var(--text-3);">🤔 Analiz ediliyor...</div>';
+      try {
+        const resp = await fetch('/api/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Şu işlemleri analiz et:\n${summary}\n\nGenel performans değerlendirmesi, zayıf/güçlü yönler, iyileştirme önerileri ver.` }) });
+        const data = await resp.json();
+        msgDiv.innerHTML = '<div style="white-space:pre-wrap;line-height:1.6;">' + esc(data.reply || 'Cevap alınamadı.') + '</div>';
+      } catch(e) {
+        msgDiv.innerHTML = '<div style="color:var(--red);">Analiz hatası: ' + e.message + '</div>';
+      }
+    });
+  }
 }
 
 // ============ Haftalık Değerlendirme ============
@@ -5252,6 +5469,38 @@ function renderReview() {
     wrap.appendChild(head); wrap.appendChild(ta);
     sBox.appendChild(wrap);
   });
+  // Data trades equity chart
+  const rows = sortedData();
+  const cv = document.getElementById('rv-eq-chart');
+  const wrap = document.getElementById('rv-eq-wrap');
+  document.getElementById('rv-eq-total').textContent = rows.length ? rows.reduce((s,t) => s + dnum(t.r), 0).toFixed(2) + ' R' : '';
+  if (cv && wrap && rows.length) {
+    const W = wrap.clientWidth || 600, H = 160;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.cssText = 'width:'+W+'px;height:'+H+'px;display:block;';
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    let cum = 0; const pts = [0]; rows.forEach(t => { cum += dnum(t.r); pts.push(cum); });
+    const min = Math.min(0, ...pts), max = Math.max(0, ...pts);
+    const pad = 12, range = (max - min) || 1;
+    const x = i => pad + (W - 2 * pad) * (i / (pts.length - 1 || 1));
+    const y = v => (H - pad) - (H - 2 * pad) * ((v - min) / range);
+    ctx.strokeStyle = '#e6e8f0'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, y(0)); ctx.lineTo(W - pad, y(0)); ctx.stroke();
+    const up = pts[pts.length - 1] >= 0;
+    const col = up ? '#16a34a' : '#dc2626';
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, up ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.moveTo(x(0), y(pts[0]));
+    pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+    ctx.lineTo(x(pts.length - 1), y(0)); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x(0), y(pts[0]));
+    pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.stroke();
+    // Son değer etiketi
+    ctx.fillStyle = col; ctx.font = '600 12px Inter,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText((pts[pts.length-1] > 0 ? '+' : '') + pts[pts.length-1].toFixed(2) + 'R', W - pad, y(pts[pts.length-1]) - 6);
+  } else if (cv) { cv.style.display = 'none'; }
 }
 
 function bindReviewPage() {
@@ -5268,7 +5517,7 @@ function bindReviewPage() {
   };
   g('rr-krip-in').addEventListener('input', e => saveRR('kripto', e.target.value));
   g('rr-fx-in').addEventListener('input', e => saveRR('fx', e.target.value));
-  window.addEventListener('resize', () => { if (currentPage === 'review') updateRRcum(); });
+  window.addEventListener('resize', () => { if (currentPage === 'review') { updateRRcum(); renderReview(); } });
 }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
