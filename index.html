@@ -2381,8 +2381,10 @@
     <div class="eg-brand">
       <span class="eg-brand-name">Alfa Edu</span>
       <span class="eg-brand-sub">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin.</span>
-      <span id="eg-publish-st" style="font-size:12px;font-weight:600;margin-left:auto;"></span>
-      <button class="btn solid" id="eg-publish-btn" type="button" style="display:none;">🌐 Herkese Yayınla</button>
+    </div>
+    <div id="eg-admin-bar" style="display:none;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn solid" id="eg-publish-btn" type="button">🌐 Herkese Yayınla</button>
+      <span id="eg-publish-st" style="font-size:12.5px;font-weight:600;"></span>
     </div>
     <div class="controls">
       <div class="seg" id="eg-sec-seg">
@@ -6438,11 +6440,24 @@ function bindEgitimPage() {
   if (egPubBtn) egPubBtn.addEventListener('click', async () => {
     const st = g('eg-publish-st');
     egPubBtn.disabled = true; const orig = egPubBtn.textContent; egPubBtn.textContent = 'Yayınlanıyor…';
-    if (st) { st.textContent = ''; }
+    if (st) { st.textContent = ''; st.style.color = 'var(--text-3)'; }
     const r = await saveEgitim();
+    // Sunucuda gerçekten kaç video linki kayıtlı — GET ile doğrula
+    let verify = '';
+    if (r && r.ok && !r.local) {
+      try {
+        const gr = await fetch('/api/edu-shared', { cache: 'no-store' });
+        if (gr.ok) {
+          const d = await gr.json();
+          let sv = 0;
+          Object.values(d.sections || {}).forEach(arr => (arr || []).forEach(t => { sv += (t.videos || []).filter(v => v.url).length; }));
+          verify = ' · sunucuda ' + sv + ' link doğrulandı';
+        }
+      } catch (e) {}
+    }
     egPubBtn.disabled = false; egPubBtn.textContent = orig;
     if (st) {
-      if (r && r.ok && !r.local) { st.textContent = '✓ ' + r.topics + ' konu · ' + r.videos + ' video herkese yayınlandı'; st.style.color = 'var(--green)'; }
+      if (r && r.ok && !r.local) { st.textContent = '✓ ' + r.topics + ' konu · ' + r.videos + ' video yayınlandı' + verify; st.style.color = 'var(--green)'; }
       else if (r && r.local) { st.textContent = 'Sadece admin yayınlayabilir.'; st.style.color = 'var(--text-3)'; }
       else { st.textContent = '✗ Yayınlanamadı: ' + ((r && r.error) || 'bilinmeyen hata'); st.style.color = 'var(--red)'; }
     }
@@ -6597,8 +6612,8 @@ async function onAuthed(user) {
   const isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
   const adminTab = document.getElementById('tab-chat-admin');
   if (adminTab) adminTab.style.display = isAdmin ? '' : 'none';
-  const egPubBtn = document.getElementById('eg-publish-btn');
-  if (egPubBtn) egPubBtn.style.display = isAdmin ? '' : 'none';
+  const egPubBar = document.getElementById('eg-admin-bar');
+  if (egPubBar) egPubBar.style.display = isAdmin ? 'flex' : 'none';
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
