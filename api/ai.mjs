@@ -44,8 +44,9 @@ export default async function handler(req, res) {
     const data = await response.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (reply) return res.json({ reply });
-    const errMsg = data?.error?.message || 'Bilinmeyen hata';
-    return res.json({ reply: 'Üzgünüm, şu anda cevap veremiyorum. (' + errMsg + ')' });
+    const errMsg = data?.error?.message || '';
+    if (errMsg.includes('quota') || errMsg.includes('Quota')) return res.json({ reply: '⚠️ AI kotası doldu, biraz sonra tekrar dene. (Ücretsiz API limiti)' });
+    return res.json({ reply: 'Üzgünüm, şu anda cevap veremiyorum.' });
   } catch (e) {
     return res.json({ reply: 'Bağlantı hatası. Lütfen tekrar dene.' });
   }
