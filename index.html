@@ -1284,6 +1284,20 @@
 .ca-msg .ca-meta { font-size:10px; color:var(--text-3); display:flex; gap:8px; }
 .ca-msg.u .ca-meta { color:rgba(255,255,255,.7); }
 .ca-conv.on .ca-conv-h .ca-badge { background: rgba(255,255,255,.3); }
+  /* ---- Public Alfa Edu Overlay ---- */
+  .lp-edu-btn { background: var(--card); border: 1px solid var(--border); color: var(--text-2); border-radius: 10px; padding: 9px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .lp-edu-btn:hover { border-color: var(--acc); color: var(--acc); }
+  .pub-edu-ov { display: none; position: fixed; inset: 0; z-index: 150; background: var(--bg); overflow-y: auto; }
+  .pub-edu-ov.open { display: block; }
+  .pub-edu-hdr { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+  .pub-edu-hdr .eg-brand-name { font-size: 18px; }
+  .pub-edu-free { font-size: 11px; color: var(--green); font-weight: 700; background: var(--green-soft); border-radius: 999px; padding: 2px 9px; }
+  .pub-edu-close { margin-left: auto; background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 6px 13px; cursor: pointer; color: var(--text-2); font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; }
+  .pub-edu-close:hover { border-color: var(--acc); color: var(--acc); }
+  .pub-edu-body { max-width: 1060px; margin: 0 auto; padding: 20px 14px 40px; }
+  .pub-edu-cta { margin-top: 28px; padding: 24px 20px; background: linear-gradient(135deg, var(--acc-soft), #f0f0fd); border: 1px solid var(--acc); border-radius: 16px; text-align: center; }
+  .pub-edu-cta h3 { font-family: var(--font-display); font-size: 18px; letter-spacing: -.02em; margin-bottom: 7px; }
+  .pub-edu-cta p { color: var(--text-2); font-size: 13px; margin-bottom: 16px; }
 </style>
 </head>
 <body>
@@ -1296,7 +1310,10 @@
         <div class="sub">Trader'lar için Disiplin Aracı</div>
       </div>
     </div>
-    <button class="nav-login" id="nav-login" type="button">Giriş yap</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="lp-edu-btn" id="lp-edu-btn" type="button">📚 Alfa Edu</button>
+      <button class="nav-login" id="nav-login" type="button">Giriş yap</button>
+    </div>
   </nav>
   <section class="lp-hero">
     <span class="lp-badge">Alfa trader'lar için disiplin aracı</span>
@@ -1436,6 +1453,56 @@
     </form>
   </div>
 </div>
+
+<!-- Public Alfa Edu Overlay — giriş gerektirmez -->
+<div id="public-edu" class="pub-edu-ov">
+  <div class="pub-edu-hdr">
+    <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 L16 5.5 L26.5 26.5" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 23 Q16 17 25.5 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></div>
+    <span class="eg-brand-name">Alfa Edu</span>
+    <span class="pub-edu-free">Ücretsiz Erişim</span>
+    <button class="pub-edu-close" id="pub-edu-close" type="button">✕ Kapat</button>
+  </div>
+  <div class="pub-edu-body">
+    <div class="controls" style="margin-top:10px;">
+      <div class="seg" id="pub-eg-sec-seg">
+        <button data-sec="teknik" class="on-gold" type="button">Teknik Analiz</button>
+        <button data-sec="temel" type="button">Temel Analiz</button>
+        <button data-sec="psikoloji" type="button">Trade Psikolojisi</button>
+        <button data-sec="islem" type="button">İşlem &amp; Backtest</button>
+        <button data-sec="onchain" type="button">Onchain</button>
+      </div>
+    </div>
+    <div class="eg-course" style="margin-top:14px;">
+      <aside class="panel eg-list-panel">
+        <h2>Konular</h2>
+        <div id="pub-eg-list" class="eg-list"></div>
+        <div id="pub-eg-empty" class="eg-empty-list">Bu bölümde henüz video içerikli konu yok.</div>
+      </aside>
+      <section class="panel eg-player-panel">
+        <div id="pub-eg-player-wrap">
+          <div class="eg-embed" id="pub-eg-embed"></div>
+          <div class="eg-now">
+            <div class="eg-now-title-row">
+              <div class="eg-now-title" id="pub-eg-now-title">—</div>
+            </div>
+            <a class="eg-card-link" id="pub-eg-now-link" href="#" target="_blank" rel="noopener noreferrer">YouTube'da aç ↗</a>
+          </div>
+          <div class="eg-vids">
+            <div class="eg-vids-h"><span>Videolar</span></div>
+            <div id="pub-eg-vid-list" class="eg-vid-list"></div>
+          </div>
+        </div>
+        <div id="pub-eg-player-empty" class="data-empty">Soldan bir konu seç — videoları burada izle.</div>
+      </section>
+    </div>
+    <div class="pub-edu-cta">
+      <h3>Devam etmek için kayıt ol</h3>
+      <p>Not al, ilerleme takip et, kendi içerik önerilerini ekle ve tam platforma ücretsiz eriş.</p>
+      <button class="primary" id="pub-edu-register" type="button">Ücretsiz kayıt ol →</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
   <nav class="navbar">
     <a href="?page=home" class="nav-brand" id="nav-home" data-nav>
@@ -6007,6 +6074,105 @@ function submitSeniorForm() {
   const lasttrade = document.getElementById('sf-lasttrade').value.trim();
   const why = document.getElementById('sf-why').value.trim();
   if (!name || !tg || !exp || !market || !freq || !method || !level || !pnl || !why) { result.textContent = 'Ad, Telegram, tecrübe, piyasa, sıklık, analiz, seviye, son 6 ay ve neden zorunlu.'; result.style.display = 'block'; return; }
+  // ---- Public Alfa Edu (giriş gerektirmez) ----
+  (function () {
+    let pubSec = 'teknik';
+    let pubData = { sections: {} };
+    let pubSel = {};
+    let pubSelVid = {};
+    let loaded = false;
+
+    async function loadPubEdu() {
+      try {
+        const r = await fetch('/api/edu-shared');
+        if (r.ok) { const d = await r.json(); if (d && d.sections) pubData = d; }
+      } catch (e) { /* */ }
+      loaded = true;
+    }
+
+    function pubTopics() {
+      return (pubData.sections[pubSec] || []).filter(t => (t.videos || []).some(v => v.url));
+    }
+
+    function renderPubEdu() {
+      const topics = pubTopics();
+      document.querySelectorAll('#pub-eg-sec-seg button').forEach(b => {
+        b.classList.toggle('on-gold', b.getAttribute('data-sec') === pubSec);
+      });
+      const listBox = document.getElementById('pub-eg-list');
+      listBox.innerHTML = '';
+      topics.forEach((t, i) => {
+        const vids = (t.videos || []).filter(v => v.url);
+        if (!vids.length) return;
+        const row = document.createElement('div');
+        row.className = 'eg-item' + (t.id === pubSel[pubSec] ? ' on' : '');
+        const idx = document.createElement('span'); idx.className = 'eg-item-idx'; idx.textContent = i + 1;
+        const tt = document.createElement('span'); tt.className = 'eg-item-t'; tt.textContent = t.title || '(başlıksız)';
+        const cnt = document.createElement('span'); cnt.className = 'eg-count' + (vids.length ? ' has' : ''); cnt.textContent = vids.length;
+        row.appendChild(idx); row.appendChild(tt); row.appendChild(cnt);
+        row.addEventListener('click', () => { pubSel[pubSec] = t.id; renderPubEdu(); });
+        listBox.appendChild(row);
+      });
+      document.getElementById('pub-eg-empty').style.display = topics.length ? 'none' : 'block';
+      const cur = topics.find(t => t.id === pubSel[pubSec]) || topics[0];
+      const wrap = document.getElementById('pub-eg-player-wrap');
+      const empty = document.getElementById('pub-eg-player-empty');
+      if (!cur) { wrap.style.display = 'none'; empty.style.display = 'block'; return; }
+      if (cur.id !== pubSel[pubSec]) pubSel[pubSec] = cur.id;
+      wrap.style.display = 'block'; empty.style.display = 'none';
+      const vids = (cur.videos || []).filter(v => v.url);
+      const curVid = vids.find(v => v.id === pubSelVid[cur.id]) || vids[0];
+      if (curVid && curVid.id !== pubSelVid[cur.id]) pubSelVid[cur.id] = curVid.id;
+      const embed = document.getElementById('pub-eg-embed');
+      embed.innerHTML = '';
+      const src = curVid ? egEmbedSrc(curVid) : '';
+      if (src) {
+        const ifr = document.createElement('iframe');
+        ifr.src = src; ifr.title = curVid.title || cur.title || 'video';
+        ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+        ifr.setAttribute('allowfullscreen', '');
+        embed.appendChild(ifr);
+      }
+      document.getElementById('pub-eg-now-title').textContent = cur.title || '(başlıksız)';
+      const link = document.getElementById('pub-eg-now-link');
+      if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
+      else { link.style.display = 'none'; }
+      const vidList = document.getElementById('pub-eg-vid-list');
+      vidList.innerHTML = '';
+      vids.forEach((v, vi) => {
+        const row = document.createElement('div');
+        row.className = 'eg-vid-row' + (curVid && v.id === curVid.id ? ' on' : '');
+        const idx2 = document.createElement('span'); idx2.className = 'eg-vid-idx'; idx2.textContent = vi + 1;
+        const vt = document.createElement('span'); vt.className = 'eg-vid-t'; vt.textContent = v.title || 'Video';
+        row.appendChild(idx2); row.appendChild(vt);
+        row.addEventListener('click', () => { pubSelVid[cur.id] = v.id; renderPubEdu(); });
+        vidList.appendChild(row);
+      });
+    }
+
+    function openPubEdu() {
+      document.getElementById('public-edu').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      if (!loaded) { loadPubEdu().then(renderPubEdu); } else { renderPubEdu(); }
+    }
+
+    function closePubEdu() {
+      document.getElementById('public-edu').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('lp-edu-btn').addEventListener('click', openPubEdu);
+    document.getElementById('pub-edu-close').addEventListener('click', closePubEdu);
+    document.querySelectorAll('#pub-eg-sec-seg button').forEach(b => {
+      b.addEventListener('click', () => { pubSec = b.getAttribute('data-sec'); renderPubEdu(); });
+    });
+    document.getElementById('pub-edu-register').addEventListener('click', () => {
+      closePubEdu();
+      const regBtn = document.getElementById('hero-register');
+      if (regBtn) regBtn.click();
+    });
+  })();
+
   if (!BAS_GS_URL) { result.textContent = 'Google Sheets bağlantısı henüz ayarlanmadı.'; result.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Gönderiliyor...';
   result.style.display = 'none';
