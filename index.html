@@ -82,6 +82,7 @@
   body[data-page="chat-admin"] { --pc: #4ade80; --pc-soft: rgba(74,222,128,.16); --glow-a: rgba(74,222,128,.18); --glow-b: rgba(34,197,94,.10); }
   body[data-page="calc"] { --pc: #8b7bfa; --pc-soft: rgba(139,123,250,.16); --glow-a: rgba(139,123,250,.20); --glow-b: rgba(109,92,240,.10); }
   body[data-page="basvuru"] { --pc: #fbbf24; --pc-soft: rgba(251,191,36,.16); --glow-a: rgba(251,191,36,.18); --glow-b: rgba(245,158,11,.10); }
+  body[data-page="trading"] { --pc: #22d3ee; --pc-soft: rgba(34,211,238,.16); --glow-a: rgba(34,211,238,.18); --glow-b: rgba(6,182,212,.10); }
   .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
 
   .tophead { padding: 18px 0 4px; }
@@ -212,12 +213,23 @@
   .nav-drop .drop-menu .nav-link { display: block; white-space: nowrap; }
   .nav-drop.on > .drop-btn { background: var(--pc-soft); color: var(--pc); }
   @media (max-width: 680px) {
+    .navbar { gap: 8px; padding: 8px 0; margin-bottom: 14px; }
+    .logo-mark { width: 30px; height: 30px; border-radius: 8px; font-size: 14px; }
+    .nav-brand span { font-size: 15px; }
     .nav-links { overflow-x: auto; }
+    .nav-links .nav-link, .nav-links .drop-btn { white-space: nowrap; }
     .nav-drop { position: static; }
     .nav-drop .drop-menu { position: static; box-shadow: none; border: none; padding: 0 0 0 16px; min-width: auto; }
     .nav-drop.open .drop-menu { display: flex; }
+    .nav-link, .nav-drop .drop-btn { padding: 7px 12px; font-size: 13px; }
+    .nav-contact { gap: 6px; }
+    .nc-lbl { display: none; }
+    .soc-link { width: 28px; height: 28px; }
+    .navbar .user-badge { margin-left: 6px; }
+    .navbar .nav-login { margin-left: 6px; }
   }
   .navbar .user-badge { margin-left: 12px; }
+  .navbar .nav-login { margin-left: 12px; flex: none; }
   /* İletişim (navbar sağ üst) */
   .nav-contact { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .nav-contact .nc-lbl { font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: var(--text-3); }
@@ -424,7 +436,7 @@
   .df-row-note { align-items:flex-start; }
   .df-crits { display:flex; flex-wrap:wrap; gap:6px 12px; padding:8px 0; }
   .df-crits label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--text-2); flex:1; min-width:100px; }
-  .crit-range { flex:1; height:6px; -webkit-appearance:none; appearance:none; border-radius:3px; background:var(--border); outline:none; cursor:pointer; }
+  .crit-range { flex:1; min-width:0; height:6px; -webkit-appearance:none; appearance:none; border-radius:3px; background:var(--border); outline:none; cursor:pointer; }
   .crit-range::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--pc); cursor:pointer; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.15); }
   .crit-val { font-size:13px; font-weight:700; color:var(--pc); min-width:18px; text-align:center; }
   .df-imgs { grid-column:1/-1; }
@@ -1398,7 +1410,7 @@
 .bas-hero h1 { font-size: 30px; font-weight: 800; letter-spacing: -.4px; margin: 0 0 8px; background: linear-gradient(135deg, var(--pc), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .bas-hero p { color: var(--text-2); font-size: 13.5px; max-width: 480px; margin: 0 auto; line-height: 1.5; }
 /* Kümülatif PnL sayacı */
-.cum-pnl-wrap { margin: 26px auto 0; display: inline-block; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px 32px 18px; box-shadow: var(--shadow); }
+.cum-pnl-wrap { margin: 26px auto 0; display: inline-block; max-width: 100%; box-sizing: border-box; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px 32px 18px; box-shadow: var(--shadow); }
 .cum-pnl-lbl { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; color: var(--green); text-transform: uppercase; margin-bottom: 8px; }
 .cum-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex: none; }
 .cum-pnl-val { font-family: var(--font-display); font-size: clamp(34px, 9vw, 56px); font-weight: 800; letter-spacing: -.05em; color: var(--green); line-height: 1; font-variant-numeric: tabular-nums; }
@@ -1495,10 +1507,11 @@
 .result-item .result-value.pos { color: #34d399; }
 .result-item .result-value.neg { color: #f87171; }
 @media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } .calc-page { padding: 16px 12px 40px; } }
-.home-ticker { position: relative; z-index: 50; padding: 6px 20px; background: linear-gradient(90deg, rgba(123,120,245,0.08), rgba(124,58,237,0.05)); border-bottom: 1px solid rgba(123,120,245,0.12); display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-2); line-height: 1.45; }
-.home-ticker .tq { flex: 1; font-style: italic; text-align: center; }
-.home-ticker .ta { flex: none; font-size: 10px; color: var(--pc); white-space: nowrap; font-weight: 600; }
-@media (max-width: 640px) { .home-ticker { font-size: 11px; padding: 5px 12px; } .home-ticker .ta { display: none; } }
+.home-ticker { position: relative; z-index: 50; padding: 8px 16px; background: linear-gradient(90deg, var(--pc-soft), rgba(124,58,237,0.05) 55%, transparent); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+.home-ticker .ht-lbl { flex: none; font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pc); background: var(--pc-soft); border: 1px solid color-mix(in srgb, var(--pc) 28%, transparent); padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.home-ticker .tq { flex: 1; font-style: italic; text-align: center; color: var(--text); font-weight: 500; }
+.home-ticker .ta { flex: none; font-size: 10.5px; color: var(--pc); white-space: nowrap; font-weight: 700; }
+@media (max-width: 640px) { .home-ticker { font-size: 11.5px; padding: 7px 12px; } .home-ticker .ta { display: none; } }
 .chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--pc), #7c3aed); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(123,120,245,.35); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
 .chat-bubble:hover { transform: scale(1.08); }
 .chat-popup { position: fixed; bottom: 88px; right: 24px; z-index: 1000; width: 340px; max-width: calc(100vw - 48px); height: 460px; max-height: calc(100vh - 140px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.15); display: none; flex-direction: column; overflow: hidden; animation: basFadeIn .2s ease; }
@@ -1610,6 +1623,94 @@
   html[data-theme="light"] .lp-hero-band .lp-cta .ghost { background: rgba(23,25,35,.05); border: 1px solid rgba(23,25,35,.14); color: #1a1d29; }
   html[data-theme="light"] .lp-hero-band .lp-cta .ghost:hover { background: rgba(23,25,35,.1); border-color: rgba(23,25,35,.22); color: #1a1d29; }
   html[data-theme="light"] .lp-grid-bg { background-image: linear-gradient(rgba(23,25,35,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(23,25,35,.05) 1px, transparent 1px); }
+  /* Landing hero band — açık temada okunabilirlik */
+  html[data-theme="light"] .lp-hero-band .lp-brand .sub,
+  html[data-theme="light"] .lp-hero-band .lp-hero > p,
+  html[data-theme="light"] .lp-proof-txt span,
+  html[data-theme="light"] .lp-proof-stars span,
+  html[data-theme="light"] .lp-hero-band .hsw-bar em,
+  html[data-theme="light"] .lp-hero-band .hsw-m label,
+  html[data-theme="light"] .lp-hero-band .hsw-m i,
+  html[data-theme="light"] .lp-hero-band .hsw-chart-h,
+  html[data-theme="light"] .lp-hero-band .hsw-side-h,
+  html[data-theme="light"] .lp-hero-band .hsw-tr { color: #5b6172; }
+  html[data-theme="light"] .lp-hero-band .lp-badge { background: rgba(91,91,214,.14); color: #4f46d8; border-color: rgba(91,91,214,.3); }
+  html[data-theme="light"] .lp-hero-band .lp-edu-btn { background: rgba(255,255,255,.75); border-color: rgba(23,25,35,.14); color: #1a1d29; }
+  html[data-theme="light"] .lp-hero-band .lp-edu-btn:hover { background: rgba(255,255,255,.92); border-color: #5b5bd6; color: #4f46d8; }
+  html[data-theme="light"] .lp-hero-band .nav-login { background: #1a1d29; border: 1px solid rgba(23,25,35,.16); color: #fff; }
+  html[data-theme="light"] .lp-hero-band .nav-login:hover { background: #2c3044; }
+  html[data-theme="light"] .lp-proof-div { background: rgba(23,25,35,.16); }
+  html[data-theme="light"] .lp-hero-band .hsw-m,
+  html[data-theme="light"] .lp-hero-band .hsw-chart,
+  html[data-theme="light"] .lp-hero-band .hsw-side { background: rgba(255,255,255,.55); border-color: rgba(23,25,35,.1); }
+  html[data-theme="light"] .lp-hero-band .hsw-bar { border-bottom-color: rgba(23,25,35,.1); }
+  .tv-bar { display: flex; align-items: center; gap: 12px; padding: 8px 2px 12px; }
+  .tv-bar-tape { flex: 1; min-width: 0; overflow: hidden; position: relative; }
+  .tv-bar-tape .marquee { display: inline-flex; gap: 30px; padding-right: 30px; white-space: nowrap; will-change: transform; animation: alfaTape 110s linear infinite; }
+  .tv-bar-tape .marquee:hover { animation-play-state: paused; }
+  @keyframes alfaTape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .tv-tk { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; }
+  .tv-tk .s { font-weight: 700; color: var(--text); font-family: var(--font-display); font-size: 13px; }
+  .tv-tk .p { color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .tv-tk .c { font-weight: 700; }
+  .tv-tk .c.up { color: var(--green); }
+  .tv-tk .c.dn { color: var(--red); }
+  .tv-bar .tv-search { width: min(280px, 30vw); flex: none; position: relative; }
+  .tv-bar .tv-search input { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; padding: 8px 12px 8px 30px; outline: none; }
+  .tv-bar .tv-search input:focus { border-color: var(--acc); }
+  .tv-bar .tv-search .s-ico { position: absolute; left: 10px; top: 8px; opacity: .55; }
+  .tv-bar .tv-term { flex: none; }
+  @media (max-width: 720px) { .tv-bar { flex-wrap: wrap; } .tv-bar-tape { order: 3; flex: 1 1 100%; } .tv-bar .tv-search { flex: 1; width: auto; } }
+  .tv-ticker { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 12px; scrollbar-width: none; }
+  .tv-ticker::-webkit-scrollbar { display: none; }
+  .tv-ticker .tk { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; font-size: 11.5px; }
+  .tv-ticker .tk .sym { font-weight: 700; color: var(--text); font-family: var(--font-display); }
+  .tv-ticker .tk .px { color: var(--text-2); font-weight: 600; }
+  .tv-ticker .tk .chg.up { color: var(--green); font-weight: 700; }
+  .tv-ticker .tk .chg.dn { color: var(--red); font-weight: 700; }
+  .tv-ticker .tk .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .tv-ticker .tk .dot.up { background: var(--green); }
+  .tv-ticker .tk .dot.dn { background: var(--red); }
+  .okx-market { margin-top: 4px; }
+  .okx-market table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .okx-market th { text-align: left; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); font-weight: 600; padding: 7px 8px; border-bottom: 1px solid var(--border); }
+  .okx-market td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+  .okx-market tr:hover td { background: var(--hover-a); }
+  .okx-market .m-sym { font-weight: 700; color: var(--text); }
+  .okx-market .m-up { color: var(--green); font-weight: 700; }
+  .okx-market .m-dn { color: var(--red); font-weight: 700; }
+  .tv-term { display: inline-flex; align-items: center; gap: 7px; background: linear-gradient(135deg, var(--pc), color-mix(in srgb, var(--pc) 40%, var(--btn-tone))); color: #fff; border-radius: 9px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; text-decoration: none; }
+  .tv-chart-box { height: calc(100vh - 225px); min-height: 400px; max-height: 700px; margin-top: 8px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--card); min-width: 0; }
+  body[data-page="trading"] { overflow-x: hidden; }
+  .tv-chart-box .tradingview-widget-container, .tv-chart-box .tradingview-widget-container__widget { height: 100%; }
+  .tv-chart-box .tradingview-widget-copyright { display: none; }
+  .tv-notes { margin-top: 12px; }
+  .tv-notes-head { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .tv-notes textarea { width: 100%; min-height: 60px; resize: vertical; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.55; padding: 10px 12px; }
+  .tv-notes textarea:focus { outline: 2px solid var(--pc); border-color: transparent; }
+  .tv-acc-link { flex: none; display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-3); }
+  .tv-acc-link a { display: inline-flex; align-items: center; gap: 5px; color: #fff; font-weight: 700; text-decoration: none; background: linear-gradient(135deg, var(--pc), color-mix(in srgb, var(--pc) 40%, var(--btn-tone))); border-radius: 8px; padding: 7px 12px; font-size: 11.5px; white-space: nowrap; }
+  .tv-acc-link a.ghost { background: var(--input-bg); color: var(--text); border: 1px solid var(--border); }
+  .tv-acc-link a:hover { filter: brightness(1.1); }
+  .tv-wl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .tv-wl .wl-head { font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--pc); white-space: nowrap; }
+  .tv-wl .wl-items { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
+  .tv-wl .wl-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 999px; padding: 4px 8px 4px 11px; font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .tv-wl .wl-chip:hover { border-color: var(--pc); }
+  .tv-wl .wl-chip.on { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
+  .tv-wl .wl-chip .rm { color: var(--text-3); font-size: 13px; line-height: 1; padding: 0 2px; border: 0; background: none; cursor: pointer; }
+  .tv-wl .wl-chip .rm:hover { color: var(--red); }
+  .tv-wl .wl-empty { font-size: 11.5px; color: var(--text-3); font-style: italic; }
+  .tv-wl .wl-add { flex: none; display: inline-flex; align-items: center; gap: 5px; background: var(--input-bg); border: 1px dashed var(--border); color: var(--text-2); border-radius: 999px; padding: 4px 12px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .tv-wl .wl-add:hover { color: var(--pc); border-color: var(--pc); }
+  .tv-sug { position: absolute; top: calc(100% + 4px); left: 0; width: 340px; max-width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.2); overflow: hidden; z-index: 300; display: none; }
+  .tv-sug.on { display: block; }
+  .tv-sug-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; font-size: 12.5px; color: var(--text); }
+  .tv-sug-item:hover { background: var(--hover-a); }
+  .tv-sug-item .s-lbl { font-weight: 700; font-family: var(--font-display); font-size: 13px; }
+  .tv-sug-item .s-ex { margin-left: auto; font-size: 10.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; }
+  .tv-sug-note { padding: 9px 12px; font-size: 11.5px; color: var(--text-3); }
+  body[data-page="trading"] .wrap { max-width: 1560px; }
   </style>
   <script>
   (function () {
@@ -1986,6 +2087,7 @@
           <a href="?page=onchain" class="nav-link" id="tab-onchain" data-nav>⛓️ Onchain</a>
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav>🧮 Alfa Calculator</a>
           <a href="?page=review" class="nav-link" id="tab-review" data-nav>📊 Haftalık Değerlendirme</a>
+          <a href="?page=trading" class="nav-link" id="tab-trading" data-nav>📉 Trading</a>
         </div>
       </div>
       <div class="nav-drop">
@@ -2011,16 +2113,164 @@
       <a class="soc-link x" id="nc-x" href="#" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.06l-4.74-6.2L5.6 21H2.6l7-8L2.2 3h6.2l4.3 5.68L17.5 3zm-1.05 16.2h1.66L7.63 4.7H5.85z"/></svg></a>
       <a class="soc-link yt" id="nc-yt" href="#" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 7.5c-.26-1-.9-1.6-1.9-1.8C19.3 5.3 12 5.3 12 5.3s-7.3 0-9.1.4C1.9 5.9 1.26 6.5 1 7.5.6 9.3.6 12 .6 12s0 2.7.4 4.5c.26 1 .9 1.6 1.9 1.8 1.8.4 9.1.4 9.1.4s7.3 0 9.1-.4c1-.2 1.64-.8 1.9-1.8.4-1.8.4-4.5.4-4.5s0-2.7-.4-4.5zM9.75 15.3V8.7l6.3 3.3z"/></svg></a>
     </div>
+    <button class="nav-login" id="nav-login-app" type="button">Giriş yap</button>
     <div class="user-badge hidden" id="user-badge">
       <span class="uname" id="user-name"></span>
       <button class="logout" id="btn-logout">Çıkış</button>
     </div>
   </nav>
+  <div class="tv-bar">
+    <div class="tv-bar-tape" id="tv-bar-tape"></div>
+    <div class="tv-search"><svg class="s-ico" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="text" placeholder="Sembol ara (BTC, XAU, ETH…)" id="tv-search-in" autocomplete="off"><div class="tv-sug" id="tv-sug"></div></div>
+    <a href="?page=trading" class="tv-term" data-nav>📉 Trading Terminali</a>
+  </div>
   <div class="home-ticker" id="home-ticker">
+    <span class="ht-lbl">📖 Günün Dersi</span>
     <span class="tq" id="ticker-text">Yükleniyor...</span>
     <span class="ta" id="ticker-author"></span>
   </div>
   <div id="page-home" class="hidden">
+    <script>
+    (function () {
+      function num(s) { var v = parseFloat(s); return isNaN(v) ? null : v; }
+      function fmtP(v) {
+        if (v === null) return '—';
+        if (v >= 100000) return v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
+        if (v >= 1000) return v.toLocaleString('tr-TR', { maximumFractionDigits: 2 });
+        return v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      }
+      function fmtC(v) { if (v === null) return ''; var s = v >= 0 ? '+' : ''; return s + v.toFixed(2) + '%'; }
+      var ITEMS = [];
+      function pushItem(s, p, c) { if (p !== null && !isNaN(p)) ITEMS.push({ s: s, p: p, c: c }); }
+      function render() {
+        var tape = document.getElementById('tv-bar-tape');
+        if (!tape || !ITEMS.length) return;
+        var one = ITEMS.map(function (t) {
+          var cHtml = '';
+          if (t.c !== null) {
+            var cls = t.c >= 0 ? 'up' : 'dn';
+            var arrow = t.c >= 0 ? '▲' : '▼';
+            cHtml = '<span class="c ' + cls + '">' + arrow + ' ' + fmtC(t.c) + '</span>';
+          }
+          return '<span class="tv-tk"><span class="s">' + t.s + '</span><span class="p">' + fmtP(t.p) + '</span>' + cHtml + '</span>';
+        }).join('');
+        tape.innerHTML = '<div class="marquee">' + one + one + '</div>';
+      }
+      async function load() {
+        ITEMS = [];
+        try {
+          var res = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=%5B%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22%5D');
+          var arr = await res.json();
+          if (Array.isArray(arr)) arr.forEach(function (t) {
+            var map = { BTCUSDT: 'BTC', ETHUSDT: 'ETH', SOLUSDT: 'SOL' };
+            if (map[t.symbol]) pushItem(map[t.symbol], num(t.lastPrice), num(t.priceChangePercent));
+          });
+        } catch (e) { /* Binance başarısız — OKX dene */ }
+        if (ITEMS.length < 3) {
+          try {
+            var okx = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT');
+            var oj = await okx.json();
+            if (oj && oj.data) oj.data.forEach(function (t) {
+              var map = { 'BTC-USDT': 'BTC', 'ETH-USDT': 'ETH', 'SOL-USDT': 'SOL' };
+              if (map[t.instId]) {
+                var last = num(t.last), open = num(t.open24h);
+                pushItem(map[t.instId], last, (last !== null && open) ? ((last - open) / open) * 100 : null);
+              }
+            });
+          } catch (e) { /* OKX de başarısız */ }
+        }
+        try {
+          var fx = await fetch('https://api.frankfurter.dev/v1/latest?from=USD&to=EUR,JPY,TRY');
+          var fxj = await fx.json();
+          if (fxj && fxj.rates) {
+            var r = fxj.rates;
+            pushItem('EUR', r.EUR ? 1 / r.EUR : null, null);
+            pushItem('JPY', num(r.JPY), null);
+            pushItem('TRY', num(r.TRY), null);
+          }
+        } catch (e) { /* FX yok */ }
+        try {
+          var gx = await fetch('https://api.gold-api.com/price/XAU');
+          var gj = await gx.json();
+          if (gj && gj.price) pushItem('XAU', num(gj.price), null);
+        } catch (e) { /* Altın yok */ }
+        try {
+          var gs = await fetch('https://api.gold-api.com/price/XAG');
+          var sj = await gs.json();
+          if (sj && sj.price) pushItem('XAG', num(sj.price), null);
+        } catch (e) { /* Gümüş yok */ }
+        render();
+      }
+      window.loadHomeTape = load;
+      function boot() {
+        load();
+        setInterval(load, 60000);
+        var sIn = document.getElementById('tv-search-in');
+        if (sIn) {
+          var SUGGEST = [
+            { p: 'BYBIT:BTCUSDT.P', l: 'BTCUSDT.P', x: 'Bybit' },
+            { p: 'BITSTAMP:BTCUSD', l: 'BTCUSD', x: 'Bitstamp' },
+            { p: 'BYBIT:ETHUSDT.P', l: 'ETHUSDT.P', x: 'Bybit' },
+            { p: 'BITSTAMP:ETHUSD', l: 'ETHUSD', x: 'Bitstamp' },
+            { p: 'BYBIT:SOLUSDT.P', l: 'SOLUSDT.P', x: 'Bybit' },
+            { p: 'COINBASE:SOLUSD', l: 'SOLUSD', x: 'Coinbase' },
+            { p: 'OANDA:XAUUSD', l: 'XAUUSD', x: 'OANDA' },
+            { p: 'OANDA:XAGUSD', l: 'XAGUSD', x: 'OANDA' },
+            { p: 'OANDA:EURUSD', l: 'EURUSD', x: 'OANDA' },
+            { p: 'OANDA:USDJPY', l: 'USDJPY', x: 'OANDA' },
+            { p: 'OANDA:USDTRY', l: 'USDTRY', x: 'OANDA' },
+            { p: 'BIST:XU100', l: 'XU100', x: 'BIST' }
+          ];
+          var sugBox = document.getElementById('tv-sug');
+          function openSym(v) {
+            v = (v || '').trim();
+            if (!v) return;
+            var sym = v.toUpperCase().replace(/\/USDT\.P$/, 'USDT.P').replace(/\/USDT$/, 'USD').replace(/\/USD$/, 'USD');
+            if (sym.indexOf(':') === -1 && !/[0-9]/.test(sym)) sym = 'BITSTAMP:' + sym;
+            if (window.loadTVChart) window.loadTVChart(sym);
+            var lg = document.getElementById('tab-trading');
+            if (lg) lg.click();
+          }
+          function hideSug() { if (sugBox) sugBox.classList.remove('on'); }
+          function renderSug() {
+            if (!sugBox) return;
+            var q = (sIn.value || '').trim().toUpperCase();
+            if (q.length < 1) { hideSug(); return; }
+            var hits = SUGGEST.filter(function (s) { return s.l.indexOf(q) !== -1 || s.x.toUpperCase().indexOf(q) !== -1; }).slice(0, 8);
+            sugBox.innerHTML = '';
+            if (!hits.length) { hideSug(); return; }
+            hits.forEach(function (h) {
+              var it = document.createElement('div');
+              it.className = 'tv-sug-item';
+              it.innerHTML = '<span class="s-lbl">' + h.l + '</span><span class="s-ex">' + h.x + '</span>';
+              it.addEventListener('click', function () {
+                sIn.value = h.l;
+                hideSug();
+                openSym(h.p);
+              });
+              sugBox.appendChild(it);
+            });
+            sugBox.classList.add('on');
+          }
+          sIn.addEventListener('input', renderSug);
+          sIn.addEventListener('focus', renderSug);
+          sIn.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              var first = sugBox && sugBox.querySelector('.tv-sug-item');
+              if (first) { first.click(); return; }
+              openSym(sIn.value);
+            }
+            if (e.key === 'Escape') hideSug();
+          });
+          document.addEventListener('click', function (e) {
+            if (sugBox && !sugBox.contains(e.target) && e.target !== sIn) hideSug();
+          });
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+      else boot();
+    })();
+    </script>
     <div class="home-wrap">
       <div class="home-hero">
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
@@ -2131,6 +2381,109 @@
         </ul>
       </div>
     </div>
+  </div>
+  <div id="page-trading" class="hidden">
+    <div class="eg-brand" style="padding:2px 0 0;margin-bottom:0;"><span class="eg-brand-ico">📉</span><span class="eg-brand-name" style="font-size:17px;">Trading Terminali</span><span class="eg-brand-sub">Canlı grafik burada çalışır (giriş gerekmez). Hesabını/watchlist'ini bağlamak için aşağıdaki butonla TradingView'da giriş yap — aynı tarayıcıda girince widget otomatik tanır.</span><span class="tv-acc-link" style="margin-left:auto;"><a href="https://www.tradingview.com/accounts/signin/" target="_blank" rel="noopener">🔑 TradingView'a giriş</a><a href="https://www.tradingview.com/" target="_blank" rel="noopener" class="ghost">TradingView'da aç</a></span></div>
+    <div class="tv-wl">
+      <span class="wl-head">⭐ Watchlist</span>
+      <div class="wl-items" id="wl-items"></div>
+      <span class="wl-empty" id="wl-empty">Boş — grafiğe eklediğin sembolü "＋" ile kaydet; her açışta burada kalır (giriş yaptıysan tüm cihazlarında).</span>
+      <button type="button" class="wl-add" id="wl-add">＋ Grafikteki sembolü ekle</button>
+    </div>
+    <div class="tv-chart-box" id="tv-chart-box"></div>
+    <script>
+    (function () {
+      window._tvSym = null;
+      function loadTVChart(sym) {
+        var box = document.getElementById('tv-chart-box');
+        if (!box) return;
+        window._tvSym = sym || 'BITSTAMP:BTCUSD';
+        var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        box.innerHTML = '';
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+        s.async = true;
+        s.textContent = JSON.stringify({
+          autosize: true,
+          symbol: sym || 'BITSTAMP:BTCUSD',
+          interval: '60',
+          timezone: 'Europe/Istanbul',
+          theme: isLight ? 'light' : 'dark',
+          style: '1',
+          locale: 'tr',
+          backgroundColor: isLight ? 'rgba(255,255,255,1)' : 'rgba(12,13,27,1)',
+          gridColor: isLight ? 'rgba(230,232,240,1)' : 'rgba(38,42,78,0.5)',
+          allow_symbol_change: true,
+          hide_side_toolbar: false,
+          details: true,
+          hotlist: true,
+          withdateranges: true,
+          studies: ['Volume@tv-basicstudies']
+        });
+        box.appendChild(s);
+        if (typeof renderWatchlist === 'function') renderWatchlist();
+      }
+      window.loadTVChart = loadTVChart;
+      var WL_KEY = 'alfa-watchlist';
+      function wlParse(v) { try { var a = JSON.parse(v); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+      function wlLabel(sym) { return sym.indexOf(':') >= 0 ? sym.split(':')[1] : sym; }
+      async function renderWatchlist() {
+        var box = document.getElementById('wl-items');
+        if (!box) return;
+        var empty = document.getElementById('wl-empty');
+        var list = wlParse(await store.get(WL_KEY));
+        box.innerHTML = '';
+        if (!list.length) { if (empty) empty.style.display = ''; return; }
+        if (empty) empty.style.display = 'none';
+        list.forEach(function (sym) {
+          var chip = document.createElement('span');
+          chip.className = 'wl-chip' + (window._tvSym === sym ? ' on' : '');
+          chip.innerHTML = wlLabel(sym) + '<button type="button" class="rm" title="Kaldır">✕</button>';
+          chip.addEventListener('click', function (ev) {
+            if (ev.target.classList.contains('rm')) { removeFromWatchlist(sym); return; }
+            if (window.loadTVChart) window.loadTVChart(sym);
+          });
+          box.appendChild(chip);
+        });
+      }
+      async function addToWatchlist(sym) {
+        if (!sym) return;
+        var list = wlParse(await store.get(WL_KEY));
+        if (list.indexOf(sym) === -1) list.push(sym);
+        await store.set(WL_KEY, JSON.stringify(list));
+        renderWatchlist();
+      }
+      async function removeFromWatchlist(sym) {
+        var list = wlParse(await store.get(WL_KEY)).filter(function (s) { return s !== sym; });
+        await store.set(WL_KEY, JSON.stringify(list));
+        renderWatchlist();
+      }
+      window.renderWatchlist = renderWatchlist;
+      function boot() {
+        loadTVChart();
+        var tg = document.getElementById('themeToggle');
+        if (tg) tg.addEventListener('click', function () { setTimeout(loadTVChart, 350); });
+        var addBtn = document.getElementById('wl-add');
+        if (addBtn) addBtn.addEventListener('click', function () { addToWatchlist(window._tvSym); });
+        renderWatchlist();
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+      else boot();
+    })();
+    </script>
+    <div class="tv-notes">
+      <div class="tv-notes-head">📝 Trading Notları</div>
+      <textarea id="tv-notes-ta" placeholder="Önemli hatırlatmalarını buraya yaz — otomatik kaydedilir (ör. BTC 68k üstü manipülasyon riski, XAU 2400 direnci…)"></textarea>
+    </div>
+    <script>
+    (function () {
+      var ta = document.getElementById('tv-notes-ta');
+      if (!ta) return;
+      try { ta.value = localStorage.getItem('alfa-tv-notes') || ''; } catch (e) {}
+      ta.addEventListener('input', function () { try { localStorage.setItem('alfa-tv-notes', ta.value); } catch (e) {} });
+    })();
+    </script>
   </div>
   <div id="page-defter" class="hidden">
     <div class="eg-brand"><span class="eg-brand-ico">✅</span><span class="eg-brand-name">Alfa-Check List</span><span class="eg-brand-sub">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
@@ -5522,7 +5875,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
+  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -5535,7 +5888,7 @@ function setInitialPage() {
 function showPage(name, skipAnim) {
   currentPage = name;
   document.body.dataset.page = name;
-  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
+  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -7151,6 +7504,8 @@ async function onAuthed(user) {
   const nm = (user.user_metadata && user.user_metadata.name) || (user.email || '').split('@')[0];
   document.getElementById('user-name').textContent = nm;
   document.getElementById('user-badge').classList.remove('hidden');
+  const nlAppBtn = document.getElementById('nav-login-app');
+  if (nlAppBtn) nlAppBtn.style.display = 'none';
   // Admin kontrolü: sadece admin görebilir
   const isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
   const adminTab = document.getElementById('tab-chat-admin');
@@ -7207,10 +7562,12 @@ function bootAuth() {
   // Tanıtım sayfası -> giriş penceresi
   const openAuth = m => { hideLanding(); showGate(); setMode(m); };
   $('nav-login').addEventListener('click', () => openAuth('login'));
+  const nlAppBtn2 = document.getElementById('nav-login-app');
+  if (nlAppBtn2) nlAppBtn2.addEventListener('click', () => openAuth('login'));
   $('hero-login').addEventListener('click', () => openAuth('login'));
   $('hero-register').addEventListener('click', () => openAuth('register'));
   $('cta-register').addEventListener('click', () => openAuth('register'));
-  $('auth-close').addEventListener('click', () => { hideGate(); showLanding(); });
+  $('auth-close').addEventListener('click', () => { hideGate(); });
   $('btn-logout').addEventListener('click', async () => {
     try { await pushCloud(); } catch (e) {}
     try { await AUTH.client.auth.signOut(); } catch (e) {}
@@ -7270,9 +7627,9 @@ function bootAuth() {
     .then(({ data }) => {
       if (recovering) { hideLanding(); showGate(); setMode('newpass'); return; }
       if (data && data.session && data.session.user) onAuthed(data.session.user);
-      else showLanding();
+      else hideLanding();
     })
-    .catch(() => { if (recovering) { showGate(); setMode('newpass'); } else showLanding(); });
+    .catch(() => { if (recovering) { showGate(); setMode('newpass'); } else hideLanding(); });
 }
 
 if (AUTH_ENABLED) {
@@ -7280,6 +7637,8 @@ if (AUTH_ENABLED) {
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
+  const nlAppBtn3 = document.getElementById('nav-login-app');
+  if (nlAppBtn3) nlAppBtn3.style.display = 'none';
   seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(loadEgitim).then(loadNews).then(init)
     .then(() => showPage(currentPage)).catch(() => showPage(currentPage));
   // OAuth olmayan modda da hash kontrolü
