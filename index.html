@@ -5400,7 +5400,7 @@ function setInitialPage() {
   });
 }
 
-function showPage(name) {
+function showPage(name, skipAnim) {
   currentPage = name;
   const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
   pages.forEach(p => {
@@ -5415,7 +5415,7 @@ function showPage(name) {
     d.classList.remove('open');
   });
   const shown = document.getElementById('page-' + name);
-  if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
+  if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   try { localStorage.setItem('df-last-page', name); } catch (e) {}
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   if (name === 'data') renderData();
@@ -6976,7 +6976,7 @@ async function refreshAppData() {
   try { if (typeof loadDaily === 'function') loadDaily(); } catch (e) { /* devam */ }
   try { if (typeof render === 'function') render(); } catch (e) { /* devam */ }
   try { if (typeof renderRRcum === 'function') renderRRcum(); } catch (e) { /* devam */ }
-  showPage(currentPage);
+  showPage(currentPage, true);
 }
 
 function showGate() { document.getElementById('auth-gate').classList.add('open'); }
