@@ -212,23 +212,36 @@
   .nav-drop.open .drop-menu { display: flex; flex-direction: column; gap: 2px; }
   .nav-drop .drop-menu .nav-link { display: block; white-space: nowrap; }
   .nav-drop.on > .drop-btn { background: var(--pc-soft); color: var(--pc); }
+  /* Mobil menü (hamburger + kenar çekmecesi) */
+  .nav-mobile-btn { display: none; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; flex: none; padding: 0; }
+  .nav-mobile-btn svg { width: 20px; height: 20px; }
+  .nav-mobile-btn:active { transform: scale(.96); }
+  .nav-mobile-backdrop { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(8,9,18,.55); }
+  .nav-mobile-backdrop.open { display: block; }
+  .nav-mobile { position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 86vw); z-index: 510; background: var(--card-2); border-left: 1px solid var(--border); box-shadow: -14px 0 44px rgba(0,0,0,.28); transform: translateX(105%); visibility: hidden; transition: transform .25s ease, visibility .25s; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .nav-mobile.open { transform: translateX(0); visibility: visible; }
+  .nav-mobile-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card-2); z-index: 2; }
+  .nav-mobile-head .nav-brand { flex: 1; min-width: 0; }
+  .nav-mobile-close { flex: none; width: 34px; height: 34px; border-radius: 9px; background: transparent; border: 1px solid var(--border); color: var(--text-2); font-size: 17px; cursor: pointer; line-height: 1; }
+  .nav-mobile-body { padding: 8px 12px 30px; }
+  .mnav-link { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-2); text-decoration: none; cursor: pointer; }
+  .mnav-link:active { background: var(--pc-soft); }
+  .mnav-link.on { background: var(--pc-soft); color: var(--pc); }
+  .mnav-link.sub { padding-left: 26px; font-size: 13.5px; color: var(--text-3); font-weight: 500; }
+  .mnav-group { padding: 16px 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+  .mnav-contact { display: flex; align-items: center; gap: 10px; padding: 18px 12px 4px; border-top: 1px solid var(--border); margin-top: 16px; }
+  .mnav-contact .nc-lbl { margin-right: auto; }
   @media (max-width: 680px) {
     .navbar { gap: 8px; padding: 8px 0; margin-bottom: 14px; backdrop-filter: none; -webkit-backdrop-filter: none; }
     .logo-mark { width: 30px; height: 30px; border-radius: 8px; font-size: 14px; }
     .nav-brand span { font-size: 15px; }
-    .nav-links { overflow-x: auto; }
-    .nav-links .nav-link, .nav-links .drop-btn { white-space: nowrap; }
-    .nav-drop { position: static; }
-    .nav-drop .drop-menu::before { display: none; }
-    .nav-drop.open::after { content: ''; position: fixed; inset: 0; background: rgba(8,9,18,.55); z-index: 290; }
-    .nav-drop.open .drop-menu { position: fixed; top: auto; left: 10px; right: 10px; bottom: 12px; max-height: 60vh; overflow-y: auto; background: var(--card-2); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--menu-shadow); padding: 10px; min-width: auto; z-index: 300; display: flex; flex-direction: column; gap: 4px; }
-    .nav-drop.open .drop-menu .nav-link { padding: 13px 14px; font-size: 14px; }
-    .nav-link, .nav-drop .drop-btn { padding: 7px 12px; font-size: 13px; }
-    .nav-contact { gap: 6px; }
-    .nc-lbl { display: none; }
+    .nav-links, .nav-contact, .wrap .nav-links, .wrap .nav-contact { display: none; }
+    .nav-mobile-btn { display: inline-flex; }
+    .navbar .user-badge, .navbar .nav-login { margin-left: auto; }
+    .navbar .user-badge .uname { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .navbar .nav-mobile-btn { margin-left: 8px; }
     .soc-link { width: 28px; height: 28px; }
-    .navbar .user-badge { margin-left: 6px; }
-    .navbar .nav-login { margin-left: 6px; }
+    body .theme-toggle { top: auto; bottom: 22px; left: 20px; right: auto; z-index: 490; }
   }
   .navbar .user-badge { margin-left: 12px; }
   .navbar .nav-login { margin-left: 12px; flex: none; }
@@ -2152,7 +2165,41 @@
       <span class="uname" id="user-name"></span>
       <button class="logout" id="btn-logout">Çıkış</button>
     </div>
+    <button class="nav-mobile-btn" id="nav-mobile-btn" type="button" aria-label="Menü" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   </nav>
+  <div class="nav-mobile-backdrop" id="nav-mobile-backdrop"></div>
+  <div class="nav-mobile" id="nav-mobile" role="dialog" aria-label="Menü">
+    <div class="nav-mobile-head">
+      <div class="nav-brand"><div class="logo-mark">α</div><span>Alfa Traders</span></div>
+      <button class="nav-mobile-close" id="nav-mobile-close" type="button" aria-label="Kapat">✕</button>
+    </div>
+    <div class="nav-mobile-body">
+      <a href="?page=home" class="mnav-link" data-nav data-mnav="home">🏠 Ana Menü</a>
+      <div class="mnav-group">⚡ Trader Araçları</div>
+      <a href="?page=trading" class="mnav-link" data-nav data-mnav="trading">📉 Trading Terminali</a>
+      <a href="?page=tv" class="mnav-link" data-nav data-mnav="tv">📺 TV Taraması</a>
+      <a href="?page=watchlist" class="mnav-link" data-nav data-mnav="watchlist">⭐ Takip Listesi</a>
+      <a href="?page=confirm" class="mnav-link" data-nav data-mnav="confirm">📜 İşlem Defteri</a>
+      <a href="?page=signal" class="mnav-link" data-nav data-mnav="signal">🛰️ Sinyal Paneli</a>
+      <a href="?page=indicator" class="mnav-link" data-nav data-mnav="indicator">📊 İndikatör Paneli</a>
+      <a href="?page=calculators" class="mnav-link" data-nav data-mnav="calculators">🧮 Hesaplayıcılar</a>
+      <div class="mnav-group">🎓 Alfa Edu</div>
+      <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim">🎓 Alfa Edu</a>
+      <a href="?page=indicators" class="mnav-link" data-nav data-mnav="indicators">📐 İndikatörler</a>
+      <div class="mnav-group">📰 AlfaNews</div>
+      <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar">📅 Ekonomik Takvim</a>
+      <a href="?page=news" class="mnav-link" data-nav data-mnav="news">🗞️ Dergi</a>
+      <div class="mnav-group">Topluluk</div>
+      <a href="?page=basvuru" class="mnav-link" data-nav data-mnav="basvuru">🚀 Alfa Trader Ol</a>
+      <a href="?page=chat-admin" class="mnav-link" data-nav data-mnav="chat-admin" data-close>💬 Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge-m">0</span></a>
+      <div class="mnav-contact">
+        <span class="nc-lbl">İletişim</span>
+        <a class="soc-link tg" id="nc-tg-m" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
+        <a class="soc-link x" id="nc-x-m" href="#" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.06l-4.74-6.2L5.6 21H2.6l7-8L2.2 3h6.2l4.3 5.68L17.5 3zm-1.05 16.2h1.66L7.63 4.7H5.85z"/></svg></a>
+        <a class="soc-link yt" id="nc-yt-m" href="#" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 7.5c-.26-1-.9-1.6-1.9-1.8C19.3 5.3 12 5.3 12 5.3s-7.3 0-9.1.4C1.9 5.9 1.26 6.5 1 7.5.6 9.3.6 12 .6 12s0 2.7.4 4.5c.26 1 .9 1.6 1.9 1.8 1.8.4 9.1.4 9.1.4s7.3 0 9.1-.4c1-.2 1.64-.8 1.9-1.8.4-1.8.4-4.5.4-4.5s0-2.7-.4-4.5zM9.75 15.3V8.7l6.3 3.3z"/></svg></a>
+      </div>
+    </div>
+  </div>
   <div class="tv-bar">
     <div class="tv-bar-tape" id="tv-bar-tape"></div>
     <div class="tv-search"><svg class="s-ico" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="text" placeholder="Sembol ara (BTC, XAU, ETH…)" id="tv-search-in" autocomplete="off"><div class="tv-sug" id="tv-sug"></div></div>
@@ -3298,9 +3345,9 @@ function applySocial() {
       else { el.style.display = 'none'; }
     });
   };
-  set(['nc-tg', 'lps-tg'], SOCIAL.telegram);
-  set(['nc-x', 'lps-x'], SOCIAL.x);
-  set(['nc-yt', 'lps-yt'], SOCIAL.youtube);
+  set(['nc-tg', 'nc-tg-m', 'lps-tg'], SOCIAL.telegram);
+  set(['nc-x', 'nc-x-m', 'lps-x'], SOCIAL.x);
+  set(['nc-yt', 'nc-yt-m', 'lps-yt'], SOCIAL.youtube);
   ['bas-ref-link', 'bas-ref-okx'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -5558,6 +5605,28 @@ function init() {
       l.addEventListener('click', () => d.classList.remove('open'));
     });
   });
+  // Mobil hamburger menü (kenar çekmecesi)
+  const mnavBtn = document.getElementById('nav-mobile-btn');
+  const mnav = document.getElementById('nav-mobile');
+  const mnavBack = document.getElementById('nav-mobile-backdrop');
+  const mnavCloseBtn = document.getElementById('nav-mobile-close');
+  function closeMobileNav() {
+    if (mnav) mnav.classList.remove('open');
+    if (mnavBack) mnavBack.classList.remove('open');
+    if (mnavBtn) mnavBtn.setAttribute('aria-expanded', 'false');
+  }
+  if (mnavBtn && mnav) {
+    mnavBtn.addEventListener('click', () => {
+      const open = mnav.classList.toggle('open');
+      if (mnavBack) mnavBack.classList.toggle('open', open);
+      mnavBtn.setAttribute('aria-expanded', String(open));
+    });
+    if (mnavCloseBtn) mnavCloseBtn.addEventListener('click', closeMobileNav);
+    if (mnavBack) mnavBack.addEventListener('click', closeMobileNav);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileNav(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 680) closeMobileNav(); });
+    document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-close]')) closeMobileNav(); });
+  }
   // Global nav link handling (SPA intercept, sağ tık açma)
   document.querySelectorAll('[data-nav]').forEach(el => {
     el.addEventListener('click', e => {
@@ -5567,7 +5636,7 @@ function init() {
       const href = el.getAttribute('href');
       if (!href) return;
       const m = href.match(/[?&]page=(\w+)/);
-      if (m) showPage(m[1]);
+      if (m) { showPage(m[1]); closeMobileNav(); }
     });
   });
   // Sayfa yüklendiğinde ?page= parametresini oku
@@ -5936,6 +6005,7 @@ function showPage(name, skipAnim) {
     const tb = document.getElementById('tab-' + p);
     if (tb) tb.classList.toggle('on', name === p);
   });
+  document.querySelectorAll('[data-mnav]').forEach(el => el.classList.toggle('on', el.getAttribute('data-mnav') === name));
   // highlight parent dropdown when child active, close all dropdowns
   document.querySelectorAll('.nav-drop').forEach(d => {
     d.classList.toggle('on', !!d.querySelector('.nav-link.on'));
@@ -8299,7 +8369,8 @@ let caLastCount = 0;
 
 function updateChatBadge() {
   const badge = document.getElementById('chat-unread-badge');
-  if (!badge) return;
+  const badgeM = document.getElementById('chat-unread-badge-m');
+  if (!badge && !badgeM) return;
   const sessions = {};
   caAllMsgs.forEach(m => {
     if (!sessions[m.sessionId]) sessions[m.sessionId] = [];
@@ -8311,8 +8382,13 @@ function updateChatBadge() {
     const msgs = sessions[sid];
     if (msgs.some(m => m.role === 'user')) unread++;
   });
-  if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hidden'); }
-  else { badge.classList.add('hidden'); }
+  const show = unread > 0;
+  const text = unread > 9 ? '9+' : unread;
+  [badge, badgeM].forEach(b => {
+    if (!b) return;
+    if (show) { b.textContent = text; b.classList.remove('hidden'); }
+    else { b.classList.add('hidden'); }
+  });
 }
 
 function renderAdminChat() {
