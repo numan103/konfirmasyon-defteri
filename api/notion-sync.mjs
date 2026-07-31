@@ -19,7 +19,8 @@ function whichDb(pair) {
 function buildProps(trade) {
   const props = {};
 
-  props['Trade #'] = { title: [{ text: { content: String(trade.id || trade.ts || Date.now()) } }] };
+  const titleText = [trade.pair, trade.dir].filter(Boolean).join(' ').toUpperCase() || 'İşlem';
+  props['Trade #'] = { title: [{ text: { content: titleText } }] };
 
   if (trade.date) {
     let iso = null;
@@ -74,13 +75,17 @@ export default async function handler(req, res) {
 
     for (const trade of trades) {
       const db = whichDb(trade.pair);
-      const body = {
-        parent: { database_id: db.id },
-        properties: buildProps(trade),
-      };
+      const props = buildProps(trade);
 
-      const r = await fetch('https://api.notion.com/v1/pages', {
-        method: 'POST',
+      let r, method = 'POST', url = 'https://api.notion.com/v1/pages';
+      if (trade.notionId) {
+        method = 'PATCH';
+        url = `https://api.notion.com/v1/pages/${trade.notionId}`;
+      }
+      const body = method === 'POST' ? { parent: { database_id: db.id }, properties: props } : { properties: props };
+
+      r = await fetch(url, {
+        method,
         headers: {
           Authorization: `Bearer ${token}`,
           'Notion-Version': NOTION_VERSION,

@@ -407,13 +407,29 @@
   .df-seg button.on { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
   .df-seg button.long.on { color: var(--green); }
   .df-seg button.short.on { color: var(--red); }
-  .data-row { display: grid; grid-template-columns: 50px 1fr 44px 52px 52px 44px 20px; gap: 4px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-size: 12.5px; cursor:pointer; transition:background .1s; }
+  .data-row { display: grid; grid-template-columns: 60px 1fr 1fr 1fr 60px 54px 28px 24px; gap: 4px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-size: 12.5px; cursor:pointer; transition:background .1s; }
   .data-row:hover { background:var(--bg-2); }
-  .data-row.detail-open { background:var(--bg-2); border-radius:6px; margin-bottom:4px; border-bottom-color:transparent; }
   .data-row.head { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1.5px solid var(--border); cursor:default; }
   .data-row.head:hover { background:transparent; }
-  .dr-detail { display:none; grid-column:1/-1; padding:10px 4px 4px; border-top:1px dashed var(--border); margin-top:4px; }
-  .data-row.detail-open .dr-detail { display:block; }
+  .dr-body { grid-column:1/-1; display:flex; flex-direction:column; gap:6px; padding:6px 4px 2px; }
+  .dr-note { font-size:12px; color:var(--text-2); padding:6px 8px; background:var(--bg); border-radius:6px; white-space:pre-wrap; }
+  .dr-edit { grid-column:1/-1; display:none; gap:10px; padding:12px 4px 4px; border-top:1px dashed var(--border); margin-top:6px; }
+  .data-row.edit-open { background:var(--bg-2); border-radius:6px; margin-bottom:4px; border-bottom-color:transparent; }
+  .data-row.edit-open .dr-edit { display:grid; }
+  .dr-edit .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; }
+  .dr-edit label { font-size:11px; font-weight:600; color:var(--text-3); display:flex; flex-direction:column; gap:4px; }
+  .dr-edit input, .dr-edit select, .dr-edit textarea { padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:13px; font-family:'Inter',sans-serif; width:100%; box-sizing:border-box; outline:none; }
+  .dr-edit input:focus, .dr-edit select:focus, .dr-edit textarea:focus { border-color:var(--acc); }
+  .dr-edit textarea { min-height:60px; resize:vertical; }
+  .dr-edit-imgs { display:flex; flex-wrap:wrap; gap:6px; }
+  .dr-edit-imgs .thmb { position:relative; width:56px; height:56px; border-radius:6px; overflow:hidden; border:1px solid var(--border); }
+  .dr-edit-imgs .thmb img { width:100%; height:100%; object-fit:cover; }
+  .dr-edit-imgs .thmb .x { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:var(--red); color:#fff; border:none; font-size:11px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+  .dr-edit .acts { display:flex; gap:8px; align-items:center; }
+  .data-row .rin { width:100%; min-width:0; padding:6px; border:1.5px solid var(--border); border-radius:7px; background:var(--card); color:var(--text); font-size:12.5px; font-weight:700; font-family:'Inter',sans-serif; text-align:right; box-sizing:border-box; outline:none; }
+  .data-row .rin:focus { border-color:var(--acc); }
+  .dr-editb { background:none; border:none; color:var(--text-3); cursor:pointer; font-size:14px; padding:0; line-height:1; }
+  .dr-editb:hover { color:var(--acc); }
   .dr-detail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:4px 12px; font-size:12px; }
   .dr-detail-grid .item { display:flex; justify-content:space-between; padding:2px 0; }
   .dr-detail-grid .item .lbl { color:var(--text-3); }
@@ -2257,8 +2273,10 @@
         <div class="df-row"><span class="df-lbl">Tarih</span><input type="date" id="df-date"></div>
         <div class="df-row"><span class="df-lbl">Parite</span><input type="text" id="df-pair" placeholder="BTC, XAU…" maxlength="12"></div>
         <div class="df-row"><span class="df-lbl">Yön</span><div class="df-seg"><button type="button" class="long on" id="df-long">LONG</button><button type="button" class="short" id="df-short">SHORT</button></div></div>
-        <div class="df-row"><span class="df-lbl">R</span><input type="number" step="0.01" id="df-r" placeholder="2.5 / -1.0"></div>
+        <div class="df-row"><span class="df-lbl">R</span><input type="number" step="0.01" id="df-r" placeholder="+2.5 / -0.3 — kayıp için (-) ile gir"></div>
+        <div class="df-row"><span class="df-lbl">Giriş</span><input type="text" id="df-entry" placeholder="ör. 2380.50"></div>
         <div class="df-row"><span class="df-lbl">Strateji</span><input type="text" id="df-strat" placeholder="Breaker, FVG…"></div>
+        <div class="df-row"><span class="df-lbl">Model</span><input type="text" id="df-model" placeholder="ör. H1 FVG + M15 iBOS"></div>
         <div class="df-row df-row-note"><span class="df-lbl">Not</span><textarea id="df-note" placeholder="İşlemle ilgili notların…" rows="2"></textarea></div>
         <div class="df-crits">
           <label>Setup <input type="range" id="df-c-setup" min="0" max="10" value="4" class="crit-range"><span class="crit-val" id="df-c-setup-v">4</span></label>
@@ -2398,8 +2416,8 @@
       <div class="mag-foot"><div class="mag-dots" id="mag-dots"></div><div class="mag-counter" id="mag-counter">1 / 1</div></div>
       <div class="mag-hint">Çevir: kaydır · oklar · klavye · içindekiler · Görsele tıkla → büyüt</div>
     </div>
-    <div id="mag-zoom"><img id="mag-zoom-img" alt=""></div>
   </div>
+  <div id="mag-zoom"><img id="mag-zoom-img" alt=""></div>
   <div id="page-egitim" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-name">Alfa Edu</span>
@@ -4489,8 +4507,17 @@ function logTrade() {
   // Notion'a senkron et
   const nt = trades[0];
   const noteText = [nt.sabah ? 'Sabah: ' + nt.sabah : '', nt.senaryo ? 'Senaryo: ' + nt.senaryo : '', nt.anti ? 'Anti: ' + nt.anti : '', nt.gunsonu ? 'Gün Sonu: ' + nt.gunsonu : ''].filter(Boolean).join('\n');
-  const ntrade = { id: nt.id, ts: nt.id, date: nt.date, pair: nt.pair, dir: nt.dir, r: nt.r, strat: nt.strat, note: noteText || '', stars: nt.stars };
-  fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) }).catch(() => {});
+  const ntrade = { id: nt.id, ts: nt.id, date: nt.date, pair: nt.pair, dir: nt.dir, r: nt.r, strat: nt.strat, note: noteText || '', stars: nt.stars, notionId: nt.notionId || undefined };
+  fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) })
+    .then(r => r.json().catch(() => ({})))
+    .then(j => {
+      const rr = Array.isArray(j.results) ? j.results[0] : null;
+      if (rr && rr.ok && rr.notionId && !nt.notionId) {
+        nt.notionId = rr.notionId;
+        saveTrades();
+      }
+    })
+    .catch(() => {});
   } catch (e) {
     console.error('logTrade hatası:', e);
     note.textContent = 'İşlem kaydedilemedi: ' + e.message;
@@ -4607,7 +4634,7 @@ function renderTrades() {
     rin.addEventListener('change', () => {
       t.r = rin.value;
       saveTrades(); renderTrades();
-      const nt = { id: t.id, ts: t.id, date: t.date, pair: t.pair, dir: t.dir, r: t.r, strat: t.strat, note: '', stars: t.stars };
+      const nt = { id: t.id, ts: t.id, date: t.date, pair: t.pair, dir: t.dir, r: t.r, strat: t.strat, note: '', stars: t.stars, notionId: t.notionId || undefined };
       fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nt) }).catch(() => {});
     });
     rwrap.appendChild(rlbl); rwrap.appendChild(rin);
@@ -5436,9 +5463,9 @@ function renderData() {
     kpis.appendChild(d);
   };
   addK('Toplam işlem', n, '', wins + ' kazanan');
-  addK('Toplam R', (totR > 0 ? '+' : '') + totR.toFixed(2), totR >= 0 ? 'pos' : 'neg', '');
+  addK('Toplam R', (totR > 0 ? '+' : '') + totR.toFixed(2) + 'R', totR >= 0 ? 'pos' : 'neg', '');
   addK('Win rate', wr + '%', '', wins + '/' + n);
-  addK('Ortalama R', (avg > 0 ? '+' : '') + avg.toFixed(2), avg >= 0 ? 'pos' : 'neg', 'işlem başına');
+  addK('Ortalama R', (avg > 0 ? '+' : '') + avg.toFixed(2) + 'R', avg >= 0 ? 'pos' : 'neg', 'işlem başına');
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(n / DF_PP));
@@ -5463,7 +5490,7 @@ function renderData() {
   const tb = document.getElementById('data-table');
   tb.innerHTML = '';
   const head = document.createElement('div'); head.className = 'data-row head';
-  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite</span><span style="text-align:center;">Yön</span><span>Strat</span><span style="text-align:right;">R</span><span style="text-align:right;">Detay</span><span></span>';
+  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite / Yön</span><span>Strateji</span><span>Model</span><span>Giriş</span><span style="text-align:right;">R</span><span></span><span></span>';
   tb.appendChild(head);
 
   pageRows.forEach(t => {
@@ -5471,50 +5498,140 @@ function renderData() {
     const row = document.createElement('div'); row.className = 'data-row';
     row.innerHTML =
       '<span style="font-size:10px;color:var(--text-3);">' + dfDateLabel(t) + '</span>' +
-      '<span class="dr-pair">' + (t.pair || '—') + '</span>' +
-      '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '" style="text-align:center;font-size:11px;">' + (t.dir || '') + '</span>' +
-      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ((t.strat||'').slice(0,10) || '—') + '</span>' +
-      '<span class="dr-r ' + (r >= 0 ? 'pos' : 'neg') + '" style="text-align:right;font-weight:700;">' + (r > 0 ? '+' : '') + r.toFixed(2) + '</span>' +
-      '<span style="text-align:right;font-size:11px;color:var(--text-3);cursor:pointer;">▼</span>';
+      '<span class="dr-pair">' + esc(t.pair || '—') + ' <span class="dr-dir ' + (t.dir || '').toLowerCase() + '">' + esc(t.dir || '') + '</span></span>' +
+      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.strat||'').slice(0,14) || '—') + '</span>' +
+      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.model||'').slice(0,14) || '—') + '</span>' +
+      '<span style="font-size:11px;color:var(--text-2);">' + esc(t.entry || '—') + '</span>';
+    const rwrap = document.createElement('span');
+    rwrap.style.textAlign = 'right';
+    const rin = document.createElement('input');
+    rin.className = 'rin'; rin.type = 'number'; rin.step = '0.01'; rin.placeholder = '—';
+    rin.value = t.r !== '' && t.r != null && !isNaN(t.r) ? Number(t.r) : '';
+    rin.setAttribute('aria-label', 'Sonuç (R)');
+    rin.addEventListener('click', e => e.stopPropagation());
+    rin.addEventListener('change', async () => {
+      t.r = rin.value;
+      await saveData(); renderData();
+      syncDataTradeNotion(t);
+    });
+    rwrap.appendChild(rin);
+    row.appendChild(rwrap);
+    const eb = document.createElement('button'); eb.className = 'dr-editb'; eb.textContent = '✎'; eb.title = 'Düzenle';
+    eb.addEventListener('click', e => { e.stopPropagation(); row.classList.toggle('edit-open'); });
+    row.appendChild(eb);
     const del = document.createElement('button'); del.className = 'dr-del'; del.type = 'button'; del.textContent = '×';
-    del.addEventListener('click', async (e) => { e.stopPropagation(); dataTrades = dataTrades.filter(x => x.id !== t.id); await saveData(); renderData(); });
+    del.addEventListener('click', async (e) => { e.stopPropagation(); if (!confirm('Bu işlemi sil?')) return; dataTrades = dataTrades.filter(x => x.id !== t.id); await saveData(); renderData(); });
     row.appendChild(del);
 
-    // Detail panel
-    const detail = document.createElement('div'); detail.className = 'dr-detail';
-    let detailHtml = '<div class="dr-detail-grid">';
-    detailHtml += '<div class="item"><span class="lbl">Tarih</span><span class="val">' + dfDateLabel(t) + '</span></div>';
-    detailHtml += '<div class="item"><span class="lbl">Parite</span><span class="val">' + esc(t.pair || '—') + '</span></div>';
-    detailHtml += '<div class="item"><span class="lbl">Yön</span><span class="val ' + (t.dir || '').toLowerCase() + '">' + esc(t.dir || '—') + '</span></div>';
-    detailHtml += '<div class="item"><span class="lbl">R</span><span class="val '+ (r>=0?'pos':'neg') + '">' + (r>0?'+':'') + r.toFixed(2) + '</span></div>';
-    if (t.strat) detailHtml += '<div class="item"><span class="lbl">Strateji</span><span class="val">' + esc(t.strat) + '</span></div>';
-    detailHtml += '</div>';
-    // Criteria bars
+    const body = document.createElement('div'); body.className = 'dr-body';
+    const bhtml = [];
+    if (t.images && t.images.length) bhtml.push('<div class="dr-imgs">' + t.images.map(u => '<img src="' + u + '" onclick="event.stopPropagation();magZoom(this.src)">').join('') + '</div>');
+    if (t.note) bhtml.push('<div class="dr-note">' + esc(t.note) + '</div>');
     if (t.criteria) {
-      detailHtml += '<div class="dr-crit-bars">';
+      bhtml.push('<div class="dr-crit-bars">');
       const cl = { setup:'Setup', entry:'Entry', exit:'Exit', risk:'Risk', psycho:'Psi' };
       Object.keys(cl).forEach(k => {
         const v = t.criteria[k] || 0;
-        detailHtml += '<div class="dr-crit-bar"><span>' + cl[k] + ' ' + v + '</span><div class="bar"><div class="fill" style="width:' + (v/10*100) + '%"></div></div></div>';
+        bhtml.push('<div class="dr-crit-bar"><span>' + cl[k] + ' ' + v + '</span><div class="bar"><div class="fill" style="width:' + (v/10*100) + '%"></div></div></div>');
       });
-      detailHtml += '</div>';
+      bhtml.push('</div>');
     }
-    if (t.note) detailHtml += '<div style="font-size:12px;color:var(--text-2);margin-top:4px;padding:6px;background:var(--bg);border-radius:6px;">' + esc(t.note) + '</div>';
-    if (t.images && t.images.length) {
-      detailHtml += '<div class="dr-imgs">';
-      t.images.forEach(url => { detailHtml += '<img src="' + url + '" onclick="event.stopPropagation();magZoom(this.src)">'; });
-      detailHtml += '</div>';
-    }
-    detail.innerHTML = detailHtml;
-    row.appendChild(detail);
+    body.innerHTML = bhtml.join('');
+    row.appendChild(body);
+
+    const edit = document.createElement('div'); edit.className = 'dr-edit';
+    edit.innerHTML = buildDrEditHtml(t);
+    bindDrEdit(edit, t, row);
+    row.appendChild(edit);
 
     row.addEventListener('click', e => {
-      if (e.target.closest('.dr-del')) return;
-      row.classList.toggle('detail-open');
+      if (e.target.closest('input,button,textarea,select,.dr-imgs img')) return;
+      row.classList.toggle('edit-open');
     });
     tb.appendChild(row);
   });
   document.getElementById('data-count').textContent = n ? (n + ' işlem · sayfa ' + dfDataPage + '/' + totalPages) : (dfFilter !== 'all' ? 'Bu filtrede işlem yok.' : 'Henüz işlem yok.');
+}
+
+async function syncDataTradeNotion(t) {
+  const parts = [];
+  if (t.note) parts.push(t.note);
+  if (t.entry) parts.push('Giriş: ' + t.entry);
+  if (t.model) parts.push('Model: ' + t.model);
+  const payload = { id: t.id, ts: t.ts || Date.now(), date: t.date || '', pair: t.pair || '', dir: t.dir || '', r: dnum(t.r) || 0, strat: t.strat || '', note: parts.join(' · '), stars: 0, notionId: t.notionId || undefined };
+  try {
+    const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const j = await resp.json();
+    const rr = Array.isArray(j.results) ? j.results[0] : null;
+    if (rr && rr.ok && rr.notionId && !t.notionId) {
+      t.notionId = rr.notionId;
+      await saveData();
+    }
+  } catch (e) {}
+}
+
+function buildDrEditHtml(t) {
+  const dirOpt = ['LONG','SHORT'].map(d => '<option value="' + d + '"' + (t.dir === d ? ' selected' : '') + '>' + d + '</option>').join('');
+  const imgs = (t.images || []).map((u, i) => '<div class="thmb"><img src="' + u + '"><button type="button" class="x" data-i="' + i + '">×</button></div>').join('');
+  return '' +
+    '<div class="row">' +
+      '<label>Tarih<input type="date" class="e-date" value="' + (t.date || '') + '"></label>' +
+      '<label>Parite<input type="text" class="e-pair" value="' + esc(t.pair || '') + '"></label>' +
+      '<label>Yön<select class="e-dir">' + dirOpt + '</select></label>' +
+      '<label>Sonuç (R)<input type="number" step="0.01" class="e-r" value="' + (t.r !== '' && t.r != null ? t.r : '') + '"></label>' +
+    '</div>' +
+    '<div class="row">' +
+      '<label>Giriş Fiyatı<input type="text" class="e-entry" value="' + esc(t.entry || '') + '"></label>' +
+      '<label>Strateji<input type="text" class="e-strat" value="' + esc(t.strat || '') + '"></label>' +
+      '<label>Model<input type="text" class="e-model" value="' + esc(t.model || '') + '"></label>' +
+    '</div>' +
+    '<label>Not<textarea class="e-note">' + esc(t.note || '') + '</textarea></label>' +
+    (imgs ? '<div class="dr-edit-imgs">' + imgs + '</div>' : '') +
+    '<div class="acts">' +
+      '<label class="btn">📷 Resim Ekle<input type="file" accept="image/*" multiple class="e-files" style="display:none;"></label>' +
+      '<button type="button" class="btn solid e-save">Kaydet</button>' +
+    '</div>';
+}
+
+function bindDrEdit(edit, t, row) {
+  edit.addEventListener('click', e => e.stopPropagation());
+  const q = s => edit.querySelector(s);
+  q('.e-save').addEventListener('click', async () => {
+    const newDate = q('.e-date').value;
+    if (newDate) { t.date = newDate; t.ts = Date.parse(newDate); }
+    t.pair = (q('.e-pair').value || '').trim().toUpperCase();
+    t.dir = q('.e-dir').value;
+    t.r = q('.e-r').value;
+    t.entry = (q('.e-entry').value || '').trim();
+    t.strat = (q('.e-strat').value || '').trim();
+    t.model = (q('.e-model').value || '').trim();
+    t.note = (q('.e-note').value || '').trim();
+    await saveData(); renderData();
+    syncDataTradeNotion(t);
+  });
+  q('.e-files').addEventListener('change', async () => {
+    const files = Array.from(q('.e-files').files || []).filter(x => x.type && x.type.startsWith('image/'));
+    if (!files.length) return;
+    if (!Array.isArray(t.images)) t.images = [];
+    let pend = files.length;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = async ev => {
+        t.images.push(ev.target.result);
+        pend--;
+        if (pend === 0) { await saveData(); renderData(); }
+      };
+      reader.readAsDataURL(file);
+    });
+    q('.e-files').value = '';
+  });
+  edit.querySelectorAll('.thmb .x').forEach(b => {
+    b.addEventListener('click', async () => {
+      const i = parseInt(b.getAttribute('data-i'), 10);
+      (t.images || []).splice(i, 1);
+      await saveData(); renderData();
+    });
+  });
 }
 
 function showNotePopup(t) {
@@ -5608,12 +5725,15 @@ async function addDataTrade() {
   if (!pair || rVal === '') { g('data-note').textContent = 'Lütfen parite ve R değerini gir.'; return; }
   const dateVal = g('df-date').value;
   const ts = dateVal ? Date.parse(dateVal) : Date.now();
+  const entry = (g('df-entry').value || '').trim();
+  const model = (g('df-model').value || '').trim();
   dataTrades.push({
     id: Date.now() + Math.random(), ts,
     date: dateVal || '',
     pair, dir: dfDir,
     r: dnum(rVal),
     strat: (g('df-strat').value || '').trim(),
+    entry, model,
     criteria: {
       setup: parseInt(g('df-c-setup').value) || 4,
       entry: parseInt(g('df-c-entry').value) || 5,
@@ -5625,15 +5745,24 @@ async function addDataTrade() {
     images: dfImages.slice()
   });
   await saveData();
-  g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-strat').value = ''; g('df-note').value = '';
+  g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-entry').value = ''; g('df-strat').value = ''; g('df-model').value = ''; g('df-note').value = '';
   document.querySelectorAll('.crit-range').forEach(r => { r.value = 4; r.dispatchEvent(new Event('input')); });
   dfImages = []; renderDfPreviews();
   dfDataPage = 1;
   g('data-note').textContent = '✅ İşlem kaydedildi — Notion\'a da senkron ediliyor.';
   renderData();
   const last = dataTrades[dataTrades.length - 1];
-  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, note: last.note || '', stars: 0 };
-  fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) }).catch(() => {});
+  const noteParts = [];
+  if (last.note) noteParts.push(last.note);
+  if (last.entry) noteParts.push('Giriş: ' + last.entry);
+  if (last.model) noteParts.push('Model: ' + last.model);
+  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, note: noteParts.join(' · '), stars: 0 };
+  try {
+    const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) });
+    const j = await resp.json();
+    const rr = Array.isArray(j.results) ? j.results[0] : null;
+    if (rr && rr.ok && rr.notionId) { last.notionId = rr.notionId; await saveData(); }
+  } catch (e) { /* senkron çevrimdışı olabilir */ }
 }
 
 async function importFromDefter() {
@@ -5752,24 +5881,38 @@ async function importFromNotion() {
     try { j = await r.json(); } catch (e) { throw new Error('Sunucu yanıtı okunamadı (arka uç yüklü mü?)'); }
     if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status));
     const incoming = Array.isArray(j.trades) ? j.trades : [];
-    dataTrades = dataTrades.filter(t => t.note !== 'Notion' && t._source !== 'Notion');
-    const existIds = new Set(dataTrades.map(t => t.notionId).filter(Boolean));
-    let added = 0;
+    const byId = new Map();
+    dataTrades.forEach(t => { if (t.notionId) byId.set(t.notionId, t); });
+    let added = 0, updated = 0;
     incoming.forEach(t => {
-      if (t.notionId && existIds.has(t.notionId)) return;
-      existIds.add(t.notionId);
-      dataTrades.push({
-        id: Date.now() + Math.random() + added,
-        notionId: t.notionId || null,
-        ts: t.ts || (Date.now() + added),
-        date: t.date ? (t.date.slice(8, 10) + '/' + t.date.slice(5, 7)) : '',
-        pair: (t.pair || '').toUpperCase(), dir: t.dir || 'LONG',
-        r: dnum(t.r), pnl: null, strat: t.strat || '', note: t.note || '', _source: 'Notion'
-      });
-      added++;
+      const exist = t.notionId ? byId.get(t.notionId) : null;
+      if (exist) {
+        if (t.date) exist.date = t.date;
+        if (t.pair) exist.pair = String(t.pair).toUpperCase();
+        if (t.dir) exist.dir = t.dir;
+        if (t.r != null) exist.r = dnum(t.r);
+        if (t.strat) exist.strat = t.strat;
+        if (t.note) exist.note = t.note;
+        updated++;
+      } else {
+        const dup = dataTrades.find(x => (x.pair||'') === (t.pair||'').toUpperCase() && (x.date||'') === (t.date||'') && (x.dir||'') === (t.dir||'') && dnum(x.r) === dnum(t.r));
+        if (dup) return;
+        dataTrades.push({
+          id: Date.now() + Math.random() + added,
+          notionId: t.notionId || null,
+          ts: t.ts || (Date.now() + added),
+          date: t.date || '',
+          pair: (t.pair || '').toUpperCase(), dir: t.dir || 'LONG',
+          r: dnum(t.r), pnl: null, strat: t.strat || '', note: t.note || '', _source: 'Notion'
+        });
+        added++;
+      }
     });
     await saveData(); renderData();
-    note.textContent = added + ' işlem Notion\'dan çekildi.';
+    const parts = [];
+    if (added) parts.push(added + ' yeni eklendi');
+    if (updated) parts.push(updated + ' güncellendi');
+    note.textContent = parts.length ? parts.join(' · ') + ' — Notion senkronu tamam.' : 'Zaten güncel — çekilecek yeni kayıt yok.';
   } catch (e) {
     note.textContent = 'Notion\'dan çekilemedi: ' + ((e && e.message) || e);
   } finally {
