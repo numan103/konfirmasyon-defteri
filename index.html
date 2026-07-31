@@ -6951,6 +6951,21 @@ async function bootApp(opts) {
   try { await loadReviews(); } catch (e) { /* devam */ }
   try { await loadEgitim(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
+  showPage(currentPage);
+}
+
+async function refreshAppData() {
+  try { await loadConfig(); } catch (e) { /* devam */ }
+  try { await loadData(); } catch (e) { /* devam */ }
+  try { await loadNews(); } catch (e) { /* devam */ }
+  try { await loadReviews(); } catch (e) { /* devam */ }
+  try { await loadEgitim(); } catch (e) { /* devam */ }
+  try { await loadTrades(); renderTrades(); } catch (e) { /* devam */ }
+  try { await loadLessons(); renderLessons(); } catch (e) { /* devam */ }
+  try { if (typeof loadDaily === 'function') loadDaily(); } catch (e) { /* devam */ }
+  try { if (typeof render === 'function') render(); } catch (e) { /* devam */ }
+  try { if (typeof renderRRcum === 'function') renderRRcum(); } catch (e) { /* devam */ }
+  showPage(currentPage);
 }
 
 function showGate() { document.getElementById('auth-gate').classList.add('open'); }
@@ -7002,8 +7017,7 @@ async function onAuthed(user) {
   hideLanding();
   const wrap = document.querySelector('.wrap');
   if (wrap) wrap.classList.remove('hidden');
-  await bootApp({ seed: false });
-  showPage(currentPage);
+  await refreshAppData();
   scheduleCloudSync();
   handleNotionHash();
 }
@@ -7118,13 +7132,12 @@ function bootAuth() {
 }
 
 if (AUTH_ENABLED) {
-  const wrap = document.querySelector('.wrap');
-  if (wrap) wrap.classList.add('hidden');
-  showLanding();
+  bootApp({ seed: false });
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
-  seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(loadEgitim).then(loadNews).then(init).catch(init);
+  seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(loadEgitim).then(loadNews).then(init)
+    .then(() => showPage(currentPage)).catch(() => showPage(currentPage));
   // OAuth olmayan modda da hash kontrolü
   setTimeout(handleNotionHash, 1000);
 }
