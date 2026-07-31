@@ -213,14 +213,16 @@
   .nav-drop .drop-menu .nav-link { display: block; white-space: nowrap; }
   .nav-drop.on > .drop-btn { background: var(--pc-soft); color: var(--pc); }
   @media (max-width: 680px) {
-    .navbar { gap: 8px; padding: 8px 0; margin-bottom: 14px; }
+    .navbar { gap: 8px; padding: 8px 0; margin-bottom: 14px; backdrop-filter: none; -webkit-backdrop-filter: none; }
     .logo-mark { width: 30px; height: 30px; border-radius: 8px; font-size: 14px; }
     .nav-brand span { font-size: 15px; }
     .nav-links { overflow-x: auto; }
     .nav-links .nav-link, .nav-links .drop-btn { white-space: nowrap; }
     .nav-drop { position: static; }
-    .nav-drop .drop-menu { position: static; box-shadow: none; border: none; padding: 0 0 0 16px; min-width: auto; }
-    .nav-drop.open .drop-menu { display: flex; }
+    .nav-drop .drop-menu::before { display: none; }
+    .nav-drop.open::after { content: ''; position: fixed; inset: 0; background: rgba(8,9,18,.55); z-index: 290; }
+    .nav-drop.open .drop-menu { position: fixed; top: auto; left: 10px; right: 10px; bottom: 12px; max-height: 60vh; overflow-y: auto; background: var(--card-2); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--menu-shadow); padding: 10px; min-width: auto; z-index: 300; display: flex; flex-direction: column; gap: 4px; }
+    .nav-drop.open .drop-menu .nav-link { padding: 13px 14px; font-size: 14px; }
     .nav-link, .nav-drop .drop-btn { padding: 7px 12px; font-size: 13px; }
     .nav-contact { gap: 6px; }
     .nc-lbl { display: none; }
@@ -874,6 +876,8 @@
     padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text);
   }
   .auth-field input:focus { outline: 2px solid var(--pc); border-color: transparent; }
+  .auth-remember { display: flex; align-items: center; gap: 8px; margin: -2px 0 14px; cursor: pointer; font-size: 13px; color: var(--text-2); user-select: none; }
+  .auth-remember input { width: 16px; height: 16px; accent-color: var(--pc); cursor: pointer; }
   .auth-submit {
     width: 100%; background: var(--pc); border: none; color: #fff; border-radius: 10px;
     padding: 12px 0; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
@@ -899,6 +903,7 @@
   }
   .user-badge .logout:hover { background: var(--pc-soft); border-color: var(--pc); color: var(--pc); }
   /* --- Tanıtım (landing) sayfası --- */
+  body.landed .wrap, body.landed .chat-bubble, body.landed .chat-popup, body.landed .theme-toggle { display: none; }
   #landing { display: none; position: fixed; inset: 0; z-index: 150; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
   /* ===== Premium hero band ===== */
   .lp-hero-band { position: relative; overflow: hidden; background: radial-gradient(1100px 560px at 50% -8%, #20223f 0%, #12132530 0%, transparent 60%), linear-gradient(180deg, #0d0e1c 0%, #0b0c17 60%, #0a0b14 100%); padding-bottom: 30px; }
@@ -995,6 +1000,33 @@
   .lp-quote p { font-size: clamp(20px, 3.6vw, 30px); font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: var(--text); font-style: italic; margin: 0 0 16px; }
   .lp-quote cite { font-style: normal; font-size: 13.5px; font-weight: 700; letter-spacing: .04em; color: var(--pc); text-transform: uppercase; }
   .lp-foot { text-align: center; padding: 22px; margin-top: 40px; font-size: 12px; color: var(--text-3); border-top: 1px solid var(--border); }
+  /* Landing — mobil: sade ve hızlı giriş ekranı */
+  @media (max-width: 640px) {
+    .lp-nav { padding: 12px 14px; }
+    .lp-nav .lp-edu-btn, .lp-nav .nav-login { padding: 8px 13px; font-size: 12.5px; }
+    .lp-brand .logo-mark { width: 32px; height: 32px; border-radius: 9px; }
+    .lp-brand h1 { font-size: 15px; }
+    .lp-brand .sub { font-size: 10.5px; }
+    .lp-hero { padding: 24px 16px 12px; }
+    .lp-badge { font-size: 11px; padding: 5px 11px; margin-bottom: 14px; }
+    .lp-hero h2 { font-size: clamp(24px, 7vw, 32px); margin-bottom: 10px; }
+    .lp-hero > p { font-size: 14px; line-height: 1.5; margin-bottom: 18px; }
+    .lp-cta { gap: 10px; }
+    .lp-cta button { padding: 12px 22px; font-size: 14px; }
+    .lp-proof { margin-top: 16px; }
+    .lp-proof-txt span, .lp-proof-txt b { font-size: 11px; }
+    .lp-proof-av span { width: 26px; height: 26px; }
+    #landing .lp-hero-shot, #landing .lp-stats, #landing .lp-cta-band, #landing .lp-quote { display: none; }
+    .lp-section-head { padding: 24px 14px 2px; }
+    .lp-section-head h3 { font-size: 20px; }
+    .lp-features { padding: 16px 14px 26px; gap: 10px; }
+    .lp-visual { height: 76px; }
+    .lp-card-body { padding: 10px 12px 13px; }
+    .lp-card-body h3 { font-size: 13.5px; }
+    .lp-card-body p { font-size: 12px; }
+    .lp-social { padding: 26px 16px 6px; gap: 12px; }
+    .lp-foot { margin-top: 22px; padding: 16px 14px; }
+  }
   /* Landing ürün görseli (mockup) */
   .lp-shot-wrap { max-width: 720px; margin: 6px auto 0; padding: 0 20px; }
   .lp-shot { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 44px rgba(23,25,35,0.13); overflow: hidden; }
@@ -1738,7 +1770,7 @@
   })();
   </script>
 </head>
-<body>
+<body class="landed">
 <button id="themeToggle" class="theme-toggle" type="button" role="switch" aria-label="Gündüz / Gece modu"><span class="tt-thumb"></span></button>
 <div id="landing">
   <div class="lp-hero-band">
@@ -2012,6 +2044,10 @@
         <label for="au-pass">Şifre</label>
         <input type="password" id="au-pass" placeholder="En az 6 karakter" autocomplete="current-password" minlength="6">
       </div>
+      <label class="auth-remember" id="f-remember" title="Bu cihazda seni hatırlayalım">
+        <input type="checkbox" id="au-remember" checked>
+        <span>Beni hatırla</span>
+      </label>
       <button type="submit" class="auth-submit" id="au-submit">Giriş yap</button>
       <div class="auth-alt">
         <button type="button" class="auth-link" id="forgot-link">Şifreni mi unuttun?</button>
@@ -5512,7 +5548,14 @@ function init() {
     const isMobile = () => window.innerWidth <= 680;
     d.addEventListener('mouseenter', () => { if (!isMobile()) { clearTimeout(hoverTimer); d.classList.add('open'); } });
     d.addEventListener('mouseleave', () => { if (!isMobile()) { hoverTimer = setTimeout(() => d.classList.remove('open'), 100); } });
-    btn.addEventListener('click', (e) => { e.preventDefault(); if (isMobile()) d.classList.toggle('open'); });
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isMobile()) {
+        document.querySelectorAll('.nav-drop.open').forEach(o => { if (o !== d) o.classList.remove('open'); });
+        d.classList.toggle('open');
+      }
+    });
+    d.addEventListener('click', (e) => { if (isMobile() && e.target === d) d.classList.remove('open'); });
     d.querySelectorAll('.drop-menu .nav-link').forEach(l => {
       l.addEventListener('click', () => d.classList.remove('open'));
     });
@@ -7467,8 +7510,8 @@ async function refreshAppData() {
 
 function showGate() { document.getElementById('auth-gate').classList.add('open'); }
 function hideGate() { document.getElementById('auth-gate').classList.remove('open'); }
-function showLanding() { document.getElementById('landing').classList.add('open'); }
-function hideLanding() { document.getElementById('landing').classList.remove('open'); }
+function showLanding() { document.body.classList.add('landed'); document.getElementById('landing').classList.add('open'); }
+function hideLanding() { document.body.classList.remove('landed'); document.getElementById('landing').classList.remove('open'); }
 
 function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
@@ -7550,6 +7593,7 @@ function bootAuth() {
     $('f-pass').classList.toggle('hidden', isReset);  // sıfırlama isteğinde şifre yok
     $('forgot-link').classList.toggle('hidden', !isLogin);
     $('back-login').classList.toggle('hidden', !isReset);
+    if ($('f-remember')) $('f-remember').classList.toggle('hidden', !isLogin);
     $('au-submit').textContent = isReg ? 'Kayıt ol' : isReset ? 'Sıfırlama bağlantısı gönder' : isNew ? 'Şifreyi güncelle' : 'Giriş yap';
     $('au-pass').setAttribute('autocomplete', (isReg || isNew) ? 'new-password' : 'current-password');
     $('au-pass').setAttribute('placeholder', isNew ? 'Yeni şifre (en az 6 karakter)' : 'En az 6 karakter');
@@ -7560,7 +7604,7 @@ function bootAuth() {
   $('forgot-link').addEventListener('click', () => setMode('reset'));
   $('back-login').addEventListener('click', () => setMode('login'));
   // Tanıtım sayfası -> giriş penceresi
-  const openAuth = m => { hideLanding(); showGate(); setMode(m); };
+  const openAuth = m => { showGate(); setMode(m); };
   $('nav-login').addEventListener('click', () => openAuth('login'));
   const nlAppBtn2 = document.getElementById('nav-login-app');
   if (nlAppBtn2) nlAppBtn2.addEventListener('click', () => openAuth('login'));
@@ -7577,7 +7621,7 @@ function bootAuth() {
   AUTH.client.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') {
       recovering = true;
-      hideLanding(); showGate(); setMode('newpass');
+      showGate(); setMode('newpass');
     }
   });
   $('auth-form').addEventListener('submit', async (e) => {
@@ -7612,6 +7656,14 @@ function bootAuth() {
         setMode('login');
       } else {
         if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
+        const rem = document.getElementById('au-remember');
+        const remember = !rem || rem.checked;
+        const keep = remember ? window.localStorage : window.sessionStorage;
+        const drop = remember ? window.sessionStorage : window.localStorage;
+        try { Object.keys(drop).filter(k => k.indexOf('sb-') === 0).forEach(k => drop.removeItem(k)); } catch (e3) {}
+        if (!remember) {
+          AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: keep, autoRefreshToken: true, detectSessionInUrl: false } });
+        }
         const { data, error } = await AUTH.client.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;
         await onAuthed(data.user);
@@ -7625,11 +7677,11 @@ function bootAuth() {
   // Mevcut oturum var mı? Sıfırlama akışındaysak yeni şifre ekranını göster.
   AUTH.client.auth.getSession()
     .then(({ data }) => {
-      if (recovering) { hideLanding(); showGate(); setMode('newpass'); return; }
+      if (recovering) { showGate(); setMode('newpass'); return; }
       if (data && data.session && data.session.user) onAuthed(data.session.user);
-      else hideLanding();
+      else showLanding();
     })
-    .catch(() => { if (recovering) { showGate(); setMode('newpass'); } else hideLanding(); });
+    .catch(() => { if (recovering) { showGate(); setMode('newpass'); } else showLanding(); });
 }
 
 if (AUTH_ENABLED) {
@@ -7637,6 +7689,7 @@ if (AUTH_ENABLED) {
   bootAuth();
 } else {
   // Yerel mod (anahtar yok): eski davranış — kimse giriş yapmadan çalışır.
+  document.body.classList.remove('landed');
   const nlAppBtn3 = document.getElementById('nav-login-app');
   if (nlAppBtn3) nlAppBtn3.style.display = 'none';
   seedIfEmpty().then(loadConfig).then(loadData).then(loadReviews).then(loadEgitim).then(loadNews).then(init)
