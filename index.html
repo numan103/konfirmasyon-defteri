@@ -847,11 +847,9 @@
     background: var(--bg); padding: 20px; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-  #auth-gate.open { display: flex; align-items: center; justify-content: center; }
-  .auth-box {
-    width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 24px;
-  }
+  #auth-gate.open { display: flex; }
+  .auth-box { margin: auto; width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 24px; }
   .auth-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 4px; }
   .auth-brand .logo-mark {
     width: 38px; height: 38px; border-radius: 10px; background: var(--pc); color: #fff;
@@ -7630,6 +7628,7 @@ function bootAuth() {
     const pass = $('au-pass').value;
     const name = $('au-name').value.trim();
     $('au-submit').disabled = true;
+    const safety = setTimeout(() => { $('au-submit').disabled = false; }, 20000);
     try {
       if (mode === 'reset') {
         if (!email) { msg('E-postanı yaz.', 'err'); return; }
@@ -7670,7 +7669,12 @@ function bootAuth() {
       }
     } catch (err) {
       msg(authError(err), 'err');
+      if (mode === 'login' && $('au-pass')) {
+        $('au-pass').value = '';
+        try { $('au-pass').focus({ preventScroll: true }); } catch (e2) {}
+      }
     } finally {
+      clearTimeout(safety);
       $('au-submit').disabled = false;
     }
   });
