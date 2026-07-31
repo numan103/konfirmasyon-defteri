@@ -1850,7 +1850,7 @@
       <span>Alfa Traders</span>
     </a>
     <div class="nav-links">
-      <a href="?page=home" class="nav-link" id="tab-home" data-nav>Ana Menü</a>
+      <a href="?page=home" class="nav-link on" id="tab-home" data-nav>Ana Menü</a>
       <div class="nav-drop">
         <a class="nav-link drop-btn">Trader ▾</a>
         <div class="drop-menu">
@@ -1893,7 +1893,7 @@
     <span class="tq" id="ticker-text">Yükleniyor...</span>
     <span class="ta" id="ticker-author"></span>
   </div>
-  <div id="page-home" class="hidden">
+  <div id="page-home">
     <div class="home-wrap">
       <div class="home-hero">
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
@@ -2005,7 +2005,7 @@
       </div>
     </div>
   </div>
-  <div id="page-defter">
+  <div id="page-defter" class="hidden">
     <div class="eg-brand"><span class="eg-brand-name">Alfa-Check List</span><span class="eg-brand-sub">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
   <div class="controls">
     <div class="seg" id="pair-seg"></div>
@@ -5054,7 +5054,11 @@ function dnum(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
 const DATA_KEY = 'defter-data-v1';
 let dataTrades = [];
 let dfDir = 'LONG';
-let currentPage = 'defter';
+let currentPage = 'home';
+try {
+  const lp = localStorage.getItem('df-last-page');
+  if (lp && ['home','defter','data','review','news','egitim','indicators','onchain','calendar','basvuru','chat-admin','calc'].indexOf(lp) >= 0) currentPage = lp;
+} catch (e) {}
 const NEWS_KEY = 'alfanews-shared-v1';
 const ADMIN_EMAIL = 'ahmetnuman20@gmail.com';
 // AlfaNews — paylaşımlı dergi (sabit kapak + içindekiler + analiz sayfaları)
@@ -5401,6 +5405,7 @@ function showPage(name) {
   });
   const shown = document.getElementById('page-' + name);
   if (shown) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
+  try { localStorage.setItem('df-last-page', name); } catch (e) {}
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   if (name === 'data') renderData();
   if (name === 'review') renderReview();
@@ -6998,6 +7003,7 @@ async function onAuthed(user) {
   const wrap = document.querySelector('.wrap');
   if (wrap) wrap.classList.remove('hidden');
   await bootApp({ seed: false });
+  showPage(currentPage);
   scheduleCloudSync();
   handleNotionHash();
 }
