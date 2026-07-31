@@ -2306,6 +2306,12 @@
         <button type="button" class="cat-edit danger-edit" id="data-clear" onclick="event.stopPropagation()">Tümünü temizle</button>
       </h2>
       <div id="df-table-wrap" class="open">
+        <div class="tf-row" id="data-filter">
+          <button class="tf on" data-f="all">Tümü</button>
+          <button class="tf" data-f="today">Bugün</button>
+          <button class="tf" data-f="week">Bu hafta</button>
+          <button class="tf" data-f="month">Bu ay</button>
+        </div>
         <div id="data-table"></div>
         <div class="df-pages-bottom" id="df-pages-bottom"></div>
       </div>
@@ -5379,8 +5385,44 @@ function showPage(name) {
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
 
+let dfFilter = 'all';
+function dfTs(t) { return t.ts || (t.date ? new Date(String(t.date).slice(0, 10) + 'T12:00:00').getTime() : 0) || 0; }
+function dfPassesFilter(t) {
+  if (dfFilter === 'all') return true;
+  const ts = dfTs(t);
+  if (!ts) return false;
+  const d = new Date(ts), now = new Date();
+  if (dfFilter === 'today') {
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  }
+  if (dfFilter === 'month') {
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }
+  if (dfFilter === 'week') {
+    const day = (now.getDay() + 6) % 7; // Pzt=0
+    const monday = new Date(now); monday.setDate(now.getDate() - day); monday.setHours(0, 0, 0, 0);
+    return ts >= monday.getTime();
+  }
+  return true;
+}
+function fmtDfDate(d) {
+  if (!d) return '—';
+  const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[3] + '/' + m[2] + '/' + m[1].slice(2);
+  return String(d);
+}
+function dfDateLabel(t) {
+  if (t.date) return fmtDfDate(t.date);
+  const ts = dfTs(t);
+  if (ts) {
+    const d = new Date(ts);
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getFullYear()).slice(2);
+  }
+  return '—';
+}
+
 function renderData() {
-  const rows = sortedData();
+  const rows = sortedData().filter(dfPassesFilter);
   const n = rows.length;
   const totR = rows.reduce((s, t) => s + dnum(t.r), 0);
   const wins = rows.filter(t => dnum(t.r) > 0).length;
@@ -5428,7 +5470,7 @@ function renderData() {
     const r = dnum(t.r);
     const row = document.createElement('div'); row.className = 'data-row';
     row.innerHTML =
-      '<span style="font-size:10px;color:var(--text-3);">' + (t.date ? t.date.slice(8,10)+'/'+t.date.slice(5,7) : '') + '</span>' +
+      '<span style="font-size:10px;color:var(--text-3);">' + dfDateLabel(t) + '</span>' +
       '<span class="dr-pair">' + (t.pair || '—') + '</span>' +
       '<span class="dr-dir ' + (t.dir || '').toLowerCase() + '" style="text-align:center;font-size:11px;">' + (t.dir || '') + '</span>' +
       '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ((t.strat||'').slice(0,10) || '—') + '</span>' +
@@ -5441,7 +5483,7 @@ function renderData() {
     // Detail panel
     const detail = document.createElement('div'); detail.className = 'dr-detail';
     let detailHtml = '<div class="dr-detail-grid">';
-    if (t.date) detailHtml += '<div class="item"><span class="lbl">Tarih</span><span class="val">' + t.date + '</span></div>';
+    if (t.date) detailHtml += '<div class="item"><span class="lbl">Tarih</span><span class="val">' + fmtDfDate(t.date) + '</span></div>';
     detailHtml += '<div class="item"><span class="lbl">R</span><span class="val '+ (r>=0?'pos':'neg') + '">' + (r>0?'+':'') + r.toFixed(2) + '</span></div>';
     detailHtml += '</div>';
     // Criteria bars
@@ -5457,7 +5499,7 @@ function renderData() {
     if (t.note) detailHtml += '<div style="font-size:12px;color:var(--text-2);margin-top:4px;padding:6px;background:var(--bg);border-radius:6px;">' + esc(t.note) + '</div>';
     if (t.images && t.images.length) {
       detailHtml += '<div class="dr-imgs">';
-      t.images.forEach(url => { detailHtml += '<img src="' + url + '" onclick="window.open(\'' + url + '\')">'; });
+      t.images.forEach(url => { detailHtml += '<img src="' + url + '" onclick="event.stopPropagation();magZoom(this.src)">'; });
       detailHtml += '</div>';
     }
     detail.innerHTML = detailHtml;
@@ -5469,7 +5511,7 @@ function renderData() {
     });
     tb.appendChild(row);
   });
-  document.getElementById('data-count').textContent = n ? (n + ' işlem · sayfa ' + dfDataPage + '/' + totalPages) : 'Henüz işlem yok.';
+  document.getElementById('data-count').textContent = n ? (n + ' işlem · sayfa ' + dfDataPage + '/' + totalPages) : (dfFilter !== 'all' ? 'Bu filtrede işlem yok.' : 'Henüz işlem yok.');
 }
 
 function showNotePopup(t) {
@@ -5584,8 +5626,11 @@ async function addDataTrade() {
   document.querySelectorAll('.crit-range').forEach(r => { r.value = 4; r.dispatchEvent(new Event('input')); });
   dfImages = []; renderDfPreviews();
   dfDataPage = Math.ceil(dataTrades.length / DF_PP);
-  g('data-note').textContent = '✅ İşlem kaydedildi.';
+  g('data-note').textContent = '✅ İşlem kaydedildi — Notion\'a da senkron ediliyor.';
   renderData();
+  const last = dataTrades[dataTrades.length - 1];
+  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, note: last.note || '', stars: 0 };
+  fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) }).catch(() => {});
 }
 
 async function importFromDefter() {
@@ -5781,6 +5826,14 @@ function bindDataPage() {
   g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
   g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
   g('df-add').addEventListener('click', addDataTrade);
+  document.querySelectorAll('#data-filter .tf').forEach(b => {
+    b.addEventListener('click', () => {
+      dfFilter = b.getAttribute('data-f');
+      document.querySelectorAll('#data-filter .tf').forEach(x => x.classList.toggle('on', x === b));
+      dfDataPage = 1;
+      renderData();
+    });
+  });
   g('data-import-defter').addEventListener('click', importFromDefter);
   g('data-clear').addEventListener('click', async () => {
     if (!dataTrades.length) return;

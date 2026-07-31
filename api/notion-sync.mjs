@@ -22,11 +22,15 @@ function buildProps(trade) {
   props['Trade #'] = { title: [{ text: { content: String(trade.id || trade.ts || Date.now()) } }] };
 
   if (trade.date) {
-    const parts = trade.date.split('/');
-    if (parts.length === 2) {
-      const iso = '2026-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
-      props['Tarih'] = { date: { start: iso } };
+    let iso = null;
+    const isoM = String(trade.date).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoM) {
+      iso = isoM[1] + '-' + isoM[2] + '-' + isoM[3];
+    } else {
+      const parts = trade.date.split('/');
+      if (parts.length === 2) iso = '2026-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
     }
+    if (iso) props['Tarih'] = { date: { start: iso } };
   }
 
   if (trade.pair) {
