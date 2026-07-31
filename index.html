@@ -1893,7 +1893,7 @@
     <span class="tq" id="ticker-text">Yükleniyor...</span>
     <span class="ta" id="ticker-author"></span>
   </div>
-  <div id="page-home">
+  <div id="page-home" class="hidden">
     <div class="home-wrap">
       <div class="home-hero">
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M5.5 26.5 16 5.5l10.5 21" stroke="#7b78f5" stroke-width="2.6" stroke-linejoin="round"/><path d="M7 23c6-1 12-5 18-11" stroke="#c5c1ff" stroke-width="2.2" stroke-linecap="round"/></svg></div>
@@ -5059,6 +5059,7 @@ try {
   const lp = localStorage.getItem('df-last-page');
   if (lp && ['home','defter','data','review','news','egitim','indicators','onchain','calendar','basvuru','chat-admin','calc'].indexOf(lp) >= 0) currentPage = lp;
 } catch (e) {}
+setInitialPage();
 const NEWS_KEY = 'alfanews-shared-v1';
 const ADMIN_EMAIL = 'ahmetnuman20@gmail.com';
 // AlfaNews — paylaşımlı dergi (sabit kapak + içindekiler + analiz sayfaları)
@@ -5388,6 +5389,16 @@ async function loadData() {
   if (!Array.isArray(dataTrades)) dataTrades = [];
 }
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
+
+function setInitialPage() {
+  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
+  pages.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.toggle('hidden', p !== currentPage);
+    const tb = document.getElementById('tab-' + p);
+    if (tb) tb.classList.toggle('on', p === currentPage);
+  });
+}
 
 function showPage(name) {
   currentPage = name;
