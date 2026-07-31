@@ -407,7 +407,7 @@
   .df-seg button.on { background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
   .df-seg button.long.on { color: var(--green); }
   .df-seg button.short.on { color: var(--red); }
-  .data-row { display: grid; grid-template-columns: 60px 1fr 1fr 1fr 60px 54px 28px 24px; gap: 4px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-size: 12.5px; cursor:pointer; transition:background .1s; }
+  .data-row { display: grid; grid-template-columns: 62px 1fr 1fr 1fr 54px 28px 24px; gap: 4px; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-size: 12.5px; cursor:pointer; transition:background .1s; }
   .data-row:hover { background:var(--bg-2); }
   .data-row.head { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1.5px solid var(--border); cursor:default; }
   .data-row.head:hover { background:transparent; }
@@ -426,6 +426,8 @@
   .dr-edit-imgs .thmb img { width:100%; height:100%; object-fit:cover; }
   .dr-edit-imgs .thmb .x { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:var(--red); color:#fff; border:none; font-size:11px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
   .dr-edit .acts { display:flex; gap:8px; align-items:center; }
+  .dr-add-img { width:38px; height:38px; border-radius:9px; border:1.5px dashed var(--border); background:var(--card); color:var(--acc); font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dr-add-img:hover { border-color: var(--acc); background: var(--bg-2); }
   .data-row .rin { width:100%; min-width:0; padding:6px; border:1.5px solid var(--border); border-radius:7px; background:var(--card); color:var(--text); font-size:12.5px; font-weight:700; font-family:'Inter',sans-serif; text-align:right; box-sizing:border-box; outline:none; }
   .data-row .rin:focus { border-color:var(--acc); }
   .dr-editb { background:none; border:none; color:var(--text-3); cursor:pointer; font-size:14px; padding:0; line-height:1; }
@@ -2274,9 +2276,8 @@
         <div class="df-row"><span class="df-lbl">Parite</span><input type="text" id="df-pair" placeholder="BTC, XAU…" maxlength="12"></div>
         <div class="df-row"><span class="df-lbl">Yön</span><div class="df-seg"><button type="button" class="long on" id="df-long">LONG</button><button type="button" class="short" id="df-short">SHORT</button></div></div>
         <div class="df-row"><span class="df-lbl">R</span><input type="number" step="0.01" id="df-r" placeholder="+2.5 / -0.3 — kayıp için (-) ile gir"></div>
-        <div class="df-row"><span class="df-lbl">Giriş</span><input type="text" id="df-entry" placeholder="ör. 2380.50"></div>
         <div class="df-row"><span class="df-lbl">Strateji</span><input type="text" id="df-strat" placeholder="Breaker, FVG…"></div>
-        <div class="df-row"><span class="df-lbl">Model</span><input type="text" id="df-model" placeholder="ör. H1 FVG + M15 iBOS"></div>
+        <div class="df-row"><span class="df-lbl">Entry Model</span><input type="text" id="df-model" placeholder="ör. H1 FVG + M15 iBOS"></div>
         <div class="df-row df-row-note"><span class="df-lbl">Not</span><textarea id="df-note" placeholder="İşlemle ilgili notların…" rows="2"></textarea></div>
         <div class="df-crits">
           <label>Setup <input type="range" id="df-c-setup" min="0" max="10" value="4" class="crit-range"><span class="crit-val" id="df-c-setup-v">4</span></label>
@@ -5490,7 +5491,7 @@ function renderData() {
   const tb = document.getElementById('data-table');
   tb.innerHTML = '';
   const head = document.createElement('div'); head.className = 'data-row head';
-  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite / Yön</span><span>Strateji</span><span>Model</span><span>Giriş</span><span style="text-align:right;">R</span><span></span><span></span>';
+  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite / Yön</span><span>Strateji</span><span>Entry Model</span><span style="text-align:right;">R</span><span></span><span></span>';
   tb.appendChild(head);
 
   pageRows.forEach(t => {
@@ -5500,8 +5501,7 @@ function renderData() {
       '<span style="font-size:10px;color:var(--text-3);">' + dfDateLabel(t) + '</span>' +
       '<span class="dr-pair">' + esc(t.pair || '—') + ' <span class="dr-dir ' + (t.dir || '').toLowerCase() + '">' + esc(t.dir || '') + '</span></span>' +
       '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.strat||'').slice(0,14) || '—') + '</span>' +
-      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.model||'').slice(0,14) || '—') + '</span>' +
-      '<span style="font-size:11px;color:var(--text-2);">' + esc(t.entry || '—') + '</span>';
+      '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.model||'').slice(0,18) || '—') + '</span>';
     const rwrap = document.createElement('span');
     rwrap.style.textAlign = 'right';
     const rin = document.createElement('input');
@@ -5556,9 +5556,8 @@ function renderData() {
 async function syncDataTradeNotion(t) {
   const parts = [];
   if (t.note) parts.push(t.note);
-  if (t.entry) parts.push('Giriş: ' + t.entry);
-  if (t.model) parts.push('Model: ' + t.model);
-  const payload = { id: t.id, ts: t.ts || Date.now(), date: t.date || '', pair: t.pair || '', dir: t.dir || '', r: dnum(t.r) || 0, strat: t.strat || '', note: parts.join(' · '), stars: 0, notionId: t.notionId || undefined };
+  if (t.model) parts.push('Entry Model: ' + t.model);
+  const payload = { id: t.id, ts: t.ts || Date.now(), date: t.date || '', pair: t.pair || '', dir: t.dir || '', r: dnum(t.r) || 0, strat: t.strat || '', model: t.model || '', note: parts.join(' · '), stars: 0, notionId: t.notionId || undefined };
   try {
     const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const j = await resp.json();
@@ -5581,16 +5580,32 @@ function buildDrEditHtml(t) {
       '<label>Sonuç (R)<input type="number" step="0.01" class="e-r" value="' + (t.r !== '' && t.r != null ? t.r : '') + '"></label>' +
     '</div>' +
     '<div class="row">' +
-      '<label>Giriş Fiyatı<input type="text" class="e-entry" value="' + esc(t.entry || '') + '"></label>' +
       '<label>Strateji<input type="text" class="e-strat" value="' + esc(t.strat || '') + '"></label>' +
-      '<label>Model<input type="text" class="e-model" value="' + esc(t.model || '') + '"></label>' +
+      '<label>Entry Model<input type="text" class="e-model" value="' + esc(t.model || '') + '"></label>' +
     '</div>' +
     '<label>Not<textarea class="e-note">' + esc(t.note || '') + '</textarea></label>' +
     (imgs ? '<div class="dr-edit-imgs">' + imgs + '</div>' : '') +
     '<div class="acts">' +
-      '<label class="btn">📷 Resim Ekle<input type="file" accept="image/*" multiple class="e-files" style="display:none;"></label>' +
+      '<button type="button" class="dr-add-img" title="Resim ekle — tıkla seç, sonra Ctrl+V ile de yapıştırabilirsin">+</button>' +
+      '<input type="file" accept="image/*" multiple class="e-files" style="display:none;">' +
       '<button type="button" class="btn solid e-save">Kaydet</button>' +
     '</div>';
+}
+
+function readFilesToTrade(t, fileList, onDone) {
+  const files = Array.from(fileList || []).filter(x => x.type && x.type.startsWith('image/'));
+  if (!files.length) { if (onDone) onDone(); return; }
+  if (!Array.isArray(t.images)) t.images = [];
+  let pend = files.length;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      t.images.push(ev.target.result);
+      pend--;
+      if (pend === 0 && onDone) onDone();
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function bindDrEdit(edit, t, row) {
@@ -5602,27 +5617,23 @@ function bindDrEdit(edit, t, row) {
     t.pair = (q('.e-pair').value || '').trim().toUpperCase();
     t.dir = q('.e-dir').value;
     t.r = q('.e-r').value;
-    t.entry = (q('.e-entry').value || '').trim();
     t.strat = (q('.e-strat').value || '').trim();
     t.model = (q('.e-model').value || '').trim();
     t.note = (q('.e-note').value || '').trim();
     await saveData(); renderData();
     syncDataTradeNotion(t);
   });
+  const addBtn = q('.dr-add-img');
+  if (addBtn) addBtn.addEventListener('click', e => { e.preventDefault(); q('.e-files').click(); });
+  edit.addEventListener('paste', e => {
+    const items = Array.from((e.clipboardData || {}).items || []);
+    const imgs = items.filter(i => i.type && i.type.startsWith('image/'));
+    if (!imgs.length) return;
+    e.preventDefault();
+    readFilesToTrade(t, imgs.map(i => i.getAsFile()), async () => { await saveData(); renderData(); });
+  });
   q('.e-files').addEventListener('change', async () => {
-    const files = Array.from(q('.e-files').files || []).filter(x => x.type && x.type.startsWith('image/'));
-    if (!files.length) return;
-    if (!Array.isArray(t.images)) t.images = [];
-    let pend = files.length;
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = async ev => {
-        t.images.push(ev.target.result);
-        pend--;
-        if (pend === 0) { await saveData(); renderData(); }
-      };
-      reader.readAsDataURL(file);
-    });
+    readFilesToTrade(t, q('.e-files').files, async () => { await saveData(); renderData(); });
     q('.e-files').value = '';
   });
   edit.querySelectorAll('.thmb .x').forEach(b => {
@@ -5725,7 +5736,6 @@ async function addDataTrade() {
   if (!pair || rVal === '') { g('data-note').textContent = 'Lütfen parite ve R değerini gir.'; return; }
   const dateVal = g('df-date').value;
   const ts = dateVal ? Date.parse(dateVal) : Date.now();
-  const entry = (g('df-entry').value || '').trim();
   const model = (g('df-model').value || '').trim();
   dataTrades.push({
     id: Date.now() + Math.random(), ts,
@@ -5733,7 +5743,7 @@ async function addDataTrade() {
     pair, dir: dfDir,
     r: dnum(rVal),
     strat: (g('df-strat').value || '').trim(),
-    entry, model,
+    model,
     criteria: {
       setup: parseInt(g('df-c-setup').value) || 4,
       entry: parseInt(g('df-c-entry').value) || 5,
@@ -5745,7 +5755,7 @@ async function addDataTrade() {
     images: dfImages.slice()
   });
   await saveData();
-  g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-entry').value = ''; g('df-strat').value = ''; g('df-model').value = ''; g('df-note').value = '';
+  g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-strat').value = ''; g('df-model').value = ''; g('df-note').value = '';
   document.querySelectorAll('.crit-range').forEach(r => { r.value = 4; r.dispatchEvent(new Event('input')); });
   dfImages = []; renderDfPreviews();
   dfDataPage = 1;
@@ -5754,9 +5764,8 @@ async function addDataTrade() {
   const last = dataTrades[dataTrades.length - 1];
   const noteParts = [];
   if (last.note) noteParts.push(last.note);
-  if (last.entry) noteParts.push('Giriş: ' + last.entry);
-  if (last.model) noteParts.push('Model: ' + last.model);
-  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, note: noteParts.join(' · '), stars: 0 };
+  if (last.model) noteParts.push('Entry Model: ' + last.model);
+  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, model: last.model, note: noteParts.join(' · '), stars: 0 };
   try {
     const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) });
     const j = await resp.json();
@@ -5892,6 +5901,7 @@ async function importFromNotion() {
         if (t.dir) exist.dir = t.dir;
         if (t.r != null) exist.r = dnum(t.r);
         if (t.strat) exist.strat = t.strat;
+        if (t.model) exist.model = t.model;
         if (t.note) exist.note = t.note;
         updated++;
       } else {
@@ -5903,7 +5913,7 @@ async function importFromNotion() {
           ts: t.ts || (Date.now() + added),
           date: t.date || '',
           pair: (t.pair || '').toUpperCase(), dir: t.dir || 'LONG',
-          r: dnum(t.r), pnl: null, strat: t.strat || '', note: t.note || '', _source: 'Notion'
+          r: dnum(t.r), pnl: null, strat: t.strat || '', model: t.model || '', note: t.note || '', _source: 'Notion'
         });
         added++;
       }
@@ -6023,7 +6033,7 @@ function bindDataPage() {
   }
   // Ctrl+V resim yapıştır
   document.addEventListener('paste', e => {
-    if (currentPage !== 'data') return;
+    if (currentPage !== 'data' || document.querySelector('.data-row.edit-open')) return;
     const items = e.clipboardData?.items;
     if (!items) return;
     Array.from(items).filter(item => item.type.startsWith('image/')).forEach(item => {

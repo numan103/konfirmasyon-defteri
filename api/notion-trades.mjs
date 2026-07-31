@@ -37,6 +37,11 @@ function parseRichText(p) { return (p?.rich_text || []).map(t => t.plain_text).j
 
 function mapRow(page, market) {
   const date = parseDate(prop(page, 'Tarih'));
+  let model = '';
+  for (const n of ['Entry Model', 'Model', 'Entry Modeli', 'Model Adı']) {
+    const p = prop(page, n);
+    if (p) { model = parseSelect(p) || parseMultiSelect(p) || parseRichText(p) || ''; if (model) break; }
+  }
   return {
     notionId: page.id,
     ts: date ? new Date(date).getTime() : page.created_time ? new Date(page.created_time).getTime() : null,
@@ -46,6 +51,7 @@ function mapRow(page, market) {
     r: parseNumber(prop(page, 'Profit')),
     pnl: null,
     strat: parseSelect(prop(page, 'Trade Stratejisi')) || '',
+    model,
     note: parseRichText(prop(page, 'Not')) || '',
     tradeNo: parseTitle(prop(page, 'Trade #')) || '',
     market,

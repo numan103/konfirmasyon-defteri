@@ -16,7 +16,25 @@ function whichDb(pair) {
   return DBS[1];
 }
 
-function buildProps(trade) {
+let dbSchemas = {};
+
+async function getModelProp(dbId, token) {
+  if (dbSchemas[dbId] !== undefined) return dbSchemas[dbId];
+  dbSchemas[dbId] = null;
+  try {
+    const res = await fetch(`https://api.notion.com/v1/databases/${dbId}`, {
+      headers: { Authorization: `Bearer ${token}`, 'Notion-Version': NOTION_VERSION },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const props = data.properties || {};
+    const hit = Object.keys(props).find(n => /entry.{0,4}model|^model$|model.{0,4}entry/i.test(n));
+    if (hit) dbSchemas[dbId] = { name: hit, type: props[hit].type };
+  } catch (e) {}
+  return dbSchemas[dbId];
+}
+
+function buildProps(trade, modelProp) {
   const props = {};
 
   const titleText = [trade.pair, trade.dir].filter(Boolean).join(' ').toUpperCase() || 'İşlem';
@@ -50,6 +68,14 @@ function buildProps(trade) {
     props['Trade Stratejisi'] = { select: { name: trade.strat } };
   }
 
+  if (trade.model && modelProp) {
+    const val = String(trade.model).slice(0, 100);
+    const key = modelProp.name;
+    if (modelProp.type === 'select') props[key] = { select: { name: val } };
+    else if (modelProp.type === 'multi_select') props[key] = { multi_select: [{ name: val }] };
+    else props[key] = { rich_text: [{ text: { content: val } }] };
+  }
+
   if (trade.note) {
     props['Not'] = { rich_text: [{ text: { content: trade.note } }] };
   }
@@ -75,7 +101,8 @@ export default async function handler(req, res) {
 
     for (const trade of trades) {
       const db = whichDb(trade.pair);
-      const props = buildProps(trade);
+      const modelProp = await getModelProp(db.id, token);
+      const props = buildProps(trade, modelProp);
 
       let r, method = 'POST', url = 'https://api.notion.com/v1/pages';
       if (trade.notionId) {
