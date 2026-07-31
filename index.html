@@ -223,6 +223,13 @@
   .nav-mobile-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card-2); z-index: 2; }
   .nav-mobile-head .nav-brand { flex: 1; min-width: 0; }
   .nav-mobile-close { flex: none; width: 34px; height: 34px; border-radius: 9px; background: transparent; border: 1px solid var(--border); color: var(--text-2); font-size: 17px; cursor: pointer; line-height: 1; }
+  .nav-mobile-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+  .theme-toggle-d { position: relative; width: 42px; height: 24px; border-radius: 999px; padding: 0; background: #454a73; border: 1px solid var(--border); cursor: pointer; box-shadow: var(--shadow); -webkit-appearance: none; appearance: none; flex: none; }
+  .theme-toggle-d .tt-thumb { position: absolute; top: 1.5px; left: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); transition: transform .25s cubic-bezier(.2,.8,.3,1); }
+  .theme-toggle-d .tt-thumb { transform: translateX(17px); }
+  html[data-theme="light"] .theme-toggle-d { background: var(--acc); border-color: var(--acc); }
+  html[data-theme="light"] .theme-toggle-d .tt-thumb { transform: translateX(0); }
+  .theme-toggle-d:hover { border-color: var(--acc); }
   .nav-mobile-body { padding: 8px 12px 30px; }
   .mnav-link { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-2); text-decoration: none; cursor: pointer; }
   .mnav-link:active { background: var(--pc-soft); }
@@ -241,7 +248,7 @@
     .navbar .user-badge .uname { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .navbar .nav-mobile-btn { margin-left: 8px; }
     .soc-link { width: 28px; height: 28px; }
-    body .theme-toggle { top: auto; bottom: 22px; left: 20px; right: auto; z-index: 490; }
+    body .theme-toggle { display: none; }
   }
   .navbar .user-badge { margin-left: 12px; }
   .navbar .nav-login { margin-left: 12px; flex: none; }
@@ -628,10 +635,19 @@
   .crit.on.neg .pts { color: var(--red); }
 
   .gauge-panel { text-align: center; padding: 20px 14px 16px; }
-  svg.dial { width: 100%; max-width: 316px; height: auto; }
-  .score-num { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 52px; fill: var(--text); }
-  .score-pct { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 20px; fill: var(--text-3); }
-  .dial-dir { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.22em; fill: var(--text-3); }
+  .score-donut { width: 210px; height: 210px; margin: 6px auto 4px; position: relative; }
+  .donut-track, .donut-arc { position: absolute; inset: 0; border-radius: 50%; }
+  .donut-track { background: var(--muted-2); opacity: .28; -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 26px), #000 calc(100% - 25px)); mask: radial-gradient(farthest-side, transparent calc(100% - 26px), #000 calc(100% - 25px)); }
+  .donut-arc { background: conic-gradient(var(--arc-c, var(--pc)) calc(var(--p, 0) * 1%), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 26px), #000 calc(100% - 25px)); mask: radial-gradient(farthest-side, transparent calc(100% - 26px), #000 calc(100% - 25px)); transition: background .2s; }
+  .donut-hole { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+  .donut-num { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 54px; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+  .donut-num small { font-size: 22px; font-weight: 700; color: var(--text-3); margin-left: 2px; }
+  .donut-dir { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .18em; color: var(--text-3); text-transform: uppercase; }
+  .score-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .sstat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
+  .sstat .l { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 3px; }
+  .sstat .v { display: block; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); }
+  .sstat .v.green { color: var(--green); } .sstat .v.amber { color: var(--amber); } .sstat .v.red { color: var(--red); }
   #verdict {
     display: inline-block; font-weight: 700; font-size: 13.5px; letter-spacing: 0.06em;
     margin-top: 12px; border-radius: 999px; padding: 7px 16px;
@@ -924,16 +940,16 @@
   .lp-orb-b { width: 380px; height: 380px; background: #7c3aed; opacity: .38; top: -60px; right: -90px; }
   .lp-hero-band .lp-nav { position: relative; z-index: 2; max-width: 1080px; }
   .lp-hero-band .lp-brand h1 { color: #fff; }
-  .lp-hero-band .lp-brand .sub { color: rgba(255,255,255,.5); }
+  .lp-hero-band .lp-brand .sub { color: rgba(255,255,255,.72); }
   .lp-hero-band .lp-edu-btn { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.85); }
   .lp-hero-band .lp-edu-btn:hover { background: rgba(255,255,255,.13); color: #fff; border-color: rgba(255,255,255,.24); }
   .lp-hero-band .nav-login { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(6px); }
   .lp-hero-band .nav-login:hover { background: rgba(255,255,255,.18); }
   .lp-hero-band .lp-hero { position: relative; z-index: 2; padding-top: 42px; padding-bottom: 8px; }
-  .lp-hero-band .lp-badge { background: rgba(123,120,245,.16); color: #cbc9ff; border: 1px solid rgba(123,120,245,.32); }
-  .lp-hero-band .lp-hero h2 { color: #fff; font-size: clamp(32px, 6.6vw, 56px); font-family: var(--font-display); letter-spacing: -.03em; }
+  .lp-hero-band .lp-badge { background: rgba(123,120,245,.18); color: #e4e2ff; border: 1px solid rgba(123,120,245,.38); }
+  .lp-hero-band .lp-hero h2 { color: #fff; font-size: clamp(32px, 6.6vw, 56px); font-family: var(--font-display); letter-spacing: -.03em; text-shadow: 0 2px 24px rgba(0,0,0,.32); }
   .lp-hero .grad { background: linear-gradient(115deg, #a78bfa 0%, #7b78f5 45%, #5b8cff 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .lp-hero-band .lp-hero > p { color: rgba(255,255,255,.64); }
+  .lp-hero-band .lp-hero > p { color: rgba(255,255,255,.88); text-shadow: 0 1px 16px rgba(0,0,0,.32); }
   .lp-hero-band .lp-cta .primary { background: linear-gradient(135deg, #8683ff, #5b5bd6); box-shadow: 0 10px 36px rgba(91,91,214,.5); border: none; }
   .lp-hero-band .lp-cta .primary:hover { box-shadow: 0 14px 44px rgba(91,91,214,.65); transform: translateY(-1px); }
   .lp-hero-band .lp-cta .ghost { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16); color: #fff; }
@@ -945,33 +961,33 @@
   .lp-proof-av span:first-child { margin-left: 0; }
   .lp-proof-txt { text-align: left; line-height: 1.25; }
   .lp-proof-txt b { display: block; color: #fff; font-size: 13px; font-weight: 700; }
-  .lp-proof-txt span { color: rgba(255,255,255,.5); font-size: 11.5px; }
+  .lp-proof-txt span { color: rgba(255,255,255,.72); font-size: 11.5px; }
   .lp-proof-div { width: 1px; height: 28px; background: rgba(255,255,255,.15); }
   .lp-proof-stars { color: #f5b623; font-size: 14px; letter-spacing: 2px; line-height: 1.2; }
-  .lp-proof-stars span { display: block; color: rgba(255,255,255,.5); font-size: 11px; letter-spacing: normal; margin-top: 1px; }
+  .lp-proof-stars span { display: block; color: rgba(255,255,255,.72); font-size: 11px; letter-spacing: normal; margin-top: 1px; }
   /* cam dashboard mockup */
   .lp-hero-shot { position: relative; z-index: 2; max-width: 920px; margin: 40px auto 0; padding: 0 20px; }
   .hsw { background: rgba(19,20,38,.72); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; box-shadow: 0 34px 90px rgba(0,0,0,.55); overflow: hidden; }
   .hsw-bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
   .hsw-bar span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.2); }
   .hsw-bar span:nth-child(1) { background: #ff5f57; } .hsw-bar span:nth-child(2) { background: #febc2e; } .hsw-bar span:nth-child(3) { background: #28c840; }
-  .hsw-bar em { margin-left: 10px; font-style: normal; font-size: 12px; color: rgba(255,255,255,.5); }
+  .hsw-bar em { margin-left: 10px; font-style: normal; font-size: 12px; color: rgba(255,255,255,.68); }
   .hsw-body { padding: 18px; }
   .hsw-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
   .hsw-m { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 14px; }
-  .hsw-m label { display: block; font-size: 11px; color: rgba(255,255,255,.5); margin-bottom: 5px; }
+  .hsw-m label { display: block; font-size: 11px; color: rgba(255,255,255,.64); margin-bottom: 5px; }
   .hsw-m b { font-size: 22px; font-weight: 800; color: #fff; font-family: var(--font-display); letter-spacing: -.02em; }
   .hsw-m b.up { color: #4ade80; }
-  .hsw-m i { display: block; font-style: normal; font-size: 10.5px; color: rgba(255,255,255,.4); margin-top: 3px; }
+  .hsw-m i { display: block; font-style: normal; font-size: 10.5px; color: rgba(255,255,255,.56); margin-top: 3px; }
   .hsw-m i.up { color: rgba(74,222,128,.75); }
   .hsw-main { display: grid; grid-template-columns: 1fr 200px; gap: 14px; }
   .hsw-chart { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 14px; }
-  .hsw-chart-h { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.6); margin-bottom: 8px; }
+  .hsw-chart-h { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.72); margin-bottom: 8px; }
   .hsw-chart-h .up { color: #4ade80; font-weight: 600; }
   .hsw-chart svg { width: 100%; height: 120px; display: block; }
   .hsw-side { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 12px 14px; }
-  .hsw-side-h { font-size: 12px; color: rgba(255,255,255,.6); margin-bottom: 8px; font-weight: 600; }
-  .hsw-tr { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,.82); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .hsw-side-h { font-size: 12px; color: rgba(255,255,255,.72); margin-bottom: 8px; font-weight: 600; }
+  .hsw-tr { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,.9); padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
   .hsw-tr:last-child { border-bottom: none; }
   .hsw-tr b { margin-left: auto; font-weight: 700; }
   .hsw-tr b.up { color: #4ade80; } .hsw-tr b.down { color: #f87171; }
@@ -1677,6 +1693,8 @@
   html[data-theme="light"] .lp-hero-band .hsw-chart-h,
   html[data-theme="light"] .lp-hero-band .hsw-side-h,
   html[data-theme="light"] .lp-hero-band .hsw-tr { color: #5b6172; }
+  html[data-theme="light"] .lp-hero-band .lp-hero h2,
+  html[data-theme="light"] .lp-hero-band .lp-hero > p { text-shadow: none; }
   html[data-theme="light"] .lp-hero-band .lp-badge { background: rgba(91,91,214,.14); color: #4f46d8; border-color: rgba(91,91,214,.3); }
   html[data-theme="light"] .lp-hero-band .lp-edu-btn { background: rgba(255,255,255,.75); border-color: rgba(23,25,35,.14); color: #1a1d29; }
   html[data-theme="light"] .lp-hero-band .lp-edu-btn:hover { background: rgba(255,255,255,.92); border-color: #5b5bd6; color: #4f46d8; }
@@ -1765,17 +1783,21 @@
     document.documentElement.setAttribute('data-theme', initial);
     function applyTheme(t) {
       document.documentElement.setAttribute('data-theme', t);
-      var b = document.getElementById('themeToggle');
-      if (b) b.setAttribute('aria-checked', t === 'light' ? 'true' : 'false');
+      var checked = t === 'light' ? 'true' : 'false';
+      document.querySelectorAll('.theme-toggle, .theme-toggle-d').forEach(function (b) {
+        b.setAttribute('aria-checked', checked);
+      });
     }
     document.addEventListener('DOMContentLoaded', function () {
-      var btn = document.getElementById('themeToggle');
-      if (!btn) return;
-      btn.setAttribute('aria-checked', initial === 'light' ? 'true' : 'false');
-      btn.addEventListener('click', function () {
-        var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        try { localStorage.setItem('alfa-theme', cur); } catch (e) {}
-        applyTheme(cur);
+      var btns = document.querySelectorAll('.theme-toggle, .theme-toggle-d');
+      if (!btns.length) return;
+      btns.forEach(function (btn) {
+        btn.setAttribute('aria-checked', initial === 'light' ? 'true' : 'false');
+        btn.addEventListener('click', function () {
+          var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+          try { localStorage.setItem('alfa-theme', cur); } catch (e) {}
+          applyTheme(cur);
+        });
       });
     });
   })();
@@ -2170,26 +2192,27 @@
   <div class="nav-mobile-backdrop" id="nav-mobile-backdrop"></div>
   <div class="nav-mobile" id="nav-mobile" role="dialog" aria-label="Menü">
     <div class="nav-mobile-head">
-      <div class="nav-brand"><div class="logo-mark">α</div><span>Alfa Traders</span></div>
-      <button class="nav-mobile-close" id="nav-mobile-close" type="button" aria-label="Kapat">✕</button>
+      <div class="nav-brand"><div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.5 26.5 L16 5.5 L26.5 26.5" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M6.5 23 Q16 17 25.5 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></div><span>Alfa Traders</span></div>
+      <div class="nav-mobile-actions">
+        <button class="theme-toggle-d" id="themeToggleM" type="button" role="switch" aria-label="Gündüz / Gece modu"><span class="tt-thumb"></span></button>
+        <button class="nav-mobile-close" id="nav-mobile-close" type="button" aria-label="Kapat">✕</button>
+      </div>
     </div>
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home">🏠 Ana Menü</a>
-      <div class="mnav-group">⚡ Trader Araçları</div>
-      <a href="?page=trading" class="mnav-link" data-nav data-mnav="trading">📉 Trading Terminali</a>
-      <a href="?page=tv" class="mnav-link" data-nav data-mnav="tv">📺 TV Taraması</a>
-      <a href="?page=watchlist" class="mnav-link" data-nav data-mnav="watchlist">⭐ Takip Listesi</a>
-      <a href="?page=confirm" class="mnav-link" data-nav data-mnav="confirm">📜 İşlem Defteri</a>
-      <a href="?page=signal" class="mnav-link" data-nav data-mnav="signal">🛰️ Sinyal Paneli</a>
-      <a href="?page=indicator" class="mnav-link" data-nav data-mnav="indicator">📊 İndikatör Paneli</a>
-      <a href="?page=calculators" class="mnav-link" data-nav data-mnav="calculators">🧮 Hesaplayıcılar</a>
-      <div class="mnav-group">🎓 Alfa Edu</div>
+      <div class="mnav-group">⚡ Trader</div>
+      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter">✅ Check List</a>
+      <a href="?page=data" class="mnav-link" data-nav data-mnav="data">📈 Trade Günlüğü</a>
+      <a href="?page=onchain" class="mnav-link" data-nav data-mnav="onchain">⛓️ Onchain</a>
+      <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc">🧮 Alfa Calculator</a>
+      <a href="?page=review" class="mnav-link" data-nav data-mnav="review">📊 Haftalık Değerlendirme</a>
+      <a href="?page=trading" class="mnav-link" data-nav data-mnav="trading">📉 Trading</a>
+      <div class="mnav-group">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim">🎓 Alfa Edu</a>
       <a href="?page=indicators" class="mnav-link" data-nav data-mnav="indicators">📐 İndikatörler</a>
       <div class="mnav-group">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar">📅 Ekonomik Takvim</a>
       <a href="?page=news" class="mnav-link" data-nav data-mnav="news">🗞️ Dergi</a>
-      <div class="mnav-group">Topluluk</div>
       <a href="?page=basvuru" class="mnav-link" data-nav data-mnav="basvuru">🚀 Alfa Trader Ol</a>
       <a href="?page=chat-admin" class="mnav-link" data-nav data-mnav="chat-admin" data-close>💬 Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge-m">0</span></a>
       <div class="mnav-contact">
@@ -2544,7 +2567,9 @@
       function boot() {
         loadTVChart();
         var tg = document.getElementById('themeToggle');
+        var tgM = document.getElementById('themeToggleM');
         if (tg) tg.addEventListener('click', function () { setTimeout(loadTVChart, 350); });
+        if (tgM) tgM.addEventListener('click', function () { setTimeout(loadTVChart, 350); });
         var addBtn = document.getElementById('wl-add');
         if (addBtn) addBtn.addEventListener('click', function () { addToWatchlist(window._tvSym); });
         renderWatchlist();
@@ -2608,13 +2633,21 @@
   <div class="board">
     <div class="col-c">
       <div class="panel gauge-panel">
-        <svg class="dial" viewBox="0 0 260 260" role="img" aria-label="Konfirmasyon skoru">
-          <g id="slices"></g>
-          <text id="score-txt" class="score-num" x="130" y="140" text-anchor="middle">0<tspan class="score-pct" dx="2">%</tspan></text>
-          <text id="dial-dir" class="dial-dir" x="130" y="166" text-anchor="middle"></text>
-        </svg>
+        <div class="score-donut" id="score-donut">
+          <div class="donut-track"></div>
+          <div class="donut-arc" id="donut-arc"></div>
+          <div class="donut-hole">
+            <div class="donut-num" id="donut-num">0<small>%</small></div>
+            <div class="donut-dir" id="donut-dir"></div>
+          </div>
+        </div>
         <div><span id="verdict" class="v-no">ANLAŞMA YOK</span></div>
         <div id="risk-line">Kadran karar verir, sen değil.</div>
+        <div class="score-stats">
+          <div class="sstat"><span class="l">A+ eşiği</span><span class="v" id="stat-aplus">70</span></div>
+          <div class="sstat"><span class="l">B eşiği</span><span class="v" id="stat-b">50</span></div>
+          <div class="sstat"><span class="l">İşaretli</span><span class="v" id="stat-cnt">0/0</span></div>
+        </div>
         <div class="mood">
           <span class="mood-end">KORKU</span>
           <input type="range" class="mood-range" id="mood-range" min="-10" max="10" step="1" value="0" aria-label="Duygu ibresi: korku ile coşku arası">
@@ -3717,18 +3750,6 @@ function autoSession() {
   return m < 990 ? 'London' : 'NY'; // 16:30 öncesi London, sonrası NY
 }
 
-const SLICES = 36, CX = 130, CY = 130, R_OUT = 124, R_IN = 92;
-
-function polar(r, deg) {
-  const rad = (deg - 90) * Math.PI / 180;
-  return [CX + r * Math.cos(rad), CY + r * Math.sin(rad)];
-}
-function slicePath(a0, a1) {
-  const large = (a1 - a0) > 180 ? 1 : 0;
-  const [x0o, y0o] = polar(R_OUT, a0), [x1o, y1o] = polar(R_OUT, a1);
-  const [x0i, y0i] = polar(R_IN, a0), [x1i, y1i] = polar(R_IN, a1);
-  return `M ${x0o} ${y0o} A ${R_OUT} ${R_OUT} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${R_IN} ${R_IN} 0 ${large} 0 ${x0i} ${y0i} Z`;
-}
 function cfg() { return config.pairs[pair]; }
 function zoneColor(pct, lit) {
   const a = cfg().thresholds.aplus, b = cfg().thresholds.b;
@@ -3737,17 +3758,11 @@ function zoneColor(pct, lit) {
   return lit ? '#f87171' : '#f6e2e2';
 }
 function renderGauge(score) {
-  const g = document.getElementById('slices');
-  g.innerHTML = '';
-  const gap = 1.8, step = 360 / SLICES;
-  for (let i = 0; i < SLICES; i++) {
-    const a0 = i * step + gap / 2, a1 = (i + 1) * step - gap / 2;
-    const mid = (i + 0.5) / SLICES * 100;
-    const isLit = ((i + 1) / SLICES * 100) <= score + 0.001;
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', slicePath(a0, a1));
-    p.setAttribute('fill', zoneColor(mid, isLit));
-    g.appendChild(p);
+  const arc = document.getElementById('donut-arc');
+  if (arc) {
+    const s = Math.max(0, Math.min(100, score));
+    arc.style.setProperty('--p', s);
+    arc.style.setProperty('--arc-c', zoneColor(s, true));
   }
 }
 function ptsFor(c) { return direction === 'LONG' ? Number(c.l) || 0 : Number(c.s) || 0; }
@@ -4047,8 +4062,18 @@ function renderPairs() {
 function render() {
   const s = computeScore();
   const { aplus: a, b } = cfg().thresholds;
-  document.getElementById('score-txt').innerHTML = Math.round(s) + '<tspan class="score-pct" dx="2">%</tspan>';
-  document.getElementById('dial-dir').textContent = pair + ' · ' + direction;
+  const numEl = document.getElementById('donut-num');
+  if (numEl) numEl.innerHTML = Math.round(s) + '<small>%</small>';
+  const dirEl = document.getElementById('donut-dir');
+  if (dirEl) dirEl.textContent = pair + ' · ' + direction;
+  const sa = document.getElementById('stat-aplus'); if (sa) sa.textContent = a;
+  const sb = document.getElementById('stat-b'); if (sb) sb.textContent = b;
+  const sc = document.getElementById('stat-cnt');
+  if (sc) {
+    let on = 0, tot = 0;
+    cfg().criteria.forEach((c, i) => { if (c.cat === 'duygu') return; tot++; if (checked.has(i)) on++; });
+    sc.textContent = on + '/' + tot;
+  }
   renderGauge(s);
 
   const v = document.getElementById('verdict'), risk = document.getElementById('risk-line');
