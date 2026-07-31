@@ -5422,7 +5422,7 @@ function dfDateLabel(t) {
 }
 
 function renderData() {
-  const rows = sortedData().filter(dfPassesFilter);
+  const rows = sortedData().reverse().filter(dfPassesFilter);
   const n = rows.length;
   const totR = rows.reduce((s, t) => s + dnum(t.r), 0);
   const wins = rows.filter(t => dnum(t.r) > 0).length;
@@ -5483,8 +5483,11 @@ function renderData() {
     // Detail panel
     const detail = document.createElement('div'); detail.className = 'dr-detail';
     let detailHtml = '<div class="dr-detail-grid">';
-    if (t.date) detailHtml += '<div class="item"><span class="lbl">Tarih</span><span class="val">' + fmtDfDate(t.date) + '</span></div>';
+    detailHtml += '<div class="item"><span class="lbl">Tarih</span><span class="val">' + dfDateLabel(t) + '</span></div>';
+    detailHtml += '<div class="item"><span class="lbl">Parite</span><span class="val">' + esc(t.pair || '—') + '</span></div>';
+    detailHtml += '<div class="item"><span class="lbl">Yön</span><span class="val ' + (t.dir || '').toLowerCase() + '">' + esc(t.dir || '—') + '</span></div>';
     detailHtml += '<div class="item"><span class="lbl">R</span><span class="val '+ (r>=0?'pos':'neg') + '">' + (r>0?'+':'') + r.toFixed(2) + '</span></div>';
+    if (t.strat) detailHtml += '<div class="item"><span class="lbl">Strateji</span><span class="val">' + esc(t.strat) + '</span></div>';
     detailHtml += '</div>';
     // Criteria bars
     if (t.criteria) {
@@ -5625,7 +5628,7 @@ async function addDataTrade() {
   g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-strat').value = ''; g('df-note').value = '';
   document.querySelectorAll('.crit-range').forEach(r => { r.value = 4; r.dispatchEvent(new Event('input')); });
   dfImages = []; renderDfPreviews();
-  dfDataPage = Math.ceil(dataTrades.length / DF_PP);
+  dfDataPage = 1;
   g('data-note').textContent = '✅ İşlem kaydedildi — Notion\'a da senkron ediliyor.';
   renderData();
   const last = dataTrades[dataTrades.length - 1];
