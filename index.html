@@ -1404,6 +1404,22 @@
 .bas-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
+.calc-page { max-width: 960px; margin: 0 auto; padding: 24px 16px 60px; }
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+.calc-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+.calc-section h3 { margin: 0 0 16px; font-size: 15px; color: var(--text); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.calc-section h3::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: linear-gradient(135deg, var(--acc), #7c3aed); }
+.calc-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.calc-row label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.calc-row input, .calc-row select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit; box-sizing: border-box; }
+.calc-row input:focus, .calc-row select:focus { outline: none; border-color: var(--acc); }
+.result-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.result-item:last-child { border-bottom: none; }
+.result-item span:first-child { font-size: 13px; color: var(--text-2); }
+.result-item .result-value { font-size: 14px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.result-item .result-value.pos { color: #34d399; }
+.result-item .result-value.neg { color: #f87171; }
+@media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } .calc-page { padding: 16px 12px 40px; } }
 .home-ticker { position: relative; z-index: 50; padding: 6px 20px; background: linear-gradient(90deg, rgba(123,120,245,0.08), rgba(124,58,237,0.05)); border-bottom: 1px solid rgba(123,120,245,0.12); display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-2); line-height: 1.45; }
 .home-ticker .tq { flex: 1; font-style: italic; text-align: center; }
 .home-ticker .ta { flex: none; font-size: 10px; color: var(--acc); white-space: nowrap; font-weight: 600; }
@@ -1823,6 +1839,7 @@
           <a href="?page=defter" class="nav-link" id="tab-defter" data-nav>Check List</a>
           <a href="?page=data" class="nav-link" id="tab-data" data-nav>Trade Günlüğü</a>
           <a href="?page=onchain" class="nav-link" id="tab-onchain" data-nav>Onchain</a>
+          <a href="?page=calc" class="nav-link" id="tab-calc" data-nav>Alfa Calculator</a>
           <a href="?page=review" class="nav-link" id="tab-review" data-nav>Haftalık Değerlendirme</a>
         </div>
       </div>
@@ -2509,6 +2526,107 @@
       </div>
     </div>
   </div>
+
+  <div id="page-calc" class="hidden calc-page">
+    <div class="panel">
+      <h2><span>FX Risk & Pozisyon Boyutu Hesaplayıcı</span></h2>
+      <div class="calc-grid">
+        <div class="calc-inputs">
+          <div class="calc-section">
+            <h3>Hesap Bilgileri</h3>
+            <div class="calc-row">
+              <label>Hesap Bakiyesi ($)</label>
+              <input type="number" id="accountBalance" value="10000" step="100" min="1">
+            </div>
+            <div class="calc-row">
+              <label>Risk Türü</label>
+              <select id="riskType">
+                <option value="percent">Risk Oranı (%)</option>
+                <option value="amount">Risk Miktarı ($)</option>
+              </select>
+            </div>
+            <div class="calc-row">
+              <label id="riskValueLabel">Risk Oranı (%)</label>
+              <input type="number" id="riskValue" value="1" step="0.1" min="0.1" max="100">
+            </div>
+          </div>
+          
+          <div class="calc-section">
+            <h3>İşlem Bilgileri</h3>
+            <div class="calc-row">
+              <label>Parite / Enstrüman</label>
+              <select id="instrument">
+                <option value="EURUSD" data-pip="0.0001" data-contract="100000">EUR/USD</option>
+                <option value="GBPUSD" data-pip="0.0001" data-contract="100000">GBP/USD</option>
+                <option value="USDJPY" data-pip="0.01" data-contract="100000">USD/JPY</option>
+                <option value="AUDUSD" data-pip="0.0001" data-contract="100000">AUD/USD</option>
+                <option value="USDCAD" data-pip="0.0001" data-contract="100000">USD/CAD</option>
+                <option value="XAUUSD" data-pip="0.01" data-contract="100">XAU/USD (Altın)</option>
+                <option value="BTCUSDT" data-pip="1" data-contract="1">BTC/USDT</option>
+              </select>
+            </div>
+            <div class="calc-row">
+              <label>Giriş Fiyatı (Entry)</label>
+              <input type="number" id="entryPrice" value="1.08500" step="0.00001">
+            </div>
+            <div class="calc-row">
+              <label>Stop-Loss Fiyatı (SL)</label>
+              <input type="number" id="slPrice" value="1.08000" step="0.00001">
+            </div>
+            <div class="calc-row">
+              <label>Kaldıraç (Leverage)</label>
+              <select id="leverage">
+                <option value="30">1:30</option>
+                <option value="50">1:50</option>
+                <option value="100" selected>1:100</option>
+                <option value="200">1:200</option>
+                <option value="500">1:500</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="calc-results">
+          <div class="calc-section">
+            <h3>Hesaplama Sonuçları</h3>
+            <div class="result-item">
+              <span>Risk Edilen Tutar:</span>
+              <span id="resRiskAmount" class="result-value">$100.00</span>
+            </div>
+            <div class="result-item">
+              <span>Risk Edilen Mesafe:</span>
+              <span id="resPipDistance" class="result-value">50.0 Pips</span>
+            </div>
+            <div class="result-item">
+              <span>Standard Lot:</span>
+              <span id="resStandardLot" class="result-value">0.20</span>
+            </div>
+            <div class="result-item">
+              <span>Mini Lot (0.1):</span>
+              <span id="resMiniLot" class="result-value">2.0</span>
+            </div>
+            <div class="result-item">
+              <span>Mikro Lot (0.01):</span>
+              <span id="resMicroLot" class="result-value">20.0</span>
+            </div>
+            <div class="result-item">
+              <span>Pozisyon Büyüklüğü:</span>
+              <span id="resNotionalValue" class="result-value">$21,700.00</span>
+            </div>
+            <div class="result-item">
+              <span>Gerekli Marj:</span>
+              <span id="resMarginRequired" class="result-value">$217.00</span>
+            </div>
+            <div class="result-item">
+              <span>1 Pip Değeri (1 Lot):</span>
+              <span id="resPipValue" class="result-value">$10.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="page-basvuru" class="hidden">
     <div class="bas-page">
       <div class="bas-hero">
@@ -4856,6 +4974,7 @@ function init() {
   bindIndicatorsPage();
   bindAdminChat();
   bindOnchainPage();
+  bindCalcPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
   document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
@@ -5234,7 +5353,7 @@ async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)
 
 function showPage(name) {
   currentPage = name;
-  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin'];
+  const pages = ['home', 'defter', 'data', 'review', 'news', 'egitim', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -6539,6 +6658,57 @@ function bindIndicatorsPage() {
 
 function bindOnchainPage() {
   const g = id => document.getElementById(id);
+}
+function bindCalcPage() {
+  const g = id => document.getElementById(id);
+  ['accountBalance', 'riskValue', 'entryPrice', 'slPrice'].forEach(id => {
+    const el = g(id);
+    if (el) el.addEventListener('input', updateCalc);
+  });
+  ['riskType', 'instrument', 'leverage'].forEach(id => {
+    const el = g(id);
+    if (el) el.addEventListener('change', updateCalc);
+  });
+  updateCalc();
+}
+function updateCalc() {
+  const g = id => document.getElementById(id);
+  const balance = dnum(g('accountBalance') && g('accountBalance').value);
+  const riskType = g('riskType') ? g('riskType').value : 'percent';
+  const riskVal = dnum(g('riskValue') && g('riskValue').value);
+  const entry = dnum(g('entryPrice') && g('entryPrice').value);
+  const sl = dnum(g('slPrice') && g('slPrice').value);
+  const lev = dnum(g('leverage') && g('leverage').value) || 1;
+  const instSel = g('instrument');
+  let pip = 0.0001, contract = 100000, symbol = '';
+  if (instSel) {
+    const opt = instSel.options[instSel.selectedIndex];
+    pip = parseFloat(opt.getAttribute('data-pip')) || 0.0001;
+    contract = parseFloat(opt.getAttribute('data-contract')) || 100000;
+    symbol = instSel.value;
+  }
+  if (riskType === 'percent') {
+    g('riskValueLabel').textContent = 'Risk Oranı (%)';
+    g('riskValue').setAttribute('max', '100');
+  } else {
+    g('riskValueLabel').textContent = 'Risk Miktarı ($)';
+    g('riskValue').removeAttribute('max');
+  }
+  const riskAmount = riskType === 'percent' ? balance * riskVal / 100 : riskVal;
+  const pipDist = entry > 0 ? Math.abs(entry - sl) / pip : 0;
+  const quoteUsd = !/JPY|CAD/.test(symbol);
+  const pipValueLot = quoteUsd ? contract * pip : entry > 0 ? (contract * pip) / entry : 0;
+  const lot = pipDist > 0 && pipValueLot > 0 ? riskAmount / (pipDist * pipValueLot) : 0;
+  const notional = entry > 0 ? lot * contract * (quoteUsd ? entry : 1 / entry) : 0;
+  const margin = notional / lev;
+  g('resRiskAmount').textContent = '$' + riskAmount.toFixed(2);
+  g('resPipDistance').textContent = pipDist.toFixed(1) + ' Pips';
+  g('resStandardLot').textContent = lot.toFixed(2);
+  g('resMiniLot').textContent = (lot / 0.1).toFixed(1);
+  g('resMicroLot').textContent = (lot / 0.01).toFixed(1);
+  g('resNotionalValue').textContent = '$' + notional.toFixed(2);
+  g('resMarginRequired').textContent = '$' + margin.toFixed(2);
+  g('resPipValue').textContent = '$' + pipValueLot.toFixed(2);
 }
 function bindAdminChat() {
   const g = id => document.getElementById(id);
