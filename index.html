@@ -3277,11 +3277,7 @@
     <div class="eg-brand">
       <span class="eg-brand-ico">🎓</span>
       <span class="eg-brand-name">Alfa Edu</span>
-      <span class="eg-brand-sub">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin.</span>
-    </div>
-    <div id="eg-admin-bar" style="display:none;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-      <button class="btn solid" id="eg-publish-btn" type="button">🌐 Herkese Yayınla</button>
-      <span id="eg-publish-st" style="font-size:12.5px;font-weight:600;"></span>
+      <span class="eg-brand-sub">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin. Değişiklikler otomatik yayınlanır.</span>
     </div>
     <div class="controls">
       <div class="seg" id="eg-sec-seg">
@@ -8519,7 +8515,6 @@ function renderEgitim() {
     const chk = document.createElement('button'); chk.className = 'eg-check' + (v.done ? ' on' : ''); chk.type = 'button';
     chk.textContent = '✓'; chk.title = v.done ? 'İzlendi — geri al' : 'İzlendi olarak işaretle';
     chk.addEventListener('click', async (e) => { e.stopPropagation(); v.done = !v.done; await saveEgitim(); renderEgitim(); });
-    row.appendChild(chk);
     const idx = document.createElement('span'); idx.className = 'eg-vid-idx'; idx.textContent = (i + 1);
     row.appendChild(idx);
     const t = document.createElement('span'); t.className = 'eg-vid-t'; t.textContent = v.title || '(başlıksız)';
@@ -8543,6 +8538,8 @@ function renderEgitim() {
     if (canEdit) {
       row.appendChild(up); row.appendChild(dn); row.appendChild(edit); row.appendChild(del);
     }
+    // izlendi işareti en sağda
+    row.appendChild(chk);
     row.addEventListener('click', async () => {
       if (egitimData.selVid[cur.id] === v.id) return;
       egitimData.selVid[cur.id] = v.id; await saveEgitim(); renderEgitim();
@@ -8652,32 +8649,6 @@ function bindEgitimPage() {
       if (v) { v.title = title || v.title || 'Video'; v.url = url; egitimData.selVid[t.id] = v.id; }
     }
     await saveEgitim(); egCloseForm(); renderEgitim();
-  });
-  const egPubBtn = g('eg-publish-btn');
-  if (egPubBtn) egPubBtn.addEventListener('click', async () => {
-    const st = g('eg-publish-st');
-    egPubBtn.disabled = true; const orig = egPubBtn.textContent; egPubBtn.textContent = 'Yayınlanıyor…';
-    if (st) { st.textContent = ''; st.style.color = 'var(--text-3)'; }
-    const r = await saveEgitim();
-    // Sunucuda gerçekten kaç video linki kayıtlı — GET ile doğrula
-    let verify = '';
-    if (r && r.ok && !r.local) {
-      try {
-        const gr = await fetch('/api/edu-shared', { cache: 'no-store' });
-        if (gr.ok) {
-          const d = await gr.json();
-          let sv = 0;
-          Object.values(d.sections || {}).forEach(arr => (arr || []).forEach(t => { sv += (t.videos || []).filter(v => v.url).length; }));
-          verify = ' · sunucuda ' + sv + ' link doğrulandı';
-        }
-      } catch (e) {}
-    }
-    egPubBtn.disabled = false; egPubBtn.textContent = orig;
-    if (st) {
-      if (r && r.ok && !r.local) { st.textContent = '✓ ' + r.topics + ' konu · ' + r.videos + ' video yayınlandı' + verify; st.style.color = 'var(--green)'; }
-      else if (r && r.local) { st.textContent = 'Sadece admin yayınlayabilir.'; st.style.color = 'var(--text-3)'; }
-      else { st.textContent = '✗ Yayınlanamadı: ' + ((r && r.error) || 'bilinmeyen hata'); st.style.color = 'var(--red)'; }
-    }
   });
   g('eg-in-url').addEventListener('keydown', e => { if (e.key === 'Enter') g('eg-in-save').click(); });
   g('eg-in-title').addEventListener('keydown', e => { if (e.key === 'Enter' && g('eg-in-url').style.display === 'none') g('eg-in-save').click(); });
@@ -8903,8 +8874,6 @@ async function onAuthed(user) {
   const isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
   const adminTab = document.getElementById('tab-chat-admin');
   if (adminTab) adminTab.style.display = isAdmin ? '' : 'none';
-  const egPubBar = document.getElementById('eg-admin-bar');
-  if (egPubBar) egPubBar.style.display = isAdmin ? 'flex' : 'none';
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
