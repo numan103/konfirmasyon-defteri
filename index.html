@@ -694,6 +694,58 @@
     border: 1.5px solid var(--pc); border-radius: 999px; background: var(--card); color: var(--text);
   }
   .chip-input:focus { outline: none; }
+  .chip { display: inline-flex; align-items: center; }
+  .chip-rm { background: none; border: none; cursor: pointer; color: inherit; opacity: 0.55; font-size: 11px; line-height: 1; padding: 0 0 0 7px; }
+  .chip-rm:hover { opacity: 1; }
+
+  .ai-wrap { margin-bottom: 12px; }
+  .ai-head { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-wrap: wrap; padding: 2px 0; }
+  .ai-title { font-size: 14px; font-weight: 800; color: var(--pc); letter-spacing: 0.02em; }
+  .ai-sub { font-size: 11.5px; color: var(--text-3); flex: 1; min-width: 120px; }
+  .ai-caret { color: var(--text-3); transition: transform 0.15s ease; }
+  .ai-wrap.open .ai-caret { transform: rotate(180deg); }
+  #ai-body { padding-top: 12px; margin-top: 12px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 10px; }
+  .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  #ai-body label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 700; color: var(--text-2); }
+  #ai-body select, #ai-body input[type="text"], #ai-body textarea {
+    font-family: 'Inter', sans-serif; font-size: 13.5px; padding: 9px 11px;
+    background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); width: 100%;
+  }
+  #ai-body select:focus, #ai-body input[type="text"]:focus, #ai-body textarea:focus { outline: 2px solid var(--pc); border-color: transparent; }
+  .ai-lbl { font-size: 12px; font-weight: 700; color: var(--text-2); }
+  #ai-result { margin-top: 4px; }
+  .ai-r-box { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .ai-r-sum { font-size: 12.5px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px; }
+  .ai-r-cats { display: grid; gap: 4px; }
+  .ai-r-cat { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin: 8px 0 2px; }
+  .ai-r-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); padding: 4px 0; border-bottom: 1px dashed var(--border); }
+  .ai-r-pts { font-size: 11px; font-weight: 700; color: var(--pc); min-width: 30px; text-align: right; }
+  .ai-r-pts.neg { color: var(--red); }
+  .ai-banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--pc-soft); border: 1px solid var(--pc); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; }
+  .ai-banner strong { color: var(--pc); }
+  .ai-banner > div:first-child { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 180px; }
+  .ai-banner-name { font-size: 12px; color: var(--text-2); }
+  .ai-banner-acts { display: flex; gap: 8px; }
+
+  .note-popup-content.wide { max-width: 660px; }
+  .pe-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .pe-row input { flex: 1; min-width: 0; font-family: 'Inter', sans-serif; font-size: 13px; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
+  .pe-row select { font-family: 'Inter', sans-serif; font-size: 12px; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
+  .pe-row input:focus, .pe-row select:focus { outline: 2px solid var(--pc); border-color: transparent; }
+  .pe-del { width: 28px; height: 28px; flex: 0 0 auto; background: var(--red-soft); border: none; border-radius: 7px; color: var(--red); font-size: 15px; line-height: 1; cursor: pointer; }
+  .pe-del:hover { background: var(--red-hover); }
+  .pe-add { width: 100%; margin-top: 4px; }
+
+  .rv-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+  .rv-notion { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rv-month-kpi { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+  .rv-mkpi { flex: 1; min-width: 120px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .rv-mkpi .mk-lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+  .rv-mkpi .mk-val { font-size: 17px; font-weight: 800; }
+  .rv-mkpi .mk-val.pos { color: var(--green); }
+  .rv-mkpi .mk-val.neg { color: var(--red); }
+  .rv-lesson { font-size: 13px; color: var(--text); line-height: 1.5; padding: 7px 0; border-bottom: 1px dashed var(--border); }
+  .rv-lesson:last-child { border-bottom: none; }
 
   .mx-grid { display: grid; grid-template-columns: 52px repeat(2, 1fr); gap: 5px; margin-bottom: 8px; }
   .mx-grid .mx-h { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-3); text-transform: uppercase; align-self: center; }
@@ -2710,6 +2762,50 @@
   </div>
   <div id="page-defter" class="hidden">
     <div class="eg-brand"><span class="eg-brand-ico">✅</span><span class="eg-brand-name">Alfa-Check List</span><span class="eg-brand-sub">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
+  <div class="ai-wrap panel" id="ai-wrap">
+    <div class="ai-head" id="ai-head" role="button" tabindex="0" aria-expanded="false">
+      <span class="ai-title">🧠 Yapay Zeka ile Kişisel Checklist</span>
+      <span class="ai-sub" id="ai-sub">Profili doldur → öneri üret → checklist'e uygula</span>
+      <span class="ai-caret" id="ai-caret">▾</span>
+    </div>
+    <div id="ai-body" style="display:none;">
+      <div class="ai-grid">
+        <label>Piyasa
+          <select id="ai-market">
+            <option value="kripto">Kripto (orderflow)</option>
+            <option value="xau">Altın (XAU)</option>
+            <option value="fx">FX</option>
+          </select>
+        </label>
+        <label>Deneyim
+          <select id="ai-exp">
+            <option value="yeni">Yeni başlayan</option>
+            <option value="orta" selected>Orta</option>
+            <option value="ileri">İleri</option>
+          </select>
+        </label>
+      </div>
+      <label>Strateji(ler) <input type="text" id="ai-strat" placeholder="Breaker, IFVG, Orderflow…"></label>
+      <span class="ai-lbl">Duygusal zayıflıkların</span>
+      <div class="chiprow" id="ai-emos"></div>
+      <label>Problemlerin <textarea id="ai-problem" rows="2" placeholder="Ne batırıyor seni? (stop çekmeme, geç girme, fazla işlem…)" maxlength="300"></textarea></label>
+      <label>İlgi / hedef <input type="text" id="ai-interest" placeholder="Ör: sadece altın, 2 yılda full-time…"></label>
+      <div class="actions" style="justify-content:flex-start;">
+        <button class="btn solid" id="ai-gen">🤖 Öneri Üret</button>
+        <span id="ai-status" class="hint" style="margin:0;align-self:center;"></span>
+      </div>
+      <div id="ai-result"></div>
+    </div>
+  </div>
+  <div class="ai-banner hidden" id="ai-banner">
+    <div>
+      <strong>🧠 AI Profili aktif</strong>
+      <span class="ai-banner-name" id="ai-banner-name"></span>
+    </div>
+    <div class="ai-banner-acts">
+      <button class="btn" type="button" id="ai-exit">Kendi ayarlarıma dön</button>
+    </div>
+  </div>
   <div class="controls">
     <div class="seg" id="pair-seg"></div>
     <div class="seg">
@@ -2825,7 +2921,7 @@
 
     <div class="col-r">
       <div class="panel" style="margin-bottom:12px;">
-        <h2><span>Pozisyon Esnasında</span><span class="n" id="n-pos"></span></h2>
+        <h2><span>Pozisyon Esnasında</span><span class="n" id="n-pos"></span><button type="button" class="cat-edit" id="pos-edit">✎ Düzenle</button></h2>
         <div id="list-pos"></div>
         <div class="sent-note" id="pos-verdict"></div>
       </div>
@@ -3021,6 +3117,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;padding:12px;background:var(--bg-2);border-radius:8px;">
           <label style="font-size:12px;">Kripto DB ID <input type="text" id="ndb-kripto" placeholder="380f561953ab8088b5f9ffd53a397de9" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
           <label style="font-size:12px;">Fx DB ID <input type="text" id="ndb-fx" placeholder="380f561953ab80938bdbfc07fcef2de1" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
+          <label style="font-size:12px;">Haftalık Değerlendirme DB ID <input type="text" id="ndb-week" placeholder="Haftalık değerlendirme database id" style="width:100%;margin-top:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;"></label>
           <button class="btn" id="ndb-save" style="grid-column:1/-1;">Kaydet</button>
           <span id="ndb-note" class="hint" style="grid-column:1/-1;"></span>
         </div>
@@ -3076,6 +3173,17 @@
       <div class="rv-week" id="rv-week">—</div>
       <button class="rv-nav" id="rv-next" type="button">▶</button>
       <button class="rv-today" id="rv-today" type="button">Bu hafta</button>
+    </div>
+    <div class="rv-toolbar">
+      <div class="seg" id="rv-mode-seg">
+        <button class="on" id="rv-mode-week" type="button">Hafta</button>
+        <button id="rv-mode-month" type="button">Ay Özeti</button>
+      </div>
+      <div class="rv-notion">
+        <button class="btn" id="rv-npush" type="button">⬆ Notion'a Senkronla</button>
+        <button class="btn" id="rv-npull" type="button">⬇ Notion'dan Çek</button>
+        <span id="rv-nstatus" class="hint" style="margin:0;font-size:11.5px;"></span>
+      </div>
     </div>
     <div class="panel rv-perf">
       <div class="rv-totals">
@@ -3776,6 +3884,69 @@ const SESSIONS = ['London', 'NY'];
 let session = 'London';
 let strat = '';
 
+// ============ Yapay Zeka Profili (izole — kullanıcı config'ine dokunmaz) ============
+const AI_PROFILE_KEY = 'defter-ai-profile-v1';
+let aiProfile = null;   // { market, experience, strategy, emotions[], problem, interest, gold, lastPair, criteria[], thresholds, strategies[], pos[], summary }
+let aiActive = false;
+let aiPrevPair = 'BTC';
+
+function aiGold() { return !!(aiActive && aiProfile && aiProfile.gold); }
+
+async function loadAiProfile() {
+  try {
+    const raw = await store.get(AI_PROFILE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p && Array.isArray(p.criteria)) { aiProfile = p; aiActive = false; }
+    }
+  } catch (e) { /* boş başla */ }
+}
+async function saveAiProfile() {
+  if (!aiProfile) return;
+  try { await store.set(AI_PROFILE_KEY, JSON.stringify(aiProfile)); } catch (e) { /* izole */ }
+}
+function applyAiProfile() {
+  if (!aiProfile) return;
+  aiPrevPair = pair;
+  aiActive = true;
+  pair = aiProfile.gold ? 'XAU' : 'BTC';
+  checked = new Set(); sent = ''; posChecked = new Set(); intent = ''; mood = 0;
+  const mr = document.getElementById('mood-range'); if (mr) mr.value = 0;
+  renderAiBanner();
+  renderPairs(); renderCriteria(); render(); renderSent(); renderPos(); applyPairPanels(); renderMatrix();
+  if (typeof renderMood === 'function') renderMood();
+  if (typeof renderIntent === 'function') renderIntent();
+  const pf = document.getElementById('d-pair'); if (pf) pf.value = pair;
+  if (document.getElementById('editor').classList.contains('open')) renderEditor();
+}
+function exitAiProfile() {
+  if (!aiActive) return;
+  aiActive = false;
+  pair = aiPrevPair;
+  checked = new Set(); sent = ''; posChecked = new Set(); intent = ''; mood = 0;
+  const mr = document.getElementById('mood-range'); if (mr) mr.value = 0;
+  renderAiBanner();
+  renderPairs(); renderCriteria(); render(); renderSent(); renderPos(); applyPairPanels(); renderMatrix();
+  if (typeof renderMood === 'function') renderMood();
+  if (typeof renderIntent === 'function') renderIntent();
+  const pf = document.getElementById('d-pair'); if (pf) pf.value = pair;
+  if (document.getElementById('editor').classList.contains('open')) renderEditor();
+}
+function renderAiBanner() {
+  const b = document.getElementById('ai-banner');
+  if (!b) return;
+  const name = document.getElementById('ai-banner-name');
+  if (aiActive && aiProfile) {
+    b.classList.remove('hidden');
+    const emos = (aiProfile.emotions && aiProfile.emotions.length)
+      ? ' · ' + aiProfile.emotions.join(', ') : '';
+    name.textContent = (aiProfile.gold ? 'Altın (XAU)' : 'Kripto') + ' profili' +
+      (aiProfile.strategy ? ' · ' + aiProfile.strategy : '') + emos;
+  } else {
+    b.classList.add('hidden');
+  }
+}
+
 function pairDays(p) {
   const isGold = p === 'XAU' || p.indexOf('XAU') !== -1 || p.indexOf('GOLD') !== -1;
   return isGold ? ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'] : ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
@@ -3804,6 +3975,7 @@ function defaultMatrixFor(p) {
 }
 function defaultMatrix() { return defaultMatrixFor('BTC'); }
 function stratsFor(p) {
+  if (aiActive && aiProfile && Array.isArray(aiProfile.strategies) && aiProfile.strategies.length) return aiProfile.strategies;
   if (!config.stratByPair) config.stratByPair = {};
   if (!Array.isArray(config.stratByPair[p])) config.stratByPair[p] = defaultStrategiesFor(p).slice();
   return config.stratByPair[p];
@@ -3992,7 +4164,10 @@ function autoSession() {
   return m < 990 ? 'London' : 'NY'; // 16:30 öncesi London, sonrası NY
 }
 
-function cfg() { return config.pairs[pair]; }
+function cfg() {
+  if (aiActive && aiProfile && Array.isArray(aiProfile.criteria)) return aiProfile;
+  return config.pairs[pair];
+}
 function zoneColor(pct, lit) {
   const a = cfg().thresholds.aplus, b = cfg().thresholds.b;
   if (pct >= a) return lit ? '#34d399' : '#e4f3ea';
@@ -4046,8 +4221,285 @@ const POS_ITEMS_XAU = [
   { name: 'TP ucundan dönen işlem kapandı mı?', valid: false }
 ];
 function posItems() {
+  if (aiActive && aiProfile && Array.isArray(aiProfile.pos) && aiProfile.pos.length) return aiProfile.pos;
   const isGold = pair === 'XAU' || pair.indexOf('XAU') !== -1 || pair.indexOf('GOLD') !== -1;
-  return isGold ? POS_ITEMS_XAU : POS_ITEMS_BTC;
+  if (!config.posByPair) config.posByPair = {};
+  if (!Array.isArray(config.posByPair[pair])) {
+    const seed = isGold ? POS_ITEMS_XAU : POS_ITEMS_BTC;
+    config.posByPair[pair] = seed.map(x => ({ name: x.name, valid: x.valid }));
+  }
+  return config.posByPair[pair];
+}
+
+function openPosEditor() {
+  const body = document.getElementById('note-popup-body');
+  const popup = document.getElementById('note-popup');
+  const items = posItems();
+  const box = document.createElement('div');
+  const h = document.createElement('h2');
+  h.textContent = 'Pozisyon Esnasında — Düzenle';
+  box.appendChild(h);
+  const hint = document.createElement('p');
+  hint.className = 'hint';
+  hint.style.cssText = 'margin:0 0 12px;';
+  hint.textContent = 'Cümleyi değiştir, ÇIKIŞ (plan gereği kapatma sebebi) / DÜRTÜ (hissi kapatma gerekçesi) seç, × ile sil ya da en alta yeni ekle. Kaydedince panel anında güncellenir.';
+  box.appendChild(hint);
+  const rows = document.createElement('div');
+  rows.id = 'pe-rows';
+  const addRow = (it) => {
+    const row = document.createElement('div'); row.className = 'pe-row';
+    const inp = document.createElement('input'); inp.value = it.name; inp.placeholder = 'Kural cümlesi';
+    inp.addEventListener('input', () => { it.name = inp.value; });
+    const sel = document.createElement('select');
+    const o1 = document.createElement('option'); o1.value = 'cikis'; o1.textContent = 'ÇIKIŞ';
+    const o2 = document.createElement('option'); o2.value = 'durtu'; o2.textContent = 'DÜRTÜ';
+    sel.appendChild(o1); sel.appendChild(o2);
+    sel.value = it.valid ? 'cikis' : 'durtu';
+    sel.addEventListener('change', () => { it.valid = sel.value === 'cikis'; });
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'pe-del'; del.textContent = '×'; del.title = 'Sil';
+    del.addEventListener('click', () => { const i = items.indexOf(it); if (i > -1) items.splice(i, 1); row.remove(); });
+    row.appendChild(inp); row.appendChild(sel); row.appendChild(del);
+    rows.appendChild(row);
+  };
+  items.forEach(addRow);
+  box.appendChild(rows);
+  const add = document.createElement('button'); add.type = 'button'; add.className = 'btn pe-add'; add.textContent = '+ Yeni ekle';
+  add.addEventListener('click', () => { const it = { name: '', valid: false }; items.push(it); addRow(it); });
+  box.appendChild(add);
+  const acts = document.createElement('div'); acts.className = 'actions';
+  acts.style.cssText = 'justify-content:flex-start;margin-top:14px;';
+  const save = document.createElement('button'); save.type = 'button'; save.className = 'btn solid'; save.textContent = 'Kaydet';
+  save.addEventListener('click', () => {
+    items.forEach(it => { it.name = String(it.name || '').trim(); });
+    for (let i = items.length - 1; i >= 0; i--) { if (!items[i].name) items.splice(i, 1); }
+    posChecked = new Set();
+    saveConfig(); renderPos();
+    closeNotePopup();
+  });
+  const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'btn'; cancel.textContent = 'Vazgeç';
+  cancel.addEventListener('click', closeNotePopup);
+  acts.appendChild(save); acts.appendChild(cancel);
+  box.appendChild(acts);
+  body.innerHTML = '';
+  body.appendChild(box);
+  const content = popup.querySelector('.note-popup-content');
+  if (content) content.classList.add('wide');
+  popup.classList.remove('hidden');
+}
+
+// ============ Yapay Zeka ile Checklist ============
+const AI_EMOS = [
+  { v: 'fomo', lbl: 'FOMO' },
+  { v: 'revenge', lbl: 'Revenge' },
+  { v: 'impatience', lbl: 'Sabırsızlık' },
+  { v: 'fear', lbl: 'Korku / Çekinme' },
+  { v: 'overconfidence', lbl: 'Aşırı özgüven' },
+  { v: 'distracted', lbl: 'Dikkat dağınıklığı' },
+  { v: 'overtrading', lbl: 'Aşırı işlem' }
+];
+let aiEmoDraft = [];
+
+function renderAiEmos() {
+  const box = document.getElementById('ai-emos');
+  if (!box) return;
+  box.innerHTML = '';
+  AI_EMOS.forEach(e => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (aiEmoDraft.includes(e.v) ? ' on' : '');
+    c.textContent = e.lbl;
+    c.setAttribute('role', 'button');
+    c.addEventListener('click', () => {
+      if (aiEmoDraft.includes(e.v)) aiEmoDraft = aiEmoDraft.filter(x => x !== e.v);
+      else aiEmoDraft.push(e.v);
+      renderAiEmos();
+    });
+    box.appendChild(c);
+  });
+}
+
+function aiProfileFromForm() {
+  return {
+    market: document.getElementById('ai-market').value,
+    experience: document.getElementById('ai-exp').value,
+    strategy: document.getElementById('ai-strat').value.trim(),
+    emotions: aiEmoDraft.slice(),
+    problem: document.getElementById('ai-problem').value.trim(),
+    interest: document.getElementById('ai-interest').value.trim()
+  };
+}
+
+function fallbackAiProfile(form) {
+  const market = String(form.market || 'kripto').toLowerCase();
+  const gold = market.indexOf('xau') !== -1 || market.indexOf('gold') !== -1;
+  const beginner = String(form.experience || '').indexOf('yeni') !== -1;
+  const base = gold
+    ? [
+        { name: 'Kırmızı haber var / yaklaşıyor', cat: 'veri', l: -15, s: -15 },
+        { name: 'Manipülasyon kesin', cat: 'teknik', l: 14, s: 14 },
+        { name: 'Likidite alındı', cat: 'teknik', l: 14, s: 14 },
+        { name: 'Daily / 4H OTE bölgesinde', cat: 'teknik', l: 10, s: 10 },
+        { name: 'Daily / 4H arz-talep bölgesinde', cat: 'teknik', l: 10, s: 10 },
+        { name: 'Yapı net', cat: 'teknik', l: 8, s: 8 },
+        { name: 'Günlük / 4H / 1H mum uyumlu', cat: 'teknik', l: 8, s: 8 },
+        { name: 'Entry sabah yazılan Daily Bias planından geliyor', cat: 'pozisyon', l: 20, s: 20 },
+        { name: 'Daily plana zıt işlem', cat: 'pozisyon', l: -15, s: -15 }
+      ]
+    : [
+        { name: 'Spot CVD işlem yönünde', cat: 'veri', l: 8, s: 8 },
+        { name: 'Open Interest işlem yönünde', cat: 'veri', l: 6, s: 6 },
+        { name: 'Futures CVD işlem yönünde', cat: 'veri', l: 6, s: 6 },
+        { name: 'Orderbook kümelenmesi destekliyor', cat: 'veri', l: 2, s: 2 },
+        { name: 'İşlem trend yönünde', cat: 'teknik', l: 10, s: 10 },
+        { name: 'Key levelda', cat: 'teknik', l: 10, s: 10 },
+        { name: 'Manipülasyon gerçekleşti', cat: 'teknik', l: 8, s: 8 },
+        { name: 'Bias flip', cat: 'teknik', l: 3, s: 3 },
+        { name: 'Planlanmış entry', cat: 'pozisyon', l: 31, s: 31 },
+        { name: 'TP/SL paylaşımdan önce girildi', cat: 'pozisyon', l: 4, s: 4 }
+      ];
+  const criteria = base.map(c => ({ name: c.name, cat: c.cat, l: c.l, s: c.s }));
+  const emoPts = { fomo: 12, revenge: 12, impatience: 10, fear: 8, overconfidence: 10, distracted: 8, overtrading: 10 };
+  (form.emotions || []).forEach(v => {
+    const pts = emoPts[v] || 8;
+    const lbl = { fomo: 'FOMO — hareket kaçıyor hissi', revenge: 'Az önce stop oldum — revenge penceresi', impatience: 'Sabırsızlık — setup eksikken girme dürtüsü', fear: 'Korku / çekinme — plana rağmen girememe', overconfidence: 'Aşırı özgüven — risk büyütme dürtüsü', distracted: 'Dikkat dağınıklığı / bölünmüş odak', overtrading: 'Aşırı işlem — boş ekran dürtüsü' }[v];
+    if (lbl && !criteria.some(c => c.cat === 'duygu' && c.name === lbl)) criteria.push({ name: lbl, cat: 'duygu', l: -pts, s: -pts });
+  });
+  if (beginner) {
+    criteria.push({ name: 'Bu setup dünkü planda yazılıydı — canlı icat değil', cat: 'pozisyon', l: 15, s: 15 });
+    criteria.push({ name: 'Risk masadan önce yazıldı — ekran açılmadan', cat: 'pozisyon', l: 10, s: 10 });
+  }
+  const strategies = String(form.strategy || '').split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+  (gold ? ['Breaker', 'LHPB/LLPB', 'IFVG'] : ['Breaker', 'LHPB', 'Monday Manipulation', 'IFVG']).forEach(s => { if (!strategies.includes(s)) strategies.push(s); });
+  const pos = gold
+    ? [
+        { name: 'İnvalidasyon gerçekleşti mi?', valid: true },
+        { name: 'TP doğru şekilde mi uzatıldı?', valid: false },
+        { name: 'Geceye bırakılan işlem mantıklı mı?', valid: false },
+        { name: 'TP ucundan dönen işlem kapandı mı?', valid: false }
+      ]
+    : [
+        { name: 'İnvalidasyon gerçekleşti — senaryo bozuldu', valid: true },
+        { name: 'Planda yazılı haber riski geldi / yaklaşıyor', valid: true },
+        { name: 'Fiyat istediğim gibi gitmiyor (invalidasyon yok)', valid: false },
+        { name: 'PnL paylaştım', valid: false },
+        { name: "TP'nin ucundan geri döndü — kapat dürtüsü", valid: false },
+        { name: 'Her muma tepki veriyorum — ekrandan kalk', valid: false }
+      ];
+  return {
+    criteria, thresholds: { aplus: 70, b: 50 }, strategies, pos,
+    summary: 'Profiline göre hazırlandı: ' + (gold ? 'altın teknik seti' : 'kripto veri/teknik seti') +
+      ((form.emotions && form.emotions.length) ? ' ve duygusal zayıflıkların için ' + form.emotions.length + ' kilit maddesi' : '') +
+      (beginner ? '; yeni başlayan disiplini için plan/risk maddeleri eklendi' : '') + '. Eşikler 70/50; uygulayıp checklist\'e geçebilirsin.'
+  };
+}
+
+async function generateAi() {
+  const status = document.getElementById('ai-status');
+  const resBox = document.getElementById('ai-result');
+  if (!status || !resBox) return;
+  const form = aiProfileFromForm();
+  if (!form.strategy && form.emotions.length === 0 && !form.problem) {
+    status.textContent = 'En az strateji, duygusal zayıflık ya da problem yaz — boş profil öneriyi anlamsızlaştırır.';
+    return;
+  }
+  status.textContent = '🤖 Düşünüyorum…';
+  resBox.innerHTML = '';
+  let profile = null;
+  let viaAi = false;
+  try {
+    const resp = await fetch('/api/ai-checklist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: form })
+    });
+    const data = await resp.json();
+    if (data && data.ok && data.profile && Array.isArray(data.profile.criteria)) {
+      profile = data.profile; viaAi = true;
+    } else if (data && data.profile && Array.isArray(data.profile.criteria)) {
+      profile = data.profile; viaAi = false;
+    } else {
+      throw new Error('yanıt boş');
+    }
+  } catch (e) {
+    profile = fallbackAiProfile(form); viaAi = false;
+  }
+  profile.market = form.market;
+  profile.experience = form.experience;
+  profile.strategy = form.strategy;
+  profile.emotions = form.emotions.slice();
+  profile.problem = form.problem;
+  profile.interest = form.interest;
+  profile.gold = String(form.market).toLowerCase() !== 'kripto';
+  profile.lastPair = pair;
+  profile.usedAi = viaAi;
+  aiProfile = profile;
+  status.textContent = viaAi ? 'Öneri hazır ✓ (yapay zeka)' : 'Öneri hazır ✓ (hazır şablon — AI anahtarı yok, sunucu şablonu kullanıldı)';
+  renderAiResult(profile, viaAi);
+}
+
+function renderAiResult(profile, viaAi) {
+  const resBox = document.getElementById('ai-result');
+  resBox.innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'ai-r-box';
+  const sum = document.createElement('div');
+  sum.className = 'ai-r-sum';
+  sum.textContent = profile.summary || 'Profiline göre checklist hazır.';
+  box.appendChild(sum);
+  const catsWrap = document.createElement('div');
+  catsWrap.className = 'ai-r-cats';
+  const CAT_LBL = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duygu (kilit)' };
+  Object.keys(CAT_LBL).forEach(cat => {
+    const items = profile.criteria.filter(c => c.cat === cat);
+    if (!items.length) return;
+    const h = document.createElement('div'); h.className = 'ai-r-cat'; h.textContent = CAT_LBL[cat];
+    catsWrap.appendChild(h);
+    items.forEach(c => {
+      const row = document.createElement('div'); row.className = 'ai-r-row';
+      const nm = document.createElement('span'); nm.textContent = c.name; nm.style.cssText = 'flex:1;';
+      const pt = document.createElement('span'); pt.className = 'ai-r-pts' + (c.l < 0 ? ' neg' : '');
+      pt.textContent = (c.l > 0 ? '+' : '') + c.l;
+      row.appendChild(nm); row.appendChild(pt);
+      catsWrap.appendChild(row);
+    });
+  });
+  const stratRow = document.createElement('div'); stratRow.className = 'ai-r-row';
+  stratRow.innerHTML = '<span style="flex:1;font-weight:700;">Stratejiler</span><span style="font-size:11.5px;color:var(--text-2);">' + esc((profile.strategies || []).join(', ')) + '</span>';
+  catsWrap.appendChild(stratRow);
+  box.appendChild(catsWrap);
+  const acts = document.createElement('div'); acts.className = 'actions';
+  acts.style.cssText = 'justify-content:flex-start;margin-top:14px;';
+  const apply = document.createElement('button'); apply.type = 'button'; apply.className = 'btn solid'; apply.textContent = '✅ Uygula ve Checklist\'e Başla';
+  apply.addEventListener('click', () => {
+    saveAiProfile();
+    applyAiProfile();
+    showPage('defter');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  acts.appendChild(apply);
+  box.appendChild(acts);
+  resBox.appendChild(box);
+}
+
+function bindAiPanel() {
+  const head = document.getElementById('ai-head');
+  const wrap = document.getElementById('ai-wrap');
+  const body = document.getElementById('ai-body');
+  if (head && wrap && body) {
+    const toggle = () => {
+      const open = wrap.classList.toggle('open');
+      body.style.display = open ? '' : 'none';
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    head.addEventListener('click', toggle);
+    head.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  }
+  renderAiEmos();
+  const gen = document.getElementById('ai-gen');
+  if (gen) gen.addEventListener('click', generateAi);
+  const exit = document.getElementById('ai-exit');
+  if (exit) exit.addEventListener('click', () => { exitAiProfile(); });
+  const posEdit = document.getElementById('pos-edit');
+  if (posEdit) posEdit.addEventListener('click', openPosEditor);
 }
 let posChecked = new Set();
 
@@ -4182,7 +4634,20 @@ function renderChips() {
   strategies.forEach(s => {
     const c = document.createElement('span');
     c.className = 'chip' + (strat === s ? ' on' : '');
-    c.textContent = s;
+    const lbl = document.createElement('span'); lbl.textContent = s;
+    c.appendChild(lbl);
+    const rm = document.createElement('button');
+    rm.type = 'button'; rm.className = 'chip-rm'; rm.textContent = '✕'; rm.title = 'Stratejiyi sil';
+    rm.setAttribute('aria-label', s + ' stratejisini sil');
+    rm.addEventListener('click', ev => {
+      ev.stopPropagation();
+      const arr = stratsFor(pair);
+      const idx = arr.indexOf(s);
+      if (idx > -1) arr.splice(idx, 1);
+      if (strat === s) strat = '';
+      saveConfig(); renderChips(); render();
+    });
+    c.appendChild(rm);
     c.addEventListener('click', () => { strat = (strat === s ? '' : s); renderChips(); });
     st.appendChild(c);
   });
@@ -4271,6 +4736,15 @@ function deletePair(p) {
 function renderPairs() {
   const seg = document.getElementById('pair-seg');
   seg.innerHTML = '';
+  if (aiActive && aiProfile) {
+    const b = document.createElement('button');
+    b.className = 'pair-tab on-gold';
+    const lbl = document.createElement('span');
+    lbl.textContent = 'AI · ' + (aiProfile.gold ? 'XAU' : 'BTC');
+    b.appendChild(lbl);
+    seg.appendChild(b);
+    return;
+  }
   const multi = Object.keys(config.pairs).length > 1;
   Object.keys(config.pairs).forEach(p => {
     const b = document.createElement('button');
@@ -4307,7 +4781,7 @@ function render() {
   const numEl = document.getElementById('donut-num');
   if (numEl) numEl.innerHTML = Math.round(s) + '<small>%</small>';
   const dirEl = document.getElementById('donut-dir');
-  if (dirEl) dirEl.textContent = pair + ' · ' + direction;
+  if (dirEl) dirEl.textContent = (aiActive ? 'AI · ' : '') + pair + ' · ' + direction;
   const sa = document.getElementById('stat-aplus'); if (sa) sa.textContent = a;
   const sb = document.getElementById('stat-b'); if (sb) sb.textContent = b;
   const sc = document.getElementById('stat-cnt');
@@ -4574,6 +5048,12 @@ function renderEditor() {
 }
 
 async function saveConfig() {
+  if (aiActive && aiProfile) {
+    await saveAiProfile();
+    const note = document.getElementById('save-note');
+    if (note) { note.textContent = 'AI profiline işlendi — kendi ayarların değişmedi.'; setTimeout(() => { note.textContent = ''; }, 4000); }
+    return;
+  }
   const note = document.getElementById('save-note');
   const ok = await store.set(STORAGE_KEY, JSON.stringify(config));
   note.textContent = ok ? 'Deftere işlendi.' : 'Kayıt yapılamadı; bu oturumda geçerli.';
@@ -5833,6 +6313,8 @@ function init() {
     const btn = document.getElementById('catedit-' + cat);
     if (btn) btn.addEventListener('click', () => toggleCatEdit(cat));
   });
+  bindAiPanel();
+  renderAiBanner();
   bindDataPage();
   bindNewsPage();
   bindDataPage();
@@ -5841,6 +6323,7 @@ function init() {
   bindAdminChat();
   bindOnchainPage();
   bindCalcPage();
+  bindReviewPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
   document.getElementById('btn-restore').addEventListener('click', () => document.getElementById('restore-file').click());
@@ -6556,7 +7039,7 @@ function closeNotePopup() {
 document.addEventListener('click', e => {
   const p = document.getElementById('note-popup');
   if (p && e.target.closest('#note-popup-close, #note-popup-close-btn, .note-popup-overlay')) closeNotePopup();
-  if (p && !e.target.closest('.note-popup-content') && !e.target.closest('.data-row.has-note') && p.classList.contains('hidden') === false) closeNotePopup();
+  if (p && !e.target.closest('.note-popup-content') && !e.target.closest('.data-row.has-note') && !e.target.closest('#pos-edit') && p.classList.contains('hidden') === false) closeNotePopup();
 });
 
 function drawEquity(rows) {
@@ -6740,19 +7223,22 @@ function importCsv(file) {
 
 function getNotionDbIds() {
   const k = typeof store !== 'undefined' ? store : null;
-  let kid = '', fid = '';
+  let kid = '', fid = '', wid = '';
   try { kid = localStorage.getItem('ndb_kripto') || ''; } catch (e) {}
   try { fid = localStorage.getItem('ndb_fx') || ''; } catch (e) {}
+  try { wid = localStorage.getItem('ndb_week') || ''; } catch (e) {}
   if (typeof AUTH !== 'undefined' && AUTH.cloud) {
     if (AUTH.cloud.ndb_kripto) kid = AUTH.cloud.ndb_kripto;
     if (AUTH.cloud.ndb_fx) fid = AUTH.cloud.ndb_fx;
+    if (AUTH.cloud.ndb_week) wid = AUTH.cloud.ndb_week;
   }
-  return { kripto: kid.trim(), fx: fid.trim() };
+  return { kripto: kid.trim(), fx: fid.trim(), week: wid.trim() };
 }
-function saveNotionDbIds(kripto, fx) {
-  if (typeof AUTH !== 'undefined' && AUTH.cloud) { AUTH.cloud.ndb_kripto = kripto; AUTH.cloud.ndb_fx = fx; scheduleCloudSync(); }
+function saveNotionDbIds(kripto, fx, week) {
+  if (typeof AUTH !== 'undefined' && AUTH.cloud) { AUTH.cloud.ndb_kripto = kripto; AUTH.cloud.ndb_fx = fx; AUTH.cloud.ndb_week = week; scheduleCloudSync(); }
   try { localStorage.setItem('ndb_kripto', kripto); } catch (e) {}
   try { localStorage.setItem('ndb_fx', fx); } catch (e) {}
+  try { localStorage.setItem('ndb_week', week); } catch (e) {}
 }
 
 async function importFromNotion() {
@@ -6853,11 +7339,12 @@ function bindDataPage() {
     const dbs = getNotionDbIds();
     const ki = g('ndb-kripto'); if (ki) ki.value = dbs.kripto;
     const fi = g('ndb-fx'); if (fi) fi.value = dbs.fx;
+    const wi = g('ndb-week'); if (wi) wi.value = dbs.week;
   })();
   const ns = g('ndb-save');
   if (ns) ns.addEventListener('click', () => {
-    const ki = g('ndb-kripto'), fi = g('ndb-fx');
-    saveNotionDbIds(ki ? ki.value.trim() : '', fi ? fi.value.trim() : '');
+    const ki = g('ndb-kripto'), fi = g('ndb-fx'), wi = g('ndb-week');
+    saveNotionDbIds(ki ? ki.value.trim() : '', fi ? fi.value.trim() : '', wi ? wi.value.trim() : '');
     const nn = g('ndb-note');
     if (nn) { nn.textContent = '✅ Database ID\'ler kaydedildi.'; setTimeout(() => { nn.textContent = ''; }, 2000); }
   });
@@ -7049,6 +7536,8 @@ let reviews = {};
 let reviewCfg = null;
 let reviewWeek = null;
 let reviewSaveTimer = null;
+let reviewMode = 'week';
+let reviewMonth = null;
 
 function rid() { return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function defaultReviewCfg() {
@@ -7154,6 +7643,158 @@ function drawReviewChart(series) {
 function renderReview() {
   if (!reviewCfg) reviewCfg = defaultReviewCfg();
   if (!reviewWeek) reviewWeek = mondayOf(new Date());
+  if (!reviewMonth) reviewMonth = new Date(reviewWeek.getFullYear(), reviewWeek.getMonth(), 1);
+  const modeWeek = document.getElementById('rv-mode-week');
+  const modeMonth = document.getElementById('rv-mode-month');
+  if (modeWeek) modeWeek.classList.toggle('on-gold', reviewMode === 'week');
+  if (modeMonth) modeMonth.classList.toggle('on-gold', reviewMode === 'month');
+  const rvToday = document.getElementById('rv-today');
+  if (rvToday) rvToday.textContent = reviewMode === 'month' ? 'Bu ay' : 'Bu hafta';
+  const rvIn = document.querySelector('.rv-inputs');
+  if (rvIn) rvIn.style.display = reviewMode === 'month' ? 'none' : '';
+  if (reviewMode === 'month') renderReviewMonth();
+  else renderReviewWeek();
+}
+
+function monthKeyOf(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+function monthLabel(d) {
+  const mon = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  return mon[d.getMonth()] + ' ' + d.getFullYear();
+}
+function weeksOfMonth(d) {
+  const key = monthKeyOf(d);
+  return Object.keys(reviews).filter(k => k.indexOf(key) === 0).sort();
+}
+
+function renderReviewMonth() {
+  const wk = monthKeyOf(reviewMonth);
+  document.getElementById('rv-week').textContent = monthLabel(reviewMonth);
+  const weekKeys = weeksOfMonth(reviewMonth);
+  let cK = 0, cF = 0;
+  weekKeys.forEach(k => {
+    const r = (reviews[k] && reviews[k].rr) || {};
+    cK += dnum(r.kripto); cF += dnum(r.fx);
+  });
+  const setCum = (id, v) => {
+    const el = document.getElementById(id); if (!el) return;
+    el.textContent = (v > 0 ? '+' : '') + v.toFixed(2) + 'R';
+    el.className = 't-val ' + (v >= 0 ? 'pos' : 'neg');
+  };
+  setCum('rr-krip-cum', cK); setCum('rr-fx-cum', cF); setCum('rr-tot-cum', cK + cF);
+  const empty = document.getElementById('rv-empty'); if (empty) empty.style.display = 'none';
+  const wrap = document.getElementById('rv-chart-wrap'); if (wrap) wrap.style.display = 'none';
+
+  // Ay KPI kartları
+  const perf = document.querySelector('.rv-perf');
+  let kpiBox = document.getElementById('rv-mkpis');
+  if (!kpiBox && perf) {
+    kpiBox = document.createElement('div'); kpiBox.id = 'rv-mkpis'; kpiBox.className = 'rv-month-kpi';
+    perf.appendChild(kpiBox);
+  }
+  if (kpiBox) {
+    kpiBox.innerHTML = '';
+    const nWeeks = weekKeys.length;
+    const tradesInMonth = (Array.isArray(dataTrades) ? dataTrades : []).filter(t => {
+      const ts = dfTs(t); if (!ts) return false;
+      const d = new Date(ts);
+      return monthKeyOf(d) === wk;
+    });
+    const totR = tradesInMonth.reduce((s, t) => s + dnum(t.r), 0);
+    const wins = tradesInMonth.filter(t => dnum(t.r) > 0).length;
+    const mk = (lbl, val, cls) => {
+      const d = document.createElement('div'); d.className = 'rv-mkpi';
+      d.innerHTML = '<div class="mk-lbl">' + lbl + '</div><div class="mk-val ' + (cls || '') + '">' + val + '</div>';
+      kpiBox.appendChild(d);
+    };
+    mk('Değerlendirilen hafta', nWeeks + ' hafta');
+    mk('Haftalık Toplam RR', (cK + cF > 0 ? '+' : '') + (cK + cF).toFixed(2) + 'R', cK + cF >= 0 ? 'pos' : 'neg');
+    mk('Trade Günlüğü R', (totR > 0 ? '+' : '') + totR.toFixed(2) + 'R', totR >= 0 ? 'pos' : 'neg');
+    mk('Win rate', tradesInMonth.length ? Math.round(wins / tradesInMonth.length * 100) + '%' : '—');
+  }
+
+  // Metrikler — ortalama
+  const mBox = document.getElementById('rv-metrics');
+  mBox.innerHTML = '';
+  reviewCfg.metrics.forEach(m => {
+    let sum = 0, cnt = 0;
+    weekKeys.forEach(k => { const v = reviews[k] && reviews[k].bars && reviews[k].bars[m.id]; if (v != null) { sum += Number(v); cnt++; } });
+    const avg = cnt ? Math.round(sum / cnt) : null;
+    const wrap = document.createElement('div'); wrap.className = 'rv-metric';
+    const head = document.createElement('div'); head.className = 'rv-mhead';
+    const lbl = document.createElement('span'); lbl.className = 'rv-mlabel'; lbl.textContent = m.title;
+    const valSpan = document.createElement('span'); valSpan.className = 'rv-mval';
+    valSpan.textContent = avg === null ? '—' : avg + '%' + (cnt ? ' (' + cnt + ' hafta)' : '');
+    head.appendChild(lbl); head.appendChild(valSpan);
+    const bar = document.createElement('div'); bar.className = 'rv-bar';
+    const fill = document.createElement('div'); fill.className = 'rv-bar-fill';
+    fill.style.width = (avg === null ? 0 : avg) + '%'; bar.appendChild(fill);
+    wrap.appendChild(head); wrap.appendChild(bar);
+    mBox.appendChild(wrap);
+  });
+
+  // Bölümler — birleştirilmiş notlar + çıkarılan dersler otomatik
+  const sBox = document.getElementById('rv-sections');
+  sBox.innerHTML = '';
+  reviewCfg.sections.forEach(sec => {
+    const parts = [];
+    weekKeys.forEach(k => {
+      const v = reviews[k] && reviews[k].notes && reviews[k].notes[sec.id];
+      if (v && v.trim()) parts.push('▸ ' + weekLabel(new Date(k + 'T00:00:00')) + '\n' + v.trim());
+    });
+    const isOgren = /öğren|ogren|ders|lesson/i.test(sec.title);
+    if (isOgren) {
+      const lessons = (Array.isArray(lessonsData && lessonsData.lessons) ? lessonsData.lessons : [])
+        .filter(l => l && l.added && String(l.added).indexOf(wk) === 0);
+      if (lessons.length) {
+        parts.push('▸ Çıkarılan dersler (otomatik — Ders Defteri):\n' + lessons.map(l => '• ' + l.text).join('\n'));
+      }
+    }
+    const wrap = document.createElement('div'); wrap.className = 'rv-section';
+    const head = document.createElement('div'); head.className = 'rv-shead';
+    const title = document.createElement('span'); title.className = 'rv-stitle'; title.textContent = sec.title;
+    head.appendChild(title);
+    const ta = document.createElement('div'); ta.className = 'rv-ta';
+    ta.style.cssText = 'white-space:pre-wrap;';
+    ta.textContent = parts.length ? parts.join('\n\n') : (isOgren ? 'Bu ay çıkarılan ders yok.' : 'Bu ay bu bölüme not girilmemiş.');
+    wrap.appendChild(head); wrap.appendChild(ta);
+    sBox.appendChild(wrap);
+  });
+
+  // Trade günlüğü equity
+  const rows = sortedData();
+  const cv = document.getElementById('rv-eq-chart');
+  const wrap2 = document.getElementById('rv-eq-wrap');
+  document.getElementById('rv-eq-total').textContent = rows.length ? rows.reduce((s, t) => s + dnum(t.r), 0).toFixed(2) + ' R' : '';
+  if (cv && wrap2 && rows.length) {
+    const W = wrap2.clientWidth || 600, H = 160;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.cssText = 'width:' + W + 'px;height:' + H + 'px;display:block;';
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    let cum = 0; const pts = [0]; rows.forEach(t => { cum += dnum(t.r); pts.push(cum); });
+    const min = Math.min(0, ...pts), max = Math.max(0, ...pts);
+    const pad = 12, range = (max - min) || 1;
+    const x = i => pad + (W - 2 * pad) * (i / (pts.length - 1 || 1));
+    const y = v => (H - pad) - (H - 2 * pad) * ((v - min) / range);
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted-2').trim() || '#3a3f63'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, y(0)); ctx.lineTo(W - pad, y(0)); ctx.stroke();
+    const up = pts[pts.length - 1] >= 0;
+    const col = up ? '#34d399' : '#f87171';
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, up ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.moveTo(x(0), y(pts[0])); pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+    ctx.lineTo(x(pts.length - 1), y(0)); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x(0), y(pts[0])); pts.forEach((v, i) => ctx.lineTo(x(i), y(v)));
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = col; ctx.font = '600 12px Inter,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText((pts[pts.length - 1] > 0 ? '+' : '') + pts[pts.length - 1].toFixed(2) + 'R', W - pad, y(pts[pts.length - 1]) - 6);
+  } else if (cv) { cv.style.display = 'none'; }
+}
+
+function renderReviewWeek() {
+  if (!reviewCfg) reviewCfg = defaultReviewCfg();
+  if (!reviewWeek) reviewWeek = mondayOf(new Date());
+  const mk = document.getElementById('rv-mkpis'); if (mk) mk.remove();
   const wk = weekKeyOf(reviewWeek);
   document.getElementById('rv-week').textContent = weekLabel(reviewWeek);
   const data = reviews[wk] || { notes: {}, bars: {}, rr: {} };
@@ -7236,11 +7877,35 @@ function renderReview() {
 
 function bindReviewPage() {
   const g = id => document.getElementById(id);
-  g('rv-prev').addEventListener('click', () => { reviewWeek = new Date(reviewWeek.getTime() - 7 * 864e5); renderReview(); });
-  g('rv-next').addEventListener('click', () => { reviewWeek = new Date(reviewWeek.getTime() + 7 * 864e5); renderReview(); });
-  g('rv-today').addEventListener('click', () => { reviewWeek = mondayOf(new Date()); renderReview(); });
+  const navStep = () => {
+    if (reviewMode === 'month') {
+      reviewMonth = new Date(reviewMonth.getFullYear(), reviewMonth.getMonth() + 1, 1);
+    } else {
+      reviewWeek = new Date(reviewWeek.getTime() - 7 * 864e5);
+    }
+    renderReview();
+  };
+  const navStepFwd = () => {
+    if (reviewMode === 'month') {
+      reviewMonth = new Date(reviewMonth.getFullYear(), reviewMonth.getMonth() + 1, 1);
+    } else {
+      reviewWeek = new Date(reviewWeek.getTime() + 7 * 864e5);
+    }
+    renderReview();
+  };
+  g('rv-prev').addEventListener('click', navStep);
+  g('rv-next').addEventListener('click', navStepFwd);
+  g('rv-today').addEventListener('click', () => {
+    if (reviewMode === 'month') { reviewMonth = new Date(); }
+    else { reviewWeek = mondayOf(new Date()); }
+    renderReview();
+  });
+  const mw = g('rv-mode-week'); if (mw) mw.addEventListener('click', () => { reviewMode = 'week'; renderReview(); });
+  const mm = g('rv-mode-month'); if (mm) mm.addEventListener('click', () => { reviewMode = 'month'; renderReview(); });
   g('rv-add-section').addEventListener('click', () => { reviewCfg.sections.push({ id: rid(), title: '' }); saveReviewCfg(); renderReview(); });
   g('rv-add-metric').addEventListener('click', () => { reviewCfg.metrics.push({ id: rid(), title: 'Yeni ölçüt' }); saveReviewCfg(); renderReview(); });
+  const npush = g('rv-npush'); if (npush) npush.addEventListener('click', syncWeekToNotion);
+  const npull = g('rv-npull'); if (npull) npull.addEventListener('click', pullWeeksFromNotion);
   const saveRR = (which, val) => {
     const wk = weekKeyOf(reviewWeek);
     ensureWeek(wk).rr[which] = (val === '') ? null : dnum(val);
@@ -7249,6 +7914,98 @@ function bindReviewPage() {
   g('rr-krip-in').addEventListener('input', e => saveRR('kripto', e.target.value));
   g('rr-fx-in').addEventListener('input', e => saveRR('fx', e.target.value));
   window.addEventListener('resize', () => { if (currentPage === 'review') { updateRRcum(); renderReview(); } });
+}
+
+async function syncWeekToNotion() {
+  const status = document.getElementById('rv-nstatus');
+  if (!status) return;
+  const dbId = getNotionDbIds().week;
+  if (!dbId) {
+    status.textContent = 'Önce haftalık DB ID gerekli: Trade Günlüğü → ⚙ Notion Database Ayarları.';
+    status.style.color = 'var(--red)';
+    return;
+  }
+  const wk = weekKeyOf(reviewWeek);
+  const data = ensureWeek(wk);
+  const rr = data.rr || {};
+  const sections = reviewCfg.sections
+    .filter(s => s.title)
+    .map(s => ({ title: s.title, text: (data.notes && data.notes[s.id]) || '' }));
+  const metrics = reviewCfg.metrics
+    .filter(m => m.title)
+    .map(m => ({ title: m.title, val: (data.bars && data.bars[m.id] != null) ? data.bars[m.id] : 50 }));
+  status.textContent = 'Notion\'a yazılıyor…';
+  status.style.color = '';
+  try {
+    const resp = await fetch('/api/notion-week', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'push', dbId, week: wk, rr: { kripto: rr.kripto, fx: rr.fx }, sections, metrics })
+    });
+    const j = await resp.json();
+    if (j.ok) status.textContent = '✅ ' + wk + ' senkronlandı' + (j.created ? ' (yeni sayfa)' : ' (güncellendi)');
+    else status.textContent = '⚠ ' + (j.error || 'Senkron hatası') + ' — DB ID / yetki kontrol et.';
+    status.style.color = j.ok ? 'var(--green)' : 'var(--red)';
+  } catch (e) {
+    status.textContent = '⚠ Sunucuya ulaşılamadı.';
+    status.style.color = 'var(--red)';
+  }
+}
+
+async function pullWeeksFromNotion() {
+  const status = document.getElementById('rv-nstatus');
+  if (!status) return;
+  const dbId = getNotionDbIds().week;
+  if (!dbId) {
+    status.textContent = 'Önce haftalık DB ID gerekli: Trade Günlüğü → ⚙ Notion Database Ayarları.';
+    status.style.color = 'var(--red)';
+    return;
+  }
+  status.textContent = 'Notion\'dan çekiliyor…';
+  status.style.color = '';
+  try {
+    const resp = await fetch('/api/notion-week', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'pull', dbId })
+    });
+    const j = await resp.json();
+    if (!j.ok || !j.weeks) throw new Error(j.error || 'Çekme hatası');
+    const weeks = j.weeks;
+    let n = 0;
+    Object.keys(weeks).forEach(k => {
+      const d = ensureWeek(k);
+      const w = weeks[k];
+      if (w.rr && (w.rr.kripto != null || w.rr.fx != null)) {
+        d.rr = d.rr || {};
+        if (w.rr.kripto != null) d.rr.kripto = w.rr.kripto;
+        if (w.rr.fx != null) d.rr.fx = w.rr.fx;
+      }
+      if (w.bars && typeof w.bars === 'object') {
+        d.bars = d.bars || {};
+        Object.keys(w.bars).forEach(title => {
+          const sec = reviewCfg.metrics.find(m => m.title === title);
+          if (sec) d.bars[sec.id] = w.bars[title];
+        });
+      }
+      if (w.sections && typeof w.sections === 'object') {
+        d.notes = d.notes || {};
+        Object.keys(w.sections).forEach(title => {
+          const sec = reviewCfg.sections.find(s => s.title === title);
+          if (sec) d.notes[sec.id] = w.sections[title];
+        });
+      }
+      n++;
+    });
+    await saveReviews();
+    updateRRcum();
+    renderReview();
+    status.textContent = '✅ ' + n + ' hafta içe aktarıldı.';
+    status.style.color = 'var(--green)';
+  } catch (e) {
+    status.textContent = '⚠ ' + (e.message || 'Çekme hatası');
+    status.style.color = 'var(--red)';
+  }
 }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
@@ -7823,6 +8580,7 @@ async function bootApp(opts) {
   APP_BOOTED = true;
   if (opts && opts.seed) { try { await seedIfEmpty(); } catch (e) { /* boş başla */ } }
   try { await loadConfig(); } catch (e) { /* devam */ }
+  try { await loadAiProfile(); } catch (e) { /* devam */ }
   try { await loadData(); } catch (e) { /* devam */ }
   try { await loadNews(); } catch (e) { /* devam */ }
   try { await loadReviews(); } catch (e) { /* devam */ }
