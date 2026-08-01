@@ -716,6 +716,7 @@
   #ai-result { margin-top: 4px; }
   .ai-r-box { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
   .ai-r-sum { font-size: 12.5px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px; }
+  .ai-r-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; color: var(--text-2); background: var(--input-bg); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; margin-bottom: 10px; }
   .ai-r-cats { display: grid; gap: 4px; }
   .ai-r-cat { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin: 8px 0 2px; }
   .ai-r-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); padding: 4px 0; border-bottom: 1px dashed var(--border); }
@@ -1851,6 +1852,22 @@
   .tv-chart-box .tradingview-widget-container, .tv-chart-box .tradingview-widget-container__widget { height: 100%; }
   .tv-chart-box .tradingview-widget-copyright { display: none; }
   #cal-tv .tradingview-widget-copyright { display: none; }
+  .cal-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .cal-status { margin-left: auto; font-size: 12px; font-weight: 600; }
+  #cal-list { padding: 4px 14px 14px; }
+  .cal-day-head { font-size: 12.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--pc); padding: 14px 4px 8px; border-bottom: 1px solid var(--border); }
+  .cal-row { display: flex; align-items: center; gap: 12px; padding: 9px 4px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-time { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); min-width: 44px; font-size: 13.5px; }
+  .cal-flag { font-weight: 800; font-size: 12px; color: var(--text-2); background: var(--input-bg); border: 1px solid var(--border); padding: 3px 8px; border-radius: 7px; min-width: 40px; text-align: center; }
+  .cal-title { flex: 1; min-width: 200px; font-size: 13.5px; color: var(--text); }
+  .cal-imp { font-size: 10.5px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .cal-imp.high { color: #fff; background: linear-gradient(135deg, #eb5757, var(--red)); }
+  .cal-imp.medium { color: var(--text-2); background: var(--input-bg); border: 1px solid var(--border); }
+  .cal-imp.low { color: var(--text-3); background: transparent; border: 1px solid var(--border); }
+  .cal-fp { font-size: 12px; color: var(--text-2); }
+  .cal-fp.prev { color: var(--text-3); }
+  .cal-empty { padding: 28px; text-align: center; color: var(--text-3); font-size: 13.5px; }
   .tv-notes { margin-top: 12px; }
   .tv-notes-head { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
   .tv-notes textarea { width: 100%; min-height: 60px; resize: vertical; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.55; padding: 10px 12px; }
@@ -2772,9 +2789,9 @@
       <div class="ai-grid">
         <label>Piyasa
           <select id="ai-market">
-            <option value="kripto">Kripto (orderflow)</option>
+            <option value="kripto">Kripto</option>
             <option value="xau">Altın (XAU)</option>
-            <option value="fx">FX</option>
+            <option value="fx">FX / Endeks</option>
           </select>
         </label>
         <label>Deneyim
@@ -2784,8 +2801,25 @@
             <option value="ileri">İleri</option>
           </select>
         </label>
+        <label>Çalışma tarzı
+          <select id="ai-style">
+            <option value="scalp">Scalp (M1-M5)</option>
+            <option value="intraday" selected>Gün içi (M15-H1)</option>
+            <option value="swing">Swing (H4-Günlük)</option>
+            <option value="mix">Karışık</option>
+          </select>
+        </label>
+        <label>Risk toleransı
+          <select id="ai-rtf">
+            <option value="düşük">Düşük (sakın)</option>
+            <option value="orta" selected>Orta</option>
+            <option value="yüksek">Yüksek (agresif)</option>
+          </select>
+        </label>
       </div>
       <label>Strateji(ler) <input type="text" id="ai-strat" placeholder="Breaker, IFVG, Orderflow…"></label>
+      <span class="ai-lbl">Kullandığın konsept / araçlar</span>
+      <div class="chiprow" id="ai-concepts"></div>
       <span class="ai-lbl">Duygusal zayıflıkların</span>
       <div class="chiprow" id="ai-emos"></div>
       <label>Problemlerin <textarea id="ai-problem" rows="2" placeholder="Ne batırıyor seni? (stop çekmeme, geç girme, fazla işlem…)" maxlength="300"></textarea></label>
@@ -3351,41 +3385,99 @@
       <span class="eg-brand-sub">3 yıldız haberler — yüksek etkili makro verileri ve merkez bankası kararları</span>
     </div>
     <div id="cal-wrap" style="max-width:1200px;margin:0 auto;padding:16px;">
-      <div class="panel" style="padding:8px;">
-        <div id="cal-tv"></div>
+      <div class="cal-toolbar">
+        <div class="seg" id="cal-imp-seg">
+          <button data-imp="1" class="on-gold">Yüksek etki</button>
+          <button data-imp="2">Tümü</button>
+        </div>
+        <button class="btn" id="cal-refresh">🔄 Yenile</button>
+        <span id="cal-status" class="cal-status"></span>
       </div>
-      <p class="hint" style="margin-top:8px;">Yalnızca yüksek etkili haberler gösterilir. Kaynak: TradingView.</p>
+      <div class="panel" style="padding:0;overflow:hidden;">
+        <div id="cal-list"></div>
+      </div>
+      <p class="hint" style="margin-top:8px;">Bu haftanın makro takvimi · Kaynak: ForexFctory (nfs.faireconomy.media). Detay: <a href="https://www.forexfactory.com/calendar" target="_blank" rel="noopener noreferrer" style="color:var(--pc);">forexfactory.com/calendar ↗</a></p>
     </div>
     <script>
     (function () {
-      var host = document.getElementById('cal-tv');
-      if (!host) return;
-      function isLight() { return document.documentElement.getAttribute('data-theme') === 'light'; }
-      function renderCal() {
-        host.innerHTML = '';
-        var s = document.createElement('script');
-        s.type = 'text/javascript';
-        s.async = true;
-        s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-eco_calendar.js';
-        s.textContent = JSON.stringify({
-          showDate: true,
-          showFilter: true,
-          showAnalysis: false,
-          showZoom: true,
-          showHeader: true,
-          importanceFilter: '1',
-          locale: 'tr',
-          colorTheme: isLight() ? 'light' : 'dark',
-          isTransparent: false,
-          backgroundColor: isLight() ? 'rgba(255,255,255,1)' : 'rgba(13,14,27,1)',
-          height: '680',
-          width: '100%'
-        });
-        host.appendChild(s);
+      var calData = [];
+      var calImp = 1;
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+      function impCls(impact) { return String(impact || '').toLowerCase(); }
+      function calDayKey(ts) { var d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+      function fmtTime(ts) { var d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+      function dayLabel(ts) {
+        var d = new Date(ts), now = new Date();
+        var same = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+        var names = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        return (same ? 'Bugün · ' : '') + names[d.getDay()] + ' ' + String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0');
       }
-      renderCal();
-      var mo = new MutationObserver(function () { setTimeout(renderCal, 250); });
-      mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      function sortEvents(a, b) { return (a._ts || 0) - (b._ts || 0); }
+      function renderCal() {
+        var list = document.getElementById('cal-list');
+        var status = document.getElementById('cal-status');
+        if (!list) return;
+        if (!calData.length) { list.innerHTML = '<div class="cal-empty">📅 Bu hafta için veri bulunamadı.</div>'; return; }
+        var filtered = calData.filter(function (e) { return calImp === 2 || e.impact === 'high'; }).slice().sort(sortEvents);
+        var groups = {};
+        filtered.forEach(function (e) { var k = calDayKey(e._ts); (groups[k] = groups[k] || []).push(e); });
+        var html = '';
+        Object.keys(groups).sort().forEach(function (k) {
+          var evs = groups[k];
+          html += '<div class="cal-day"><div class="cal-day-head">' + esc(dayLabel(evs[0]._ts)) + '</div>';
+          evs.forEach(function (e) {
+            var badge = '';
+            if (e.impact === 'high') badge = '<span class="cal-imp high">Yüksek</span>';
+            else if (e.impact === 'medium') badge = '<span class="cal-imp medium">Orta</span>';
+            else badge = '<span class="cal-imp low">Düşük</span>';
+            html += '<div class="cal-row">' +
+              '<span class="cal-time">' + fmtTime(e._ts) + '</span>' +
+              '<span class="cal-flag">' + esc(e.country) + '</span>' +
+              '<span class="cal-title">' + esc(e.title) + '</span>' +
+              badge +
+              '<span class="cal-fp">' + (e.forecast ? 'Beklenti: ' + esc(e.forecast) : '') + '</span>' +
+              '<span class="cal-fp prev">' + (e.previous ? 'Önceki: ' + esc(e.previous) : '') + '</span>' +
+              '</div>';
+          });
+          html += '</div>';
+        });
+        list.innerHTML = html;
+        if (status) status.textContent = filtered.length + ' etkinlik';
+      }
+      function loadCal() {
+        var list = document.getElementById('cal-list');
+        var status = document.getElementById('cal-status');
+        if (list) list.innerHTML = '<div class="cal-empty">⏳ Takvim yükleniyor…</div>';
+        if (status) status.textContent = '';
+        fetch('/api/eco-cal').then(function (r) { return r.json(); }).then(function (j) {
+          if (j && j.ok && Array.isArray(j.items)) {
+            calData = j.items.map(function (e) {
+              var ts = e.date ? new Date(e.date).getTime() : 0;
+              return { title: e.title, country: e.country, impact: impCls(e.impact), forecast: e.forecast, previous: e.previous, _ts: ts };
+            }).filter(function (e) { return e._ts > 0 && e.title; });
+          } else {
+            calData = [];
+            if (status) status.textContent = '⚠ ' + ((j && j.error) || 'Veri alınamadı');
+          }
+          renderCal();
+        }).catch(function () {
+          calData = [];
+          if (status) status.textContent = '⚠ Takvim yüklenemedi (ağ hatası)';
+          if (list) list.innerHTML = '<div class="cal-empty">Takvim yüklenemedi. Bağlantını kontrol et.</div>';
+        });
+      }
+      window.loadCal = loadCal;
+      document.addEventListener('click', function (ev) {
+        var b = ev.target.closest ? ev.target.closest('#cal-imp-seg button') : null;
+        if (b) {
+          calImp = Number(b.getAttribute('data-imp'));
+          document.querySelectorAll('#cal-imp-seg button').forEach(function (x) { x.classList.toggle('on-gold', x === b); });
+          renderCal();
+          return;
+        }
+        var rf = ev.target.closest ? ev.target.closest('#cal-refresh') : null;
+        if (rf) { loadCal(); }
+      });
     })();
     </script>
   </div>
@@ -4297,7 +4389,34 @@ const AI_EMOS = [
   { v: 'distracted', lbl: 'Dikkat dağınıklığı' },
   { v: 'overtrading', lbl: 'Aşırı işlem' }
 ];
+const AI_CONCEPTS = [
+  { v: 'ICT', lbl: 'ICT / SMC' },
+  { v: 'PA', lbl: 'Price Action' },
+  { v: 'IND', lbl: 'İndikatörler' },
+  { v: 'OF', lbl: 'Orderflow' },
+  { v: 'ONC', lbl: 'On-chain' },
+  { v: 'KLASIK', lbl: 'Klasik / Fib' }
+];
 let aiEmoDraft = [];
+let aiConceptDraft = [];
+
+function renderAiConcepts() {
+  const box = document.getElementById('ai-concepts');
+  if (!box) return;
+  box.innerHTML = '';
+  AI_CONCEPTS.forEach(e => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (aiConceptDraft.includes(e.v) ? ' on' : '');
+    c.textContent = e.lbl;
+    c.setAttribute('role', 'button');
+    c.addEventListener('click', () => {
+      if (aiConceptDraft.includes(e.v)) aiConceptDraft = aiConceptDraft.filter(x => x !== e.v);
+      else aiConceptDraft.push(e.v);
+      renderAiConcepts();
+    });
+    box.appendChild(c);
+  });
+}
 
 function renderAiEmos() {
   const box = document.getElementById('ai-emos');
@@ -4311,7 +4430,8 @@ function renderAiEmos() {
     c.addEventListener('click', () => {
       if (aiEmoDraft.includes(e.v)) aiEmoDraft = aiEmoDraft.filter(x => x !== e.v);
       else aiEmoDraft.push(e.v);
-      renderAiEmos();
+  renderAiEmos();
+  renderAiConcepts();
     });
     box.appendChild(c);
   });
@@ -4321,6 +4441,9 @@ function aiProfileFromForm() {
   return {
     market: document.getElementById('ai-market').value,
     experience: document.getElementById('ai-exp').value,
+    style: document.getElementById('ai-style').value,
+    risk: document.getElementById('ai-rtf').value,
+    concepts: aiConceptDraft.slice(),
     strategy: document.getElementById('ai-strat').value.trim(),
     emotions: aiEmoDraft.slice(),
     problem: document.getElementById('ai-problem').value.trim(),
@@ -4331,65 +4454,130 @@ function aiProfileFromForm() {
 function fallbackAiProfile(form) {
   const market = String(form.market || 'kripto').toLowerCase();
   const gold = market.indexOf('xau') !== -1 || market.indexOf('gold') !== -1;
+  const fx = market.indexOf('fx') !== -1 || market.indexOf('endeks') !== -1;
   const beginner = String(form.experience || '').indexOf('yeni') !== -1;
-  const base = gold
-    ? [
-        { name: 'Kırmızı haber var / yaklaşıyor', cat: 'veri', l: -15, s: -15 },
-        { name: 'Manipülasyon kesin', cat: 'teknik', l: 14, s: 14 },
-        { name: 'Likidite alındı', cat: 'teknik', l: 14, s: 14 },
-        { name: 'Daily / 4H OTE bölgesinde', cat: 'teknik', l: 10, s: 10 },
-        { name: 'Daily / 4H arz-talep bölgesinde', cat: 'teknik', l: 10, s: 10 },
-        { name: 'Yapı net', cat: 'teknik', l: 8, s: 8 },
-        { name: 'Günlük / 4H / 1H mum uyumlu', cat: 'teknik', l: 8, s: 8 },
-        { name: 'Entry sabah yazılan Daily Bias planından geliyor', cat: 'pozisyon', l: 20, s: 20 },
-        { name: 'Daily plana zıt işlem', cat: 'pozisyon', l: -15, s: -15 }
-      ]
-    : [
-        { name: 'Spot CVD işlem yönünde', cat: 'veri', l: 8, s: 8 },
-        { name: 'Open Interest işlem yönünde', cat: 'veri', l: 6, s: 6 },
-        { name: 'Futures CVD işlem yönünde', cat: 'veri', l: 6, s: 6 },
-        { name: 'Orderbook kümelenmesi destekliyor', cat: 'veri', l: 2, s: 2 },
-        { name: 'İşlem trend yönünde', cat: 'teknik', l: 10, s: 10 },
-        { name: 'Key levelda', cat: 'teknik', l: 10, s: 10 },
-        { name: 'Manipülasyon gerçekleşti', cat: 'teknik', l: 8, s: 8 },
-        { name: 'Bias flip', cat: 'teknik', l: 3, s: 3 },
-        { name: 'Planlanmış entry', cat: 'pozisyon', l: 31, s: 31 },
-        { name: 'TP/SL paylaşımdan önce girildi', cat: 'pozisyon', l: 4, s: 4 }
-      ];
-  const criteria = base.map(c => ({ name: c.name, cat: c.cat, l: c.l, s: c.s }));
+  const style = String(form.style || 'intraday').toLowerCase();
+  const rtf = String(form.risk || 'orta').toLowerCase();
+  const concepts = (Array.isArray(form.concepts) ? form.concepts : []).map(String);
+  const has = (v) => concepts.indexOf(v) !== -1;
   const emoPts = { fomo: 12, revenge: 12, impatience: 10, fear: 8, overconfidence: 10, distracted: 8, overtrading: 10 };
-  (form.emotions || []).forEach(v => {
-    const pts = emoPts[v] || 8;
-    const lbl = { fomo: 'FOMO — hareket kaçıyor hissi', revenge: 'Az önce stop oldum — revenge penceresi', impatience: 'Sabırsızlık — setup eksikken girme dürtüsü', fear: 'Korku / çekinme — plana rağmen girememe', overconfidence: 'Aşırı özgüven — risk büyütme dürtüsü', distracted: 'Dikkat dağınıklığı / bölünmüş odak', overtrading: 'Aşırı işlem — boş ekran dürtüsü' }[v];
-    if (lbl && !criteria.some(c => c.cat === 'duygu' && c.name === lbl)) criteria.push({ name: lbl, cat: 'duygu', l: -pts, s: -pts });
-  });
-  if (beginner) {
-    criteria.push({ name: 'Bu setup dünkü planda yazılıydı — canlı icat değil', cat: 'pozisyon', l: 15, s: 15 });
-    criteria.push({ name: 'Risk masadan önce yazıldı — ekran açılmadan', cat: 'pozisyon', l: 10, s: 10 });
+  const emoChipLbl = { fomo: 'FOMO — hareket kaçıyor hissi', revenge: 'Az önce stop oldum — revenge penceresi', impatience: 'Sabırsızlık — setup eksikken girme dürtüsü', fear: 'Korku / çekinme — plana rağmen girememe', overconfidence: 'Aşırı özgüven — risk büyütme dürtüsü', distracted: 'Dikkat dağınıklığı / bölünmüş odak', overtrading: 'Aşırı işlem — boş ekran dürtüsü' };
+  const criteria = [];
+  const add = (c) => { if (!criteria.some(x => x.name === c.name)) criteria.push(c); };
+
+  // ---------- VERİ ----------
+  if (gold) {
+    add({ name: 'Kırmızı haber var / yaklaşıyor (merkez bankası, ABD verileri)', cat: 'veri', l: -15, s: -15 });
+    add({ name: 'DXY (dolar endeksi) işlem yönüyle uyumlu', cat: 'veri', l: 6, s: 6 });
+    add({ name: 'Veri takvimi sakin — sürpriz riski düşük', cat: 'veri', l: 5, s: 5 });
+  } else if (fx) {
+    add({ name: 'Pariteyi etkileyen haber / merkez bankası sakin', cat: 'veri', l: -12, s: -12 });
+    add({ name: 'Dolar endeksi / ilgili çapraz trend yönünde', cat: 'veri', l: 5, s: 5 });
+    add({ name: 'Likidite penceresi (London/NY açılışı) uygun', cat: 'veri', l: 4, s: 4 });
+  } else {
+    add({ name: 'BTC genel trendi işlem yönünde (H1/günlük)', cat: 'veri', l: 7, s: 7 });
+    add({ name: 'Kripto-aktif haber riski yok (CPI/FED/ETF olayı)', cat: 'veri', l: 5, s: 5 });
+    if (has('OF')) {
+      add({ name: 'Spot CVD işlem yönünde', cat: 'veri', l: 6, s: 6 });
+      add({ name: 'Futures CVD işlem yönünde', cat: 'veri', l: 5, s: 5 });
+      add({ name: 'Open Interest aşırı kalabalık değil / yönü destekliyor', cat: 'veri', l: 4, s: 4 });
+      add({ name: 'Funding normal — aşırı long/short birikmiş değil', cat: 'veri', l: 4, s: 4 });
+      add({ name: 'Orderbook kümelenmesi entry alanını destekliyor', cat: 'veri', l: 3, s: 3 });
+    } else if (has('ONC')) {
+      add({ name: 'Whale / büyük akış işlem yönünde', cat: 'veri', l: 5, s: 5 });
+      add({ name: 'Funding / OI aşırı kalabalık değil', cat: 'veri', l: 5, s: 5 });
+      add({ name: 'Exchange rezervlerinde anomali yok', cat: 'veri', l: 3, s: 3 });
+    } else {
+      add({ name: 'Hacim artışı yönü doğruluyor', cat: 'veri', l: 5, s: 5 });
+      add({ name: 'Funding / OI normal — aşırı kalabalık değil', cat: 'veri', l: 4, s: 4 });
+    }
   }
+
+  // ---------- TEKNİK ----------
+  if (has('ICT')) {
+    add({ name: 'Likidite / eşikler alındı (sweep) — tuzak temizlendi', cat: 'teknik', l: 11, s: 11 });
+    add({ name: 'Manipülasyon gerçekleşti — fiyat önce yanlış yöne gitti', cat: 'teknik', l: 9, s: 9 });
+    add({ name: 'OTE bölgesinde reaksiyon bekleniyor', cat: 'teknik', l: 8, s: 8 });
+    add({ name: 'Daily bias ile uyumlu', cat: 'teknik', l: 7, s: 7 });
+    add({ name: 'Order block / FVG alanına denk geliyor', cat: 'teknik', l: 7, s: 7 });
+    add({ name: 'BOS / CHoCH ile yapı doğrulandı', cat: 'teknik', l: 6, s: 6 });
+    add({ name: 'Killzone (Asian/London/NY) saatine uygun', cat: 'teknik', l: 5, s: 5 });
+  }
+  if (has('PA')) {
+    add({ name: 'Ana destek / direnç seviyesinde', cat: 'teknik', l: 8, s: 8 });
+    add({ name: 'Trend yönüne doğru tepki mumu (engulfing/pin)', cat: 'teknik', l: 6, s: 6 });
+    add({ name: 'Günlük / 4H / 1H mum yapıları uyumlu', cat: 'teknik', l: 6, s: 6 });
+  }
+  if (has('IND')) {
+    add({ name: 'EMA / VWAP yönü işlemle uyumlu', cat: 'teknik', l: 5, s: 5 });
+    add({ name: 'RSI aşırı alım / satımda değil', cat: 'teknik', l: 4, s: 4 });
+    add({ name: 'MACD / osilatör teyidi var', cat: 'teknik', l: 3, s: 3 });
+  }
+  if (has('KLASIK') || (!has('ICT') && !has('PA') && !has('IND'))) {
+    add({ name: 'S/R ya da fib bölgesinde', cat: 'teknik', l: 7, s: 7 });
+    add({ name: 'Yapı net (HH/HL veya LH/LL)', cat: 'teknik', l: 6, s: 6 });
+    add({ name: 'Trend yönü işlem yönünde', cat: 'teknik', l: 5, s: 5 });
+    add({ name: 'Key seviyede denge — ilk deneme değil, tepki var', cat: 'teknik', l: 4, s: 4 });
+  }
+  if (!criteria.some(c => c.cat === 'teknik')) {
+    add({ name: 'Yapı net ve key seviyede', cat: 'teknik', l: 8, s: 8 });
+  }
+
+  // ---------- POZİSYON ----------
+  add({ name: 'Bu setup planda yazılıydı — canlı icat değil', cat: 'pozisyon', l: 16, s: 16 });
+  add({ name: 'RR en az 1:3 (küçük risk, büyük TP)', cat: 'pozisyon', l: 9, s: 9 });
+  add({ name: 'Risk oranı önceden yazıldı (risk/bakiye)', cat: 'pozisyon', l: 8, s: 8 });
+  add({ name: 'SL anlamlı seviyenin ötesinde — stop bilinçli kondu', cat: 'pozisyon', l: 7, s: 7 });
+  add({ name: 'Giriş tetikleyicisi net — “bu seviye görülürse girerim”', cat: 'pozisyon', l: 7, s: 7 });
+  if (rtf === 'düşük') add({ name: 'Parti büyüklüğü normalin altında (düşük risk modu)', cat: 'pozisyon', l: 6, s: 6 });
+  if (rtf === 'yüksek') add({ name: 'Risk payı agresif modda bile büyütülmedi', cat: 'pozisyon', l: 6, s: 6 });
+  if (style === 'swing' || style === 'mix') add({ name: 'Geceye / hafta sonuna kalma kararı mantıklı', cat: 'pozisyon', l: 5, s: 5 });
+  if (beginner) add({ name: 'Risk masadan önce yazıldı — ekran açılmadan', cat: 'pozisyon', l: 9, s: 9 });
+
+  // ---------- DUYGU (negatif kilit) ----------
+  (form.emotions || []).forEach(v => {
+    const lbl = emoChipLbl[v];
+    const pts = emoPts[v] || 8;
+    if (lbl) add({ name: lbl, cat: 'duygu', l: -pts, s: -pts });
+  });
+  add({ name: 'Uykusuz / yorgunum', cat: 'duygu', l: -8, s: -8 });
+  add({ name: 'Günün hedefi doldu — ekstra işlem dürtüsü', cat: 'duygu', l: -8, s: -8 });
+  if (String(form.problem || '').indexOf('stop') !== -1) {
+    add({ name: 'Stop düşünüyorum — plan yoksa hareket yok', cat: 'duygu', l: -10, s: -10 });
+  }
+
+  // ---------- STRATEJİLER ----------
   const strategies = String(form.strategy || '').split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-  (gold ? ['Breaker', 'LHPB/LLPB', 'IFVG'] : ['Breaker', 'LHPB', 'Monday Manipulation', 'IFVG']).forEach(s => { if (!strategies.includes(s)) strategies.push(s); });
-  const pos = gold
-    ? [
-        { name: 'İnvalidasyon gerçekleşti mi?', valid: true },
-        { name: 'TP doğru şekilde mi uzatıldı?', valid: false },
-        { name: 'Geceye bırakılan işlem mantıklı mı?', valid: false },
-        { name: 'TP ucundan dönen işlem kapandı mı?', valid: false }
-      ]
-    : [
-        { name: 'İnvalidasyon gerçekleşti — senaryo bozuldu', valid: true },
-        { name: 'Planda yazılı haber riski geldi / yaklaşıyor', valid: true },
-        { name: 'Fiyat istediğim gibi gitmiyor (invalidasyon yok)', valid: false },
-        { name: 'PnL paylaştım', valid: false },
-        { name: "TP'nin ucundan geri döndü — kapat dürtüsü", valid: false },
-        { name: 'Her muma tepki veriyorum — ekrandan kalk', valid: false }
-      ];
-  return {
-    criteria, thresholds: { aplus: 70, b: 50 }, strategies, pos,
-    summary: 'Profiline göre hazırlandı: ' + (gold ? 'altın teknik seti' : 'kripto veri/teknik seti') +
-      ((form.emotions && form.emotions.length) ? ' ve duygusal zayıflıkların için ' + form.emotions.length + ' kilit maddesi' : '') +
-      (beginner ? '; yeni başlayan disiplini için plan/risk maddeleri eklendi' : '') + '. Eşikler 70/50; uygulayıp checklist\'e geçebilirsin.'
-  };
+  const defaults = [];
+  if (has('ICT')) defaults.push('Breaker', 'IFVG', 'OTE', 'Sweep & Reclaim');
+  if (has('PA')) defaults.push('S/R Bounce', 'Trend Follow');
+  if (has('IND')) defaults.push('EMA Pullback', 'VWAP Reclaim');
+  if (has('OF')) defaults.push('CVD Diverjans', 'Liquidity Grab');
+  if (has('ONC')) defaults.push('Funding + Whale Flow');
+  if (gold) defaults.push('Breaker', 'LHPB/LLPB', 'IFVG');
+  if (!has('ICT') && !has('PA') && !has('IND') && !has('OF') && !has('ONC') && !gold) defaults.push('Breaker', 'LHPB', 'IFVG');
+  defaults.forEach(s => { if (!strategies.includes(s)) strategies.push(s); });
+
+  // ---------- POZİSYON KURALLARI ----------
+  const pos = [];
+  if (has('ICT')) pos.push({ name: 'İnvalidasyon: OTE reaksiyonu almadı — senaryo bozuldu', valid: true });
+  else pos.push({ name: 'İnvalidasyon gerçekleşti — senaryo bozuldu', valid: true });
+  pos.push({ name: 'Planda yazılı haber riski geldi / yaklaşıyor', valid: true });
+  pos.push({ name: 'Fiyat istediğim gibi gitmiyor (invalidasyon yok)', valid: false });
+  pos.push({ name: 'PnL paylaştım', valid: false });
+  pos.push({ name: 'TP’nin ucundan geri döndü — kapat dürtüsü', valid: false });
+  pos.push({ name: 'Her muma tepki veriyorum — ekrandan kalk', valid: false });
+  if (beginner) pos.push({ name: 'Belirsizlikte plana dön — akşamki yazıya bak', valid: false });
+
+  const posTot = criteria.filter(c => c.cat === 'pozisyon').reduce((a, c) => a + c.l, 0);
+  const sum = 'Profiline göre hazırlandı: ' +
+    (gold ? 'altın (XAU) için haber+DXY+likidite ağırlıklı' : fx ? 'FX için haber+trend+seviye ağırlıklı' : 'kripto için BTC trendi + ' + (has('OF') ? 'orderflow' : has('ONC') ? 'onchain' : 'hacim') + ' ağırlıklı') +
+    ' — ' + criteria.length + ' kriter' +
+    ((form.emotions && form.emotions.length) ? ', ' + form.emotions.length + ' duygusal kilit maddesi' : '') +
+    (has('ICT') ? ', ICT/SMC lensi' : '') +
+    ', stil: ' + (style === 'scalp' ? 'scalp' : style === 'swing' ? 'swing' : style === 'mix' ? 'karışık' : 'gün içi') +
+    '. Eşikler 70/50; uygulayıp checklist\'e geçebilirsin.';
+  return { criteria, thresholds: { aplus: 70, b: 50 }, strategies, pos, summary: sum };
 }
 
 async function generateAi() {
@@ -4424,6 +4612,9 @@ async function generateAi() {
   }
   profile.market = form.market;
   profile.experience = form.experience;
+  profile.style = form.style;
+  profile.risk = form.risk;
+  profile.concepts = form.concepts.slice();
   profile.strategy = form.strategy;
   profile.emotions = form.emotions.slice();
   profile.problem = form.problem;
@@ -4445,6 +4636,21 @@ function renderAiResult(profile, viaAi) {
   sum.className = 'ai-r-sum';
   sum.textContent = profile.summary || 'Profiline göre checklist hazır.';
   box.appendChild(sum);
+  const meta = document.createElement('div');
+  meta.className = 'ai-r-meta';
+  const metaParts = [];
+  const mk = String(profile.market || 'kripto').toLowerCase();
+  metaParts.push(mk.indexOf('xau') !== -1 ? 'Altın (XAU)' : mk.indexOf('fx') !== -1 ? 'FX / Endeks' : 'Kripto');
+  const st = String(profile.style || '');
+  if (st) metaParts.push({ scalp: 'Scalp', intraday: 'Gün içi', swing: 'Swing', mix: 'Karışık' }[st] || st);
+  const rt = String(profile.risk || '');
+  if (rt) metaParts.push('Risk: ' + rt);
+  if (Array.isArray(profile.concepts) && profile.concepts.length) {
+    const CL = { ICT: 'ICT/SMC', PA: 'Price Action', IND: 'İndikatörler', OF: 'Orderflow', ONC: 'On-chain', KLASIK: 'Klasik/Fib' };
+    metaParts.push(profile.concepts.map(v => CL[v] || v).join(' · '));
+  }
+  meta.textContent = metaParts.join('  ·  ');
+  box.appendChild(meta);
   const catsWrap = document.createElement('div');
   catsWrap.className = 'ai-r-cats';
   const CAT_LBL = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duygu (kilit)' };
@@ -6772,6 +6978,7 @@ function showPage(name, skipAnim) {
   if (name === 'news') renderNews();
   if (name === 'egitim') renderEgitim();
   if (name === 'indicators') renderIndicators();
+  if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') renderFeed();
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
 }
