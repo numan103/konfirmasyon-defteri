@@ -1720,6 +1720,9 @@
   html[data-theme="light"] .lp-hero-band .hsw-chart,
   html[data-theme="light"] .lp-hero-band .hsw-side { background: rgba(255,255,255,.55); border-color: rgba(23,25,35,.1); }
   html[data-theme="light"] .lp-hero-band .hsw-bar { border-bottom-color: rgba(23,25,35,.1); }
+  html[data-theme="light"] .lp-hero-band .hsw { background: rgba(255,255,255,.78); border-color: rgba(23,25,35,.12); box-shadow: 0 30px 80px rgba(23,25,35,.18); }
+  html[data-theme="light"] .lp-hero-band .hsw-bar span { background: rgba(23,25,35,.2); }
+  html[data-theme="light"] .lp-hero-band .hsw-chart svg .hs-grid { stroke: rgba(23,25,35,.12); }
   .tv-bar { display: flex; align-items: center; gap: 12px; padding: 8px 2px 12px; }
   .tv-bar-tape { flex: 1; min-width: 0; overflow: hidden; position: relative; }
   .tv-bar-tape .marquee { display: inline-flex; gap: 30px; padding-right: 30px; white-space: nowrap; will-change: transform; animation: alfaTape 110s linear infinite; }
@@ -1834,7 +1837,6 @@
       </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button class="lp-edu-btn" id="lp-edu-btn" type="button">📚 Alfa Edu</button>
       <button class="nav-login" id="nav-login" type="button">Giriş yap</button>
     </div>
   </nav>
@@ -1853,9 +1855,9 @@
         <span style="background:linear-gradient(135deg,#f5a623,#d97706)"></span>
         <span style="background:linear-gradient(135deg,#e5484d,#b42318)"></span>
       </div>
-      <div class="lp-proof-txt"><b>500+ trader</b><span>disiplinle işlem yapıyor</span></div>
+      <div class="lp-proof-txt"><b>20+ trader</b><span>disiplinle işlem yapıyor</span></div>
       <div class="lp-proof-div"></div>
-      <div class="lp-proof-stars">★★★★★<span>topluluk memnuniyeti</span></div>
+      <div class="lp-proof-stars">★★★★½<span>4.5 / 5 topluluk puanı</span></div>
     </div>
   </section>
   <div class="lp-hero-shot">
@@ -1871,10 +1873,19 @@
           <div class="hsw-chart">
             <div class="hsw-chart-h"><span>Equity Curve</span><span class="up">2026 · +52R</span></div>
             <svg viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
-              <defs><linearGradient id="hsg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity=".34"/><stop offset="1" stop-color="#4ade80" stop-opacity="0"/></linearGradient></defs>
+              <defs>
+                <linearGradient id="hsg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity=".5"/><stop offset="1" stop-color="#4ade80" stop-opacity="0"/></linearGradient>
+                <filter id="hsglow" x="-20%" y="-20%" width="140%" height="180%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#4ade80" flood-opacity=".85"/></filter>
+              </defs>
+              <g class="hs-grid" stroke="rgba(255,255,255,.08)" stroke-width="1">
+                <line x1="8" y1="30" x2="392" y2="30"/>
+                <line x1="8" y1="55" x2="392" y2="55"/>
+                <line x1="8" y1="80" x2="392" y2="80"/>
+              </g>
               <path d="M8,96 50,104 92,88 134,94 176,62 218,70 260,44 302,52 344,30 392,16 L392,116 L8,116 Z" fill="url(#hsg)"/>
-              <polyline points="8,96 50,104 92,88 134,94 176,62 218,70 260,44 302,52 344,30 392,16" fill="none" stroke="#4ade80" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="392" cy="16" r="4" fill="#4ade80"/>
+              <polyline points="8,96 50,104 92,88 134,94 176,62 218,70 260,44 302,52 344,30 392,16" fill="none" stroke="#4ade80" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#hsglow)"/>
+              <circle cx="392" cy="16" r="5" fill="#0c0d1b" stroke="#4ade80" stroke-width="3"/>
+              <text x="386" y="7" text-anchor="end" font-size="11" font-weight="800" fill="#4ade80" font-family="Inter, sans-serif">+52R</text>
             </svg>
           </div>
           <div class="hsw-side">
@@ -1894,8 +1905,7 @@
     <h3>Bir trader'ın ihtiyacı olan her şey</h3>
     <p>Eğitimden analize, defterden topluluğa — hepsi tek platformda.</p>
   </div>
-  <section class="lp-features">
-    <!-- 1. Setup Kalite Skoru -->
+    <section class="lp-features">
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -1909,23 +1919,8 @@
           <text x="209" y="68" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">A+</text>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>🎯 Setup Kalite Skoru</h3><p>Kriterleri işaretle, anında A+ / B kalite puanı al.</p></div>
+      <div class="lp-card-body"><h3>Check List</h3><p>Kriterleri işaretle, setup kalite skorunu ve A+ / B kararını anında gör.</p></div>
     </div>
-    <!-- 2. Bias & Psikoloji -->
-    <div class="lp-card">
-      <div class="lp-visual">
-        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs><linearGradient id="lv2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
-          <rect width="300" height="128" fill="url(#lv2)"/>
-          <path d="M120 62 v-9 a30 30 0 0 1 60 0 v9" fill="none" stroke="var(--pc)" stroke-width="8"/>
-          <rect x="112" y="60" width="76" height="52" rx="10" fill="var(--pc)"/>
-          <circle cx="150" cy="82" r="8" fill="#fff"/>
-          <rect x="146" y="84" width="8" height="16" rx="4" fill="#fff"/>
-        </svg>
-      </div>
-      <div class="lp-card-body"><h3>🧭 Bias & Psikoloji Kilidi</h3><p>Kötü anında FOMO ve revenge'i sistem kilitler.</p></div>
-    </div>
-    <!-- 3. Trade Defteri -->
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -1936,9 +1931,8 @@
           <circle cx="278" cy="26" r="5" fill="var(--green)"/>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>📓 Trade Defteri & İstatistik</h3><p>Notion senkronu + kümülatif R eğrisi tek yerde.</p></div>
+      <div class="lp-card-body"><h3>Trade Günlüğü</h3><p>Her işlemi R cinsinden kaydet, kümülatif eğriyi ve istatistiklerini izle.</p></div>
     </div>
-    <!-- 4. Haftalık Değerlendirme -->
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -1952,29 +1946,12 @@
           <rect x="230" y="46" width="26" height="56" rx="5" fill="var(--pc)" opacity=".78"/>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>📈 Haftalık Değerlendirme</h3><p>Haftalık RR gir, trendini ve retrospektini izle.</p></div>
+      <div class="lp-card-body"><h3>Haftalık Değerlendirme</h3><p>Haftalık RR ve retrospektif ile performans trendini takip et.</p></div>
     </div>
-    <!-- 5. Alfa Edu -->
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs><linearGradient id="lv5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
-          <rect width="300" height="128" fill="url(#lv5)"/>
-          <rect x="30" y="30" width="118" height="68" rx="10" fill="var(--pc)" opacity=".16"/>
-          <circle cx="89" cy="64" r="20" fill="var(--pc)"/>
-          <path d="M83 54 l14 10 -14 10 z" fill="#fff"/>
-          <rect x="170" y="42" width="100" height="11" rx="5.5" fill="var(--pc)" opacity=".55"/>
-          <rect x="170" y="61" width="80" height="11" rx="5.5" fill="var(--border)"/>
-          <rect x="170" y="80" width="92" height="11" rx="5.5" fill="var(--border)"/>
-        </svg>
-      </div>
-      <div class="lp-card-body"><h3>🎓 Alfa Edu — Video Eğitim</h3><p>Teknikten psikolojiye, bölüm → konu → video.</p></div>
-    </div>
-    <!-- 6. İndikatörler & Onchain -->
-    <div class="lp-card">
-      <div class="lp-visual">
-        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs><linearGradient id="lv6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
+          <defs><linearGradient id="lv6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs>
           <rect width="300" height="128" fill="url(#lv6)"/>
           <g stroke="var(--green)" stroke-width="2.4"><line x1="52" y1="30" x2="52" y2="98"/></g>
           <rect x="46" y="44" width="12" height="40" rx="2" fill="var(--green)"/>
@@ -1990,9 +1967,88 @@
           <rect x="246" y="28" width="12" height="32" rx="2" fill="var(--green)"/>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>📊 İndikatörler & Onchain</h3><p>Aggr, Alfa Levels, Flow + Coinglass funding/CVD.</p></div>
+      <div class="lp-card-body"><h3>Onchain</h3><p>Funding, CVD ve akış verileriyle piyasanın konumunu oku.</p></div>
     </div>
-    <!-- 7. AlfaNews & Takvim -->
+    <div class="lp-card">
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lvA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".14"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lvA)"/>
+          <rect x="86" y="22" width="128" height="84" rx="12" fill="var(--card)" stroke="var(--border)"/>
+          <rect x="96" y="32" width="108" height="28" rx="7" fill="var(--green)" opacity=".14" stroke="var(--border)"/>
+          <text x="150" y="51" text-anchor="middle" font-size="15" font-weight="800" fill="var(--green)">0.75% risk</text>
+          <rect x="96" y="68" width="24" height="26" rx="6" fill="var(--pc)" opacity=".6"/>
+          <rect x="125" y="68" width="24" height="26" rx="6" fill="var(--pc)" opacity=".85"/>
+          <rect x="154" y="68" width="24" height="26" rx="6" fill="var(--pc)"/>
+          <rect x="183" y="68" width="21" height="26" rx="6" fill="var(--pc)" opacity=".55"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>Alfa Calculator</h3><p>Riske göre pozisyon boyutunu ve kaldıracı hızlıca hesapla.</p></div>
+    </div>
+    <div class="lp-card">
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lvB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".11"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lvB)"/>
+          <g stroke="var(--border)" stroke-width="2">
+            <line x1="52" y1="34" x2="52" y2="94"/>
+            <line x1="92" y1="40" x2="92" y2="100"/>
+            <line x1="132" y1="28" x2="132" y2="88"/>
+            <line x1="172" y1="22" x2="172" y2="82"/>
+            <line x1="212" y1="30" x2="212" y2="90"/>
+            <line x1="252" y1="18" x2="252" y2="78"/>
+          </g>
+          <rect x="46" y="56" width="12" height="30" rx="2" fill="#f2555a"/>
+          <rect x="86" y="64" width="12" height="28" rx="2" fill="var(--green)"/>
+          <rect x="126" y="44" width="12" height="36" rx="2" fill="var(--green)"/>
+          <rect x="166" y="36" width="12" height="38" rx="2" fill="var(--green)"/>
+          <rect x="206" y="48" width="12" height="34" rx="2" fill="#f2555a"/>
+          <rect x="246" y="32" width="12" height="38" rx="2" fill="var(--green)"/>
+          <polyline points="52,72 92,78 132,60 172,52 212,62 252,44" fill="none" stroke="var(--pc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>Trading</h3><p>Canlı grafik, indikatörler ve watchlist tek panelde.</p></div>
+    </div>
+    <div class="lp-card">
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lv5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lv5)"/>
+          <rect x="30" y="30" width="118" height="68" rx="10" fill="var(--pc)" opacity=".16"/>
+          <circle cx="89" cy="64" r="20" fill="var(--pc)"/>
+          <path d="M83 54 l14 10 -14 10 z" fill="#fff"/>
+          <rect x="170" y="42" width="100" height="11" rx="5.5" fill="var(--pc)" opacity=".55"/>
+          <rect x="170" y="61" width="80" height="11" rx="5.5" fill="var(--border)"/>
+          <rect x="170" y="80" width="92" height="11" rx="5.5" fill="var(--border)"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>Alfa Edu</h3><p>Bölüm → konu → video; teknikten psikolojiye ücretsiz eğitim.</p></div>
+    </div>
+    <div class="lp-card">
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lvC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".11"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lvC)"/>
+          <g stroke="var(--border)" stroke-width="2">
+            <line x1="52" y1="34" x2="52" y2="94"/>
+            <line x1="92" y1="40" x2="92" y2="100"/>
+            <line x1="132" y1="28" x2="132" y2="88"/>
+            <line x1="172" y1="22" x2="172" y2="82"/>
+            <line x1="212" y1="30" x2="212" y2="90"/>
+            <line x1="252" y1="18" x2="252" y2="78"/>
+          </g>
+          <rect x="46" y="56" width="12" height="30" rx="2" fill="#f2555a"/>
+          <rect x="86" y="64" width="12" height="28" rx="2" fill="var(--green)"/>
+          <rect x="126" y="44" width="12" height="36" rx="2" fill="var(--green)"/>
+          <rect x="166" y="36" width="12" height="38" rx="2" fill="var(--green)"/>
+          <rect x="206" y="48" width="12" height="34" rx="2" fill="#f2555a"/>
+          <rect x="246" y="32" width="12" height="38" rx="2" fill="var(--green)"/>
+          <polyline points="40,58 100,70 160,48 220,54 270,36" fill="none" stroke="var(--green)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="40,76 100,86 160,66 220,72 270,58" fill="none" stroke="#f5a623" stroke-width="2.2" stroke-dasharray="6 5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>İndikatörler</h3><p>Aggr, Alfa Levels, Flow — kendi indikatör setini kur.</p></div>
+    </div>
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -2006,9 +2062,24 @@
           <path d="M232 30 l3 6 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1 z" fill="#f5a623"/>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>📰 AlfaNews & Takvim</h3><p>Dergi analizleri + 3 yıldız makro haberler.</p></div>
+      <div class="lp-card-body"><h3>Ekonomik Takvim</h3><p>3 yıldız makro veriler ve piyasayı etkileyen haberler.</p></div>
     </div>
-    <!-- 8. Alfa Trader Ol -->
+    <div class="lp-card">
+      <div class="lp-visual">
+        <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="lvD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".11"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs>
+          <rect width="300" height="128" fill="url(#lvD)"/>
+          <rect x="40" y="26" width="220" height="76" rx="9" fill="var(--card)" stroke="var(--border)"/>
+          <rect x="54" y="38" width="66" height="10" rx="5" fill="var(--pc)" opacity=".6"/>
+          <rect x="54" y="54" width="150" height="7" rx="3.5" fill="var(--text-3)" opacity=".45"/>
+          <rect x="54" y="67" width="130" height="7" rx="3.5" fill="var(--border)"/>
+          <rect x="54" y="80" width="145" height="7" rx="3.5" fill="var(--border)"/>
+          <rect x="210" y="54" width="34" height="33" rx="5" fill="var(--pc)" opacity=".22"/>
+          <text x="227" y="72" text-anchor="middle" font-size="12" font-weight="800" fill="var(--pc)">D</text>
+        </svg>
+      </div>
+      <div class="lp-card-body"><h3>Dergi</h3><p>Haftalık piyasa analizleri ve trade notları tek yerde.</p></div>
+    </div>
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -2021,9 +2092,8 @@
           <text x="150" y="105" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">+52R</text>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>🤝 Alfa Trader Ol — Topluluk</h3><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
+      <div class="lp-card-body"><h3>Alfa Trader Ol</h3><p>Topluluk akışı, PnL performansı ve referansla katılım.</p></div>
     </div>
-    <!-- 9. AI Asistan -->
     <div class="lp-card">
       <div class="lp-visual">
         <svg viewBox="0 0 300 128" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -2036,9 +2106,10 @@
           <rect x="212" y="86" width="34" height="6" rx="3" fill="#fff" opacity=".55"/>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>🤖 AI Asistan</h3><p>Takıldığın yeri sor, anında trade odaklı yanıt al.</p></div>
+      <div class="lp-card-body"><h3>Canlı Destek</h3><p>İhtiyacın olduğunda anında yanıt veren destek hattı.</p></div>
     </div>
   </section>
+
   <div class="lp-stats">
     <div class="lp-stat"><b>10+</b><span>Araç &amp; modül</span></div>
     <div class="lp-stat"><b>A+ · B</b><span>Kalite kararı</span></div>
@@ -2051,12 +2122,6 @@
       <p>Hesabını oluştur, defterin her cihazdan seninle olsun. Saniyeler sürer.</p>
       <button id="cta-register" type="button">Ücretsiz kayıt ol</button>
     </div>
-  </div>
-  <div class="lp-social" id="lp-social">
-    <span class="lps-lbl">İletişim</span>
-    <a class="tg" id="lps-tg" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
-    <a class="x" id="lps-x" href="#" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.06l-4.74-6.2L5.6 21H2.6l7-8L2.2 3h6.2l4.3 5.68L17.5 3zm-1.05 16.2h1.66L7.63 4.7H5.85z"/></svg></a>
-    <a class="yt" id="lps-yt" href="#" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 7.5c-.26-1-.9-1.6-1.9-1.8C19.3 5.3 12 5.3 12 5.3s-7.3 0-9.1.4C1.9 5.9 1.26 6.5 1 7.5.6 9.3.6 12 .6 12s0 2.7.4 4.5c.26 1 .9 1.6 1.9 1.8 1.8.4 9.1.4 9.1.4s7.3 0 9.1-.4c1-.2 1.64-.8 1.9-1.8.4-1.8.4-4.5.4-4.5s0-2.7-.4-4.5zM9.75 15.3V8.7l6.3 3.3z"/></svg></a>
   </div>
   <div class="lp-quote">
     <span class="lp-quote-mark">“</span>
@@ -7689,6 +7754,25 @@ function bootAuth() {
   // Şifre sıfırlama bağlantısıyla mı gelindi? (URL'de recovery işareti)
   let recovering = /type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search);
   const msg = (t, cls) => { const el = $('au-msg'); el.textContent = t; el.className = 'auth-msg' + (cls ? ' ' + cls : ''); };
+  // "Beni hatırla" — giriş bilgilerini bu cihazda sakla, form açılınca doldur
+  const REM_KEY = 'alfa-login-rem';
+  const saveRemember = (email, pass, remember) => {
+    try {
+      if (remember) localStorage.setItem(REM_KEY, JSON.stringify({ email, pass }));
+      else localStorage.removeItem(REM_KEY);
+    } catch (e) {}
+  };
+  const rememberPrefill = () => {
+    try {
+      const raw = localStorage.getItem(REM_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (d.email) $('au-email').value = d.email;
+      if (d.pass) $('au-pass').value = d.pass;
+      const chk = document.getElementById('au-remember');
+      if (chk) chk.checked = true;
+    } catch (e) {}
+  };
   // Modlar: login | register | reset (sıfırlama isteği) | newpass (yeni şifre belirle)
   const setMode = m => {
     mode = m;
@@ -7705,6 +7789,7 @@ function bootAuth() {
     $('au-submit').textContent = isReg ? 'Kayıt ol' : isReset ? 'Sıfırlama bağlantısı gönder' : isNew ? 'Şifreyi güncelle' : 'Giriş yap';
     $('au-pass').setAttribute('autocomplete', (isReg || isNew) ? 'new-password' : 'current-password');
     $('au-pass').setAttribute('placeholder', isNew ? 'Yeni şifre (en az 6 karakter)' : 'En az 6 karakter');
+    if (isLogin) rememberPrefill();
     msg('', '');
   };
   $('tab-login').addEventListener('click', () => setMode('login'));
@@ -7760,7 +7845,7 @@ function bootAuth() {
         if (!name) { msg('Lütfen isminizi yazın.', 'err'); return; }
         const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name } } });
         if (error) throw error;
-        if (data && data.session && data.user) { await onAuthed(data.user); return; }
+        if (data && data.session && data.user) { saveRemember(email, pass, true); await onAuthed(data.user); return; }
         msg('Kayıt alındı. E-posta onayı gerekiyorsa gelen kutunu kontrol et, sonra giriş yap.', 'ok');
         setMode('login');
       } else {
@@ -7775,6 +7860,7 @@ function bootAuth() {
         }
         const { data, error } = await AUTH.client.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;
+        saveRemember(email, pass, remember);
         await onAuthed(data.user);
       }
     } catch (err) {
@@ -8160,7 +8246,8 @@ function submitSeniorForm() {
       document.body.style.overflow = '';
     }
 
-    document.getElementById('lp-edu-btn').addEventListener('click', openPubEdu);
+    const lpEduBtn = document.getElementById('lp-edu-btn');
+    if (lpEduBtn) lpEduBtn.addEventListener('click', openPubEdu);
     document.getElementById('pub-edu-close').addEventListener('click', closePubEdu);
     document.querySelectorAll('#pub-eg-sec-seg button').forEach(b => {
       b.addEventListener('click', () => { pubSec = b.getAttribute('data-sec'); renderPubEdu(); });
