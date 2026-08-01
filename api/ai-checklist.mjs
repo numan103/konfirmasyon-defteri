@@ -51,10 +51,19 @@ function cleanJson(text) {
   const end = t.lastIndexOf('}');
   if (start === -1 || end === -1 || end <= start) return null;
   t = t.slice(start, end + 1);
-  try { return JSON.parse(t); } catch (e) {
-    // trailing comma temizleme denemesi
-    try { return JSON.parse(t.replace(/,\s*([}\]])/g, '$1')); } catch (e2) { return null; }
+  // 1) düz, 2) trailing comma
+  const stripTrailing = s => s.replace(/,\s*([}\]])/g, '$1');
+  try { return JSON.parse(t); } catch (e) {}
+  try { return JSON.parse(stripTrailing(t)); } catch (e) {}
+  // 3) kesik JSON kurtarması: sondan geriye tam eleman sınırlarını dene
+  const candidates = [];
+  for (let i = t.length - 1; i > 0 && candidates.length < 60; i--) {
+    if (t[i] === '}') candidates.push(i);
   }
+  for (const cut of candidates) {
+    try { return JSON.parse(stripTrailing(t.slice(0, cut + 1))); } catch (e) {}
+  }
+  return null;
 }
 
 function validCat(c) { return c === 'veri' || c === 'teknik' || c === 'pozisyon' || c === 'duygu'; }
@@ -270,7 +279,7 @@ export default async function handler(req, res) {
           { role: 'user', content: userText }
         ],
         temperature: 0.4,
-        max_tokens: 1500
+        max_tokens: 8192
       })
     });
     if (!r.ok) return res.json({ ok: false, reason: 'http-' + r.status, profile: sanitize(fallbackProfile(profile)) });
