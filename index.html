@@ -1365,6 +1365,9 @@
   .eg-item:hover .eg-item-edit, .eg-item:hover .eg-item-del, .eg-item.on .eg-item-edit, .eg-item.on .eg-item-del { opacity: 1; }
   .eg-item-edit:hover { background: var(--pc-soft); color: var(--pc); }
   .eg-item-del:hover { background: var(--red-soft); color: var(--red); }
+  .eg-item-move { flex: none; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-3); font-size: 12px; line-height: 1; cursor: pointer; border-radius: 5px; padding: 0; opacity: 0; transition: opacity .15s ease; }
+  .eg-item:hover .eg-item-move, .eg-item.on .eg-item-move { opacity: 1; }
+  .eg-item-move:hover { background: var(--pc-soft); color: var(--pc); }
   .eg-embed-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 20px; text-align: center; }
   .eg-ph-txt { color: #7d82a6; font-size: 13.5px; font-weight: 500; }
   .eg-form-h { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text); }
@@ -2288,13 +2291,7 @@
   </div>
   <div class="pub-edu-body">
     <div class="controls" style="margin-top:10px;">
-      <div class="seg" id="pub-eg-sec-seg">
-        <button data-sec="teknik" class="on-gold" type="button">Teknik Analiz</button>
-        <button data-sec="temel" type="button">Temel Analiz</button>
-        <button data-sec="psikoloji" type="button">Trade Psikolojisi</button>
-        <button data-sec="islem" type="button">İşlem &amp; Backtest</button>
-        <button data-sec="onchain" type="button">Onchain</button>
-      </div>
+      <div class="seg" id="pub-eg-sec-seg"></div>
     </div>
     <div class="eg-course" style="margin-top:14px;">
       <aside class="panel eg-list-panel">
@@ -3280,13 +3277,7 @@
       <span class="eg-brand-sub">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin. Değişiklikler otomatik yayınlanır.</span>
     </div>
     <div class="controls">
-      <div class="seg" id="eg-sec-seg">
-        <button data-sec="teknik" class="on-gold" type="button">Teknik Analiz</button>
-        <button data-sec="temel" type="button">Temel Analiz</button>
-        <button data-sec="psikoloji" type="button">Trade Psikolojisi</button>
-        <button data-sec="islem" type="button">İşlem &amp; Backtest</button>
-        <button data-sec="onchain" type="button">Onchain</button>
-      </div>
+      <div class="seg" id="eg-sec-seg"></div>
       <div class="seg" id="eg-level-seg" style="margin-top:6px;display:none;">
         <button data-level="temel" class="on-gold" type="button">Temel</button>
         <button data-level="orta" type="button">Orta</button>
@@ -8228,6 +8219,26 @@ let egLevel = 'temel';
 let egShared = null;
 let egSaveTimer = null;
 let egForm = { mode: null, topicId: null, vidId: null };
+let egPendingDelSec = null;
+function egDefaultSecMeta() { return Object.keys(EG_SECTIONS).map(id => ({ id, title: EG_SECTIONS[id] })); }
+function egSecMeta() {
+  const m = egitimData && egitimData.secMeta;
+  if (m && Array.isArray(m) && m.length) return m;
+  return egDefaultSecMeta();
+}
+function egMoveTopic(t, dir) {
+  const all = egitimData.sections[egSec];
+  if (!all || !all.length) return false;
+  const vis = egTopics();
+  const vi = vis.indexOf(t);
+  if (vi < 0) return false;
+  const tgt = vis[vi + dir];
+  if (!tgt) return false;
+  const ai = all.indexOf(t), bi = all.indexOf(tgt);
+  if (ai < 0 || bi < 0) return false;
+  [all[ai], all[bi]] = [all[bi], all[ai]];
+  return true;
+}
 
 async function loadEgitim() {
   // shared API ana kaynak, localStorage yedek
@@ -8278,7 +8289,8 @@ async function loadEgitim() {
     if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
     // shared'dan gelen konuları local'e ekle (yoksa)
     if (sharedData && sharedData.sections) {
-      Object.keys(EG_SECTIONS).forEach(sec => {
+      const secIds = Array.from(new Set([...egDefaultSecMeta().map(s => s.id), ...Object.keys(sharedData.sections)]));
+      secIds.forEach(sec => {
         const arr = sharedData.sections[sec] || [];
         if (!Array.isArray(egitimData.sections[sec])) egitimData.sections[sec] = [];
         const localIds = new Set(egitimData.sections[sec].map(t => t.id));
@@ -8293,6 +8305,7 @@ async function loadEgitim() {
   }
   if (!egitimData.sel || typeof egitimData.sel !== 'object') egitimData.sel = {};
   if (!egitimData.selVid || typeof egitimData.selVid !== 'object') egitimData.selVid = {};
+  if (!egitimData.secMeta || !Array.isArray(egitimData.secMeta) || !egitimData.secMeta.length) egitimData.secMeta = egDefaultSecMeta();
   // Adminse veriyi shared'a ata (hem ilk seferde hem de her yüklemede)
   if (isAdmin && Object.values(egitimData.sections).some(arr => arr && arr.length > 0)) {
     try {
@@ -8305,19 +8318,19 @@ async function saveEgitim() {
   // Sadece admin shared'a yazsın, herkes okusun
   if (AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL) {
     try {
-      const payload = { sections: {} };
+      const payload = { sections: {}, secMeta: egSecMeta().map(s => ({ id: s.id, title: s.title })) };
       let topicCount = 0, videoCount = 0;
-      Object.keys(EG_SECTIONS).forEach(sec => {
+      egSecMeta().forEach(sec => {
         // Temiz kopya: kişiye özel not/done alanları HERKESE yayınlanmasın
-        const list = (egitimData.sections[sec] || [])
+        const list = (egitimData.sections[sec.id] || [])
           .filter(t => t.title || t.videos?.length)
           .map(t => ({
             id: t.id,
             title: t.title || '',
-            level: (sec === 'teknik' && t.level) || undefined,
+            level: (sec.id === 'teknik' && t.level) || undefined,
             videos: (t.videos || []).map(v => ({ id: v.id, title: v.title || '', url: v.url || '' })),
           }));
-        payload.sections[sec] = list;
+        payload.sections[sec.id] = list;
         topicCount += list.length;
         list.forEach(t => { videoCount += (t.videos || []).filter(v => v.url).length; });
       });
@@ -8394,9 +8407,53 @@ function egCurVid(topic) {
 }
 
 function renderEgitim() {
-  document.querySelectorAll('#eg-sec-seg button').forEach(b => {
-    b.classList.toggle('on-gold', b.getAttribute('data-sec') === egSec);
+  const canEdit = magIsAdmin();
+  // ---- Bölüm sekmeleri (dinamik; ekle/sil sadece admin) ----
+  const seg = document.getElementById('eg-sec-seg');
+  seg.innerHTML = '';
+  egSecMeta().forEach(s => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pair-tab' + (s.id === egSec ? ' on-gold' : '');
+    b.setAttribute('data-sec', s.id);
+    const lbl = document.createElement('span');
+    lbl.textContent = s.title;
+    lbl.addEventListener('click', () => { egSec = s.id; egLevel = 'temel'; egPendingDelSec = null; egCloseForm(); renderEgitim(); });
+    b.appendChild(lbl);
+    if (canEdit) {
+      const armed = egPendingDelSec === s.id;
+      const x = document.createElement('span');
+      x.className = 'pair-x' + (armed ? ' armed' : '');
+      x.textContent = armed ? 'sil?' : '×';
+      x.setAttribute('role', 'button');
+      x.setAttribute('aria-label', s.title + ' bölümünü sil');
+      x.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (egPendingDelSec !== s.id) { egPendingDelSec = s.id; renderEgitim(); return; }
+        egPendingDelSec = null;
+        const meta = egSecMeta().filter(m => m.id !== s.id);
+        if (!meta.length) return;
+        if (!confirm('“' + s.title + '” bölümü ve içindeki tüm konular silinsin mi?')) return;
+        egitimData.secMeta = meta;
+        delete egitimData.sections[s.id];
+        delete egitimData.sel[s.id];
+        if (egSec === s.id) { egSec = meta[0].id; egLevel = 'temel'; }
+        saveEgitim().then(renderEgitim);
+      });
+      b.appendChild(x);
+    }
+    seg.appendChild(b);
   });
+  if (canEdit) {
+    const add = document.createElement('button');
+    add.className = 'addp'; add.textContent = '+';
+    add.setAttribute('aria-label', 'Yeni bölüm ekle');
+    add.title = 'Yeni bölüm ekle';
+    add.addEventListener('click', () => {
+      if (document.getElementById('eg-add-form').classList.contains('hidden')) egOpenForm('sec-add', null, null); else egCloseForm();
+    });
+    seg.appendChild(add);
+  }
   const levelSeg = document.getElementById('eg-level-seg');
   if (levelSeg) levelSeg.style.display = egSec === 'teknik' ? 'flex' : 'none';
   document.querySelectorAll('#eg-level-seg button').forEach(b => {
@@ -8404,7 +8461,6 @@ function renderEgitim() {
   });
   const topics = egTopics();
   const cur = egCurTopic();
-  const canEdit = magIsAdmin();
   // Düzenleme sadece admin: + Konu, kalem, + Video ekle
   const addTopicBtn = document.getElementById('eg-add-topic');
   if (addTopicBtn) addTopicBtn.style.display = canEdit ? '' : 'none';
@@ -8418,6 +8474,15 @@ function renderEgitim() {
   topics.forEach((t, i) => {
     const row = document.createElement('div');
     row.className = 'eg-item' + (cur && t.id === cur.id ? ' on' : '');
+    // yukarı/aşağı taşıma (sadece admin, satırın en solunda)
+    if (canEdit) {
+      const up = document.createElement('button'); up.className = 'eg-item-move'; up.type = 'button'; up.textContent = '▲'; up.title = 'Konuyu yukarı taşı';
+      up.addEventListener('click', async (e) => { e.stopPropagation(); if (egMoveTopic(t, -1)) { await saveEgitim(); renderEgitim(); } });
+      row.appendChild(up);
+      const dn = document.createElement('button'); dn.className = 'eg-item-move'; dn.type = 'button'; dn.textContent = '▼'; dn.title = 'Konuyu aşağı taşı';
+      dn.addEventListener('click', async (e) => { e.stopPropagation(); if (egMoveTopic(t, 1)) { await saveEgitim(); renderEgitim(); } });
+      row.appendChild(dn);
+    }
     const idx = document.createElement('span'); idx.className = 'eg-item-idx'; idx.textContent = (i + 1);
     row.appendChild(idx);
     const tt = document.createElement('span'); tt.className = 'eg-item-t'; tt.textContent = t.title || '(başlıksız)';
@@ -8555,13 +8620,14 @@ function egOpenForm(mode, ids, prefill) {
   const g = id => document.getElementById(id);
   egForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null };
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
+  const isSec = (mode === 'sec-add');
   g('eg-in-title').value = (prefill && prefill.title) || '';
   g('eg-in-url').value = (prefill && prefill.url) || '';
   g('eg-in-url').style.display = isVideo ? '' : 'none';
   g('eg-in-err').textContent = '';
-  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Video ekle', 'video-edit': 'Videoyu düzenle' };
+  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Video ekle', 'video-edit': 'Videoyu düzenle', 'sec-add': 'Yeni bölüm' };
   g('eg-form-title').textContent = titles[mode] || 'Düzenle';
-  g('eg-in-title').setAttribute('placeholder', isVideo ? 'Video başlığı (ör. Market Yapısı -1)' : 'Konu başlığı (ör. Market Yapısı)');
+  g('eg-in-title').setAttribute('placeholder', isVideo ? 'Video başlığı (ör. Market Yapısı -1)' : isSec ? 'Bölüm başlığı (ör. Onchain Analizi)' : 'Konu başlığı (ör. Market Yapısı)');
   // Seviye seçici (sadece teknik bölümünde konu ekleme/düzenleme)
   const lp = g('eg-level-picker');
   const isTopicMode = (mode === 'topic-add' || mode === 'topic-edit');
@@ -8587,9 +8653,6 @@ function egFlashSaved() {
 
 function bindEgitimPage() {
   const g = id => document.getElementById(id);
-  document.querySelectorAll('#eg-sec-seg button').forEach(b => {
-    b.addEventListener('click', () => { egSec = b.getAttribute('data-sec'); egLevel = 'temel'; egCloseForm(); renderEgitim(); });
-  });
   document.querySelectorAll('#eg-level-seg button').forEach(b => {
     b.addEventListener('click', () => { egLevel = b.getAttribute('data-level'); renderEgitim(); });
   });
@@ -8635,7 +8698,13 @@ function bindEgitimPage() {
     let pickedLevel = 'temel';
     const lvBtn = document.querySelector('#eg-level-picker [data-lv].on-gold');
     if (lvBtn) pickedLevel = lvBtn.getAttribute('data-lv');
-    if (mode === 'topic-add') {
+    if (mode === 'sec-add') {
+      const meta = egSecMeta();
+      const id = rid();
+      egitimData.secMeta = meta.concat([{ id, title: title || 'Yeni Bölüm' }]);
+      if (!egitimData.sections[id]) egitimData.sections[id] = [];
+      egSec = id; egLevel = 'temel'; egPendingDelSec = null;
+    } else if (mode === 'topic-add') {
       const t = { id: rid(), title: title || 'Konu', note: '', videos: [], level: (egSec === 'teknik' ? pickedLevel : 'temel') };
       secList.push(t); egitimData.sel[egSec] = t.id;
     } else if (mode === 'topic-edit') {
@@ -9325,10 +9394,26 @@ function submitSeniorForm() {
       return (pubData.sections[pubSec] || []).filter(t => (t.videos || []).some(v => v.url));
     }
 
+    function pubSecMeta() {
+      const m = pubData && pubData.secMeta;
+      if (m && Array.isArray(m) && m.length) return m;
+      return Object.keys(EG_SECTIONS).map(id => ({ id, title: EG_SECTIONS[id] }));
+    }
+
     function renderPubEdu() {
       const topics = pubTopics();
-      document.querySelectorAll('#pub-eg-sec-seg button').forEach(b => {
-        b.classList.toggle('on-gold', b.getAttribute('data-sec') === pubSec);
+      const pseg = document.getElementById('pub-eg-sec-seg');
+      pseg.innerHTML = '';
+      const meta = pubSecMeta();
+      if (!meta.some(s => s.id === pubSec)) pubSec = meta.length ? meta[0].id : 'teknik';
+      meta.forEach(s => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = s.id === pubSec ? 'on-gold' : '';
+        b.setAttribute('data-sec', s.id);
+        b.textContent = s.title;
+        b.addEventListener('click', () => { pubSec = s.id; renderPubEdu(); });
+        pseg.appendChild(b);
       });
       const listBox = document.getElementById('pub-eg-list');
       listBox.innerHTML = '';
@@ -9395,9 +9480,6 @@ function submitSeniorForm() {
     const lpEduBtn = document.getElementById('lp-edu-btn');
     if (lpEduBtn) lpEduBtn.addEventListener('click', openPubEdu);
     document.getElementById('pub-edu-close').addEventListener('click', closePubEdu);
-    document.querySelectorAll('#pub-eg-sec-seg button').forEach(b => {
-      b.addEventListener('click', () => { pubSec = b.getAttribute('data-sec'); renderPubEdu(); });
-    });
     document.getElementById('pub-edu-register').addEventListener('click', () => {
       closePubEdu();
       const regBtn = document.getElementById('hero-register');
