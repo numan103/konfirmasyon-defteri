@@ -269,22 +269,27 @@ export default async function handler(req, res) {
   ].join('\n');
 
   try {
-    const attempts = [8192, 4096, 2048];
+    const attempts = [
+      { model: 'llama-3.3-70b-versatile', mt: 8192 },
+      { model: 'llama-3.3-70b-versatile', mt: 4096 },
+      { model: GROQ_MODEL, mt: 4096 },
+      { model: GROQ_MODEL, mt: 2048 }
+    ];
     let content = null;
     let lastStatus = null;
     let lastErr = null;
-    for (const mt of attempts) {
+    for (const a of attempts) {
       const r = await fetch(GROQ_URL, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model: a.model,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             { role: 'user', content: userText }
           ],
           temperature: 0.4,
-          max_tokens: mt
+          max_tokens: a.mt
         })
       });
       lastStatus = r.status;
