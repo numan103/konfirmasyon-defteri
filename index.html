@@ -1408,21 +1408,22 @@
   .eg-count.all { color: #fff; background: var(--green); }
   .eg-progress { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; color: var(--text-3); text-transform: none; }
   .eg-progress b { color: var(--green); }
-  .eg-done-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; border: 1.5px solid var(--green); background: var(--green-soft); color: var(--green); border-radius: 10px; padding: 9px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+  .eg-done-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 10px; align-self: flex-end; border: 1.5px solid var(--green); background: var(--green-soft); color: var(--green); border-radius: 10px; padding: 9px 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
   .eg-done-btn:hover { background: var(--green-hover); }
   .eg-done-btn.on { background: var(--green); border-color: var(--green); color: #fff; }
   .eg-done-btn.pop { animation: egPop .45s cubic-bezier(.34,1.56,.64,1); }
   @keyframes egPop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
   @media (prefers-reduced-motion: reduce) { .eg-done-btn.pop { animation: none; } }
-  .eg-cheer { margin-left: 8px; font-size: 12.5px; font-weight: 700; color: var(--green); opacity: 0; }
+  .eg-cheer { margin-left: 0; font-size: 12.5px; font-weight: 700; color: var(--green); opacity: 0; }
   .eg-cheer.show { animation: egCheer 1.6s ease; }
   @keyframes egCheer { 0% { opacity: 0; transform: translateY(4px); } 15% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .eg-cheer.show { animation: none; opacity: 1; } }
   .eg-empty-list { font-size: 12.5px; color: var(--text-3); padding: 14px 6px; line-height: 1.55; }
   .eg-embed { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0d0f16; border-radius: 12px; overflow: hidden; }
   .eg-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  .eg-now { margin-top: 12px; }
+  .eg-now { margin-top: 12px; display: flex; flex-direction: column; }
   .eg-now-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; line-height: 1.3; color: var(--text); text-wrap: balance; }
+  .eg-now-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
   .eg-card-link { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--pc); text-decoration: none; }
   .eg-card-link:hover { text-decoration: underline; }
   .eg-note-row { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
@@ -3311,8 +3312,11 @@
               <div class="eg-now-title" id="eg-now-title">—</div>
               <button class="eg-mini-edit" id="eg-topic-edit" type="button" title="Konu başlığını düzenle">✎</button>
             </div>
-            <a class="eg-card-link" id="eg-now-link" href="#" target="_blank" rel="noopener noreferrer">YouTube'da aç ↗</a>
-            <div><button type="button" class="eg-done-btn" id="eg-done"><span id="eg-done-txt">İzledim</span></button><span class="eg-cheer" id="eg-cheer">Tebrikler! 🎉</span></div>
+            <div class="eg-now-meta">
+              <a class="eg-card-link" id="eg-now-link" href="#" target="_blank" rel="noopener noreferrer">YouTube'da aç ↗</a>
+              <span class="eg-cheer" id="eg-cheer">Tebrikler! 🎉</span>
+            </div>
+            <button type="button" class="eg-done-btn" id="eg-done"><span id="eg-done-txt">İzledim</span></button>
           </div>
           <div class="eg-vids">
             <div class="eg-vids-h"><span>Videolar</span><button type="button" class="eg-vid-add" id="eg-add-vid">+ Video ekle</button></div>
@@ -8249,6 +8253,25 @@ async function loadEgitim() {
     egitimData = JSON.parse(JSON.stringify(sharedData));
     egitimData.sel = localSel;
     egitimData.selVid = localSelVid;
+    // Kullanıcının KENDİ işaretlerini (v.done) ve notlarını (t.note) shared veriye geri yükle
+    // (bu veriler hesaba özel saklanır; ortak içerikle karışmaz)
+    if (rawLocal) {
+      try {
+        const p = JSON.parse(rawLocal);
+        const psecs = p.sections || {};
+        Object.keys(psecs).forEach(sec => {
+          (psecs[sec] || []).forEach(lt => {
+            const t = (egitimData.sections[sec] || []).find(x => x.id === lt.id);
+            if (!t) return;
+            if (lt.note != null) t.note = lt.note;
+            (lt.videos || []).forEach(lv => {
+              const v = (t.videos || []).find(x => x.id === lv.id);
+              if (v && lv.done) v.done = true;
+            });
+          });
+        });
+      } catch (e) { /* yerel veri bozuksa yok say */ }
+    }
   } else {
     try {
       if (rawLocal) egitimData = JSON.parse(rawLocal);
@@ -8289,7 +8312,15 @@ async function saveEgitim() {
       const payload = { sections: {} };
       let topicCount = 0, videoCount = 0;
       Object.keys(EG_SECTIONS).forEach(sec => {
-        const list = (egitimData.sections[sec] || []).filter(t => t.title || t.videos?.length);
+        // Temiz kopya: kişiye özel not/done alanları HERKESE yayınlanmasın
+        const list = (egitimData.sections[sec] || [])
+          .filter(t => t.title || t.videos?.length)
+          .map(t => ({
+            id: t.id,
+            title: t.title || '',
+            level: (sec === 'teknik' && t.level) || undefined,
+            videos: (t.videos || []).map(v => ({ id: v.id, title: v.title || '', url: v.url || '' })),
+          }));
         payload.sections[sec] = list;
         topicCount += list.length;
         list.forEach(t => { videoCount += (t.videos || []).filter(v => v.url).length; });
@@ -8377,6 +8408,14 @@ function renderEgitim() {
   });
   const topics = egTopics();
   const cur = egCurTopic();
+  const canEdit = magIsAdmin();
+  // Düzenleme sadece admin: + Konu, kalem, + Video ekle
+  const addTopicBtn = document.getElementById('eg-add-topic');
+  if (addTopicBtn) addTopicBtn.style.display = canEdit ? '' : 'none';
+  const topicEditBtn = document.getElementById('eg-topic-edit');
+  if (topicEditBtn) topicEditBtn.style.display = canEdit ? '' : 'none';
+  const addVidBtn = document.getElementById('eg-add-vid');
+  if (addVidBtn) addVidBtn.style.display = canEdit ? '' : 'none';
   // ---- Sol: konular ----
   const listBox = document.getElementById('eg-list');
   listBox.innerHTML = '';
@@ -8401,7 +8440,7 @@ function renderEgitim() {
     const edit = document.createElement('button'); edit.className = 'eg-item-edit'; edit.type = 'button';
     edit.textContent = '✎'; edit.title = 'Konu adını düzenle';
     edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('topic-edit', { topicId: t.id }, { title: t.title, level: t.level }); });
-    row.appendChild(edit);
+    if (canEdit) row.appendChild(edit);
     const del = document.createElement('button'); del.className = 'eg-item-del'; del.type = 'button';
     del.textContent = '×'; del.title = 'Konuyu sil';
     del.addEventListener('click', async (e) => {
@@ -8411,13 +8450,14 @@ function renderEgitim() {
       if (egitimData.sel[egSec] === t.id) egitimData.sel[egSec] = null;
       await saveEgitim(); renderEgitim();
     });
-    row.appendChild(del);
+    if (canEdit) row.appendChild(del);
     row.addEventListener('click', async () => {
       if (egitimData.sel[egSec] === t.id) return;
       egitimData.sel[egSec] = t.id; await saveEgitim(); renderEgitim();
     });
     listBox.appendChild(row);
   });
+  document.getElementById('eg-empty').textContent = canEdit ? 'Bu bölümde konu yok. "+ Konu" ile ekle.' : 'Bu bölümde henüz konu yok.';
   document.getElementById('eg-empty').style.display = topics.length ? 'none' : 'block';
   // bölüm ilerlemesi (izlenen / toplam)
   let secTot = 0, secDone = 0;
@@ -8445,10 +8485,12 @@ function renderEgitim() {
     const txt = document.createElement('div'); txt.className = 'eg-ph-txt';
     txt.textContent = vids.length ? 'Bu videoya henüz YouTube bağlantısı eklenmedi.' : 'Bu konuda henüz video yok.';
     ph.appendChild(txt);
-    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
-    if (vids.length && curVid) { btn.textContent = '＋ Bağlantı ekle'; btn.addEventListener('click', () => egOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url })); }
-    else { btn.textContent = '＋ Video ekle'; btn.addEventListener('click', () => egOpenForm('video-add', { topicId: cur.id }, null)); }
-    ph.appendChild(btn);
+    if (canEdit) {
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
+      if (vids.length && curVid) { btn.textContent = '＋ Bağlantı ekle'; btn.addEventListener('click', () => egOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url })); }
+      else { btn.textContent = '＋ Video ekle'; btn.addEventListener('click', () => egOpenForm('video-add', { topicId: cur.id }, null)); }
+      ph.appendChild(btn);
+    }
     embed.appendChild(ph);
   }
   // başlık = konu adı
@@ -8484,16 +8526,13 @@ function renderEgitim() {
     row.appendChild(t);
     if (kind === 'playlist') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = 'Liste'; row.appendChild(tag); }
     else if (kind === 'invalid') { const tag = document.createElement('span'); tag.className = 'eg-item-tag muted'; tag.textContent = 'Link yok'; row.appendChild(tag); }
-    // yukarı/aşağı taşıma
+    // yukarı/aşağı taşıma (sadece admin)
     const up = document.createElement('button'); up.className = 'eg-vid-move'; up.type = 'button'; up.textContent = '▲'; up.title = 'Yukarı taşı';
     up.addEventListener('click', async (e) => { e.stopPropagation(); if (i === 0) return; [cur.videos[i - 1], cur.videos[i]] = [cur.videos[i], cur.videos[i - 1]]; await saveEgitim(); renderEgitim(); });
-    row.appendChild(up);
     const dn = document.createElement('button'); dn.className = 'eg-vid-move'; dn.type = 'button'; dn.textContent = '▼'; dn.title = 'Aşağı taşı';
     dn.addEventListener('click', async (e) => { e.stopPropagation(); if (i === vids.length - 1) return; [cur.videos[i], cur.videos[i + 1]] = [cur.videos[i + 1], cur.videos[i]]; await saveEgitim(); renderEgitim(); });
-    row.appendChild(dn);
     const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'Videoyu düzenle';
     edit.addEventListener('click', (e) => { e.stopPropagation(); egOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url }); });
-    row.appendChild(edit);
     const del = document.createElement('button'); del.className = 'eg-vid-del'; del.type = 'button'; del.textContent = '×'; del.title = 'Videoyu sil';
     del.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -8501,7 +8540,9 @@ function renderEgitim() {
       if (egitimData.selVid[cur.id] === v.id) egitimData.selVid[cur.id] = null;
       await saveEgitim(); renderEgitim();
     });
-    row.appendChild(del);
+    if (canEdit) {
+      row.appendChild(up); row.appendChild(dn); row.appendChild(edit); row.appendChild(del);
+    }
     row.addEventListener('click', async () => {
       if (egitimData.selVid[cur.id] === v.id) return;
       egitimData.selVid[cur.id] = v.id; await saveEgitim(); renderEgitim();
@@ -8513,6 +8554,7 @@ function renderEgitim() {
 }
 
 function egOpenForm(mode, ids, prefill) {
+  if (!magIsAdmin()) return;
   const g = id => document.getElementById(id);
   egForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null };
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
@@ -8582,6 +8624,7 @@ function bindEgitimPage() {
   // form kaydet
   g('eg-in-cancel').addEventListener('click', () => egCloseForm());
   g('eg-in-save').addEventListener('click', async () => {
+    if (!magIsAdmin()) { egCloseForm(); return; }
     const title = g('eg-in-title').value.trim();
     const url = g('eg-in-url').value.trim();
     const mode = egForm.mode;
@@ -8644,6 +8687,11 @@ function bindEgitimPage() {
     t.note = e.target.value;
     clearTimeout(egSaveTimer);
     egSaveTimer = setTimeout(async () => { await saveEgitim(); egFlashSaved(); }, 600);
+  });
+  // not alanından ayrılınca hemen kaydet (sayfa kapanmadan önce kaçmasın)
+  g('eg-notes').addEventListener('blur', () => {
+    clearTimeout(egSaveTimer);
+    saveEgitim().then(() => egFlashSaved()).catch(() => {});
   });
 }
 
