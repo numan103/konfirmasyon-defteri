@@ -269,22 +269,34 @@ export default async function handler(req, res) {
   ].join('\n');
 
   try {
-    const r = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userText }
-        ],
-        temperature: 0.4,
-        max_tokens: 8192
-      })
-    });
-    if (!r.ok) return res.json({ ok: false, reason: 'http-' + r.status, profile: sanitize(fallbackProfile(profile)) });
-    const data = await r.json();
-    const content = data?.choices?.[0]?.message?.content;
+    const attempts = [8192, 4096, 2048];
+    let content = null;
+    let lastStatus = null;
+    let lastErr = null;
+    for (const mt of attempts) {
+      const r = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: userText }
+          ],
+          temperature: 0.4,
+          max_tokens: mt
+        })
+      });
+      lastStatus = r.status;
+      if (!r.ok) {
+        try { const e = await r.json(); lastErr = (e && e.error && (e.error.message || e.error.type)) || String(r.status); } catch { lastErr = String(r.status); }
+        continue;
+      }
+      const data = await r.json();
+      content = data?.choices?.[0]?.message?.content;
+      if (content) break;
+    }
+    if (!content) return res.json({ ok: false, reason: 'http-' + lastStatus, err: lastErr, profile: sanitize(fallbackProfile(profile)) });
     const parsed = cleanJson(content);
     if (!parsed) return res.json({ ok: false, reason: 'parse', profile: sanitize(fallbackProfile(profile)) });
     const out = sanitize(parsed);
