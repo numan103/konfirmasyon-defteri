@@ -1757,7 +1757,9 @@
   html[data-theme="light"] #hseq-tip { background: rgba(255,255,255,.96); border-color: rgba(23,25,35,.14); color: #1a1d29; box-shadow: 0 8px 20px rgba(23,25,35,.18); }
   html[data-theme="light"] #hseq-tip b { color: #16a34a; }
   .tv-bar { display: flex; align-items: center; gap: 12px; padding: 8px 2px 12px; }
-  .tv-bar-tape { flex: 1; min-width: 0; overflow: hidden; position: relative; }
+  .tv-bar-tape { flex: 1; min-width: 0; overflow: hidden; position: relative; cursor: grab; touch-action: pan-y; }
+  .tv-bar-tape.dragging { cursor: grabbing; user-select: none; }
+  .tv-bar-tape.dragging .marquee, .tv-bar-tape.dragging .marquee * { user-select: none; }
   .tv-bar-tape .marquee { display: inline-flex; gap: 30px; padding-right: 30px; white-space: nowrap; will-change: transform; animation: alfaTape 110s linear infinite; }
   .tv-bar-tape .marquee:hover { animation-play-state: paused; }
   @keyframes alfaTape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -1796,6 +1798,7 @@
   body[data-page="trading"] { overflow-x: hidden; }
   .tv-chart-box .tradingview-widget-container, .tv-chart-box .tradingview-widget-container__widget { height: 100%; }
   .tv-chart-box .tradingview-widget-copyright { display: none; }
+  #cal-tv .tradingview-widget-copyright { display: none; }
   .tv-notes { margin-top: 12px; }
   .tv-notes-head { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
   .tv-notes textarea { width: 100%; min-height: 60px; resize: vertical; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.55; padding: 10px 12px; }
@@ -2114,7 +2117,7 @@
           <text x="150" y="105" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">+52R</text>
         </svg>
       </div>
-      <div class="lp-card-body"><h3>Alfa Trader Ol</h3><p>Topluluk akışı, PnL performansı ve referansla katılım.</p></div>
+      <div class="lp-card-body"><h3>Alfa Ol</h3><p>Topluluk akışı, PnL performansı ve referansla katılım.</p></div>
     </div>
     <div class="lp-card">
       <div class="lp-visual">
@@ -2287,7 +2290,7 @@
           <a href="?page=news" class="nav-link" id="tab-news" data-nav>🗞️ Dergi</a>
         </div>
       </div>
-      <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav>🚀 Alfa Trader Ol</a>
+      <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav>🚀 Alfa Ol</a>
       <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" onclick="event.preventDefault();void showPage('chat-admin')">💬 Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge">0</span></a>
     </div>
     <div class="nav-contact" id="nav-contact">
@@ -2327,7 +2330,7 @@
       <div class="mnav-group">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar">📅 Ekonomik Takvim</a>
       <a href="?page=news" class="mnav-link" data-nav data-mnav="news">🗞️ Dergi</a>
-      <a href="?page=basvuru" class="mnav-link" data-nav data-mnav="basvuru">🚀 Alfa Trader Ol</a>
+      <a href="?page=basvuru" class="mnav-link" data-nav data-mnav="basvuru">🚀 Alfa Ol</a>
       <a href="?page=chat-admin" class="mnav-link" data-nav data-mnav="chat-admin" data-close>💬 Canlı Destek <span class="nav-badge hidden" id="chat-unread-badge-m">0</span></a>
       <div class="mnav-contact">
         <span class="nc-lbl">İletişim</span>
@@ -2584,7 +2587,7 @@
         </a>
         <a href="?page=basvuru" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv9)"/><circle cx="114" cy="50" r="19" fill="var(--pc)" stroke="var(--card)" stroke-width="4"/><circle cx="150" cy="50" r="19" fill="#7c3aed" stroke="var(--card)" stroke-width="4"/><circle cx="186" cy="50" r="19" fill="var(--green)" stroke="var(--card)" stroke-width="4"/><rect x="122" y="78" width="56" height="22" rx="11" fill="var(--green)"/><text x="150" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">+52R</text></svg></div>
-          <div class="hc-body"><h2>🤝 Alfa Trader Ol</h2><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
+          <div class="hc-body"><h2>🤝 Alfa Ol</h2><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
         </a>
       </div>
       <div class="home-tips">
@@ -3240,11 +3243,43 @@
       <span class="eg-brand-sub">3 yıldız haberler — yüksek etkili makro verileri ve merkez bankası kararları</span>
     </div>
     <div id="cal-wrap" style="max-width:1200px;margin:0 auto;padding:16px;">
-      <div class="panel">
-        <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=3" style="width:100%;height:700px;border:none;border-radius:10px;background:var(--bg);" loading="lazy"></iframe>
+      <div class="panel" style="padding:8px;">
+        <div id="cal-tv"></div>
       </div>
-      <p class="hint" style="margin-top:8px;">Yalnızca yüksek etkili (3 yıldız) haberler gösterilir. Kaynak: Investing.com.</p>
+      <p class="hint" style="margin-top:8px;">Yalnızca yüksek etkili haberler gösterilir. Kaynak: TradingView.</p>
     </div>
+    <script>
+    (function () {
+      var host = document.getElementById('cal-tv');
+      if (!host) return;
+      function isLight() { return document.documentElement.getAttribute('data-theme') === 'light'; }
+      function renderCal() {
+        host.innerHTML = '';
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-eco_calendar.js';
+        s.textContent = JSON.stringify({
+          showDate: true,
+          showFilter: true,
+          showAnalysis: false,
+          showZoom: true,
+          showHeader: true,
+          importanceFilter: '1',
+          locale: 'tr',
+          colorTheme: isLight() ? 'light' : 'dark',
+          isTransparent: false,
+          backgroundColor: isLight() ? 'rgba(255,255,255,1)' : 'rgba(13,14,27,1)',
+          height: '680',
+          width: '100%'
+        });
+        host.appendChild(s);
+      }
+      renderCal();
+      var mo = new MutationObserver(function () { setTimeout(renderCal, 250); });
+      mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    })();
+    </script>
   </div>
   <div id="page-chat-admin" class="hidden">
     <div class="eg-brand"><span class="eg-brand-ico">💬</span><span class="eg-brand-name">Canlı Destek</span><span class="eg-brand-sub">Ziyaretçilerden gelen mesajları gör, yanıtla. Yanıtların anında kullanıcının sohbetinde görünür.</span></div>
@@ -3367,7 +3402,7 @@
   <div id="page-basvuru" class="hidden">
     <div class="bas-page">
       <div class="bas-hero">
-        <h1>Alfa Trader Ol</h1>
+        <h1>Alfa Ol</h1>
         <p>Rolünü seç, yolculuğuna başla.</p>
         <div class="cum-pnl-wrap">
           <div class="cum-pnl-lbl"><span class="cum-live-dot"></span>Topluluk Kümülatif PnL</div>
@@ -3539,6 +3574,51 @@ function applySocial() {
       tip.style.top = (gr.top - pr.top) + 'px';
     });
     ptsEl.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  })();
+  /* Üst fiyat şeridi — sürükleyerek sola/sağa kaydır */
+  (function () {
+    const tape = document.getElementById('tv-bar-tape');
+    if (!tape) return;
+    let startX = null, base = 0, dragging = false;
+    const mq = () => tape.querySelector('.marquee');
+    const max = () => { const m = mq(); return m ? Math.max(0, m.scrollWidth - tape.clientWidth) : 0; };
+    const clamp = x => Math.max(-max(), Math.min(0, x));
+    const cur = () => {
+      const m = mq();
+      if (!m) return 0;
+      const t = getComputedStyle(m).transform;
+      if (t && t !== 'none') { const mm = t.match(/matrix\((-?[\d.]+),/); if (mm) return parseFloat(mm[1]); }
+      return 0;
+    };
+    const setX = x => { const m = mq(); if (m) m.style.transform = 'translateX(' + x + 'px)'; };
+    tape.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      startX = e.clientX;
+      base = cur();
+      dragging = true;
+      tape.classList.add('dragging');
+      const m = mq();
+      if (m) { m.style.animation = 'none'; m.style.willChange = 'transform'; setX(base); }
+      try { tape.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    tape.addEventListener('pointermove', e => {
+      if (!dragging || startX === null) return;
+      setX(clamp(base + (e.clientX - startX)));
+    });
+    const end = () => {
+      if (!dragging) return;
+      dragging = false;
+      startX = null;
+      tape.classList.remove('dragging');
+    };
+    tape.addEventListener('pointerup', end);
+    tape.addEventListener('pointercancel', end);
+    tape.addEventListener('mouseleave', () => {
+      if (dragging) return;
+      const m = mq();
+      if (m) { m.style.animation = ''; m.style.transform = ''; m.style.willChange = ''; }
+    });
   })();
   set(['nc-tg', 'nc-tg-m', 'lps-tg', 'lp-comm-tg'], SOCIAL.telegram);
   set(['nc-x', 'nc-x-m', 'lps-x'], SOCIAL.x);
@@ -6202,6 +6282,8 @@ function showPage(name, skipAnim) {
   if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   try { localStorage.setItem('df-last-page', name); } catch (e) {}
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
+  const tvBar = document.querySelector('.tv-bar');
+  if (tvBar) tvBar.style.display = name === 'home' ? '' : 'none';
   if (name === 'data') renderData();
   if (name === 'review') renderReview();
   if (name === 'news') renderNews();
@@ -8094,9 +8176,9 @@ if (AUTH_ENABLED) {
     },
     ihtiyac: {
       egitim:    { t: 'Alfa Edu', p: 'egitim' },
-      topluluk:  { t: 'Alfa Trader Ol', p: 'basvuru' },
+      topluluk:  { t: 'Alfa Ol', p: 'basvuru' },
       araclar:   { t: 'İndikatörler', p: 'indicators' },
-      mentorluk: { t: 'Alfa Trader Ol', p: 'basvuru' },
+      mentorluk: { t: 'Alfa Ol', p: 'basvuru' },
     },
   };
 
