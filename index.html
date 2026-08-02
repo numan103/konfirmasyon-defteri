@@ -1457,7 +1457,7 @@
   .mag-btn:hover { background: #4c4cc4; }
   .mag-btn.sm { padding: 7px 11px; font-size: 12px; }
   .mag-book { position: relative; }
-  .mag-viewport { position: relative; width: 100%; aspect-ratio: 1 / 1.35; max-height: 82vh; margin: 0 auto; perspective: 2600px; touch-action: pan-y; }
+  .mag-viewport { position: relative; width: 100%; aspect-ratio: 1 / 1.5; max-height: 88vh; margin: 0 auto; perspective: 2600px; touch-action: pan-y; }
   .mag-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
   .mag-page { position: absolute; inset: 0; transform-origin: left center; transition: transform .62s cubic-bezier(.3,.1,.2,1); backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 8px; overflow: hidden; box-shadow: 0 14px 44px rgba(23,25,35,.30); background: var(--card); }
   .mag-page.turned { transform: rotateY(-180deg); }
@@ -1477,6 +1477,11 @@
   .cv-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; padding-top: 24px; }
   .cv-date { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.85); }
   .cv-turn { font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,.6); }
+  .cv-date-in { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.32); border-radius: 8px; color: #fff; font-size: 13px; font-weight: 700; padding: 6px 11px; font-family: inherit; width: auto; max-width: 210px; }
+  .cv-date-in::placeholder { color: rgba(255,255,255,.5); }
+  .cv-date-in:focus { outline: none; border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.2); }
+  .cv-issue-in { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); border-radius: 6px; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 6px; width: 54px; font-family: inherit; }
+  .cv-issue-in:focus { outline: none; border-color: rgba(255,255,255,.6); }
   /* İçindekiler */
   .toc-kicker { font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--pc); }
   .toc-h { font-family: var(--font-display); font-size: 30px; font-weight: 800; letter-spacing: -.02em; margin: 4px 0 16px; }
@@ -6702,8 +6707,26 @@ function magBuildCover() {
     '<h1 class="cv-title">AlfaNews</h1>' +
     '<div class="cv-sub">Haftalık Piyasa Dergisi</div>' +
     '<div class="cv-cats"><span>Makroekonomi</span><span>Bitcoin &amp; Kripto</span><span>Forex</span><span>Teknik Analiz</span></div>' +
-    '<div class="cv-foot"><div class="cv-date">' + magWeek() + '</div><div class="cv-turn">Oku →</div></div>';
+    '<div class="cv-foot"><div class="cv-date">' + magEsc(magData.weekLabel || magWeek()) + '</div><div class="cv-turn">Oku →</div></div>';
   inner.appendChild(pad);
+  // Admin: hafta tarihi + sayı numarası yerinde düzenlenebilir
+  if (magIsAdmin()) {
+    const dEl = pad.querySelector('.cv-date');
+    if (dEl) {
+      const di = document.createElement('input'); di.className = 'cv-date-in'; di.value = magData.weekLabel || magWeek(); di.placeholder = 'ör. 3 – 10 Ağustos';
+      magKbIsolate(di);
+      di.addEventListener('input', () => { magData.weekLabel = di.value; magSaveT(); });
+      dEl.replaceWith(di);
+    }
+    const iEl = pad.querySelector('.cv-issue');
+    if (iEl) {
+      const wrap = document.createElement('span'); wrap.className = 'cv-issue'; wrap.textContent = 'Sayı ';
+      const ii = document.createElement('input'); ii.className = 'cv-issue-in'; ii.type = 'number'; ii.value = magData.issueNo || 1; ii.min = '1';
+      magKbIsolate(ii);
+      ii.addEventListener('input', () => { magData.issueNo = parseInt(ii.value, 10) || 1; magSaveT(); });
+      wrap.appendChild(ii); iEl.replaceWith(wrap);
+    }
+  }
   // Analist avatarları — sağ alt köşede yay dizilimi
   const list = (magData.authors || []).slice(0, 6);
   if (list.length) {
