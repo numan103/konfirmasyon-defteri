@@ -1489,6 +1489,12 @@
   .toc-kicker { font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--pc); }
   .toc-h { font-family: var(--font-display); font-size: 30px; font-weight: 800; letter-spacing: -.02em; margin: 4px 0 16px; }
   .toc-empty { font-size: 13px; color: var(--text-3); padding: 12px 2px; }
+  .toc-row { display: flex; align-items: stretch; gap: 6px; border-bottom: 1px solid var(--border); }
+  .toc-row .toc-item { border-bottom: none; }
+  .toc-ord { display: flex; flex-direction: column; justify-content: center; gap: 3px; flex: none; padding: 4px 0; }
+  .toc-ord button { width: 30px; height: 22px; border: 1px solid var(--border); background: var(--card); border-radius: 6px; color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; }
+  .toc-ord button:hover:not(:disabled) { border-color: var(--acc); color: var(--acc); }
+  .toc-ord button:disabled { opacity: .3; cursor: not-allowed; }
   .toc-item { display: flex; align-items: baseline; gap: 13px; width: 100%; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 13px 4px; cursor: pointer; font-family: 'Inter', sans-serif; }
   .toc-item:hover { background: var(--pc-soft); }
   .toc-item b { font-family: var(--font-display); font-size: 15px; font-weight: 800; color: var(--pc); min-width: 24px; }
@@ -6780,13 +6786,24 @@ function magBuildToc() {
   if (!magData.entries.length) {
     const e = document.createElement('div'); e.className = 'toc-empty'; e.textContent = magIsAdmin() ? 'Henüz analiz yok. Üstteki “+ Analiz ekle” ile başla.' : 'Bu sayı hazırlanıyor.'; pad.appendChild(e);
   }
+  const adminToc = magIsAdmin() && !magPreview;
   magData.entries.forEach((en, i) => {
+    const row = document.createElement('div'); row.className = 'toc-row';
     const it = document.createElement('button'); it.className = 'toc-item'; it.type = 'button';
     const au = magAuthor(en.authorId);
     const auName = au && au.name ? au.name : (en.authorName || '');
     it.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b><span class="tt">' + magEsc(en.title || 'Analiz') + (auName ? '<small>✍ ' + magEsc(auName) + '</small>' : '') + '</span><span class="pg">sf ' + (i + 3) + '</span>';
     it.addEventListener('click', () => magGoTo(i + 2));
-    pad.appendChild(it);
+    row.appendChild(it);
+    if (adminToc) {
+      const ord = document.createElement('div'); ord.className = 'toc-ord';
+      const up = document.createElement('button'); up.type = 'button'; up.textContent = '↑'; up.title = 'Yukarı taşı'; up.disabled = i === 0;
+      up.addEventListener('click', e => { e.stopPropagation(); magMoveEntry(i, i - 1, 1); });
+      const dn = document.createElement('button'); dn.type = 'button'; dn.textContent = '↓'; dn.title = 'Aşağı taşı'; dn.disabled = i === magData.entries.length - 1;
+      dn.addEventListener('click', e => { e.stopPropagation(); magMoveEntry(i, i + 1, 1); });
+      ord.appendChild(up); ord.appendChild(dn); row.appendChild(ord);
+    }
+    pad.appendChild(row);
   });
   inner.appendChild(pad); page.appendChild(inner); return page;
 }
@@ -6955,7 +6972,7 @@ async function magAddEntry() {
   magIndex = magCount() - 1; await saveNews(); renderNews();
 }
 async function magDelEntry(i) { if (!confirm('Bu analiz sayfası silinsin mi?')) return; magData.entries.splice(i, 1); if (magIndex >= magCount()) magIndex = Math.max(0, magCount() - 1); await saveNews(); renderNews(); }
-async function magMoveEntry(from, to) { if (to < 0 || to >= magData.entries.length) return; const a = magData.entries; const it = a.splice(from, 1)[0]; a.splice(to, 0, it); magIndex = to + 2; await saveNews(); renderNews(); }
+async function magMoveEntry(from, to, keepIndex) { if (to < 0 || to >= magData.entries.length) return; const a = magData.entries; const it = a.splice(from, 1)[0]; a.splice(to, 0, it); magIndex = (typeof keepIndex === 'number') ? keepIndex : to + 2; await saveNews(); renderNews(); }
 
 function magZoom(url, text) { const z = document.getElementById('mag-zoom'); const im = document.getElementById('mag-zoom-img'); if (!z || !im) return; im.src = url; const cap = document.getElementById('mag-zoom-cap'); if (cap) cap.textContent = text || ''; const inr = z.querySelector('.mz-inner'); if (inr) inr.scrollTop = 0; z.classList.add('open'); }
 function magZoomClose() { const z = document.getElementById('mag-zoom'); if (z) { z.classList.remove('open'); const im = document.getElementById('mag-zoom-img'); if (im) im.src = ''; } }
