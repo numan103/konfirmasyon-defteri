@@ -3255,10 +3255,12 @@
       <div class="mag-toolbar">
         <div class="mag-brand2">AlfaNews<button type="button" class="mag-key" id="mag-key" title="Yönetici anahtarı (yakında)" aria-label="Yönetici anahtarı">🔑</button><span class="mag-adminbadge" id="mag-adminbadge">Düzenleme modu</span></div>
         <div class="mag-tools" id="mag-tools">
+          <button id="mag-preview" class="mag-btn ghost" type="button">👁 Okuyucu önizleme</button>
           <button id="mag-authors" class="mag-btn ghost" type="button">Analistler</button>
           <button id="mag-addentry" class="mag-btn" type="button">＋ Analiz ekle</button>
         </div>
       </div>
+      <button id="mag-preview-exit" type="button" style="display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:120;background:linear-gradient(135deg,#6d6ae6,var(--acc));color:#fff;border:none;border-radius:999px;padding:11px 22px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 26px rgba(91,91,214,.45);">✏ Düzenlemeye dön</button>
       <div id="mag-roster" class="mag-roster hidden"></div>
       <div class="mag-book" id="mag-book">
         <button class="mag-nav prev" id="mag-prev" type="button" aria-label="Önceki sayfa">‹</button>
@@ -6607,6 +6609,7 @@ const ADMIN_EMAIL = 'ahmetnuman20@gmail.com';
 let magData = { issueNo: 1, entries: [] };
 let magIndex = 0;
 let magSaveTimer = null;
+let magPreview = false; // admin okuyucu önizlemesi
 
 function magIsAdmin() {
   try { return (typeof AUTH !== 'undefined' && AUTH.user) ? ((AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL) : true; }
@@ -6738,7 +6741,7 @@ function magBuildToc() {
 }
 function magEsc(v) { const d = document.createElement('div'); d.textContent = String(v == null ? '' : v); return d.innerHTML; }
 
-function magAddImg(en, url) { if (!url) return; en.images.push(url); saveNews().then(renderNews); }
+function magAddImg(en, url) { if (!url) return; if (!Array.isArray(en.images)) en.images = []; if (en.images.includes(url)) return; en.images.push(url); saveNews().then(renderNews); }
 function magFilesToEntry(en, files) {
   const list = Array.from(files || []).filter(f => f.type && f.type.indexOf('image/') === 0);
   if (!list.length) return;
@@ -6865,8 +6868,10 @@ function renderNews() {
   const stage = document.getElementById('mag-stage'); if (!stage) return;
   if (!magData || !Array.isArray(magData.entries)) magData = { issueNo: 1, entries: [], authors: [] };
   if (!Array.isArray(magData.authors)) magData.authors = [];
-  const admin = magIsAdmin();
-  const tools = document.getElementById('mag-tools'); if (tools) tools.style.display = admin ? '' : 'none';
+  const isAdmin = magIsAdmin();
+  const admin = isAdmin && !magPreview; // önizlemede okuyucu gibi render et
+  const tools = document.getElementById('mag-tools'); if (tools) tools.style.display = (isAdmin && !magPreview) ? '' : 'none';
+  const exitBtn = document.getElementById('mag-preview-exit'); if (exitBtn) exitBtn.style.display = (isAdmin && magPreview) ? '' : 'none';
   renderRoster();
   const badge = document.getElementById('mag-adminbadge'); if (badge) badge.style.display = admin ? '' : 'none';
   const n = magCount();
@@ -6908,6 +6913,8 @@ function bindNewsPage() {
   const g = id => document.getElementById(id);
   const nx = g('mag-next'), pv = g('mag-prev'); if (nx) nx.addEventListener('click', magNext); if (pv) pv.addEventListener('click', magPrev);
   const addb = g('mag-addentry'); if (addb) addb.addEventListener('click', magAddEntry);
+  const pvw = g('mag-preview'); if (pvw) pvw.addEventListener('click', () => { magPreview = true; magRosterOpen = false; magIndex = 0; renderNews(); const bk = g('mag-book'); if (bk) bk.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  const pvx = g('mag-preview-exit'); if (pvx) pvx.addEventListener('click', () => { magPreview = false; renderNews(); });
   const aub = g('mag-authors'); if (aub) aub.addEventListener('click', () => { magRosterOpen = !magRosterOpen; aub.classList.toggle('on', magRosterOpen); renderRoster(); });
   const z = g('mag-zoom'); if (z) z.addEventListener('click', magZoomClose);
   const vp = g('mag-viewport');
