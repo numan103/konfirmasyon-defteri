@@ -1482,6 +1482,9 @@
   .cv-date-in:focus { outline: none; border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.2); }
   .cv-issue-in { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); border-radius: 6px; color: #fff; font-size: 12px; font-weight: 700; padding: 2px 6px; width: 54px; font-family: inherit; }
   .cv-issue-in:focus { outline: none; border-color: rgba(255,255,255,.6); }
+  .cv-deco { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .cv-deco svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mag-cover3 .cv-glow { position: absolute; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(167,139,250,.5), transparent 70%); filter: blur(50px); top: -80px; right: -70px; z-index: 0; pointer-events: none; }
   /* İçindekiler */
   .toc-kicker { font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--pc); }
   .toc-h { font-family: var(--font-display); font-size: 30px; font-weight: 800; letter-spacing: -.02em; margin: 4px 0 16px; }
@@ -6703,6 +6706,19 @@ function magBuildCover() {
   const page = document.createElement('div'); page.className = 'mag-page mag-cover3';
   const inner = document.createElement('div'); inner.className = 'mag-inner';
   if (magData.coverBg) { const bg = document.createElement('div'); bg.className = 'cv-bg'; bg.style.backgroundImage = 'url("' + String(magData.coverBg).replace(/"/g, '') + '")'; inner.appendChild(bg); }
+  else {
+    // Gömülü kapak tasarımı — trading temalı grafik motifi
+    const glow = document.createElement('div'); glow.className = 'cv-glow'; inner.appendChild(glow);
+    const deco = document.createElement('div'); deco.className = 'cv-deco';
+    deco.innerHTML = '<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true">' +
+      '<g stroke="rgba(255,255,255,.06)" stroke-width="1"><line x1="0" y1="420" x2="400" y2="420"/><line x1="0" y1="480" x2="400" y2="480"/><line x1="0" y1="540" x2="400" y2="540"/></g>' +
+      '<path d="M0,522 44,500 88,510 132,466 176,484 220,436 264,452 308,402 352,420 400,368 L400,600 L0,600 Z" fill="rgba(255,255,255,.05)"/>' +
+      '<polyline points="0,522 44,500 88,510 132,466 176,484 220,436 264,452 308,402 352,420 400,368" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="400" cy="368" r="4" fill="rgba(255,255,255,.5)"/>' +
+      '<g fill="rgba(255,255,255,.10)"><rect x="66" y="548" width="9" height="34" rx="2"/><rect x="126" y="536" width="9" height="30" rx="2"/><rect x="186" y="556" width="9" height="24" rx="2"/><rect x="246" y="528" width="9" height="42" rx="2"/><rect x="306" y="544" width="9" height="28" rx="2"/><rect x="360" y="516" width="9" height="46" rx="2"/></g>' +
+      '</svg>';
+    inner.appendChild(deco);
+  }
   const pad = document.createElement('div'); pad.className = 'mag-pad';
   pad.innerHTML =
     '<div class="cv-top"><span class="cv-oa">ALFA TRADERS</span><span class="cv-issue">Sayı ' + (magData.issueNo || 1) + '</span></div>' +
@@ -6766,7 +6782,9 @@ function magBuildToc() {
   }
   magData.entries.forEach((en, i) => {
     const it = document.createElement('button'); it.className = 'toc-item'; it.type = 'button';
-    it.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b><span class="tt">' + magEsc(en.title || 'Analiz') + '<small>' + magEsc(en.authorName || '') + '</small></span><span class="pg">sf ' + (i + 3) + '</span>';
+    const au = magAuthor(en.authorId);
+    const auName = au && au.name ? au.name : (en.authorName || '');
+    it.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + '</b><span class="tt">' + magEsc(en.title || 'Analiz') + (auName ? '<small>✍ ' + magEsc(auName) + '</small>' : '') + '</span><span class="pg">sf ' + (i + 3) + '</span>';
     it.addEventListener('click', () => magGoTo(i + 2));
     pad.appendChild(it);
   });
