@@ -6673,14 +6673,21 @@ function magWeek() {
   return f(mon) + ' – ' + f(sun);
 }
 
+function magKbIsolate(el) {
+  // Dergi yazı alanlarına basılan tuşları global kısayollardan izole et
+  // (aksi halde space/ok tuşları bir üst handler'a sızıp engellenebiliyor)
+  ['keydown', 'keypress', 'keyup'].forEach(evt => el.addEventListener(evt, e => e.stopPropagation()));
+}
 function magInput(val, ph, cls, oninput) {
   const el = document.createElement('input'); el.type = 'text'; el.className = 'mag-in ' + (cls || ''); el.value = val || ''; if (ph) el.placeholder = ph;
   el.addEventListener('input', () => { oninput(el.value); magSaveT(); });
+  magKbIsolate(el);
   return el;
 }
 function magArea(val, ph, oninput) {
   const el = document.createElement('textarea'); el.className = 'mag-in mag-area'; el.value = val || ''; if (ph) el.placeholder = ph;
   el.addEventListener('input', () => { oninput(el.value); magSaveT(); });
+  magKbIsolate(el);
   return el;
 }
 
