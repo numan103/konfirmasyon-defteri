@@ -1543,9 +1543,12 @@
   .mag-counter { font-size: 12.5px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
   .mag-hint { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 8px; line-height: 1.5; }
   /* Büyüteç (zoom) */
-  #mag-zoom { position: fixed; inset: 0; z-index: 300; background: rgba(10,12,20,.92); display: none; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+  #mag-zoom { position: fixed; inset: 0; z-index: 300; background: rgba(10,12,20,.94); display: none; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }
   #mag-zoom.open { display: flex; }
-  #mag-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .mz-inner { display: flex; flex-direction: column; gap: 16px; align-items: center; max-width: 900px; max-height: 92vh; overflow-y: auto; }
+  #mag-zoom img { max-width: 100%; max-height: 68vh; object-fit: contain; border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,.5); cursor: zoom-out; }
+  #mag-zoom-cap { color: #e8e9f0; font-size: 14.5px; line-height: 1.72; white-space: pre-wrap; max-width: 720px; width: 100%; cursor: text; }
+  #mag-zoom-cap:empty { display: none; }
   /* Görsel dropzone */
   .e-dz { margin-top: 8px; border: 1.5px dashed var(--border); border-radius: 12px; padding: 22px 16px; text-align: center; cursor: pointer; transition: all .15s ease; outline: none; }
   .e-dz:hover, .e-dz:focus { border-color: var(--pc); background: var(--pc-soft); }
@@ -3276,7 +3279,7 @@
       <div class="mag-hint">Çevir: kaydır · oklar · klavye · içindekiler · Görsele tıkla → büyüt</div>
     </div>
   </div>
-  <div id="mag-zoom"><img id="mag-zoom-img" alt=""></div>
+  <div id="mag-zoom"><div class="mz-inner"><img id="mag-zoom-img" alt=""><div id="mag-zoom-cap"></div></div></div>
   <div id="page-egitim" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🎓</span>
@@ -6809,7 +6812,7 @@ function magBuildEntry(en, i, admin) {
   (en.images || []).forEach((url, k) => {
     const wrap = document.createElement('div'); wrap.className = 'e-imgwrap';
     const img = document.createElement('img'); img.className = 'e-img'; img.src = url; img.alt = 'Analiz görseli'; img.loading = 'lazy';
-    img.addEventListener('click', () => magZoom(url));
+    img.addEventListener('click', () => magZoom(url, en.body));
     wrap.appendChild(img);
     if (admin) { const x = document.createElement('button'); x.type = 'button'; x.className = 'e-imgdel'; x.textContent = '×'; x.title = 'Görseli kaldır'; x.addEventListener('click', e => { e.stopPropagation(); en.images.splice(k, 1); saveNews(); renderNews(); }); wrap.appendChild(x); }
     imgs.appendChild(wrap);
@@ -6936,7 +6939,7 @@ async function magAddEntry() {
 async function magDelEntry(i) { if (!confirm('Bu analiz sayfası silinsin mi?')) return; magData.entries.splice(i, 1); if (magIndex >= magCount()) magIndex = Math.max(0, magCount() - 1); await saveNews(); renderNews(); }
 async function magMoveEntry(from, to) { if (to < 0 || to >= magData.entries.length) return; const a = magData.entries; const it = a.splice(from, 1)[0]; a.splice(to, 0, it); magIndex = to + 2; await saveNews(); renderNews(); }
 
-function magZoom(url) { const z = document.getElementById('mag-zoom'); const im = document.getElementById('mag-zoom-img'); if (!z || !im) return; im.src = url; z.classList.add('open'); }
+function magZoom(url, text) { const z = document.getElementById('mag-zoom'); const im = document.getElementById('mag-zoom-img'); if (!z || !im) return; im.src = url; const cap = document.getElementById('mag-zoom-cap'); if (cap) cap.textContent = text || ''; const inr = z.querySelector('.mz-inner'); if (inr) inr.scrollTop = 0; z.classList.add('open'); }
 function magZoomClose() { const z = document.getElementById('mag-zoom'); if (z) { z.classList.remove('open'); const im = document.getElementById('mag-zoom-img'); if (im) im.src = ''; } }
 
 function bindNewsPage() {
@@ -6947,6 +6950,7 @@ function bindNewsPage() {
   const pvx = g('mag-preview-exit'); if (pvx) pvx.addEventListener('click', () => { magPreview = false; renderNews(); });
   const aub = g('mag-authors'); if (aub) aub.addEventListener('click', () => { magRosterOpen = !magRosterOpen; aub.classList.toggle('on', magRosterOpen); renderRoster(); });
   const z = g('mag-zoom'); if (z) z.addEventListener('click', magZoomClose);
+  const zcap = g('mag-zoom-cap'); if (zcap) zcap.addEventListener('click', e => e.stopPropagation());
   const vp = g('mag-viewport');
   if (vp) {
     let sx = null;
