@@ -1576,8 +1576,8 @@
   .cv-analysts { position: absolute; right: 16px; bottom: 16px; width: 180px; height: 180px; z-index: 2; pointer-events: none; }
   .cv-an { position: absolute; width: 50px; height: 50px; border-radius: 50%; transform: translate(-50%, -50%); background-size: cover; background-position: center; border: 2px solid rgba(255,255,255,.85); box-shadow: 0 4px 12px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
   .cv-an.empty { background: rgba(255,255,255,.16); color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 17px; }
-  .cv-bgup { position: absolute; left: 26px; bottom: 20px; z-index: 3; font-size: 11px; font-weight: 700; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
-  .cv-bgup:hover { background: rgba(255,255,255,.28); } .cv-bgup input { display: none; }
+  .cv-bgup { position: absolute; left: 20px; bottom: 18px; z-index: 3; font-size: 15px; color: #fff; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.28); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: .55; transition: opacity .15s; }
+  .cv-bgup:hover { background: rgba(255,255,255,.28); opacity: 1; } .cv-bgup input { display: none; }
 /* Başvuru Sayfası */
 .bas-page { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
 .bas-hero { text-align: center; padding: 36px 20px 32px; }
@@ -6770,7 +6770,7 @@ function magBuildCover() {
     inner.appendChild(cl);
   }
   if (magIsAdmin()) {
-    const up = document.createElement('label'); up.className = 'cv-bgup'; up.textContent = magData.coverBg ? '⟳ Kapak görseli' : '＋ Kapak arka plan görseli';
+    const up = document.createElement('label'); up.className = 'cv-bgup'; up.textContent = '📷'; up.title = magData.coverBg ? 'Kapak görselini değiştir' : 'Kapak görseli ekle';
     const fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
     fi.addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = async () => { magData.coverBg = r.result; await saveNews(); renderNews(); }; r.readAsDataURL(f); e.target.value = ''; });
     up.appendChild(fi); inner.appendChild(up);
