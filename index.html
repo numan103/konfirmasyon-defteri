@@ -2007,14 +2007,19 @@
 .sfx { margin-top: 36px; }
 .sfx-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .sfx-head h2 { font-size: 19px; font-weight: 800; margin: 0; }
-.sfx-add-btn { padding: 7px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color .15s, color .15s; }
-.sfx-add-btn:hover { border-color: var(--pc); color: var(--pc); }
-.sfx-add { margin-bottom: 14px; }
-.sfx-add-form { display: flex; gap: 8px; flex-wrap: wrap; }
-.sfx-paste { width: 100%; border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; font-size: 12.5px; color: var(--text-2); cursor: pointer; transition: border-color .15s, background .15s; }
-.sfx-paste:hover, .sfx-paste.over { border-color: var(--pc); color: var(--pc); background: rgba(124,58,237,.06); }
-.sfx-add-form input { flex: 1 1 200px; background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text); }
-.sfx-add-form button { background: var(--pc); border: none; color: #fff; border-radius: 9px; padding: 9px 18px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.sfx-add-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 20px; font-weight: 600; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s, color .15s, transform .15s; }
+.sfx-add-btn:hover { border-color: var(--pc); color: var(--pc); transform: scale(1.08); }
+.sfx-modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 80; }
+.sfx-modal-card { position: relative; width: 100%; max-width: 480px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+.sfx-modal-x { position: absolute; top: 12px; right: 14px; background: none; border: none; color: var(--text-3); font-size: 17px; cursor: pointer; }
+.sfx-modal-t { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+.sfx-paste { border: 1.5px dashed var(--border); border-radius: 12px; padding: 30px 16px; text-align: center; font-size: 13px; color: var(--text-2); cursor: pointer; transition: border-color .15s, background .15s; outline: none; }
+.sfx-paste:focus, .sfx-paste:hover, .sfx-paste.over { border-color: var(--pc); color: var(--pc); background: rgba(124,58,237,.06); }
+.sfx-url-row { display: flex; gap: 8px; margin-top: 12px; }
+.sfx-url-row input { flex: 1 1 auto; background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text); min-width: 0; }
+.sfx-url-row button { background: var(--pc); border: none; color: #fff; border-radius: 9px; padding: 9px 18px; font-size: 12.5px; font-weight: 700; cursor: pointer; flex: none; }
+.sfx-msg { min-height: 18px; margin-top: 10px; font-size: 12.5px; color: var(--green); }
+.sfx-msg.err { color: #ef4444; }
 .sfx-view { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--border); background: var(--card); -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
 .sfx-track { display: flex; gap: 14px; width: max-content; padding: 16px 0; animation: sfx-scroll 42s linear infinite; }
 .sfx-view:hover .sfx-track { animation-play-state: paused; }
@@ -4455,19 +4460,23 @@
       <div class="sfx" id="sfx">
         <div class="sfx-head">
           <h2>🎉 Alfa Traders Başarıları</h2>
-          <button class="sfx-add-btn hidden" id="sfx-add-btn" onclick="toggleSfxAdd()">➕ Fotoğraf ekle</button>
-        </div>
-        <div class="sfx-add hidden" id="sfx-add">
-          <div class="sfx-add-form">
-            <div class="sfx-paste" id="sfx-paste" title="Ctrl+V ile yapıştır ya da tıkla ve dosya seç">📸 Ctrl+V ile yapıştır, ya da tıkla ve dosya seç</div>
-            <input type="url" id="sfx-url" placeholder="Fotoğraf linki (https://...)" />
-            <input type="text" id="sfx-caption" placeholder="Açıklama (opsiyonel)" />
-            <button type="button" onclick="addSfxPhoto()">Ekle</button>
-            <input type="file" id="sfx-file" accept="image/*" hidden />
-          </div>
+          <button class="sfx-add-btn hidden" id="sfx-add-btn" onclick="openSfxModal()">+</button>
         </div>
         <div class="sfx-view">
           <div class="sfx-track" id="sfx-track"><div class="sfx-empty">Başarı fotoğrafları yükleniyor…</div></div>
+        </div>
+        <div class="sfx-modal hidden" id="sfx-modal">
+          <div class="sfx-modal-card">
+            <button class="sfx-modal-x" onclick="closeSfxModal()" type="button" aria-label="Kapat">✕</button>
+            <div class="sfx-modal-t">Fotoğraf Ekle</div>
+            <div class="sfx-paste" id="sfx-paste" tabindex="0">📸 Şimdi Ctrl+V yap — ya da buraya tıkla → dosya seç</div>
+            <div class="sfx-url-row">
+              <input type="url" id="sfx-url" placeholder="…veya fotoğraf linki yapıştır (https://)" />
+              <button type="button" onclick="addSfxPhoto()">Ekle</button>
+            </div>
+            <div class="sfx-msg" id="sfx-msg"></div>
+            <input type="file" id="sfx-file" accept="image/*" hidden />
+          </div>
         </div>
       </div>
 
@@ -12955,9 +12964,24 @@ function renderSfx() {
     track.appendChild(c);
   });
 }
-function toggleSfxAdd() {
-  const a = document.getElementById('sfx-add');
-  if (a) a.classList.toggle('hidden');
+let sfxPasteOpen = false;
+function openSfxModal() {
+  const m = document.getElementById('sfx-modal');
+  if (!m) return;
+  m.classList.remove('hidden');
+  sfxPasteOpen = true;
+  setSfxMsg('', '');
+  const b = document.getElementById('sfx-paste');
+  if (b) { b.focus(); b.classList.add('over'); setTimeout(() => b.classList.remove('over'), 300); }
+}
+function closeSfxModal() {
+  const m = document.getElementById('sfx-modal');
+  if (m) m.classList.add('hidden');
+  sfxPasteOpen = false;
+}
+function setSfxMsg(text, cls) {
+  const el = document.getElementById('sfx-msg');
+  if (el) { el.textContent = text; el.className = 'sfx-msg' + (cls ? ' ' + cls : ''); }
 }
 function initSfxPaste() {
   const box = document.getElementById('sfx-paste');
@@ -12983,6 +13007,16 @@ function initSfxPaste() {
     box.classList.remove('over');
     if (e.dataTransfer.files && e.dataTransfer.files[0]) handleSfxFile(e.dataTransfer.files[0]);
   });
+  document.addEventListener('paste', e => {
+    if (!sfxPasteOpen) return;
+    const items = e.clipboardData && e.clipboardData.items;
+    for (const it of items || []) {
+      if (it.type && it.type.indexOf('image') === 0) { e.preventDefault(); handleSfxFile(it.getAsFile()); break; }
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeSfxModal();
+  });
 }
 function handleSfxFile(file) {
   const reader = new FileReader();
@@ -12997,7 +13031,7 @@ function handleSfxFile(file) {
       c.getContext('2d').drawImage(img, 0, 0, w, h);
       uploadSfxImage(c.toDataURL('image/jpeg', 0.82));
     };
-    img.onerror = () => window.alert('Görsel okunamadı.');
+    img.onerror = () => setSfxMsg('Görsel okunamadı.', 'err');
     img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
@@ -13005,40 +13039,39 @@ function handleSfxFile(file) {
 async function uploadSfxImage(data) {
   const box = document.getElementById('sfx-paste');
   if (box) { box.textContent = '⏳ Yükleniyor…'; box.style.pointerEvents = 'none'; }
+  setSfxMsg('Yükleniyor…', '');
   try {
     const r = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
     const j = await r.json();
-    if (!j.ok || !j.url) { window.alert('Yüklenemedi: ' + (j.error || 'hata')); return; }
+    if (!j.ok || !j.url) { setSfxMsg('Yüklenemedi: ' + (j.error || 'hata'), 'err'); return; }
     const url = j.url;
-    const capEl = document.getElementById('sfx-caption');
-    const caption = capEl ? capEl.value.trim() : '';
-    if (capEl) capEl.value = '';
     try {
-      const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption, sort: sfxPhotos.length + 1 });
+      const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption: '', sort: sfxPhotos.length + 1 });
       if (error) throw new Error(error.message);
     } catch (err) {
       const uEl = document.getElementById('sfx-url');
       if (uEl) uEl.value = url;
-      window.alert('Fotoğraf yüklendi ama tabloya eklenemedi. URL alanına kondu, Ekle\'ye basabilirsin. (' + (err.message || 'hata') + ')');
+      setSfxMsg('Fotoğraf yüklendi ama tabloya eklenemedi — URL alanına kondu, Ekle\'ye bas. (' + (err.message || 'hata') + ')', 'err');
       return;
     }
+    setSfxMsg('✅ Eklendi. Devam edebilirsin — şerit yenilendi.', '');
     loadSfx();
   } catch (e) {
-    window.alert('Yükleme hatası: ' + (e.message || 'hata'));
+    setSfxMsg('Yükleme hatası: ' + (e.message || 'hata'), 'err');
   } finally {
-    if (box) { box.textContent = '📸 Ctrl+V ile yapıştır, ya da tıkla ve dosya seç'; box.style.pointerEvents = ''; }
+    if (box) { box.textContent = '📸 Şimdi Ctrl+V yap — ya da buraya tıkla → dosya seç'; box.style.pointerEvents = ''; box.focus(); }
   }
 }
 async function addSfxPhoto() {
-  const url = document.getElementById('sfx-url').value.trim();
-  const caption = document.getElementById('sfx-caption').value.trim();
-  if (!url) { window.alert('Fotoğraf linki gerekli.'); return; }
+  const uEl = document.getElementById('sfx-url');
+  const url = uEl ? uEl.value.trim() : '';
+  if (!url) { setSfxMsg('Fotoğraf linki gerekli.', 'err'); return; }
   try {
-    const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption, sort: sfxPhotos.length + 1 });
-    if (error) { window.alert('Eklenemedi: ' + (error.message || 'hata')); return; }
-  } catch (e) { window.alert('Eklenemedi: ' + (e.message || 'hata')); return; }
-  document.getElementById('sfx-url').value = '';
-  document.getElementById('sfx-caption').value = '';
+    const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption: '', sort: sfxPhotos.length + 1 });
+    if (error) { setSfxMsg('Eklenemedi: ' + (error.message || 'hata'), 'err'); return; }
+  } catch (e) { setSfxMsg('Eklenemedi: ' + (e.message || 'hata'), 'err'); return; }
+  if (uEl) uEl.value = '';
+  setSfxMsg('✅ Eklendi.', '');
   loadSfx();
 }
 async function delSfxPhoto(id) {
