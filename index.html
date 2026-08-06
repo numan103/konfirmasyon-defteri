@@ -13082,7 +13082,7 @@ async function uploadSfxImage(data) {
   if (box) { box.textContent = '⏳ Yükleniyor…'; box.style.pointerEvents = 'none'; }
   setSfxMsg('Yükleniyor…', '');
   try {
-    const r = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
+    const r = await fetch('/api/contrib?upload=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
     const j = await r.json();
     if (!j.ok || !j.url) { setSfxMsg('Yüklenemedi: ' + (j.error || 'hata'), 'err'); return; }
     try {
