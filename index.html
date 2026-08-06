@@ -2011,6 +2011,8 @@
 .sfx-add-btn:hover { border-color: var(--pc); color: var(--pc); }
 .sfx-add { margin-bottom: 14px; }
 .sfx-add-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.sfx-paste { width: 100%; border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; font-size: 12.5px; color: var(--text-2); cursor: pointer; transition: border-color .15s, background .15s; }
+.sfx-paste:hover, .sfx-paste.over { border-color: var(--pc); color: var(--pc); background: rgba(124,58,237,.06); }
 .sfx-add-form input { flex: 1 1 200px; background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text); }
 .sfx-add-form button { background: var(--pc); border: none; color: #fff; border-radius: 9px; padding: 9px 18px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 .sfx-view { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--border); background: var(--card); -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
@@ -4457,9 +4459,11 @@
         </div>
         <div class="sfx-add hidden" id="sfx-add">
           <div class="sfx-add-form">
+            <div class="sfx-paste" id="sfx-paste" title="Ctrl+V ile yapıştır ya da tıkla ve dosya seç">📸 Ctrl+V ile yapıştır, ya da tıkla ve dosya seç</div>
             <input type="url" id="sfx-url" placeholder="Fotoğraf linki (https://...)" />
             <input type="text" id="sfx-caption" placeholder="Açıklama (opsiyonel)" />
             <button type="button" onclick="addSfxPhoto()">Ekle</button>
+            <input type="file" id="sfx-file" accept="image/*" hidden />
           </div>
         </div>
         <div class="sfx-view">
@@ -12955,6 +12959,76 @@ function toggleSfxAdd() {
   const a = document.getElementById('sfx-add');
   if (a) a.classList.toggle('hidden');
 }
+function initSfxPaste() {
+  const box = document.getElementById('sfx-paste');
+  const input = document.getElementById('sfx-file');
+  if (!box) return;
+  box.addEventListener('click', () => { if (input) input.click(); });
+  if (input) {
+    input.addEventListener('change', () => {
+      if (input.files && input.files[0]) handleSfxFile(input.files[0]);
+      input.value = '';
+    });
+  }
+  box.addEventListener('paste', e => {
+    const items = e.clipboardData && e.clipboardData.items;
+    for (const it of items || []) {
+      if (it.type && it.type.indexOf('image') === 0) { e.preventDefault(); handleSfxFile(it.getAsFile()); break; }
+    }
+  });
+  box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('over'); });
+  box.addEventListener('dragleave', () => box.classList.remove('over'));
+  box.addEventListener('drop', e => {
+    e.preventDefault();
+    box.classList.remove('over');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) handleSfxFile(e.dataTransfer.files[0]);
+  });
+}
+function handleSfxFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 1400;
+      let w = img.width, h = img.height;
+      if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      uploadSfxImage(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => window.alert('Görsel okunamadı.');
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+async function uploadSfxImage(data) {
+  const box = document.getElementById('sfx-paste');
+  if (box) { box.textContent = '⏳ Yükleniyor…'; box.style.pointerEvents = 'none'; }
+  try {
+    const r = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
+    const j = await r.json();
+    if (!j.ok || !j.url) { window.alert('Yüklenemedi: ' + (j.error || 'hata')); return; }
+    const url = j.url;
+    const capEl = document.getElementById('sfx-caption');
+    const caption = capEl ? capEl.value.trim() : '';
+    if (capEl) capEl.value = '';
+    try {
+      const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption, sort: sfxPhotos.length + 1 });
+      if (error) throw new Error(error.message);
+    } catch (err) {
+      const uEl = document.getElementById('sfx-url');
+      if (uEl) uEl.value = url;
+      window.alert('Fotoğraf yüklendi ama tabloya eklenemedi. URL alanına kondu, Ekle\'ye basabilirsin. (' + (err.message || 'hata') + ')');
+      return;
+    }
+    loadSfx();
+  } catch (e) {
+    window.alert('Yükleme hatası: ' + (e.message || 'hata'));
+  } finally {
+    if (box) { box.textContent = '📸 Ctrl+V ile yapıştır, ya da tıkla ve dosya seç'; box.style.pointerEvents = ''; }
+  }
+}
 async function addSfxPhoto() {
   const url = document.getElementById('sfx-url').value.trim();
   const caption = document.getElementById('sfx-caption').value.trim();
@@ -13619,6 +13693,7 @@ loadChat();
 loadFeed();
 document.addEventListener('DOMContentLoaded', renderFeed);
 setTimeout(renderFeed, 100);
+initSfxPaste();
 loadSfx();
 </script>
 <script>
