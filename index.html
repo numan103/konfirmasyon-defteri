@@ -2029,7 +2029,9 @@
 .sfx-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 12px 9px; font-size: 11.5px; font-weight: 700; color: #fff; background: linear-gradient(180deg, transparent, rgba(0,0,0,.78)); }
 .sfx-del { position: absolute; top: 7px; right: 7px; z-index: 3; background: rgba(0,0,0,.55); color: #fff; border: none; border-radius: 8px; font-size: 12px; width: 26px; height: 26px; cursor: pointer; }
 .sfx-empty { padding: 22px; text-align: center; font-size: 13px; color: var(--text-3); }
-@media (max-width: 640px) { .sfx-card { width: 230px; height: 150px; } }
+.sfx-slot { flex: none; width: 120px; height: 190px; border: 1.5px dashed var(--border); border-radius: 12px; background: rgba(124,58,237,.05); color: var(--text-2); font-size: 30px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s, color .15s, background .15s; }
+.sfx-slot:hover { border-color: var(--pc); color: var(--pc); background: rgba(124,58,237,.12); }
+@media (max-width: 640px) { .sfx-card { width: 230px; height: 150px; } .sfx-slot { width: 90px; height: 150px; font-size: 24px; } }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) { .bas-strip { grid-template-columns: 1fr; } .bas-strip-arrow { transform: rotate(90deg); padding: 0; } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
@@ -4468,7 +4470,7 @@
         <div class="sfx-modal hidden" id="sfx-modal">
           <div class="sfx-modal-card">
             <button class="sfx-modal-x" onclick="closeSfxModal()" type="button" aria-label="Kapat">✕</button>
-            <div class="sfx-modal-t">Fotoğraf Ekle</div>
+            <div class="sfx-modal-t" id="sfx-modal-t">Fotoğraf Ekle</div>
             <div class="sfx-paste" id="sfx-paste" tabindex="0">📸 Şimdi Ctrl+V yap — ya da buraya tıkla → dosya seç</div>
             <div class="sfx-url-row">
               <input type="url" id="sfx-url" placeholder="…veya fotoğraf linki yapıştır (https://)" />
@@ -12943,14 +12945,21 @@ function renderSfx() {
   const track = document.getElementById('sfx-track');
   const addBtn = document.getElementById('sfx-add-btn');
   if (!track) return;
-  if (addBtn) addBtn.classList.toggle('hidden', !appsAllowed());
+  const admin = appsAllowed();
+  if (addBtn) addBtn.classList.toggle('hidden', !admin);
   if (!sfxPhotos.length) {
-    track.innerHTML = '<div class="sfx-empty">Henüz başarı fotoğrafı eklenmemiş.</div>';
+    track.innerHTML = admin
+      ? '<button type="button" class="sfx-slot" onclick="openSfxModal()" title="İlk fotoğrafı ekle">+</button>'
+      : '<div class="sfx-empty">Henüz başarı fotoğrafı eklenmemiş.</div>';
     return;
   }
-  const twice = sfxPhotos.concat(sfxPhotos);
-  track.innerHTML = '';
-  twice.forEach(p => {
+  function makeSlot(i) {
+    const s = document.createElement('button');
+    s.type = 'button'; s.className = 'sfx-slot'; s.title = 'Buraya fotoğraf ekle (Ctrl+V)'; s.textContent = '+';
+    s.addEventListener('click', () => openSfxModal(i));
+    return s;
+  }
+  function makeCard(p) {
     const c = document.createElement('figure');
     c.className = 'sfx-card';
     const img = document.createElement('img');
@@ -12961,17 +12970,27 @@ function renderSfx() {
       fig.textContent = p.caption;
       c.appendChild(fig);
     }
-    if (appsAllowed()) {
+    if (admin) {
       const del = document.createElement('button');
       del.type = 'button'; del.className = 'sfx-del'; del.textContent = '🗑'; del.title = 'Sil';
       del.addEventListener('click', () => delSfxPhoto(p.id));
       c.appendChild(del);
     }
-    track.appendChild(c);
-  });
+    return c;
+  }
+  const group = document.createDocumentFragment();
+  sfxPhotos.forEach((p, i) => { group.appendChild(makeSlot(i)); group.appendChild(makeCard(p)); });
+  group.appendChild(makeSlot(sfxPhotos.length));
+  track.innerHTML = '';
+  track.appendChild(group);
+  track.appendChild(group.cloneNode(true));
 }
+let sfxInsertAt = null;
 let sfxPasteOpen = false;
-function openSfxModal() {
+function openSfxModal(idx) {
+  sfxInsertAt = (typeof idx === 'number') ? idx : null;
+  const t = document.getElementById('sfx-modal-t');
+  if (t) t.textContent = (typeof idx === 'number') ? 'Fotoğraf Ekle — şeridin bu noktasına' : 'Fotoğraf Ekle';
   const m = document.getElementById('sfx-modal');
   if (!m) return;
   m.classList.remove('hidden');
@@ -12984,6 +13003,7 @@ function closeSfxModal() {
   const m = document.getElementById('sfx-modal');
   if (m) m.classList.add('hidden');
   sfxPasteOpen = false;
+  sfxInsertAt = null;
 }
 function setSfxMsg(text, cls) {
   const el = document.getElementById('sfx-msg');
@@ -13042,6 +13062,21 @@ function handleSfxFile(file) {
   };
   reader.readAsDataURL(file);
 }
+async function sfxAddRow(url, caption) {
+  const arr = sfxPhotos.slice();
+  const idx = (sfxInsertAt == null || sfxInsertAt > arr.length) ? arr.length : sfxInsertAt;
+  const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption, sort: idx });
+  if (error) throw new Error(error.message);
+  arr.splice(idx, 0, { url, caption, sort: idx });
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].id && arr[i].sort !== i) {
+      const { error: ue } = await AUTH.client.from(SFX_TABLE).update({ sort: i }).eq('id', arr[i].id);
+      if (ue) { /* sıralama hatası göz ardı edilir */ }
+    }
+  }
+  sfxInsertAt = idx + 1;
+  loadSfx();
+}
 async function uploadSfxImage(data) {
   const box = document.getElementById('sfx-paste');
   if (box) { box.textContent = '⏳ Yükleniyor…'; box.style.pointerEvents = 'none'; }
@@ -13050,18 +13085,15 @@ async function uploadSfxImage(data) {
     const r = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
     const j = await r.json();
     if (!j.ok || !j.url) { setSfxMsg('Yüklenemedi: ' + (j.error || 'hata'), 'err'); return; }
-    const url = j.url;
     try {
-      const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption: '', sort: sfxPhotos.length + 1 });
-      if (error) throw new Error(error.message);
+      await sfxAddRow(j.url, '');
     } catch (err) {
       const uEl = document.getElementById('sfx-url');
-      if (uEl) uEl.value = url;
+      if (uEl) uEl.value = j.url;
       setSfxMsg('Fotoğraf yüklendi ama tabloya eklenemedi — URL alanına kondu, Ekle\'ye bas. (' + (err.message || 'hata') + ')', 'err');
       return;
     }
     setSfxMsg('✅ Eklendi. Devam edebilirsin — şerit yenilendi.', '');
-    loadSfx();
   } catch (e) {
     setSfxMsg('Yükleme hatası: ' + (e.message || 'hata'), 'err');
   } finally {
@@ -13073,12 +13105,10 @@ async function addSfxPhoto() {
   const url = uEl ? uEl.value.trim() : '';
   if (!url) { setSfxMsg('Fotoğraf linki gerekli.', 'err'); return; }
   try {
-    const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption: '', sort: sfxPhotos.length + 1 });
-    if (error) { setSfxMsg('Eklenemedi: ' + (error.message || 'hata'), 'err'); return; }
+    await sfxAddRow(url, '');
   } catch (e) { setSfxMsg('Eklenemedi: ' + (e.message || 'hata'), 'err'); return; }
   if (uEl) uEl.value = '';
   setSfxMsg('✅ Eklendi.', '');
-  loadSfx();
 }
 async function delSfxPhoto(id) {
   if (!window.confirm('Bu fotoğraf silinsin mi?')) return;
