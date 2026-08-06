@@ -13188,7 +13188,33 @@ function renderAppsCard(row) {
     body.appendChild(item);
   });
   card.appendChild(body);
+  const foot = document.createElement('div');
+  foot.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:10px;';
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.textContent = '🗑 Sil';
+  del.style.cssText = 'margin-left:auto;padding:5px 14px;font-size:11px;font-weight:700;border-radius:8px;border:1px solid rgba(239,68,68,.4);color:#ef4444;background:transparent;cursor:pointer;';
+  del.addEventListener('click', () => { deleteApplication(row.id, row.queued); });
+  foot.appendChild(del);
+  card.appendChild(foot);
   return card;
+}
+async function deleteApplication(id, queued) {
+  if (!window.confirm('Bu başvuru silinsin mi?')) return;
+  if (queued) {
+    try {
+      const q = JSON.parse(localStorage.getItem('apply_queue') || '[]');
+      const at = String(id).replace(/^q_/, '');
+      localStorage.setItem('apply_queue', JSON.stringify(q.filter(x => x.at !== at)));
+    } catch (e) { /* */ }
+    renderApps();
+    return;
+  }
+  try {
+    const { error } = await AUTH.client.from(APPLY_TABLE).delete().eq('id', id);
+    if (error) { window.alert('Silinemedi: ' + (error.message || 'hata')); return; }
+  } catch (e) { window.alert('Silinemedi: ' + (e.message || 'hata')); return; }
+  renderApps();
 }
 // ============ Chat Widget ============
 const CHAT_KEY = 'alfa-chat-v3';
