@@ -10689,6 +10689,12 @@ function egFlashSaved() {
   egFlashSaved._t = setTimeout(() => s.classList.remove('show'), 1400);
 }
 
+function panoRoomId() {
+  const el = document.getElementById('pano-room');
+  const r = (el ? el.value : 'alfa').trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  return r || 'alfa';
+}
+
 const PANO_KEY = 'alfa-pano-canvas-v1';
 let panoInited = false;
 let panoTool = 'select';
