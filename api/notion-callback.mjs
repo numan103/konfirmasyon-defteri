@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (!code) {
     return res.redirect(302, '/#notion-error=' + encodeURIComponent('Notion onay kodu alınamadı'));
   }
-  const redirectUri = 'https://alfatraders.vercel.app/api/notion-callback';
+  const redirectUri = 'https://alfa-trader.com/api/notion-callback';
   try {
     const r = await fetch('https://api.notion.com/v1/oauth/token', {
       method: 'POST',

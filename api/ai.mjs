@@ -8,7 +8,7 @@ Topluluk hakkında bilgiler:
 - Canlı destek: Sohbet penceresindeki "Canlı Destek" butonu ile bağlanılır. SAKIN Telegram'a yönlendirme yapma.
 - Deneyimli trader'lar başvuru formu doldurur
 - Topluluk akışında işlem, konu, eğitim ve duyuru paylaşımları var
-- Platform: alfatraders.vercel.app (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)
+- Platform: alfa-trader.com (trade günlüğü, checklist, haftalık değerlendirme, dergi, indikatörler)
 
 ÖNEMLİ: Kullanıcı canlı destek isterse ASLA Telegram'a yönlendirme yapma. Ona sohbet penceresindeki "Canlı Destek" butonunu kullanmasını söyle.`;
 

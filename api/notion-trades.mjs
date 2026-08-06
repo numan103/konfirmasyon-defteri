@@ -58,6 +58,41 @@ function mapRow(page, market) {
   };
 }
 
+async function dbSchema(token, dbId) {
+  const res = await fetch(`https://api.notion.com/v1/databases/${dbId}`, {
+    headers: { Authorization: `Bearer ${token}`, 'Notion-Version': NOTION_VERSION },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+function propOptions(props, names) {
+  for (const n of names) {
+    const p = props?.[n];
+    if (!p) continue;
+    if (p.type === 'select') return (p.select?.options || []).map(o => o.name).filter(Boolean);
+    if (p.type === 'multi_select') return (p.multi_select?.options || []).map(o => o.name).filter(Boolean);
+  }
+  return null;
+}
+
+async function collectOptions(token, dbs) {
+  const stratSet = new Set();
+  const modelSet = new Set();
+  for (const db of dbs) {
+    const schema = await dbSchema(token, db.id);
+    if (!schema) continue;
+    const props = schema.properties || {};
+    (propOptions(props, ['Trade Stratejisi', 'Strateji']) || []).forEach(s => stratSet.add(s));
+    const modelHit = Object.keys(props).find(n => /entry.{0,4}model|^model$|model.{0,4}entry/i.test(n));
+    if (modelHit) {
+      const opts = propOptions(props, [modelHit]);
+      if (opts) opts.forEach(m => modelSet.add(m));
+    }
+  }
+  return { strategies: [...stratSet], models: [...modelSet] };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -74,6 +109,10 @@ export default async function handler(req, res) {
     } catch (e) { /* geçersiz dbs parametresi, varsayılan kullanılır */ }
   }
   try {
+    if (req.query.mode === 'options') {
+      const options = await collectOptions(token, DBS);
+      return res.status(200).json(options);
+    }
     const results = await Promise.all(
       DBS.map(db => queryDB(token, db.id).then(rows => rows.map(r => mapRow(r, db.market))))
     );
