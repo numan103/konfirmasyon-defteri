@@ -4360,7 +4360,23 @@
           <p class="sub" data-i18n="pg.bas.junS">Bu yola başlıyorsun. Sende aradıklarımız: aktiflik, chart paylaşımı ve gelişime açıklık. Karşılığında sana işlemleri, mentörlüğü ve sohbet ortamını sunuyoruz.</p>
           <div class="form" id="junior-form">
             <input type="text" id="jf-name" placeholder="Adın / Nick" />
-            <input type="text" id="jf-contact" placeholder="X veya Telegram kullanıcı adın" />
+            <div class="row">
+              <input type="text" id="jf-tg" placeholder="Telegram kullanıcı adın" />
+              <input type="text" id="jf-x" placeholder="X hesabın (opsiyonel)" />
+            </div>
+            <div class="row">
+              <select id="jf-exp"><option value="">Tecrübe</option><option>Yeni başladım</option><option>&lt;3 ay</option><option>3-12 ay</option><option>1+ yıl</option></select>
+              <select id="jf-market"><option value="">Piyasa</option><option>Kripto</option><option>Forex</option><option>Hisse</option><option>Altın</option><option>Birden fazla</option></select>
+            </div>
+            <div class="row">
+              <select id="jf-freq"><option value="">İşlem sıklığı</option><option>Sadece takip ediyorum</option><option>Demo hesap kullanıyorum</option><option>Haftada 1-3 işlem</option><option>Günlük işlem</option></select>
+              <select id="jf-method"><option value="">Öğrenmek istediğin</option><option>Teknik analiz</option><option>Temel analiz</option><option>Price Action</option><option>Karma</option></select>
+            </div>
+            <div class="row">
+              <select id="jf-level"><option value="">Seviye</option><option>Başlangıç</option><option>Orta</option><option>İleri</option></select>
+              <select id="jf-time"><option value="">Günlük ayırabildiğin süre</option><option>&lt;1 saat</option><option>1-3 saat</option><option>3+ saat</option><option>Esnek</option></select>
+            </div>
+            <select id="jf-share"><option value="">Chart / analiz paylaşımı</option><option>Evet, paylaşırım</option><option>Zamanla başlarım</option><option>Sadece takip ederim</option></select>
             <textarea id="jf-why" placeholder="Neden katılmak istiyorsun? Ne kadar aktifsin?"></textarea>
             <button class="path-btn" id="jf-submit" onclick="submitJuniorForm()">Başvur →</button>
             <div class="result" id="jf-result"></div>
@@ -13021,14 +13037,22 @@ function submitJuniorForm() {
   const btn = document.getElementById('jf-submit');
   const r = document.getElementById('jf-result');
   const name = document.getElementById('jf-name').value.trim();
-  const contact = document.getElementById('jf-contact').value.trim();
+  const tg = document.getElementById('jf-tg').value.trim();
+  const x = document.getElementById('jf-x').value.trim();
+  const exp = document.getElementById('jf-exp').value;
+  const market = document.getElementById('jf-market').value;
+  const freq = document.getElementById('jf-freq').value;
+  const method = document.getElementById('jf-method').value;
+  const level = document.getElementById('jf-level').value;
+  const time = document.getElementById('jf-time').value;
+  const share = document.getElementById('jf-share').value;
   const why = document.getElementById('jf-why').value.trim();
-  if (!name || !contact || !why) { r.textContent = 'Ad, iletişim ve neden alanları zorunlu.'; r.style.display = 'block'; r.style.color = '#ef4444'; return; }
+  if (!name || !tg || !exp || !market || !freq || !method || !why) { r.textContent = 'Ad, Telegram, tecrübe, piyasa, sıklık, öğrenmek istediğin ve neden zorunlu.'; r.style.display = 'block'; r.style.color = '#ef4444'; return; }
   if (!BAS_GS_URL) { r.textContent = t('pg.bas.errConn'); r.style.display = 'block'; r.style.color = '#ef4444'; return; }
   btn.disabled = true; btn.textContent = 'Gönderiliyor...';
   r.style.display = 'none';
-  fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'junior', name, contact, why, date: new Date().toISOString() }) })
-    .then(() => { r.textContent = t('pg.bas.okJunior'); r.style.display = 'block'; r.style.color = '#22c55e'; document.getElementById('junior-form').querySelectorAll('input, textarea').forEach(el => el.value = ''); })
+  fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'junior', name, tg, x, exp, market, freq, method, level, time, share, why, date: new Date().toISOString() }) })
+    .then(() => { r.textContent = t('pg.bas.okJunior'); r.style.display = 'block'; r.style.color = '#22c55e'; document.getElementById('junior-form').querySelectorAll('input, textarea, select').forEach(el => el.value = ''); })
     .catch(() => { r.textContent = t('pg.bas.errRetry'); r.style.display = 'block'; r.style.color = '#ef4444'; })
     .finally(() => { btn.disabled = false; btn.textContent = 'Başvur →'; });
 }
