@@ -2003,6 +2003,26 @@
 .bas-faq details .faq-a ul { margin: 8px 0 0; padding-left: 18px; }
 .bas-faq details .faq-a li { margin: 4px 0; }
 .bas-faq details .faq-a b { color: var(--text); }
+/* Başarı fotoğrafları şeridi */
+.sfx { margin-top: 36px; }
+.sfx-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.sfx-head h2 { font-size: 19px; font-weight: 800; margin: 0; }
+.sfx-add-btn { padding: 7px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color .15s, color .15s; }
+.sfx-add-btn:hover { border-color: var(--pc); color: var(--pc); }
+.sfx-add { margin-bottom: 14px; }
+.sfx-add-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.sfx-add-form input { flex: 1 1 200px; background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text); }
+.sfx-add-form button { background: var(--pc); border: none; color: #fff; border-radius: 9px; padding: 9px 18px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.sfx-view { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--border); background: var(--card); -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.sfx-track { display: flex; gap: 14px; width: max-content; padding: 16px 0; animation: sfx-scroll 42s linear infinite; }
+.sfx-view:hover .sfx-track { animation-play-state: paused; }
+@keyframes sfx-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.sfx-card { position: relative; width: 300px; height: 190px; border-radius: 12px; overflow: hidden; flex: none; border: 1px solid var(--border); background: #101123; }
+.sfx-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sfx-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 12px 9px; font-size: 11.5px; font-weight: 700; color: #fff; background: linear-gradient(180deg, transparent, rgba(0,0,0,.78)); }
+.sfx-del { position: absolute; top: 7px; right: 7px; z-index: 3; background: rgba(0,0,0,.55); color: #fff; border: none; border-radius: 8px; font-size: 12px; width: 26px; height: 26px; cursor: pointer; }
+.sfx-empty { padding: 22px; text-align: center; font-size: 13px; color: var(--text-3); }
+@media (max-width: 640px) { .sfx-card { width: 230px; height: 150px; } }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) { .bas-strip { grid-template-columns: 1fr; } .bas-strip-arrow { transform: rotate(90deg); padding: 0; } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
@@ -4422,7 +4442,7 @@
       <div class="bas-ask">
         <div>
           <h3>❓ Sorun mu var?</h3>
-          <p>Toplulukta "Soru" türünde paylaş, herkes yanıtlasın. Ya da bana doğrudan yaz:</p>
+          <p>Merak ettiğin bir şey mi var? Bana doğrudan yaz:</p>
         </div>
         <div class="bas-ask-links">
           <a id="bas-ask-x" href="#" target="_blank" rel="noopener noreferrer">𝕏 X'ten mesaj ↗</a>
@@ -4430,30 +4450,21 @@
         </div>
       </div>
 
-      <div class="bas-feed" id="bas-feed">
-        <div class="bas-feed-header">
-          <h2>Topluluk Akışı</h2>
-          <button class="btn" onclick="toggleAddPost()" id="feed-add-btn">+ Paylaş</button>
+      <div class="sfx" id="sfx">
+        <div class="sfx-head">
+          <h2>🎉 Alfa Traders Başarıları</h2>
+          <button class="sfx-add-btn hidden" id="sfx-add-btn" onclick="toggleSfxAdd()">➕ Fotoğraf ekle</button>
         </div>
-        <div class="bas-add-wrap" id="bas-add-wrap">
-          <div class="bas-add">
-            <h3>Yeni Paylaşım</h3>
-            <div class="row">
-              <select id="feed-type"><option value="trade">İşlem</option><option value="topic">Konu</option><option value="question">Soru</option><option value="edu">Eğitim</option><option value="announce">Duyuru</option></select>
-              <input id="feed-title" placeholder="Başlık" />
-            </div>
-            <textarea id="feed-content" placeholder="İçerik..."></textarea>
-            <div class="row">
-              <input id="feed-author" placeholder="İsim" />
-              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2);flex:none;"><input type="checkbox" id="feed-pin" /> Sabitle</label>
-            </div>
-            <div class="btns">
-              <button class="save" onclick="addFeedPost()">Paylaş</button>
-              <button class="cancel" onclick="toggleAddPost()">İptal</button>
-            </div>
+        <div class="sfx-add hidden" id="sfx-add">
+          <div class="sfx-add-form">
+            <input type="url" id="sfx-url" placeholder="Fotoğraf linki (https://...)" />
+            <input type="text" id="sfx-caption" placeholder="Açıklama (opsiyonel)" />
+            <button type="button" onclick="addSfxPhoto()">Ekle</button>
           </div>
         </div>
-        <div id="bas-feed-list"></div>
+        <div class="sfx-view">
+          <div class="sfx-track" id="sfx-track"><div class="sfx-empty">Başarı fotoğrafları yükleniyor…</div></div>
+        </div>
       </div>
 
       <div class="bas-faq">
@@ -4464,7 +4475,7 @@
         </details>
         <details>
           <summary>Junior ve Senior arasındaki fark nedir?</summary>
-          <div class="faq-a"><b>Junior Alfa Trader</b> bu yola yeni başlayan, öğrenmeye ve işlem almaya hazır üyedir. <b>Senior Alfa Trader</b> ise deneyimli, piyasayı okuyabilen ve ekibe değer katmak isteyen üyedir. İkisinde de ortak aradığımız şey: aktiflik, chart paylaşımı ve gelişime açıklık.</div>
+          <div class="faq-a"><b>Junior Alfa Trader</b> bu yola yeni başlayan, öğrenmeye ve işlem almaya hazır üyedir. <b>Senior Alfa Trader</b> ise deneyimli, piyasayı okuyabilen ve ekibe değer katmak isteyen üyedir. İkisinde de ortak aradığımız şey: aktiflik, chart paylaşımı ve gelişime açıklık. Senior adaylardan ayrıca doğrulanabilir başarı (verify), before/after tool ile işlem ve grup içi görevlendirmelere katılım bekliyoruz.</div>
         </details>
         <details>
           <summary>Başvurum nasıl değerlendirilir?</summary>
@@ -4474,6 +4485,7 @@
               <li>📊 <b>Chart paylaşımı:</b> Analizini ve grafiğini ekiple paylaşıyor musun?</li>
               <li>📈 <b>Gelişime açıklık:</b> Geri bildirimi kabul edip kendini geliştirmeye açık mısın?</li>
             </ul>
+            Senior başvurularda bunlara ek olarak: 🔎 <b>verify başarı</b> (doğrulanabilir sonuç), 🔄 <b>before/after tool ile işlem</b> ve 👥 <b>grup içi görevlendirmelere katılım</b> da değerlendirmeye alınır.
           </div>
         </details>
         <details>
@@ -4494,8 +4506,10 @@
           <summary>Senior Alfa Trader'dan beklentilerimiz neler?</summary>
           <div class="faq-a">Deneyimli trader olarak buraya yerleşiyorsun. Senden beklentilerimiz:
             <ul>
+              <li>🔎 <b>Verify başarı:</b> Doğrulanabilir sonuçların (başarı kanıtı, payout / PnL çıktısı).</li>
+              <li>🔄 <b>Before/after tool ile işlem:</b> İşlemlerini bu aracı kullanarak paylaşman.</li>
+              <li>👥 <b>Grup içi görevlendirmelere katılım:</b> Ekip görevlerinde aktif yer alman.</li>
               <li>📊 <b>Chart paylaşımı:</b> Analizlerini ve işlemlerini düzenli olarak ekiple paylaşman.</li>
-              <li>🧭 <b>Gelişime açıklık:</b> Kendi hatalarını raporlaman ve geri bildirime açık olman.</li>
               <li>🌱 <b>Ekibe katkı:</b> Deneyimini junior'lara aktararak ekibi büyütmen.</li>
             </ul>
             Karşılığında sana ekip işlemlerini, mentörlük desteğini ve gerçek bir sohbet ortamını sunuyoruz.
@@ -8955,7 +8969,7 @@ function showPage(name, skipAnim) {
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
-  if (name === 'basvuru') { renderFeed(); }
+  if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
   if (name === 'alfa') { renderAlfaMan(); }
   if (name === 'apps') { renderApps(); }
@@ -12893,6 +12907,74 @@ function addFeedPost() {
   document.getElementById('feed-pin').checked = false;
   toggleAddPost();
 }
+// ============ Başarı Fotoğrafları (Supabase) ============
+const SFX_TABLE = 'success_photos';
+let sfxPhotos = [];
+async function loadSfx() {
+  sfxPhotos = [];
+  try {
+    if (typeof AUTH !== 'undefined' && AUTH.client) {
+      const { data, error } = await AUTH.client.from(SFX_TABLE).select('*').order('sort', { ascending: true }).limit(60);
+      if (!error && data) sfxPhotos = data;
+    }
+  } catch (e) { /* */ }
+  renderSfx();
+}
+function renderSfx() {
+  const track = document.getElementById('sfx-track');
+  const addBtn = document.getElementById('sfx-add-btn');
+  if (!track) return;
+  if (addBtn) addBtn.classList.toggle('hidden', !appsAllowed());
+  if (!sfxPhotos.length) {
+    track.innerHTML = '<div class="sfx-empty">Henüz başarı fotoğrafı eklenmemiş.</div>';
+    return;
+  }
+  const twice = sfxPhotos.concat(sfxPhotos);
+  track.innerHTML = '';
+  twice.forEach(p => {
+    const c = document.createElement('figure');
+    c.className = 'sfx-card';
+    const img = document.createElement('img');
+    img.src = p.url; img.alt = p.caption || 'Alfa Traders başarısı'; img.loading = 'lazy';
+    c.appendChild(img);
+    if (p.caption) {
+      const fig = document.createElement('figcaption');
+      fig.textContent = p.caption;
+      c.appendChild(fig);
+    }
+    if (appsAllowed()) {
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'sfx-del'; del.textContent = '🗑'; del.title = 'Sil';
+      del.addEventListener('click', () => delSfxPhoto(p.id));
+      c.appendChild(del);
+    }
+    track.appendChild(c);
+  });
+}
+function toggleSfxAdd() {
+  const a = document.getElementById('sfx-add');
+  if (a) a.classList.toggle('hidden');
+}
+async function addSfxPhoto() {
+  const url = document.getElementById('sfx-url').value.trim();
+  const caption = document.getElementById('sfx-caption').value.trim();
+  if (!url) { window.alert('Fotoğraf linki gerekli.'); return; }
+  try {
+    const { error } = await AUTH.client.from(SFX_TABLE).insert({ url, caption, sort: sfxPhotos.length + 1 });
+    if (error) { window.alert('Eklenemedi: ' + (error.message || 'hata')); return; }
+  } catch (e) { window.alert('Eklenemedi: ' + (e.message || 'hata')); return; }
+  document.getElementById('sfx-url').value = '';
+  document.getElementById('sfx-caption').value = '';
+  loadSfx();
+}
+async function delSfxPhoto(id) {
+  if (!window.confirm('Bu fotoğraf silinsin mi?')) return;
+  try {
+    const { error } = await AUTH.client.from(SFX_TABLE).delete().eq('id', id);
+    if (error) { window.alert('Silinemedi: ' + (error.message || 'hata')); return; }
+  } catch (e) { window.alert('Silinemedi: ' + (e.message || 'hata')); return; }
+  loadSfx();
+}
 // ============ Deneyimli Alfa Trader — Form → Google Sheets ============
 // 📌 Buraya Google Apps Script Web App URL'ni ekle:
 const BAS_GS_URL = 'https://script.google.com/macros/s/AKfycbxemXXvOyEW6tqwPv2ib6MQx9BeStGjbjtY_1rQU7cPWttLuzEP3-v4M_cPR1hIHZ0/exec';
@@ -13537,6 +13619,7 @@ loadChat();
 loadFeed();
 document.addEventListener('DOMContentLoaded', renderFeed);
 setTimeout(renderFeed, 100);
+loadSfx();
 </script>
 <script>
 (function () {
