@@ -2819,6 +2819,7 @@
       </div>
       <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav data-i18n="app.alfa">🚀 Alfa Ol</a>
       <a href="?page=alfa" class="nav-link" id="tab-alfa" data-nav style="display:none">💪 Alfa Man</a>
+      <a href="?page=apps" class="nav-link" id="tab-apps" data-nav style="display:none">📋 Başvurular</a>
       <a href="?page=chat-admin" class="nav-link" id="tab-chat-admin" onclick="event.preventDefault();void showPage('chat-admin')"><span data-i18n="app.support">💬 Canlı Destek</span> <span class="nav-badge hidden" id="chat-unread-badge">0</span></a>
     </div>
     <div class="nav-contact" id="nav-contact">
@@ -2867,6 +2868,7 @@
       <a href="?page=news" class="mnav-link" data-nav data-mnav="news" data-i18n="app.magazine">🗞️ Dergi</a>
       <a href="?page=basvuru" class="mnav-link" data-nav data-mnav="basvuru" data-i18n="app.alfa">🚀 Alfa Ol</a>
       <a href="?page=alfa" class="mnav-link" data-nav data-mnav="alfa" id="mnav-alfa" style="display:none">💪 Alfa Man</a>
+      <a href="?page=apps" class="mnav-link" data-nav data-mnav="apps" id="mnav-apps" style="display:none">📋 Başvurular</a>
       <a href="?page=chat-admin" class="mnav-link" data-nav data-mnav="chat-admin" data-close><span data-i18n="app.support">💬 Canlı Destek</span> <span class="nav-badge hidden" id="chat-unread-badge-m">0</span></a>
       <div class="mnav-contact">
         <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
@@ -4501,6 +4503,16 @@
         </details>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="page-apps" class="hidden">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:12px;margin:20px 0 14px;flex-wrap:wrap;">
+      <h1 style="font-size:21px;margin:0;letter-spacing:-.02em;">📋 Başvurular</h1>
+      <button class="path-btn" onclick="renderApps()" style="margin-left:auto;padding:9px 18px;font-size:13px;">🔄 Yenile</button>
+    </div>
+    <div id="apps-list" style="font-size:12.5px;color:var(--text-3);">Yükleniyor...</div>
   </div>
 </div>
 
@@ -7791,7 +7803,7 @@ let dfDir = 'LONG';
 let currentPage = 'home';
 try {
   const lp = localStorage.getItem('df-last-page');
-  if (lp && ['home','defter','data','review','news','egitim','mentoring','pano','indicators','onchain','calendar','basvuru','chat-admin','calc'].indexOf(lp) >= 0) currentPage = lp;
+  if (lp && ['home','defter','data','review','news','egitim','mentoring','pano','indicators','onchain','calendar','basvuru','chat-admin','calc','alfa','apps'].indexOf(lp) >= 0) currentPage = lp;
 } catch (e) {}
 setInitialPage();
 const NEWS_KEY = 'alfanews-shared-v1';
@@ -8513,7 +8525,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc'];
+  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -8912,10 +8924,11 @@ function amRenderPlan() {
 
 function showPage(name, skipAnim) {
   if (name === 'alfa' && !amAllowed()) name = 'home';
+  if (name === 'apps' && !appsAllowed()) name = 'home';
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa'];
+  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -8945,6 +8958,7 @@ function showPage(name, skipAnim) {
   if (name === 'basvuru') { renderFeed(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
   if (name === 'alfa') { renderAlfaMan(); }
+  if (name === 'apps') { renderApps(); }
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -11756,6 +11770,11 @@ async function onAuthed(user) {
   const amMob = document.getElementById('mnav-alfa');
   if (amTab) amTab.style.display = isAdmin ? '' : 'none';
   if (amMob) amMob.style.display = isAdmin ? '' : 'none';
+  // Başvurular: sadece admin hesabında
+  const apTab = document.getElementById('tab-apps');
+  const apMob = document.getElementById('mnav-apps');
+  if (apTab) apTab.style.display = isAdmin ? '' : 'none';
+  if (apMob) apMob.style.display = isAdmin ? '' : 'none';
   // Mentoring erişimi: sadece Ahmet + Çağatay (e-postası sonradan eklenecek)
   const mtDesk = document.getElementById('tab-mentoring');
   const mtMob = document.getElementById('mnav-mentoring');
@@ -12877,7 +12896,7 @@ function addFeedPost() {
 // ============ Deneyimli Alfa Trader — Form → Google Sheets ============
 // 📌 Buraya Google Apps Script Web App URL'ni ekle:
 const BAS_GS_URL = 'https://script.google.com/macros/s/AKfycbxemXXvOyEW6tqwPv2ib6MQx9BeStGjbjtY_1rQU7cPWttLuzEP3-v4M_cPR1hIHZ0/exec';
-function submitSeniorForm() {
+async function submitSeniorForm() {
   const btn = document.getElementById('sf-submit');
   const result = document.getElementById('sf-result');
   const name = document.getElementById('sf-name').value.trim();
@@ -13007,14 +13026,18 @@ function submitSeniorForm() {
     });
   })();
 
-  if (!BAS_GS_URL) { result.textContent = 'Google Sheets bağlantısı henüz ayarlanmadı.'; result.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Gönderiliyor...';
   result.style.display = 'none';
   const payload = { name, tg, x, exp, market, freq, method, level, pnl, pnl2, payout, lasttrade, why, date: new Date().toISOString() };
-  fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-    .then(() => { result.textContent = t('pg.bas.okSenior'); result.style.display = 'block'; result.style.color = '#22c55e'; document.getElementById('senior-form').querySelectorAll('input, select, textarea').forEach(el => el.value = ''); })
-    .catch(() => { result.textContent = t('pg.bas.errRetry'); result.style.display = 'block'; result.style.color = '#ef4444'; })
-    .finally(() => { btn.disabled = false; btn.textContent = t('pg.bas.fSubmit'); });
+  const res = await saveApplication(payload, 'senior');
+  btn.disabled = false; btn.textContent = t('pg.bas.fSubmit');
+  if (res.ok) {
+    result.textContent = res.queued ? '✅ Başvurun bu cihazda kaydedildi. Supabase erişimi açılınca iletilir.' : t('pg.bas.okSenior');
+    result.style.display = 'block'; result.style.color = '#22c55e';
+    document.getElementById('senior-form').querySelectorAll('input, select, textarea').forEach(el => el.value = '');
+  } else {
+    result.textContent = t('pg.bas.errRetry'); result.style.display = 'block'; result.style.color = '#ef4444';
+  }
 }
 </script>
 <button class="chat-bubble" id="chat-btn" onclick="toggleChat()">💬</button>
@@ -13048,13 +13071,124 @@ function submitJuniorForm() {
   const share = document.getElementById('jf-share').value;
   const why = document.getElementById('jf-why').value.trim();
   if (!name || !tg || !exp || !market || !freq || !method || !why) { r.textContent = 'Ad, Telegram, tecrübe, piyasa, sıklık, öğrenmek istediğin ve neden zorunlu.'; r.style.display = 'block'; r.style.color = '#ef4444'; return; }
-  if (!BAS_GS_URL) { r.textContent = t('pg.bas.errConn'); r.style.display = 'block'; r.style.color = '#ef4444'; return; }
   btn.disabled = true; btn.textContent = 'Gönderiliyor...';
   r.style.display = 'none';
-  fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'junior', name, tg, x, exp, market, freq, method, level, time, share, why, date: new Date().toISOString() }) })
-    .then(() => { r.textContent = t('pg.bas.okJunior'); r.style.display = 'block'; r.style.color = '#22c55e'; document.getElementById('junior-form').querySelectorAll('input, textarea, select').forEach(el => el.value = ''); })
-    .catch(() => { r.textContent = t('pg.bas.errRetry'); r.style.display = 'block'; r.style.color = '#ef4444'; })
-    .finally(() => { btn.disabled = false; btn.textContent = 'Başvur →'; });
+  const payload = { type: 'junior', name, tg, x, exp, market, freq, method, level, time, share, why, date: new Date().toISOString() };
+  saveApplication(payload, 'junior').then(res => {
+    btn.disabled = false; btn.textContent = 'Başvur →';
+    if (res.ok) {
+      r.textContent = res.queued ? '✅ Başvurun bu cihazda kaydedildi. Supabase erişimi açılınca iletilir.' : t('pg.bas.okJunior');
+      r.style.display = 'block'; r.style.color = '#22c55e';
+      document.getElementById('junior-form').querySelectorAll('input, textarea, select').forEach(el => el.value = '');
+    } else {
+      r.textContent = t('pg.bas.errRetry'); r.style.display = 'block'; r.style.color = '#ef4444';
+    }
+  });
+}
+// ============ Başvurular (Supabase) ============
+const APPLY_TABLE = 'applications';
+function appsAllowed() {
+  return !!(typeof AUTH !== 'undefined' && AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL);
+}
+async function saveApplication(payload, type) {
+  try {
+    if (typeof AUTH !== 'undefined' && AUTH.client) {
+      const { error } = await AUTH.client.from(APPLY_TABLE).insert({ type: type || payload.type || 'junior', payload: Object.assign({}, payload) });
+      if (!error) return { ok: true };
+    }
+  } catch (e) { /* */ }
+  try {
+    const q = JSON.parse(localStorage.getItem('apply_queue') || '[]');
+    q.push({ at: new Date().toISOString(), type: type || payload.type || 'junior', payload });
+    localStorage.setItem('apply_queue', JSON.stringify(q));
+    return { ok: true, queued: true };
+  } catch (e) { /* */ }
+  return { ok: false };
+}
+async function flushApplyQueue() {
+  try {
+    const q = JSON.parse(localStorage.getItem('apply_queue') || '[]');
+    if (!q.length) return;
+    const remaining = [];
+    for (const it of q) {
+      try {
+        const { error } = await AUTH.client.from(APPLY_TABLE).insert({ type: it.type || 'junior', payload: it.payload });
+        if (error) remaining.push(it);
+      } catch (e) { remaining.push(it); }
+    }
+    localStorage.setItem('apply_queue', JSON.stringify(remaining));
+  } catch (e) { /* */ }
+  renderApps();
+}
+const AP_FIELDS = {
+  junior: [['name', 'Ad'], ['tg', 'Telegram'], ['x', 'X'], ['exp', 'Tecrübe'], ['market', 'Piyasa'], ['freq', 'İşlem sıklığı'], ['method', 'Öğrenmek istediğin'], ['level', 'Seviye'], ['time', 'Günlük süre'], ['share', 'Chart paylaşımı'], ['why', 'Neden'], ['date', 'Tarih']],
+  senior: [['name', 'Ad'], ['tg', 'Telegram'], ['x', 'X'], ['exp', 'Tecrübe'], ['market', 'Piyasa'], ['freq', 'Sıklık'], ['method', 'Analiz'], ['level', 'Seviye'], ['pnl', 'Son 6 ay'], ['pnl2', '2 aylık PnL'], ['payout', 'Payout'], ['lasttrade', 'Son işlem'], ['why', 'Neden'], ['date', 'Tarih']]
+};
+async function renderApps() {
+  const list = document.getElementById('apps-list');
+  if (!list) return;
+  if (!appsAllowed()) { list.innerHTML = 'Bu sayfa yalnızca yöneticiye özeldir.'; return; }
+  list.innerHTML = 'Yükleniyor...';
+  let rows = [];
+  let qErr = false;
+  try {
+    if (typeof AUTH !== 'undefined' && AUTH.client && AUTH.user) {
+      const { data, error } = await AUTH.client.from(APPLY_TABLE).select('*').order('created_at', { ascending: false }).limit(300);
+      if (error) qErr = true; else if (data) rows = data;
+    } else qErr = true;
+  } catch (e) { qErr = true; }
+  let queued = [];
+  try { queued = JSON.parse(localStorage.getItem('apply_queue') || '[]'); } catch (e) { /* */ }
+  if (qErr && !rows.length && !queued.length) {
+    list.innerHTML = '<div style="padding:26px;text-align:center;">Başvurular yüklenemedi. Supabase tablosunu kontrol et (<code>public.applications</code>).</div>';
+    return;
+  }
+  list.innerHTML = '';
+  if (queued.length) {
+    const qb = document.createElement('div');
+    qb.style.cssText = 'border:1px solid var(--amber);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--amber);';
+    qb.innerHTML = '<b>⚠ ' + queued.length + ' başvuru bu cihazda bekliyor</b> — Supabase\'e yazılamamış. <button class="path-btn" onclick="flushApplyQueue()" style="margin-left:8px;padding:5px 12px;font-size:11px;">Şimdi ilet</button>';
+    list.appendChild(qb);
+    rows = rows.concat(queued.map(x => ({ id: 'q_' + x.at, created_at: x.at, type: x.type || 'junior', payload: x.payload, queued: true })));
+  }
+  if (!rows.length) {
+    list.innerHTML = '<div style="padding:26px;text-align:center;">Henüz başvuru yok.</div>';
+    return;
+  }
+  rows.forEach(row => list.appendChild(renderAppsCard(row)));
+}
+function renderAppsCard(row) {
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;';
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;';
+  const badge = document.createElement('span');
+  const tkey = row.type === 'senior' ? 'senior' : 'junior';
+  badge.textContent = tkey === 'senior' ? 'Senior' : 'Junior';
+  badge.style.cssText = 'font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:3px 9px;' + (tkey === 'senior' ? 'background:rgba(167,139,250,.16);color:#a78bfa;' : 'background:rgba(249,115,22,.16);color:#f97316;');
+  head.appendChild(badge);
+  if (row.queued) {
+    const q = document.createElement('span');
+    q.textContent = '⌛ bekliyor';
+    q.style.cssText = 'font-size:10px;font-weight:700;color:var(--amber);';
+    head.appendChild(q);
+  }
+  const dt = document.createElement('span');
+  try { dt.textContent = new Date(row.created_at).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { dt.textContent = row.created_at || ''; }
+  dt.style.cssText = 'margin-left:auto;font-size:11px;color:var(--text-3);';
+  head.appendChild(dt);
+  card.appendChild(head);
+  const body = document.createElement('div');
+  body.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 14px;font-size:12px;';
+  (AP_FIELDS[tkey] || []).forEach(pair => {
+    const v = row.payload ? row.payload[pair[0]] : undefined;
+    if (v === undefined || v === '') return;
+    const item = document.createElement('div');
+    item.innerHTML = '<div style="color:var(--text-3);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">' + esc(pair[1]) + '</div><div style="margin-top:2px;color:var(--text);word-break:break-word;">' + esc(String(v)) + '</div>';
+    body.appendChild(item);
+  });
+  card.appendChild(body);
+  return card;
 }
 // ============ Chat Widget ============
 const CHAT_KEY = 'alfa-chat-v3';
