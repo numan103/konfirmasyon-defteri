@@ -13001,14 +13001,22 @@ let sfxT = null;
 let sfxDrag = null;
 let sfxHover = false;
 let sfxJustDragged = false;
+function sfxPeriod(track) {
+  const cards = track.querySelectorAll('.sfx-card');
+  const n = cards.length / 2;
+  if (n < 1) return 0;
+  const a = cards[0].getBoundingClientRect().left;
+  const b = cards[n].getBoundingClientRect().left;
+  return b - a;
+}
 function sfxApply() {
   const track = document.getElementById('sfx-track');
   if (!track) return;
+  const P = sfxPeriod(track);
   let x = sfxAuto + sfxOff;
-  const hw = (track.scrollWidth - 32) / 2;
-  if (hw > 0) {
-    const m = ((x % hw) + hw) % hw;
-    x = m - hw;
+  if (P > 0) {
+    const m = ((x % P) + P) % P;
+    x = m - P;
   }
   track.style.transform = 'translateX(' + x + 'px)';
 }
