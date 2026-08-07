@@ -2021,17 +2021,19 @@
 .sfx-msg { min-height: 18px; margin-top: 10px; font-size: 12.5px; color: var(--green); }
 .sfx-msg.err { color: #ef4444; }
 .sfx-view { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--border); background: var(--card); -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
-.sfx-track { display: flex; gap: 14px; width: max-content; padding: 16px 0; animation: sfx-scroll 42s linear infinite; }
+.sfx-track { display: flex; gap: 14px; width: max-content; padding: 16px 0; animation: sfx-scroll 90s linear infinite; }
 .sfx-view:hover .sfx-track { animation-play-state: paused; }
 @keyframes sfx-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.sfx-card { position: relative; width: 300px; height: 190px; border-radius: 12px; overflow: hidden; flex: none; border: 1px solid var(--border); background: #101123; }
-.sfx-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sfx-card { position: relative; width: 300px; height: 260px; border-radius: 12px; overflow: hidden; flex: none; border: 1px solid var(--border); background: #101123; }
+.sfx-card img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; }
 .sfx-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 12px 9px; font-size: 11.5px; font-weight: 700; color: #fff; background: linear-gradient(180deg, transparent, rgba(0,0,0,.78)); }
 .sfx-del { position: absolute; top: 7px; right: 7px; z-index: 3; background: rgba(0,0,0,.55); color: #fff; border: none; border-radius: 8px; font-size: 12px; width: 26px; height: 26px; cursor: pointer; }
 .sfx-empty { padding: 22px; text-align: center; font-size: 13px; color: var(--text-3); }
-.sfx-slot { flex: none; width: 120px; height: 190px; border: 1.5px dashed var(--border); border-radius: 12px; background: rgba(124,58,237,.05); color: var(--text-2); font-size: 30px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s, color .15s, background .15s; }
-.sfx-slot:hover { border-color: var(--pc); color: var(--pc); background: rgba(124,58,237,.12); }
-@media (max-width: 640px) { .sfx-card { width: 230px; height: 150px; } .sfx-slot { width: 90px; height: 150px; font-size: 24px; } }
+.sfx-lg { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center; padding: 28px; cursor: zoom-out; }
+.sfx-lg img { max-width: 100%; max-height: 100%; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+.sfx-lg-x { position: absolute; top: 16px; right: 20px; color: #fff; font-size: 30px; line-height: 1; cursor: pointer; opacity: .85; background: none; border: none; }
+.sfx-lg-x:hover { opacity: 1; }
+@media (max-width: 640px) { .sfx-card { width: 240px; height: 210px; } }
 @keyframes basFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) { .bas-strip { grid-template-columns: 1fr; } .bas-strip-arrow { transform: rotate(90deg); padding: 0; } }
 @media (max-width: 768px) { .bas-paths { grid-template-columns: 1fr; } .bas-path .form .row { flex-direction: column; } .bas-page { padding: 16px 12px 40px; } .bas-hero { padding: 24px 12px 20px; } .bas-hero h1 { font-size: 26px; } }
@@ -4466,6 +4468,10 @@
         </div>
         <div class="sfx-view">
           <div class="sfx-track" id="sfx-track"><div class="sfx-empty">Başarı fotoğrafları yükleniyor…</div></div>
+        </div>
+        <div class="sfx-lg hidden" id="sfx-lg">
+          <button class="sfx-lg-x" type="button" aria-label="Kapat" onclick="closeSfxLightbox()">✕</button>
+          <img id="sfx-lg-img" src="" alt="" />
         </div>
         <div class="sfx-modal hidden" id="sfx-modal">
           <div class="sfx-modal-card">
@@ -12948,22 +12954,15 @@ function renderSfx() {
   const admin = appsAllowed();
   if (addBtn) addBtn.classList.toggle('hidden', !admin);
   if (!sfxPhotos.length) {
-    track.innerHTML = admin
-      ? '<button type="button" class="sfx-slot" onclick="openSfxModal()" title="İlk fotoğrafı ekle">+</button>'
-      : '<div class="sfx-empty">Henüz başarı fotoğrafı eklenmemiş.</div>';
+    track.innerHTML = '<div class="sfx-empty">Henüz başarı fotoğrafı eklenmemiş.</div>';
     return;
-  }
-  function makeSlot(i) {
-    const s = document.createElement('button');
-    s.type = 'button'; s.className = 'sfx-slot'; s.title = 'Buraya fotoğraf ekle (Ctrl+V)'; s.textContent = '+';
-    s.addEventListener('click', () => openSfxModal(i));
-    return s;
   }
   function makeCard(p) {
     const c = document.createElement('figure');
     c.className = 'sfx-card';
     const img = document.createElement('img');
     img.src = p.url; img.alt = p.caption || 'Alfa Traders başarısı'; img.loading = 'lazy';
+    img.addEventListener('click', () => openSfxLightbox(p.url));
     c.appendChild(img);
     if (p.caption) {
       const fig = document.createElement('figcaption');
@@ -12973,17 +12972,27 @@ function renderSfx() {
     if (admin) {
       const del = document.createElement('button');
       del.type = 'button'; del.className = 'sfx-del'; del.textContent = '🗑'; del.title = 'Sil';
-      del.addEventListener('click', () => delSfxPhoto(p.id));
+      del.addEventListener('click', ev => { ev.stopPropagation(); delSfxPhoto(p.id); });
       c.appendChild(del);
     }
     return c;
   }
   const group = document.createDocumentFragment();
-  sfxPhotos.forEach((p, i) => { group.appendChild(makeSlot(i)); group.appendChild(makeCard(p)); });
-  group.appendChild(makeSlot(sfxPhotos.length));
+  sfxPhotos.forEach(p => group.appendChild(makeCard(p)));
   track.innerHTML = '';
   track.appendChild(group);
   track.appendChild(group.cloneNode(true));
+}
+function openSfxLightbox(url) {
+  const lg = document.getElementById('sfx-lg');
+  const im = document.getElementById('sfx-lg-img');
+  if (!lg || !im) return;
+  im.src = url; im.alt = 'Alfa Traders başarısı';
+  lg.classList.remove('hidden');
+}
+function closeSfxLightbox() {
+  const lg = document.getElementById('sfx-lg');
+  if (lg) lg.classList.add('hidden');
 }
 let sfxInsertAt = null;
 let sfxPasteOpen = false;
@@ -13020,12 +13029,6 @@ function initSfxPaste() {
       input.value = '';
     });
   }
-  box.addEventListener('paste', e => {
-    const items = e.clipboardData && e.clipboardData.items;
-    for (const it of items || []) {
-      if (it.type && it.type.indexOf('image') === 0) { e.preventDefault(); handleSfxFile(it.getAsFile()); break; }
-    }
-  });
   box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('over'); });
   box.addEventListener('dragleave', () => box.classList.remove('over'));
   box.addEventListener('drop', e => {
@@ -13041,8 +13044,10 @@ function initSfxPaste() {
     }
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeSfxModal();
+    if (e.key === 'Escape') { closeSfxModal(); closeSfxLightbox(); }
   });
+  const lg = document.getElementById('sfx-lg');
+  if (lg) lg.addEventListener('click', () => closeSfxLightbox());
 }
 function handleSfxFile(file) {
   const reader = new FileReader();
