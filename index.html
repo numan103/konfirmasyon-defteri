@@ -12999,7 +12999,6 @@ let sfxAuto = 0;
 let sfxOff = 0;
 let sfxT = null;
 let sfxDrag = null;
-let sfxHover = false;
 let sfxJustDragged = false;
 function sfxPeriod(track) {
   const cards = track.querySelectorAll('.sfx-card');
@@ -13022,7 +13021,7 @@ function sfxApply() {
 }
 function sfxLoop() {
   sfxT = requestAnimationFrame(sfxLoop);
-  if (!sfxDrag && !sfxHover) sfxAuto -= 0.33;
+  if (!sfxDrag) sfxAuto -= 0.33;
   sfxApply();
 }
 function initSfxDrag() {
@@ -13050,8 +13049,6 @@ function initSfxDrag() {
   };
   track.addEventListener('pointerup', end);
   track.addEventListener('pointercancel', end);
-  track.addEventListener('mouseenter', () => { sfxHover = true; });
-  track.addEventListener('mouseleave', () => { sfxHover = false; });
 }
 function sfxStart() {
   if (sfxT != null) return;
