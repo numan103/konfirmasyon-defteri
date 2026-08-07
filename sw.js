@@ -1,4 +1,4 @@
-const CACHE = 'alfa-v2';
+const CACHE = 'alfa-v3';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
