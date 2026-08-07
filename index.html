@@ -13055,6 +13055,18 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
+const APP_BUILD = 'b3';
+function initAutoReload() {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  setInterval(async () => {
+    try {
+      const r = await fetch('/sw.js?__v=' + Date.now(), { cache: 'no-store' });
+      const t = await r.text();
+      const m = /const BUILD_ID = '([^']+)'/.exec(t);
+      if (m && m[1] && m[1] !== APP_BUILD) location.reload();
+    } catch (e) { /* */ }
+  }, 40000);
+}
 let sfxInsertAt = null;
 let sfxPasteOpen = false;
 function openSfxModal(idx) {
@@ -13840,6 +13852,7 @@ loadFeed();
 document.addEventListener('DOMContentLoaded', renderFeed);
 setTimeout(renderFeed, 100);
 initSfxPaste();
+initAutoReload();
 loadSfx();
 </script>
 <script>
