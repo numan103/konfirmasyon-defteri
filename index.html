@@ -13003,7 +13003,14 @@ let sfxHover = false;
 let sfxJustDragged = false;
 function sfxApply() {
   const track = document.getElementById('sfx-track');
-  if (track) track.style.transform = 'translateX(' + (sfxAuto + sfxOff) + 'px)';
+  if (!track) return;
+  let x = sfxAuto + sfxOff;
+  const hw = (track.scrollWidth - 32) / 2;
+  if (hw > 0) {
+    const m = ((x % hw) + hw) % hw;
+    x = m - hw;
+  }
+  track.style.transform = 'translateX(' + x + 'px)';
 }
 function sfxLoop() {
   sfxT = requestAnimationFrame(sfxLoop);
@@ -13015,9 +13022,9 @@ function initSfxDrag() {
   if (!track || typeof PointerEvent === 'undefined') return;
   track.addEventListener('pointerdown', e => {
     sfxDrag = { x: e.clientX, off: sfxOff };
-    try { track.setPointerCapture(e.pointerId); } catch (_) { /* */ }
+    const t = e.target;
+    if (t && t.setPointerCapture) { try { t.setPointerCapture(e.pointerId); } catch (_) { /* */ } }
     track.querySelectorAll('img').forEach(im => im.classList.add('dragging'));
-    try { e.preventDefault(); } catch (_) { /* */ }
   });
   track.addEventListener('pointermove', e => {
     if (!sfxDrag) return;
