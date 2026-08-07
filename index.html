@@ -13082,14 +13082,25 @@ async function uploadSfxImage(data) {
   if (box) { box.textContent = '⏳ Yükleniyor…'; box.style.pointerEvents = 'none'; }
   setSfxMsg('Yükleniyor…', '');
   try {
-    const r = await fetch('/api/contrib?upload=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
-    const j = await r.json();
-    if (!j.ok || !j.url) { setSfxMsg('Yüklenemedi: ' + (j.error || 'hata'), 'err'); return; }
+    let url = null;
+    if (AUTH.client && AUTH.client.storage) {
+      const res = await fetch(data);
+      const blob = await res.blob();
+      const path = 'sfx/' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+      const { error: upErr } = await AUTH.client.storage.from('success').upload(path, blob, { contentType: 'image/jpeg', upsert: false, cacheControl: '31536000' });
+      if (upErr) throw new Error(upErr.message);
+      url = AUTH.client.storage.from('success').getPublicUrl(path).data.publicUrl;
+    } else {
+      const r = await fetch('/api/contrib?upload=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data }) });
+      const j = await r.json();
+      if (!j.ok || !j.url) throw new Error(j.error || 'hata');
+      url = j.url;
+    }
     try {
-      await sfxAddRow(j.url, '');
+      await sfxAddRow(url, '');
     } catch (err) {
       const uEl = document.getElementById('sfx-url');
-      if (uEl) uEl.value = j.url;
+      if (uEl) uEl.value = url;
       setSfxMsg('Fotoğraf yüklendi ama tabloya eklenemedi — URL alanına kondu, Ekle\'ye bas. (' + (err.message || 'hata') + ')', 'err');
       return;
     }

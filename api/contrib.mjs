@@ -1,5 +1,4 @@
 // Topluluk Katkıları + Çalışma Panosu — Supabase üzerinden paylaşım (edu_shared tablosunun ayrı satırları).
-import { put } from '@vercel/blob';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
 const ROW_CONTRIB = 'contribs';
@@ -60,34 +59,10 @@ function cleanRoom(r) {
   return String(r || 'alfa').replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'alfa';
 }
 
-async function handleUpload(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(503).json({ error: 'BLOB token not set.' });
-  let body;
-  try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
-  const dataUrl = body && body.data;
-  if (!dataUrl) return res.status(400).json({ error: 'data required' });
-  const match = /^data:image\/(png|jpe?g|webp|gif);base64,([\s\S]+)$/.exec(dataUrl);
-  if (!match) return res.status(400).json({ error: 'invalid image' });
-  const ext = match[1].toLowerCase() === 'jpeg' ? 'jpg' : match[1].toLowerCase();
-  const buf = Buffer.from(match[2], 'base64');
-  if (!buf.length) return res.status(400).json({ error: 'empty image' });
-  if (buf.length > 8 * 1024 * 1024) return res.status(413).json({ error: 'too large (max 8MB)' });
-  try {
-    const path = 'success/' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-    const blob = await put(path, buf, { access: 'public', addRandomSuffix: false });
-    return res.status(200).json({ ok: true, url: blob.url });
-  } catch (e) {
-    return res.status(200).json({ ok: false, error: e.message });
-  }
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  if (req.query.upload) return handleUpload(req, res);
 
   const store = req.query.store === 'pano' ? 'pano' : 'contrib';
   const rowId = store === 'pano' ? ROW_PANO : ROW_CONTRIB;
