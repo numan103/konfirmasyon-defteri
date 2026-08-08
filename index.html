@@ -4713,7 +4713,11 @@ const store = {
   async get(k) {
     if (AUTH.user) {
       if (k in AUTH.cloud) return AUTH.cloud[k];
-      try { const v = localStorage.getItem(AUTH.ns + k); if (v !== null) return v; } catch (e) {}
+      try {
+        let v = localStorage.getItem(AUTH.ns + k);
+        if (v === null) v = localStorage.getItem(k);
+        if (v !== null) return v;
+      } catch (e) {}
       return null;
     }
     if (window.storage && window.storage.get) {
@@ -11770,7 +11774,7 @@ function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
   try {
     Object.keys(localStorage).forEach(k => {
-      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === NEWS_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k === MT_KEY || k.indexOf(DAILY_PREFIX) === 0);
+      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === NEWS_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k === MT_KEY || k === AI_PROFILE_KEY || k.indexOf(DAILY_PREFIX) === 0);
       if (keep && !(k in AUTH.cloud)) AUTH.cloud[k] = localStorage.getItem(k);
     });
   } catch (e) { /* erişilemedi */ }
@@ -11794,8 +11798,9 @@ async function onAuthed(user) {
     } catch (e) { /* yok */ }
   }
   AUTH.cloud = data;
-  // İlk kez ve boşsa: bu cihazdaki eski (hesapsız) verileri hesaba taşı
-  if (Object.keys(AUTH.cloud).length === 0) migrateLegacyLocal();
+  // Yerel (hesapsız) verileri hesaba taşı: bulut boş olsun olmasın,
+  // yalnızca bulutta OLMAYAN anahtarlar kopyalanır (mevcut veri ezilmez).
+  migrateLegacyLocal();
 
   const nm = (user.user_metadata && user.user_metadata.name) || (user.email || '').split('@')[0];
   document.getElementById('user-name').textContent = nm;
@@ -13064,7 +13069,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b6';
+const APP_BUILD = 'b7';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
