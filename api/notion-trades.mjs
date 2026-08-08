@@ -35,7 +35,51 @@ function parseNumber(p) { return p?.number ?? null; }
 function parseTitle(p) { return (p?.title || []).map(t => t.plain_text).join('') || null; }
 function parseRichText(p) { return (p?.rich_text || []).map(t => t.plain_text).join('') || null; }
 
-function mapRow(page, market) {
+// Sayfa altındaki görsel blokları topla (image blokları: external URL veya kalıcı file URL)
+async function pageImages(token, pageId) {
+  const urls = [];
+  try {
+    let cursor;
+    do {
+      const qs = new URLSearchParams({ page_size: '100' });
+      if (cursor) qs.set('start_cursor', cursor);
+      const res = await fetch(`https://api.notion.com/v1/blocks/${pageId}/children?${qs}`, {
+        headers: { Authorization: `Bearer ${token}`, 'Notion-Version': NOTION_VERSION },
+      });
+      if (!res.ok) break;
+      const data = await res.json();
+      for (const b of data.results || []) {
+        if (!b || b.type !== 'image' || !b.image) continue;
+        const img = b.image;
+        let src = null, external = false;
+        if (img.type === 'external' && img.external?.url) { src = img.external.url; external = true; }
+        else if (img.file?.url) src = img.file.url;
+        if (!src) continue;
+        urls.push(external ? src : await toDurable(src));
+      }
+      cursor = data.has_more ? data.next_cursor : null;
+    } while (cursor);
+  } catch (e) { /* görsel hatası göz ardı edilir */ }
+  return urls;
+}
+
+// Notion file gorunum URL'leri 1 saatte suresi dolar; kalici olmasi icin sunucuda indirip data URL'e ceviriyoruz.
+// external URL'ler zaten kalici, onlara dokunmuyoruz.
+async function toDurable(src) {
+  if (String(src).indexOf('data:') === 0) return src;
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 12000);
+    const res = await fetch(src, { redirect: 'follow', signal: ctl.signal });
+    clearTimeout(t);
+    if (!res.ok) return src;
+    const buf = await res.arrayBuffer();
+    const mime = (res.headers.get('content-type') || 'image/jpeg').split(';')[0];
+    return 'data:' + mime + ';base64,' + Buffer.from(buf).toString('base64');
+  } catch (e) { return src; }
+}
+
+async function mapRow(page, market, token) {
   const date = parseDate(prop(page, 'Tarih'));
   let model = '';
   for (const n of ['Entry Model', 'Model', 'Entry Modeli', 'Model Adı']) {
@@ -55,6 +99,7 @@ function mapRow(page, market) {
     note: parseRichText(prop(page, 'Not')) || '',
     tradeNo: parseTitle(prop(page, 'Trade #')) || '',
     market,
+    images: await pageImages(token, page.id),
   };
 }
 
@@ -113,9 +158,9 @@ export default async function handler(req, res) {
       const options = await collectOptions(token, DBS);
       return res.status(200).json(options);
     }
-    const results = await Promise.all(
-      DBS.map(db => queryDB(token, db.id).then(rows => rows.map(r => mapRow(r, db.market))))
-    );
+      const results = await Promise.all(
+        DBS.map(db => queryDB(token, db.id).then(rows => Promise.all(rows.map(r => mapRow(r, db.market, token)))))
+      );
     const trades = results.flat().sort((a, b) => (a.ts || 0) - (b.ts || 0));
     return res.status(200).json({ trades });
   } catch (e) {

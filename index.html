@@ -9507,17 +9507,30 @@ async function importFromNotion() {
         if (t.strat) exist.strat = t.strat;
         if (t.model) exist.model = t.model;
         if (t.note) exist.note = t.note;
+        if (Array.isArray(t.images) && t.images.length) {
+          const cur = exist.images || [];
+          t.images.forEach(u => { if (!cur.includes(u)) cur.push(u); });
+          exist.images = cur;
+        }
         updated++;
       } else {
         const dup = dataTrades.find(x => (x.pair||'') === (t.pair||'').toUpperCase() && (x.date||'') === (t.date||'') && (x.dir||'') === (t.dir||'') && dnum(x.r) === dnum(t.r));
-        if (dup) return;
+        if (dup) {
+          if (Array.isArray(t.images) && t.images.length) {
+            const cur = dup.images || [];
+            t.images.forEach(u => { if (!cur.includes(u)) cur.push(u); });
+            dup.images = cur;
+          }
+          return;
+        }
         dataTrades.push({
           id: Date.now() + Math.random() + added,
           notionId: t.notionId || null,
           ts: t.ts || (Date.now() + added),
           date: t.date || '',
           pair: (t.pair || '').toUpperCase(), dir: t.dir || 'LONG',
-          r: dnum(t.r), pnl: null, strat: t.strat || '', model: t.model || '', note: t.note || '', _source: 'Notion'
+          r: dnum(t.r), pnl: null, strat: t.strat || '', model: t.model || '', note: t.note || '', _source: 'Notion',
+          images: Array.isArray(t.images) ? t.images.slice() : []
         });
         added++;
       }
