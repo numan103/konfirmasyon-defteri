@@ -12980,9 +12980,10 @@ function renderSfx() {
   }
   const group = document.createDocumentFragment();
   sfxPhotos.forEach(p => group.appendChild(makeCard(p)));
+  const clone = group.cloneNode(true);
   track.innerHTML = '';
   track.appendChild(group);
-  track.appendChild(group.cloneNode(true));
+  track.appendChild(clone);
 }
 function openSfxLightbox(url) {
   const lg = document.getElementById('sfx-lg');
@@ -13000,11 +13001,12 @@ let sfxOff = 0;
 let sfxT = null;
 let sfxDrag = null;
 let sfxHover = false;
+let sfxHoverable = typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 let sfxJustDragged = false;
 function sfxPeriod(track) {
   const cards = track.querySelectorAll('.sfx-card');
-  const n = cards.length / 2;
-  if (n < 1) return 0;
+  const n = Math.floor(cards.length / 2);
+  if (n < 1 || cards.length < 2) return 0;
   const a = cards[0].getBoundingClientRect().left;
   const b = cards[n].getBoundingClientRect().left;
   return b - a;
@@ -13012,7 +13014,8 @@ function sfxPeriod(track) {
 function sfxApply() {
   const track = document.getElementById('sfx-track');
   if (!track) return;
-  const P = sfxPeriod(track);
+  let P = 0;
+  try { P = sfxPeriod(track); } catch (_) { P = 0; }
   let x = sfxAuto + sfxOff;
   if (P > 0) {
     const m = ((x % P) + P) % P;
@@ -13051,7 +13054,7 @@ function initSfxDrag() {
   };
   track.addEventListener('pointerup', end);
   track.addEventListener('pointercancel', end);
-  if (view) {
+  if (view && sfxHoverable) {
     view.addEventListener('mouseenter', () => { sfxHover = true; });
     view.addEventListener('mouseleave', () => { sfxHover = false; });
   }
@@ -13061,7 +13064,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b5';
+const APP_BUILD = 'b6';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
