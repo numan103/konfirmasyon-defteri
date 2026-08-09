@@ -100,6 +100,7 @@
   body[data-page="basvuru"] { --pc: #fbbf24; --pc-soft: rgba(251,191,36,.16); --glow-a: rgba(251,191,36,.18); --glow-b: rgba(245,158,11,.10); }
   body[data-page="trading"] { --pc: #22d3ee; --pc-soft: rgba(34,211,238,.16); --glow-a: rgba(34,211,238,.18); --glow-b: rgba(6,182,212,.10); }
   body[data-page="alfa"] { --pc: #ef4444; --pc-soft: rgba(239,68,68,.16); --glow-a: rgba(239,68,68,.20); --glow-b: rgba(220,38,38,.10); }
+  body[data-page="designer"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.18); --glow-b: rgba(132,204,22,.10); }
   .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
 
   .tophead { padding: 18px 0 4px; }
@@ -1512,6 +1513,69 @@
   .eg-item-move { flex: none; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-3); font-size: 12px; line-height: 1; cursor: pointer; border-radius: 5px; padding: 0; opacity: 0; transition: opacity .15s ease; }
   .eg-item:hover .eg-item-move, .eg-item.on .eg-item-move { opacity: 1; }
   .eg-item-move:hover { background: var(--pc-soft); color: var(--pc); }
+  /* ===== Alfa Designer (trader vücudu) ===== */
+  .ds-wrap { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
+  @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
+  .ds-body-panel { position: sticky; top: 14px; }
+  @media (max-width: 860px) { .ds-body-panel { position: static; } }
+  .ds-svg { width: 100%; display: block; }
+  .ds-organ { cursor: pointer; }
+  .ds-organ-shape { fill: color-mix(in srgb, currentColor 20%, transparent); stroke: currentColor; stroke-width: 2; }
+  .ds-organ:hover .ds-organ-shape { stroke-width: 3; }
+  .ds-organ.sel .ds-organ-shape { stroke-width: 3.5; }
+  .ds-organ-lbl { font-size: 9px; fill: var(--text-3); font-weight: 700; pointer-events: none; }
+  .ds-organ.sel .ds-organ-lbl { fill: var(--pc); }
+  .ds-legend { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+  .ds-legend-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); cursor: pointer; }
+  .ds-legend-row:hover { border-color: var(--pc); }
+  .ds-legend-row.sel { border-color: var(--pc); box-shadow: inset 3px 0 0 var(--pc); }
+  .ds-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .ds-dot-ok { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .ds-dot-warn { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .ds-dot-crit { background: var(--red); box-shadow: 0 0 10px var(--red); animation: dsPulse 1.4s ease-in-out infinite; }
+  .ds-legend-ico { font-size: 16px; flex: none; }
+  .ds-legend-nm { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; color: var(--text); }
+  .ds-legend-sc { font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-3); }
+  .ds-detail { min-height: 420px; }
+  .ds-detail-inner { padding: 4px 2px; }
+  .ds-head { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+  .ds-head-ico { width: 52px; height: 52px; flex: none; border-radius: 14px; background: var(--pc-soft); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .ds-head-t { flex: 1; min-width: 200px; }
+  .ds-title { font-family: var(--font-display); font-size: 21px; font-weight: 800; color: var(--text); }
+  .ds-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
+  .ds-status { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .03em; }
+  .ds-status.ok { background: rgba(52,211,153,.14); color: var(--green); border: 1px solid rgba(52,211,153,.4); }
+  .ds-status.warn { background: rgba(251,191,36,.14); color: var(--amber); border: 1px solid rgba(251,191,36,.4); }
+  .ds-status.crit { background: rgba(248,113,113,.14); color: var(--red); border: 1px solid rgba(248,113,113,.4); animation: dsPulse 1.4s ease-in-out infinite; }
+  @keyframes dsPulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  .ds-big-score { font-size: 38px; font-weight: 800; font-family: var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 12px; }
+  .ds-big-score small { font-size: 15px; color: var(--text-3); font-weight: 600; }
+  .ds-bar { height: 12px; border-radius: 999px; background: var(--bg2); overflow: hidden; margin-top: 8px; }
+  .ds-bar-fill { height: 100%; border-radius: 999px; transition: width .5s ease; }
+  .ds-sec { margin-top: 20px; }
+  .ds-sec-h { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
+  .ds-reasons { display: flex; flex-direction: column; gap: 6px; }
+  .ds-reason { display: flex; gap: 9px; align-items: flex-start; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); font-size: 13px; color: var(--text-2); line-height: 1.45; }
+  .ds-reason b { color: var(--text); font-weight: 700; }
+  .ds-reason .ds-rmrk { flex: none; font-size: 15px; line-height: 1.2; }
+  .ds-topics { display: flex; flex-wrap: wrap; gap: 7px; }
+  .ds-topic { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; background: var(--pc-soft); border: 1px solid var(--border); color: var(--text); font-size: 12.5px; font-weight: 600; }
+  .ds-topic button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
+  .ds-topic button:hover { color: var(--red); }
+  .ds-topic-add { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .ds-topic-add input { flex: 1; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; }
+  .ds-topic-add input:focus { outline: none; border-color: var(--pc); }
+  .ds-empty { text-align: center; padding: 40px 10px; color: var(--text-3); font-size: 13.5px; }
+  .ds-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 12px; }
+  .ds-kpi { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 12px 14px; }
+  .ds-kpi .k-lbl { font-size: 11px; color: var(--text-3); font-weight: 700; }
+  .ds-kpi .k-val { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 3px; }
+  .ds-overall { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); margin-bottom: 14px; }
+  .ds-overall-score { font-family: var(--font-display); font-size: 26px; font-weight: 800; }
+  .ds-overall-bar { flex: 1; min-width: 180px; height: 10px; border-radius: 999px; background: var(--bg2); overflow: hidden; }
+  .ds-overall-bar .ds-bar-fill { background: var(--pc); }
+  .ds-overall-txt { font-size: 12.5px; color: var(--text-3); font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) { .ds-dot-crit, .ds-status.crit { animation: none; } }
   /* ===== Mentoring (ortak eğitim) ===== */
   .mt-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
   @media (max-width: 820px) { .mt-wrap { grid-template-columns: 1fr; } }
@@ -2839,6 +2903,7 @@
           <a href="?page=pano" class="nav-link" id="tab-pano" data-nav data-i18n="app.pano">🛠️ Çalışma Panosu</a>
           <a href="?page=mentoring" class="nav-link" id="tab-mentoring" data-nav data-i18n="app.mentoring" style="display:none">🤝 Mentoring</a>
           <a href="?page=indicators" class="nav-link" id="tab-indicators" data-nav data-i18n="app.indicators">📐 İndikatörler</a>
+          <a href="?page=designer" class="nav-link" id="tab-designer" data-nav data-i18n="app.designer">🧬 Alfa Designer</a>
         </div>
       </div>
       <div class="nav-drop">
@@ -2894,6 +2959,7 @@
       <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" data-i18n="app.pano">🛠️ Çalışma Panosu</a>
       <a href="?page=mentoring" class="mnav-link" data-nav data-mnav="mentoring" id="mnav-mentoring" style="display:none" data-i18n="app.mentoring">🤝 Mentoring</a>
       <a href="?page=indicators" class="mnav-link" data-nav data-mnav="indicators" data-i18n="app.indicators">📐 İndikatörler</a>
+      <a href="?page=designer" class="mnav-link" data-nav data-mnav="designer" data-i18n="app.designer">🧬 Alfa Designer</a>
       <div class="mnav-group" data-i18n="app.news">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=news" class="mnav-link" data-nav data-mnav="news" data-i18n="app.magazine">🗞️ Dergi</a>
@@ -3893,6 +3959,25 @@
         <button class="btn" id="mt-in-cancel" type="button" data-i18n="act.cancel">Vazgeç</button>
       </div>
       <div class="eg-form-err" id="mt-in-err"></div>
+    </div>
+  </div>
+  <div id="page-designer" class="hidden">
+    <div class="eg-brand">
+      <span class="eg-brand-ico">🧬</span>
+      <span class="eg-brand-name">Alfa Designer</span>
+      <span class="eg-brand-sub">Trader'ın vücudu — her organ bir yetenek. Trade günlüğün ve checklist'ten hesaplanır; kırmızı organlar seni zayıflatan bölgelerdir. Üstüne tıkla, çalışma konularını gör.</span>
+    </div>
+    <div class="ds-overall" id="ds-overall"></div>
+    <div class="ds-wrap">
+      <aside class="panel ds-body-panel">
+        <svg id="ds-svg" class="ds-svg" viewBox="0 0 320 420" role="img" aria-label="Trader vücudu diyagramı"></svg>
+        <div class="ds-legend" id="ds-legend"></div>
+      </aside>
+      <section class="panel ds-detail">
+        <div id="ds-detail" class="ds-detail-inner">
+          <div class="ds-empty">Soldaki vücuttan bir organ seç — durumunu, nedenlerini ve çalışman gereken konuları burada göreceksin.</div>
+        </div>
+      </section>
     </div>
   </div>
   <div id="mt-zoom">
@@ -7756,6 +7841,7 @@ function init() {
   bindAdminChat();
   bindOnchainPage();
   bindCalcPage();
+  bindDesignerPage();
   bindReviewPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
@@ -7842,7 +7928,7 @@ let dfDir = 'LONG';
 let currentPage = 'home';
 try {
   const lp = localStorage.getItem('df-last-page');
-  if (lp && ['home','defter','data','review','news','egitim','mentoring','pano','indicators','onchain','calendar','basvuru','chat-admin','calc','alfa','apps'].indexOf(lp) >= 0) currentPage = lp;
+  if (lp && ['home','defter','data','review','news','egitim','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps'].indexOf(lp) >= 0) currentPage = lp;
 } catch (e) {}
 setInitialPage();
 const NEWS_KEY = 'alfanews-shared-v1';
@@ -8564,7 +8650,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps'];
+  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -8967,7 +9053,7 @@ function showPage(name, skipAnim) {
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -8993,6 +9079,7 @@ function showPage(name, skipAnim) {
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
+  if (name === 'designer') renderDesigner();
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
@@ -11677,6 +11764,369 @@ function bindIndicatorsPage() {
   const g = id => document.getElementById(id);
 }
 
+/* ===== Alfa Designer — trader vücudu ===== */
+const DESIGNER_KEY = 'defter-designer-v1';
+let designerData = { topics: {} };
+let designerSel = 'brain';
+const DESIGNER_ORGANS = [
+  { id: 'brain', ico: '🧠', name: 'Edge & Setup', body: 'Beyin', desc: 'Setup kalitesi: checklist skoru, A+/B karar oranı, entry kalitesi. Beyin zayıfsa yüksek olasılıklı setup bulamıyorsun demektir.' },
+  { id: 'eyes', ico: '👁️', name: 'Analiz & Veri', body: 'Gözler', desc: 'Veri ve teknik kriterleri okuma: CVD, OI, orderbook, trend, key level. Gözler bulanıksa piyasayı net göremiyorsun.' },
+  { id: 'heart', ico: '❤️', name: 'Risk Yönetimi', body: 'Kalp', desc: 'Pozisyon kriterleri, risk disiplini ve kayıpları sınırlama. Kalp zayıfsa tek işlem bilançoyu sarsabilir.' },
+  { id: 'lungs', ico: '🫁', name: 'Trade Psikolojisi', body: 'Akciğer', desc: 'Duygu kontrolü: mood ibresi, duygu kilitleri, intent. Akciğer zayıfsa duygular nefesini kesiyor demektir.' },
+  { id: 'muscle', ico: '💪', name: 'Disiplin & İcra', body: 'Kaslar', desc: 'Günlük plan (sabah/senaryo/anti/gün sonu), YOK kararla işlem açmama. Kas zayıfsa planı uygulamıyorsun.' },
+  { id: 'bone', ico: '🦴', name: 'Para Yönetimi', body: 'İskelet', desc: 'R sonuçları, win rate, ortalama R, drawdown ve konsistans. İskelet zayıfsa kümülatif eğri çöker.' }
+];
+const DS_STATUS = { ok: 'Sağlıklı', warn: 'Dikkat', crit: 'Kritik' };
+function dsClamp(v) { return Math.max(0, Math.min(100, v)); }
+function dsStatusOf(score) { return score >= 70 ? 'ok' : score >= 40 ? 'warn' : 'crit'; }
+
+async function loadDesigner() {
+  try {
+    const raw = await store.get(DESIGNER_KEY);
+    if (raw) { const d = JSON.parse(raw); if (d && d.topics) designerData = d; }
+  } catch (e) { /* ilk açılış */ }
+}
+async function saveDesigner() {
+  try { await store.set(DESIGNER_KEY, JSON.stringify(designerData)); }
+  catch (e) { console.error('saveDesigner:', e); }
+}
+
+function dsTradeCatFrac(t, cat) {
+  const pcfg = config.pairs[t.pair];
+  if (!pcfg || !Array.isArray(pcfg.criteria)) return null;
+  const catNames = pcfg.criteria.filter(c => c.cat === cat).map(c => c.name);
+  if (!catNames.length) return null;
+  const checked = new Set((t.crits || []).map(c => c.n));
+  let hit = 0;
+  catNames.forEach(n => { if (checked.has(n)) hit++; });
+  return hit / catNames.length;
+}
+
+function computeDesigner() {
+  const T = (typeof trades !== 'undefined' && Array.isArray(trades)) ? trades : [];
+  const D = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades : [];
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+  const out = {};
+  const stats = { n: T.length, scored: 0, winRate: 0, avgR: 0, totalR: 0, pf: 0, negTrades: 0 };
+
+  // ---- Beyin: Edge & Setup ----
+  {
+    const scored = T.filter(t => typeof t.score === 'number');
+    const avgScore = avg(scored.map(t => t.score));
+    const aplusRate = scored.length ? scored.filter(t => t.verdict === 'A+').length / scored.length : 0;
+    const bRate = scored.length ? scored.filter(t => t.verdict === 'B').length / scored.length : 0;
+    const setupScores = D.map(t => t.criteria && typeof t.criteria.setup === 'number' ? t.criteria.setup : null).filter(v => v !== null);
+    const entryScores = D.map(t => t.criteria && typeof t.criteria.entry === 'number' ? t.criteria.entry : null).filter(v => v !== null);
+    const avgSetup = setupScores.length ? avg(setupScores) * 10 : null;
+    const avgEntry = entryScores.length ? avg(entryScores) * 10 : null;
+    let score = 50, reasons = [], topics = [];
+    if (scored.length) {
+      score = 0.45 * dsClamp(avgScore) + 0.35 * (aplusRate + 0.5 * bRate) * 100;
+      if (avgSetup !== null) score = score * 0.7 + avgSetup * 0.3;
+      if (avgEntry !== null) score = score * 0.7 + avgEntry * 0.3;
+      score = Math.round(dsClamp(score));
+      reasons.push({ m: '⬆', t: 'Ortalama checklist skoru <b>' + Math.round(avgScore) + '</b>/100' });
+      reasons.push({ m: '🏁', t: '<b>' + Math.round(aplusRate * 100) + '%</b> A+ karar verilmiş' });
+      if (avgSetup !== null) reasons.push({ m: '⚙️', t: 'Setup kalitesi <b>' + Math.round(avgSetup) + '</b>/100' });
+      if (avgEntry !== null) reasons.push({ m: '🎯', t: 'Entry kalitesi <b>' + Math.round(avgEntry) + '</b>/100' });
+      if (avgScore < 70) topics.push('Setup kalitesini yükselt — kriterleri daha çok işaretle');
+      if (aplusRate < 0.3) topics.push('A+ karar oranını artırmak için daha seçici ol');
+      if (avgEntry !== null && avgEntry < 60) topics.push('Entry kalitesi — reaksiyon ve zamanlama çalış');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz işlem yok — checklist kaydedince puanlanır.' });
+      topics.push('Checklist kullanmaya başla');
+    }
+    out.brain = { score, reasons, topics };
+  }
+
+  // ---- Gözler: Analiz & Veri ----
+  {
+    const veriFracs = T.map(t => dsTradeCatFrac(t, 'veri')).filter(v => v !== null);
+    const tekFracs = T.map(t => dsTradeCatFrac(t, 'teknik')).filter(v => v !== null);
+    const veriAvg = veriFracs.length ? avg(veriFracs) : null;
+    const tekAvg = tekFracs.length ? avg(tekFracs) : null;
+    let score = 50, reasons = [], topics = [];
+    const v100 = veriAvg !== null ? veriAvg * 100 : null;
+    const t100 = tekAvg !== null ? tekAvg * 100 : null;
+    if (v100 !== null || t100 !== null) {
+      const parts = [v100, t100].filter(v => v !== null);
+      score = Math.round(dsClamp(avg(parts)));
+      if (v100 !== null) reasons.push({ m: '📊', t: 'Veri kriterleri (CVD/OI/orderbook) <b>' + Math.round(v100) + '%</b> işaretlenmiş' });
+      if (t100 !== null) reasons.push({ m: '📈', t: 'Teknik kriterler <b>' + Math.round(t100) + '%</b> işaretlenmiş' });
+      if (v100 !== null && v100 < 60) topics.push('Spot CVD / OI / Long-Shorts verisini analizine kat');
+      if (t100 !== null && t100 < 60) topics.push('Trend, key level ve manipulasyon okumasını geliştir');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz işlem yok — analiz kriterleri puanlanamadı.' });
+      topics.push('Orderflow ve CVD okuma çalış');
+    }
+    out.eyes = { score, reasons, topics };
+  }
+
+  // ---- Kalp: Risk Yönetimi ----
+  {
+    const posFracs = T.map(t => dsTradeCatFrac(t, 'pozisyon')).filter(v => v !== null);
+    const posAvg = posFracs.length ? avg(posFracs) * 100 : null;
+    const riskScores = D.map(t => t.criteria && typeof t.criteria.risk === 'number' ? t.criteria.risk : null).filter(v => v !== null);
+    const riskAvg = riskScores.length ? avg(riskScores) * 10 : null;
+    const withR = D.filter(t => t.r !== '' && t.r != null && !isNaN(Number(t.r))).map(t => Number(t.r));
+    const lossRate = withR.length ? withR.filter(v => v < 0).length / withR.length * 100 : null;
+    let score = 50, reasons = [], topics = [];
+    if (withR.length || riskScores.length || posFracs.length) {
+      const parts = [];
+      if (riskAvg !== null) parts.push(riskAvg);
+      if (posAvg !== null) parts.push(posAvg);
+      if (lossRate !== null) parts.push(100 - lossRate * 1.2);
+      score = parts.length ? Math.round(dsClamp(avg(parts))) : 50;
+      if (riskAvg !== null) reasons.push({ m: '🛡️', t: 'Risk kriteri <b>' + Math.round(riskAvg) + '</b>/100' });
+      if (posAvg !== null) reasons.push({ m: '📐', t: 'Pozisyon kriterleri <b>' + Math.round(posAvg) + '%</b> işaretlenmiş' });
+      if (lossRate !== null) reasons.push({ m: '💸', t: 'Kayıp işlem oranı <b>%' + Math.round(lossRate) + '</b>' });
+      if (riskAvg !== null && riskAvg < 60) topics.push('Risk büyüklüğü — her işlemde sabit % risk');
+      if (posAvg !== null && posAvg < 60) topics.push('Pozisyon planlama — entry/TP/SL önceden belirle');
+      if (lossRate !== null && lossRate > 50) topics.push('Kayıp oranını düşür — daha az ama daha iyi işlem');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz sonuç verisi yok.' });
+      topics.push('Risk yönetimi kuralları çalış');
+    }
+    out.heart = { score, reasons, topics };
+  }
+
+  // ---- Akciğer: Trade Psikolojisi ----
+  {
+    const emoRate = T.length ? T.filter(t => t.emoBlock).length / T.length : null;
+    const intentEmo = T.length ? T.filter(t => t.intent === 'emo').length / T.length : null;
+    const moodBad = T.length ? T.filter(t => typeof t.mood === 'number' && Math.abs(t.mood) >= 6).length / T.length : null;
+    const duyguFrac = (() => { const f = T.map(t => dsTradeCatFrac(t, 'duygu')).filter(v => v !== null); return f.length ? avg(f) : null; })();
+    const psychoScores = D.map(t => t.criteria && typeof t.criteria.psycho === 'number' ? t.criteria.psycho : null).filter(v => v !== null);
+    const psychoAvg = psychoScores.length ? avg(psychoScores) * 10 : null;
+    let score = 50, reasons = [], topics = [];
+    const parts = [];
+    if (emoRate !== null) parts.push((1 - emoRate) * 100);
+    if (intentEmo !== null) parts.push((1 - intentEmo) * 100);
+    if (moodBad !== null) parts.push((1 - moodBad) * 100);
+    if (duyguFrac !== null) parts.push((1 - duyguFrac) * 100);
+    if (psychoAvg !== null) parts.push(psychoAvg);
+    if (parts.length) {
+      score = Math.round(dsClamp(avg(parts)));
+      if (emoRate !== null) reasons.push({ m: '🔒', t: '<b>' + Math.round(emoRate * 100) + '%</b> işlem duygu kilitli' });
+      if (intentEmo !== null) reasons.push({ m: '😤', t: '<b>' + Math.round(intentEmo * 100) + '%</b> işlemde "Duygumu" tradeledin' });
+      if (moodBad !== null) reasons.push({ m: '🎢', t: '<b>' + Math.round(moodBad * 100) + '%</b> işlemde uç duygu (|mood| ≥ 6)' });
+      if (duyguFrac !== null && duyguFrac > 0) reasons.push({ m: '💭', t: 'Negatif duygu kriterleri işaretlenmiş: %' + Math.round(duyguFrac * 100) });
+      if (psychoAvg !== null) reasons.push({ m: '🧘', t: 'Psikoloji notu <b>' + Math.round(psychoAvg) + '</b>/100' });
+      if (emoRate !== null && emoRate > 0.1) topics.push('Duygu kilitleriyle işlem açma alışkanlığını kır');
+      if (intentEmo !== null && intentEmo > 0.1) topics.push('Revenge / duygu tradeleme döngüsünü bitir');
+      if (moodBad !== null && moodBad > 0.2) topics.push('Uç duyguda (coşku/korku) karar verme — mola al');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz psikoloji verisi yok.' });
+      topics.push('Trade psikolojisi ve duygu farkındalığı çalış');
+    }
+    out.lungs = { score, reasons, topics };
+  }
+
+  // ---- Kaslar: Disiplin & İcra ----
+  {
+    const yokRate = T.length ? T.filter(t => t.verdict === 'YOK').length / T.length : null;
+    const capRate = T.length ? T.filter(t => t.cap).length / T.length : null;
+    const planFill = T.length ? T.filter(t => (t.sabah && t.senaryo && t.anti) || t.gunsonu).length / T.length : null;
+    const sessOk = T.length ? T.filter(t => t.sess && t.sess !== '—').length / T.length : null;
+    let score = 50, reasons = [], topics = [];
+    const parts = [];
+    if (yokRate !== null) parts.push((1 - yokRate) * 100);
+    if (capRate !== null) parts.push((1 - capRate) * 100);
+    if (planFill !== null) parts.push(planFill * 100);
+    if (sessOk !== null) parts.push(sessOk * 100);
+    if (parts.length) {
+      score = Math.round(dsClamp(avg(parts)));
+      if (yokRate !== null) reasons.push({ m: '🚫', t: '<b>' + Math.round(yokRate * 100) + '%</b> işlem YOK kararla açılmış' });
+      if (capRate !== null) reasons.push({ m: '⚠️', t: '<b>' + Math.round(capRate * 100) + '%</b> işlem kapasite dışı' });
+      if (planFill !== null) reasons.push({ m: '📋', t: 'Günlük plan kullanımı <b>%' + Math.round(planFill * 100) + '</b>' });
+      if (sessOk !== null) reasons.push({ m: '🕐', t: 'Seans seçimi <b>%' + Math.round(sessOk * 100) + '</b>' });
+      if (yokRate !== null && yokRate > 0.15) topics.push('YOK kararla işlem açmayı bırak — kadran karar verir');
+      if (planFill !== null && planFill < 0.5) topics.push('Günlük planı (sabah/senaryo/anti) düzenli doldur');
+      if (capRate !== null && capRate > 0.15) topics.push('Kapasite dışı işlemleri azalt');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz disiplin verisi yok.' });
+      topics.push('Günlük plan ve seans disiplini çalış');
+    }
+    out.muscle = { score, reasons, topics };
+  }
+
+  // ---- İskelet: Para Yönetimi ----
+  {
+    const withR = D.filter(t => t.r !== '' && t.r != null && !isNaN(Number(t.r))).map(t => Number(t.r));
+    const wins = withR.filter(v => v > 0), losses = withR.filter(v => v < 0);
+    const winRate = withR.length ? wins.length / withR.length * 100 : null;
+    const avgR = withR.length ? avg(withR) : null;
+    const totalR = withR.length ? withR.reduce((a, b) => a + b, 0) : null;
+    const pf = losses.length ? Math.abs(avg(wins)) / Math.abs(avg(losses)) : null;
+    let peak = 0, maxDD = 0, cum = 0;
+    withR.forEach(v => { cum += v; peak = Math.max(peak, cum); maxDD = Math.max(maxDD, peak - cum); });
+    let score = 50, reasons = [], topics = [];
+    if (withR.length) {
+      const parts = [];
+      if (winRate !== null) parts.push(winRate);
+      if (avgR !== null) parts.push(dsClamp((avgR + 1) * 40));
+      if (pf !== null) parts.push(dsClamp(pf * 50));
+      if (maxDD > 0) parts.push(dsClamp(100 - maxDD * 20));
+      score = Math.round(dsClamp(avg(parts)));
+      reasons.push({ m: '🎯', t: 'Win rate <b>%' + Math.round(winRate) + '</b> (' + wins.length + '/' + withR.length + ')' });
+      reasons.push({ m: '📈', t: 'Ortalama R <b>' + (avgR > 0 ? '+' : '') + avgR.toFixed(2) + '</b>' });
+      reasons.push({ m: '💰', t: 'Toplam <b>' + (totalR > 0 ? '+' : '') + totalR.toFixed(1) + 'R</b>' });
+      if (pf !== null) reasons.push({ m: '⚖️', t: 'Profit factor <b>' + pf.toFixed(2) + '</b>' });
+      if (maxDD > 0) reasons.push({ m: '📉', t: 'Maksimum drawdown <b>' + maxDD.toFixed(1) + 'R</b>' });
+      if (winRate !== null && winRate < 45) topics.push('Win rate düşük — edge geliştir');
+      if (avgR !== null && avgR < 0.3) topics.push('Ortalama R pozitif olmalı — kayıpları kes, kazananları taşı');
+      if (maxDD > 5) topics.push('Drawdown kontrolü — kayıp serisinde boyut küçült');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz R sonucu girilmemiş.' });
+      topics.push('İşlem sonuçlarını R olarak gir');
+    }
+    out.bone = { score, reasons, topics };
+  }
+
+  // küresel istatistikler
+  stats.scored = T.filter(t => typeof t.score === 'number').length;
+  const wR = D.filter(t => t.r !== '' && t.r != null && !isNaN(Number(t.r))).map(t => Number(t.r));
+  const w = wR.filter(v => v > 0), l = wR.filter(v => v < 0);
+  stats.totalR = wR.length ? wR.reduce((a, b) => a + b, 0) : 0;
+  stats.winRate = wR.length ? w.length / wR.length * 100 : 0;
+  stats.avgR = wR.length ? avg(wR) : 0;
+  stats.pf = l.length ? Math.abs(avg(w)) / Math.abs(avg(l)) : null;
+  stats.negTrades = l.length;
+  out.stats = stats;
+  return out;
+}
+
+function dsTopicsFor(id) {
+  const manual = (designerData.topics[id] || []).slice();
+  return manual;
+}
+
+function dsSvgHtml(organs) {
+  const shapes = {
+    brain: '<ellipse class="ds-organ-shape" cx="160" cy="56" rx="15" ry="11"/><path class="ds-organ-line" d="M152 52 q4 3 0 6 M158 50 q4 3 0 6 M164 52 q4 3 0 6" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round"/>',
+    eyes: '<ellipse class="ds-organ-shape" cx="150" cy="72" rx="5.5" ry="4"/><ellipse class="ds-organ-shape" cx="170" cy="72" rx="5.5" ry="4"/><circle cx="150" cy="72" r="1.7" fill="currentColor"/><circle cx="170" cy="72" r="1.7" fill="currentColor"/>',
+    heart: '<path class="ds-organ-shape" d="M132 158 Q118 144 124 134 Q130 126 139 134 Q148 126 154 134 Q160 144 146 158 Q139 166 132 158 Z"/>',
+    lungs: '<ellipse class="ds-organ-shape" cx="187" cy="146" rx="11" ry="17"/><ellipse class="ds-organ-shape" cx="195" cy="159" rx="8" ry="12"/>',
+    muscle: '<ellipse class="ds-organ-shape" cx="90" cy="150" rx="12" ry="17" transform="rotate(-18 90 150)"/><path class="ds-organ-line" d="M84 142 q4 3 0 6" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round"/>',
+    bone: '<ellipse class="ds-organ-shape" cx="142" cy="300" rx="8" ry="27" transform="rotate(7 142 300)"/><ellipse class="ds-organ-shape" cx="180" cy="300" rx="8" ry="27" transform="rotate(-7 180 300)"/>'
+  };
+  const labels = { brain: [160, 76], eyes: [160, 86], heart: [139, 178], lungs: [196, 184], muscle: [88, 178], bone: [161, 338] };
+  let h = '';
+  h += '<g class="ds-sil" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.14)" stroke-width="2">';
+  h += '<circle cx="160" cy="64" r="26"/>';
+  h += '<rect x="154" y="88" width="12" height="16" rx="4"/>';
+  h += '<path d="M120 108 Q120 96 160 96 Q200 96 200 108 L202 208 Q202 230 160 230 Q118 230 118 208 Z"/>';
+  h += '<path d="M120 108 Q92 116 88 150 Q84 188 98 212" fill="none"/>';
+  h += '<path d="M200 108 Q228 116 232 150 Q236 188 222 212" fill="none"/>';
+  h += '<path d="M132 228 L124 318 Q122 344 146 344 L156 344 Q176 344 174 318 L170 228 Z"/>';
+  h += '<path d="M148 228 L146 318 Q145 344 168 344 L178 344 Q198 344 196 318 L190 228 Z"/>';
+  h += '</g>';
+  DESIGNER_ORGANS.forEach(o => {
+    const sc = organs[o.id].score;
+    const st = dsStatusOf(sc);
+    const col = st === 'ok' ? 'var(--green)' : st === 'warn' ? 'var(--amber)' : 'var(--red)';
+    const sel = designerSel === o.id ? ' sel' : '';
+    h += '<g class="ds-organ' + sel + '" data-organ="' + o.id + '" style="color:' + col + ';">';
+    h += shapes[o.id];
+    h += '</g>';
+    h += '<text class="ds-organ-lbl" x="' + labels[o.id][0] + '" y="' + labels[o.id][1] + '" text-anchor="middle">' + o.ico + ' ' + sc + '</text>';
+  });
+  return h;
+}
+
+function dsLegendHtml(organs) {
+  return DESIGNER_ORGANS.map(o => {
+    const sc = organs[o.id].score;
+    const st = dsStatusOf(sc);
+    const sel = designerSel === o.id ? ' sel' : '';
+    return '<div class="ds-legend-row' + sel + '" data-organ="' + o.id + '"><span class="ds-legend-dot ds-dot-' + st + '"></span><span class="ds-legend-ico">' + o.ico + '</span><span class="ds-legend-nm">' + o.body + ' — ' + o.name + '</span><span class="ds-legend-sc">' + sc + '</span></div>';
+  }).join('');
+}
+
+function renderDesigner() {
+  const organs = computeDesigner();
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+  const st = organs.stats;
+  const overall = Math.round(avg(DESIGNER_ORGANS.map(o => organs[o.id].score)));
+  const oSt = dsStatusOf(overall);
+  const overallEl = document.getElementById('ds-overall');
+  if (overallEl) {
+    overallEl.innerHTML = '<span class="ds-overall-score" style="color:var(--' + (oSt === 'ok' ? 'green' : oSt === 'warn' ? 'amber' : 'red') + ');">' + overall + '<small style="font-size:13px;color:var(--text-3);">/100</small></span>' +
+      '<div class="ds-overall-bar"><div class="ds-bar-fill" style="width:' + overall + '%;background:var(--' + (oSt === 'ok' ? 'green' : oSt === 'warn' ? 'amber' : 'red') + ');"></div></div>' +
+      '<span class="ds-overall-txt">Genel trader sağlığı · ' + st.n + ' işlem · ' + st.scored + ' checklist' + (st.totalR !== 0 ? ' · ' + (st.totalR > 0 ? '+' : '') + st.totalR.toFixed(1) + 'R' : '') + '</span>';
+  }
+  const svg = document.getElementById('ds-svg');
+  if (svg) { svg.innerHTML = dsSvgHtml(organs); }
+  const legend = document.getElementById('ds-legend');
+  if (legend) { legend.innerHTML = dsLegendHtml(organs); }
+  renderDsDetail(organs, organs[designerSel]);
+}
+
+function renderDsDetail(organs, organ) {
+  const el = document.getElementById('ds-detail');
+  if (!el || !organ) return;
+  const st = dsStatusOf(organ.score);
+  const color = st === 'ok' ? 'var(--green)' : st === 'warn' ? 'var(--amber)' : 'var(--red)';
+  const o = DESIGNER_ORGANS.find(x => x.id === designerSel) || DESIGNER_ORGANS[0];
+  const manual = dsTopicsFor(designerSel);
+  const allTopics = organ.topics.concat(manual.filter(t => organ.topics.indexOf(t) === -1));
+  el.innerHTML =
+    '<div class="ds-head">' +
+      '<div class="ds-head-ico">' + o.ico + '</div>' +
+      '<div class="ds-head-t"><div class="ds-title">' + o.body + ' — ' + o.name + '</div><div class="ds-sub">' + o.desc + '</div></div>' +
+      '<div class="ds-status ' + st + '">' + DS_STATUS[st] + '</div>' +
+    '</div>' +
+    '<div class="ds-big-score" style="color:' + color + ';">' + organ.score + '<small>/100</small></div>' +
+    '<div class="ds-bar"><div class="ds-bar-fill" style="width:' + organ.score + '%;background:' + color + ';"></div></div>' +
+    '<div class="ds-sec"><div class="ds-sec-h">🔍 Neden bu durumda?</div><div class="ds-reasons">' +
+      organ.reasons.map(r => '<div class="ds-reason"><span class="ds-rmrk">' + r.m + '</span><span>' + r.t + '</span></div>').join('') +
+    '</div></div>' +
+    '<div class="ds-sec"><div class="ds-sec-h">📚 Çalışma konuları</div>' +
+      (allTopics.length ? '<div class="ds-topics">' + allTopics.map(t => '<span class="ds-topic">' + esc(t) + (manual.indexOf(t) > -1 ? '<button type="button" title="Kaldır" data-topic-del="' + esc(t) + '">✕</button>' : '') + '</span>').join('') + '</div>' : '<div class="ds-empty" style="padding:12px;">Henüz öneri yok.</div>') +
+      '<div class="ds-topic-add"><input type="text" id="ds-topic-in" placeholder="Kendi çalışma konunu ekle…" maxlength="80"><button type="button" class="btn solid" id="ds-topic-add">Ekle</button></div>' +
+    '</div>' +
+    '<div class="ds-kpis">' +
+      '<div class="ds-kpi"><div class="k-lbl">İşlem</div><div class="k-val">' + organs.stats.n + '</div></div>' +
+      '<div class="ds-kpi"><div class="k-lbl">Win rate</div><div class="k-val">%' + Math.round(organs.stats.winRate) + '</div></div>' +
+      '<div class="ds-kpi"><div class="k-lbl">Ort. R</div><div class="k-val" style="color:' + (organs.stats.avgR >= 0 ? 'var(--green)' : 'var(--red)') + ';">' + (organs.stats.avgR > 0 ? '+' : '') + organs.stats.avgR.toFixed(2) + '</div></div>' +
+      '<div class="ds-kpi"><div class="k-lbl">Toplam R</div><div class="k-val" style="color:' + (organs.stats.totalR >= 0 ? 'var(--green)' : 'var(--red)') + ';">' + (organs.stats.totalR > 0 ? '+' : '') + organs.stats.totalR.toFixed(1) + '</div></div>' +
+    '</div>';
+  const inEl = document.getElementById('ds-topic-in');
+  const addBtn = document.getElementById('ds-topic-add');
+  if (addBtn) addBtn.addEventListener('click', () => dsAddTopic());
+  if (inEl) inEl.addEventListener('keydown', e => { if (e.key === 'Enter') dsAddTopic(); });
+}
+
+function dsAddTopic() {
+  const inEl = document.getElementById('ds-topic-in');
+  const v = (inEl.value || '').trim();
+  if (!v) return;
+  if (!designerData.topics[designerSel]) designerData.topics[designerSel] = [];
+  if (designerData.topics[designerSel].indexOf(v) === -1) designerData.topics[designerSel].push(v);
+  saveDesigner();
+  renderDesigner();
+}
+
+function bindDesignerPage() {
+  document.getElementById('ds-svg').addEventListener('click', e => {
+    const g = e.target.closest('.ds-organ');
+    if (g) { designerSel = g.getAttribute('data-organ'); renderDesigner(); }
+  });
+  document.getElementById('ds-legend').addEventListener('click', e => {
+    const g = e.target.closest('.ds-legend-row');
+    if (g) { designerSel = g.getAttribute('data-organ'); renderDesigner(); }
+  });
+  document.getElementById('ds-detail').addEventListener('click', e => {
+    const del = e.target.closest('[data-topic-del]');
+    if (del) {
+      const t = del.getAttribute('data-topic-del');
+      designerData.topics[designerSel] = (designerData.topics[designerSel] || []).filter(x => x !== t);
+      saveDesigner();
+      renderDesigner();
+    }
+  });
+}
+
 function bindOnchainPage() {
   const g = id => document.getElementById(id);
 }
@@ -11759,6 +12209,7 @@ async function bootApp(opts) {
   try { await loadMentor(); } catch (e) { /* devam */ }
   try { await loadReviews(); } catch (e) { /* devam */ }
   try { await loadEgitim(); } catch (e) { /* devam */ }
+  try { await loadDesigner(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
   showPage(currentPage);
 }
@@ -11770,6 +12221,7 @@ async function refreshAppData() {
   try { await loadMentor(); } catch (e) { /* devam */ }
   try { await loadReviews(); } catch (e) { /* devam */ }
   try { await loadEgitim(); } catch (e) { /* devam */ }
+  try { await loadDesigner(); } catch (e) { /* devam */ }
   try { await loadTrades(); renderTrades(); } catch (e) { /* devam */ }
   try { await loadLessons(); renderLessons(); } catch (e) { /* devam */ }
   try { if (typeof loadDaily === 'function') loadDaily(); } catch (e) { /* devam */ }
@@ -11787,7 +12239,7 @@ function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
   try {
     Object.keys(localStorage).forEach(k => {
-      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === NEWS_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k === MT_KEY || k === AI_PROFILE_KEY || k.indexOf(DAILY_PREFIX) === 0);
+      const keep = (k === STORAGE_KEY || k === TRADES_KEY || k === LESSONS_KEY || k === DATA_KEY || k === NEWS_KEY || k === REVIEW_KEY || k === REVIEW_CFG_KEY || k === EGITIM_KEY || k === MT_KEY || k === AI_PROFILE_KEY || k === DESIGNER_KEY || k.indexOf(DAILY_PREFIX) === 0);
       if (keep && !(k in AUTH.cloud)) AUTH.cloud[k] = localStorage.getItem(k);
     });
   } catch (e) { /* erişilemedi */ }
@@ -14003,6 +14455,7 @@ loadSfx();
     'app.pano': { tr: '🛠️ Çalışma Panosu', en: '🛠️ Work Board' },
     'app.mentoring': { tr: '🤝 Mentoring', en: '🤝 Mentoring' },
     'app.indicators': { tr: '📐 İndikatörler', en: '📐 Indicators' },
+    'app.designer': { tr: '🧬 Alfa Designer', en: '🧬 Alfa Designer' },
     'app.calendar': { tr: '📅 Ekonomik Takvim', en: '📅 Economic Calendar' },
     'app.magazine': { tr: '🗞️ Dergi', en: '🗞️ Magazine' },
     'app.alfa': { tr: '🚀 Alfa Ol', en: '🚀 Become Alfa' },
