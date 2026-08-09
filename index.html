@@ -1518,19 +1518,20 @@
   @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
   .ds-body-panel { position: sticky; top: 14px; }
   @media (max-width: 860px) { .ds-body-panel { position: static; } }
-  .ds-svg { width: 100%; display: block; }
-  .ds-sil-part { fill: url(#dsSkin); stroke: rgba(255,255,255,.16); stroke-width: 1.6; }
-  .ds-sil-limb { fill: none; stroke: url(#dsSkin); stroke-width: 21; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(255,255,255,.05)); }
-  .ds-sil-detail { fill: rgba(255,255,255,.05); stroke: rgba(255,255,255,.10); stroke-width: 1.2; }
+  .ds-svg { --ds-skin: #d0aa81; width: 100%; display: block; }
+  .ds-sil { filter: drop-shadow(0 4px 14px rgba(0,0,0,.38)); }
+  .ds-sil-part { fill: var(--ds-skin); }
+  .ds-sil-limb { fill: none; stroke: var(--ds-skin); stroke-width: 24; stroke-linecap: round; }
+  .ds-sil-hand, .ds-sil-foot { fill: var(--ds-skin); }
+  .ds-sil-detail { fill: none; stroke: rgba(76,48,26,.28); stroke-width: 1.2; }
   .ds-organ { cursor: pointer; filter: url(#dsGlow); }
   .ds-organ-shape { fill: color-mix(in srgb, currentColor 22%, transparent); stroke: currentColor; stroke-width: 2; }
   .ds-organ:hover .ds-organ-shape { stroke-width: 3; }
   .ds-organ.sel .ds-organ-shape { stroke-width: 3.5; }
   .ds-organ.crit .ds-organ-shape { animation: dsOrganPulse 1.4s ease-in-out infinite; }
   @keyframes dsOrganPulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
-  .ds-organ-lbl { font-size: 10px; fill: var(--text-3); font-weight: 800; pointer-events: none; }
-  .ds-organ-lbl-bg { fill: rgba(8,10,20,.82); stroke: rgba(255,255,255,.14); stroke-width: 1; }
-  .ds-organ-lbl.sel { fill: var(--pc); }
+  .ds-organ-lbl { font-size: 10.5px; font-weight: 800; pointer-events: none; }
+  .ds-organ-lbl-bg { fill: rgba(10,12,24,.82); stroke: rgba(255,255,255,.16); stroke-width: 1; }
   .ds-organ-lbl.sel .ds-organ-lbl-bg { stroke: var(--pc); }
   .ds-organ-tip { stroke: rgba(255,255,255,.24); stroke-width: 1; fill: none; stroke-dasharray: 2 3; pointer-events: none; }
   .ds-legend { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
@@ -12054,53 +12055,42 @@ function dsTopicsFor(id) {
 
 function dsSvgHtml(organs) {
   const shapes = {
-    brain: '<ellipse class="ds-organ-shape" cx="160" cy="50" rx="13" ry="10"/><path class="ds-organ-line" d="M151 46 q3 2 0 4 M158 44 q3 2 0 4 M165 46 q3 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
-    eyes: '<ellipse class="ds-organ-shape" cx="149" cy="66" rx="5" ry="4"/><ellipse class="ds-organ-shape" cx="171" cy="66" rx="5" ry="4"/><circle cx="149" cy="66" r="1.6" fill="currentColor"/><circle cx="171" cy="66" r="1.6" fill="currentColor"/>',
-    heart: '<path class="ds-organ-shape" d="M146 150 Q132 136 138 125 Q143 117 152 125 Q161 117 166 125 Q172 136 158 150 Q152 157 146 150 Z"/>',
-    lungs: '<ellipse class="ds-organ-shape" cx="175" cy="128" rx="9" ry="15"/><ellipse class="ds-organ-shape" cx="185" cy="148" rx="7" ry="11"/>',
-    muscle: '<ellipse class="ds-organ-shape" cx="97" cy="150" rx="11" ry="16" transform="rotate(-16 97 150)"/><path class="ds-organ-line" d="M91 142 q3 2.5 0 5" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
-    bone: '<ellipse class="ds-organ-shape" cx="148" cy="316" rx="7" ry="26" transform="rotate(8 148 316)"/><ellipse class="ds-organ-shape" cx="172" cy="316" rx="7" ry="26" transform="rotate(-8 172 316)"/>'
+    brain: '<ellipse class="ds-organ-shape" cx="160" cy="52" rx="14" ry="11"/><path class="ds-organ-line" d="M151 48 q3 2 0 4 M158 46 q3 2 0 4 M165 48 q3 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
+    eyes: '<ellipse class="ds-organ-shape" cx="150" cy="68" rx="4.5" ry="3.8"/><ellipse class="ds-organ-shape" cx="170" cy="68" rx="4.5" ry="3.8"/><circle cx="150" cy="68" r="1.5" fill="currentColor"/><circle cx="170" cy="68" r="1.5" fill="currentColor"/>',
+    heart: '<path class="ds-organ-shape" d="M150 152 Q136 140 141 129 Q146 122 153 129 Q160 122 165 129 Q170 140 156 152 Q151 157 150 152 Z"/>',
+    lungs: '<ellipse class="ds-organ-shape" cx="170" cy="136" rx="8" ry="14"/><ellipse class="ds-organ-shape" cx="184" cy="158" rx="7" ry="11"/>',
+    muscle: '<ellipse class="ds-organ-shape" cx="114" cy="160" rx="9" ry="15" transform="rotate(-14 114 160)"/><ellipse class="ds-organ-shape" cx="206" cy="160" rx="9" ry="15" transform="rotate(14 206 160)"/><path class="ds-organ-line" d="M109 154 q2.5 2 0 4 M201 154 q2.5 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
+    bone: '<ellipse class="ds-organ-shape" cx="150" cy="300" rx="6" ry="24" transform="rotate(6 150 300)"/><ellipse class="ds-organ-shape" cx="170" cy="300" rx="6" ry="24" transform="rotate(-6 170 300)"/>'
   };
-  const chips = {
-    brain: [160, 14], eyes: [230, 64], heart: [72, 126], lungs: [240, 146], muscle: [46, 158], bone: [240, 318]
-  };
-  const leaders = {
-    brain: 'M160 32 L160 20', eyes: 'M180 66 L224 64', heart: 'M112 138 L78 128',
-    lungs: 'M194 140 L234 146', muscle: 'M84 150 L52 156', bone: 'M180 316 L234 318'
+  const labels = {
+    brain: [160, 32], eyes: [160, 82], heart: [126, 168], lungs: [188, 194], muscle: [110, 196], bone: [160, 322]
   };
   let h = '';
   h += '<defs>' +
-    '<linearGradient id="dsSkin" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" stop-color="rgba(255,255,255,.14)"/>' +
-      '<stop offset="1" stop-color="rgba(255,255,255,.03)"/>' +
-    '</linearGradient>' +
-    '<linearGradient id="dsLimb" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" stop-color="rgba(255,255,255,.12)"/>' +
-      '<stop offset="1" stop-color="rgba(255,255,255,.04)"/>' +
-    '</linearGradient>' +
     '<filter id="dsGlow" x="-60%" y="-60%" width="220%" height="220%">' +
       '<feGaussianBlur stdDeviation="3.2" result="b"/>' +
       '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
     '</filter>' +
   '</defs>';
-  // insan silüeti
+  // insan silüeti (tek parça gibi birleşik gövde)
   h += '<g class="ds-sil">';
-  h += '<path class="ds-sil-limb" d="M144 268 C142 312 142 352 144 386"/>';
-  h += '<path class="ds-sil-limb" d="M176 268 C178 312 178 352 176 386"/>';
-  h += '<ellipse class="ds-sil-part" cx="138" cy="394" rx="14" ry="6"/>';
-  h += '<ellipse class="ds-sil-part" cx="182" cy="394" rx="14" ry="6"/>';
-  h += '<path class="ds-sil-limb" d="M124 110 C110 118 100 138 100 162 C100 190 108 214 120 234"/>';
-  h += '<path class="ds-sil-limb" d="M196 110 C210 118 220 138 220 162 C220 190 212 214 200 234"/>';
-  h += '<circle class="ds-sil-part" cx="120" cy="236" r="7"/>';
-  h += '<circle class="ds-sil-part" cx="200" cy="236" r="7"/>';
-  h += '<path class="ds-sil-part" d="M160 98 C148 96 136 98 128 104 C120 110 114 122 112 136 C112 172 112 202 114 226 C116 238 126 246 140 248 L180 248 C194 246 204 238 206 226 C208 202 208 172 208 136 C206 122 200 110 192 104 C184 98 172 96 160 98 Z"/>';
-  h += '<path class="ds-sil-part" d="M122 244 C128 258 138 266 152 268 L168 268 C182 266 192 258 198 244 C192 252 180 254 160 254 C140 254 128 252 122 244 Z"/>';
-  h += '<rect class="ds-sil-part" x="153" y="80" width="14" height="20" rx="5"/>';
-  h += '<ellipse class="ds-sil-part" cx="160" cy="52" rx="27" ry="30"/>';
-  h += '<path class="ds-sil-detail" d="M160 74 L160 82 M156 78 L164 78"/>';
-  h += '<path class="ds-sil-detail" d="M138 118 Q160 128 182 118"/>';
-  h += '<path class="ds-sil-detail" d="M160 128 L160 220"/>';
-  h += '<path class="ds-sil-detail" d="M150 236 Q160 242 170 236"/>';
+  h += '<path class="ds-sil-limb" d="M148 252 C146 288 144 328 145 362"/>';
+  h += '<path class="ds-sil-limb" d="M172 252 C174 288 176 328 175 362"/>';
+  h += '<ellipse class="ds-sil-foot" cx="139" cy="370" rx="17" ry="8"/>';
+  h += '<ellipse class="ds-sil-foot" cx="181" cy="370" rx="17" ry="8"/>';
+  h += '<path class="ds-sil-limb" d="M122 108 C110 124 103 148 103 176 C103 204 107 228 114 248"/>';
+  h += '<path class="ds-sil-limb" d="M198 108 C210 124 217 148 217 176 C217 204 213 228 206 248"/>';
+  h += '<circle class="ds-sil-hand" cx="116" cy="252" r="9"/>';
+  h += '<circle class="ds-sil-hand" cx="204" cy="252" r="9"/>';
+  h += '<path class="ds-sil-part" d="M160 98 C146 98 132 102 122 110 C112 118 108 130 108 144 C108 170 108 196 110 214 C112 232 118 244 130 252 C140 258 150 260 160 260 C170 260 180 258 190 252 C202 244 208 232 210 214 C212 196 212 170 212 144 C212 130 208 118 198 110 C188 102 174 98 160 98 Z"/>';
+  h += '<rect class="ds-sil-part" x="153" y="78" width="14" height="22" rx="6"/>';
+  h += '<ellipse class="ds-sil-part" cx="160" cy="56" rx="23" ry="27"/>';
+  h += '<circle class="ds-sil-part" cx="137" cy="58" r="5"/>';
+  h += '<circle class="ds-sil-part" cx="183" cy="58" r="5"/>';
+  h += '<path class="ds-sil-detail" d="M126 116 Q160 126 194 116"/>';
+  h += '<path class="ds-sil-detail" d="M160 118 L160 206"/>';
+  h += '<path class="ds-sil-detail" d="M116 148 L204 148"/>';
+  h += '<path class="ds-sil-detail" d="M116 180 L204 180"/>';
   h += '</g>';
   DESIGNER_ORGANS.forEach(o => {
     const sc = organs[o.id].score;
@@ -12108,15 +12098,15 @@ function dsSvgHtml(organs) {
     const col = st === 'ok' ? 'var(--green)' : st === 'warn' ? 'var(--amber)' : 'var(--red)';
     const sel = designerSel === o.id ? ' sel' : '';
     const crit = st === 'crit' ? ' crit' : '';
-    h += '<path class="ds-organ-tip" d="' + leaders[o.id] + '"/>';
     h += '<g class="ds-organ' + sel + crit + '" data-organ="' + o.id + '" style="color:' + col + '">';
     h += '<title>' + o.body + ' — ' + o.name + ' · ' + sc + '/100 · ' + DS_STATUS[st] + '</title>';
     h += shapes[o.id];
     h += '</g>';
-    const cx = chips[o.id][0], cy = chips[o.id][1];
+    const cx = labels[o.id][0], cy = labels[o.id][1];
+    const w = 24 + o.body.length * 6.5 + String(sc).length * 6;
     h += '<g class="ds-organ-lbl' + (designerSel === o.id ? ' sel' : '') + '" transform="translate(' + cx + ' ' + cy + ')">' +
-      '<rect class="ds-organ-lbl-bg" x="-22" y="-11" width="44" height="22" rx="9"/>' +
-      '<text x="0" y="4" text-anchor="middle">' + o.ico + ' ' + sc + '</text>' +
+      '<rect class="ds-organ-lbl-bg" x="' + (-w / 2) + '" y="-11" width="' + w + '" height="22" rx="11"/>' +
+      '<text x="0" y="4" text-anchor="middle"><tspan fill="rgba(255,255,255,.92)">' + o.ico + ' ' + o.body + ' </tspan><tspan fill="' + col + '">' + sc + '</tspan></text>' +
     '</g>';
   });
   return h;
