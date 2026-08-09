@@ -21,13 +21,15 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const { message } = req.body || {};
+  const { message, history, system, tokens } = req.body || {};
   if (!message) return res.status(400).json({ reply: 'Mesaj girmelisin.' });
 
   const API_KEY = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
   if (!API_KEY) {
     return res.json({ reply: null });
   }
+
+  const historyMessages = Array.isArray(history) ? history.filter(h => h && h.role && typeof h.content === 'string').slice(-14) : [];
 
   try {
     const r = await fetch(GROQ_URL, {
@@ -36,11 +38,12 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: system || SYSTEM_PROMPT },
+          ...historyMessages,
           { role: 'user', content: message }
         ],
         temperature: 0.7,
-        max_tokens: 300
+        max_tokens: Math.min(Math.max(parseInt(tokens, 10) || 300, 100), 1200)
       })
     });
 
