@@ -10,6 +10,7 @@ const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_3esU1e0
 const ROWS = {
   shared: { rowId: 'v1', journalUid: '00000000-0000-0000-0000-00000000e000' },
   channel: { rowId: 'channels', journalUid: '00000000-0000-0000-0000-00000000e002' },
+  short: { rowId: 'shortlinks', journalUid: '00000000-0000-0000-0000-00000000e003' },
 };
 
 const sbHeaders = (key) => ({
@@ -99,13 +100,13 @@ function sanitizeChannel(c) {
             const isNote = (vtype === 'article' || vtype === 'post' || vtype === 'not' || vtype === 'foto');
             const photos = [];
             if (isNote) {
-              if (vtype === 'foto' && v && v.url) photos.push({ url: String(v.url).trim().slice(0, 600), caption: '' });
+              if (vtype === 'foto' && v && v.url) photos.push({ url: String(v.url).trim().slice(0, 500000), caption: '' });
               if (Array.isArray(v && v.photos)) {
                 v.photos.slice(0, 10).forEach(p => {
-                  const u = String((p && p.url) || '').trim().slice(0, 600);
+                  const u = String((p && p.url) || '').trim().slice(0, 500000);
                   if (!u) return;
                   if (photos.some(x => x.url === u)) return;
-                  photos.push({ url: u, caption: String((p && p.caption) || '').trim().slice(0, 300) });
+                  photos.push({ url: u, caption: String((p && p.caption) || '').trim().slice(0, 500) });
                 });
               }
             }
@@ -130,7 +131,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const isChannel = String(req.query && req.query.kind) === 'channel';
-  const meta = isChannel ? ROWS.channel : ROWS.shared;
+  const isShort = String(req.query && req.query.kind) === 'short';
+  const meta = isShort ? ROWS.short : (isChannel ? ROWS.channel : ROWS.shared);
 
   // Ortak oku/yaz katmanı
   const load = async () => {
@@ -151,6 +153,13 @@ export default async function handler(req, res) {
   };
 
   if (req.method === 'GET') {
+    if (isShort) {
+      const code = String(req.query.code || '').trim().slice(0, 40);
+      const cur = await load();
+      const map = (cur.data && cur.data.links) || {};
+      const target = code ? (map[code] || null) : null;
+      return res.status(200).json({ ok: true, found: !!target, target });
+    }
     if (isChannel) {
       const cur = await load();
       const base = cur.data && cur.data.traders ? cur.data : emptyChannels();
@@ -165,6 +174,33 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     let body;
     try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
+
+    if (isShort) {
+      const tgt = body && body.target;
+      if (!tgt || !tgt.ch) return res.status(400).json({ error: 'target.ch gerekli' });
+      const cleanT = {
+        ch: String(tgt.ch).trim().slice(0, 120),
+        sec: tgt.sec ? String(tgt.sec).trim().slice(0, 60) : null,
+        t: tgt.t ? String(tgt.t).trim().slice(0, 60) : null,
+        v: tgt.v ? String(tgt.v).trim().slice(0, 60) : null,
+      };
+      if (!cleanT.ch) return res.status(400).json({ error: 'target.ch gerekli' });
+      const cur = await load();
+      const map = (cur.data && cur.data.links && typeof cur.data.links === 'object') ? cur.data.links : {};
+      let code = null;
+      Object.keys(map).forEach(k => {
+        if (code) return;
+        const m = map[k];
+        if (m && m.ch === cleanT.ch && (m.sec || null) === cleanT.sec && (m.t || null) === cleanT.t && (m.v || null) === cleanT.v) code = k;
+      });
+      if (!code) {
+        do { code = Math.random().toString(36).slice(2, 8); } while (map[code]);
+        map[code] = cleanT;
+        const s = await store({ links: map });
+        if (!s.ok) return res.status(500).json({ error: s.error });
+      }
+      return res.status(200).json({ ok: true, code, target: cleanT });
+    }
 
     if (isChannel || body.trader || body.channel || body.remove) {
       const cur = await load();
