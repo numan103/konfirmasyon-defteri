@@ -71,10 +71,14 @@ function sanitizeChannel(c) {
   const name = String(c.name || '').trim().slice(0, 80);
   if (!name) return null;
   const bio = String(c.bio || '').trim().slice(0, 500);
+  const editors = Array.isArray(c.editors)
+    ? Array.from(new Set(c.editors.map(e => String(e || '').trim().toLowerCase().slice(0, 120)).filter(Boolean))).slice(0, 20)
+    : [];
   const clean = {
     id,
     name,
     bio,
+    editors,
     createdAt: typeof c.createdAt === 'number' ? c.createdAt : Date.now(),
     sections: {},
     secMeta: Array.isArray(c.secMeta)
@@ -88,11 +92,16 @@ function sanitizeChannel(c) {
       id: String((t && t.id) || '').slice(0, 60),
       title: String((t && t.title) || '').slice(0, 200),
       videos: Array.isArray(t && t.videos)
-        ? t.videos.slice(0, 200).map(v => ({
-            id: String((v && v.id) || '').slice(0, 60),
-            title: String((v && v.title) || '').slice(0, 200),
-            url: String((v && v.url) || '').slice(0, 600),
-          }))
+        ? t.videos.slice(0, 200).map(v => {
+            const vtype = String((v && v.type) || 'video').toLowerCase();
+            return {
+              id: String((v && v.id) || '').slice(0, 60),
+              title: String((v && v.title) || '').slice(0, 200),
+              url: String((v && v.url) || '').slice(0, 600),
+              type: (vtype === 'article' || vtype === 'post') ? vtype : 'video',
+              body: String((v && v.body) || '').slice(0, 40000),
+            };
+          })
         : [],
     })).filter(t => t.id);
   });

@@ -1537,6 +1537,22 @@
   .ch-view-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .ch-view-actions .btn { padding: 7px 13px; font-size: 12px; }
   .ch-badge-owner { display: inline-block; font-size: 9.5px; font-weight: 800; color: var(--pc); background: var(--pc-soft); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; margin-left: 6px; letter-spacing: .03em; vertical-align: 1px; }
+  .ch-article { max-width: 760px; margin: 0 auto; padding: 10px 6px 4px; font-size: 14px; line-height: 1.72; color: var(--text); overflow-wrap: break-word; }
+  .ch-article h2 { font-family: var(--font-display); font-size: 19px; font-weight: 800; margin: 18px 0 8px; color: var(--text); letter-spacing: -.01em; }
+  .ch-article h3 { font-size: 15.5px; font-weight: 800; margin: 16px 0 6px; color: var(--text); }
+  .ch-article h4 { font-size: 13.5px; font-weight: 800; margin: 13px 0 5px; color: var(--text-2); }
+  .ch-article p { margin: 0 0 10px; }
+  .ch-article ul { margin: 0 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 3px; }
+  .ch-article li { margin: 0; }
+  .ch-article a { color: var(--pc); text-decoration: underline; }
+  .ch-article em { font-style: italic; }
+  .ch-src-link { display: inline-block; margin-top: 4px; font-size: 12.5px; font-weight: 700; color: var(--pc); text-decoration: none; }
+  .ch-src-link:hover { text-decoration: underline; }
+  .ch-editors-lbl { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-3); margin: 10px 2px 4px; }
+  #ch-prof-editors, #ch-in-title, #ch-in-url, #ch-in-body { width: 100%; }
+  #ch-in-body { min-height: 150px; resize: vertical; font-size: 13.5px; line-height: 1.6; }
+  #ch-type-seg { display: flex; flex-wrap: wrap; }
+  #ch-type-seg button { flex: 1; min-width: 90px; justify-content: center; }
   /* ===== Alfa Designer (trader vücudu) ===== */
   .ds-wrap { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
   @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
@@ -3942,8 +3958,8 @@
         <div class="ch-panel">
           <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
           <div id="eg-ch-list" class="ch-list"></div>
-          <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok. İlk kanalı sen aç!</div>
-          <button type="button" class="btn ch-mine-btn" id="eg-ch-mine" data-i18n="pg.egitim.chMine">＋ Kanalımı aç</button>
+          <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok.</div>
+          <button type="button" class="btn ch-mine-btn hidden" id="eg-ch-add" data-i18n="pg.egitim.chAdd">＋ Yeni kanal ekle</button>
         </div>
       </aside>
       <section class="panel eg-player-panel">
@@ -4024,7 +4040,7 @@
                 <a class="eg-card-link" id="ch-now-link" href="#" target="_blank" rel="noopener noreferrer" data-i18n="pg.egitim.openYt">YouTube'da aç ↗</a>
               </div>
               <div class="eg-vids">
-                <div class="eg-vids-h"><span data-i18n="pg.egitim.videos">Videolar</span><button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addVideo">+ Video ekle</button></div>
+                <div class="eg-vids-h"><span data-i18n="pg.egitim.videos">Videolar</span><button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addContent">+ İçerik ekle</button></div>
                 <div id="ch-vid-list" class="eg-vid-list"></div>
               </div>
             </div>
@@ -4034,10 +4050,16 @@
       </div>
     </div>
 
-    <!-- Kanal formu: bölüm / konu / video ekle-düzenle -->
+    <!-- Kanal formu: bölüm / konu / içerik ekle-düzenle -->
     <div id="ch-form" class="eg-form hidden">
       <div class="eg-form-h" id="ch-form-title" data-i18n="pg.egitim.new">Yeni</div>
+      <div class="seg" id="ch-type-seg" style="margin-bottom:8px;">
+        <button data-ctype="video" type="button" class="on-gold" data-i18n="pg.egitim.typeVideo">🎬 Video</button>
+        <button data-ctype="article" type="button" data-i18n="pg.egitim.typeArticle">📄 Makale</button>
+        <button data-ctype="post" type="button" data-i18n="pg.egitim.typePost">💬 Gönderi</button>
+      </div>
       <input type="text" id="ch-in-title" data-i18n-ph="pg.egitim.titlePh" placeholder="Başlık" maxlength="140">
+      <textarea id="ch-in-body" class="eg-notes" data-i18n-ph="pg.egitim.bodyPh" placeholder="İçeriğin…" maxlength="40000" style="height:160px;display:none;"></textarea>
       <input type="text" id="ch-in-url" data-i18n-ph="pg.egitim.urlPh" placeholder="YouTube video ya da oynatma listesi bağlantısı">
       <div class="eg-form-btns">
         <button class="btn solid" id="ch-in-save" type="button" data-i18n="act.save">Kaydet</button>
@@ -4049,8 +4071,10 @@
     <!-- Kanal profili formu -->
     <div id="ch-prof-form" class="eg-form hidden">
       <div class="eg-form-h" id="ch-prof-title" data-i18n="pg.egitim.chProfT">Kanal Profili</div>
-      <input type="text" id="ch-prof-name" data-i18n-ph="pg.egitim.chNamePh" placeholder="Trader adın / kanal adı" maxlength="80">
+      <input type="text" id="ch-prof-name" data-i18n-ph="pg.egitim.chNamePh" placeholder="Trader adı / kanal adı" maxlength="80">
       <textarea id="ch-prof-bio" class="eg-notes" data-i18n-ph="pg.egitim.chBioPh" placeholder="Kısa tanıtım — ne paylaşacaksın?" maxlength="500" style="height:76px;"></textarea>
+      <label class="ch-editors-lbl" for="ch-prof-editors" data-i18n="pg.egitim.chEditors">Düzenleyebilen mailler (virgülle)</label>
+      <input type="text" id="ch-prof-editors" data-i18n-ph="pg.egitim.chEditorsPh" placeholder="ornek@mail.com, diger@mail.com">
       <div class="eg-form-btns">
         <button class="btn solid" id="ch-prof-save" type="button" data-i18n="act.save">Kaydet</button>
         <button class="btn danger hidden" id="ch-prof-del" type="button" data-i18n="pg.egitim.chDel">Kanalı sil</button>
@@ -10977,25 +11001,20 @@ let channelOpen = null;   // açık kanalın trader userId'si
 let chSec = 'teknik';     // kanal içinde seçili bölüm id
 let chTopic = null;       // kanal içinde seçili konu id
 let chVid = null;         // kanal içinde seçili video id
-let chForm = { mode: null, topicId: null, vidId: null };
+let chForm = { mode: null, topicId: null, vidId: null, ctype: 'video' };
 let chDelArmed = null;    // bölüm silme onayı (secId)
+let chProfMode = null;    // 'new' | 'edit'
+let chProfTarget = null;  // edit edilen kanal id
 
 function chUid() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-function chMe() {
-  if (AUTH && AUTH.user) return AUTH.user.id;
-  // girişsiz mod (yerel/offline): kararlı cihaz kimliği
-  try {
-    let d = localStorage.getItem('alfa-ch-device');
-    if (!d) { d = 'dev-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem('alfa-ch-device', d); }
-    return d;
-  } catch (e) { return 'dev-' + Date.now().toString(36); }
-}
-function chMyTrader() { const me = chMe(); return me ? channelsData.traders[me] || null : null; }
+function chUserEmail() { return (AUTH && AUTH.user && AUTH.user.email) ? String(AUTH.user.email).toLowerCase() : ''; }
+function chIsAdmin() { return !!(AUTH && AUTH.user && (AUTH.user.email || '').toLowerCase() === (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')); }
 function chCanEdit(trader) {
   if (!trader) return false;
-  if (magIsAdmin()) return true;
-  const me = chMe();
-  return !!me && trader.id === me;
+  if (chIsAdmin()) return true;
+  const email = chUserEmail();
+  if (!email) return false;
+  return (trader.editors || []).map(e => String(e).toLowerCase()).indexOf(email) !== -1;
 }
 function chCount(t) {
   let n = 0;
@@ -11060,23 +11079,20 @@ async function deleteChannel(traderId) {
 function renderEduChannels() {
   const listEl = document.getElementById('eg-ch-list');
   const emptyEl = document.getElementById('eg-ch-empty');
-  const mineBtn = document.getElementById('eg-ch-mine');
+  const addBtn = document.getElementById('eg-ch-add');
   if (!listEl) return;
   listEl.innerHTML = '';
   channelsData.order.map(id => channelsData.traders[id]).filter(Boolean).forEach(t => {
     const row = document.createElement('button');
     row.type = 'button';
     row.className = 'ch-trader' + (channelOpen === t.id ? ' on' : '');
-    row.innerHTML = '<span class="ch-ava">' + chAvatarHtml(t) + '</span><span class="ch-t-name">' + esc(t.name || 'Trader') + '</span><span class="ch-t-cnt">' + chCount(t) + '🎬</span>';
+    row.innerHTML = '<span class="ch-ava">' + chAvatarHtml(t) + '</span><span class="ch-t-name">' + esc(t.name || 'Trader') + '</span><span class="ch-t-cnt">' + chCount(t) + ' içerik</span>';
     row.addEventListener('click', () => openChannel(t.id));
     listEl.appendChild(row);
   });
   if (emptyEl) emptyEl.style.display = channelsData.order.length ? 'none' : '';
-  const mine = chMyTrader();
-  if (mineBtn) {
-    mineBtn.style.display = '';
-    mineBtn.textContent = mine ? '✎ ' + (mine.name || 'Kanalım') + ' — yönet' : '＋ Kanalımı aç';
-  }
+  // Yeni kanal ekleme sadece admin'e özel; diğer herkes sadece izler
+  if (addBtn) addBtn.classList.toggle('hidden', !chIsAdmin());
 }
 
 function chCurTrader() { return channelOpen ? channelsData.traders[channelOpen] || null : null; }
@@ -11125,8 +11141,8 @@ function renderChannelView() {
   // header
   document.getElementById('ch-view-ava').innerHTML = chAvatarHtml(t);
   const nm = document.getElementById('ch-view-name');
-  nm.innerHTML = esc(t.name || 'Trader') + ' <small>' + chSecMeta(t).length + ' bölüm · ' + chCount(t) + ' video</small>';
-  if (chMe() === t.id) nm.innerHTML += ' <span class="ch-badge-owner">KANALIN</span>';
+  nm.innerHTML = esc(t.name || 'Trader') + ' <small>' + chSecMeta(t).length + ' bölüm · ' + chCount(t) + ' içerik</small>';
+  if (chCanEdit(t)) nm.innerHTML += ' <span class="ch-badge-owner">' + (chIsAdmin() ? 'ADMIN' : 'KANALIN') + '</span>';
   document.getElementById('ch-view-bio').textContent = t.bio || 'Bu trader henüz bir tanıtım yazmadı.';
   const editProf = document.getElementById('ch-edit-prof');
   if (editProf) editProf.classList.toggle('hidden', !canEdit);
@@ -11197,7 +11213,7 @@ function renderChannelView() {
     const tt = document.createElement('span'); tt.className = 'eg-item-t'; tt.textContent = topic.title || '(başlıksız)';
     row.appendChild(tt);
     const cnt = document.createElement('span'); cnt.className = 'eg-count'; cnt.textContent = (topic.videos || []).length;
-    cnt.title = 'Bu konudaki video sayısı';
+    cnt.title = 'Bu konudaki içerik sayısı';
     row.appendChild(cnt);
     if (canEdit) {
       const edit = document.createElement('button'); edit.className = 'eg-item-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'Konu adını düzenle';
@@ -11226,8 +11242,35 @@ function renderChannelView() {
   const curVid = chCurVid(cur);
   const embed = document.getElementById('ch-embed');
   embed.innerHTML = '';
-  const src = curVid ? egEmbedSrc(curVid) : '';
-  if (src) {
+  const isText = curVid && (curVid.type === 'article' || curVid.type === 'post');
+  const src = (!isText && curVid) ? egEmbedSrc(curVid) : '';
+  if (isText) {
+    // Makale / gönderi: metni biçimlendirerek göster
+    const div = document.createElement('div');
+    div.className = 'ch-article';
+    if (curVid.body && curVid.body.trim()) {
+      div.innerHTML = chFormatBody(curVid.body);
+      if (curVid.url) {
+        const a = document.createElement('a');
+        a.className = 'ch-src-link'; a.href = curVid.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.textContent = 'Kaynağı aç ↗';
+        div.appendChild(a);
+      }
+    } else {
+      const ph = document.createElement('div'); ph.className = 'eg-embed-ph';
+      const txt = document.createElement('div'); txt.className = 'eg-ph-txt';
+      txt.textContent = 'Bu içerik henüz yazılmadı.';
+      ph.appendChild(txt);
+      if (canEdit) {
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
+        btn.textContent = '＋ İçeriği düzenle';
+        btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url, type: curVid.type, body: curVid.body }));
+        ph.appendChild(btn);
+      }
+      div.appendChild(ph);
+    }
+    embed.appendChild(div);
+  } else if (src) {
     const ifr = document.createElement('iframe');
     ifr.src = src; ifr.title = (curVid.title || cur.title || 'video');
     ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
@@ -11236,29 +11279,31 @@ function renderChannelView() {
   } else {
     const ph = document.createElement('div'); ph.className = 'eg-embed-ph';
     const txt = document.createElement('div'); txt.className = 'eg-ph-txt';
-    txt.textContent = vids.length ? 'Bu videoya henüz YouTube bağlantısı eklenmedi.' : 'Bu konuda henüz video yok.';
+    txt.textContent = vids.length ? 'Bu videoya henüz YouTube bağlantısı eklenmedi.' : 'Bu konuda henüz içerik yok.';
     ph.appendChild(txt);
     if (canEdit) {
       const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
-      if (vids.length && curVid) { btn.textContent = '＋ Bağlantı ekle'; btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url })); }
-      else { btn.textContent = '＋ Video ekle'; btn.addEventListener('click', () => chOpenForm('video-add', { topicId: cur.id }, null)); }
+      if (vids.length && curVid) { btn.textContent = '＋ Bağlantı ekle'; btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url, type: curVid.type, body: curVid.body })); }
+      else { btn.textContent = '＋ İçerik ekle'; btn.addEventListener('click', () => chOpenForm('video-add', { topicId: cur.id }, null)); }
       ph.appendChild(btn);
     }
     embed.appendChild(ph);
   }
   document.getElementById('ch-now-title').textContent = cur.title || '(başlıksız)';
   const link = document.getElementById('ch-now-link');
-  if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
+  if (curVid && isText && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
+  else if (curVid && !isText && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
   else { link.style.display = 'none'; }
   const addVid = document.getElementById('ch-add-vid');
   if (addVid) addVid.classList.toggle('hidden', !canEdit);
   const vlist = document.getElementById('ch-vid-list');
   vlist.innerHTML = '';
   if (!vids.length) {
-    const e = document.createElement('div'); e.className = 'eg-vid-empty'; e.textContent = 'Henüz video yok — “+ Video ekle” ile bağla.';
+    const e = document.createElement('div'); e.className = 'eg-vid-empty'; e.textContent = 'Henüz içerik yok — “+ İçerik ekle” ile bağla.';
     vlist.appendChild(e);
   }
   vids.forEach((v, i) => {
+    const vtype = (v.type === 'article' || v.type === 'post') ? v.type : 'video';
     const kind = egKind(v);
     const row = document.createElement('div');
     row.className = 'eg-vid-row' + (curVid && v.id === curVid.id ? ' on' : '');
@@ -11267,16 +11312,18 @@ function renderChannelView() {
     row.appendChild(idx);
     const tt = document.createElement('span'); tt.className = 'eg-vid-t'; tt.textContent = v.title || '(başlıksız)';
     row.appendChild(tt);
-    if (kind === 'playlist') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = 'Liste'; row.appendChild(tag); }
+    if (vtype === 'article') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = '📄 Makale'; row.appendChild(tag); }
+    else if (vtype === 'post') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = '💬 Gönderi'; row.appendChild(tag); }
+    else if (kind === 'playlist') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = 'Liste'; row.appendChild(tag); }
     else if (kind === 'invalid') { const tag = document.createElement('span'); tag.className = 'eg-item-tag muted'; tag.textContent = 'Link yok'; row.appendChild(tag); }
     if (canEdit) {
       const up = document.createElement('button'); up.className = 'eg-vid-move'; up.type = 'button'; up.textContent = '▲'; up.title = 'Yukarı taşı';
       up.addEventListener('click', (e) => { e.stopPropagation(); if (i === 0) return; [cur.videos[i - 1], cur.videos[i]] = [cur.videos[i], cur.videos[i - 1]]; saveChannel(t); renderChannelView(); });
       const dn = document.createElement('button'); dn.className = 'eg-vid-move'; dn.type = 'button'; dn.textContent = '▼'; dn.title = 'Aşağı taşı';
       dn.addEventListener('click', (e) => { e.stopPropagation(); if (i === vids.length - 1) return; [cur.videos[i], cur.videos[i + 1]] = [cur.videos[i + 1], cur.videos[i]]; saveChannel(t); renderChannelView(); });
-      const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'Videoyu düzenle';
-      edit.addEventListener('click', (e) => { e.stopPropagation(); chOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url }); });
-      const del = document.createElement('button'); del.className = 'eg-vid-del'; del.type = 'button'; del.textContent = '×'; del.title = 'Videoyu sil';
+      const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'İçeriği düzenle';
+      edit.addEventListener('click', (e) => { e.stopPropagation(); chOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url, type: v.type, body: v.body }); });
+      const del = document.createElement('button'); del.className = 'eg-vid-del'; del.type = 'button'; del.textContent = '×'; del.title = 'İçeriği sil';
       del.addEventListener('click', (e) => {
         e.stopPropagation();
         cur.videos = cur.videos.filter(x => x.id !== v.id);
@@ -11290,24 +11337,69 @@ function renderChannelView() {
   });
 }
 
+function chInline(t) {
+  t = esc(t);
+  t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/(^|.)\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+  return t;
+}
+function chFormatBody(text) {
+  const lines = String(text || '').split(/\r?\n/);
+  let html = '', ul = false, para = [];
+  const flushPara = () => { if (para.length) { html += '<p>' + para.map(chInline).join('<br>') + '</p>'; para = []; } };
+  const flushUl = () => { if (ul) { html += '</ul>'; ul = false; } };
+  for (let raw of lines) {
+    const ln = raw.trim();
+    if (!ln) { flushPara(); flushUl(); continue; }
+    if (ln.startsWith('### ')) { flushPara(); flushUl(); html += '<h4>' + chInline(ln.slice(4)) + '</h4>'; continue; }
+    if (ln.startsWith('## ')) { flushPara(); flushUl(); html += '<h3>' + chInline(ln.slice(3)) + '</h3>'; continue; }
+    if (ln.startsWith('# ')) { flushPara(); flushUl(); html += '<h2>' + chInline(ln.slice(2)) + '</h2>'; continue; }
+    if (ln.startsWith('- ') || ln.startsWith('* ')) {
+      flushPara();
+      if (!ul) { html += '<ul>'; ul = true; }
+      html += '<li>' + chInline(ln.replace(/^[-*]\s*/, '')) + '</li>';
+      continue;
+    }
+    flushUl();
+    para.push(ln);
+  }
+  flushPara(); flushUl();
+  return html || '<p>—</p>';
+}
+
 function chOpenForm(mode, ids, prefill) {
   if (!chCanEditCur()) return;
   const g = id => document.getElementById(id);
-  chForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null };
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
   const isSec = (mode === 'sec-add');
+  const ctype = (prefill && prefill.type) || 'video';
+  chForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, ctype: ctype };
   g('ch-in-title').value = (prefill && prefill.title) || '';
+  g('ch-in-body').value = (prefill && prefill.body) || '';
   g('ch-in-url').value = (prefill && prefill.url) || '';
-  g('ch-in-url').style.display = isVideo ? '' : 'none';
   g('ch-in-err').textContent = '';
-  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Video ekle', 'video-edit': 'Videoyu düzenle', 'sec-add': 'Yeni bölüm' };
+  const typeSeg = g('ch-type-seg');
+  if (isVideo) {
+    typeSeg.style.display = '';
+    typeSeg.querySelectorAll('[data-ctype]').forEach(b => b.classList.toggle('on-gold', b.getAttribute('data-ctype') === ctype));
+    g('ch-in-body').style.display = (ctype === 'article' || ctype === 'post') ? '' : 'none';
+    const urlRow = g('ch-in-url');
+    urlRow.style.display = '';
+    urlRow.setAttribute('placeholder', (ctype === 'article' || ctype === 'post') ? 'Kaynak bağlantısı (isteğe bağlı)' : 'YouTube video ya da oynatma listesi bağlantısı');
+  } else {
+    typeSeg.style.display = 'none';
+    g('ch-in-body').style.display = 'none';
+    g('ch-in-url').style.display = 'none';
+  }
+  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm' };
   g('ch-form-title').textContent = titles[mode] || 'Düzenle';
-  g('ch-in-title').setAttribute('placeholder', isVideo ? 'Video başlığı (ör. Market Yapısı -1)' : isSec ? 'Bölüm başlığı (ör. Onchain Analizi)' : 'Konu başlığı (ör. Market Yapısı)');
+  g('ch-in-title').setAttribute('placeholder', isVideo ? 'Başlık (ör. Market Yapısı -1)' : isSec ? 'Bölüm başlığı (ör. Onchain Analizi)' : 'Konu başlığı (ör. Market Yapısı)');
   g('ch-form').classList.remove('hidden');
   g('ch-in-title').focus();
 }
-function chCloseForm() { chForm = { mode: null, topicId: null, vidId: null }; const f = document.getElementById('ch-form'); if (f) f.classList.add('hidden'); }
-function chCloseProf() { const f = document.getElementById('ch-prof-form'); if (f) f.classList.add('hidden'); }
+function chCloseForm() { chForm = { mode: null, topicId: null, vidId: null, ctype: 'video' }; const f = document.getElementById('ch-form'); if (f) f.classList.add('hidden'); }
+function chCloseProf() { chProfMode = null; chProfTarget = null; const f = document.getElementById('ch-prof-form'); if (f) f.classList.add('hidden'); }
 
 async function chSaveForm() {
   const g = id => document.getElementById(id);
@@ -11315,9 +11407,16 @@ async function chSaveForm() {
   if (!t || !chCanEditCur()) { chCloseForm(); return; }
   const title = g('ch-in-title').value.trim();
   const url = g('ch-in-url').value.trim();
+  const body = g('ch-in-body').value.trim();
   const mode = chForm.mode;
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
-  if (isVideo && url && !ytId(url) && !ytListId(url)) {
+  const ctype = isVideo ? chForm.ctype : 'video';
+  const isText = (ctype === 'article' || ctype === 'post');
+  if (isVideo && isText && !body && !url) {
+    g('ch-in-err').textContent = 'Makale/gönderi için biraz metin ya da kaynak bağlantısı gir.';
+    return;
+  }
+  if (isVideo && !isText && url && !ytId(url) && !ytListId(url)) {
     g('ch-in-err').textContent = 'Geçerli bir YouTube video ya da oynatma listesi bağlantısı gir (ya da boş bırak).';
     return;
   }
@@ -11339,7 +11438,7 @@ async function chSaveForm() {
   } else if (mode === 'video-add') {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     if (x) {
-      const v = { id: chUid(), title: title || ((ytListId(url) && !ytId(url)) ? 'Oynatma listesi' : 'Video'), url };
+      const v = { id: chUid(), title: title || (isText ? (ctype === 'article' ? 'Makale' : 'Gönderi') : ((ytListId(url) && !ytId(url)) ? 'Oynatma listesi' : 'Video')), url, type: isText ? ctype : 'video', body: isText ? body : '' };
       if (!x.videos) x.videos = [];
       x.videos.push(v);
       chTopic = x.id; chVid = v.id;
@@ -11347,66 +11446,84 @@ async function chSaveForm() {
   } else if (mode === 'video-edit') {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     const v = x && x.videos && x.videos.find(k => k.id === chForm.vidId);
-    if (v) { v.title = title || v.title || 'Video'; v.url = url; chVid = v.id; }
+    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = isText ? ctype : 'video'; v.body = isText ? body : ''; chVid = v.id; }
   }
   chCloseForm();
   await saveChannel(t);
   renderChannelView();
 }
 
-function chOpenMine() {
-  const appEl = document.getElementById('app');
-  const appShown = appEl && !appEl.classList.contains('hidden');
-  if (!AUTH.user && !appShown) {
-    try { document.getElementById('hero-register').click(); } catch (e) { /* */ }
-    return;
-  }
-  const mine = chMyTrader();
-  if (mine) { openChannel(mine.id); return; }
-  chOpenProf();
-}
-function chOpenProf() {
+function chOpenNew() {
+  if (!chIsAdmin()) return;
+  chProfMode = 'new'; chProfTarget = null;
   const g = id => document.getElementById(id);
-  const mine = chMyTrader();
-  g('ch-prof-name').value = mine ? mine.name : ((AUTH.user && AUTH.user.user_metadata && AUTH.user.user_metadata.name) || '');
-  g('ch-prof-bio').value = mine ? (mine.bio || '') : '';
+  g('ch-prof-name').value = '';
+  g('ch-prof-bio').value = '';
+  g('ch-prof-editors').value = '';
   g('ch-prof-err').textContent = '';
   const del = g('ch-prof-del');
-  if (del) del.classList.toggle('hidden', !mine);
+  if (del) del.classList.add('hidden');
+  const ed = g('ch-prof-editors');
+  if (ed) ed.style.display = '';
+  g('ch-prof-title').textContent = 'Yeni Kanal';
+  g('ch-prof-form').classList.remove('hidden');
+  g('ch-prof-name').focus();
+}
+function chOpenProf(traderId) {
+  const t = traderId ? channelsData.traders[traderId] : chCurTrader();
+  if (!t || !chCanEdit(t)) return;
+  chProfMode = 'edit'; chProfTarget = t.id;
+  const g = id => document.getElementById(id);
+  g('ch-prof-name').value = t.name || '';
+  g('ch-prof-bio').value = t.bio || '';
+  g('ch-prof-editors').value = (t.editors || []).join(', ');
+  g('ch-prof-err').textContent = '';
+  const del = g('ch-prof-del');
+  if (del) del.classList.toggle('hidden', !chIsAdmin());
+  const ed = g('ch-prof-editors');
+  if (ed) ed.style.display = chIsAdmin() ? '' : 'none';
+  g('ch-prof-title').textContent = 'Kanal Profili';
   g('ch-prof-form').classList.remove('hidden');
   g('ch-prof-name').focus();
 }
 async function chSaveProf() {
   const g = id => document.getElementById(id);
-  const me = chMe();
-  if (!me) { g('ch-prof-err').textContent = 'Önce giriş yapmalısın.'; return; }
   const name = g('ch-prof-name').value.trim();
   const bio = g('ch-prof-bio').value.trim();
   if (!name) { g('ch-prof-err').textContent = 'Kanal adı boş olamaz.'; return; }
-  let t = chMyTrader();
-  if (!t) { t = { id: me, name, bio, createdAt: Date.now(), sections: {}, secMeta: null }; }
-  else { t.name = name; t.bio = bio; }
+  const editors = (g('ch-prof-editors').value || '')
+    .split(/[,;\n]+/).map(e => e.trim().toLowerCase()).filter(Boolean).slice(0, 20);
+  if (chProfMode === 'new') {
+    if (!chIsAdmin()) { g('ch-prof-err').textContent = 'Yeni kanal sadece admin açabilir.'; return; }
+    var t = { id: chUid(), name, bio, editors, createdAt: Date.now(), sections: {}, secMeta: null };
+  } else {
+    var t = chProfTarget ? channelsData.traders[chProfTarget] : chCurTrader();
+    if (!t || !chCanEdit(t)) { chCloseProf(); return; }
+    t.name = name; t.bio = bio;
+    if (chIsAdmin()) t.editors = editors;
+  }
   chCloseProf();
   await saveChannel(t);
   openChannel(t.id);
   renderEduChannels();
 }
 async function chDelProf() {
-  const me = chMe();
-  if (!me || !chMyTrader()) return;
-  if (!confirm('Kanalını silmek istediğine emin misin? Tüm konu ve videolar kaldırılır.')) return;
+  if (!chIsAdmin()) return;
+  const t = chProfTarget ? channelsData.traders[chProfTarget] : chCurTrader();
+  if (!t) return;
+  if (!confirm('“' + t.name + '” kanalı silinsin mi? Tüm konu ve içerikler kaldırılır.')) return;
   chCloseProf();
-  await deleteChannel(me);
+  await deleteChannel(t.id);
 }
 
 function bindChannelsPage() {
   const g = id => document.getElementById(id);
-  const mine = g('eg-ch-mine');
-  if (mine) mine.addEventListener('click', chOpenMine);
+  const addBtn = g('eg-ch-add');
+  if (addBtn) addBtn.addEventListener('click', chOpenNew);
   const back = g('ch-back');
   if (back) back.addEventListener('click', closeChannel);
   const editProf = g('ch-edit-prof');
-  if (editProf) editProf.addEventListener('click', chOpenProf);
+  if (editProf) editProf.addEventListener('click', () => chOpenProf(null));
   const addTopic = g('ch-add-topic');
   if (addTopic) addTopic.addEventListener('click', () => { if (chCanEditCur()) chOpenForm('topic-add', null, null); });
   const addVid = g('ch-add-vid');
@@ -11416,6 +11533,16 @@ function bindChannelsPage() {
     if (!cur) { alert('Önce soldan bir konu seç.'); return; }
     chOpenForm('video-add', { topicId: cur.id }, null);
   });
+  const typeSeg = g('ch-type-seg');
+  if (typeSeg) typeSeg.querySelectorAll('[data-ctype]').forEach(b => b.addEventListener('click', () => {
+    const ctype = b.getAttribute('data-ctype');
+    chForm.ctype = ctype;
+    typeSeg.querySelectorAll('[data-ctype]').forEach(x => x.classList.toggle('on-gold', x === b));
+    const body = g('ch-in-body');
+    if (body) body.style.display = (ctype === 'article' || ctype === 'post') ? '' : 'none';
+    const url = g('ch-in-url');
+    if (url) url.setAttribute('placeholder', (ctype === 'article' || ctype === 'post') ? 'Kaynak bağlantısı (isteğe bağlı)' : 'YouTube video ya da oynatma listesi bağlantısı');
+  }));
   const inCancel = g('ch-in-cancel');
   if (inCancel) inCancel.addEventListener('click', chCloseForm);
   const inSave = g('ch-in-save');
@@ -15492,15 +15619,22 @@ loadSfx();
     'pg.egitim.level': { tr: 'Seviye', en: 'Level' },
     'pg.egitim.editTopic': { tr: 'Konu başlığını düzenle', en: 'Edit topic title' },
     'pg.egitim.channels': { tr: '🎬 Eğitsel Kanal — Traderlar', en: '🎬 Edu Channel — Traders' },
-    'pg.egitim.chEmpty': { tr: 'Henüz trader kanalı yok. İlk kanalı sen aç!', en: 'No trader channel yet. Open the first one!' },
-    'pg.egitim.chMine': { tr: '＋ Kanalımı aç', en: '＋ Open my channel' },
+    'pg.egitim.chEmpty': { tr: 'Henüz trader kanalı yok.', en: 'No trader channel yet.' },
+    'pg.egitim.chAdd': { tr: '＋ Yeni kanal ekle', en: '＋ Add new channel' },
     'pg.egitim.chEditProf': { tr: '✎ Profili düzenle', en: '✎ Edit profile' },
     'pg.egitim.chBack': { tr: '← Alfa Edu', en: '← Alfa Edu' },
     'pg.egitim.chNoTopics': { tr: 'Bu kanalda henüz konu yok.', en: 'No topics in this channel yet.' },
     'pg.egitim.chProfT': { tr: 'Kanal Profili', en: 'Channel Profile' },
-    'pg.egitim.chNamePh': { tr: 'Trader adın / kanal adı', en: 'Your trader / channel name' },
+    'pg.egitim.chNamePh': { tr: 'Trader adı / kanal adı', en: 'Trader / channel name' },
     'pg.egitim.chBioPh': { tr: 'Kısa tanıtım — ne paylaşacaksın?', en: 'Short intro — what will you share?' },
+    'pg.egitim.chEditors': { tr: 'Düzenleyebilen mailler (virgülle)', en: 'Editor emails (comma separated)' },
+    'pg.egitim.chEditorsPh': { tr: 'ornek@mail.com, diger@mail.com', en: 'name@mail.com, other@mail.com' },
     'pg.egitim.chDel': { tr: 'Kanalı sil', en: 'Delete channel' },
+    'pg.egitim.addContent': { tr: '+ İçerik ekle', en: '+ Add content' },
+    'pg.egitim.typeVideo': { tr: '🎬 Video', en: '🎬 Video' },
+    'pg.egitim.typeArticle': { tr: '📄 Makale', en: '📄 Article' },
+    'pg.egitim.typePost': { tr: '💬 Gönderi', en: '💬 Post' },
+    'pg.egitim.bodyPh': { tr: 'İçeriğin… (# başlık, - madde, **kalın** destekli)', en: 'Your content… (# heading, - bullet, **bold** supported)' },
     'pg.mentoring.t': { tr: 'Mentoring', en: 'Mentoring' },
     'pg.mentoring.s': { tr: 'Ahmet + Çağatay ortak eğitim paneli — konular, notlar ve fotoğraflar otomatik senkronlanır.', en: 'Ahmet + Çağatay shared training panel — topics, notes and photos sync automatically.' },
     'pg.mentoring.empty': { tr: 'Henüz konu yok. &quot;+ Konu&quot; ile başla.', en: 'No topics yet. Start with &quot;+ Topic&quot;.' },
