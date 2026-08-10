@@ -94,12 +94,28 @@ function sanitizeChannel(c) {
       videos: Array.isArray(t && t.videos)
         ? t.videos.slice(0, 200).map(v => {
             const vtype = String((v && v.type) || 'video').toLowerCase();
+            // video dışındaki tüm içerik türleri (article/post/foto) zengin "not"a normalleştirilir;
+            // foto kayıtları URL'sini notun foto listesinin ilk fotoğrafı olarak taşır.
+            const isNote = (vtype === 'article' || vtype === 'post' || vtype === 'not' || vtype === 'foto');
+            const photos = [];
+            if (isNote) {
+              if (vtype === 'foto' && v && v.url) photos.push({ url: String(v.url).trim().slice(0, 600), caption: '' });
+              if (Array.isArray(v && v.photos)) {
+                v.photos.slice(0, 10).forEach(p => {
+                  const u = String((p && p.url) || '').trim().slice(0, 600);
+                  if (!u) return;
+                  if (photos.some(x => x.url === u)) return;
+                  photos.push({ url: u, caption: String((p && p.caption) || '').trim().slice(0, 300) });
+                });
+              }
+            }
             return {
               id: String((v && v.id) || '').slice(0, 60),
               title: String((v && v.title) || '').slice(0, 200),
               url: String((v && v.url) || '').slice(0, 600),
-              type: (vtype === 'article' || vtype === 'post' || vtype === 'not' || vtype === 'foto') ? vtype : 'video',
-              body: String((v && v.body) || '').slice(0, 40000),
+              type: isNote ? 'not' : 'video',
+              body: isNote ? String((v && v.body) || '').slice(0, 40000) : '',
+              photos,
             };
           })
         : [],
