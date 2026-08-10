@@ -1552,6 +1552,8 @@
   .ch-photo { max-width: 100%; max-height: 70vh; border-radius: 10px; border: 1px solid var(--border); background: #000; }
   /* zengin not görünümü: kaydırılabilir panel (video alanından bağımsız) */
   .ch-note-view { width: 100%; max-height: 62vh; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; scrollbar-width: thin; box-sizing: border-box; }
+  .ch-note-embed { aspect-ratio: auto; overflow: visible; }
+  .ch-article .ch-photo-item { margin: 14px 0; }
   .ch-note-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -.01em; line-height: 1.35; }
   .ch-photo-item { margin: 0 0 16px; }
   .ch-photo-item .ch-photo { width: 100%; height: auto; max-height: 62vh; object-fit: contain; }
@@ -1576,6 +1578,8 @@
   .ch-pfile:hover { border-color: var(--pc); color: var(--pc); }
   .ch-pdel { flex: none; width: 26px; height: 26px; border: 1px solid var(--border); background: var(--card); color: var(--red); border-radius: 7px; font-size: 15px; line-height: 1; cursor: pointer; }
   .ch-pdel:hover { background: var(--red-soft); color: var(--red); }
+  .ch-pins { flex: none; width: 30px; height: 26px; border: 1px solid var(--border); background: var(--card); color: var(--pc); border-radius: 7px; font-size: 13px; line-height: 1; cursor: pointer; }
+  .ch-pins:hover { background: var(--pc-soft); color: var(--pc); }
   .ch-editors-lbl { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-3); margin: 10px 2px 4px; }
   #ch-prof-editors, #ch-in-title, #ch-in-url, #ch-in-body { width: 100%; }
   #ch-in-body { min-height: 150px; resize: vertical; font-size: 13.5px; line-height: 1.6; }
@@ -4093,6 +4097,7 @@
         <button type="button" data-wrap="#" title="Başlık">H</button>
         <button type="button" data-wrap="-" title="Madde">•</button>
         <button type="button" data-link="1" title="Bağlantı ekle">🔗</button>
+        <button type="button" data-img="1" title="Fotoğrafı yazının içine koy (imleç konumuna)">📷</button>
       </div>
       <textarea id="ch-in-body" class="eg-notes" data-i18n-ph="pg.egitim.bodyPh" placeholder="İçeriğin…" maxlength="40000" style="height:160px;display:none;"></textarea>
       <div id="ch-photo-ed" style="display:none;margin-top:8px;"></div>
@@ -11376,6 +11381,7 @@ function renderChannelView() {
   embed.innerHTML = '';
   const isNote = curVid && curVid.type !== 'video';
   const src = (!isNote && curVid) ? egEmbedSrc(curVid) : '';
+  embed.className = isNote ? 'eg-embed ch-note-embed' : 'eg-embed';
   if (isNote) {
     // zengin not: başlık + fotoğraflar (açıklamalı) + biçimlendirilmiş metin — kaydırılabilir panel
     const view = document.createElement('div');
@@ -11384,8 +11390,17 @@ function renderChannelView() {
     view.appendChild(ttl);
     const photos = (curVid.photos && curVid.photos.length) ? curVid.photos : [];
     const hasBody = !!(curVid.body && curVid.body.trim());
+    const inBody = new Set();
+    if (hasBody) {
+      const re = /\{\{foto:(\d+)\}\}|!\[[^\]]*\]\(([^)]+)\)/g;
+      let mm; while ((mm = re.exec(curVid.body))) {
+        if (mm[1]) { const ph = photos[Number(mm[1]) - 1]; if (ph) inBody.add(String(ph.url).trim()); }
+        else inBody.add(String(mm[2]).trim());
+      }
+    }
     if (photos.length || hasBody || curVid.url) {
       photos.forEach(p => {
+        if (inBody.has(String(p.url || '').trim())) return;
         const fig = document.createElement('figure'); fig.className = 'ch-photo-item';
         const img = document.createElement('img');
         img.className = 'ch-photo'; img.src = p.url; img.alt = p.caption || curVid.title || 'foto'; img.loading = 'lazy';
@@ -11397,7 +11412,8 @@ function renderChannelView() {
       });
       if (hasBody) {
         const art = document.createElement('div'); art.className = 'ch-article';
-        art.innerHTML = chFormatBody(curVid.body);
+        art.innerHTML = chFormatBody(curVid.body, photos);
+        art.addEventListener('click', (e) => { const im = e.target.closest('.ch-photo'); if (im) chZoomPhoto(im.src, im.getAttribute('data-cap') || ''); });
         view.appendChild(art);
       }
       if (curVid.url) {
@@ -11507,10 +11523,36 @@ function chInline(t) {
   t = t.replace(/(^|.)\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
   return t;
 }
-function chFormatBody(text) {
+function chImgFigure(cap, url) {
+  const c = esc(cap || '');
+  return '<figure class="ch-photo-item"><img class="ch-photo" src="' + esc(url) + '" alt="' + c + '" loading="lazy" data-cap="' + c + '">'
+    + (c ? '<figcaption class="ch-photo-cap">' + c + '</figcaption>' : '') + '</figure>';
+}
+function chFormatBody(text, photos) {
   const lines = String(text || '').split(/\r?\n/);
   let html = '', ul = false, para = [];
-  const flushPara = () => { if (para.length) { html += '<p>' + para.map(chInline).join('<br>') + '</p>'; para = []; } };
+  const IMG = /^(\{\{foto:(\d+)\}\}|!\[([^\]]*)\]\(([^)]+)\))$/;
+  const flushPara = () => {
+    if (!para.length) return;
+    const parts = para.join('\n').split(/(\{\{foto:\d+\}\}|!\[[^\]]*\]\([^)]+\))/);
+    let seg = [];
+    parts.forEach(p => {
+      const m = p.match(IMG);
+      if (m) {
+        if (seg.length) { html += '<p>' + seg.map(chInline).join('<br>') + '</p>'; seg = []; }
+        if (m[2]) {
+          const ph = (photos || [])[Number(m[2]) - 1];
+          if (ph && ph.url) html += chImgFigure(ph.caption, ph.url);
+        } else {
+          html += chImgFigure(m[3], m[4].trim());
+        }
+      } else if (p) {
+        seg.push(p);
+      }
+    });
+    if (seg.length) html += '<p>' + seg.map(chInline).join('<br>') + '</p>';
+    para = [];
+  };
   const flushUl = () => { if (ul) { html += '</ul>'; ul = false; } };
   for (let raw of lines) {
     const ln = raw.trim();
@@ -11540,10 +11582,20 @@ function chPhotoRow(photo) {
   const fileBtn = document.createElement('button'); fileBtn.type = 'button'; fileBtn.className = 'ch-pfile'; fileBtn.textContent = '📁 PC\u2019den';
   const fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'image/*'; fileIn.style.display = 'none';
   const capIn = document.createElement('input'); capIn.type = 'text'; capIn.className = 'ch-pcap'; capIn.placeholder = 'Fotoğrafın altına yazılacak metin'; capIn.maxLength = 500;
+  const ins = document.createElement('button'); ins.type = 'button'; ins.className = 'ch-pins'; ins.textContent = '↪'; ins.title = 'Fotoğrafı yazının içine koy (imleç konumuna)';
   const del = document.createElement('button'); del.type = 'button'; del.className = 'ch-pdel'; del.textContent = '×'; del.title = 'Bu fotoğrafı kaldır';
   if (photo && photo.url) urlIn.value = photo.url;
   if (photo && photo.caption) capIn.value = photo.caption;
   chPhotoPreview(urlIn, prev);
+  ins.addEventListener('click', () => {
+    const ta = document.getElementById('ch-in-body');
+    if (!ta) return;
+    if (!urlIn.value.trim()) { urlIn.focus(); return; }
+    const s = ta.selectionStart, e2 = ta.selectionEnd;
+    const idx = (Array.prototype.indexOf.call(row.parentNode ? row.parentNode.children : [], row) || 0) + 1;
+    ta.setRangeText('\n{{foto:' + idx + '}}\n', s, e2, 'end');
+    ta.focus();
+  });
   del.addEventListener('click', () => row.remove());
   fileBtn.addEventListener('click', () => fileIn.click());
   fileIn.addEventListener('change', () => {
@@ -11568,6 +11620,7 @@ function chPhotoRow(photo) {
   row.appendChild(fileBtn);
   row.appendChild(fileIn);
   row.appendChild(capIn);
+  row.appendChild(ins);
   row.appendChild(del);
   return row;
 }
@@ -11830,9 +11883,17 @@ function bindChannelsPage() {
     const ta = g('ch-in-body'); if (!ta) return;
     const mode = b.getAttribute('data-wrap');
     const isLink = b.hasAttribute('data-link');
+    const isImg = b.hasAttribute('data-img');
     const s = ta.selectionStart, e2 = ta.selectionEnd;
     const sel = ta.value.slice(s, e2);
-    if (isLink) {
+    if (isImg) {
+      const pv = g('ch-photo-ed');
+      const first = pv ? (pv.querySelector('.ch-purl') || {}).value || '' : '';
+      const url = window.prompt('Fotoğraf bağlantısı (URL):', first || 'https://');
+      if (!url) return;
+      const cap = window.prompt('Fotoğrafın altına yazılacak metin:', '') || '';
+      ta.setRangeText('\n![ ' + cap + '](' + url.trim() + ')\n', s, e2, 'end');
+    } else if (isLink) {
       const url = window.prompt('Bağlantı adresi (URL):', 'https://');
       if (!url) return;
       const label = sel || url;
