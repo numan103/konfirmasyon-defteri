@@ -98,7 +98,7 @@ function sanitizeChannel(c) {
               id: String((v && v.id) || '').slice(0, 60),
               title: String((v && v.title) || '').slice(0, 200),
               url: String((v && v.url) || '').slice(0, 600),
-              type: (vtype === 'article' || vtype === 'post') ? vtype : 'video',
+              type: (vtype === 'article' || vtype === 'post' || vtype === 'not' || vtype === 'foto') ? vtype : 'video',
               body: String((v && v.body) || '').slice(0, 40000),
             };
           })
