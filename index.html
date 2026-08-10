@@ -11015,7 +11015,7 @@ function chDefaultSecMeta() { return Object.keys(EG_SECTIONS).map(id => ({ id, t
 
 async function loadChannels() {
   try {
-    const r = await fetch('/api/edu-channel');
+    const r = await fetch('/api/edu-shared?kind=channel');
     if (r.ok) {
       const j = await r.json();
       if (j && j.data && j.data.traders) {
@@ -11039,7 +11039,7 @@ async function saveChannel(trader, silent) {
   try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
   if (!silent) renderEduChannels();
   try {
-    await fetch('/api/edu-channel', {
+    await fetch('/api/edu-shared?kind=channel', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ trader }),
     });
@@ -11051,7 +11051,7 @@ async function deleteChannel(traderId) {
   try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
   if (channelOpen === traderId) { channelOpen = null; renderEgitim(); } else renderEduChannels();
   try {
-    await fetch('/api/edu-channel', {
+    await fetch('/api/edu-shared?kind=channel', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ remove: traderId }),
     });
