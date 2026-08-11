@@ -1528,6 +1528,14 @@
   .ch-t-cnt { flex: none; font-size: 10.5px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
   .ch-mine-btn { width: 100%; margin-top: 8px; font-size: 12px; padding: 8px; border-radius: 9px; }
   .ch-empty { font-size: 12px; color: var(--text-3); padding: 6px 2px; }
+  .ch-main { border: 1px solid var(--border); border-radius: 14px; padding: 14px; background: var(--panel-alt); margin-top: 14px; }
+  .ch-main .ch-panel-h { margin-bottom: 10px; }
+  .ch-main .ch-list { max-height: none; gap: 8px; }
+  .ch-main .ch-trader { padding: 11px 12px; }
+  .ch-main .ch-ava { width: 32px; height: 32px; font-size: 13px; }
+  .ch-main .ch-t-name { font-size: 13.5px; }
+  .ch-main .ch-t-cnt { font-size: 11.5px; }
+  .ch-main .ch-empty { font-size: 13px; padding: 10px 4px; }
   .ch-view-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 14px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow); }
   .ch-view-ava { flex: none; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--pc), #7c3aed); color: #fff; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .ch-view-ava img { width: 100%; height: 100%; object-fit: cover; }
@@ -3980,28 +3988,20 @@
     <div class="eg-brand">
       <span class="eg-brand-ico">🎓</span>
       <span class="eg-brand-name" data-i18n="pg.egitim.t">Alfa Edu</span>
-      <span class="eg-brand-sub" data-i18n="pg.egitim.s">Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin. Değişiklikler otomatik yayınlanır.</span>
+      <span class="eg-brand-sub" data-i18n="pg.egitim.s">Eğitsel trader kanalları — videolar, notlar ve fotoğraflar. Kanalına tıkla, içeriği izle.</span>
     </div>
-    <div class="controls">
-      <div class="seg" id="eg-sec-seg"></div>
-      <div class="seg" id="eg-level-seg" style="margin-top:6px;display:none;">
-        <button data-level="temel" class="on-gold" type="button" data-i18n="pg.egitim.lvl1">Temel</button>
-        <button data-level="orta" type="button" data-i18n="pg.egitim.lvl2">Orta</button>
-        <button data-level="ileri" type="button" data-i18n="pg.egitim.lvl3">İleri</button>
-        <button data-level="all" type="button" data-i18n="pg.egitim.lvlAll">Tümü</button>
-      </div>
+    <div class="ch-panel ch-main">
+      <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
+      <div id="eg-ch-list" class="ch-list"></div>
+      <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok.</div>
+      <button type="button" class="btn ch-mine-btn hidden" id="eg-ch-add" data-i18n="pg.egitim.chAdd">＋ Yeni kanal ekle</button>
+      <div id="eg-no-channel" class="data-empty" data-i18n="pg.egitim.chPick">Bir trader kanalına tıkla — videoları ve notları burada izle.</div>
     </div>
-    <div class="eg-course">
+    <div class="eg-course hidden" id="eg-old-course">
       <aside class="panel eg-list-panel">
             <h2 class="cat-h2"><span data-i18n="pg.topics">Konular</span><span class="eg-progress" id="eg-progress"></span><button type="button" class="cat-edit" id="eg-add-topic" data-i18n="pg.addTopic">+ Konu</button></h2>
         <div id="eg-list" class="eg-list"></div>
         <div id="eg-empty" class="eg-empty-list" data-i18n="pg.egitim.empty">Bu bölümde konu yok. &quot;+ Konu&quot; ile ekle.</div>
-        <div class="ch-panel">
-          <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
-          <div id="eg-ch-list" class="ch-list"></div>
-          <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok.</div>
-          <button type="button" class="btn ch-mine-btn hidden" id="eg-ch-add" data-i18n="pg.egitim.chAdd">＋ Yeni kanal ekle</button>
-        </div>
       </aside>
       <section class="panel eg-player-panel">
         <div id="eg-player-wrap">
@@ -10801,26 +10801,27 @@ function renderEgitim() {
     chSeedFromEdu(chMineTrader());
   }
   renderEduChannels();
-  // ---- Kanal görünümü açıksa kursu gizle, kanalı göster ----
+  // ---- Kanal görünümü: Alfa Edu artık sadece trader kanalları; eski kurs arayüzü kapalı ----
   const chView = document.getElementById('ch-view');
-  const course = document.querySelector('#page-egitim > .eg-course');
+  const oldCourse = document.getElementById('eg-old-course');
   const mainControls = document.querySelector('#page-egitim > .controls');
   const egAddForm = document.getElementById('eg-add-form');
   const chFormEl = document.getElementById('ch-form');
   const chProfEl = document.getElementById('ch-prof-form');
+  if (oldCourse) oldCourse.classList.add('hidden');
+  if (mainControls) mainControls.style.display = 'none';
+  if (egAddForm) egAddForm.classList.add('hidden');
+  const noCh = document.getElementById('eg-no-channel');
+  if (noCh) noCh.style.display = channelOpen ? 'none' : 'block';
   if (channelOpen) {
     if (chView) chView.classList.remove('hidden');
-    if (course) course.style.display = 'none';
-    if (mainControls) mainControls.style.display = 'none';
-    if (egAddForm) egAddForm.classList.add('hidden');
     if (chFormEl) chFormEl.classList.add('hidden');
     if (chProfEl) chProfEl.classList.add('hidden');
     renderChannelView();
     return;
   }
   if (chView) chView.classList.add('hidden');
-  if (course) course.style.display = '';
-  if (mainControls) mainControls.style.display = '';
+  return;
   // ---- Bölüm sekmeleri (dinamik; ekle/sil sadece admin) ----
   const seg = document.getElementById('eg-sec-seg');
   seg.innerHTML = '';
@@ -14981,7 +14982,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b14';
+const APP_BUILD = 'b15';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -16125,7 +16126,7 @@ loadSfx();
     'pg.news.cardClose': { tr: 'Kapat', en: 'Close' },
     'pg.news.cardHint': { tr: 'Görseli sürükleyin ya da sağ tıklayıp kopyalayın', en: 'Drag the image or right-click to copy' },
     'pg.egitim.t': { tr: 'Alfa Edu', en: 'Alfa Edu' },
-    'pg.egitim.s': { tr: 'Bölüm → konu → video. Bir konuya birden çok video ekleyebilirsin. Değişiklikler otomatik yayınlanır.', en: 'Section → topic → video. You can add multiple videos to a topic. Changes publish automatically.' },
+    'pg.egitim.s': { tr: 'Eğitsel trader kanalları — videolar, notlar ve fotoğraflar. Kanalına tıkla, içeriği izle.', en: 'Educational trader channels — videos, notes and photos. Click a channel to watch its content.' },
     'pg.egitim.lvl1': { tr: 'Temel', en: 'Basic' },
     'pg.egitim.lvl2': { tr: 'Orta', en: 'Intermediate' },
     'pg.egitim.lvl3': { tr: 'İleri', en: 'Advanced' },
@@ -16145,6 +16146,7 @@ loadSfx();
     'pg.egitim.level': { tr: 'Seviye', en: 'Level' },
     'pg.egitim.editTopic': { tr: 'Konu başlığını düzenle', en: 'Edit topic title' },
     'pg.egitim.channels': { tr: '🎬 Eğitsel Kanal — Traderlar', en: '🎬 Edu Channel — Traders' },
+    'pg.egitim.chPick': { tr: 'Bir trader kanalına tıkla — videoları ve notları burada izle.', en: 'Pick a trader channel — watch videos and notes here.' },
     'pg.egitim.chEmpty': { tr: 'Henüz trader kanalı yok.', en: 'No trader channel yet.' },
     'pg.egitim.chAdd': { tr: '＋ Yeni kanal ekle', en: '＋ Add new channel' },
     'pg.egitim.chEditProf': { tr: '✎ Profili düzenle', en: '✎ Edit profile' },
