@@ -11433,8 +11433,8 @@ function renderChannelView() {
   }
   document.getElementById('ch-now-title').textContent = cur.title || '(başlıksız)';
   const link = document.getElementById('ch-now-link');
-  if (curVid && isNote && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
-  else if (curVid && !isNote && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
+  if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
+  else if (curVid && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
   else { link.style.display = 'none'; }
   const addVid = document.getElementById('ch-add-vid');
   if (addVid) addVid.classList.toggle('hidden', !canEdit);
@@ -14802,7 +14802,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b11';
+const APP_BUILD = 'b12';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
