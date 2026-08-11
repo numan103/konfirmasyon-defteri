@@ -1605,11 +1605,11 @@
   @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
   .ds-body-panel { position: sticky; top: 14px; }
   @media (max-width: 860px) { .ds-body-panel { position: static; } }
-  .ds-svg { --ds-skin: rgba(255,255,255,.12); --ds-skin-line: rgba(255,255,255,.82); width: 100%; display: block; }
+  .ds-svg { --ds-skin: rgba(255,255,255,.14); --ds-skin-line: rgba(255,255,255,.85); width: 100%; display: block; }
   .ds-sil { filter: drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
   .ds-sil-part { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.6; }
   .ds-sil-neck { fill: var(--ds-skin); }
-  .ds-sil-limb { fill: none; stroke: var(--ds-skin); stroke-width: 22; stroke-linecap: round; }
+  .ds-sil-limb { fill: none; stroke: var(--ds-skin); stroke-width: 15; stroke-linecap: round; }
   .ds-sil-limb-edge { fill: none; stroke: var(--ds-skin-line); stroke-width: 1.6; stroke-linecap: round; }
   .ds-sil-hand, .ds-sil-foot { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.6; }
   .ds-sil-detail { fill: none; stroke: rgba(255,255,255,.3); stroke-width: 1.2; }
@@ -13279,15 +13279,15 @@ function dsTopicsFor(id) {
 
 function dsSvgHtml(organs) {
   const shapes = {
-    brain: '<ellipse class="ds-organ-shape" cx="160" cy="52" rx="14" ry="11"/><path class="ds-organ-line" d="M151 48 q3 2 0 4 M158 46 q3 2 0 4 M165 48 q3 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
-    eyes: '<ellipse class="ds-organ-shape" cx="150" cy="68" rx="4.5" ry="3.8"/><ellipse class="ds-organ-shape" cx="170" cy="68" rx="4.5" ry="3.8"/><circle cx="150" cy="68" r="1.5" fill="currentColor"/><circle cx="170" cy="68" r="1.5" fill="currentColor"/>',
+    brain: '<ellipse class="ds-organ-shape" cx="160" cy="44" rx="14" ry="11"/><path class="ds-organ-line" d="M151 40 q3 2 0 4 M158 38 q3 2 0 4 M165 40 q3 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
+    eyes: '<ellipse class="ds-organ-shape" cx="148" cy="58" rx="4.5" ry="3.5"/><ellipse class="ds-organ-shape" cx="172" cy="58" rx="4.5" ry="3.5"/><circle cx="148" cy="58" r="1.5" fill="currentColor"/><circle cx="172" cy="58" r="1.5" fill="currentColor"/>',
     heart: '<path class="ds-organ-shape" d="M150 152 Q136 140 141 129 Q146 122 153 129 Q160 122 165 129 Q170 140 156 152 Q151 157 150 152 Z"/>',
     lungs: '<ellipse class="ds-organ-shape" cx="147" cy="132" rx="7" ry="12"/><ellipse class="ds-organ-shape" cx="173" cy="132" rx="7" ry="12"/>',
     muscle: '<ellipse class="ds-organ-shape" cx="114" cy="160" rx="9" ry="15" transform="rotate(-14 114 160)"/><ellipse class="ds-organ-shape" cx="206" cy="160" rx="9" ry="15" transform="rotate(14 206 160)"/><path class="ds-organ-line" d="M109 154 q2.5 2 0 4 M201 154 q2.5 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
     bone: '<ellipse class="ds-organ-shape" cx="150" cy="300" rx="6" ry="24" transform="rotate(6 150 300)"/><ellipse class="ds-organ-shape" cx="170" cy="300" rx="6" ry="24" transform="rotate(-6 170 300)"/>'
   };
   const labels = {
-    brain: [160, 32], eyes: [160, 82], heart: [126, 168], lungs: [188, 194], muscle: [110, 196], bone: [160, 322]
+    brain: [160, 12], eyes: [160, 72], heart: [126, 170], lungs: [188, 194], muscle: [110, 196], bone: [160, 322]
   };
   let h = '';
   h += '<defs>' +
@@ -13296,37 +13296,32 @@ function dsSvgHtml(organs) {
       '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
     '</filter>' +
   '</defs>';
-  // insan silüeti — şeffaf "cam" gövde, ince beyaz dış çizgi
+  // insan silüeti — şeffaf "cam" gövde, ince beyaz dış çizgi, minimal ve elegan
   h += '<g class="ds-sil">';
-  // bacaklar (gövde içinden başlar)
-  const legL = 'M150 240 C147 282 144 328 145 362';
-  const legR = 'M170 240 C173 282 176 328 175 362';
-  h += '<path class="ds-sil-limb" d="' + legL + '"/>';
-  h += '<path class="ds-sil-limb" d="' + legR + '"/>';
-  h += '<path class="ds-sil-limb-edge" d="' + legL + '"/>';
-  h += '<path class="ds-sil-limb-edge" d="' + legR + '"/>';
-  // kollar (omuzdan başlar)
-  const armL = 'M126 104 C112 122 104 148 103 176 C103 204 107 228 114 248';
-  const armR = 'M194 104 C208 122 216 148 217 176 C217 204 213 228 206 248';
+  // kollar (omuzdan başlar, gövdenin yanında süzülür)
+  const armL = 'M140 88 C124 98 118 116 118 136 C118 168 120 204 124 236';
+  const armR = 'M180 88 C196 98 202 116 202 136 C202 168 200 204 196 236';
   h += '<path class="ds-sil-limb" d="' + armL + '"/>';
   h += '<path class="ds-sil-limb" d="' + armR + '"/>';
   h += '<path class="ds-sil-limb-edge" d="' + armL + '"/>';
   h += '<path class="ds-sil-limb-edge" d="' + armR + '"/>';
-  // gövde — geniş omuz, belirgin bel (atletik siluet)
-  h += '<path class="ds-sil-part" d="M160 98 C176 98 192 102 202 112 C210 120 214 132 213 146 C212 160 204 172 194 180 C204 190 214 200 216 212 C218 224 206 231 194 234 C183 236 172 237 160 237 C148 237 137 236 126 234 C114 231 102 224 104 212 C106 200 116 190 126 180 C116 172 108 160 107 146 C106 132 110 120 118 112 C128 102 144 98 160 98 Z"/>';
-  // boyun + baş
-  h += '<rect class="ds-sil-neck" x="153" y="82" width="14" height="26" rx="7"/>';
-  h += '<path class="ds-sil-part" d="M160 32 C175 32 187 42 189 57 C191 72 184 85 175 92 C168 98 166 101 160 102 C154 101 152 98 145 92 C136 85 129 72 131 57 C133 42 145 32 160 32 Z"/>';
+  // bacaklar (kalçadan başlar)
+  const legL = 'M151 212 C148 252 146 300 145 350 C144 362 145 370 147 374';
+  const legR = 'M169 212 C172 252 174 300 175 350 C176 362 175 370 173 374';
+  h += '<path class="ds-sil-limb" d="' + legL + '"/>';
+  h += '<path class="ds-sil-limb" d="' + legR + '"/>';
+  h += '<path class="ds-sil-limb-edge" d="' + legL + '"/>';
+  h += '<path class="ds-sil-limb-edge" d="' + legR + '"/>';
+  // gövde — geniş omuz, ince bel (elegan siluet)
+  h += '<path class="ds-sil-part" d="M160 84 C170 84 178 87 184 92 C193 98 197 106 197 116 C197 128 195 138 192 144 C190 149 186 153 182 156 C186 162 192 172 194 184 C196 196 194 206 188 212 C183 216 172 218 160 218 C148 218 137 216 132 212 C126 206 124 196 126 184 C128 172 134 162 138 156 C134 153 130 149 128 144 C125 138 123 128 123 116 C123 106 127 98 136 92 C142 87 150 84 160 84 Z"/>';
+  // boyun + baş (küçük ve sade)
+  h += '<rect class="ds-sil-neck" x="152" y="62" width="16" height="22" rx="8"/>';
+  h += '<ellipse class="ds-sil-part" cx="160" cy="42" rx="19" ry="22"/>';
   // eller + ayaklar
-  h += '<circle class="ds-sil-hand" cx="116" cy="252" r="8"/>';
-  h += '<circle class="ds-sil-hand" cx="204" cy="252" r="8"/>';
-  h += '<ellipse class="ds-sil-foot" cx="140" cy="370" rx="16" ry="7"/>';
-  h += '<ellipse class="ds-sil-foot" cx="180" cy="370" rx="16" ry="7"/>';
-  // anatomik detay çizgileri (hafif)
-  h += '<path class="ds-sil-detail" d="M124 122 Q160 130 196 122"/>';
-  h += '<path class="ds-sil-detail" d="M160 124 L160 232"/>';
-  h += '<path class="ds-sil-detail" d="M128 134 L160 142 L192 134"/>';
-  h += '<path class="ds-sil-detail" d="M120 168 Q160 178 200 168"/>';
+  h += '<circle class="ds-sil-hand" cx="124" cy="244" r="6.5"/>';
+  h += '<circle class="ds-sil-hand" cx="196" cy="244" r="6.5"/>';
+  h += '<ellipse class="ds-sil-foot" cx="142" cy="378" rx="15" ry="6"/>';
+  h += '<ellipse class="ds-sil-foot" cx="178" cy="378" rx="15" ry="6"/>';
   h += '</g>';
   DESIGNER_ORGANS.forEach(o => {
     const sc = organs[o.id].score;
@@ -14996,7 +14991,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b16';
+const APP_BUILD = 'b17';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
