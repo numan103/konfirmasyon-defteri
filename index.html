@@ -10793,8 +10793,13 @@ function egCurVid(topic) {
 function renderEgitim() {
   const canEdit = magIsAdmin();
   // ---- Eğitsel Kanal: trader listesi (sol alttaki panel) ----
-  if (!channelsLoaded) { channelsLoaded = true; loadChannels().then(() => { renderEduChannels(); applyChDeep(); }); }
-  else applyChDeep();
+  if (!channelsLoaded) {
+    channelsLoaded = true;
+    loadChannels().then(async () => { await chEnsureMine(); chSeedFromEdu(chMineTrader()); renderEduChannels(); applyChDeep(); });
+  } else {
+    applyChDeep();
+    chSeedFromEdu(chMineTrader());
+  }
   renderEduChannels();
   // ---- Kanal görünümü açıksa kursu gizle, kanalı göster ----
   const chView = document.getElementById('ch-view');
@@ -11134,6 +11139,76 @@ async function loadChannels() {
     channelsLoaded = true;
   } catch (e) { /* */ }
 }
+// Adminin kendi kanalı (Trader Ahmet): Alfa Edu içeriğiyle bir kez tohumlanır, üstüne eklenebilir
+function chIsMine(t) {
+  const a = (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '') || '';
+  return !!(t && t.owner && String(t.owner).toLowerCase() === String(a).toLowerCase());
+}
+function chMineTrader() {
+  for (const id of channelsData.order) { const t = channelsData.traders[id]; if (chIsMine(t)) return t; }
+  for (const id of Object.keys(channelsData.traders || {})) { const t = channelsData.traders[id]; if (chIsMine(t)) return t; }
+  // Eski veri: 'Trader Ahmet' adıyla açılmış kanal da adminin sayılır
+  for (const id of channelsData.order) {
+    const t = channelsData.traders[id];
+    if (t && String(t.name || '').trim().toLowerCase() === 'trader ahmet') return t;
+  }
+  return null;
+}
+async function chEnsureMine() {
+  if (!chIsAdmin()) return null;
+  const mine = chMineTrader();
+  if (mine) {
+    // Eski kanalı sahiplen (owner alanı yoksa)
+    if (!mine.owner) {
+      mine.owner = (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '').toLowerCase();
+      if (Object.values(mine.sections || {}).some(arr => arr && arr.length)) mine.seeded = true;
+      saveChannel(mine, true);
+    }
+    return mine;
+  }
+  const t = {
+    id: chUid(),
+    name: 'Trader Ahmet',
+    bio: 'Alfa Edu içerikleri bu kanaldadır — videolar ve notlar üstüne eklenir.',
+    owner: (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '').toLowerCase(),
+    editors: [],
+    createdAt: Date.now(),
+    sections: {},
+    secMeta: null,
+    seeded: false,
+  };
+  channelsData.traders[t.id] = t;
+  if (channelsData.order.indexOf(t.id) === -1) channelsData.order.push(t.id);
+  try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
+  try { await fetch('/api/edu-shared?kind=channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trader: t }) }); } catch (e) {}
+  return t;
+}
+function chSeedFromEdu(t) {
+  if (!t || t.seeded) return;
+  if (!egitimData || !egitimData.sections) return;
+  if (Object.values(t.sections || {}).some(arr => arr && arr.length)) { t.seeded = true; return; }
+  const meta = chSecMeta(t);
+  let added = 0;
+  t.sections = t.sections || {};
+  meta.forEach(m => {
+    const src = egitimData.sections[m.id] || [];
+    if (!Array.isArray(src) || !src.length) return;
+    if (!Array.isArray(t.sections[m.id])) t.sections[m.id] = [];
+    src.forEach(x => {
+      const vids = (x.videos || []).map(v => ({ id: chUid(), title: v.title || '', url: v.url || '' }));
+      t.sections[m.id].push({
+        id: chUid(),
+        title: x.title || '',
+        level: (m.id === 'teknik' && x.level) || undefined,
+        videos: vids,
+      });
+      added += vids.length;
+    });
+  });
+  if (!added) return;
+  t.seeded = true;
+  saveChannel(t, true);
+}
 async function saveChannel(trader, silent) {
   if (!trader) return;
   channelsData.traders[trader.id] = trader;
@@ -11183,6 +11258,7 @@ function chCanEditCur() { return chCanEdit(chCurTrader()); }
 function openChannel(userId) {
   const t = channelsData.traders[userId];
   if (!t) return;
+  if (chIsMine(t)) chSeedFromEdu(t);
   channelOpen = userId;
   chSec = chSecMeta(t)[0].id;
   chTopic = null; chVid = null;
@@ -14905,7 +14981,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b13';
+const APP_BUILD = 'b14';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

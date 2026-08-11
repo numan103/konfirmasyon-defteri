@@ -117,6 +117,13 @@ function sanitizeChannel(c) {
               type: isNote ? 'not' : 'video',
               body: isNote ? String((v && v.body) || '').slice(0, 40000) : '',
               photos,
+              // içeriğe gömülü ek videolar ({{video:N}} işaretleri bunlara bakar)
+              vids: Array.isArray(v && v.vids)
+                ? v.vids.slice(0, 30).map(x => {
+                    const vu = String((typeof x === 'string' ? x : (x && x.url)) || '').trim().slice(0, 600);
+                    return vu ? { url: vu } : null;
+                  }).filter(Boolean)
+                : [],
             };
           })
         : [],
