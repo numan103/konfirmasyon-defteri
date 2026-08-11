@@ -1582,6 +1582,11 @@
   .ch-pdel:hover { background: var(--red-soft); color: var(--red); }
   .ch-pins { flex: none; width: 30px; height: 26px; border: 1px solid var(--border); background: var(--card); color: var(--pc); border-radius: 7px; font-size: 13px; line-height: 1; cursor: pointer; }
   .ch-pins:hover { background: var(--pc-soft); color: var(--pc); }
+  .ch-vrow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-alt); }
+  .ch-vrow input[type="text"] { width: auto; flex: 1 1 200px; }
+  .ch-video-item { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; margin: 14px 0; background: #000; border: 1px solid var(--border); }
+  .ch-video-item iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .ch-extra-vids { margin-top: 12px; }
   .ch-editors-lbl { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-3); margin: 10px 2px 4px; }
   #ch-prof-editors, #ch-in-title, #ch-in-url, #ch-in-body { width: 100%; }
   #ch-in-body { min-height: 150px; resize: vertical; font-size: 13.5px; line-height: 1.6; }
@@ -4100,10 +4105,13 @@
         <button type="button" data-wrap="-" title="Madde">•</button>
         <button type="button" data-link="1" title="Bağlantı ekle">🔗</button>
         <button type="button" data-img="1" title="Fotoğrafı yazının içine koy (imleç konumuna)">📷</button>
+        <button type="button" data-vid="1" title="Videoyu yazının içine koy (imleç konumuna)">🎞</button>
       </div>
       <textarea id="ch-in-body" class="eg-notes" data-i18n-ph="pg.egitim.bodyPh" placeholder="Videonun altına not yaz — fotoğraf ve metin karışık olabilir…" maxlength="40000" style="height:160px;"></textarea>
       <div id="ch-photo-ed" style="margin-top:8px;"></div>
       <button type="button" id="ch-add-photo" class="btn" style="margin:6px 0 0;align-self:flex-start;">＋ Fotoğraf ekle</button>
+      <div id="ch-video-ed" style="margin-top:8px;"></div>
+      <button type="button" id="ch-add-video" class="btn" style="margin:6px 0 0;align-self:flex-start;">＋ Video ekle (yazının içine)</button>
       <input type="text" id="ch-in-url" data-i18n-ph="pg.egitim.urlPh" placeholder="YouTube video ya da oynatma listesi bağlantısı (boş bırakılırsa sadece not)">
       <div class="eg-form-btns">
         <button class="btn solid" id="ch-in-save" type="button" data-i18n="act.save">Kaydet</button>
@@ -11412,13 +11420,23 @@ function renderChannelView() {
   }
   // notlar: video oynatıcının altında (video yoksa tek başına, aynı genişlikte)
   noteBox.innerHTML = '';
+  let boxShown = false;
   if (curVid && hasNote) {
-    noteBox.classList.remove('hidden');
+    boxShown = true;
     const nv = chBuildNoteBox(curVid, cur.title);
     if (nv) noteBox.appendChild(nv);
-  } else {
-    noteBox.classList.add('hidden');
   }
+  if (curVid) {
+    const used = chUsedVidSet(curVid);
+    const extraHtml = chItemVids(curVid).map((u, i) => used.has(i) ? '' : chVideoEmbedHtml(u)).filter(Boolean).join('');
+    if (extraHtml) {
+      boxShown = true;
+      const wrap = document.createElement('div'); wrap.className = 'ch-extra-vids';
+      wrap.innerHTML = extraHtml;
+      noteBox.appendChild(wrap);
+    }
+  }
+  if (boxShown) noteBox.classList.remove('hidden'); else noteBox.classList.add('hidden');
   // okudum/izledim tik
   if (curVid) {
     foot.classList.remove('hidden');
@@ -11511,7 +11529,7 @@ function chBuildNoteBox(vid, fallbackTitle) {
   });
   if (body) {
     const art = document.createElement('div'); art.className = 'ch-article';
-    art.innerHTML = chFormatBody(body, photos);
+    art.innerHTML = chFormatBody(body, photos, chItemVids(vid));
     art.addEventListener('click', (e) => { const im = e.target.closest('.ch-photo'); if (im) chZoomPhoto(im.src, im.getAttribute('data-cap') || ''); });
     view.appendChild(art);
   }
@@ -11534,15 +11552,28 @@ function chImgFigure(cap, url) {
   return '<figure class="ch-photo-item"><img class="ch-photo" src="' + esc(url) + '" alt="' + c + '" loading="lazy" data-cap="' + c + '">'
     + (c ? '<figcaption class="ch-photo-cap">' + c + '</figcaption>' : '') + '</figure>';
 }
-function chFormatBody(text, photos) {
+function chFormatBody(text, photos, vids) {
   const lines = String(text || '').split(/\r?\n/);
   let html = '', ul = false, para = [];
   const IMG = /^(\{\{foto:(\d+)\}\}|!\[([^\]]*)\]\(([^)]+)\))$/;
+  const VID = /^\{\{video:([^{}]+)\}\}$/;
   const flushPara = () => {
     if (!para.length) return;
-    const parts = para.join('\n').split(/(\{\{foto:\d+\}\}|!\[[^\]]*\]\([^)]+\))/);
+    const parts = para.join('\n').split(/(\{\{foto:\d+\}\}|\{\{video:[^{}]+\}\}|!\[[^\]]*\]\([^)]+\))/);
     let seg = [];
     parts.forEach(p => {
+      const vm = p.match(VID);
+      if (vm) {
+        if (seg.length) { html += '<p>' + seg.map(chInline).join('<br>') + '</p>'; seg = []; }
+        const ref = vm[1].trim();
+        if (/^\d+$/.test(ref)) {
+          const vu = (vids || [])[Number(ref) - 1];
+          if (vu) html += chVideoEmbedHtml(vu);
+        } else {
+          html += chVideoEmbedHtml(ref);
+        }
+        return;
+      }
       const m = p.match(IMG);
       if (m) {
         if (seg.length) { html += '<p>' + seg.map(chInline).join('<br>') + '</p>'; seg = []; }
@@ -11664,6 +11695,52 @@ function chCollectPhotos() {
   });
   return out;
 }
+function chVideoRow(url) {
+  const row = document.createElement('div');
+  row.className = 'ch-vrow';
+  const urlIn = document.createElement('input'); urlIn.type = 'text'; urlIn.className = 'ch-vurl'; urlIn.placeholder = 'YouTube video ya da oynatma listesi bağlantısı'; urlIn.maxLength = 500;
+  if (url) urlIn.value = url;
+  const ins = document.createElement('button'); ins.type = 'button'; ins.className = 'ch-pins'; ins.textContent = '↪'; ins.title = 'Videoyu yazının içine koy (imleç konumuna)';
+  ins.addEventListener('click', () => {
+    const ta = document.getElementById('ch-in-body');
+    if (!ta) return;
+    if (!urlIn.value.trim()) { urlIn.focus(); return; }
+    const s = ta.selectionStart, e2 = ta.selectionEnd;
+    const idx = (Array.prototype.indexOf.call(row.parentNode ? row.parentNode.children : [], row) || 0) + 1;
+    ta.setRangeText('\n{{video:' + idx + '}}\n', s, e2, 'end');
+    ta.focus();
+  });
+  const del = document.createElement('button'); del.type = 'button'; del.className = 'ch-pdel'; del.textContent = '×'; del.title = 'Bu videoyu kaldır';
+  del.addEventListener('click', () => row.remove());
+  row.appendChild(urlIn); row.appendChild(ins); row.appendChild(del);
+  return row;
+}
+function chCollectVideos() {
+  const out = [];
+  document.querySelectorAll('#ch-video-ed .ch-vrow').forEach(row => {
+    const u = (row.querySelector('.ch-vurl').value || '').trim();
+    if (u) out.push({ url: u });
+  });
+  return out;
+}
+function chItemVids(v) {
+  if (!v || !Array.isArray(v.vids) || !v.vids.length) return [];
+  const out = [];
+  v.vids.forEach(x => { const u = (typeof x === 'string' ? x : (x && x.url)) || ''; if (u) out.push(String(u).trim()); });
+  return out;
+}
+function chUsedVidSet(v) {
+  const used = new Set();
+  const body = (v && v.body) ? String(v.body) : '';
+  const re = /\{\{video:(\d+)\}\}/g;
+  let mm; while ((mm = re.exec(body))) used.add(Number(mm[1]) - 1);
+  return used;
+}
+function chVideoEmbedHtml(url) {
+  const src = egEmbedSrc({ url: String(url || '') });
+  if (!src) return '';
+  return '<div class="ch-video-item"><iframe src="' + esc(src) + '" title="video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen="" loading="lazy"></iframe></div>';
+}
 function chZoomPhoto(src, cap) {
   const old = document.getElementById('ch-zoom');
   if (old) old.remove();
@@ -11691,6 +11768,11 @@ function chOpenForm(mode, ids, prefill) {
   if (photoEd) {
     photoEd.innerHTML = '';
     prePhotos.forEach(p => photoEd.appendChild(chPhotoRow(p)));
+  }
+  const videoEd = g('ch-video-ed');
+  if (videoEd) {
+    videoEd.innerHTML = '';
+    chItemVids(prefill || {}).forEach(u => videoEd.appendChild(chVideoRow(u)));
   }
   g('ch-in-err').textContent = '';
   const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm' };
@@ -11737,7 +11819,7 @@ async function chSaveForm() {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     if (x) {
       const defTitle = hasVideoLink ? ((ytListId(url) && !ytId(url)) ? 'Oynatma listesi' : 'Video') : 'İçerik';
-      const v = { id: chUid(), title: title || defTitle, url, type: ctype, body, photos };
+      const v = { id: chUid(), title: title || defTitle, url, type: ctype, body, photos, vids: chCollectVideos() };
       if (!x.videos) x.videos = [];
       x.videos.push(v);
       chTopic = x.id; chVid = v.id;
@@ -11745,7 +11827,7 @@ async function chSaveForm() {
   } else if (mode === 'video-edit') {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     const v = x && x.videos && x.videos.find(k => k.id === chForm.vidId);
-    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.body = body; v.photos = photos; chVid = v.id; }
+    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.body = body; v.photos = photos; v.vids = chCollectVideos(); chVid = v.id; }
   }
   chCloseForm();
   await saveChannel(t);
@@ -11837,6 +11919,11 @@ function bindChannelsPage() {
     const ed = g('ch-photo-ed');
     if (ed) { ed.appendChild(chPhotoRow(null)); ed.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
   });
+  const addVideo = g('ch-add-video');
+  if (addVideo) addVideo.addEventListener('click', () => {
+    const ed = g('ch-video-ed');
+    if (ed) { ed.appendChild(chVideoRow(null)); ed.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  });
   const bodyTool = g('ch-body-tool');
   if (bodyTool) bodyTool.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
@@ -11844,9 +11931,25 @@ function bindChannelsPage() {
     const mode = b.getAttribute('data-wrap');
     const isLink = b.hasAttribute('data-link');
     const isImg = b.hasAttribute('data-img');
+    const isVid = b.hasAttribute('data-vid');
     const s = ta.selectionStart, e2 = ta.selectionEnd;
     const sel = ta.value.slice(s, e2);
-    if (isImg) {
+    if (isVid) {
+      const pv = g('ch-video-ed');
+      const first = pv ? (pv.querySelector('.ch-vurl') || {}).value || '' : '';
+      const url = window.prompt('Video bağlantısı (YouTube):', first || 'https://');
+      if (!url) return;
+      const vidUrl = url.trim();
+      let idx = 0;
+      if (pv) {
+        let rows = pv.querySelectorAll('.ch-vrow');
+        if (!rows.length) { pv.appendChild(chVideoRow(vidUrl)); rows = pv.querySelectorAll('.ch-vrow'); }
+        let vi = -1; rows.forEach((r, i) => { if ((r.querySelector('.ch-vurl').value || '').trim() === vidUrl) vi = i; });
+        if (vi === -1) { pv.appendChild(chVideoRow(vidUrl)); rows = pv.querySelectorAll('.ch-vrow'); vi = rows.length - 1; }
+        idx = vi + 1;
+      }
+      ta.setRangeText('\n{{video:' + idx + '}}\n', s, e2, 'end');
+    } else if (isImg) {
       const pv = g('ch-photo-ed');
       const first = pv ? (pv.querySelector('.ch-purl') || {}).value || '' : '';
       const url = window.prompt('Fotoğraf bağlantısı (URL):', first || 'https://');
@@ -14802,7 +14905,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b12';
+const APP_BUILD = 'b13';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -15056,7 +15159,17 @@ async function submitSeniorForm() {
       pubNote.innerHTML = '';
       pubNote.style.display = '';
       const nv = curVid ? chBuildNoteBox(curVid, cur.title) : null;
-      if (nv) pubNote.appendChild(nv); else pubNote.style.display = 'none';
+      if (nv) pubNote.appendChild(nv);
+      if (curVid) {
+        const used = chUsedVidSet(curVid);
+        const extraHtml = chItemVids(curVid).map((u, i) => used.has(i) ? '' : chVideoEmbedHtml(u)).filter(Boolean).join('');
+        if (extraHtml) {
+          const wrap = document.createElement('div'); wrap.className = 'ch-extra-vids';
+          wrap.innerHTML = extraHtml;
+          pubNote.appendChild(wrap);
+        }
+      }
+      if (!pubNote.childNodes.length) pubNote.style.display = 'none';
       document.getElementById('pub-eg-now-title').textContent = cur.title || '(başlıksız)';
       const link = document.getElementById('pub-eg-now-link');
       if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
