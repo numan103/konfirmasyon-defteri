@@ -1527,17 +1527,17 @@
   .ch-t-cnt { flex: none; font-size: 10.5px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
   .ch-mine-btn { width: 100%; margin-top: 8px; font-size: 12px; padding: 8px; border-radius: 9px; }
   .ch-empty { font-size: 12px; color: var(--text-3); padding: 6px 2px; }
-  .ch-view-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 14px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow); transition: padding .25s ease, margin-bottom .25s ease; }
-  .ch-view-header.collapsed { padding: 7px 14px; margin-bottom: 10px; }
-  .ch-view-header.collapsed .ch-view-ava { width: 36px; height: 36px; font-size: 15px; }
-  .ch-view-header.collapsed .ch-view-name { font-size: 15px; }
-  .ch-view-header.collapsed .ch-view-name small,
-  .ch-view-header.collapsed .ch-view-bio,
-  .ch-view-header.collapsed #ch-edit-prof { display: none; }
-  .ch-view-toggle { flex: none; width: 34px; height: 34px; padding: 0; font-size: 13px; border-radius: 10px; }
+  .ch-view-header { display: flex; align-items: center; gap: 14px; padding: 8px 14px; margin-bottom: 10px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow); }
+  .ch-view-header .ch-view-ava { width: 40px; height: 40px; font-size: 17px; }
+  .ch-view-header .ch-view-name { font-size: 15.5px; }
+  .ch-view-hover { max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-4px); transition: max-height .3s ease, opacity .25s ease, transform .25s ease; }
+  .ch-view-header:hover .ch-view-hover, .ch-view-header.ch-open .ch-view-hover { max-height: 200px; opacity: 1; transform: translateY(0); }
+  .ch-view-hover .ch-view-bio { margin-top: 3px; }
+  .ch-view-toggle { flex: none; width: 30px; height: 30px; padding: 0; font-size: 12px; border-radius: 10px; }
   .eg-vids-cap { display: flex; align-items: center; gap: 5px; cursor: pointer; }
   .eg-vids-arr { font-size: 9px; color: var(--pc); }
-  .eg-vid-list.collapsed { display: none; }
+  .eg-vid-list { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .35s ease, opacity .25s ease; }
+  .eg-vids:hover .eg-vid-list, .eg-vids.ch-open .eg-vid-list { max-height: 400px; opacity: 1; overflow-y: auto; }
   .ch-view-ava { flex: none; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--pc), #7c3aed); color: #fff; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .ch-view-ava img { width: 100%; height: 100%; object-fit: cover; }
   .ch-view-meta { flex: 1; min-width: 0; }
@@ -4051,15 +4051,17 @@
 
     <!-- Kanal görünümü: traderın kendi sayfası -->
     <div id="ch-view" class="hidden">
-      <div class="ch-view-header">
+      <div class="ch-view-header" id="ch-view-header">
         <div class="ch-view-ava" id="ch-view-ava"></div>
         <div class="ch-view-meta">
           <div class="ch-view-name" id="ch-view-name"></div>
-          <div class="ch-view-bio" id="ch-view-bio"></div>
+          <div class="ch-view-hover">
+            <div class="ch-view-bio" id="ch-view-bio"></div>
+          </div>
         </div>
         <div class="ch-view-actions">
           <button type="button" class="btn solid hidden" id="ch-edit-prof" data-i18n="pg.egitim.chEditProf">✎ Profili düzenle</button>
-          <button type="button" class="btn ch-view-toggle" id="ch-view-toggle" title="Üst paneli aç/kapat" aria-expanded="false">▲</button>
+          <button type="button" class="btn ch-view-toggle" id="ch-view-toggle" title="Paneli aç/kapat (dokunmatik için)">▾</button>
           <button type="button" class="btn" id="ch-back" data-i18n="pg.egitim.chBack">← Alfa Edu</button>
         </div>
       </div>
@@ -4083,9 +4085,9 @@
                 <a class="eg-card-link" id="ch-now-link" href="#" target="_blank" rel="noopener noreferrer" data-i18n="pg.egitim.openYt">YouTube'da aç ↗</a>
                 <button type="button" class="btn eg-share-btn" id="ch-share-topic">🔗 Paylaş</button>
               </div>
-              <div class="eg-vids">
+              <div class="eg-vids" id="ch-vids">
                 <div class="eg-vids-h" id="ch-vids-h" role="button" tabindex="0" title="Ders listesini aç/kapat">
-                  <span class="eg-vids-cap"><span data-i18n="pg.egitim.videos">Ders</span><span class="eg-vids-arr">▼</span></span>
+                  <span class="eg-vids-cap"><span data-i18n="pg.egitim.videos">Ders</span><span class="eg-vids-arr">▾</span></span>
                   <button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addContent">+ İçerik ekle</button>
                 </div>
                 <div id="ch-vid-list" class="eg-vid-list"></div>
@@ -11076,8 +11078,8 @@ let chProfMode = null;    // 'new' | 'edit'
 let chProfTarget = null;  // edit edilen kanal id
 let chDeep = null;        // derin bağlantı (?ch=&sec=&t=&v=) bekliyorsa burada
 let chProg = null;        // kullanıcıya özel "okudum/izledim" tik haritası (yerel)
-let chVidsOpen = false;   // kanal içinde "Ders" listesi açık mı (tıkla-büyüt)
-let chViewCollapsed = (() => { try { const v = localStorage.getItem('alfa-chview-collapsed'); return v === null ? true : v === '1'; } catch (e) { return true; } })();
+let chVidsPinned = false; // dokunmatikte "Ders" listesini sabitle
+let chViewPinned = false; // dokunmatikte üst paneli sabitle
 
 function chUid() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function chUserEmail() { return (AUTH && AUTH.user && AUTH.user.email) ? String(AUTH.user.email).toLowerCase() : ''; }
@@ -11530,10 +11532,6 @@ function renderChannelView() {
     row.addEventListener('click', () => { if (chVid === v.id) return; chVid = v.id; renderChannelView(); });
     vlist.appendChild(row);
   });
-  const vlistEl = document.getElementById('ch-vid-list');
-  if (vlistEl) vlistEl.classList.toggle('collapsed', !chVidsOpen);
-  const vidsH2 = document.getElementById('ch-vids-h');
-  if (vidsH2) { const arr = vidsH2.querySelector('.eg-vids-arr'); if (arr) arr.textContent = chVidsOpen ? '▲' : '▼'; }
 }
 
 function chInline(t) {
@@ -11868,28 +11866,33 @@ function bindChannelsPage() {
   if (editProf) editProf.addEventListener('click', () => chOpenProf(null));
   const chHeader = g('ch-view-header');
   const chHeaderToggle = g('ch-view-toggle');
-  if (chHeader && chHeaderToggle) {
-    const applyHeader = () => {
-      chHeader.classList.toggle('collapsed', !!chViewCollapsed);
-      chHeaderToggle.textContent = chViewCollapsed ? '▼' : '▲';
-      chHeaderToggle.setAttribute('aria-expanded', String(!chViewCollapsed));
+  if (chHeader) {
+    const setHeader = (open) => {
+      chHeader.classList.toggle('ch-open', open);
+      if (chHeaderToggle) chHeaderToggle.textContent = open ? '▴' : '▾';
     };
-    applyHeader();
-    chHeaderToggle.addEventListener('click', () => {
-      chViewCollapsed = !chViewCollapsed;
-      try { localStorage.setItem('alfa-chview-collapsed', chViewCollapsed ? '1' : ''); } catch (e) {}
-      applyHeader();
+    chHeader.addEventListener('mouseenter', () => { if (!chViewPinned) setHeader(true); });
+    chHeader.addEventListener('mouseleave', () => { if (!chViewPinned) setHeader(false); });
+    if (chHeaderToggle) chHeaderToggle.addEventListener('click', () => {
+      chViewPinned = !chViewPinned;
+      setHeader(chViewPinned);
     });
   }
+  const vidsBox = g('ch-vids');
   const vidsH = g('ch-vids-h');
-  if (vidsH) vidsH.addEventListener('click', (e) => {
-    if (e.target.closest('button')) return;
-    chVidsOpen = !chVidsOpen;
-    const list = g('ch-vid-list');
-    const arr = vidsH.querySelector('.eg-vids-arr');
-    if (list) list.classList.toggle('collapsed', !chVidsOpen);
-    if (arr) arr.textContent = chVidsOpen ? '▲' : '▼';
-  });
+  if (vidsBox) {
+    const setVids = (open) => {
+      vidsBox.classList.toggle('ch-open', open);
+      if (vidsH) { const arr = vidsH.querySelector('.eg-vids-arr'); if (arr) arr.textContent = open ? '▴' : '▾'; }
+    };
+    vidsBox.addEventListener('mouseenter', () => { if (!chVidsPinned) setVids(true); });
+    vidsBox.addEventListener('mouseleave', () => { if (!chVidsPinned) setVids(false); });
+    if (vidsH) vidsH.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      chVidsPinned = !chVidsPinned;
+      setVids(chVidsPinned);
+    });
+  }
   const addTopic = g('ch-add-topic');
   if (addTopic) addTopic.addEventListener('click', () => { if (chCanEditCur()) chOpenForm('topic-add', null, null); });
   const addVid = g('ch-add-vid');
