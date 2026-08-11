@@ -233,12 +233,13 @@
   .nav-drop.on > .drop-btn { background: var(--pc-soft); color: var(--pc); }
   /* Dergi: üst menü mause ile gelince aşağı insin (yer kazanımı) */
   .nav-hover-zone { display: none; }
-  body[data-page="news"] .nav-hover-zone { display: block; position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 150; background: transparent; cursor: default; }
-  body[data-page="news"] .navbar { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; max-width: 1060px; padding: 14px; border-radius: 0 0 16px 16px; transform: translateY(-110%); transition: transform .3s cubic-bezier(.3,.1,.2,1); box-shadow: 0 12px 34px rgba(10,12,24,.28); }
-  body[data-page="news"] .nav-hover-zone:hover ~ .navbar, body[data-page="news"] .navbar:hover, body[data-page="news"] .navbar:focus-within { transform: translateY(0); }
+  body[data-page="news"] .nav-hover-zone, body[data-page="egitim"] .nav-hover-zone { display: block; position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 150; background: transparent; cursor: default; }
+  body[data-page="news"] .navbar, body[data-page="egitim"] .navbar { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; max-width: 1060px; padding: 14px; border-radius: 0 0 16px 16px; transform: translateY(-110%); transition: transform .3s cubic-bezier(.3,.1,.2,1); box-shadow: 0 12px 34px rgba(10,12,24,.28); }
+  body[data-page="news"] .nav-hover-zone:hover ~ .navbar, body[data-page="egitim"] .nav-hover-zone:hover ~ .navbar, body[data-page="news"] .navbar:hover, body[data-page="egitim"] .navbar:hover, body[data-page="news"] .navbar:focus-within, body[data-page="egitim"] .navbar:focus-within { transform: translateY(0); }
+  body[data-page="egitim"] .navbar { max-width: 1400px; }
   @media (max-width: 680px) {
-    body[data-page="news"] .nav-hover-zone { display: none; }
-    body[data-page="news"] .navbar { position: sticky; top: 0; max-width: none; padding: 8px 0; border-radius: 0; box-shadow: none; transform: none; }
+    body[data-page="news"] .nav-hover-zone, body[data-page="egitim"] .nav-hover-zone { display: none; }
+    body[data-page="news"] .navbar, body[data-page="egitim"] .navbar { position: sticky; top: 0; max-width: none; padding: 8px 0; border-radius: 0; box-shadow: none; transform: none; }
   }
   /* Mobil menü (hamburger + kenar çekmecesi) */
   .nav-mobile-btn { display: none; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; flex: none; padding: 0; }
@@ -1527,17 +1528,7 @@
   .ch-t-cnt { flex: none; font-size: 10.5px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
   .ch-mine-btn { width: 100%; margin-top: 8px; font-size: 12px; padding: 8px; border-radius: 9px; }
   .ch-empty { font-size: 12px; color: var(--text-3); padding: 6px 2px; }
-  .ch-view-header { display: flex; align-items: center; gap: 14px; padding: 8px 14px; margin-bottom: 10px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow); }
-  .ch-view-header .ch-view-ava { width: 40px; height: 40px; font-size: 17px; }
-  .ch-view-header .ch-view-name { font-size: 15.5px; }
-  .ch-view-hover { max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-4px); transition: max-height .3s ease, opacity .25s ease, transform .25s ease; }
-  .ch-view-header:hover .ch-view-hover, .ch-view-header.ch-open .ch-view-hover { max-height: 200px; opacity: 1; transform: translateY(0); }
-  .ch-view-hover .ch-view-bio { margin-top: 3px; }
-  .ch-view-toggle { flex: none; width: 30px; height: 30px; padding: 0; font-size: 12px; border-radius: 10px; }
-  .eg-vids-cap { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-  .eg-vids-arr { font-size: 9px; color: var(--pc); }
-  .eg-vid-list { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .35s ease, opacity .25s ease; }
-  .eg-vids:hover .eg-vid-list, .eg-vids.ch-open .eg-vid-list { max-height: 400px; opacity: 1; overflow-y: auto; }
+  .ch-view-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 14px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow); }
   .ch-view-ava { flex: none; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--pc), #7c3aed); color: #fff; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .ch-view-ava img { width: 100%; height: 100%; object-fit: cover; }
   .ch-view-meta { flex: 1; min-width: 0; }
@@ -1547,7 +1538,7 @@
   .ch-view-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .ch-view-actions .btn { padding: 7px 13px; font-size: 12px; }
   .ch-badge-owner { display: inline-block; font-size: 9.5px; font-weight: 800; color: var(--pc); background: var(--pc-soft); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; margin-left: 6px; letter-spacing: .03em; vertical-align: 1px; }
-  .ch-article { max-width: 760px; margin: 0 auto; padding: 10px 6px 4px; font-size: 14px; line-height: 1.72; color: var(--text); overflow-wrap: break-word; }
+  .ch-article { max-width: none; margin: 0; padding: 12px 2px 6px; font-size: 16px; line-height: 1.8; color: var(--text); overflow-wrap: break-word; }
   .ch-article h2 { font-family: var(--font-display); font-size: 19px; font-weight: 800; margin: 18px 0 8px; color: var(--text); letter-spacing: -.01em; }
   .ch-article h3 { font-size: 15.5px; font-weight: 800; margin: 16px 0 6px; color: var(--text); }
   .ch-article h4 { font-size: 13.5px; font-weight: 800; margin: 13px 0 5px; color: var(--text-2); }
@@ -1561,7 +1552,7 @@
   .ch-photo-wrap { max-width: 760px; margin: 0 auto; padding: 10px 6px 4px; text-align: center; }
   .ch-photo { max-width: 100%; max-height: 70vh; border-radius: 10px; border: 1px solid var(--border); background: #000; }
   /* zengin not görünümü: kaydırılabilir panel (video alanından bağımsız) */
-  .ch-note-view { width: 100%; max-height: 76vh; min-height: 46vh; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; scrollbar-width: thin; box-sizing: border-box; }
+  .ch-note-view { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; box-sizing: border-box; }
   .ch-note-embed { aspect-ratio: auto; overflow: visible; }
   .ch-article .ch-photo-item { margin: 14px 0; }
   .ch-note-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -.01em; line-height: 1.35; }
@@ -2466,6 +2457,7 @@
   .tv-sug-item .s-ex { margin-left: auto; font-size: 10.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; }
   .tv-sug-note { padding: 9px 12px; font-size: 11.5px; color: var(--text-3); }
   body[data-page="trading"] .wrap { max-width: 1560px; }
+  body[data-page="egitim"] .wrap { max-width: 1400px; }
   /* Alfa Man */
   .alfa-page { max-width: 980px; margin: 0 auto; padding: 22px 14px 70px; }
   .am-tabs { display: flex; gap: 8px; margin: 16px 0; }
@@ -4051,17 +4043,14 @@
 
     <!-- Kanal görünümü: traderın kendi sayfası -->
     <div id="ch-view" class="hidden">
-      <div class="ch-view-header" id="ch-view-header">
+      <div class="ch-view-header">
         <div class="ch-view-ava" id="ch-view-ava"></div>
         <div class="ch-view-meta">
           <div class="ch-view-name" id="ch-view-name"></div>
-          <div class="ch-view-hover">
-            <div class="ch-view-bio" id="ch-view-bio"></div>
-          </div>
+          <div class="ch-view-bio" id="ch-view-bio"></div>
         </div>
         <div class="ch-view-actions">
           <button type="button" class="btn solid hidden" id="ch-edit-prof" data-i18n="pg.egitim.chEditProf">✎ Profili düzenle</button>
-          <button type="button" class="btn ch-view-toggle" id="ch-view-toggle" title="Paneli aç/kapat (dokunmatik için)">▾</button>
           <button type="button" class="btn" id="ch-back" data-i18n="pg.egitim.chBack">← Alfa Edu</button>
         </div>
       </div>
@@ -4085,11 +4074,8 @@
                 <a class="eg-card-link" id="ch-now-link" href="#" target="_blank" rel="noopener noreferrer" data-i18n="pg.egitim.openYt">YouTube'da aç ↗</a>
                 <button type="button" class="btn eg-share-btn" id="ch-share-topic">🔗 Paylaş</button>
               </div>
-              <div class="eg-vids" id="ch-vids">
-                <div class="eg-vids-h" id="ch-vids-h" role="button" tabindex="0" title="Ders listesini aç/kapat">
-                  <span class="eg-vids-cap"><span data-i18n="pg.egitim.videos">Ders</span><span class="eg-vids-arr">▾</span></span>
-                  <button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addContent">+ İçerik ekle</button>
-                </div>
+              <div class="eg-vids">
+                <div class="eg-vids-h"><span data-i18n="pg.egitim.videos">Ders</span><button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addContent">+ İçerik ekle</button></div>
                 <div id="ch-vid-list" class="eg-vid-list"></div>
               </div>
             </div>
@@ -11078,8 +11064,6 @@ let chProfMode = null;    // 'new' | 'edit'
 let chProfTarget = null;  // edit edilen kanal id
 let chDeep = null;        // derin bağlantı (?ch=&sec=&t=&v=) bekliyorsa burada
 let chProg = null;        // kullanıcıya özel "okudum/izledim" tik haritası (yerel)
-let chVidsPinned = false; // dokunmatikte "Ders" listesini sabitle
-let chViewPinned = false; // dokunmatikte üst paneli sabitle
 
 function chUid() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function chUserEmail() { return (AUTH && AUTH.user && AUTH.user.email) ? String(AUTH.user.email).toLowerCase() : ''; }
@@ -11864,35 +11848,6 @@ function bindChannelsPage() {
   if (back) back.addEventListener('click', closeChannel);
   const editProf = g('ch-edit-prof');
   if (editProf) editProf.addEventListener('click', () => chOpenProf(null));
-  const chHeader = g('ch-view-header');
-  const chHeaderToggle = g('ch-view-toggle');
-  if (chHeader) {
-    const setHeader = (open) => {
-      chHeader.classList.toggle('ch-open', open);
-      if (chHeaderToggle) chHeaderToggle.textContent = open ? '▴' : '▾';
-    };
-    chHeader.addEventListener('mouseenter', () => { if (!chViewPinned) setHeader(true); });
-    chHeader.addEventListener('mouseleave', () => { if (!chViewPinned) setHeader(false); });
-    if (chHeaderToggle) chHeaderToggle.addEventListener('click', () => {
-      chViewPinned = !chViewPinned;
-      setHeader(chViewPinned);
-    });
-  }
-  const vidsBox = g('ch-vids');
-  const vidsH = g('ch-vids-h');
-  if (vidsBox) {
-    const setVids = (open) => {
-      vidsBox.classList.toggle('ch-open', open);
-      if (vidsH) { const arr = vidsH.querySelector('.eg-vids-arr'); if (arr) arr.textContent = open ? '▴' : '▾'; }
-    };
-    vidsBox.addEventListener('mouseenter', () => { if (!chVidsPinned) setVids(true); });
-    vidsBox.addEventListener('mouseleave', () => { if (!chVidsPinned) setVids(false); });
-    if (vidsH) vidsH.addEventListener('click', (e) => {
-      if (e.target.closest('button')) return;
-      chVidsPinned = !chVidsPinned;
-      setVids(chVidsPinned);
-    });
-  }
   const addTopic = g('ch-add-topic');
   if (addTopic) addTopic.addEventListener('click', () => { if (chCanEditCur()) chOpenForm('topic-add', null, null); });
   const addVid = g('ch-add-vid');
@@ -14889,7 +14844,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b7';
+const APP_BUILD = 'b9';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
