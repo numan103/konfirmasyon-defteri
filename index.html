@@ -1553,7 +1553,7 @@
   .ch-photo { max-width: 100%; max-height: 70vh; border-radius: 10px; border: 1px solid var(--border); background: #000; }
   /* zengin not görünümü: kaydırılabilir panel (video alanından bağımsız) */
   .ch-note-view { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; box-sizing: border-box; }
-  .ch-note-embed { aspect-ratio: auto; overflow: visible; }
+  .eg-embed.ch-note-embed { aspect-ratio: auto; overflow: visible; }
   .ch-article .ch-photo-item { margin: 14px 0; }
   .ch-note-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -.01em; line-height: 1.35; }
   .ch-photo-item { margin: 0 0 16px; }
@@ -14844,7 +14844,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b9';
+const APP_BUILD = 'b10';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
