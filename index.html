@@ -1605,7 +1605,8 @@
   @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
   .ds-body-panel { position: sticky; top: 14px; }
   @media (max-width: 860px) { .ds-body-panel { position: static; } }
-  .ds-svg { --ds-skin: rgba(255,255,255,.11); --ds-skin-line: rgba(255,255,255,.42); --ds-seam: rgba(255,255,255,.28); width: 100%; display: block; }
+  .ds-svg { --ds-skin: rgba(206,214,236,.15); --ds-skin-line: rgba(214,220,240,.5); --ds-seam: rgba(214,220,240,.34); width: 100%; display: block; }
+  html[data-theme="light"] .ds-svg { --ds-skin: rgba(96,106,140,.16); --ds-skin-line: rgba(70,80,112,.55); --ds-seam: rgba(70,80,112,.42); }
   .ds-sil { filter: drop-shadow(0 12px 28px rgba(0,0,0,.5)); }
   .ds-sil-part { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; stroke-linejoin: round; }
   .ds-sil-neck { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; }
