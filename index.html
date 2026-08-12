@@ -1794,6 +1794,34 @@
   .at-frow { display: flex; gap: 10px; } .at-frow > * { flex: 1; min-width: 0; }
   .at-frow3 { gap: 8px; }
   .at-imgprev img { width: 100%; border-radius: 10px; margin-top: 4px; max-height: 220px; object-fit: cover; }
+  .at-head-btns { display: flex; gap: 8px; flex: none; }
+  .at-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .at-c-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  /* alıntı (quote) bloğu */
+  .at-quote { margin: 12px 16px 0; border: 1px solid var(--border); border-left: 3px solid var(--pc); border-radius: 10px; background: var(--bg2); padding: 10px 12px; }
+  .at-quote-hd { font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .at-quote-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .at-quote-note { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin-top: 6px; white-space: pre-wrap; }
+  .at-rpill { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .at-rpill.pos { color: #16a34a; } .at-rpill.neg { color: #dc2626; }
+  /* kompozer: alıntı butonları + sonuç listesi + önizleme */
+  .at-quote-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .at-qbtn { border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 999px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .at-qbtn:hover { border-color: var(--pc); color: var(--pc); }
+  .at-result-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; padding: 6px; }
+  .at-rrow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg2); cursor: pointer; font-size: 12.5px; }
+  .at-rrow:hover { border-color: var(--pc); }
+  .at-quote-box { border: 1px solid var(--pc); border-radius: 10px; background: var(--pc-soft); padding: 10px 12px; position: relative; font-size: 13px; color: var(--text); }
+  .at-quote-box .at-qx { position: absolute; top: 6px; right: 8px; border: none; background: none; color: var(--text-3); cursor: pointer; font-size: 13px; }
+  .at-prev-lbl { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-top: 4px; }
+  .at-live-prev { border: 1px dashed var(--border); border-radius: 14px; padding: 8px; background: var(--bg); }
+  .at-live-prev .at-card { box-shadow: none; }
+  .at-live-prev .at-actions, .at-live-prev .at-comments, .at-live-prev .at-c-del { display: none; }
+  .at-quote-box .at-quote { margin: 0; border: none; background: transparent; padding: 0; }
+  .at-flabel { font-size: 12px; font-weight: 700; color: var(--text-2); }
+  .at-prof-prev { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); }
+  .at-prof-prev .at-avatar { width: 48px; height: 48px; font-size: 20px; }
+  .at-prof-prev .nm { font-size: 15px; font-weight: 800; color: var(--text); }
   @media (max-width: 640px) { .at-coin-search { margin-left: 0; max-width: none; } }
   /* ===== Mentoring (ortak eğitim) ===== */
   .mt-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
@@ -4318,7 +4346,10 @@
           <div class="at-brand-sub">Adminlerin coin/bias analizleri ve işlem paylaşımları — beğen, yorum yap, tartış.</div>
         </div>
       </div>
-      <button type="button" class="btn solid at-new-btn" id="at-new-btn" style="display:none">+ Paylaşım Ekle</button>
+      <div class="at-head-btns">
+        <button type="button" class="btn ghost at-prof-btn" id="at-prof-btn" style="display:none">⚙ Profil</button>
+        <button type="button" class="btn solid at-new-btn" id="at-new-btn" style="display:none">+ Paylaşım Ekle</button>
+      </div>
     </div>
     <div class="at-filters" id="at-filters">
       <button type="button" class="at-fbtn on" data-atf="all">Hepsi</button>
@@ -4368,10 +4399,34 @@
           <input type="text" id="at-f-img" class="at-inp" placeholder="Görsel linki (opsiyonel, https://…)" maxlength="400">
         </div>
         <div id="at-f-imgprev" class="at-imgprev"></div>
+        <div class="at-quote-row">
+          <button type="button" class="at-qbtn" id="at-q-bias">🎯 Bias alıntıla</button>
+          <button type="button" class="at-qbtn" id="at-q-result">📊 İşlem sonucu alıntıla</button>
+        </div>
+        <div id="at-result-list" class="at-result-list" style="display:none"></div>
+        <div id="at-quote-box" class="at-quote-box" style="display:none"></div>
+        <div class="at-prev-lbl">Önizleme</div>
+        <div id="at-live-prev" class="at-live-prev"></div>
       </div>
       <div class="at-modal-ft">
         <button type="button" class="btn ghost" id="at-cancel">Vazgeç</button>
         <button type="button" class="btn solid" id="at-submit">Paylaş</button>
+      </div>
+    </div>
+  </div>
+  <div id="at-pmodal" class="at-modal">
+    <div class="at-modal-box" style="max-width:420px">
+      <div class="at-modal-hd"><span>Admin Profili</span><button type="button" class="at-modal-x" id="at-pmodal-x" aria-label="Kapat">✕</button></div>
+      <div class="at-modal-body">
+        <div class="at-prof-prev" id="at-prof-prev"></div>
+        <label class="at-flabel">Görünen isim</label>
+        <input type="text" id="at-p-name" class="at-inp" placeholder="Örn. Numan" maxlength="40">
+        <label class="at-flabel">Profil fotoğrafı (link)</label>
+        <input type="text" id="at-p-avatar" class="at-inp" placeholder="https://… (kare görsel önerilir)" maxlength="400">
+      </div>
+      <div class="at-modal-ft">
+        <button type="button" class="btn ghost" id="at-pmodal-cancel">Vazgeç</button>
+        <button type="button" class="btn solid" id="at-pmodal-save">Kaydet</button>
       </div>
     </div>
   </div>
@@ -13811,9 +13866,38 @@ function alfaNick(force) {
   }
   return n;
 }
+function alfaProfile() { try { return JSON.parse(localStorage.getItem('alfa-profile') || '{}') || {}; } catch (e) { return {}; } }
+function alfaSaveProfile(p) { try { localStorage.setItem('alfa-profile', JSON.stringify(p)); } catch (e) {} }
 function alfaMyName() {
-  if (alfaIsAdmin()) { try { return (AUTH && AUTH.user && (AUTH.user.email || '').split('@')[0]) || 'Admin'; } catch (e) { return 'Admin'; } }
+  if (alfaIsAdmin()) {
+    const p = alfaProfile(); if (p.name) return p.name;
+    try { return (AUTH && AUTH.user && (AUTH.user.email || '').split('@')[0]) || 'Admin'; } catch (e) { return 'Admin'; }
+  }
   return alfaNick(false) || '';
+}
+function alfaMyAvatar() { return alfaIsAdmin() ? (alfaProfile().avatar || '') : ''; }
+function atQuoteHtml(q) {
+  if (!q) return '';
+  if (q.kind === 'bias') {
+    const d = (q.dir || '').toUpperCase();
+    const emo = (d === 'BULLISH' || d === 'LONG') ? '🟢' : (d === 'BEARISH' || d === 'SHORT') ? '🔴' : '⚪';
+    const lbl = d === 'BULLISH' ? 'Bullish' : d === 'BEARISH' ? 'Bearish' : (d || 'Nötr');
+    return '<div class="at-quote"><div class="at-quote-hd">🎯 Alıntı · HTF Bias</div>' +
+      '<div class="at-quote-main">' + emo + ' ' + esc(lbl) + (q.pair ? ' · ' + esc(q.pair) : '') + '</div>' +
+      (q.note ? '<div class="at-quote-note">' + esc(q.note) + '</div>' : '') + '</div>';
+  }
+  if (q.kind === 'result') {
+    const rn = parseFloat(String(q.r).replace(',', '.'));
+    const cls = isNaN(rn) ? '' : (rn >= 0 ? ' pos' : ' neg');
+    const rtxt = (q.r === '' || q.r == null) ? '—' : ((rn > 0 ? '+' : '') + q.r + 'R');
+    const dir = String(q.dir || '').toUpperCase();
+    const dtag = dir ? ' <span class="at-tag ' + (dir === 'LONG' ? 'long">🟢 LONG' : 'short">🔴 SHORT') + '</span>' : '';
+    return '<div class="at-quote"><div class="at-quote-hd">📊 Alıntı · İşlem Sonucu</div>' +
+      '<div class="at-quote-main">' + esc(q.pair || '') + dtag + ' <span class="at-rpill' + cls + '">' + esc(rtxt) + '</span>' +
+      (q.verdict ? ' · ' + esc(q.verdict) : '') + (q.date ? ' · ' + esc(q.date) : '') + '</div>' +
+      (q.strat ? '<div class="at-quote-note">Strateji: ' + esc(q.strat) + '</div>' : '') + '</div>';
+  }
+  return '';
 }
 function atTimeAgo(ts) {
   const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
@@ -13840,8 +13924,9 @@ async function loadAlfaTrading() {
   renderAlfaFeed();
 }
 function renderAlfaTrading() {
-  const nb = document.getElementById('at-new-btn');
-  if (nb) nb.style.display = alfaIsAdmin() ? '' : 'none';
+  const adm = alfaIsAdmin();
+  const nb = document.getElementById('at-new-btn'); if (nb) nb.style.display = adm ? '' : 'none';
+  const pb = document.getElementById('at-prof-btn'); if (pb) pb.style.display = adm ? '' : 'none';
   if (!alfaLoaded) { loadAlfaTrading(); } else { renderAlfaFeed(); loadAlfaTrading(); }
 }
 function alfaFiltered() {
@@ -13888,13 +13973,14 @@ function atCardHtml(p) {
     if (p.lev || p.risk) levels += '<div class="at-text" style="color:var(--text-3);font-size:12px;">' + [p.lev ? 'Kaldıraç: ' + esc(p.lev) : '', p.risk ? 'Risk: ' + esc(p.risk) : ''].filter(Boolean).join(' · ') + '</div>';
   }
   const comments = (p.comments || []).map(c =>
-    '<div class="at-comment" data-cid="' + c.id + '"><div class="at-c-av">' + (c.nick || '?').trim().charAt(0).toUpperCase() + '</div>' +
+    '<div class="at-comment" data-cid="' + c.id + '"><div class="at-c-av">' + (c.avatar ? '<img src="' + esc(c.avatar) + '" alt="">' : (c.nick || '?').trim().charAt(0).toUpperCase()) + '</div>' +
     '<div class="at-c-body"><div class="at-c-top"><span class="at-c-nick">' + esc(c.nick) + (c.isAdmin ? ' 👑' : '') + '</span><span class="at-c-time">' + atTimeAgo(c.ts) + '</span>' +
     (admin ? '<button type="button" class="at-c-del" data-atcdel="' + p.id + '|' + c.id + '">✕</button>' : '') +
     '</div><div class="at-c-text">' + esc(c.text) + '</div></div></div>'
   ).join('');
+  const avHtml = p.avatar ? '<img src="' + esc(p.avatar) + '" alt="">' : esc(av);
   return '<article class="at-card" data-pid="' + p.id + '">' +
-    '<div class="at-card-hd"><div class="at-avatar">' + esc(av) + '</div>' +
+    '<div class="at-card-hd"><div class="at-avatar">' + avHtml + '</div>' +
       '<div class="at-who"><div class="at-author">' + esc(p.author || 'Admin') + (p.isAdmin ? '<span class="at-adm">Admin</span>' : '') + '</div>' +
       '<div class="at-time">' + atTimeAgo(p.ts) + '</div></div>' +
       (admin ? '<button type="button" class="at-act danger at-c-del" data-atpdel="' + p.id + '" title="Sil">🗑</button>' : '') +
@@ -13903,6 +13989,7 @@ function atCardHtml(p) {
     (p.title ? '<div class="at-title">' + esc(p.title) + '</div>' : '') +
     (p.text ? '<div class="at-text">' + esc(p.text) + '</div>' : '') +
     levels +
+    atQuoteHtml(p.quote) +
     (p.img ? '<img class="at-img" src="' + esc(p.img) + '" alt="" loading="lazy" data-atimg="' + esc(p.img) + '">' : '') +
     '<div class="at-actions">' +
       '<button type="button" class="at-act' + (liked ? ' liked' : '') + '" data-atlike="' + p.id + '">' + (liked ? '❤️' : '🤍') + ' <span>' + nlike + '</span></button>' +
@@ -13932,11 +14019,12 @@ async function atSendComment(pid) {
   const nick = alfaMyName() || alfaNick(true); if (!nick) return;
   inp.value = '';
   const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  const av = alfaMyAvatar();
   p.comments = p.comments || [];
-  p.comments.push({ id: 't' + Date.now(), nick, text, ts: Date.now(), isAdmin: alfaIsAdmin() });
+  p.comments.push({ id: 't' + Date.now(), nick, text, ts: Date.now(), isAdmin: alfaIsAdmin(), avatar: av });
   renderAlfaFeed();
   const box = document.getElementById('at-com-' + pid); if (box) box.classList.add('open');
-  await atApi('comment', { postId: pid, nick, text, isAdmin: alfaIsAdmin() });
+  await atApi('comment', { postId: pid, nick, text, isAdmin: alfaIsAdmin(), avatar: av });
   loadAlfaTrading();
 }
 async function atDelPost(pid) {
@@ -13967,28 +14055,101 @@ function atToolSend(pid) {
   try { if (typeof updateCalc === 'function') updateCalc(); } catch (e) {}
 }
 function atOpenModal() {
-  alfaComposer = { type: 'analiz', dir: 'long' };
+  alfaComposer = { type: 'analiz', dir: 'long', quote: null };
   ['at-f-coin', 'at-f-title', 'at-f-text', 'at-f-entry', 'at-f-tp', 'at-f-sl', 'at-f-lev', 'at-f-risk', 'at-f-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const bias = document.getElementById('at-f-bias'); if (bias) bias.value = '';
   document.querySelectorAll('.at-type').forEach(b => b.classList.toggle('on', b.getAttribute('data-attype') === 'analiz'));
   document.querySelectorAll('.at-dir').forEach(b => b.classList.toggle('on', b.getAttribute('data-atdir') === 'long'));
   document.getElementById('at-islem-fields').style.display = 'none';
   document.getElementById('at-f-imgprev').innerHTML = '';
+  document.getElementById('at-result-list').style.display = 'none';
+  atRenderQuoteBox(); atUpdatePreview();
   document.getElementById('at-modal').classList.add('open');
 }
 function atCloseModal() { document.getElementById('at-modal').classList.remove('open'); }
+
+function atRenderQuoteBox() {
+  const box = document.getElementById('at-quote-box'); if (!box) return;
+  if (!alfaComposer.quote) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<button type="button" class="at-qx" id="at-qx">✕</button>' + atQuoteHtml(alfaComposer.quote);
+}
+function atUpdatePreview() {
+  const prev = document.getElementById('at-live-prev'); if (!prev) return;
+  const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const type = alfaComposer.type;
+  const post = {
+    id: 'prev', type, author: alfaMyName() || 'Admin', avatar: alfaMyAvatar(), isAdmin: true,
+    coin: val('at-f-coin').toUpperCase(), bias: (document.getElementById('at-f-bias') || {}).value || '',
+    title: val('at-f-title'), text: val('at-f-text'), img: val('at-f-img'),
+    dir: type === 'islem' ? alfaComposer.dir : '',
+    entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
+    lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
+    status: 'aktif', quote: alfaComposer.quote || null, ts: Date.now(), likes: [], comments: [],
+  };
+  prev.innerHTML = atCardHtml(post);
+}
+function atQuoteBias() {
+  let d = {};
+  try { d = (typeof collectDaily === 'function') ? collectDaily() : {}; } catch (e) {}
+  let dir = (d && d.bias) || (typeof dailyBias !== 'undefined' ? dailyBias : '');
+  if (!dir) { const c = prompt('Bias yönü: 1=Bullish, 2=Bearish, 3=Nötr', '1'); dir = { '1': 'BULLISH', '2': 'BEARISH', '3': 'NÖTR' }[(c || '').trim()] || ''; if (!dir) return; }
+  alfaComposer.quote = { kind: 'bias', dir, pair: (d && d.pair) || '', note: ((d && d.senaryo) || '').slice(0, 500) };
+  atRenderQuoteBox(); atUpdatePreview();
+}
+function atToggleResultList() {
+  const box = document.getElementById('at-result-list'); if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  const trades = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades.filter(t => t.r !== '' && t.r != null) : [];
+  if (!trades.length) { box.style.display = 'block'; box.innerHTML = '<div class="at-rrow" style="cursor:default">Sonucu girilmiş işlem bulunamadı.</div>'; return; }
+  const sorted = trades.slice().sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 20);
+  box.innerHTML = sorted.map(t => {
+    const rn = parseFloat(String(t.r).replace(',', '.'));
+    const col = isNaN(rn) ? 'var(--text-3)' : (rn >= 0 ? '#16a34a' : '#dc2626');
+    return '<div class="at-rrow" data-atrid="' + t.id + '"><span>' + esc(t.pair || '') + ' ' + esc(t.dir || '') + '</span> · <b style="color:' + col + '">' + ((rn > 0 ? '+' : '') + t.r + 'R') + '</b> · ' + esc(t.verdict || '') + ' · ' + esc(t.date || '') + '</div>';
+  }).join('');
+  box.style.display = 'block';
+}
+function atPickResult(id) {
+  const t = (typeof dataTrades !== 'undefined' ? dataTrades : []).find(x => String(x.id) === String(id)); if (!t) return;
+  alfaComposer.quote = { kind: 'result', pair: t.pair || '', dir: t.dir || '', r: t.r || '', verdict: t.verdict || '', date: t.date || '', strat: t.strat || '' };
+  const box = document.getElementById('at-result-list'); if (box) box.style.display = 'none';
+  atRenderQuoteBox(); atUpdatePreview();
+}
+function atOpenProfile() {
+  const p = alfaProfile();
+  document.getElementById('at-p-name').value = p.name || '';
+  document.getElementById('at-p-avatar').value = p.avatar || '';
+  atRenderProfPrev();
+  document.getElementById('at-pmodal').classList.add('open');
+}
+function atRenderProfPrev() {
+  const name = (document.getElementById('at-p-name').value || alfaMyName() || 'Admin').trim();
+  const av = (document.getElementById('at-p-avatar').value || '').trim();
+  const el = document.getElementById('at-prof-prev'); if (!el) return;
+  el.innerHTML = '<div class="at-avatar">' + (/^https?:\/\//.test(av) ? '<img src="' + esc(av) + '" alt="">' : esc((name || 'A').charAt(0).toUpperCase())) + '</div>' +
+    '<div><div class="nm">' + esc(name) + '</div><div class="at-time">Admin</div></div>';
+}
+function atSaveProfile() {
+  const name = (document.getElementById('at-p-name').value || '').trim().slice(0, 40);
+  const avatar = (document.getElementById('at-p-avatar').value || '').trim().slice(0, 400);
+  alfaSaveProfile({ name, avatar });
+  document.getElementById('at-pmodal').classList.remove('open');
+  renderAlfaFeed();
+}
 async function atSubmit() {
   const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   const type = alfaComposer.type;
   const text = val('at-f-text'), title = val('at-f-title');
   if (!text && !title && !val('at-f-coin')) { alert('En azından başlık, coin ya da metin gir.'); return; }
   const post = {
-    type, author: alfaMyName() || 'Admin', authorEmail: (function () { try { return AUTH && AUTH.user ? AUTH.user.email : ''; } catch (e) { return ''; } })(),
+    type, author: alfaMyName() || 'Admin', avatar: alfaMyAvatar(), authorEmail: (function () { try { return AUTH && AUTH.user ? AUTH.user.email : ''; } catch (e) { return ''; } })(),
     coin: val('at-f-coin'), bias: (document.getElementById('at-f-bias') || {}).value || '',
     title, text, img: val('at-f-img'),
     dir: type === 'islem' ? alfaComposer.dir : '',
     entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
     lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
+    quote: alfaComposer.quote || null,
   };
   const btn = document.getElementById('at-submit'); if (btn) { btn.disabled = true; btn.textContent = 'Paylaşılıyor…'; }
   const r = await atApi('add', { post });
@@ -14006,13 +14167,29 @@ function bindAlfaTrading() {
     alfaComposer.type = b.getAttribute('data-attype');
     document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x === b));
     document.getElementById('at-islem-fields').style.display = alfaComposer.type === 'islem' ? '' : 'none';
+    atUpdatePreview();
   }));
   document.querySelectorAll('.at-dir').forEach(b => b.addEventListener('click', () => {
     alfaComposer.dir = b.getAttribute('data-atdir');
     document.querySelectorAll('.at-dir').forEach(x => x.classList.toggle('on', x === b));
+    atUpdatePreview();
   }));
   const img = document.getElementById('at-f-img');
   if (img) img.addEventListener('input', () => { const v = img.value.trim(); document.getElementById('at-f-imgprev').innerHTML = /^https?:\/\//.test(v) ? '<img src="' + esc(v) + '" alt="">' : ''; });
+  const mbody = document.querySelector('#at-modal .at-modal-body');
+  if (mbody) mbody.addEventListener('input', atUpdatePreview);
+  // alıntı butonları
+  const qb = document.getElementById('at-q-bias'); if (qb) qb.addEventListener('click', atQuoteBias);
+  const qr = document.getElementById('at-q-result'); if (qr) qr.addEventListener('click', atToggleResultList);
+  const rlist = document.getElementById('at-result-list'); if (rlist) rlist.addEventListener('click', e => { const r = e.target.closest('[data-atrid]'); if (r) atPickResult(r.getAttribute('data-atrid')); });
+  const qbox = document.getElementById('at-quote-box'); if (qbox) qbox.addEventListener('click', e => { if (e.target.closest('#at-qx')) { alfaComposer.quote = null; atRenderQuoteBox(); atUpdatePreview(); } });
+  // profil
+  const profBtn = document.getElementById('at-prof-btn'); if (profBtn) profBtn.addEventListener('click', atOpenProfile);
+  const pmx = document.getElementById('at-pmodal-x'); if (pmx) pmx.addEventListener('click', () => document.getElementById('at-pmodal').classList.remove('open'));
+  const pmc = document.getElementById('at-pmodal-cancel'); if (pmc) pmc.addEventListener('click', () => document.getElementById('at-pmodal').classList.remove('open'));
+  const pms = document.getElementById('at-pmodal-save'); if (pms) pms.addEventListener('click', atSaveProfile);
+  const pmodal = document.getElementById('at-pmodal'); if (pmodal) pmodal.addEventListener('click', e => { if (e.target === pmodal) pmodal.classList.remove('open'); });
+  ['at-p-name', 'at-p-avatar'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', atRenderProfPrev); });
   document.querySelectorAll('.at-fbtn').forEach(b => b.addEventListener('click', () => {
     alfaFilter = b.getAttribute('data-atf');
     document.querySelectorAll('.at-fbtn').forEach(x => x.classList.toggle('on', x === b));

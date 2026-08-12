@@ -63,6 +63,12 @@ function cleanRoom(r) {
 const AT_ROW = 'alfa_trading';
 const atUid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const atClip = (s, n) => String(s == null ? '' : s).slice(0, n);
+function atQuote(q) {
+  if (!q || typeof q !== 'object') return null;
+  if (q.kind === 'bias') return { kind: 'bias', dir: atClip(q.dir, 12), pair: atClip(q.pair, 20).toUpperCase(), note: atClip(q.note, 500) };
+  if (q.kind === 'result') return { kind: 'result', pair: atClip(q.pair, 20).toUpperCase(), dir: atClip(q.dir, 10), r: atClip(q.r, 20), verdict: atClip(q.verdict, 10), date: atClip(q.date, 20), strat: atClip(q.strat, 60) };
+  return null;
+}
 async function alfaTrading(req, res) {
   const r = await readShared(AT_ROW);
   const posts = (r.data && Array.isArray(r.data.posts)) ? r.data.posts : [];
@@ -77,7 +83,8 @@ async function alfaTrading(req, res) {
     const p = body.post || {};
     const post = {
       id: atUid(), type: p.type === 'islem' ? 'islem' : 'analiz',
-      author: atClip(p.author, 40) || 'Admin', authorEmail: atClip(p.authorEmail, 120), isAdmin: true,
+      author: atClip(p.author, 40) || 'Admin', authorEmail: atClip(p.authorEmail, 120), avatar: atClip(p.avatar, 400), isAdmin: true,
+      quote: atQuote(p.quote),
       coin: atClip(p.coin, 20).toUpperCase(), bias: ['long', 'short', 'notr'].includes(p.bias) ? p.bias : '',
       dir: ['long', 'short'].includes(p.dir) ? p.dir : '',
       entry: atClip(p.entry, 40), tp: atClip(p.tp, 40), sl: atClip(p.sl, 40),
@@ -99,7 +106,7 @@ async function alfaTrading(req, res) {
     const post = find(body.postId); if (!post) return res.status(404).json({ error: 'post yok' });
     const nick = atClip(body.nick, 40), text = atClip(body.text, 800);
     if (!nick || !text) return res.status(400).json({ error: 'nick+text gerekli' });
-    post.comments = post.comments || []; post.comments.push({ id: atUid(), nick, text, ts: Date.now(), isAdmin: !!body.isAdmin });
+    post.comments = post.comments || []; post.comments.push({ id: atUid(), nick, text, ts: Date.now(), isAdmin: !!body.isAdmin, avatar: atClip(body.avatar, 400) });
     await save(); return res.status(200).json({ ok: true });
   }
   if (action === 'delPost') { const i = posts.findIndex(p => p.id === body.postId); if (i >= 0) posts.splice(i, 1); await save(); return res.status(200).json({ ok: true }); }
