@@ -1605,15 +1605,15 @@
   @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
   .ds-body-panel { position: sticky; top: 14px; }
   @media (max-width: 860px) { .ds-body-panel { position: static; } }
-  .ds-svg { --ds-skin: rgba(255,255,255,.14); --ds-skin-line: rgba(255,255,255,.85); width: 100%; display: block; }
-  .ds-sil { filter: drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
-  .ds-sil-part { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.6; }
-  .ds-sil-neck { fill: var(--ds-skin); }
-  .ds-sil-limb { fill: none; stroke: var(--ds-skin); stroke-width: 15; stroke-linecap: round; }
-  .ds-sil-arm { fill: none; stroke: var(--ds-skin); stroke-width: 13; stroke-linecap: round; }
-  .ds-sil-limb-edge { fill: none; stroke: var(--ds-skin-line); stroke-width: 1.6; stroke-linecap: round; }
-  .ds-sil-hand, .ds-sil-foot { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.6; }
-  .ds-sil-detail { fill: none; stroke: rgba(255,255,255,.3); stroke-width: 1.2; }
+  .ds-svg { --ds-skin: rgba(255,255,255,.11); --ds-skin-line: rgba(255,255,255,.42); --ds-seam: rgba(255,255,255,.28); width: 100%; display: block; }
+  .ds-sil { filter: drop-shadow(0 12px 28px rgba(0,0,0,.5)); }
+  .ds-sil-part { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; stroke-linejoin: round; }
+  .ds-sil-neck { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; }
+  .ds-sil-limb { fill: none; stroke: var(--ds-skin); stroke-width: 26; stroke-linecap: round; stroke-linejoin: round; }
+  .ds-sil-arm { fill: none; stroke: var(--ds-skin); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+  .ds-sil-limb-edge { fill: none; stroke: var(--ds-skin-line); stroke-width: 1.3; stroke-linecap: round; }
+  .ds-sil-hand, .ds-sil-foot { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; }
+  .ds-sil-detail { fill: none; stroke: var(--ds-seam); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
   .ds-organ { cursor: pointer; filter: url(#dsGlow); }
   .ds-organ-shape { fill: color-mix(in srgb, currentColor 28%, transparent); stroke: currentColor; stroke-width: 2; }
   .ds-organ:hover .ds-organ-shape { stroke-width: 3; }
@@ -13297,32 +13297,53 @@ function dsSvgHtml(organs) {
       '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
     '</filter>' +
   '</defs>';
-  // insan silüeti — şeffaf "cam" gövde, ince beyaz dış çizgi, referans oranları
+  // insan silüeti — dolgulu "manken" gövde, yumuşak beyaz, segment/panel dikişleri (referans mankeni)
   h += '<g class="ds-sil">';
-  // kollar (omuzdan başlar, gövdenin yanında süzülür)
-  const armL = 'M100 96 C91 108 86 126 86 146 C86 180 90 218 98 252';
-  const armR = 'M220 96 C229 108 234 126 234 146 C234 180 230 218 222 252';
-  h += '<path class="ds-sil-arm" d="' + armL + '"/>';
-  h += '<path class="ds-sil-arm" d="' + armR + '"/>';
-  h += '<path class="ds-sil-limb-edge" d="' + armL + '"/>';
-  h += '<path class="ds-sil-limb-edge" d="' + armR + '"/>';
-  // bacaklar (kalçadan başlar, hafif aralıklı)
-  const legL = 'M138 218 C135 256 133 306 132 356 C131 367 133 375 135 379';
-  const legR = 'M182 218 C185 256 187 306 188 356 C189 367 187 375 185 379';
+  // kollar (omuzdan başlar, hafif dışa, elde biter) — düz ve rahat
+  const armL = 'M114 102 C104 120 99 142 99 166 C99 198 101 226 103 250';
+  const armR = 'M206 102 C216 120 221 142 221 166 C221 198 219 226 217 250';
+  // bacaklar (kalçadan aşağı, hafif aralıklı) — dolgun ama düz
+  const legL = 'M140 216 C136 252 134 302 133 350 C133 362 134 370 135 376';
+  const legR = 'M180 216 C184 252 186 302 187 350 C187 362 186 370 185 376';
   h += '<path class="ds-sil-limb" d="' + legL + '"/>';
   h += '<path class="ds-sil-limb" d="' + legR + '"/>';
-  h += '<path class="ds-sil-limb-edge" d="' + legL + '"/>';
-  h += '<path class="ds-sil-limb-edge" d="' + legR + '"/>';
-  // gövde — geniş omuz, ince bel, geniş leğen (referans oranları)
-  h += '<path class="ds-sil-part" d="M160 90 C 178 90, 194 96, 205 104 C 216 112, 222 120, 228 128 C 227 142, 220 154, 211 163 C 202 171, 197 176 C 200 182, 208 191, 212 200 C 214 202 C 213 214, 205 224, 194 230 C 180 233, 160 234 C 140 233, 126 230, 115 224 C 107 214, 106 202 C 108 200, 112 191, 120 182 C 123 176 C 118 171, 109 163, 100 154 C 93 142, 92 128 C 98 120, 104 112, 115 104 C 126 96, 142 90, 160 90 Z"/>';
-  // boyun + baş (küçük ve sade)
-  h += '<rect class="ds-sil-neck" x="152" y="64" width="16" height="24" rx="8"/>';
-  h += '<ellipse class="ds-sil-part" cx="160" cy="43" rx="16" ry="21"/>';
-  // eller + ayaklar
-  h += '<circle class="ds-sil-hand" cx="98" cy="256" r="6"/>';
-  h += '<circle class="ds-sil-hand" cx="222" cy="256" r="6"/>';
-  h += '<ellipse class="ds-sil-foot" cx="132" cy="383" rx="15" ry="6"/>';
-  h += '<ellipse class="ds-sil-foot" cx="188" cy="383" rx="15" ry="6"/>';
+  h += '<path class="ds-sil-arm" d="' + armL + '"/>';
+  h += '<path class="ds-sil-arm" d="' + armR + '"/>';
+  // gövde — geniş omuz, yumuşak (aşırı kaslı değil) bel, geniş leğen
+  h += '<path class="ds-sil-part" d="M160 88 C176 88 192 94 206 104 C210 120 206 140 198 158 C194 172 190 184 192 198 C196 208 200 216 198 224 C190 232 174 236 160 236 C146 236 130 232 122 224 C120 216 124 208 128 198 C130 184 126 172 122 158 C114 140 110 120 114 104 C128 94 144 88 160 88 Z"/>';
+  // boyun + baş (küçük, sade, yumuşak çene)
+  h += '<path class="ds-sil-neck" d="M150 62 C150 74 152 84 148 90 C158 92 162 92 172 90 C168 84 170 74 170 62 Z"/>';
+  h += '<ellipse class="ds-sil-part" cx="160" cy="43" rx="17" ry="22"/>';
+  // eller + ayaklar (yumuşak, açık el)
+  h += '<ellipse class="ds-sil-hand" cx="98" cy="258" rx="9" ry="11"/>';
+  h += '<ellipse class="ds-sil-hand" cx="222" cy="258" rx="9" ry="11"/>';
+  h += '<ellipse class="ds-sil-foot" cx="133" cy="382" rx="14" ry="7"/>';
+  h += '<ellipse class="ds-sil-foot" cx="187" cy="382" rx="14" ry="7"/>';
+  // ---- panel / segment dikişleri (soluk, referans mankeni gibi) ----
+  const seams = [
+    // baş: kafatası kepi + çene hattı
+    'M146 34 C152 26 168 26 174 34', 'M150 57 C155 63 165 63 170 57',
+    // boyun tabanı / klavikula yoke
+    'M122 106 C140 98 180 98 198 106',
+    // pektoral orta çizgi + alt göğüs kavisleri
+    'M160 108 L160 150', 'M133 116 C143 138 152 143 160 143', 'M187 116 C177 138 168 143 160 143',
+    // karın orta + yatay segmentler
+    'M160 150 L160 192', 'M150 160 H170', 'M150 174 H170',
+    // bel çizgisi + brief (kasık) hattı
+    'M126 190 C142 197 178 197 194 190', 'M128 208 C145 220 175 220 192 208',
+    'M160 236 L147 214', 'M160 236 L173 214',
+    // omuz (deltoid) kapak dikişleri
+    'M100 120 C106 108 118 104 126 110', 'M220 120 C214 108 202 104 194 110',
+    // dirsek bantları
+    'M90 166 H108', 'M212 166 H230',
+    // bilek bantları
+    'M94 250 H112', 'M208 250 H228',
+    // diz bantları
+    'M120 302 H146', 'M174 302 H200',
+    // ayak bileği bantları
+    'M123 362 H145', 'M175 362 H197'
+  ];
+  seams.forEach(d => { h += '<path class="ds-sil-detail" d="' + d + '"/>'; });
   h += '</g>';
   DESIGNER_ORGANS.forEach(o => {
     const sc = organs[o.id].score;
