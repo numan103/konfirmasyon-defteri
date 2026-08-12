@@ -1605,8 +1605,7 @@
   @media (max-width: 860px) { .ds-wrap { grid-template-columns: 1fr; } }
   .ds-body-panel { position: sticky; top: 14px; }
   @media (max-width: 860px) { .ds-body-panel { position: static; } }
-  .ds-svg { --ds-skin: rgba(206,214,236,.15); --ds-skin-line: rgba(214,220,240,.5); --ds-seam: rgba(214,220,240,.34); width: 100%; display: block; }
-  html[data-theme="light"] .ds-svg { --ds-skin: rgba(96,106,140,.16); --ds-skin-line: rgba(70,80,112,.55); --ds-seam: rgba(70,80,112,.42); }
+  .ds-svg { --ds-body-hi: #ffffff; --ds-body-mid: #eef1f7; --ds-body-lo: #d4dae7; --ds-limb-a: #e4e9f2; --ds-limb-b: #f5f7fc; --ds-limb-c: #d4dae7; --ds-edge: #b7bfd2; --ds-seam: #a6aec6; width: 100%; display: block; }
   .ds-sil { filter: drop-shadow(0 12px 28px rgba(0,0,0,.5)); }
   .ds-sil-part { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; stroke-linejoin: round; }
   .ds-sil-neck { fill: var(--ds-skin); stroke: var(--ds-skin-line); stroke-width: 1.3; }
@@ -13297,55 +13296,59 @@ function dsSvgHtml(organs) {
       '<feGaussianBlur stdDeviation="3.2" result="b"/>' +
       '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
     '</filter>' +
+    '<radialGradient id="dsBodyG" cx="42%" cy="26%" r="80%">' +
+      '<stop offset="0%" stop-color="var(--ds-body-hi)"/><stop offset="55%" stop-color="var(--ds-body-mid)"/><stop offset="100%" stop-color="var(--ds-body-lo)"/>' +
+    '</radialGradient>' +
+    '<linearGradient id="dsLimbG" x1="0" y1="0" x2="1" y2="0">' +
+      '<stop offset="0%" stop-color="var(--ds-limb-a)"/><stop offset="45%" stop-color="var(--ds-limb-b)"/><stop offset="100%" stop-color="var(--ds-limb-c)"/>' +
+    '</linearGradient>' +
+    '<filter id="dsSoft" x="-25%" y="-25%" width="150%" height="150%">' +
+      '<feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#454c6b" flood-opacity="0.26"/>' +
+    '</filter>' +
   '</defs>';
-  // insan silüeti — dolgulu "manken" gövde, yumuşak beyaz, segment/panel dikişleri (referans mankeni)
-  h += '<g class="ds-sil">';
-  // kollar (omuzdan başlar, hafif dışa, elde biter) — düz ve rahat
-  const armL = 'M114 102 C104 120 99 142 99 166 C99 198 101 226 103 250';
-  const armR = 'M206 102 C216 120 221 142 221 166 C221 198 219 226 217 250';
-  // bacaklar (kalçadan aşağı, hafif aralıklı) — dolgun ama düz
-  const legL = 'M140 216 C136 252 134 302 133 350 C133 362 134 370 135 376';
-  const legR = 'M180 216 C184 252 186 302 187 350 C187 362 186 370 185 376';
-  h += '<path class="ds-sil-limb" d="' + legL + '"/>';
-  h += '<path class="ds-sil-limb" d="' + legR + '"/>';
-  h += '<path class="ds-sil-arm" d="' + armL + '"/>';
-  h += '<path class="ds-sil-arm" d="' + armR + '"/>';
-  // gövde — geniş omuz, yumuşak (aşırı kaslı değil) bel, geniş leğen
-  h += '<path class="ds-sil-part" d="M160 88 C176 88 192 94 206 104 C210 120 206 140 198 158 C194 172 190 184 192 198 C196 208 200 216 198 224 C190 232 174 236 160 236 C146 236 130 232 122 224 C120 216 124 208 128 198 C130 184 126 172 122 158 C114 140 110 120 114 104 C128 94 144 88 160 88 Z"/>';
-  // boyun + baş (küçük, sade, yumuşak çene)
-  h += '<path class="ds-sil-neck" d="M150 62 C150 74 152 84 148 90 C158 92 162 92 172 90 C168 84 170 74 170 62 Z"/>';
-  h += '<ellipse class="ds-sil-part" cx="160" cy="43" rx="17" ry="22"/>';
-  // eller + ayaklar (yumuşak, açık el)
-  h += '<ellipse class="ds-sil-hand" cx="98" cy="258" rx="9" ry="11"/>';
-  h += '<ellipse class="ds-sil-hand" cx="222" cy="258" rx="9" ry="11"/>';
-  h += '<ellipse class="ds-sil-foot" cx="133" cy="382" rx="14" ry="7"/>';
-  h += '<ellipse class="ds-sil-foot" cx="187" cy="382" rx="14" ry="7"/>';
-  // ---- panel / segment dikişleri (soluk, referans mankeni gibi) ----
-  const seams = [
-    // baş: kafatası kepi + çene hattı
-    'M146 34 C152 26 168 26 174 34', 'M150 57 C155 63 165 63 170 57',
-    // boyun tabanı / klavikula yoke
-    'M122 106 C140 98 180 98 198 106',
-    // pektoral orta çizgi + alt göğüs kavisleri
-    'M160 108 L160 150', 'M133 116 C143 138 152 143 160 143', 'M187 116 C177 138 168 143 160 143',
-    // karın orta + yatay segmentler
-    'M160 150 L160 192', 'M150 160 H170', 'M150 174 H170',
-    // bel çizgisi + brief (kasık) hattı
-    'M126 190 C142 197 178 197 194 190', 'M128 208 C145 220 175 220 192 208',
-    'M160 236 L147 214', 'M160 236 L173 214',
-    // omuz (deltoid) kapak dikişleri
-    'M100 120 C106 108 118 104 126 110', 'M220 120 C214 108 202 104 194 110',
-    // dirsek bantları
-    'M90 166 H108', 'M212 166 H230',
-    // bilek bantları
-    'M94 250 H112', 'M208 250 H228',
-    // diz bantları
-    'M120 302 H146', 'M174 302 H200',
-    // ayak bileği bantları
-    'M123 362 H145', 'M175 362 H197'
-  ];
-  seams.forEach(d => { h += '<path class="ds-sil-detail" d="' + d + '"/>'; });
+  // ===== profesyonel manken figürü — hacimli gölge + anatomik kas grubu dikişleri =====
+  const _p = (d, f) => '<path d="' + d + '" fill="' + (f || 'url(#dsBodyG)') + '" stroke="var(--ds-edge)" stroke-width="1.3" stroke-linejoin="round"/>';
+  const _s = (d, w) => '<path d="' + d + '" fill="none" stroke="var(--ds-seam)" stroke-width="' + (w || 1.3) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+  h += '<g class="ds-sil" filter="url(#dsSoft)">';
+  // kollar (omuzdan aşağı, hafif dışa, önkola incelir)
+  h += _p('M200 106 C216 112 226 126 229 146 C232 168 231 192 228 214 C226 232 224 250 223 266 C222 280 221 292 220 300 C219 306 214 308 210 306 C205 304 203 298 203 292 C202 274 202 250 202 226 C201 198 199 168 196 148 C194 132 192 116 200 106 Z', 'url(#dsLimbG)');
+  h += _p('M120 106 C104 112 94 126 91 146 C88 168 89 192 92 214 C94 232 96 250 97 266 C98 280 99 292 100 300 C101 306 106 308 110 306 C115 304 117 298 117 292 C118 274 118 250 118 226 C119 198 121 168 124 148 C126 132 128 116 120 106 Z', 'url(#dsLimbG)');
+  // bacaklar (uyluk → diz → baldır)
+  h += _p('M160 216 C170 216 182 220 187 232 C193 246 194 268 192 294 C190 316 187 332 186 348 C185 362 187 380 186 396 C185 406 178 408 172 406 C167 404 165 396 164 386 C162 360 161 322 161 292 C160 262 156 234 160 216 Z', 'url(#dsLimbG)');
+  h += _p('M160 216 C150 216 138 220 133 232 C127 246 126 268 128 294 C130 316 133 332 134 348 C135 362 133 380 134 396 C135 406 142 408 148 406 C153 404 155 396 156 386 C158 360 159 322 159 292 C160 262 164 234 160 216 Z', 'url(#dsLimbG)');
+  // gövde (geniş omuz → ince bel → leğen)
+  h += _p('M160 92 C174 92 187 95 196 103 C206 112 211 124 212 138 C213 154 208 170 201 183 C196 192 192 200 192 210 C192 218 190 226 184 231 C176 237 168 238 160 238 C152 238 144 237 136 231 C130 226 128 218 128 210 C128 200 124 192 119 183 C112 170 107 154 108 138 C109 124 114 112 124 103 C133 95 146 92 160 92 Z');
+  // boyun + baş
+  h += _p('M151 68 C151 79 153 88 148 95 C156 99 164 99 172 95 C167 88 169 79 169 68 Z');
+  h += _p('M160 24 C175 24 185 38 185 54 C185 71 174 84 160 84 C146 84 135 71 135 54 C135 38 145 24 160 24 Z');
+  // eller (açık) + ayaklar
+  h += _p('M213 300 C220 304 224 312 224 322 C224 334 221 344 215 346 C208 348 203 342 203 330 C203 316 207 302 213 300 Z', 'url(#dsLimbG)');
+  h += _p('M107 300 C100 304 96 312 96 322 C96 334 99 344 105 346 C112 348 117 342 117 330 C117 316 113 302 107 300 Z', 'url(#dsLimbG)');
+  h += _p('M162 398 C174 398 184 404 184 410 C184 415 175 417 160 417 C151 417 147 413 149 407 C151 401 156 398 162 398 Z', 'url(#dsLimbG)');
+  h += _p('M158 398 C146 398 136 404 136 410 C136 415 145 417 160 417 C169 417 173 413 171 407 C169 401 164 398 158 398 Z', 'url(#dsLimbG)');
   h += '</g>';
+  // ---- kas grubu dikişleri ----
+  const seams = [
+    'M143 48 C151 37 169 37 177 48',                 // kafatası kepi
+    'M120 103 C140 94 180 94 200 103',               // klavikula / omuz yoke
+    'M160 104 L160 148',                             // pektoral orta
+    'M128 114 C142 140 152 148 160 148', 'M192 114 C178 140 168 148 160 148', // alt göğüs
+    'M105 128 C112 114 124 108 133 114', 'M215 128 C208 114 196 108 187 114', // deltoid kapak
+    'M97 148 C92 166 92 188 97 208', 'M223 148 C228 166 228 188 223 208',     // biceps
+    'M92 226 L118 226', 'M202 226 L228 226',         // dirsek
+    'M98 262 L118 262', 'M202 262 L222 262',         // bilek
+    'M160 148 L160 198', 'M149 162 H171', 'M147 178 H173', // karın orta + segment
+    'M126 186 C142 194 178 194 194 186',             // oblik / bel
+    'M128 210 C144 224 176 224 192 210',             // brief hattı
+    'M160 238 L147 216', 'M160 238 L173 216',        // kasık V
+    'M151 248 C151 282 153 312 157 338', 'M169 248 C169 282 167 312 163 338', // uyluk iç
+    'M131 322 C139 330 153 330 159 322', 'M161 322 C167 330 181 330 189 322', // diz
+    'M136 388 L157 388', 'M163 388 L184 388'         // ayak bileği
+  ];
+  seams.forEach(d => { h += _s(d); });
+  // parmak ipuçları
+  [207, 211, 215, 219].forEach(x => { h += _s('M' + x + ' 332 L' + (x + 1) + ' 345', 1); });
+  [113, 109, 105, 101].forEach(x => { h += _s('M' + x + ' 332 L' + (x - 1) + ' 345', 1); });
   DESIGNER_ORGANS.forEach(o => {
     const sc = organs[o.id].score;
     const st = dsStatusOf(sc);
