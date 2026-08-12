@@ -13065,8 +13065,10 @@ const DESIGNER_ORGANS = [
   { id: 'eyes', ico: '👁️', name: 'Analiz & Veri', body: 'Gözler', desc: 'Veri ve teknik kriterleri okuma: CVD, OI, orderbook, trend, key level.', weak: 'Piyasayı net göremiyorsun demektir. Orderflow ve teknik veriyi okumadan işlem açıyorsun — analizin "hissetmeye" dayanıyor, veriye değil.', topics: ['Spot CVD / OI / Long-Shorts verisini analizine kat', 'Trend, key level ve manipulasyon okumasını geliştir', 'Trade başlamadan önce tezini yaz'] },
   { id: 'heart', ico: '❤️', name: 'Risk Yönetimi', body: 'Kalp', desc: 'Pozisyon kriterleri, risk disiplini ve kayıpları sınırlama.', weak: 'Tek bir işlem bilançoyu sarsabilir demektir. Risk büyüklüğü kontrolsüz; pozisyon planı yok, kayıplar sınırlanmıyor.', topics: ['Risk büyüklüğü — her işlemde sabit % risk', 'Pozisyon planlama — entry/TP/SL önceden belirle', 'Kayıp oranını düşür — daha az ama daha iyi işlem'] },
   { id: 'lungs', ico: '🫁', name: 'Trade Psikolojisi', body: 'Akciğer', desc: 'Duygu kontrolü: mood ibresi, duygu kilitleri, intent.', weak: 'Duygular nefesini kesiyor demektir. Korku/coşku anında karar veriyorsun; duygu kilitleri ve revenge trading planını çiğniyor.', topics: ['Duygu kilitleriyle işlem açma alışkanlığını kır', 'Revenge / duygu tradeleme döngüsünü bitir', 'Uç duyguda (coşku/korku) karar verme — mola al'] },
-  { id: 'muscle', ico: '💪', name: 'Disiplin & İcra', body: 'Kaslar', desc: 'Günlük plan (sabah/senaryo/anti/gün sonu), YOK kararla işlem açmama.', weak: 'Planı uygulamıyorsun demektir. Günlük plan boş, YOK kararla işlem açılıyor, kapasite dışı pozisyona giriliyor — analiz bile plana dönüşmüyor.', topics: ['Günlük planı (sabah/senaryo/anti) düzenli doldur', 'YOK kararla işlem açmayı bırak — kadran karar verir', 'Kapasite dışı işlemleri azalt'] },
-  { id: 'bone', ico: '🦴', name: 'Para Yönetimi', body: 'İskelet', desc: 'R sonuçları, win rate, ortalama R, drawdown ve konsistans.', weak: 'Kümülatif eğrin çökebilir demektir. Kayıplar kazançları siliyor, win rate ya da ortalama R zayıf, drawdown derinleşiyor.', topics: ['İşlem sonuçlarını düzenli R olarak gir', 'Ortalama R pozitif olmalı — kayıpları kes, kazananları taşı', 'Drawdown kontrolü — kayıp serisinde boyut küçült'] }
+  { id: 'muscle', ico: '💪', name: 'Disiplin & İcra', body: 'Kaslar', desc: 'Kural takibi ve icra gücü: YOK kararla işlem açmama, kapasite içinde kalma.', weak: 'Kasların zayıf — kurallarına uymuyorsun demektir. YOK kararla işlem açıyor, kapasite dışına çıkıyorsun; irade değil dürtü karar veriyor.', topics: ['YOK kararla işlem açmayı bırak — kadran karar verir', 'Kapasite dışı işlemleri azalt', 'Kurallarına sıkı sıkıya bağlı kal'] },
+  { id: 'bone', ico: '🦴', name: 'Para Yönetimi', body: 'İskelet', desc: 'İskelet = sistemin taşıyıcı yapısı: R sonuçları, win rate, ortalama R, drawdown ve konsistans.', weak: 'Kümülatif eğrin çökebilir demektir. Kayıplar kazançları siliyor, win rate ya da ortalama R zayıf, drawdown derinleşiyor.', topics: ['İşlem sonuçlarını düzenli R olarak gir', 'Ortalama R pozitif olmalı — kayıpları kes, kazananları taşı', 'Drawdown kontrolü — kayıp serisinde boyut küçült'] },
+  { id: 'legs', ico: '🦵', name: 'Plan & Rutin', body: 'Bacaklar', desc: 'Seni ayakta tutan rutin: günlük plan (sabah/senaryo/anti), gün sonu değerlendirme ve seans seçimi.', weak: 'Ayaklarının üstünde sağlam duramıyorsun demektir. Plan ve rutin eksik; hazırlıksız, rastgele saatlerde işleme giriyorsun.', topics: ['Her işlem öncesi günlük planı (sabah/senaryo/anti) doldur', 'Gün sonu değerlendirme rutini kur', 'Seansını önceden seç — rastgele saatte işlem açma'] },
+  { id: 'feet', ico: '👣', name: 'İstikrar & İcra', body: 'Ayaklar', desc: 'Her gün aynı disiplinle yürümek: kararı uygulama (icra) oranı ve sonuçların istikrarı.', weak: 'İstikrarlı adım atamıyorsun demektir. Bazen uyguluyor bazen kaçıyorsun; sonuçların çok dalgalı, süreklilik yok.', topics: ['Kararlarını istikrarla uygula — analiz edip kaçma', 'Pozisyon boyutunu sabit tut — sonuç dalgalanmasını azalt', 'Her gün aynı rutinle işlem yap'] }
 ];
 const DS_STATUS = { ok: 'Sağlıklı', warn: 'Dikkat', crit: 'Kritik' };
 function dsClamp(v) { return Math.max(0, Math.min(100, v)); }
@@ -13215,32 +13217,79 @@ function computeDesigner() {
     out.lungs = { score, reasons, topics };
   }
 
-  // ---- Kaslar: Disiplin & İcra ----
+  // ---- Kaslar: Disiplin & İcra (kural takibi) ----
   {
     const yokRate = T.length ? T.filter(t => t.verdict === 'YOK').length / T.length : null;
     const capRate = T.length ? T.filter(t => t.cap).length / T.length : null;
-    const planFill = T.length ? T.filter(t => (t.sabah && t.senaryo && t.anti) || t.gunsonu).length / T.length : null;
-    const sessOk = T.length ? T.filter(t => t.sess && t.sess !== '—').length / T.length : null;
     let score = 50, reasons = [], topics = [];
     const parts = [];
     if (yokRate !== null) parts.push((1 - yokRate) * 100);
     if (capRate !== null) parts.push((1 - capRate) * 100);
-    if (planFill !== null) parts.push(planFill * 100);
-    if (sessOk !== null) parts.push(sessOk * 100);
     if (parts.length) {
       score = Math.round(dsClamp(avg(parts)));
       if (yokRate !== null) reasons.push({ m: '🚫', t: '<b>' + Math.round(yokRate * 100) + '%</b> işlem YOK kararla açılmış' });
       if (capRate !== null) reasons.push({ m: '⚠️', t: '<b>' + Math.round(capRate * 100) + '%</b> işlem kapasite dışı' });
-      if (planFill !== null) reasons.push({ m: '📋', t: 'Günlük plan kullanımı <b>%' + Math.round(planFill * 100) + '</b>' });
-      if (sessOk !== null) reasons.push({ m: '🕐', t: 'Seans seçimi <b>%' + Math.round(sessOk * 100) + '</b>' });
       if (yokRate !== null && yokRate > 0.15) topics.push('YOK kararla işlem açmayı bırak — kadran karar verir');
-      if (planFill !== null && planFill < 0.5) topics.push('Günlük planı (sabah/senaryo/anti) düzenli doldur');
       if (capRate !== null && capRate > 0.15) topics.push('Kapasite dışı işlemleri azalt');
     } else {
       reasons.push({ m: '⏳', t: 'Henüz disiplin verisi yok.' });
-      topics.push('Günlük plan ve seans disiplini çalış');
+      topics.push('İşlem disiplini ve kural takibi çalış');
     }
     out.muscle = { score, reasons, topics };
+  }
+
+  // ---- Bacaklar: Plan & Rutin ----
+  {
+    const planFill = T.length ? T.filter(t => t.sabah && t.senaryo && t.anti).length / T.length : null;
+    const reviewRate = T.length ? T.filter(t => t.gunsonu).length / T.length : null;
+    const sessOk = T.length ? T.filter(t => t.sess && t.sess !== '—').length / T.length : null;
+    let score = 50, reasons = [], topics = [];
+    const parts = [];
+    if (planFill !== null) parts.push(planFill * 100);
+    if (reviewRate !== null) parts.push(reviewRate * 100);
+    if (sessOk !== null) parts.push(sessOk * 100);
+    if (parts.length && T.length) {
+      score = Math.round(dsClamp(avg(parts)));
+      if (planFill !== null) reasons.push({ m: '📋', t: 'Günlük plan (sabah/senaryo/anti) <b>%' + Math.round(planFill * 100) + '</b> dolu' });
+      if (reviewRate !== null) reasons.push({ m: '🌙', t: 'Gün sonu değerlendirmesi <b>%' + Math.round(reviewRate * 100) + '</b>' });
+      if (sessOk !== null) reasons.push({ m: '🕐', t: 'Seans seçimi <b>%' + Math.round(sessOk * 100) + '</b>' });
+      if (planFill !== null && planFill < 0.5) topics.push('Her işlem öncesi günlük planı (sabah/senaryo/anti) doldur');
+      if (reviewRate !== null && reviewRate < 0.5) topics.push('Gün sonu değerlendirme rutini kur');
+      if (sessOk !== null && sessOk < 0.5) topics.push('Seansını önceden seç — rastgele saatte işlem açma');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz plan/rutin verisi yok.' });
+      topics.push('Günlük plan ve rutin oluşturmaya başla');
+    }
+    out.legs = { score, reasons, topics };
+  }
+
+  // ---- Ayaklar: İstikrar & İcra ----
+  {
+    const execRate = T.length ? T.filter(t => t.verdict && t.verdict !== 'YOK').length / T.length : null;
+    const withR = D.filter(t => t.r !== '' && t.r != null && !isNaN(Number(t.r))).map(t => Number(t.r));
+    let rConsist = null;
+    if (withR.length >= 3) {
+      const m = avg(withR);
+      const std = Math.sqrt(avg(withR.map(v => (v - m) * (v - m))));
+      rConsist = dsClamp(100 - std * 16);
+    }
+    let score = 50, reasons = [], topics = [];
+    const parts = [];
+    if (execRate !== null) parts.push(execRate * 100);
+    if (rConsist !== null) parts.push(rConsist);
+    if (parts.length && (T.length || withR.length)) {
+      score = Math.round(dsClamp(avg(parts)));
+      if (execRate !== null) reasons.push({ m: '🚶', t: 'Kararı uygulama (icra) oranı <b>%' + Math.round(execRate * 100) + '</b>' });
+      if (rConsist !== null) reasons.push({ m: '📏', t: 'Sonuç istikrarı (R dağılımı) <b>' + Math.round(rConsist) + '</b>/100' });
+      reasons.push({ m: '🔁', t: 'Toplam <b>' + T.length + '</b> işlem kaydı' });
+      if (execRate !== null && execRate < 0.6) topics.push('Kararlarını uygula — analiz edip işlem açmamak istikrarı bozar');
+      if (rConsist !== null && rConsist < 60) topics.push('Sonuçların çok dalgalı — pozisyon boyutunu ve riski sabit tut');
+      topics.push('Her gün aynı rutinle işlem yap — istikrar edge kadar önemlidir');
+    } else {
+      reasons.push({ m: '⏳', t: 'Henüz istikrar verisi yok.' });
+      topics.push('Düzenli işlem ve kayıt alışkanlığı oluştur');
+    }
+    out.feet = { score, reasons, topics };
   }
 
   // ---- İskelet: Para Yönetimi ----
@@ -13307,7 +13356,9 @@ function dsSvgHtml(organs) {
     heart: '<ellipse cx="452" cy="442" rx="82" ry="86"/>',
     lungs: '<ellipse cx="588" cy="446" rx="82" ry="86"/>',
     muscle: '<ellipse cx="298" cy="520" rx="70" ry="155"/><ellipse cx="728" cy="520" rx="70" ry="155"/>',
-    bone: '<ellipse cx="512" cy="1090" rx="168" ry="390"/>'
+    bone: '<ellipse cx="512" cy="705" rx="122" ry="108"/>',
+    legs: '<ellipse cx="442" cy="1015" rx="74" ry="155"/><ellipse cx="586" cy="1015" rx="74" ry="155"/>',
+    feet: '<ellipse cx="452" cy="1345" rx="64" ry="182"/><ellipse cx="580" cy="1345" rx="64" ry="182"/>'
   };
   let h = '<g class="ds-zones">';
   DESIGNER_ORGANS.forEach(o => {
@@ -13348,7 +13399,7 @@ function renderDesigner() {
 }
 
 /* ---- Body-map: foto üzerinde organ işaretleri (marker) ---- */
-const DS_MARK = { brain: [512, 112], eyes: [614, 178], heart: [452, 432], lungs: [602, 452], muscle: [300, 486], bone: [560, 1040] };
+const DS_MARK = { brain: [512, 112], eyes: [614, 178], heart: [452, 432], lungs: [602, 452], muscle: [300, 486], bone: [512, 700], legs: [600, 1000], feet: [452, 1360] };
 function renderDsMarkers(organs) {
   const box = document.getElementById('ds-markers');
   if (!box) return;
