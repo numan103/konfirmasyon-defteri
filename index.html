@@ -1695,53 +1695,47 @@
   .ds-ai-input input:focus { outline: none; border-color: var(--pc); }
   #ds-ai-body { display: none; }
   #ds-ai-body.open { display: block; }
-  /* ===== Alfa Designer — Body Map (floating cards + connectors) ===== */
-  .ds-stage { position: relative; margin: 6px 0 18px; min-height: 580px; }
-  .ds-body-hold { width: 300px; max-width: 58%; margin: 0 auto; position: relative; z-index: 2; }
+  /* ===== Alfa Designer — Body Map (foto vücut solda + kartlar sağda) ===== */
+  .ds-stage { position: relative; display: grid; grid-template-columns: minmax(240px, 38%) 1fr; gap: 30px; align-items: start; margin: 6px 0 18px; }
+  .ds-body-hold { position: relative; width: 100%; max-width: 400px; z-index: 2; }
+  .ds-photo { width: 100%; display: block; border-radius: 16px; -webkit-user-drag: none; user-select: none; }
+  .ds-svg.ds-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
   .ds-connectors { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
-  .ds-conn-line { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 3 4; fill: none; transition: stroke .18s ease, stroke-dasharray .18s ease; }
+  .ds-conn-line { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 3 4; fill: none; transition: stroke .18s ease; }
   .ds-conn-line.hot { stroke: var(--pc); stroke-dasharray: none; stroke-width: 1.8; }
   .ds-conn-dot { fill: var(--pc); opacity: 0; transition: opacity .18s ease; }
   .ds-conn-dot.hot { opacity: 1; }
-  /* interaktif vücut bölgeleri */
+  /* interaktif vücut bölgeleri (foto üstünde) */
   .ds-zone { fill: transparent; stroke: none; cursor: pointer; transition: fill .2s ease, stroke .2s ease; }
-  .ds-zone.hot { fill: color-mix(in srgb, var(--pc) 10%, transparent); }
-  .ds-zone.sel { fill: color-mix(in srgb, var(--pc) 20%, transparent); stroke: var(--pc); stroke-width: 1.4; }
-  .ds-anchor { fill: var(--pc); stroke: var(--card); stroke-width: 1.4; opacity: 0; transition: opacity .2s ease; }
+  .ds-zone.hot { fill: color-mix(in srgb, var(--pc) 16%, transparent); }
+  .ds-zone.sel { fill: color-mix(in srgb, var(--pc) 24%, transparent); stroke: var(--pc); stroke-width: 6; }
+  .ds-anchor { fill: var(--pc); stroke: #fff; stroke-width: 5; opacity: 0; transition: opacity .2s ease; }
   .ds-anchor.on, .ds-anchor.hot { opacity: 1; }
-  /* floating cards */
-  .ds-cards { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-  .ds-card { position: absolute; width: 212px; min-width: 0; box-sizing: border-box; pointer-events: auto; display: flex; align-items: center; gap: 11px; padding: 12px 13px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .2s ease; }
+  /* kartlar (sağ sütun, dikey liste) */
+  .ds-cards { display: flex; flex-direction: column; gap: 11px; position: relative; z-index: 3; }
+  .ds-card { position: relative; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 13px 15px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .2s ease; }
   .ds-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(20,24,45,.14); border-color: color-mix(in srgb, var(--pc) 45%, var(--border)); }
   .ds-card.sel { border-color: var(--pc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 22%, transparent), 0 10px 26px rgba(20,24,45,.16); }
-  .ds-stage.has-sel .ds-card:not(.sel):not(.tip) { opacity: .5; }
+  .ds-stage.has-sel .ds-card:not(.sel):not(.tip) { opacity: .55; }
   .ds-stage.has-sel .ds-card:not(.sel):hover { opacity: 1; }
-  .ds-card-ico { width: 38px; height: 38px; flex: none; border-radius: 11px; background: var(--pc-soft); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .ds-card-ico { width: 40px; height: 40px; flex: none; border-radius: 11px; background: var(--pc-soft); display: flex; align-items: center; justify-content: center; font-size: 21px; }
   .ds-card-body { flex: 1; min-width: 0; }
-  .ds-card-t { font-size: 13.5px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .ds-card-t { font-size: 14px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
   .ds-card-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-  .ds-card-s { font-size: 11.5px; color: var(--text-3); font-weight: 600; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ds-card-sc { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; flex: none; }
+  .ds-card-s { font-size: 12px; color: var(--text-3); font-weight: 600; margin-top: 1px; }
+  .ds-card-sc { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; flex: none; }
   .ds-card-chev { flex: none; color: var(--text-3); }
-  .ds-card.tip { cursor: default; }
+  .ds-card.tip { cursor: default; margin-top: 4px; }
   .ds-card.tip:hover { transform: none; box-shadow: var(--shadow); border-color: var(--border); }
-  .ds-card[data-slot="l0"] { left: 0; top: 2%; }
-  .ds-card[data-slot="l1"] { left: 0; top: 31%; }
-  .ds-card[data-slot="l2"] { left: 0; top: 60%; }
-  .ds-card[data-slot="r0"] { right: 0; top: 8%; }
-  .ds-card[data-slot="r1"] { right: 0; top: 37%; }
-  .ds-card[data-slot="r2"] { right: 0; top: 65%; }
-  .ds-card[data-slot="tip"] { right: 0; bottom: 0; width: 232px; }
-  @media (max-width: 940px) { .ds-card { width: 184px; } .ds-body-hold { max-width: 44%; } }
+  .ds-card.tip .ds-card-s { white-space: normal; }
   @media (max-width: 760px) {
-    .ds-stage { min-height: 0; }
-    .ds-body-hold { width: 240px; max-width: 80%; margin: 0 auto 18px; }
+    .ds-stage { grid-template-columns: 1fr; gap: 14px; }
+    .ds-body-hold { max-width: 260px; margin: 0 auto; }
     .ds-connectors { display: none; }
-    .ds-cards { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; inset: auto; }
-    .ds-card { position: static !important; width: auto !important; }
+    .ds-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .ds-stage.has-sel .ds-card:not(.sel):not(.tip) { opacity: 1; }
     .ds-card.sel { box-shadow: 0 0 0 2px var(--pc); }
-    .ds-card[data-slot="tip"] { grid-column: 1 / -1; width: auto !important; }
+    .ds-card.tip { grid-column: 1 / -1; }
   }
   @media (max-width: 460px) { .ds-cards { grid-template-columns: 1fr; } }
   /* ===== Mentoring (ortak eğitim) ===== */
@@ -4226,7 +4220,8 @@
     <div class="ds-stage" id="ds-stage">
       <svg class="ds-connectors" id="ds-connectors" preserveAspectRatio="none" aria-hidden="true"></svg>
       <div class="ds-body-hold">
-        <svg id="ds-svg" class="ds-svg" viewBox="0 0 320 420" role="img" aria-label="Trader vücudu — trading sistemi haritası"></svg>
+        <img class="ds-photo" src="alfa-body.png" alt="Trader vücudu — trading sistemi haritası" draggable="false">
+        <svg id="ds-svg" class="ds-svg ds-overlay" viewBox="0 0 1024 1536" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
       </div>
       <div class="ds-cards" id="ds-cards"></div>
     </div>
@@ -13329,97 +13324,27 @@ function dsTopicsFor(id) {
 }
 
 function dsSvgHtml(organs) {
-  const shapes = {
-    brain: '<ellipse class="ds-organ-shape" cx="160" cy="40" rx="14" ry="11"/><path class="ds-organ-line" d="M151 36 q3 2 0 4 M158 34 q3 2 0 4 M165 36 q3 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
-    eyes: '<ellipse class="ds-organ-shape" cx="148" cy="55" rx="4.5" ry="3.5"/><ellipse class="ds-organ-shape" cx="172" cy="55" rx="4.5" ry="3.5"/><circle cx="148" cy="55" r="1.5" fill="currentColor"/><circle cx="172" cy="55" r="1.5" fill="currentColor"/>',
-    heart: '<path class="ds-organ-shape" d="M150 152 Q136 140 141 129 Q146 122 153 129 Q160 122 165 129 Q170 140 156 152 Q151 157 150 152 Z"/>',
-    lungs: '<ellipse class="ds-organ-shape" cx="147" cy="132" rx="7" ry="12"/><ellipse class="ds-organ-shape" cx="173" cy="132" rx="7" ry="12"/>',
-    muscle: '<ellipse class="ds-organ-shape" cx="114" cy="160" rx="9" ry="15" transform="rotate(-14 114 160)"/><ellipse class="ds-organ-shape" cx="206" cy="160" rx="9" ry="15" transform="rotate(14 206 160)"/><path class="ds-organ-line" d="M109 154 q2.5 2 0 4 M201 154 q2.5 2 0 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/>',
-    bone: '<ellipse class="ds-organ-shape" cx="150" cy="300" rx="6" ry="24" transform="rotate(6 150 300)"/><ellipse class="ds-organ-shape" cx="170" cy="300" rx="6" ry="24" transform="rotate(-6 170 300)"/>'
-  };
-  const labels = {
-    brain: [160, 10], eyes: [160, 66], heart: [126, 170], lungs: [188, 194], muscle: [110, 196], bone: [160, 322]
-  };
-  let h = '';
-  h += '<defs>' +
-    '<filter id="dsGlow" x="-60%" y="-60%" width="220%" height="220%">' +
-      '<feGaussianBlur stdDeviation="3.2" result="b"/>' +
-      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-    '</filter>' +
-    '<radialGradient id="dsBodyG" cx="42%" cy="26%" r="80%">' +
-      '<stop offset="0%" stop-color="var(--ds-body-hi)"/><stop offset="55%" stop-color="var(--ds-body-mid)"/><stop offset="100%" stop-color="var(--ds-body-lo)"/>' +
-    '</radialGradient>' +
-    '<linearGradient id="dsLimbG" x1="0" y1="0" x2="1" y2="0">' +
-      '<stop offset="0%" stop-color="var(--ds-limb-a)"/><stop offset="45%" stop-color="var(--ds-limb-b)"/><stop offset="100%" stop-color="var(--ds-limb-c)"/>' +
-    '</linearGradient>' +
-    '<filter id="dsSoft" x="-25%" y="-25%" width="150%" height="150%">' +
-      '<feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#454c6b" flood-opacity="0.26"/>' +
-    '</filter>' +
-  '</defs>';
-  // ===== profesyonel manken figürü — hacimli gölge + anatomik kas grubu dikişleri =====
-  const _p = (d, f) => '<path d="' + d + '" fill="' + (f || 'url(#dsBodyG)') + '" stroke="var(--ds-edge)" stroke-width="1.3" stroke-linejoin="round"/>';
-  const _s = (d, w) => '<path d="' + d + '" fill="none" stroke="var(--ds-seam)" stroke-width="' + (w || 1.3) + '" stroke-linecap="round" stroke-linejoin="round"/>';
-  h += '<g class="ds-sil" filter="url(#dsSoft)">';
-  // kollar (omuzdan aşağı, hafif dışa, önkola incelir)
-  h += _p('M200 106 C216 112 226 126 229 146 C232 168 231 192 228 214 C226 232 224 250 223 266 C222 280 221 292 220 300 C219 306 214 308 210 306 C205 304 203 298 203 292 C202 274 202 250 202 226 C201 198 199 168 196 148 C194 132 192 116 200 106 Z', 'url(#dsLimbG)');
-  h += _p('M120 106 C104 112 94 126 91 146 C88 168 89 192 92 214 C94 232 96 250 97 266 C98 280 99 292 100 300 C101 306 106 308 110 306 C115 304 117 298 117 292 C118 274 118 250 118 226 C119 198 121 168 124 148 C126 132 128 116 120 106 Z', 'url(#dsLimbG)');
-  // bacaklar (uyluk → diz → baldır)
-  h += _p('M160 216 C170 216 182 220 187 232 C193 246 194 268 192 294 C190 316 187 332 186 348 C185 362 187 380 186 396 C185 406 178 408 172 406 C167 404 165 396 164 386 C162 360 161 322 161 292 C160 262 156 234 160 216 Z', 'url(#dsLimbG)');
-  h += _p('M160 216 C150 216 138 220 133 232 C127 246 126 268 128 294 C130 316 133 332 134 348 C135 362 133 380 134 396 C135 406 142 408 148 406 C153 404 155 396 156 386 C158 360 159 322 159 292 C160 262 164 234 160 216 Z', 'url(#dsLimbG)');
-  // gövde (geniş omuz → ince bel → leğen)
-  h += _p('M160 92 C174 92 187 95 196 103 C206 112 211 124 212 138 C213 154 208 170 201 183 C196 192 192 200 192 210 C192 218 190 226 184 231 C176 237 168 238 160 238 C152 238 144 237 136 231 C130 226 128 218 128 210 C128 200 124 192 119 183 C112 170 107 154 108 138 C109 124 114 112 124 103 C133 95 146 92 160 92 Z');
-  // boyun + baş
-  h += _p('M151 68 C151 79 153 88 148 95 C156 99 164 99 172 95 C167 88 169 79 169 68 Z');
-  h += _p('M160 24 C175 24 185 38 185 54 C185 71 174 84 160 84 C146 84 135 71 135 54 C135 38 145 24 160 24 Z');
-  // eller (açık) + ayaklar
-  h += _p('M213 300 C220 304 224 312 224 322 C224 334 221 344 215 346 C208 348 203 342 203 330 C203 316 207 302 213 300 Z', 'url(#dsLimbG)');
-  h += _p('M107 300 C100 304 96 312 96 322 C96 334 99 344 105 346 C112 348 117 342 117 330 C117 316 113 302 107 300 Z', 'url(#dsLimbG)');
-  h += _p('M162 398 C174 398 184 404 184 410 C184 415 175 417 160 417 C151 417 147 413 149 407 C151 401 156 398 162 398 Z', 'url(#dsLimbG)');
-  h += _p('M158 398 C146 398 136 404 136 410 C136 415 145 417 160 417 C169 417 173 413 171 407 C169 401 164 398 158 398 Z', 'url(#dsLimbG)');
-  h += '</g>';
-  // ---- kas grubu dikişleri ----
-  const seams = [
-    'M143 48 C151 37 169 37 177 48',                 // kafatası kepi
-    'M120 103 C140 94 180 94 200 103',               // klavikula / omuz yoke
-    'M160 104 L160 148',                             // pektoral orta
-    'M128 114 C142 140 152 148 160 148', 'M192 114 C178 140 168 148 160 148', // alt göğüs
-    'M105 128 C112 114 124 108 133 114', 'M215 128 C208 114 196 108 187 114', // deltoid kapak
-    'M97 148 C92 166 92 188 97 208', 'M223 148 C228 166 228 188 223 208',     // biceps
-    'M92 226 L118 226', 'M202 226 L228 226',         // dirsek
-    'M98 262 L118 262', 'M202 262 L222 262',         // bilek
-    'M160 148 L160 198', 'M149 162 H171', 'M147 178 H173', // karın orta + segment
-    'M126 186 C142 194 178 194 194 186',             // oblik / bel
-    'M128 210 C144 224 176 224 192 210',             // brief hattı
-    'M160 238 L147 216', 'M160 238 L173 216',        // kasık V
-    'M151 248 C151 282 153 312 157 338', 'M169 248 C169 282 167 312 163 338', // uyluk iç
-    'M131 322 C139 330 153 330 159 322', 'M161 322 C167 330 181 330 189 322', // diz
-    'M136 388 L157 388', 'M163 388 L184 388'         // ayak bileği
-  ];
-  seams.forEach(d => { h += _s(d); });
-  // parmak ipuçları
-  [207, 211, 215, 219].forEach(x => { h += _s('M' + x + ' 332 L' + (x + 1) + ' 345', 1); });
-  [113, 109, 105, 101].forEach(x => { h += _s('M' + x + ' 332 L' + (x - 1) + ' 345', 1); });
-  // ---- interaktif vücut bölgeleri (zone) + bağlantı noktaları (anchor) ----
-  // NOT: kol/bacak zone'ları mankenin path'leriyle birebir aynıdır ki highlight tam otursun.
+  // Gerçek foto vücut (alfa-body.png) üzerine bindirilen etkileşim katmanı.
+  // Koordinatlar görselin piksel uzayında (1024 x 1536).
   const ZONES = {
-    brain: 'M160 24 C175 24 185 38 185 54 C185 71 174 84 160 84 C146 84 135 71 135 54 C135 38 145 24 160 24 Z',
-    eyes: 'M143 55 Q160 50 177 55 Q177 66 160 68 Q143 66 143 55 Z',
-    heart: 'M129 100 C123 116 126 140 138 151 C149 157 159 149 160 137 L160 103 C150 96 138 96 129 100 Z',
-    lungs: 'M191 100 C197 116 194 140 182 151 C171 157 161 149 160 137 L160 103 C170 96 182 96 191 100 Z',
-    muscle: 'M120 106 C104 112 94 126 91 146 C88 168 89 192 92 214 C94 232 96 250 97 266 C98 280 99 292 100 300 C101 306 106 308 110 306 C115 304 117 298 117 292 C118 274 118 250 118 226 C119 198 121 168 124 148 C126 132 128 116 120 106 Z M200 106 C216 112 226 126 229 146 C232 168 231 192 228 214 C226 232 224 250 223 266 C222 280 221 292 220 300 C219 306 214 308 210 306 C205 304 203 298 203 292 C202 274 202 250 202 226 C201 198 199 168 196 148 C194 132 192 116 200 106 Z',
-    bone: 'M160 216 C150 216 138 220 133 232 C127 246 126 268 128 294 C130 316 133 332 134 348 C135 362 133 380 134 396 C135 406 142 408 148 406 C153 404 155 396 156 386 C158 360 159 322 159 292 C160 262 164 234 160 216 Z M160 216 C170 216 182 220 187 232 C193 246 194 268 192 294 C190 316 187 332 186 348 C185 362 187 380 186 396 C185 406 178 408 172 406 C167 404 165 396 164 386 C162 360 161 322 161 292 C160 262 156 234 160 216 Z'
+    brain: '<ellipse cx="512" cy="150" rx="98" ry="118"/>',
+    eyes: '<ellipse cx="512" cy="188" rx="92" ry="52"/>',
+    heart: '<ellipse cx="452" cy="442" rx="82" ry="86"/>',
+    lungs: '<ellipse cx="588" cy="446" rx="82" ry="86"/>',
+    muscle: '<ellipse cx="298" cy="520" rx="70" ry="155"/><ellipse cx="728" cy="520" rx="70" ry="155"/>',
+    bone: '<ellipse cx="512" cy="1090" rx="168" ry="390"/>'
   };
-  const ANCH = { brain: [150, 46], eyes: [172, 62], heart: [146, 140], lungs: [180, 150], muscle: [106, 178], bone: [184, 298] };
-  h += '<g class="ds-zones">';
+  const ANCH = { brain: [512, 118], eyes: [548, 186], heart: [452, 440], lungs: [588, 444], muscle: [728, 512], bone: [560, 1140] };
+  let h = '<g class="ds-zones">';
   DESIGNER_ORGANS.forEach(o => {
     const st = dsStatusOf(organs[o.id].score);
     const selc = designerSel === o.id ? ' sel' : '';
-    h += '<path class="ds-zone' + selc + '" data-organ="' + o.id + '" d="' + ZONES[o.id] + '"><title>' + o.body + ' — ' + o.name + ' · ' + organs[o.id].score + '/100 · ' + DS_STATUS[st] + '</title></path>';
+    h += '<g class="ds-zone' + selc + '" data-organ="' + o.id + '"><title>' + o.body + ' — ' + o.name + ' · ' + organs[o.id].score + '/100 · ' + DS_STATUS[st] + '</title>' + ZONES[o.id] + '</g>';
   });
   DESIGNER_ORGANS.forEach(o => {
     const onc = designerSel === o.id ? ' on' : '';
     const a = ANCH[o.id];
-    h += '<circle class="ds-anchor' + onc + '" data-organ="' + o.id + '" cx="' + a[0] + '" cy="' + a[1] + '" r="3.6"/>';
+    h += '<circle class="ds-anchor' + onc + '" data-organ="' + o.id + '" cx="' + a[0] + '" cy="' + a[1] + '" r="14"/>';
   });
   h += '</g>';
   return h;
@@ -13466,7 +13391,7 @@ function renderDsCards(organs) {
     const st = dsStatusOf(sc);
     const col = st === 'ok' ? 'var(--green)' : st === 'warn' ? 'var(--amber)' : 'var(--red)';
     const sel = designerSel === o.id ? ' sel' : '';
-    return '<div class="ds-card' + sel + '" data-organ="' + o.id + '" data-slot="' + (DS_CARD_SLOT[o.id] || 'l0') + '" role="button" tabindex="0" aria-pressed="' + (designerSel === o.id) + '">' +
+    return '<div class="ds-card' + sel + '" data-organ="' + o.id + '" role="button" tabindex="0" aria-pressed="' + (designerSel === o.id) + '">' +
       '<div class="ds-card-ico">' + o.ico + '</div>' +
       '<div class="ds-card-body"><div class="ds-card-t"><span class="ds-card-dot" style="background:' + col + '"></span>' + o.body + '</div><div class="ds-card-s">' + o.name + '</div></div>' +
       '<div class="ds-card-sc" style="color:' + col + '">' + sc + '</div>' + chev +
@@ -13482,9 +13407,11 @@ function drawDsConnectors() {
   const stage = document.getElementById('ds-stage');
   const svg = document.getElementById('ds-connectors');
   const cards = document.getElementById('ds-cards');
-  if (!stage || !svg || !cards) return;
+  const hold = document.querySelector('.ds-body-hold');
+  if (!stage || !svg || !cards || !hold) return;
   const sr = stage.getBoundingClientRect();
   if (!sr.width || getComputedStyle(svg).display === 'none') { svg.innerHTML = ''; return; }
+  const bhr = hold.getBoundingClientRect();
   svg.setAttribute('viewBox', '0 0 ' + sr.width + ' ' + sr.height);
   let out = '';
   cards.querySelectorAll('.ds-card[data-organ]').forEach(card => {
@@ -13493,14 +13420,14 @@ function drawDsConnectors() {
     if (!anchor) return;
     const cr = card.getBoundingClientRect();
     const ar = anchor.getBoundingClientRect();
-    const left = (card.getAttribute('data-slot') || '').charAt(0) === 'l';
-    const x1 = (left ? cr.right : cr.left) - sr.left;
+    // gövde solda: kartın SOL kenarından, gövde panelinin SAĞ kenarına (anchor hizasında) çiz
+    const x1 = cr.left - sr.left;
     const y1 = cr.top + cr.height / 2 - sr.top;
-    const x2 = ar.left + ar.width / 2 - sr.left;
+    const x2 = bhr.right - sr.left;
     const y2 = ar.top + ar.height / 2 - sr.top;
     const hot = designerSel === id ? ' hot' : '';
     out += '<line class="ds-conn-line' + hot + '" data-organ="' + id + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>';
-    out += '<circle class="ds-conn-dot' + hot + '" data-organ="' + id + '" cx="' + x2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="3"/>';
+    out += '<circle class="ds-conn-dot' + hot + '" data-organ="' + id + '" cx="' + x2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="3.5"/>';
   });
   svg.innerHTML = out;
 }
