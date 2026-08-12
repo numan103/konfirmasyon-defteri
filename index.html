@@ -1699,17 +1699,8 @@
   .ds-body-hold { position: relative; width: 100%; }
   .ds-photo { width: 100%; display: block; border-radius: 14px; -webkit-user-drag: none; user-select: none; }
   #ds-svg.ds-overlay { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  /* durum-renkli bölgeler (düşük puan = kırmızı/yaralı) */
-  .ds-zone { fill: transparent; stroke: none; stroke-width: 4; stroke-linejoin: round; cursor: pointer; transition: fill .2s ease, stroke-width .2s ease; }
-  .ds-zone.ok { fill: rgba(22,163,74,.13); stroke: #16a34a; }
-  .ds-zone.warn { fill: rgba(217,119,6,.16); stroke: #d97706; }
-  .ds-zone.crit { fill: rgba(220,38,38,.20); stroke: #dc2626; }
-  .ds-zone.sel { stroke-width: 9; }
-  .ds-zone.sel.ok { fill: rgba(22,163,74,.24); }
-  .ds-zone.sel.warn { fill: rgba(217,119,6,.30); }
-  .ds-zone.sel.crit { fill: rgba(220,38,38,.36); }
-  .ds-zone.crit { animation: dsZoneWound 1.9s ease-in-out infinite; }
-  @keyframes dsZoneWound { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  /* görünmez ama tıklanabilir bölgeler (renkli halkalar kaldırıldı) */
+  .ds-zone { fill: transparent; stroke: none; cursor: pointer; }
   /* organ işaretleri (badge) — bölgenin üstünde ikon + puan */
   .ds-markers { position: absolute; inset: 0; pointer-events: none; }
   .ds-marker { position: absolute; transform: translate(-50%,-50%); pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 2px 7px 2px 2px; background: var(--card); border: 1.5px solid var(--border); border-radius: 999px; box-shadow: 0 2px 8px rgba(20,24,45,.16); transition: transform .15s ease, box-shadow .15s ease; }
@@ -1719,10 +1710,7 @@
   .ds-marker.ok { border-color: rgba(22,163,74,.5); } .ds-marker.ok .ds-marker-sc { color: #16a34a; } .ds-marker.ok .ds-marker-ico { background: rgba(22,163,74,.14); }
   .ds-marker.warn { border-color: rgba(217,119,6,.5); } .ds-marker.warn .ds-marker-sc { color: #d97706; } .ds-marker.warn .ds-marker-ico { background: rgba(217,119,6,.16); }
   .ds-marker.crit { border-color: #dc2626; } .ds-marker.crit .ds-marker-sc { color: #dc2626; } .ds-marker.crit .ds-marker-ico { background: rgba(220,38,38,.18); }
-  .ds-marker.crit { animation: dsMarkWound 1.5s ease-in-out infinite; }
-  @keyframes dsMarkWound { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,.5), 0 2px 8px rgba(20,24,45,.16); } 50% { box-shadow: 0 0 0 7px rgba(220,38,38,0), 0 2px 8px rgba(20,24,45,.16); } }
   .ds-marker.sel { border-width: 2px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 26%, transparent), 0 4px 12px rgba(20,24,45,.22); }
-  @media (prefers-reduced-motion: reduce) { .ds-zone.crit, .ds-marker.crit { animation: none; } }
   @media (max-width: 640px) { .ds-marker-ico { width: 20px; height: 20px; } .ds-marker-sc { font-size: 10px; } }
   /* ===== Mentoring (ortak eğitim) ===== */
   .mt-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
