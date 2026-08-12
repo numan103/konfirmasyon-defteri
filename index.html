@@ -1695,49 +1695,35 @@
   .ds-ai-input input:focus { outline: none; border-color: var(--pc); }
   #ds-ai-body { display: none; }
   #ds-ai-body.open { display: block; }
-  /* ===== Alfa Designer — Body Map (foto vücut solda + kartlar sağda) ===== */
-  .ds-stage { position: relative; display: grid; grid-template-columns: minmax(240px, 38%) 1fr; gap: 30px; align-items: start; margin: 6px 0 18px; }
-  .ds-body-hold { position: relative; width: 100%; max-width: 400px; z-index: 2; }
-  .ds-photo { width: 100%; display: block; border-radius: 16px; -webkit-user-drag: none; user-select: none; }
-  .ds-svg.ds-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .ds-connectors { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
-  .ds-conn-line { stroke: var(--border); stroke-width: 1.5; stroke-dasharray: 3 4; fill: none; transition: stroke .18s ease; }
-  .ds-conn-line.hot { stroke: var(--pc); stroke-dasharray: none; stroke-width: 1.8; }
-  .ds-conn-dot { fill: var(--pc); opacity: 0; transition: opacity .18s ease; }
-  .ds-conn-dot.hot { opacity: 1; }
-  /* interaktif vücut bölgeleri (foto üstünde) */
-  .ds-zone { fill: transparent; stroke: none; cursor: pointer; transition: fill .2s ease, stroke .2s ease; }
-  .ds-zone.hot { fill: color-mix(in srgb, var(--pc) 16%, transparent); }
-  .ds-zone.sel { fill: color-mix(in srgb, var(--pc) 24%, transparent); stroke: var(--pc); stroke-width: 6; }
-  .ds-anchor { fill: var(--pc); stroke: #fff; stroke-width: 5; opacity: 0; transition: opacity .2s ease; }
-  .ds-anchor.on, .ds-anchor.hot { opacity: 1; }
-  /* kartlar (sağ sütun, dikey liste) */
-  .ds-cards { display: flex; flex-direction: column; gap: 11px; position: relative; z-index: 3; }
-  .ds-card { position: relative; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 13px 15px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .2s ease; }
-  .ds-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(20,24,45,.14); border-color: color-mix(in srgb, var(--pc) 45%, var(--border)); }
-  .ds-card.sel { border-color: var(--pc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 22%, transparent), 0 10px 26px rgba(20,24,45,.16); }
-  .ds-stage.has-sel .ds-card:not(.sel):not(.tip) { opacity: .55; }
-  .ds-stage.has-sel .ds-card:not(.sel):hover { opacity: 1; }
-  .ds-card-ico { width: 40px; height: 40px; flex: none; border-radius: 11px; background: var(--pc-soft); display: flex; align-items: center; justify-content: center; font-size: 21px; }
-  .ds-card-body { flex: 1; min-width: 0; }
-  .ds-card-t { font-size: 14px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
-  .ds-card-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-  .ds-card-s { font-size: 12px; color: var(--text-3); font-weight: 600; margin-top: 1px; }
-  .ds-card-sc { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; flex: none; }
-  .ds-card-chev { flex: none; color: var(--text-3); }
-  .ds-card.tip { cursor: default; margin-top: 4px; }
-  .ds-card.tip:hover { transform: none; box-shadow: var(--shadow); border-color: var(--border); }
-  .ds-card.tip .ds-card-s { white-space: normal; }
-  @media (max-width: 760px) {
-    .ds-stage { grid-template-columns: 1fr; gap: 14px; }
-    .ds-body-hold { max-width: 260px; margin: 0 auto; }
-    .ds-connectors { display: none; }
-    .ds-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .ds-stage.has-sel .ds-card:not(.sel):not(.tip) { opacity: 1; }
-    .ds-card.sel { box-shadow: 0 0 0 2px var(--pc); }
-    .ds-card.tip { grid-column: 1 / -1; }
-  }
-  @media (max-width: 460px) { .ds-cards { grid-template-columns: 1fr; } }
+  /* ===== Alfa Designer — Body Map (foto vücut solda, açıklama sağda) ===== */
+  .ds-body-hold { position: relative; width: 100%; }
+  .ds-photo { width: 100%; display: block; border-radius: 14px; -webkit-user-drag: none; user-select: none; }
+  #ds-svg.ds-overlay { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  /* durum-renkli bölgeler (düşük puan = kırmızı/yaralı) */
+  .ds-zone { fill: transparent; stroke: none; stroke-width: 4; stroke-linejoin: round; cursor: pointer; transition: fill .2s ease, stroke-width .2s ease; }
+  .ds-zone.ok { fill: rgba(22,163,74,.13); stroke: #16a34a; }
+  .ds-zone.warn { fill: rgba(217,119,6,.16); stroke: #d97706; }
+  .ds-zone.crit { fill: rgba(220,38,38,.20); stroke: #dc2626; }
+  .ds-zone.sel { stroke-width: 9; }
+  .ds-zone.sel.ok { fill: rgba(22,163,74,.24); }
+  .ds-zone.sel.warn { fill: rgba(217,119,6,.30); }
+  .ds-zone.sel.crit { fill: rgba(220,38,38,.36); }
+  .ds-zone.crit { animation: dsZoneWound 1.9s ease-in-out infinite; }
+  @keyframes dsZoneWound { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  /* organ işaretleri (badge) — bölgenin üstünde ikon + puan */
+  .ds-markers { position: absolute; inset: 0; pointer-events: none; }
+  .ds-marker { position: absolute; transform: translate(-50%,-50%); pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 2px 7px 2px 2px; background: var(--card); border: 1.5px solid var(--border); border-radius: 999px; box-shadow: 0 2px 8px rgba(20,24,45,.16); transition: transform .15s ease, box-shadow .15s ease; }
+  .ds-marker:hover { transform: translate(-50%,-50%) scale(1.09); }
+  .ds-marker-ico { width: 22px; height: 22px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 13px; background: var(--pc-soft); }
+  .ds-marker-sc { font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ds-marker.ok { border-color: rgba(22,163,74,.5); } .ds-marker.ok .ds-marker-sc { color: #16a34a; } .ds-marker.ok .ds-marker-ico { background: rgba(22,163,74,.14); }
+  .ds-marker.warn { border-color: rgba(217,119,6,.5); } .ds-marker.warn .ds-marker-sc { color: #d97706; } .ds-marker.warn .ds-marker-ico { background: rgba(217,119,6,.16); }
+  .ds-marker.crit { border-color: #dc2626; } .ds-marker.crit .ds-marker-sc { color: #dc2626; } .ds-marker.crit .ds-marker-ico { background: rgba(220,38,38,.18); }
+  .ds-marker.crit { animation: dsMarkWound 1.5s ease-in-out infinite; }
+  @keyframes dsMarkWound { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,.5), 0 2px 8px rgba(20,24,45,.16); } 50% { box-shadow: 0 0 0 7px rgba(220,38,38,0), 0 2px 8px rgba(20,24,45,.16); } }
+  .ds-marker.sel { border-width: 2px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 26%, transparent), 0 4px 12px rgba(20,24,45,.22); }
+  @media (prefers-reduced-motion: reduce) { .ds-zone.crit, .ds-marker.crit { animation: none; } }
+  @media (max-width: 640px) { .ds-marker-ico { width: 20px; height: 20px; } .ds-marker-sc { font-size: 10px; } }
   /* ===== Mentoring (ortak eğitim) ===== */
   .mt-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
   @media (max-width: 820px) { .mt-wrap { grid-template-columns: 1fr; } }
@@ -4217,19 +4203,20 @@
       <span class="eg-brand-sub">Trader'ın vücudu — her organ bir yetenek. Trade günlüğün ve checklist'ten hesaplanır; kırmızı organlar seni zayıflatan bölgelerdir. Üstüne tıkla, çalışma konularını gör.</span>
     </div>
     <div class="ds-overall" id="ds-overall"></div>
-    <div class="ds-stage" id="ds-stage">
-      <svg class="ds-connectors" id="ds-connectors" preserveAspectRatio="none" aria-hidden="true"></svg>
-      <div class="ds-body-hold">
-        <img class="ds-photo" src="alfa-body.png" alt="Trader vücudu — trading sistemi haritası" draggable="false">
-        <svg id="ds-svg" class="ds-svg ds-overlay" viewBox="0 0 1024 1536" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-      </div>
-      <div class="ds-cards" id="ds-cards"></div>
+    <div class="ds-wrap">
+      <aside class="panel ds-body-panel">
+        <div class="ds-body-hold">
+          <img class="ds-photo" src="alfa-body.png" alt="Trader vücudu — trading sistemi haritası" draggable="false">
+          <svg id="ds-svg" class="ds-overlay" viewBox="0 0 1024 1536" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+          <div class="ds-markers" id="ds-markers"></div>
+        </div>
+      </aside>
+      <section class="panel ds-detail">
+        <div id="ds-detail" class="ds-detail-inner">
+          <div class="ds-empty">Soldaki vücuttan bir bölgeye tıkla — durumunu, nedenlerini ve çalışman gereken konuları burada göreceksin.</div>
+        </div>
+      </section>
     </div>
-    <section class="panel ds-detail">
-      <div id="ds-detail" class="ds-detail-inner">
-        <div class="ds-empty">Bir bölge kartına ya da vücuttaki alana tıkla — o parçanın durumunu, nedenlerini ve çalışman gereken konuları burada göreceksin.</div>
-      </div>
-    </section>
     <div class="panel ds-ai" id="ds-ai">
       <h2 class="cat-h2" style="cursor:pointer;" onclick="document.getElementById('ds-ai-body').classList.toggle('open');this.querySelector('.df-toggle').classList.toggle('open');">
         <span>🤖 Alfa Mentor — çalışma konularını birlikte öğren</span>
@@ -13334,17 +13321,11 @@ function dsSvgHtml(organs) {
     muscle: '<ellipse cx="298" cy="520" rx="70" ry="155"/><ellipse cx="728" cy="520" rx="70" ry="155"/>',
     bone: '<ellipse cx="512" cy="1090" rx="168" ry="390"/>'
   };
-  const ANCH = { brain: [512, 118], eyes: [548, 186], heart: [452, 440], lungs: [588, 444], muscle: [728, 512], bone: [560, 1140] };
   let h = '<g class="ds-zones">';
   DESIGNER_ORGANS.forEach(o => {
     const st = dsStatusOf(organs[o.id].score);
     const selc = designerSel === o.id ? ' sel' : '';
-    h += '<g class="ds-zone' + selc + '" data-organ="' + o.id + '"><title>' + o.body + ' — ' + o.name + ' · ' + organs[o.id].score + '/100 · ' + DS_STATUS[st] + '</title>' + ZONES[o.id] + '</g>';
-  });
-  DESIGNER_ORGANS.forEach(o => {
-    const onc = designerSel === o.id ? ' on' : '';
-    const a = ANCH[o.id];
-    h += '<circle class="ds-anchor' + onc + '" data-organ="' + o.id + '" cx="' + a[0] + '" cy="' + a[1] + '" r="14"/>';
+    h += '<g class="ds-zone ' + st + selc + '" data-organ="' + o.id + '"><title>' + o.body + ' — ' + o.name + ' · ' + organs[o.id].score + '/100 · ' + DS_STATUS[st] + '</title>' + ZONES[o.id] + '</g>';
   });
   h += '</g>';
   return h;
@@ -13373,68 +13354,24 @@ function renderDesigner() {
   }
   const svg = document.getElementById('ds-svg');
   if (svg) { svg.innerHTML = dsSvgHtml(organs); }
-  renderDsCards(organs);
+  renderDsMarkers(organs);
   renderDsDetail(organs, organs[designerSel]);
   dsAiRender();
-  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(drawDsConnectors);
-  setTimeout(drawDsConnectors, 160);
 }
 
-/* ---- Body-map: floating kartlar + bağlantı çizgileri ---- */
-const DS_CARD_SLOT = { brain: 'l0', heart: 'l1', muscle: 'l2', eyes: 'r0', lungs: 'r1', bone: 'r2' };
-function renderDsCards(organs) {
-  const box = document.getElementById('ds-cards');
+/* ---- Body-map: foto üzerinde organ işaretleri (marker) ---- */
+const DS_MARK = { brain: [512, 112], eyes: [614, 178], heart: [452, 432], lungs: [602, 452], muscle: [300, 486], bone: [560, 1040] };
+function renderDsMarkers(organs) {
+  const box = document.getElementById('ds-markers');
   if (!box) return;
-  const chev = '<svg class="ds-card-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
-  let html = DESIGNER_ORGANS.map(o => {
+  box.innerHTML = DESIGNER_ORGANS.map(o => {
     const sc = organs[o.id].score;
     const st = dsStatusOf(sc);
-    const col = st === 'ok' ? 'var(--green)' : st === 'warn' ? 'var(--amber)' : 'var(--red)';
     const sel = designerSel === o.id ? ' sel' : '';
-    return '<div class="ds-card' + sel + '" data-organ="' + o.id + '" role="button" tabindex="0" aria-pressed="' + (designerSel === o.id) + '">' +
-      '<div class="ds-card-ico">' + o.ico + '</div>' +
-      '<div class="ds-card-body"><div class="ds-card-t"><span class="ds-card-dot" style="background:' + col + '"></span>' + o.body + '</div><div class="ds-card-s">' + o.name + '</div></div>' +
-      '<div class="ds-card-sc" style="color:' + col + '">' + sc + '</div>' + chev +
-    '</div>';
+    const a = DS_MARK[o.id];
+    const l = (a[0] / 1024 * 100).toFixed(2), t = (a[1] / 1536 * 100).toFixed(2);
+    return '<div class="ds-marker ' + st + sel + '" data-organ="' + o.id + '" style="left:' + l + '%;top:' + t + '%" role="button" tabindex="0" title="' + o.body + ' — ' + o.name + ' · ' + sc + '/100 · ' + DS_STATUS[st] + '"><span class="ds-marker-ico">' + o.ico + '</span><span class="ds-marker-sc">' + sc + '</span></div>';
   }).join('');
-  html += '<div class="ds-card tip" data-slot="tip"><div class="ds-card-ico">💡</div><div class="ds-card-body"><div class="ds-card-t">İpucu</div><div class="ds-card-s" style="white-space:normal;">Her bölgeyi güçlendirerek trading sistemini mükemmelleştir.</div></div></div>';
-  box.innerHTML = html;
-  const stage = document.getElementById('ds-stage');
-  if (stage) stage.classList.add('has-sel');
-}
-
-function drawDsConnectors() {
-  const stage = document.getElementById('ds-stage');
-  const svg = document.getElementById('ds-connectors');
-  const cards = document.getElementById('ds-cards');
-  const hold = document.querySelector('.ds-body-hold');
-  if (!stage || !svg || !cards || !hold) return;
-  const sr = stage.getBoundingClientRect();
-  if (!sr.width || getComputedStyle(svg).display === 'none') { svg.innerHTML = ''; return; }
-  const bhr = hold.getBoundingClientRect();
-  svg.setAttribute('viewBox', '0 0 ' + sr.width + ' ' + sr.height);
-  let out = '';
-  cards.querySelectorAll('.ds-card[data-organ]').forEach(card => {
-    const id = card.getAttribute('data-organ');
-    const anchor = stage.querySelector('.ds-anchor[data-organ="' + id + '"]');
-    if (!anchor) return;
-    const cr = card.getBoundingClientRect();
-    const ar = anchor.getBoundingClientRect();
-    // gövde solda: kartın SOL kenarından, gövde panelinin SAĞ kenarına (anchor hizasında) çiz
-    const x1 = cr.left - sr.left;
-    const y1 = cr.top + cr.height / 2 - sr.top;
-    const x2 = bhr.right - sr.left;
-    const y2 = ar.top + ar.height / 2 - sr.top;
-    const hot = designerSel === id ? ' hot' : '';
-    out += '<line class="ds-conn-line' + hot + '" data-organ="' + id + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>';
-    out += '<circle class="ds-conn-dot' + hot + '" data-organ="' + id + '" cx="' + x2.toFixed(1) + '" cy="' + y2.toFixed(1) + '" r="3.5"/>';
-  });
-  svg.innerHTML = out;
-}
-
-function dsSetHot(id, on) {
-  document.querySelectorAll('.ds-zone[data-organ="' + id + '"], .ds-anchor[data-organ="' + id + '"], .ds-conn-line[data-organ="' + id + '"], .ds-conn-dot[data-organ="' + id + '"]')
-    .forEach(el => el.classList.toggle('hot', on));
 }
 
 function renderDsDetail(organs, organ) {
@@ -13596,31 +13533,23 @@ async function dsAiAsk(text) {
 
 function bindDesignerPage() {
   const svgEl = document.getElementById('ds-svg');
-  if (svgEl) {
-    svgEl.addEventListener('click', e => {
-      const z = e.target.closest('[data-organ]');
-      if (z) { designerSel = z.getAttribute('data-organ'); renderDesigner(); }
+  if (svgEl) svgEl.addEventListener('click', e => {
+    const z = e.target.closest('[data-organ]');
+    if (z) { designerSel = z.getAttribute('data-organ'); renderDesigner(); }
+  });
+  const markBox = document.getElementById('ds-markers');
+  if (markBox) {
+    markBox.addEventListener('click', e => {
+      const m = e.target.closest('.ds-marker[data-organ]');
+      if (m) { designerSel = m.getAttribute('data-organ'); renderDesigner(); }
     });
-    svgEl.addEventListener('mouseover', e => { const z = e.target.closest('[data-organ]'); if (z) dsSetHot(z.getAttribute('data-organ'), true); });
-    svgEl.addEventListener('mouseout', e => { const z = e.target.closest('[data-organ]'); if (z) dsSetHot(z.getAttribute('data-organ'), false); });
-  }
-  const cardsBox = document.getElementById('ds-cards');
-  if (cardsBox) {
-    cardsBox.addEventListener('click', e => {
-      const c = e.target.closest('.ds-card[data-organ]');
-      if (c) { designerSel = c.getAttribute('data-organ'); renderDesigner(); }
-    });
-    cardsBox.addEventListener('keydown', e => {
+    markBox.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
-        const c = e.target.closest('.ds-card[data-organ]');
-        if (c) { e.preventDefault(); designerSel = c.getAttribute('data-organ'); renderDesigner(); }
+        const m = e.target.closest('.ds-marker[data-organ]');
+        if (m) { e.preventDefault(); designerSel = m.getAttribute('data-organ'); renderDesigner(); }
       }
     });
-    cardsBox.addEventListener('mouseover', e => { const c = e.target.closest('.ds-card[data-organ]'); if (c) dsSetHot(c.getAttribute('data-organ'), true); });
-    cardsBox.addEventListener('mouseout', e => { const c = e.target.closest('.ds-card[data-organ]'); if (c) dsSetHot(c.getAttribute('data-organ'), false); });
   }
-  let dsRz;
-  window.addEventListener('resize', () => { clearTimeout(dsRz); dsRz = setTimeout(drawDsConnectors, 120); });
   document.getElementById('ds-detail').addEventListener('click', e => {
     const del = e.target.closest('[data-topic-del]');
     if (del) {
