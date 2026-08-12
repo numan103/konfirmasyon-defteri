@@ -13824,7 +13824,7 @@ function atTimeAgo(ts) {
   try { return new Date(ts).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }); } catch (e) { return d + ' gün'; }
 }
 async function atApi(action, payload) {
-  const res = await fetch('/api/alfa-trading', {
+  const res = await fetch('/api/contrib?store=alfatrading', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(Object.assign({ action }, payload || {})),
   });
@@ -13832,7 +13832,7 @@ async function atApi(action, payload) {
 }
 async function loadAlfaTrading() {
   try {
-    const res = await fetch('/api/alfa-trading', { cache: 'no-store' });
+    const res = await fetch('/api/contrib?store=alfatrading', { cache: 'no-store' });
     const data = await res.json();
     alfaPosts = Array.isArray(data.posts) ? data.posts : [];
   } catch (e) { alfaPosts = []; }
