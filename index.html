@@ -1626,6 +1626,39 @@
   .sd-ders-card .sd-edu-links, .sd-ders-card .sd-edu-vids { margin-bottom: 0; }
   #strat-toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 16px); background: var(--pc); color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 11px 18px; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 10000; max-width: 90vw; text-align: center; }
   #strat-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .ana-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ana-filter-bar select { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; }
+  .ana-list { display: flex; flex-direction: column; gap: 10px; }
+  .ana-card { border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); padding: 14px 16px; }
+  .ana-card-h { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ana-av { width: 34px; height: 34px; flex: none; border-radius: 10px; background: linear-gradient(135deg, var(--pc), #6a67e8); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; }
+  .ana-tinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ana-tname { font-size: 14px; font-weight: 800; color: var(--text); }
+  .ana-tdate { font-size: 11px; color: var(--text-3); font-weight: 600; }
+  .ana-tag { display: flex; align-items: center; gap: 6px; }
+  .ana-url { font-size: 12px; font-weight: 700; color: var(--pc); text-decoration: none; }
+  .ana-url:hover { text-decoration: underline; }
+  .ana-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .ana-chip { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--bg2); border: 1px solid var(--border); color: var(--text-2); }
+  .ana-chip-coin { color: var(--pc); border-color: color-mix(in srgb, var(--pc) 45%, var(--border)); background: color-mix(in srgb, var(--pc) 8%, var(--bg2)); }
+  .ana-chip-dir { color: var(--green); border-color: color-mix(in srgb, var(--green) 45%, var(--border)); }
+  .ana-note { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 6px; }
+  .ana-note b { color: var(--pc); }
+  .ana-text { font-size: 13px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; margin: 8px 0; }
+  .ana-img { width: 100%; max-width: 560px; border-radius: 12px; border: 1px solid var(--border); cursor: zoom-in; margin-top: 6px; }
+  .ana-imgprev img { max-width: 100%; max-height: 260px; border-radius: 12px; border: 1px solid var(--border); }
+  .ana-imgph { font-size: 12px; color: var(--text-3); padding: 18px; border: 1px dashed var(--border); border-radius: 12px; text-align: center; }
+  .ana-trader-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg2); margin-bottom: 6px; }
+  .ana-trader-row .ana-av { width: 28px; height: 28px; font-size: 13px; border-radius: 8px; }
+  .ana-tw { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+  .ana-traders-list { margin-bottom: 12px; }
+  .ana-full { grid-column: 1 / -1; }
+  #ana-form textarea, #ana-form input { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; width: 100%; box-sizing: border-box; }
+  #ana-form textarea { resize: vertical; line-height: 1.5; }
+  #ana-form select { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; width: 100%; box-sizing: border-box; }
+  #ana-form textarea:focus, #ana-form input:focus, #ana-form select:focus { outline: none; border-color: var(--pc); }
+  .ana-trader-add { display: flex; gap: 8px; width: 100%; }
+  .ana-trader-add input { flex: 1; min-width: 0; }
   .strat-lb { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 24px; cursor: zoom-out; }
   .strat-lb img { max-width: 92vw; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
   .sd-note { padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg2); font-size: 12.5px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
@@ -3311,6 +3344,7 @@
         <div class="drop-menu">
           <a href="?page=egitim" class="nav-link" id="tab-egitim" data-nav data-i18n="app.eduPage">🎓 Alfa Edu</a>
           <a href="?page=strategies" class="nav-link" id="tab-strategies" data-nav data-i18n="app.strategies">🧪 Stratejiler</a>
+          <a href="?page=analiz" class="nav-link" id="tab-analiz" data-nav data-i18n="app.analiz">🧭 Analiz Köşesi</a>
           <a href="?page=pano" class="nav-link" id="tab-pano" data-nav data-i18n="app.pano">🛠️ Çalışma Panosu</a>
           <a href="?page=mentoring" class="nav-link" id="tab-mentoring" data-nav data-i18n="app.mentoring" style="display:none">🤝 Mentoring</a>
           <a href="?page=indicators" class="nav-link" id="tab-indicators" data-nav data-i18n="app.indicators">📐 İndikatörler</a>
@@ -3369,6 +3403,7 @@
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
       <a href="?page=strategies" class="mnav-link" data-nav data-mnav="strategies" data-i18n="app.strategies">🧪 Stratejiler</a>
+      <a href="?page=analiz" class="mnav-link" data-nav data-mnav="analiz" data-i18n="app.analiz">🧭 Analiz Köşesi</a>
       <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" data-i18n="app.pano">🛠️ Çalışma Panosu</a>
       <a href="?page=mentoring" class="mnav-link" data-nav data-mnav="mentoring" id="mnav-mentoring" style="display:none" data-i18n="app.mentoring">🤝 Mentoring</a>
       <a href="?page=indicators" class="mnav-link" data-nav data-mnav="indicators" data-i18n="app.indicators">📐 İndikatörler</a>
@@ -4437,6 +4472,7 @@
           <div class="strat-sub">Stratejilerini tanımla: kurallar, konfirmasyon kutucukları, işlem kayıtları. Profit factor ve win rate kendiliğinden hesaplanır. Bu bölüm yalnızca senin cihazında.</div>
         </div>
         <div class="strat-head-actions">
+          <button type="button" class="btn" id="strat-analiz-btn" title="Trader analizlerini kaydettiğin Analiz Köşesi'ne git">🧭 Analiz Köşesi</button>
           <button type="button" class="btn" id="strat-distribute-all" title="Trade günlüğündeki tüm kayıtları strateji adına / notuna göre otomatik dağıt">📥 Günlükten Tümünü Dağıt</button>
           <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
         </div>
@@ -4507,6 +4543,88 @@
         </div>
       </div>
     </div>
+  <div id="page-analiz" class="hidden">
+    <div class="strat-head">
+      <div>
+        <div class="strat-title">🧭 Analiz Köşesi</div>
+        <div class="strat-sub">Takip ettiğin traderların paylaşımlarını topla: tweet, görsel, metin. "🤖 Analiz Et" ile önemli noktaları (nereyi önemsedi, ne dedi, neden önemsedi) otomatik çıkar. Bu bölüm yalnızca senin cihazında.</div>
+      </div>
+      <div class="strat-head-actions">
+        <button type="button" class="btn" id="ana-traders" title="Takipteki traderları yönet">👥 Traderlar</button>
+        <button type="button" class="btn solid" id="ana-add">＋ Analiz Ekle</button>
+      </div>
+    </div>
+    <div id="ana-filter-bar" class="ana-filter-bar"></div>
+    <div id="ana-list" class="ana-list"></div>
+    <div id="ana-empty" class="data-empty">Henüz analiz yok. "＋ Analiz Ekle" ile bir trader paylaşımını kaydet.</div>
+    <div id="ana-form" class="strat-form hidden">
+      <div class="strat-form-h" id="ana-form-title">Yeni Analiz</div>
+      <div class="strat-form-grid">
+        <div class="strat-f">
+          <label>Trader *</label>
+          <select id="af-trader"></select>
+        </div>
+        <div class="strat-f">
+          <label>Tarih</label>
+          <input type="date" id="af-date">
+        </div>
+        <div class="strat-f">
+          <label>Tweet / gönderi linki</label>
+          <input type="text" id="af-url" placeholder="https://x.com/trader/status/…" maxlength="300">
+        </div>
+        <div class="strat-f">
+          <label>Yeni trader ekle (yoksa)</label>
+          <div class="ana-trader-add"><input type="text" id="af-newtrader" placeholder="Trader adı…" maxlength="60"><button type="button" class="btn solid" id="af-newtrader-btn">＋</button></div>
+        </div>
+      </div>
+      <div class="strat-sec">🎯 Gönderi içeriği</div>
+      <div class="strat-form-grid">
+        <div class="strat-f ana-full">
+          <label>Metin <span class="sd-hint">tweet metnini yapıştır veya elle yaz — coin, yön, seviye, zaman dilimi otomatik çıkarılır</span></label>
+          <textarea id="af-text" rows="6" placeholder="Paylaşımın metni…" maxlength="5000"></textarea>
+        </div>
+        <div class="strat-f ana-full">
+          <label>Görsel <span class="sd-hint">görseli yapıştır (Ctrl+V) veya dosya seç</span></label>
+          <div class="ana-imgprev" id="af-imgprev"></div>
+          <div class="sd-addrow">
+            <input type="file" id="af-file" accept="image/*" class="hidden">
+            <button type="button" class="btn solid" id="af-img-btn">📷 Görsel Ekle</button>
+            <button type="button" class="btn" id="af-img-clear">🗑 Kaldır</button>
+            <button type="button" class="btn solid" id="af-ai">🤖 Analiz Et</button>
+          </div>
+        </div>
+      </div>
+      <div class="strat-sec">🧠 Önemli Noktalar (AI çıkarır, düzenleyebilirsin)</div>
+      <div class="strat-form-grid">
+        <div class="strat-f">
+          <label>Nereyi önemsedi <span class="sd-hint">coin, seviye, zaman dilimi, yön</span></label>
+          <input type="text" id="af-what" maxlength="300" placeholder="örn: BTC $67.5k direnci, 4H — long">
+        </div>
+        <div class="strat-f">
+          <label>Neden önemsedi <span class="sd-hint">mantığı: likidite mi, kırılım mı, trend mi?</span></label>
+          <input type="text" id="af-why" maxlength="300" placeholder="örn: likidite topladıktan sonra yukarı kırılım bekliyor">
+        </div>
+        <div class="strat-f">
+          <label>Konu</label>
+          <select id="af-topic"></select>
+        </div>
+      </div>
+      <div class="strat-form-btns">
+        <button type="button" class="btn solid" id="af-save">💾 Analizi Kaydet</button>
+        <button type="button" class="btn" id="af-cancel">Vazgeç</button>
+      </div>
+    </div>
+    <div id="ana-traders-form" class="strat-form hidden">
+      <div class="strat-form-h">👥 Takip Edilen Traderlar</div>
+      <div id="ana-traders-list" class="ana-traders-list"></div>
+      <div class="sd-addrow">
+        <input type="text" id="at-name" placeholder="Trader adı…" maxlength="60">
+        <input type="text" id="at-tw" placeholder="@twitter (opsiyonel)" maxlength="40">
+        <button type="button" class="btn solid" id="at-add">＋ Trader Ekle</button>
+      </div>
+      <div class="strat-form-btns"><button type="button" class="btn" id="at-close">Kapat</button></div>
+    </div>
+  </div>
   <div id="page-mentoring" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🤝</span>
@@ -8549,6 +8667,7 @@ function init() {
   bindDataPage();
   bindEgitimPage();
   bindStrategiesPage();
+  bindAnalizPage();
   bindChannelsPage();
   mtInit();
   bindPanoPage();
@@ -8655,7 +8774,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','defter','data','review','news','egitim','strategies','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
+  const VALID_PAGES = ['home','defter','data','review','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -9787,7 +9906,7 @@ function showPage(name, skipAnim) {
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'strategies', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -9811,6 +9930,7 @@ function showPage(name, skipAnim) {
   if (name === 'news') renderNews();
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
+  if (name === 'analiz') renderAnaliz();
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -11344,13 +11464,14 @@ const STRAT_TOPICS = [
 function stratTopicMeta(id) { return STRAT_TOPICS.find(t => t.id === id) || { id: 'genel', ico: '🎓', name: 'Genel / Diğer', kw: [] }; }
 function stratDetectTopic() {
   // "AI" benzeri client-side sınıflandırıcı: metinlerdeki anahtar kavramlara göre konu önerir
+  const norm = s => String(s || '').toLowerCase().replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ğ/g, 'g');
   const hay = [];
-  for (let i = 0; i < arguments.length; i++) hay.push(String(arguments[i] || '').toLowerCase().replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ğ/g, 'g'));
+  for (let i = 0; i < arguments.length; i++) hay.push(norm(arguments[i]));
   const joined = ' ' + hay.join(' ');
   let best = null, bestScore = 0;
   STRAT_TOPICS.forEach(t => {
     let score = 0;
-    t.kw.forEach(k => { if (k.length >= 3 && joined.indexOf(k.toLowerCase()) >= 0) score += k.length >= 6 ? 2 : 1; });
+    t.kw.forEach(k => { const kk = norm(k); if (kk.length >= 3 && joined.indexOf(kk) >= 0) score += kk.length >= 6 ? 2 : 1; });
     if (score > bestScore) { bestScore = score; best = t; }
   });
   return { id: (best ? best.id : 'genel'), meta: (best ? best : stratTopicMeta('genel')), score: bestScore };
@@ -11751,6 +11872,239 @@ function stratDistributeAll() {
       (dupe ? ' · ' + dupe + ' zaten vardı (atlandı)' : '') +
       (unmatched ? ' · ' + unmatched + ' hiçbir stratejiyle eşleşmedi' : '') + '.</div>';
     stratToast('📥 ' + added + ' işlem dağıtıldı' + (dupe ? ' · ' + dupe + ' zaten vardı' : '') + (unmatched ? ' · ' + unmatched + ' eşleşmedi' : ''));
+  });
+}
+// ============ Analiz Köşesi ============
+const ANALIZ_KEY = 'defter-analiz-v1';
+let analizData = { traders: [], posts: [] };
+let anaEditId = null;
+let anaPendingImg = null;
+let anaFilter = { trader: '', topic: '' };
+const ANA_COINS = ['BTC','ETH','SOL','XRP','DOGE','ADA','AVAX','LINK','LTC','DOT','BNB','ARB','OP','SUI','APT','TIA','INJ','PEPE','WIF','BONK','NEAR','ATOM','FIL','ETC','MATIC','UNI','AAVE','FTM','HBAR','VET','ALGO','SEI','PENDLE','RUNE','LDO','SHIB','TRX','TON','ORDI','MKR','CRV','ENA','STRK','TAO','RENDER','WLD','AXL','STX','JUP'];
+async function loadAnaliz() {
+  try {
+    const raw = await store.get(ANALIZ_KEY);
+    const d = raw ? JSON.parse(raw) : null;
+    if (d && Array.isArray(d.posts)) { analizData = { traders: Array.isArray(d.traders) ? d.traders : [], posts: d.posts }; }
+  } catch (e) { analizData = { traders: [], posts: [] }; }
+}
+async function saveAnaliz() {
+  try { await store.set(ANALIZ_KEY, JSON.stringify(analizData)); } catch (e) { console.error('saveAnaliz:', e); }
+}
+function anaTraderName(id) { const t = analizData.traders.find(x => x.id === id); return t ? t.name : ''; }
+function anaAi(text) {
+  // "AI" benzeri client-side çıkarım: metinden coin, yön, zaman dilimi, seviye, konu
+  const s = String(text || '');
+  const low = ' ' + s.toLowerCase().replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ğ/g, 'g') + ' ';
+  const coins = [];
+  const found = new Set();
+  (s.match(/\$([A-Za-z]{2,10})/g) || []).forEach(m => { const c = m.replace('$', '').toUpperCase(); if (!found.has(c)) { found.add(c); coins.push(c); } });
+  (s.toUpperCase().match(new RegExp('\\b(' + ANA_COINS.join('|') + ')\\b', 'g')) || []).forEach(c => { if (!found.has(c)) { found.add(c); coins.push(c); } });
+  const dir = (/\blong\b|\bal\b|\bbuy\b|\byukari\b|\bboga\b|\bbullish\b/.test(low) ? 'long' : (/\bshort\b|\bsat\b|\bsell\b|\basagi\b|\bayi\b|\bbearish\b/.test(low) ? 'short' : ''));
+  const tfM = s.match(/(\d{1,2})\s?(?:m|min|h|d|w|hafta)\b/gi);
+  const tf = tfM ? tfM[0].replace(/\s+/g, '').toUpperCase() : (/\bH4\b|\bD1\b|\bH1\b|\bD4\b|\bweekly\b|\bgünlük\b|\bhaftalık\b/i.test(s) ? (s.match(/\b(H4|D1|H1|D4|weekly|günlük|haftalık)\b/i) || [''])[0] : '');
+  const sev = [];
+  (s.match(/\$\s?[\d.,]+\s?[kmKM]?\b/g) || []).forEach(m => { const v = m.replace(/\s+/g, '').toUpperCase(); if (sev.indexOf(v) < 0) sev.push(v); });
+  (s.match(/\b[\d.,]+\s?[kmKM]\b/g) || []).forEach(m => { const v = m.replace(/\s+/g, '').toUpperCase(); if (sev.indexOf(v) < 0 && sev.length < 3) sev.push(v); });
+  const topic = stratDetectTopic(s);
+  const what = [coins.join(', '), sev.join(', '), tf, dir].filter(Boolean).join(' · ') || 'metin taraması yapıldı';
+  const why = topic.meta.name === 'Genel / Diğer' ? 'konu netleşmedi — kendin yaz' : 'kavram: ' + topic.meta.name;
+  return { coins, dir, tf, sev, topicId: topic.id, what, why };
+}
+function anaChipsHtml(p) {
+  const chips = [];
+  (p.coins || []).forEach(c => chips.push('<span class="ana-chip ana-chip-coin">' + esc(c) + '</span>'));
+  if (p.dir) chips.push('<span class="ana-chip ana-chip-dir">' + (p.dir === 'long' ? '↗ Long' : '↘ Short') + '</span>');
+  if (p.tf) chips.push('<span class="ana-chip">⏱ ' + esc(p.tf) + '</span>');
+  (p.sev || []).forEach(v => chips.push('<span class="ana-chip">🎯 ' + esc(v) + '</span>'));
+  const tm = stratTopicMeta(p.topic);
+  chips.push('<span class="ana-chip">' + tm.ico + ' ' + tm.name + '</span>');
+  return chips.join(' ');
+}
+function anaCardHtml(p) {
+  const tr = anaTraderName(p.trader);
+  const url = p.url ? '<a class="ana-url" href="' + esc(p.url) + '" target="_blank" rel="noopener">🔗 Gönderi</a>' : '';
+  const img = p.img ? '<img class="ana-img" src="' + p.img + '" alt="analiz görseli" loading="lazy">' : '';
+  const text = p.text ? '<div class="ana-text">' + esc(p.text) + '</div>' : '';
+  const what = p.what ? '<div class="ana-note"><b>🎯 Nereyi önemsedi:</b> ' + esc(p.what) + '</div>' : '';
+  const why = p.why ? '<div class="ana-note"><b>🤔 Neden:</b> ' + esc(p.why) + '</div>' : '';
+  return '<div class="ana-card">' +
+    '<div class="ana-card-h">' +
+      '<span class="ana-av">' + esc((tr || '?').charAt(0).toUpperCase()) + '</span>' +
+      '<div class="ana-tinfo"><span class="ana-tname">' + esc(tr || 'Bilinmeyen') + '</span>' +
+        '<span class="ana-tdate">' + (p.date ? new Date(p.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : '') + '</span></div>' +
+      '<div class="ana-tag">' + url + '<button type="button" class="sd-x" data-ana-del="' + p.id + '" title="Analizi sil">✕</button></div>' +
+    '</div>' +
+    '<div class="ana-chips">' + anaChipsHtml(p) + '</div>' +
+    what + why + text + img +
+  '</div>';
+}
+function renderAnaliz() {
+  const listEl = document.getElementById('ana-list');
+  const emptyEl = document.getElementById('ana-empty');
+  const fbEl = document.getElementById('ana-filter-bar');
+  if (!listEl) return;
+  const traders = analizData.traders.slice().sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+  let posts = analizData.posts.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || (b.created || 0) - (a.created || 0));
+  if (anaFilter.trader) posts = posts.filter(p => p.trader === anaFilter.trader);
+  if (anaFilter.topic) posts = posts.filter(p => (p.topic || 'genel') === anaFilter.topic);
+  if (fbEl) {
+    fbEl.innerHTML =
+      '<select id="ana-f-trader"><option value="">👥 Tüm traderlar</option>' +
+      traders.map(t => '<option value="' + t.id + '"' + (anaFilter.trader === t.id ? ' selected' : '') + '>' + esc(t.name) + (t.tw ? ' (' + esc(t.tw) + ')' : '') + '</option>').join('') + '</select>' +
+      '<select id="ana-f-topic"><option value="">🎓 Tüm konular</option>' +
+      STRAT_TOPICS.map(t => '<option value="' + t.id + '"' + (anaFilter.topic === t.id ? ' selected' : '') + '>' + t.ico + ' ' + t.name + '</option>').join('') + '</select>' +
+      '<button type="button" class="btn" id="ana-f-clear">Temizle</button>';
+  }
+  listEl.innerHTML = posts.map(anaCardHtml).join('');
+  if (emptyEl) emptyEl.style.display = posts.length ? 'none' : 'block';
+}
+function anaFillTraderSelect(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Trader seç —</option>' +
+    analizData.traders.slice().sort((a, b) => a.name.localeCompare(b.name, 'tr')).map(t =>
+      '<option value="' + t.id + '">' + esc(t.name) + (t.tw ? ' (' + esc(t.tw) + ')' : '') + '</option>').join('');
+}
+function anaOpenForm(post) {
+  anaEditId = post ? post.id : null;
+  anaPendingImg = null;
+  anaFillTraderSelect('af-trader');
+  const tSel = document.getElementById('af-topic');
+  if (tSel) tSel.innerHTML = STRAT_TOPICS.map(t => '<option value="' + t.id + '">' + t.ico + ' ' + t.name + '</option>').join('');
+  const g = id => document.getElementById(id);
+  g('af-date').value = post && post.date ? post.date : new Date().toISOString().slice(0, 10);
+  g('af-url').value = post ? (post.url || '') : '';
+  g('af-text').value = post ? (post.text || '') : '';
+  g('af-what').value = post ? (post.what || '') : '';
+  g('af-why').value = post ? (post.why || '') : '';
+  if (post && post.trader) g('af-trader').value = post.trader;
+  if (post && post.topic) g('af-topic').value = post.topic;
+  anaRenderImgPreview(post ? (post.img || '') : '');
+  g('af-trader').value = post && post.trader ? post.trader : (anaFillTraderSelect && g('af-trader').value);
+  g('ana-form-title').textContent = post ? 'Analizi Düzenle' : 'Yeni Analiz';
+  g('ana-form').classList.remove('hidden');
+  g('ana-list').style.display = 'none';
+  const e = document.getElementById('ana-empty'); if (e) e.style.display = 'none';
+  const f = document.getElementById('ana-filter-bar'); if (f) f.style.display = 'none';
+}
+function anaCancelForm() {
+  anaEditId = null; anaPendingImg = null;
+  const f = document.getElementById('ana-form'); if (f) f.classList.add('hidden');
+  const l = document.getElementById('ana-list'); if (l) l.style.display = '';
+  const e = document.getElementById('ana-empty'); if (e) e.style.display = '';
+  const fb = document.getElementById('ana-filter-bar'); if (fb) fb.style.display = '';
+}
+function anaSave() {
+  const g = id => document.getElementById(id);
+  const trader = g('af-trader').value;
+  const text = g('af-text').value;
+  if (!trader && !text.trim()) { stratToast('Trader seç veya metin yaz.'); return; }
+  const post = {
+    id: anaEditId || ('a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)),
+    trader: trader || '',
+    date: g('af-date').value || new Date().toISOString().slice(0, 10),
+    url: g('af-url').value.trim(),
+    text: text.trim(),
+    img: anaPendingImg || '',
+    what: g('af-what').value.trim(),
+    why: g('af-why').value.trim(),
+    topic: g('af-topic').value || 'genel',
+    created: Date.now(),
+  };
+  if (anaEditId) {
+    const i = analizData.posts.findIndex(p => p.id === anaEditId);
+    if (i >= 0) { const old = analizData.posts[i]; post.created = old.created || Date.now(); post.id = anaEditId; analizData.posts[i] = post; }
+  } else {
+    analizData.posts.push(post);
+  }
+  saveAnaliz().then(() => { anaCancelForm(); renderAnaliz(); stratToast('🧭 Analiz kaydedildi'); });
+}
+function anaDelete(id) {
+  if (!confirm('Bu analizi sil?')) return;
+  analizData.posts = analizData.posts.filter(p => p.id !== id);
+  saveAnaliz().then(renderAnaliz);
+}
+function anaAddTrader(name, tw) {
+  name = String(name || '').trim();
+  if (!name) return null;
+  if (analizData.traders.some(t => t.name.toLowerCase() === name.toLowerCase())) return analizData.traders.find(t => t.name.toLowerCase() === name.toLowerCase()).id;
+  const t = { id: 'tr' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, tw: String(tw || '').trim() };
+  analizData.traders.push(t);
+  return t.id;
+}
+function anaRenderImgPreview(src) {
+  const prev = document.getElementById('af-imgprev');
+  if (!prev) return;
+  prev.innerHTML = src ? '<img src="' + src + '" alt="önizleme">' : '<div class="ana-imgph">Görsel burada önizlenir — Ctrl+V ile yapıştır</div>';
+}
+function anaHandleImgFile(file) {
+  if (!file) return;
+  if (typeof stratResizeImg === 'function') stratResizeImg(file, out => { anaPendingImg = out; anaRenderImgPreview(out); stratToast('📷 Görsel eklendi'); });
+  else { const r = new FileReader(); r.onload = e => { anaPendingImg = e.target.result; anaRenderImgPreview(anaPendingImg); }; r.readAsDataURL(file); }
+}
+function bindAnalizPage() {
+  const g = id => document.getElementById(id);
+  const pg = document.getElementById('page-analiz');
+  if (!pg) return;
+  pg.addEventListener('click', e => {
+    const del = e.target.closest('[data-ana-del]');
+    if (del) { anaDelete(del.getAttribute('data-ana-del')); return; }
+    if (e.target.closest('#ana-add')) anaOpenForm(null);
+    else if (e.target.closest('#af-save')) anaSave();
+    else if (e.target.closest('#af-cancel')) anaCancelForm();
+    else if (e.target.closest('#af-img-btn')) { const f = g('af-file'); if (f) f.click(); }
+    else if (e.target.closest('#af-img-clear')) { anaPendingImg = null; anaRenderImgPreview(''); }
+    else if (e.target.closest('#af-ai')) {
+      const t = g('af-text').value;
+      if (!t.trim()) { stratToast('🤖 Analiz için önce metni yapıştır.'); return; }
+      const r = anaAi(t);
+      g('af-what').value = r.what;
+      g('af-why').value = r.why;
+      if (r.topicId && r.topicId !== 'genel') g('af-topic').value = r.topicId;
+      stratToast('🤖 Çıkarıldı: ' + r.what);
+    }
+    else if (e.target.closest('#af-newtrader-btn')) {
+      const v = g('af-newtrader').value;
+      const id = anaAddTrader(v, '');
+      if (id) { anaFillTraderSelect('af-trader'); g('af-trader').value = id; g('af-newtrader').value = ''; stratToast('👥 Trader eklendi'); }
+    }
+    else if (e.target.closest('#ana-traders')) {
+      g('ana-traders-form').classList.remove('hidden');
+      g('ana-traders-list').innerHTML = analizData.traders.map(t =>
+        '<div class="ana-trader-row"><span class="ana-av">' + esc(t.name.charAt(0).toUpperCase()) + '</span>' +
+        '<span class="ana-tname">' + esc(t.name) + '</span>' + (t.tw ? '<span class="ana-tw">' + esc(t.tw) + '</span>' : '') +
+        '<button type="button" class="sd-x" data-at-del="' + t.id + '">✕</button></div>').join('') ||
+        '<div class="sd-empty">Henüz trader yok — aşağıdan ekle.</div>';
+    }
+    else if (e.target.closest('#at-add')) { anaAddTrader(g('at-name').value, g('at-tw').value); g('at-name').value = ''; g('at-tw').value = ''; anaFillTraderSelect('af-trader'); renderAnaliz(); const bl = g('ana-traders-list'); if (bl) bl.innerHTML = analizData.traders.map(t => '<div class="ana-trader-row"><span class="ana-av">' + esc(t.name.charAt(0).toUpperCase()) + '</span><span class="ana-tname">' + esc(t.name) + '</span>' + (t.tw ? '<span class="ana-tw">' + esc(t.tw) + '</span>' : '') + '<button type="button" class="sd-x" data-at-del="' + t.id + '">✕</button></div>').join(''); stratToast('👥 Trader eklendi'); }
+    else if (e.target.closest('#at-close')) { g('ana-traders-form').classList.add('hidden'); }
+    else if (e.target.closest('[data-at-del]')) {
+      const id = e.target.closest('[data-at-del]').getAttribute('data-at-del');
+      if (!confirm('Bu traderı sil? (Analizleri kalır)')) return;
+      analizData.traders = analizData.traders.filter(t => t.id !== id);
+      saveAnaliz().then(() => { renderAnaliz(); anaFillTraderSelect('af-trader'); const bl = g('ana-traders-list'); if (bl) bl.innerHTML = analizData.traders.map(t => '<div class="ana-trader-row"><span class="ana-av">' + esc(t.name.charAt(0).toUpperCase()) + '</span><span class="ana-tname">' + esc(t.name) + '</span>' + (t.tw ? '<span class="ana-tw">' + esc(t.tw) + '</span>' : '') + '<button type="button" class="sd-x" data-at-del="' + t.id + '">✕</button></div>').join('') || '<div class="sd-empty">Henüz trader yok.</div>'; });
+    }
+    else if (e.target.closest('#ana-f-clear')) { anaFilter = { trader: '', topic: '' }; renderAnaliz(); }
+    else if (e.target.closest('#ana-f-trader') || e.target.closest('#ana-f-topic')) { }
+  });
+  pg.addEventListener('change', e => {
+    const tr = e.target.closest('#ana-f-trader');
+    const tp = e.target.closest('#ana-f-topic');
+    const f = e.target.closest('#af-file');
+    if (tr) { anaFilter.trader = tr.value; renderAnaliz(); }
+    else if (tp) { anaFilter.topic = tp.value; renderAnaliz(); }
+    else if (f) { const fl = f.files && f.files[0]; if (fl) anaHandleImgFile(fl); }
+  });
+  document.addEventListener('paste', ev => {
+    if (currentPage !== 'analiz') return;
+    const form = document.getElementById('ana-form');
+    if (!form || form.classList.contains('hidden')) return;
+    const items = ev.clipboardData && ev.clipboardData.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') === 0) { const fl = items[i].getAsFile(); if (fl) anaHandleImgFile(fl); ev.preventDefault(); break; }
+    }
   });
 }
 async function stratImportFromNotion(id) {
@@ -14138,6 +14492,8 @@ function bindStrategiesPage() {
   g('strat-add').addEventListener('click', () => stratOpenForm(null));
   const distBtn = document.getElementById('strat-distribute-all');
   if (distBtn) distBtn.addEventListener('click', stratDistributeAll);
+  const anBtn = document.getElementById('strat-analiz-btn');
+  if (anBtn) anBtn.addEventListener('click', () => showPage('analiz'));
   g('strat-list').addEventListener('click', e => {
     const open = e.target.closest('[data-strat-open]');
     const ed = e.target.closest('[data-strat-edit]');
@@ -15644,6 +16000,7 @@ async function bootApp(opts) {
   try { await loadReviews(); } catch (e) { /* devam */ }
   try { await loadEgitim(); } catch (e) { /* devam */ }
   try { await loadStrat(); } catch (e) { /* devam */ }
+  try { await loadAnaliz(); } catch (e) { /* devam */ }
   try { await loadDesigner(); } catch (e) { /* devam */ }
   try { init(); } catch (e) { /* devam */ }
   showPage(currentPage);
@@ -15657,6 +16014,7 @@ async function refreshAppData() {
   try { await loadReviews(); } catch (e) { /* devam */ }
   try { await loadEgitim(); } catch (e) { /* devam */ }
   try { await loadStrat(); } catch (e) { /* devam */ }
+  try { await loadAnaliz(); } catch (e) { /* devam */ }
   try { await loadDesigner(); } catch (e) { /* devam */ }
   try { await loadTrades(); renderTrades(); } catch (e) { /* devam */ }
   try { await loadLessons(); renderLessons(); } catch (e) { /* devam */ }
@@ -16970,7 +17328,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b22';
+const APP_BUILD = 'b23';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -17907,6 +18265,7 @@ loadSfx();
     'app.trading': { tr: '📉 Trading', en: '📉 Trading' },
     'app.eduPage': { tr: '🎓 Alfa Edu', en: '🎓 Alfa Edu' },
     'app.strategies': { tr: '🧪 Stratejiler', en: '🧪 Strategies' },
+    'app.analiz': { tr: '🧭 Analiz Köşesi', en: '🧭 Analysis Corner' },
     'app.pano': { tr: '🛠️ Çalışma Panosu', en: '🛠️ Work Board' },
     'app.mentoring': { tr: '🤝 Mentoring', en: '🤝 Mentoring' },
     'app.indicators': { tr: '📐 İndikatörler', en: '📐 Indicators' },
