@@ -1583,9 +1583,33 @@
   .sd-table tr:last-child td { border-bottom: none; }
   .sd-table td.good { color: var(--green); font-weight: 800; } .sd-table td.bad { color: var(--red); font-weight: 800; }
   .sd-tr-note { color: var(--text-2); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sd-tr-form { display: grid; grid-template-columns: 130px 90px 1fr 1fr 100px 1fr auto; gap: 8px; margin-top: 12px; }
+  .sd-tr-form { display: grid; grid-template-columns: 130px 90px 1fr 100px 1fr auto auto; gap: 8px; margin-top: 12px; align-items: center; }
   .sd-tr-form input, .sd-tr-form select { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; width: 100%; box-sizing: border-box; }
   .sd-tr-form input:focus, .sd-tr-form select:focus { outline: none; border-color: var(--pc); }
+  .sd-tr-form .btn { white-space: nowrap; }
+  .sd-tr-hint { font-size: 11px; color: var(--text-3); margin-top: 6px; font-weight: 600; }
+  .sd-tr-img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); cursor: zoom-in; display: block; }
+  .sd-tr-imgcell { width: 48px; }
+  .sd-tr-imgprev { display: flex; align-items: center; gap: 6px; }
+  .sd-tr-imgprev img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); cursor: zoom-in; }
+  .sd-tabs { display: flex; gap: 6px; margin-bottom: 10px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); width: fit-content; max-width: 100%; overflow-x: auto; }
+  .sd-tab { border: none; background: transparent; color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; padding: 8px 14px; border-radius: 9px; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
+  .sd-tab:hover { color: var(--text); }
+  .sd-tab.on { background: var(--pc); color: #fff; }
+  .sd-edu-sec { grid-column: 1 / -1; }
+  .sd-edu-row { margin-bottom: 14px; }
+  .sd-edu-row > label { display: block; font-size: 12px; font-weight: 800; color: var(--text-2); margin-bottom: 6px; }
+  .sd-edu-row textarea { width: 100%; box-sizing: border-box; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; resize: vertical; margin-bottom: 6px; }
+  .sd-edu-row textarea:focus { outline: none; border-color: var(--pc); }
+  .sd-edu-links, .sd-edu-vids { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .sd-edu-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg2); }
+  .sd-edu-item a { color: var(--pc); font-weight: 700; font-size: 13px; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sd-edu-item a:hover { text-decoration: underline; }
+  .sd-edu-vid { flex-direction: column; align-items: stretch; gap: 8px; }
+  .sd-edu-vid-top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--text-2); }
+  .sd-edu-vid iframe { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: none; }
+  .strat-lb { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 24px; cursor: zoom-out; }
+  .strat-lb img { max-width: 92vw; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
   .sd-note { padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg2); font-size: 12.5px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
   @media (max-width: 900px) { .sd-cols { grid-template-columns: 1fr; } }
   @media (max-width: 720px) { .strat-form-grid { grid-template-columns: 1fr 1fr; } .sd-tr-form { grid-template-columns: 1fr 1fr; } }
@@ -11061,6 +11085,14 @@ async function loadStrat() {
     if (raw) { const d = JSON.parse(raw); if (d && Array.isArray(d.list)) stratData = d; }
   } catch (e) { /* ilk açılış */ }
   if (!Array.isArray(stratData.list)) stratData.list = [];
+  let migrated = false;
+  stratData.list.forEach(s => {
+    if (!Array.isArray(s.liveTrades) && Array.isArray(s.trades)) { s.liveTrades = s.trades; delete s.trades; migrated = true; }
+    if (!Array.isArray(s.btTrades)) { s.btTrades = []; migrated = true; }
+    if (!Array.isArray(s.liveTrades)) { s.liveTrades = []; migrated = true; }
+    if (!s.edu) { s.edu = { src: '', learned: '', links: [], videos: [] }; migrated = true; }
+  });
+  if (migrated) saveStrat();
 }
 async function saveStrat() {
   try { await store.set(STRAT_KEY, JSON.stringify(stratData)); } catch (e) { console.error('saveStrat:', e); }
@@ -11070,8 +11102,8 @@ function stratCur() { return stratData.list.find(x => x.id === stratCurId) || nu
 function stratNum(v) { const n = parseFloat(v); return isFinite(n) ? n : null; }
 
 // --- otomatik metrikler: trade kayıtlarından ---
-function stratAutoMetrics(s) {
-  const ts = s && Array.isArray(s.trades) ? s.trades : [];
+function stratMetrics(trades) {
+  const ts = Array.isArray(trades) ? trades : [];
   const out = { n: ts.length, wr: null, pf: null, avg: null, netR: null, dd: null };
   const rs = [];
   ts.forEach(t => { const v = stratNum(t.r); if (v !== null) rs.push(v); });
@@ -11088,6 +11120,14 @@ function stratAutoMetrics(s) {
   rs.forEach(v => { cum += v; if (cum > peak) peak = cum; const dd = peak - cum; if (dd > maxdd) maxdd = dd; });
   out.dd = Math.round(maxdd * 100) / 100;
   return out;
+}
+function stratTradesOf(s, kind) {
+  if (kind === 'bt') return (s && Array.isArray(s.btTrades)) ? s.btTrades : [];
+  return (s && Array.isArray(s.liveTrades)) ? s.liveTrades : [];
+}
+function stratAutoMetrics(s) {
+  // birleşik: backtest + live — liste kartı ve skor için
+  return stratMetrics(stratTradesOf(s, 'bt').concat(stratTradesOf(s, 'live')));
 }
 function stratScore(s) {
   // kompozit skor: işlem kayıtlarından hesaplanan metrikler. 0-100.
@@ -11138,7 +11178,7 @@ function stratRenderList() {
     const st = s.status;
     const meta = stratStatusMeta(st);
     const rules = (s.rules || []).length;
-    const tr = (s.trades || []).length;
+    const tr = stratTradesOf(s, 'bt').length + stratTradesOf(s, 'live').length;
     const m = (lbl, val, cls) => '<div class="strat-metric"><span class="m-lbl">' + lbl + '</span><span class="m-val ' + (cls || '') + '">' + val + '</span></div>';
     const wr = auto.wr;
     const pf = auto.pf;
@@ -11152,7 +11192,8 @@ function stratRenderList() {
           (s.dir ? '<span class="strat-chip">' + (s.dir === 'long' ? '↗ Long' : s.dir === 'short' ? '↘ Short' : '⇅ Her iki yön') + '</span>' : '') +
         '</div>' +
         '<div class="strat-meta">' + (s.created ? 'Eklenme: ' + new Date(s.created).toLocaleDateString('tr-TR') : '') +
-          (rules ? ' · 📋 ' + rules + ' kural' : '') + (tr ? ' · 📈 ' + tr + ' işlem' : '') + '</div>' +
+          (rules ? ' · 📋 ' + rules + ' kural' : '') + (tr ? ' · 📈 ' + tr + ' işlem' : '') +
+          (s.edu && s.edu.src ? ' · 🎓 @' + esc(s.edu.src) : '') + '</div>' +
         '<div class="strat-metrics">' +
           m('Win rate', wr != null ? wr + '%' : '—', wr >= 50 ? 'good' : wr >= 40 ? 'neu' : 'bad') +
           m('PF', pf != null ? pf : '—', pf >= 1.5 ? 'good' : pf >= 1 ? 'neu' : 'bad') +
@@ -11174,6 +11215,115 @@ function stratRenderList() {
   if (emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
   if (list.length && stratEditId && !stratData.list.find(x => x.id === stratEditId)) stratEditId = null;
 }
+let stratTradeTab = 'live';   // detay işlem sekmesi: 'bt' | 'live'
+let stratPendingImg = null;   // işlem formuna eklenecek bekleyen fotoğraf (dataURL)
+
+function stratYtId(url) {
+  const u = String(url || '').trim();
+  if (!u) return null;
+  const m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function stratResizeImg(file, cb) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1280;
+      let w = img.width, h = img.height;
+      if (Math.max(w, h) > MAX) { const k = MAX / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      let out;
+      try { out = cv.toDataURL('image/jpeg', 0.72); } catch (e) { out = ev.target.result; }
+      cb(out);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function stratShowImg(src) {
+  let lb = document.getElementById('strat-lb');
+  if (!lb) {
+    lb = document.createElement('div');
+    lb.id = 'strat-lb';
+    lb.className = 'strat-lb hidden';
+    lb.innerHTML = '<img id="strat-lb-img" alt="">';
+    lb.addEventListener('click', () => lb.classList.add('hidden'));
+    document.body.appendChild(lb);
+  }
+  const im = document.getElementById('strat-lb-img');
+  im.src = src;
+  lb.classList.remove('hidden');
+}
+function stratHideImg() { const lb = document.getElementById('strat-lb'); if (lb) lb.classList.add('hidden'); }
+function stratEdu(s) { if (!s.edu) s.edu = { src: '', learned: '', links: [], videos: [] }; return s.edu; }
+function stratTrMeta(t) {
+  const rv = stratNum(t.r);
+  const cls = rv === null ? '' : rv > 0 ? 'good' : rv < 0 ? 'bad' : 'neu';
+  return { rv, cls };
+}
+function stratTrRow(t, kind) {
+  const { rv, cls } = stratTrMeta(t);
+  const img = t.img ? '<img class="sd-tr-img" src="' + t.img + '" data-sd-img="1" alt="foto">' : '—';
+  return '<tr>' +
+    '<td>' + esc(t.date || '—') + '</td>' +
+    '<td>' + (t.dir === 'short' ? '↘ Short' : t.dir === 'long' ? '↗ Long' : '—') + '</td>' +
+    '<td>' + esc(t.pair || '—') + '</td>' +
+    '<td class="' + cls + '">' + (rv !== null ? (rv > 0 ? '+' : '') + rv : '—') + '</td>' +
+    '<td class="sd-tr-imgcell">' + img + '</td>' +
+    '<td class="sd-tr-note">' + esc(t.note || '') + '</td>' +
+    '<td><button type="button" class="sd-x" data-tr-del="' + kind + '" data-tr-id="' + t.id + '">✕</button></td>' +
+  '</tr>';
+}
+function stratTrFormHtml(kind) {
+  const lbl = kind === 'bt' ? 'Backtest işlemi' : 'Live işlem';
+  const img = stratPendingImg ? '<div class="sd-tr-imgprev"><img src="' + stratPendingImg + '" data-sd-img="1" alt="foto"><button type="button" class="sd-x" data-img-clear="1">✕</button></div>' : '';
+  return '<div class="sd-tr-form">' +
+    '<input type="date" id="sd-tr-date" value="' + new Date().toISOString().slice(0, 10) + '">' +
+    '<select id="sd-tr-dir"><option value="long">Long</option><option value="short">Short</option></select>' +
+    '<input type="text" id="sd-tr-pair" placeholder="Çift" maxlength="20">' +
+    '<input type="number" id="sd-tr-r" placeholder="Sonuç R (+2, -1)" step="0.01">' +
+    '<input type="text" id="sd-tr-note" placeholder="Kısa not (opsiyonel)" maxlength="120">' +
+    '<button type="button" class="btn solid" data-img-add title="Dosyadan fotoğraf seç">📷</button>' +
+    '<input type="file" id="sd-tr-file" accept="image/*" class="hidden">' +
+    img +
+    '<button type="button" class="btn solid" data-tr-add="' + kind + '">＋ ' + lbl + '</button>' +
+  '</div>' +
+  '<div class="sd-tr-hint">Fotoğrafı bu alana yapıştır (Ctrl+V) veya 📷 ile yükle — sıkıştırılıp kaydedilir.</div>';
+}
+function stratTrTableHtml(s, kind) {
+  const list = stratTradesOf(s, kind);
+  const rows = list.slice().reverse().map(t => stratTrRow(t, kind)).join('');
+  return '<div class="sd-table-wrap"><table class="sd-table">' +
+    '<thead><tr><th>Tarih</th><th>Yön</th><th>Çift</th><th>Sonuç (R)</th><th>Foto</th><th>Not</th><th></th></tr></thead>' +
+    '<tbody>' + (rows || '<tr><td colspan="7" class="sd-empty">Henüz işlem yok — aşağıdan ekle.</td></tr>') + '</tbody>' +
+  '</table></div>';
+}
+function stratEduHtml(s) {
+  const edu = stratEdu(s);
+  const links = (edu.links || []).map(l =>
+    '<div class="sd-edu-item"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">🔗 ' + esc(l.title || l.url) + '</a><button type="button" class="sd-x" data-edu-link-del="' + l.id + '">✕</button></div>'
+  ).join('');
+  const vids = (edu.videos || []).map(v =>
+    '<div class="sd-edu-item sd-edu-vid"><div class="sd-edu-vid-top"><span>▶️ YouTube</span><button type="button" class="sd-x" data-edu-vid-del="' + v.id + '">✕</button></div>' +
+    '<iframe src="https://www.youtube.com/embed/' + esc(v.vid) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>'
+  ).join('');
+  return '<div class="sd-sec sd-edu-sec">' +
+    '<div class="sd-sec-h">🎓 Eğitim & Kaynak <span class="sd-hint">stratejiyi nereden öğrendiğin ve öğrendiklerin</span></div>' +
+    '<div class="sd-edu-row"><label>Kimden öğreniliyor / kaynak</label>' +
+      '<div class="sd-addrow"><input type="text" id="sd-edu-src" value="' + esc(edu.src || '') + '" placeholder="Örn: efloud, ICT, …" maxlength="80"><button type="button" class="btn solid" data-edu-src-save>💾 Kaydet</button></div></div>' +
+    '<div class="sd-edu-row"><label>Öğrenilenler</label>' +
+      '<textarea id="sd-edu-learned" rows="4" placeholder="Bu strateji hakkında öğrendiklerin…" maxlength="2000">' + esc(edu.learned || '') + '</textarea>' +
+      '<button type="button" class="btn solid" data-edu-learned-save>💾 Kaydet</button></div>' +
+    '<div class="sd-edu-row"><label>Linkler <span class="sd-hint">tweet, makale, site — başlık + adres</span></label>' +
+      '<div class="sd-edu-links">' + (links || '<div class="sd-empty">Henüz link yok.</div>') + '</div>' +
+      '<div class="sd-addrow"><input type="text" id="sd-edu-link-t" placeholder="Başlık (örn: efloud’un tweet\'i)" maxlength="120"><input type="text" id="sd-edu-link-u" placeholder="https://…" maxlength="300"><button type="button" class="btn solid" data-edu-link-add>＋ Link</button></div></div>' +
+    '<div class="sd-edu-row"><label>Videolar <span class="sd-hint">YouTube linki yapıştır — gömülü izlenir</span></label>' +
+      '<div class="sd-edu-vids">' + (vids || '<div class="sd-empty">Henüz video yok.</div>') + '</div>' +
+      '<div class="sd-addrow"><input type="text" id="sd-edu-vid-u" placeholder="https://youtube.com/watch?v=…" maxlength="300"><button type="button" class="btn solid" data-edu-vid-add>＋ Video</button></div></div>' +
+  '</div>';
+}
 // --- detay görünümü ---
 function stratRenderDetail(s) {
   const listWrap = document.getElementById('strat-list-wrap');
@@ -11183,6 +11333,8 @@ function stratRenderDetail(s) {
   if (formEl) formEl.classList.add('hidden');
   detEl.classList.remove('hidden');
   const auto = stratAutoMetrics(s);
+  const btM = stratMetrics(stratTradesOf(s, 'bt'));
+  const liveM = stratMetrics(stratTradesOf(s, 'live'));
   const sc = stratScore(s);
   const st = s.status;
   const meta = stratStatusMeta(st);
@@ -11190,27 +11342,16 @@ function stratRenderDetail(s) {
   const rules = (s.rules || []).map(r => '<div class="sd-rule"><span class="sd-rule-txt">📋 ' + esc(r.t) + '</span><button type="button" class="sd-x" data-rule-del="' + r.id + '">✕</button></div>').join('');
   const confirms = (s.confirms || []).map(c =>
     '<label class="sd-conf' + (c.on ? ' on' : '') + '"><input type="checkbox" data-conf="' + c.id + '"' + (c.on ? ' checked' : '') + '><span class="sd-conf-box"></span><span class="sd-conf-txt">' + esc(c.t) + '</span></label>').join('');
-  const rows = (s.trades || []).slice().reverse().map(t => {
-    const rv = stratNum(t.r);
-    const cls = rv === null ? '' : rv > 0 ? 'good' : rv < 0 ? 'bad' : 'neu';
-    return '<tr>' +
-      '<td>' + esc(t.date || '—') + '</td>' +
-      '<td>' + (t.dir === 'short' ? '↘ Short' : t.dir === 'long' ? '↗ Long' : '—') + '</td>' +
-      '<td>' + esc(t.pair || '—') + '</td>' +
-      '<td>' + esc(t.entry || '') + '</td>' +
-      '<td>' + esc(t.exit || '') + '</td>' +
-      '<td class="' + cls + '">' + (rv !== null ? (rv > 0 ? '+' : '') + rv : '—') + '</td>' +
-      '<td class="sd-tr-note">' + esc(t.note || '') + '</td>' +
-      '<td><button type="button" class="sd-x" data-tr-del="' + t.id + '">✕</button></td>' +
-    '</tr>';
-  }).join('');
   const confsOn = (s.confirms || []).filter(c => c.on).length;
   const confsTotal = (s.confirms || []).length;
+  const edu = stratEdu(s);
+  const trLbl = kind => kind === 'bt' ? '📊 Backtest Kayıtları' : '📈 Live Test Kayıtları';
   detEl.innerHTML =
     '<div class="sd-head">' +
       '<div class="sd-title-row">' +
         '<div class="strat-name">' + esc(s.name) + '</div>' +
         '<span class="strat-chip st-' + st + '">' + meta.label + '</span>' +
+        (edu.src ? '<span class="strat-chip">🎓 @' + esc(edu.src) + '</span>' : '') +
         '<span class="sd-score s-val ' + stratScoreClass(sc) + '">' + sc + '</span><span class="s-lbl">Skor</span>' +
       '</div>' +
       '<div class="sd-chips">' +
@@ -11219,25 +11360,41 @@ function stratRenderDetail(s) {
         (s.dir ? '<span class="strat-chip">' + (s.dir === 'long' ? '↗ Long' : s.dir === 'short' ? '↘ Short' : '⇅ Her iki yön') + '</span>' : '') +
         (s.prio ? '<span class="strat-chip">Öncelik ' + s.prio + '</span>' : '') +
         (confsTotal ? '<span class="strat-chip">✅ ' + confsOn + '/' + confsTotal + ' onay</span>' : '') +
+        (btM.n ? '<span class="strat-chip">📊 ' + btM.n + ' bt</span>' : '') +
+        (liveM.n ? '<span class="strat-chip">📈 ' + liveM.n + ' live</span>' : '') +
       '</div>' +
       '<div class="sd-actions">' +
         '<button type="button" class="btn" data-sd-back>← Liste</button>' +
         '<button type="button" class="btn" data-sd-edit>✎ Düzenle</button>' +
         '<button type="button" class="btn" data-sd-status>' + stratNextBtn(st) + '</button>' +
-        '<button type="button" class="btn" data-sd-import title="Trade Günlüğündeki bu strateji adına işlenmiş kayıtları getir">📥 Günlükten Aktar</button>' +
+        '<button type="button" class="btn" data-sd-import title="Trade Günlüğündeki bu strateji adına işlenmiş kayıtları live kayıtlara getir">📥 Günlükten Aktar</button>' +
         '<button type="button" class="btn" data-sd-import-notion title="Önce Notion senkronunu çeker, sonra bu stratejiye eşleyen kayıtları içe aktarır">☁️ Notion\'dan Çek</button>' +
         '<button type="button" class="btn" data-sd-del style="color:var(--red)">🗑 Sil</button>' +
       '</div>' +
       (s._impMsg ? '<div class="sd-import-note">' + esc(s._impMsg) + '</div>' : '') +
     '</div>' +
     '<div class="sd-metrics">' +
-      '<div class="sd-metric-group"><div class="sd-mg-title">📊 Backtest (işlem kayıtlarından otomatik)</div><div class="strat-metrics">' +
+      '<div class="sd-metric-group"><div class="sd-mg-title">📊 Backtest</div><div class="strat-metrics">' +
+        m('İşlem', btM.n) +
+        m('Win rate', btM.wr != null ? btM.wr + '%' : '—', btM.wr >= 50 ? 'good' : btM.wr >= 40 ? 'neu' : 'bad') +
+        m('PF', btM.pf != null ? btM.pf : '—', btM.pf >= 1.5 ? 'good' : btM.pf >= 1 ? 'neu' : 'bad') +
+        m('Ort. R', btM.avg != null ? btM.avg : '—', btM.avg >= 0.3 ? 'good' : btM.avg >= 0 ? 'neu' : 'bad') +
+        m('Net R', btM.netR != null ? (btM.netR > 0 ? '+' : '') + btM.netR : '—', btM.netR >= 0 ? 'good' : 'bad') +
+        m('Max DD (R)', btM.dd != null ? btM.dd : '—', btM.dd <= 3 ? 'good' : btM.dd <= 6 ? 'neu' : 'bad') +
+      '</div></div>' +
+      '<div class="sd-metric-group"><div class="sd-mg-title">📈 Live Test</div><div class="strat-metrics">' +
+        m('İşlem', liveM.n) +
+        m('Win rate', liveM.wr != null ? liveM.wr + '%' : '—', liveM.wr >= 50 ? 'good' : liveM.wr >= 40 ? 'neu' : 'bad') +
+        m('PF', liveM.pf != null ? liveM.pf : '—', liveM.pf >= 1.5 ? 'good' : liveM.pf >= 1 ? 'neu' : 'bad') +
+        m('Ort. R', liveM.avg != null ? liveM.avg : '—', liveM.avg >= 0.3 ? 'good' : liveM.avg >= 0 ? 'neu' : 'bad') +
+        m('Net R', liveM.netR != null ? (liveM.netR > 0 ? '+' : '') + liveM.netR : '—', liveM.netR >= 0 ? 'good' : 'bad') +
+        m('Max DD (R)', liveM.dd != null ? liveM.dd : '—', liveM.dd <= 3 ? 'good' : liveM.dd <= 6 ? 'neu' : 'bad') +
+      '</div></div>' +
+      '<div class="sd-metric-group"><div class="sd-mg-title">🔗 Toplam</div><div class="strat-metrics">' +
         m('İşlem', auto.n) +
         m('Win rate', auto.wr != null ? auto.wr + '%' : '—', auto.wr >= 50 ? 'good' : auto.wr >= 40 ? 'neu' : 'bad') +
         m('PF', auto.pf != null ? auto.pf : '—', auto.pf >= 1.5 ? 'good' : auto.pf >= 1 ? 'neu' : 'bad') +
-        m('Ort. R', auto.avg != null ? auto.avg : '—', auto.avg >= 0.3 ? 'good' : auto.avg >= 0 ? 'neu' : 'bad') +
         m('Net R', auto.netR != null ? (auto.netR > 0 ? '+' : '') + auto.netR : '—', auto.netR >= 0 ? 'good' : 'bad') +
-        m('Max DD (R)', auto.dd != null ? auto.dd : '—', auto.dd <= 3 ? 'good' : auto.dd <= 6 ? 'neu' : 'bad') +
       '</div></div>' +
     '</div>' +
     '<div class="sd-cols">' +
@@ -11253,22 +11410,15 @@ function stratRenderDetail(s) {
       '</div>' +
     '</div>' +
     '<div class="sd-sec sd-trades-sec">' +
-      '<div class="sd-sec-h">📈 İşlem Kayıtları <span class="sd-hint">R sonucu gir — PF, win rate otomatik hesaplanır</span></div>' +
-      '<div class="sd-table-wrap"><table class="sd-table">' +
-        '<thead><tr><th>Tarih</th><th>Yön</th><th>Çift</th><th>Giriş</th><th>Çıkış</th><th>Sonuç (R)</th><th>Not</th><th></th></tr></thead>' +
-        '<tbody>' + (rows || '<tr><td colspan="8" class="sd-empty">Henüz işlem yok — aşağıdan ekle.</td></tr>') + '</tbody>' +
-      '</table></div>' +
-      '<div class="sd-tr-form">' +
-        '<input type="date" id="sd-tr-date" value="' + new Date().toISOString().slice(0, 10) + '">' +
-        '<select id="sd-tr-dir"><option value="long">Long</option><option value="short">Short</option></select>' +
-        '<input type="text" id="sd-tr-pair" placeholder="Çift" maxlength="20">' +
-        '<input type="number" id="sd-tr-entry" placeholder="Giriş" step="any">' +
-        '<input type="number" id="sd-tr-exit" placeholder="Çıkış" step="any">' +
-        '<input type="number" id="sd-tr-r" placeholder="Sonuç R (+2, -1)" step="0.01">' +
-        '<input type="text" id="sd-tr-note" placeholder="Kısa not (opsiyonel)" maxlength="120">' +
-        '<button type="button" class="btn solid" data-tr-add>＋ İşlem</button>' +
+      '<div class="sd-tabs">' +
+        '<button type="button" class="sd-tab' + (stratTradeTab === 'bt' ? ' on' : '') + '" data-tr-tab="bt">📊 Backtest</button>' +
+        '<button type="button" class="sd-tab' + (stratTradeTab === 'live' ? ' on' : '') + '" data-tr-tab="live">📈 Live Test</button>' +
       '</div>' +
+      '<div class="sd-sec-h">' + trLbl(stratTradeTab) + ' <span class="sd-hint">R sonucu gir — PF, win rate otomatik hesaplanır</span></div>' +
+      stratTrTableHtml(s, stratTradeTab) +
+      stratTrFormHtml(stratTradeTab) +
     '</div>' +
+    stratEduHtml(s) +
     (s.note ? '<div class="sd-note">📝 ' + esc(s.note) + '</div>' : '');
   delete s._impMsg;
 }
@@ -11308,7 +11458,7 @@ function stratSaveForm() {
   } else {
     rec.id = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     rec.created = Date.now();
-    rec.rules = []; rec.confirms = []; rec.trades = [];
+    rec.rules = []; rec.confirms = []; rec.btTrades = []; rec.liveTrades = [];
     stratData.list.push(rec);
   }
   stratEditId = null;
@@ -11367,33 +11517,47 @@ function stratDelConf(id, cid) {
   s.confirms = (s.confirms || []).filter(c => c.id !== cid);
   saveStrat().then(() => stratRenderDetail(s));
 }
-function stratAddTrade(id) {
+function stratAddTrade(id, kind) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
   const g = el => document.getElementById(el);
   const r = stratNum(g('sd-tr-r').value);
   if (r === null || r === 0) { const e = g('sd-tr-r'); if (e) e.focus(); return; }
-  if (!Array.isArray(s.trades)) s.trades = [];
-  s.trades.push({
+  if (!Array.isArray(s.btTrades)) s.btTrades = [];
+  if (!Array.isArray(s.liveTrades)) s.liveTrades = [];
+  const list = kind === 'bt' ? s.btTrades : s.liveTrades;
+  list.push({
     id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     date: g('sd-tr-date').value,
     dir: g('sd-tr-dir').value,
     pair: g('sd-tr-pair').value.trim(),
-    entry: g('sd-tr-entry').value.trim(),
-    exit: g('sd-tr-exit').value.trim(),
     r,
     note: g('sd-tr-note').value.trim(),
+    img: stratPendingImg,
   });
-  g('sd-tr-pair').value = ''; g('sd-tr-entry').value = ''; g('sd-tr-exit').value = ''; g('sd-tr-r').value = ''; g('sd-tr-note').value = '';
+  stratPendingImg = null;
+  g('sd-tr-pair').value = ''; g('sd-tr-r').value = ''; g('sd-tr-note').value = '';
   saveStrat().then(() => stratRenderDetail(s));
 }
-function stratDelTrade(id, tid) {
+function stratDelTrade(id, kind, tid) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
-  s.trades = (s.trades || []).filter(t => t.id !== tid);
+  if (kind === 'bt') s.btTrades = (s.btTrades || []).filter(t => t.id !== tid);
+  else s.liveTrades = (s.liveTrades || []).filter(t => t.id !== tid);
   saveStrat().then(() => stratRenderDetail(s));
 }
-// --- Trade Günlüğü / Notion'dan içe aktarma ---
+function stratClearPendingImg() { stratPendingImg = null; renderStrategies(); }
+function stratSetPendingImg(src) { stratPendingImg = src; renderStrategies(); }
+function stratPickImgFile() {
+  const inp = document.getElementById('sd-tr-file');
+  if (inp) inp.click();
+}
+function stratHandleImgFile() {
+  const inp = document.getElementById('sd-tr-file');
+  if (!inp || !inp.files || !inp.files.length) return;
+  stratResizeImg(inp.files[0], src => { stratPendingImg = src; inp.value = ''; renderStrategies(); });
+}
+// --- Trade Günlüğü / Notion'dan içe aktarma (live kayıtlara) ---
 function stratImportFrom(id, source) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
@@ -11403,8 +11567,8 @@ function stratImportFrom(id, source) {
   const matches = source === 'notion'
     ? src.filter(t => (t._source === 'Notion' || t.notionId) && stratMatch(t, name))
     : src.filter(t => stratMatch(t, name));
-  if (!Array.isArray(s.trades)) s.trades = [];
-  const known = new Set(s.trades.map(x => (x.date || '') + '|' + (x.r === null || x.r === undefined ? '' : String(x.r))));
+  if (!Array.isArray(s.liveTrades)) s.liveTrades = [];
+  const known = new Set(s.liveTrades.map(x => (x.date || '') + '|' + (x.r === null || x.r === undefined ? '' : String(x.r))));
   let added = 0, skipped = 0;
   matches.forEach(t => {
     const rv = stratNum(t.r);
@@ -11412,12 +11576,12 @@ function stratImportFrom(id, source) {
     const key = (t.date || '') + '|' + String(rv);
     if (known.has(key)) { skipped++; return; }
     known.add(key);
-    s.trades.push({
+    s.liveTrades.push({
       id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
       date: t.date || '',
       dir: String(t.dir || 'LONG').toLowerCase().indexOf('short') === 0 ? 'short' : 'long',
       pair: t.pair || t.coin || '',
-      entry: '', exit: '', r: rv,
+      r: rv,
       note: t.note || ((source === 'notion' ? 'Notion' : 'Günlük') + ' içe aktarıldı'),
     });
     added++;
@@ -11439,6 +11603,55 @@ async function stratImportFromNotion(id) {
     if (typeof importFromNotion === 'function') await importFromNotion();
   } catch (e) { /* senkron yoksa devam */ }
   stratImportFrom(id, 'notion');
+}
+function stratSetTradeTab(kind) { stratTradeTab = kind === 'bt' ? 'bt' : 'live'; renderStrategies(); }
+function stratSaveEduSrc(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  stratEdu(s).src = document.getElementById('sd-edu-src').value.trim();
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratSaveEduLearned(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  stratEdu(s).learned = document.getElementById('sd-edu-learned').value;
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratAddEduLink(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const edu = stratEdu(s);
+  const t = document.getElementById('sd-edu-link-t').value.trim();
+  const u = document.getElementById('sd-edu-link-u').value.trim();
+  if (!u) return;
+  if (!Array.isArray(edu.links)) edu.links = [];
+  edu.links.push({ id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title: t, url: u });
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratDelEduLink(id, lid) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const edu = stratEdu(s);
+  edu.links = (edu.links || []).filter(l => l.id !== lid);
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratAddEduVideo(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const edu = stratEdu(s);
+  const u = document.getElementById('sd-edu-vid-u').value.trim();
+  const vid = stratYtId(u);
+  if (!vid) return;
+  if (!Array.isArray(edu.videos)) edu.videos = [];
+  edu.videos.push({ id: 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), vid });
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratDelEduVideo(id, vid2) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const edu = stratEdu(s);
+  edu.videos = (edu.videos || []).filter(v => v.id !== vid2);
+  saveStrat().then(() => stratRenderDetail(s));
 }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
@@ -13762,10 +13975,20 @@ function bindStrategiesPage() {
       const confDel = e.target.closest('[data-conf-del]');
       const trAdd = e.target.closest('[data-tr-add]');
       const trDel = e.target.closest('[data-tr-del]');
+      const trTab = e.target.closest('[data-tr-tab]');
       const impJ = e.target.closest('[data-sd-import]');
       const impN = e.target.closest('[data-sd-import-notion]');
+      const imgAdd = e.target.closest('[data-img-add]');
+      const imgClr = e.target.closest('[data-img-clear]');
+      const imgEl = e.target.closest('[data-sd-img]');
+      const eSrc = e.target.closest('[data-edu-src-save]');
+      const eLrn = e.target.closest('[data-edu-learned-save]');
+      const eLinkAdd = e.target.closest('[data-edu-link-add]');
+      const eLinkDel = e.target.closest('[data-edu-link-del]');
+      const eVidAdd = e.target.closest('[data-edu-vid-add]');
+      const eVidDel = e.target.closest('[data-edu-vid-del]');
       const id = stratCurId;
-      if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; renderStrategies(); }
+      if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; stratPendingImg = null; renderStrategies(); }
       else if (edit) stratOpenForm(id);
       else if (st) stratCycleStatus(id);
       else if (del) { if (confirm('Bu stratejiyi kalıcı olarak sil?')) stratDelete(id); }
@@ -13773,14 +13996,38 @@ function bindStrategiesPage() {
       else if (ruleDel) stratDelRule(id, ruleDel.getAttribute('data-rule-del'));
       else if (confAdd) stratAddConf(id);
       else if (confDel) stratDelConf(id, confDel.getAttribute('data-conf-del'));
-      else if (trAdd) stratAddTrade(id);
-      else if (trDel) stratDelTrade(id, trDel.getAttribute('data-tr-del'));
+      else if (trTab) stratSetTradeTab(trTab.getAttribute('data-tr-tab'));
+      else if (trAdd) stratAddTrade(id, trAdd.getAttribute('data-tr-add'));
+      else if (trDel) stratDelTrade(id, trDel.getAttribute('data-tr-del'), trDel.getAttribute('data-tr-id'));
+      else if (imgAdd) stratPickImgFile();
+      else if (imgClr) stratClearPendingImg();
+      else if (imgEl) { e.preventDefault(); stratShowImg(imgEl.src); }
+      else if (eSrc) stratSaveEduSrc(id);
+      else if (eLrn) stratSaveEduLearned(id);
+      else if (eLinkAdd) stratAddEduLink(id);
+      else if (eLinkDel) stratDelEduLink(id, eLinkDel.getAttribute('data-edu-link-del'));
+      else if (eVidAdd) stratAddEduVideo(id);
+      else if (eVidDel) stratDelEduVideo(id, eVidDel.getAttribute('data-edu-vid-del'));
       else if (impJ) stratImportFrom(id, 'journal');
       else if (impN) stratImportFromNotion(id);
     });
     sdEl.addEventListener('change', e => {
       const c = e.target.closest('[data-conf]');
       if (c) stratToggleConf(stratCurId, c.getAttribute('data-conf'));
+      const f = e.target.closest('#sd-tr-file');
+      if (f) stratHandleImgFile();
+    });
+    document.addEventListener('paste', ev => {
+      if (stratMode !== 'detail' || !stratCurId) return;
+      const items = ev.clipboardData && ev.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') === 0) {
+          const f = items[i].getAsFile();
+          if (f) { ev.preventDefault(); stratResizeImg(f, src => { stratPendingImg = src; renderStrategies(); }); }
+          break;
+        }
+      }
     });
   }
   g('sf-save').addEventListener('click', stratSaveForm);
@@ -16518,7 +16765,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b19';
+const APP_BUILD = 'b20';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
