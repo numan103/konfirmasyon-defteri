@@ -69,6 +69,15 @@ function atQuote(q) {
   if (q.kind === 'result') return { kind: 'result', pair: atClip(q.pair, 20).toUpperCase(), dir: atClip(q.dir, 10), r: atClip(q.r, 20), verdict: atClip(q.verdict, 10), date: atClip(q.date, 20), strat: atClip(q.strat, 60) };
   return null;
 }
+function atRepost(rp) {
+  if (!rp || typeof rp !== 'object') return null;
+  return {
+    id: atClip(rp.id, 40), author: atClip(rp.author, 40), avatar: atClip(rp.avatar, 400000),
+    type: rp.type === 'islem' ? 'islem' : 'analiz', coin: atClip(rp.coin, 20).toUpperCase(),
+    dir: atClip(rp.dir, 10), status: atClip(rp.status, 10),
+    title: atClip(rp.title, 160), text: atClip(rp.text, 320), img: atClip(rp.img, 800000),
+  };
+}
 async function alfaTrading(req, res) {
   const r = await readShared(AT_ROW);
   const posts = (r.data && Array.isArray(r.data.posts)) ? r.data.posts : [];
@@ -83,13 +92,13 @@ async function alfaTrading(req, res) {
     const p = body.post || {};
     const post = {
       id: atUid(), type: p.type === 'islem' ? 'islem' : 'analiz',
-      author: atClip(p.author, 40) || 'Admin', authorEmail: atClip(p.authorEmail, 120), avatar: atClip(p.avatar, 400), isAdmin: true,
-      quote: atQuote(p.quote),
+      author: atClip(p.author, 40) || 'Admin', authorEmail: atClip(p.authorEmail, 120), avatar: atClip(p.avatar, 400000), isAdmin: true,
+      quote: atQuote(p.quote), repost: atRepost(p.repost),
       coin: atClip(p.coin, 20).toUpperCase(), bias: ['long', 'short', 'notr'].includes(p.bias) ? p.bias : '',
       dir: ['long', 'short'].includes(p.dir) ? p.dir : '',
       entry: atClip(p.entry, 40), tp: atClip(p.tp, 40), sl: atClip(p.sl, 40),
       lev: atClip(p.lev, 20), risk: atClip(p.risk, 20), status: 'aktif',
-      title: atClip(p.title, 160), text: atClip(p.text, 4000), img: atClip(p.img, 400),
+      title: atClip(p.title, 160), text: atClip(p.text, 4000), img: atClip(p.img, 800000),
       ts: Date.now(), likes: [], comments: [],
     };
     posts.unshift(post); if (posts.length > 300) posts.length = 300;
@@ -112,6 +121,12 @@ async function alfaTrading(req, res) {
   if (action === 'delPost') { const i = posts.findIndex(p => p.id === body.postId); if (i >= 0) posts.splice(i, 1); await save(); return res.status(200).json({ ok: true }); }
   if (action === 'delComment') { const post = find(body.postId); if (post && Array.isArray(post.comments)) post.comments = post.comments.filter(c => c.id !== body.commentId); await save(); return res.status(200).json({ ok: true }); }
   if (action === 'status') { const post = find(body.postId); if (post) post.status = ['aktif', 'tp', 'sl', 'iptal'].includes(body.status) ? body.status : post.status; await save(); return res.status(200).json({ ok: true }); }
+  if (action === 'profileUpdate') {
+    const email = atClip(body.email, 120), name = atClip(body.name, 40), avatar = atClip(body.avatar, 400000);
+    if (!email) return res.status(400).json({ error: 'email gerekli' });
+    posts.forEach(p => { if (p.authorEmail && p.authorEmail === email) { if (name) p.author = name; p.avatar = avatar; } });
+    await save(); return res.status(200).json({ ok: true });
+  }
   return res.status(400).json({ error: 'bilinmeyen action' });
 }
 

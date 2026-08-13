@@ -1818,6 +1818,20 @@
   .at-live-prev .at-card { box-shadow: none; }
   .at-live-prev .at-actions, .at-live-prev .at-comments, .at-live-prev .at-c-del { display: none; }
   .at-quote-box .at-quote { margin: 0; border: none; background: transparent; padding: 0; }
+  .at-imgrow { align-items: stretch; }
+  .at-imgrow .at-inp { flex: 1; }
+  .at-upl { flex: none; border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 10px; padding: 0 14px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .at-upl:hover { border-color: var(--pc); color: var(--pc); }
+  .at-hint { font-size: 11px; color: var(--text-3); }
+  /* repost (RT) — alıntılı gönderi */
+  .at-repost { margin: 12px 16px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); padding: 10px 12px; }
+  .at-repost-hd { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
+  .at-repost-hd .at-c-av { width: 24px; height: 24px; font-size: 11px; }
+  .at-repost-title { font-weight: 800; font-size: 13.5px; color: var(--text); margin-top: 6px; }
+  .at-repost-text { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin-top: 3px; white-space: pre-wrap; }
+  .at-repost-img { width: 100%; border-radius: 8px; margin-top: 8px; max-height: 180px; object-fit: cover; }
+  .at-quote-box .at-repost { margin: 0; }
+  .at-rt-badge { font-size: 11.5px; color: var(--text-3); font-weight: 700; padding: 8px 16px 0; display: flex; align-items: center; gap: 5px; }
   .at-flabel { font-size: 12px; font-weight: 700; color: var(--text-2); }
   .at-prof-prev { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); }
   .at-prof-prev .at-avatar { width: 48px; height: 48px; font-size: 20px; }
@@ -4395,10 +4409,14 @@
             <input type="text" id="at-f-risk" class="at-inp" placeholder="Risk (örn. %1)" maxlength="20">
           </div>
         </div>
-        <div class="at-frow">
-          <input type="text" id="at-f-img" class="at-inp" placeholder="Görsel linki (opsiyonel, https://…)" maxlength="400">
+        <div class="at-frow at-imgrow">
+          <input type="text" id="at-f-img" class="at-inp" placeholder="Görsel linki (https://…) · ya da yapıştır / yükle">
+          <button type="button" class="at-upl" id="at-f-upl">📎 Yükle</button>
+          <input type="file" id="at-f-file" accept="image/*" hidden>
         </div>
+        <div class="at-hint">İpucu: bir görseli kopyalayıp bu pencerede <b>Ctrl+V</b> ile de yapıştırabilirsin.</div>
         <div id="at-f-imgprev" class="at-imgprev"></div>
+        <div id="at-repost-box" class="at-quote-box" style="display:none"></div>
         <div class="at-quote-row">
           <button type="button" class="at-qbtn" id="at-q-bias">🎯 Bias alıntıla</button>
           <button type="button" class="at-qbtn" id="at-q-result">📊 İşlem sonucu alıntıla</button>
@@ -4421,8 +4439,12 @@
         <div class="at-prof-prev" id="at-prof-prev"></div>
         <label class="at-flabel">Görünen isim</label>
         <input type="text" id="at-p-name" class="at-inp" placeholder="Örn. Numan" maxlength="40">
-        <label class="at-flabel">Profil fotoğrafı (link)</label>
-        <input type="text" id="at-p-avatar" class="at-inp" placeholder="https://… (kare görsel önerilir)" maxlength="400">
+        <label class="at-flabel">Profil fotoğrafı</label>
+        <div class="at-frow at-imgrow">
+          <input type="text" id="at-p-avatar" class="at-inp" placeholder="Link (https://…) · ya da yapıştır / yükle">
+          <button type="button" class="at-upl" id="at-p-upl">📎 Yükle</button>
+          <input type="file" id="at-p-file" accept="image/*" hidden>
+        </div>
       </div>
       <div class="at-modal-ft">
         <button type="button" class="btn ghost" id="at-pmodal-cancel">Vazgeç</button>
@@ -13980,6 +14002,7 @@ function atCardHtml(p) {
   ).join('');
   const avHtml = p.avatar ? '<img src="' + esc(p.avatar) + '" alt="">' : esc(av);
   return '<article class="at-card" data-pid="' + p.id + '">' +
+    (p.repost ? '<div class="at-rt-badge">🔁 ' + esc(p.author || 'Admin') + ' bir gönderiyi alıntıladı</div>' : '') +
     '<div class="at-card-hd"><div class="at-avatar">' + avHtml + '</div>' +
       '<div class="at-who"><div class="at-author">' + esc(p.author || 'Admin') + (p.isAdmin ? '<span class="at-adm">Admin</span>' : '') + '</div>' +
       '<div class="at-time">' + atTimeAgo(p.ts) + '</div></div>' +
@@ -13990,10 +14013,12 @@ function atCardHtml(p) {
     (p.text ? '<div class="at-text">' + esc(p.text) + '</div>' : '') +
     levels +
     atQuoteHtml(p.quote) +
+    atRepostHtml(p.repost) +
     (p.img ? '<img class="at-img" src="' + esc(p.img) + '" alt="" loading="lazy" data-atimg="' + esc(p.img) + '">' : '') +
     '<div class="at-actions">' +
       '<button type="button" class="at-act' + (liked ? ' liked' : '') + '" data-atlike="' + p.id + '">' + (liked ? '❤️' : '🤍') + ' <span>' + nlike + '</span></button>' +
       '<button type="button" class="at-act" data-atcom="' + p.id + '">💬 <span>' + ncom + '</span></button>' +
+      (admin ? '<button type="button" class="at-act" data-atrt="' + p.id + '">🔁 RT</button>' : '') +
       (p.type === 'islem' && (p.entry || p.sl) ? '<button type="button" class="at-act tool" data-attool="' + p.id + '">🧮 Calculator\'a gönder</button>' : '') +
       (admin && p.type === 'islem' ? '<button type="button" class="at-act" data-atstatus="' + p.id + '">⚙ Durum</button>' : '') +
     '</div>' +
@@ -14054,8 +14079,73 @@ function atToolSend(pid) {
   showPage('calc');
   try { if (typeof updateCalc === 'function') updateCalc(); } catch (e) {}
 }
+function atCompressImage(fileOrBlob, maxW, quality) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(fileOrBlob);
+    const im = new Image();
+    im.onload = () => {
+      const scale = Math.min(1, maxW / (im.width || maxW));
+      const w = Math.max(1, Math.round(im.width * scale)), h = Math.max(1, Math.round(im.height * scale));
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      try { resolve(cv.toDataURL('image/jpeg', quality)); } catch (e) { reject(e); }
+    };
+    im.onerror = e => { URL.revokeObjectURL(url); reject(e); };
+    im.src = url;
+  });
+}
+async function atSetPostImage(blob) {
+  try {
+    const d = await atCompressImage(blob, 1000, 0.72);
+    const el = document.getElementById('at-f-img'); if (el) el.value = d;
+    document.getElementById('at-f-imgprev').innerHTML = '<img src="' + d + '" alt="">';
+    atUpdatePreview();
+  } catch (e) { alert('Görsel işlenemedi.'); }
+}
+async function atSetAvatarImage(blob) {
+  try {
+    const d = await atCompressImage(blob, 256, 0.85);
+    const el = document.getElementById('at-p-avatar'); if (el) el.value = d;
+    atRenderProfPrev();
+  } catch (e) { alert('Görsel işlenemedi.'); }
+}
+function atPasteImageFrom(e, handler) {
+  const items = (e.clipboardData && e.clipboardData.items) || [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type && items[i].type.indexOf('image') === 0) {
+      const blob = items[i].getAsFile(); if (blob) { e.preventDefault(); handler(blob); return true; }
+    }
+  }
+  return false;
+}
+function atRepostHtml(rp) {
+  if (!rp) return '';
+  const av = rp.avatar ? '<img src="' + esc(rp.avatar) + '" alt="">' : esc((rp.author || 'A').charAt(0).toUpperCase());
+  const dtag = (rp.type === 'islem' && rp.dir) ? ' <span class="at-tag ' + (rp.dir === 'long' ? 'long">🟢 LONG' : 'short">🔴 SHORT') + '</span>' : '';
+  return '<div class="at-repost"><div class="at-repost-hd"><span class="at-c-av">' + av + '</span><span class="at-c-nick">' + esc(rp.author || 'Admin') + '</span>' +
+    (rp.coin ? ' <span class="at-tag coin">' + esc(rp.coin) + '</span>' : '') + dtag + '</div>' +
+    (rp.title ? '<div class="at-repost-title">' + esc(rp.title) + '</div>' : '') +
+    (rp.text ? '<div class="at-repost-text">' + esc(rp.text) + '</div>' : '') +
+    (rp.img ? '<img class="at-repost-img" src="' + esc(rp.img) + '" alt="">' : '') + '</div>';
+}
+function atRenderRepostBox() {
+  const box = document.getElementById('at-repost-box'); if (!box) return;
+  if (!alfaComposer.repost) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<button type="button" class="at-qx" id="at-rtx">✕</button><div class="at-repost-hd" style="margin-bottom:6px;color:var(--text-3);font-weight:700">🔁 Alıntılanan gönderi</div>' + atRepostHtml(alfaComposer.repost);
+}
+function atStartRepost(pid) {
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  atOpenModal();
+  alfaComposer.repost = { id: p.id, author: p.author, avatar: p.avatar || '', type: p.type, coin: p.coin || '', dir: p.dir || '', status: p.status || '', title: p.title || '', text: (p.text || '').slice(0, 300), img: p.img || '' };
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '🔁 RT / Güncelle';
+  const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Güncelleme / yorumunu yaz…';
+  atRenderRepostBox(); atUpdatePreview();
+}
 function atOpenModal() {
-  alfaComposer = { type: 'analiz', dir: 'long', quote: null };
+  alfaComposer = { type: 'analiz', dir: 'long', quote: null, repost: null };
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = 'Yeni Paylaşım';
   ['at-f-coin', 'at-f-title', 'at-f-text', 'at-f-entry', 'at-f-tp', 'at-f-sl', 'at-f-lev', 'at-f-risk', 'at-f-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const bias = document.getElementById('at-f-bias'); if (bias) bias.value = '';
   document.querySelectorAll('.at-type').forEach(b => b.classList.toggle('on', b.getAttribute('data-attype') === 'analiz'));
@@ -14063,7 +14153,7 @@ function atOpenModal() {
   document.getElementById('at-islem-fields').style.display = 'none';
   document.getElementById('at-f-imgprev').innerHTML = '';
   document.getElementById('at-result-list').style.display = 'none';
-  atRenderQuoteBox(); atUpdatePreview();
+  atRenderQuoteBox(); atRenderRepostBox(); atUpdatePreview();
   document.getElementById('at-modal').classList.add('open');
 }
 function atCloseModal() { document.getElementById('at-modal').classList.remove('open'); }
@@ -14085,7 +14175,7 @@ function atUpdatePreview() {
     dir: type === 'islem' ? alfaComposer.dir : '',
     entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
     lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
-    status: 'aktif', quote: alfaComposer.quote || null, ts: Date.now(), likes: [], comments: [],
+    status: 'aktif', quote: alfaComposer.quote || null, repost: alfaComposer.repost || null, ts: Date.now(), likes: [], comments: [],
   };
   prev.innerHTML = atCardHtml(post);
 }
@@ -14130,12 +14220,16 @@ function atRenderProfPrev() {
   el.innerHTML = '<div class="at-avatar">' + (/^https?:\/\//.test(av) ? '<img src="' + esc(av) + '" alt="">' : esc((name || 'A').charAt(0).toUpperCase())) + '</div>' +
     '<div><div class="nm">' + esc(name) + '</div><div class="at-time">Admin</div></div>';
 }
-function atSaveProfile() {
+async function atSaveProfile() {
   const name = (document.getElementById('at-p-name').value || '').trim().slice(0, 40);
-  const avatar = (document.getElementById('at-p-avatar').value || '').trim().slice(0, 400);
+  const avatar = (document.getElementById('at-p-avatar').value || '').trim();
   alfaSaveProfile({ name, avatar });
   document.getElementById('at-pmodal').classList.remove('open');
+  let email = ''; try { email = (AUTH && AUTH.user) ? AUTH.user.email : ''; } catch (e) {}
+  // geçmiş gönderilerdeki isim/foto da güncellensin
+  alfaPosts.forEach(p => { if (email && p.authorEmail === email) { if (name) p.author = name; p.avatar = avatar; } });
   renderAlfaFeed();
+  if (email) { try { await atApi('profileUpdate', { email, name, avatar }); } catch (e) {} loadAlfaTrading(); }
 }
 async function atSubmit() {
   const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
@@ -14149,7 +14243,7 @@ async function atSubmit() {
     dir: type === 'islem' ? alfaComposer.dir : '',
     entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
     lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
-    quote: alfaComposer.quote || null,
+    quote: alfaComposer.quote || null, repost: alfaComposer.repost || null,
   };
   const btn = document.getElementById('at-submit'); if (btn) { btn.disabled = true; btn.textContent = 'Paylaşılıyor…'; }
   const r = await atApi('add', { post });
@@ -14183,6 +14277,15 @@ function bindAlfaTrading() {
   const qr = document.getElementById('at-q-result'); if (qr) qr.addEventListener('click', atToggleResultList);
   const rlist = document.getElementById('at-result-list'); if (rlist) rlist.addEventListener('click', e => { const r = e.target.closest('[data-atrid]'); if (r) atPickResult(r.getAttribute('data-atrid')); });
   const qbox = document.getElementById('at-quote-box'); if (qbox) qbox.addEventListener('click', e => { if (e.target.closest('#at-qx')) { alfaComposer.quote = null; atRenderQuoteBox(); atUpdatePreview(); } });
+  const rbox = document.getElementById('at-repost-box'); if (rbox) rbox.addEventListener('click', e => { if (e.target.closest('#at-rtx')) { alfaComposer.repost = null; atRenderRepostBox(); atUpdatePreview(); } });
+  // görsel yükle / yapıştır — post
+  const upl = document.getElementById('at-f-upl'); const file = document.getElementById('at-f-file');
+  if (upl && file) { upl.addEventListener('click', () => file.click()); file.addEventListener('change', () => { if (file.files && file.files[0]) atSetPostImage(file.files[0]); file.value = ''; }); }
+  if (modal) modal.addEventListener('paste', e => atPasteImageFrom(e, atSetPostImage));
+  // görsel yükle / yapıştır — profil avatar
+  const pupl = document.getElementById('at-p-upl'); const pfile = document.getElementById('at-p-file');
+  if (pupl && pfile) { pupl.addEventListener('click', () => pfile.click()); pfile.addEventListener('change', () => { if (pfile.files && pfile.files[0]) atSetAvatarImage(pfile.files[0]); pfile.value = ''; }); }
+  const pmodalEl = document.getElementById('at-pmodal'); if (pmodalEl) pmodalEl.addEventListener('paste', e => atPasteImageFrom(e, atSetAvatarImage));
   // profil
   const profBtn = document.getElementById('at-prof-btn'); if (profBtn) profBtn.addEventListener('click', atOpenProfile);
   const pmx = document.getElementById('at-pmodal-x'); if (pmx) pmx.addEventListener('click', () => document.getElementById('at-pmodal').classList.remove('open'));
@@ -14204,6 +14307,7 @@ function bindAlfaTrading() {
     const csend = t.closest('[data-atcsend]'); if (csend) return atSendComment(csend.getAttribute('data-atcsend'));
     const pdel = t.closest('[data-atpdel]'); if (pdel) return atDelPost(pdel.getAttribute('data-atpdel'));
     const cdel = t.closest('[data-atcdel]'); if (cdel) { const [pi, ci] = cdel.getAttribute('data-atcdel').split('|'); return atDelComment(pi, ci); }
+    const rt = t.closest('[data-atrt]'); if (rt) return atStartRepost(rt.getAttribute('data-atrt'));
     const tool = t.closest('[data-attool]'); if (tool) return atToolSend(tool.getAttribute('data-attool'));
     const stt = t.closest('[data-atstatus]'); if (stt) return atSetStatus(stt.getAttribute('data-atstatus'));
     const im = t.closest('[data-atimg]'); if (im) { try { window.open(im.getAttribute('data-atimg'), '_blank', 'noopener'); } catch (e) {} }
