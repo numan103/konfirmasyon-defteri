@@ -1608,6 +1608,24 @@
   .sd-edu-vid { flex-direction: column; align-items: stretch; gap: 8px; }
   .sd-edu-vid-top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--text-2); }
   .sd-edu-vid iframe { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: none; }
+  .sd-addrow select { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; min-width: 0; }
+  .sd-addrow select:focus { outline: none; border-color: var(--pc); }
+  .strat-ders { margin-top: 18px; }
+  .sd-ders-conu { border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); margin-bottom: 10px; overflow: hidden; }
+  .sd-ders-conu summary { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; list-style: none; user-select: none; }
+  .sd-ders-conu summary::-webkit-details-marker { display: none; }
+  .sd-ders-conu summary:hover { background: var(--bg2); }
+  .sd-ders-conu summary::after { content: '▾'; margin-left: auto; color: var(--text-3); transition: transform .15s ease; }
+  .sd-ders-conu[open] summary::after { transform: rotate(180deg); }
+  .sd-ders-ico { font-size: 18px; }
+  .sd-ders-name { font-size: 14px; font-weight: 800; color: var(--text); }
+  .sd-ders-body { padding: 2px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .sd-ders-card { border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); padding: 12px 14px; }
+  .sd-ders-card-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .sd-ders-learned { font-size: 12.5px; color: var(--text); line-height: 1.55; white-space: pre-wrap; margin-bottom: 8px; }
+  .sd-ders-card .sd-edu-links, .sd-ders-card .sd-edu-vids { margin-bottom: 0; }
+  #strat-toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 16px); background: var(--pc); color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 11px 18px; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 10000; max-width: 90vw; text-align: center; }
+  #strat-toast.show { opacity: 1; transform: translate(-50%, 0); }
   .strat-lb { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 24px; cursor: zoom-out; }
   .strat-lb img { max-width: 92vw; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
   .sd-note { padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg2); font-size: 12.5px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
@@ -4426,6 +4444,7 @@
         <div id="strat-list" class="strat-list"></div>
         <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
       </div>
+      <div id="strat-ders" class="strat-ders"></div>
       <div id="strat-detail" class="strat-detail hidden"></div>
       <div id="strat-form" class="strat-form hidden">
         <div class="strat-form-h" id="strat-form-title">Yeni Strateji</div>
@@ -11213,10 +11232,61 @@ function stratRenderList() {
   };
   listEl.innerHTML = list.map(card).join('');
   if (emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
+  const dersEl = document.getElementById('strat-ders');
+  if (dersEl) dersEl.innerHTML = stratDersHtml();
   if (list.length && stratEditId && !stratData.list.find(x => x.id === stratEditId)) stratEditId = null;
 }
 let stratTradeTab = 'live';   // detay işlem sekmesi: 'bt' | 'live'
 let stratPendingImg = null;   // işlem formuna eklenecek bekleyen fotoğraf (dataURL)
+
+function stratDersHtml() {
+  // "Dersler & Konular": tüm stratejilerin eğitim içeriğini konu konu gruplar
+  const groups = {};
+  stratData.list.forEach(s => {
+    const edu = s.edu || {};
+    const hasContent = (edu.learned && edu.learned.trim()) || (edu.links && edu.links.length) || (edu.videos && edu.videos.length) || (edu.src && edu.src.trim());
+    if (!hasContent) return;
+    const det = stratDetectTopic(edu.learned || '', s.name, edu.src || '');
+    const tid = edu.topic || det.id;
+    if (!groups[tid]) groups[tid] = { meta: stratTopicMeta(tid), items: [] };
+    groups[tid].items.push(s);
+  });
+  const ids = Object.keys(groups);
+  if (!ids.length) {
+    return '<div class="sd-sec sd-edu-sec">' +
+      '<div class="sd-sec-h">🎓 Dersler & Konular <span class="sd-hint">eğitim içerikleri otomatik gruplanır</span></div>' +
+      '<div class="sd-empty">Henüz ders içeriği yok — bir stratejiyi aç, Eğitim & Kaynak bölümünden kaynak / öğrenilenler / link / video ekle, burada ders ders gruplansın.</div></div>';
+  }
+  ids.sort((a, b) => groups[b].items.length - groups[a].items.length || stratTopicMeta(a).name.localeCompare(stratTopicMeta(b).name));
+  const cardsHtml = s => {
+    const edu = stratEdu(s);
+    const links = (edu.links || []).map(l =>
+      '<div class="sd-edu-item"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">🔗 ' + esc(l.title || l.url) + '</a></div>').join('');
+    const vids = (edu.videos || []).map(v =>
+      '<div class="sd-edu-item sd-edu-vid"><div class="sd-edu-vid-top"><span>▶️ YouTube</span></div>' +
+      '<iframe src="https://www.youtube.com/embed/' + esc(v.vid) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>').join('');
+    return '<div class="sd-ders-card">' +
+      '<div class="sd-ders-card-h">' +
+        '<button type="button" class="btn solid" data-ders-open="' + s.id + '">' + esc(s.name) + '</button>' +
+        (edu.src ? '<span class="strat-chip">🎓 @' + esc(edu.src) + '</span>' : '') +
+        (s.status ? '<span class="strat-chip st-' + s.status + '">' + stratStatusMeta(s.status).label + '</span>' : '') +
+      '</div>' +
+      (edu.learned && edu.learned.trim() ? '<div class="sd-ders-learned">' + esc(edu.learned) + '</div>' : '') +
+      (links ? '<div class="sd-edu-links">' + links + '</div>' : '') +
+      (vids ? '<div class="sd-edu-vids">' + vids + '</div>' : '') +
+    '</div>';
+  };
+  return '<div class="sd-sec sd-edu-sec">' +
+    '<div class="sd-sec-h">🎓 Dersler & Konular <span class="sd-hint">tüm stratejilerin eğitim içerikleri konu konu — başlığa tıkla, not ve videoları gör</span></div>' +
+    ids.map(tid => {
+      const g = groups[tid];
+      return '<details class="sd-ders-conu">' +
+        '<summary><span class="sd-ders-ico">' + g.meta.ico + '</span><span class="sd-ders-name">' + g.meta.name + '</span><span class="strat-group-n">' + g.items.length + '</span></summary>' +
+        '<div class="sd-ders-body">' + g.items.map(cardsHtml).join('') + '</div>' +
+      '</details>';
+    }).join('') +
+  '</div>';
+}
 
 function stratYtId(url) {
   const u = String(url || '').trim();
@@ -11257,7 +11327,39 @@ function stratShowImg(src) {
   lb.classList.remove('hidden');
 }
 function stratHideImg() { const lb = document.getElementById('strat-lb'); if (lb) lb.classList.add('hidden'); }
-function stratEdu(s) { if (!s.edu) s.edu = { src: '', learned: '', links: [], videos: [] }; return s.edu; }
+const STRAT_TOPICS = [
+  { id: 'likidite', ico: '💧', name: 'Likidite & Tuzak', kw: ['likidite', 'liquidity', 'grab', 'tuza', 'trap', 'sweep', 'süpür', 'stop hunt', 'bos', 'breaker', 'fvg', 'imbalance', 'order block', 'orderblock'] },
+  { id: 'kiralim', ico: '🧱', name: 'Kırılım & Yapı', kw: ['kırılım', 'kırılma', 'break', 'breakout', 'iç bar', 'dış bar', 'ic bar', 'dis bar', 'inside', 'outside', 'sıkışma', 'sikisma', 'range', 'konsolid', 'daralma'] },
+  { id: 'trend', ico: '📈', name: 'Trend & Momentum', kw: ['trend', 'momentum', 'impulse', 'itki', 'devam', 'pullback', 'ger çekil', 'dip', 'tepe', 'higher high', 'higher low', 'lower high', 'lower low'] },
+  { id: 'konfluens', ico: '✅', name: 'Konfluens & Onay', kw: ['konfluens', 'conflu', 'onay', 'confirm', 'cvd', 'hacim', 'volume', 'orderbook', 'order book', 'open interest', 'funding', 'fonlama', 'equilibrium', 'denge'] },
+  { id: 'risk', ico: '🛡️', name: 'Risk & Para Yönetimi', kw: ['risk', 'stop loss', 'take profit', 'pozisyon boyu', 'position size', 'para yönetimi', 'kaldıraç', 'kaldirac', 'leverage', 'r:r', 'koruma', 'zarar kes'] },
+  { id: 'psikoloji', ico: '🧠', name: 'Psikoloji & Disiplin', kw: ['psikoloji', 'disiplin', 'duygu', 'sabır', 'sabir', 'korku', 'fear', 'açgözlü', 'greed', 'intikam', 'revenge', 'panik', 'panic', 'overtrade', 'disiplinsiz'] },
+  { id: 'backtest', ico: '📊', name: 'Backtest & Veri', kw: ['backtest', 'geri test', 'istatistik', 'win rate', 'profit factor', 'veri', 'kayıt', 'kayit', 'journal', 'günlük', 'gunluk', 'sonuç', 'sonuc', 'örneklem', 'orneklem'] },
+  { id: 'plan', ico: '📅', name: 'Plan & Rutin', kw: ['plan', 'rutin', 'senaryo', 'sabah', 'akşam', 'aksam', 'checklist', 'kontrol listesi', 'hazırlık', 'hazirlik', 'rutin dışı', 'rutin disi', 'ekonomi', 'haber'] }
+];
+function stratTopicMeta(id) { return STRAT_TOPICS.find(t => t.id === id) || { id: 'genel', ico: '🎓', name: 'Genel / Diğer', kw: [] }; }
+function stratDetectTopic() {
+  // "AI" benzeri client-side sınıflandırıcı: metinlerdeki anahtar kavramlara göre konu önerir
+  const hay = [];
+  for (let i = 0; i < arguments.length; i++) hay.push(String(arguments[i] || '').toLowerCase().replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ğ/g, 'g'));
+  const joined = ' ' + hay.join(' ');
+  let best = null, bestScore = 0;
+  STRAT_TOPICS.forEach(t => {
+    let score = 0;
+    t.kw.forEach(k => { if (k.length >= 3 && joined.indexOf(k.toLowerCase()) >= 0) score += k.length >= 6 ? 2 : 1; });
+    if (score > bestScore) { bestScore = score; best = t; }
+  });
+  return { id: (best ? best.id : 'genel'), meta: (best ? best : stratTopicMeta('genel')), score: bestScore };
+}
+function stratEdu(s) { if (!s.edu) s.edu = { topic: '', src: '', learned: '', links: [], videos: [] }; return s.edu; }
+function stratToast(msg) {
+  let el = document.getElementById('strat-toast');
+  if (!el) { el = document.createElement('div'); el.id = 'strat-toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(function () { el.classList.remove('show'); }, 2400);
+}
 function stratTrMeta(t) {
   const rv = stratNum(t.r);
   const cls = rv === null ? '' : rv > 0 ? 'good' : rv < 0 ? 'bad' : 'neu';
@@ -11302,6 +11404,10 @@ function stratTrTableHtml(s, kind) {
 }
 function stratEduHtml(s) {
   const edu = stratEdu(s);
+  const curTopic = stratTopicMeta(edu.topic);
+  const det = stratDetectTopic(edu.learned, s.name, edu.src);
+  const topicOpts = '<option value="">— Konu seç / otomatik —</option>' + STRAT_TOPICS.map(t =>
+    '<option value="' + t.id + '"' + (edu.topic === t.id ? ' selected' : '') + '>' + t.ico + ' ' + t.name + '</option>').join('');
   const links = (edu.links || []).map(l =>
     '<div class="sd-edu-item"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">🔗 ' + esc(l.title || l.url) + '</a><button type="button" class="sd-x" data-edu-link-del="' + l.id + '">✕</button></div>'
   ).join('');
@@ -11310,7 +11416,11 @@ function stratEduHtml(s) {
     '<iframe src="https://www.youtube.com/embed/' + esc(v.vid) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>'
   ).join('');
   return '<div class="sd-sec sd-edu-sec">' +
-    '<div class="sd-sec-h">🎓 Eğitim & Kaynak <span class="sd-hint">stratejiyi nereden öğrendiğin ve öğrendiklerin</span></div>' +
+    '<div class="sd-sec-h">🎓 Eğitim & Kaynak <span class="sd-hint">stratejiyi nereden öğrendiğin ve öğrendiklerin — aşağıdaki Dersler & Konular bölümünde ders ders gruplanır</span></div>' +
+    '<div class="sd-edu-row"><label>Ders / Konu ' + (edu.topic ? '<span class="strat-chip">' + curTopic.ico + ' ' + curTopic.name + '</span>' : '') + '</label>' +
+      '<div class="sd-addrow"><select id="sd-edu-topic">' + topicOpts + '</select>' +
+      '<button type="button" class="btn solid" data-edu-topic-save>💾 Konuyu Kaydet</button></div>' +
+      '<div class="sd-tr-hint">🤖 AI önerisi: <b>' + det.meta.ico + ' ' + det.meta.name + '</b> — <button type="button" class="btn" data-edu-topic-apply>Uygula</button></div></div>' +
     '<div class="sd-edu-row"><label>Kimden öğreniliyor / kaynak</label>' +
       '<div class="sd-addrow"><input type="text" id="sd-edu-src" value="' + esc(edu.src || '') + '" placeholder="Örn: efloud, ICT, …" maxlength="80"><button type="button" class="btn solid" data-edu-src-save>💾 Kaydet</button></div></div>' +
     '<div class="sd-edu-row"><label>Öğrenilenler</label>' +
@@ -11609,13 +11719,40 @@ function stratSaveEduSrc(id) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
   stratEdu(s).src = document.getElementById('sd-edu-src').value.trim();
-  saveStrat().then(() => stratRenderDetail(s));
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('💾 Kaynak kaydedildi: ' + (s.edu.src ? '@' + s.edu.src : '(boş)')); });
 }
 function stratSaveEduLearned(id) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
-  stratEdu(s).learned = document.getElementById('sd-edu-learned').value;
-  saveStrat().then(() => stratRenderDetail(s));
+  const edu = stratEdu(s);
+  edu.learned = document.getElementById('sd-edu-learned').value;
+  if (!edu.topic && edu.learned.trim()) {
+    const det = stratDetectTopic(edu.learned, s.name, edu.src);
+    edu.topic = det.id;
+    if (det.id !== 'genel') {
+      saveStrat().then(() => { stratRenderDetail(s); stratToast('💾 Öğrenilenler kaydedildi · 🤖 Konu: ' + det.meta.ico + ' ' + det.meta.name + ' (otomatik)'); });
+      return;
+    }
+  }
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('💾 Öğrenilenler kaydedildi'); });
+}
+function stratSaveEduTopic(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const el = document.getElementById('sd-edu-topic');
+  if (!el) return;
+  const t = stratTopicMeta(el.value);
+  stratEdu(s).topic = t.id;
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('💾 Konu kaydedildi: ' + t.ico + ' ' + t.name); });
+}
+function stratApplyEduTopic(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const el = document.getElementById('sd-edu-topic');
+  if (!el) return;
+  const det = stratDetectTopic(stratEdu(s).learned, s.name, stratEdu(s).src);
+  el.value = det.id;
+  stratToast('🤖 AI önerisi uygulandı: ' + det.meta.ico + ' ' + det.meta.name + (det.id === 'genel' ? ' (konu bulunamadı — elle seç)' : ''));
 }
 function stratAddEduLink(id) {
   const s = stratData.list.find(x => x.id === id);
@@ -11626,14 +11763,14 @@ function stratAddEduLink(id) {
   if (!u) return;
   if (!Array.isArray(edu.links)) edu.links = [];
   edu.links.push({ id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title: t, url: u });
-  saveStrat().then(() => stratRenderDetail(s));
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('🔗 Link eklendi'); });
 }
 function stratDelEduLink(id, lid) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
   const edu = stratEdu(s);
   edu.links = (edu.links || []).filter(l => l.id !== lid);
-  saveStrat().then(() => stratRenderDetail(s));
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('🔗 Link silindi'); });
 }
 function stratAddEduVideo(id) {
   const s = stratData.list.find(x => x.id === id);
@@ -11644,14 +11781,14 @@ function stratAddEduVideo(id) {
   if (!vid) return;
   if (!Array.isArray(edu.videos)) edu.videos = [];
   edu.videos.push({ id: 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), vid });
-  saveStrat().then(() => stratRenderDetail(s));
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('▶️ Video eklendi'); });
 }
 function stratDelEduVideo(id, vid2) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
   const edu = stratEdu(s);
   edu.videos = (edu.videos || []).filter(v => v.id !== vid2);
-  saveStrat().then(() => stratRenderDetail(s));
+  saveStrat().then(() => { stratRenderDetail(s); stratToast('▶️ Video silindi'); });
 }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
@@ -13962,6 +14099,21 @@ function bindStrategiesPage() {
     else if (st) stratCycleStatus(st.getAttribute('data-strat-status'));
     else if (del) { if (confirm('Bu stratejiyi kalıcı olarak sil?')) stratDelete(del.getAttribute('data-strat-del')); }
   });
+  const dersEl = document.getElementById('strat-ders');
+  if (dersEl) {
+    dersEl.addEventListener('click', e => {
+      const open = e.target.closest('[data-ders-open]');
+      if (!open) return;
+      stratCurId = open.getAttribute('data-ders-open');
+      stratMode = 'detail';
+      stratEditId = null;
+      stratFormOpen = false;
+      stratPendingImg = null;
+      renderStrategies();
+      const detEl = document.getElementById('strat-detail');
+      if (detEl) detEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
   const sdEl = document.getElementById('strat-detail');
   if (sdEl) {
     sdEl.addEventListener('click', e => {
@@ -13987,6 +14139,8 @@ function bindStrategiesPage() {
       const eLinkDel = e.target.closest('[data-edu-link-del]');
       const eVidAdd = e.target.closest('[data-edu-vid-add]');
       const eVidDel = e.target.closest('[data-edu-vid-del]');
+      const eTopic = e.target.closest('[data-edu-topic-save]');
+      const eTopicApply = e.target.closest('[data-edu-topic-apply]');
       const id = stratCurId;
       if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; stratPendingImg = null; renderStrategies(); }
       else if (edit) stratOpenForm(id);
@@ -14008,6 +14162,8 @@ function bindStrategiesPage() {
       else if (eLinkDel) stratDelEduLink(id, eLinkDel.getAttribute('data-edu-link-del'));
       else if (eVidAdd) stratAddEduVideo(id);
       else if (eVidDel) stratDelEduVideo(id, eVidDel.getAttribute('data-edu-vid-del'));
+      else if (eTopic) stratSaveEduTopic(id);
+      else if (eTopicApply) stratApplyEduTopic(id);
       else if (impJ) stratImportFrom(id, 'journal');
       else if (impN) stratImportFromNotion(id);
     });
@@ -16765,7 +16921,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b20';
+const APP_BUILD = 'b21';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
