@@ -4379,7 +4379,7 @@
     <div class="at-modal-box">
       <div class="at-modal-hd"><span id="at-modal-title">Yeni Paylaşım</span><button type="button" class="at-modal-x" id="at-modal-x" aria-label="Kapat">✕</button></div>
       <div class="at-modal-body">
-        <div class="at-typeseg">
+        <div class="at-typeseg" id="at-typeseg">
           <button type="button" class="at-type on" data-attype="analiz">📝 Analiz</button>
           <button type="button" class="at-type" data-attype="islem">📊 İşlem</button>
         </div>
@@ -14005,7 +14005,8 @@ function atCardHtml(p) {
     (p.repost ? '<div class="at-rt-badge">🔁 ' + esc(p.author || 'Admin') + ' bir gönderiyi alıntıladı</div>' : '') +
     '<div class="at-card-hd"><div class="at-avatar">' + avHtml + '</div>' +
       '<div class="at-who"><div class="at-author">' + esc(p.author || 'Admin') + (p.isAdmin ? '<span class="at-adm">Admin</span>' : '') + '</div>' +
-      '<div class="at-time">' + atTimeAgo(p.ts) + '</div></div>' +
+      '<div class="at-time">' + atTimeAgo(p.ts) + (p.edited ? ' · düzenlendi' : '') + '</div></div>' +
+      (admin ? '<button type="button" class="at-act danger at-c-del" data-atedit="' + p.id + '" title="Düzenle">✏️</button>' : '') +
       (admin ? '<button type="button" class="at-act danger at-c-del" data-atpdel="' + p.id + '" title="Sil">🗑</button>' : '') +
     '</div>' +
     '<div class="at-badges">' + badges + '</div>' +
@@ -14013,8 +14014,8 @@ function atCardHtml(p) {
     (p.text ? '<div class="at-text">' + esc(p.text) + '</div>' : '') +
     levels +
     atQuoteHtml(p.quote) +
-    atRepostHtml(p.repost) +
     (p.img ? '<img class="at-img" src="' + esc(p.img) + '" alt="" loading="lazy" data-atimg="' + esc(p.img) + '">' : '') +
+    atRepostHtml(p.repost) +
     '<div class="at-actions">' +
       '<button type="button" class="at-act' + (liked ? ' liked' : '') + '" data-atlike="' + p.id + '">' + (liked ? '❤️' : '🤍') + ' <span>' + nlike + '</span></button>' +
       '<button type="button" class="at-act" data-atcom="' + p.id + '">💬 <span>' + ncom + '</span></button>' +
@@ -14139,13 +14140,41 @@ function atStartRepost(pid) {
   const p = alfaPosts.find(x => x.id === pid); if (!p) return;
   atOpenModal();
   alfaComposer.repost = { id: p.id, author: p.author, avatar: p.avatar || '', type: p.type, coin: p.coin || '', dir: p.dir || '', status: p.status || '', title: p.title || '', text: (p.text || '').slice(0, 300), img: p.img || '' };
+  // RT = sadece metin güncellemesi: analiz tipine sabitle, işlem (entry/tp/sl/kaldıraç) alanlarını gizle
+  alfaComposer.type = 'analiz';
+  const ts = document.getElementById('at-typeseg'); if (ts) ts.style.display = 'none';
+  document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x.getAttribute('data-attype') === 'analiz'));
+  document.getElementById('at-islem-fields').style.display = 'none';
   const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '🔁 RT / Güncelle';
   const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Güncelleme / yorumunu yaz…';
   atRenderRepostBox(); atUpdatePreview();
 }
+function atStartEdit(pid) {
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  atOpenModal();
+  alfaComposer.editId = p.id;
+  alfaComposer.type = p.type || 'analiz';
+  alfaComposer.dir = p.dir || 'long';
+  alfaComposer.quote = p.quote || null;
+  alfaComposer.repost = p.repost || null;
+  const setv = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  setv('at-f-coin', p.coin); setv('at-f-title', p.title); setv('at-f-text', p.text); setv('at-f-img', p.img);
+  setv('at-f-entry', p.entry); setv('at-f-tp', p.tp); setv('at-f-sl', p.sl); setv('at-f-lev', p.lev); setv('at-f-risk', p.risk);
+  const bias = document.getElementById('at-f-bias'); if (bias) bias.value = p.bias || '';
+  document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x.getAttribute('data-attype') === alfaComposer.type));
+  document.querySelectorAll('.at-dir').forEach(x => x.classList.toggle('on', x.getAttribute('data-atdir') === alfaComposer.dir));
+  document.getElementById('at-islem-fields').style.display = alfaComposer.type === 'islem' ? '' : 'none';
+  document.getElementById('at-f-imgprev').innerHTML = p.img ? '<img src="' + esc(p.img) + '" alt="">' : '';
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '✏️ Gönderiyi Düzenle';
+  const sb = document.getElementById('at-submit'); if (sb) sb.textContent = 'Kaydet';
+  atRenderQuoteBox(); atRenderRepostBox(); atUpdatePreview();
+}
 function atOpenModal() {
-  alfaComposer = { type: 'analiz', dir: 'long', quote: null, repost: null };
+  alfaComposer = { type: 'analiz', dir: 'long', quote: null, repost: null, editId: null };
   const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = 'Yeni Paylaşım';
+  const sb = document.getElementById('at-submit'); if (sb) sb.textContent = 'Paylaş';
+  const ts = document.getElementById('at-typeseg'); if (ts) ts.style.display = '';
+  const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Analiz / açıklama…';
   ['at-f-coin', 'at-f-title', 'at-f-text', 'at-f-entry', 'at-f-tp', 'at-f-sl', 'at-f-lev', 'at-f-risk', 'at-f-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const bias = document.getElementById('at-f-bias'); if (bias) bias.value = '';
   document.querySelectorAll('.at-type').forEach(b => b.classList.toggle('on', b.getAttribute('data-attype') === 'analiz'));
@@ -14245,11 +14274,19 @@ async function atSubmit() {
     lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
     quote: alfaComposer.quote || null, repost: alfaComposer.repost || null,
   };
-  const btn = document.getElementById('at-submit'); if (btn) { btn.disabled = true; btn.textContent = 'Paylaşılıyor…'; }
-  const r = await atApi('add', { post });
-  if (btn) { btn.disabled = false; btn.textContent = 'Paylaş'; }
-  if (r && r.ok && r.post) { alfaPosts.unshift(r.post); atCloseModal(); renderAlfaFeed(); }
-  else alert('Paylaşılamadı: ' + ((r && r.error) || 'bilinmeyen hata'));
+  const btn = document.getElementById('at-submit'); const editing = !!alfaComposer.editId;
+  if (btn) { btn.disabled = true; btn.textContent = editing ? 'Kaydediliyor…' : 'Paylaşılıyor…'; }
+  let r;
+  if (editing) {
+    r = await atApi('edit', { postId: alfaComposer.editId, post });
+    if (r && r.ok) { const i = alfaPosts.findIndex(x => x.id === alfaComposer.editId); if (i >= 0) Object.assign(alfaPosts[i], post, { edited: true }); }
+  } else {
+    r = await atApi('add', { post });
+    if (r && r.ok && r.post) alfaPosts.unshift(r.post);
+  }
+  if (btn) { btn.disabled = false; btn.textContent = editing ? 'Kaydet' : 'Paylaş'; }
+  if (r && r.ok) { atCloseModal(); renderAlfaFeed(); }
+  else alert((editing ? 'Kaydedilemedi: ' : 'Paylaşılamadı: ') + ((r && r.error) || 'bilinmeyen hata'));
 }
 function bindAlfaTrading() {
   const nb = document.getElementById('at-new-btn'); if (nb) nb.addEventListener('click', atOpenModal);
@@ -14305,6 +14342,7 @@ function bindAlfaTrading() {
     const like = t.closest('[data-atlike]'); if (like) return atToggleLike(like.getAttribute('data-atlike'));
     const com = t.closest('[data-atcom]'); if (com) { const b = document.getElementById('at-com-' + com.getAttribute('data-atcom')); if (b) b.classList.toggle('open'); return; }
     const csend = t.closest('[data-atcsend]'); if (csend) return atSendComment(csend.getAttribute('data-atcsend'));
+    const ed = t.closest('[data-atedit]'); if (ed) return atStartEdit(ed.getAttribute('data-atedit'));
     const pdel = t.closest('[data-atpdel]'); if (pdel) return atDelPost(pdel.getAttribute('data-atpdel'));
     const cdel = t.closest('[data-atcdel]'); if (cdel) { const [pi, ci] = cdel.getAttribute('data-atcdel').split('|'); return atDelComment(pi, ci); }
     const rt = t.closest('[data-atrt]'); if (rt) return atStartRepost(rt.getAttribute('data-atrt'));

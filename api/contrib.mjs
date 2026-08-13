@@ -118,6 +118,21 @@ async function alfaTrading(req, res) {
     post.comments = post.comments || []; post.comments.push({ id: atUid(), nick, text, ts: Date.now(), isAdmin: !!body.isAdmin, avatar: atClip(body.avatar, 400) });
     await save(); return res.status(200).json({ ok: true });
   }
+  if (action === 'edit') {
+    const post = find(body.postId); if (!post) return res.status(404).json({ error: 'post yok' });
+    const p = body.post || {};
+    Object.assign(post, {
+      type: p.type === 'islem' ? 'islem' : 'analiz',
+      coin: atClip(p.coin, 20).toUpperCase(), bias: ['long', 'short', 'notr'].includes(p.bias) ? p.bias : '',
+      dir: ['long', 'short'].includes(p.dir) ? p.dir : '',
+      entry: atClip(p.entry, 40), tp: atClip(p.tp, 40), sl: atClip(p.sl, 40),
+      lev: atClip(p.lev, 20), risk: atClip(p.risk, 20),
+      title: atClip(p.title, 160), text: atClip(p.text, 4000), img: atClip(p.img, 800000),
+      quote: atQuote(p.quote), repost: atRepost(p.repost),
+      edited: true, editedTs: Date.now(),
+    });
+    await save(); return res.status(200).json({ ok: true, post });
+  }
   if (action === 'delPost') { const i = posts.findIndex(p => p.id === body.postId); if (i >= 0) posts.splice(i, 1); await save(); return res.status(200).json({ ok: true }); }
   if (action === 'delComment') { const post = find(body.postId); if (post && Array.isArray(post.comments)) post.comments = post.comments.filter(c => c.id !== body.commentId); await save(); return res.status(200).json({ ok: true }); }
   if (action === 'status') { const post = find(body.postId); if (post) post.status = ['aktif', 'tp', 'sl', 'iptal'].includes(body.status) ? body.status : post.status; await save(); return res.status(200).json({ ok: true }); }
