@@ -1832,6 +1832,14 @@
   .at-repost-img { width: 100%; border-radius: 8px; margin-top: 8px; max-height: 180px; object-fit: cover; }
   .at-quote-box .at-repost { margin: 0; }
   .at-rt-badge { font-size: 11.5px; color: var(--text-3); font-weight: 700; padding: 8px 16px 0; display: flex; align-items: center; gap: 5px; }
+  /* dış paylaşım modalı */
+  .at-share-prevwrap { display: flex; justify-content: center; }
+  .at-share-prevwrap img { width: 100%; max-width: 300px; border-radius: 14px; border: 1px solid var(--border); display: block; }
+  .at-share-opts { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); font-weight: 600; cursor: pointer; }
+  .at-card.at-hl { animation: atHl 2.2s ease; }
+  @keyframes atHl { 0%, 100% { box-shadow: var(--shadow); } 25% { box-shadow: 0 0 0 3px var(--pc); } }
+  .at-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: #111827; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; z-index: 900; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+  .at-toast.on { opacity: 1; }
   .at-flabel { font-size: 12px; font-weight: 700; color: var(--text-2); }
   .at-prof-prev { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); }
   .at-prof-prev .at-avatar { width: 48px; height: 48px; font-size: 20px; }
@@ -4452,6 +4460,22 @@
       </div>
     </div>
   </div>
+  <div id="at-smodal" class="at-modal">
+    <div class="at-modal-box" style="max-width:420px">
+      <div class="at-modal-hd"><span>📤 Sonucu paylaş</span><button type="button" class="at-modal-x" id="at-smodal-x" aria-label="Kapat">✕</button></div>
+      <div class="at-modal-body">
+        <div class="at-share-prevwrap"><img id="at-share-img" alt="Paylaşım görseli"></div>
+        <label class="at-share-opts"><input type="checkbox" id="at-share-teaser"> Sonucu gizle (teaser — linke tıklatır)</label>
+        <div class="at-hint">Görseli Twitter/Telegram'da paylaş; bağlantı görenleri bu gönderiye götürür.</div>
+      </div>
+      <div class="at-modal-ft" style="flex-wrap:wrap;gap:8px">
+        <button type="button" class="btn ghost" id="at-share-copy">🔗 Bağlantıyı kopyala</button>
+        <button type="button" class="btn ghost" id="at-share-dl">⬇ Görseli indir</button>
+        <button type="button" class="btn solid" id="at-share-go">📤 Paylaş</button>
+      </div>
+    </div>
+  </div>
+  <div class="at-toast" id="at-toast"></div>
   <div id="mt-zoom">
     <div class="mtz-inner">
       <img id="mtz-img" alt="Mentoring fotoğrafı">
@@ -8413,8 +8437,14 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
+  const VALID_PAGES = ['home','defter','data','review','news','egitim','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
-  if (lp && ['home','defter','data','review','news','egitim','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'].indexOf(lp) >= 0) currentPage = lp;
+  if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
+  const sp = new URLSearchParams(location.search);
+  const pg = sp.get('page');
+  if (pg && VALID_PAGES.indexOf(pg) >= 0) currentPage = pg;
+  const postId = sp.get('post');
+  if (postId) { window.alfaOpenPostId = postId; currentPage = 'alfatrading'; }
 } catch (e) {}
 setInitialPage();
 const NEWS_KEY = 'alfanews-shared-v1';
@@ -13968,6 +13998,14 @@ function renderAlfaFeed() {
     return;
   }
   feed.innerHTML = list.map(atCardHtml).join('');
+  if (window.alfaOpenPostId) {
+    const pid = window.alfaOpenPostId;
+    const el = feed.querySelector('.at-card[data-pid="' + pid + '"]');
+    if (el) {
+      window.alfaOpenPostId = '';
+      setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('at-hl'); }, 150);
+    }
+  }
 }
 function atCardHtml(p) {
   const admin = alfaIsAdmin();
@@ -14019,8 +14057,9 @@ function atCardHtml(p) {
     '<div class="at-actions">' +
       '<button type="button" class="at-act' + (liked ? ' liked' : '') + '" data-atlike="' + p.id + '">' + (liked ? '❤️' : '🤍') + ' <span>' + nlike + '</span></button>' +
       '<button type="button" class="at-act" data-atcom="' + p.id + '">💬 <span>' + ncom + '</span></button>' +
+      '<button type="button" class="at-act" data-atshare="' + p.id + '">🔗 Paylaş</button>' +
       (admin ? '<button type="button" class="at-act" data-atrt="' + p.id + '">🔁 RT</button>' : '') +
-      (admin ? '<button type="button" class="at-act" data-atafter="' + p.id + '">📊 Sonuç paylaş</button>' : '') +
+      (admin ? '<button type="button" class="at-act" data-atafter="' + p.id + '">📊 Sonuç ekle</button>' : '') +
       (p.type === 'islem' && (p.entry || p.sl) ? '<button type="button" class="at-act tool" data-attool="' + p.id + '">🧮 Calculator\'a gönder</button>' : '') +
       (admin && p.type === 'islem' ? '<button type="button" class="at-act" data-atstatus="' + p.id + '">⚙ Durum</button>' : '') +
     '</div>' +
@@ -14296,6 +14335,84 @@ async function atSubmit() {
   if (r && r.ok) { atCloseModal(); renderAlfaFeed(); }
   else alert((editing ? 'Kaydedilemedi: ' : 'Paylaşılamadı: ') + ((r && r.error) || 'bilinmeyen hata'));
 }
+/* ---- Dış paylaşım: markalı sonuç görseli + teaser + link ---- */
+let atShareState = { pid: '', teaser: false, dataUrl: '' };
+function atShareLink(pid) { return location.origin + location.pathname + '?page=alfatrading&post=' + encodeURIComponent(pid); }
+function atToast(msg) { const t = document.getElementById('at-toast'); if (!t) return; t.textContent = msg; t.classList.add('on'); clearTimeout(atToast._t); atToast._t = setTimeout(() => t.classList.remove('on'), 1900); }
+function atRR(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function atWrap(c, text, x, y, maxW, lh, maxLines) {
+  if (!text) return y;
+  const words = String(text).split(/\s+/); let line = '', lines = 0;
+  for (let i = 0; i < words.length; i++) {
+    const t = line ? line + ' ' + words[i] : words[i];
+    if (c.measureText(t).width > maxW && line) {
+      c.fillText(line, x, y); y += lh; line = words[i];
+      if (++lines >= maxLines) { c.fillText('…', x, y); return y; }
+    } else line = t;
+  }
+  c.fillText(line, x, y); return y;
+}
+function atMakeShareCanvas(p, teaser) {
+  const W = 1080, H = 1080, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#0b1220'); g.addColorStop(1, '#0e1c2e');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#2aabee'; c.fillRect(0, 0, W, 12);
+  c.fillStyle = '#7fa8c4'; c.font = '800 36px Inter, Arial, sans-serif'; c.fillText('ALFA TRADING', 70, 116);
+  c.textAlign = 'right'; c.fillStyle = '#cbd5e1'; c.font = '600 30px Inter, Arial, sans-serif'; c.fillText('@' + (p.author || 'admin'), W - 70, 116); c.textAlign = 'left';
+  c.fillStyle = '#ffffff'; c.font = '800 132px Inter, Arial, sans-serif'; c.fillText((p.coin || 'ALFA'), 70, 300);
+  const dir = String(p.dir || (p.quote && p.quote.dir) || '').toUpperCase();
+  if (dir === 'LONG' || dir === 'SHORT') {
+    const isL = dir === 'LONG'; c.fillStyle = isL ? '#16a34a' : '#dc2626'; atRR(c, 70, 336, 250, 74, 18); c.fill();
+    c.fillStyle = '#fff'; c.font = '800 42px Inter, Arial, sans-serif'; c.fillText(isL ? 'LONG' : 'SHORT', 102, 388);
+  }
+  c.fillStyle = '#dbe4ee'; c.font = '600 42px Inter, Arial, sans-serif'; atWrap(c, p.title || '', 70, 500, W - 140, 54, 2);
+  // sonuç kutusu
+  c.fillStyle = '#0f2136'; atRR(c, 70, 630, W - 140, 250, 26); c.fill();
+  c.fillStyle = '#7c93a8'; c.font = '700 30px Inter, Arial, sans-serif'; c.fillText('SONUÇ', 110, 702);
+  const rq = (p.quote && p.quote.kind === 'result') ? p.quote : null;
+  if (rq && rq.verdict) { c.textAlign = 'right'; c.fillStyle = '#94a3b8'; c.font = '800 40px Inter, Arial, sans-serif'; c.fillText(rq.verdict, W - 110, 704); c.textAlign = 'left'; }
+  let rTxt = '', rn = NaN;
+  if (rq) { rn = parseFloat(String(rq.r).replace(',', '.')); rTxt = (isNaN(rn) ? String(rq.r) : (rn > 0 ? '+' : '') + rq.r) + 'R'; }
+  else if (p.type === 'islem') { rTxt = ({ aktif: 'AKTİF', tp: 'TP GELDİ', sl: 'SL', iptal: 'İPTAL' })[p.status] || 'AKTİF'; }
+  if (rTxt && !teaser) {
+    c.fillStyle = (!isNaN(rn) ? (rn >= 0 ? '#22c55e' : '#ef4444') : '#e2e8f0'); c.font = '800 118px Inter, Arial, sans-serif'; c.fillText(rTxt, 110, 838);
+  } else {
+    c.save(); c.filter = 'blur(20px)'; c.fillStyle = '#22c55e'; c.font = '800 118px Inter, Arial, sans-serif'; c.fillText('+ ? . ? R', 110, 832); c.restore();
+    c.fillStyle = '#e2e8f0'; c.font = '700 40px Inter, Arial, sans-serif'; c.fillText('🔒 Sonucu görmek için linke tıkla', 110, 800);
+  }
+  c.fillStyle = '#2aabee'; c.font = '800 42px Inter, Arial, sans-serif'; c.fillText('alfa-trader.com', 70, 992);
+  c.fillStyle = '#64748b'; c.font = '600 28px Inter, Arial, sans-serif'; c.fillText('Analiz · İşlem · Topluluk', 70, 1034);
+  return cv;
+}
+function atRenderShare() {
+  const p = alfaPosts.find(x => x.id === atShareState.pid); if (!p) return;
+  try { atShareState.dataUrl = atMakeShareCanvas(p, atShareState.teaser).toDataURL('image/png'); } catch (e) { atShareState.dataUrl = ''; }
+  const img = document.getElementById('at-share-img'); if (img && atShareState.dataUrl) img.src = atShareState.dataUrl;
+}
+function atShareOpen(pid) {
+  atShareState = { pid: pid, teaser: false, dataUrl: '' };
+  const tc = document.getElementById('at-share-teaser'); if (tc) tc.checked = false;
+  atRenderShare();
+  document.getElementById('at-smodal').classList.add('open');
+}
+async function atShareGo() {
+  const link = atShareLink(atShareState.pid);
+  const p = alfaPosts.find(x => x.id === atShareState.pid);
+  const text = (p && p.title ? p.title + ' — ' : '') + 'Alfa Trading';
+  try {
+    if (atShareState.dataUrl && navigator.canShare) {
+      const blob = await (await fetch(atShareState.dataUrl)).blob();
+      const file = new File([blob], 'alfa-trading.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text: text + '\n' + link }); return; }
+    }
+    if (navigator.share) { await navigator.share({ title: 'Alfa Trading', text: text, url: link }); return; }
+    await navigator.clipboard.writeText(link); atToast('Bağlantı kopyalandı ✓');
+  } catch (e) { try { await navigator.clipboard.writeText(link); atToast('Bağlantı kopyalandı ✓'); } catch (_) {} }
+}
+function atShareCopy() { const link = atShareLink(atShareState.pid); (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => atToast('Bağlantı kopyalandı ✓')).catch(() => { prompt('Bağlantıyı kopyala:', link); }); }
+function atShareDownload() { if (!atShareState.dataUrl) return; const a = document.createElement('a'); a.href = atShareState.dataUrl; a.download = 'alfa-trading-' + atShareState.pid + '.png'; document.body.appendChild(a); a.click(); a.remove(); }
+
 function bindAlfaTrading() {
   const nb = document.getElementById('at-new-btn'); if (nb) nb.addEventListener('click', atOpenModal);
   const mx = document.getElementById('at-modal-x'); if (mx) mx.addEventListener('click', atCloseModal);
@@ -14331,6 +14448,13 @@ function bindAlfaTrading() {
   const pupl = document.getElementById('at-p-upl'); const pfile = document.getElementById('at-p-file');
   if (pupl && pfile) { pupl.addEventListener('click', () => pfile.click()); pfile.addEventListener('change', () => { if (pfile.files && pfile.files[0]) atSetAvatarImage(pfile.files[0]); pfile.value = ''; }); }
   const pmodalEl = document.getElementById('at-pmodal'); if (pmodalEl) pmodalEl.addEventListener('paste', e => atPasteImageFrom(e, atSetAvatarImage));
+  // dış paylaşım modalı
+  const smx = document.getElementById('at-smodal-x'); if (smx) smx.addEventListener('click', () => document.getElementById('at-smodal').classList.remove('open'));
+  const smodal = document.getElementById('at-smodal'); if (smodal) smodal.addEventListener('click', e => { if (e.target === smodal) smodal.classList.remove('open'); });
+  const steaser = document.getElementById('at-share-teaser'); if (steaser) steaser.addEventListener('change', () => { atShareState.teaser = steaser.checked; atRenderShare(); });
+  const scopy = document.getElementById('at-share-copy'); if (scopy) scopy.addEventListener('click', atShareCopy);
+  const sdl = document.getElementById('at-share-dl'); if (sdl) sdl.addEventListener('click', atShareDownload);
+  const sgo = document.getElementById('at-share-go'); if (sgo) sgo.addEventListener('click', atShareGo);
   // profil
   const profBtn = document.getElementById('at-prof-btn'); if (profBtn) profBtn.addEventListener('click', atOpenProfile);
   const pmx = document.getElementById('at-pmodal-x'); if (pmx) pmx.addEventListener('click', () => document.getElementById('at-pmodal').classList.remove('open'));
@@ -14353,6 +14477,7 @@ function bindAlfaTrading() {
     const ed = t.closest('[data-atedit]'); if (ed) return atStartEdit(ed.getAttribute('data-atedit'));
     const pdel = t.closest('[data-atpdel]'); if (pdel) return atDelPost(pdel.getAttribute('data-atpdel'));
     const cdel = t.closest('[data-atcdel]'); if (cdel) { const [pi, ci] = cdel.getAttribute('data-atcdel').split('|'); return atDelComment(pi, ci); }
+    const sh = t.closest('[data-atshare]'); if (sh) return atShareOpen(sh.getAttribute('data-atshare'));
     const rt = t.closest('[data-atrt]'); if (rt) return atStartRepost(rt.getAttribute('data-atrt'));
     const af = t.closest('[data-atafter]'); if (af) return atStartAfter(af.getAttribute('data-atafter'));
     const tool = t.closest('[data-attool]'); if (tool) return atToolSend(tool.getAttribute('data-attool'));
