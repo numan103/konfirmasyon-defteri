@@ -101,6 +101,7 @@
   body[data-page="trading"] { --pc: #22d3ee; --pc-soft: rgba(34,211,238,.16); --glow-a: rgba(34,211,238,.18); --glow-b: rgba(6,182,212,.10); }
   body[data-page="alfa"] { --pc: #ef4444; --pc-soft: rgba(239,68,68,.16); --glow-a: rgba(239,68,68,.20); --glow-b: rgba(220,38,38,.10); }
   body[data-page="designer"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.18); --glow-b: rgba(132,204,22,.10); }
+  body[data-page="alfatrading"] { --pc: #2aabee; --pc-soft: rgba(42,171,238,.16); --glow-a: rgba(42,171,238,.18); --glow-b: rgba(14,165,233,.10); }
   .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
 
   .tophead { padding: 18px 0 4px; }
@@ -1712,6 +1713,138 @@
   .ds-marker.crit { border-color: #dc2626; } .ds-marker.crit .ds-marker-sc { color: #dc2626; } .ds-marker.crit .ds-marker-ico { background: rgba(220,38,38,.18); }
   .ds-marker.sel { border-width: 2px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 26%, transparent), 0 4px 12px rgba(20,24,45,.22); }
   @media (max-width: 640px) { .ds-marker-ico { width: 20px; height: 20px; } .ds-marker-sc { font-size: 10px; } }
+  /* ===== Alfa Trading (topluluk akışı) ===== */
+  .at-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .at-head-l { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .at-brand-ico { font-size: 30px; }
+  .at-brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text); }
+  .at-brand-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
+  .at-new-btn { flex: none; }
+  .at-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .at-fbtn { border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 999px; padding: 7px 15px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+  .at-fbtn:hover { border-color: var(--pc); }
+  .at-fbtn.on { background: var(--pc-soft); border-color: var(--pc); color: var(--pc); }
+  .at-coin-search { flex: 1; min-width: 140px; max-width: 240px; background: var(--bg2); border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; margin-left: auto; }
+  .at-coin-search:focus { outline: none; border-color: var(--pc); }
+  .at-feed { display: flex; flex-direction: column; gap: 14px; max-width: 720px; margin: 0 auto; }
+  .at-empty { text-align: center; padding: 44px 10px; color: var(--text-3); font-size: 14px; }
+  .at-card { border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); overflow: hidden; }
+  .at-card-hd { display: flex; align-items: center; gap: 10px; padding: 13px 16px 0; }
+  .at-avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; background: var(--pc-soft); color: var(--pc); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; }
+  .at-who { flex: 1; min-width: 0; }
+  .at-author { font-size: 13.5px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .at-adm { font-size: 9.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: var(--pc-soft); color: var(--pc); border-radius: 999px; padding: 2px 7px; }
+  .at-time { font-size: 11.5px; color: var(--text-3); }
+  .at-badges { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px 0; }
+  .at-tag { font-size: 11px; font-weight: 800; border-radius: 8px; padding: 3px 9px; letter-spacing: .02em; }
+  .at-tag.coin { background: var(--bg2); color: var(--text-2); }
+  .at-tag.type { background: var(--pc-soft); color: var(--pc); }
+  .at-tag.long { background: rgba(22,163,74,.14); color: #16a34a; }
+  .at-tag.short { background: rgba(220,38,38,.14); color: #dc2626; }
+  .at-tag.notr { background: var(--bg2); color: var(--text-3); }
+  .at-tag.st-aktif { background: rgba(56,189,248,.16); color: #0284c7; }
+  .at-tag.st-tp { background: rgba(22,163,74,.16); color: #16a34a; }
+  .at-tag.st-sl { background: rgba(220,38,38,.16); color: #dc2626; }
+  .at-tag.st-iptal { background: var(--bg2); color: var(--text-3); }
+  .at-title { padding: 10px 16px 0; font-family: var(--font-display); font-size: 16.5px; font-weight: 800; color: var(--text); }
+  .at-text { padding: 8px 16px 0; font-size: 13.5px; line-height: 1.6; color: var(--text-2); white-space: pre-wrap; word-break: break-word; }
+  .at-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px 0; }
+  .at-lvl { border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: center; background: var(--bg2); }
+  .at-lvl .l { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+  .at-lvl .v { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; color: var(--text); }
+  .at-lvl.tp .v { color: #16a34a; } .at-lvl.sl .v { color: #dc2626; }
+  .at-img { display: block; width: 100%; max-height: 420px; object-fit: cover; margin-top: 12px; cursor: zoom-in; }
+  .at-actions { display: flex; align-items: center; gap: 6px; padding: 12px 16px; margin-top: 4px; flex-wrap: wrap; }
+  .at-act { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 999px; padding: 7px 13px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+  .at-act:hover { border-color: var(--pc); color: var(--pc); }
+  .at-act.liked { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.5); color: #ef4444; }
+  .at-act.tool { margin-left: auto; }
+  .at-act.danger:hover { border-color: var(--red); color: var(--red); }
+  .at-comments { border-top: 1px solid var(--border); padding: 12px 16px; display: none; flex-direction: column; gap: 10px; background: var(--bg); }
+  .at-comments.open { display: flex; }
+  .at-comment { display: flex; gap: 9px; }
+  .at-c-av { width: 28px; height: 28px; border-radius: 50%; flex: none; background: var(--bg2); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+  .at-c-body { flex: 1; min-width: 0; }
+  .at-c-top { display: flex; align-items: center; gap: 7px; }
+  .at-c-nick { font-size: 12.5px; font-weight: 800; color: var(--text); }
+  .at-c-time { font-size: 10.5px; color: var(--text-3); }
+  .at-c-del { margin-left: auto; border: none; background: none; color: var(--text-3); cursor: pointer; font-size: 12px; }
+  .at-c-del:hover { color: var(--red); }
+  .at-c-text { font-size: 13px; color: var(--text-2); line-height: 1.5; word-break: break-word; margin-top: 1px; }
+  .at-c-add { display: flex; gap: 8px; align-items: center; }
+  .at-c-add input { flex: 1; min-width: 0; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 9px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; }
+  .at-c-add input:focus { outline: none; border-color: var(--pc); }
+  .at-c-send { flex: none; border: none; background: var(--pc); color: #fff; border-radius: 999px; width: 38px; height: 38px; cursor: pointer; font-size: 15px; }
+  /* modal */
+  .at-modal { display: none; position: fixed; inset: 0; z-index: 720; background: rgba(6,7,15,.68); align-items: center; justify-content: center; padding: 16px; }
+  .at-modal.open { display: flex; }
+  .at-modal-box { width: 100%; max-width: 540px; max-height: 92vh; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.4); }
+  .at-modal-hd { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text); }
+  .at-modal-x { border: none; background: none; color: var(--text-3); font-size: 18px; cursor: pointer; }
+  .at-modal-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .at-modal-ft { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--border); }
+  .at-typeseg { display: inline-flex; background: var(--bg2); border-radius: 10px; padding: 3px; gap: 3px; }
+  .at-type, .at-dir { border: none; background: none; color: var(--text-2); border-radius: 8px; padding: 7px 14px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .at-type.on { background: var(--card); color: var(--pc); box-shadow: var(--shadow); }
+  .at-dir.on[data-atdir="long"] { background: var(--card); color: #16a34a; box-shadow: var(--shadow); }
+  .at-dir.on[data-atdir="short"] { background: var(--card); color: #dc2626; box-shadow: var(--shadow); }
+  .at-inp { width: 100%; box-sizing: border-box; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13.5px; }
+  .at-inp:focus { outline: none; border-color: var(--pc); }
+  .at-ta { min-height: 110px; resize: vertical; }
+  .at-frow { display: flex; gap: 10px; } .at-frow > * { flex: 1; min-width: 0; }
+  .at-frow3 { gap: 8px; }
+  .at-imgprev img { width: 100%; border-radius: 10px; margin-top: 4px; max-height: 220px; object-fit: cover; }
+  .at-head-btns { display: flex; gap: 8px; flex: none; }
+  .at-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .at-c-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  /* alıntı (quote) bloğu */
+  .at-quote { margin: 12px 16px 0; border: 1px solid var(--border); border-left: 3px solid var(--pc); border-radius: 10px; background: var(--bg2); padding: 10px 12px; }
+  .at-quote-hd { font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .at-quote-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .at-quote-note { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin-top: 6px; white-space: pre-wrap; }
+  .at-rpill { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .at-rpill.pos { color: #16a34a; } .at-rpill.neg { color: #dc2626; }
+  /* kompozer: alıntı butonları + sonuç listesi + önizleme */
+  .at-quote-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .at-qbtn { border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 999px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .at-qbtn:hover { border-color: var(--pc); color: var(--pc); }
+  .at-result-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; padding: 6px; }
+  .at-rrow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg2); cursor: pointer; font-size: 12.5px; }
+  .at-rrow:hover { border-color: var(--pc); }
+  .at-quote-box { border: 1px solid var(--pc); border-radius: 10px; background: var(--pc-soft); padding: 10px 12px; position: relative; font-size: 13px; color: var(--text); }
+  .at-quote-box .at-qx { position: absolute; top: 6px; right: 8px; border: none; background: none; color: var(--text-3); cursor: pointer; font-size: 13px; }
+  .at-prev-lbl { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-top: 4px; }
+  .at-live-prev { border: 1px dashed var(--border); border-radius: 14px; padding: 8px; background: var(--bg); }
+  .at-live-prev .at-card { box-shadow: none; }
+  .at-live-prev .at-actions, .at-live-prev .at-comments, .at-live-prev .at-c-del { display: none; }
+  .at-quote-box .at-quote { margin: 0; border: none; background: transparent; padding: 0; }
+  .at-imgrow { align-items: stretch; }
+  .at-imgrow .at-inp { flex: 1; }
+  .at-upl { flex: none; border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 10px; padding: 0 14px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .at-upl:hover { border-color: var(--pc); color: var(--pc); }
+  .at-hint { font-size: 11px; color: var(--text-3); }
+  /* repost (RT) — alıntılı gönderi */
+  .at-repost { margin: 12px 16px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); padding: 10px 12px; }
+  .at-repost-hd { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
+  .at-repost-hd .at-c-av { width: 24px; height: 24px; font-size: 11px; }
+  .at-repost-title { font-weight: 800; font-size: 13.5px; color: var(--text); margin-top: 6px; }
+  .at-repost-text { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin-top: 3px; white-space: pre-wrap; }
+  .at-repost-img { width: 100%; border-radius: 8px; margin-top: 8px; max-height: 180px; object-fit: cover; }
+  .at-quote-box .at-repost { margin: 0; }
+  .at-rt-badge { font-size: 11.5px; color: var(--text-3); font-weight: 700; padding: 8px 16px 0; display: flex; align-items: center; gap: 5px; }
+  /* dış paylaşım modalı */
+  .at-share-prevwrap { display: flex; justify-content: center; }
+  .at-share-prevwrap img { width: 100%; max-width: 300px; border-radius: 14px; border: 1px solid var(--border); display: block; }
+  .at-share-opts { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); font-weight: 600; cursor: pointer; }
+  .at-card.at-hl { animation: atHl 2.2s ease; }
+  @keyframes atHl { 0%, 100% { box-shadow: var(--shadow); } 25% { box-shadow: 0 0 0 3px var(--pc); } }
+  .at-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: #111827; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; z-index: 900; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+  .at-toast.on { opacity: 1; }
+  .at-flabel { font-size: 12px; font-weight: 700; color: var(--text-2); }
+  .at-prof-prev { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); }
+  .at-prof-prev .at-avatar { width: 48px; height: 48px; font-size: 20px; }
+  .at-prof-prev .nm { font-size: 15px; font-weight: 800; color: var(--text); }
+  @media (max-width: 640px) { .at-coin-search { margin-left: 0; max-width: none; } }
   /* ===== Mentoring (ortak eğitim) ===== */
   .mt-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
   @media (max-width: 820px) { .mt-wrap { grid-template-columns: 1fr; } }
@@ -3032,6 +3165,7 @@
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav data-i18n="app.calc">🧮 Alfa Calculator</a>
           <a href="?page=review" class="nav-link" id="tab-review" data-nav data-i18n="app.weekly">📊 Haftalık Değerlendirme</a>
           <a href="?page=trading" class="nav-link" id="tab-trading" data-nav data-i18n="app.trading">📉 Trading</a>
+          <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 Alfa Trading</a>
         </div>
       </div>
       <div class="nav-drop">
@@ -3092,6 +3226,7 @@
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=review" class="mnav-link" data-nav data-mnav="review" data-i18n="app.weekly">📊 Haftalık Değerlendirme</a>
       <a href="?page=trading" class="mnav-link" data-nav data-mnav="trading" data-i18n="app.trading">📉 Trading</a>
+      <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading">📢 Alfa Trading</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
       <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" data-i18n="app.pano">🛠️ Çalışma Panosu</a>
@@ -4224,6 +4359,123 @@
       </div>
     </div>
   </div>
+  <div id="page-alfatrading" class="hidden">
+    <div class="at-head">
+      <div class="at-head-l">
+        <span class="at-brand-ico">📢</span>
+        <div>
+          <div class="at-brand-name">Alfa Trading</div>
+          <div class="at-brand-sub">Adminlerin coin/bias analizleri ve işlem paylaşımları — beğen, yorum yap, tartış.</div>
+        </div>
+      </div>
+      <div class="at-head-btns">
+        <button type="button" class="btn ghost at-prof-btn" id="at-prof-btn" style="display:none">⚙ Profil</button>
+        <button type="button" class="btn solid at-new-btn" id="at-new-btn" style="display:none">+ Paylaşım Ekle</button>
+      </div>
+    </div>
+    <div class="at-filters" id="at-filters">
+      <button type="button" class="at-fbtn on" data-atf="all">Hepsi</button>
+      <button type="button" class="at-fbtn" data-atf="analiz">📝 Analiz</button>
+      <button type="button" class="at-fbtn" data-atf="islem">📊 İşlem</button>
+      <input type="text" id="at-coin-search" class="at-coin-search" placeholder="Coin ara (BTC, ETH…)" autocomplete="off">
+    </div>
+    <div class="at-feed" id="at-feed">
+      <div class="at-empty">Yükleniyor…</div>
+    </div>
+  </div>
+  <div id="at-modal" class="at-modal">
+    <div class="at-modal-box">
+      <div class="at-modal-hd"><span id="at-modal-title">Yeni Paylaşım</span><button type="button" class="at-modal-x" id="at-modal-x" aria-label="Kapat">✕</button></div>
+      <div class="at-modal-body">
+        <div class="at-typeseg" id="at-typeseg">
+          <button type="button" class="at-type on" data-attype="analiz">📝 Analiz</button>
+          <button type="button" class="at-type" data-attype="islem">📊 İşlem</button>
+        </div>
+        <div class="at-frow">
+          <input type="text" id="at-f-coin" class="at-inp" placeholder="Coin / Sembol (örn. BTC)" maxlength="20">
+          <select id="at-f-bias" class="at-inp">
+            <option value="">Bias —</option>
+            <option value="long">🟢 Long bias</option>
+            <option value="short">🔴 Short bias</option>
+            <option value="notr">⚪ Nötr</option>
+          </select>
+        </div>
+        <input type="text" id="at-f-title" class="at-inp" placeholder="Başlık (örn. BTC 4H long senaryosu)" maxlength="160">
+        <textarea id="at-f-text" class="at-inp at-ta" placeholder="Analiz / açıklama…" maxlength="4000"></textarea>
+        <div class="at-islem-fields" id="at-islem-fields" style="display:none">
+          <div class="at-typeseg at-dirseg">
+            <button type="button" class="at-dir on" data-atdir="long">🟢 Long</button>
+            <button type="button" class="at-dir" data-atdir="short">🔴 Short</button>
+          </div>
+          <div class="at-frow at-frow3">
+            <input type="text" id="at-f-entry" class="at-inp" placeholder="Entry">
+            <input type="text" id="at-f-tp" class="at-inp" placeholder="TP">
+            <input type="text" id="at-f-sl" class="at-inp" placeholder="SL">
+          </div>
+          <div class="at-frow">
+            <input type="text" id="at-f-lev" class="at-inp" placeholder="Kaldıraç (örn. 10x)" maxlength="20">
+            <input type="text" id="at-f-risk" class="at-inp" placeholder="Risk (örn. %1)" maxlength="20">
+          </div>
+        </div>
+        <div class="at-frow at-imgrow">
+          <input type="text" id="at-f-img" class="at-inp" placeholder="Görsel linki (https://…) · ya da yapıştır / yükle">
+          <button type="button" class="at-upl" id="at-f-upl">📎 Yükle</button>
+          <input type="file" id="at-f-file" accept="image/*" hidden>
+        </div>
+        <div class="at-hint">İpucu: bir görseli kopyalayıp bu pencerede <b>Ctrl+V</b> ile de yapıştırabilirsin.</div>
+        <div id="at-f-imgprev" class="at-imgprev"></div>
+        <div id="at-repost-box" class="at-quote-box" style="display:none"></div>
+        <div class="at-quote-row">
+          <button type="button" class="at-qbtn" id="at-q-bias">🎯 Bias alıntıla</button>
+          <button type="button" class="at-qbtn" id="at-q-result">📊 İşlem sonucu alıntıla</button>
+        </div>
+        <div id="at-result-list" class="at-result-list" style="display:none"></div>
+        <div id="at-quote-box" class="at-quote-box" style="display:none"></div>
+        <div class="at-prev-lbl">Önizleme</div>
+        <div id="at-live-prev" class="at-live-prev"></div>
+      </div>
+      <div class="at-modal-ft">
+        <button type="button" class="btn ghost" id="at-cancel">Vazgeç</button>
+        <button type="button" class="btn solid" id="at-submit">Paylaş</button>
+      </div>
+    </div>
+  </div>
+  <div id="at-pmodal" class="at-modal">
+    <div class="at-modal-box" style="max-width:420px">
+      <div class="at-modal-hd"><span>Admin Profili</span><button type="button" class="at-modal-x" id="at-pmodal-x" aria-label="Kapat">✕</button></div>
+      <div class="at-modal-body">
+        <div class="at-prof-prev" id="at-prof-prev"></div>
+        <label class="at-flabel">Görünen isim</label>
+        <input type="text" id="at-p-name" class="at-inp" placeholder="Örn. Numan" maxlength="40">
+        <label class="at-flabel">Profil fotoğrafı</label>
+        <div class="at-frow at-imgrow">
+          <input type="text" id="at-p-avatar" class="at-inp" placeholder="Link (https://…) · ya da yapıştır / yükle">
+          <button type="button" class="at-upl" id="at-p-upl">📎 Yükle</button>
+          <input type="file" id="at-p-file" accept="image/*" hidden>
+        </div>
+      </div>
+      <div class="at-modal-ft">
+        <button type="button" class="btn ghost" id="at-pmodal-cancel">Vazgeç</button>
+        <button type="button" class="btn solid" id="at-pmodal-save">Kaydet</button>
+      </div>
+    </div>
+  </div>
+  <div id="at-smodal" class="at-modal">
+    <div class="at-modal-box" style="max-width:420px">
+      <div class="at-modal-hd"><span>📤 Sonucu paylaş</span><button type="button" class="at-modal-x" id="at-smodal-x" aria-label="Kapat">✕</button></div>
+      <div class="at-modal-body">
+        <div class="at-share-prevwrap"><img id="at-share-img" alt="Paylaşım görseli"></div>
+        <label class="at-share-opts"><input type="checkbox" id="at-share-teaser"> Sonucu gizle (teaser — linke tıklatır)</label>
+        <div class="at-hint">Görseli Twitter/Telegram'da paylaş; bağlantı görenleri bu gönderiye götürür.</div>
+      </div>
+      <div class="at-modal-ft" style="flex-wrap:wrap;gap:8px">
+        <button type="button" class="btn ghost" id="at-share-copy">🔗 Bağlantıyı kopyala</button>
+        <button type="button" class="btn ghost" id="at-share-dl">⬇ Görseli indir</button>
+        <button type="button" class="btn solid" id="at-share-go">📤 Paylaş</button>
+      </div>
+    </div>
+  </div>
+  <div class="at-toast" id="at-toast"></div>
   <div id="mt-zoom">
     <div class="mtz-inner">
       <img id="mtz-img" alt="Mentoring fotoğrafı">
@@ -8087,6 +8339,7 @@ function init() {
   bindOnchainPage();
   bindCalcPage();
   bindDesignerPage();
+  bindAlfaTrading();
   bindReviewPage();
   document.getElementById('btn-backup').addEventListener('click', exportBackup);
   document.getElementById('btn-mergeseed').addEventListener('click', mergeSeed);
@@ -8184,8 +8437,14 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
+  const VALID_PAGES = ['home','defter','data','review','news','egitim','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
-  if (lp && ['home','defter','data','review','news','egitim','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps'].indexOf(lp) >= 0) currentPage = lp;
+  if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
+  const sp = new URLSearchParams(location.search);
+  const pg = sp.get('page');
+  if (pg && VALID_PAGES.indexOf(pg) >= 0) currentPage = pg;
+  const postId = sp.get('post');
+  if (postId) { window.alfaOpenPostId = postId; currentPage = 'alfatrading'; }
 } catch (e) {}
 setInitialPage();
 const NEWS_KEY = 'alfanews-shared-v1';
@@ -8907,7 +9166,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps'];
+  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -9310,7 +9569,7 @@ function showPage(name, skipAnim) {
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'trading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -9337,6 +9596,7 @@ function showPage(name, skipAnim) {
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
   if (name === 'designer') renderDesigner();
+  if (name === 'alfatrading') renderAlfaTrading();
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
@@ -13632,6 +13892,600 @@ function bindDesignerPage() {
     designerData.chat = [];
     saveDesigner();
     dsAiRender();
+  });
+}
+
+/* ===== Alfa Trading — topluluk işlem/analiz akışı ===== */
+const ALFA_ADMIN_EMAILS = [ADMIN_EMAIL]; // buraya yeni admin e-postaları eklenebilir
+let alfaPosts = [];
+let alfaFilter = 'all';
+let alfaCoinQ = '';
+let alfaComposer = { type: 'analiz', dir: 'long' };
+let alfaLoaded = false;
+
+function alfaIsAdmin() {
+  try {
+    if (typeof AUTH === 'undefined' || !AUTH_ENABLED) return true; // yerel/geliştirme
+    return !!(AUTH.user && ALFA_ADMIN_EMAILS.indexOf((AUTH.user.email || '').toLowerCase()) >= 0);
+  } catch (e) { return false; }
+}
+function alfaNick(force) {
+  let n = '';
+  try { n = localStorage.getItem('alfa-nick') || ''; } catch (e) {}
+  if (!n && force) {
+    n = (prompt('Toplulukta görünecek rumuzun:') || '').trim().slice(0, 40);
+    if (n) { try { localStorage.setItem('alfa-nick', n); } catch (e) {} }
+  }
+  return n;
+}
+function alfaProfile() { try { return JSON.parse(localStorage.getItem('alfa-profile') || '{}') || {}; } catch (e) { return {}; } }
+function alfaSaveProfile(p) { try { localStorage.setItem('alfa-profile', JSON.stringify(p)); } catch (e) {} }
+function alfaMyName() {
+  if (alfaIsAdmin()) {
+    const p = alfaProfile(); if (p.name) return p.name;
+    try { return (AUTH && AUTH.user && (AUTH.user.email || '').split('@')[0]) || 'Admin'; } catch (e) { return 'Admin'; }
+  }
+  return alfaNick(false) || '';
+}
+function alfaMyAvatar() { return alfaIsAdmin() ? (alfaProfile().avatar || '') : ''; }
+function atQuoteHtml(q) {
+  if (!q) return '';
+  if (q.kind === 'bias') {
+    const d = (q.dir || '').toUpperCase();
+    const emo = (d === 'BULLISH' || d === 'LONG') ? '🟢' : (d === 'BEARISH' || d === 'SHORT') ? '🔴' : '⚪';
+    const lbl = d === 'BULLISH' ? 'Bullish' : d === 'BEARISH' ? 'Bearish' : (d || 'Nötr');
+    return '<div class="at-quote"><div class="at-quote-hd">🎯 Alıntı · HTF Bias</div>' +
+      '<div class="at-quote-main">' + emo + ' ' + esc(lbl) + (q.pair ? ' · ' + esc(q.pair) : '') + '</div>' +
+      (q.note ? '<div class="at-quote-note">' + esc(q.note) + '</div>' : '') + '</div>';
+  }
+  if (q.kind === 'result') {
+    const rn = parseFloat(String(q.r).replace(',', '.'));
+    const cls = isNaN(rn) ? '' : (rn >= 0 ? ' pos' : ' neg');
+    const rtxt = (q.r === '' || q.r == null) ? '—' : ((rn > 0 ? '+' : '') + q.r + 'R');
+    const dir = String(q.dir || '').toUpperCase();
+    const dtag = dir ? ' <span class="at-tag ' + (dir === 'LONG' ? 'long">🟢 LONG' : 'short">🔴 SHORT') + '</span>' : '';
+    return '<div class="at-quote"><div class="at-quote-hd">📊 Alıntı · İşlem Sonucu</div>' +
+      '<div class="at-quote-main">' + esc(q.pair || '') + dtag + ' <span class="at-rpill' + cls + '">' + esc(rtxt) + '</span>' +
+      (q.verdict ? ' · ' + esc(q.verdict) : '') + (q.date ? ' · ' + esc(q.date) : '') + '</div>' +
+      (q.strat ? '<div class="at-quote-note">Strateji: ' + esc(q.strat) + '</div>' : '') + '</div>';
+  }
+  return '';
+}
+function atTimeAgo(ts) {
+  const s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+  if (s < 60) return s + ' sn';
+  const m = Math.floor(s / 60); if (m < 60) return m + ' dk';
+  const h = Math.floor(m / 60); if (h < 24) return h + ' sa';
+  const d = Math.floor(h / 24); if (d < 7) return d + ' gün';
+  try { return new Date(ts).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }); } catch (e) { return d + ' gün'; }
+}
+async function atApi(action, payload) {
+  const res = await fetch('/api/contrib?store=alfatrading', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ action }, payload || {})),
+  });
+  return res.json();
+}
+async function loadAlfaTrading() {
+  try {
+    const res = await fetch('/api/contrib?store=alfatrading', { cache: 'no-store' });
+    const data = await res.json();
+    alfaPosts = Array.isArray(data.posts) ? data.posts : [];
+  } catch (e) { alfaPosts = []; }
+  alfaLoaded = true;
+  renderAlfaFeed();
+}
+function renderAlfaTrading() {
+  const adm = alfaIsAdmin();
+  const nb = document.getElementById('at-new-btn'); if (nb) nb.style.display = adm ? '' : 'none';
+  const pb = document.getElementById('at-prof-btn'); if (pb) pb.style.display = adm ? '' : 'none';
+  if (!alfaLoaded) { loadAlfaTrading(); } else { renderAlfaFeed(); loadAlfaTrading(); }
+}
+function alfaFiltered() {
+  const q = alfaCoinQ.trim().toUpperCase();
+  return alfaPosts.filter(p => {
+    if (alfaFilter !== 'all' && p.type !== alfaFilter) return false;
+    if (q && (p.coin || '').toUpperCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+function renderAlfaFeed() {
+  const feed = document.getElementById('at-feed');
+  if (!feed) return;
+  const list = alfaFiltered();
+  if (!list.length) {
+    feed.innerHTML = '<div class="at-empty">' + (alfaLoaded ? (alfaPosts.length ? 'Bu filtrede paylaşım yok.' : 'Henüz paylaşım yok.' + (alfaIsAdmin() ? ' Üstteki “+ Paylaşım Ekle” ile başla.' : '')) : 'Yükleniyor…') + '</div>';
+    return;
+  }
+  feed.innerHTML = list.map(atCardHtml).join('');
+  if (window.alfaOpenPostId) {
+    const pid = window.alfaOpenPostId;
+    const el = feed.querySelector('.at-card[data-pid="' + pid + '"]');
+    if (el) {
+      window.alfaOpenPostId = '';
+      setTimeout(() => { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('at-hl'); }, 150);
+    }
+  }
+}
+function atCardHtml(p) {
+  const admin = alfaIsAdmin();
+  const me = alfaMyName();
+  const liked = me && (p.likes || []).indexOf(me) >= 0;
+  const nlike = (p.likes || []).length;
+  const ncom = (p.comments || []).length;
+  const av = (p.author || 'A').trim().charAt(0).toUpperCase();
+  let badges = '';
+  badges += '<span class="at-tag type">' + (p.type === 'islem' ? '📊 İşlem' : '📝 Analiz') + '</span>';
+  if (p.coin) badges += '<span class="at-tag coin">' + esc(p.coin) + '</span>';
+  if (p.bias) badges += '<span class="at-tag ' + p.bias + '">' + (p.bias === 'long' ? '🟢 Long bias' : p.bias === 'short' ? '🔴 Short bias' : '⚪ Nötr') + '</span>';
+  if (p.type === 'islem' && p.dir) badges += '<span class="at-tag ' + p.dir + '">' + (p.dir === 'long' ? '🟢 LONG' : '🔴 SHORT') + '</span>';
+  if (p.type === 'islem') {
+    const stL = { aktif: 'Aktif', tp: 'TP geldi', sl: 'SL', iptal: 'İptal' }[p.status] || 'Aktif';
+    badges += '<span class="at-tag st-' + (p.status || 'aktif') + '">' + stL + '</span>';
+  }
+  let levels = '';
+  if (p.type === 'islem' && (p.entry || p.tp || p.sl)) {
+    levels = '<div class="at-levels">' +
+      '<div class="at-lvl"><div class="l">Entry</div><div class="v">' + (esc(p.entry) || '—') + '</div></div>' +
+      '<div class="at-lvl tp"><div class="l">TP</div><div class="v">' + (esc(p.tp) || '—') + '</div></div>' +
+      '<div class="at-lvl sl"><div class="l">SL</div><div class="v">' + (esc(p.sl) || '—') + '</div></div>' +
+    '</div>';
+    if (p.lev || p.risk) levels += '<div class="at-text" style="color:var(--text-3);font-size:12px;">' + [p.lev ? 'Kaldıraç: ' + esc(p.lev) : '', p.risk ? 'Risk: ' + esc(p.risk) : ''].filter(Boolean).join(' · ') + '</div>';
+  }
+  const comments = (p.comments || []).map(c =>
+    '<div class="at-comment" data-cid="' + c.id + '"><div class="at-c-av">' + (c.avatar ? '<img src="' + esc(c.avatar) + '" alt="">' : (c.nick || '?').trim().charAt(0).toUpperCase()) + '</div>' +
+    '<div class="at-c-body"><div class="at-c-top"><span class="at-c-nick">' + esc(c.nick) + (c.isAdmin ? ' 👑' : '') + '</span><span class="at-c-time">' + atTimeAgo(c.ts) + '</span>' +
+    (admin ? '<button type="button" class="at-c-del" data-atcdel="' + p.id + '|' + c.id + '">✕</button>' : '') +
+    '</div><div class="at-c-text">' + esc(c.text) + '</div></div></div>'
+  ).join('');
+  const avHtml = p.avatar ? '<img src="' + esc(p.avatar) + '" alt="">' : esc(av);
+  return '<article class="at-card" data-pid="' + p.id + '">' +
+    (p.repost ? '<div class="at-rt-badge">🔁 ' + esc(p.author || 'Admin') + ' bir gönderiyi alıntıladı</div>' : '') +
+    '<div class="at-card-hd"><div class="at-avatar">' + avHtml + '</div>' +
+      '<div class="at-who"><div class="at-author">' + esc(p.author || 'Admin') + (p.isAdmin ? '<span class="at-adm">Admin</span>' : '') + '</div>' +
+      '<div class="at-time">' + atTimeAgo(p.ts) + (p.edited ? ' · düzenlendi' : '') + '</div></div>' +
+      (admin ? '<button type="button" class="at-act danger at-c-del" data-atedit="' + p.id + '" title="Düzenle">✏️</button>' : '') +
+      (admin ? '<button type="button" class="at-act danger at-c-del" data-atpdel="' + p.id + '" title="Sil">🗑</button>' : '') +
+    '</div>' +
+    '<div class="at-badges">' + badges + '</div>' +
+    (p.title ? '<div class="at-title">' + esc(p.title) + '</div>' : '') +
+    (p.text ? '<div class="at-text">' + esc(p.text) + '</div>' : '') +
+    levels +
+    atQuoteHtml(p.quote) +
+    (p.img ? '<img class="at-img" src="' + esc(p.img) + '" alt="" loading="lazy" data-atimg="' + esc(p.img) + '">' : '') +
+    atRepostHtml(p.repost) +
+    '<div class="at-actions">' +
+      '<button type="button" class="at-act' + (liked ? ' liked' : '') + '" data-atlike="' + p.id + '">' + (liked ? '❤️' : '🤍') + ' <span>' + nlike + '</span></button>' +
+      '<button type="button" class="at-act" data-atcom="' + p.id + '">💬 <span>' + ncom + '</span></button>' +
+      '<button type="button" class="at-act" data-atshare="' + p.id + '">🔗 Paylaş</button>' +
+      (admin ? '<button type="button" class="at-act" data-atrt="' + p.id + '">🔁 RT</button>' : '') +
+      (admin ? '<button type="button" class="at-act" data-atafter="' + p.id + '">📊 Sonuç ekle</button>' : '') +
+      (p.type === 'islem' && (p.entry || p.sl) ? '<button type="button" class="at-act tool" data-attool="' + p.id + '">🧮 Calculator\'a gönder</button>' : '') +
+      (admin && p.type === 'islem' ? '<button type="button" class="at-act" data-atstatus="' + p.id + '">⚙ Durum</button>' : '') +
+    '</div>' +
+    '<div class="at-comments" id="at-com-' + p.id + '">' + comments +
+      '<div class="at-c-add"><input type="text" placeholder="Yorum yaz…" maxlength="800" data-atcinput="' + p.id + '"><button type="button" class="at-c-send" data-atcsend="' + p.id + '">➤</button></div>' +
+    '</div>' +
+  '</article>';
+}
+async function atToggleLike(pid) {
+  const nick = alfaMyName() || alfaNick(true);
+  if (!nick) return;
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  p.likes = p.likes || [];
+  const i = p.likes.indexOf(nick);
+  if (i >= 0) p.likes.splice(i, 1); else p.likes.push(nick);
+  renderAlfaFeed();
+  await atApi('like', { postId: pid, nick });
+}
+async function atSendComment(pid) {
+  const inp = document.querySelector('[data-atcinput="' + pid + '"]');
+  if (!inp) return;
+  const text = (inp.value || '').trim(); if (!text) return;
+  const nick = alfaMyName() || alfaNick(true); if (!nick) return;
+  inp.value = '';
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  const av = alfaMyAvatar();
+  p.comments = p.comments || [];
+  p.comments.push({ id: 't' + Date.now(), nick, text, ts: Date.now(), isAdmin: alfaIsAdmin(), avatar: av });
+  renderAlfaFeed();
+  const box = document.getElementById('at-com-' + pid); if (box) box.classList.add('open');
+  await atApi('comment', { postId: pid, nick, text, isAdmin: alfaIsAdmin(), avatar: av });
+  loadAlfaTrading();
+}
+async function atDelPost(pid) {
+  if (!confirm('Bu paylaşım silinsin mi?')) return;
+  alfaPosts = alfaPosts.filter(p => p.id !== pid);
+  renderAlfaFeed();
+  await atApi('delPost', { postId: pid });
+}
+async function atDelComment(pid, cid) {
+  const p = alfaPosts.find(x => x.id === pid); if (p) p.comments = (p.comments || []).filter(c => c.id !== cid);
+  renderAlfaFeed();
+  const box = document.getElementById('at-com-' + pid); if (box) box.classList.add('open');
+  await atApi('delComment', { postId: pid, commentId: cid });
+}
+async function atSetStatus(pid) {
+  const opts = { '1': 'aktif', '2': 'tp', '3': 'sl', '4': 'iptal' };
+  const c = prompt('Durum seç:\n1 = Aktif\n2 = TP geldi\n3 = SL\n4 = İptal', '1');
+  const st = opts[(c || '').trim()]; if (!st) return;
+  const p = alfaPosts.find(x => x.id === pid); if (p) p.status = st;
+  renderAlfaFeed();
+  await atApi('status', { postId: pid, status: st });
+}
+function atToolSend(pid) {
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  const setv = (id, v) => { const el = document.getElementById(id); if (el && v) { el.value = v; el.dispatchEvent(new Event('input')); } };
+  setv('entryPrice', p.entry); setv('slPrice', p.sl);
+  showPage('calc');
+  try { if (typeof updateCalc === 'function') updateCalc(); } catch (e) {}
+}
+function atCompressImage(fileOrBlob, maxW, quality) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(fileOrBlob);
+    const im = new Image();
+    im.onload = () => {
+      const scale = Math.min(1, maxW / (im.width || maxW));
+      const w = Math.max(1, Math.round(im.width * scale)), h = Math.max(1, Math.round(im.height * scale));
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      try { resolve(cv.toDataURL('image/jpeg', quality)); } catch (e) { reject(e); }
+    };
+    im.onerror = e => { URL.revokeObjectURL(url); reject(e); };
+    im.src = url;
+  });
+}
+async function atSetPostImage(blob) {
+  try {
+    const d = await atCompressImage(blob, 1000, 0.72);
+    const el = document.getElementById('at-f-img'); if (el) el.value = d;
+    document.getElementById('at-f-imgprev').innerHTML = '<img src="' + d + '" alt="">';
+    atUpdatePreview();
+  } catch (e) { alert('Görsel işlenemedi.'); }
+}
+async function atSetAvatarImage(blob) {
+  try {
+    const d = await atCompressImage(blob, 256, 0.85);
+    const el = document.getElementById('at-p-avatar'); if (el) el.value = d;
+    atRenderProfPrev();
+  } catch (e) { alert('Görsel işlenemedi.'); }
+}
+function atPasteImageFrom(e, handler) {
+  const items = (e.clipboardData && e.clipboardData.items) || [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type && items[i].type.indexOf('image') === 0) {
+      const blob = items[i].getAsFile(); if (blob) { e.preventDefault(); handler(blob); return true; }
+    }
+  }
+  return false;
+}
+function atRepostHtml(rp) {
+  if (!rp) return '';
+  const av = rp.avatar ? '<img src="' + esc(rp.avatar) + '" alt="">' : esc((rp.author || 'A').charAt(0).toUpperCase());
+  const dtag = (rp.type === 'islem' && rp.dir) ? ' <span class="at-tag ' + (rp.dir === 'long' ? 'long">🟢 LONG' : 'short">🔴 SHORT') + '</span>' : '';
+  return '<div class="at-repost"><div class="at-repost-hd"><span class="at-c-av">' + av + '</span><span class="at-c-nick">' + esc(rp.author || 'Admin') + '</span>' +
+    (rp.coin ? ' <span class="at-tag coin">' + esc(rp.coin) + '</span>' : '') + dtag + '</div>' +
+    (rp.title ? '<div class="at-repost-title">' + esc(rp.title) + '</div>' : '') +
+    (rp.text ? '<div class="at-repost-text">' + esc(rp.text) + '</div>' : '') +
+    (rp.img ? '<img class="at-repost-img" src="' + esc(rp.img) + '" alt="">' : '') + '</div>';
+}
+function atRenderRepostBox() {
+  const box = document.getElementById('at-repost-box'); if (!box) return;
+  if (!alfaComposer.repost) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<button type="button" class="at-qx" id="at-rtx">✕</button><div class="at-repost-hd" style="margin-bottom:6px;color:var(--text-3);font-weight:700">🔁 Alıntılanan gönderi</div>' + atRepostHtml(alfaComposer.repost);
+}
+function atStartRepost(pid) {
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  atOpenModal();
+  alfaComposer.repost = { id: p.id, author: p.author, avatar: p.avatar || '', type: p.type, coin: p.coin || '', dir: p.dir || '', status: p.status || '', title: p.title || '', text: (p.text || '').slice(0, 300), img: p.img || '' };
+  // RT = sadece metin güncellemesi: analiz tipine sabitle, işlem (entry/tp/sl/kaldıraç) alanlarını gizle
+  alfaComposer.type = 'analiz';
+  const ts = document.getElementById('at-typeseg'); if (ts) ts.style.display = 'none';
+  document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x.getAttribute('data-attype') === 'analiz'));
+  document.getElementById('at-islem-fields').style.display = 'none';
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '🔁 RT / Güncelle';
+  const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Güncelleme / yorumunu yaz…';
+  atRenderRepostBox(); atUpdatePreview();
+}
+function atStartAfter(pid) {
+  atStartRepost(pid); // before = alıntılanan gönderi
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '📊 Sonucu paylaş (after)';
+  const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Sonuç / kapanış yorumu (örn. TP geldi ✅ +2.4R)…';
+  // "after" için işlem sonucu seçiciyi otomatik aç
+  const box = document.getElementById('at-result-list'); if (box && box.style.display === 'none') atToggleResultList();
+}
+function atStartEdit(pid) {
+  const p = alfaPosts.find(x => x.id === pid); if (!p) return;
+  atOpenModal();
+  alfaComposer.editId = p.id;
+  alfaComposer.type = p.type || 'analiz';
+  alfaComposer.dir = p.dir || 'long';
+  alfaComposer.quote = p.quote || null;
+  alfaComposer.repost = p.repost || null;
+  const setv = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  setv('at-f-coin', p.coin); setv('at-f-title', p.title); setv('at-f-text', p.text); setv('at-f-img', p.img);
+  setv('at-f-entry', p.entry); setv('at-f-tp', p.tp); setv('at-f-sl', p.sl); setv('at-f-lev', p.lev); setv('at-f-risk', p.risk);
+  const bias = document.getElementById('at-f-bias'); if (bias) bias.value = p.bias || '';
+  document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x.getAttribute('data-attype') === alfaComposer.type));
+  document.querySelectorAll('.at-dir').forEach(x => x.classList.toggle('on', x.getAttribute('data-atdir') === alfaComposer.dir));
+  document.getElementById('at-islem-fields').style.display = alfaComposer.type === 'islem' ? '' : 'none';
+  document.getElementById('at-f-imgprev').innerHTML = p.img ? '<img src="' + esc(p.img) + '" alt="">' : '';
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '✏️ Gönderiyi Düzenle';
+  const sb = document.getElementById('at-submit'); if (sb) sb.textContent = 'Kaydet';
+  atRenderQuoteBox(); atRenderRepostBox(); atUpdatePreview();
+}
+function atOpenModal() {
+  alfaComposer = { type: 'analiz', dir: 'long', quote: null, repost: null, editId: null };
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = 'Yeni Paylaşım';
+  const sb = document.getElementById('at-submit'); if (sb) sb.textContent = 'Paylaş';
+  const ts = document.getElementById('at-typeseg'); if (ts) ts.style.display = '';
+  const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Analiz / açıklama…';
+  ['at-f-coin', 'at-f-title', 'at-f-text', 'at-f-entry', 'at-f-tp', 'at-f-sl', 'at-f-lev', 'at-f-risk', 'at-f-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const bias = document.getElementById('at-f-bias'); if (bias) bias.value = '';
+  document.querySelectorAll('.at-type').forEach(b => b.classList.toggle('on', b.getAttribute('data-attype') === 'analiz'));
+  document.querySelectorAll('.at-dir').forEach(b => b.classList.toggle('on', b.getAttribute('data-atdir') === 'long'));
+  document.getElementById('at-islem-fields').style.display = 'none';
+  document.getElementById('at-f-imgprev').innerHTML = '';
+  document.getElementById('at-result-list').style.display = 'none';
+  atRenderQuoteBox(); atRenderRepostBox(); atUpdatePreview();
+  document.getElementById('at-modal').classList.add('open');
+}
+function atCloseModal() { document.getElementById('at-modal').classList.remove('open'); }
+
+function atRenderQuoteBox() {
+  const box = document.getElementById('at-quote-box'); if (!box) return;
+  if (!alfaComposer.quote) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<button type="button" class="at-qx" id="at-qx">✕</button>' + atQuoteHtml(alfaComposer.quote);
+}
+function atUpdatePreview() {
+  const prev = document.getElementById('at-live-prev'); if (!prev) return;
+  const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const type = alfaComposer.type;
+  const post = {
+    id: 'prev', type, author: alfaMyName() || 'Admin', avatar: alfaMyAvatar(), isAdmin: true,
+    coin: val('at-f-coin').toUpperCase(), bias: (document.getElementById('at-f-bias') || {}).value || '',
+    title: val('at-f-title'), text: val('at-f-text'), img: val('at-f-img'),
+    dir: type === 'islem' ? alfaComposer.dir : '',
+    entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
+    lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
+    status: 'aktif', quote: alfaComposer.quote || null, repost: alfaComposer.repost || null, ts: Date.now(), likes: [], comments: [],
+  };
+  prev.innerHTML = atCardHtml(post);
+}
+function atQuoteBias() {
+  let d = {};
+  try { d = (typeof collectDaily === 'function') ? collectDaily() : {}; } catch (e) {}
+  let dir = (d && d.bias) || (typeof dailyBias !== 'undefined' ? dailyBias : '');
+  if (!dir) { const c = prompt('Bias yönü: 1=Bullish, 2=Bearish, 3=Nötr', '1'); dir = { '1': 'BULLISH', '2': 'BEARISH', '3': 'NÖTR' }[(c || '').trim()] || ''; if (!dir) return; }
+  alfaComposer.quote = { kind: 'bias', dir, pair: (d && d.pair) || '', note: ((d && d.senaryo) || '').slice(0, 500) };
+  atRenderQuoteBox(); atUpdatePreview();
+}
+function atToggleResultList() {
+  const box = document.getElementById('at-result-list'); if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  const trades = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades.filter(t => t.r !== '' && t.r != null) : [];
+  if (!trades.length) { box.style.display = 'block'; box.innerHTML = '<div class="at-rrow" style="cursor:default">Sonucu girilmiş işlem bulunamadı.</div>'; return; }
+  const sorted = trades.slice().sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 20);
+  box.innerHTML = sorted.map(t => {
+    const rn = parseFloat(String(t.r).replace(',', '.'));
+    const col = isNaN(rn) ? 'var(--text-3)' : (rn >= 0 ? '#16a34a' : '#dc2626');
+    return '<div class="at-rrow" data-atrid="' + t.id + '"><span>' + esc(t.pair || '') + ' ' + esc(t.dir || '') + '</span> · <b style="color:' + col + '">' + ((rn > 0 ? '+' : '') + t.r + 'R') + '</b> · ' + esc(t.verdict || '') + ' · ' + esc(t.date || '') + '</div>';
+  }).join('');
+  box.style.display = 'block';
+}
+function atPickResult(id) {
+  const t = (typeof dataTrades !== 'undefined' ? dataTrades : []).find(x => String(x.id) === String(id)); if (!t) return;
+  alfaComposer.quote = { kind: 'result', pair: t.pair || '', dir: t.dir || '', r: t.r || '', verdict: t.verdict || '', date: t.date || '', strat: t.strat || '' };
+  const box = document.getElementById('at-result-list'); if (box) box.style.display = 'none';
+  atRenderQuoteBox(); atUpdatePreview();
+}
+function atOpenProfile() {
+  const p = alfaProfile();
+  document.getElementById('at-p-name').value = p.name || '';
+  document.getElementById('at-p-avatar').value = p.avatar || '';
+  atRenderProfPrev();
+  document.getElementById('at-pmodal').classList.add('open');
+}
+function atRenderProfPrev() {
+  const name = (document.getElementById('at-p-name').value || alfaMyName() || 'Admin').trim();
+  const av = (document.getElementById('at-p-avatar').value || '').trim();
+  const el = document.getElementById('at-prof-prev'); if (!el) return;
+  el.innerHTML = '<div class="at-avatar">' + (/^https?:\/\//.test(av) ? '<img src="' + esc(av) + '" alt="">' : esc((name || 'A').charAt(0).toUpperCase())) + '</div>' +
+    '<div><div class="nm">' + esc(name) + '</div><div class="at-time">Admin</div></div>';
+}
+async function atSaveProfile() {
+  const name = (document.getElementById('at-p-name').value || '').trim().slice(0, 40);
+  const avatar = (document.getElementById('at-p-avatar').value || '').trim();
+  alfaSaveProfile({ name, avatar });
+  document.getElementById('at-pmodal').classList.remove('open');
+  let email = ''; try { email = (AUTH && AUTH.user) ? AUTH.user.email : ''; } catch (e) {}
+  // geçmiş gönderilerdeki isim/foto da güncellensin
+  alfaPosts.forEach(p => { if (email && p.authorEmail === email) { if (name) p.author = name; p.avatar = avatar; } });
+  renderAlfaFeed();
+  if (email) { try { await atApi('profileUpdate', { email, name, avatar }); } catch (e) {} loadAlfaTrading(); }
+}
+async function atSubmit() {
+  const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const type = alfaComposer.type;
+  const text = val('at-f-text'), title = val('at-f-title');
+  if (!text && !title && !val('at-f-coin')) { alert('En azından başlık, coin ya da metin gir.'); return; }
+  const post = {
+    type, author: alfaMyName() || 'Admin', avatar: alfaMyAvatar(), authorEmail: (function () { try { return AUTH && AUTH.user ? AUTH.user.email : ''; } catch (e) { return ''; } })(),
+    coin: val('at-f-coin'), bias: (document.getElementById('at-f-bias') || {}).value || '',
+    title, text, img: val('at-f-img'),
+    dir: type === 'islem' ? alfaComposer.dir : '',
+    entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
+    lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
+    quote: alfaComposer.quote || null, repost: alfaComposer.repost || null,
+  };
+  const btn = document.getElementById('at-submit'); const editing = !!alfaComposer.editId;
+  if (btn) { btn.disabled = true; btn.textContent = editing ? 'Kaydediliyor…' : 'Paylaşılıyor…'; }
+  let r;
+  if (editing) {
+    r = await atApi('edit', { postId: alfaComposer.editId, post });
+    if (r && r.ok) { const i = alfaPosts.findIndex(x => x.id === alfaComposer.editId); if (i >= 0) Object.assign(alfaPosts[i], post, { edited: true }); }
+  } else {
+    r = await atApi('add', { post });
+    if (r && r.ok && r.post) alfaPosts.unshift(r.post);
+  }
+  if (btn) { btn.disabled = false; btn.textContent = editing ? 'Kaydet' : 'Paylaş'; }
+  if (r && r.ok) { atCloseModal(); renderAlfaFeed(); }
+  else alert((editing ? 'Kaydedilemedi: ' : 'Paylaşılamadı: ') + ((r && r.error) || 'bilinmeyen hata'));
+}
+/* ---- Dış paylaşım: markalı sonuç görseli + teaser + link ---- */
+let atShareState = { pid: '', teaser: false, dataUrl: '' };
+function atShareLink(pid) { return location.origin + location.pathname + '?page=alfatrading&post=' + encodeURIComponent(pid); }
+function atToast(msg) { const t = document.getElementById('at-toast'); if (!t) return; t.textContent = msg; t.classList.add('on'); clearTimeout(atToast._t); atToast._t = setTimeout(() => t.classList.remove('on'), 1900); }
+function atRR(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function atWrap(c, text, x, y, maxW, lh, maxLines) {
+  if (!text) return y;
+  const words = String(text).split(/\s+/); let line = '', lines = 0;
+  for (let i = 0; i < words.length; i++) {
+    const t = line ? line + ' ' + words[i] : words[i];
+    if (c.measureText(t).width > maxW && line) {
+      c.fillText(line, x, y); y += lh; line = words[i];
+      if (++lines >= maxLines) { c.fillText('…', x, y); return y; }
+    } else line = t;
+  }
+  c.fillText(line, x, y); return y;
+}
+function atMakeShareCanvas(p, teaser) {
+  const W = 1080, H = 1080, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#0b1220'); g.addColorStop(1, '#0e1c2e');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#2aabee'; c.fillRect(0, 0, W, 12);
+  c.fillStyle = '#7fa8c4'; c.font = '800 36px Inter, Arial, sans-serif'; c.fillText('ALFA TRADING', 70, 116);
+  c.textAlign = 'right'; c.fillStyle = '#cbd5e1'; c.font = '600 30px Inter, Arial, sans-serif'; c.fillText('@' + (p.author || 'admin'), W - 70, 116); c.textAlign = 'left';
+  c.fillStyle = '#ffffff'; c.font = '800 132px Inter, Arial, sans-serif'; c.fillText((p.coin || 'ALFA'), 70, 300);
+  const dir = String(p.dir || (p.quote && p.quote.dir) || '').toUpperCase();
+  if (dir === 'LONG' || dir === 'SHORT') {
+    const isL = dir === 'LONG'; c.fillStyle = isL ? '#16a34a' : '#dc2626'; atRR(c, 70, 336, 250, 74, 18); c.fill();
+    c.fillStyle = '#fff'; c.font = '800 42px Inter, Arial, sans-serif'; c.fillText(isL ? 'LONG' : 'SHORT', 102, 388);
+  }
+  c.fillStyle = '#dbe4ee'; c.font = '600 42px Inter, Arial, sans-serif'; atWrap(c, p.title || '', 70, 500, W - 140, 54, 2);
+  // sonuç kutusu
+  c.fillStyle = '#0f2136'; atRR(c, 70, 630, W - 140, 250, 26); c.fill();
+  c.fillStyle = '#7c93a8'; c.font = '700 30px Inter, Arial, sans-serif'; c.fillText('SONUÇ', 110, 702);
+  const rq = (p.quote && p.quote.kind === 'result') ? p.quote : null;
+  if (rq && rq.verdict) { c.textAlign = 'right'; c.fillStyle = '#94a3b8'; c.font = '800 40px Inter, Arial, sans-serif'; c.fillText(rq.verdict, W - 110, 704); c.textAlign = 'left'; }
+  let rTxt = '', rn = NaN;
+  if (rq) { rn = parseFloat(String(rq.r).replace(',', '.')); rTxt = (isNaN(rn) ? String(rq.r) : (rn > 0 ? '+' : '') + rq.r) + 'R'; }
+  else if (p.type === 'islem') { rTxt = ({ aktif: 'AKTİF', tp: 'TP GELDİ', sl: 'SL', iptal: 'İPTAL' })[p.status] || 'AKTİF'; }
+  if (rTxt && !teaser) {
+    c.fillStyle = (!isNaN(rn) ? (rn >= 0 ? '#22c55e' : '#ef4444') : '#e2e8f0'); c.font = '800 118px Inter, Arial, sans-serif'; c.fillText(rTxt, 110, 838);
+  } else {
+    c.save(); c.filter = 'blur(20px)'; c.fillStyle = '#22c55e'; c.font = '800 118px Inter, Arial, sans-serif'; c.fillText('+ ? . ? R', 110, 832); c.restore();
+    c.fillStyle = '#e2e8f0'; c.font = '700 40px Inter, Arial, sans-serif'; c.fillText('🔒 Sonucu görmek için linke tıkla', 110, 800);
+  }
+  c.fillStyle = '#2aabee'; c.font = '800 42px Inter, Arial, sans-serif'; c.fillText('alfa-trader.com', 70, 992);
+  c.fillStyle = '#64748b'; c.font = '600 28px Inter, Arial, sans-serif'; c.fillText('Analiz · İşlem · Topluluk', 70, 1034);
+  return cv;
+}
+function atRenderShare() {
+  const p = alfaPosts.find(x => x.id === atShareState.pid); if (!p) return;
+  try { atShareState.dataUrl = atMakeShareCanvas(p, atShareState.teaser).toDataURL('image/png'); } catch (e) { atShareState.dataUrl = ''; }
+  const img = document.getElementById('at-share-img'); if (img && atShareState.dataUrl) img.src = atShareState.dataUrl;
+}
+function atShareOpen(pid) {
+  atShareState = { pid: pid, teaser: false, dataUrl: '' };
+  const tc = document.getElementById('at-share-teaser'); if (tc) tc.checked = false;
+  atRenderShare();
+  document.getElementById('at-smodal').classList.add('open');
+}
+async function atShareGo() {
+  const link = atShareLink(atShareState.pid);
+  const p = alfaPosts.find(x => x.id === atShareState.pid);
+  const text = (p && p.title ? p.title + ' — ' : '') + 'Alfa Trading';
+  try {
+    if (atShareState.dataUrl && navigator.canShare) {
+      const blob = await (await fetch(atShareState.dataUrl)).blob();
+      const file = new File([blob], 'alfa-trading.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text: text + '\n' + link }); return; }
+    }
+    if (navigator.share) { await navigator.share({ title: 'Alfa Trading', text: text, url: link }); return; }
+    await navigator.clipboard.writeText(link); atToast('Bağlantı kopyalandı ✓');
+  } catch (e) { try { await navigator.clipboard.writeText(link); atToast('Bağlantı kopyalandı ✓'); } catch (_) {} }
+}
+function atShareCopy() { const link = atShareLink(atShareState.pid); (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => atToast('Bağlantı kopyalandı ✓')).catch(() => { prompt('Bağlantıyı kopyala:', link); }); }
+function atShareDownload() { if (!atShareState.dataUrl) return; const a = document.createElement('a'); a.href = atShareState.dataUrl; a.download = 'alfa-trading-' + atShareState.pid + '.png'; document.body.appendChild(a); a.click(); a.remove(); }
+
+function bindAlfaTrading() {
+  const nb = document.getElementById('at-new-btn'); if (nb) nb.addEventListener('click', atOpenModal);
+  const mx = document.getElementById('at-modal-x'); if (mx) mx.addEventListener('click', atCloseModal);
+  const cc = document.getElementById('at-cancel'); if (cc) cc.addEventListener('click', atCloseModal);
+  const sub = document.getElementById('at-submit'); if (sub) sub.addEventListener('click', atSubmit);
+  const modal = document.getElementById('at-modal'); if (modal) modal.addEventListener('click', e => { if (e.target === modal) atCloseModal(); });
+  document.querySelectorAll('.at-type').forEach(b => b.addEventListener('click', () => {
+    alfaComposer.type = b.getAttribute('data-attype');
+    document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x === b));
+    document.getElementById('at-islem-fields').style.display = alfaComposer.type === 'islem' ? '' : 'none';
+    atUpdatePreview();
+  }));
+  document.querySelectorAll('.at-dir').forEach(b => b.addEventListener('click', () => {
+    alfaComposer.dir = b.getAttribute('data-atdir');
+    document.querySelectorAll('.at-dir').forEach(x => x.classList.toggle('on', x === b));
+    atUpdatePreview();
+  }));
+  const img = document.getElementById('at-f-img');
+  if (img) img.addEventListener('input', () => { const v = img.value.trim(); document.getElementById('at-f-imgprev').innerHTML = /^https?:\/\//.test(v) ? '<img src="' + esc(v) + '" alt="">' : ''; });
+  const mbody = document.querySelector('#at-modal .at-modal-body');
+  if (mbody) mbody.addEventListener('input', atUpdatePreview);
+  // alıntı butonları
+  const qb = document.getElementById('at-q-bias'); if (qb) qb.addEventListener('click', atQuoteBias);
+  const qr = document.getElementById('at-q-result'); if (qr) qr.addEventListener('click', atToggleResultList);
+  const rlist = document.getElementById('at-result-list'); if (rlist) rlist.addEventListener('click', e => { const r = e.target.closest('[data-atrid]'); if (r) atPickResult(r.getAttribute('data-atrid')); });
+  const qbox = document.getElementById('at-quote-box'); if (qbox) qbox.addEventListener('click', e => { if (e.target.closest('#at-qx')) { alfaComposer.quote = null; atRenderQuoteBox(); atUpdatePreview(); } });
+  const rbox = document.getElementById('at-repost-box'); if (rbox) rbox.addEventListener('click', e => { if (e.target.closest('#at-rtx')) { alfaComposer.repost = null; atRenderRepostBox(); atUpdatePreview(); } });
+  // görsel yükle / yapıştır — post
+  const upl = document.getElementById('at-f-upl'); const file = document.getElementById('at-f-file');
+  if (upl && file) { upl.addEventListener('click', () => file.click()); file.addEventListener('change', () => { if (file.files && file.files[0]) atSetPostImage(file.files[0]); file.value = ''; }); }
+  if (modal) modal.addEventListener('paste', e => atPasteImageFrom(e, atSetPostImage));
+  // görsel yükle / yapıştır — profil avatar
+  const pupl = document.getElementById('at-p-upl'); const pfile = document.getElementById('at-p-file');
+  if (pupl && pfile) { pupl.addEventListener('click', () => pfile.click()); pfile.addEventListener('change', () => { if (pfile.files && pfile.files[0]) atSetAvatarImage(pfile.files[0]); pfile.value = ''; }); }
+  const pmodalEl = document.getElementById('at-pmodal'); if (pmodalEl) pmodalEl.addEventListener('paste', e => atPasteImageFrom(e, atSetAvatarImage));
+  // dış paylaşım modalı
+  const smx = document.getElementById('at-smodal-x'); if (smx) smx.addEventListener('click', () => document.getElementById('at-smodal').classList.remove('open'));
+  const smodal = document.getElementById('at-smodal'); if (smodal) smodal.addEventListener('click', e => { if (e.target === smodal) smodal.classList.remove('open'); });
+  const steaser = document.getElementById('at-share-teaser'); if (steaser) steaser.addEventListener('change', () => { atShareState.teaser = steaser.checked; atRenderShare(); });
+  const scopy = document.getElementById('at-share-copy'); if (scopy) scopy.addEventListener('click', atShareCopy);
+  const sdl = document.getElementById('at-share-dl'); if (sdl) sdl.addEventListener('click', atShareDownload);
+  const sgo = document.getElementById('at-share-go'); if (sgo) sgo.addEventListener('click', atShareGo);
+  // profil
+  const profBtn = document.getElementById('at-prof-btn'); if (profBtn) profBtn.addEventListener('click', atOpenProfile);
+  const pmx = document.getElementById('at-pmodal-x'); if (pmx) pmx.addEventListener('click', () => document.getElementById('at-pmodal').classList.remove('open'));
+  const pmc = document.getElementById('at-pmodal-cancel'); if (pmc) pmc.addEventListener('click', () => document.getElementById('at-pmodal').classList.remove('open'));
+  const pms = document.getElementById('at-pmodal-save'); if (pms) pms.addEventListener('click', atSaveProfile);
+  const pmodal = document.getElementById('at-pmodal'); if (pmodal) pmodal.addEventListener('click', e => { if (e.target === pmodal) pmodal.classList.remove('open'); });
+  ['at-p-name', 'at-p-avatar'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', atRenderProfPrev); });
+  document.querySelectorAll('.at-fbtn').forEach(b => b.addEventListener('click', () => {
+    alfaFilter = b.getAttribute('data-atf');
+    document.querySelectorAll('.at-fbtn').forEach(x => x.classList.toggle('on', x === b));
+    renderAlfaFeed();
+  }));
+  const cs = document.getElementById('at-coin-search'); if (cs) cs.addEventListener('input', () => { alfaCoinQ = cs.value; renderAlfaFeed(); });
+  const feed = document.getElementById('at-feed');
+  if (feed) feed.addEventListener('click', e => {
+    const t = e.target;
+    const like = t.closest('[data-atlike]'); if (like) return atToggleLike(like.getAttribute('data-atlike'));
+    const com = t.closest('[data-atcom]'); if (com) { const b = document.getElementById('at-com-' + com.getAttribute('data-atcom')); if (b) b.classList.toggle('open'); return; }
+    const csend = t.closest('[data-atcsend]'); if (csend) return atSendComment(csend.getAttribute('data-atcsend'));
+    const ed = t.closest('[data-atedit]'); if (ed) return atStartEdit(ed.getAttribute('data-atedit'));
+    const pdel = t.closest('[data-atpdel]'); if (pdel) return atDelPost(pdel.getAttribute('data-atpdel'));
+    const cdel = t.closest('[data-atcdel]'); if (cdel) { const [pi, ci] = cdel.getAttribute('data-atcdel').split('|'); return atDelComment(pi, ci); }
+    const sh = t.closest('[data-atshare]'); if (sh) return atShareOpen(sh.getAttribute('data-atshare'));
+    const rt = t.closest('[data-atrt]'); if (rt) return atStartRepost(rt.getAttribute('data-atrt'));
+    const af = t.closest('[data-atafter]'); if (af) return atStartAfter(af.getAttribute('data-atafter'));
+    const tool = t.closest('[data-attool]'); if (tool) return atToolSend(tool.getAttribute('data-attool'));
+    const stt = t.closest('[data-atstatus]'); if (stt) return atSetStatus(stt.getAttribute('data-atstatus'));
+    const im = t.closest('[data-atimg]'); if (im) { try { window.open(im.getAttribute('data-atimg'), '_blank', 'noopener'); } catch (e) {} }
+  });
+  if (feed) feed.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const inp = e.target.closest('[data-atcinput]'); if (inp) { e.preventDefault(); atSendComment(inp.getAttribute('data-atcinput')); } }
   });
 }
 
