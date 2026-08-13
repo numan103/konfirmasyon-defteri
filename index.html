@@ -1494,11 +1494,15 @@
   .eg-brand-ico { width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 19px; border-radius: 12px; background: var(--pc-soft); border: 1px solid var(--border); box-shadow: 0 6px 16px rgba(0,0,0,.35); }
   .eg-brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(120deg, var(--pc), #cfd3ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .eg-brand-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; }
-  .strat-open-btn { margin-left: auto; }
-  /* Strateji Optimizasyonu */
+  /* EDU sekmeleri */
+  .eg-tabs { display: flex; gap: 6px; margin: 0 0 14px; padding: 4px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg2); width: fit-content; max-width: 100%; overflow-x: auto; }
+  .eg-tab { border: none; background: transparent; color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
+  .eg-tab:hover { color: var(--text); }
+  .eg-tab.on { background: var(--pc); color: #fff; }
+  /* Strateji Yönetimi */
   .strat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 16px 18px; margin-bottom: 14px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow); }
   .strat-title { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text); }
-  .strat-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; margin-top: 3px; max-width: 640px; }
+  .strat-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; margin-top: 3px; max-width: 680px; }
   .strat-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .strat-list { display: flex; flex-direction: column; gap: 10px; }
   .strat-card { display: flex; align-items: stretch; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
@@ -1521,9 +1525,8 @@
   .strat-score { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: none; padding: 0 6px; }
   .strat-score .s-val { font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
   .strat-score .s-lbl { font-size: 9.5px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .03em; }
-  .strat-note { font-size: 12.5px; color: var(--text-2); margin-top: 8px; line-height: 1.5; white-space: pre-wrap; }
-  .strat-actions { display: flex; flex-direction: column; justify-content: center; gap: 6px; flex: none; }
-  .strat-actions button { font-size: 11.5px; padding: 5px 10px; }
+  .strat-actions-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .strat-actions-row button { font-size: 11.5px; padding: 5px 10px; }
   .strat-form { margin-top: 14px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
   .strat-form-h { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
   .strat-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 12px; }
@@ -1535,8 +1538,54 @@
   .strat-f input:focus, .strat-f select:focus, .strat-f textarea:focus { outline: none; border-color: var(--pc); }
   .strat-sec { font-size: 13px; font-weight: 800; color: var(--text-2); margin: 14px 0 8px; padding-top: 12px; border-top: 1px dashed var(--border); }
   .strat-form-btns { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
-  @media (max-width: 720px) { .strat-form-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 480px) { .strat-form-grid { grid-template-columns: 1fr; } .strat-card { flex-direction: column; } .strat-score { flex-direction: row; justify-content: flex-start; padding: 6px 0 0; } .strat-actions { flex-direction: row; flex-wrap: wrap; } }
+  /* Strateji detayı */
+  .strat-detail { display: flex; flex-direction: column; gap: 14px; }
+  .strat-detail .strat-name { font-size: 18px; }
+  .sd-head { padding: 16px 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+  .sd-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sd-score { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .sd-score.good { color: var(--green); } .sd-score.neu { color: var(--text-2); } .sd-score.bad { color: var(--red); }
+  .sd-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .sd-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .sd-actions button { font-size: 11.5px; padding: 6px 11px; }
+  .sd-metrics { display: flex; flex-direction: column; gap: 10px; }
+  .sd-metric-group { padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
+  .sd-mg-title { font-size: 12.5px; font-weight: 800; color: var(--text-2); margin-bottom: 4px; }
+  .sd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sd-sec { padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
+  .sd-sec-h { font-size: 13.5px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .sd-hint { font-size: 11px; font-weight: 600; color: var(--text-3); margin-left: 6px; }
+  .sd-rules, .sd-confs { display: flex; flex-direction: column; gap: 6px; }
+  .sd-rule { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg2); }
+  .sd-rule-txt { flex: 1; font-size: 12.5px; color: var(--text); line-height: 1.45; }
+  .sd-conf { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg2); cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+  .sd-conf.on { border-color: color-mix(in srgb, var(--green) 55%, var(--border)); background: color-mix(in srgb, var(--green) 10%, var(--bg2)); }
+  .sd-conf input { display: none; }
+  .sd-conf-box { width: 17px; height: 17px; flex: none; border-radius: 5px; border: 1.5px solid var(--border); background: var(--card); position: relative; transition: border-color .15s ease, background-color .15s ease; }
+  .sd-conf.on .sd-conf-box { border-color: var(--green); background: var(--green); }
+  .sd-conf.on .sd-conf-box::after { content: ''; position: absolute; left: 5px; top: 1.5px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .sd-conf-txt { font-size: 12.5px; color: var(--text); line-height: 1.45; }
+  .sd-empty { font-size: 12px; color: var(--text-3); padding: 6px 2px; }
+  .sd-addrow { display: flex; gap: 8px; margin-top: 10px; }
+  .sd-addrow input { flex: 1; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; }
+  .sd-addrow input:focus { outline: none; border-color: var(--pc); }
+  .sd-x { flex: none; border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 3px 7px; border-radius: 6px; }
+  .sd-x:hover { color: var(--red); background: color-mix(in srgb, var(--red) 12%, transparent); }
+  .sd-trades-sec { grid-column: 1 / -1; }
+  .sd-table-wrap { overflow-x: auto; }
+  .sd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .sd-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-3); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .sd-table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text); font-variant-numeric: tabular-nums; }
+  .sd-table tr:last-child td { border-bottom: none; }
+  .sd-table td.good { color: var(--green); font-weight: 800; } .sd-table td.bad { color: var(--red); font-weight: 800; }
+  .sd-tr-note { color: var(--text-2); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sd-tr-form { display: grid; grid-template-columns: 130px 90px 1fr 1fr 100px 1fr auto; gap: 8px; margin-top: 12px; }
+  .sd-tr-form input, .sd-tr-form select { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; width: 100%; box-sizing: border-box; }
+  .sd-tr-form input:focus, .sd-tr-form select:focus { outline: none; border-color: var(--pc); }
+  .sd-note { padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg2); font-size: 12.5px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
+  @media (max-width: 900px) { .sd-cols { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) { .strat-form-grid { grid-template-columns: 1fr 1fr; } .sd-tr-form { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .strat-form-grid { grid-template-columns: 1fr; } .strat-card { flex-direction: column; } .strat-score { flex-direction: row; justify-content: flex-start; padding: 6px 0 0; } .strat-actions-row { flex-direction: row; flex-wrap: wrap; } .sd-tr-form { grid-template-columns: 1fr; } }
   /* kurs düzeni: solda konular, sağda büyük oynatıcı */
   .eg-course { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 4px; }
   @media (max-width: 820px) { .eg-course { grid-template-columns: 1fr; } }
@@ -4187,21 +4236,26 @@
       <span class="eg-brand-ico">🎓</span>
       <span class="eg-brand-name" data-i18n="pg.egitim.t">Alfa Edu</span>
       <span class="eg-brand-sub" data-i18n="pg.egitim.s">Eğitsel trader kanalları — videolar, notlar ve fotoğraflar. Kanalına tıkla, içeriği izle.</span>
-      <button type="button" class="btn strat-open-btn hidden" id="strat-open">🧪 Strateji Optimizasyonu</button>
+    </div>
+    <div class="eg-tabs" id="eg-tabs">
+      <button type="button" class="eg-tab on" id="eg-tab-channels">📡 Kanallar</button>
+      <button type="button" class="eg-tab" id="eg-tab-strategies">🧪 Stratejiler</button>
     </div>
     <div id="strat-view" class="hidden">
       <div class="strat-head">
         <div>
-          <div class="strat-title">🧪 Strateji Optimizasyonu</div>
-          <div class="strat-sub">Backtest ve canlı verileri gir, kötü gidenleri ele, piyasadan gördüğün stratejileri ekle. Bu sayfa yalnızca senin cihazında.</div>
+          <div class="strat-title">🧪 Strateji Yönetimi</div>
+          <div class="strat-sub">Stratejilerini tanımla: kurallar, konfirmasyon kutucukları, işlem kayıtları. Profit factor ve win rate kendiliğinden hesaplanır. Bu bölüm yalnızca senin cihazında.</div>
         </div>
         <div class="strat-head-actions">
           <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
-          <button type="button" class="btn" id="strat-back">← Alfa Edu</button>
         </div>
       </div>
-      <div id="strat-list" class="strat-list"></div>
-      <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
+      <div id="strat-list-wrap">
+        <div id="strat-list" class="strat-list"></div>
+        <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
+      </div>
+      <div id="strat-detail" class="strat-detail hidden"></div>
       <div id="strat-form" class="strat-form hidden">
         <div class="strat-form-h" id="strat-form-title">Yeni Strateji</div>
         <div class="strat-form-grid">
@@ -4222,7 +4276,7 @@
             <select id="sf-dir"><option value="">—</option><option value="long">Long</option><option value="short">Short</option><option value="both">Her iki yön</option></select>
           </div>
         </div>
-        <div class="strat-sec">📊 Backtest</div>
+        <div class="strat-sec">📊 Backtest sonuçları</div>
         <div class="strat-form-grid">
           <div class="strat-f">
             <label>İşlem sayısı</label>
@@ -4249,26 +4303,7 @@
             <input type="text" id="sf-bt-per" placeholder="Oca 24 – Haz 26" maxlength="40">
           </div>
         </div>
-        <div class="strat-sec">🚀 Canlı (Live)</div>
-        <div class="strat-form-grid">
-          <div class="strat-f">
-            <label>Canlı başlangıç</label>
-            <input type="date" id="sf-lv-start">
-          </div>
-          <div class="strat-f">
-            <label>Canlı işlem</label>
-            <input type="number" id="sf-lv-trades" placeholder="0" min="0" step="1">
-          </div>
-          <div class="strat-f">
-            <label>Canlı win rate (%)</label>
-            <input type="number" id="sf-lv-wr" placeholder="0-100" min="0" max="100" step="0.1">
-          </div>
-          <div class="strat-f">
-            <label>Canlı net R</label>
-            <input type="number" id="sf-lv-r" placeholder="+2.4" step="0.01">
-          </div>
-        </div>
-        <div class="strat-sec">🎯 Durum &amp; Eleme</div>
+        <div class="strat-sec">🎯 Durum &amp; Öncelik</div>
         <div class="strat-form-grid">
           <div class="strat-f">
             <label>Durum</label>
@@ -4290,8 +4325,8 @@
             </select>
           </div>
           <div class="strat-f strat-f-full">
-            <label>Eleme / değerlendirme notu</label>
-            <textarea id="sf-note" rows="3" placeholder="Neden elendi, neyi iyi yaptı, piyasada nereden gördün, nasıl çalışıyor…"></textarea>
+            <label>Değerlendirme notu</label>
+            <textarea id="sf-note" rows="3" placeholder="Strateji nasıl çalışıyor, nereden gördün, neden elendi…"></textarea>
           </div>
         </div>
         <div class="strat-form-btns">
@@ -4300,7 +4335,7 @@
         </div>
       </div>
     </div>
-    <div class="ch-panel ch-main">
+    <div class="ch-panel ch-main" id="ch-main">
       <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
       <div id="eg-ch-list" class="ch-list"></div>
       <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok.</div>
@@ -11028,10 +11063,12 @@ async function pullWeeksFromNotion() {
   }
 }
 
-// ============ Strateji Optimizasyonu (yalnızca admin, localStorage) ============
+// ============ Strateji Yönetimi (yalnızca admin, localStorage) ============
 const STRAT_KEY = 'defter-strategies-v1';
 let stratData = { list: [] };
-let stratOpen = false;
+let stratTab = 'channels';   // EDU sekmeleri: 'channels' | 'strategies'
+let stratMode = 'list';      // strateji sayfası: 'list' | 'detail'
+let stratCurId = null;
 let stratEditId = null;
 let stratFormOpen = false;
 
@@ -11045,107 +11082,256 @@ async function loadStrat() {
 async function saveStrat() {
   try { await store.set(STRAT_KEY, JSON.stringify(stratData)); } catch (e) { console.error('saveStrat:', e); }
 }
+function stratCur() { return stratData.list.find(x => x.id === stratCurId) || null; }
 
 function stratNum(v) { const n = parseFloat(v); return isFinite(n) ? n : null; }
+
+// --- otomatik metrikler: trade kayıtlarından ---
+function stratAutoMetrics(s) {
+  const ts = s && Array.isArray(s.trades) ? s.trades : [];
+  const out = { n: ts.length, wr: null, pf: null, avg: null, netR: null, dd: null };
+  const rs = [];
+  ts.forEach(t => { const v = stratNum(t.r); if (v !== null) rs.push(v); });
+  if (!rs.length) return out;
+  const wins = rs.filter(v => v > 0);
+  const gWin = wins.reduce((a, b) => a + b, 0);
+  const gLoss = Math.abs(rs.filter(v => v < 0).reduce((a, b) => a + b, 0));
+  const net = rs.reduce((a, b) => a + b, 0);
+  out.wr = Math.round(wins.length / rs.length * 1000) / 10;
+  out.pf = gLoss > 0 ? Math.round(gWin / gLoss * 100) / 100 : (gWin > 0 ? 99 : 0);
+  out.avg = Math.round(net / rs.length * 100) / 100;
+  out.netR = Math.round(net * 100) / 100;
+  let peak = 0, cum = 0, maxdd = 0;
+  rs.forEach(v => { cum += v; if (cum > peak) peak = cum; const dd = peak - cum; if (dd > maxdd) maxdd = dd; });
+  out.dd = Math.round(maxdd * 100) / 100;
+  return out;
+}
 function stratScore(s) {
-  // kompozit skor: backtest + canlı kalitesi. 0-100.
+  // kompozit skor: backtest + canlı trade kayıtları. 0-100.
   const bt = s.bt || {};
-  const lv = s.lv || {};
+  const auto = stratAutoMetrics(s);
   const parts = [];
-  const wr = bt.wr != null ? bt.wr : (lv.wr != null ? lv.wr : null);
+  const wr = bt.wr != null ? bt.wr : (auto.wr != null ? auto.wr : null);
   if (wr != null) parts.push(wr);
-  const pf = bt.pf != null ? Math.min(100, bt.pf * 40) : null;
+  const pf = bt.pf != null ? Math.min(100, bt.pf * 40) : (auto.pf != null && auto.pf > 0 ? Math.min(100, auto.pf * 40) : null);
   if (pf != null) parts.push(pf);
-  const avg = bt.avg != null ? Math.min(100, (bt.avg + 1) * 33) : null;
+  const avg = bt.avg != null ? Math.min(100, (bt.avg + 1) * 33) : (auto.avg != null ? Math.min(100, (auto.avg + 1) * 33) : null);
   if (avg != null) parts.push(avg);
-  if (bt.dd != null) parts.push(bt.dd <= 2 ? 85 : bt.dd <= 4 ? 60 : bt.dd <= 7 ? 35 : 10);
-  if (lv.wr != null && lv.trades >= 20) parts.push(lv.wr * 0.9);
-  if (lv.r != null && lv.trades >= 20) parts.push(Math.min(100, Math.max(0, (lv.r / lv.trades) * 160)));
+  const dd = bt.dd != null ? bt.dd : auto.dd;
+  if (dd != null) parts.push(dd <= 2 ? 85 : dd <= 4 ? 60 : dd <= 7 ? 35 : 10);
+  if (auto.n >= 5) {
+    if (auto.wr != null) parts.push(auto.wr * 0.9);
+    if (auto.netR != null) parts.push(Math.min(100, Math.max(0, (auto.netR / auto.n) * 160)));
+  }
   let sc = parts.length ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : 0;
   if (s.status === 'elendi') sc = Math.min(sc, 25);
   if (s.status === 'pasif') sc = Math.round(sc * 0.7);
   return sc;
 }
 function stratScoreClass(sc) { return sc >= 70 ? 'good' : sc >= 40 ? 'neu' : 'bad'; }
+function stratStatusMeta(st) { return { label: st === 'aktif' ? '🟢 Aktif' : st === 'izleniyor' ? '🟡 İzleniyor' : st === 'pasif' ? '⚪ Pasif' : '🔴 Elendi', next: st === 'aktif' ? 'izleniyor' : st === 'izleniyor' ? 'pasif' : st === 'pasif' ? 'elendi' : 'aktif' }; }
+function stratNextBtn(st) { return st === 'aktif' ? '➖ Pasifleştir' : st === 'izleniyor' ? '⚪ Pasif yap' : st === 'pasif' ? '🔴 Ele' : '♻️ Geri al'; }
 
+// --- EDU içi sayfa görünümü ---
 function renderStrat() {
+  const tabs = document.getElementById('eg-tabs');
+  const isAdmin = magIsAdmin();
+  if (tabs) tabs.style.display = isAdmin ? 'flex' : 'none';
+  if (!isAdmin) stratTab = 'channels';
   const view = document.getElementById('strat-view');
   const main = document.querySelector('#page-egitim > .ch-panel.ch-main');
   const oldCourse = document.getElementById('eg-old-course');
   const chView = document.getElementById('ch-view');
-  const noCh = document.getElementById('eg-no-channel');
   const chFormEl = document.getElementById('ch-form');
-  const btn = document.getElementById('strat-open');
-  if (btn) btn.classList.toggle('hidden', !magIsAdmin());
-  if (view && main && oldCourse) {
-    if (stratOpen) {
-      view.classList.remove('hidden');
-      main.classList.add('hidden');
-      oldCourse.classList.add('hidden');
-      if (chView) chView.classList.add('hidden');
-      if (chFormEl) chFormEl.classList.add('hidden');
-      if (noCh) noCh.style.display = 'none';
-      stratRenderList();
-    } else {
-      view.classList.add('hidden');
-      main.classList.remove('hidden');
-      oldCourse.classList.remove('hidden');
-    }
+  const noCh = document.getElementById('eg-no-channel');
+  if (!view || !main) return;
+  const tb1 = document.getElementById('eg-tab-channels');
+  const tb2 = document.getElementById('eg-tab-strategies');
+  if (tb1) tb1.classList.toggle('on', stratTab === 'channels');
+  if (tb2) tb2.classList.toggle('on', stratTab === 'strategies');
+  if (stratTab === 'strategies') {
+    view.classList.remove('hidden');
+    main.classList.add('hidden');
+    if (oldCourse) oldCourse.classList.add('hidden');
+    if (chView) chView.classList.add('hidden');
+    if (chFormEl) chFormEl.classList.add('hidden');
+    if (noCh) noCh.style.display = 'none';
+    renderStratPage();
+  } else {
+    view.classList.add('hidden');
+    main.classList.remove('hidden');
   }
 }
+function renderStratPage() {
+  if (stratMode === 'detail') {
+    const s = stratCur();
+    if (!s) { stratMode = 'list'; stratRenderList(); }
+    else stratRenderDetail(s);
+  } else {
+    stratRenderList();
+  }
+}
+// --- liste görünümü ---
 function stratRenderList() {
   const listEl = document.getElementById('strat-list');
   const emptyEl = document.getElementById('strat-empty');
+  const wrap = document.getElementById('strat-list-wrap');
   const formEl = document.getElementById('strat-form');
+  if (wrap) wrap.style.display = 'block';
+  const detEl = document.getElementById('strat-detail');
+  if (detEl) detEl.classList.add('hidden');
+  if (formEl) formEl.classList.toggle('hidden', !stratFormOpen);
   if (!listEl) return;
   const list = stratData.list.slice().sort((a, b) => stratScore(b) - stratScore(a) || (a.prio || 3) - (b.prio || 3));
   listEl.innerHTML = list.map(s => {
-    const bt = s.bt || {}, lv = s.lv || {};
+    const bt = s.bt || {};
+    const auto = stratAutoMetrics(s);
     const sc = stratScore(s);
-    const stChip = s.status === 'aktif' ? '🟢 Aktif' : s.status === 'izleniyor' ? '🟡 İzleniyor' : s.status === 'pasif' ? '⚪ Pasif' : '🔴 Elendi';
-    const st = s.status === 'aktif' ? 'aktif' : s.status === 'izleniyor' ? 'izleniyor' : s.status === 'pasif' ? 'pasif' : 'elendi';
-    const fmt = v => v === null || v === undefined || v === '' ? '—' : v;
-    const wr = bt.wr != null ? bt.wr : (lv.wr != null ? lv.wr : null);
+    const st = s.status;
+    const meta = stratStatusMeta(st);
+    const rules = (s.rules || []).length;
+    const tr = (s.trades || []).length;
     const m = (lbl, val, cls) => '<div class="strat-metric"><span class="m-lbl">' + lbl + '</span><span class="m-val ' + (cls || '') + '">' + val + '</span></div>';
-    const dur = s.status === 'elendi' ? ' <span class="strat-chip st-elendi">Elenen</span>' : '';
-    const note = s.note ? '<div class="strat-note">' + esc(s.note) + '</div>' : '';
+    const wr = bt.wr != null ? bt.wr : auto.wr;
+    const pf = bt.pf != null ? bt.pf : auto.pf;
+    const netR = auto.netR != null ? (auto.netR > 0 ? '+' : '') + auto.netR : null;
     return '<div class="strat-card st-' + st + '" data-strat="' + s.id + '">' +
       '<div class="strat-flag ' + st + '"></div>' +
       '<div class="strat-main">' +
-        '<div class="strat-name-row"><span class="strat-name">' + esc(s.name) + '</span><span class="strat-chip st-' + st + '">' + stChip + '</span>' + dur +
+        '<div class="strat-name-row"><span class="strat-name">' + esc(s.name) + '</span><span class="strat-chip st-' + st + '">' + meta.label + '</span>' +
           (s.market ? '<span class="strat-chip">' + esc(s.market) + '</span>' : '') +
           (s.tf ? '<span class="strat-chip">⏱ ' + esc(s.tf) + '</span>' : '') +
           (s.dir ? '<span class="strat-chip">' + (s.dir === 'long' ? '↗ Long' : s.dir === 'short' ? '↘ Short' : '⇅ Her iki yön') + '</span>' : '') +
-          (s.prio ? '<span class="strat-chip">Öncelik ' + s.prio + '</span>' : '') +
         '</div>' +
-        '<div class="strat-meta">' + (s.created ? 'Eklenme: ' + new Date(s.created).toLocaleDateString('tr-TR') + ' · ' : '') + 'Öncelik: ' + (s.prio || '—') + '</div>' +
+        '<div class="strat-meta">' + (s.created ? 'Eklenme: ' + new Date(s.created).toLocaleDateString('tr-TR') : '') +
+          (rules ? ' · 📋 ' + rules + ' kural' : '') + (tr ? ' · 📈 ' + tr + ' işlem' : '') + '</div>' +
         '<div class="strat-metrics">' +
-          m('Backtest işlem', fmt(bt.trades)) +
           m('Win rate', wr != null ? wr + '%' : '—', wr >= 50 ? 'good' : wr >= 40 ? 'neu' : 'bad') +
-          m('PF', bt.pf != null ? bt.pf : '—', bt.pf >= 1.5 ? 'good' : bt.pf >= 1 ? 'neu' : 'bad') +
-          m('Ort. R', bt.avg != null ? bt.avg : '—', bt.avg >= 0.3 ? 'good' : bt.avg >= 0 ? 'neu' : 'bad') +
-          m('DD (R)', bt.dd != null ? bt.dd : '—', bt.dd <= 3 ? 'good' : bt.dd <= 6 ? 'neu' : 'bad') +
-          m('Canlı işlem', fmt(lv.trades)) +
-          m('Canlı WR', lv.wr != null ? lv.wr + '%' : '—', lv.wr >= 50 ? 'good' : lv.wr >= 40 ? 'neu' : 'bad') +
-          m('Canlı net R', lv.r != null ? (lv.r > 0 ? '+' : '') + lv.r : '—', lv.r >= 0 ? 'good' : 'bad') +
+          m('PF', pf != null ? pf : '—', pf >= 1.5 ? 'good' : pf >= 1 ? 'neu' : 'bad') +
+          m('Ort. R', bt.avg != null ? bt.avg : (auto.avg != null ? auto.avg : '—'), (bt.avg || auto.avg) >= 0.3 ? 'good' : (bt.avg || auto.avg) >= 0 ? 'neu' : 'bad') +
+          m('Canlı net R', netR != null ? netR : '—', auto.netR >= 0 ? 'good' : 'bad') +
+          m('Öncelik', s.prio || '—') +
         '</div>' +
-        note +
+        '<div class="strat-actions-row">' +
+          '<button type="button" class="btn" data-strat-open="' + s.id + '">Aç</button>' +
+          '<button type="button" class="btn" data-strat-edit="' + s.id + '">✎ Düzenle</button>' +
+          '<button type="button" class="btn" data-strat-status="' + s.id + '">' + stratNextBtn(st) + '</button>' +
+          '<button type="button" class="btn" data-strat-del="' + s.id + '" style="color:var(--red)">🗑 Sil</button>' +
+        '</div>' +
       '</div>' +
       '<div class="strat-score"><span class="s-val ' + stratScoreClass(sc) + '">' + sc + '</span><span class="s-lbl">Skor</span></div>' +
-      '<div class="strat-actions">' +
-        '<button type="button" class="btn" data-strat-edit="' + s.id + '">✎ Düzenle</button>' +
-        '<button type="button" class="btn" data-strat-status="' + s.id + '">' + (s.status === 'aktif' ? '➖ Pasifleştir' : s.status === 'pasif' ? '🟢 Aktif yap' : s.status === 'elendi' ? '♻️ Geri al' : '🔴 Ele') + '</button>' +
-        '<button type="button" class="btn" data-strat-del="' + s.id + '" style="color:var(--red)">🗑 Sil</button>' +
-      '</div>' +
     '</div>';
   }).join('');
   if (emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
-  if (formEl) formEl.classList.toggle('hidden', !stratFormOpen);
   if (list.length && stratEditId && !stratData.list.find(x => x.id === stratEditId)) stratEditId = null;
 }
+// --- detay görünümü ---
+function stratRenderDetail(s) {
+  const listWrap = document.getElementById('strat-list-wrap');
+  const formEl = document.getElementById('strat-form');
+  const detEl = document.getElementById('strat-detail');
+  if (!detEl) return;
+  if (listWrap) listWrap.style.display = 'none';
+  if (formEl) formEl.classList.add('hidden');
+  detEl.classList.remove('hidden');
+  const bt = s.bt || {};
+  const auto = stratAutoMetrics(s);
+  const sc = stratScore(s);
+  const st = s.status;
+  const meta = stratStatusMeta(st);
+  const m = (lbl, val, cls) => '<div class="strat-metric"><span class="m-lbl">' + lbl + '</span><span class="m-val ' + (cls || '') + '">' + val + '</span></div>';
+  const rules = (s.rules || []).map(r => '<div class="sd-rule"><span class="sd-rule-txt">📋 ' + esc(r.t) + '</span><button type="button" class="sd-x" data-rule-del="' + r.id + '">✕</button></div>').join('');
+  const confirms = (s.confirms || []).map(c =>
+    '<label class="sd-conf' + (c.on ? ' on' : '') + '"><input type="checkbox" data-conf="' + c.id + '"' + (c.on ? ' checked' : '') + '><span class="sd-conf-box"></span><span class="sd-conf-txt">' + esc(c.t) + '</span></label>').join('');
+  const rows = (s.trades || []).slice().reverse().map(t => {
+    const rv = stratNum(t.r);
+    const cls = rv === null ? '' : rv > 0 ? 'good' : rv < 0 ? 'bad' : 'neu';
+    return '<tr>' +
+      '<td>' + esc(t.date || '—') + '</td>' +
+      '<td>' + (t.dir === 'short' ? '↘ Short' : t.dir === 'long' ? '↗ Long' : '—') + '</td>' +
+      '<td>' + esc(t.entry || '') + '</td>' +
+      '<td>' + esc(t.exit || '') + '</td>' +
+      '<td class="' + cls + '">' + (rv !== null ? (rv > 0 ? '+' : '') + rv : '—') + '</td>' +
+      '<td class="sd-tr-note">' + esc(t.note || '') + '</td>' +
+      '<td><button type="button" class="sd-x" data-tr-del="' + t.id + '">✕</button></td>' +
+    '</tr>';
+  }).join('');
+  const confsOn = (s.confirms || []).filter(c => c.on).length;
+  const confsTotal = (s.confirms || []).length;
+  detEl.innerHTML =
+    '<div class="sd-head">' +
+      '<div class="sd-title-row">' +
+        '<div class="strat-name">' + esc(s.name) + '</div>' +
+        '<span class="strat-chip st-' + st + '">' + meta.label + '</span>' +
+        '<span class="sd-score s-val ' + stratScoreClass(sc) + '">' + sc + '</span><span class="s-lbl">Skor</span>' +
+      '</div>' +
+      '<div class="sd-chips">' +
+        (s.market ? '<span class="strat-chip">💰 ' + esc(s.market) + '</span>' : '') +
+        (s.tf ? '<span class="strat-chip">⏱ ' + esc(s.tf) + '</span>' : '') +
+        (s.dir ? '<span class="strat-chip">' + (s.dir === 'long' ? '↗ Long' : s.dir === 'short' ? '↘ Short' : '⇅ Her iki yön') + '</span>' : '') +
+        (s.prio ? '<span class="strat-chip">Öncelik ' + s.prio + '</span>' : '') +
+        (confsTotal ? '<span class="strat-chip">✅ ' + confsOn + '/' + confsTotal + ' onay</span>' : '') +
+      '</div>' +
+      '<div class="sd-actions">' +
+        '<button type="button" class="btn" data-sd-back>← Liste</button>' +
+        '<button type="button" class="btn" data-sd-edit>✎ Düzenle</button>' +
+        '<button type="button" class="btn" data-sd-status>' + stratNextBtn(st) + '</button>' +
+        '<button type="button" class="btn" data-sd-del style="color:var(--red)">🗑 Sil</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sd-metrics">' +
+      '<div class="sd-metric-group"><div class="sd-mg-title">📊 Backtest</div><div class="strat-metrics">' +
+        m('İşlem', bt.trades != null ? bt.trades : '—') +
+        m('Win rate', bt.wr != null ? bt.wr + '%' : '—', bt.wr >= 50 ? 'good' : bt.wr >= 40 ? 'neu' : 'bad') +
+        m('PF', bt.pf != null ? bt.pf : '—', bt.pf >= 1.5 ? 'good' : bt.pf >= 1 ? 'neu' : 'bad') +
+        m('Ort. R', bt.avg != null ? bt.avg : '—', bt.avg >= 0.3 ? 'good' : bt.avg >= 0 ? 'neu' : 'bad') +
+        m('DD (R)', bt.dd != null ? bt.dd : '—', bt.dd <= 3 ? 'good' : bt.dd <= 6 ? 'neu' : 'bad') +
+        (s.btPer ? m('Dönem', esc(s.btPer)) : '') +
+      '</div></div>' +
+      '<div class="sd-metric-group"><div class="sd-mg-title">📈 Canlı (işlemlerden otomatik)</div><div class="strat-metrics">' +
+        m('İşlem', auto.n) +
+        m('Win rate', auto.wr != null ? auto.wr + '%' : '—', auto.wr >= 50 ? 'good' : auto.wr >= 40 ? 'neu' : 'bad') +
+        m('PF', auto.pf != null ? auto.pf : '—', auto.pf >= 1.5 ? 'good' : auto.pf >= 1 ? 'neu' : 'bad') +
+        m('Ort. R', auto.avg != null ? auto.avg : '—', auto.avg >= 0.3 ? 'good' : auto.avg >= 0 ? 'neu' : 'bad') +
+        m('Net R', auto.netR != null ? (auto.netR > 0 ? '+' : '') + auto.netR : '—', auto.netR >= 0 ? 'good' : 'bad') +
+        m('Max DD (R)', auto.dd != null ? auto.dd : '—', auto.dd <= 3 ? 'good' : auto.dd <= 6 ? 'neu' : 'bad') +
+      '</div></div>' +
+    '</div>' +
+    '<div class="sd-cols">' +
+      '<div class="sd-sec">' +
+        '<div class="sd-sec-h">📋 Strateji Kuralları <span class="sd-hint">stratejiyi ne zaman ve nasıl açacağını tanımlar</span></div>' +
+        '<div class="sd-rules">' + (rules || '<div class="sd-empty">Henüz kural yok.</div>') + '</div>' +
+        '<div class="sd-addrow"><input type="text" id="sd-rule-in" placeholder="Yeni kural… örn: CVD trend yönünde, hacim eşiği 1.2x" maxlength="200"><button type="button" class="btn solid" data-rule-add>＋ Ekle</button></div>' +
+      '</div>' +
+      '<div class="sd-sec">' +
+        '<div class="sd-sec-h">✅ Konfirmasyonlar <span class="sd-hint">işlem öncesi kontrol — kutucuğu işaretle</span></div>' +
+        '<div class="sd-confs">' + (confirms || '<div class="sd-empty">Henüz onay öğesi yok.</div>') + '</div>' +
+        '<div class="sd-addrow"><input type="text" id="sd-conf-in" placeholder="Yeni onay… örn: R:R ≥ 1:2, trend onayı" maxlength="200"><button type="button" class="btn solid" data-conf-add>＋ Ekle</button></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sd-sec sd-trades-sec">' +
+      '<div class="sd-sec-h">📈 İşlem Kayıtları <span class="sd-hint">R sonucu gir — PF, win rate otomatik hesaplanır</span></div>' +
+      '<div class="sd-table-wrap"><table class="sd-table">' +
+        '<thead><tr><th>Tarih</th><th>Yön</th><th>Giriş</th><th>Çıkış</th><th>Sonuç (R)</th><th>Not</th><th></th></tr></thead>' +
+        '<tbody>' + (rows || '<tr><td colspan="7" class="sd-empty">Henüz işlem yok — aşağıdan ekle.</td></tr>') + '</tbody>' +
+      '</table></div>' +
+      '<div class="sd-tr-form">' +
+        '<input type="date" id="sd-tr-date" value="' + new Date().toISOString().slice(0, 10) + '">' +
+        '<select id="sd-tr-dir"><option value="long">Long</option><option value="short">Short</option></select>' +
+        '<input type="number" id="sd-tr-entry" placeholder="Giriş" step="any">' +
+        '<input type="number" id="sd-tr-exit" placeholder="Çıkış" step="any">' +
+        '<input type="number" id="sd-tr-r" placeholder="Sonuç R (+2, -1)" step="0.01">' +
+        '<input type="text" id="sd-tr-note" placeholder="Kısa not (opsiyonel)" maxlength="120">' +
+        '<button type="button" class="btn solid" data-tr-add>＋ İşlem</button>' +
+      '</div>' +
+    '</div>' +
+    (s.note ? '<div class="sd-note">📝 ' + esc(s.note) + '</div>' : '');
+}
+// --- form görünümü ---
 function stratOpenForm(id) {
   stratEditId = id || null;
   stratFormOpen = true;
+  stratMode = 'list';
   const g = el => document.getElementById(el);
   const s = id ? stratData.list.find(x => x.id === id) : null;
   g('strat-form-title').textContent = s ? 'Düzenle: ' + s.name : 'Yeni Strateji';
@@ -11160,11 +11346,6 @@ function stratOpenForm(id) {
   g('sf-bt-avg').value = bt.avg != null ? bt.avg : '';
   g('sf-bt-dd').value = bt.dd != null ? bt.dd : '';
   g('sf-bt-per').value = s ? (s.btPer || '') : '';
-  const lv = s ? (s.lv || {}) : {};
-  g('sf-lv-start').value = s ? (s.lvStart || '') : '';
-  g('sf-lv-trades').value = lv.trades != null ? lv.trades : '';
-  g('sf-lv-wr').value = lv.wr != null ? lv.wr : '';
-  g('sf-lv-r').value = lv.r != null ? lv.r : '';
   g('sf-status').value = s ? (s.status || 'aktif') : 'aktif';
   g('sf-prio').value = s ? (String(s.prio || 3)) : '3';
   g('sf-note').value = s ? (s.note || '') : '';
@@ -11180,18 +11361,12 @@ function stratSaveForm() {
     tf: g('sf-tf').value.trim(),
     dir: g('sf-dir').value,
     btPer: g('sf-bt-per').value.trim(),
-    lvStart: g('sf-lv-start').value,
     bt: {
       trades: stratNum(g('sf-bt-trades').value),
       wr: stratNum(g('sf-bt-wr').value),
       pf: stratNum(g('sf-bt-pf').value),
       avg: stratNum(g('sf-bt-avg').value),
       dd: stratNum(g('sf-bt-dd').value),
-    },
-    lv: {
-      trades: stratNum(g('sf-lv-trades').value),
-      wr: stratNum(g('sf-lv-wr').value),
-      r: stratNum(g('sf-lv-r').value),
     },
     status: g('sf-status').value,
     prio: parseInt(g('sf-prio').value, 10) || 3,
@@ -11203,6 +11378,7 @@ function stratSaveForm() {
   } else {
     rec.id = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     rec.created = Date.now();
+    rec.rules = []; rec.confirms = []; rec.trades = [];
     stratData.list.push(rec);
   }
   stratEditId = null;
@@ -11211,15 +11387,80 @@ function stratSaveForm() {
 }
 function stratDelete(id) {
   stratData.list = stratData.list.filter(x => x.id !== id);
+  if (stratCurId === id) { stratCurId = null; stratMode = 'list'; }
   if (stratEditId === id) { stratEditId = null; stratFormOpen = false; }
   saveStrat().then(() => stratRenderList());
 }
 function stratCycleStatus(id) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
-  const order = ['aktif', 'izleniyor', 'pasif', 'elendi'];
-  s.status = order[(order.indexOf(s.status) + 1) % order.length];
-  saveStrat().then(() => stratRenderList());
+  s.status = stratStatusMeta(s.status).next;
+  saveStrat().then(() => renderStratPage());
+}
+function stratAddRule(id) {
+  const s = stratData.list.find(x => x.id === id);
+  const inp = document.getElementById('sd-rule-in');
+  if (!s || !inp) return;
+  const t = inp.value.trim();
+  if (!t) return;
+  if (!Array.isArray(s.rules)) s.rules = [];
+  s.rules.push({ id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t });
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratDelRule(id, rid) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  s.rules = (s.rules || []).filter(r => r.id !== rid);
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratAddConf(id) {
+  const s = stratData.list.find(x => x.id === id);
+  const inp = document.getElementById('sd-conf-in');
+  if (!s || !inp) return;
+  const t = inp.value.trim();
+  if (!t) return;
+  if (!Array.isArray(s.confirms)) s.confirms = [];
+  s.confirms.push({ id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t, on: false });
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratToggleConf(id, cid) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const c = (s.confirms || []).find(x => x.id === cid);
+  if (!c) return;
+  c.on = !c.on;
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratDelConf(id, cid) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  s.confirms = (s.confirms || []).filter(c => c.id !== cid);
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratAddTrade(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const g = el => document.getElementById(el);
+  const r = stratNum(g('sd-tr-r').value);
+  if (r === null || r === 0) { const e = g('sd-tr-r'); if (e) e.focus(); return; }
+  if (!Array.isArray(s.trades)) s.trades = [];
+  s.trades.push({
+    id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    date: g('sd-tr-date').value,
+    dir: g('sd-tr-dir').value,
+    entry: g('sd-tr-entry').value.trim(),
+    exit: g('sd-tr-exit').value.trim(),
+    r,
+    note: g('sd-tr-note').value.trim(),
+  });
+  g('sd-tr-entry').value = ''; g('sd-tr-exit').value = ''; g('sd-tr-r').value = ''; g('sd-tr-note').value = '';
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratDelTrade(id, tid) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  s.trades = (s.trades || []).filter(t => t.id !== tid);
+  saveStrat().then(() => stratRenderDetail(s));
 }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
@@ -11425,7 +11666,7 @@ function egCurVid(topic) {
 function renderEgitim() {
   const canEdit = magIsAdmin();
   renderStrat();
-  if (stratOpen) return;
+  if (stratTab === 'strategies') return;
   // ---- Eğitsel Kanal: trader listesi (sol alttaki panel) ----
   if (!channelsLoaded) {
     channelsLoaded = true;
@@ -13521,18 +13762,50 @@ function bindPanoPage() {
 
 function bindEgitimPage() {
   const g = id => document.getElementById(id);
-  // ---- Strateji Optimizasyonu ----
-  g('strat-open').addEventListener('click', () => { stratOpen = !stratOpen; if (!stratOpen) { stratEditId = null; stratFormOpen = false; } renderEgitim(); });
-  g('strat-back').addEventListener('click', () => { stratOpen = false; stratEditId = null; stratFormOpen = false; renderEgitim(); });
+  // ---- Strateji Yönetimi ----
+  g('eg-tab-channels').addEventListener('click', () => { stratTab = 'channels'; renderEgitim(); });
+  g('eg-tab-strategies').addEventListener('click', () => { stratTab = 'strategies'; stratMode = 'list'; stratCurId = null; renderEgitim(); });
   g('strat-add').addEventListener('click', () => stratOpenForm(null));
   g('strat-list').addEventListener('click', e => {
+    const open = e.target.closest('[data-strat-open]');
     const ed = e.target.closest('[data-strat-edit]');
     const st = e.target.closest('[data-strat-status]');
     const del = e.target.closest('[data-strat-del]');
-    if (ed) stratOpenForm(ed.getAttribute('data-strat-edit'));
+    if (open) { stratCurId = open.getAttribute('data-strat-open'); stratMode = 'detail'; renderEgitim(); }
+    else if (ed) stratOpenForm(ed.getAttribute('data-strat-edit'));
     else if (st) stratCycleStatus(st.getAttribute('data-strat-status'));
     else if (del) { if (confirm('Bu stratejiyi kalıcı olarak sil?')) stratDelete(del.getAttribute('data-strat-del')); }
   });
+  const sdEl = document.getElementById('strat-detail');
+  if (sdEl) {
+    sdEl.addEventListener('click', e => {
+      const back = e.target.closest('[data-sd-back]');
+      const edit = e.target.closest('[data-sd-edit]');
+      const st = e.target.closest('[data-sd-status]');
+      const del = e.target.closest('[data-sd-del]');
+      const ruleAdd = e.target.closest('[data-rule-add]');
+      const ruleDel = e.target.closest('[data-rule-del]');
+      const confAdd = e.target.closest('[data-conf-add]');
+      const confDel = e.target.closest('[data-conf-del]');
+      const trAdd = e.target.closest('[data-tr-add]');
+      const trDel = e.target.closest('[data-tr-del]');
+      const id = stratCurId;
+      if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; renderEgitim(); }
+      else if (edit) stratOpenForm(id);
+      else if (st) stratCycleStatus(id);
+      else if (del) { if (confirm('Bu stratejiyi kalıcı olarak sil?')) stratDelete(id); }
+      else if (ruleAdd) stratAddRule(id);
+      else if (ruleDel) stratDelRule(id, ruleDel.getAttribute('data-rule-del'));
+      else if (confAdd) stratAddConf(id);
+      else if (confDel) stratDelConf(id, confDel.getAttribute('data-conf-del'));
+      else if (trAdd) stratAddTrade(id);
+      else if (trDel) stratDelTrade(id, trDel.getAttribute('data-tr-del'));
+    });
+    sdEl.addEventListener('change', e => {
+      const c = e.target.closest('[data-conf]');
+      if (c) stratToggleConf(stratCurId, c.getAttribute('data-conf'));
+    });
+  }
   g('sf-save').addEventListener('click', stratSaveForm);
   g('sf-cancel').addEventListener('click', () => { stratEditId = null; stratFormOpen = false; stratRenderList(); });
   g('sf-name').addEventListener('keydown', e => { if (e.key === 'Enter') stratSaveForm(); });
