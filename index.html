@@ -1505,6 +1505,10 @@
   .strat-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; margin-top: 3px; max-width: 680px; }
   .strat-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .strat-list { display: flex; flex-direction: column; gap: 10px; }
+  .strat-group { display: flex; flex-direction: column; gap: 8px; }
+  .strat-group-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; margin: 4px 2px 2px; }
+  .strat-group-n { font-size: 10.5px; font-weight: 700; color: var(--text-3); background: var(--bg2); border: 1px solid var(--border); padding: 1px 8px; border-radius: 999px; }
+  .sd-import-note { margin-top: 10px; padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--pc) 10%, var(--bg2)); border: 1px solid color-mix(in srgb, var(--pc) 30%, var(--border)); font-size: 12.5px; font-weight: 600; color: var(--text); }
   .strat-card { display: flex; align-items: stretch; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
   .strat-card.st-elendi { opacity: .55; }
   .strat-flag { width: 4px; flex: none; border-radius: 999px; align-self: stretch; }
@@ -4274,6 +4278,20 @@
           <div class="strat-f">
             <label>Yön</label>
             <select id="sf-dir"><option value="">—</option><option value="long">Long</option><option value="short">Short</option><option value="both">Her iki yön</option></select>
+          </div>
+          <div class="strat-f">
+            <label>Kategori</label>
+            <input type="text" id="sf-cat" list="strat-cat-list" placeholder="SMC, Fibonacci…" maxlength="40">
+            <datalist id="strat-cat-list">
+              <option value="SMC"></option>
+              <option value="Fibonacci"></option>
+              <option value="Momentum"></option>
+              <option value="Trend"></option>
+              <option value="Reversal"></option>
+              <option value="Breakout"></option>
+              <option value="Range"></option>
+              <option value="Onchain"></option>
+            </datalist>
           </div>
         </div>
         <div class="strat-sec">📊 Backtest sonuçları</div>
@@ -11183,7 +11201,10 @@ function stratRenderList() {
   if (formEl) formEl.classList.toggle('hidden', !stratFormOpen);
   if (!listEl) return;
   const list = stratData.list.slice().sort((a, b) => stratScore(b) - stratScore(a) || (a.prio || 3) - (b.prio || 3));
-  listEl.innerHTML = list.map(s => {
+  const groups = {};
+  list.forEach(s => { const k = (s.cat || '').trim() || 'Kategorisiz'; (groups[k] = groups[k] || []).push(s); });
+  const groupKeys = Object.keys(groups).sort();
+  const card = s => {
     const bt = s.bt || {};
     const auto = stratAutoMetrics(s);
     const sc = stratScore(s);
@@ -11221,7 +11242,11 @@ function stratRenderList() {
       '</div>' +
       '<div class="strat-score"><span class="s-val ' + stratScoreClass(sc) + '">' + sc + '</span><span class="s-lbl">Skor</span></div>' +
     '</div>';
-  }).join('');
+  };
+  listEl.innerHTML = groupKeys.map(k =>
+    '<div class="strat-group"><div class="strat-group-h">' + esc(k) + ' <span class="strat-group-n">' + groups[k].length + '</span></div>' +
+    groups[k].map(card).join('') + '</div>'
+  ).join('');
   if (emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
   if (list.length && stratEditId && !stratData.list.find(x => x.id === stratEditId)) stratEditId = null;
 }
@@ -11230,8 +11255,7 @@ function stratRenderDetail(s) {
   const listWrap = document.getElementById('strat-list-wrap');
   const formEl = document.getElementById('strat-form');
   const detEl = document.getElementById('strat-detail');
-  if (!detEl) return;
-  if (listWrap) listWrap.style.display = 'none';
+  if (!detEl) return;  if (listWrap) listWrap.style.display = 'none';
   if (formEl) formEl.classList.add('hidden');
   detEl.classList.remove('hidden');
   const bt = s.bt || {};
@@ -11276,8 +11300,11 @@ function stratRenderDetail(s) {
         '<button type="button" class="btn" data-sd-back>← Liste</button>' +
         '<button type="button" class="btn" data-sd-edit>✎ Düzenle</button>' +
         '<button type="button" class="btn" data-sd-status>' + stratNextBtn(st) + '</button>' +
+        '<button type="button" class="btn" data-sd-import title="Trade Günlüğündeki bu strateji adına işlenmiş kayıtları getir">📥 Günlükten Aktar</button>' +
+        '<button type="button" class="btn" data-sd-import-notion title="Önce Notion senkronunu çeker, sonra bu stratejiye eşleyen kayıtları içe aktarır">☁️ Notion\'dan Çek</button>' +
         '<button type="button" class="btn" data-sd-del style="color:var(--red)">🗑 Sil</button>' +
       '</div>' +
+      (s._impMsg ? '<div class="sd-import-note">' + esc(s._impMsg) + '</div>' : '') +
     '</div>' +
     '<div class="sd-metrics">' +
       '<div class="sd-metric-group"><div class="sd-mg-title">📊 Backtest</div><div class="strat-metrics">' +
@@ -11326,6 +11353,7 @@ function stratRenderDetail(s) {
       '</div>' +
     '</div>' +
     (s.note ? '<div class="sd-note">📝 ' + esc(s.note) + '</div>' : '');
+  delete s._impMsg;
 }
 // --- form görünümü ---
 function stratOpenForm(id) {
@@ -11339,6 +11367,7 @@ function stratOpenForm(id) {
   g('sf-market').value = s ? (s.market || '') : '';
   g('sf-tf').value = s ? (s.tf || '') : '';
   g('sf-dir').value = s ? (s.dir || '') : '';
+  g('sf-cat').value = s ? (s.cat || '') : '';
   const bt = s ? (s.bt || {}) : {};
   g('sf-bt-trades').value = bt.trades != null ? bt.trades : '';
   g('sf-bt-wr').value = bt.wr != null ? bt.wr : '';
@@ -11360,6 +11389,7 @@ function stratSaveForm() {
     market: g('sf-market').value.trim(),
     tf: g('sf-tf').value.trim(),
     dir: g('sf-dir').value,
+    cat: g('sf-cat').value.trim(),
     btPer: g('sf-bt-per').value.trim(),
     bt: {
       trades: stratNum(g('sf-bt-trades').value),
@@ -11461,6 +11491,52 @@ function stratDelTrade(id, tid) {
   if (!s) return;
   s.trades = (s.trades || []).filter(t => t.id !== tid);
   saveStrat().then(() => stratRenderDetail(s));
+}
+// --- Trade Günlüğü / Notion'dan içe aktarma ---
+function stratImportFrom(id, source) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  const name = (s.name || '').trim().toLowerCase();
+  if (!name) { s._impMsg = 'Önce strateji adı gir.'; stratRenderDetail(s); return; }
+  const src = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades : [];
+  const matches = source === 'notion'
+    ? src.filter(t => (t._source === 'Notion' || t.notionId) && stratMatch(t, name))
+    : src.filter(t => stratMatch(t, name));
+  if (!Array.isArray(s.trades)) s.trades = [];
+  const known = new Set(s.trades.map(x => (x.date || '') + '|' + (x.r === null || x.r === undefined ? '' : String(x.r))));
+  let added = 0, skipped = 0;
+  matches.forEach(t => {
+    const rv = stratNum(t.r);
+    if (rv === null) return;
+    const key = (t.date || '') + '|' + String(rv);
+    if (known.has(key)) { skipped++; return; }
+    known.add(key);
+    s.trades.push({
+      id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      date: t.date || '',
+      dir: String(t.dir || 'LONG').toLowerCase().indexOf('short') === 0 ? 'short' : 'long',
+      entry: '', exit: '', r: rv,
+      note: t.note || ((source === 'notion' ? 'Notion' : 'Günlük') + ' içe aktarıldı'),
+    });
+    added++;
+  });
+  if (added) s._impMsg = '✅ ' + added + ' işlem içe aktarıldı' + (skipped ? ' · ' + skipped + ' zaten var' : '') + (source === 'notion' ? ' (Notion)' : ' (Günlük)');
+  else s._impMsg = 'Bu strateji adıyla eşleşen kayıt bulunamadı' + (skipped ? ' — ' + skipped + ' zaten eklenmiş.' : '.');
+  saveStrat().then(() => stratRenderDetail(s));
+}
+function stratMatch(t, name) {
+  const tn = String(t.strat || '').trim().toLowerCase();
+  const nm = String(name || '').trim().toLowerCase();
+  if (!tn || !nm) return false;
+  return tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0;
+}
+async function stratImportFromNotion(id) {
+  const s = stratData.list.find(x => x.id === id);
+  if (!s) return;
+  try {
+    if (typeof importFromNotion === 'function') await importFromNotion();
+  } catch (e) { /* senkron yoksa devam */ }
+  stratImportFrom(id, 'notion');
 }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
@@ -13789,6 +13865,8 @@ function bindEgitimPage() {
       const confDel = e.target.closest('[data-conf-del]');
       const trAdd = e.target.closest('[data-tr-add]');
       const trDel = e.target.closest('[data-tr-del]');
+      const impJ = e.target.closest('[data-sd-import]');
+      const impN = e.target.closest('[data-sd-import-notion]');
       const id = stratCurId;
       if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; renderEgitim(); }
       else if (edit) stratOpenForm(id);
@@ -13800,6 +13878,8 @@ function bindEgitimPage() {
       else if (confDel) stratDelConf(id, confDel.getAttribute('data-conf-del'));
       else if (trAdd) stratAddTrade(id);
       else if (trDel) stratDelTrade(id, trDel.getAttribute('data-tr-del'));
+      else if (impJ) stratImportFrom(id, 'journal');
+      else if (impN) stratImportFromNotion(id);
     });
     sdEl.addEventListener('change', e => {
       const c = e.target.closest('[data-conf]');
