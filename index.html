@@ -3268,6 +3268,7 @@
         <a class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</a>
         <div class="drop-menu">
           <a href="?page=egitim" class="nav-link" id="tab-egitim" data-nav data-i18n="app.eduPage">🎓 Alfa Edu</a>
+          <a href="?page=strategies" class="nav-link" id="tab-strategies" data-nav data-i18n="app.strategies">🧪 Stratejiler</a>
           <a href="?page=pano" class="nav-link" id="tab-pano" data-nav data-i18n="app.pano">🛠️ Çalışma Panosu</a>
           <a href="?page=mentoring" class="nav-link" id="tab-mentoring" data-nav data-i18n="app.mentoring" style="display:none">🤝 Mentoring</a>
           <a href="?page=indicators" class="nav-link" id="tab-indicators" data-nav data-i18n="app.indicators">📐 İndikatörler</a>
@@ -3325,6 +3326,7 @@
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading">📢 Alfa Trading</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
+      <a href="?page=strategies" class="mnav-link" data-nav data-mnav="strategies" data-i18n="app.strategies">🧪 Stratejiler</a>
       <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" data-i18n="app.pano">🛠️ Çalışma Panosu</a>
       <a href="?page=mentoring" class="mnav-link" data-nav data-mnav="mentoring" id="mnav-mentoring" style="display:none" data-i18n="app.mentoring">🤝 Mentoring</a>
       <a href="?page=indicators" class="mnav-link" data-nav data-mnav="indicators" data-i18n="app.indicators">📐 İndikatörler</a>
@@ -4241,118 +4243,6 @@
       <span class="eg-brand-name" data-i18n="pg.egitim.t">Alfa Edu</span>
       <span class="eg-brand-sub" data-i18n="pg.egitim.s">Eğitsel trader kanalları — videolar, notlar ve fotoğraflar. Kanalına tıkla, içeriği izle.</span>
     </div>
-    <div class="eg-tabs" id="eg-tabs">
-      <button type="button" class="eg-tab on" id="eg-tab-channels">📡 Kanallar</button>
-      <button type="button" class="eg-tab" id="eg-tab-strategies">🧪 Stratejiler</button>
-    </div>
-    <div id="strat-view" class="hidden">
-      <div class="strat-head">
-        <div>
-          <div class="strat-title">🧪 Strateji Yönetimi</div>
-          <div class="strat-sub">Stratejilerini tanımla: kurallar, konfirmasyon kutucukları, işlem kayıtları. Profit factor ve win rate kendiliğinden hesaplanır. Bu bölüm yalnızca senin cihazında.</div>
-        </div>
-        <div class="strat-head-actions">
-          <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
-        </div>
-      </div>
-      <div id="strat-list-wrap">
-        <div id="strat-list" class="strat-list"></div>
-        <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
-      </div>
-      <div id="strat-detail" class="strat-detail hidden"></div>
-      <div id="strat-form" class="strat-form hidden">
-        <div class="strat-form-h" id="strat-form-title">Yeni Strateji</div>
-        <div class="strat-form-grid">
-          <div class="strat-f">
-            <label>Strateji adı *</label>
-            <input type="text" id="sf-name" placeholder="Örn: Alfa Momentum CVD" maxlength="80">
-          </div>
-          <div class="strat-f">
-            <label>Piyasa / Coin</label>
-            <input type="text" id="sf-market" placeholder="BTC, ETH, Tüm majörler…" maxlength="60">
-          </div>
-          <div class="strat-f">
-            <label>Zaman dilimi</label>
-            <input type="text" id="sf-tf" placeholder="5m, 15m, 1H, 4H…" maxlength="20">
-          </div>
-          <div class="strat-f">
-            <label>Yön</label>
-            <select id="sf-dir"><option value="">—</option><option value="long">Long</option><option value="short">Short</option><option value="both">Her iki yön</option></select>
-          </div>
-          <div class="strat-f">
-            <label>Kategori</label>
-            <input type="text" id="sf-cat" list="strat-cat-list" placeholder="SMC, Fibonacci…" maxlength="40">
-            <datalist id="strat-cat-list">
-              <option value="SMC"></option>
-              <option value="Fibonacci"></option>
-              <option value="Momentum"></option>
-              <option value="Trend"></option>
-              <option value="Reversal"></option>
-              <option value="Breakout"></option>
-              <option value="Range"></option>
-              <option value="Onchain"></option>
-            </datalist>
-          </div>
-        </div>
-        <div class="strat-sec">📊 Backtest sonuçları</div>
-        <div class="strat-form-grid">
-          <div class="strat-f">
-            <label>İşlem sayısı</label>
-            <input type="number" id="sf-bt-trades" placeholder="0" min="0" step="1">
-          </div>
-          <div class="strat-f">
-            <label>Win rate (%)</label>
-            <input type="number" id="sf-bt-wr" placeholder="0-100" min="0" max="100" step="0.1">
-          </div>
-          <div class="strat-f">
-            <label>Profit factor</label>
-            <input type="number" id="sf-bt-pf" placeholder="1.5" min="0" step="0.01">
-          </div>
-          <div class="strat-f">
-            <label>Ortalama R</label>
-            <input type="number" id="sf-bt-avg" placeholder="0.5" step="0.01">
-          </div>
-          <div class="strat-f">
-            <label>Maks drawdown (R)</label>
-            <input type="number" id="sf-bt-dd" placeholder="3.0" min="0" step="0.1">
-          </div>
-          <div class="strat-f">
-            <label>Backtest dönemi</label>
-            <input type="text" id="sf-bt-per" placeholder="Oca 24 – Haz 26" maxlength="40">
-          </div>
-        </div>
-        <div class="strat-sec">🎯 Durum &amp; Öncelik</div>
-        <div class="strat-form-grid">
-          <div class="strat-f">
-            <label>Durum</label>
-            <select id="sf-status">
-              <option value="aktif">🟢 Aktif</option>
-              <option value="izleniyor">🟡 İzleniyor</option>
-              <option value="pasif">⚪ Pasif</option>
-              <option value="elendi">🔴 Elendi</option>
-            </select>
-          </div>
-          <div class="strat-f">
-            <label>Öncelik</label>
-            <select id="sf-prio">
-              <option value="1">1 — En yüksek</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5 — En düşük</option>
-            </select>
-          </div>
-          <div class="strat-f strat-f-full">
-            <label>Değerlendirme notu</label>
-            <textarea id="sf-note" rows="3" placeholder="Strateji nasıl çalışıyor, nereden gördün, neden elendi…"></textarea>
-          </div>
-        </div>
-        <div class="strat-form-btns">
-          <button type="button" class="btn solid" id="sf-save">Kaydet</button>
-          <button type="button" class="btn" id="sf-cancel">Vazgeç</button>
-        </div>
-      </div>
-    </div>
     <div class="ch-panel ch-main" id="ch-main">
       <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
       <div id="eg-ch-list" class="ch-list"></div>
@@ -4498,6 +4388,80 @@
       <div class="eg-form-err" id="ch-prof-err"></div>
     </div>
   </div>
+<div id="page-strategies" class="hidden">
+      <div class="strat-head">
+        <div>
+          <div class="strat-title">🧪 Strateji Yönetimi</div>
+          <div class="strat-sub">Stratejilerini tanımla: kurallar, konfirmasyon kutucukları, işlem kayıtları. Profit factor ve win rate kendiliğinden hesaplanır. Bu bölüm yalnızca senin cihazında.</div>
+        </div>
+        <div class="strat-head-actions">
+          <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
+        </div>
+      </div>
+      <div id="strat-list-wrap">
+        <div id="strat-list" class="strat-list"></div>
+        <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
+      </div>
+      <div id="strat-detail" class="strat-detail hidden"></div>
+      <div id="strat-form" class="strat-form hidden">
+        <div class="strat-form-h" id="strat-form-title">Yeni Strateji</div>
+        <div class="strat-form-grid">
+          <div class="strat-f">
+            <label>Strateji adı *</label>
+            <input type="text" id="sf-name" list="strat-name-list" placeholder="breaker, 0.382, ifvg, LHPB, LLPB…" maxlength="80">
+            <datalist id="strat-name-list">
+              <option value="breaker"></option>
+              <option value="0.382"></option>
+              <option value="ifvg"></option>
+              <option value="LHPB"></option>
+              <option value="LLPB"></option>
+            </datalist>
+          </div>
+          <div class="strat-f">
+            <label>Piyasa / Coin</label>
+            <input type="text" id="sf-market" placeholder="BTC, ETH, Tüm majörler…" maxlength="60">
+          </div>
+          <div class="strat-f">
+            <label>Zaman dilimi</label>
+            <input type="text" id="sf-tf" placeholder="5m, 15m, 1H, 4H…" maxlength="20">
+          </div>
+          <div class="strat-f">
+            <label>Yön</label>
+            <select id="sf-dir"><option value="">—</option><option value="long">Long</option><option value="short">Short</option><option value="both">Her iki yön</option></select>
+          </div>
+        </div>
+        <div class="strat-sec">🎯 Durum &amp; Öncelik</div>
+        <div class="strat-form-grid">
+          <div class="strat-f">
+            <label>Durum</label>
+            <select id="sf-status">
+              <option value="aktif">🟢 Aktif</option>
+              <option value="izleniyor">🟡 İzleniyor</option>
+              <option value="pasif">⚪ Pasif</option>
+              <option value="elendi">🔴 Elendi</option>
+            </select>
+          </div>
+          <div class="strat-f">
+            <label>Öncelik</label>
+            <select id="sf-prio">
+              <option value="1">1 — En yüksek</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5 — En düşük</option>
+            </select>
+          </div>
+          <div class="strat-f strat-f-full">
+            <label>Değerlendirme notu</label>
+            <textarea id="sf-note" rows="3" placeholder="Strateji nasıl çalışıyor, nereden gördün, neden elendi…"></textarea>
+          </div>
+        </div>
+        <div class="strat-form-btns">
+          <button type="button" class="btn solid" id="sf-save">Kaydet</button>
+          <button type="button" class="btn" id="sf-cancel">Vazgeç</button>
+        </div>
+      </div>
+    </div>
   <div id="page-mentoring" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🤝</span>
@@ -8539,6 +8503,7 @@ function init() {
   bindNewsPage();
   bindDataPage();
   bindEgitimPage();
+  bindStrategiesPage();
   bindChannelsPage();
   mtInit();
   bindPanoPage();
@@ -8645,7 +8610,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','defter','data','review','news','egitim','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
+  const VALID_PAGES = ['home','defter','data','review','news','egitim','strategies','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -9777,7 +9742,7 @@ function showPage(name, skipAnim) {
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'strategies', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -9800,6 +9765,7 @@ function showPage(name, skipAnim) {
   if (name === 'review') renderReview();
   if (name === 'news') renderNews();
   if (name === 'egitim') renderEgitim();
+  if (name === 'strategies') renderStrategies();
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -11084,7 +11050,6 @@ async function pullWeeksFromNotion() {
 // ============ Strateji Yönetimi (yalnızca admin, localStorage) ============
 const STRAT_KEY = 'defter-strategies-v1';
 let stratData = { list: [] };
-let stratTab = 'channels';   // EDU sekmeleri: 'channels' | 'strategies'
 let stratMode = 'list';      // strateji sayfası: 'list' | 'detail'
 let stratCurId = null;
 let stratEditId = null;
@@ -11125,18 +11090,13 @@ function stratAutoMetrics(s) {
   return out;
 }
 function stratScore(s) {
-  // kompozit skor: backtest + canlı trade kayıtları. 0-100.
-  const bt = s.bt || {};
+  // kompozit skor: işlem kayıtlarından hesaplanan metrikler. 0-100.
   const auto = stratAutoMetrics(s);
   const parts = [];
-  const wr = bt.wr != null ? bt.wr : (auto.wr != null ? auto.wr : null);
-  if (wr != null) parts.push(wr);
-  const pf = bt.pf != null ? Math.min(100, bt.pf * 40) : (auto.pf != null && auto.pf > 0 ? Math.min(100, auto.pf * 40) : null);
-  if (pf != null) parts.push(pf);
-  const avg = bt.avg != null ? Math.min(100, (bt.avg + 1) * 33) : (auto.avg != null ? Math.min(100, (auto.avg + 1) * 33) : null);
-  if (avg != null) parts.push(avg);
-  const dd = bt.dd != null ? bt.dd : auto.dd;
-  if (dd != null) parts.push(dd <= 2 ? 85 : dd <= 4 ? 60 : dd <= 7 ? 35 : 10);
+  if (auto.wr != null) parts.push(auto.wr);
+  if (auto.pf != null && auto.pf > 0) parts.push(Math.min(100, auto.pf * 40));
+  if (auto.avg != null) parts.push(Math.min(100, (auto.avg + 1) * 33));
+  if (auto.dd != null) parts.push(auto.dd <= 2 ? 85 : auto.dd <= 4 ? 60 : auto.dd <= 7 ? 35 : 10);
   if (auto.n >= 5) {
     if (auto.wr != null) parts.push(auto.wr * 0.9);
     if (auto.netR != null) parts.push(Math.min(100, Math.max(0, (auto.netR / auto.n) * 160)));
@@ -11150,37 +11110,8 @@ function stratScoreClass(sc) { return sc >= 70 ? 'good' : sc >= 40 ? 'neu' : 'ba
 function stratStatusMeta(st) { return { label: st === 'aktif' ? '🟢 Aktif' : st === 'izleniyor' ? '🟡 İzleniyor' : st === 'pasif' ? '⚪ Pasif' : '🔴 Elendi', next: st === 'aktif' ? 'izleniyor' : st === 'izleniyor' ? 'pasif' : st === 'pasif' ? 'elendi' : 'aktif' }; }
 function stratNextBtn(st) { return st === 'aktif' ? '➖ Pasifleştir' : st === 'izleniyor' ? '⚪ Pasif yap' : st === 'pasif' ? '🔴 Ele' : '♻️ Geri al'; }
 
-// --- EDU içi sayfa görünümü ---
-function renderStrat() {
-  const tabs = document.getElementById('eg-tabs');
-  const isAdmin = magIsAdmin();
-  if (tabs) tabs.style.display = isAdmin ? 'flex' : 'none';
-  if (!isAdmin) stratTab = 'channels';
-  const view = document.getElementById('strat-view');
-  const main = document.querySelector('#page-egitim > .ch-panel.ch-main');
-  const oldCourse = document.getElementById('eg-old-course');
-  const chView = document.getElementById('ch-view');
-  const chFormEl = document.getElementById('ch-form');
-  const noCh = document.getElementById('eg-no-channel');
-  if (!view || !main) return;
-  const tb1 = document.getElementById('eg-tab-channels');
-  const tb2 = document.getElementById('eg-tab-strategies');
-  if (tb1) tb1.classList.toggle('on', stratTab === 'channels');
-  if (tb2) tb2.classList.toggle('on', stratTab === 'strategies');
-  if (stratTab === 'strategies') {
-    view.classList.remove('hidden');
-    main.classList.add('hidden');
-    if (oldCourse) oldCourse.classList.add('hidden');
-    if (chView) chView.classList.add('hidden');
-    if (chFormEl) chFormEl.classList.add('hidden');
-    if (noCh) noCh.style.display = 'none';
-    renderStratPage();
-  } else {
-    view.classList.add('hidden');
-    main.classList.remove('hidden');
-  }
-}
-function renderStratPage() {
+// --- Stratejiler sayfası görünümü ---
+function renderStrategies() {
   if (stratMode === 'detail') {
     const s = stratCur();
     if (!s) { stratMode = 'list'; stratRenderList(); }
@@ -11201,11 +11132,7 @@ function stratRenderList() {
   if (formEl) formEl.classList.toggle('hidden', !stratFormOpen);
   if (!listEl) return;
   const list = stratData.list.slice().sort((a, b) => stratScore(b) - stratScore(a) || (a.prio || 3) - (b.prio || 3));
-  const groups = {};
-  list.forEach(s => { const k = (s.cat || '').trim() || 'Kategorisiz'; (groups[k] = groups[k] || []).push(s); });
-  const groupKeys = Object.keys(groups).sort();
   const card = s => {
-    const bt = s.bt || {};
     const auto = stratAutoMetrics(s);
     const sc = stratScore(s);
     const st = s.status;
@@ -11213,8 +11140,8 @@ function stratRenderList() {
     const rules = (s.rules || []).length;
     const tr = (s.trades || []).length;
     const m = (lbl, val, cls) => '<div class="strat-metric"><span class="m-lbl">' + lbl + '</span><span class="m-val ' + (cls || '') + '">' + val + '</span></div>';
-    const wr = bt.wr != null ? bt.wr : auto.wr;
-    const pf = bt.pf != null ? bt.pf : auto.pf;
+    const wr = auto.wr;
+    const pf = auto.pf;
     const netR = auto.netR != null ? (auto.netR > 0 ? '+' : '') + auto.netR : null;
     return '<div class="strat-card st-' + st + '" data-strat="' + s.id + '">' +
       '<div class="strat-flag ' + st + '"></div>' +
@@ -11229,8 +11156,8 @@ function stratRenderList() {
         '<div class="strat-metrics">' +
           m('Win rate', wr != null ? wr + '%' : '—', wr >= 50 ? 'good' : wr >= 40 ? 'neu' : 'bad') +
           m('PF', pf != null ? pf : '—', pf >= 1.5 ? 'good' : pf >= 1 ? 'neu' : 'bad') +
-          m('Ort. R', bt.avg != null ? bt.avg : (auto.avg != null ? auto.avg : '—'), (bt.avg || auto.avg) >= 0.3 ? 'good' : (bt.avg || auto.avg) >= 0 ? 'neu' : 'bad') +
-          m('Canlı net R', netR != null ? netR : '—', auto.netR >= 0 ? 'good' : 'bad') +
+          m('Ort. R', auto.avg != null ? auto.avg : '—', auto.avg >= 0.3 ? 'good' : auto.avg >= 0 ? 'neu' : 'bad') +
+          m('Net R', netR != null ? netR : '—', auto.netR >= 0 ? 'good' : 'bad') +
           m('Öncelik', s.prio || '—') +
         '</div>' +
         '<div class="strat-actions-row">' +
@@ -11243,10 +11170,7 @@ function stratRenderList() {
       '<div class="strat-score"><span class="s-val ' + stratScoreClass(sc) + '">' + sc + '</span><span class="s-lbl">Skor</span></div>' +
     '</div>';
   };
-  listEl.innerHTML = groupKeys.map(k =>
-    '<div class="strat-group"><div class="strat-group-h">' + esc(k) + ' <span class="strat-group-n">' + groups[k].length + '</span></div>' +
-    groups[k].map(card).join('') + '</div>'
-  ).join('');
+  listEl.innerHTML = list.map(card).join('');
   if (emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
   if (list.length && stratEditId && !stratData.list.find(x => x.id === stratEditId)) stratEditId = null;
 }
@@ -11258,7 +11182,6 @@ function stratRenderDetail(s) {
   if (!detEl) return;  if (listWrap) listWrap.style.display = 'none';
   if (formEl) formEl.classList.add('hidden');
   detEl.classList.remove('hidden');
-  const bt = s.bt || {};
   const auto = stratAutoMetrics(s);
   const sc = stratScore(s);
   const st = s.status;
@@ -11273,6 +11196,7 @@ function stratRenderDetail(s) {
     return '<tr>' +
       '<td>' + esc(t.date || '—') + '</td>' +
       '<td>' + (t.dir === 'short' ? '↘ Short' : t.dir === 'long' ? '↗ Long' : '—') + '</td>' +
+      '<td>' + esc(t.pair || '—') + '</td>' +
       '<td>' + esc(t.entry || '') + '</td>' +
       '<td>' + esc(t.exit || '') + '</td>' +
       '<td class="' + cls + '">' + (rv !== null ? (rv > 0 ? '+' : '') + rv : '—') + '</td>' +
@@ -11307,15 +11231,7 @@ function stratRenderDetail(s) {
       (s._impMsg ? '<div class="sd-import-note">' + esc(s._impMsg) + '</div>' : '') +
     '</div>' +
     '<div class="sd-metrics">' +
-      '<div class="sd-metric-group"><div class="sd-mg-title">📊 Backtest</div><div class="strat-metrics">' +
-        m('İşlem', bt.trades != null ? bt.trades : '—') +
-        m('Win rate', bt.wr != null ? bt.wr + '%' : '—', bt.wr >= 50 ? 'good' : bt.wr >= 40 ? 'neu' : 'bad') +
-        m('PF', bt.pf != null ? bt.pf : '—', bt.pf >= 1.5 ? 'good' : bt.pf >= 1 ? 'neu' : 'bad') +
-        m('Ort. R', bt.avg != null ? bt.avg : '—', bt.avg >= 0.3 ? 'good' : bt.avg >= 0 ? 'neu' : 'bad') +
-        m('DD (R)', bt.dd != null ? bt.dd : '—', bt.dd <= 3 ? 'good' : bt.dd <= 6 ? 'neu' : 'bad') +
-        (s.btPer ? m('Dönem', esc(s.btPer)) : '') +
-      '</div></div>' +
-      '<div class="sd-metric-group"><div class="sd-mg-title">📈 Canlı (işlemlerden otomatik)</div><div class="strat-metrics">' +
+      '<div class="sd-metric-group"><div class="sd-mg-title">📊 Backtest (işlem kayıtlarından otomatik)</div><div class="strat-metrics">' +
         m('İşlem', auto.n) +
         m('Win rate', auto.wr != null ? auto.wr + '%' : '—', auto.wr >= 50 ? 'good' : auto.wr >= 40 ? 'neu' : 'bad') +
         m('PF', auto.pf != null ? auto.pf : '—', auto.pf >= 1.5 ? 'good' : auto.pf >= 1 ? 'neu' : 'bad') +
@@ -11339,12 +11255,13 @@ function stratRenderDetail(s) {
     '<div class="sd-sec sd-trades-sec">' +
       '<div class="sd-sec-h">📈 İşlem Kayıtları <span class="sd-hint">R sonucu gir — PF, win rate otomatik hesaplanır</span></div>' +
       '<div class="sd-table-wrap"><table class="sd-table">' +
-        '<thead><tr><th>Tarih</th><th>Yön</th><th>Giriş</th><th>Çıkış</th><th>Sonuç (R)</th><th>Not</th><th></th></tr></thead>' +
-        '<tbody>' + (rows || '<tr><td colspan="7" class="sd-empty">Henüz işlem yok — aşağıdan ekle.</td></tr>') + '</tbody>' +
+        '<thead><tr><th>Tarih</th><th>Yön</th><th>Çift</th><th>Giriş</th><th>Çıkış</th><th>Sonuç (R)</th><th>Not</th><th></th></tr></thead>' +
+        '<tbody>' + (rows || '<tr><td colspan="8" class="sd-empty">Henüz işlem yok — aşağıdan ekle.</td></tr>') + '</tbody>' +
       '</table></div>' +
       '<div class="sd-tr-form">' +
         '<input type="date" id="sd-tr-date" value="' + new Date().toISOString().slice(0, 10) + '">' +
         '<select id="sd-tr-dir"><option value="long">Long</option><option value="short">Short</option></select>' +
+        '<input type="text" id="sd-tr-pair" placeholder="Çift" maxlength="20">' +
         '<input type="number" id="sd-tr-entry" placeholder="Giriş" step="any">' +
         '<input type="number" id="sd-tr-exit" placeholder="Çıkış" step="any">' +
         '<input type="number" id="sd-tr-r" placeholder="Sonuç R (+2, -1)" step="0.01">' +
@@ -11367,14 +11284,6 @@ function stratOpenForm(id) {
   g('sf-market').value = s ? (s.market || '') : '';
   g('sf-tf').value = s ? (s.tf || '') : '';
   g('sf-dir').value = s ? (s.dir || '') : '';
-  g('sf-cat').value = s ? (s.cat || '') : '';
-  const bt = s ? (s.bt || {}) : {};
-  g('sf-bt-trades').value = bt.trades != null ? bt.trades : '';
-  g('sf-bt-wr').value = bt.wr != null ? bt.wr : '';
-  g('sf-bt-pf').value = bt.pf != null ? bt.pf : '';
-  g('sf-bt-avg').value = bt.avg != null ? bt.avg : '';
-  g('sf-bt-dd').value = bt.dd != null ? bt.dd : '';
-  g('sf-bt-per').value = s ? (s.btPer || '') : '';
   g('sf-status').value = s ? (s.status || 'aktif') : 'aktif';
   g('sf-prio').value = s ? (String(s.prio || 3)) : '3';
   g('sf-note').value = s ? (s.note || '') : '';
@@ -11389,15 +11298,6 @@ function stratSaveForm() {
     market: g('sf-market').value.trim(),
     tf: g('sf-tf').value.trim(),
     dir: g('sf-dir').value,
-    cat: g('sf-cat').value.trim(),
-    btPer: g('sf-bt-per').value.trim(),
-    bt: {
-      trades: stratNum(g('sf-bt-trades').value),
-      wr: stratNum(g('sf-bt-wr').value),
-      pf: stratNum(g('sf-bt-pf').value),
-      avg: stratNum(g('sf-bt-avg').value),
-      dd: stratNum(g('sf-bt-dd').value),
-    },
     status: g('sf-status').value,
     prio: parseInt(g('sf-prio').value, 10) || 3,
     note: g('sf-note').value.trim(),
@@ -11425,7 +11325,7 @@ function stratCycleStatus(id) {
   const s = stratData.list.find(x => x.id === id);
   if (!s) return;
   s.status = stratStatusMeta(s.status).next;
-  saveStrat().then(() => renderStratPage());
+  saveStrat().then(() => renderStrategies());
 }
 function stratAddRule(id) {
   const s = stratData.list.find(x => x.id === id);
@@ -11478,12 +11378,13 @@ function stratAddTrade(id) {
     id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     date: g('sd-tr-date').value,
     dir: g('sd-tr-dir').value,
+    pair: g('sd-tr-pair').value.trim(),
     entry: g('sd-tr-entry').value.trim(),
     exit: g('sd-tr-exit').value.trim(),
     r,
     note: g('sd-tr-note').value.trim(),
   });
-  g('sd-tr-entry').value = ''; g('sd-tr-exit').value = ''; g('sd-tr-r').value = ''; g('sd-tr-note').value = '';
+  g('sd-tr-pair').value = ''; g('sd-tr-entry').value = ''; g('sd-tr-exit').value = ''; g('sd-tr-r').value = ''; g('sd-tr-note').value = '';
   saveStrat().then(() => stratRenderDetail(s));
 }
 function stratDelTrade(id, tid) {
@@ -11515,6 +11416,7 @@ function stratImportFrom(id, source) {
       id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
       date: t.date || '',
       dir: String(t.dir || 'LONG').toLowerCase().indexOf('short') === 0 ? 'short' : 'long',
+      pair: t.pair || t.coin || '',
       entry: '', exit: '', r: rv,
       note: t.note || ((source === 'notion' ? 'Notion' : 'Günlük') + ' içe aktarıldı'),
     });
@@ -11741,8 +11643,6 @@ function egCurVid(topic) {
 
 function renderEgitim() {
   const canEdit = magIsAdmin();
-  renderStrat();
-  if (stratTab === 'strategies') return;
   // ---- Eğitsel Kanal: trader listesi (sol alttaki panel) ----
   if (!channelsLoaded) {
     channelsLoaded = true;
@@ -13836,18 +13736,15 @@ function bindPanoPage() {
   panoInit();
 }
 
-function bindEgitimPage() {
+function bindStrategiesPage() {
   const g = id => document.getElementById(id);
-  // ---- Strateji Yönetimi ----
-  g('eg-tab-channels').addEventListener('click', () => { stratTab = 'channels'; renderEgitim(); });
-  g('eg-tab-strategies').addEventListener('click', () => { stratTab = 'strategies'; stratMode = 'list'; stratCurId = null; renderEgitim(); });
   g('strat-add').addEventListener('click', () => stratOpenForm(null));
   g('strat-list').addEventListener('click', e => {
     const open = e.target.closest('[data-strat-open]');
     const ed = e.target.closest('[data-strat-edit]');
     const st = e.target.closest('[data-strat-status]');
     const del = e.target.closest('[data-strat-del]');
-    if (open) { stratCurId = open.getAttribute('data-strat-open'); stratMode = 'detail'; renderEgitim(); }
+    if (open) { stratCurId = open.getAttribute('data-strat-open'); stratMode = 'detail'; renderStrategies(); }
     else if (ed) stratOpenForm(ed.getAttribute('data-strat-edit'));
     else if (st) stratCycleStatus(st.getAttribute('data-strat-status'));
     else if (del) { if (confirm('Bu stratejiyi kalıcı olarak sil?')) stratDelete(del.getAttribute('data-strat-del')); }
@@ -13868,7 +13765,7 @@ function bindEgitimPage() {
       const impJ = e.target.closest('[data-sd-import]');
       const impN = e.target.closest('[data-sd-import-notion]');
       const id = stratCurId;
-      if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; renderEgitim(); }
+      if (back) { stratMode = 'list'; stratCurId = null; stratEditId = null; stratFormOpen = false; renderStrategies(); }
       else if (edit) stratOpenForm(id);
       else if (st) stratCycleStatus(id);
       else if (del) { if (confirm('Bu stratejiyi kalıcı olarak sil?')) stratDelete(id); }
@@ -13889,6 +13786,10 @@ function bindEgitimPage() {
   g('sf-save').addEventListener('click', stratSaveForm);
   g('sf-cancel').addEventListener('click', () => { stratEditId = null; stratFormOpen = false; stratRenderList(); });
   g('sf-name').addEventListener('keydown', e => { if (e.key === 'Enter') stratSaveForm(); });
+}
+
+function bindEgitimPage() {
+  const g = id => document.getElementById(id);
   document.querySelectorAll('#eg-level-seg button').forEach(b => {
     b.addEventListener('click', () => { egLevel = b.getAttribute('data-level'); renderEgitim(); });
   });
@@ -16617,7 +16518,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b18';
+const APP_BUILD = 'b19';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -17553,6 +17454,7 @@ loadSfx();
     'app.weekly': { tr: '📊 Haftalık Değerlendirme', en: '📊 Weekly Review' },
     'app.trading': { tr: '📉 Trading', en: '📉 Trading' },
     'app.eduPage': { tr: '🎓 Alfa Edu', en: '🎓 Alfa Edu' },
+    'app.strategies': { tr: '🧪 Stratejiler', en: '🧪 Strategies' },
     'app.pano': { tr: '🛠️ Çalışma Panosu', en: '🛠️ Work Board' },
     'app.mentoring': { tr: '🤝 Mentoring', en: '🤝 Mentoring' },
     'app.indicators': { tr: '📐 İndikatörler', en: '📐 Indicators' },
