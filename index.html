@@ -14020,6 +14020,7 @@ function atCardHtml(p) {
       '<button type="button" class="at-act' + (liked ? ' liked' : '') + '" data-atlike="' + p.id + '">' + (liked ? '❤️' : '🤍') + ' <span>' + nlike + '</span></button>' +
       '<button type="button" class="at-act" data-atcom="' + p.id + '">💬 <span>' + ncom + '</span></button>' +
       (admin ? '<button type="button" class="at-act" data-atrt="' + p.id + '">🔁 RT</button>' : '') +
+      (admin ? '<button type="button" class="at-act" data-atafter="' + p.id + '">📊 Sonuç paylaş</button>' : '') +
       (p.type === 'islem' && (p.entry || p.sl) ? '<button type="button" class="at-act tool" data-attool="' + p.id + '">🧮 Calculator\'a gönder</button>' : '') +
       (admin && p.type === 'islem' ? '<button type="button" class="at-act" data-atstatus="' + p.id + '">⚙ Durum</button>' : '') +
     '</div>' +
@@ -14148,6 +14149,13 @@ function atStartRepost(pid) {
   const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '🔁 RT / Güncelle';
   const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Güncelleme / yorumunu yaz…';
   atRenderRepostBox(); atUpdatePreview();
+}
+function atStartAfter(pid) {
+  atStartRepost(pid); // before = alıntılanan gönderi
+  const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '📊 Sonucu paylaş (after)';
+  const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Sonuç / kapanış yorumu (örn. TP geldi ✅ +2.4R)…';
+  // "after" için işlem sonucu seçiciyi otomatik aç
+  const box = document.getElementById('at-result-list'); if (box && box.style.display === 'none') atToggleResultList();
 }
 function atStartEdit(pid) {
   const p = alfaPosts.find(x => x.id === pid); if (!p) return;
@@ -14346,6 +14354,7 @@ function bindAlfaTrading() {
     const pdel = t.closest('[data-atpdel]'); if (pdel) return atDelPost(pdel.getAttribute('data-atpdel'));
     const cdel = t.closest('[data-atcdel]'); if (cdel) { const [pi, ci] = cdel.getAttribute('data-atcdel').split('|'); return atDelComment(pi, ci); }
     const rt = t.closest('[data-atrt]'); if (rt) return atStartRepost(rt.getAttribute('data-atrt'));
+    const af = t.closest('[data-atafter]'); if (af) return atStartAfter(af.getAttribute('data-atafter'));
     const tool = t.closest('[data-attool]'); if (tool) return atToolSend(tool.getAttribute('data-attool'));
     const stt = t.closest('[data-atstatus]'); if (stt) return atSetStatus(stt.getAttribute('data-atstatus'));
     const im = t.closest('[data-atimg]'); if (im) { try { window.open(im.getAttribute('data-atimg'), '_blank', 'noopener'); } catch (e) {} }
