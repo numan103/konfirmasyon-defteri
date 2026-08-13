@@ -4437,10 +4437,12 @@
           <div class="strat-sub">Stratejilerini tanımla: kurallar, konfirmasyon kutucukları, işlem kayıtları. Profit factor ve win rate kendiliğinden hesaplanır. Bu bölüm yalnızca senin cihazında.</div>
         </div>
         <div class="strat-head-actions">
+          <button type="button" class="btn" id="strat-distribute-all" title="Trade günlüğündeki tüm kayıtları strateji adına / notuna göre otomatik dağıt">📥 Günlükten Tümünü Dağıt</button>
           <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
         </div>
       </div>
       <div id="strat-list-wrap">
+        <div id="strat-dist-note"></div>
         <div id="strat-list" class="strat-list"></div>
         <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
       </div>
@@ -11186,6 +11188,8 @@ function stratRenderList() {
   const wrap = document.getElementById('strat-list-wrap');
   const formEl = document.getElementById('strat-form');
   if (wrap) wrap.style.display = 'block';
+  const dN = document.getElementById('strat-dist-note');
+  if (dN) dN.innerHTML = '';
   const detEl = document.getElementById('strat-detail');
   if (detEl) detEl.classList.add('hidden');
   if (formEl) formEl.classList.toggle('hidden', !stratFormOpen);
@@ -11701,10 +11705,53 @@ function stratImportFrom(id, source) {
   saveStrat().then(() => stratRenderDetail(s));
 }
 function stratMatch(t, name) {
-  const tn = String(t.strat || '').trim().toLowerCase();
   const nm = String(name || '').trim().toLowerCase();
-  if (!tn || !nm) return false;
-  return tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0;
+  if (!nm) return false;
+  const tn = String(t.strat || '').trim().toLowerCase();
+  if (tn && (tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0)) return true;
+  if (nm.length >= 3) {
+    const hay = (String(t.note || '') + ' ' + String(t.model || '')).toLowerCase();
+    if (hay.indexOf(nm) >= 0) return true;
+  }
+  return false;
+}
+function stratDistributeAll() {
+  // Tek buton: trade günlüğündeki tüm kayıtları strateji adı / not / model eşleşmesiyle uygun stratejilere dağıt
+  const trades = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades : [];
+  if (!trades.length) { stratToast('Trade günlüğünde kayıt yok — önce günlükten işlem ekle.'); return; }
+  const strats = stratData.list.filter(s => (s.name || '').trim());
+  let added = 0, dupe = 0, unmatched = 0, tagged = 0;
+  trades.forEach(t => {
+    const rv = stratNum(t.r);
+    if (rv === null) return;
+    const hit = strats.find(s => stratMatch(t, s.name));
+    if (!hit) { unmatched++; return; }
+    if (!Array.isArray(hit.liveTrades)) hit.liveTrades = [];
+    const key = (t.date || '') + '|' + String(t.dir || '') + '|' + String(t.pair || '').toUpperCase() + '|' + String(rv);
+    const known = hit.liveTrades.some(x =>
+      (x.date || '') + '|' + String(x.dir || '') + '|' + String(x.pair || '').toUpperCase() + '|' + (x.r === null || x.r === undefined ? '' : String(x.r)) === key);
+    if (known) { dupe++; return; }
+    hit.liveTrades.push({
+      id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      date: t.date || '',
+      dir: String(t.dir || 'LONG').toLowerCase().indexOf('short') === 0 ? 'short' : 'long',
+      pair: t.pair || t.coin || '',
+      r: rv,
+      note: t.note || 'Günlükten dağıtıldı',
+    });
+    added++;
+    if (!String(t.strat || '').trim()) { t.strat = hit.name; tagged++; }
+  });
+  saveStrat().then(async () => {
+    if (tagged) { try { await saveData(); } catch (e) { /* günlük geri yazımı opsiyonel */ } }
+    stratRenderList();
+    const note = document.getElementById('strat-dist-note');
+    if (note) note.innerHTML = '<div class="sd-import-note">📥 Dağıtım özeti: <b>' + added + '</b> işlem stratejilere eklendi' +
+      (tagged ? ' · <b>' + tagged + '</b> kayıt strateji adıyla etiketlendi' : '') +
+      (dupe ? ' · ' + dupe + ' zaten vardı (atlandı)' : '') +
+      (unmatched ? ' · ' + unmatched + ' hiçbir stratejiyle eşleşmedi' : '') + '.</div>';
+    stratToast('📥 ' + added + ' işlem dağıtıldı' + (dupe ? ' · ' + dupe + ' zaten vardı' : '') + (unmatched ? ' · ' + unmatched + ' eşleşmedi' : ''));
+  });
 }
 async function stratImportFromNotion(id) {
   const s = stratData.list.find(x => x.id === id);
@@ -14089,6 +14136,8 @@ function bindPanoPage() {
 function bindStrategiesPage() {
   const g = id => document.getElementById(id);
   g('strat-add').addEventListener('click', () => stratOpenForm(null));
+  const distBtn = document.getElementById('strat-distribute-all');
+  if (distBtn) distBtn.addEventListener('click', stratDistributeAll);
   g('strat-list').addEventListener('click', e => {
     const open = e.target.closest('[data-strat-open]');
     const ed = e.target.closest('[data-strat-edit]');
@@ -16921,7 +16970,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b21';
+const APP_BUILD = 'b22';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
