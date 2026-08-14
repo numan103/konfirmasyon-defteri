@@ -12035,8 +12035,27 @@ function anaDeepLocal(text) {
   }
   L.push('');
   L.push('📍 Önemli Seviyeler');
-  if (a.sev.length) a.sev.forEach(v => L.push('  • ' + v + (a.dir === 'long' ? ' — üstünde kalırsa senaryo geçerli' : ' — altında kalırsa senaryo geçerli')));
-  else L.push('  • Metinde net bir seviye yok — trader seviye yerine alan / yapı tarif etmiş olabilir.');
+  if (a.sev.length) {
+    const sevN = a.sev.map(v => ({ raw: v, n: parseFloat(String(v).replace(/[^0-9.,]/g, '').replace(',', '.')) }));
+    const sevSorted = sevN.slice().sort((x, y) => (isNaN(x.n) ? 0 : x.n) - (isNaN(y.n) ? 0 : y.n));
+    sevSorted.forEach((v, i) => {
+      let note = '— alan / bölge';
+      if (!isNaN(v.n) && a.dir) {
+        if (a.dir === 'long') {
+          if (i === sevSorted.length - 1) note = '— hedef / direnç: üstünde kalırsa senaryo güçlenir';
+          else if (i === 0 && sevSorted.length > 1) note = '— geçersizlik: altında günlük kapanış senaryoyu bozar';
+          else note = '— destek: üstünde kalmalı';
+        } else {
+          if (i === 0) note = '— hedef / destek: altında kalırsa senaryo güçlenir';
+          else if (i === sevSorted.length - 1) note = '— geçersizlik: üstünde günlük kapanış senaryoyu bozar';
+          else note = '— direnç: altında kalmalı';
+        }
+      }
+      L.push('  • ' + v.raw + ' ' + note);
+    });
+  } else {
+    L.push('  • Metinde net bir seviye yok — trader seviye yerine alan / yapı tarif etmiş olabilir.');
+  }
   L.push('');
   L.push('🎯 Beklenti & Senaryo');
   L.push('  ' + (a.dir === 'long' ? 'Yukarı senaryo ön planda.' : a.dir === 'short' ? 'Aşağı senaryo ön planda.' : 'Yön belirsiz — trader teyit bekliyor olabilir.'));
@@ -17641,7 +17660,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b25';
+const APP_BUILD = 'b26';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
