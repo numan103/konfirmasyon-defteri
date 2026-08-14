@@ -206,14 +206,14 @@
   }
   .ce-add:hover { background: var(--hover-b); }
   /* --- Navbar --- */
-  .navbar { display: flex; align-items: center; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .navbar { display: flex; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .nav-brand { display: flex; align-items: center; gap: 11px; cursor: pointer; text-decoration: none; color: inherit; }
   .nav-brand:hover { opacity: .8; }
   a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
   .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; background: linear-gradient(120deg, var(--text) 35%, var(--pc)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .nav-links { display: flex; align-items: center; gap: 4px; overflow: visible; flex: 1; justify-content: space-between; min-width: 0; }
+  .nav-links { display: flex; gap: 2px; overflow: visible; }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-link { position: relative; background: transparent; border: none; padding: 9px 16px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
   .nav-link:hover { background: rgba(123,120,245,.14); color: var(--text); }
@@ -279,11 +279,6 @@
     .navbar .nav-mobile-btn { margin-left: 8px; }
     .soc-link { width: 28px; height: 28px; }
     body .theme-toggle { display: none; }
-  }
-  @media (max-width: 1080px) {
-    .navbar { gap: 14px; }
-    .nav-links { gap: 2px; }
-    .nav-link, .nav-drop .drop-btn { padding: 8px 12px; font-size: 13.5px; }
   }
   .navbar .user-badge { margin-left: 12px; }
   .navbar .nav-login { margin-left: 12px; flex: none; }
@@ -18245,7 +18240,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b30';
+const APP_BUILD = 'b31';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
