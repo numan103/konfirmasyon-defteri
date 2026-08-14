@@ -4,8 +4,8 @@ const grab = (start, end) => h.slice(h.indexOf(start), h.indexOf(end));
 
 // stratNum / stratMetrics / stratScore / stratScoreClass / stratAutoMetrics / stratStatusMeta / stratMatch / stratTradesOf / stratYtId (saf fonksiyonlar)
 let mSrc = grab('function stratNum(', '// ============ Eğitim İçeriği (Alfa Edu) ============');
-let fn = new Function(mSrc + '\nreturn { stratNum, stratMetrics, stratScore, stratScoreClass, stratAutoMetrics, stratStatusMeta, stratMatch, stratTradesOf, stratYtId, stratDetectTopic, stratTopicMeta, anaAi, anaDetectTopic, anaTopicMeta, anaConcepts, anaDeepLocal, stratCleanForSpeech };')();
-const { stratNum, stratMetrics, stratScore, stratScoreClass, stratAutoMetrics, stratStatusMeta, stratMatch, stratTradesOf, stratYtId, stratDetectTopic, stratTopicMeta, anaAi, anaDetectTopic, anaTopicMeta, anaConcepts, anaDeepLocal, stratCleanForSpeech } = fn;
+let fn = new Function(mSrc + '\nreturn { stratNum, stratMetrics, stratScore, stratScoreClass, stratAutoMetrics, stratStatusMeta, stratMatch, stratTradesOf, stratYtId, stratDetectTopic, stratTopicMeta, anaAi, anaDetectTopic, anaTopicMeta, anaConcepts, anaDeepLocal, stratCleanForSpeech, butceNum, butceMoney, butceMonthKey, butceMonthShift, butceFilterMonth, butceTotals, butceGroup, butceGroupPct, butceDonutSegs, butceArcPath, butceBudgetLeft, butceUid };')();
+const { stratNum, stratMetrics, stratScore, stratScoreClass, stratAutoMetrics, stratStatusMeta, stratMatch, stratTradesOf, stratYtId, stratDetectTopic, stratTopicMeta, anaAi, anaDetectTopic, anaTopicMeta, anaConcepts, anaDeepLocal, stratCleanForSpeech, butceNum, butceMoney, butceMonthKey, butceMonthShift, butceFilterMonth, butceTotals, butceGroup, butceGroupPct, butceDonutSegs, butceArcPath, butceBudgetLeft, butceUid } = fn;
 
 const pass = [];
 const fail = [];
@@ -142,6 +142,25 @@ t('ana concepts tasindi', anaAi('likidite avı sonrası kırılım').concepts.le
 t('speak emoji temiz', stratCleanForSpeech('📌 Felsefe test 🧭').indexOf('📌') < 0);
 t('speak yeni satir', stratCleanForSpeech('a\n\nb') === 'a b');
 t('speak cizgi', stratCleanForSpeech('hedef — direnç').indexOf('—') < 0);
+// --- Alfa Defter (Bütçe) ---
+t('butce num', butceNum('x') === 0 && butceNum(12.5) === 12.5 && butceNum('3.5') === 3.5);
+t('butce monthkey', butceMonthKey('2026-08-05') === '2026-08');
+t('butce monthkey date', butceMonthKey(new Date(2026, 7, 15)) === '2026-08');
+t('butce shift', butceMonthShift('2026-01-15', -1) === '2025-12');
+const bt = [
+  { id: '1', type: 'gelir', cat: 'maas', date: '2026-08-05', amount: 10000 },
+  { id: '2', type: 'gider', cat: 'gida', date: '2026-08-06', amount: 500 },
+  { id: '3', type: 'gider', cat: 'kira', date: '2026-08-07', amount: 2500 },
+  { id: '4', type: 'gider', cat: 'gida', date: '2026-07-20', amount: 999 }
+];
+t('butce totals', butceTotals(butceFilterMonth(bt, '2026-08')).gelir === 10000 && butceTotals(butceFilterMonth(bt, '2026-08')).gider === 3000 && butceTotals(butceFilterMonth(bt, '2026-08')).net === 7000);
+t('butce group', butceGroup(butceFilterMonth(bt, '2026-08')).length === 2 && butceGroup(butceFilterMonth(bt, '2026-08')).some(g => g.id === 'gida' && g.total === 500));
+t('butce grouppct', Math.round(butceGroupPct(butceGroup(butceFilterMonth(bt, '2026-08'))).reduce((s, g) => s + g.pct, 0)) === 100);
+t('butce donut segs', butceDonutSegs([{ id: 'a', total: 1 }, { id: 'b', total: 3 }], 4).length === 2 && butceDonutSegs([{ id: 'a', total: 1 }, { id: 'b', total: 3 }], 4)[1].start === 90);
+t('butce arc path', butceArcPath(100, 100, 86, 52, 0, 90).indexOf('M') === 0);
+t('butce arc full', (butceArcPath(100, 100, 86, 52, 0, 360).match(/M/g) || []).length === 2);
+t('butce budget', butceBudgetLeft(butceFilterMonth(bt, '2026-08'), '2026-08', 4000).left === 1000 && butceBudgetLeft(butceFilterMonth(bt, '2026-08'), '2026-08', 2000).pct === 100);
+t('butce uid', butceUid().length > 4);
 
 console.log(pass.length + ' passed, ' + fail.length + ' failed');
 if (fail.length) { console.log('FAILED:', fail.join(', ')); process.exit(1); }

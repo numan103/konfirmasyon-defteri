@@ -117,6 +117,7 @@
     'app.eduPage': { tr: '🎓 Alfa Edu', en: '🎓 Alfa Edu' },
     'app.strategies': { tr: '🧪 Stratejiler', en: '🧪 Strategies' },
     'app.analiz': { tr: '🧭 Analiz Köşesi', en: '🧭 Analysis Corner' },
+    'app.butce': { tr: '💰 Alfa Defter', en: '💰 Alfa Ledger' },
     'app.pano': { tr: '🛠️ Çalışma Panosu', en: '🛠️ Work Board' },
     'app.mentoring': { tr: '🤝 Mentoring', en: '🤝 Mentoring' },
     'app.indicators': { tr: '📐 İndikatörler', en: '📐 Indicators' },

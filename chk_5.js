@@ -3198,6 +3198,8 @@ function init() {
   bindEgitimPage();
   bindStrategiesPage();
   bindAnalizPage();
+  bindButcePage();
+  loadButce().then(renderButce);
   bindChannelsPage();
   mtInit();
   bindPanoPage();
@@ -3304,7 +3306,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','defter','data','review','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
+  const VALID_PAGES = ['home','butce','defter','data','review','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -4436,7 +4438,7 @@ function showPage(name, skipAnim) {
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'butce', 'trading', 'alfatrading', 'defter', 'data', 'review', 'news', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -4461,6 +4463,7 @@ function showPage(name, skipAnim) {
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
+  if (name === 'butce') renderButce();
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -7103,6 +7106,366 @@ function stratDelEduVideo(id, vid2) {
   edu.videos = (edu.videos || []).filter(v => v.id !== vid2);
   saveStrat().then(() => { stratRenderDetail(s); stratToast('▶️ Video silindi'); });
 }
+
+// ============ Alfa Defter (Bütçe) ============
+const BUTCE_KEY = 'defter-butce-v1';
+const BUTCE_COLORS = ['#22d3ee', '#f97316', '#a78bfa', '#facc15', '#fb7185', '#c084fc', '#38bdf8', '#34d399', '#60a5fa', '#f472b6', '#f59e0b', '#94a3b8', '#4ade80', '#2dd4bf', '#a3e635', '#fbbf24', '#86efac'];
+const BUTCE_CATS = [
+  { id: 'gida', name: 'Gıda & Market', icon: '🛒', color: '#22d3ee', type: 'gider' },
+  { id: 'restoran', name: 'Restoran & Dışarı', icon: '🍽️', color: '#f97316', type: 'gider' },
+  { id: 'ulasim', name: 'Ulaşım', icon: '🚗', color: '#a78bfa', type: 'gider' },
+  { id: 'fatura', name: 'Faturalar', icon: '💡', color: '#facc15', type: 'gider' },
+  { id: 'kira', name: 'Kira & Ev', icon: '🏠', color: '#fb7185', type: 'gider' },
+  { id: 'eglence', name: 'Eğlence & Oyun', icon: '🎮', color: '#c084fc', type: 'gider' },
+  { id: 'giyim', name: 'Giyim & Aksesuar', icon: '👕', color: '#38bdf8', type: 'gider' },
+  { id: 'saglik', name: 'Sağlık', icon: '💊', color: '#34d399', type: 'gider' },
+  { id: 'egitim', name: 'Eğitim', icon: '📚', color: '#60a5fa', type: 'gider' },
+  { id: 'abonelik', name: 'Abonelikler', icon: '📺', color: '#f472b6', type: 'gider' },
+  { id: 'kripto', name: 'Kripto & Yatırım', icon: '₿', color: '#f59e0b', type: 'gider' },
+  { id: 'hediye', name: 'Hediye & Kişisel', icon: '🎁', color: '#94a3b8', type: 'gider' },
+  { id: 'diger-gider', name: 'Diğer Gider', icon: '🧾', color: '#94a3b8', type: 'gider' },
+  { id: 'maas', name: 'Maaş', icon: '💼', color: '#4ade80', type: 'gelir' },
+  { id: 'serbest', name: 'Serbest Çalışma', icon: '🚀', color: '#2dd4bf', type: 'gelir' },
+  { id: 'yatirim', name: 'Yatırım Getirisi', icon: '📈', color: '#a3e635', type: 'gelir' },
+  { id: 'kripto-gelir', name: 'Kripto Kâr', icon: '💰', color: '#fbbf24', type: 'gelir' },
+  { id: 'diger-gelir', name: 'Diğer Gelir', icon: '🎁', color: '#86efac', type: 'gelir' }
+];
+let butceData = { entries: [], cats: [], budget: { monthly: 0 } };
+let butceMk = '';
+let butceTypeF = 'all';
+let butceCatF = '';
+let butceQ = '';
+let butceEditId = null;
+let butceFormTypeV = 'gider';
+function butceNum(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function butceMoney(n) { return butceNum(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'; }
+function butceMonthKey(d) {
+  const dt = d instanceof Date ? d : new Date(String(d).slice(0, 10) + 'T12:00:00');
+  if (isNaN(dt.getTime())) return '';
+  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
+}
+function butceMonthShift(mk, delta) {
+  const y = parseInt(mk.slice(0, 4), 10), m = parseInt(mk.slice(5, 7), 10) - 1;
+  const d = new Date(y, m + delta, 1);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function butceMonthLabel(mk) {
+  const y = parseInt(mk.slice(0, 4), 10), m = parseInt(mk.slice(5, 7), 10) - 1;
+  return new Date(y, m, 1).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+}
+function butceFilterMonth(entries, mk) { return (entries || []).filter(e => butceMonthKey(e.date) === mk); }
+function butceTotals(entries) {
+  let gelir = 0, gider = 0;
+  (entries || []).forEach(e => {
+    const a = butceNum(e.amount);
+    if (e.type === 'gelir') gelir += a; else if (e.type === 'gider') gider += a;
+  });
+  return { gelir, gider, net: gelir - gider, count: (entries || []).length };
+}
+function butceGroup(entries) {
+  const m = {};
+  (entries || []).forEach(e => {
+    if (e.type !== 'gider') return;
+    const id = e.cat || 'diger-gider';
+    if (!m[id]) m[id] = 0;
+    m[id] += butceNum(e.amount);
+  });
+  return Object.keys(m).map(id => ({ id, total: m[id] })).sort((a, b) => b.total - a.total);
+}
+function butceGroupPct(group) {
+  const total = (group || []).reduce((s, g) => s + g.total, 0) || 0;
+  return (group || []).map(g => ({ id: g.id, total: g.total, pct: total ? (g.total / total) * 100 : 0 }));
+}
+function butceDonutSegs(group, total) {
+  let acc = 0;
+  return (group || []).map(g => {
+    const start = acc;
+    const sweep = total ? (g.total / total) * 360 : 0;
+    acc += sweep;
+    return { id: g.id, total: g.total, start, end: acc };
+  });
+}
+function butceArcPath(cx, cy, r, inner, startDeg, endDeg) {
+  if (endDeg - startDeg >= 359.9) {
+    return butceArcPath(cx, cy, r, inner, startDeg, startDeg + 180) + ' ' + butceArcPath(cx, cy, r, inner, startDeg + 180, startDeg + 360);
+  }
+  const rad = d => ((d - 90) * Math.PI) / 180;
+  const px = (a, rv) => cx + rv * Math.cos(rad(a));
+  const py = (a, rv) => cy + rv * Math.sin(rad(a));
+  const x0 = px(startDeg, r), y0 = py(startDeg, r);
+  const x1 = px(endDeg, r), y1 = py(endDeg, r);
+  const x2 = px(endDeg, inner), y2 = py(endDeg, inner);
+  const x3 = px(startDeg, inner), y3 = py(startDeg, inner);
+  const large = (endDeg - startDeg) > 180 ? 1 : 0;
+  return 'M' + x0 + ' ' + y0 + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x1 + ' ' + y1 +
+         ' L' + x2 + ' ' + y2 + ' A' + inner + ' ' + inner + ' 0 ' + large + ' 0 ' + x3 + ' ' + y3 + ' Z';
+}
+function butceBudgetLeft(entries, mk, limit) {
+  const gider = butceTotals(butceFilterMonth(entries, mk)).gider;
+  limit = butceNum(limit);
+  return { gider, limit, left: limit - gider, pct: limit ? Math.min(100, (gider / limit) * 100) : 0 };
+}
+function butceUid() { return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function butceCat(id) {
+  if (!id) return null;
+  const c = (butceData.cats || []).find(x => x.id === id);
+  if (c) return c;
+  return BUTCE_CATS.find(x => x.id === id) || null;
+}
+function butceCatList(type) {
+  const presets = BUTCE_CATS.filter(c => c.type === type);
+  const custom = (butceData.cats || []).filter(c => c.type === type);
+  return presets.concat(custom);
+}
+function butceCatOptsHtml(sel, type) {
+  return butceCatList(type).map(c => '<option value="' + c.id + '"' + (c.id === sel ? ' selected' : '') + '>' + c.icon + ' ' + esc(c.name) + '</option>').join('');
+}
+function butceDonutHtml(group) {
+  if (!group.length) return '<div class="bd-chart-empty">Bu ay gider yok 🎉</div>';
+  const total = group.reduce((s, g) => s + g.total, 0);
+  const segs = butceDonutSegs(group, total);
+  const paths = segs.map(sg => {
+    const c = butceCat(sg.id) || { icon: '🧾', name: 'Diğer', color: '#94a3b8' };
+    const d = butceArcPath(100, 100, 86, 52, sg.start, sg.end);
+    return '<path class="bd-arc" data-bcat="' + sg.id + '" d="' + d + '" fill="' + c.color + '"><title>' + esc(c.icon + ' ' + c.name + ' · %' + ((sg.total / (total || 1)) * 100).toFixed(1)) + '</title></path>';
+  }).join('');
+  return '<svg viewBox="0 0 200 200" class="bd-donut" role="img" aria-label="Harcama dağılımı pasta grafiği">' +
+    paths +
+    '<text x="100" y="97" class="bd-donut-c">' + esc(butceMoney(total)) + '</text>' +
+    '<text x="100" y="113" class="bd-donut-s">toplam harcama</text>' +
+    '</svg>';
+}
+function butceListFiltered(monthEntries) {
+  return (monthEntries || []).filter(e => {
+    if (butceTypeF !== 'all' && e.type !== butceTypeF) return false;
+    if (butceCatF && e.cat !== butceCatF) return false;
+    if (butceQ) {
+      const q = butceQ.toLowerCase();
+      const c = butceCat(e.cat);
+      const hay = ((c ? c.name : '') + ' ' + (e.note || '')).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  }).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || (b.created || 0) - (a.created || 0));
+}
+function butceRenderList(month) {
+  const list = butceListFiltered(month);
+  const wrap = document.getElementById('bd-list');
+  const empty = document.getElementById('bd-empty');
+  document.getElementById('bd-list-sub').textContent = list.length ? list.length + ' kayıt' : '';
+  if (!list.length) {
+    wrap.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  wrap.innerHTML = list.map(e => {
+    const c = butceCat(e.cat) || { icon: '🧾', name: 'Diğer', color: '#94a3b8' };
+    const dt = e.date ? new Date(String(e.date).slice(0, 10) + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : '';
+    const cls = e.type === 'gelir' ? 'in' : 'out';
+    const sign = e.type === 'gelir' ? '+' : '−';
+    return '<div class="bd-row">' +
+      '<span class="bd-row-ico" style="background:' + c.color + '22">' + c.icon + '</span>' +
+      '<div class="bd-row-main">' +
+        '<div class="bd-row-cat">' + esc(c.name) + '</div>' +
+        '<div class="bd-row-note">' + esc(e.note || '') + ' · ' + esc(dt) + '</div>' +
+      '</div>' +
+      '<span class="bd-row-amt ' + cls + '">' + sign + butceMoney(e.amount) + '</span>' +
+      '<button type="button" class="bd-row-x" data-bedit="' + e.id + '" title="Düzenle">✎</button>' +
+      '<button type="button" class="bd-row-x" data-bdel="' + e.id + '" title="Sil">✕</button>' +
+    '</div>';
+  }).join('');
+}
+function renderButce() {
+  if (!butceMk) butceMk = butceMonthKey(new Date());
+  document.getElementById('bd-month').textContent = butceMonthLabel(butceMk);
+  const month = butceFilterMonth(butceData.entries, butceMk);
+  const totals = butceTotals(month);
+  const budget = butceBudgetLeft(month, butceMk, butceData.budget.monthly);
+  const bp = budget.pct;
+  const bcl = bp >= 100 ? 'over' : (bp >= 80 ? 'warn' : '');
+  const btxt = budget.limit > 0 ? (budget.left >= 0 ? 'Kalan: ' + butceMoney(budget.left) : 'Aşıldı: ' + butceMoney(-budget.left)) : '';
+  const cards = [
+    ['💵 Gelir', butceMoney(totals.gelir), 'bd-up'],
+    ['💳 Gider', butceMoney(totals.gider), 'bd-down'],
+    ['⚖️ Net', butceMoney(totals.net), 'bd-net'],
+    ['🧾 Kayıt', String(totals.count), '']
+  ];
+  document.getElementById('bd-summary').innerHTML =
+    cards.map(c => '<div class="bd-card ' + c[2] + '"><div class="bd-k">' + c[0] + '</div><div class="bd-v">' + c[1] + '</div></div>').join('') +
+    '<div class="bd-budget-row">' +
+      '<label>🎯 Aylık harcama limiti</label>' +
+      '<input type="number" id="bd-budget-in" min="0" step="100" value="' + (butceData.budget.monthly || '') + '" placeholder="0">' +
+      '<span class="bd-budget-bar"><span class="bd-budget-fill ' + bcl + '" style="width:' + bp + '%"></span></span>' +
+      '<span class="bd-budget-txt">' + esc(btxt) + '</span>' +
+    '</div>';
+  const gGroup = butceGroupPct(butceGroup(month));
+  const totalGider = totals.gider;
+  document.getElementById('bd-chart-sub').textContent = totalGider ? 'Toplam harcama: ' + butceMoney(totalGider) : 'Bu ay harcama yok';
+  document.getElementById('bd-chart').innerHTML = butceDonutHtml(gGroup);
+  const legendHtml = gGroup.length
+    ? gGroup.map(g => {
+        const c = butceCat(g.id) || { icon: '🧾', name: 'Diğer', color: '#94a3b8' };
+        const on = butceCatF === g.id ? ' on' : '';
+        return '<div class="bd-legend-row' + on + '" data-bcat="' + g.id + '" title="Sadece bu kategoriyi göster">' +
+          '<span class="bd-dot" style="background:' + c.color + '"></span>' +
+          '<span class="bd-legend-name">' + c.icon + ' ' + esc(c.name) + '</span>' +
+          '<span class="bd-legend-v">' + butceMoney(g.total) + '</span>' +
+          '<span class="bd-legend-p">%' + g.pct.toFixed(1) + '</span>' +
+        '</div>';
+      }).join('')
+    : '<div class="bd-chart-empty">Bu ay gider yok 🎉</div>';
+  document.getElementById('bd-legend').innerHTML = legendHtml;
+  const barsHtml = gGroup.length
+    ? gGroup.map(g => {
+        const c = butceCat(g.id) || { icon: '🧾', name: 'Diğer', color: '#94a3b8' };
+        const w = Math.max(3, Math.min(100, g.pct));
+        return '<div class="bd-bar-row">' +
+          '<div class="bd-bar-top"><span class="bd-dot" style="background:' + c.color + '"></span><span>' + c.icon + ' ' + esc(c.name) + '</span><span style="flex:1"></span><b>' + butceMoney(g.total) + '</b><span class="bd-legend-p">%' + g.pct.toFixed(1) + '</span></div>' +
+          '<div class="bd-bar-track"><div class="bd-bar-fill" style="width:' + w + '%;background:' + c.color + '"></div></div>' +
+        '</div>';
+      }).join('')
+    : '<div class="bd-chart-empty">Bu ay gider yok 🎉</div>';
+  document.getElementById('bd-bars').innerHTML = barsHtml;
+  butceRenderList(month);
+  const cf = document.getElementById('bd-catf');
+  cf.innerHTML = '<option value="">Tüm kategoriler</option>' + butceCatList('gider').map(c => '<option value="' + c.id + '"' + (c.id === butceCatF ? ' selected' : '') + '>' + c.icon + ' ' + esc(c.name) + '</option>').join('');
+  document.querySelectorAll('#bd-typeseg button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bt') === butceTypeF));
+  document.querySelectorAll('#bd-form-type button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bt') === butceFormTypeV));
+}
+function butceOpenForm(entry) {
+  butceEditId = entry ? entry.id : null;
+  butceFormTypeV = entry ? entry.type : 'gider';
+  document.getElementById('bd-form-title').textContent = entry ? '✎ Kaydı Düzenle' : 'Yeni Kayıt';
+  document.getElementById('bd-form-date').value = entry ? (entry.date || '') : new Date().toISOString().slice(0, 10);
+  document.getElementById('bd-form-amount').value = entry ? entry.amount : '';
+  document.getElementById('bd-form-note').value = entry ? (entry.note || '') : '';
+  document.querySelectorAll('#bd-form-type button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bt') === butceFormTypeV));
+  const sel = document.getElementById('bd-form-cat');
+  sel.innerHTML = butceCatOptsHtml(entry ? entry.cat : '', butceFormTypeV);
+  document.getElementById('bd-form').classList.remove('hidden');
+}
+function butceSaveForm() {
+  const amount = butceNum(document.getElementById('bd-form-amount').value);
+  const cat = document.getElementById('bd-form-cat').value;
+  const date = document.getElementById('bd-form-date').value;
+  const note = document.getElementById('bd-form-note').value.trim();
+  if (!(amount > 0)) { stratToast('⚠️ Tutar girmelisin.'); return; }
+  if (!cat) { stratToast('⚠️ Kategori seçmelisin.'); return; }
+  if (!date) { stratToast('⚠️ Tarih girmelisin.'); return; }
+  if (butceEditId) {
+    const e = butceData.entries.find(x => x.id === butceEditId);
+    if (e) Object.assign(e, { amount, cat, date, note, type: butceFormTypeV });
+  } else {
+    butceData.entries.push({ id: butceUid(), type: butceFormTypeV, cat, date, amount, note, created: Date.now() });
+  }
+  saveButce().then(() => {
+    butceEditId = null;
+    butceMk = butceMonthKey(date);
+    document.getElementById('bd-form').classList.add('hidden');
+    stratToast('💾 Kayıt kaydedildi');
+    renderButce();
+  });
+}
+function butceDelete(id) {
+  if (!window.confirm('Bu kaydı silmek istediğine emin misin?')) return;
+  butceData.entries = butceData.entries.filter(e => e.id !== id);
+  saveButce().then(() => { stratToast('🗑 Kayıt silindi'); renderButce(); });
+}
+function butceAddCat() {
+  const n = document.getElementById('bd-newcat-name').value.trim();
+  if (!n) { stratToast('⚠️ Kategori adı girmelisin.'); return; }
+  const ico = document.getElementById('bd-newcat-ico').value.trim() || '🏷️';
+  const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  butceData.cats.push({ id, name: n, icon: ico.slice(0, 2), color: BUTCE_COLORS[(BUTCE_CATS.length + butceData.cats.length) % BUTCE_COLORS.length], type: butceFormTypeV });
+  document.getElementById('bd-newcat-name').value = '';
+  document.getElementById('bd-newcat-ico').value = '';
+  saveButce().then(() => {
+    document.getElementById('bd-form-cat').innerHTML = butceCatOptsHtml(id, butceFormTypeV);
+    stratToast('🏷️ Kategori eklendi: ' + n);
+  });
+}
+function butceBackup() {
+  try {
+    const blob = new Blob([JSON.stringify({ app: 'alfa-defter', ver: 1, data: butceData })], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'alfa-defter-yedek-' + butceMk + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    stratToast('💾 Yedek indirildi');
+  } catch (e) { stratToast('⚠️ Yedek alınamadı'); }
+}
+function butceRestoreFile(f) {
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = JSON.parse(r.result);
+      const d = o && o.data && Array.isArray(o.data.entries) ? o.data : o;
+      if (!d || !Array.isArray(d.entries)) throw new Error('format');
+      butceData = { entries: d.entries, cats: Array.isArray(d.cats) ? d.cats : [], budget: (d.budget && d.budget.monthly != null) ? d.budget : { monthly: 0 } };
+      saveButce().then(() => { stratToast('📂 ' + butceData.entries.length + ' kayıt yüklendi'); renderButce(); });
+    } catch (e) { stratToast('⚠️ Yedek dosyası okunamadı'); }
+  };
+  r.readAsText(f);
+}
+function bindButcePage() {
+  const pg = document.getElementById('page-butce');
+  if (!pg) return;
+  pg.addEventListener('click', e => {
+    if (e.target.closest('#bd-add')) { butceOpenForm(null); return; }
+    if (e.target.closest('#bd-backup')) { butceBackup(); return; }
+    if (e.target.closest('#bd-restore')) { document.getElementById('bd-restore-file').click(); return; }
+    if (e.target.closest('#bd-prev')) { butceMk = butceMonthShift(butceMk, -1); butceCatF = ''; renderButce(); return; }
+    if (e.target.closest('#bd-next')) { butceMk = butceMonthShift(butceMk, 1); butceCatF = ''; renderButce(); return; }
+    if (e.target.closest('#bd-today')) { butceMk = butceMonthKey(new Date()); butceCatF = ''; butceTypeF = 'all'; butceQ = ''; const q = document.getElementById('bd-q'); if (q) q.value = ''; renderButce(); return; }
+    const tb = e.target.closest('#bd-typeseg button');
+    if (tb) { butceTypeF = tb.getAttribute('data-bt'); butceCatF = ''; renderButce(); return; }
+    const lb = e.target.closest('.bd-legend-row, .bd-arc');
+    if (lb) { const cid = lb.getAttribute('data-bcat'); butceCatF = butceCatF === cid ? '' : cid; renderButce(); return; }
+    const fb = e.target.closest('#bd-form-type button');
+    if (fb) {
+      butceFormTypeV = fb.getAttribute('data-bt');
+      document.querySelectorAll('#bd-form-type button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bt') === butceFormTypeV));
+      document.getElementById('bd-form-cat').innerHTML = butceCatOptsHtml('', butceFormTypeV);
+      return;
+    }
+    if (e.target.closest('#bd-newcat-add')) { butceAddCat(); return; }
+    if (e.target.closest('#bd-save')) { butceSaveForm(); return; }
+    if (e.target.closest('#bd-cancel')) { butceEditId = null; document.getElementById('bd-form').classList.add('hidden'); return; }
+    const del = e.target.closest('[data-bdel]');
+    if (del) { butceDelete(del.getAttribute('data-bdel')); return; }
+    const ed = e.target.closest('[data-bedit]');
+    if (ed) {
+      const en = butceData.entries.find(x => x.id === ed.getAttribute('data-bedit'));
+      if (en) butceOpenForm(en);
+    }
+  });
+  pg.addEventListener('change', e => {
+    const t = e.target;
+    if (!t) return;
+    if (t.id === 'bd-catf') { butceCatF = t.value; renderButce(); }
+    else if (t.id === 'bd-budget-in') { butceData.budget.monthly = butceNum(t.value); saveButce().then(() => renderButce()); }
+    else if (t.id === 'bd-restore-file') {
+      const f = t.files && t.files[0];
+      t.value = '';
+      if (f) butceRestoreFile(f);
+    }
+  });
+  pg.addEventListener('input', e => {
+    if (e.target && e.target.id === 'bd-q') { butceQ = e.target.value; butceRenderList(butceFilterMonth(butceData.entries, butceMk)); }
+  });
+}
+async function loadButce() {
+  try {
+    const raw = await store.get(BUTCE_KEY);
+    const d = raw ? JSON.parse(raw) : null;
+    if (d && Array.isArray(d.entries)) {
+      butceData = { entries: d.entries, cats: Array.isArray(d.cats) ? d.cats : [], budget: (d.budget && d.budget.monthly != null) ? d.budget : { monthly: 0 } };
+    }
+  } catch (e) { butceData = { entries: [], cats: [], budget: { monthly: 0 } }; }
+}
+function saveButce() { return store.set(BUTCE_KEY, JSON.stringify(butceData)).catch(e => console.error('saveButce:', e)); }
 
 // ============ Eğitim İçeriği (Alfa Edu) ============
 const EGITIM_KEY = 'defter-egitim-v1';
@@ -12240,7 +12603,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b27';
+const APP_BUILD = 'b28';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
