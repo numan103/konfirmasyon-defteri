@@ -102,7 +102,7 @@
   body[data-page="alfa"] { --pc: #ef4444; --pc-soft: rgba(239,68,68,.16); --glow-a: rgba(239,68,68,.20); --glow-b: rgba(220,38,38,.10); }
   body[data-page="designer"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.18); --glow-b: rgba(132,204,22,.10); }
   body[data-page="alfatrading"] { --pc: #2aabee; --pc-soft: rgba(42,171,238,.16); --glow-a: rgba(42,171,238,.18); --glow-b: rgba(14,165,233,.10); }
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 0 14px; }
 
   .tophead { padding: 18px 0 4px; }
   .tophead-inner { display: flex; align-items: center; gap: 12px; }
@@ -206,22 +206,22 @@
   }
   .ce-add:hover { background: var(--hover-b); }
   /* --- Navbar --- */
-  .navbar { display: flex; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .navbar { display: flex; align-items: center; gap: 26px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .nav-brand { display: flex; align-items: center; gap: 11px; cursor: pointer; text-decoration: none; color: inherit; }
   .nav-brand:hover { opacity: .8; }
   a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
   .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; background: linear-gradient(120deg, var(--text) 35%, var(--pc)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .nav-links { display: flex; gap: 2px; overflow: visible; }
+  .nav-links { display: flex; align-items: center; gap: 6px; overflow: visible; flex: 1; justify-content: center; min-width: 0; }
   .nav-links::-webkit-scrollbar { display: none; }
-  .nav-link { position: relative; background: transparent; border: none; padding: 9px 16px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
+  .nav-link { position: relative; background: transparent; border: none; padding: 10px 18px; border-radius: 10px; font-family: var(--font-display); font-size: 14.5px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
   .nav-link:hover { background: rgba(123,120,245,.14); color: var(--text); }
   .nav-link:active { transform: scale(0.97); }
   .nav-link.on { background: var(--pc-soft); color: var(--pc); }
   .nav-link.on:hover { background: var(--pc-soft); color: var(--pc); }
   .nav-drop { position: relative; display: inline-flex; align-items: center; }
-  .nav-drop .drop-btn { cursor: default; display: inline-flex; align-items: center; gap: 2px; padding: 9px 16px; border-radius: 10px; }
+  .nav-drop .drop-btn { cursor: default; display: inline-flex; align-items: center; gap: 2px; padding: 10px 18px; border-radius: 10px; }
   .nav-drop .drop-btn:hover { background: rgba(123,120,245,.14); color: var(--text); }
   .nav-drop.on .drop-btn { background: var(--pc-soft); color: var(--pc); }
   .nav-drop .drop-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 7px; min-width: 210px; z-index: 300; box-shadow: var(--menu-shadow); }
@@ -235,7 +235,7 @@
   /* Dergi: üst menü mause ile gelince aşağı insin (yer kazanımı) */
   .nav-hover-zone { display: none; }
   body[data-page="news"] .nav-hover-zone, body[data-page="egitim"] .nav-hover-zone { display: block; position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 150; background: transparent; cursor: default; }
-  body[data-page="news"] .navbar, body[data-page="egitim"] .navbar { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; max-width: 1060px; padding: 14px; border-radius: 0 0 16px 16px; transform: translateY(-110%); transition: transform .3s cubic-bezier(.3,.1,.2,1); box-shadow: 0 12px 34px rgba(10,12,24,.28); }
+  body[data-page="news"] .navbar, body[data-page="egitim"] .navbar { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; max-width: 1400px; padding: 14px; border-radius: 0 0 16px 16px; transform: translateY(-110%); transition: transform .3s cubic-bezier(.3,.1,.2,1); box-shadow: 0 12px 34px rgba(10,12,24,.28); }
   body[data-page="news"] .nav-hover-zone:hover ~ .navbar, body[data-page="egitim"] .nav-hover-zone:hover ~ .navbar, body[data-page="news"] .navbar:hover, body[data-page="egitim"] .navbar:hover, body[data-page="news"] .navbar:focus-within, body[data-page="egitim"] .navbar:focus-within { transform: translateY(0); }
   body[data-page="egitim"] .navbar { max-width: 1400px; }
   @media (max-width: 680px) {
@@ -279,6 +279,11 @@
     .navbar .nav-mobile-btn { margin-left: 8px; }
     .soc-link { width: 28px; height: 28px; }
     body .theme-toggle { display: none; }
+  }
+  @media (max-width: 1180px) {
+    .navbar { gap: 16px; }
+    .nav-links { gap: 2px; }
+    .nav-link, .nav-drop .drop-btn { padding: 9px 12px; font-size: 14px; }
   }
   .navbar .user-badge { margin-left: 12px; }
   .navbar .nav-login { margin-left: 12px; flex: none; }
@@ -18240,7 +18245,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b28';
+const APP_BUILD = 'b29';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
