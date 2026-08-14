@@ -213,7 +213,7 @@
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
   .nav-brand span { font-family: var(--font-display); font-size: 17px; font-weight: 700; letter-spacing: -0.015em; background: linear-gradient(120deg, var(--text) 35%, var(--pc)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .nav-links { display: flex; gap: 2px; overflow: visible; }
+  .nav-links { display: flex; gap: 8px; overflow: visible; }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-link { position: relative; background: transparent; border: none; padding: 9px 16px; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--text-3); cursor: pointer; transition: color .2s ease, background-color .2s ease, transform .15s ease; }
   .nav-link:hover { background: rgba(123,120,245,.14); color: var(--text); }
@@ -282,6 +282,7 @@
   }
   .navbar .user-badge { margin-left: 12px; }
   .navbar .nav-login { margin-left: 12px; flex: none; }
+  @media (max-width: 1000px) { .nav-links { gap: 4px; } }
   /* İletişim (navbar sağ üst) */
   .nav-contact { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .nav-contact .nc-lbl { font-family: var(--font-display); font-size: 12.5px; font-weight: 600; color: var(--text-3); }
@@ -18240,7 +18241,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b31';
+const APP_BUILD = 'b32';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
