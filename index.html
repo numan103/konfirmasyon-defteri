@@ -1642,7 +1642,7 @@
   .ana-chip { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--bg2); border: 1px solid var(--border); color: var(--text-2); }
   .ana-chip-coin { color: var(--pc); border-color: color-mix(in srgb, var(--pc) 45%, var(--border)); background: color-mix(in srgb, var(--pc) 8%, var(--bg2)); }
   .ana-chip-dir { color: var(--green); border-color: color-mix(in srgb, var(--green) 45%, var(--border)); }
-  .ana-note { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 6px; }
+  .ana-note { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 6px; white-space: pre-wrap; }
   .ana-note b { color: var(--pc); }
   .ana-text { font-size: 13px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; margin: 8px 0; }
   .ana-img { width: 100%; max-width: 560px; border-radius: 12px; border: 1px solid var(--border); cursor: zoom-in; margin-top: 6px; }
@@ -1666,6 +1666,14 @@
   .ana-pthumb img { width: 112px; height: 84px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); }
   .ana-pthumb .sd-x { position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; font-size: 10px; line-height: 18px; border-radius: 50%; padding: 0; }
   #ana-form.ana-drop { outline: 2px dashed var(--pc); outline-offset: -6px; border-radius: 16px; }
+  .ana-dropzone { border: 2px dashed var(--border); border-radius: 14px; padding: 16px 14px; text-align: center; cursor: pointer; transition: border-color .15s ease, background-color .15s ease; background: var(--bg2); }
+  .ana-dropzone:hover { border-color: var(--pc); background: var(--pc-soft); }
+  .ana-dz-ico { font-size: 24px; line-height: 1.2; }
+  .ana-dz-txt { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+  .ana-dropzone .ana-imgs-prev { justify-content: center; }
+  .ana-deep { margin-top: 10px; border: 1px solid var(--border); border-left: 3px solid var(--pc); border-radius: 12px; background: var(--bg2); padding: 10px 12px; }
+  .ana-deep-h { font-weight: 800; font-size: 12px; color: var(--pc); margin-bottom: 6px; }
+  .ana-deep-b { font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; color: var(--text-2); }
   .strat-lb { position: fixed; inset: 0; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 24px; cursor: zoom-out; }
   .strat-lb img { max-width: 92vw; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
   .sd-note { padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg2); font-size: 12.5px; color: var(--text-2); line-height: 1.55; white-space: pre-wrap; }
@@ -4587,12 +4595,16 @@
       <div class="strat-sec">🎯 Gönderi içeriği</div>
       <div class="strat-form-grid">
         <div class="strat-f ana-full">
-          <label>Metin <span class="sd-hint">tweet metnini yapıştır veya elle yaz — coin, yön, seviye, zaman dilimi otomatik çıkarılır</span></label>
-          <textarea id="af-text" rows="6" placeholder="Paylaşımın metni…" maxlength="5000"></textarea>
+          <label>Metin <span class="sd-hint">tweet metnini yapıştır veya elle yaz — coin, yön, seviye, konsept, felsefe otomatik analiz edilir</span></label>
+          <textarea id="af-text" rows="12" placeholder="Paylaşımın metni…" maxlength="5000"></textarea>
         </div>
         <div class="strat-f ana-full">
-          <label>Görseller <span class="sd-hint">Ctrl+V yapıştır, sürükle-bırak veya dosya seç — en fazla 8 görsel</span></label>
-          <div class="ana-imgprev" id="af-imgprev"></div>
+          <label>Görseller <span class="sd-hint">Ctrl+V, sürükle-bırak veya tıkla &amp; seç — en fazla 8 görsel</span></label>
+          <div class="ana-dropzone" id="af-dropzone" title="Tıkla ve görsel seç — Ctrl+V veya sürükle-bırak da çalışır">
+            <div class="ana-dz-ico">🖼️</div>
+            <div class="ana-dz-txt">Ctrl+V yapıştır · sürükle-bırak · <b>tıkla &amp; seç</b></div>
+            <div class="ana-imgprev" id="af-imgprev"></div>
+          </div>
           <div class="sd-addrow">
             <input type="file" id="af-file" accept="image/*" multiple class="hidden">
             <button type="button" class="btn solid" id="af-img-btn">📷 Görsel Ekle</button>
@@ -4601,19 +4613,23 @@
           </div>
         </div>
       </div>
-      <div class="strat-sec">🧠 Önemli Noktalar (AI çıkarır, düzenleyebilirsin)</div>
+      <div class="strat-sec">🧠 Analiz (AI çıkarır, düzenleyebilirsin)</div>
       <div class="strat-form-grid">
         <div class="strat-f">
           <label>Nereyi önemsedi <span class="sd-hint">coin, seviye, zaman dilimi, yön</span></label>
-          <input type="text" id="af-what" maxlength="300" placeholder="örn: BTC $67.5k direnci, 4H — long">
+          <textarea id="af-what" rows="3" maxlength="600" placeholder="örn: BTC $67.5k direnci, 4H — long; likidite avı sonrası kırılım"></textarea>
         </div>
         <div class="strat-f">
-          <label>Neden önemsedi <span class="sd-hint">mantığı: likidite mi, kırılım mı, trend mi?</span></label>
-          <input type="text" id="af-why" maxlength="300" placeholder="örn: likidite topladıktan sonra yukarı kırılım bekliyor">
+          <label>Neden önemsedi <span class="sd-hint">felsefe: likidite mi, yapı mı, trend mi? nasıl düşünüyor</span></label>
+          <textarea id="af-why" rows="3" maxlength="600" placeholder="örn: likidite topladıktan sonra yukarı kırılım bekliyor; OB/FVG onayı"></textarea>
         </div>
         <div class="strat-f">
           <label>Konu</label>
           <select id="af-topic"></select>
+        </div>
+        <div class="strat-f ana-full">
+          <label>Kapsamlı analiz <span class="sd-hint">felsefe, yaklaşım, konseptler &amp; yapılar, önemli seviyeler, senaryo</span></label>
+          <textarea id="af-deep" rows="9" maxlength="4000" placeholder="📌 Felsefe&#10;🧭 Yaklaşım&#10;🧩 Konseptler &amp; Yapılar&#10;📍 Önemli Seviyeler&#10;🎯 Senaryo"></textarea>
         </div>
       </div>
       <div class="strat-form-btns">
@@ -11927,8 +11943,41 @@ async function saveAnaliz() {
   try { await store.set(ANALIZ_KEY, JSON.stringify(analizData)); } catch (e) { console.error('saveAnaliz:', e); }
 }
 function anaTraderName(id) { const t = analizData.traders.find(x => x.id === id); return t ? t.name : ''; }
+const ANA_CONCEPT_DEFS = [
+  { id: 'liq', name: 'Likidite & Stop Avı', kw: ['likidite', 'liquidity', 'stop av', 'stop hunt', 'sweep', 'grab', 'tuzak', 'trap', 'supur', 'likidite topla'] },
+  { id: 'ob', name: 'Order Block', kw: ['order block', 'orderblock', 'order blo', 'arz blogu', 'talep blogu'] },
+  { id: 'fvg', name: 'FVG / Imbalance', kw: ['fvg', 'fair value gap', 'imbalance', 'dengesizlik', 'fiyat boslugu'] },
+  { id: 'bos', name: 'Yapı Kırılımı (BOS / CHoCH)', kw: ['choch', 'bos kirilim', 'yapi kirilim', 'break of structure', 'kirilim', 'kirilma', 'breakout', 'break'] },
+  { id: 'trend', name: 'Trend & Momentum', kw: ['trend', 'momentum', 'impulse', 'itki', 'devam', 'sureklilik', 'pullback', 'ger cekilme'] },
+  { id: 'range', name: 'Aralık / Konsolidasyon', kw: ['range', 'aralik', 'konsolid', 'sikisma', 'daralma', 'yatay'] },
+  { id: 'supply', name: 'Arz Bölgesi', kw: ['supply', 'arz bolgesi'] },
+  { id: 'demand', name: 'Talep Bölgesi', kw: ['demand', 'talep bolgesi'] },
+  { id: 'time', name: 'Zaman & Sesyon', kw: ['zamanlama', 'sesyon', 'session', 'londra', 'new york', 'asya'] }
+];
+function anaConcepts(text) {
+  const norm = s => String(s || '').toLowerCase().replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ğ/g, 'g');
+  const low = ' ' + norm(text) + ' ';
+  const out = [];
+  ANA_CONCEPT_DEFS.forEach(c => { if (c.kw.some(k => low.indexOf(norm(k)) >= 0)) out.push(c); });
+  return out;
+}
+function anaConceptNarrative(concepts) {
+  const msgs = [];
+  concepts.forEach(c => {
+    if (c.id === 'liq') msgs.push('likidite odaklı: stop avı / sweep ile likidite toplayıp hareketi ters yönde bekliyor');
+    else if (c.id === 'ob') msgs.push('order block bölgelerini destek/direnç alanı olarak kullanıyor');
+    else if (c.id === 'fvg') msgs.push('FVG / imbalance alanlarını yön boşluğu olarak takip ediyor');
+    else if (c.id === 'bos') msgs.push('yapı kırılımı (BOS/CHoCH) ile yön teyidi alıyor');
+    else if (c.id === 'trend') msgs.push('trend/momentum devamına güveniyor');
+    else if (c.id === 'range') msgs.push('aralık içinde sıkışma sonrası kırılım bekliyor');
+    else if (c.id === 'supply') msgs.push('arz bölgesinden satış baskısı bekliyor');
+    else if (c.id === 'demand') msgs.push('talep bölgesinden alım bekliyor');
+    else if (c.id === 'time') msgs.push('zaman / sesyon ritmine göre pozisyon alıyor');
+  });
+  return msgs;
+}
 function anaAi(text) {
-  // "AI" benzeri client-side çıkarım: metinden coin, yön, zaman dilimi, seviye, konu
+  // "AI" benzeri client-side çıkarım: metinden coin, yön, zaman dilimi, seviye, konu + konsept
   const s = String(text || '');
   const low = ' ' + s.toLowerCase().replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ğ/g, 'g') + ' ';
   const coins = [];
@@ -11942,9 +11991,102 @@ function anaAi(text) {
   (s.match(/\$\s?[\d.,]+\s?[kmKM]?\b/g) || []).forEach(m => { const v = m.replace(/\s+/g, '').toUpperCase(); if (sev.indexOf(v) < 0) sev.push(v); });
   (s.match(/\b[\d.,]+\s?[kmKM]\b/g) || []).forEach(m => { const v = m.replace(/\s+/g, '').toUpperCase(); if (sev.indexOf(v) < 0 && sev.length < 3) sev.push(v); });
   const topic = anaDetectTopic(s);
-  const what = [coins.join(', '), sev.join(', '), tf, dir].filter(Boolean).join(' · ') || 'metin taraması yapıldı';
-  const why = topic.meta.name === 'Genel — Piyasa' ? 'konu netleşmedi — kendin yaz' : 'piyasa: ' + topic.meta.name;
-  return { coins, dir, tf, sev, topicId: topic.id, what, why };
+  const concepts = anaConcepts(s);
+  const whatBits = [];
+  if (coins.length) whatBits.push(coins.join(', '));
+  if (tf) whatBits.push(tf);
+  if (dir) whatBits.push(dir === 'long' ? 'long (alım)' : 'short (satış)');
+  if (sev.length) whatBits.push('seviyeler: ' + sev.join(', '));
+  if (topic.id !== 'genel') whatBits.push(topic.meta.ico + ' ' + topic.meta.name);
+  const what = whatBits.join(' · ') || 'metin taraması yapıldı';
+  const msgs = anaConceptNarrative(concepts);
+  let why = 'Felsefe: ' + (msgs.length ? msgs.join(' · ') : 'konu netleşmedi — kendi notunu yaz');
+  if (dir && sev.length) why += ' · ' + (dir === 'long' ? 'Seviyelerin üstünde kalırsa devam bekliyor.' : 'Seviyelerin altında kalırsa devam bekliyor.');
+  return { coins, dir, tf, sev, topicId: topic.id, concepts, what, why };
+}
+function anaDeepLocal(text) {
+  const a = anaAi(text);
+  const C = a.concepts;
+  const has = id => C.some(c => c.id === id);
+  const L = [];
+  L.push('📌 Felsefe — nasıl düşünüyor');
+  L.push('  ' + a.why);
+  L.push('');
+  L.push('🧭 Yaklaşım — nasıl yapıyor');
+  const yak = [];
+  yak.push(a.coins.length ? a.coins.join(' / ') + ' piyasasında' : 'Piyasada');
+  yak.push(a.tf ? a.tf + ' grafikte' : 'kısa/orta vade grafiklerde');
+  yak.push(a.dir ? (a.dir === 'long' ? 'long (alım) tarafında çalışıyor' : 'short (satış) tarafında çalışıyor') : 'yön netleşmemiş, teyit bekliyor');
+  L.push('  ' + yak.join(' — ') + '.');
+  L.push('');
+  L.push('🧩 Konseptler & Yapılar');
+  if (C.length) {
+    C.forEach(c => L.push('  • ' + c.name));
+    if (has('liq')) L.push('      ↳ Likidite toplama + stop avı: tuzağın olduğu yerde ters hareket beklenir.');
+    if (has('ob')) L.push('      ↳ Order Block: giriş/dönüş alanı; fiyat bu bölgeye dönüşte tepki aranır.');
+    if (has('fvg')) L.push('      ↳ FVG / Imbalance: fiyat bu boşluğa çekilebilir; dolmadan yönün devamı beklenir.');
+    if (has('bos')) L.push('      ↳ BOS / CHoCH: kırılım yönün devamını ya da dönüşü teyit eder.');
+    if (has('trend')) L.push('      ↳ Trend / Momentum: itkiler ve geri çekilmeler trend yönünde değerlendirilir.');
+    if (has('range')) L.push('      ↳ Aralık / Konsolidasyon: sıkışma sonrası kırılım yönü hedeflenir.');
+    if (has('supply')) L.push('      ↳ Arz bölgesi: satış baskısının güçlendiği alan.');
+    if (has('demand')) L.push('      ↳ Talep bölgesi: alımın güçlendiği alan.');
+  } else {
+    L.push('  • Metinde belirgin bir konsept geçmiyor — trader\'ın teyit / alım-satım mantığını kendin yorumla.');
+  }
+  L.push('');
+  L.push('📍 Önemli Seviyeler');
+  if (a.sev.length) a.sev.forEach(v => L.push('  • ' + v + (a.dir === 'long' ? ' — üstünde kalırsa senaryo geçerli' : ' — altında kalırsa senaryo geçerli')));
+  else L.push('  • Metinde net bir seviye yok — trader seviye yerine alan / yapı tarif etmiş olabilir.');
+  L.push('');
+  L.push('🎯 Beklenti & Senaryo');
+  L.push('  ' + (a.dir === 'long' ? 'Yukarı senaryo ön planda.' : a.dir === 'short' ? 'Aşağı senaryo ön planda.' : 'Yön belirsiz — trader teyit bekliyor olabilir.'));
+  L.push("  Geçersiz olma koşulu: trader'ın işaret ettiği seviyenin aksi yönünde günlük kapanış.");
+  return { what: a.what, why: a.why, deep: L.join('\n'), coins: a.coins, dir: a.dir, tf: a.tf, sev: a.sev, topicId: a.topicId, concepts: a.concepts };
+}
+async function anaDeepLLM(text) {
+  const prompt = "Sen kripto piyasa analistisin. Aşağıdaki trader paylaşımını oku ve profesyonel bir trade analizi yaz. Tüm çıktı Türkçe, keskin ve uygulanabilir olmalı. Şu başlıkları kullan:\n📌 Felsefe (trader piyasayı nasıl görüyor)\n🧭 Yaklaşım (nasıl çalışıyor, nereden giriş arıyor)\n🧩 Konseptler & Yapılar (OB, FVG, BOS, CHoCH, likidite vb. tespit edilenler)\n📍 Önemli Seviyeler (net fiyatlar)\n🎯 Senaryo (beklenti + geçersiz olma koşulu)\n\nEn sona şu iki satırı ekle:\nWHAT: tek satır özet (coin, seviye, TF, yön)\nWHY: tek satır ana neden\n\nPaylaşım:\n" + String(text || '').slice(0, 2500);
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const res = await fetch('https://text.pollinations.ai/' + encodeURIComponent(prompt), { signal: ctl.signal });
+    if (!res.ok) throw new Error('http ' + res.status);
+    const body = await res.text();
+    if (!body || body.trim().length < 20 || body.trim().indexOf('{') === 0) return null;
+    let what = null, why = null;
+    const rest = [];
+    body.split('\n').forEach(l => {
+      const m = l.trim();
+      if (/^WHAT:/i.test(m)) what = m.replace(/^WHAT:\s*/i, '').trim();
+      else if (/^WHY:/i.test(m)) why = m.replace(/^WHY:\s*/i, '').trim();
+      else rest.push(l);
+    });
+    return { deep: rest.join('\n').trim(), what, why };
+  } catch (e) { return null; }
+  finally { clearTimeout(to); }
+}
+async function anaDeepRun() {
+  const g = id => document.getElementById(id);
+  const t = g('af-text').value;
+  if (!t.trim()) { stratToast('🤖 Analiz için önce metni yapıştır.'); return; }
+  const d = anaDeepLocal(t);
+  g('af-what').value = d.what;
+  g('af-why').value = d.why;
+  g('af-deep').value = d.deep;
+  const tSel = g('af-topic');
+  if (d.topicId && d.topicId !== 'genel' && tSel) tSel.value = d.topicId;
+  stratToast('🤖 Analiz hazır — ' + (d.concepts && d.concepts.length ? d.concepts.map(c => c.name).slice(0, 3).join(', ') : 'genel'));
+  try {
+    const r = await anaDeepLLM(t);
+    if (r && r.deep) {
+      const untouched = g('af-deep').value === d.deep;
+      if (untouched) {
+        if (r.deep) g('af-deep').value = r.deep;
+        if (r.what) g('af-what').value = r.what;
+        if (r.why) g('af-why').value = r.why;
+        stratToast('✨ Derin analiz (LLM) tamamlandı');
+      }
+    }
+  } catch (e) { /* yerel analiz yeterli */ }
 }
 function anaChipsHtml(p) {
   const chips = [];
@@ -11966,6 +12108,7 @@ function anaCardHtml(p) {
   const text = p.text ? '<div class="ana-text">' + esc(p.text) + '</div>' : '';
   const what = p.what ? '<div class="ana-note"><b>🎯 Nereyi önemsedi:</b> ' + esc(p.what) + '</div>' : '';
   const why = p.why ? '<div class="ana-note"><b>🤔 Neden:</b> ' + esc(p.why) + '</div>' : '';
+  const deep = p.deep ? '<div class="ana-deep"><div class="ana-deep-h">🧠 Analiz</div><div class="ana-deep-b">' + esc(p.deep) + '</div></div>' : '';
   return '<div class="ana-card" data-ana-post="' + p.id + '">' +
     '<div class="ana-card-h">' +
       '<span class="ana-av">' + esc((tr || '?').charAt(0).toUpperCase()) + '</span>' +
@@ -11976,7 +12119,7 @@ function anaCardHtml(p) {
         '<button type="button" class="sd-x" data-ana-del="' + p.id + '" title="Analizi sil">✕</button></div>' +
     '</div>' +
     '<div class="ana-chips">' + anaChipsHtml(p) + '</div>' +
-    what + why + text + im +
+    what + why + text + im + deep +
   '</div>';
 }
 function renderAnaliz() {
@@ -12018,6 +12161,7 @@ function anaOpenForm(post) {
   g('af-text').value = post ? (post.text || '') : '';
   g('af-what').value = post ? (post.what || '') : '';
   g('af-why').value = post ? (post.why || '') : '';
+  g('af-deep').value = post ? (post.deep || '') : '';
   if (post && post.trader) g('af-trader').value = post.trader;
   if (post && post.topic) g('af-topic').value = post.topic;
   const fi = g('af-file'); if (fi) fi.value = '';
@@ -12053,6 +12197,7 @@ function anaSave() {
     img: anaPendingImgs[0] || '',
     what: g('af-what').value.trim(),
     why: g('af-why').value.trim(),
+    deep: g('af-deep').value.trim(),
     topic: g('af-topic').value || 'genel',
     created: Date.now(),
   };
@@ -12080,7 +12225,7 @@ function anaAddTrader(name, tw) {
 function anaRenderImgPreview() {
   const prev = document.getElementById('af-imgprev');
   if (!prev) return;
-  if (!anaPendingImgs.length) { prev.innerHTML = '<div class="ana-imgph">Görseller burada önizlenir — Ctrl+V, sürükle-bırak ya da dosya seç</div>'; return; }
+  if (!anaPendingImgs.length) { prev.innerHTML = ''; return; }
   prev.innerHTML = '<div class="ana-imgs-prev">' + anaPendingImgs.map((s, i) =>
     '<div class="ana-pthumb"><img src="' + esc(s) + '" alt="görsel ' + (i + 1) + '"><button type="button" class="sd-x" data-ana-rm-img="' + i + '" title="Görseli kaldır">✕</button></div>').join('') + '</div>';
 }
@@ -12131,7 +12276,7 @@ async function anaFetchLink() {
           anaFillTraderSelect('af-trader');
           tSel.value = tid;
         }
-        if (txt) { const r2 = anaAi(txt); g('af-what').value = r2.what; g('af-why').value = r2.why; if (r2.topicId && r2.topicId !== 'genel') g('af-topic').value = r2.topicId; }
+        if (txt) anaDeepRun();
         stratToast('📥 Tweet çekildi' + (cnt ? ' · ' + cnt + ' görsel' : ''));
         return;
       } catch (e) { stratToast('⚠️ Tweet alınamadı: ' + e.message); return; }
@@ -12187,21 +12332,17 @@ function bindAnalizPage() {
     else if (e.target.closest('#af-save')) anaSave();
     else if (e.target.closest('#af-cancel')) anaCancelForm();
     else if (e.target.closest('#af-fetch')) anaFetchLink();
+    else if (e.target.closest('#af-dropzone')) {
+      if (e.target.closest('[data-ana-rm-img]')) return;
+      const f = g('af-file'); if (f) f.click();
+    }
     else if (e.target.closest('#af-img-btn')) { const f = g('af-file'); if (f) f.click(); }
     else if (e.target.closest('#af-img-clear')) { anaPendingImgs = []; const fi = g('af-file'); if (fi) fi.value = ''; anaRenderImgPreview(); }
     else if (e.target.closest('[data-ana-rm-img]')) {
       const idx = Number(e.target.closest('[data-ana-rm-img]').getAttribute('data-ana-rm-img'));
       if (!isNaN(idx) && anaPendingImgs[idx]) { anaPendingImgs.splice(idx, 1); anaRenderImgPreview(); }
     }
-    else if (e.target.closest('#af-ai')) {
-      const t = g('af-text').value;
-      if (!t.trim()) { stratToast('🤖 Analiz için önce metni yapıştır.'); return; }
-      const r = anaAi(t);
-      g('af-what').value = r.what;
-      g('af-why').value = r.why;
-      if (r.topicId && r.topicId !== 'genel') g('af-topic').value = r.topicId;
-      stratToast('🤖 Çıkarıldı: ' + r.what);
-    }
+    else if (e.target.closest('#af-ai')) { anaDeepRun(); }
     else if (e.target.closest('#af-newtrader-btn')) {
       const v = g('af-newtrader').value;
       const id = anaAddTrader(v, '');
@@ -17500,7 +17641,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b24';
+const APP_BUILD = 'b25';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
