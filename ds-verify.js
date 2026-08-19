@@ -59,7 +59,7 @@ function fetchText(u, headers) {
     alfa_portfoy_data_key: html.includes("AP2_KEY = 'alfa-fund-v1'"),
     alfa_portfoy_bind: html.includes('function bindAlfaPortfoy2'),
     sw_b57: sw.includes("'b57'"),
-    alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') renderAlfaPortfoy2()"),
+    alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2();"),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
   };
   let ok = true;
