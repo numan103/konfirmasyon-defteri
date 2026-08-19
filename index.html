@@ -10904,7 +10904,7 @@ function showPage(name, skipAnim) {
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
-  if (name === 'butce') { renderButce(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') renderAlfaPortfoy2(); }
+  if (name === 'butce') { renderButce(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); } }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -14278,7 +14278,7 @@ function bdSetTab(t) {
   document.getElementById('bd-view-alfaportfoy').classList.toggle('hidden', bdTab !== 'alfaportfoy');
   document.querySelectorAll('#bd-tabs button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bdt') === bdTab));
   if (bdTab === 'portfoy') { renderPortfoy(); pfLoadPrices(); }
-  if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2(); }
+  if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); }
 }
 const AP2_KEY = 'alfa-fund-v1';
 const AP2_COLORS = ['#3b82f6','#f59e0b','#10b981','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#6366f1','#14b8a6','#e11d48','#84cc16'];
@@ -14530,6 +14530,65 @@ function ap2RebalCalc() {
       const pctAfter = newTotal > 0 ? (targetVal / newTotal * 100) : 0;
       return '<div class="ap2-rebal-row"><span style="color:' + color + ';font-weight:700;min-width:50px">' + p.symbol + '</span><span style="color:var(--text-3);min-width:90px">' + curPct.toFixed(1) + '% → ' + pctAfter.toFixed(1) + '%</span><span style="font-weight:700;color:var(--text);min-width:80px">' + (addNow > 0 ? '+' + ap2Fmt(addNow) : '—') + '</span></div>';
     }).join('');
+}
+let ap2Pricing = false;
+async function ap2LoadPrices() {
+  if (ap2Pricing) return;
+  const positions = (ap2Data.positions || []).filter(p => p.type === 'kripto' && p.symbol);
+  if (!positions.length) return;
+  ap2Pricing = true;
+  const syms = [...new Set(positions.map(p => pfNorm(p.symbol)).filter(Boolean))];
+  const cryptos = {};
+  try {
+    const q = encodeURIComponent('[' + syms.map(s => '"' + s + 'USDT"').join(',') + ']');
+    const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=' + q);
+    const j = await r.json();
+    if (Array.isArray(j)) j.forEach(t => {
+      const s = String(t.symbol || '').replace(/USDT$/, '');
+      if (syms.indexOf(s) >= 0) cryptos[s] = { usd: pfNum(t.lastPrice), pct: pfNum(t.priceChangePercent) };
+    });
+  } catch (e) { /* Binance yok */ }
+  try {
+    const missing = syms.filter(s => !cryptos[s]);
+    if (missing.length) {
+      const r = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT');
+      const j = await r.json();
+      if (j && j.data) j.data.forEach(t => {
+        const m = String(t.instId || '').match(/^([A-Z0-9]+)-USDT$/);
+        if (m && missing.indexOf(m[1]) >= 0) {
+          const last = pfNum(t.last), open = pfNum(t.open24h);
+          cryptos[m[1]] = { usd: last, pct: (last !== null && open) ? ((last - open) / open) * 100 : null };
+        }
+      });
+    }
+  } catch (e) { /* OKX de yok */ }
+  try {
+    const stillMissing = syms.filter(s => !cryptos[s]);
+    for (const sym of stillMissing) {
+      try {
+        const sr = await fetch('https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(sym));
+        const sj = await sr.json();
+        if (sj && sj.coins && sj.coins.length) {
+          const cid = sj.coins[0].id;
+          const pr = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + encodeURIComponent(cid) + '&vs_currencies=usd&include_24hr_change=true');
+          const pj = await pr.json();
+          if (pj && pj[cid]) cryptos[sym] = { usd: pfNum(pj[cid].usd), pct: pfNum(pj[cid].usd_24h_change) };
+        }
+      } catch (e) { /* CoinGecko tek coin arama hatası */ }
+    }
+  } catch (e) { /* CoinGecko yok */ }
+  let updated = 0;
+  (ap2Data.positions || []).forEach(p => {
+    if (p.type !== 'kripto') return;
+    const sym = pfNorm(p.symbol);
+    if (sym && cryptos[sym] && cryptos[sym].usd !== null && cryptos[sym].usd > 0) {
+      p.price = cryptos[sym].usd;
+      updated++;
+    }
+  });
+  if (updated > 0) ap2Save();
+  ap2Pricing = false;
+  renderAlfaPortfoy2();
 }
 function bindAlfaPortfoy2() {
   const view = document.getElementById('bd-view-alfaportfoy');
@@ -14802,6 +14861,7 @@ function bindPortfoy() {
     }
   });
   setInterval(() => { if (bdTab === 'portfoy' && !document.hidden) pfLoadPrices(); }, 60000);
+  setInterval(() => { if (bdTab === 'alfaportfoy' && !document.hidden) ap2LoadPrices(); }, 120000);
   pfPlanApplyInputs();
   pfPlanRender();
 }
@@ -20652,7 +20712,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b56';
+const APP_BUILD = 'b57';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
