@@ -1846,73 +1846,75 @@
     .ap-pos-bar-wrap { display: none; }
     .ap-donut-row { flex-direction: column; align-items: center; }
   }
-  /* Alfa Portföy (Fon) */
-  .ap2-hero { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  @media (max-width: 700px) { .ap2-hero { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 400px) { .ap2-hero { grid-template-columns: 1fr; } }
-  .ap2-hero-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
-  .ap2-hero-main { border-left: 3px solid var(--pc); }
-  .ap2-hero-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; }
-  .ap2-hero-value { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1; }
-  .ap2-hero-cost { color: var(--text-2); }
-  .ap2-hero-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
-  .ap2-donut-row { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
-  .ap2-donut-wrap { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
-  .ap2-donut-svg { width: 100%; height: 100%; }
-  .ap2-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-  .ap2-donut-center-val { font-size: 18px; font-weight: 800; color: var(--text); }
-  .ap2-donut-center-lbl { font-size: 10.5px; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
-  .ap2-legend { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-  .ap2-legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
-  .ap2-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .ap2-legend-name { flex: 1; font-weight: 600; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ap2-legend-pct { font-size: 12px; color: var(--text-3); font-weight: 600; width: 44px; text-align: right; }
-  .ap2-legend-val { font-size: 13px; font-weight: 700; color: var(--text); }
-  .ap2-health { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
-  @media (max-width: 700px) { .ap2-health { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 400px) { .ap2-health { grid-template-columns: repeat(2, 1fr); } }
-  .ap2-health-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; text-align: center; }
-  .ap2-health-num { font-size: 20px; font-weight: 800; }
-  .ap2-health-lbl { font-size: 10.5px; color: var(--text-3); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
-  .ap2-positions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .ap2-pos { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 12px; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; transition: border-color .15s; }
-  .ap2-pos:hover { border-color: var(--pc); }
-  .ap2-pos-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .ap2-pos-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .ap2-pos-sym { font-size: 14px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
-  .ap2-pos-chip { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
-  .ap2-pos-meta { font-size: 11px; color: var(--text-3); }
-  .ap2-pos-vals { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .ap2-pos-val { font-size: 14px; font-weight: 700; color: var(--text); }
-  .ap2-pos-pnl { font-size: 12px; font-weight: 600; }
-  .ap2-pos-pnl.pos { color: var(--green); }
-  .ap2-pos-pnl.neg { color: var(--red); }
-  .ap2-pos-bar-wrap { width: 80px; }
-  .ap2-pos-bar { height: 6px; border-radius: 3px; background: var(--bg); overflow: hidden; }
-  .ap2-pos-bar-fill { height: 100%; border-radius: 3px; transition: width .3s; }
-  .ap2-pos-pct { font-size: 11px; color: var(--text-3); text-align: right; margin-top: 2px; }
-  .ap2-target-row { margin-top: 6px; }
-  .ap2-target-bar { position: relative; height: 6px; border-radius: 3px; background: var(--bg); overflow: visible; margin-bottom: 3px; }
-  .ap2-target-bar-fill { height: 100%; border-radius: 3px; transition: width .3s; }
-  .ap2-target-marker { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--text); border-radius: 1px; }
-  .ap2-target-labels { display: flex; gap: 6px; align-items: center; font-size: 12px; }
-  .ap2-rebal-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  /* Alfa Portföy v2 — Modern */
+  .ap2-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  @media (max-width: 800px) { .ap2-summary { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 440px) { .ap2-summary { grid-template-columns: 1fr; } }
+  .ap2-sum-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+  .ap2-sum-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 14px 14px 0 0; }
+  .ap2-sum-card[data-accent="pc"]::before { background: var(--pc); }
+  .ap2-sum-card[data-accent="green"]::before { background: var(--green); }
+  .ap2-sum-card[data-accent="amber"]::before { background: var(--amber); }
+  .ap2-sum-card[data-accent="red"]::before { background: var(--red); }
+  .ap2-sum-lbl { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .ap2-sum-val { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: -.5px; }
+  .ap2-sum-sub { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
+  .ap2-alloc { display: flex; gap: 10px; margin-bottom: 20px; }
+  @media (max-width: 600px) { .ap2-alloc { flex-direction: column; } }
+  .ap2-alloc-bar { flex: 1; display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .ap2-alloc-track { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; position: relative; }
+  .ap2-alloc-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+  .ap2-alloc-cash { height: 100%; border-radius: 4px; transition: width .4s ease; opacity: .4; }
+  .ap2-alloc-label { font-size: 12px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+  .ap2-alloc-pct { font-size: 13px; font-weight: 700; color: var(--text); min-width: 40px; text-align: right; }
+  .ap2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 440px) { .ap2-grid { grid-template-columns: 1fr; } }
+  .ap2-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color .2s, box-shadow .2s; position: relative; }
+  .ap2-card:hover { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc); }
+  .ap2-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .ap2-card-sym { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
+  .ap2-card-type { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .3px; }
+  .ap2-card-actions { display: flex; gap: 2px; }
+  .ap2-card-actions button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 13px; padding: 4px 7px; border-radius: 6px; transition: all .15s; }
+  .ap2-card-actions button:hover { background: var(--bg); color: var(--text); }
+  .ap2-card-actions button.sell-btn:hover { color: var(--amber); }
+  .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .ap2-card-price-box { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+  .ap2-card-price-lbl { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px; }
+  .ap2-card-price-val { font-size: 15px; font-weight: 700; color: var(--text); }
+  .ap2-card-pnl { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; }
+  .ap2-card-pnl.pos { background: rgba(16,185,129,.08); }
+  .ap2-card-pnl.neg { background: rgba(239,68,68,.08); }
+  .ap2-card-pnl.zero { background: var(--bg); }
+  .ap2-card-pnl-val { font-size: 16px; font-weight: 800; }
+  .ap2-card-pnl-val.pos { color: var(--green); }
+  .ap2-card-pnl-val.neg { color: var(--red); }
+  .ap2-card-pnl-val.zero { color: var(--text-3); }
+  .ap2-card-pnl-pct { font-size: 13px; font-weight: 700; }
+  .ap2-card-pnl-pct.pos { color: var(--green); }
+  .ap2-card-pnl-pct.neg { color: var(--red); }
+  .ap2-card-pnl-pct.zero { color: var(--text-3); }
+  .ap2-card-meta { font-size: 11px; color: var(--text-3); margin-bottom: 8px; }
+  .ap2-card-target { margin-top: 8px; }
+  .ap2-card-target-bar { position: relative; height: 6px; background: var(--bg); border-radius: 3px; overflow: visible; margin-bottom: 4px; }
+  .ap2-card-target-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+  .ap2-card-target-marker { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--text-2); border-radius: 1px; }
+  .ap2-card-target-labels { display: flex; justify-content: space-between; font-size: 11px; }
+  .ap2-card-target-labels span:first-child { font-weight: 700; }
+  .ap2-card-target-labels span:last-child { color: var(--text-3); }
+  .ap2-rebal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
+  .ap2-rebal h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .ap2-rebal-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .ap2-rebal-row:last-child { border-bottom: none; }
-  .ap2-rebal-header { font-size: 13px; font-weight: 700; color: var(--text); padding: 8px 12px 4px; }
-  .ap2-pos-actions { display: flex; gap: 4px; }
-  .ap2-pos-actions button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 6px; transition: background .15s; }
-  .ap2-pos-actions button:hover { background: var(--bg); color: var(--text); }
-  .ap2-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ap2-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
+  .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .ap2-sell-row:last-child { border-bottom: none; }
+  .ap2-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
   .ap2-type-chips { display: flex; gap: 4px; flex-wrap: wrap; }
   .ap2-type-chip { border: 1px solid var(--border); background: var(--bg); color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; transition: all .15s; }
   .ap2-type-chip.on { background: var(--pc); color: #fff; border-color: var(--pc); }
   .ap2-type-chip:hover:not(.on) { border-color: var(--pc); color: var(--text); }
-  @media (max-width: 500px) {
-    .ap2-pos { grid-template-columns: auto 1fr auto; }
-    .ap2-pos-bar-wrap { display: none; }
-    .ap2-donut-row { flex-direction: column; align-items: center; }
-    .ap2-health { grid-template-columns: repeat(2, 1fr); }
-  }
   /* Portföy */
   .bd-pf-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
   @media (max-width: 640px) { .bd-pf-summary { grid-template-columns: repeat(2, 1fr); } }
@@ -5513,45 +5515,35 @@
     </div><!-- /bd-view-portfoy -->
     <div id="bd-view-alfaportfoy" class="hidden">
       <div class="ap2-tools">
-        <button type="button" class="btn solid" id="ap2-add">＋ Yeni Enstrüman</button>
+        <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
         <div class="ap2-type-chips" id="ap2-type-filter">
           <button type="button" class="ap2-type-chip on" data-ap2f="all">Tümü</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="kripto">🪙 Kripto</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="hisse">📈 Hisse</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="altin">🥇 Altın</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="gumus">🪙 Gümüş</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="emtia">🛢️ Emtia</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="doviz">💵 Döviz</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="endeks">📊 Endeks</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="fon">🏢 Fon</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="custom">✍️ Özel</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="kripto">Kripto</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="hisse">Hisse</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="altin">Altın</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="gumus">Gümüş</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="emtia">Emtia</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="doviz">Döviz</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="endeks">Endeks</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="fon">Fon</button>
+          <button type="button" class="ap2-type-chip" data-ap2f="custom">Özel</button>
         </div>
       </div>
-      <div id="ap2-empty" class="data-empty">Henüz enstrüman yok. "＋ Yeni Enstrüman" ile başla — fon gibi portföyünü buradan yönet.</div>
-      <div class="ap2-hero" id="ap2-hero" style="display:none"></div>
-      <div id="ap2-rebalance" class="panel" style="display:none;margin-bottom:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:14px;">
-        <div class="panel-h" style="margin-bottom:10px">🔄 Rebalance Hesaplayıcı <span class="bd-panel-sub">aylık ekleme tutarını gir — her enstrümana ne kadar eklemeli göreceksin</span></div>
+      <div id="ap2-empty" class="data-empty">Henüz enstrüman yok. "+ Yeni" ile başla.</div>
+      <div id="ap2-summary-area"></div>
+      <div id="ap2-alloc-area"></div>
+      <div id="ap2-grid" class="ap2-grid"></div>
+      <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
+        <h4>Rebalance Hesaplayıcı</h4>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-          <label style="margin:0;font-size:13px;font-weight:600;white-space:nowrap">Bu ay ekle ($):</label>
+          <label style="margin:0;font-size:13px;font-weight:600">Bu ay ekle:</label>
           <input type="number" id="ap2-rebal-amount" placeholder="500" min="0" step="any" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
           <span id="ap2-rebal-total-pct" style="font-size:12px;color:var(--text-3)"></span>
         </div>
         <div id="ap2-rebal-result"></div>
       </div>
-      <div class="ap2-donut-row" id="ap2-donut-row" style="display:none">
-        <div class="ap2-donut-wrap">
-          <svg id="ap2-donut-svg" viewBox="0 0 200 200" class="ap2-donut-svg"></svg>
-          <div class="ap2-donut-center">
-            <div class="ap2-donut-center-val" id="ap2-donut-center">—</div>
-            <div class="ap2-donut-center-lbl">Dağılım</div>
-          </div>
-        </div>
-        <div class="ap2-legend" id="ap2-legend"></div>
-      </div>
-      <div class="ap2-health" id="ap2-health" style="display:none"></div>
-      <div class="ap2-positions" id="ap2-positions"></div>
-      <div id="ap2-sell-hist" class="panel" style="display:none;margin-bottom:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:14px">
-        <div class="panel-h" style="margin-bottom:10px">📜 Satış Geçmişi</div>
+      <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
+        <h4>Satis Gecmisi</h4>
         <div id="ap2-sell-hist-body"></div>
       </div>
       <div id="ap2-form" class="strat-form hidden">
@@ -14447,140 +14439,90 @@ function ap2SellConfirm() {
 function renderAlfaPortfoy2() {
   const positions = ap2Data.positions || [];
   const emptyEl = document.getElementById('ap2-empty');
-  const heroEl = document.getElementById('ap2-hero');
-  const donutEl = document.getElementById('ap2-donut-row');
-  const healthEl = document.getElementById('ap2-health');
-  const posEl = document.getElementById('ap2-positions');
+  const sumEl = document.getElementById('ap2-summary-area');
+  const allocEl = document.getElementById('ap2-alloc-area');
+  const gridEl = document.getElementById('ap2-grid');
   const rebalEl = document.getElementById('ap2-rebalance');
   if (!positions.length) {
     if (emptyEl) emptyEl.style.display = '';
-    if (heroEl) heroEl.style.display = 'none';
-    if (donutEl) donutEl.style.display = 'none';
-    if (healthEl) healthEl.style.display = 'none';
+    if (sumEl) sumEl.innerHTML = '';
+    if (allocEl) allocEl.innerHTML = '';
+    if (gridEl) gridEl.innerHTML = '';
     if (rebalEl) rebalEl.style.display = 'none';
-    if (posEl) posEl.innerHTML = '';
     return;
   }
   if (emptyEl) emptyEl.style.display = 'none';
-  if (heroEl) heroEl.style.display = '';
-  if (donutEl) donutEl.style.display = '';
-  if (healthEl) healthEl.style.display = '';
   const filtered = ap2Filter === 'all' ? positions : positions.filter(p => p.type === ap2Filter);
   const sum = ap2Summary();
-  heroEl.innerHTML =
-    '<div class="ap2-hero-card ap2-hero-main"><div class="ap2-hero-label">Toplam Değer</div><div class="ap2-hero-value">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-hero-sub">' + sum.count + ' enstrüman · ' + sum.priced + '/' + sum.count + ' fiyatlandı</div></div>' +
-    '<div class="ap2-hero-card"><div class="ap2-hero-label">Bakiye (Nakit)</div><div class="ap2-hero-value" style="color:' + (sum.cash >= 0 ? 'var(--green)' : 'var(--red)') + '">' + ap2Fmt(sum.cash) + '</div><div class="ap2-hero-sub">yatırım yapılabilir</div></div>' +
-    '<div class="ap2-hero-card"><div class="ap2-hero-label">Yatırım</div><div class="ap2-hero-value ap2-hero-cost">' + ap2Fmt(sum.totalValue) + '</div><div class="ap2-hero-sub">pozisyon değeri</div></div>' +
-    '<div class="ap2-hero-card"><div class="ap2-hero-label">Kâr / Zarar</div><div class="hero-value" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')</div><div class="ap2-hero-sub">' + ap2Fmt(sum.startBalance) + ' başlangıç</div></div>';
-  const slices = [];
-  const groupMap = {};
-  filtered.forEach((p, i) => {
-    const c = ap2Calc(p);
-    const val = c.value !== null ? c.value : c.totalCost;
-    if (val <= 0) return;
-    const key = p.symbol;
-    if (!groupMap[key]) groupMap[key] = { val: 0, color: AP2_COLORS[i % AP2_COLORS.length], type: p.type, symbol: p.symbol };
-    groupMap[key].val += val;
-  });
-  if (sum.cash > 0) {
-    groupMap['Bakiye'] = { val: sum.cash, color: '#10b981', type: 'nakit', symbol: 'Bakiye' };
-  }
-  Object.values(groupMap).forEach(g => slices.push(g));
-  slices.sort((a, b) => b.val - a.val);
-  const svgEl = document.getElementById('ap2-donut-svg');
-  if (svgEl && slices.length) {
-    const totalSlice = slices.reduce((s, x) => s + x.val, 0);
-    let cum = 0;
-    let paths = '';
-    slices.forEach(sl => {
-      const pct = totalSlice > 0 ? sl.val / totalSlice : 0;
-      if (pct < 0.001) return;
-      const startAngle = cum * 2 * Math.PI - Math.PI / 2;
-      cum += pct;
-      const endAngle = cum * 2 * Math.PI - Math.PI / 2;
-      const large = pct > 0.5 ? 1 : 0;
-      const x1 = 100 + 80 * Math.cos(startAngle), y1 = 100 + 80 * Math.sin(startAngle);
-      const x2 = 100 + 80 * Math.cos(endAngle), y2 = 100 + 80 * Math.sin(endAngle);
-      const ix1 = 100 + 52 * Math.cos(startAngle), iy1 = 100 + 52 * Math.sin(startAngle);
-      const ix2 = 100 + 52 * Math.cos(endAngle), iy2 = 100 + 52 * Math.sin(endAngle);
-      paths += '<path d="M' + x1 + ',' + y1 + ' A80,80 0 ' + large + ',1 ' + x2 + ',' + y2 + ' L' + ix2 + ',' + iy2 + ' A52,52 0 ' + large + ',0 ' + ix1 + ',' + iy1 + ' Z" fill="' + sl.color + '" opacity="0.9"/>';
-    });
-    svgEl.innerHTML = paths;
-  }
-  document.getElementById('ap2-donut-center').textContent = slices.length + ' dilim';
-  const legendEl = document.getElementById('ap2-legend');
-  if (legendEl) {
-    const totalSlice = slices.reduce((s, x) => s + x.val, 0);
-    legendEl.innerHTML = slices.map(sl => {
-      const pct = totalSlice > 0 ? (sl.val / totalSlice * 100) : 0;
-      const chip = AP2_TYPES[sl.type] || '🪙';
-      return '<div class="ap2-legend-row"><span class="ap2-legend-dot" style="background:' + sl.color + '"></span><span class="ap2-legend-name">' + chip.split(' ')[0] + ' ' + sl.symbol + '</span><span class="ap2-legend-pct">' + pct.toFixed(1) + '%</span><span class="ap2-legend-val">' + ap2Fmt(sl.val) + '</span></div>';
-    }).join('');
-  }
-  let bestPnl = -Infinity, worstPnl = Infinity, bestSym = '', worstSym = '';
-  filtered.forEach(p => {
-    const c = ap2Calc(p);
-    if (c.pnlPct !== null) {
-      if (c.pnlPct > bestPnl) { bestPnl = c.pnlPct; bestSym = p.symbol; }
-      if (c.pnlPct < worstPnl) { worstPnl = c.pnlPct; worstSym = p.symbol; }
-    }
-  });
-  const maxPct = sum.portfolioValue > 0 ? Math.max(...filtered.map(p => { const c = ap2Calc(p); const v = c.value !== null ? c.value : c.totalCost; return v / sum.portfolioValue * 100; }), (sum.cash > 0 ? sum.cash / sum.portfolioValue * 100 : 0)) : 0;
-  healthEl.innerHTML =
-    '<div class="ap2-health-card"><div class="ap2-health-num" style="color:' + (slices.length >= 4 ? 'var(--green)' : slices.length >= 2 ? 'var(--amber)' : 'var(--red)') + '">' + (slices.length >= 4 ? 'İyi' : slices.length >= 2 ? 'Orta' : 'Zayıf') + '</div><div class="ap2-health-lbl">Çeşitlilik</div></div>' +
-    '<div class="ap2-health-card"><div class="ap2-health-num" style="color:' + (maxPct > 60 ? 'var(--red)' : maxPct > 35 ? 'var(--amber)' : 'var(--green)') + '">' + (maxPct > 60 ? 'Yüksek' : maxPct > 35 ? 'Normal' : 'Dağınık') + '</div><div class="ap2-health-lbl">Konsantrasyon</div></div>' +
-    '<div class="ap2-health-card"><div class="ap2-health-num">' + filtered.length + '</div><div class="ap2-health-lbl">Pozisyon</div></div>' +
-    '<div class="ap2-health-card"><div class="ap2-health-num">' + (bestSym || '—') + '</div><div class="ap2-health-lbl">En İyi (' + (bestPnl > -Infinity ? pfPct(bestPnl) : '—') + ')</div></div>' +
-    '<div class="ap2-health-card"><div class="ap2-health-num">' + (worstSym || '—') + '</div><div class="ap2-health-lbl">En Kötü (' + (worstPnl < Infinity ? pfPct(worstPnl) : '—') + ')</div></div>';
+  sumEl.innerHTML =
+    '<div class="ap2-sum-card" data-accent="pc"><div class="ap2-sum-lbl">Bakiye</div><div class="ap2-sum-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sub">Nakit para</div></div>' +
+    '<div class="ap2-sum-card" data-accent="green"><div class="ap2-sum-lbl">Yatirim</div><div class="ap2-sum-val">' + ap2Fmt(sum.totalValue) + '</div><div class="ap2-sum-sub">' + sum.count + ' enstruman</div></div>' +
+    '<div class="ap2-sum-card" data-accent="amber"><div class="ap2-sum-lbl">Toplam Deger</div><div class="ap2-sum-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sub">Bakiye + Yatirim</div></div>' +
+    '<div class="ap2-sum-card" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-lbl">Kar / Zarar</div><div class="ap2-sum-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sub">' + pfPct(sum.pnlPct) + ' · ' + ap2Fmt(sum.startBalance) + ' baslangictan</div></div>';
+  const totalInvest = sum.totalValue + sum.cash;
+  const investPct = totalInvest > 0 ? sum.totalValue / totalInvest * 100 : 0;
+  const cashPct = totalInvest > 0 ? sum.cash / totalInvest * 100 : 0;
+  allocEl.innerHTML =
+    '<div class="ap2-alloc"><div class="ap2-alloc-bar"><span class="ap2-alloc-label">Yatirim</span><div class="ap2-alloc-track"><div class="ap2-alloc-fill" style="width:' + investPct + '%;background:var(--pc)"></div></div><span class="ap2-alloc-pct">' + investPct.toFixed(0) + '%</span></div>' +
+    '<div class="ap2-alloc-bar"><span class="ap2-alloc-label">Nakit</span><div class="ap2-alloc-track"><div class="ap2-alloc-cash" style="width:' + cashPct + '%;background:var(--green)"></div></div><span class="ap2-alloc-pct">' + cashPct.toFixed(0) + '%</span></div></div>';
   const hasTargets = positions.some(p => p.target != null && p.target > 0);
   if (rebalEl) rebalEl.style.display = hasTargets ? '' : 'none';
-  posEl.innerHTML = filtered.map(p => {
+  gridEl.innerHTML = filtered.map(p => {
     const c = ap2Calc(p);
     const val = c.value !== null ? c.value : c.totalCost;
-    const curPct = sum.portfolioValue > 0 ? (val / sum.portfolioValue * 100) : 0;
-    const tgtPct = p.target || 0;
-    const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
-    const chipCls = AP2_TYPE_CLS[p.type] || 'pf-crypto';
-    const chipTxt = AP2_TYPES[p.type] || '🪙 Kripto';
     const pnlSign = c.pnl !== null ? (c.pnl >= 0 ? '+' : '') : '';
-    const pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : '';
+    const pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : 'zero';
+    const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
+    const chipTxt = AP2_TYPES[p.type] || p.type;
+    const curPct = sum.portfolioValue > 0 ? val / sum.portfolioValue * 100 : 0;
+    const tgtPct = p.target || 0;
     const diff = tgtPct > 0 ? curPct - tgtPct : 0;
     const diffSign = diff >= 0 ? '+' : '';
     const diffColor = Math.abs(diff) < 2 ? 'var(--green)' : diff > 0 ? 'var(--amber)' : 'var(--pc)';
-    let targetBar = '';
+    let targetHtml = '';
     if (tgtPct > 0) {
       const barW = Math.min(curPct, 100);
       const tgtW = Math.min(tgtPct, 100);
-      targetBar = '<div class="ap2-target-row">' +
-        '<div class="ap2-target-bar">' +
-          '<div class="ap2-target-bar-fill" style="width:' + barW + '%;background:' + color + '"></div>' +
-          '<div class="ap2-target-marker" style="left:' + tgtW + '%"></div>' +
+      targetHtml = '<div class="ap2-card-target">' +
+        '<div class="ap2-card-target-bar">' +
+          '<div class="ap2-card-target-fill" style="width:' + barW + '%;background:' + color + '"></div>' +
+          '<div class="ap2-card-target-marker" style="left:' + tgtW + '%"></div>' +
         '</div>' +
-        '<div class="ap2-target-labels">' +
-          '<span style="color:' + color + ';font-weight:700">' + curPct.toFixed(1) + '%</span>' +
-          '<span style="font-size:10px;color:var(--text-3)">→</span>' +
-          '<span style="color:var(--text);font-weight:600">' + tgtPct.toFixed(1) + '%</span>' +
-          '<span style="font-size:11px;font-weight:600;color:' + diffColor + '">' + diffSign + diff.toFixed(1) + '</span>' +
-        '</div>' +
-      '</div>';
+        '<div class="ap2-card-target-labels">' +
+          '<span style="color:' + color + '">' + curPct.toFixed(1) + '% → ' + tgtPct.toFixed(1) + '%</span>' +
+          '<span style="color:' + diffColor + '">' + diffSign + diff.toFixed(1) + '</span>' +
+        '</div></div>';
     }
-    return '<div class="ap2-pos" data-ap2id="' + p.id + '">' +
-      '<span class="ap2-pos-dot" style="background:' + color + '"></span>' +
-      '<div class="ap2-pos-info"><div class="ap2-pos-sym">' + p.symbol + ' <span class="ap2-pos-chip bd-pf-chip ' + chipCls + '">' + chipTxt + '</span></div><div class="ap2-pos-meta">' + (p.date || '—') + (p.note ? ' · ' + p.note : '') + ' · ' + p.qty + ' adet × ' + ap2Fmt(p.cost) + '</div>' + targetBar + '</div>' +
-      '<div class="ap2-pos-vals"><div class="ap2-pos-val">' + ap2Fmt(val) + '</div><div class="ap2-pos-pnl ' + pnlCls + '">' + pnlSign + pfPct(c.pnlPct) + '</div></div>' +
-      '<div class="ap2-pos-actions"><button type="button" data-ap2sell="' + p.id + '" title="Sat" style="color:var(--amber)">💰</button><button type="button" data-ap2edit="' + p.id + '" title="Düzenle">✎</button><button type="button" data-ap2del="' + p.id + '" title="Sil">✕</button></div>' +
+    return '<div class="ap2-card" data-ap2id="' + p.id + '">' +
+      '<div class="ap2-card-top"><div><div class="ap2-card-sym">' + p.symbol + '</div></div>' +
+      '<div class="ap2-card-actions">' +
+        '<button type="button" data-ap2sell="' + p.id + '" class="sell-btn" title="Satis">Satis</button>' +
+        '<button type="button" data-ap2edit="' + p.id + '" title="Duzenle">Duzenle</button>' +
+        '<button type="button" data-ap2del="' + p.id + '" title="Sil">Sil</button>' +
+      '</div></div>' +
+      '<div class="ap2-card-prices">' +
+        '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Maliyet</div><div class="ap2-card-price-val">' + ap2Fmt(p.cost) + '</div></div>' +
+        '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Guncel</div><div class="ap2-card-price-val">' + (c.value !== null ? ap2Fmt(p.price) : '<span style="color:var(--text-3)">—</span>') + '</div></div>' +
+      '</div>' +
+      '<div class="ap2-card-pnl ' + pnlCls + '">' +
+        '<div><div class="ap2-card-pnl-val ' + pnlCls + '">' + (c.pnl !== null ? pnlSign + ap2Fmt(c.pnl) : '—') + '</div></div>' +
+        '<div class="ap2-card-pnl-pct ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '—') + '</div>' +
+      '</div>' +
+      '<div class="ap2-card-meta">' + p.qty + ' adet · ' + (p.date || '') + (p.note ? ' · ' + p.note : '') + '</div>' +
+      targetHtml +
     '</div>';
   }).join('');
   const sellHistEl = document.getElementById('ap2-sell-hist');
   const sellHistBody = document.getElementById('ap2-sell-hist-body');
-  const sells = (ap2Data.sells || []);
+  const sells = ap2Data.sells || [];
   if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
-  if (sellHistBody) {
+  if (sellHistBody && sells.length) {
     sellHistBody.innerHTML = sells.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0)).map(sl => {
       const d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '';
-      return '<div class="ap2-sell-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">' +
+      const pnlAmt = sl.amount - (sl.qty * (ap2Data.positions.find(x => x.id === sl.posId)?.cost || sl.price));
+      return '<div class="ap2-sell-row">' +
         '<span style="font-weight:700">' + sl.symbol + '</span>' +
-        '<span style="color:var(--text-3)">' + sl.qty + ' adet × ' + ap2Fmt(sl.price) + ' · ' + d + '</span>' +
+        '<span style="color:var(--text-3)">' + sl.qty + ' x ' + ap2Fmt(sl.price) + ' · ' + d + '</span>' +
         '<span style="font-weight:700;color:var(--green)">+' + ap2Fmt(sl.amount) + '</span>' +
       '</div>';
     }).join('');
@@ -14613,7 +14555,7 @@ function ap2RebalCalc() {
   }
   const sum = ap2Summary();
   const newTotal = sum.portfolioValue + amount;
-  resultEl.innerHTML = '<div class="ap2-rebal-header">📈 $' + amount.toLocaleString('en-US') + ' eklenirse → toplam $' + Math.round(newTotal).toLocaleString('en-US') + '</div>' +
+  resultEl.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:var(--text)">$' + amount.toLocaleString('en-US') + ' eklenirse</div>' +
     withTarget.map(p => {
       const c = ap2Calc(p);
       const val = c.value !== null ? c.value : c.totalCost;
@@ -20821,7 +20763,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b58';
+const APP_BUILD = 'b59';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
