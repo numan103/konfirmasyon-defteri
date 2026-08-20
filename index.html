@@ -14435,6 +14435,12 @@ function ap2ShowGate() {
       var sum = ap2Summary();
       ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, cash: sum.cash, count: sum.count, startBalance: sum.startBalance, totalValue: sum.totalValue, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-gt');
     } else {
+      var gtTotal = document.getElementById('ap2-gt-total');
+      if (gtTotal) { gtTotal.textContent = 'Yükleniyor...'; }
+      var gtPnl = document.getElementById('ap2-gt-pnl');
+      if (gtPnl) { gtPnl.textContent = '—'; }
+      var gtPct = document.getElementById('ap2-gt-pct');
+      if (gtPct) { gtPct.textContent = '—'; }
       ap2FetchCloud().then(function(d) {
         if (d && d.portfolioValue) { ap2RenderTeaserTarget(d, 'ap2-gt'); }
       });
@@ -14567,6 +14573,12 @@ function ap2RenderTeaserTarget(data, prefix) {
       '<div class="ap2-sum-sm" data-accent="' + cl + '"><div class="ap2-sum-sm-lbl">Kümülatif K/Z</div><div class="ap2-sum-sm-val" style="color:' + cv + '">' + (pl >= 0 ? '+' : '') + ap2Fmt(pl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(pp) + ' getiri</div></div>' +
       '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye</div><div class="ap2-sum-sm-val">' + ap2Fmt(cs) + '</div><div class="ap2-sum-sm-sub">' + cnt + ' pozisyon · son ' + lu + '</div></div>';
   }
+  var totalEl = document.getElementById(prefix + '-total');
+  if (totalEl) { totalEl.textContent = '$' + Number(data.portfolioValue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
+  var pnlEl = document.getElementById(prefix + '-pnl');
+  if (pnlEl) { pnlEl.textContent = (data.pnl >= 0 ? '+' : '') + '$' + Math.abs(data.pnl || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); pnlEl.style.color = data.pnl >= 0 ? '#34d399' : '#f87171'; }
+  var pctEl = document.getElementById(prefix + '-pct');
+  if (pctEl) { pctEl.textContent = (data.pnlPct >= 0 ? '+' : '') + (data.pnlPct || 0).toFixed(1) + '%'; pctEl.style.color = data.pnlPct >= 0 ? '#34d399' : '#f87171'; }
   var chartEl = document.getElementById(prefix + '-chart');
   if (chartEl && data.history && data.history.length >= 2) {
     var vals = data.history.map(function(h) { return h.v; });
