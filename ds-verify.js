@@ -69,7 +69,7 @@ function fetchText(u, headers) {
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
     alfa_portfoy_scroll_legend: html.includes('ap2-donut-legend::-webkit-scrollbar'),
     alfa_portfoy_modern_ui: html.includes('ap2-sum-sm') && html.includes('ap2-donut-panel') && html.includes('ap2-chart-panel'),
-    alfa_portfoy_member_gate: html.includes('ap2-gate') && html.includes('AP2_MEMBER_KEY'),
+    alfa_portfoy_member_gate: html.includes('ap2-gate') && html.includes('AP2_MEMBER_KEY') && html.includes('CRYPTOAHMET'),
     alfa_portfoy_share_buttons: html.includes('ap2-share-copy') && html.includes('ap2-share-dl') && html.includes('ap2-share-native'),
     alfa_portfoy_share_download: html.includes('ap2ShareDownload') && html.includes('ap2ShareCopy'),
     alfa_portfoy_mobile_sticky_fix: html.includes('position: static !important'),
