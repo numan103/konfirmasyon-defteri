@@ -1846,8 +1846,8 @@
     .ap-pos-bar-wrap { display: none; }
     .ap-donut-row { flex-direction: column; align-items: center; }
   }
-  /* Alfa Portföy v2 — Modern */
-  .ap2-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  /* Alfa Portföy v3 — OKX Style */
+  .ap2-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
   @media (max-width: 800px) { .ap2-summary { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 440px) { .ap2-summary { grid-template-columns: 1fr; } }
   .ap2-sum-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
@@ -1859,23 +1859,37 @@
   .ap2-sum-lbl { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
   .ap2-sum-val { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: -.5px; }
   .ap2-sum-sub { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
-  .ap2-alloc { display: flex; gap: 10px; margin-bottom: 20px; }
-  @media (max-width: 600px) { .ap2-alloc { flex-direction: column; } }
-  .ap2-alloc-bar { flex: 1; display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-  .ap2-alloc-track { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; position: relative; }
-  .ap2-alloc-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
-  .ap2-alloc-cash { height: 100%; border-radius: 4px; transition: width .4s ease; opacity: .4; }
-  .ap2-alloc-label { font-size: 12px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
-  .ap2-alloc-pct { font-size: 13px; font-weight: 700; color: var(--text); min-width: 40px; text-align: right; }
-  .ap2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .ap2-layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .ap2-layout { grid-template-columns: 1fr; } }
+  .ap2-layout-sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .ap2-donut-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .ap2-donut-header { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+  .ap2-donut-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto 16px; }
+  .ap2-donut-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ap2-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+  .ap2-donut-center-val { font-size: 20px; font-weight: 800; color: var(--text); }
+  .ap2-donut-center-lbl { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .ap2-donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .ap2-donut-legend-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .ap2-donut-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .ap2-donut-legend-name { flex: 1; font-weight: 600; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ap2-donut-legend-val { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ap2-donut-legend-pct { font-size: 12px; color: var(--text-3); font-weight: 600; min-width: 40px; text-align: right; }
+  .ap2-chart-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .ap2-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .ap2-chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .ap2-chart-change { font-size: 13px; font-weight: 700; }
+  .ap2-chart-canvas { width: 100%; height: 140px; position: relative; }
+  .ap2-chart-canvas svg { width: 100%; height: 100%; }
+  .ap2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 20px; }
   @media (max-width: 440px) { .ap2-grid { grid-template-columns: 1fr; } }
   .ap2-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color .2s, box-shadow .2s; position: relative; }
   .ap2-card:hover { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc); }
   .ap2-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .ap2-card-sym { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
-  .ap2-card-type { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .3px; }
+  .ap2-card-sym { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -.3px; display: flex; align-items: center; gap: 8px; }
+  .ap2-card-type-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; letter-spacing: .3px; background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
   .ap2-card-actions { display: flex; gap: 2px; }
-  .ap2-card-actions button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 13px; padding: 4px 7px; border-radius: 6px; transition: all .15s; }
+  .ap2-card-actions button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; transition: all .15s; font-family: 'Inter', sans-serif; }
   .ap2-card-actions button:hover { background: var(--bg); color: var(--text); }
   .ap2-card-actions button.sell-btn:hover { color: var(--amber); }
   .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
@@ -1903,14 +1917,14 @@
   .ap2-card-target-labels span:first-child { font-weight: 700; }
   .ap2-card-target-labels span:last-child { color: var(--text-3); }
   .ap2-rebal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
-  .ap2-rebal h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .ap2-rebal h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
   .ap2-rebal-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .ap2-rebal-row:last-child { border-bottom: none; }
   .ap2-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
   .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
   .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .ap2-sell-row:last-child { border-bottom: none; }
-  .ap2-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .ap2-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
   .ap2-type-chips { display: flex; gap: 4px; flex-wrap: wrap; }
   .ap2-type-chip { border: 1px solid var(--border); background: var(--bg); color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; transition: all .15s; }
   .ap2-type-chip.on { background: var(--pc); color: #fff; border-color: var(--pc); }
@@ -5516,35 +5530,48 @@
     <div id="bd-view-alfaportfoy" class="hidden">
       <div class="ap2-tools">
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
-        <div class="ap2-type-chips" id="ap2-type-filter">
-          <button type="button" class="ap2-type-chip on" data-ap2f="all">Tümü</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="kripto">Kripto</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="hisse">Hisse</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="altin">Altın</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="gumus">Gümüş</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="emtia">Emtia</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="doviz">Döviz</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="endeks">Endeks</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="fon">Fon</button>
-          <button type="button" class="ap2-type-chip" data-ap2f="custom">Özel</button>
-        </div>
       </div>
       <div id="ap2-empty" class="data-empty">Henüz enstrüman yok. "+ Yeni" ile başla.</div>
       <div id="ap2-summary-area"></div>
-      <div id="ap2-alloc-area"></div>
-      <div id="ap2-grid" class="ap2-grid"></div>
-      <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
-        <h4>Rebalance Hesaplayıcı</h4>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-          <label style="margin:0;font-size:13px;font-weight:600">Bu ay ekle:</label>
-          <input type="number" id="ap2-rebal-amount" placeholder="500" min="0" step="any" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
-          <span id="ap2-rebal-total-pct" style="font-size:12px;color:var(--text-3)"></span>
+      <div class="ap2-layout">
+        <div class="ap2-layout-main">
+          <div id="ap2-grid" class="ap2-grid"></div>
+          <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
+            <h4>Rebalance Hesaplayıcı</h4>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+              <label style="margin:0;font-size:13px;font-weight:600">Bu ay ekle:</label>
+              <input type="number" id="ap2-rebal-amount" placeholder="500" min="0" step="any" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
+              <span id="ap2-rebal-total-pct" style="font-size:12px;color:var(--text-3)"></span>
+            </div>
+            <div id="ap2-rebal-result"></div>
+          </div>
+          <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
+            <h4>Satis Gecmisi</h4>
+            <div id="ap2-sell-hist-body"></div>
+          </div>
         </div>
-        <div id="ap2-rebal-result"></div>
-      </div>
-      <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
-        <h4>Satis Gecmisi</h4>
-        <div id="ap2-sell-hist-body"></div>
+        <div class="ap2-layout-sidebar">
+          <div class="ap2-donut-panel" id="ap2-donut-panel">
+            <div class="ap2-donut-header">Dagilim</div>
+            <div class="ap2-donut-wrap">
+              <svg id="ap2-donut-svg" viewBox="0 0 200 200" class="ap2-donut-svg"></svg>
+              <div class="ap2-donut-center">
+                <div class="ap2-donut-center-val" id="ap2-donut-center">—</div>
+                <div class="ap2-donut-center-lbl">Toplam</div>
+              </div>
+            </div>
+            <div class="ap2-donut-legend" id="ap2-donut-legend"></div>
+          </div>
+          <div class="ap2-chart-panel" id="ap2-chart-panel">
+            <div class="ap2-chart-header">
+              <span class="ap2-chart-title">Portfolio Buyumesi</span>
+              <span class="ap2-chart-change" id="ap2-chart-change"></span>
+            </div>
+            <div class="ap2-chart-canvas" id="ap2-chart-canvas">
+              <svg id="ap2-chart-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="ap2-form" class="strat-form hidden">
         <div class="strat-form-head">
@@ -14299,8 +14326,9 @@ function bdSetTab(t) {
   if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); }
 }
 const AP2_KEY = 'alfa-fund-v1';
-const AP2_COLORS = ['#3b82f6','#f59e0b','#10b981','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#6366f1','#14b8a6','#e11d48','#84cc16'];
-const AP2_TYPES = { kripto:'🪙 Kripto', hisse:'📈 Hisse', altin:'🥇 Altın', gumus:'🪙 Gümüş', emtia:'🛢️ Emtia', doviz:'💵 Döviz', endeks:'📊 Endeks', fon:'🏢 Fon', custom:'✍️ Özel' };
+const AP2_HIST_KEY = 'alfa-fund-hist-v1';
+const AP2_COLORS = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#6366f1','#14b8a6','#e11d48','#84cc16'];
+const AP2_TYPES = { kripto:'Kripto', hisse:'Hisse', altin:'Altin', gumus:'Gumus', emtia:'Emtia', doviz:'Doviz', endeks:'Endeks', fon:'Fon', custom:'Ozel' };
 const AP2_TYPE_CLS = { kripto:'pf-crypto', hisse:'pf-hisse', altin:'pf-altin', gumus:'pf-gumus', emtia:'pf-emtia', doviz:'pf-doviz', endeks:'pf-endeks', fon:'pf-fon', custom:'pf-custom' };
 const AP2_TYPE_CLR = { kripto:'#3b82f6', hisse:'#8b5cf6', altin:'#f59e0b', gumus:'#94a3b8', emtia:'#78350f', doviz:'#10b981', endeks:'#06b6d4', fon:'#ec4899', custom:'#6366f1' };
 let ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
@@ -14436,93 +14464,193 @@ function ap2SellConfirm() {
   renderAlfaPortfoy2();
   stratToast('💰 ' + sellQty + ' ' + pos.symbol + ' satıldı — +' + ap2Fmt(amount));
 }
+function ap2TrackHistory(value) {
+  try {
+    let hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
+    const today = new Date().toISOString().slice(0, 10);
+    const last = hist.length ? hist[hist.length - 1] : null;
+    if (last && last.d === today) { last.v = value; } else { hist.push({ d: today, v: value }); }
+    if (hist.length > 90) hist = hist.slice(-90);
+    localStorage.setItem(AP2_HIST_KEY, JSON.stringify(hist));
+  } catch (e) {}
+}
+function ap2RenderDonut(slices, total) {
+  const svgEl = document.getElementById('ap2-donut-svg');
+  const legendEl = document.getElementById('ap2-donut-legend');
+  const centerEl = document.getElementById('ap2-donut-center');
+  if (!svgEl) return;
+  if (!slices.length) { svgEl.innerHTML = ''; if (legendEl) legendEl.innerHTML = ''; if (centerEl) centerEl.textContent = '—'; return; }
+  let cum = 0;
+  let paths = '';
+  slices.forEach(function(sl) {
+    var pct = total > 0 ? sl.val / total : 0;
+    if (pct < 0.005) return;
+    var startAngle = cum * 2 * Math.PI;
+    cum += pct;
+    var endAngle = cum * 2 * Math.PI;
+    var large = pct > 0.5 ? 1 : 0;
+    var r1 = 90, r2 = 60;
+    var x1 = 100 + r1 * Math.cos(startAngle), y1 = 100 + r1 * Math.sin(startAngle);
+    var x2 = 100 + r1 * Math.cos(endAngle), y2 = 100 + r1 * Math.sin(endAngle);
+    var ix1 = 100 + r2 * Math.cos(startAngle), iy1 = 100 + r2 * Math.sin(startAngle);
+    var ix2 = 100 + r2 * Math.cos(endAngle), iy2 = 100 + r2 * Math.sin(endAngle);
+    paths += '<path d="M' + x1 + ',' + y1 + ' A' + r1 + ',' + r1 + ' 0 ' + large + ',1 ' + x2 + ',' + y2 + ' L' + ix2 + ',' + iy2 + ' A' + r2 + ',' + r2 + ' 0 ' + large + ',0 ' + ix1 + ',' + iy1 + ' Z" fill="' + sl.color + '" opacity="0.85"/>';
+  });
+  svgEl.innerHTML = paths;
+  if (centerEl) centerEl.textContent = '$' + Math.round(total).toLocaleString('en-US');
+  if (legendEl) {
+    legendEl.innerHTML = slices.map(function(sl) {
+      var pct = total > 0 ? (sl.val / total * 100) : 0;
+      return '<div class="ap2-donut-legend-row">' +
+        '<span class="ap2-donut-legend-dot" style="background:' + sl.color + '"></span>' +
+        '<span class="ap2-donut-legend-name">' + sl.symbol + '</span>' +
+        '<span class="ap2-donut-legend-val">' + ap2Fmt(sl.val) + '</span>' +
+        '<span class="ap2-donut-legend-pct">' + pct.toFixed(1) + '%</span>' +
+      '</div>';
+    }).join('');
+  }
+}
+function ap2RenderChart(hist) {
+  var svgEl = document.getElementById('ap2-chart-svg');
+  var changeEl = document.getElementById('ap2-chart-change');
+  if (!svgEl) return;
+  if (!hist || hist.length < 2) {
+    svgEl.innerHTML = '<text x="140" y="75" text-anchor="middle" fill="var(--text-3)" font-size="12" font-weight="600">Gecmis verisi yok</text>';
+    if (changeEl) changeEl.textContent = '';
+    return;
+  }
+  var vals = hist.map(function(h) { return h.v; });
+  var minV = Math.min.apply(null, vals) * 0.98;
+  var maxV = Math.max.apply(null, vals) * 1.02;
+  var range = maxV - minV || 1;
+  var w = 280, h = 140, pad = 4;
+  var points = vals.map(function(v, i) {
+    var x = pad + (i / (vals.length - 1)) * (w - pad * 2);
+    var y = pad + (1 - (v - minV) / range) * (h - pad * 2);
+    return { x: x, y: y };
+  });
+  var lineColor = vals[vals.length - 1] >= vals[0] ? '#10b981' : '#ef4444';
+  var gradId = 'ap2cg' + Date.now();
+  var d = 'M' + points[0].x + ',' + points[0].y;
+  for (var i = 1; i < points.length; i++) d += ' L' + points[i].x + ',' + points[i].y;
+  var lastPt = points[points.length - 1];
+  var firstPt = points[0];
+  var areaD = d + ' L' + lastPt.x + ',' + h + ' L' + firstPt.x + ',' + h + ' Z';
+  var change = vals[vals.length - 1] - vals[0];
+  var changePct = vals[0] > 0 ? (change / vals[0] * 100) : 0;
+  svgEl.innerHTML =
+    '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="' + lineColor + '" stop-opacity="0.2"/>' +
+      '<stop offset="100%" stop-color="' + lineColor + '" stop-opacity="0.01"/>' +
+    '</linearGradient></defs>' +
+    '<path d="' + areaD + '" fill="url(#' + gradId + ')"/>' +
+    '<path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<circle cx="' + lastPt.x + '" cy="' + lastPt.y + '" r="3.5" fill="' + lineColor + '"/>';
+  if (changeEl) {
+    changeEl.textContent = (change >= 0 ? '+' : '') + '$' + Math.round(change) + ' (' + (changePct >= 0 ? '+' : '') + changePct.toFixed(1) + '%)';
+    changeEl.style.color = lineColor;
+  }
+}
 function renderAlfaPortfoy2() {
-  const positions = ap2Data.positions || [];
-  const emptyEl = document.getElementById('ap2-empty');
-  const sumEl = document.getElementById('ap2-summary-area');
-  const allocEl = document.getElementById('ap2-alloc-area');
-  const gridEl = document.getElementById('ap2-grid');
-  const rebalEl = document.getElementById('ap2-rebalance');
+  var positions = ap2Data.positions || [];
+  var emptyEl = document.getElementById('ap2-empty');
+  var sumEl = document.getElementById('ap2-summary-area');
+  var gridEl = document.getElementById('ap2-grid');
+  var rebalEl = document.getElementById('ap2-rebalance');
+  var donutPanel = document.getElementById('ap2-donut-panel');
+  var chartPanel = document.getElementById('ap2-chart-panel');
+  var layoutEl = document.querySelector('.ap2-layout');
   if (!positions.length) {
     if (emptyEl) emptyEl.style.display = '';
     if (sumEl) sumEl.innerHTML = '';
-    if (allocEl) allocEl.innerHTML = '';
     if (gridEl) gridEl.innerHTML = '';
     if (rebalEl) rebalEl.style.display = 'none';
+    if (layoutEl) layoutEl.style.display = 'none';
     return;
   }
   if (emptyEl) emptyEl.style.display = 'none';
-  const filtered = ap2Filter === 'all' ? positions : positions.filter(p => p.type === ap2Filter);
-  const sum = ap2Summary();
+  if (layoutEl) layoutEl.style.display = '';
+  var sum = ap2Summary();
   sumEl.innerHTML =
     '<div class="ap2-sum-card" data-accent="pc"><div class="ap2-sum-lbl">Bakiye</div><div class="ap2-sum-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sub">Nakit para</div></div>' +
     '<div class="ap2-sum-card" data-accent="green"><div class="ap2-sum-lbl">Yatirim</div><div class="ap2-sum-val">' + ap2Fmt(sum.totalValue) + '</div><div class="ap2-sum-sub">' + sum.count + ' enstruman</div></div>' +
-    '<div class="ap2-sum-card" data-accent="amber"><div class="ap2-sum-lbl">Toplam Deger</div><div class="ap2-sum-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sub">Bakiye + Yatirim</div></div>' +
-    '<div class="ap2-sum-card" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-lbl">Kar / Zarar</div><div class="ap2-sum-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sub">' + pfPct(sum.pnlPct) + ' · ' + ap2Fmt(sum.startBalance) + ' baslangictan</div></div>';
-  const totalInvest = sum.totalValue + sum.cash;
-  const investPct = totalInvest > 0 ? sum.totalValue / totalInvest * 100 : 0;
-  const cashPct = totalInvest > 0 ? sum.cash / totalInvest * 100 : 0;
-  allocEl.innerHTML =
-    '<div class="ap2-alloc"><div class="ap2-alloc-bar"><span class="ap2-alloc-label">Yatirim</span><div class="ap2-alloc-track"><div class="ap2-alloc-fill" style="width:' + investPct + '%;background:var(--pc)"></div></div><span class="ap2-alloc-pct">' + investPct.toFixed(0) + '%</span></div>' +
-    '<div class="ap2-alloc-bar"><span class="ap2-alloc-label">Nakit</span><div class="ap2-alloc-track"><div class="ap2-alloc-cash" style="width:' + cashPct + '%;background:var(--green)"></div></div><span class="ap2-alloc-pct">' + cashPct.toFixed(0) + '%</span></div></div>';
-  const hasTargets = positions.some(p => p.target != null && p.target > 0);
+    '<div class="ap2-sum-card" data-accent="amber"><div class="ap2-sum-lbl">Toplam Deger</div><div class="ap2-sum-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sub">$' + sum.startBalance + ' baslangic</div></div>' +
+    '<div class="ap2-sum-card" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-lbl">Kar / Zarar</div><div class="ap2-sum-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sub">' + pfPct(sum.pnlPct) + '</div></div>';
+  ap2TrackHistory(sum.portfolioValue);
+  var slices = [];
+  var groupMap = {};
+  positions.forEach(function(p, i) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    if (val <= 0) return;
+    var key = p.symbol;
+    if (!groupMap[key]) groupMap[key] = { val: 0, color: AP2_COLORS[i % AP2_COLORS.length], symbol: p.symbol };
+    groupMap[key].val += val;
+  });
+  if (sum.cash > 0) groupMap['Bakiye'] = { val: sum.cash, color: '#22c55e', symbol: 'Bakiye' };
+  Object.keys(groupMap).forEach(function(k) { slices.push(groupMap[k]); });
+  slices.sort(function(a, b) { return b.val - a.val; });
+  if (donutPanel) donutPanel.style.display = '';
+  if (chartPanel) chartPanel.style.display = '';
+  ap2RenderDonut(slices, sum.portfolioValue);
+  try { var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); ap2RenderChart(hist); } catch (e) { ap2RenderChart([]); }
+  var hasTargets = positions.some(function(p) { return p.target != null && p.target > 0; });
   if (rebalEl) rebalEl.style.display = hasTargets ? '' : 'none';
-  gridEl.innerHTML = filtered.map(p => {
-    const c = ap2Calc(p);
-    const val = c.value !== null ? c.value : c.totalCost;
-    const pnlSign = c.pnl !== null ? (c.pnl >= 0 ? '+' : '') : '';
-    const pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : 'zero';
-    const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
-    const chipTxt = AP2_TYPES[p.type] || p.type;
-    const curPct = sum.portfolioValue > 0 ? val / sum.portfolioValue * 100 : 0;
-    const tgtPct = p.target || 0;
-    const diff = tgtPct > 0 ? curPct - tgtPct : 0;
-    const diffSign = diff >= 0 ? '+' : '';
-    const diffColor = Math.abs(diff) < 2 ? 'var(--green)' : diff > 0 ? 'var(--amber)' : 'var(--pc)';
-    let targetHtml = '';
+  gridEl.innerHTML = positions.map(function(p) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    var pnlSign = c.pnl !== null ? (c.pnl >= 0 ? '+' : '') : '';
+    var pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : 'zero';
+    var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
+    var chipTxt = AP2_TYPES[p.type] || p.type;
+    var curPct = sum.portfolioValue > 0 ? val / sum.portfolioValue * 100 : 0;
+    var tgtPct = p.target || 0;
+    var diff = tgtPct > 0 ? curPct - tgtPct : 0;
+    var diffSign = diff >= 0 ? '+' : '';
+    var diffColor = Math.abs(diff) < 2 ? 'var(--green)' : diff > 0 ? 'var(--amber)' : 'var(--pc)';
+    var targetHtml = '';
     if (tgtPct > 0) {
-      const barW = Math.min(curPct, 100);
-      const tgtW = Math.min(tgtPct, 100);
+      var barW = Math.min(curPct, 100);
+      var tgtW = Math.min(tgtPct, 100);
       targetHtml = '<div class="ap2-card-target">' +
         '<div class="ap2-card-target-bar">' +
           '<div class="ap2-card-target-fill" style="width:' + barW + '%;background:' + color + '"></div>' +
           '<div class="ap2-card-target-marker" style="left:' + tgtW + '%"></div>' +
         '</div>' +
         '<div class="ap2-card-target-labels">' +
-          '<span style="color:' + color + '">' + curPct.toFixed(1) + '% → ' + tgtPct.toFixed(1) + '%</span>' +
+          '<span style="color:' + color + '">' + curPct.toFixed(1) + '% / ' + tgtPct.toFixed(1) + '%</span>' +
           '<span style="color:' + diffColor + '">' + diffSign + diff.toFixed(1) + '</span>' +
         '</div></div>';
     }
     return '<div class="ap2-card" data-ap2id="' + p.id + '">' +
-      '<div class="ap2-card-top"><div><div class="ap2-card-sym">' + p.symbol + '</div></div>' +
+      '<div class="ap2-card-top"><div class="ap2-card-sym">' + p.symbol + '<span class="ap2-card-type-badge">' + chipTxt + '</span></div>' +
       '<div class="ap2-card-actions">' +
-        '<button type="button" data-ap2sell="' + p.id + '" class="sell-btn" title="Satis">Satis</button>' +
-        '<button type="button" data-ap2edit="' + p.id + '" title="Duzenle">Duzenle</button>' +
-        '<button type="button" data-ap2del="' + p.id + '" title="Sil">Sil</button>' +
+        '<button type="button" data-ap2sell="' + p.id + '" class="sell-btn">Satis</button>' +
+        '<button type="button" data-ap2edit="' + p.id + '">Duzenle</button>' +
+        '<button type="button" data-ap2del="' + p.id + '">Sil</button>' +
       '</div></div>' +
       '<div class="ap2-card-prices">' +
         '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Maliyet</div><div class="ap2-card-price-val">' + ap2Fmt(p.cost) + '</div></div>' +
-        '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Guncel</div><div class="ap2-card-price-val">' + (c.value !== null ? ap2Fmt(p.price) : '<span style="color:var(--text-3)">—</span>') + '</div></div>' +
+        '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Guncel</div><div class="ap2-card-price-val">' + (c.value !== null ? ap2Fmt(p.price) : '<span style="color:var(--text-3)">\u2014</span>') + '</div></div>' +
       '</div>' +
       '<div class="ap2-card-pnl ' + pnlCls + '">' +
-        '<div><div class="ap2-card-pnl-val ' + pnlCls + '">' + (c.pnl !== null ? pnlSign + ap2Fmt(c.pnl) : '—') + '</div></div>' +
-        '<div class="ap2-card-pnl-pct ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '—') + '</div>' +
+        '<div><div class="ap2-card-pnl-val ' + pnlCls + '">' + (c.pnl !== null ? pnlSign + ap2Fmt(c.pnl) : '\u2014') + '</div></div>' +
+        '<div class="ap2-card-pnl-pct ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '\u2014') + '</div>' +
       '</div>' +
-      '<div class="ap2-card-meta">' + p.qty + ' adet · ' + (p.date || '') + (p.note ? ' · ' + p.note : '') + '</div>' +
+      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + '</div>' +
       targetHtml +
     '</div>';
   }).join('');
-  const sellHistEl = document.getElementById('ap2-sell-hist');
-  const sellHistBody = document.getElementById('ap2-sell-hist-body');
-  const sells = ap2Data.sells || [];
+  var sellHistEl = document.getElementById('ap2-sell-hist');
+  var sellHistBody = document.getElementById('ap2-sell-hist-body');
+  var sells = ap2Data.sells || [];
   if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
   if (sellHistBody && sells.length) {
-    sellHistBody.innerHTML = sells.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0)).map(sl => {
-      const d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '';
-      const pnlAmt = sl.amount - (sl.qty * (ap2Data.positions.find(x => x.id === sl.posId)?.cost || sl.price));
+    sellHistBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
+      var d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '';
       return '<div class="ap2-sell-row">' +
         '<span style="font-weight:700">' + sl.symbol + '</span>' +
-        '<span style="color:var(--text-3)">' + sl.qty + ' x ' + ap2Fmt(sl.price) + ' · ' + d + '</span>' +
+        '<span style="color:var(--text-3)">' + sl.qty + ' x ' + ap2Fmt(sl.price) + ' \u00b7 ' + d + '</span>' +
         '<span style="font-weight:700;color:var(--green)">+' + ap2Fmt(sl.amount) + '</span>' +
       '</div>';
     }).join('');
@@ -14642,13 +14770,7 @@ function bindAlfaPortfoy2() {
     if (sl) { ap2OpenSell(sl.getAttribute('data-ap2sell')); return; }
     if (e.target.closest('#ap2-sell-confirm')) { ap2SellConfirm(); return; }
     if (e.target.closest('#ap2-sell-cancel') || e.target.closest('#ap2-sell-cancel2')) { document.getElementById('ap2-sell-form').classList.add('hidden'); ap2SellId = null; return; }
-    const chip = e.target.closest('#ap2-type-filter .ap2-type-chip');
-    if (chip) {
-      ap2Filter = chip.getAttribute('data-ap2f');
-      document.querySelectorAll('#ap2-type-filter .ap2-type-chip').forEach(b => b.classList.toggle('on', b === chip));
-      renderAlfaPortfoy2();
-      return;
-    }
+
   });
   view.addEventListener('click', e => {
     const chip = e.target.closest('#ap2-f-type .ap2-type-chip');
@@ -20763,7 +20885,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b59';
+const APP_BUILD = 'b60';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
