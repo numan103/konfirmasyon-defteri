@@ -14438,18 +14438,16 @@ function ap2ShowGate() {
   var positions = ap2Data.positions || [];
   var teaser = document.getElementById('ap2-gate-teaser');
   if (teaser) {
+    teaser.style.display = '';
     if (positions.length) {
-      teaser.style.display = '';
       var sum = ap2Summary();
       ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-gt');
     } else {
-      teaser.style.display = '';
       document.getElementById('ap2-gt-total').textContent = 'Yükleniyor...';
       document.getElementById('ap2-gt-pnl').textContent = '—';
       document.getElementById('ap2-gt-pct').textContent = '—';
       ap2FetchCloud().then(function(d) {
-        if (d) { ap2RenderTeaserTarget(d, 'ap2-gt'); }
-        else { teaser.style.display = 'none'; }
+        if (d && d.portfolioValue) { ap2RenderTeaserTarget(d, 'ap2-gt'); }
       });
     }
   }
@@ -14460,18 +14458,16 @@ function ap2RenderPublicTeaser() {
   if (ap2IsMember()) { el.style.display = 'none'; return; }
   ap2Load();
   var positions = ap2Data.positions || [];
+  el.style.display = '';
   if (positions.length) {
-    el.style.display = '';
     var sum = ap2Summary();
     ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-pt');
   } else {
-    el.style.display = '';
     document.getElementById('ap2-pt-total').textContent = 'Yükleniyor...';
     document.getElementById('ap2-pt-pnl').textContent = '—';
     document.getElementById('ap2-pt-pct').textContent = '—';
     ap2FetchCloud().then(function(d) {
-      if (d) { ap2RenderTeaserTarget(d, 'ap2-pt'); }
-      else { el.style.display = 'none'; }
+      if (d && d.portfolioValue) { ap2RenderTeaserTarget(d, 'ap2-pt'); }
     });
   }
 }
