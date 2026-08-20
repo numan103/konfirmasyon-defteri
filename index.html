@@ -5353,6 +5353,18 @@
         <input type="file" id="bd-restore-file" accept="application/json" class="hidden">
       </div>
     </div>
+    <div id="ap2-public-teaser" class="ap2-gate-teaser" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Alfa Portföy</div>
+        <div style="font-size:11px;color:#64748b;cursor:pointer" onclick="bdSetTab('alfaportfoy')">Detay için tıkla →</div>
+      </div>
+      <div class="ap2-gate-teaser-row">
+        <div><div class="ap2-gate-teaser-lbl">Toplam Değer</div><div class="ap2-gate-teaser-val" id="ap2-pt-total">—</div></div>
+        <div><div class="ap2-gate-teaser-lbl">Kar / Zarar</div><div class="ap2-gate-teaser-val" id="ap2-pt-pnl">—</div></div>
+        <div><div class="ap2-gate-teaser-lbl">Getiri</div><div class="ap2-gate-teaser-val" id="ap2-pt-pct">—</div></div>
+      </div>
+      <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
+    </div>
     <div class="bd-tabs" id="bd-tabs">
       <button type="button" class="bd-tab on" data-bdt="defter">📒 Defter</button>
       <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföy</button>
@@ -11047,7 +11059,7 @@ function showPage(name, skipAnim) {
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
-  if (name === 'butce') { renderButce(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
+  if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -14453,6 +14465,39 @@ function ap2ShowGate() {
     }
   }
 }
+function ap2RenderPublicTeaser() {
+  var el = document.getElementById('ap2-public-teaser');
+  if (!el) return;
+  if (ap2IsMember()) { el.style.display = 'none'; return; }
+  ap2Load();
+  var positions = ap2Data.positions || [];
+  if (!positions.length) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  var sum = ap2Summary();
+  document.getElementById('ap2-pt-total').textContent = ap2Fmt(sum.portfolioValue);
+  var pnlEl = document.getElementById('ap2-pt-pnl');
+  pnlEl.textContent = (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl);
+  pnlEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
+  var pctEl = document.getElementById('ap2-pt-pct');
+  pctEl.textContent = pfPct(sum.pnlPct);
+  pctEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
+  var chartEl = document.getElementById('ap2-pt-chart');
+  if (chartEl) {
+    try {
+      var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
+      if (hist.length >= 2) {
+        var vals = hist.map(function(h) { return h.v; });
+        var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+        var range = mx - mn || 1;
+        var w = 400, h = 50, pad = 2;
+        var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
+        var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+        var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
+        chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+    } catch (e) {}
+  }
+}
 function ap2HideGate() {
   var gate = document.getElementById('ap2-gate');
   var content = document.getElementById('ap2-gate-content');
@@ -14990,7 +15035,7 @@ function ap2ShareDownload() {
   if (!card) return;
   var sum = ap2Summary();
   var canvas = document.createElement('canvas');
-  var w = 520, h = 600;
+  var w = 520, h = 680;
   canvas.width = w * 2; canvas.height = h * 2;
   var ctx = canvas.getContext('2d');
   ctx.scale(2, 2);
@@ -15006,30 +15051,57 @@ function ap2ShareDownload() {
   ctx.fillText(ap2Fmt(sum.portfolioValue), 24, 82);
   ctx.fillStyle = sum.pnl >= 0 ? '#34d399' : '#f87171'; ctx.font = '700 14px Inter, sans-serif';
   ctx.fillText((sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')', 24, 106);
-  var y = 136;
+  var chartY = 118;
+  try {
+    var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
+    if (hist.length >= 2) {
+      var vals = hist.map(function(h) { return h.v; });
+      var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+      var range = mx - mn || 1;
+      var cw = w - 48, ch = 60, pad = 2;
+      var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (cw - pad * 2), y: pad + (1 - (v - mn) / range) * (ch - pad * 2) }; });
+      var lineD = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+      var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
+      var strokeW = 2;
+      ctx.save();
+      ctx.beginPath();
+      var path2d = new Path2D(lineD);
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = strokeW;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.translate(24, chartY);
+      ctx.stroke(path2d);
+      ctx.restore();
+      var lastPt = pts[pts.length - 1];
+      ctx.fillStyle = lineColor;
+      ctx.beginPath(); ctx.arc(24 + lastPt.x, chartY + lastPt.y, 3, 0, Math.PI * 2); ctx.fill();
+      chartY += ch + 10;
+    }
+  } catch (e) {}
   ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(24, y); ctx.lineTo(w - 24, y); ctx.stroke(); y += 12;
+  ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 14;
   (ap2Data.positions || []).forEach(function(p) {
     var c = ap2Calc(p);
     var val = c.value !== null ? c.value : c.totalCost;
     var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
-    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(32, y + 4, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText(p.symbol, 42, y + 8);
-    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(val), w - 140, y + 8);
-    if (c.pnlPct !== null) { ctx.fillStyle = c.pnlPct >= 0 ? '#34d399' : '#f87171'; ctx.fillText(pfPct(c.pnlPct), w - 60, y + 8); }
-    y += 28;
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText(p.symbol, 42, chartY + 8);
+    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(val), w - 140, chartY + 8);
+    if (c.pnlPct !== null) { ctx.fillStyle = c.pnlPct >= 0 ? '#34d399' : '#f87171'; ctx.fillText(pfPct(c.pnlPct), w - 60, chartY + 8); }
+    chartY += 28;
   });
   if (sum.cash > 0) {
-    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(32, y + 4, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye', 42, y + 8);
-    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(sum.cash), w - 140, y + 8);
-    y += 28;
+    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye', 42, chartY + 8);
+    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(sum.cash), w - 140, chartY + 8);
+    chartY += 28;
   }
-  y += 12;
-  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(24, y); ctx.lineTo(w - 24, y); ctx.stroke(); y += 16;
+  chartY += 12;
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 16;
   ctx.fillStyle = '#475569'; ctx.font = '400 10px Inter, sans-serif';
-  ctx.fillText(sum.count + ' enstrüman', 24, y);
-  ctx.fillText('alfa-trader.com', w - 110, y);
+  ctx.fillText(sum.count + ' enstrüman', 24, chartY);
+  ctx.fillText('alfa-trader.com', w - 110, chartY);
   canvas.toBlob(function(blob) {
     if (!blob) return;
     var a = document.createElement('a');

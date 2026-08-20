@@ -75,6 +75,8 @@ function fetchText(u, headers) {
     alfa_portfoy_mobile_sticky_fix: html.includes('position: static !important'),
     alfa_portfoy_gate_content: html.includes('ap2-gate-content'),
     alfa_portfoy_gate_teaser: html.includes('ap2-gate-teaser') && html.includes('ap2-gt-total'),
+    alfa_portfoy_public_teaser: html.includes('ap2-public-teaser') && html.includes('ap2RenderPublicTeaser'),
+    alfa_portfoy_share_chart: html.includes('Path2D') && html.includes('ap2-gt-chart'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {
