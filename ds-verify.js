@@ -15,7 +15,7 @@ function fetchText(u, headers) {
   const botHome = await fetchText('https://alfa-trader.com/', { 'User-Agent': 'Googlebot/2.1 (+http://www.google.com/bot.html)' });
   const botAt = await fetchText('https://alfa-trader.com/?page=alfatrading', { 'User-Agent': 'TelegramBot (like TwitterBot)' });
   const marks = {
-    APP_BUILD_b62: html.includes("APP_BUILD = 'b62'"),
+    APP_BUILD_b63: html.includes("APP_BUILD = 'b63'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
     og_not_old: !html.includes('Setup Kalitesi'),
     og_image_static: html.includes('alfa-trader.com/og.png'),
@@ -49,7 +49,7 @@ function fetchText(u, headers) {
     coingecko_fallback: html.includes('api.coingecko.com'),
     earnings_per_pos: html.includes('bd-pl-hrow-earn'),
     earnings_summary: html.includes('bd-pl-hld-summary'),
-    sw_v25: sw.includes('alfa-v25'),
+    sw_v26: sw.includes('alfa-v26'),
     basvuru_admin_gate: html.includes("name === 'basvuru' && !amAllowed()"),
     basvuru_nav_hidden: html.includes('id="tab-basvuru"') && html.includes('id="mnav-basvuru"'),
     alfa_portfoy_page: !html.includes('id="page-alfaportfoy"'),
@@ -63,7 +63,7 @@ function fetchText(u, headers) {
     alfa_portfoy_sellform: html.includes('id="ap2-sell-form"'),
     alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
     alfa_portfoy_cash_hero: html.includes('data-accent="pc"'),
-    sw_b62: sw.includes("'b62'"),
+    sw_b63: sw.includes("'b63'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') {") && html.includes('ap2IsMember'),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
@@ -77,6 +77,9 @@ function fetchText(u, headers) {
     alfa_portfoy_gate_teaser: html.includes('ap2-gate-teaser') && html.includes('ap2-gt-total'),
     alfa_portfoy_public_teaser: html.includes('ap2-public-teaser') && html.includes('ap2RenderPublicTeaser'),
     alfa_portfoy_share_chart: html.includes('Path2D') && html.includes('ap2-gt-chart'),
+    sw_v26: sw.includes('alfa-v26'),
+    alfa_portfoy_cloud_sync: html.includes('ap2SyncCloud') && html.includes('ap2FetchCloud'),
+    alfa_portfoy_cloud_render: html.includes('ap2RenderTeaserTarget'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

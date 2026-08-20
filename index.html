@@ -14437,31 +14437,20 @@ function ap2ShowGate() {
   ap2Load();
   var positions = ap2Data.positions || [];
   var teaser = document.getElementById('ap2-gate-teaser');
-  if (teaser && positions.length) {
-    teaser.style.display = '';
-    var sum = ap2Summary();
-    document.getElementById('ap2-gt-total').textContent = ap2Fmt(sum.portfolioValue);
-    var pnlEl = document.getElementById('ap2-gt-pnl');
-    pnlEl.textContent = (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl);
-    pnlEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
-    var pctEl = document.getElementById('ap2-gt-pct');
-    pctEl.textContent = pfPct(sum.pnlPct);
-    pctEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
-    var chartEl = document.getElementById('ap2-gt-chart');
-    if (chartEl) {
-      try {
-        var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
-        if (hist.length >= 2) {
-          var vals = hist.map(function(h) { return h.v; });
-          var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-          var range = mx - mn || 1;
-          var w = 400, h = 50, pad = 2;
-          var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
-          var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-          var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
-          chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        }
-      } catch (e) {}
+  if (teaser) {
+    if (positions.length) {
+      teaser.style.display = '';
+      var sum = ap2Summary();
+      ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-gt');
+    } else {
+      teaser.style.display = '';
+      document.getElementById('ap2-gt-total').textContent = 'Yükleniyor...';
+      document.getElementById('ap2-gt-pnl').textContent = '—';
+      document.getElementById('ap2-gt-pct').textContent = '—';
+      ap2FetchCloud().then(function(d) {
+        if (d) { ap2RenderTeaserTarget(d, 'ap2-gt'); }
+        else { teaser.style.display = 'none'; }
+      });
     }
   }
 }
@@ -14471,31 +14460,19 @@ function ap2RenderPublicTeaser() {
   if (ap2IsMember()) { el.style.display = 'none'; return; }
   ap2Load();
   var positions = ap2Data.positions || [];
-  if (!positions.length) { el.style.display = 'none'; return; }
-  el.style.display = '';
-  var sum = ap2Summary();
-  document.getElementById('ap2-pt-total').textContent = ap2Fmt(sum.portfolioValue);
-  var pnlEl = document.getElementById('ap2-pt-pnl');
-  pnlEl.textContent = (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl);
-  pnlEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
-  var pctEl = document.getElementById('ap2-pt-pct');
-  pctEl.textContent = pfPct(sum.pnlPct);
-  pctEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
-  var chartEl = document.getElementById('ap2-pt-chart');
-  if (chartEl) {
-    try {
-      var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
-      if (hist.length >= 2) {
-        var vals = hist.map(function(h) { return h.v; });
-        var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-        var range = mx - mn || 1;
-        var w = 400, h = 50, pad = 2;
-        var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
-        var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-        var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
-        chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      }
-    } catch (e) {}
+  if (positions.length) {
+    el.style.display = '';
+    var sum = ap2Summary();
+    ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-pt');
+  } else {
+    el.style.display = '';
+    document.getElementById('ap2-pt-total').textContent = 'Yükleniyor...';
+    document.getElementById('ap2-pt-pnl').textContent = '—';
+    document.getElementById('ap2-pt-pct').textContent = '—';
+    ap2FetchCloud().then(function(d) {
+      if (d) { ap2RenderTeaserTarget(d, 'ap2-pt'); }
+      else { el.style.display = 'none'; }
+    });
   }
 }
 function ap2HideGate() {
@@ -14544,7 +14521,67 @@ let ap2Filter = 'all';
 let ap2EditId = null;
 let ap2SellId = null;
 function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; } } catch(e) {} }
-function ap2Save() { try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} }
+function ap2Save() { try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} try { ap2SyncCloud(); } catch(e) {} }
+const AP2_CLOUD_KEY = 'alfa_portfoy_public';
+let ap2CloudData = null;
+let ap2CloudLoading = false;
+function ap2CloudSummary() {
+  var positions = ap2Data.positions || [];
+  var sum = ap2Summary();
+  var hist = [];
+  try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) {}
+  return {
+    portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct,
+    cash: sum.cash, count: sum.count, startBalance: sum.startBalance,
+    positions: positions.map(function(p) {
+      var c = ap2Calc(p); var val = c.value !== null ? c.value : c.totalCost;
+      return { symbol: p.symbol, type: p.type, value: val, pnlPct: c.pnlPct };
+    }),
+    history: hist.slice(-60)
+  };
+}
+async function ap2SyncCloud() {
+  if (!amAllowed()) return;
+  try {
+    var data = ap2CloudSummary();
+    var url = SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + AP2_CLOUD_KEY;
+    var r = await fetch(url, { method: 'PATCH', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ data: data }) });
+    if (r.status === 404 || r.status === 406) {
+      await fetch(SUPABASE_URL + '/rest/v1/edu_shared', { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ id: AP2_CLOUD_KEY, data: data }) });
+    }
+  } catch(e) {}
+}
+async function ap2FetchCloud() {
+  if (ap2CloudData) return ap2CloudData;
+  if (ap2CloudLoading) return null;
+  ap2CloudLoading = true;
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + AP2_CLOUD_KEY + '&select=data', { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
+    var j = await r.json();
+    if (j && j.length && j[0].data) { ap2CloudData = j[0].data; return ap2CloudData; }
+  } catch(e) {}
+  ap2CloudLoading = false;
+  return null;
+}
+function ap2RenderTeaserTarget(data, prefix) {
+  if (!data) return;
+  document.getElementById(prefix + '-total').textContent = '$' + Number(data.portfolioValue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  var pnlEl = document.getElementById(prefix + '-pnl');
+  if (pnlEl) { pnlEl.textContent = (data.pnl >= 0 ? '+' : '') + '$' + Math.abs(data.pnl || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); pnlEl.style.color = data.pnl >= 0 ? '#34d399' : '#f87171'; }
+  var pctEl = document.getElementById(prefix + '-pct');
+  if (pctEl) { pctEl.textContent = (data.pnlPct >= 0 ? '+' : '') + (data.pnlPct || 0).toFixed(1) + '%'; pctEl.style.color = data.pnlPct >= 0 ? '#34d399' : '#f87171'; }
+  var chartEl = document.getElementById(prefix + '-chart');
+  if (chartEl && data.history && data.history.length >= 2) {
+    var vals = data.history.map(function(h) { return h.v; });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    var range = mx - mn || 1;
+    var w = 400, h = 50, pad = 2;
+    var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
+    var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+    var lineColor = data.pnl >= 0 ? '#34d399' : '#f87171';
+    chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+}
 function ap2Calc(p) {
   const qty = Number(p.qty) || 0;
   const cost = Number(p.cost) || 0;
@@ -21264,7 +21301,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b62';
+const APP_BUILD = 'b63';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
