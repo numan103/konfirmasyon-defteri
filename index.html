@@ -1922,6 +1922,13 @@
   .ap2-gate-code-row input:focus { border-color: var(--pc); }
   .ap2-gate-code-row button { padding: 10px 18px; border: none; border-radius: 10px; background: var(--pc); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
   .ap2-gate-err { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 18px; }
+  .ap2-gate-teaser { margin-bottom: 20px; padding: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; }
+  .ap2-gate-teaser-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+  .ap2-gate-teaser-lbl { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .4px; }
+  .ap2-gate-teaser-val { font-size: 17px; font-weight: 800; color: #f8fafc; margin-top: 2px; }
+  .ap2-gate-teaser-chart { height: 50px; margin: 6px 0; }
+  .ap2-gate-teaser-chart svg { width: 100%; height: 100%; }
+  .ap2-gate-teaser-note { font-size: 10px; color: #64748b; text-align: center; margin-top: 4px; }
   /* Alfa Portföy Preview Card */
   .ap2-preview-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; cursor: pointer; transition: border-color .2s, box-shadow .2s; color: #f8fafc; }
   .ap2-preview-card:hover { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc); }
@@ -5346,28 +5353,6 @@
         <input type="file" id="bd-restore-file" accept="application/json" class="hidden">
       </div>
     </div>
-    <div id="ap2-preview-card" class="ap2-preview-card" style="display:none" onclick="bdSetTab('alfaportfoy')">
-      <div class="ap2-preview-row">
-        <div class="ap2-preview-item">
-          <div class="ap2-preview-lbl">📊 Alfa Portföy</div>
-          <div class="ap2-preview-val" id="ap2-pv-total">—</div>
-        </div>
-        <div class="ap2-preview-item">
-          <div class="ap2-preview-lbl">Kar / Zarar</div>
-          <div class="ap2-preview-val" id="ap2-pv-pnl">—</div>
-        </div>
-        <div class="ap2-preview-item">
-          <div class="ap2-preview-lbl">Getiri</div>
-          <div class="ap2-preview-val" id="ap2-pv-pct">—</div>
-        </div>
-        <div class="ap2-preview-item">
-          <div class="ap2-preview-lbl">Bakiye</div>
-          <div class="ap2-preview-val" id="ap2-pv-cash">—</div>
-        </div>
-      </div>
-      <div class="ap2-preview-chart" id="ap2-pv-chart"></div>
-      <div class="ap2-preview-hint">Detay için tıkla →</div>
-    </div>
     <div class="bd-tabs" id="bd-tabs">
       <button type="button" class="bd-tab on" data-bdt="defter">📒 Defter</button>
       <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföy</button>
@@ -5606,6 +5591,15 @@
           <div class="ap2-gate-icon">🔒</div>
           <div class="ap2-gate-title">Alfa Portföy'e Hoş Geldin</div>
           <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referral linkimle kayıt olman gerekiyor. Kayıt sonrası verilen kodu girerek erişim sağlayabilirsin.</div>
+          <div id="ap2-gate-teaser" class="ap2-gate-teaser" style="display:none">
+            <div class="ap2-gate-teaser-row">
+              <div><div class="ap2-gate-teaser-lbl">Toplam Değer</div><div class="ap2-gate-teaser-val" id="ap2-gt-total">—</div></div>
+              <div><div class="ap2-gate-teaser-lbl">Kar / Zarar</div><div class="ap2-gate-teaser-val" id="ap2-gt-pnl">—</div></div>
+              <div><div class="ap2-gate-teaser-lbl">Getiri</div><div class="ap2-gate-teaser-val" id="ap2-gt-pct">—</div></div>
+            </div>
+            <div class="ap2-gate-teaser-chart" id="ap2-gt-chart"></div>
+            <div class="ap2-gate-teaser-note">Güncel portföy durumu — erişim için kayıt ol</div>
+          </div>
           <div class="ap2-gate-links">
             <a href="https://www.okx.com/join/CRYPTOAHMET" target="_blank" rel="noopener" class="ap2-gate-link">
               <div class="ap2-gate-link-icon" style="background:#fff">🟣</div>
@@ -11053,7 +11047,7 @@ function showPage(name, skipAnim) {
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
-  if (name === 'butce') { renderButce(); ap2RenderPreview(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
+  if (name === 'butce') { renderButce(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -14428,44 +14422,42 @@ function ap2ShowGate() {
   var content = document.getElementById('ap2-gate-content');
   if (gate) gate.classList.remove('hidden');
   if (content) content.style.display = 'none';
+  ap2Load();
+  var positions = ap2Data.positions || [];
+  var teaser = document.getElementById('ap2-gate-teaser');
+  if (teaser && positions.length) {
+    teaser.style.display = '';
+    var sum = ap2Summary();
+    document.getElementById('ap2-gt-total').textContent = ap2Fmt(sum.portfolioValue);
+    var pnlEl = document.getElementById('ap2-gt-pnl');
+    pnlEl.textContent = (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl);
+    pnlEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
+    var pctEl = document.getElementById('ap2-gt-pct');
+    pctEl.textContent = pfPct(sum.pnlPct);
+    pctEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
+    var chartEl = document.getElementById('ap2-gt-chart');
+    if (chartEl) {
+      try {
+        var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
+        if (hist.length >= 2) {
+          var vals = hist.map(function(h) { return h.v; });
+          var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+          var range = mx - mn || 1;
+          var w = 400, h = 50, pad = 2;
+          var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
+          var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+          var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
+          chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        }
+      } catch (e) {}
+    }
+  }
 }
 function ap2HideGate() {
   var gate = document.getElementById('ap2-gate');
   var content = document.getElementById('ap2-gate-content');
   if (gate) gate.classList.add('hidden');
   if (content) content.style.display = '';
-}
-function ap2RenderPreview() {
-  var card = document.getElementById('ap2-preview-card');
-  if (!card) return;
-  ap2Load();
-  var positions = ap2Data.positions || [];
-  if (!positions.length) { card.style.display = 'none'; return; }
-  card.style.display = '';
-  var sum = ap2Summary();
-  document.getElementById('ap2-pv-total').textContent = ap2Fmt(sum.portfolioValue);
-  var pnlEl = document.getElementById('ap2-pv-pnl');
-  pnlEl.textContent = (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl);
-  pnlEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
-  var pctEl = document.getElementById('ap2-pv-pct');
-  pctEl.textContent = pfPct(sum.pnlPct);
-  pctEl.style.color = sum.pnl >= 0 ? '#34d399' : '#f87171';
-  document.getElementById('ap2-pv-cash').textContent = ap2Fmt(sum.cash);
-  var chartEl = document.getElementById('ap2-pv-chart');
-  if (chartEl) {
-    try {
-      var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
-      if (hist.length < 2) { chartEl.innerHTML = ''; return; }
-      var vals = hist.map(function(h) { return h.v; });
-      var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-      var range = mx - mn || 1;
-      var w = 400, h = 40, pad = 2;
-      var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
-      var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-      var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
-      chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" style="width:100%;height:100%"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    } catch (e) { chartEl.innerHTML = ''; }
-  }
 }
 function ap2VerifyCode() {
   var inp = document.getElementById('ap2-gate-code');
