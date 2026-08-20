@@ -74,6 +74,7 @@ function fetchText(u, headers) {
     alfa_portfoy_share_download: html.includes('ap2ShareDownload') && html.includes('ap2ShareCopy'),
     alfa_portfoy_mobile_sticky_fix: html.includes('position: static !important'),
     alfa_portfoy_gate_content: html.includes('ap2-gate-content'),
+    alfa_portfoy_preview_card: html.includes('ap2-preview-card') && html.includes('ap2RenderPreview'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {
