@@ -1846,85 +1846,103 @@
     .ap-pos-bar-wrap { display: none; }
     .ap-donut-row { flex-direction: column; align-items: center; }
   }
-  /* Alfa Portföy v3 — OKX Style */
-  .ap2-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-  @media (max-width: 800px) { .ap2-summary { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 440px) { .ap2-summary { grid-template-columns: 1fr; } }
-  .ap2-sum-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
-  .ap2-sum-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 14px 14px 0 0; }
-  .ap2-sum-card[data-accent="pc"]::before { background: var(--pc); }
-  .ap2-sum-card[data-accent="green"]::before { background: var(--green); }
-  .ap2-sum-card[data-accent="amber"]::before { background: var(--amber); }
-  .ap2-sum-card[data-accent="red"]::before { background: var(--red); }
-  .ap2-sum-lbl { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-  .ap2-sum-val { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: -.5px; }
-  .ap2-sum-sub { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
-  .ap2-layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+  /* Alfa Portföy v4 */
+  .ap2-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; align-items: start; }
   @media (max-width: 860px) { .ap2-layout { grid-template-columns: 1fr; } }
-  .ap2-layout-sidebar { display: flex; flex-direction: column; gap: 16px; }
-  .ap2-donut-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .ap2-donut-header { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
-  .ap2-donut-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto 16px; }
-  .ap2-donut-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ap2-layout-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .ap2-layout-right { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 60px; }
+  .ap2-sum-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 600px) { .ap2-sum-row { grid-template-columns: repeat(2, 1fr); } }
+  .ap2-sum-sm { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; position: relative; overflow: hidden; }
+  .ap2-sum-sm::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .ap2-sum-sm[data-accent="pc"]::before { background: var(--pc); }
+  .ap2-sum-sm[data-accent="green"]::before { background: var(--green); }
+  .ap2-sum-sm[data-accent="red"]::before { background: var(--red); }
+  .ap2-sum-sm-lbl { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
+  .ap2-sum-sm-val { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; }
+  .ap2-sum-sm-sub { font-size: 10.5px; color: var(--text-3); margin-top: 4px; }
+  .ap2-donut-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; overflow: hidden; }
+  .ap2-donut-header { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .ap2-donut-wrap { position: relative; width: 180px; height: 180px; margin: 0 auto 12px; flex-shrink: 0; }
+  .ap2-donut-svg { width: 100%; height: 100%; }
   .ap2-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-  .ap2-donut-center-val { font-size: 20px; font-weight: 800; color: var(--text); }
-  .ap2-donut-center-lbl { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
-  .ap2-donut-legend { display: flex; flex-direction: column; gap: 8px; }
-  .ap2-donut-legend-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .ap2-donut-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .ap2-donut-center-val { font-size: 18px; font-weight: 800; color: var(--text); }
+  .ap2-donut-center-lbl { font-size: 9px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .ap2-donut-legend { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+  .ap2-donut-legend::-webkit-scrollbar { width: 4px; }
+  .ap2-donut-legend::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .ap2-donut-legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .ap2-donut-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
   .ap2-donut-legend-name { flex: 1; font-weight: 600; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ap2-donut-legend-val { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-  .ap2-donut-legend-pct { font-size: 12px; color: var(--text-3); font-weight: 600; min-width: 40px; text-align: right; }
-  .ap2-chart-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .ap2-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .ap2-donut-legend-pct { font-size: 11px; color: var(--text-3); font-weight: 600; min-width: 36px; text-align: right; }
+  .ap2-chart-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+  .ap2-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .ap2-chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
   .ap2-chart-change { font-size: 13px; font-weight: 700; }
-  .ap2-chart-canvas { width: 100%; height: 140px; position: relative; }
+  .ap2-chart-canvas { width: 100%; height: 120px; position: relative; }
   .ap2-chart-canvas svg { width: 100%; height: 100%; }
-  .ap2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .ap2-share-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 20px; color: #f8fafc; }
+  .ap2-share-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .ap2-share-brand { font-size: 13px; font-weight: 700; color: #94a3b8; letter-spacing: .5px; }
+  .ap2-share-date { font-size: 11px; color: #64748b; }
+  .ap2-share-total { font-size: 32px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; line-height: 1; }
+  .ap2-share-pnl { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .ap2-share-pnl.pos { color: #34d399; }
+  .ap2-share-pnl.neg { color: #f87171; }
+  .ap2-share-positions { display: flex; flex-direction: column; gap: 6px; }
+  .ap2-share-pos { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); }
+  .ap2-share-pos-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .ap2-share-pos-name { flex: 1; font-size: 12px; font-weight: 600; color: #cbd5e1; }
+  .ap2-share-pos-val { font-size: 12px; font-weight: 700; color: #f8fafc; font-variant-numeric: tabular-nums; }
+  .ap2-share-pos-pnl { font-size: 11px; font-weight: 700; min-width: 50px; text-align: right; }
+  .ap2-share-pos-pnl.pos { color: #34d399; }
+  .ap2-share-pos-pnl.neg { color: #f87171; }
+  .ap2-share-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.06); font-size: 10px; color: #475569; }
+  .ap2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 16px; }
   @media (max-width: 440px) { .ap2-grid { grid-template-columns: 1fr; } }
-  .ap2-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color .2s, box-shadow .2s; position: relative; }
+  .ap2-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; transition: border-color .2s, box-shadow .2s; position: relative; }
   .ap2-card:hover { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc); }
-  .ap2-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .ap2-card-sym { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -.3px; display: flex; align-items: center; gap: 8px; }
-  .ap2-card-type-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; letter-spacing: .3px; background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+  .ap2-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .ap2-card-sym { font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -.3px; display: flex; align-items: center; gap: 6px; }
+  .ap2-card-type-badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 5px; text-transform: uppercase; letter-spacing: .3px; background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
   .ap2-card-actions { display: flex; gap: 2px; }
-  .ap2-card-actions button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; transition: all .15s; font-family: 'Inter', sans-serif; }
+  .ap2-card-actions button { border: none; background: transparent; color: var(--text-3); cursor: pointer; font-size: 11px; font-weight: 600; padding: 3px 6px; border-radius: 5px; transition: all .15s; font-family: 'Inter', sans-serif; }
   .ap2-card-actions button:hover { background: var(--bg); color: var(--text); }
   .ap2-card-actions button.sell-btn:hover { color: var(--amber); }
-  .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .ap2-card-price-box { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
-  .ap2-card-price-lbl { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px; }
-  .ap2-card-price-val { font-size: 15px; font-weight: 700; color: var(--text); }
-  .ap2-card-pnl { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; }
+  .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .ap2-card-price-box { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+  .ap2-card-price-lbl { font-size: 9px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
+  .ap2-card-price-val { font-size: 14px; font-weight: 700; color: var(--text); }
+  .ap2-card-pnl { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 8px; margin-bottom: 8px; }
   .ap2-card-pnl.pos { background: rgba(16,185,129,.08); }
   .ap2-card-pnl.neg { background: rgba(239,68,68,.08); }
   .ap2-card-pnl.zero { background: var(--bg); }
-  .ap2-card-pnl-val { font-size: 16px; font-weight: 800; }
+  .ap2-card-pnl-val { font-size: 15px; font-weight: 800; }
   .ap2-card-pnl-val.pos { color: var(--green); }
   .ap2-card-pnl-val.neg { color: var(--red); }
   .ap2-card-pnl-val.zero { color: var(--text-3); }
-  .ap2-card-pnl-pct { font-size: 13px; font-weight: 700; }
+  .ap2-card-pnl-pct { font-size: 12px; font-weight: 700; }
   .ap2-card-pnl-pct.pos { color: var(--green); }
   .ap2-card-pnl-pct.neg { color: var(--red); }
   .ap2-card-pnl-pct.zero { color: var(--text-3); }
-  .ap2-card-meta { font-size: 11px; color: var(--text-3); margin-bottom: 8px; }
-  .ap2-card-target { margin-top: 8px; }
-  .ap2-card-target-bar { position: relative; height: 6px; background: var(--bg); border-radius: 3px; overflow: visible; margin-bottom: 4px; }
+  .ap2-card-meta { font-size: 10px; color: var(--text-3); margin-bottom: 6px; }
+  .ap2-card-target { margin-top: 6px; }
+  .ap2-card-target-bar { position: relative; height: 5px; background: var(--bg); border-radius: 3px; overflow: visible; margin-bottom: 3px; }
   .ap2-card-target-fill { height: 100%; border-radius: 3px; transition: width .3s; }
-  .ap2-card-target-marker { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--text-2); border-radius: 1px; }
-  .ap2-card-target-labels { display: flex; justify-content: space-between; font-size: 11px; }
+  .ap2-card-target-marker { position: absolute; top: -3px; width: 2px; height: 11px; background: var(--text-2); border-radius: 1px; }
+  .ap2-card-target-labels { display: flex; justify-content: space-between; font-size: 10px; }
   .ap2-card-target-labels span:first-child { font-weight: 700; }
   .ap2-card-target-labels span:last-child { color: var(--text-3); }
-  .ap2-rebal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
-  .ap2-rebal h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .ap2-rebal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .ap2-rebal h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
   .ap2-rebal-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .ap2-rebal-row:last-child { border-bottom: none; }
-  .ap2-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; }
-  .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
-  .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .ap2-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+  .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .ap2-sell-row:last-child { border-bottom: none; }
-  .ap2-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .ap2-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
   .ap2-type-chips { display: flex; gap: 4px; flex-wrap: wrap; }
   .ap2-type-chip { border: 1px solid var(--border); background: var(--bg); color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; transition: all .15s; }
   .ap2-type-chip.on { background: var(--pc); color: #fff; border-color: var(--pc); }
@@ -5532,12 +5550,12 @@
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
       </div>
       <div id="ap2-empty" class="data-empty">Henüz enstrüman yok. "+ Yeni" ile başla.</div>
-      <div id="ap2-summary-area"></div>
       <div class="ap2-layout">
-        <div class="ap2-layout-main">
+        <div class="ap2-layout-left">
+          <div id="ap2-summary-area"></div>
           <div id="ap2-grid" class="ap2-grid"></div>
           <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
-            <h4>Rebalance Hesaplayıcı</h4>
+            <h4>Rebalance</h4>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
               <label style="margin:0;font-size:13px;font-weight:600">Bu ay ekle:</label>
               <input type="number" id="ap2-rebal-amount" placeholder="500" min="0" step="any" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
@@ -5550,7 +5568,7 @@
             <div id="ap2-sell-hist-body"></div>
           </div>
         </div>
-        <div class="ap2-layout-sidebar">
+        <div class="ap2-layout-right">
           <div class="ap2-donut-panel" id="ap2-donut-panel">
             <div class="ap2-donut-header">Dagilim</div>
             <div class="ap2-donut-wrap">
@@ -5564,13 +5582,14 @@
           </div>
           <div class="ap2-chart-panel" id="ap2-chart-panel">
             <div class="ap2-chart-header">
-              <span class="ap2-chart-title">Portfolio Buyumesi</span>
+              <span class="ap2-chart-title">Buyume</span>
               <span class="ap2-chart-change" id="ap2-chart-change"></span>
             </div>
             <div class="ap2-chart-canvas" id="ap2-chart-canvas">
               <svg id="ap2-chart-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
             </div>
           </div>
+          <div id="ap2-share-area"></div>
         </div>
       </div>
       <div id="ap2-form" class="strat-form hidden">
@@ -14560,22 +14579,25 @@ function renderAlfaPortfoy2() {
   var donutPanel = document.getElementById('ap2-donut-panel');
   var chartPanel = document.getElementById('ap2-chart-panel');
   var layoutEl = document.querySelector('.ap2-layout');
+  var shareArea = document.getElementById('ap2-share-area');
   if (!positions.length) {
     if (emptyEl) emptyEl.style.display = '';
     if (sumEl) sumEl.innerHTML = '';
     if (gridEl) gridEl.innerHTML = '';
     if (rebalEl) rebalEl.style.display = 'none';
     if (layoutEl) layoutEl.style.display = 'none';
+    if (shareArea) shareArea.innerHTML = '';
     return;
   }
   if (emptyEl) emptyEl.style.display = 'none';
   if (layoutEl) layoutEl.style.display = '';
   var sum = ap2Summary();
   sumEl.innerHTML =
-    '<div class="ap2-sum-card" data-accent="pc"><div class="ap2-sum-lbl">Bakiye</div><div class="ap2-sum-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sub">Nakit para</div></div>' +
-    '<div class="ap2-sum-card" data-accent="green"><div class="ap2-sum-lbl">Yatirim</div><div class="ap2-sum-val">' + ap2Fmt(sum.totalValue) + '</div><div class="ap2-sum-sub">' + sum.count + ' enstruman</div></div>' +
-    '<div class="ap2-sum-card" data-accent="amber"><div class="ap2-sum-lbl">Toplam Deger</div><div class="ap2-sum-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sub">$' + sum.startBalance + ' baslangic</div></div>' +
-    '<div class="ap2-sum-card" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-lbl">Kar / Zarar</div><div class="ap2-sum-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sub">' + pfPct(sum.pnlPct) + '</div></div>';
+    '<div class="ap2-sum-row">' +
+      '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Deger</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">$' + sum.startBalance + ' baslangic</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Nakit para</div></div>' +
+    '</div>';
   ap2TrackHistory(sum.portfolioValue);
   var slices = [];
   var groupMap = {};
@@ -14655,6 +14677,45 @@ function renderAlfaPortfoy2() {
       '</div>';
     }).join('');
   }
+  var sharePosHtml = '';
+  positions.forEach(function(p) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    var pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : '';
+    var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
+    sharePosHtml +=
+      '<div class="ap2-share-pos">' +
+        '<div class="ap2-share-pos-dot" style="background:' + color + '"></div>' +
+        '<div class="ap2-share-pos-name">' + p.symbol + '</div>' +
+        '<div class="ap2-share-pos-val">' + ap2Fmt(val) + '</div>' +
+        '<div class="ap2-share-pos-pnl ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '\u2014') + '</div>' +
+      '</div>';
+  });
+  if (sum.cash > 0) {
+    sharePosHtml +=
+      '<div class="ap2-share-pos">' +
+        '<div class="ap2-share-pos-dot" style="background:#22c55e"></div>' +
+        '<div class="ap2-share-pos-name">Bakiye</div>' +
+        '<div class="ap2-share-pos-val">' + ap2Fmt(sum.cash) + '</div>' +
+        '<div class="ap2-share-pos-pnl"></div>' +
+      '</div>';
+  }
+  var shareDate = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  var shareHtml =
+    '<div class="ap2-share-card">' +
+      '<div class="ap2-share-top">' +
+        '<div class="ap2-share-brand">ALFA PORTFOY</div>' +
+        '<div class="ap2-share-date">' + shareDate + '</div>' +
+      '</div>' +
+      '<div class="ap2-share-total">' + ap2Fmt(sum.portfolioValue) + '</div>' +
+      '<div class="ap2-share-pnl ' + (sum.pnl >= 0 ? 'pos' : 'neg') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')</div>' +
+      '<div class="ap2-share-positions">' + sharePosHtml + '</div>' +
+      '<div class="ap2-share-footer">' +
+        '<span>' + sum.count + ' enstr\u00fcman</span>' +
+        '<span>' + shareDate + '</span>' +
+      '</div>' +
+    '</div>';
+  if (shareArea) shareArea.innerHTML = shareHtml;
   ap2RebalCalc();
 }
 function ap2RebalCalc() {
@@ -20885,7 +20946,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b60';
+const APP_BUILD = 'b61';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
