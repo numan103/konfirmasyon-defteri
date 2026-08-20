@@ -15,7 +15,7 @@ function fetchText(u, headers) {
   const botHome = await fetchText('https://alfa-trader.com/', { 'User-Agent': 'Googlebot/2.1 (+http://www.google.com/bot.html)' });
   const botAt = await fetchText('https://alfa-trader.com/?page=alfatrading', { 'User-Agent': 'TelegramBot (like TwitterBot)' });
   const marks = {
-    APP_BUILD_b57: html.includes("APP_BUILD = 'b57'"),
+    APP_BUILD_b58: html.includes("APP_BUILD = 'b58'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
     og_not_old: !html.includes('Setup Kalitesi'),
     og_image_static: html.includes('alfa-trader.com/og.png'),
@@ -58,7 +58,12 @@ function fetchText(u, headers) {
     alfa_portfoy_render: html.includes('function renderAlfaPortfoy2'),
     alfa_portfoy_data_key: html.includes("AP2_KEY = 'alfa-fund-v1'"),
     alfa_portfoy_bind: html.includes('function bindAlfaPortfoy2'),
-    sw_b57: sw.includes("'b57'"),
+    alfa_portfoy_balance: html.includes('startBalance: 1000') || html.includes('startBalance'),
+    alfa_portfoy_sell: html.includes('function ap2SellConfirm') && html.includes('ap2Data.sells.push'),
+    alfa_portfoy_sellform: html.includes('id="ap2-sell-form"'),
+    alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
+    alfa_portfoy_cash_hero: html.includes('Bakiye (Nakit)'),
+    sw_b58: sw.includes("'b58'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2();"),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
   };

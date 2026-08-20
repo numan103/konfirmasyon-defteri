@@ -5550,6 +5550,10 @@
       </div>
       <div class="ap2-health" id="ap2-health" style="display:none"></div>
       <div class="ap2-positions" id="ap2-positions"></div>
+      <div id="ap2-sell-hist" class="panel" style="display:none;margin-bottom:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:14px">
+        <div class="panel-h" style="margin-bottom:10px">📜 Satış Geçmişi</div>
+        <div id="ap2-sell-hist-body"></div>
+      </div>
       <div id="ap2-form" class="strat-form hidden">
         <div class="strat-form-head">
           <span id="ap2-form-title">Yeni Enstrüman</span>
@@ -5587,6 +5591,28 @@
             <button type="button" class="btn" id="ap2-f-cancel">Vazgeç</button>
           </div>
           <div class="strat-form-err" id="ap2-f-err"></div>
+        </div>
+      </div>
+      <div id="ap2-sell-form" class="strat-form hidden">
+        <div class="strat-form-head">
+          <span id="ap2-sell-title">💰 Sat</span>
+          <button type="button" class="btn" id="ap2-sell-cancel">✕</button>
+        </div>
+        <div class="strat-form-body">
+          <div id="ap2-sell-sym" style="font-weight:700;margin-bottom:8px"></div>
+          <div id="ap2-sell-info" style="font-size:12px;color:var(--text-3);margin-bottom:10px"></div>
+          <label>Miktar Sat</label>
+          <input type="number" id="ap2-sell-qty" placeholder="Satılacak miktar" step="any" min="0">
+          <label>Satış Fiyatı ($)</label>
+          <input type="number" id="ap2-sell-price" placeholder="Piyasa fiyatı" step="any" min="0">
+          <div style="margin-top:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <span style="color:var(--text-3)">Tutar: </span><strong id="ap2-sell-amount">—</strong>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button type="button" class="btn solid" id="ap2-sell-confirm" style="background:var(--amber);color:#000">💰 Satışı Onayla</button>
+            <button type="button" class="btn" id="ap2-sell-cancel2">Vazgeç</button>
+          </div>
+          <div class="strat-form-err" id="ap2-sell-err"></div>
         </div>
       </div>
     </div><!-- /bd-view-alfaportfoy -->
@@ -14285,10 +14311,11 @@ const AP2_COLORS = ['#3b82f6','#f59e0b','#10b981','#8b5cf6','#ef4444','#06b6d4',
 const AP2_TYPES = { kripto:'🪙 Kripto', hisse:'📈 Hisse', altin:'🥇 Altın', gumus:'🪙 Gümüş', emtia:'🛢️ Emtia', doviz:'💵 Döviz', endeks:'📊 Endeks', fon:'🏢 Fon', custom:'✍️ Özel' };
 const AP2_TYPE_CLS = { kripto:'pf-crypto', hisse:'pf-hisse', altin:'pf-altin', gumus:'pf-gumus', emtia:'pf-emtia', doviz:'pf-doviz', endeks:'pf-endeks', fon:'pf-fon', custom:'pf-custom' };
 const AP2_TYPE_CLR = { kripto:'#3b82f6', hisse:'#8b5cf6', altin:'#f59e0b', gumus:'#94a3b8', emtia:'#78350f', doviz:'#10b981', endeks:'#06b6d4', fon:'#ec4899', custom:'#6366f1' };
-let ap2Data = { positions: [] };
+let ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
 let ap2Filter = 'all';
 let ap2EditId = null;
-function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) ap2Data = JSON.parse(raw); } catch(e) {} }
+let ap2SellId = null;
+function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; } } catch(e) {} }
 function ap2Save() { try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} }
 function ap2Calc(p) {
   const qty = Number(p.qty) || 0;
@@ -14302,11 +14329,16 @@ function ap2Calc(p) {
 }
 function ap2Summary() {
   const positions = ap2Data.positions || [];
+  const sells = ap2Data.sells || [];
+  const startBalance = Number(ap2Data.startBalance) || 1000;
+  const cash = Number(ap2Data.cash) || 0;
   let totalValue = 0, totalCost = 0, priced = 0;
   positions.forEach(p => { const c = ap2Calc(p); totalCost += c.totalCost; if (c.value !== null) { totalValue += c.value; priced++; } else { totalValue += c.totalCost; } });
-  const pnl = totalValue - totalCost;
-  const pnlPct = totalCost > 0 ? pnl / totalCost * 100 : null;
-  return { totalValue, totalCost, pnl, pnlPct, count: positions.length, priced };
+  const portfolioValue = cash + totalValue;
+  const pnl = portfolioValue - startBalance;
+  const pnlPct = startBalance > 0 ? pnl / startBalance * 100 : null;
+  const totalSellAmount = sells.reduce((s, sl) => s + (Number(sl.amount) || 0), 0);
+  return { totalValue, totalCost, cash, portfolioValue, pnl, pnlPct, startBalance, totalSellAmount, count: positions.length, priced, sellCount: sells.length };
 }
 function ap2Fmt(n) { return pfAmt(n); }
 function ap2Id() { return 'ap2_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
@@ -14351,8 +14383,15 @@ function ap2SaveForm() {
   };
   if (ap2EditId) {
     const idx = ap2Data.positions.findIndex(x => x.id === ap2EditId);
-    if (idx >= 0) ap2Data.positions[idx] = pos;
+    if (idx >= 0) {
+      const old = ap2Data.positions[idx];
+      const oldCost = (Number(old.qty) || 0) * (Number(old.cost) || 0);
+      const newCost = qty * cost;
+      ap2Data.cash = (Number(ap2Data.cash) || 0) + oldCost - newCost;
+      ap2Data.positions[idx] = pos;
+    }
   } else {
+    ap2Data.cash = (Number(ap2Data.cash) || 0) - qty * cost;
     ap2Data.positions.push(pos);
   }
   ap2Save();
@@ -14362,9 +14401,48 @@ function ap2SaveForm() {
 }
 function ap2Delete(id) {
   if (!confirm('Bu enstrümanı silmek istediğine emin misin?')) return;
+  const pos = ap2Data.positions.find(x => x.id === id);
+  if (pos) { const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; }
   ap2Data.positions = ap2Data.positions.filter(x => x.id !== id);
   ap2Save();
   renderAlfaPortfoy2();
+}
+function ap2OpenSell(id) {
+  const pos = ap2Data.positions.find(x => x.id === id);
+  if (!pos) return;
+  ap2SellId = id;
+  const c = ap2Calc(pos);
+  document.getElementById('ap2-sell-sym').textContent = pos.symbol + ' — ' + (AP2_TYPES[pos.type] || '');
+  document.getElementById('ap2-sell-info').textContent = 'Mevcut: ' + pos.qty + ' adet · Maliyet: ' + ap2Fmt(pos.cost) + '/adet · Toplam: ' + ap2Fmt(c.totalCost) + (c.value !== null ? ' · Değer: ' + ap2Fmt(c.value) : '');
+  document.getElementById('ap2-sell-qty').value = '';
+  document.getElementById('ap2-sell-qty').max = pos.qty;
+  document.getElementById('ap2-sell-price').value = pos.price || '';
+  document.getElementById('ap2-sell-amount').textContent = '—';
+  document.getElementById('ap2-sell-err').textContent = '';
+  document.getElementById('ap2-form').classList.add('hidden');
+  document.getElementById('ap2-sell-form').classList.remove('hidden');
+  document.getElementById('ap2-sell-qty').focus();
+}
+function ap2SellConfirm() {
+  const pos = ap2Data.positions.find(x => x.id === ap2SellId);
+  if (!pos) return;
+  const sellQty = parseFloat(document.getElementById('ap2-sell-qty').value);
+  const sellPrice = parseFloat(document.getElementById('ap2-sell-price').value);
+  if (!sellQty || sellQty <= 0) { document.getElementById('ap2-sell-err').textContent = 'Satış miktarı 0\'dan büyük olmalı'; return; }
+  if (sellQty > pos.qty) { document.getElementById('ap2-sell-err').textContent = 'Mevcut miktar (' + pos.qty + ') kadar satılabilir'; return; }
+  if (!sellPrice || sellPrice <= 0) { document.getElementById('ap2-sell-err').textContent = 'Satış fiyatı girilmeli'; return; }
+  const amount = sellQty * sellPrice;
+  if (!confirm(sellQty + ' ' + pos.symbol + ' → ' + ap2Fmt(sellPrice) + '/adet = ' + ap2Fmt(amount) + ' Satışı onayla?')) return;
+  ap2Data.sells = ap2Data.sells || [];
+  ap2Data.sells.push({ id: ap2Id(), posId: pos.id, symbol: pos.symbol, type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now() });
+  pos.qty = Math.round((pos.qty - sellQty) * 1e8) / 1e8;
+  ap2Data.cash = (Number(ap2Data.cash) || 0) + amount;
+  if (pos.qty <= 0) { ap2Data.positions = ap2Data.positions.filter(x => x.id !== pos.id); }
+  ap2Save();
+  document.getElementById('ap2-sell-form').classList.add('hidden');
+  ap2SellId = null;
+  renderAlfaPortfoy2();
+  stratToast('💰 ' + sellQty + ' ' + pos.symbol + ' satıldı — +' + ap2Fmt(amount));
 }
 function renderAlfaPortfoy2() {
   const positions = ap2Data.positions || [];
@@ -14390,10 +14468,10 @@ function renderAlfaPortfoy2() {
   const filtered = ap2Filter === 'all' ? positions : positions.filter(p => p.type === ap2Filter);
   const sum = ap2Summary();
   heroEl.innerHTML =
-    '<div class="ap2-hero-card ap2-hero-main"><div class="ap2-hero-label">Toplam Değer</div><div class="ap2-hero-value">' + ap2Fmt(sum.totalValue) + '</div><div class="ap2-hero-sub">' + sum.count + ' enstrüman · ' + sum.priced + '/' + sum.count + ' fiyatlandı</div></div>' +
-    '<div class="ap2-hero-card"><div class="ap2-hero-label">Toplam Maliyet</div><div class="ap2-hero-value ap2-hero-cost">' + ap2Fmt(sum.totalCost) + '</div></div>' +
-    '<div class="ap2-hero-card"><div class="ap2-hero-label">Kâr / Zarar</div><div class="ap2-hero-value" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-hero-sub">gerçekleşmemiş</div></div>' +
-    '<div class="ap2-hero-card"><div class="ap2-hero-label">Getiri</div><div class="ap2-hero-value" style="color:' + ((sum.pnlPct || 0) >= 0 ? 'var(--green)' : 'var(--red)') + '">' + pfPct(sum.pnlPct) + '</div><div class="ap2-hero-sub">toplam getiri</div></div>';
+    '<div class="ap2-hero-card ap2-hero-main"><div class="ap2-hero-label">Toplam Değer</div><div class="ap2-hero-value">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-hero-sub">' + sum.count + ' enstrüman · ' + sum.priced + '/' + sum.count + ' fiyatlandı</div></div>' +
+    '<div class="ap2-hero-card"><div class="ap2-hero-label">Bakiye (Nakit)</div><div class="ap2-hero-value" style="color:' + (sum.cash >= 0 ? 'var(--green)' : 'var(--red)') + '">' + ap2Fmt(sum.cash) + '</div><div class="ap2-hero-sub">yatırım yapılabilir</div></div>' +
+    '<div class="ap2-hero-card"><div class="ap2-hero-label">Yatırım</div><div class="ap2-hero-value ap2-hero-cost">' + ap2Fmt(sum.totalValue) + '</div><div class="ap2-hero-sub">pozisyon değeri</div></div>' +
+    '<div class="ap2-hero-card"><div class="ap2-hero-label">Kâr / Zarar</div><div class="hero-value" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')</div><div class="ap2-hero-sub">' + ap2Fmt(sum.startBalance) + ' başlangıç</div></div>';
   const slices = [];
   const groupMap = {};
   filtered.forEach((p, i) => {
@@ -14404,6 +14482,9 @@ function renderAlfaPortfoy2() {
     if (!groupMap[key]) groupMap[key] = { val: 0, color: AP2_COLORS[i % AP2_COLORS.length], type: p.type, symbol: p.symbol };
     groupMap[key].val += val;
   });
+  if (sum.cash > 0) {
+    groupMap['Bakiye'] = { val: sum.cash, color: '#10b981', type: 'nakit', symbol: 'Bakiye' };
+  }
   Object.values(groupMap).forEach(g => slices.push(g));
   slices.sort((a, b) => b.val - a.val);
   const svgEl = document.getElementById('ap2-donut-svg');
@@ -14444,7 +14525,7 @@ function renderAlfaPortfoy2() {
       if (c.pnlPct < worstPnl) { worstPnl = c.pnlPct; worstSym = p.symbol; }
     }
   });
-  const maxPct = sum.totalValue > 0 ? Math.max(...filtered.map(p => { const c = ap2Calc(p); const v = c.value !== null ? c.value : c.totalCost; return v / sum.totalValue * 100; })) : 0;
+  const maxPct = sum.portfolioValue > 0 ? Math.max(...filtered.map(p => { const c = ap2Calc(p); const v = c.value !== null ? c.value : c.totalCost; return v / sum.portfolioValue * 100; }), (sum.cash > 0 ? sum.cash / sum.portfolioValue * 100 : 0)) : 0;
   healthEl.innerHTML =
     '<div class="ap2-health-card"><div class="ap2-health-num" style="color:' + (slices.length >= 4 ? 'var(--green)' : slices.length >= 2 ? 'var(--amber)' : 'var(--red)') + '">' + (slices.length >= 4 ? 'İyi' : slices.length >= 2 ? 'Orta' : 'Zayıf') + '</div><div class="ap2-health-lbl">Çeşitlilik</div></div>' +
     '<div class="ap2-health-card"><div class="ap2-health-num" style="color:' + (maxPct > 60 ? 'var(--red)' : maxPct > 35 ? 'var(--amber)' : 'var(--green)') + '">' + (maxPct > 60 ? 'Yüksek' : maxPct > 35 ? 'Normal' : 'Dağınık') + '</div><div class="ap2-health-lbl">Konsantrasyon</div></div>' +
@@ -14456,7 +14537,7 @@ function renderAlfaPortfoy2() {
   posEl.innerHTML = filtered.map(p => {
     const c = ap2Calc(p);
     const val = c.value !== null ? c.value : c.totalCost;
-    const curPct = sum.totalValue > 0 ? (val / sum.totalValue * 100) : 0;
+    const curPct = sum.portfolioValue > 0 ? (val / sum.portfolioValue * 100) : 0;
     const tgtPct = p.target || 0;
     const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
     const chipCls = AP2_TYPE_CLS[p.type] || 'pf-crypto';
@@ -14487,9 +14568,23 @@ function renderAlfaPortfoy2() {
       '<span class="ap2-pos-dot" style="background:' + color + '"></span>' +
       '<div class="ap2-pos-info"><div class="ap2-pos-sym">' + p.symbol + ' <span class="ap2-pos-chip bd-pf-chip ' + chipCls + '">' + chipTxt + '</span></div><div class="ap2-pos-meta">' + (p.date || '—') + (p.note ? ' · ' + p.note : '') + ' · ' + p.qty + ' adet × ' + ap2Fmt(p.cost) + '</div>' + targetBar + '</div>' +
       '<div class="ap2-pos-vals"><div class="ap2-pos-val">' + ap2Fmt(val) + '</div><div class="ap2-pos-pnl ' + pnlCls + '">' + pnlSign + pfPct(c.pnlPct) + '</div></div>' +
-      '<div class="ap2-pos-actions"><button type="button" data-ap2edit="' + p.id + '" title="Düzenle">✎</button><button type="button" data-ap2del="' + p.id + '" title="Sil">✕</button></div>' +
+      '<div class="ap2-pos-actions"><button type="button" data-ap2sell="' + p.id + '" title="Sat" style="color:var(--amber)">💰</button><button type="button" data-ap2edit="' + p.id + '" title="Düzenle">✎</button><button type="button" data-ap2del="' + p.id + '" title="Sil">✕</button></div>' +
     '</div>';
   }).join('');
+  const sellHistEl = document.getElementById('ap2-sell-hist');
+  const sellHistBody = document.getElementById('ap2-sell-hist-body');
+  const sells = (ap2Data.sells || []);
+  if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
+  if (sellHistBody) {
+    sellHistBody.innerHTML = sells.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0)).map(sl => {
+      const d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '';
+      return '<div class="ap2-sell-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">' +
+        '<span style="font-weight:700">' + sl.symbol + '</span>' +
+        '<span style="color:var(--text-3)">' + sl.qty + ' adet × ' + ap2Fmt(sl.price) + ' · ' + d + '</span>' +
+        '<span style="font-weight:700;color:var(--green)">+' + ap2Fmt(sl.amount) + '</span>' +
+      '</div>';
+    }).join('');
+  }
   ap2RebalCalc();
 }
 function ap2RebalCalc() {
@@ -14507,7 +14602,7 @@ function ap2RebalCalc() {
     resultEl.innerHTML = withTarget.map(p => {
       const c = ap2Calc(p);
       const val = c.value !== null ? c.value : c.totalCost;
-      const curPct = sum.totalValue > 0 ? (val / sum.totalValue * 100) : 0;
+      const curPct = sum.portfolioValue > 0 ? (val / sum.portfolioValue * 100) : 0;
       const diff = curPct - p.target;
       const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
       const diffSign = diff >= 0 ? '+' : '';
@@ -14517,12 +14612,12 @@ function ap2RebalCalc() {
     return;
   }
   const sum = ap2Summary();
-  const newTotal = sum.totalValue + amount;
+  const newTotal = sum.portfolioValue + amount;
   resultEl.innerHTML = '<div class="ap2-rebal-header">📈 $' + amount.toLocaleString('en-US') + ' eklenirse → toplam $' + Math.round(newTotal).toLocaleString('en-US') + '</div>' +
     withTarget.map(p => {
       const c = ap2Calc(p);
       const val = c.value !== null ? c.value : c.totalCost;
-      const curPct = sum.totalValue > 0 ? (val / sum.totalValue * 100) : 0;
+      const curPct = sum.portfolioValue > 0 ? (val / sum.portfolioValue * 100) : 0;
       const targetVal = newTotal * (p.target / 100);
       const need = targetVal - val;
       const addNow = Math.max(0, need);
@@ -14601,6 +14696,10 @@ function bindAlfaPortfoy2() {
     if (ed) { const p = ap2Data.positions.find(x => x.id === ed.getAttribute('data-ap2edit')); if (p) ap2OpenForm(p); return; }
     const dl = e.target.closest('[data-ap2del]');
     if (dl) { ap2Delete(dl.getAttribute('data-ap2del')); return; }
+    const sl = e.target.closest('[data-ap2sell]');
+    if (sl) { ap2OpenSell(sl.getAttribute('data-ap2sell')); return; }
+    if (e.target.closest('#ap2-sell-confirm')) { ap2SellConfirm(); return; }
+    if (e.target.closest('#ap2-sell-cancel') || e.target.closest('#ap2-sell-cancel2')) { document.getElementById('ap2-sell-form').classList.add('hidden'); ap2SellId = null; return; }
     const chip = e.target.closest('#ap2-type-filter .ap2-type-chip');
     if (chip) {
       ap2Filter = chip.getAttribute('data-ap2f');
@@ -14617,6 +14716,16 @@ function bindAlfaPortfoy2() {
   });
   const rebalInput = document.getElementById('ap2-rebal-amount');
   if (rebalInput) rebalInput.addEventListener('input', () => ap2RebalCalc());
+  const sellQty = document.getElementById('ap2-sell-qty');
+  const sellPrice = document.getElementById('ap2-sell-price');
+  const sellAmt = document.getElementById('ap2-sell-amount');
+  function ap2SellCalcAmount() {
+    const q = parseFloat(sellQty.value) || 0;
+    const p = parseFloat(sellPrice.value) || 0;
+    sellAmt.textContent = q > 0 && p > 0 ? ap2Fmt(q * p) : '—';
+  }
+  if (sellQty) sellQty.addEventListener('input', ap2SellCalcAmount);
+  if (sellPrice) sellPrice.addEventListener('input', ap2SellCalcAmount);
 }
 function pfOpenForm(p) {
   pfEditId = p ? p.id : null;
@@ -20712,7 +20821,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b57';
+const APP_BUILD = 'b58';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
