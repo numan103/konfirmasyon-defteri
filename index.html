@@ -1848,7 +1848,7 @@
   }
   /* Alfa Portföy v4 */
   .ap2-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; align-items: start; }
-  @media (max-width: 860px) { .ap2-layout { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) { .ap2-layout { grid-template-columns: 1fr; } .ap2-layout-right { position: static !important; } }
   .ap2-layout-left { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .ap2-layout-right { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 60px; }
   .ap2-sum-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
@@ -1899,6 +1899,29 @@
   .ap2-share-pos-pnl.pos { color: #34d399; }
   .ap2-share-pos-pnl.neg { color: #f87171; }
   .ap2-share-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.06); font-size: 10px; color: #475569; }
+  .ap2-share-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .ap2-share-actions button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: #f8fafc; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; }
+  .ap2-share-actions button:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+  .ap2-share-actions button:active { transform: scale(.97); }
+  .ap2-share-actions button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  /* Alfa Portföy Membership Gate */
+  .ap2-gate { padding: 40px 20px; text-align: center; }
+  .ap2-gate-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 24px; max-width: 420px; margin: 0 auto; }
+  .ap2-gate-icon { font-size: 48px; margin-bottom: 16px; }
+  .ap2-gate-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .ap2-gate-desc { font-size: 13px; color: var(--text-3); line-height: 1.6; margin-bottom: 20px; }
+  .ap2-gate-links { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .ap2-gate-link { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--text); transition: all .2s; background: var(--bg); }
+  .ap2-gate-link:hover { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc); }
+  .ap2-gate-link-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .ap2-gate-link-text { text-align: left; }
+  .ap2-gate-link-name { font-size: 14px; font-weight: 700; }
+  .ap2-gate-link-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .ap2-gate-code-row { display: flex; gap: 8px; align-items: center; }
+  .ap2-gate-code-row input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; outline: none; }
+  .ap2-gate-code-row input:focus { border-color: var(--pc); }
+  .ap2-gate-code-row button { padding: 10px 18px; border: none; border-radius: 10px; background: var(--pc); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+  .ap2-gate-err { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 18px; }
   .ap2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 16px; }
   @media (max-width: 440px) { .ap2-grid { grid-template-columns: 1fr; } }
   .ap2-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; transition: border-color .2s, box-shadow .2s; position: relative; }
@@ -5546,6 +5569,35 @@
     </div>
     </div><!-- /bd-view-portfoy -->
     <div id="bd-view-alfaportfoy" class="hidden">
+      <div id="ap2-gate" class="ap2-gate hidden">
+        <div class="ap2-gate-card">
+          <div class="ap2-gate-icon">🔒</div>
+          <div class="ap2-gate-title">Alfa Portföy'e Hoş Geldin</div>
+          <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referral linkimle kayıt olman gerekiyor. Kayıt sonrası verilen kodu girerek erişim sağlayabilirsin.</div>
+          <div class="ap2-gate-links">
+            <a href="https://www.okx.com/join/6877987" target="_blank" rel="noopener" class="ap2-gate-link">
+              <div class="ap2-gate-link-icon" style="background:#fff">🟣</div>
+              <div class="ap2-gate-link-text">
+                <div class="ap2-gate-link-name">OKX'te Kayıt Ol</div>
+                <div class="ap2-gate-link-sub">Referral link ile tıkla → hesap aç</div>
+              </div>
+            </a>
+            <a href="https://www.bybit.com/invite?ref=NMYPP" target="_blank" rel="noopener" class="ap2-gate-link">
+              <div class="ap2-gate-link-icon" style="background:#f7a600">🟡</div>
+              <div class="ap2-gate-link-text">
+                <div class="ap2-gate-link-name">Bybit'te Kayıt Ol</div>
+                <div class="ap2-gate-link-sub">Referral link ile tıkla → hesap aç</div>
+              </div>
+            </a>
+          </div>
+          <div class="ap2-gate-code-row">
+            <input type="text" id="ap2-gate-code" placeholder="Erişim kodun..." maxlength="40" autocomplete="off">
+            <button type="button" id="ap2-gate-verify">Doğrula</button>
+          </div>
+          <div class="ap2-gate-err" id="ap2-gate-err"></div>
+        </div>
+      </div>
+      <div id="ap2-gate-content">
       <div class="ap2-tools">
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
       </div>
@@ -5653,6 +5705,7 @@
           <div class="strat-form-err" id="ap2-sell-err"></div>
         </div>
       </div>
+      </div><!-- /ap2-gate-content -->
     </div><!-- /bd-view-alfaportfoy -->
   </div><!-- /page-butce -->
   <div id="page-mentoring" class="hidden">
@@ -10968,7 +11021,7 @@ function showPage(name, skipAnim) {
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
-  if (name === 'butce') { renderButce(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); } }
+  if (name === 'butce') { renderButce(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -14335,6 +14388,36 @@ function renderPortfoy() {
   }).join('');
   if (document.getElementById('bd-sim-panel')) pfPlanRender();
 }
+const AP2_MEMBER_KEY = 'alfa-fund-member-v1';
+const AP2_MEMBER_SECRET = 'ALFA2024';
+function ap2IsMember() { return localStorage.getItem(AP2_MEMBER_KEY) === 'approved'; }
+function ap2ShowGate() {
+  var gate = document.getElementById('ap2-gate');
+  var content = document.getElementById('ap2-gate-content');
+  if (gate) gate.classList.remove('hidden');
+  if (content) content.style.display = 'none';
+}
+function ap2HideGate() {
+  var gate = document.getElementById('ap2-gate');
+  var content = document.getElementById('ap2-gate-content');
+  if (gate) gate.classList.add('hidden');
+  if (content) content.style.display = '';
+}
+function ap2VerifyCode() {
+  var inp = document.getElementById('ap2-gate-code');
+  var err = document.getElementById('ap2-gate-err');
+  var code = (inp ? inp.value : '').trim();
+  if (!code) { if (err) err.textContent = 'Lütfen kodu gir.'; return; }
+  if (code === AP2_MEMBER_SECRET) {
+    localStorage.setItem(AP2_MEMBER_KEY, 'approved');
+    ap2HideGate();
+    renderAlfaPortfoy2();
+    ap2LoadPrices();
+    stratToast('Alfa Portföy erişimi aktif!');
+  } else {
+    if (err) err.textContent = 'Geçersiz kod. Kodu doğrulayın.';
+  }
+}
 function bdSetTab(t) {
   bdTab = t === 'portfoy' ? 'portfoy' : (t === 'alfaportfoy' ? 'alfaportfoy' : 'defter');
   document.getElementById('bd-view-defter').classList.toggle('hidden', bdTab !== 'defter');
@@ -14342,7 +14425,12 @@ function bdSetTab(t) {
   document.getElementById('bd-view-alfaportfoy').classList.toggle('hidden', bdTab !== 'alfaportfoy');
   document.querySelectorAll('#bd-tabs button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bdt') === bdTab));
   if (bdTab === 'portfoy') { renderPortfoy(); pfLoadPrices(); }
-  if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); }
+  if (bdTab === 'alfaportfoy') {
+    if (!ap2IsMember()) { ap2ShowGate(); return; }
+    ap2HideGate();
+    renderAlfaPortfoy2();
+    ap2LoadPrices();
+  }
 }
 const AP2_KEY = 'alfa-fund-v1';
 const AP2_HIST_KEY = 'alfa-fund-hist-v1';
@@ -14571,6 +14659,7 @@ function ap2RenderChart(hist) {
   }
 }
 function renderAlfaPortfoy2() {
+  if (!ap2IsMember()) { ap2ShowGate(); return; }
   var positions = ap2Data.positions || [];
   var emptyEl = document.getElementById('ap2-empty');
   var sumEl = document.getElementById('ap2-summary-area');
@@ -14714,6 +14803,11 @@ function renderAlfaPortfoy2() {
         '<span>' + sum.count + ' enstr\u00fcman</span>' +
         '<span>' + shareDate + '</span>' +
       '</div>' +
+      '<div class="ap2-share-actions">' +
+        '<button type="button" id="ap2-share-copy" title="Metin olarak kopyala"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Kopyala</button>' +
+        '<button type="button" id="ap2-share-dl" title="Görsel olarak kaydet"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Kaydet</button>' +
+        '<button type="button" id="ap2-share-native" title="Paylaş"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş</button>' +
+      '</div>' +
     '</div>';
   if (shareArea) shareArea.innerHTML = shareHtml;
   ap2RebalCalc();
@@ -14816,6 +14910,96 @@ async function ap2LoadPrices() {
   ap2Pricing = false;
   renderAlfaPortfoy2();
 }
+function ap2ShareCopy() {
+  var card = document.querySelector('.ap2-share-card');
+  if (!card) return;
+  var sum = ap2Summary();
+  var lines = ['ALFA PORTFOY', ''];
+  lines.push('Toplam: ' + ap2Fmt(sum.portfolioValue));
+  lines.push((sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')');
+  lines.push('');
+  (ap2Data.positions || []).forEach(function(p) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    var pnlStr = c.pnlPct !== null ? ' (' + pfPct(c.pnlPct) + ')' : '';
+    lines.push(p.symbol + ': ' + ap2Fmt(val) + pnlStr);
+  });
+  if (sum.cash > 0) lines.push('Bakiye: ' + ap2Fmt(sum.cash));
+  lines.push('', sum.count + ' enstrüman · ' + new Date().toLocaleDateString('tr-TR'));
+  lines.push('alfa-trader.com');
+  navigator.clipboard.writeText(lines.join('\n')).then(function() { stratToast('Kopyalandı!'); }).catch(function() { stratToast('Kopyalanamadı.'); });
+}
+function ap2ShareDownload() {
+  var card = document.querySelector('.ap2-share-card');
+  if (!card) return;
+  var sum = ap2Summary();
+  var canvas = document.createElement('canvas');
+  var w = 520, h = 600;
+  canvas.width = w * 2; canvas.height = h * 2;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  var grd = ctx.createLinearGradient(0, 0, w, h);
+  grd.addColorStop(0, '#0f172a'); grd.addColorStop(0.5, '#1e293b'); grd.addColorStop(1, '#0f172a');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#94a3b8'; ctx.font = '700 13px Inter, sans-serif';
+  ctx.fillText('ALFA PORTFOY', 24, 42);
+  ctx.fillStyle = '#64748b'; ctx.font = '400 11px Inter, sans-serif';
+  ctx.fillText(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), w - 140, 42);
+  ctx.fillStyle = '#f8fafc'; ctx.font = '800 30px Inter, sans-serif';
+  ctx.fillText(ap2Fmt(sum.portfolioValue), 24, 82);
+  ctx.fillStyle = sum.pnl >= 0 ? '#34d399' : '#f87171'; ctx.font = '700 14px Inter, sans-serif';
+  ctx.fillText((sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')', 24, 106);
+  var y = 136;
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(24, y); ctx.lineTo(w - 24, y); ctx.stroke(); y += 12;
+  (ap2Data.positions || []).forEach(function(p) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(32, y + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText(p.symbol, 42, y + 8);
+    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(val), w - 140, y + 8);
+    if (c.pnlPct !== null) { ctx.fillStyle = c.pnlPct >= 0 ? '#34d399' : '#f87171'; ctx.fillText(pfPct(c.pnlPct), w - 60, y + 8); }
+    y += 28;
+  });
+  if (sum.cash > 0) {
+    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(32, y + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye', 42, y + 8);
+    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(sum.cash), w - 140, y + 8);
+    y += 28;
+  }
+  y += 12;
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(24, y); ctx.lineTo(w - 24, y); ctx.stroke(); y += 16;
+  ctx.fillStyle = '#475569'; ctx.font = '400 10px Inter, sans-serif';
+  ctx.fillText(sum.count + ' enstrüman', 24, y);
+  ctx.fillText('alfa-trader.com', w - 110, y);
+  canvas.toBlob(function(blob) {
+    if (!blob) return;
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'alfa-portfoy-' + new Date().toISOString().slice(0, 10) + '.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    stratToast('Görsel kaydedildi!');
+  });
+}
+function ap2ShareNative() {
+  var sum = ap2Summary();
+  var text = 'ALFA PORTFOY\nToplam: ' + ap2Fmt(sum.portfolioValue) + '\n' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')\n\n';
+  (ap2Data.positions || []).forEach(function(p) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    text += p.symbol + ': ' + ap2Fmt(val) + (c.pnlPct !== null ? ' (' + pfPct(c.pnlPct) + ')' : '') + '\n';
+  });
+  if (sum.cash > 0) text += 'Bakiye: ' + ap2Fmt(sum.cash) + '\n';
+  text += '\nalfa-trader.com';
+  if (navigator.share) {
+    navigator.share({ title: 'Alfa Portföy', text: text }).catch(function() {});
+  } else {
+    navigator.clipboard.writeText(text).then(function() { stratToast('Paylaşılamadı, metin kopyalandı!'); }).catch(function() {});
+  }
+}
 function bindAlfaPortfoy2() {
   const view = document.getElementById('bd-view-alfaportfoy');
   if (!view) return;
@@ -14831,7 +15015,9 @@ function bindAlfaPortfoy2() {
     if (sl) { ap2OpenSell(sl.getAttribute('data-ap2sell')); return; }
     if (e.target.closest('#ap2-sell-confirm')) { ap2SellConfirm(); return; }
     if (e.target.closest('#ap2-sell-cancel') || e.target.closest('#ap2-sell-cancel2')) { document.getElementById('ap2-sell-form').classList.add('hidden'); ap2SellId = null; return; }
-
+    if (e.target.closest('#ap2-share-copy')) { ap2ShareCopy(); return; }
+    if (e.target.closest('#ap2-share-dl')) { ap2ShareDownload(); return; }
+    if (e.target.closest('#ap2-share-native')) { ap2ShareNative(); return; }
   });
   view.addEventListener('click', e => {
     const chip = e.target.closest('#ap2-f-type .ap2-type-chip');
@@ -14851,6 +15037,10 @@ function bindAlfaPortfoy2() {
   }
   if (sellQty) sellQty.addEventListener('input', ap2SellCalcAmount);
   if (sellPrice) sellPrice.addEventListener('input', ap2SellCalcAmount);
+  var gateVerify = document.getElementById('ap2-gate-verify');
+  if (gateVerify) gateVerify.addEventListener('click', ap2VerifyCode);
+  var gateCode = document.getElementById('ap2-gate-code');
+  if (gateCode) gateCode.addEventListener('keydown', function(e) { if (e.key === 'Enter') ap2VerifyCode(); });
 }
 function pfOpenForm(p) {
   pfEditId = p ? p.id : null;
@@ -20946,7 +21136,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b61';
+const APP_BUILD = 'b62';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

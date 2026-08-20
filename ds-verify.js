@@ -15,7 +15,7 @@ function fetchText(u, headers) {
   const botHome = await fetchText('https://alfa-trader.com/', { 'User-Agent': 'Googlebot/2.1 (+http://www.google.com/bot.html)' });
   const botAt = await fetchText('https://alfa-trader.com/?page=alfatrading', { 'User-Agent': 'TelegramBot (like TwitterBot)' });
   const marks = {
-    APP_BUILD_b61: html.includes("APP_BUILD = 'b61'"),
+    APP_BUILD_b62: html.includes("APP_BUILD = 'b62'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
     og_not_old: !html.includes('Setup Kalitesi'),
     og_image_static: html.includes('alfa-trader.com/og.png'),
@@ -49,7 +49,7 @@ function fetchText(u, headers) {
     coingecko_fallback: html.includes('api.coingecko.com'),
     earnings_per_pos: html.includes('bd-pl-hrow-earn'),
     earnings_summary: html.includes('bd-pl-hld-summary'),
-    sw_v24: sw.includes('alfa-v24'),
+    sw_v25: sw.includes('alfa-v25'),
     basvuru_admin_gate: html.includes("name === 'basvuru' && !amAllowed()"),
     basvuru_nav_hidden: html.includes('id="tab-basvuru"') && html.includes('id="mnav-basvuru"'),
     alfa_portfoy_page: !html.includes('id="page-alfaportfoy"'),
@@ -63,12 +63,17 @@ function fetchText(u, headers) {
     alfa_portfoy_sellform: html.includes('id="ap2-sell-form"'),
     alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
     alfa_portfoy_cash_hero: html.includes('data-accent="pc"'),
-    sw_b61: sw.includes("'b61'"),
+    sw_b62: sw.includes("'b62'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2();"),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
     alfa_portfoy_scroll_legend: html.includes('ap2-donut-legend::-webkit-scrollbar'),
     alfa_portfoy_modern_ui: html.includes('ap2-sum-sm') && html.includes('ap2-donut-panel') && html.includes('ap2-chart-panel'),
+    alfa_portfoy_member_gate: html.includes('ap2-gate') && html.includes('AP2_MEMBER_KEY'),
+    alfa_portfoy_share_buttons: html.includes('ap2-share-copy') && html.includes('ap2-share-dl') && html.includes('ap2-share-native'),
+    alfa_portfoy_share_download: html.includes('ap2ShareDownload') && html.includes('ap2ShareCopy'),
+    alfa_portfoy_mobile_sticky_fix: html.includes('position: static !important'),
+    alfa_portfoy_gate_content: html.includes('ap2-gate-content'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {
