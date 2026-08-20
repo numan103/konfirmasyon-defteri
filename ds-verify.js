@@ -74,12 +74,12 @@ function fetchText(u, headers) {
     alfa_portfoy_share_download: html.includes('ap2ShareDownload') && html.includes('ap2ShareCopy'),
     alfa_portfoy_mobile_sticky_fix: html.includes('position: static !important'),
     alfa_portfoy_gate_content: html.includes('ap2-gate-content'),
-    alfa_portfoy_gate_teaser: html.includes('ap2-gate-teaser') && html.includes('ap2-gt-total'),
-    alfa_portfoy_public_teaser: html.includes('ap2-public-teaser') && html.includes('ap2RenderPublicTeaser'),
+    alfa_portfoy_gate_teaser: html.includes('ap2-gate-teaser') && html.includes('ap2-gt-cards'),
+    alfa_portfoy_public_teaser: html.includes('ap2-public-teaser') && html.includes('ap2RenderPublicTeaser') && html.includes('ap2-pt-cards'),
     alfa_portfoy_share_chart: html.includes('Path2D') && html.includes('ap2-gt-chart'),
     sw_v26: sw.includes('alfa-v26'),
     alfa_portfoy_cloud_sync: html.includes('ap2SyncCloud') && html.includes('ap2FetchCloud'),
-    alfa_portfoy_cloud_render: html.includes('ap2RenderTeaserTarget'),
+    alfa_portfoy_cloud_render: html.includes('ap2RenderTeaserTarget') && html.includes('ap2-sum-sm-lbl'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

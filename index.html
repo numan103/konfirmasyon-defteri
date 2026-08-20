@@ -5358,11 +5358,7 @@
         <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Alfa Portföy</div>
         <div style="font-size:11px;color:#64748b;cursor:pointer" onclick="bdSetTab('alfaportfoy')">Detay için tıkla →</div>
       </div>
-      <div class="ap2-gate-teaser-row">
-        <div><div class="ap2-gate-teaser-lbl">Toplam Değer</div><div class="ap2-gate-teaser-val" id="ap2-pt-total">—</div></div>
-        <div><div class="ap2-gate-teaser-lbl">Kar / Zarar</div><div class="ap2-gate-teaser-val" id="ap2-pt-pnl">—</div></div>
-        <div><div class="ap2-gate-teaser-lbl">Getiri</div><div class="ap2-gate-teaser-val" id="ap2-pt-pct">—</div></div>
-      </div>
+      <div class="ap2-sum-row" id="ap2-pt-cards"></div>
       <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
     </div>
     <div class="bd-tabs" id="bd-tabs">
@@ -5604,13 +5600,9 @@
           <div class="ap2-gate-title">Alfa Portföy'e Hoş Geldin</div>
           <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referral linkimle kayıt olman gerekiyor. Kayıt sonrası verilen kodu girerek erişim sağlayabilirsin.</div>
           <div id="ap2-gate-teaser" class="ap2-gate-teaser" style="display:none">
-            <div class="ap2-gate-teaser-row">
-              <div><div class="ap2-gate-teaser-lbl">Toplam Değer</div><div class="ap2-gate-teaser-val" id="ap2-gt-total">—</div></div>
-              <div><div class="ap2-gate-teaser-lbl">Kar / Zarar</div><div class="ap2-gate-teaser-val" id="ap2-gt-pnl">—</div></div>
-              <div><div class="ap2-gate-teaser-lbl">Getiri</div><div class="ap2-gate-teaser-val" id="ap2-gt-pct">—</div></div>
-            </div>
+            <div class="ap2-sum-row" id="ap2-gt-cards"></div>
             <div class="ap2-gate-teaser-chart" id="ap2-gt-chart"></div>
-            <div class="ap2-gate-teaser-note">Güncel portföy durumu — erişim için kayıt ol</div>
+            <div class="ap2-gate-teaser-note">Alfa Portföy — erişim için kayıt ol</div>
           </div>
           <div class="ap2-gate-links">
             <a href="https://www.okx.com/join/CRYPTOAHMET" target="_blank" rel="noopener" class="ap2-gate-link">
@@ -14441,11 +14433,8 @@ function ap2ShowGate() {
     teaser.style.display = '';
     if (positions.length) {
       var sum = ap2Summary();
-      ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-gt');
+      ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, cash: sum.cash, count: sum.count, startBalance: sum.startBalance, totalValue: sum.totalValue, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-gt');
     } else {
-      document.getElementById('ap2-gt-total').textContent = 'Yükleniyor...';
-      document.getElementById('ap2-gt-pnl').textContent = '—';
-      document.getElementById('ap2-gt-pct').textContent = '—';
       ap2FetchCloud().then(function(d) {
         if (d && d.portfolioValue) { ap2RenderTeaserTarget(d, 'ap2-gt'); }
       });
@@ -14461,11 +14450,8 @@ function ap2RenderPublicTeaser() {
   el.style.display = '';
   if (positions.length) {
     var sum = ap2Summary();
-    ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-pt');
+    ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, cash: sum.cash, count: sum.count, startBalance: sum.startBalance, totalValue: sum.totalValue, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-pt');
   } else {
-    document.getElementById('ap2-pt-total').textContent = 'Yükleniyor...';
-    document.getElementById('ap2-pt-pnl').textContent = '—';
-    document.getElementById('ap2-pt-pct').textContent = '—';
     ap2FetchCloud().then(function(d) {
       if (d && d.portfolioValue) { ap2RenderTeaserTarget(d, 'ap2-pt'); }
     });
@@ -14526,14 +14512,20 @@ function ap2CloudSummary() {
   var sum = ap2Summary();
   var hist = [];
   try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) {}
+  var startDate = positions.length ? (positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity)) : null;
+  var lastUpdate = positions.length ? (positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t > m ? t : m; }, 0)) : null;
   return {
     portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct,
     cash: sum.cash, count: sum.count, startBalance: sum.startBalance,
+    totalValue: sum.totalValue || 0,
+    startDate: startDate ? new Date(startDate).toISOString().slice(0, 10) : null,
+    lastUpdate: lastUpdate ? new Date(lastUpdate).toISOString().slice(0, 10) : null,
+    syncedAt: new Date().toISOString(),
     positions: positions.map(function(p) {
       var c = ap2Calc(p); var val = c.value !== null ? c.value : c.totalCost;
       return { symbol: p.symbol, type: p.type, value: val, pnlPct: c.pnlPct };
     }),
-    history: hist.slice(-60)
+    history: hist.slice(-90)
   };
 }
 async function ap2SyncCloud() {
@@ -14558,21 +14550,35 @@ async function ap2FetchCloud() {
 }
 function ap2RenderTeaserTarget(data, prefix) {
   if (!data) return;
-  document.getElementById(prefix + '-total').textContent = '$' + Number(data.portfolioValue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-  var pnlEl = document.getElementById(prefix + '-pnl');
-  if (pnlEl) { pnlEl.textContent = (data.pnl >= 0 ? '+' : '') + '$' + Math.abs(data.pnl || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); pnlEl.style.color = data.pnl >= 0 ? '#34d399' : '#f87171'; }
-  var pctEl = document.getElementById(prefix + '-pct');
-  if (pctEl) { pctEl.textContent = (data.pnlPct >= 0 ? '+' : '') + (data.pnlPct || 0).toFixed(1) + '%'; pctEl.style.color = data.pnlPct >= 0 ? '#34d399' : '#f87171'; }
+  var cardsEl = document.getElementById(prefix + '-cards');
+  if (cardsEl) {
+    var p = data.portfolioValue || 0;
+    var pl = data.pnl || 0;
+    var pp = data.pnlPct || 0;
+    var cs = data.cash || 0;
+    var sb = data.startBalance || 0;
+    var sd = data.startDate || '—';
+    var lu = data.lastUpdate || '—';
+    var cnt = data.count || 0;
+    var cl = pl >= 0 ? 'green' : 'red';
+    var cv = pl >= 0 ? 'var(--green)' : 'var(--red)';
+    cardsEl.innerHTML =
+      '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Değer</div><div class="ap2-sum-sm-val">' + ap2Fmt(p) + '</div><div class="ap2-sum-sm-sub">$' + sb.toLocaleString() + ' başlangıç · ' + sd + '</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="' + cl + '"><div class="ap2-sum-sm-lbl">Kümülatif K/Z</div><div class="ap2-sum-sm-val" style="color:' + cv + '">' + (pl >= 0 ? '+' : '') + ap2Fmt(pl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(pp) + ' getiri</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye</div><div class="ap2-sum-sm-val">' + ap2Fmt(cs) + '</div><div class="ap2-sum-sm-sub">' + cnt + ' pozisyon · son ' + lu + '</div></div>';
+  }
   var chartEl = document.getElementById(prefix + '-chart');
   if (chartEl && data.history && data.history.length >= 2) {
     var vals = data.history.map(function(h) { return h.v; });
     var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
     var range = mx - mn || 1;
-    var w = 400, h = 50, pad = 2;
+    var w = 400, h = 60, pad = 2;
     var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (w - pad * 2), y: pad + (1 - (v - mn) / range) * (h - pad * 2) }; });
     var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+    var fillColor = data.pnl >= 0 ? 'rgba(52,211,153,.12)' : 'rgba(248,113,113,.12)';
     var lineColor = data.pnl >= 0 ? '#34d399' : '#f87171';
-    chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var last = pts[pts.length - 1];
+    chartEl.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><defs><linearGradient id="' + prefix + '-lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + lineColor + '" stop-opacity=".25"/><stop offset="100%" stop-color="' + lineColor + '" stop-opacity="0"/></linearGradient></defs><path d="' + d + ' L' + last.x.toFixed(1) + ',' + h + ' L' + pts[0].x.toFixed(1) + ',' + h + ' Z" fill="url(#' + prefix + '-lg)"/><path d="' + d + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="' + last.x.toFixed(1) + '" cy="' + last.y.toFixed(1) + '" r="3" fill="' + lineColor + '"/></svg>';
   }
 }
 function ap2Calc(p) {
