@@ -14544,11 +14544,7 @@ async function ap2SyncCloud() {
   if (!amAllowed()) return;
   try {
     var data = ap2CloudSummary();
-    var url = SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + AP2_CLOUD_KEY;
-    var r = await fetch(url, { method: 'PATCH', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ data: data }) });
-    if (r.status === 404 || r.status === 406) {
-      await fetch(SUPABASE_URL + '/rest/v1/edu_shared', { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ id: AP2_CLOUD_KEY, data: data }) });
-    }
+    await fetch('/api/alfa-portfolio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
   } catch(e) {}
 }
 async function ap2FetchCloud() {
@@ -14556,9 +14552,9 @@ async function ap2FetchCloud() {
   if (ap2CloudLoading) return null;
   ap2CloudLoading = true;
   try {
-    var r = await fetch(SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + AP2_CLOUD_KEY + '&select=data', { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
+    var r = await fetch('/api/alfa-portfolio');
     var j = await r.json();
-    if (j && j.length && j[0].data) { ap2CloudData = j[0].data; return ap2CloudData; }
+    if (j && j.data) { ap2CloudData = j.data; return ap2CloudData; }
   } catch(e) {}
   ap2CloudLoading = false;
   return null;
