@@ -64,7 +64,7 @@ function fetchText(u, headers) {
     alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
     alfa_portfoy_cash_hero: html.includes('data-accent="pc"'),
     sw_b62: sw.includes("'b62'"),
-    alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') { renderAlfaPortfoy2();"),
+    alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') {") && html.includes('ap2IsMember'),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
     alfa_portfoy_scroll_legend: html.includes('ap2-donut-legend::-webkit-scrollbar'),
