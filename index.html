@@ -14578,7 +14578,7 @@ function ap2RenderTeaserTarget(data, prefix) {
     var cv = pl >= 0 ? 'var(--green)' : 'var(--red)';
     cardsEl.innerHTML =
       '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Değer</div><div class="ap2-sum-sm-val">' + ap2Fmt(p) + '</div><div class="ap2-sum-sm-sub">$' + sb.toLocaleString() + ' başlangıç · ' + sd + '</div></div>' +
-      '<div class="ap2-sum-sm" data-accent="' + cl + '"><div class="ap2-sum-sm-lbl">Kümülatif K/Z</div><div class="ap2-sum-sm-val" style="color:' + cv + '">' + (pl >= 0 ? '+' : '') + ap2Fmt(pl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(pp) + ' getiri</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="' + cl + '"><div class="ap2-sum-sm-lbl">Kümülatif K/Z</div><div class="ap2-sum-sm-val">' + (pl >= 0 ? '+' : '') + ap2Fmt(pl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(pp) + ' getiri</div></div>' +
       '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye</div><div class="ap2-sum-sm-val">' + ap2Fmt(cs) + '</div><div class="ap2-sum-sm-sub">' + cnt + ' pozisyon · son ' + lu + '</div></div>';
   }
   var totalEl = document.getElementById(prefix + '-total');
