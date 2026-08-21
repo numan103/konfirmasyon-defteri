@@ -2060,11 +2060,15 @@
   .pf-sell-err { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 16px; }
   .pf-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
   .pf-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-  .pf-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .pf-sell-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .pf-sell-row:last-child { border-bottom: none; }
   .pf-sell-row .pf-sell-sym { font-weight: 700; color: var(--text); }
   .pf-sell-row .pf-sell-amt { color: var(--green); font-weight: 700; }
   .pf-sell-row .pf-sell-date { color: var(--text-3); font-size: 11px; }
+  .pf-sell-row .pf-sell-detail { font-size: 11px; color: var(--text-3); }
+  .pf-sell-row .pf-sell-profit { font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .pf-sell-row .pf-sell-profit.pf-profit-pos { color: var(--green); }
+  .pf-sell-row .pf-sell-profit.pf-profit-neg { color: var(--red); }
   @media (max-width: 560px) { .bd-pf-row { flex-wrap: wrap; } .bd-pf-row .bd-pf-meta { text-align: left; width: 100%; } .pf-sell-rows { grid-template-columns: 1fr; } }
   /* Yatırım Planı */
   body[data-page="butce"] .wrap { max-width: 1280px; }
@@ -15489,9 +15493,11 @@ function pfSellConfirm() {
   if (pos.amount != null && sellQty > pos.amount) { document.getElementById('pf-sell-err').textContent = 'Mevcut miktar (' + pos.amount + ') kadar satılabilir'; return; }
   if (!sellPrice || sellPrice <= 0) { document.getElementById('pf-sell-err').textContent = 'Satış fiyatı girilmeli'; return; }
   const amount = sellQty * sellPrice;
-  if (!confirm(sellQty + ' ' + pfSym(pos) + ' → ' + pfAmt(sellPrice) + '/adet = ' + pfAmt(amount) + ' Satışı onayla?')) return;
+  const buyPrice = pos.amount > 0 ? pos.cost / pos.amount : 0;
+  const profit = (sellPrice - buyPrice) * sellQty;
+  if (!confirm(sellQty + ' ' + pfSym(pos) + ' → ' + pfAmt(sellPrice) + '/adet = ' + pfAmt(amount) + (profit >= 0 ? ' (Kâr: ' + pfAmt(profit) + ')' : ' (Zarar: ' + pfAmt(profit) + ')') + ' Satışı onayla?')) return;
   pfData.sells = pfData.sells || [];
-  pfData.sells.push({ posId: pos.id, symbol: pfSym(pos), type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now() });
+  pfData.sells.push({ posId: pos.id, symbol: pfSym(pos), type: pos.type, qty: sellQty, price: sellPrice, buyPrice: buyPrice, profit: profit, amount: amount, ts: Date.now() });
   if (pos.amount != null) {
     pos.amount = Math.round((pos.amount - sellQty) * 1e8) / 1e8;
     pos.cost = Math.round(pos.amount * (pos.cost / (pos.amount + sellQty)) * 100) / 100;
@@ -15517,7 +15523,11 @@ function pfRenderSellHist() {
   bodyEl.innerHTML = sells.slice().reverse().map(s => {
     const d = new Date(s.ts);
     const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
-    return '<div class="pf-sell-row"><span class="pf-sell-sym">' + esc(s.symbol) + ' · ' + s.qty + '</span><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span><span class="pf-sell-date">' + dateStr + '</span></div>';
+    const buyP = s.buyPrice ? pfAmt(s.buyPrice) : '—';
+    const profit = s.profit;
+    const profitCls = profit != null ? (profit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg') : '';
+    const profitTxt = profit != null ? (profit >= 0 ? '+' : '') + pfAmt(profit) : '';
+    return '<div class="pf-sell-row"><span class="pf-sell-sym">' + esc(s.symbol) + ' · ' + s.qty + '</span><span class="pf-sell-detail">Alış ' + buyP + ' → Satış ' + pfAmt(s.price) + '</span><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span>' + (profitTxt ? '<span class="pf-sell-profit ' + profitCls + '">' + profitTxt + '</span>' : '') + '<span class="pf-sell-date">' + dateStr + '</span></div>';
   }).join('');
 }
 async function loadPortfoy() {
@@ -21551,7 +21561,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b69';
+const APP_BUILD = 'b70';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
