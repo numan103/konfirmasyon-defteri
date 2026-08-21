@@ -6152,7 +6152,7 @@
           <div class="calc-section">
             <h3 data-i18n="pg.calc.acct">Hesap Bilgileri</h3>
             <div class="calc-row">
-              <label data-i18n="pg.calc.balance">Hesap Bakiyesi ($)</label>
+              <label data-i18n="pg.calc.balance">Hesap Bakiyesi (USDT)</label>
               <input type="number" id="accountBalance" value="10000" step="100" min="1">
             </div>
             <div class="calc-row">
@@ -14579,7 +14579,7 @@ function ap2RenderTeaserTarget(data, prefix) {
     cardsEl.innerHTML =
       '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Değer</div><div class="ap2-sum-sm-val">' + ap2Fmt(p) + '</div><div class="ap2-sum-sm-sub">$' + sb.toLocaleString() + ' başlangıç · ' + sd + '</div></div>' +
       '<div class="ap2-sum-sm" data-accent="' + cl + '"><div class="ap2-sum-sm-lbl">Kümülatif K/Z</div><div class="ap2-sum-sm-val">' + (pl >= 0 ? '+' : '') + ap2Fmt(pl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(pp) + ' getiri</div></div>' +
-      '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye</div><div class="ap2-sum-sm-val">' + ap2Fmt(cs) + '</div><div class="ap2-sum-sm-sub">' + cnt + ' pozisyon · son ' + lu + '</div></div>';
+      '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(cs) + '</div><div class="ap2-sum-sm-sub">' + cnt + ' pozisyon · son ' + lu + '</div></div>';
   }
   var totalEl = document.getElementById(prefix + '-total');
   if (totalEl) { totalEl.textContent = '$' + Number(data.portfolioValue || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
@@ -14853,7 +14853,7 @@ function renderAlfaPortfoy2() {
     '<div class="ap2-sum-row">' +
       '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Deger</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">$' + sum.startBalance + ' baslangic</div></div>' +
       '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '</div></div>' +
-      '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Nakit para</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Serbest USDT bakiyesi</div></div>' +
     '</div>';
   ap2TrackHistory(sum.portfolioValue);
   var slices = [];
@@ -14866,7 +14866,7 @@ function renderAlfaPortfoy2() {
     if (!groupMap[key]) groupMap[key] = { val: 0, color: AP2_COLORS[i % AP2_COLORS.length], symbol: p.symbol };
     groupMap[key].val += val;
   });
-  if (sum.cash > 0) groupMap['Bakiye'] = { val: sum.cash, color: '#22c55e', symbol: 'Bakiye' };
+  if (sum.cash > 0) groupMap['USDT'] = { val: sum.cash, color: '#22c55e', symbol: 'USDT' };
   Object.keys(groupMap).forEach(function(k) { slices.push(groupMap[k]); });
   slices.sort(function(a, b) { return b.val - a.val; });
   if (donutPanel) donutPanel.style.display = '';
@@ -14952,7 +14952,7 @@ function renderAlfaPortfoy2() {
     sharePosHtml +=
       '<div class="ap2-share-pos">' +
         '<div class="ap2-share-pos-dot" style="background:#22c55e"></div>' +
-        '<div class="ap2-share-pos-name">Bakiye</div>' +
+        '<div class="ap2-share-pos-name">USDT</div>' +
         '<div class="ap2-share-pos-val">' + ap2Fmt(sum.cash) + '</div>' +
         '<div class="ap2-share-pos-pnl"></div>' +
       '</div>';
@@ -15092,7 +15092,7 @@ function ap2ShareCopy() {
     var pnlStr = c.pnlPct !== null ? ' (' + pfPct(c.pnlPct) + ')' : '';
     lines.push(p.symbol + ': ' + ap2Fmt(val) + pnlStr);
   });
-  if (sum.cash > 0) lines.push('Bakiye: ' + ap2Fmt(sum.cash));
+  if (sum.cash > 0) lines.push('Bakiye (USDT): ' + ap2Fmt(sum.cash));
   lines.push('', sum.count + ' enstrüman · ' + new Date().toLocaleDateString('tr-TR'));
   lines.push('alfa-trader.com');
   navigator.clipboard.writeText(lines.join('\n')).then(function() { stratToast('Kopyalandı!'); }).catch(function() { stratToast('Kopyalanamadı.'); });
@@ -15160,7 +15160,7 @@ function ap2ShareDownload() {
   });
   if (sum.cash > 0) {
     ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye', 42, chartY + 8);
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye (USDT)', 42, chartY + 8);
     ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(sum.cash), w - 140, chartY + 8);
     chartY += 28;
   }
@@ -15187,7 +15187,7 @@ function ap2ShareNative() {
     var val = c.value !== null ? c.value : c.totalCost;
     text += p.symbol + ': ' + ap2Fmt(val) + (c.pnlPct !== null ? ' (' + pfPct(c.pnlPct) + ')' : '') + '\n';
   });
-  if (sum.cash > 0) text += 'Bakiye: ' + ap2Fmt(sum.cash) + '\n';
+  if (sum.cash > 0) text += 'Bakiye (USDT): ' + ap2Fmt(sum.cash) + '\n';
   text += '\nalfa-trader.com';
   if (navigator.share) {
     navigator.share({ title: 'Alfa Portföy', text: text }).catch(function() {});
@@ -21331,7 +21331,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b65';
+const APP_BUILD = 'b66';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -22609,7 +22609,7 @@ loadSfx();
     'pg.calc.s': { tr: 'FX risk ve pozisyon boyutu hesaplayıcı', en: 'FX risk and position size calculator' },
     'pg.calc.h2': { tr: 'FX Risk & Pozisyon Boyutu Hesaplayıcı', en: 'FX Risk & Position Size Calculator' },
     'pg.calc.acct': { tr: 'Hesap Bilgileri', en: 'Account Info' },
-    'pg.calc.balance': { tr: 'Hesap Bakiyesi ($)', en: 'Account Balance ($)' },
+    'pg.calc.balance': { tr: 'Hesap Bakiyesi (USDT)', en: 'Account Balance (USDT)' },
     'pg.calc.riskType': { tr: 'Risk Türü', en: 'Risk Type' },
     'pg.calc.riskPct': { tr: 'Risk Oranı (%)', en: 'Risk Percentage (%)' },
     'pg.calc.riskAmt': { tr: 'Risk Miktarı ($)', en: 'Risk Amount ($)' },
