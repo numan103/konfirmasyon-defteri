@@ -1860,6 +1860,9 @@
   .ap2-sum-sm[data-accent="red"]::before { background: var(--red); }
   .ap2-sum-sm-lbl { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
   .ap2-sum-sm-val { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; }
+  .ap2-sum-sm[data-accent="pc"] .ap2-sum-sm-val { color: var(--pc); }
+  .ap2-sum-sm[data-accent="green"] .ap2-sum-sm-val { color: var(--green); }
+  .ap2-sum-sm[data-accent="red"] .ap2-sum-sm-val { color: var(--red); }
   .ap2-sum-sm-sub { font-size: 10.5px; color: var(--text-3); margin-top: 4px; }
   .ap2-donut-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; overflow: hidden; }
   .ap2-donut-header { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
@@ -5356,7 +5359,7 @@
     <div id="ap2-public-teaser" class="ap2-gate-teaser" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Alfa Portföy</div>
-        <div style="font-size:11px;color:#64748b;cursor:pointer" onclick="bdSetTab('alfaportfoy')">Detay için tıkla →</div>
+        <div style="font-size:11px;color:var(--pc);cursor:pointer;font-weight:600" onclick="bdSetTab('alfaportfoy');setTimeout(function(){var t=document.getElementById('bd-tabs');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},100)">Detay için tıkla →</div>
       </div>
       <div class="ap2-sum-row" id="ap2-pt-cards"></div>
       <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
@@ -5664,8 +5667,13 @@
           </div>
           <div class="ap2-chart-panel" id="ap2-chart-panel">
             <div class="ap2-chart-header">
-              <span class="ap2-chart-title">Buyume</span>
+              <span class="ap2-chart-title">📈 Büyüme</span>
               <span class="ap2-chart-change" id="ap2-chart-change"></span>
+            </div>
+            <div id="ap2-chart-meta" style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Başlangıç</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-start">—</div></div>
+              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Süre</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-duration">—</div></div>
+              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Kümülatif</div><div style="font-size:12px;font-weight:700;margin-top:2px" id="ap2-chart-cum">—</div></div>
             </div>
             <div class="ap2-chart-canvas" id="ap2-chart-canvas">
               <svg id="ap2-chart-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
@@ -14769,7 +14777,17 @@ function ap2RenderDonut(slices, total) {
 function ap2RenderChart(hist) {
   var svgEl = document.getElementById('ap2-chart-svg');
   var changeEl = document.getElementById('ap2-chart-change');
+  var startEl = document.getElementById('ap2-chart-start');
+  var durEl = document.getElementById('ap2-chart-duration');
+  var cumEl = document.getElementById('ap2-chart-cum');
   if (!svgEl) return;
+  var sum = ap2Summary();
+  var startPos = ap2Data.positions || [];
+  var firstDate = startPos.length ? startPos.reduce(function(m,p){ var t=new Date(p.date||Date.now()).getTime(); return t<m?t:m; }, Infinity) : null;
+  var daysSince = firstDate ? Math.max(1, Math.round((Date.now()-firstDate)/864e5)) : 0;
+  if (startEl) startEl.textContent = firstDate ? new Date(firstDate).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+  if (durEl) durEl.textContent = daysSince > 0 ? daysSince + ' gün' : '—';
+  if (cumEl) { cumEl.textContent = (sum.pnl>=0?'+':'') + pfPct(sum.pnlPct); cumEl.style.color = sum.pnl>=0?'var(--green)':'var(--red)'; }
   if (!hist || hist.length < 2) {
     svgEl.innerHTML = '<text x="140" y="75" text-anchor="middle" fill="var(--text-3)" font-size="12" font-weight="600">Gecmis verisi yok</text>';
     if (changeEl) changeEl.textContent = '';
