@@ -1341,6 +1341,31 @@
   body.landed .rv-fab { display: none; }
   @media (max-width: 680px) { .rv-fab { display: none; } }
   html[data-theme="light"] .lp-comm-inner { background: linear-gradient(135deg, #ffffff, #eef0fa); border-color: rgba(23,25,35,.1); }
+  /* Ücretlendirme */
+  .lp-pricing { max-width: 860px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .lp-pricing { grid-template-columns: 1fr; } }
+  .lp-price-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 32px 26px; display: flex; flex-direction: column; position: relative; }
+  .lp-price-card.featured { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc), 0 8px 32px rgba(99,91,255,.15); }
+  .lp-price-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--pc); color: #fff; font-size: 11.5px; font-weight: 700; padding: 5px 16px; border-radius: 20px; letter-spacing: .03em; white-space: nowrap; }
+  .lp-price-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .lp-price-desc { font-size: 13px; color: var(--text-3); margin-bottom: 18px; line-height: 1.5; }
+  .lp-price-val { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+  .lp-price-val b { font-size: 40px; font-weight: 800; letter-spacing: -.02em; }
+  .lp-price-val span { font-size: 14px; color: var(--text-3); font-weight: 600; }
+  .lp-price-val .lp-free { font-size: 40px; color: var(--green); }
+  .lp-price-period { font-size: 12.5px; color: var(--text-3); margin-bottom: 22px; }
+  .lp-price-feats { list-style: none; padding: 0; margin: 0 0 24px; flex: 1; }
+  .lp-price-feats li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; line-height: 1.5; padding: 7px 0; color: var(--text-2); }
+  .lp-price-feats li::before { content: ''; flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; background: rgba(34,197,94,.12); display: flex; align-items: center; justify-content: center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 11.5 3.5 8.5l1-1 2 2 4.5-4.5 1 1z' fill='%2322c55e'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 14px; }
+  .lp-price-feats li.disabled { opacity: .4; }
+  .lp-price-feats li.disabled::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 4.5l7 7M11.5 4.5l-7 7' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-size: 12px; }
+  .lp-price-btn { display: block; width: 100%; text-align: center; padding: 13px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; border: none; transition: all .15s ease; }
+  .lp-price-btn.primary { background: var(--pc); color: #fff; }
+  .lp-price-btn.primary:hover { background: #4c4cc4; }
+  .lp-price-btn.ghost { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+  .lp-price-btn.ghost:hover { border-color: var(--pc); color: var(--pc); }
+  html[data-theme="light"] .lp-price-card { background: #fff; }
+  html[data-theme="light"] .lp-price-card.featured { box-shadow: 0 0 0 1px var(--pc), 0 8px 32px rgba(99,91,255,.12); }
   /* Kapanış çağrısı */
   .lp-cta-band { max-width: 1000px; margin: 34px auto 0; padding: 0 20px; }
   .lp-cta-inner { background: linear-gradient(135deg, var(--pc), #403aa0); border-radius: 20px; padding: 42px 28px; text-align: center; color: #fff; }
@@ -3827,6 +3852,49 @@
       <div class="lp-card-body"><h3 data-i18n="feat.support">Canlı Destek</h3><p data-i18n="feat.support.d">İhtiyacın olduğunda anında yanıt veren destek hattı.</p></div>
     </div>
   </section>
+
+  <div class="lp-section-head">
+    <div class="lp-eyebrow">Ücretlendirme</div>
+    <h3>Her trader'a uygun plan</h3>
+    <p>Ücretsiz başla, ihtiyacın olduğunda Pro'ya geç. Tüm verilerin cihazında güvende.</p>
+  </div>
+  <div class="lp-pricing">
+    <div class="lp-price-card">
+      <div class="lp-price-name">Ücretsiz</div>
+      <div class="lp-price-desc">Temel araçlarla başla,_limitsiz.</div>
+      <div class="lp-price-val"><b class="lp-free">$0</b></div>
+      <div class="lp-price-period">Ömür boyu ücretsiz</div>
+      <ul class="lp-price-feats">
+        <li>Alfa Edu — eğitim videoları</li>
+        <li>Ekonomik Takvim — 3 yıldız makro veriler</li>
+        <li>Trading Terminali — canlı grafik &amp; watchlist</li>
+        <li>Alfa Calculator — pozisyon boyutlandırma</li>
+        <li>Dergi — haftalık piyasa analizleri</li>
+        <li class="disabled">Trade Günlüğü</li>
+        <li class="disabled">Portföy &amp; Birikim Planı</li>
+        <li class="disabled">Onchain veriler &amp; indikatörler</li>
+      </ul>
+      <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
+    </div>
+    <div class="lp-price-card featured">
+      <div class="lp-price-badge">En popüler</div>
+      <div class="lp-price-name">Pro</div>
+      <div class="lp-price-desc">Disiplinli trading için tüm araçlar tek yerde.</div>
+      <div class="lp-price-val"><b>$7</b><span>/ ay</span></div>
+      <div class="lp-price-period">İstediğin zaman iptal et</div>
+      <ul class="lp-price-feats">
+        <li>Ücretsiz planın tüm özellikleri</li>
+        <li>Trade Günlüğü — R cinsinden kayıt &amp; istatistik</li>
+        <li>Portföy &amp; Birikim Planı — kripto, altın, özel varlık</li>
+        <li>Haftalık Değerlendirme — RR ve retrospektif</li>
+        <li>Onchain veriler — funding, CVD, akış</li>
+        <li>İndikatörler — Aggr, Alfa Levels, Flow</li>
+        <li>Alfa Portföy — topluluk performansı</li>
+        <li>Canlı Destek — anında yanıt</li>
+      </ul>
+      <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Pro'ya geç →</button>
+    </div>
+  </div>
 
   <div class="lp-section-head">
     <div class="lp-eyebrow" data-i18n="sec.reviews.eyebrow">Üye yorumları</div>
@@ -21331,7 +21399,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b66';
+const APP_BUILD = 'b67';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
