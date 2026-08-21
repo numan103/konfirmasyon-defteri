@@ -15,7 +15,7 @@ function fetchText(u, headers) {
   const botHome = await fetchText('https://alfa-trader.com/', { 'User-Agent': 'Googlebot/2.1 (+http://www.google.com/bot.html)' });
   const botAt = await fetchText('https://alfa-trader.com/?page=alfatrading', { 'User-Agent': 'TelegramBot (like TwitterBot)' });
   const marks = {
-    APP_BUILD_b68: html.includes("APP_BUILD = 'b68'"),
+    APP_BUILD_b69: html.includes("APP_BUILD = 'b69'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
     og_not_old: !html.includes('Setup Kalitesi'),
     og_image_static: html.includes('alfa-trader.com/og.png'),
@@ -63,7 +63,7 @@ function fetchText(u, headers) {
     alfa_portfoy_sellform: html.includes('id="ap2-sell-form"'),
     alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
     alfa_portfoy_cash_hero: html.includes('data-accent="pc"'),
-    sw_b68: sw.includes("'b68'"),
+    sw_b69: sw.includes("'b69'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') {") && html.includes('ap2IsMember'),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),

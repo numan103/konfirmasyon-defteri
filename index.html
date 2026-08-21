@@ -2041,7 +2041,31 @@
   .bd-pf-chip.pf-crypto { color: var(--blue-txt); border-color: rgba(96,165,250,.35); }
   .bd-pf-chip.pf-altin { color: #fbbf24; border-color: rgba(251,191,36,.35); }
   .bd-pf-chip.pf-custom { color: #a78bfa; border-color: rgba(167,139,250,.35); }
-  @media (max-width: 560px) { .bd-pf-row { flex-wrap: wrap; } .bd-pf-row .bd-pf-meta { text-align: left; width: 100%; } }
+  .bd-pf-cash-row { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.2); border-radius: 12px; margin-bottom: 12px; }
+  .bd-pf-cash-row .bd-pf-cash-ico { font-size: 18px; }
+  .bd-pf-cash-row .bd-pf-cash-val { font-size: 15px; font-weight: 800; color: var(--green); }
+  .bd-pf-cash-row .bd-pf-cash-sub { font-size: 11.5px; color: var(--text-3); margin-left: auto; }
+  .pf-sell-form { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .pf-sell-form h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .pf-sell-info { font-size: 12px; color: var(--text-3); margin-bottom: 10px; line-height: 1.5; }
+  .pf-sell-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .pf-sell-rows label { display: block; font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .pf-sell-rows input { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; font-size: 14px; font-weight: 600; color: var(--text); font-family: 'Inter', sans-serif; }
+  .pf-sell-rows input:focus { outline: 2px solid var(--pc); border-color: transparent; }
+  .pf-sell-total { font-size: 13px; color: var(--text-2); margin-bottom: 12px; }
+  .pf-sell-total strong { color: var(--text); font-weight: 800; }
+  .pf-sell-btns { display: flex; gap: 8px; }
+  .pf-sell-btns .btn { flex: 1; }
+  .pf-sell-btns .btn.gold { background: var(--amber); color: #000; font-weight: 700; }
+  .pf-sell-err { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 16px; }
+  .pf-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .pf-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+  .pf-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .pf-sell-row:last-child { border-bottom: none; }
+  .pf-sell-row .pf-sell-sym { font-weight: 700; color: var(--text); }
+  .pf-sell-row .pf-sell-amt { color: var(--green); font-weight: 700; }
+  .pf-sell-row .pf-sell-date { color: var(--text-3); font-size: 11px; }
+  @media (max-width: 560px) { .bd-pf-row { flex-wrap: wrap; } .bd-pf-row .bd-pf-meta { text-align: left; width: 100%; } .pf-sell-rows { grid-template-columns: 1fr; } }
   /* Yatırım Planı */
   body[data-page="butce"] .wrap { max-width: 1280px; }
   .bd-sim-panel { margin-bottom: 14px; }
@@ -5599,6 +5623,30 @@
         <div id="bd-pf-list" class="bd-list"></div>
         <div id="bd-pf-empty" class="data-empty">Henüz pozisyon yok. &quot;＋ Pozisyon Ekle&quot; ile uzun vadeli yatırımını takip et.</div>
       </section>
+      <div id="pf-sell-form" class="pf-sell-form hidden">
+        <h4><span id="pf-sell-title">💰 Satış</span><button type="button" class="btn" id="pf-sell-cancel" style="padding:4px 10px;font-size:12px;">✕</button></h4>
+        <div id="pf-sell-sym" style="font-weight:700;margin-bottom:6px;font-size:14px;"></div>
+        <div id="pf-sell-info" class="pf-sell-info"></div>
+        <div class="pf-sell-rows">
+          <div><label>Miktar</label><input type="number" id="pf-sell-qty" placeholder="Satılacak miktar" step="any" min="0"></div>
+          <div><label>Satış Fiyatı ($)</label><input type="number" id="pf-sell-price" placeholder="Piyasa fiyatı" step="any" min="0"></div>
+        </div>
+        <div class="pf-sell-total">Tutar: <strong id="pf-sell-amount">—</strong></div>
+        <div class="pf-sell-btns">
+          <button type="button" class="btn gold" id="pf-sell-confirm">💰 Satışı Onayla</button>
+          <button type="button" class="btn" id="pf-sell-cancel2">Vazgeç</button>
+        </div>
+        <div class="pf-sell-err" id="pf-sell-err"></div>
+      </div>
+      <div id="pf-sell-hist" class="pf-sell-hist" style="display:none">
+        <h4>💰 Satış Geçmişi</h4>
+        <div id="pf-sell-hist-body"></div>
+      </div>
+      <div id="pf-cash-row" class="bd-pf-cash-row" style="display:none">
+        <span class="bd-pf-cash-ico">💵</span>
+        <span class="bd-pf-cash-val" id="pf-cash-val">$0</span>
+        <span class="bd-pf-cash-sub">Bakiye (USDT) — satışlardan gelen</span>
+      </div>
       <section class="panel bd-sim-panel" id="bd-sim-panel">
         <div class="panel-h">📈 Yatırım Planı <span class="bd-panel-sub">elimdeki para → aylık birikim → neye ne kadar koyarsam ne olur</span></div>
         <button type="button" class="btn" id="bd-pl-sync" style="margin-bottom:12px;">🔄 Pozisyonlardan Doldur</button>
@@ -14249,7 +14297,7 @@ function saveButce() { return store.set(BUTCE_KEY, JSON.stringify(butceData)).ca
 // ============ Alfa Portföy (Kripto + Altın) ============
 const PORTFOY_KEY = 'defter-portfoy-v1';
 const PF_OZ_GRAM = 31.1035;
-let pfData = { positions: [] };
+let pfData = { positions: [], cash: 0, sells: [] };
 let pfEditId = null;
 let pfFormType = 'crypto';
 let pfPrices = { usdTry: null, xauUsd: null, cryptos: {}, loadedAt: 0 };
@@ -14327,7 +14375,8 @@ function pfSummary() {
     count++;
   });
   const pnl = totalValue - totalCost;
-  return { totalCost, totalValue, priced, unpriced, count, cryptoValue, goldValue, customValue, pnl, pnlPct: totalCost ? (pnl / totalCost) * 100 : null };
+  const cash = Number(pfData.cash) || 0;
+  return { totalCost, totalValue: totalValue + cash, priced, unpriced, count, cryptoValue, goldValue, customValue, pnl, pnlPct: totalCost ? (pnl / totalCost) * 100 : null, cash };
 }
 async function pfLoadPrices() {
   if (pfPricing) return;
@@ -14512,9 +14561,17 @@ function renderPortfoy() {
         '<div class="bd-pf-pnl ' + pnlCls + '">' + pnlPctTxt + ' · ' + pnlTxt + '</div>' +
       '</div>' +
       '<button type="button" class="bd-row-x" data-pfedit="' + p.id + '" title="Düzenle">✎</button>' +
+      '<button type="button" class="bd-row-x" data-pfsell="' + p.id + '" title="Sat" style="color:var(--amber)">💰</button>' +
       '<button type="button" class="bd-row-x" data-pfdel="' + p.id + '" title="Sil">✕</button>' +
     '</div>';
   }).join('');
+  const cashVal = Number(pfData.cash) || 0;
+  const cashEl = document.getElementById('pf-cash-row');
+  if (cashEl) {
+    if (cashVal > 0) { cashEl.style.display = ''; document.getElementById('pf-cash-val').textContent = pfAmt(cashVal); }
+    else { cashEl.style.display = 'none'; }
+  }
+  pfRenderSellHist();
   if (document.getElementById('bd-sim-panel')) pfPlanRender();
 }
 const AP2_MEMBER_KEY = 'alfa-fund-member-v1';
@@ -15405,19 +15462,77 @@ function pfDelete(id) {
   pfData.positions = pfData.positions.filter(p => p.id !== id);
   savePortfoy().then(() => { stratToast('🗑 Pozisyon silindi'); renderPortfoy(); try { pfPlanHoldings(); } catch (e) { } });
 }
+let pfSellId = null;
+function pfSellOpen(id) {
+  const pos = pfData.positions.find(x => x.id === id);
+  if (!pos) return;
+  pfSellId = id;
+  const c = pfPosCalc(pos);
+  const s = pfSym(pos);
+  const noAmt = pos.amount == null;
+  document.getElementById('pf-sell-sym').textContent = s + (pos.type === 'altin' ? ' (Altın)' : pos.type === 'custom' ? ' (Kendim)' : ' (Kripto)');
+  document.getElementById('pf-sell-info').textContent = 'Mevcut: ' + (noAmt ? '—' : pos.amount) + ' adet · Maliyet: ' + pfAmt(c.cost) + '/adet · Toplam: ' + pfAmt(c.cost) + (c.value !== null ? ' · Güncel: ' + pfAmt(c.value) : '');
+  document.getElementById('pf-sell-qty').value = '';
+  document.getElementById('pf-sell-qty').max = pos.amount || '';
+  document.getElementById('pf-sell-price').value = c.cur !== null ? c.cur : '';
+  document.getElementById('pf-sell-amount').textContent = '—';
+  document.getElementById('pf-sell-err').textContent = '';
+  document.getElementById('pf-sell-form').classList.remove('hidden');
+  document.getElementById('pf-sell-qty').focus();
+}
+function pfSellConfirm() {
+  const pos = pfData.positions.find(x => x.id === pfSellId);
+  if (!pos) return;
+  const sellQty = parseFloat(document.getElementById('pf-sell-qty').value);
+  const sellPrice = parseFloat(document.getElementById('pf-sell-price').value);
+  if (!sellQty || sellQty <= 0) { document.getElementById('pf-sell-err').textContent = 'Satış miktarı 0\'dan büyük olmalı'; return; }
+  if (pos.amount != null && sellQty > pos.amount) { document.getElementById('pf-sell-err').textContent = 'Mevcut miktar (' + pos.amount + ') kadar satılabilir'; return; }
+  if (!sellPrice || sellPrice <= 0) { document.getElementById('pf-sell-err').textContent = 'Satış fiyatı girilmeli'; return; }
+  const amount = sellQty * sellPrice;
+  if (!confirm(sellQty + ' ' + pfSym(pos) + ' → ' + pfAmt(sellPrice) + '/adet = ' + pfAmt(amount) + ' Satışı onayla?')) return;
+  pfData.sells = pfData.sells || [];
+  pfData.sells.push({ posId: pos.id, symbol: pfSym(pos), type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now() });
+  if (pos.amount != null) {
+    pos.amount = Math.round((pos.amount - sellQty) * 1e8) / 1e8;
+    pos.cost = Math.round(pos.amount * (pos.cost / (pos.amount + sellQty)) * 100) / 100;
+    if (pos.amount <= 0) { pfData.positions = pfData.positions.filter(x => x.id !== pos.id); }
+  } else {
+    pfData.positions = pfData.positions.filter(x => x.id !== pos.id);
+  }
+  pfData.cash = (Number(pfData.cash) || 0) + amount;
+  savePortfoy().then(() => {
+    document.getElementById('pf-sell-form').classList.add('hidden');
+    pfSellId = null;
+    stratToast('💰 ' + pfSym(pos) + ' satıldı — +' + pfAmt(amount));
+    renderPortfoy();
+    try { pfPlanHoldings(); } catch (e) { }
+  });
+}
+function pfRenderSellHist() {
+  const histEl = document.getElementById('pf-sell-hist');
+  const bodyEl = document.getElementById('pf-sell-hist-body');
+  const sells = pfData.sells || [];
+  if (!sells.length) { histEl.style.display = 'none'; return; }
+  histEl.style.display = '';
+  bodyEl.innerHTML = sells.slice().reverse().map(s => {
+    const d = new Date(s.ts);
+    const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return '<div class="pf-sell-row"><span class="pf-sell-sym">' + esc(s.symbol) + ' · ' + s.qty + '</span><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span><span class="pf-sell-date">' + dateStr + '</span></div>';
+  }).join('');
+}
 async function loadPortfoy() {
   try {
     const raw = await store.get(PORTFOY_KEY);
     const d = raw ? JSON.parse(raw) : null;
     if (d && Array.isArray(d.positions)) {
-      pfData = { positions: d.positions };
+      pfData = { positions: d.positions, cash: Number(d.cash) || 0, sells: Array.isArray(d.sells) ? d.sells : [] };
       let migrated = false;
       pfData.positions.forEach(p => {
         if (p && typeof p.unit !== 'string') { p.unit = 'tl'; migrated = true; }
       });
       if (migrated) await savePortfoy();
     }
-  } catch (e) { pfData = { positions: [] }; }
+  } catch (e) { pfData = { positions: [], cash: 0, sells: [] }; }
 }
 function savePortfoy() { return store.set(PORTFOY_KEY, JSON.stringify(pfData)).catch(e => console.error('savePortfoy:', e)); }
 function bindPortfoy() {
@@ -15442,11 +15557,15 @@ function bindPortfoy() {
     }
     const del = e.target.closest('[data-pfdel]');
     if (del) { pfDelete(del.getAttribute('data-pfdel')); return; }
+    const sell = e.target.closest('[data-pfsell]');
+    if (sell) { pfSellOpen(sell.getAttribute('data-pfsell')); return; }
     const ed = e.target.closest('[data-pfedit]');
     if (ed) {
       const p = pfData.positions.find(x => x.id === ed.getAttribute('data-pfedit'));
       if (p) pfOpenForm(p);
     }
+    if (e.target.closest('#pf-sell-confirm')) { pfSellConfirm(); return; }
+    if (e.target.closest('#pf-sell-cancel') || e.target.closest('#pf-sell-cancel2')) { document.getElementById('pf-sell-form').classList.add('hidden'); pfSellId = null; return; }
   });
   view.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target && e.target.id === 'bd-pf-form-symbol') { e.preventDefault(); pfSaveForm(); }
@@ -15462,6 +15581,16 @@ function bindPortfoy() {
   view.addEventListener('change', e => {
     if (e.target.closest('.bd-pl-p') || e.target.closest('.bd-pl-r')) pfPlanRender();
   });
+  const pfSellQty = document.getElementById('pf-sell-qty');
+  const pfSellPrice = document.getElementById('pf-sell-price');
+  const pfSellAmt = document.getElementById('pf-sell-amount');
+  function pfSellCalcAmount() {
+    const q = parseFloat(pfSellQty && pfSellQty.value) || 0;
+    const p = parseFloat(pfSellPrice && pfSellPrice.value) || 0;
+    if (pfSellAmt) pfSellAmt.textContent = q && p ? pfAmt(q * p) : '—';
+  }
+  if (pfSellQty) pfSellQty.addEventListener('input', pfSellCalcAmount);
+  if (pfSellPrice) pfSellPrice.addEventListener('input', pfSellCalcAmount);
   view.addEventListener('click', e => {
     const pc = e.target.closest('[data-plan]');
     if (pc) {
@@ -21422,7 +21551,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b68';
+const APP_BUILD = 'b69';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
