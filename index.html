@@ -14818,6 +14818,7 @@ function renderAlfaPortfoy2() {
   var chartPanel = document.getElementById('ap2-chart-panel');
   var layoutEl = document.querySelector('.ap2-layout');
   var shareArea = document.getElementById('ap2-share-area');
+  try { ap2SyncCloud(); } catch(e) {}
   if (!positions.length) {
     if (emptyEl) emptyEl.style.display = '';
     if (sumEl) sumEl.innerHTML = '';
