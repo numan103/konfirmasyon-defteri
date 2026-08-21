@@ -1376,6 +1376,16 @@
   #auth-gate .auth-box { position: relative; }
   .auth-x { position: absolute; top: 12px; right: 14px; background: transparent; border: none; font-size: 22px; line-height: 1; color: var(--text-3); cursor: pointer; padding: 4px; }
   .auth-x:hover { color: var(--text); }
+  .auth-pricing { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .auth-price { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 12px; text-align: center; }
+  .auth-price.featured { border-color: var(--pc); background: rgba(99,91,255,.06); }
+  .auth-price-name { font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .auth-price-val { font-size: 22px; font-weight: 800; }
+  .auth-price-val .auth-price-free { color: var(--green); }
+  .auth-price-val span { font-size: 12px; color: var(--text-3); font-weight: 600; }
+  .auth-price-desc { font-size: 11px; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
+  .auth-price-badge { display: inline-block; background: var(--pc); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-bottom: 6px; }
+  @media (max-width: 400px) { .auth-pricing { grid-template-columns: 1fr; } }
   .daily-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 820px) { .daily-grid { grid-template-columns: 1fr 1fr; } .dg-full { grid-column: 1 / -1; } }
   .fbox label {
@@ -3984,6 +3994,19 @@
       </div>
       <div class="auth-msg" id="au-msg"></div>
     </form>
+    <div class="auth-pricing">
+      <div class="auth-price">
+        <div class="auth-price-name">Ücretsiz</div>
+        <div class="auth-price-val"><span class="auth-price-free">$0</span></div>
+        <div class="auth-price-desc">Eğitim, grafik, takvim</div>
+      </div>
+      <div class="auth-price featured">
+        <div class="auth-price-badge">En popüler</div>
+        <div class="auth-price-name">Pro</div>
+        <div class="auth-price-val">$7<span>/ ay</span></div>
+        <div class="auth-price-desc">Tüm araçlar + destek</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -21399,7 +21422,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b67';
+const APP_BUILD = 'b68';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
