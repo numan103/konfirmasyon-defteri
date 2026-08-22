@@ -15562,7 +15562,7 @@ function pfRenderSellHist() {
     return '<div class="pf-sell-card">' +
       '<div class="pf-sell-top"><span class="pf-sell-sym">' + esc(s.symbol) + '</span><span class="pf-sell-qty">' + s.qty + ' adet</span><span class="pf-sell-date">' + dateStr + '</span>' + fixBtn + delBtn + '</div>' +
       buyPLine +
-      '<div class="pf-sell-bottom"><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span>' + profitHtml + '</div>' +
+      '<div class="pf-sell-bottom">' + profitHtml + '</div>' +
     '</div>';
   }).join('');
   const tpCls = totalProfit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg';
@@ -21642,7 +21642,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b73';
+const APP_BUILD = 'b74';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
