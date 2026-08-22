@@ -1238,6 +1238,26 @@
   .ring-lbl { position: relative; font-size: 11px; color: var(--text-3); z-index: 1; }
   .verdict { font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
   .verdict.ap { background: var(--green-soft); color: var(--green); }
+  .k-kalite-wrap { margin-top: 10px; }
+  .k-kalite-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); margin-bottom: 6px; }
+  .k-kalite-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .k-kalite-btns button { padding: 6px 12px; border-radius: 8px; border: 2px solid var(--border); background: var(--input-bg); color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; }
+  .k-kalite-btns button:hover { border-color: var(--text-3); }
+  .k-kalite-btns button.kk-on { color: #fff; }
+  .k-kalite-btns button[data-kk="Kurallı"].kk-on { background: var(--green); border-color: var(--green); }
+  .k-kalite-btns button[data-kk="Zorlama"].kk-on { background: var(--red); border-color: var(--red); }
+  .k-kalite-btns button[data-kk="Kaçan-Korku"].kk-on { background: #f97316; border-color: #f97316; }
+  .k-kalite-btns button[data-kk="Doğru-Pas"].kk-on { background: #3b82f6; border-color: #3b82f6; }
+  .k-kalite-btns button:disabled { opacity: .45; cursor: default; }
+  .k-kalite-locked { display: inline-block; font-size: 11px; color: var(--text-3); margin-left: 8px; }
+  .kk-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; margin-left: 6px; vertical-align: middle; }
+  .kk-badge.kk-kuralli { background: rgba(34,197,94,.15); color: var(--green); }
+  .kk-badge.kk-zorlama { background: rgba(239,68,68,.15); color: var(--red); }
+  .kk-badge.kk-kacan { background: rgba(249,115,22,.15); color: #f97316; }
+  .kk-badge.kk-dogru-pas { background: rgba(59,130,246,.15); color: #3b82f6; }
+  .kk-badge.kk-yok { background: var(--bg-2); color: var(--text-3); }
+  .kk-edit-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 11px; padding: 2px 6px; margin-left: 4px; vertical-align: middle; }
+  .kk-edit-btn:hover { color: var(--pc); }
   .shot-crits { flex: 1; min-width: 210px; display: flex; flex-direction: column; gap: 8px; }
   .crit { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--text); background: var(--input-bg); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
   .crit i { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 11px; font-weight: 700; flex: 0 0 auto; }
@@ -4703,6 +4723,15 @@
           </div>
         </div>
         <div><span id="verdict" class="v-no" data-i18n="pg.defter.verdict">ANLAŞMA YOK</span></div>
+        <div class="k-kalite-wrap" id="kk-defter-wrap">
+          <div class="k-kalite-lbl">Karar Kalitesi <span class="k-kalite-locked" id="kk-defter-lock" style="display:none;">🔒</span></div>
+          <div class="k-kalite-btns" id="kk-defter-btns">
+            <button type="button" data-kk="Kurallı">Kurallı</button>
+            <button type="button" data-kk="Zorlama">Zorlama</button>
+            <button type="button" data-kk="Kaçan-Korku">Kaçan-Korku</button>
+            <button type="button" data-kk="Doğru-Pas">Doğru-Pas</button>
+          </div>
+        </div>
         <div id="risk-line" data-i18n="pg.defter.riskLine">Kadran karar verir, sen değil.</div>
         <div class="score-stats">
           <div class="sstat"><span class="l" data-i18n="pg.defter.thAplus">A+ eşiği</span><span class="v" id="stat-aplus">70</span></div>
@@ -4944,6 +4973,15 @@
           <label data-i18n="pg.data.cExit">Exit <input type="range" id="df-c-exit" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-exit-v">5</span></label>
           <label data-i18n="pg.data.cRisk">Risk <input type="range" id="df-c-risk" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-risk-v">5</span></label>
           <label data-i18n="pg.data.cPsycho">Psikoloji <input type="range" id="df-c-psycho" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-psycho-v">5</span></label>
+        </div>
+        <div class="k-kalite-wrap" id="kk-data-wrap">
+          <div class="k-kalite-lbl">Karar Kalitesi <span class="k-kalite-locked" id="kk-data-lock" style="display:none;">🔒</span></div>
+          <div class="k-kalite-btns" id="kk-data-btns">
+            <button type="button" data-kk="Kurallı">Kurallı</button>
+            <button type="button" data-kk="Zorlama">Zorlama</button>
+            <button type="button" data-kk="Kaçan-Korku">Kaçan-Korku</button>
+            <button type="button" data-kk="Doğru-Pas">Doğru-Pas</button>
+          </div>
         </div>
         <div class="df-imgs" id="df-imgs-area">
           <div class="df-img-drop" id="df-img-drop">
@@ -7007,6 +7045,10 @@ const SESSIONS = ['London', 'NY'];
 let session = 'London';
 let strat = '';
 let model = '';
+let kkSelected = null;
+let kkDataSelected = null;
+let kkLocked = false;
+let kkDataLocked = false;
 
 // ============ Yapay Zeka Profili (izole — kullanıcı config'ine dokunmaz) ============
 const AI_PROFILE_KEY = 'defter-ai-profile-v1';
@@ -9264,18 +9306,20 @@ async function syncDefterToJournal(t) {
   const payload = {
     date: t.date || '', pair: t.pair || '', dir: t.dir || 'LONG',
     r: dnum(t.r), pnl: null, strat: t.strat || '', model: t.model || '',
-    note: t.note || '', images: (t.images || []).slice()
+    note: t.note || '', images: (t.images || []).slice(),
+    kKalite: t.kKalite || null
   };
   let cur;
   if (existing) {
     existing.date = payload.date; existing.pair = payload.pair; existing.dir = payload.dir;
     existing.r = payload.r; existing.strat = payload.strat; existing.model = payload.model;
+    existing.kKalite = payload.kKalite;
     if (payload.note) existing.note = payload.note;
     if (payload.images.length) existing.images = payload.images;
     cur = existing;
     await saveData();
   } else {
-    cur = Object.assign({ id: Date.now() + Math.random(), ts: t.id, criteria: { setup: 5, entry: 5, exit: 5, risk: 5, psycho: 5 } }, payload);
+    cur = Object.assign({ id: Date.now() + Math.random(), ts: t.id, criteria: { setup: 5, entry: 5, exit: 5, risk: 5, psycho: 5 }, kKaliteLog: [] }, payload);
     dataTrades.push(cur);
     await saveData();
   }
@@ -9291,6 +9335,7 @@ async function syncDefterToJournal(t) {
   const nt = {
     id: cur.id, ts: cur.id, date: cur.date || '', pair: cur.pair || '', dir: cur.dir || '',
     r: cur.r, strat: cur.strat || '', model: cur.model || '',
+    kKalite: cur.kKalite || '',
     note: noteText, images: cur.images || [], stars: cur.stars || 0,
     notionId: cur.notionId || undefined, syncedImages: cur.imgSynced || []
   };
@@ -9310,6 +9355,12 @@ function logTrade() {
   try {
   if (intentLocked()) {
     note.textContent = 'İşlem açılamaz — girişte "Duygumu" seçili. Setup tradelemiyorsan bu işlemi geç.';
+    note.style.color = 'var(--red)';
+    setTimeout(() => { note.style.color = ''; }, 6000);
+    return;
+  }
+  if (!kkSelected) {
+    note.textContent = '⚠️ Karar Kalitesi seçilmeli — Kurallı, Zorlama, Kaçan-Korku veya Doğru-Pas.';
     note.style.color = 'var(--red)';
     setTimeout(() => { note.style.color = ''; }, 6000);
     return;
@@ -9366,6 +9417,7 @@ function logTrade() {
     crits: crits, miss: miss, mood: mood, day: day, sess: session, cell: currentCell(),
     cap: (s >= cfg().thresholds.aplus && currentCell() !== 'A+'), strat: strat, model: model, sent: sent,
     emoBlock: emoLocked(), intent: intent, stars: 0, r: '',
+    kKalite: kkSelected, kKaliteLog: [],
     sabah: document.getElementById('d-sabah').value,
     senaryo: document.getElementById('d-senaryo').value,
     anti: document.getElementById('d-anti').value,
@@ -9373,6 +9425,9 @@ function logTrade() {
     note: '',
     images: []
   });
+  kkSelected = null; kkLocked = false;
+  document.querySelectorAll('#kk-defter-btns button').forEach(x => { x.classList.remove('kk-on'); x.disabled = false; });
+  document.getElementById('kk-defter-lock').style.display = 'none';
   saveTrades(); renderTrades();
   di.value = '';
   note.textContent = 'İşlem kaydedildi — Trade Günlüğü\'ne otomatik eklendi. Sonucu belli olunca R kolonunu doldur.';
@@ -9658,6 +9713,48 @@ function renderTrades() {
     });
 
     row.appendChild(when); row.appendChild(pd); row.appendChild(sc);
+    const kkCls = { 'Kurallı': 'kk-kuralli', 'Zorlama': 'kk-zorlama', 'Kaçan-Korku': 'kk-kacan', 'Doğru-Pas': 'kk-dogru-pas' };
+    if (t.kKalite) {
+      const kkBadge = document.createElement('span');
+      kkBadge.className = 'kk-badge ' + (kkCls[t.kKalite] || 'kk-yok');
+      kkBadge.textContent = t.kKalite;
+      row.appendChild(kkBadge);
+    } else {
+      const kkBadge = document.createElement('span');
+      kkBadge.className = 'kk-badge kk-yok';
+      kkBadge.textContent = 'etiketsiz';
+      row.appendChild(kkBadge);
+    }
+    const kkEditBtn = document.createElement('button');
+    kkEditBtn.className = 'kk-edit-btn';
+    kkEditBtn.textContent = '✎';
+    kkEditBtn.title = 'Karar Kalitesini düzenle';
+    kkEditBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const opts = ['Kurallı', 'Zorlama', 'Kaçan-Korku', 'Doğru-Pas'];
+      const cur = t.kKalite || '';
+      const input = prompt('Karar Kalitesi:\n1=Kurallı  2=Zorlama  3=Kaçan-Korku  4=Doğru-Pas\n\nMevcut: ' + (cur || 'yok'), '');
+      if (input === null) return;
+      const idx = parseInt(input);
+      if (idx >= 1 && idx <= 4) {
+        const newVal = opts[idx - 1];
+        if (newVal !== cur) {
+          t.kKaliteLog = t.kKaliteLog || [];
+          t.kKaliteLog.push({ old: cur || null, new: newVal, ts: Date.now() });
+          t.kKalite = newVal;
+          saveTrades(); renderTrades();
+        }
+      } else {
+        const picked = prompt('Doğrudan yaz (Kurallı / Zorlama / Kaçan-Korku / Doğru-Pas):', cur || '');
+        if (picked && opts.includes(picked) && picked !== cur) {
+          t.kKaliteLog = t.kKaliteLog || [];
+          t.kKaliteLog.push({ old: cur || null, new: picked, ts: Date.now() });
+          t.kKalite = picked;
+          saveTrades(); renderTrades();
+        }
+      }
+    });
+    row.appendChild(kkEditBtn);
     if (stratChip) row.appendChild(stratChip);
     row.appendChild(crits);
 
@@ -9841,6 +9938,16 @@ function init() {
   });
 
   document.getElementById('btn-logtrade').addEventListener('click', logTrade);
+  document.querySelectorAll('#kk-defter-btns button').forEach(b => {
+    b.addEventListener('click', () => {
+      if (kkLocked) return;
+      const val = b.getAttribute('data-kk');
+      kkSelected = (kkSelected === val) ? null : val;
+      document.querySelectorAll('#kk-defter-btns button').forEach(x => x.classList.toggle('kk-on', x.getAttribute('data-kk') === kkSelected));
+      document.getElementById('kk-defter-lock').style.display = kkSelected ? '' : 'none';
+      if (kkSelected) { kkLocked = true; document.querySelectorAll('#kk-defter-btns button').forEach(x => x.disabled = true); }
+    });
+  });
   const anHead = document.getElementById('an-head');
   if (anHead) anHead.addEventListener('click', () => {
     const body = document.getElementById('an-body');
@@ -11309,15 +11416,18 @@ function renderData() {
   const tb = document.getElementById('data-table');
   tb.innerHTML = '';
   const head = document.createElement('div'); head.className = 'data-row head';
-  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite / Yön</span><span>Strateji</span><span>Entry Model</span><span style="text-align:right;">R</span><span></span><span></span>';
+  head.innerHTML = '<span style="font-size:9px;">Tarih</span><span>Parite / Yön</span><span>Karar</span><span>Strateji</span><span>Entry Model</span><span style="text-align:right;">R</span><span></span><span></span>';
   tb.appendChild(head);
 
   pageRows.forEach(t => {
     const r = dnum(t.r);
+    const kkCls2 = { 'Kurallı': 'kk-kuralli', 'Zorlama': 'kk-zorlama', 'Kaçan-Korku': 'kk-kacan', 'Doğru-Pas': 'kk-dogru-pas' };
+    const kkHtml = t.kKalite ? '<span class="kk-badge ' + (kkCls2[t.kKalite] || 'kk-yok') + '">' + esc(t.kKalite) + '</span>' : '<span class="kk-badge kk-yok">etiketsiz</span>';
     const row = document.createElement('div'); row.className = 'data-row';
     row.innerHTML =
       '<span style="font-size:10px;color:var(--text-3);">' + dfDateLabel(t) + '</span>' +
       '<span class="dr-pair">' + esc(t.pair || '—') + ' <span class="dr-dir ' + (t.dir || '').toLowerCase() + '">' + esc(t.dir || '') + '</span></span>' +
+      kkHtml +
       '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.strat||'').slice(0,14) || '—') + '</span>' +
       '<span style="font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((t.model||'').slice(0,18) || '—') + '</span>';
     const rwrap = document.createElement('span');
@@ -11562,6 +11672,7 @@ async function addDataTrade() {
   const pair = (g('df-pair').value || '').trim().toUpperCase();
   const rVal = g('df-r').value;
   if (!pair || rVal === '') { g('data-note').textContent = 'Lütfen parite ve R değerini gir.'; return; }
+  if (!kkDataSelected) { g('data-note').textContent = '⚠️ Karar Kalitesi seçilmeli — Kurallı, Zorlama, Kaçan-Korku veya Doğru-Pas.'; return; }
   const dateVal = g('df-date').value;
   const ts = dateVal ? Date.parse(dateVal) : Date.now();
   const model = (g('df-model').value || '').trim();
@@ -11579,9 +11690,13 @@ async function addDataTrade() {
       risk: parseInt(g('df-c-risk').value) || 5,
       psycho: parseInt(g('df-c-psycho').value) || 5
     },
+    kKalite: kkDataSelected, kKaliteLog: [],
     note: (g('df-note').value || '').trim(),
     images: dfImages.slice()
   });
+  kkDataSelected = null; kkDataLocked = false;
+  document.querySelectorAll('#kk-data-btns button').forEach(x => { x.classList.remove('kk-on'); x.disabled = false; });
+  document.getElementById('kk-data-lock').style.display = 'none';
   await saveData();
   g('df-date').value = ''; g('df-pair').value = ''; g('df-r').value = ''; g('df-strat').value = ''; g('df-model').value = ''; g('df-note').value = '';
   document.querySelectorAll('.crit-range').forEach(r => { r.value = 4; r.dispatchEvent(new Event('input')); });
@@ -11593,7 +11708,7 @@ async function addDataTrade() {
   const noteParts = [];
   if (last.note) noteParts.push(last.note);
   if (last.model) noteParts.push('Entry Model: ' + last.model);
-  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, model: last.model, note: noteParts.join(' · '), stars: 0, images: last.images || [], syncedImages: last.imgSynced || [] };
+  const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, model: last.model, kKalite: last.kKalite || '', note: noteParts.join(' · '), stars: 0, images: last.images || [], syncedImages: last.imgSynced || [] };
   try {
     const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) });
     const j = await resp.json();
@@ -11829,6 +11944,16 @@ function bindDataPage() {
   g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
   g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
   g('df-add').addEventListener('click', addDataTrade);
+  document.querySelectorAll('#kk-data-btns button').forEach(b => {
+    b.addEventListener('click', () => {
+      if (kkDataLocked) return;
+      const val = b.getAttribute('data-kk');
+      kkDataSelected = (kkDataSelected === val) ? null : val;
+      document.querySelectorAll('#kk-data-btns button').forEach(x => x.classList.toggle('kk-on', x.getAttribute('data-kk') === kkDataSelected));
+      document.getElementById('kk-data-lock').style.display = kkDataSelected ? '' : 'none';
+      if (kkDataSelected) { kkDataLocked = true; document.querySelectorAll('#kk-data-btns button').forEach(x => x.disabled = true); }
+    });
+  });
   document.querySelectorAll('#data-filter .tf').forEach(b => {
     b.addEventListener('click', () => {
       dfFilter = b.getAttribute('data-f');
@@ -21642,7 +21767,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b74';
+const APP_BUILD = 'b75';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

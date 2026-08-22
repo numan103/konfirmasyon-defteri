@@ -95,6 +95,7 @@ async function mapRow(page, market, token) {
     r: parseNumber(prop(page, 'Profit')),
     pnl: null,
     strat: parseSelect(prop(page, 'Trade Stratejisi')) || '',
+    kKalite: parseSelect(prop(page, 'Karar Kalitesi')) || '',
     model,
     note: parseRichText(prop(page, 'Not')) || '',
     tradeNo: parseTitle(prop(page, 'Trade #')) || '',

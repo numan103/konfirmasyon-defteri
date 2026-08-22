@@ -69,6 +69,10 @@ function buildProps(trade, modelProp) {
     props['Trade Stratejisi'] = { select: { name: trade.strat } };
   }
 
+  if (trade.kKalite) {
+    props['Karar Kalitesi'] = { select: { name: trade.kKalite } };
+  }
+
   if (trade.model && modelProp) {
     const val = String(trade.model).slice(0, 100);
     const key = modelProp.name;
