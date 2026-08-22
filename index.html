@@ -235,13 +235,13 @@
   .nav-drop.on > .drop-btn { background: var(--pc-soft); color: var(--pc); }
   /* Dergi: üst menü mause ile gelince aşağı insin (yer kazanımı) */
   .nav-hover-zone { display: none; }
-  body[data-page="news"] .nav-hover-zone, body[data-page="egitim"] .nav-hover-zone { display: block; position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 150; background: transparent; cursor: default; }
-  body[data-page="news"] .navbar, body[data-page="egitim"] .navbar { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; max-width: 1060px; padding: 14px; border-radius: 0 0 16px 16px; transform: translateY(-110%); transition: transform .3s cubic-bezier(.3,.1,.2,1); box-shadow: 0 12px 34px rgba(10,12,24,.28); }
-  body[data-page="news"] .nav-hover-zone:hover ~ .navbar, body[data-page="egitim"] .nav-hover-zone:hover ~ .navbar, body[data-page="news"] .navbar:hover, body[data-page="egitim"] .navbar:hover, body[data-page="news"] .navbar:focus-within, body[data-page="egitim"] .navbar:focus-within { transform: translateY(0); }
-  body[data-page="egitim"] .navbar { max-width: 1400px; }
+  body[data-page="news"] .nav-hover-zone, body[data-page="egitim2"] .nav-hover-zone { display: block; position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 150; background: transparent; cursor: default; }
+  body[data-page="news"] .navbar, body[data-page="egitim2"] .navbar { position: fixed; top: 0; left: 0; right: 0; margin: 0 auto; max-width: 1060px; padding: 14px; border-radius: 0 0 16px 16px; transform: translateY(-110%); transition: transform .3s cubic-bezier(.3,.1,.2,1); box-shadow: 0 12px 34px rgba(10,12,24,.28); }
+  body[data-page="news"] .nav-hover-zone:hover ~ .navbar, body[data-page="egitim2"] .nav-hover-zone:hover ~ .navbar, body[data-page="news"] .navbar:hover, body[data-page="egitim2"] .navbar:hover, body[data-page="news"] .navbar:focus-within, body[data-page="egitim2"] .navbar:focus-within { transform: translateY(0); }
+  body[data-page="egitim2"] .navbar { max-width: 1400px; }
   @media (max-width: 680px) {
-    body[data-page="news"] .nav-hover-zone, body[data-page="egitim"] .nav-hover-zone { display: none; }
-    body[data-page="news"] .navbar, body[data-page="egitim"] .navbar { position: sticky; top: 0; max-width: none; padding: 8px 0; border-radius: 0; box-shadow: none; transform: none; }
+    body[data-page="news"] .nav-hover-zone, body[data-page="egitim2"] .nav-hover-zone { display: none; }
+    body[data-page="news"] .navbar, body[data-page="egitim2"] .navbar { position: sticky; top: 0; max-width: none; padding: 8px 0; border-radius: 0; box-shadow: none; transform: none; }
   }
   /* Mobil menü (hamburger + kenar çekmecesi) */
   .nav-mobile-btn { display: none; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; flex: none; padding: 0; }
@@ -13450,8 +13450,9 @@ function stratMatch(t, name) {
   const tn = String(t.strat || '').trim().toLowerCase();
   if (tn && (tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0)) return true;
   if (nm.length >= 3) {
-    const hay = (String(t.note || '') + ' ' + String(t.model || '')).toLowerCase();
-    if (hay.indexOf(nm) >= 0) return true;
+    const hay = (String(t.note || '') + ' ' + String(t.model || '') + ' ' + String(t.pair || '') + ' ' + String(t.verdict || '') + ' ' + String(t.sent || '') + ' ' + String(t.kKalite || '')).toLowerCase();
+    const nmWords = nm.split(/\s+/).filter(w => w.length >= 3);
+    if (nmWords.length > 0 && nmWords.every(w => hay.indexOf(w) >= 0)) return true;
   }
   return false;
 }
@@ -21975,7 +21976,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b79';
+const APP_BUILD = 'b80';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
