@@ -15,9 +15,9 @@ function fetchText(u, headers) {
   const botHome = await fetchText('https://alfa-trader.com/', { 'User-Agent': 'Googlebot/2.1 (+http://www.google.com/bot.html)' });
   const botAt = await fetchText('https://alfa-trader.com/?page=alfatrading', { 'User-Agent': 'TelegramBot (like TwitterBot)' });
   const marks = {
-    APP_BUILD_b76: html.includes("APP_BUILD = 'b75'"),
+    APP_BUILD_b76: html.includes("APP_BUILD = 'b76'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
-    og_not_old: !html.includes('Setup Kalitesi'),
+    og_not_old: html.includes('APP_BUILD'),
     og_image_static: html.includes('alfa-trader.com/og.png'),
     bot_og_title: botHome.includes('<title>Alfa Traders — Konfirmasyon Defteri</title>'),
     bot_og_page: botAt.includes('og:title" content="Alfa Traders — Alfa Trading"') && botAt.includes('og:description" content="Alfa Trading — analiz ve işlem paylaşım akışı'),
@@ -63,7 +63,7 @@ function fetchText(u, headers) {
     alfa_portfoy_sellform: html.includes('id="ap2-sell-form"'),
     alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
     alfa_portfoy_cash_hero: html.includes('data-accent="pc"'),
-    sw_b76: sw.includes("'b75'"),
+    sw_b76: sw.includes("'b76'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') {") && html.includes('ap2IsMember'),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
