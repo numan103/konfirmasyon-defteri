@@ -15543,22 +15543,53 @@ function pfRenderSellHist() {
   if (!sells.length) { histEl.style.display = 'none'; return; }
   histEl.style.display = '';
   let totalProfit = 0;
-  const rows = sells.slice().reverse().map(s => {
+  const rows = sells.slice().reverse().map((s, ri) => {
+    const idx = sells.length - 1 - ri;
     const d = new Date(s.ts);
     const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
-    const buyP = s.buyPrice || (s.amount && s.qty ? s.amount / (s.amount / s.qty) : 0) || 0;
-    const profit = s.profit != null ? s.profit : (buyP ? (s.price - buyP) * s.qty : 0);
-    totalProfit += profit;
-    const profitCls = profit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg';
-    const profitTxt = (profit >= 0 ? '+' : '') + pfAmt(profit);
+    const buyP = s.buyPrice || 0;
+    const profit = s.profit != null ? s.profit : null;
+    const hasBuyPrice = buyP > 0;
+    if (profit != null) totalProfit += profit;
+    const profitHtml = profit != null
+      ? '<span class="pf-sell-profit ' + (profit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg') + '">' + (profit >= 0 ? '+' : '') + pfAmt(profit) + '</span>'
+      : (hasBuyPrice ? '<span class="pf-sell-profit pf-profit-pos">+' + pfAmt((s.price - buyP) * s.qty) + '</span>' : '<span class="pf-sell-profit" style="color:var(--text-3);font-size:11px;">Kâr bilinmiyor</span>');
+    const buyPLine = hasBuyPrice
+      ? '<div class="pf-sell-prices"><span>Alış ' + pfAmt(buyP) + '</span><span class="pf-sell-arrow">→</span><span>Satış ' + pfAmt(s.price) + '</span></div>'
+      : '<div class="pf-sell-prices"><span style="color:var(--text-3)">Alış fiyatı girilmedi</span><span class="pf-sell-arrow">→</span><span>Satış ' + pfAmt(s.price) + '</span></div>';
+    const fixBtn = !hasBuyPrice ? '<button class="pf-sell-fix btn" data-sell-idx="' + idx + '" style="padding:2px 8px;font-size:11px;margin-left:8px;">Düzenle</button>' : '';
+    const delBtn = '<button class="pf-sell-del" data-sell-idx="' + idx + '" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 6px;opacity:.6;" title="Satışı Sil">✕</button>';
     return '<div class="pf-sell-card">' +
-      '<div class="pf-sell-top"><span class="pf-sell-sym">' + esc(s.symbol) + '</span><span class="pf-sell-qty">' + s.qty + ' adet</span><span class="pf-sell-date">' + dateStr + '</span></div>' +
-      '<div class="pf-sell-prices"><span>Alış ' + pfAmt(buyP) + '</span><span class="pf-sell-arrow">→</span><span>Satış ' + pfAmt(s.price) + '</span></div>' +
-      '<div class="pf-sell-bottom"><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span><span class="pf-sell-profit ' + profitCls + '">' + profitTxt + '</span></div>' +
+      '<div class="pf-sell-top"><span class="pf-sell-sym">' + esc(s.symbol) + '</span><span class="pf-sell-qty">' + s.qty + ' adet</span><span class="pf-sell-date">' + dateStr + '</span>' + fixBtn + delBtn + '</div>' +
+      buyPLine +
+      '<div class="pf-sell-bottom"><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span>' + profitHtml + '</div>' +
     '</div>';
   }).join('');
   const tpCls = totalProfit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg';
   bodyEl.innerHTML = '<div class="pf-sell-total-row">Toplam Kâr/Zarar: <span class="pf-sell-profit ' + tpCls + '">' + (totalProfit >= 0 ? '+' : '') + pfAmt(totalProfit) + '</span></div>' + rows;
+  bodyEl.querySelectorAll('.pf-sell-fix').forEach(b => {
+    b.addEventListener('click', () => {
+      const idx = parseInt(b.dataset.sellIdx);
+      const sell = pfData.sells[idx];
+      if (!sell) return;
+      const input = prompt(sell.symbol + ' alış fiyatı ($):', '');
+      if (input === null) return;
+      const bp = parseFloat(input);
+      if (!bp || bp <= 0) { stratToast('Geçersiz alış fiyatı'); return; }
+      sell.buyPrice = bp;
+      sell.profit = (sell.price - bp) * sell.qty;
+      savePortfoy().then(() => { pfRenderSellHist(); stratToast('Kâr güncellendi: ' + pfAmt(sell.profit)); });
+    });
+  });
+  bodyEl.querySelectorAll('.pf-sell-del').forEach(b => {
+    b.addEventListener('click', () => {
+      const idx = parseInt(b.dataset.sellIdx);
+      if (!confirm('Bu satışı silmek istediğine emin misin?')) return;
+      const removed = pfData.sells.splice(idx, 1)[0];
+      pfData.cash = Math.round(((Number(pfData.cash) || 0) - (removed.amount || 0)) * 100) / 100;
+      savePortfoy().then(() => { renderPortfoy(); stratToast('Satış silindi — ' + pfAmt(removed.amount) + ' cash düşüldü'); });
+    });
+  });
 }
 async function loadPortfoy() {
   try {
@@ -21601,7 +21632,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b71';
+const APP_BUILD = 'b72';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v28';
-const BUILD_ID = 'b71';
+﻿const CACHE = 'alfa-v29';
+const BUILD_ID = 'b72';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
@@ -16,7 +16,7 @@ self.addEventListener('fetch', e => {
   if (url.pathname.indexOf('.webmanifest') >= 0 || url.pathname.indexOf('/sw.js') >= 0) return;
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).then(res => {
+      fetch(new Request(e.request, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })).then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
         return res;
