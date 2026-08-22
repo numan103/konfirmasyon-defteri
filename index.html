@@ -2069,6 +2069,19 @@
   .pf-sell-row .pf-sell-profit { font-size: 11px; font-weight: 700; white-space: nowrap; }
   .pf-sell-row .pf-sell-profit.pf-profit-pos { color: var(--green); }
   .pf-sell-row .pf-sell-profit.pf-profit-neg { color: var(--red); }
+  .pf-sell-total-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-2); border-radius: 10px; margin-bottom: 10px; font-size: 13px; font-weight: 700; color: var(--text); }
+  .pf-sell-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+  .pf-sell-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .pf-sell-top .pf-sell-sym { font-weight: 800; font-size: 14px; color: var(--text); }
+  .pf-sell-top .pf-sell-qty { font-size: 12px; color: var(--text-2); }
+  .pf-sell-top .pf-sell-date { font-size: 11px; color: var(--text-3); margin-left: auto; }
+  .pf-sell-prices { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-2); margin-bottom: 6px; }
+  .pf-sell-prices .pf-sell-arrow { color: var(--text-3); }
+  .pf-sell-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .pf-sell-bottom .pf-sell-amt { font-size: 14px; font-weight: 800; color: var(--green); }
+  .pf-sell-bottom .pf-sell-profit { font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+  .pf-sell-bottom .pf-sell-profit.pf-profit-pos { color: var(--green); background: rgba(34,197,94,.1); }
+  .pf-sell-bottom .pf-sell-profit.pf-profit-neg { color: var(--red); background: rgba(239,68,68,.1); }
   @media (max-width: 560px) { .bd-pf-row { flex-wrap: wrap; } .bd-pf-row .bd-pf-meta { text-align: left; width: 100%; } .pf-sell-rows { grid-template-columns: 1fr; } }
   /* Yatırım Planı */
   body[data-page="butce"] .wrap { max-width: 1280px; }
@@ -5636,6 +5649,7 @@
           <div><label>Satış Fiyatı ($)</label><input type="number" id="pf-sell-price" placeholder="Piyasa fiyatı" step="any" min="0"></div>
         </div>
         <div class="pf-sell-total">Tutar: <strong id="pf-sell-amount">—</strong></div>
+        <div class="pf-sell-total" id="pf-sell-profit-line" style="display:none;">Tahmini Kâr/Zarar: <strong id="pf-sell-profit-preview">—</strong></div>
         <div class="pf-sell-btns">
           <button type="button" class="btn gold" id="pf-sell-confirm">💰 Satışı Onayla</button>
           <button type="button" class="btn" id="pf-sell-cancel2">Vazgeç</button>
@@ -14378,9 +14392,15 @@ function pfSummary() {
     else cryptoValue += v;
     count++;
   });
-  const pnl = totalValue - totalCost;
+  const unrealizedPnl = totalValue - totalCost;
   const cash = Number(pfData.cash) || 0;
-  return { totalCost, totalValue: totalValue + cash, priced, unpriced, count, cryptoValue, goldValue, customValue, pnl, pnlPct: totalCost ? (pnl / totalCost) * 100 : null, cash };
+  let realizedProfit = 0;
+  (pfData.sells || []).forEach(s => {
+    const buyP = s.buyPrice || (s.amount && s.qty ? s.amount / (s.amount / s.qty) : 0) || 0;
+    realizedProfit += s.profit != null ? s.profit : (buyP ? (s.price - buyP) * s.qty : 0);
+  });
+  const totalPnl = unrealizedPnl + realizedProfit;
+  return { totalCost, totalValue: totalValue + cash, priced, unpriced, count, cryptoValue, goldValue, customValue, pnl: totalPnl, pnlPct: totalCost ? (totalPnl / totalCost) * 100 : null, cash, realizedProfit, unrealizedPnl };
 }
 async function pfLoadPrices() {
   if (pfPricing) return;
@@ -15474,13 +15494,15 @@ function pfSellOpen(id) {
   const c = pfPosCalc(pos);
   const s = pfSym(pos);
   const noAmt = pos.amount == null;
+  const buyP = pos.amount > 0 ? pos.cost / pos.amount : 0;
   document.getElementById('pf-sell-sym').textContent = s + (pos.type === 'altin' ? ' (Altın)' : pos.type === 'custom' ? ' (Kendim)' : ' (Kripto)');
-  document.getElementById('pf-sell-info').textContent = 'Mevcut: ' + (noAmt ? '—' : pos.amount) + ' adet · Maliyet: ' + pfAmt(c.cost) + '/adet · Toplam: ' + pfAmt(c.cost) + (c.value !== null ? ' · Güncel: ' + pfAmt(c.value) : '');
+  document.getElementById('pf-sell-info').textContent = 'Mevcut: ' + (noAmt ? '—' : pos.amount) + ' adet · Alış fiyatı: ' + pfAmt(buyP) + '/adet' + (c.value !== null ? ' · Güncel: ' + pfAmt(c.value) : '');
   document.getElementById('pf-sell-qty').value = '';
   document.getElementById('pf-sell-qty').max = pos.amount || '';
   document.getElementById('pf-sell-price').value = c.cur !== null ? c.cur : '';
   document.getElementById('pf-sell-amount').textContent = '—';
   document.getElementById('pf-sell-err').textContent = '';
+  document.getElementById('pf-sell-profit-line').style.display = 'none';
   document.getElementById('pf-sell-form').classList.remove('hidden');
   document.getElementById('pf-sell-qty').focus();
 }
@@ -15520,15 +15542,23 @@ function pfRenderSellHist() {
   const sells = pfData.sells || [];
   if (!sells.length) { histEl.style.display = 'none'; return; }
   histEl.style.display = '';
-  bodyEl.innerHTML = sells.slice().reverse().map(s => {
+  let totalProfit = 0;
+  const rows = sells.slice().reverse().map(s => {
     const d = new Date(s.ts);
     const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
-    const buyP = s.buyPrice ? pfAmt(s.buyPrice) : '—';
-    const profit = s.profit;
-    const profitCls = profit != null ? (profit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg') : '';
-    const profitTxt = profit != null ? (profit >= 0 ? '+' : '') + pfAmt(profit) : '';
-    return '<div class="pf-sell-row"><span class="pf-sell-sym">' + esc(s.symbol) + ' · ' + s.qty + '</span><span class="pf-sell-detail">Alış ' + buyP + ' → Satış ' + pfAmt(s.price) + '</span><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span>' + (profitTxt ? '<span class="pf-sell-profit ' + profitCls + '">' + profitTxt + '</span>' : '') + '<span class="pf-sell-date">' + dateStr + '</span></div>';
+    const buyP = s.buyPrice || (s.amount && s.qty ? s.amount / (s.amount / s.qty) : 0) || 0;
+    const profit = s.profit != null ? s.profit : (buyP ? (s.price - buyP) * s.qty : 0);
+    totalProfit += profit;
+    const profitCls = profit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg';
+    const profitTxt = (profit >= 0 ? '+' : '') + pfAmt(profit);
+    return '<div class="pf-sell-card">' +
+      '<div class="pf-sell-top"><span class="pf-sell-sym">' + esc(s.symbol) + '</span><span class="pf-sell-qty">' + s.qty + ' adet</span><span class="pf-sell-date">' + dateStr + '</span></div>' +
+      '<div class="pf-sell-prices"><span>Alış ' + pfAmt(buyP) + '</span><span class="pf-sell-arrow">→</span><span>Satış ' + pfAmt(s.price) + '</span></div>' +
+      '<div class="pf-sell-bottom"><span class="pf-sell-amt">+' + pfAmt(s.amount) + '</span><span class="pf-sell-profit ' + profitCls + '">' + profitTxt + '</span></div>' +
+    '</div>';
   }).join('');
+  const tpCls = totalProfit >= 0 ? 'pf-profit-pos' : 'pf-profit-neg';
+  bodyEl.innerHTML = '<div class="pf-sell-total-row">Toplam Kâr/Zarar: <span class="pf-sell-profit ' + tpCls + '">' + (totalProfit >= 0 ? '+' : '') + pfAmt(totalProfit) + '</span></div>' + rows;
 }
 async function loadPortfoy() {
   try {
@@ -15598,6 +15628,16 @@ function bindPortfoy() {
     const q = parseFloat(pfSellQty && pfSellQty.value) || 0;
     const p = parseFloat(pfSellPrice && pfSellPrice.value) || 0;
     if (pfSellAmt) pfSellAmt.textContent = q && p ? pfAmt(q * p) : '—';
+    const profitLine = document.getElementById('pf-sell-profit-line');
+    const profitPreview = document.getElementById('pf-sell-profit-preview');
+    if (!pfSellId || !profitLine || !profitPreview) return;
+    const pos = pfData.positions.find(x => x.id === pfSellId);
+    if (!pos || !q || !p) { profitLine.style.display = 'none'; return; }
+    const buyP = pos.amount > 0 ? pos.cost / pos.amount : 0;
+    const profit = (p - buyP) * q;
+    profitLine.style.display = '';
+    profitPreview.textContent = (profit >= 0 ? '+' : '') + pfAmt(profit);
+    profitPreview.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
   }
   if (pfSellQty) pfSellQty.addEventListener('input', pfSellCalcAmount);
   if (pfSellPrice) pfSellPrice.addEventListener('input', pfSellCalcAmount);
@@ -21561,7 +21601,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b70';
+const APP_BUILD = 'b71';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
