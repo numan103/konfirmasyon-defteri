@@ -5378,9 +5378,9 @@
         </div>
         <div class="strat-head-actions">
           <button type="button" class="btn" id="strat-analiz-btn" title="Trader analizlerini kaydettiğin Analiz Köşesi'ne git">🧭 Analiz Köşesi</button>
-          <button type="button" class="btn" id="strat-distribute-all" title="Trade günlüğündeki tüm kayıtları strateji adına / notuna göre otomatik dağıt">📥 Günlükten Tümünü Dağıt</button>
+          <button type="button" class="btn" id="strat-distribute-all" title="Trade günlüğündeki tüm kayıtları entry modeli / strateji adına göre otomatik dağıt">📥 Günlükten Tümünü Dağıt</button>
           <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
-          <button type="button" class="btn" id="strat-auto-journal" title="Trade günlüğündeki strateji adlarından otomatik strateji oluştur ve işlemleri dağıt">🔄 Günlükten Strateji Oluştur</button>
+          <button type="button" class="btn" id="strat-auto-journal" title="Trade günlüğündeki entry modeli adlarından otomatik strateji oluştur ve işlemleri dağıt">🔄 Entry Modellerinden Oluştur</button>
         </div>
       </div>
       <div id="strat-list-wrap">
@@ -13450,11 +13450,13 @@ function stratMatch(t, name) {
   const nm = String(name || '').trim().toLowerCase();
   if (!nm) return false;
   const tn = String(t.strat || '').trim().toLowerCase();
-  if (!tn) return false;
-  return tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0;
+  const mn = String(t.model || '').trim().toLowerCase();
+  if (tn && (tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0)) return true;
+  if (mn && (mn === nm || mn.indexOf(nm) === 0 || nm.indexOf(mn) === 0 || mn.indexOf(nm) >= 0)) return true;
+  return false;
 }
 function stratDistributeAll() {
-  // Tek buton: trade günlüğündeki tüm kayıtları strateji adı / not / model eşleşmesiyle uygun stratejilere dağıt
+  // Tek buton: trade günlüğündeki tüm kayıtları entry modeli / strateji adı eşleşmesiyle uygun stratejilere dağıt
   const trades = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades : [];
   if (!trades.length) { stratToast('Trade günlüğünde kayıt yok — önce günlükten işlem ekle.'); return; }
   const strats = stratData.list.filter(s => (s.name || '').trim());
@@ -13495,17 +13497,25 @@ function stratDistributeAll() {
 function stratAutoFromJournal() {
   const trades = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades : [];
   if (!trades.length) { stratToast('Trade günlüğünde kayıt yok — önce günlükten işlem ekle.'); return; }
-  const stratCounts = {};
+  const modelCounts = {};
+  const stratOfModel = {};
   trades.forEach(t => {
+    const m = String(t.model || '').trim();
     const s = String(t.strat || '').trim();
-    if (s) stratCounts[s] = (stratCounts[s] || 0) + 1;
+    if (m) {
+      modelCounts[m] = (modelCounts[m] || 0) + 1;
+      if (s && !stratOfModel[m]) stratOfModel[m] = s;
+    } else if (s) {
+      modelCounts[s] = (modelCounts[s] || 0) + 1;
+    }
   });
-  const names = Object.keys(stratCounts);
-  if (!names.length) { stratToast('Günlükte strateji adı bulunamadı — önce işlemlerine strateji adı gir (Trade Günlüğü → Düzenle).'); return; }
+  const names = Object.keys(modelCounts);
+  if (!names.length) { stratToast('Günlükte entry modeli bulunamadı — önce işlemlerine model gir (Trade Günlüğü → Düzenle).'); return; }
   const existing = new Set(stratData.list.map(s => (s.name || '').trim().toLowerCase()));
   let created = 0;
   names.forEach(name => {
     if (existing.has(name.toLowerCase())) return;
+    const parentStrat = stratOfModel[name] || '';
     stratData.list.push({
       id: 'st' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       name: name,
@@ -13514,7 +13524,7 @@ function stratAutoFromJournal() {
       dir: 'both',
       status: 'aktif',
       prio: 3,
-      note: 'Günlükten otomatik oluşturuldu (' + stratCounts[name] + ' işlem)',
+      note: (parentStrat ? parentStrat + ' → ' : '') + 'Entry Model · ' + modelCounts[name] + ' işlem',
       rules: [],
       confirms: [],
       btTrades: [],
@@ -13525,10 +13535,10 @@ function stratAutoFromJournal() {
     existing.add(name.toLowerCase());
     created++;
   });
-  if (!created) { stratToast('Tüm strateji adları zaten mevcut.'); return; }
+  if (!created) { stratToast('Tüm entry modeli adları zaten mevcut.'); return; }
   saveStrat().then(() => {
     stratRenderList();
-    stratToast('✅ ' + created + ' strateji oluşturuldu — şimdi "📥 Günlükten Tümünü Dağıt" ile işlemleri getir.');
+    stratToast('✅ ' + created + ' entry modeli oluşturuldu — şimdi "📥 Günlükten Tümünü Dağıt" ile işlemleri getir.');
   });
 }
 const ANALIZ_KEY = 'defter-analiz-v1';
@@ -22014,7 +22024,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b81';
+const APP_BUILD = 'b82';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
