@@ -4160,6 +4160,7 @@
           <a href="?page=news" class="nav-link" id="tab-news" data-nav data-i18n="app.magazine">🗞️ Dergi</a>
         </div>
       </div>
+      <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
       <a href="?page=basvuru" class="nav-link" id="tab-basvuru" data-nav data-i18n="app.alfa" style="display:none">🚀 Alfa Ol</a>
       <a href="?page=alfa" class="nav-link" id="tab-alfa" data-nav style="display:none">💪 Alfa Man</a>
       <a href="?page=apps" class="nav-link" id="tab-apps" data-nav style="display:none">📋 Başvurular</a>
@@ -4215,6 +4216,7 @@
       <div class="mnav-group" data-i18n="app.news">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=news" class="mnav-link" data-nav data-mnav="news" data-i18n="app.magazine">🗞️ Dergi</a>
+      <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
       <a href="?page=basvuru" class="mnav-link" data-nav data-mnav="basvuru" data-i18n="app.alfa" style="display:none" id="mnav-basvuru">🚀 Alfa Ol</a>
       <a href="?page=alfa" class="mnav-link" data-nav data-mnav="alfa" id="mnav-alfa" style="display:none">💪 Alfa Man</a>
       <a href="?page=apps" class="mnav-link" data-nav data-mnav="apps" id="mnav-apps" style="display:none">📋 Başvurular</a>
@@ -6827,6 +6829,16 @@
       <button class="path-btn" onclick="renderApps()" style="margin-left:auto;padding:9px 18px;font-size:13px;">🔄 Yenile</button>
     </div>
     <div id="apps-list" style="font-size:12.5px;color:var(--text-3);">Yükleniyor...</div>
+  </div>
+</div>
+
+<div id="page-ek" class="hidden">
+  <div class="wrap">
+    <div style="margin:20px 0 14px;">
+      <h1 style="font-size:21px;margin:0;letter-spacing:-.02em;">📎 Ek Sayfalar</h1>
+      <p style="font-size:12px;color:var(--dim);margin:6px 0 0;">Kullanılmayan veya nadir erişilen sayfalar burada toplandı.</p>
+    </div>
+    <div id="ek-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
   </div>
 </div>
 
@@ -10052,6 +10064,33 @@ async function exportData() {
   box.focus(); box.select();
 }
 
+function renderEk() {
+  const grid = document.getElementById('ek-grid');
+  if (!grid) return;
+  const cards = [
+    { icon: '⛓️', page: 'onchain', title: 'Onchain', desc: 'Zincir üstü veri analizi' },
+    { icon: '📊', page: 'review', title: 'Haftalık Değerlendirme', desc: 'Haftalık performans ve strateji retrospektifi' },
+    { icon: '📉', page: 'trading', title: 'Trading', desc: 'Trading terminali ve grafik' },
+    { icon: '📢', page: 'alfatrading', title: 'Alfa Trading', desc: 'Alfa sinyaller ve trade paylaşımı' },
+    { icon: '🛠️', page: 'pano', title: 'Çalışma Panosu', desc: 'Beyaz tahta ve not alanı' },
+    { icon: '🤝', page: 'mentoring', title: 'Mentörlük', desc: 'Koçluk ve birebir görüşme' },
+    { icon: '🗞️', page: 'news', title: 'Dergi Alfa', desc: 'Haberler, analizler, makaleler' },
+    { icon: '🚀', page: 'basvuru', title: 'Alfa Ol', desc: 'Üyelik başvuru formu' },
+    { icon: '💪', page: 'alfa', title: 'Alfa Man', desc: 'Kişisel performans panosu' },
+    { icon: '📋', page: 'apps', title: 'Başvurular', desc: 'Gelen üyelik başvuruları' },
+    { icon: '💬', page: 'chat-admin', title: 'Canlı Destek', desc: 'Mesajlaşma ve destek talepleri' },
+  ];
+  grid.innerHTML = cards.map(c => {
+    const locked = (c.page === 'alfa' || c.page === 'apps' || c.page === 'basvuru') && typeof amAllowed === 'function' && !amAllowed();
+    return '<a href="?page=' + c.page + '" data-nav onclick="event.preventDefault();showPage(\'' + c.page + '\')" style="display:block;padding:18px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);transition:box-shadow .15s,border-color .15s;">' +
+      '<div style="font-size:26px;margin-bottom:8px;">' + c.icon + '</div>' +
+      '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + c.title + '</div>' +
+      '<div style="font-size:11.5px;color:var(--dim);line-height:1.45;">' + c.desc + '</div>' +
+      (locked ? '<div style="margin-top:8px;font-size:10px;color:var(--amber);">🔒 Üyelik gerekli</div>' : '') +
+      '</a>';
+  }).join('');
+}
+
 function init() {
   ensureConfigShape();
   session = autoSession();
@@ -11482,7 +11521,8 @@ function showPage(name, skipAnim) {
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
-  const pages = ['home', 'butce', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  if (name === 'ek') renderEk();
+  const pages = ['home', 'butce', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -21952,7 +21992,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b76';
+const APP_BUILD = 'b77';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
