@@ -8744,6 +8744,7 @@ async function saveTrades() {
 // ——— Ders Defteri ———
 const LESSONS_KEY = 'defter-lessons-v1';
 let lessonsData = { lessons: [], log: {} };
+let lessonsLoaded = false;
 
 function lsToday() {
   const d = new Date();
@@ -8756,6 +8757,7 @@ async function loadLessons() {
   } catch (e) { /* boş başla */ }
   if (!Array.isArray(lessonsData.lessons)) lessonsData.lessons = [];
   if (!lessonsData.log || typeof lessonsData.log !== 'object') lessonsData.log = {};
+  lessonsLoaded = true;
   if (lessonsData.lessons.length === 0) {
     // başlangıç dersleri
     const base = Date.now();
@@ -8775,7 +8777,10 @@ async function loadLessons() {
   }
   showDailyQuote();
 }
-async function saveLessons() { await store.set(LESSONS_KEY, JSON.stringify(lessonsData)); }
+async function saveLessons() {
+  if (!lessonsLoaded) return;
+  await store.set(LESSONS_KEY, JSON.stringify(lessonsData));
+}
 
 function lsAdherence(id) {
   const days = Object.keys(lessonsData.log).sort().slice(-14);
@@ -21970,7 +21975,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b78';
+const APP_BUILD = 'b79';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
