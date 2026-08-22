@@ -2042,6 +2042,22 @@
   .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
   .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .ap2-sell-row:last-child { border-bottom: none; }
+  .ap2-ideas { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .ap2-idea-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .ap2-idea-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .ap2-idea-sym { font-weight: 800; font-size: 14px; color: var(--pc); }
+  .ap2-idea-date { font-size: 10px; color: var(--text-3); font-weight: 600; white-space: nowrap; }
+  .ap2-idea-body { font-size: 12.5px; color: var(--text-2); line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+  .ap2-idea-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .ap2-idea-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--pc-soft); color: var(--pc); }
+  .ap2-idea-actions { display: flex; gap: 4px; margin-top: 8px; }
+  .ap2-idea-actions button { font-size: 11px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-3); cursor: pointer; }
+  .ap2-idea-actions button:hover { border-color: var(--pc); color: var(--pc); }
+  .ap2-idea-form { background: var(--bg-2); border: 1px dashed var(--pc); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .ap2-idea-form input, .ap2-idea-form textarea { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 7px 9px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+  .ap2-idea-form textarea { min-height: 60px; resize: vertical; }
+  .ap2-idea-form input:focus, .ap2-idea-form textarea:focus { outline: none; border-color: var(--pc); }
+  .ap2-idea-form-actions { display: flex; gap: 6px; justify-content: flex-end; }
   .ap2-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
   .ap2-type-chips { display: flex; gap: 4px; flex-wrap: wrap; }
   .ap2-type-chip { border: 1px solid var(--border); background: var(--bg); color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; transition: all .15s; }
@@ -5554,14 +5570,6 @@
         <input type="file" id="bd-restore-file" accept="application/json" class="hidden">
       </div>
     </div>
-    <div id="ap2-public-teaser" class="ap2-gate-teaser" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Alfa Portföy</div>
-        <div style="font-size:11px;color:var(--pc);cursor:pointer;font-weight:600" onclick="bdSetTab('alfaportfoy');setTimeout(function(){var t=document.getElementById('bd-tabs');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},100)">Detay için tıkla →</div>
-      </div>
-      <div class="ap2-sum-row" id="ap2-pt-cards"></div>
-      <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
-    </div>
     <div class="bd-tabs" id="bd-tabs">
       <button type="button" class="bd-tab on" data-bdt="defter">📒 Defter</button>
       <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföy</button>
@@ -5820,6 +5828,13 @@
     </div>
     </div><!-- /bd-view-portfoy -->
     <div id="bd-view-alfaportfoy" class="hidden">
+      <div id="ap2-public-teaser" class="ap2-gate-teaser" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Alfa Portföy</div>
+        </div>
+        <div class="ap2-sum-row" id="ap2-pt-cards"></div>
+        <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
+      </div>
       <div id="ap2-gate" class="ap2-gate hidden">
         <div class="ap2-gate-card">
           <div class="ap2-gate-icon">🔒</div>
@@ -5874,6 +5889,14 @@
           <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
             <h4>Satis Gecmisi</h4>
             <div id="ap2-sell-hist-body"></div>
+          </div>
+          <div class="ap2-ideas" id="ap2-ideas">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <h4 style="margin:0;font-size:13px;font-weight:700;color:var(--text)">💡 Potansiyel Portföy Değerlendirmeleri</h4>
+              <button type="button" class="btn" id="ap2-idea-add" style="font-size:12px;padding:5px 10px">+ Not Ekle</button>
+            </div>
+            <div id="ap2-idea-list" style="display:flex;flex-direction:column;gap:8px"></div>
+            <div id="ap2-idea-empty" style="font-size:12px;color:var(--text-3);padding:12px 0;text-align:center">Henüz not yok — potansiyel yatırımlar hakkında değerlendirme notları ekle.</div>
           </div>
         </div>
         <div class="ap2-layout-right">
@@ -15070,6 +15093,74 @@ let ap2EditId = null;
 let ap2SellId = null;
 function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; } } catch(e) {} }
 function ap2Save() { try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} try { ap2SyncCloud(); } catch(e) {} }
+const AP2_IDEAS_KEY = 'alfa-fund-ideas-v1';
+let ap2Ideas = [];
+function ap2IdeasLoad() { try { const raw = localStorage.getItem(AP2_IDEAS_KEY); if (raw) ap2Ideas = JSON.parse(raw); } catch(e) {} if (!Array.isArray(ap2Ideas)) ap2Ideas = []; }
+function ap2IdeasSave() { try { localStorage.setItem(AP2_IDEAS_KEY, JSON.stringify(ap2Ideas)); } catch(e) {} }
+function ap2IdeaDate(d) { if (!d) return '—'; const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1].slice(2) : String(d); }
+function ap2RenderIdeas() {
+  ap2IdeasLoad();
+  const list = document.getElementById('ap2-idea-list');
+  const empty = document.getElementById('ap2-idea-empty');
+  if (!list) return;
+  if (!ap2Ideas.length) { list.innerHTML = ''; if (empty) empty.style.display = ''; return; }
+  if (empty) empty.style.display = 'none';
+  list.innerHTML = ap2Ideas.slice().reverse().map(function(idea) {
+    const tagHtml = (idea.tags || []).map(function(t) { return '<span class="ap2-idea-tag">' + esc(t) + '</span>'; }).join('');
+    return '<div class="ap2-idea-card" data-idea-id="' + idea.id + '">' +
+      '<div class="ap2-idea-head"><span class="ap2-idea-sym">' + esc(idea.symbol || '—') + '</span><span class="ap2-idea-date">' + ap2IdeaDate(idea.date) + '</span></div>' +
+      '<div class="ap2-idea-body">' + esc(idea.note || '') + '</div>' +
+      (tagHtml ? '<div class="ap2-idea-tags">' + tagHtml + '</div>' : '') +
+      '<div class="ap2-idea-actions"><button data-idea-edit="' + idea.id + '">✎ Düzenle</button><button data-idea-del="' + idea.id + '" style="color:var(--red)">🗑 Sil</button></div>' +
+    '</div>';
+  }).join('');
+}
+function ap2IdeaForm(show) {
+  const wrap = document.getElementById('ap2-ideas');
+  if (!wrap) return;
+  let form = document.getElementById('ap2-idea-form-wrap');
+  if (!show) { if (form) form.remove(); return; }
+  if (form) return;
+  form = document.createElement('div');
+  form.id = 'ap2-idea-form-wrap';
+  form.className = 'ap2-idea-form';
+  form.innerHTML = '<input type="text" id="ap2-idea-sym" placeholder="Sembol (BTC, ETH, XAU…)" maxlength="20" autocomplete="off">' +
+    '<textarea id="ap2-idea-note" placeholder="Değerlendirme notun (fikir, analiz, hedef fiyat, risk…)" maxlength="600"></textarea>' +
+    '<input type="text" id="ap2-idea-tags" placeholder="Etiketler (virgülle ayır: long, swing, accumulation)" maxlength="120" autocomplete="off">' +
+    '<div class="ap2-idea-form-actions"><button type="button" class="btn solid" id="ap2-idea-save">Kaydet</button><button type="button" class="btn" id="ap2-idea-cancel">Vazgeç</button></div>';
+  const listEl = document.getElementById('ap2-idea-list');
+  if (listEl) listEl.before(form);
+  document.getElementById('ap2-idea-save').addEventListener('click', function() {
+    const sym = (document.getElementById('ap2-idea-sym').value || '').trim();
+    const note = (document.getElementById('ap2-idea-note').value || '').trim();
+    if (!note) { document.getElementById('ap2-idea-note').focus(); return; }
+    const tags = (document.getElementById('ap2-idea-tags').value || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+    ap2Ideas.push({ id: 'idea' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), symbol: sym, note: note, tags: tags, date: new Date().toISOString().slice(0, 10), ts: Date.now() });
+    ap2IdeasSave(); ap2RenderIdeas(); ap2IdeaForm(false);
+  });
+  document.getElementById('ap2-idea-cancel').addEventListener('click', function() { ap2IdeaForm(false); });
+}
+function ap2IdeaDelete(id) {
+  ap2Ideas = ap2Ideas.filter(function(i) { return i.id !== id; });
+  ap2IdeasSave(); ap2RenderIdeas();
+}
+function ap2IdeaEdit(id) {
+  const idea = ap2Ideas.find(function(i) { return i.id === id; });
+  if (!idea) return;
+  ap2IdeaForm(true);
+  setTimeout(function() {
+    const si = document.getElementById('ap2-idea-sym'); if (si) si.value = idea.symbol || '';
+    const ni = document.getElementById('ap2-idea-note'); if (ni) ni.value = idea.note || '';
+    const ti = document.getElementById('ap2-idea-tags'); if (ti) ti.value = (idea.tags || []).join(', ');
+    const sv = document.getElementById('ap2-idea-save');
+    if (sv) sv.onclick = function() {
+      idea.symbol = (document.getElementById('ap2-idea-sym').value || '').trim();
+      idea.note = (document.getElementById('ap2-idea-note').value || '').trim();
+      idea.tags = (document.getElementById('ap2-idea-tags').value || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+      ap2IdeasSave(); ap2RenderIdeas(); ap2IdeaForm(false);
+    };
+  }, 30);
+}
 const AP2_CLOUD_KEY = 'alfa_portfoy_public';
 let ap2CloudData = null;
 let ap2CloudLoading = false;
@@ -15396,6 +15487,7 @@ function renderAlfaPortfoy2() {
     if (rebalEl) rebalEl.style.display = 'none';
     if (layoutEl) layoutEl.style.display = 'none';
     if (shareArea) shareArea.innerHTML = '';
+    ap2RenderIdeas();
     return;
   }
   if (emptyEl) emptyEl.style.display = 'none';
@@ -15531,6 +15623,7 @@ function renderAlfaPortfoy2() {
     '</div>';
   if (shareArea) shareArea.innerHTML = shareHtml;
   ap2RebalCalc();
+  ap2RenderIdeas();
 }
 function ap2RebalCalc() {
   const resultEl = document.getElementById('ap2-rebal-result');
@@ -15765,6 +15858,11 @@ function bindAlfaPortfoy2() {
     if (e.target.closest('#ap2-share-copy')) { ap2ShareCopy(); return; }
     if (e.target.closest('#ap2-share-dl')) { ap2ShareDownload(); return; }
     if (e.target.closest('#ap2-share-native')) { ap2ShareNative(); return; }
+    if (e.target.closest('#ap2-idea-add')) { ap2IdeaForm(true); return; }
+    const ideaDel = e.target.closest('[data-idea-del]');
+    if (ideaDel) { ap2IdeaDelete(ideaDel.getAttribute('data-idea-del')); return; }
+    const ideaEd = e.target.closest('[data-idea-edit]');
+    if (ideaEd) { ap2IdeaEdit(ideaEd.getAttribute('data-idea-edit')); return; }
   });
   view.addEventListener('click', e => {
     const chip = e.target.closest('#ap2-f-type .ap2-type-chip');
@@ -22024,7 +22122,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b82';
+const APP_BUILD = 'b83';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
