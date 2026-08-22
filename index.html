@@ -15527,7 +15527,7 @@ function pfSellConfirm() {
   } else {
     pfData.positions = pfData.positions.filter(x => x.id !== pos.id);
   }
-  pfData.cash = (Number(pfData.cash) || 0) + amount;
+  pfData.cash = Math.round(((Number(pfData.cash) || 0) + profit) * 100) / 100;
   savePortfoy().then(() => {
     document.getElementById('pf-sell-form').classList.add('hidden');
     pfSellId = null;
@@ -15586,8 +15586,9 @@ function pfRenderSellHist() {
       const idx = parseInt(b.dataset.sellIdx);
       if (!confirm('Bu satışı silmek istediğine emin misin?')) return;
       const removed = pfData.sells.splice(idx, 1)[0];
-      pfData.cash = Math.round(((Number(pfData.cash) || 0) - (removed.amount || 0)) * 100) / 100;
-      savePortfoy().then(() => { renderPortfoy(); stratToast('Satış silindi — ' + pfAmt(removed.amount) + ' cash düşüldü'); });
+      const removedProfit = removed.profit != null ? removed.profit : ((removed.buyPrice || 0) ? (removed.price - removed.buyPrice) * removed.qty : 0);
+      pfData.cash = Math.round(((Number(pfData.cash) || 0) - removedProfit) * 100) / 100;
+      savePortfoy().then(() => { renderPortfoy(); stratToast('Satış silindi — kâr/zarar geri alındı'); });
     });
   });
 }
@@ -15601,6 +15602,15 @@ async function loadPortfoy() {
       pfData.positions.forEach(p => {
         if (p && typeof p.unit !== 'string') { p.unit = 'tl'; migrated = true; }
       });
+      if (!d._cashMigrated && pfData.sells.length) {
+        pfData.cash = pfData.sells.reduce((sum, s) => {
+          const bp = s.buyPrice || 0;
+          const profit = s.profit != null ? s.profit : (bp ? (s.price - bp) * s.qty : 0);
+          return sum + profit;
+        }, 0);
+        pfData._cashMigrated = true;
+        migrated = true;
+      }
       if (migrated) await savePortfoy();
     }
   } catch (e) { pfData = { positions: [], cash: 0, sells: [] }; }
@@ -21632,7 +21642,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b72';
+const APP_BUILD = 'b73';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
