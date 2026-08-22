@@ -5380,12 +5380,13 @@
           <button type="button" class="btn" id="strat-analiz-btn" title="Trader analizlerini kaydettiğin Analiz Köşesi'ne git">🧭 Analiz Köşesi</button>
           <button type="button" class="btn" id="strat-distribute-all" title="Trade günlüğündeki tüm kayıtları strateji adına / notuna göre otomatik dağıt">📥 Günlükten Tümünü Dağıt</button>
           <button type="button" class="btn solid" id="strat-add">＋ Strateji Ekle</button>
+          <button type="button" class="btn" id="strat-auto-journal" title="Trade günlüğündeki strateji adlarından otomatik strateji oluştur ve işlemleri dağıt">🔄 Günlükten Strateji Oluştur</button>
         </div>
       </div>
       <div id="strat-list-wrap">
         <div id="strat-dist-note"></div>
         <div id="strat-list" class="strat-list"></div>
-        <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir.</div>
+        <div id="strat-empty" class="data-empty">Henüz strateji yok. "＋ Strateji Ekle" ile ilkini gir ya da aşağıdaki butonla günlüğündeki strateji adlarından otomatik oluştur.</div>
       </div>
       <div id="strat-ders" class="strat-ders"></div>
       <div id="strat-detail" class="strat-detail hidden"></div>
@@ -11513,10 +11514,11 @@ function showPage(name, skipAnim) {
     if (tb) tb.classList.toggle('on', name === p);
   });
   document.querySelectorAll('[data-mnav]').forEach(el => el.classList.toggle('on', el.getAttribute('data-mnav') === name));
-  // highlight parent dropdown when child active, close all dropdowns
+  // highlight parent dropdown when child active, close other dropdowns
   document.querySelectorAll('.nav-drop').forEach(d => {
-    d.classList.toggle('on', !!d.querySelector('.nav-link.on'));
-    d.classList.remove('open');
+    const isActive = !!d.querySelector('.nav-link.on');
+    d.classList.toggle('on', isActive);
+    if (!isActive) d.classList.remove('open');
   });
   const shown = document.getElementById('page-' + name);
   if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
@@ -13448,13 +13450,8 @@ function stratMatch(t, name) {
   const nm = String(name || '').trim().toLowerCase();
   if (!nm) return false;
   const tn = String(t.strat || '').trim().toLowerCase();
-  if (tn && (tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0)) return true;
-  if (nm.length >= 3) {
-    const hay = (String(t.note || '') + ' ' + String(t.model || '') + ' ' + String(t.pair || '') + ' ' + String(t.verdict || '') + ' ' + String(t.sent || '') + ' ' + String(t.kKalite || '')).toLowerCase();
-    const nmWords = nm.split(/\s+/).filter(w => w.length >= 3);
-    if (nmWords.length > 0 && nmWords.every(w => hay.indexOf(w) >= 0)) return true;
-  }
-  return false;
+  if (!tn) return false;
+  return tn === nm || tn.indexOf(nm) === 0 || nm.indexOf(tn) === 0 || tn.indexOf(nm) >= 0;
 }
 function stratDistributeAll() {
   // Tek buton: trade günlüğündeki tüm kayıtları strateji adı / not / model eşleşmesiyle uygun stratejilere dağıt
@@ -13468,9 +13465,10 @@ function stratDistributeAll() {
     const hit = strats.find(s => stratMatch(t, s.name));
     if (!hit) { unmatched++; return; }
     if (!Array.isArray(hit.liveTrades)) hit.liveTrades = [];
-    const key = (t.date || '') + '|' + String(t.dir || '') + '|' + String(t.pair || '').toUpperCase() + '|' + String(rv);
+    const normDir = d => String(d || '').toLowerCase().indexOf('short') === 0 ? 'short' : 'long';
+    const key = (t.date || '') + '|' + normDir(t.dir) + '|' + String(t.pair || '').toUpperCase() + '|' + String(rv);
     const known = hit.liveTrades.some(x =>
-      (x.date || '') + '|' + String(x.dir || '') + '|' + String(x.pair || '').toUpperCase() + '|' + (x.r === null || x.r === undefined ? '' : String(x.r)) === key);
+      (x.date || '') + '|' + normDir(x.dir) + '|' + String(x.pair || '').toUpperCase() + '|' + (x.r === null || x.r === undefined ? '' : String(x.r)) === key);
     if (known) { dupe++; return; }
     hit.liveTrades.push({
       id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
@@ -13494,7 +13492,45 @@ function stratDistributeAll() {
     stratToast('📥 ' + added + ' işlem dağıtıldı' + (dupe ? ' · ' + dupe + ' zaten vardı' : '') + (unmatched ? ' · ' + unmatched + ' eşleşmedi' : ''));
   });
 }
-// ============ Analiz Köşesi ============
+function stratAutoFromJournal() {
+  const trades = (typeof dataTrades !== 'undefined' && Array.isArray(dataTrades)) ? dataTrades : [];
+  if (!trades.length) { stratToast('Trade günlüğünde kayıt yok — önce günlükten işlem ekle.'); return; }
+  const stratCounts = {};
+  trades.forEach(t => {
+    const s = String(t.strat || '').trim();
+    if (s) stratCounts[s] = (stratCounts[s] || 0) + 1;
+  });
+  const names = Object.keys(stratCounts);
+  if (!names.length) { stratToast('Günlükte strateji adı bulunamadı — önce işlemlerine strateji adı gir (Trade Günlüğü → Düzenle).'); return; }
+  const existing = new Set(stratData.list.map(s => (s.name || '').trim().toLowerCase()));
+  let created = 0;
+  names.forEach(name => {
+    if (existing.has(name.toLowerCase())) return;
+    stratData.list.push({
+      id: 'st' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: name,
+      market: '',
+      tf: '',
+      dir: 'both',
+      status: 'aktif',
+      prio: 3,
+      note: 'Günlükten otomatik oluşturuldu (' + stratCounts[name] + ' işlem)',
+      rules: [],
+      confirms: [],
+      btTrades: [],
+      liveTrades: [],
+      edu: { src: '', learned: '', links: [], videos: [] },
+      created: Date.now(),
+    });
+    existing.add(name.toLowerCase());
+    created++;
+  });
+  if (!created) { stratToast('Tüm strateji adları zaten mevcut.'); return; }
+  saveStrat().then(() => {
+    stratRenderList();
+    stratToast('✅ ' + created + ' strateji oluşturuldu — şimdi "📥 Günlükten Tümünü Dağıt" ile işlemleri getir.');
+  });
+}
 const ANALIZ_KEY = 'defter-analiz-v1';
 let analizData = { traders: [], posts: [] };
 let anaEditId = null;
@@ -19121,6 +19157,8 @@ function bindStrategiesPage() {
   g('strat-add').addEventListener('click', () => stratOpenForm(null));
   const distBtn = document.getElementById('strat-distribute-all');
   if (distBtn) distBtn.addEventListener('click', stratDistributeAll);
+  const autoBtn = document.getElementById('strat-auto-journal');
+  if (autoBtn) autoBtn.addEventListener('click', stratAutoFromJournal);
   const anBtn = document.getElementById('strat-analiz-btn');
   if (anBtn) anBtn.addEventListener('click', () => showPage('analiz'));
   g('strat-list').addEventListener('click', e => {
@@ -21976,7 +22014,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b80';
+const APP_BUILD = 'b81';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
