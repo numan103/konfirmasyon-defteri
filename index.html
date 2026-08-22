@@ -1258,6 +1258,8 @@
   .kk-badge.kk-yok { background: var(--bg-2); color: var(--text-3); }
   .kk-edit-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 11px; padding: 2px 6px; margin-left: 4px; vertical-align: middle; }
   .kk-edit-btn:hover { color: var(--pc); }
+  .trade-row.ghost { opacity: .75; border-left: 3px solid var(--amber); background: rgba(245,158,11,.03); }
+  .trade-row.ghost .sc { background: rgba(245,158,11,.1); color: var(--amber); }
   .shot-crits { flex: 1; min-width: 210px; display: flex; flex-direction: column; gap: 8px; }
   .crit { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--text); background: var(--input-bg); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; }
   .crit i { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 11px; font-weight: 700; flex: 0 0 auto; }
@@ -4840,6 +4842,42 @@
     <button class="btn" id="btn-share" data-i18n="pg.defter.share">Görsel Paylaş</button>
     <button class="btn" id="btn-reset" data-i18n="pg.defter.newTrade">Yeni İşlem</button>
     <button class="btn" id="btn-edit" data-i18n="pg.defter.editBook">Defteri Düzenle</button>
+    <button class="btn" id="btn-pas" style="border-color:var(--amber);color:var(--amber);">⏸ İşlem Almadım</button>
+  </div>
+
+  <div class="daily" id="ghost-form-wrap" style="display:none;">
+    <div class="panel" style="border:1px dashed var(--amber);background:rgba(245,158,11,.03);">
+      <h2><span>⏸ Pas Kaydı (Hayalet)</span></h2>
+      <p class="hint" style="margin-top:0;">İşlem almadın — kayıt oluştur, korku maliyetini izle. PnL/R toplamlarına dahil EDİLMEZ.</p>
+      <div class="df-form">
+        <div class="df-row"><span class="df-lbl">Tarih</span><input type="date" id="gh-date"></div>
+        <div class="df-row"><span class="df-lbl">Parite</span><input type="text" id="gh-pair" placeholder="BTC, XAU…" maxlength="12"></div>
+        <div class="df-row"><span class="df-lbl">Yön (olaysa)</span><div class="df-seg"><button type="button" class="long" id="gh-long">LONG</button><button type="button" class="short" id="gh-short">SHORT</button></div></div>
+        <div class="df-row"><span class="df-lbl">Strateji</span><input type="text" id="gh-strat" placeholder="Hangi strateji?"></div>
+        <div class="df-row"><span class="df-lbl">Setup Kalitesi</span><div class="df-seg"><button type="button" class="long" id="gh-aplus">A+</button><button type="button" class="short" id="gh-b">B</button></div></div>
+        <div class="df-row"><span class="df-lbl">Olası RR</span><input type="number" step="0.1" id="gh-olasiR" placeholder="ör. 2.5"></div>
+        <div class="df-row df-row-note"><span class="df-lbl">Gerekçe</span><textarea id="gh-reason" rows="2" placeholder="Neden işleme girmedi? Korku mu, sinyal yok mu, plan mı eksik?"></textarea></div>
+        <div class="k-kalite-wrap" id="kk-ghost-wrap">
+          <div class="k-kalite-lbl">Karar Kalitesi <span class="k-kalite-locked" id="kk-ghost-lock" style="display:none;">🔒</span></div>
+          <div class="k-kalite-btns" id="kk-ghost-btns">
+            <button type="button" data-kk="Kaçan-Korku">Kaçan-Korku</button>
+            <button type="button" data-kk="Doğru-Pas">Doğru-Pas</button>
+          </div>
+        </div>
+        <div class="df-imgs" id="gh-imgs-area">
+          <div class="df-img-drop" id="gh-img-drop">
+            <span>📷 Resim sürükle/bırak veya Ctrl+V yapıştır</span>
+            <input type="file" id="gh-img-file" accept="image/*" multiple style="display:none">
+          </div>
+          <div class="df-img-previews" id="gh-img-previews"></div>
+        </div>
+        <div class="df-imgs" style="margin-top:8px;">
+          <button class="btn solid" id="btn-ghost-save" style="background:var(--amber);border-color:var(--amber);">⏸ Pas Kaydet</button>
+          <button class="btn" id="btn-ghost-cancel">Vazgeç</button>
+        </div>
+        <div id="ghost-err" class="hint" style="color:var(--red);"></div>
+      </div>
+    </div>
   </div>
 
   <div class="daily">
@@ -4860,6 +4898,15 @@
       </div>
       <textarea id="export-box" readonly style="display:none; width:100%; min-height:160px; margin-top:10px; background:var(--input-bg); border:1px solid var(--border); border-radius:10px; font-family:monospace; font-size:11px; padding:10px; color:var(--text);"></textarea>
       <div id="export-note" class="hint" style="display:none; margin-top:6px;" data-i18n="pg.defter.exportNote">Tümünü kopyala ve analiz için Claude'a yapıştır.</div>
+    </div>
+  </div>
+
+  <div class="daily">
+    <div class="panel">
+      <h2 class="collapse-h" id="kk-metrics-head"><span>📊 Karar Kalitesi Metrikleri</span><span class="caret" id="kk-metrics-caret">▾</span></h2>
+      <div id="kk-metrics-body">
+        <div id="kk-metrics-content"></div>
+      </div>
     </div>
   </div>
 
@@ -7049,6 +7096,11 @@ let kkSelected = null;
 let kkDataSelected = null;
 let kkLocked = false;
 let kkDataLocked = false;
+let kkGhostSelected = null;
+let kkGhostLocked = false;
+let ghDir = 'LONG';
+let ghSetup = 'A+';
+let ghImages = [];
 
 // ============ Yapay Zeka Profili (izole — kullanıcı config'ine dokunmaz) ============
 const AI_PROFILE_KEY = 'defter-ai-profile-v1';
@@ -9443,6 +9495,54 @@ function logTrade() {
   }
 }
 
+function logGhostTrade() {
+  const note = document.getElementById('ghost-err');
+  const g = id => document.getElementById(id);
+  const pair = (g('gh-pair').value || '').trim().toUpperCase();
+  const stratVal = (g('gh-strat').value || '').trim();
+  const reason = (g('gh-reason').value || '').trim();
+  const olasiR = parseFloat(g('gh-olasiR').value);
+  if (!pair) { note.textContent = 'Parite gerekli.'; return; }
+  if (!stratVal) { note.textContent = 'Strateji gerekli.'; return; }
+  if (!olasiR || olasiR <= 0) { note.textContent = 'Olası RR pozitif bir sayı olmalı.'; return; }
+  if (!kkGhostSelected) { note.textContent = 'Karar Kalitesi seçilmeli (Kaçan-Korku veya Doğru-Pas).'; return; }
+  if (kkGhostSelected !== 'Kaçan-Korku' && kkGhostSelected !== 'Doğru-Pas') { note.textContent = 'Hayalet kayıtta sadece Kaçan-Korku veya Doğru-Pas seçilebilir.'; return; }
+  if (!reason) { note.textContent = 'Gerekçe gerekli.'; return; }
+  let ghDate = g('gh-date').value;
+  if (!ghDate) {
+    const now = new Date();
+    ghDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  }
+  const now = new Date();
+  trades.unshift({
+    id: now.getTime(),
+    date: ghDate,
+    time: now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+    pair: pair, dir: ghDir,
+    score: 0,
+    verdict: ghSetup,
+    crits: [], miss: [], mood: 0, day: '', sess: '', cell: '',
+    cap: false, strat: stratVal, model: '', sent: '',
+    emoBlock: false, intent: 'setup', stars: 0, r: '',
+    isGhost: true,
+    kKalite: kkGhostSelected, kKaliteLog: [],
+    olasiR: olasiR, ghReason: reason,
+    sabah: '', senaryo: '', anti: '', gunsonu: '',
+    note: reason,
+    images: ghImages.slice()
+  });
+  kkGhostSelected = null; kkGhostLocked = false;
+  document.querySelectorAll('#kk-ghost-btns button').forEach(x => { x.classList.remove('kk-on'); x.disabled = false; });
+  document.getElementById('kk-ghost-lock').style.display = 'none';
+  ghImages = [];
+  saveTrades(); renderTrades();
+  document.getElementById('ghost-form-wrap').style.display = 'none';
+  g('gh-pair').value = ''; g('gh-strat').value = ''; g('gh-olasiR').value = ''; g('gh-reason').value = '';
+  note.textContent = '';
+  document.getElementById('daily-note').textContent = 'Pas kaydedildi.';
+  setTimeout(() => { document.getElementById('daily-note').textContent = ''; }, 4000);
+}
+
 function critNames(t) {
   return (t.crits || []).map(c => typeof c === 'string' ? c : c.n);
 }
@@ -9485,7 +9585,8 @@ function renderTrades() {
   list.innerHTML = '';
 
   const shown = trades.filter(passesFilter);
-  const withR = shown.filter(t => t.r !== '' && !isNaN(Number(t.r)));
+  const withR = shown.filter(t => t.r !== '' && !isNaN(Number(t.r)) && !t.isGhost);
+  const ghostCount = shown.filter(t => t.isGhost).length;
   if (withR.length > 0) {
     const grp = {};
     withR.forEach(t => {
@@ -9496,16 +9597,16 @@ function renderTrades() {
       const g = grp[v];
       return '<b>' + v + '</b> (' + g.n + ' işlem): toplam ' + g.sum.toFixed(2) + 'R, ort ' + (g.sum / g.n).toFixed(2) + 'R';
     });
-    stats.innerHTML = 'Skor × sonuç: ' + parts.join(' · ');
+    stats.innerHTML = 'Skor × sonuç: ' + parts.join(' · ') + (ghostCount > 0 ? ' · <span style="color:var(--amber);">' + ghostCount + ' pas</span>' : '');
   } else {
     stats.textContent = shown.length > 0
-      ? 'Sonuçlanan işlemlerin R değerini gir — skor dilimlerinin gerçek performansı burada birikecek.'
+      ? (ghostCount > 0 ? ghostCount + ' pas kaydı var — sonuçlanan işlemlerin R değerini gir.' : 'Sonuçlanan işlemlerin R değerini gir — skor dilimlerinin gerçek performansı burada birikecek.')
       : (trades.length > 0 ? 'Bu filtrede işlem yok.' : 'Henüz kayıt yok. Kriterleri tikleyip "İşlemi Kaydet" de.');
   }
 
   shown.slice(0, 60).forEach(t => {
     const row = document.createElement('div');
-    row.className = 'trade-row';
+    row.className = 'trade-row' + (t.isGhost ? ' ghost' : '');
     const when = document.createElement('span');
     when.className = 'when'; when.textContent = t.date + ' ' + t.time;
     when.title = 'Tarihi düzenlemek için tıkla';
@@ -9570,6 +9671,13 @@ function renderTrades() {
 
     const detail = document.createElement('div');
     detail.className = 'trade-detail';
+    if (t.isGhost) {
+      const ghInfo = document.createElement('div');
+      ghInfo.className = 'td-item yes';
+      ghInfo.innerHTML = '<span class="mk">⏸</span><span></span>';
+      ghInfo.children[1].textContent = 'Pas Kaydı — Olası RR: ' + (t.olasiR || '—') + ' · Gerekçe: ' + (t.ghReason || t.note || '—');
+      detail.appendChild(ghInfo);
+    }
     if (typeof t.mood === 'number') {
       const [mlbl] = moodLabel(t.mood);
       const mi = document.createElement('div');
@@ -9829,6 +9937,45 @@ function renderTrades() {
   });
 
   renderAnalysis();
+  renderKkMetrics();
+}
+
+function renderKkMetrics() {
+  const el = document.getElementById('kk-metrics-content');
+  if (!el) return;
+  const active = trades.filter(t => t.kKalite);
+  if (active.length === 0) { el.innerHTML = '<div class="hint">Henüz Karar Kalitesi etiketli işlem yok.</div>'; return; }
+  const total = active.length;
+  const kuralli = active.filter(t => t.kKalite === 'Kurallı').length;
+  const zorlama = active.filter(t => t.kKalite === 'Zorlama').length;
+  const korku = active.filter(t => t.kKalite === 'Kaçan-Korku').length;
+  const dogruPas = active.filter(t => t.kKalite === 'Doğru-Pas').length;
+  const ghostCount = trades.filter(t => t.isGhost).length;
+  const kuralliRate = total > 0 ? Math.round(kuralli / total * 100) : 0;
+  const zorlamaR = active.filter(t => t.kKalite === 'Zorlama' && t.r !== '' && !isNaN(Number(t.r))).reduce((s, t) => s + Number(t.r), 0);
+  const korkuRR = active.filter(t => t.kKalite === 'Kaçan-Korku').reduce((s, t) => s + (t.olasiR || 0), 0);
+  const lowSample = total < 10;
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px;">';
+  html += '<div style="text-align:center;padding:14px 10px;border-radius:12px;background:var(--card);border:1px solid var(--border);"><div style="font-size:11px;color:var(--dim);margin-bottom:6px;">Kurallı Oranı</div><div style="font-size:22px;font-weight:700;color:var(--green);">' + kuralliRate + '%</div><div style="font-size:11px;color:var(--dim);margin-top:4px;">' + kuralli + ' / ' + total + ' işlem' + (lowSample ? ' <span style="color:var(--amber);">⚠ az örneklem</span>' : '') + '</div></div>';
+  html += '<div style="text-align:center;padding:14px 10px;border-radius:12px;background:var(--card);border:1px solid var(--border);"><div style="font-size:11px;color:var(--dim);margin-bottom:6px;">Zorlama Maliyeti</div><div style="font-size:22px;font-weight:700;color:var(--red);">' + zorlamaR.toFixed(1) + 'R</div><div style="font-size:11px;color:var(--dim);margin-top:4px;">' + zorlama + ' zorlama işlem' + (lowSample ? ' <span style="color:var(--amber);">⚠ az örneklem</span>' : '') + '</div></div>';
+  html += '<div style="text-align:center;padding:14px 10px;border-radius:12px;background:var(--card);border:1px solid var(--border);"><div style="font-size:11px;color:var(--dim);margin-bottom:6px;">Korku Maliyeti</div><div style="font-size:22px;font-weight:700;color:var(--amber);">' + korkuRR.toFixed(1) + 'R</div><div style="font-size:11px;color:var(--dim);margin-top:4px;">' + korku + ' kaçan fırsat' + (ghostCount > 0 ? ' · ' + ghostCount + ' pas' : '') + '</div></div>';
+  html += '<div style="text-align:center;padding:14px 10px;border-radius:12px;background:var(--card);border:1px solid var(--border);"><div style="font-size:11px;color:var(--dim);margin-bottom:6px;">Doğru Pas</div><div style="font-size:22px;font-weight:700;color:var(--pc);">' + dogruPas + '</div><div style="font-size:11px;color:var(--dim);margin-top:4px;">Disiplin göstergesi</div></div>';
+  html += '</div>';
+  const korkuPairs = {};
+  active.filter(t => t.kKalite === 'Kaçan-Korku' && t.olasiR > 0).forEach(t => {
+    if (!korkuPairs[t.pair]) korkuPairs[t.pair] = { n: 0, rr: 0 };
+    korkuPairs[t.pair].n++; korkuPairs[t.pair].rr += t.olasiR;
+  });
+  if (Object.keys(korkuPairs).length > 0) {
+    html += '<div style="font-size:12px;color:var(--dim);margin-bottom:6px;">Korku Dağılımı (parite bazında):</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    Object.keys(korkuPairs).forEach(p => {
+      const d = korkuPairs[p];
+      html += '<div style="padding:6px 10px;border-radius:8px;background:rgba(245,158,11,.08);font-size:12px;border:1px solid rgba(245,158,11,.2);"><b>' + p + '</b>: ' + d.n + ' kez, ' + d.rr.toFixed(1) + 'R kaçırıldı</div>';
+    });
+    html += '</div>';
+  }
+  el.innerHTML = html;
 }
 
 function renderAnalysis() {
@@ -9948,12 +10095,50 @@ function init() {
       if (kkSelected) { kkLocked = true; document.querySelectorAll('#kk-defter-btns button').forEach(x => x.disabled = true); }
     });
   });
+  document.getElementById('btn-pas').addEventListener('click', () => {
+    const wrap = document.getElementById('ghost-form-wrap');
+    if (wrap.style.display === 'none') {
+      wrap.style.display = '';
+      document.getElementById('gh-pair').value = pair || '';
+      document.getElementById('gh-date').value = new Date().toISOString().slice(0, 10);
+    } else {
+      wrap.style.display = 'none';
+    }
+  });
+  document.getElementById('btn-ghost-cancel').addEventListener('click', () => { document.getElementById('ghost-form-wrap').style.display = 'none'; });
+  document.getElementById('btn-ghost-save').addEventListener('click', logGhostTrade);
+  document.getElementById('gh-long').addEventListener('click', () => { ghDir = 'LONG'; document.getElementById('gh-long').classList.add('on'); document.getElementById('gh-short').classList.remove('on'); });
+  document.getElementById('gh-short').addEventListener('click', () => { ghDir = 'SHORT'; document.getElementById('gh-short').classList.add('on'); document.getElementById('gh-long').classList.remove('on'); });
+  document.getElementById('gh-aplus').addEventListener('click', () => { ghSetup = 'A+'; document.getElementById('gh-aplus').classList.add('on'); document.getElementById('gh-b').classList.remove('on'); });
+  document.getElementById('gh-b').addEventListener('click', () => { ghSetup = 'B'; document.getElementById('gh-b').classList.add('on'); document.getElementById('gh-aplus').classList.remove('on'); });
+  document.querySelectorAll('#kk-ghost-btns button').forEach(b => {
+    b.addEventListener('click', () => {
+      if (kkGhostLocked) return;
+      const val = b.getAttribute('data-kk');
+      kkGhostSelected = (kkGhostSelected === val) ? null : val;
+      document.querySelectorAll('#kk-ghost-btns button').forEach(x => x.classList.toggle('kk-on', x.getAttribute('data-kk') === kkGhostSelected));
+      document.getElementById('kk-ghost-lock').style.display = kkGhostSelected ? '' : 'none';
+      if (kkGhostSelected) { kkGhostLocked = true; document.querySelectorAll('#kk-ghost-btns button').forEach(x => x.disabled = true); }
+    });
+  });
+  document.getElementById('gh-img-drop').addEventListener('click', () => document.getElementById('gh-img-file').click());
+  document.getElementById('gh-img-file').addEventListener('change', e => { Array.from(e.target.files).forEach(f => { const reader = new FileReader(); reader.onload = ev => { ghImages.push(ev.target.result); const p = document.getElementById('gh-img-previews'); const d = document.createElement('div'); d.className = 'thmb'; d.innerHTML = '<img src="' + ev.target.result + '"><button class="del">×</button>'; d.querySelector('.del').onclick = () => { ghImages.splice(ghImages.indexOf(ev.target.result), 1); d.remove(); }; p.appendChild(d); }; reader.readAsDataURL(f); }); e.target.value = ''; });
+  document.getElementById('gh-img-drop').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--pc)'; });
+  document.getElementById('gh-img-drop').addEventListener('dragleave', e => { e.currentTarget.style.borderColor = ''; });
+  document.getElementById('gh-img-drop').addEventListener('drop', e => { e.preventDefault(); e.currentTarget.style.borderColor = ''; Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).forEach(f => { const reader = new FileReader(); reader.onload = ev => { ghImages.push(ev.target.result); const p = document.getElementById('gh-img-previews'); const d = document.createElement('div'); d.className = 'thmb'; d.innerHTML = '<img src="' + ev.target.result + '"><button class="del">×</button>'; d.querySelector('.del').onclick = () => { ghImages.splice(ghImages.indexOf(ev.target.result), 1); d.remove(); }; p.appendChild(d); }; reader.readAsDataURL(f); }); });
   const anHead = document.getElementById('an-head');
   if (anHead) anHead.addEventListener('click', () => {
     const body = document.getElementById('an-body');
     const open = body.style.display === 'none';
     body.style.display = open ? '' : 'none';
     anHead.classList.toggle('open', open);
+  });
+  const kkMetHead = document.getElementById('kk-metrics-head');
+  if (kkMetHead) kkMetHead.addEventListener('click', () => {
+    const body = document.getElementById('kk-metrics-body');
+    const open = body.style.display === 'none';
+    body.style.display = open ? '' : 'none';
+    kkMetHead.classList.toggle('open', open);
   });
   const lsArch = document.getElementById('ls-arch-head');
   if (lsArch) lsArch.addEventListener('click', () => {
@@ -11492,7 +11677,7 @@ async function syncDataTradeNotion(t) {
   const parts = [];
   if (t.note) parts.push(t.note);
   if (t.model) parts.push('Entry Model: ' + t.model);
-  const payload = { id: t.id, ts: t.ts || Date.now(), date: t.date || '', pair: t.pair || '', dir: t.dir || '', r: dnum(t.r) || 0, strat: t.strat || '', model: t.model || '', note: parts.join(' · '), stars: 0, notionId: t.notionId || undefined, images: t.images || [], syncedImages: t.imgSynced || [] };
+  const payload = { id: t.id, ts: t.ts || Date.now(), date: t.date || '', pair: t.pair || '', dir: t.dir || '', r: dnum(t.r) || 0, strat: t.strat || '', model: t.model || '', note: parts.join(' · '), stars: 0, notionId: t.notionId || undefined, images: t.images || [], syncedImages: t.imgSynced || [], kKalite: t.kKalite || '' };
   try {
     const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const j = await resp.json();
