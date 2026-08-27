@@ -100,6 +100,7 @@ function fetchText(u, headers) {
     alfa_portfoy_tg_idea_notify: html.includes('function ap2IdeaNotify') && html.includes('ap2IdeaNotify(idea);') && !html.includes('ap2-share-tg'),
     alfa_portfoy_no_tg_daily: !html.includes('ap2TgDaily') && !html.includes('ap2_tg_last') && !html.includes('ap2TgText'),
     alfa_portfoy_tg_endpoint: html.includes('/api/tg?notify=1') && html.includes('function ap2TgNotify'),
+    alfa_portfoy_tg_pnl_events: html.includes('Yeni pozisyon') && html.includes('tamamen kapatıldı') && html.includes('Silindi') && html.includes('Kısmi satış'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

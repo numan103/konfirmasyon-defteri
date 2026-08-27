@@ -15388,6 +15388,7 @@ function ap2SaveForm() {
   } else {
     ap2Data.cash = (Number(ap2Data.cash) || 0) - qty * cost;
     ap2Data.positions.push(pos);
+    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nAdet: ' + pos.qty + ' · Maliyet: ' + ap2Fmt(pos.cost) + '/adet\nToplam maliyet: ' + ap2Fmt(qty * cost) + (pos.target != null ? '\nHedef: %' + pos.target : '') + '\n\nalfa-trader.com');
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
@@ -15397,7 +15398,7 @@ function ap2SaveForm() {
 function ap2Delete(id) {
   if (!confirm('Bu enstrümanı silmek istediğine emin misin?')) return;
   const pos = ap2Data.positions.find(x => x.id === id);
-  if (pos) { const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; }
+  if (pos) { const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; ap2TgNotify('🗑 Silindi — ' + pos.symbol + ' pozisyonu portföyden kaldırıldı\n\n' + pos.qty + ' adet · maliyet: ' + ap2Fmt(c.totalCost) + '\n\nalfa-trader.com'); }
   ap2Data.positions = ap2Data.positions.filter(x => x.id !== id);
   ap2Save();
   renderAlfaPortfoy2();
@@ -15432,7 +15433,12 @@ function ap2SellConfirm() {
   ap2Data.sells.push({ id: ap2Id(), posId: pos.id, symbol: pos.symbol, type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now() });
   pos.qty = Math.round((pos.qty - sellQty) * 1e8) / 1e8;
   ap2Data.cash = (Number(ap2Data.cash) || 0) + amount;
-  if (pos.qty <= 0) { ap2Data.positions = ap2Data.positions.filter(x => x.id !== pos.id); }
+  if (pos.qty > 0) {
+    ap2TgNotify('💰 Kısmi satış — ' + pos.symbol + '\n\n' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\nKalan: ' + pos.qty + ' adet\n\nalfa-trader.com');
+  } else {
+    ap2TgNotify('🔒 Kapanış — ' + pos.symbol + ' pozisyonu tamamen kapatıldı\n\nSatış: ' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n\nalfa-trader.com');
+    ap2Data.positions = ap2Data.positions.filter(x => x.id !== pos.id);
+  }
   ap2Save();
   document.getElementById('ap2-sell-form').classList.add('hidden');
   ap2SellId = null;
