@@ -16353,7 +16353,8 @@ function ap2TgNotify(text) {
     body: JSON.stringify({ message: text })
   }).then(function(r) { return r.json().catch(function() { return {}; }); })
     .then(function(j) {
-      if (j && j.ok) stratToast('Telegram\'a gönderildi ✓');
+      var link = j && j.link ? ' — ' + j.link : '';
+      if (j && j.ok) stratToast('Telegram\'a gönderildi ✓' + link);
       else stratToast('Telegram ayarlı değil (TG_BOT_TOKEN eksik).');
     })
     .catch(function() { stratToast('Gönderilemedi.'); });

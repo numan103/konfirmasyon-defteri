@@ -29,7 +29,7 @@ async function handleNotify(req, res) {
   }
   if (!message) return res.status(400).json({ error: 'message gerekli' });
   const out = await sendTelegram(message);
-  if (out.ok) return res.status(200).json({ ok: true });
+  if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) });
   return res.status(502).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http });
 }
 
