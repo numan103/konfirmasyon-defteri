@@ -15201,8 +15201,10 @@ function ap2IdeaForm(show) {
     const note = (document.getElementById('ap2-idea-note').value || '').trim();
     if (!note) { document.getElementById('ap2-idea-note').focus(); return; }
     const tags = (document.getElementById('ap2-idea-tags').value || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
-    ap2Ideas.push({ id: 'idea' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), symbol: sym, note: note, tags: tags, date: new Date().toISOString().slice(0, 10), ts: Date.now() });
+    var idea = { id: 'idea' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), symbol: sym, note: note, tags: tags, date: new Date().toISOString().slice(0, 10), ts: Date.now() };
+    ap2Ideas.push(idea);
     ap2IdeasSave(); ap2RenderIdeas(); ap2IdeaForm(false);
+    ap2IdeaNotify(idea);
   });
   document.getElementById('ap2-idea-cancel').addEventListener('click', function() { ap2IdeaForm(false); });
 }
@@ -15956,14 +15958,12 @@ function renderAlfaPortfoy2() {
         '<button type="button" id="ap2-share-copy" title="Görsel olarak panoya kopyala"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Kopyala</button>' +
         '<button type="button" id="ap2-share-dl" title="Görsel olarak kaydet"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Kaydet</button>' +
         '<button type="button" id="ap2-share-native" title="Paylaş"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş</button>' +
-        '<button type="button" id="ap2-share-tg" title="Telegram\'a g\u00f6nder"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg> Telegram</button>' +
       '</div>' +
     '</div>';
   if (shareArea) shareArea.innerHTML = shareHtml;
   ap2RebalCalc();
   ap2RenderIdeas();
   ap2RenderMonthly();
-  ap2TgDaily();
 }
 function ap2RebalCalc() {
   const resultEl = document.getElementById('ap2-rebal-result');
@@ -16345,25 +16345,12 @@ function ap2ShareNative() {
     navigator.clipboard.writeText(text).then(function() { stratToast('Paylaşılamadı, metin kopyalandı!'); }).catch(function() {});
   }
 }
-function ap2TgText() {
-  var sum = ap2Summary();
-  var lines = ['📦 *Alfa Portföy*', ''];
-  lines.push('Toplam: ' + ap2Fmt(sum.portfolioValue));
-  lines.push((sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')');
-  lines.push('Bakiye (USDT): ' + ap2Fmt(sum.cash) + ' · ' + sum.count + ' enstrüman');
-  (ap2Data.positions || []).forEach(function(p) {
-    var c = ap2Calc(p);
-    var val = c.value !== null ? c.value : c.totalCost;
-    lines.push('• ' + p.symbol + ': ' + ap2Fmt(val) + (c.pnlPct !== null ? ' (' + pfPct(c.pnlPct) + ')' : ''));
-  });
-  lines.push('', 'alfa-trader.com');
-  return lines.join('\n');
-}
 function ap2TgNotify(text) {
+  if (!text) return;
   fetch('/api/tg?notify=1', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: text || ap2TgText() })
+    body: JSON.stringify({ message: text })
   }).then(function(r) { return r.json().catch(function() { return {}; }); })
     .then(function(j) {
       if (j && j.ok) stratToast('Telegram\'a gönderildi ✓');
@@ -16371,17 +16358,13 @@ function ap2TgNotify(text) {
     })
     .catch(function() { stratToast('Gönderilemedi.'); });
 }
-function ap2TgDaily() {
-  try {
-    var today = new Date().toISOString().slice(0, 10);
-    var lastSent = '';
-    try { lastSent = localStorage.getItem('ap2_tg_last') || ''; } catch (e) {}
-    if (lastSent === today) return;
-    var sum = ap2Summary();
-    if (!sum.portfolioValue) return;
-    try { localStorage.setItem('ap2_tg_last', today); } catch (e) {}
-    ap2TgNotify('📊 *Günlük Değerlendirme* — ' + new Date().toLocaleDateString('tr-TR') + '\n\n' + ap2TgText());
-  } catch (e) {}
+function ap2IdeaNotify(idea) {
+  const tagTxt = (idea.tags || []).map(function(t) { return '#' + t.replace(/\s+/g, '').replace(/[^a-zA-Z0-9\u00C0-\u017F_-]/g, ''); }).filter(Boolean).join(' ');
+  const lines = ['💡 Potansiyel Fikir' + (idea.symbol ? ' — ' + idea.symbol : ''), ''];
+  if (idea.note) lines.push(idea.note);
+  if (tagTxt) lines.push('', tagTxt);
+  lines.push('', 'alfa-trader.com');
+  ap2TgNotify(lines.join('\n'));
 }
 function bindAlfaPortfoy2() {
   const view = document.getElementById('bd-view-alfaportfoy');
@@ -16401,7 +16384,6 @@ function bindAlfaPortfoy2() {
     if (e.target.closest('#ap2-share-copy')) { ap2ShareCopy(); return; }
     if (e.target.closest('#ap2-share-dl')) { ap2ShareDownload(); return; }
     if (e.target.closest('#ap2-share-native')) { ap2ShareNative(); return; }
-    if (e.target.closest('#ap2-share-tg')) { ap2TgNotify(); return; }
     if (e.target.closest('#ap2-idea-add')) { ap2IdeaForm(true); return; }
     const ideaDel = e.target.closest('[data-idea-del]');
     if (ideaDel) { ap2IdeaDelete(ideaDel.getAttribute('data-idea-del')); return; }

@@ -97,9 +97,9 @@ function fetchText(u, headers) {
     alfa_portfoy_monthly_grid_firstm: html.includes('ap2MonthRange(firstMk, curMk)') && !html.includes("ap2MonthRange(firstMk.slice(0, 4)"),
     alfa_portfoy_donut_cash_color: html.includes("color: '#64748b'") && html.includes('class="ap2-share-pos-dot" style="background:#64748b'),
     alfa_portfoy_share_canvas_dom: html.includes('card.getBoundingClientRect') && html.includes("'SON AYLAR (%)', pad"),
-    alfa_portfoy_tg_btn: html.includes('ap2-share-tg') && html.includes('ap2TgNotify'),
-    alfa_portfoy_tg_daily: html.includes('ap2TgDaily') && html.includes('ap2_tg_last'),
-    alfa_portfoy_tg_endpoint: html.includes('/api/tg?notify=1') && html.includes('ap2TgNotify'),
+    alfa_portfoy_tg_idea_notify: html.includes('function ap2IdeaNotify') && html.includes('ap2IdeaNotify(idea);') && !html.includes('ap2-share-tg'),
+    alfa_portfoy_no_tg_daily: !html.includes('ap2TgDaily') && !html.includes('ap2_tg_last') && !html.includes('ap2TgText'),
+    alfa_portfoy_tg_endpoint: html.includes('/api/tg?notify=1') && html.includes('function ap2TgNotify'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

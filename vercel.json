@@ -1,6 +1,3 @@
 {
-  "alias": ["alfatraders.vercel.app"],
-  "crons": [
-    { "path": "/api/tg?notify=1&auto=1", "schedule": "0 20 * * *" }
-  ]
+  "alias": ["alfatraders.vercel.app"]
 }
