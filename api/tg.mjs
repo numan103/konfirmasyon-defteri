@@ -6,13 +6,16 @@ const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
 const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
 const TG_TOKEN = process.env.TG_BOT_TOKEN;
 const TG_CHAT = process.env.TG_CHAT_ID;
+const TG_THREAD = process.env.TG_THREAD ? Number(process.env.TG_THREAD) : null;
 
 async function sendTelegram(text) {
   const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
+  const payload = { chat_id: TG_CHAT, text, disable_web_page_preview: true };
+  if (TG_THREAD) payload.message_thread_id = TG_THREAD;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: TG_CHAT, text, disable_web_page_preview: true }),
+    body: JSON.stringify(payload),
   });
   let out = {};
   try { out = await res.json(); } catch (e) {}
@@ -29,7 +32,7 @@ async function handleNotify(req, res) {
   }
   if (!message) return res.status(400).json({ error: 'message gerekli' });
   const out = await sendTelegram(message);
-  if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) });
+  if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') });
   return res.status(502).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http });
 }
 
