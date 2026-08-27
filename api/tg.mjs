@@ -210,7 +210,7 @@ function extractPosts(html) {
 }
 
 export default async function handler(req, res) {
-  const notify = (req.method === 'POST') || (req.query && String(req.query.notify) === '1');
+  const notify = (req.method === 'POST') || (req.query && (String(req.query.notify) === '1' || String(req.query.auto) === '1'));
   if (notify) return handleNotify(req, res);
   res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
   const embed = req.query && (req.query.embed || req.query.page);
