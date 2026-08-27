@@ -18,8 +18,9 @@ function fetchText(u, headers) {
     APP_BUILD_b85: html.includes("APP_BUILD = 'b85'"),
     APP_BUILD_b86: html.includes("APP_BUILD = 'b86'"),
     APP_BUILD_b87: html.includes("APP_BUILD = 'b87'"),
+    APP_BUILD_b88: html.includes("APP_BUILD = 'b88'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
-    og_not_old: html.includes("APP_BUILD = 'b87'"),
+    og_not_old: html.includes("APP_BUILD = 'b88'"),
     og_image_static: html.includes('alfa-trader.com/og.png'),
     bot_og_title: botHome.includes('<title>Alfa Traders — Konfirmasyon Defteri</title>'),
     bot_og_page: botAt.includes('og:title" content="Alfa Traders — Alfa Trading"') && botAt.includes('og:description" content="Alfa Trading — analiz ve işlem paylaşım akışı'),
@@ -68,6 +69,7 @@ function fetchText(u, headers) {
     sw_b85: sw.includes("'b85'"),
     sw_b86: sw.includes("'b86'"),
     sw_b87: sw.includes("'b87'"),
+    sw_b88: sw.includes("'b88'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') {") && html.includes('ap2IsMember'),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
@@ -92,6 +94,12 @@ function fetchText(u, headers) {
     alfa_portfoy_share_png_copy: html.includes('ap2ShareCanvas') && html.includes('ClipboardItem') && html.includes('ap2ShareCopyText'),
     alfa_portfoy_share_pie: html.includes('ap2-share-pie') && html.includes('ap2ShareMonthlyStrip'),
     alfa_portfoy_share_start: html.includes('shareStartTxt') && html.includes('Ba\\u015flang\\u0131\\u00e7'),
+    alfa_portfoy_monthly_grid_firstm: html.includes('ap2MonthRange(firstMk, curMk)') && !html.includes("ap2MonthRange(firstMk.slice(0, 4)"),
+    alfa_portfoy_donut_cash_color: html.includes("color: '#64748b'") && html.includes('.ap2-share-pos-dot" style="background:#64748b'),
+    alfa_portfoy_share_canvas_dom: html.includes('card.getBoundingClientRect') && html.includes("'SON AYLAR (%)', pad"),
+    alfa_portfoy_tg_btn: html.includes('ap2-share-tg') && html.includes('ap2TgNotify'),
+    alfa_portfoy_tg_daily: html.includes('ap2TgDaily') && html.includes('ap2_tg_last'),
+    alfa_portfoy_tg_endpoint: html.includes('/api/telegram-notify'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {
