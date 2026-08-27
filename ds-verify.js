@@ -16,8 +16,9 @@ function fetchText(u, headers) {
   const botAt = await fetchText('https://alfa-trader.com/?page=alfatrading', { 'User-Agent': 'TelegramBot (like TwitterBot)' });
   const marks = {
     APP_BUILD_b85: html.includes("APP_BUILD = 'b85'"),
+    APP_BUILD_b86: html.includes("APP_BUILD = 'b86'"),
     og_title_static: html.includes('Alfa Traders — Konfirmasyon Defteri'),
-    og_not_old: html.includes("APP_BUILD = 'b85'"),
+    og_not_old: html.includes("APP_BUILD = 'b86'"),
     og_image_static: html.includes('alfa-trader.com/og.png'),
     bot_og_title: botHome.includes('<title>Alfa Traders — Konfirmasyon Defteri</title>'),
     bot_og_page: botAt.includes('og:title" content="Alfa Traders — Alfa Trading"') && botAt.includes('og:description" content="Alfa Trading — analiz ve işlem paylaşım akışı'),
@@ -64,6 +65,7 @@ function fetchText(u, headers) {
     alfa_portfoy_sell_hist: html.includes('id="ap2-sell-hist"'),
     alfa_portfoy_cash_hero: html.includes('data-accent="pc"'),
     sw_b85: sw.includes("'b85'"),
+    sw_b86: sw.includes("'b86'"),
     alfa_portfoy_render_fix: html.includes("if (bdTab === 'alfaportfoy') {") && html.includes('ap2IsMember'),
     alfa_portfoy_autoprice: html.includes('function ap2LoadPrices'),
     alfa_portfoy_share_card: html.includes('ap2-share-card'),
@@ -81,6 +83,12 @@ function fetchText(u, headers) {
     alfa_portfoy_cloud_sync: html.includes('ap2SyncCloud') && html.includes('ap2FetchCloud'),
     alfa_portfoy_cloud_render: html.includes('ap2RenderTeaserTarget') && html.includes('ap2-sum-sm-lbl'),
     alfa_portfoy_monthly: html.includes('ap2RenderMonthly') && html.includes('ap2-monthly-body') && html.includes('ap2MonthKey'),
+    alfa_portfoy_monthly_full: html.includes('ap2MonthRange') && html.includes('ap2-mn-grid') && html.includes('ap2-monthly-this'),
+    alfa_portfoy_monthly_chart: html.includes('ap2-mn-chart') && html.includes('barRows'),
+    alfa_portfoy_chart_range: html.includes('ap2-chart-range') && html.includes('ap2ChartRange') && html.includes('ap2ChartWindow'),
+    alfa_portfoy_share_png_copy: html.includes('ap2ShareCanvas') && html.includes('ClipboardItem') && html.includes('ap2ShareCopyText'),
+    alfa_portfoy_share_pie: html.includes('ap2-share-pie') && html.includes('ap2ShareMonthlyStrip'),
+    alfa_portfoy_share_start: html.includes('shareStartTxt') && html.includes('Ba\\u015flang\\u0131\\u00e7'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

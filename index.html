@@ -1940,6 +1940,14 @@
   .ap2-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .ap2-chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
   .ap2-chart-change { font-size: 13px; font-weight: 700; }
+  .ap2-chart-range { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .ap2-chart-range button { flex: 1; min-width: 52px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; padding: 5px 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); color: var(--text-3); cursor: pointer; transition: all .15s; }
+  .ap2-chart-range button:hover { border-color: var(--pc); color: var(--pc); }
+  .ap2-chart-range button.on { background: var(--pc); border-color: var(--pc); color: #fff; }
+  .ap2-monthly-this { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; }
+  .ap2-monthly-this.pos { background: rgba(16,185,129,.14); color: var(--green); }
+  .ap2-monthly-this.neg { background: rgba(239,68,68,.14); color: var(--red); }
+  .ap2-monthly-this.zero { background: var(--bg-2); color: var(--text-3); }
   .ap2-chart-canvas { width: 100%; height: 120px; position: relative; }
   .ap2-chart-canvas svg { width: 100%; height: 100%; }
   .ap2-monthly { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
@@ -1958,6 +1966,21 @@
   .ap2-monthly-row .neg { color: var(--red); }
   .ap2-monthly-empty { font-size: 12px; color: var(--text-3); padding: 14px 0; text-align: center; }
   .ap2-monthly-note { font-size: 10px; color: var(--text-3); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); line-height: 1.5; }
+  .ap2-mn-chart { margin-bottom: 14px; }
+  .ap2-mn-chart-title { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+  .ap2-mn-chart svg { display: block; }
+  .ap2-mn-chart-labels { display: flex; gap: 4px; margin-top: 4px; font-size: 9px; color: var(--text-3); font-weight: 700; }
+  .ap2-mn-chart-labels span { flex: 1; text-align: center; overflow: hidden; white-space: nowrap; }
+  .ap2-mn-net { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ap2-mn-net > div { flex: 1; min-width: 110px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
+  .ap2-mn-net span { display: block; font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; font-weight: 700; margin-bottom: 2px; }
+  .ap2-mn-net b { font-size: 13px; color: var(--text); }
+  .ap2-mn-lock-title { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+  .ap2-mn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .ap2-mn-openclose { font-size: 10.5px; color: var(--text-3); margin-top: 3px; }
+  .ap2-mn-openclose b { color: var(--text); font-weight: 700; }
+  .ap2-mn-act { font-size: 10.5px; color: var(--text-3); margin-top: 3px; }
+  .ap2-mn-grid .ap2-monthly-row { border-top: none; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--bg-2); align-items: flex-start; }
   .ap2-share-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 20px; color: #f8fafc; }
   .ap2-share-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
   .ap2-share-brand { font-size: 13px; font-weight: 700; color: #94a3b8; letter-spacing: .5px; }
@@ -1966,7 +1989,21 @@
   .ap2-share-pnl { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
   .ap2-share-pnl.pos { color: #34d399; }
   .ap2-share-pnl.neg { color: #f87171; }
-  .ap2-share-positions { display: flex; flex-direction: column; gap: 6px; }
+  .ap2-share-positions { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+  .ap2-share-split { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 4px; }
+  .ap2-share-pie { position: relative; flex-shrink: 0; }
+  .ap2-share-pie svg { display: block; }
+  .ap2-share-pie-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: 13px; font-weight: 800; color: #f8fafc; line-height: 1.1; }
+  .ap2-share-pie-center span { display: block; font-size: 8px; font-weight: 600; color: #64748b; }
+  .ap2-share-monthly { margin-top: 12px; }
+  .ap2-share-monthly-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+  .ap2-share-monthly-cells { display: flex; gap: 6px; }
+  .ap2-share-mn-cell { flex: 1; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 6px 4px; text-align: center; }
+  .ap2-share-mn-cell span { display: block; font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+  .ap2-share-mn-cell b { display: block; font-size: 11px; font-weight: 800; margin-top: 2px; }
+  .ap2-share-mn-cell.pos b { color: #34d399; }
+  .ap2-share-mn-cell.neg b { color: #f87171; }
+  .ap2-share-mn-cell.zero b { color: #94a3b8; }
   .ap2-share-pos { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); }
   .ap2-share-pos-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .ap2-share-pos-name { flex: 1; font-size: 12px; font-weight: 600; color: #cbd5e1; }
@@ -5931,6 +5968,12 @@
               <span class="ap2-chart-title">📈 Büyüme</span>
               <span class="ap2-chart-change" id="ap2-chart-change"></span>
             </div>
+            <div class="ap2-chart-range" id="ap2-chart-range">
+              <button type="button" class="on" data-ap2r="today">Bugün</button>
+              <button type="button" data-ap2r="week">Bu Hafta</button>
+              <button type="button" data-ap2r="month">Bu Ay</button>
+              <button type="button" data-ap2r="all">Tümü</button>
+            </div>
             <div id="ap2-chart-meta" style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
               <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Başlangıç</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-start">—</div></div>
               <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Süre</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-duration">—</div></div>
@@ -5941,14 +5984,15 @@
             </div>
           </div>
           <div id="ap2-share-area"></div>
-          <div class="ap2-monthly" id="ap2-monthly">
-            <div class="ap2-monthly-head" id="ap2-monthly-head">
-              <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Aylık Performans</span>
-              <span class="ap2-monthly-caret" id="ap2-monthly-caret">▾</span>
-            </div>
-            <div class="ap2-monthly-body" id="ap2-monthly-body" style="display:none"></div>
-          </div>
         </div>
+      </div>
+      <div class="ap2-monthly" id="ap2-monthly">
+        <div class="ap2-monthly-head" id="ap2-monthly-head">
+          <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Aylık Performans</span>
+          <span class="ap2-monthly-this" id="ap2-monthly-this"></span>
+          <span class="ap2-monthly-caret" id="ap2-monthly-caret">▾</span>
+        </div>
+        <div class="ap2-monthly-body" id="ap2-monthly-body" style="display:none"></div>
       </div>
       <div id="ap2-form" class="strat-form hidden">
         <div class="strat-form-head">
@@ -15439,6 +15483,17 @@ function ap2RenderDonut(slices, total) {
     }).join('');
   }
 }
+function ap2ChartWindow(hist, sel) {
+  if (!hist || !hist.length || !sel || sel === 'all') return hist;
+  if (sel === 'today') { return hist.slice(-2); }
+  var now = new Date();
+  var startDay = null;
+  if (sel === 'week') { var tw = new Date(now); tw.setDate(tw.getDate() - 6); startDay = tw.toISOString().slice(0, 10); }
+  else if (sel === 'month') { var tm = new Date(now); tm.setDate(tm.getDate() - 29); startDay = tm.toISOString().slice(0, 10); }
+  if (!startDay) return hist;
+  var out = hist.filter(function(h) { return h.d >= startDay; });
+  return out.length >= 2 ? out : hist.slice(-2);
+}
 function ap2RenderChart(hist) {
   var svgEl = document.getElementById('ap2-chart-svg');
   var changeEl = document.getElementById('ap2-chart-change');
@@ -15453,6 +15508,9 @@ function ap2RenderChart(hist) {
   if (startEl) startEl.textContent = firstDate ? new Date(firstDate).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}) : '—';
   if (durEl) durEl.textContent = daysSince > 0 ? daysSince + ' gün' : '—';
   if (cumEl) { cumEl.textContent = (sum.pnl>=0?'+':'') + pfPct(sum.pnlPct); cumEl.style.color = sum.pnl>=0?'var(--green)':'var(--red)'; }
+  var rangeSel = ap2ChartRange || 'all';
+  var windowed = ap2ChartWindow(hist, rangeSel);
+  if (windowed.length >= 2) hist = windowed;
   if (!hist || hist.length < 2) {
     svgEl.innerHTML = '<text x="140" y="75" text-anchor="middle" fill="var(--text-3)" font-size="12" font-weight="600">Gecmis verisi yok</text>';
     if (changeEl) changeEl.textContent = '';
@@ -15491,6 +15549,7 @@ function ap2RenderChart(hist) {
   }
 }
 var ap2MonthlyOpen = false;
+var ap2ChartRange = 'today';
 function ap2MonthKey(ts) {
   var d = new Date(ts);
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -15500,10 +15559,20 @@ function ap2MonthLabel(mk) {
   var d = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
   return d.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
 }
+function ap2MonthRange(startMk, endMk) {
+  var out = [], p = String(startMk).split('-').map(Number), e = String(endMk).split('-').map(Number);
+  var y = p[0], m = p[1];
+  while (y < e[0] || (y === e[0] && m <= e[1])) {
+    out.push(y + '-' + String(m).padStart(2, '0'));
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  return out;
+}
 function ap2RenderMonthly() {
   var body = document.getElementById('ap2-monthly-body');
   var el = document.getElementById('ap2-monthly');
   var caret = document.getElementById('ap2-monthly-caret');
+  var thisEl = document.getElementById('ap2-monthly-this');
   if (!body) return;
   if (!ap2IsMember()) return;
   if (el) el.classList.toggle('open', ap2MonthlyOpen);
@@ -15517,21 +15586,46 @@ function ap2RenderMonthly() {
   var sells = ap2Data.sells || [];
   var sum = ap2Summary();
   var now = Date.now();
+  var curMk = ap2MonthKey(now);
 
   var histByMonth = {};
+  var monthOpenVal = null;
+  var curMonthOpen = null, curMonthClose = null;
   hist.forEach(function(h) {
-    var mk = ap2MonthKey(new Date(String(h.d).slice(0, 10) + 'T12:00:00').getTime());
+    var t = new Date(String(h.d).slice(0, 10) + 'T12:00:00').getTime();
+    var mk = ap2MonthKey(t);
     if (!histByMonth[mk]) histByMonth[mk] = [];
     histByMonth[mk].push(h.v);
+    if (mk === curMk) { curMonthClose = h.v; if (curMonthOpen === null) curMonthOpen = h.v; }
   });
+  if (curMonthClose === null) curMonthClose = sum.portfolioValue;
+
+  var thisPct = (curMonthOpen !== null && curMonthOpen > 0) ? (sum.portfolioValue - curMonthOpen) / curMonthOpen * 100 : null;
+  var thisDollars = (curMonthOpen !== null && curMonthOpen > 0) ? sum.portfolioValue - curMonthOpen : null;
+  if (thisEl) {
+    if (thisDollars !== null && thisDollars !== 0) {
+      thisEl.textContent = 'Bu ay ' + (thisDollars >= 0 ? '+' : '') + ap2Fmt(thisDollars) + ' (' + (thisPct >= 0 ? '+' : '') + thisPct.toFixed(2) + '%)';
+      thisEl.className = 'ap2-monthly-this ' + (thisDollars >= 0 ? 'pos' : 'neg');
+    } else if (thisDollars === 0) {
+      thisEl.textContent = 'Bu ay 0';
+      thisEl.className = 'ap2-monthly-this zero';
+    } else {
+      thisEl.textContent = '';
+      thisEl.className = 'ap2-monthly-this';
+    }
+  }
 
   var posByMonth = {};
   positions.forEach(function(p) {
-    var mk = ap2MonthKey(new Date(String(p.date || '').slice(0, 10) + 'T12:00:00').getTime());
-    if (!mk || isNaN(new Date(String(p.date).slice(0, 10)).getTime())) return;
-    if (!posByMonth[mk]) posByMonth[mk] = { count: 0, invested: 0 };
+    var d = new Date(String(p.date || '').slice(0, 10) + 'T12:00:00');
+    if (isNaN(d.getTime())) return;
+    var mk = ap2MonthKey(d.getTime());
+    if (!posByMonth[mk]) posByMonth[mk] = { count: 0, invested: 0, cost: 0, value: 0 };
     posByMonth[mk].count++;
-    posByMonth[mk].invested += (Number(p.qty) || 0) * (Number(p.cost) || 0);
+    var c = ap2Calc(p);
+    posByMonth[mk].invested += c.totalCost;
+    posByMonth[mk].cost += c.totalCost;
+    posByMonth[mk].value += (c.value !== null ? c.value : c.totalCost);
   });
   var sellByMonth = {};
   sells.forEach(function(s) {
@@ -15541,73 +15635,115 @@ function ap2RenderMonthly() {
     sellByMonth[mk].proceeds += Number(s.amount) || 0;
   });
 
-  var months = {};
-  Object.keys(histByMonth).forEach(function(mk) { months[mk] = true; });
-  Object.keys(posByMonth).forEach(function(mk) { months[mk] = true; });
-  Object.keys(sellByMonth).forEach(function(mk) { months[mk] = true; });
-  var curMk = ap2MonthKey(now);
-  if (!months[curMk] && (positions.length || sells.length || hist.length)) months[curMk] = true;
-  var keys = Object.keys(months).sort();
+  var allMk = {};
+  Object.keys(histByMonth).forEach(function(mk) { allMk[mk] = true; });
+  Object.keys(posByMonth).forEach(function(mk) { allMk[mk] = true; });
+  Object.keys(sellByMonth).forEach(function(mk) { allMk[mk] = true; });
 
-  if (!keys.length) {
+  var firstMk = null;
+  Object.keys(allMk).forEach(function(mk) { if (!firstMk || mk < firstMk) firstMk = mk; });
+  if (!firstMk) {
     body.innerHTML = '<div class="ap2-monthly-empty">Henüz aylık veri yok — enstrüman ekle, zamanla ay ay performans burada birikir.</div>';
     return;
   }
 
-  var rows = keys.map(function(mk) {
-    var hv = histByMonth[mk] || [];
+  var flatKeys = [];
+  var mkList = ap2MonthRange(firstMk.slice(0, 4) + '-01', curMk);
+
+  var rows = mkList.map(function(mk) {
+    var hv = (histByMonth[mk] || []).sort(function(a, b) { return a - b; });
     var open = hv.length ? hv[0] : null;
-    var close = hv.length ? hv[hv.length - 1] : null;
-    var ret = (open !== null && open > 0) ? ((close - open) / open * 100) : null;
-    var pos = posByMonth[mk] || { count: 0, invested: 0 };
-    var sl = sellByMonth[mk] || { count: 0, proceeds: 0 };
+    var close = hv.length ? hv[hv.length - 1] : (mk === curMk ? sum.portfolioValue : null);
+    if (mk !== curMk && !hv.length) { open = null; close = null; }
+    var ret = (open !== null && open > 0 && close !== null) ? ((close - open) / open * 100) : null;
+    var dollars = (open !== null && close !== null) ? close - open : null;
+    var pos = posByMonth[mk];
+    var sl = sellByMonth[mk];
+    var hasActivity = !!pos || !!sl;
     var isCurrent = mk === curMk;
-    return { mk: mk, open: open, close: close, ret: ret, pos: pos, sl: sl, hv: hv.length, isCurrent: isCurrent };
-  }).reverse();
+    return { mk: mk, open: open, close: close, ret: ret, dollars: dollars, pos: pos, sl: sl, hv: hv.length, hasActivity: hasActivity, isCurrent: isCurrent };
+  });
+
+  var emptyRows = rows.filter(function(r) { return !r.hasActivity && r.hv === 0 && !r.isCurrent; });
+  var hasAnyOld = emptyRows.length > 0 && emptyRows.some(function(r) { return r.mk < curMk; });
 
   var maxAbs = 1;
   rows.forEach(function(r) { if (r.ret !== null) maxAbs = Math.max(maxAbs, Math.abs(r.ret)); });
 
-  body.innerHTML = rows.map(function(r) {
-    var label = ap2MonthLabel(r.mk) + (r.isCurrent ? ' (bu ay)' : '');
+  var rowsHtml = rows.map(function(r) {
+    var label = ap2MonthLabel(r.mk) + (r.isCurrent ? ' <span style="font-weight:400;color:var(--text-3);font-size:10px">(bu ay)</span>' : '');
     var retTxt, retCls, retFill;
     if (r.ret === null) {
-      retTxt = '—';
-      retCls = '';
-      retFill = '0%';
+      retTxt = (r.hasActivity ? '—' : '');
+      retCls = 'zero';
+      retFill = '';
     } else {
       var abs = Math.min(100, Math.abs(r.ret) / maxAbs * 100);
       retTxt = (r.ret >= 0 ? '+' : '') + r.ret.toFixed(2) + '%';
       retCls = r.ret >= 0 ? 'pos' : 'neg';
-      retFill = abs + '%';
       retFill = 'width:' + abs + '%;background:' + (r.ret >= 0 ? 'var(--green)' : 'var(--red)');
     }
     var detail = '';
-    if (r.hv && r.open !== null) {
-      detail += '<div style="font-size:10.5px;color:var(--text-3)">Açılış <span style="color:var(--text);font-weight:700">' + ap2Fmt(r.open) + '</span> · Kapanış <span style="color:var(--text);font-weight:700">' + ap2Fmt(r.close) + '</span></div>';
+    if (r.open !== null && r.close !== null) {
+      detail += '<div class="ap2-mn-openclose">Açılış <b>' + ap2Fmt(r.open) + '</b> → Kapanış <b>' + ap2Fmt(r.close) + '</b>' + (r.dollars !== null ? ' <span class="' + retCls + '" style="font-weight:700">' + (r.dollars >= 0 ? '+' : '') + ap2Fmt(r.dollars) + '</span>' : '') + '</div>';
     }
-    if (r.pos.count || r.sl.count) {
+    if (r.pos || r.sl) {
       var bits = [];
-      if (r.pos.count) bits.push(r.pos.count + ' alım · $' + Math.round(r.pos.invested));
-      if (r.sl.count) bits.push(r.sl.count + ' satış · $' + Math.round(r.sl.proceeds));
-      detail += '<div style="font-size:10.5px;color:var(--text-3)">' + bits.join(' &middot; ') + '</div>';
+      if (r.pos && r.pos.count) bits.push(r.pos.count + ' alım · ' + ap2Fmt(r.pos.invested));
+      if (r.sl && r.sl.count) bits.push(r.sl.count + ' satış · ' + ap2Fmt(r.sl.proceeds));
+      detail += '<div class="ap2-mn-act">' + bits.join(' &middot; ') + '</div>';
     }
     return '<div class="ap2-monthly-row">' +
       '<div style="min-width:0;flex:1">' +
-        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="ap2-monthly-m">' + label + '</span><span class="' + retCls + '" style="font-weight:800;font-size:12.5px">' + retTxt + '</span></div>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="ap2-monthly-m">' + label + '</span><span class="' + retCls + '" style="font-weight:800;font-size:12.5px">' + retTxt + '</span></div>' +
         '<div class="ap2-monthly-radar" style="margin-top:5px"><div class="ap2-monthly-radar-fill" style="' + retFill + '"></div></div>' +
         detail +
       '</div>' +
     '</div>';
   }).join('');
 
-  var histLen = hist.length;
-  if (histLen >= 90) {
-    var note = document.createElement('div');
-    note.className = 'ap2-monthly-note';
-    note.textContent = 'Not: Aylık geçmiş 90 günlük kayıtla sınırlı; daha önceki aylar yalnızca alım/satış aktivitesiyle gösterilir.';
-    body.appendChild(note);
+  var barChart = '';
+  var barRows = rows.filter(function(r) { return r.ret !== null; });
+  if (barRows.length > 1) {
+    var bw = 300, bh = 80, bpad = 16;
+    var bmin = 0, bmax = 0;
+    barRows.forEach(function(r) { bmin = Math.min(bmin, r.ret); bmax = Math.max(bmax, r.ret); });
+    var bRange = (bmax - bmin) || 1;
+    var bZero = bpad + (bmax / bRange) * (bh - bpad * 2);
+    var barW = 18, gapX = (bw - 40) / barRows.length;
+    var bars = barRows.map(function(r, i) {
+      var valH = Math.max(1.5, Math.abs(r.ret) / bRange * (bh - bpad * 2));
+      var x = 18 + gapX * i + (gapX - barW) / 2;
+      var y = r.ret >= 0 ? bZero - valH : bZero;
+      var col = r.ret >= 0 ? '#10b981' : '#ef4444';
+      var lbl = r.ret.toFixed(0);
+      return '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + valH + '" rx="3" fill="' + col + '" opacity=".85"></rect>' +
+        '<text x="' + (x + barW / 2) + '" y="' + (r.ret >= 0 ? y - 3 : y + valH + 9) + '" text-anchor="middle" font-size="7" font-weight="700" fill="' + col + '">' + lbl + '</text>';
+    }).join('');
+    barChart = '<div class="ap2-mn-chart"><div class="ap2-mn-chart-title">Aylık getiri (%)</div>' +
+      '<svg viewBox="0 0 ' + bw + ' ' + bh + '" preserveAspectRatio="none" style="width:100%;height:' + bh + 'px">' +
+      '<line x1="' + bpad + '" y1="' + bZero + '" x2="' + (bw - bpad) + '" y2="' + bZero + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3"></line>' + bars + '</svg>' +
+      '<div class="ap2-mn-chart-labels">' + barRows.map(function(r) { var lbl = ap2MonthLabel(r.mk).split(' ')[0]; return '<span>' + lbl + '</span>'; }).join('') + '</div>' +
+      '</div>';
   }
+
+  var gridTitle = 'Aylar (Ocak → Bugün)';
+  var emptyNote = hasAnyOld ? '<div class="ap2-monthly-note">Geçmiş aylar için günlük değer kaydı bulunmadığından getiri hesaplanamadı — alım/satış aktivitesi gösteriliyor.</div>' : '';
+  var grid = '<div class="ap2-mn-lock-title">' + gridTitle + '</div><div class="ap2-mn-grid">' + rowsHtml + '</div>' + emptyNote;
+
+  var netHeader = '';
+  var totalInvested = Object.keys(posByMonth).reduce(function(s, k) { return s + posByMonth[k].invested; }, 0);
+  var totalProceeds = Object.keys(sellByMonth).reduce(function(s, k) { return s + sellByMonth[k].proceeds; }, 0);
+  if (totalInvested || totalProceeds || sum.count) {
+    netHeader = '<div class="ap2-mn-net">' +
+      '<div><span>Toplam yatırım</span><b>' + ap2Fmt(totalInvested) + '</b></div>' +
+      '<div><span>Toplam satış</span><b>' + ap2Fmt(totalProceeds) + '</b></div>' +
+      '<div><span>Enstrüman</span><b>' + sum.count + '</b></div>' +
+      '<div><span>Başlangıç</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
+    '</div>';
+  }
+
+  body.innerHTML = barChart + netHeader + grid;
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
@@ -15659,6 +15795,8 @@ function renderAlfaPortfoy2() {
   if (chartPanel) chartPanel.style.display = '';
   ap2RenderDonut(slices, sum.portfolioValue);
   try { var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); ap2RenderChart(hist); } catch (e) { ap2RenderChart([]); }
+  var rngBtns = document.querySelectorAll('#ap2-chart-range button');
+  if (rngBtns.length) rngBtns.forEach(function(b) { b.classList.toggle('on', (b.getAttribute('data-ap2r') || 'all') === ap2ChartRange); });
   var hasTargets = positions.some(function(p) { return p.target != null && p.target > 0; });
   if (rebalEl) rebalEl.style.display = hasTargets ? '' : 'none';
   gridEl.innerHTML = positions.map(function(p) {
@@ -15744,6 +15882,25 @@ function renderAlfaPortfoy2() {
       '</div>';
   }
   var shareDate = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  var shareStartDate = positions.length ? positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity) : Date.now();
+  var shareStartTxt = isNaN(shareStartDate) ? '—' : new Date(shareStartDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+  var shareDonutPaths = '';
+  var shareSlices = slices.slice(0, 6);
+  var shareCum = 0;
+  shareSlices.forEach(function(sl) {
+    var pct = sum.portfolioValue > 0 ? sl.val / sum.portfolioValue : 0;
+    if (pct < 0.005) return;
+    var sa = shareCum * Math.PI * 2;
+    shareCum += pct;
+    var ea = shareCum * Math.PI * 2;
+    var lf = pct > 0.5 ? 1 : 0;
+    var r = 36;
+    var x1 = 42 + r * Math.cos(sa), y1 = 42 + r * Math.sin(sa);
+    var x2 = 42 + r * Math.cos(ea), y2 = 42 + r * Math.sin(ea);
+    shareDonutPaths += '<path d="M42,42 L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + lf + ',1 ' + x2 + ',' + y2 + ' Z" fill="' + sl.color + '" opacity="0.9"/>';
+  });
+  var sharePie = '<div class="ap2-share-pie"><svg viewBox="0 0 84 84" style="width:84px;height:84px">' + shareDonutPaths + '</svg><div class="ap2-share-pie-center">' + sum.count + '<span>varlık</span></div></div>';
+  var shareMonthlyStrip = ap2ShareMonthlyStrip();
   var shareHtml =
     '<div class="ap2-share-card">' +
       '<div class="ap2-share-top">' +
@@ -15752,13 +15909,18 @@ function renderAlfaPortfoy2() {
       '</div>' +
       '<div class="ap2-share-total">' + ap2Fmt(sum.portfolioValue) + '</div>' +
       '<div class="ap2-share-pnl ' + (sum.pnl >= 0 ? 'pos' : 'neg') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')</div>' +
-      '<div class="ap2-share-positions">' + sharePosHtml + '</div>' +
+      '<div class="ap2-share-split">' +
+        '<div class="ap2-share-positions">' + sharePosHtml + '</div>' +
+        sharePie +
+      '</div>' +
+      shareMonthlyStrip +
       '<div class="ap2-share-footer">' +
         '<span>' + sum.count + ' enstr\u00fcman</span>' +
+        '<span>Ba\u015flang\u0131\u00e7: ' + shareStartTxt + '</span>' +
         '<span>' + shareDate + '</span>' +
       '</div>' +
       '<div class="ap2-share-actions">' +
-        '<button type="button" id="ap2-share-copy" title="Metin olarak kopyala"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Kopyala</button>' +
+        '<button type="button" id="ap2-share-copy" title="Görsel olarak panoya kopyala"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Kopyala</button>' +
         '<button type="button" id="ap2-share-dl" title="Görsel olarak kaydet"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Kaydet</button>' +
         '<button type="button" id="ap2-share-native" title="Paylaş"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş</button>' +
       '</div>' +
@@ -15866,9 +16028,183 @@ async function ap2LoadPrices() {
   ap2Pricing = false;
   renderAlfaPortfoy2();
 }
+function ap2ShareMonthlyStrip() {
+  var hist = [];
+  try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch (e) {}
+  var now = Date.now();
+  var curMk = ap2MonthKey(now);
+  var byMonth = {};
+  hist.forEach(function(h) {
+    var mk = ap2MonthKey(new Date(String(h.d).slice(0, 10) + 'T12:00:00').getTime());
+    if (!byMonth[mk]) byMonth[mk] = [];
+    byMonth[mk].push(h.v);
+  });
+  var mks = Object.keys(byMonth).sort();
+  var lastMonths = mks.slice(-6);
+  if (!lastMonths.length) return '';
+  var sum = ap2Summary();
+  var cells = lastMonths.map(function(mk) {
+    var hv = byMonth[mk].sort(function(a, b) { return a - b; });
+    var open = hv[0], close = mk === curMk ? sum.portfolioValue : hv[hv.length - 1];
+    var ret = open > 0 ? (close - open) / open * 100 : null;
+    var lbl = ap2MonthLabel(mk).split(' ')[0];
+    var cls = ret === null ? 'zero' : ret >= 0 ? 'pos' : 'neg';
+    var txt = ret === null ? '—' : (ret >= 0 ? '+' : '') + ret.toFixed(0) + '%';
+    return '<div class="ap2-share-mn-cell ' + cls + '"><span>' + lbl + '</span><b>' + txt + '</b></div>';
+  }).join('');
+  return '<div class="ap2-share-monthly"><div class="ap2-share-monthly-title">Son aylar (%)</div><div class="ap2-share-monthly-cells">' + cells + '</div></div>';
+}
+function ap2ShareCanvas() {
+  var sum = ap2Summary();
+  var canvas = document.createElement('canvas');
+  var w = 520, h = 760;
+  canvas.width = w * 2; canvas.height = h * 2;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  var grd = ctx.createLinearGradient(0, 0, w, h);
+  grd.addColorStop(0, '#0f172a'); grd.addColorStop(0.5, '#1e293b'); grd.addColorStop(1, '#0f172a');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#94a3b8'; ctx.font = '700 13px Inter, sans-serif';
+  ctx.fillText('ALFA PORTFOY', 24, 42);
+  ctx.fillStyle = '#64748b'; ctx.font = '400 11px Inter, sans-serif';
+  ctx.fillText(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), w - 190, 42);
+  ctx.fillStyle = '#f8fafc'; ctx.font = '800 30px Inter, sans-serif';
+  ctx.fillText(ap2Fmt(sum.portfolioValue), 24, 82);
+  ctx.fillStyle = sum.pnl >= 0 ? '#34d399' : '#f87171'; ctx.font = '700 14px Inter, sans-serif';
+  ctx.fillText((sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')', 24, 106);
+  var positions = ap2Data.positions || [];
+  var firstDate = positions.length ? positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity) : Date.now();
+  ctx.fillStyle = '#64748b'; ctx.font = '400 10px Inter, sans-serif';
+  ctx.fillText('Başlangıç: ' + (isNaN(firstDate) ? '—' : new Date(firstDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })), w - 190, 62);
+  var slices = [];
+  var groupMap = {};
+  positions.forEach(function(p, i) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    if (val <= 0) return;
+    var key = p.symbol;
+    if (!groupMap[key]) groupMap[key] = { val: 0, color: AP2_COLORS[i % AP2_COLORS.length], symbol: p.symbol };
+    groupMap[key].val += val;
+  });
+  if (sum.cash > 0) groupMap['USDT'] = { val: sum.cash, color: '#22c55e', symbol: 'USDT' };
+  Object.keys(groupMap).forEach(function(k) { slices.push(groupMap[k]); });
+  slices.sort(function(a, b) { return b.val - a.val; });
+  var pieCX = 452, pieCY = 100, pieR = 44;
+  var cumShare = 0;
+  slices.forEach(function(sl) {
+    var pct = sum.portfolioValue > 0 ? sl.val / sum.portfolioValue : 0;
+    if (pct < 0.005) return;
+    var sa = cumShare * Math.PI * 2 - Math.PI / 2;
+    cumShare += pct;
+    var ea = cumShare * Math.PI * 2 - Math.PI / 2;
+    var lf = pct > 0.5 ? 1 : 0;
+    ctx.beginPath();
+    ctx.moveTo(pieCX, pieCY);
+    ctx.arc(pieCX, pieCY, pieR, sa, ea);
+    ctx.closePath();
+    ctx.fillStyle = sl.color;
+    ctx.globalAlpha = 0.9;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+  ctx.strokeStyle = 'rgba(255,255,255,.15)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(pieCX, pieCY, pieR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = '#cbd5e1'; ctx.font = '700 16px Inter, sans-serif';
+  ctx.fillText(String(sum.count), pieCX, pieCY + 1);
+  ctx.fillStyle = '#64748b'; ctx.font = '400 9px Inter, sans-serif';
+  ctx.fillText('varlık', pieCX, pieCY + 15);
+  var chartY = 130;
+  try {
+    var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
+    if (hist.length >= 2) {
+      var vals = hist.map(function(h) { return h.v; });
+      var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+      var range = mx - mn || 1;
+      var cw = w - 48, ch = 55, pad = 2;
+      var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (cw - pad * 2), y: pad + (1 - (v - mn) / range) * (ch - pad * 2) }; });
+      var lineD = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+      var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
+      ctx.save();
+      ctx.beginPath();
+      var path2d = new Path2D(lineD);
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.translate(24, chartY);
+      ctx.stroke(path2d);
+      ctx.restore();
+      var lastPt = pts[pts.length - 1];
+      ctx.fillStyle = lineColor;
+      ctx.beginPath(); ctx.arc(24 + lastPt.x, chartY + lastPt.y, 3, 0, Math.PI * 2); ctx.fill();
+      chartY += ch + 10;
+    }
+  } catch (e) {}
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 14;
+  (positions).forEach(function(p) {
+    var c = ap2Calc(p);
+    var val = c.value !== null ? c.value : c.totalCost;
+    var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText(p.symbol, 42, chartY + 8);
+    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(val), w - 140, chartY + 8);
+    if (c.pnlPct !== null) { ctx.fillStyle = c.pnlPct >= 0 ? '#34d399' : '#f87171'; ctx.fillText(pfPct(c.pnlPct), w - 60, chartY + 8); }
+    chartY += 26;
+  });
+  if (sum.cash > 0) {
+    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye (USDT)', 42, chartY + 8);
+    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(sum.cash), w - 140, chartY + 8);
+    chartY += 26;
+  }
+  chartY += 8;
+  var hist2 = [];
+  try { hist2 = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch (e) {}
+  var byMonth = {};
+  hist2.forEach(function(h) { var mk = ap2MonthKey(new Date(String(h.d).slice(0, 10) + 'T12:00:00').getTime()); if (!byMonth[mk]) byMonth[mk] = []; byMonth[mk].push(h.v); });
+  var mks = Object.keys(byMonth).sort().slice(-6);
+  if (mks.length) {
+    ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 14;
+    ctx.fillStyle = '#64748b'; ctx.font = '700 10px Inter, sans-serif';
+    ctx.fillText('SON AYLAR (%)', 24, chartY); chartY += 14;
+    mks.forEach(function(mk) {
+      var hv = byMonth[mk].slice().sort(function(a, b) { return a - b; });
+      var curMk = ap2MonthKey(Date.now());
+      var open = hv[0], close = mk === curMk ? sum.portfolioValue : hv[hv.length - 1];
+      var ret = open > 0 ? (close - open) / open * 100 : null;
+      ctx.fillStyle = '#94a3b8'; ctx.font = '600 11px Inter, sans-serif';
+      ctx.fillText(ap2MonthLabel(mk), 32, chartY + 5);
+      ctx.fillStyle = ret === null ? '#64748b' : ret >= 0 ? '#34d399' : '#f87171';
+      ctx.font = '700 11px Inter, sans-serif';
+      ctx.fillText(ret === null ? '—' : (ret >= 0 ? '+' : '') + ret.toFixed(1) + '%', 130, chartY + 5);
+      chartY += 22;
+    });
+    chartY += 8;
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 16;
+  ctx.fillStyle = '#475569'; ctx.font = '400 10px Inter, sans-serif';
+  ctx.fillText(sum.count + ' enstrüman', 24, chartY);
+  ctx.fillText('alfa-trader.com', w - 110, chartY);
+  return canvas;
+}
 function ap2ShareCopy() {
   var card = document.querySelector('.ap2-share-card');
   if (!card) return;
+  var canvas = ap2ShareCanvas();
+  try {
+    canvas.toBlob(function(blob) {
+      if (!blob) { ap2ShareCopyText(); return; }
+      var item = new ClipboardItem({ 'image/png': blob });
+      navigator.clipboard.write([item]).then(function() { stratToast('Görsel kopyalandı!'); }).catch(function() { ap2ShareCopyText(); });
+    }, 'image/png');
+  } catch (e) { ap2ShareCopyText(); }
+}
+function ap2ShareCopyText() {
   var sum = ap2Summary();
   var lines = ['ALFA PORTFOY', ''];
   lines.push('Toplam: ' + ap2Fmt(sum.portfolioValue));
@@ -15883,80 +16219,12 @@ function ap2ShareCopy() {
   if (sum.cash > 0) lines.push('Bakiye (USDT): ' + ap2Fmt(sum.cash));
   lines.push('', sum.count + ' enstrüman · ' + new Date().toLocaleDateString('tr-TR'));
   lines.push('alfa-trader.com');
-  navigator.clipboard.writeText(lines.join('\n')).then(function() { stratToast('Kopyalandı!'); }).catch(function() { stratToast('Kopyalanamadı.'); });
+  navigator.clipboard.writeText(lines.join('\n')).then(function() { stratToast('Metin kopyalandı!'); }).catch(function() { stratToast('Kopyalanamadı.'); });
 }
 function ap2ShareDownload() {
   var card = document.querySelector('.ap2-share-card');
   if (!card) return;
-  var sum = ap2Summary();
-  var canvas = document.createElement('canvas');
-  var w = 520, h = 680;
-  canvas.width = w * 2; canvas.height = h * 2;
-  var ctx = canvas.getContext('2d');
-  ctx.scale(2, 2);
-  var grd = ctx.createLinearGradient(0, 0, w, h);
-  grd.addColorStop(0, '#0f172a'); grd.addColorStop(0.5, '#1e293b'); grd.addColorStop(1, '#0f172a');
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#94a3b8'; ctx.font = '700 13px Inter, sans-serif';
-  ctx.fillText('ALFA PORTFOY', 24, 42);
-  ctx.fillStyle = '#64748b'; ctx.font = '400 11px Inter, sans-serif';
-  ctx.fillText(new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }), w - 140, 42);
-  ctx.fillStyle = '#f8fafc'; ctx.font = '800 30px Inter, sans-serif';
-  ctx.fillText(ap2Fmt(sum.portfolioValue), 24, 82);
-  ctx.fillStyle = sum.pnl >= 0 ? '#34d399' : '#f87171'; ctx.font = '700 14px Inter, sans-serif';
-  ctx.fillText((sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + ' (' + pfPct(sum.pnlPct) + ')', 24, 106);
-  var chartY = 118;
-  try {
-    var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
-    if (hist.length >= 2) {
-      var vals = hist.map(function(h) { return h.v; });
-      var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-      var range = mx - mn || 1;
-      var cw = w - 48, ch = 60, pad = 2;
-      var pts = vals.map(function(v, i) { return { x: pad + (i / (vals.length - 1)) * (cw - pad * 2), y: pad + (1 - (v - mn) / range) * (ch - pad * 2) }; });
-      var lineD = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-      var lineColor = sum.pnl >= 0 ? '#34d399' : '#f87171';
-      var strokeW = 2;
-      ctx.save();
-      ctx.beginPath();
-      var path2d = new Path2D(lineD);
-      ctx.strokeStyle = lineColor;
-      ctx.lineWidth = strokeW;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.translate(24, chartY);
-      ctx.stroke(path2d);
-      ctx.restore();
-      var lastPt = pts[pts.length - 1];
-      ctx.fillStyle = lineColor;
-      ctx.beginPath(); ctx.arc(24 + lastPt.x, chartY + lastPt.y, 3, 0, Math.PI * 2); ctx.fill();
-      chartY += ch + 10;
-    }
-  } catch (e) {}
-  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 14;
-  (ap2Data.positions || []).forEach(function(p) {
-    var c = ap2Calc(p);
-    var val = c.value !== null ? c.value : c.totalCost;
-    var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
-    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText(p.symbol, 42, chartY + 8);
-    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(val), w - 140, chartY + 8);
-    if (c.pnlPct !== null) { ctx.fillStyle = c.pnlPct >= 0 ? '#34d399' : '#f87171'; ctx.fillText(pfPct(c.pnlPct), w - 60, chartY + 8); }
-    chartY += 28;
-  });
-  if (sum.cash > 0) {
-    ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(32, chartY + 4, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.fillText('Bakiye (USDT)', 42, chartY + 8);
-    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillText(ap2Fmt(sum.cash), w - 140, chartY + 8);
-    chartY += 28;
-  }
-  chartY += 12;
-  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(24, chartY); ctx.lineTo(w - 24, chartY); ctx.stroke(); chartY += 16;
-  ctx.fillStyle = '#475569'; ctx.font = '400 10px Inter, sans-serif';
-  ctx.fillText(sum.count + ' enstrüman', 24, chartY);
-  ctx.fillText('alfa-trader.com', w - 110, chartY);
+  var canvas = ap2ShareCanvas();
   canvas.toBlob(function(blob) {
     if (!blob) return;
     var a = document.createElement('a');
@@ -15977,7 +16245,18 @@ function ap2ShareNative() {
   });
   if (sum.cash > 0) text += 'Bakiye (USDT): ' + ap2Fmt(sum.cash) + '\n';
   text += '\nalfa-trader.com';
-  if (navigator.share) {
+  var canvas = ap2ShareCanvas();
+  var sharedCanvas = canvas;
+  if (navigator.share && sharedCanvas && sharedCanvas.toBlob) {
+    sharedCanvas.toBlob(function(blob) {
+      if (!blob || !navigator.canShare || !navigator.canShare({ files: [new File([blob], 'alfa-portfoy.png', { type: 'image/png' })] })) {
+        if (navigator.share) { navigator.share({ title: 'Alfa Portföy', text: text }).catch(function() {}); }
+        else { navigator.clipboard.writeText(text).then(function() { stratToast('Paylaşılamadı, metin kopyalandı!'); }).catch(function() {}); }
+        return;
+      }
+      navigator.share({ files: [new File([blob], 'alfa-portfoy.png', { type: 'image/png' })], title: 'Alfa Portföy', text: text }).catch(function() {});
+    }, 'image/png');
+  } else if (navigator.share) {
     navigator.share({ title: 'Alfa Portföy', text: text }).catch(function() {});
   } else {
     navigator.clipboard.writeText(text).then(function() { stratToast('Paylaşılamadı, metin kopyalandı!'); }).catch(function() {});
@@ -16007,6 +16286,13 @@ function bindAlfaPortfoy2() {
     const ideaEd = e.target.closest('[data-idea-edit]');
     if (ideaEd) { ap2IdeaEdit(ideaEd.getAttribute('data-idea-edit')); return; }
     if (e.target.closest('#ap2-monthly-head')) { ap2MonthlyOpen = !ap2MonthlyOpen; ap2RenderMonthly(); return; }
+    const rBtn = e.target.closest('#ap2-chart-range button');
+    if (rBtn) {
+      ap2ChartRange = rBtn.getAttribute('data-ap2r') || 'all';
+      document.querySelectorAll('#ap2-chart-range button').forEach(b => b.classList.toggle('on', b === rBtn));
+      try { var rh = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); ap2RenderChart(rh); } catch (err) {}
+      return;
+    }
   });
   view.addEventListener('click', e => {
     const chip = e.target.closest('#ap2-f-type .ap2-type-chip');
@@ -22266,7 +22552,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b85';
+const APP_BUILD = 'b86';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
