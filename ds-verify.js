@@ -99,7 +99,7 @@ function fetchText(u, headers) {
     alfa_portfoy_share_canvas_dom: html.includes('card.getBoundingClientRect') && html.includes("'SON AYLAR (%)', pad"),
     alfa_portfoy_tg_btn: html.includes('ap2-share-tg') && html.includes('ap2TgNotify'),
     alfa_portfoy_tg_daily: html.includes('ap2TgDaily') && html.includes('ap2_tg_last'),
-    alfa_portfoy_tg_endpoint: html.includes('/api/telegram-notify'),
+    alfa_portfoy_tg_endpoint: html.includes('/api/tg?notify=1') && html.includes('ap2TgNotify'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

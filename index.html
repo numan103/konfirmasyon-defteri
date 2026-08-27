@@ -16360,7 +16360,7 @@ function ap2TgText() {
   return lines.join('\n');
 }
 function ap2TgNotify(text) {
-  fetch('/api/telegram-notify', {
+  fetch('/api/tg?notify=1', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: text || ap2TgText() })
