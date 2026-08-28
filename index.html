@@ -15416,14 +15416,14 @@ function ap2FormCalc() {
   }
   var lines = [];
   if (total > 0) {
-    lines.push('Toplam harcama: <b>$' + ap2Fmt(total) + '</b>');
-    lines.push('Adet: <b>' + ap2FmtNum(adet) + '</b> · Ortalama maliyet: <b>$' + ap2Fmt(cost) + '</b>');
+    lines.push('Toplam harcama: <b>' + ap2Fmt(total) + '</b>');
+    lines.push('Adet: <b>' + ap2FmtNum(adet) + '</b> · Ortalama maliyet: <b>' + ap2Fmt(cost) + '</b>');
   }
   if (price > 0 && adet > 0) {
     var val = adet * price;
     var pnl = val - total;
     var pnlPct = total > 0 ? pnl / total * 100 : 0;
-    lines.push('Şu anki değer: <b>$' + ap2Fmt(val) + '</b> → <span class="' + (pnl >= 0 ? 'ok' : 'warn') + '">' + (pnl >= 0 ? '+' : '') + '$' + ap2Fmt(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%)</span>');
+    lines.push('Şu anki değer: <b>' + ap2Fmt(val) + '</b> → <span class="' + (pnl >= 0 ? 'ok' : 'warn') + '">' + (pnl >= 0 ? '+' : '') + ap2Fmt(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%)</span>');
   }
   var cash = Number(ap2Data.cash || 0);
   if (ap2EditId) {
@@ -15431,8 +15431,8 @@ function ap2FormCalc() {
     if (ed) cash = cash + (Number(ed.qty) || 0) * (Number(ed.cost) || 0);
   }
   if (total > 0 && cash >= 0) {
-    if (total <= cash) lines.push('Kalan bakiye: <span class="ok">$' + ap2Fmt(cash - total) + '</span>');
-    else lines.push('<span class="warn">⚠ Bakiyen yetersiz — kalan: $' + ap2Fmt(cash) + '</span>');
+    if (total <= cash) lines.push('Kalan bakiye: <span class="ok">' + ap2Fmt(cash - total) + '</span>');
+    else lines.push('<span class="warn">⚠ Bakiyen yetersiz — kalan: ' + ap2Fmt(cash) + '</span>');
   }
   pv.innerHTML = lines.join('<br>') || '';
 }
@@ -15486,7 +15486,7 @@ function ap2Deposit() {
   ap2Save();
   renderAlfaPortfoy2();
   document.getElementById('ap2-deposit-amount').value = '';
-  stratToast('💸 $' + ap2Fmt(amt) + ' bakiyeye eklendi (başlangıç da güncellendi).');
+  stratToast('💸 ' + ap2Fmt(amt) + ' bakiyeye eklendi (başlangıç da güncellendi).');
 }
 function ap2OpenForm(p) {
   ap2FormBind();
@@ -15553,16 +15553,16 @@ function ap2SaveForm() {
       const old = ap2Data.positions[idx];
       const oldCost = (Number(old.qty) || 0) * (Number(old.cost) || 0);
       const cash = (Number(ap2Data.cash) || 0) + oldCost;
-      if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: $' + ap2Fmt(cash); return; }
+      if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
       ap2Data.cash = cash - total;
       ap2Data.positions[idx] = pos;
     }
   } else {
     const cash = Number(ap2Data.cash) || 0;
-    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: $' + ap2Fmt(cash) + '. Önce "💸 Bakiye Ekle" ile yükle.'; return; }
+    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash) + '. Önce "💸 Bakiye Ekle" ile yükle.'; return; }
     ap2Data.cash = cash - total;
     ap2Data.positions.push(pos);
-    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nHarcama: $' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: $' + ap2Fmt(pos.cost) + (pos.target != null ? '\nHedef: %' + pos.target : '') + '\n\nalfa-trader.com');
+    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost) + (pos.target != null ? '\nHedef: %' + pos.target : '') + '\n\nalfa-trader.com');
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
@@ -16000,11 +16000,11 @@ function renderAlfaPortfoy2() {
     var diff = sum.portfolioValue - sum.startBalance;
     var diffPct = sum.startBalance > 0 ? diff / sum.startBalance * 100 : 0;
     growthEl.innerHTML =
-      '<div class="ap2-growth-cell"><span>Baslangic</span><b>$' + ap2Fmt(sum.startBalance) + '</b></div>' +
-      '<div class="ap2-growth-cell"><span>Yatirilan</span><b>$' + ap2Fmt(sum.totalInvested) + '</b></div>' +
-      '<div class="ap2-growth-cell"><span>Toplam Deger</span><b>$' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
-      '<div class="ap2-growth-cell"><span>Buyume</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + '$' + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
-      '<div class="ap2-growth-cell"><span>Serbest Bakiye</span><b>$' + ap2Fmt(sum.cash) + '</b></div>';
+      '<div class="ap2-growth-cell"><span>Baslangic</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Yatirilan</span><b>' + ap2Fmt(sum.totalInvested) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Toplam Deger</span><b>' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Buyume</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
+      '<div class="ap2-growth-cell"><span>Serbest Bakiye</span><b>' + ap2Fmt(sum.cash) + '</b></div>';
   }
   var slices = [];
   var groupMap = {};
