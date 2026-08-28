@@ -1936,6 +1936,26 @@
   .ap2-donut-legend-name { flex: 1; font-weight: 600; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ap2-donut-legend-val { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
   .ap2-donut-legend-pct { font-size: 11px; color: var(--text-3); font-weight: 600; min-width: 36px; text-align: right; }
+  .ap2-seg { display: flex; background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; margin-bottom: 10px; }
+  .ap2-seg button { flex: 1; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 8px; border: none; background: transparent; color: var(--text-3); border-radius: 8px; cursor: pointer; transition: all .15s; }
+  .ap2-seg button.on { background: var(--pc); color: #fff; }
+  .ap2-chip-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+  .ap2-chip-row button { font-size: 11px; font-weight: 700; padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-2); color: var(--text-2); cursor: pointer; transition: all .15s; }
+  .ap2-chip-row button.on { background: var(--pc); border-color: var(--pc); color: #fff; }
+  .ap2-form-preview { margin-top: 10px; padding: 10px 12px; background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(16,185,129,.12)); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; color: var(--text-2); line-height: 1.7; }
+  .ap2-form-preview b { color: var(--text); }
+  .ap2-form-preview .ok { color: var(--green); font-weight: 700; }
+  .ap2-form-preview .warn { color: var(--amber); font-weight: 700; }
+  .ap2-growth-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
+  .ap2-growth-cell { flex: 1; min-width: 104px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
+  .ap2-growth-cell span { display: block; font-size: 9px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 2px; }
+  .ap2-growth-cell b { font-size: 13px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ap2-growth-cell b.pos { color: var(--green); }
+  .ap2-growth-cell b.neg { color: var(--red); }
+  .ap2-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .ap2-deposit { display: flex; gap: 6px; }
+  .ap2-deposit input { width: 130px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .ap2-card-livep { font-size: 11px; font-weight: 700; margin-top: 6px; }
   .ap2-chart-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
   .ap2-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .ap2-chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
@@ -5923,11 +5943,16 @@
       <div id="ap2-gate-content">
       <div class="ap2-tools">
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
+        <div class="ap2-deposit">
+          <input type="number" id="ap2-deposit-amount" placeholder="Bakiyeye ekle ($)" min="0" step="any">
+          <button type="button" class="btn" id="ap2-deposit">💸 Bakiye Ekle</button>
+        </div>
       </div>
       <div id="ap2-empty" class="data-empty">Henüz enstrüman yok. "+ Yeni" ile başla.</div>
       <div class="ap2-layout">
         <div class="ap2-layout-left">
           <div id="ap2-summary-area"></div>
+          <div class="ap2-growth-row" id="ap2-growth"></div>
           <div id="ap2-grid" class="ap2-grid"></div>
           <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
             <h4>Rebalance</h4>
@@ -6000,8 +6025,18 @@
           <button type="button" class="btn" id="ap2-form-cancel">✕</button>
         </div>
         <div class="strat-form-body">
-          <label>Enstrüman Adı / Sembol</label>
-          <input type="text" id="ap2-f-sym" placeholder="Örn: BTC, AAPL, XAUUSD" maxlength="40" autocomplete="off">
+          <label>Enstrüman / Sembol</label>
+          <input type="text" id="ap2-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
+          <div class="ap2-chip-row" id="ap2-f-sym-chips">
+            <button type="button" data-sym="BTC">₿ BTC</button>
+            <button type="button" data-sym="ETH">Ξ ETH</button>
+            <button type="button" data-sym="SOL">◎ SOL</button>
+            <button type="button" data-sym="BNB">BNB</button>
+            <button type="button" data-sym="XRP">XRP</button>
+            <button type="button" data-sym="DOGE">Ð DOGE</button>
+            <button type="button" data-sym="ADA">ADA</button>
+            <button type="button" data-sym="AVAX">AVAX</button>
+          </div>
           <label>Tür</label>
           <div id="ap2-f-type" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
             <button type="button" class="ap2-type-chip on" data-ap2t="kripto">🪙 Kripto</button>
@@ -6016,18 +6051,29 @@
           </div>
           <label>Tarih</label>
           <input type="date" id="ap2-f-date">
-          <label>Adet / Miktar</label>
-          <input type="number" id="ap2-f-qty" placeholder="Örn: 0.5" step="any" min="0">
-          <label>Birim Maliyet ($)</label>
-          <input type="number" id="ap2-f-cost" placeholder="Örn: 60000" step="any" min="0">
-          <label>Güncel Fiyat ($) <span style="color:var(--text-3);font-weight:400;font-size:11px">— opsiyonel, elle de girebilirsin</span></label>
-          <input type="number" id="ap2-f-price" placeholder="Örn: 65000" step="any" min="0">
-          <label>Hedef Dağılım (%) <span style="color:var(--text-3);font-weight:400;font-size:11px">— bu enstrümanın.portföydeki hedef oranı</span></label>
+          <div class="ap2-seg" id="ap2-f-mode">
+            <button type="button" class="on" data-ap2m="tutar">💵 Tutar ile</button>
+            <button type="button" data-ap2m="adet">🪙 Adet ile</button>
+          </div>
+          <div id="ap2-f-amount-box">
+            <label>Ne kadar harcadın? ($)</label>
+            <input type="number" id="ap2-f-amount" placeholder="Örn: 500" step="any" min="0">
+          </div>
+          <div id="ap2-f-qty-box" style="display:none">
+            <label>Kaç adet aldın?</label>
+            <input type="number" id="ap2-f-qty" placeholder="Örn: 0.05" step="any" min="0">
+          </div>
+          <label>Birim maliyet (ortalama giriş fiyatı, $)</label>
+          <input type="number" id="ap2-f-cost" placeholder="Örn: 35000" step="any" min="0">
+          <label>Güncel fiyat ($) <span style="color:var(--text-3);font-weight:400;font-size:11px">— boş bırakırsan canlı fiyat dene</span></label>
+          <input type="number" id="ap2-f-price" placeholder="Otomatik getirilecek" step="any" min="0">
+          <label>Hedef Dağılım (%) <span style="color:var(--text-3);font-weight:400;font-size:11px">— portföydeki hedef oranı (rebalance)</span></label>
           <input type="number" id="ap2-f-target" placeholder="Örn: 25" step="any" min="0" max="100">
           <label>Not</label>
           <input type="text" id="ap2-f-note" placeholder="Opsiyonel not..." maxlength="120">
+          <div class="ap2-form-preview" id="ap2-f-preview"></div>
           <div style="display:flex;gap:8px;margin-top:12px">
-            <button type="button" class="btn solid" id="ap2-f-save">Kaydet</button>
+            <button type="button" class="btn solid" id="ap2-f-save">💾 Kaydet</button>
             <button type="button" class="btn" id="ap2-f-cancel">Vazgeç</button>
           </div>
           <div class="strat-form-err" id="ap2-f-err"></div>
@@ -15149,7 +15195,7 @@ function bdSetTab(t) {
 }
 const AP2_KEY = 'alfa-fund-v1';
 const AP2_HIST_KEY = 'alfa-fund-hist-v1';
-const AP2_COLORS = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#6366f1','#14b8a6','#e11d48','#84cc16'];
+const AP2_COLORS = ['#6366f1','#10b981','#f59e0b','#ec4899','#06b6d4','#8b5cf6','#f97316','#84cc16','#ef4444','#14b8a6','#d946ef','#3b82f6'];
 const AP2_TYPES = { kripto:'Kripto', hisse:'Hisse', altin:'Altin', gumus:'Gumus', emtia:'Emtia', doviz:'Doviz', endeks:'Endeks', fon:'Fon', custom:'Ozel' };
 const AP2_TYPE_CLS = { kripto:'pf-crypto', hisse:'pf-hisse', altin:'pf-altin', gumus:'pf-gumus', emtia:'pf-emtia', doviz:'pf-doviz', endeks:'pf-endeks', fon:'pf-fon', custom:'pf-custom' };
 const AP2_TYPE_CLR = { kripto:'#3b82f6', hisse:'#8b5cf6', altin:'#f59e0b', gumus:'#94a3b8', emtia:'#78350f', doviz:'#10b981', endeks:'#06b6d4', fon:'#ec4899', custom:'#6366f1' };
@@ -15333,11 +15379,117 @@ function ap2Summary() {
   const pnl = portfolioValue - startBalance;
   const pnlPct = startBalance > 0 ? pnl / startBalance * 100 : null;
   const totalSellAmount = sells.reduce((s, sl) => s + (Number(sl.amount) || 0), 0);
-  return { totalValue, totalCost, cash, portfolioValue, pnl, pnlPct, startBalance, totalSellAmount, count: positions.length, priced, sellCount: sells.length };
+  return { totalValue, totalCost, cash, portfolioValue, pnl, pnlPct, startBalance, totalSellAmount, totalInvested: totalCost, count: positions.length, priced, sellCount: sells.length };
 }
 function ap2Fmt(n) { return pfAmt(n); }
 function ap2Id() { return 'ap2_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
+let ap2FormMode = 'tutar';
+let ap2FormBound = false;
+function ap2FmtNum(n) {
+  if (n === null || n === undefined || isNaN(n)) return '0';
+  return Number(Number(n).toFixed(8)).toLocaleString('tr-TR', { maximumFractionDigits: 8 });
+}
+function ap2FormSetMode(m) {
+  ap2FormMode = m === 'adet' ? 'adet' : 'tutar';
+  var seg = document.getElementById('ap2-f-mode');
+  if (seg) seg.querySelectorAll('button').forEach(function(b) { b.classList.toggle('on', b.getAttribute('data-ap2m') === ap2FormMode); });
+  var ab = document.getElementById('ap2-f-amount-box');
+  var qb = document.getElementById('ap2-f-qty-box');
+  if (ab) ab.style.display = ap2FormMode === 'tutar' ? '' : 'none';
+  if (qb) qb.style.display = ap2FormMode === 'adet' ? '' : 'none';
+  ap2FormCalc();
+}
+function ap2FormCalc() {
+  var pv = document.getElementById('ap2-f-preview');
+  if (!pv) return;
+  var amount = parseFloat(document.getElementById('ap2-f-amount').value) || 0;
+  var qty = parseFloat(document.getElementById('ap2-f-qty').value) || 0;
+  var cost = parseFloat(document.getElementById('ap2-f-cost').value) || 0;
+  var price = parseFloat(document.getElementById('ap2-f-price').value) || 0;
+  var total, adet;
+  if (ap2FormMode === 'tutar') {
+    total = amount;
+    adet = cost > 0 ? amount / cost : 0;
+  } else {
+    adet = qty;
+    total = qty * cost;
+  }
+  var lines = [];
+  if (total > 0) {
+    lines.push('Toplam harcama: <b>$' + ap2Fmt(total) + '</b>');
+    lines.push('Adet: <b>' + ap2FmtNum(adet) + '</b> · Ortalama maliyet: <b>$' + ap2Fmt(cost) + '</b>');
+  }
+  if (price > 0 && adet > 0) {
+    var val = adet * price;
+    var pnl = val - total;
+    var pnlPct = total > 0 ? pnl / total * 100 : 0;
+    lines.push('Şu anki değer: <b>$' + ap2Fmt(val) + '</b> → <span class="' + (pnl >= 0 ? 'ok' : 'warn') + '">' + (pnl >= 0 ? '+' : '') + '$' + ap2Fmt(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%)</span>');
+  }
+  var cash = Number(ap2Data.cash || 0);
+  if (ap2EditId) {
+    var ed = ap2Data.positions.find(x => x.id === ap2EditId);
+    if (ed) cash = cash + (Number(ed.qty) || 0) * (Number(ed.cost) || 0);
+  }
+  if (total > 0 && cash >= 0) {
+    if (total <= cash) lines.push('Kalan bakiye: <span class="ok">$' + ap2Fmt(cash - total) + '</span>');
+    else lines.push('<span class="warn">⚠ Bakiyen yetersiz — kalan: $' + ap2Fmt(cash) + '</span>');
+  }
+  pv.innerHTML = lines.join('<br>') || '';
+}
+function ap2FormFetchPrice(sym) {
+  var box = document.getElementById('ap2-f-price');
+  if (!sym || !box) return;
+  var clean = String(sym).toUpperCase().replace(/USDT$/, '').trim();
+  if (!clean) return;
+  var prevPh = box.placeholder;
+  box.placeholder = 'Fiyat aranıyor…';
+  fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=' + encodeURIComponent(clean + 'USDT'))
+    .then(function(r) { return r.json(); })
+    .then(function(j) {
+      var p = pfNum(j && j.lastPrice);
+      if (p && p > 0) {
+        if (!parseFloat(box.value)) box.value = p;
+        var costInp = document.getElementById('ap2-f-cost');
+        if (costInp && !parseFloat(costInp.value)) costInp.value = p;
+        ap2FormCalc();
+      } else { box.placeholder = prevPh; }
+    })
+    .catch(function() { box.placeholder = prevPh; });
+}
+function ap2FormBind() {
+  if (ap2FormBound) return;
+  ap2FormBound = true;
+  var wrap = document.getElementById('ap2-form');
+  if (!wrap) return;
+  var seg = document.getElementById('ap2-f-mode');
+  if (seg) seg.addEventListener('click', function(ev) { var b = ev.target.closest('button[data-ap2m]'); if (b) ap2FormSetMode(b.getAttribute('data-ap2m')); });
+  var chips = document.getElementById('ap2-f-sym-chips');
+  if (chips) chips.addEventListener('click', function(ev) {
+    var b = ev.target.closest('button[data-sym]');
+    if (!b) return;
+    chips.querySelectorAll('button').forEach(function(x) { x.classList.toggle('on', x === b); });
+    var inp = document.getElementById('ap2-f-sym');
+    if (inp) { inp.value = b.getAttribute('data-sym'); ap2FormFetchPrice(inp.value); ap2FormCalc(); }
+  });
+  ['ap2-f-amount', 'ap2-f-qty', 'ap2-f-cost', 'ap2-f-price'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) ['input', 'change'].forEach(function(ev) { el.addEventListener(ev, function() { ap2FormCalc(); }); });
+  });
+  var symInp = document.getElementById('ap2-f-sym');
+  if (symInp) symInp.addEventListener('change', function() { ap2FormFetchPrice(symInp.value); });
+}
+function ap2Deposit() {
+  var amt = parseFloat(document.getElementById('ap2-deposit-amount').value) || 0;
+  if (!(amt > 0)) return;
+  ap2Data.cash = (Number(ap2Data.cash) || 0) + amt;
+  ap2Data.startBalance = (Number(ap2Data.startBalance) || 0) + amt;
+  ap2Save();
+  renderAlfaPortfoy2();
+  document.getElementById('ap2-deposit-amount').value = '';
+  stratToast('💸 $' + ap2Fmt(amt) + ' bakiyeye eklendi (başlangıç da güncellendi).');
+}
 function ap2OpenForm(p) {
+  ap2FormBind();
   ap2EditId = p ? p.id : null;
   document.getElementById('ap2-form-title').textContent = p ? '✎ Düzenle' : '＋ Yeni Enstrüman';
   document.getElementById('ap2-f-sym').value = p ? (p.symbol || '') : '';
@@ -15347,11 +15499,21 @@ function ap2OpenForm(p) {
   document.getElementById('ap2-f-price').value = p ? (p.price || '') : '';
   document.getElementById('ap2-f-target').value = (p && p.target != null) ? p.target : '';
   document.getElementById('ap2-f-note').value = p ? (p.note || '') : '';
+  if (p) {
+    document.getElementById('ap2-f-amount').value = (Number(p.qty) || 0) * (Number(p.cost) || 0);
+    ap2FormSetMode('adet');
+  } else {
+    document.getElementById('ap2-f-amount').value = '';
+    ap2FormSetMode('tutar');
+  }
   const t = p ? (p.type || 'kripto') : 'kripto';
   document.querySelectorAll('#ap2-f-type .ap2-type-chip').forEach(b => b.classList.toggle('on', b.getAttribute('data-ap2t') === t));
+  const chipRow = document.getElementById('ap2-f-sym-chips');
+  if (chipRow) chipRow.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.getAttribute('data-sym') === (p ? p.symbol : '')));
   document.getElementById('ap2-f-err').textContent = '';
   document.getElementById('ap2-form').classList.remove('hidden');
   document.getElementById('ap2-f-sym').focus();
+  ap2FormCalc();
 }
 function ap2GetFormType() {
   const on = document.querySelector('#ap2-f-type .ap2-type-chip.on');
@@ -15360,14 +15522,23 @@ function ap2GetFormType() {
 function ap2SaveForm() {
   const sym = document.getElementById('ap2-f-sym').value.trim();
   if (!sym) { document.getElementById('ap2-f-err').textContent = 'Sembol gerekli'; return; }
-  const qty = parseFloat(document.getElementById('ap2-f-qty').value) || 0;
   const cost = parseFloat(document.getElementById('ap2-f-cost').value) || 0;
+  if (cost <= 0) { document.getElementById('ap2-f-err').textContent = 'Birim maliyet 0\'dan büyük olmalı'; return; }
+  let total, qty;
+  if (ap2FormMode === 'tutar') {
+    total = parseFloat(document.getElementById('ap2-f-amount').value) || 0;
+    qty = total / cost;
+  } else {
+    qty = parseFloat(document.getElementById('ap2-f-qty').value) || 0;
+    total = qty * cost;
+  }
+  if (total <= 0) { document.getElementById('ap2-f-err').textContent = 'Harcama tutarı / adet girilmeli'; return; }
+  qty = Math.round(qty * 1e8) / 1e8;
+  if (qty <= 0) { document.getElementById('ap2-f-err').textContent = 'Adet 0\'dan büyük olmalı (harcama ve maliyeti kontrol et)'; return; }
   const priceRaw = document.getElementById('ap2-f-price').value;
   const price = priceRaw !== '' ? parseFloat(priceRaw) : null;
   const targetRaw = document.getElementById('ap2-f-target').value;
   const target = targetRaw !== '' ? parseFloat(targetRaw) : null;
-  if (qty <= 0) { document.getElementById('ap2-f-err').textContent = 'Adet 0\'dan büyük olmalı'; return; }
-  if (cost <= 0) { document.getElementById('ap2-f-err').textContent = 'Maliyet 0\'dan büyük olmalı'; return; }
   const pos = {
     id: ap2EditId || ap2Id(),
     symbol: sym.toUpperCase(),
@@ -15381,14 +15552,17 @@ function ap2SaveForm() {
     if (idx >= 0) {
       const old = ap2Data.positions[idx];
       const oldCost = (Number(old.qty) || 0) * (Number(old.cost) || 0);
-      const newCost = qty * cost;
-      ap2Data.cash = (Number(ap2Data.cash) || 0) + oldCost - newCost;
+      const cash = (Number(ap2Data.cash) || 0) + oldCost;
+      if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: $' + ap2Fmt(cash); return; }
+      ap2Data.cash = cash - total;
       ap2Data.positions[idx] = pos;
     }
   } else {
-    ap2Data.cash = (Number(ap2Data.cash) || 0) - qty * cost;
+    const cash = Number(ap2Data.cash) || 0;
+    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: $' + ap2Fmt(cash) + '. Önce "💸 Bakiye Ekle" ile yükle.'; return; }
+    ap2Data.cash = cash - total;
     ap2Data.positions.push(pos);
-    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nAdet: ' + pos.qty + ' · Maliyet: ' + ap2Fmt(pos.cost) + '/adet\nToplam maliyet: ' + ap2Fmt(qty * cost) + (pos.target != null ? '\nHedef: %' + pos.target : '') + '\n\nalfa-trader.com');
+    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nHarcama: $' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: $' + ap2Fmt(pos.cost) + (pos.target != null ? '\nHedef: %' + pos.target : '') + '\n\nalfa-trader.com');
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
@@ -15475,7 +15649,7 @@ function ap2RenderDonut(slices, total) {
     var x2 = 100 + r1 * Math.cos(endAngle), y2 = 100 + r1 * Math.sin(endAngle);
     var ix1 = 100 + r2 * Math.cos(startAngle), iy1 = 100 + r2 * Math.sin(startAngle);
     var ix2 = 100 + r2 * Math.cos(endAngle), iy2 = 100 + r2 * Math.sin(endAngle);
-    paths += '<path d="M' + x1 + ',' + y1 + ' A' + r1 + ',' + r1 + ' 0 ' + large + ',1 ' + x2 + ',' + y2 + ' L' + ix2 + ',' + iy2 + ' A' + r2 + ',' + r2 + ' 0 ' + large + ',0 ' + ix1 + ',' + iy1 + ' Z" fill="' + sl.color + '" opacity="0.85"/>';
+    paths += '<path d="M' + x1 + ',' + y1 + ' A' + r1 + ',' + r1 + ' 0 ' + large + ',1 ' + x2 + ',' + y2 + ' L' + ix2 + ',' + iy2 + ' A' + r2 + ',' + r2 + ' 0 ' + large + ',0 ' + ix1 + ',' + iy1 + ' Z" fill="' + sl.color + '" style="stroke:var(--card);stroke-width:3"/>';
   });
   svgEl.innerHTML = paths;
   if (centerEl) centerEl.textContent = '$' + Math.round(total).toLocaleString('en-US');
@@ -15805,6 +15979,8 @@ function renderAlfaPortfoy2() {
     if (rebalEl) rebalEl.style.display = 'none';
     if (layoutEl) layoutEl.style.display = 'none';
     if (shareArea) shareArea.innerHTML = '';
+    var gr0 = document.getElementById('ap2-growth');
+    if (gr0) gr0.innerHTML = '';
     ap2RenderIdeas();
     ap2RenderMonthly();
     return;
@@ -15819,6 +15995,17 @@ function renderAlfaPortfoy2() {
       '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Serbest USDT bakiyesi</div></div>' +
     '</div>';
   ap2TrackHistory(sum.portfolioValue);
+  var growthEl = document.getElementById('ap2-growth');
+  if (growthEl) {
+    var diff = sum.portfolioValue - sum.startBalance;
+    var diffPct = sum.startBalance > 0 ? diff / sum.startBalance * 100 : 0;
+    growthEl.innerHTML =
+      '<div class="ap2-growth-cell"><span>Baslangic</span><b>$' + ap2Fmt(sum.startBalance) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Yatirilan</span><b>$' + ap2Fmt(sum.totalInvested) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Toplam Deger</span><b>$' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Buyume</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + '$' + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
+      '<div class="ap2-growth-cell"><span>Serbest Bakiye</span><b>$' + ap2Fmt(sum.cash) + '</b></div>';
+  }
   var slices = [];
   var groupMap = {};
   positions.forEach(function(p, i) {
@@ -16378,6 +16565,7 @@ function bindAlfaPortfoy2() {
   if (!view) return;
   view.addEventListener('click', e => {
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
+    if (e.target.closest('#ap2-deposit')) { ap2Deposit(); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
     const ed = e.target.closest('[data-ap2edit]');
