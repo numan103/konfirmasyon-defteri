@@ -6176,9 +6176,9 @@
       </div>
       <div id="ap2-sos-share" style="position:fixed;z-index:1000;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.75);padding:16px">
         <div class="mod-inner" style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;max-height:92vh;overflow:auto">
-          <div class="ap2-sos-head"><span>📤 Paylaşım Kartu</span><button type="button" class="ap2-sos-close" id="ap2-sos-share-close">✕</button></div>
+          <div class="ap2-sos-head"><span>📤 Paylaşım Kartı</span><button type="button" class="ap2-sos-close" id="ap2-sos-share-close">✕</button></div>
           <div id="ap2-sos-card"></div>
-          <div class="ap2-sos-cap" style="margin-top:12px"><span><b>Hazır metin</b> <button type="button" class="btn solid" id="ap2-sos-copy" style="padding:4px 10px;font-size:11px">Kopyala</button></span></div>
+          <div class="ap2-sos-cap" style="margin-top:12px"><span><b>Hazır metin</b> <button type="button" class="btn solid" id="ap2-sos-copy" style="padding:4px 10px;font-size:11px">Kopyala</button></span><button type="button" class="btn solid" id="ap2-sos-download" style="padding:4px 10px;font-size:11px">⬇ PNG</button></div>
           <textarea id="ap2-sos-text" rows="5" readonly style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px;line-height:1.5;resize:vertical;margin-top:6px"></textarea>
         </div>
       </div>
@@ -16822,6 +16822,49 @@ function ap2SosCopy() {
   if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(v).then(function () { stratToast('Kopyalandı ✓'); }).catch(function () {}); }
   else { t.select(); try { document.execCommand('copy'); stratToast('Kopyalandı ✓'); } catch (e) {} }
 }
+function ap2SosDownload() {
+  const op = ap2SosShareOp;
+  if (!op) return;
+  const W = 1080, H = 540, R = 26;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  const col = { bg: '#0b1220', card: '#131b2e', border: '#26324a', text: '#e9eef7', sub: '#8b98b0', green: '#10b981', red: '#ef4444', ac: '#3b82f6' };
+  c.fillStyle = col.bg; c.fillRect(0, 0, W, H);
+  c.fillStyle = col.ac; c.fillRect(0, 0, W, 10);
+  function rr(x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  c.font = '600 30px Arial'; c.fillStyle = col.ac; c.fillText('ALFA PORTFÖY', 64, 78);
+  c.font = '600 28px Arial'; c.fillStyle = col.sub; c.textAlign = 'right'; c.fillText('SOSYALMETRE', W - 64, 78); c.textAlign = 'left';
+  rr(64, 120, W - 128, 360, R); c.fillStyle = col.card; c.fill();
+  c.strokeStyle = col.border; c.lineWidth = 2; c.stroke();
+  c.font = '700 34px Arial'; c.fillStyle = col.sub; c.fillText(op.kind.toUpperCase() + '  ·  ' + (AP2_TYPES[op.type] || op.type || ''), 116, 186);
+  c.font = '700 92px Arial'; c.fillStyle = col.text; c.fillText(op.sym, 112, 286);
+  const pnl = op.met['kar$'];
+  let pnlTxt = '—', pnlCol = col.sub;
+  if (pnl !== null && pnl !== undefined) {
+    pnlTxt = (pnl >= 0 ? '+' : '') + ap2Fmt(pnl) + (op.met['karp'] !== null && op.met['karp'] !== undefined ? '  (' + (op.met['karp'] >= 0 ? '+' : '') + op.met['karp'].toFixed(1) + '%)' : '');
+    pnlCol = pnl >= 0 ? col.green : col.red;
+  }
+  c.font = '800 72px Arial'; c.fillStyle = pnlCol; c.fillText(pnlTxt, 112, 392);
+  c.strokeStyle = col.border; c.lineWidth = 2; c.beginPath(); c.moveTo(116, 420); c.lineTo(W - 116, 420); c.stroke();
+  const rows = [
+    ['Büyüklük', ap2Fmt(op.met['kslik'])],
+    ['Adet', op.qty !== undefined && op.qty !== null ? ap2FmtNum(op.qty) : '—'],
+    ['Fiyat', (op.met['fiyat'] !== null && op.met['fiyat'] !== undefined) ? ap2Fmt(op.met['fiyat']) : '—'],
+    ['Gün', (op.met['gun'] !== null && op.met['gun'] !== undefined) ? String(op.met['gun']) : '—']
+  ];
+  c.font = '600 30px Arial';
+  rows.forEach(function (r2, i) {
+    const x = 116 + (i % 2) * 430, y = 468 + Math.floor(i / 2) * 48;
+    c.fillStyle = col.sub; c.fillText(r2[0], x, y);
+    c.fillStyle = col.text; c.textAlign = 'right'; c.fillText(r2[1], x + 380, y); c.textAlign = 'left';
+  });
+  c.font = '700 34px Arial'; c.fillStyle = col.ac; c.fillText('#AlfaTrading', 116, 506);
+  c.font = '600 30px Arial'; c.fillStyle = col.sub; c.textAlign = 'right'; c.fillText(op.date || '', W - 116, 506); c.textAlign = 'left';
+  const a = document.createElement('a');
+  a.download = 'sosyalmetre-' + String(op.sym).replace(/[^A-Za-z0-9]/g, '') + '.png';
+  a.href = cv.toDataURL('image/png');
+  a.click();
+}
 function bindAlfaPortfoy2() {
   const view = document.getElementById('bd-view-alfaportfoy');
   if (!view) return;
@@ -16838,6 +16881,7 @@ function bindAlfaPortfoy2() {
     if (sosShare) { ap2SosOpenShare(sosShare.getAttribute('data-sos-share')); return; }
     if (e.target.closest('#ap2-sos-share-close')) { ap2SosShareClose(); return; }
     if (e.target.closest('#ap2-sos-copy')) { ap2SosCopy(); return; }
+    if (e.target.closest('#ap2-sos-download')) { ap2SosDownload(); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
     const ed = e.target.closest('[data-ap2edit]');

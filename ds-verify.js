@@ -111,6 +111,7 @@ function fetchText(u, headers) {
     ap2_sosyalmetre_crit: html.includes('AP2_SOS_CRIT_KEY') && html.includes('ap2-sos-add-crit') && html.includes('ap2SosAddCrit') && html.includes('AP2_SOS_M'),
     ap2_sosyalmetre_ops: html.includes('ap2SosOps') && html.includes('data-sos-share') && html.includes('GEÇTİ') && html.includes('KALDI'),
     ap2_sosyalmetre_share: html.includes('ap2-sos-share') && html.includes('ap2SosOpenShare') && html.includes('ap2SosCopy'),
+    ap2_sosyalmetre_png: html.includes('ap2-sos-download') && html.includes('ap2SosDownload') && html.includes('toDataURL') && html.includes('1080'),
     ap2_sosyalmetre_sellmeta: html.includes('cost: _entryCost') && html.includes('profit: _profit') && html.includes('days: _days'),
   };
   let ok = true;
