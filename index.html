@@ -99,6 +99,7 @@
   body[data-page="calc"] { --pc: #8b7bfa; --pc-soft: rgba(139,123,250,.16); --glow-a: rgba(139,123,250,.20); --glow-b: rgba(109,92,240,.10); }
   body[data-page="basvuru"] { --pc: #fbbf24; --pc-soft: rgba(251,191,36,.16); --glow-a: rgba(251,191,36,.18); --glow-b: rgba(245,158,11,.10); }
   body[data-page="trading"] { --pc: #22d3ee; --pc-soft: rgba(34,211,238,.16); --glow-a: rgba(34,211,238,.18); --glow-b: rgba(6,182,212,.10); }
+  body[data-page="sosyalmetre"] { --pc: #c084fc; --pc-soft: rgba(192,132,252,.16); --glow-a: rgba(192,132,252,.18); --glow-b: rgba(168,85,247,.10); }
   body[data-page="alfa"] { --pc: #ef4444; --pc-soft: rgba(239,68,68,.16); --glow-a: rgba(239,68,68,.20); --glow-b: rgba(220,38,38,.10); }
   body[data-page="designer"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.18); --glow-b: rgba(132,204,22,.10); }
   body[data-page="alfatrading"] { --pc: #2aabee; --pc-soft: rgba(42,171,238,.16); --glow-a: rgba(42,171,238,.18); --glow-b: rgba(14,165,233,.10); }
@@ -1953,6 +1954,64 @@
   .ap2-growth-cell b.pos { color: var(--green); }
   .ap2-growth-cell b.neg { color: var(--red); }
   .ap2-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .sm-wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 60px; }
+  .sm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sm-title { margin: 0 0 4px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .sm-sub { margin: 0; font-size: 13px; color: var(--text-3); max-width: 640px; line-height: 1.5; }
+  .sm-th { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); font-weight: 600; }
+  .sm-th select { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-2); color: var(--text); font-size: 12px; font-weight: 600; }
+  .sm-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; align-items: start; }
+  .sm-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+  .sm-card-head { display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 13px; color: var(--text); margin-bottom: 12px; gap: 8px; }
+  .sm-cond-add { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .sm-cond-add input { flex: 1; min-width: 200px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .sm-cond-list { display: flex; flex-direction: column; gap: 6px; }
+  .sm-cond-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+  .sm-cond-num { min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; background: var(--pc-soft); color: var(--pc); font-size: 11px; font-weight: 800; }
+  .sm-cond-txt { flex: 1; font-size: 13px; color: var(--text-2); line-height: 1.45; }
+  .sm-cond-actions { display: flex; gap: 2px; }
+  .sm-cond-actions button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 13px; padding: 3px 5px; border-radius: 6px; }
+  .sm-cond-actions button:hover { background: var(--bg-2); color: var(--text); }
+  .sm-cond-note { color: var(--text-3); font-size: 12.5px; text-align: center; padding: 26px 8px; border: 1px dashed var(--border); border-radius: 12px; }
+  .sm-trade-add { display: grid; grid-template-columns: 1fr auto auto 1fr; gap: 8px; margin-bottom: 12px; }
+  .sm-trade-add input, .sm-trade-add select { padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; }
+  .sm-trade-add .sm-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .sm-tr { border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--card); }
+  .sm-tr-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .sm-tr-sym { font-weight: 800; font-size: 15px; color: var(--text); letter-spacing: 0.2px; }
+  .sm-tr-dir { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; letter-spacing: .4px; }
+  .sm-tr-dir.LONG { background: rgba(16,185,129,.15); color: var(--green); }
+  .sm-tr-dir.KISA { background: rgba(239,68,68,.15); color: var(--red); }
+  .sm-tr-date { font-size: 11px; color: var(--text-3); margin-left: auto; }
+  .sm-tr-del { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 13px; margin-left: 6px; }
+  .sm-tr-del:hover { color: var(--red); }
+  .sm-tr-note { font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
+  .sm-prog { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .sm-bar { flex: 1; height: 6px; background: var(--bg-2); border-radius: 999px; overflow: hidden; }
+  .sm-bar i { display: block; height: 100%; border-radius: 999px; }
+  .sm-bar i.pass { background: var(--green); }
+  .sm-bar i.fail { background: var(--red); }
+  .sm-prog-txt { font-size: 11px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+  .sm-chk-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
+  .sm-chk-row input { accent-color: var(--pc); width: 15px; height: 15px; cursor: pointer; }
+  .sm-chk-row label { font-size: 12.5px; color: var(--text-2); cursor: pointer; line-height: 1.4; }
+  .sm-tr-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 8px; flex-wrap: wrap; }
+  .sm-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: .3px; }
+  .sm-uygun { background: rgba(16,185,129,.15); color: var(--green); }
+  .sm-kaldi { background: rgba(239,68,68,.15); color: var(--red); }
+  .sm-share-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; padding: 5px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-2); cursor: pointer; }
+  .sm-share-btn:hover { border-color: var(--pc); color: var(--pc); }
+  .sm-share-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; max-width: 380px; }
+  .sm-share-card h3 { margin: 6px 0 2px; font-size: 14px; color: var(--text); }
+  .sm-share-card .sub { font-size: 11px; color: var(--text-3); }
+  .sm-share-rows { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2); margin-top: 8px; }
+  .sm-share-rows div { display: flex; justify-content: space-between; gap: 10px; }
+  .sm-share-rows .ok { color: var(--green); font-weight: 700; }
+  .sm-share-rows .no { color: var(--red); font-weight: 700; }
+  .sm-share-txt { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 12px; line-height: 1.5; resize: vertical; margin-top: 6px; }
+  @media (max-width: 760px) { .sm-grid { grid-template-columns: 1fr; } .sm-trade-add { grid-template-columns: 1fr 1fr; } .sm-trade-add input[type=date], .sm-trade-add input#sm-t-note { grid-column: 1 / -1; } }
+
   .ap2-sos-btn { font-family: 'Inter', sans-serif; }
   .ap2-sos { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-top: 14px; }
   .ap2-sos-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--text); margin-bottom: 6px; }
@@ -4251,6 +4310,7 @@
     <div class="nav-links">
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Alfa Defter</a>
+      <a href="?page=sosyalmetre" class="nav-link" id="tab-sosyalmetre" data-nav>📣 Sosyalmetre</a>
       <div class="nav-drop">
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
         <div class="drop-menu">
@@ -4308,6 +4368,7 @@
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" data-i18n="app.butce">💰 Alfa Defter</a>
+      <a href="?page=sosyalmetre" class="mnav-link" data-nav data-mnav="sosyalmetre">📣 Sosyalmetre</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
       <a href="?page=data" class="mnav-link" data-nav data-mnav="data" data-i18n="app.journal">📈 Trade Günlüğü</a>
@@ -5977,8 +6038,7 @@
       <div id="ap2-gate-content">
       <div class="ap2-tools">
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
-        <button type="button" class="btn ap2-sos-btn" id="ap2-sos-open">📣 Sosyalmetre</button>
-        <div class="ap2-deposit">
+                <div class="ap2-deposit">
           <input type="number" id="ap2-deposit-amount" placeholder="Bakiyeye ekle ($)" min="0" step="any">
           <button type="button" class="btn" id="ap2-deposit">💸 Bakiye Ekle</button>
         </div>
@@ -5988,44 +6048,6 @@
         <div class="ap2-layout-left">
           <div id="ap2-summary-area"></div>
           <div class="ap2-growth-row" id="ap2-growth"></div>
-          <div id="ap2-sos" class="ap2-sos hidden">
-            <div class="ap2-sos-head">
-              <span>📣 Sosyalmetre</span>
-              <button type="button" class="ap2-sos-close" id="ap2-sos-close" title="Kapat">✕</button>
-            </div>
-            <div class="ap2-sos-sub">Yalnızca senin göreceğin panel — işlemleri sosyal medyada paylaşmak için kendi kriterlerini belirle; geçen işlemler için web'de paylaşım kartı üret.</div>
-            <div id="ap2-sos-gate">
-              <div class="ap2-sos-cap"><span id="ap2-sos-gate-title"><b>Kilitli</b></span></div>
-              <div class="ap2-sos-gap" style="display:flex;gap:8px;margin:10px 0">
-                <input type="password" id="ap2-sos-pin" placeholder="Sahip PIN" maxlength="20" autocomplete="off" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
-                <button type="button" class="btn solid" id="ap2-sos-unlock">Aç</button>
-              </div>
-              <div class="ap2-sos-cap" style="color:var(--text-3);font-weight:600;text-transform:none;letter-spacing:0" id="ap2-sos-gate-hint">İlk açılışta sen yeni bir sahip PIN belirlersin; sonraki açılışlarda o PIN sorulur. PIN satın alınan erişim kodundan ayrıdır ve yalnızca sende kalır.</div>
-              <div class="ap2-sos-miss" id="ap2-sos-pin-msg"></div>
-            </div>
-            <div id="ap2-sos-main" class="hidden">
-              <div class="ap2-sos-cap"><span>✍️ Kriterlerin — geçen işlem paylaşıma uygun</span></div>
-              <div id="ap2-sos-crit" class="ap2-sos-crit"></div>
-              <div class="ap2-sos-crit" style="border-top:1px dashed var(--border);padding-top:10px">
-                <select id="ap2-sos-metric" style="padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg-2);color:var(--text-2);font-size:12px;font-weight:600">
-                  <option value="karp">Kâr (fiyat) %</option>
-                  <option value="kar$">Kâr $</option>
-                  <option value="kslik">Pozisyon Büyüklüğü $</option>
-                  <option value="gun">Tutulan gün</option>
-                  <option value="adet">Adet</option>
-                  <option value="fiyat">Fiyat $</option>
-                </select>
-                <select id="ap2-sos-op" style="padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg-2);color:var(--text-2);font-size:12px;font-weight:600">
-                  <option value="ge">≥</option>
-                  <option value="le">≤</option>
-                </select>
-                <input type="number" id="ap2-sos-val" placeholder="Eşik" step="any" style="width:84px;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px">
-                <button type="button" class="btn solid" id="ap2-sos-add-crit">+ Ekle</button>
-              </div>
-              <div class="ap2-sos-cap" style="margin-top:14px"><span><b>Değerlendirme</b></span></div>
-              <div id="ap2-sos-ops" class="ap2-sos-gap"></div>
-            </div>
-          </div>
           <div id="ap2-grid" class="ap2-grid"></div>
           <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
             <h4>Rebalance</h4>
@@ -6174,17 +6196,61 @@
           <div class="strat-form-err" id="ap2-sell-err"></div>
         </div>
       </div>
-      <div id="ap2-sos-share" style="position:fixed;z-index:1000;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.75);padding:16px">
-        <div class="mod-inner" style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;max-height:92vh;overflow:auto">
-          <div class="ap2-sos-head"><span>📤 Paylaşım Kartı</span><button type="button" class="ap2-sos-close" id="ap2-sos-share-close">✕</button></div>
-          <div id="ap2-sos-card"></div>
-          <div class="ap2-sos-cap" style="margin-top:12px"><span><b>Hazır metin</b> <button type="button" class="btn solid" id="ap2-sos-copy" style="padding:4px 10px;font-size:11px">Kopyala</button></span><button type="button" class="btn solid" id="ap2-sos-download" style="padding:4px 10px;font-size:11px">⬇ PNG</button></div>
-          <textarea id="ap2-sos-text" rows="5" readonly style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px;line-height:1.5;resize:vertical;margin-top:6px"></textarea>
-        </div>
-      </div>
       </div><!-- /ap2-gate-content -->
     </div><!-- /bd-view-alfaportfoy -->
   </div><!-- /page-butce -->
+
+  <div id="page-sosyalmetre" class="hidden">
+    <div class="sm-wrap">
+      <div class="sm-head">
+        <div>
+          <h2 class="sm-title">📣 Sosyalmetre</h2>
+          <p class="sm-sub">İşlem şartların için checklist oluştur; her işlemde hangi şartların sağlandığını işaretle. Tümü (veya seçtiğin eşik) sağlanırsa işlem <b>UYGUN</b> sayılır ve paylaşım kartı hazırlanır.</p>
+        </div>
+        <div class="sm-th">
+          <label for="sm-th">Uygunluk eşiği</label>
+          <select id="sm-th">
+            <option value="all">Tüm şartlar (hepsi)</option>
+            <option value="75">Şartların ≥ %75'i</option>
+            <option value="50">Şartların ≥ %50'si</option>
+          </select>
+        </div>
+      </div>
+      <div class="sm-grid">
+        <div class="sm-card">
+          <div class="sm-card-head"><span>📋 Şartlarım (checklist)</span><button type="button" class="btn solid" id="sm-add-cond">+ Şart</button></div>
+          <div class="sm-cond-add hidden" id="sm-cond-add">
+            <input id="sm-cond-text" placeholder="Örn: RR en az 3:1 olmalı" maxlength="120" autocomplete="off">
+            <button type="button" class="btn solid" id="sm-cond-save">Ekle</button>
+            <button type="button" class="btn" id="sm-cond-cancel">Vazgeç</button>
+          </div>
+          <div class="sm-cond-list" id="sm-cond-list"></div>
+          <div class="sm-cond-note" id="sm-cond-note">Henüz şart yok — "+ Şart" ile işlem şartlarını ekle (Alfa Traders / Telegram kurallarından ilham alabilirsin).</div>
+        </div>
+        <div class="sm-card">
+          <div class="sm-card-head"><span>🎯 İşlemler</span><button type="button" class="btn solid" id="sm-add-trade">+ İşlem</button></div>
+          <div class="sm-trade-add hidden" id="sm-trade-add">
+            <input id="sm-t-sym" placeholder="Sembol (BTC…)" maxlength="20" autocomplete="off">
+            <select id="sm-t-dir"><option value="LONG">LONG</option><option value="KISA">KISA</option></select>
+            <input type="date" id="sm-t-date">
+            <input id="sm-t-note" placeholder="Not (opsiyonel)" maxlength="200" autocomplete="off">
+            <div class="sm-actions"><button type="button" class="btn solid" id="sm-t-save">Ekle</button><button type="button" class="btn" id="sm-t-cancel">Vazgeç</button></div>
+          </div>
+          <div id="sm-trade-list"></div>
+          <div class="sm-cond-note" id="sm-trade-note">Henüz işlem yok — "+ İşlem" ile ekle, şartları işaretle.</div>
+        </div>
+      </div>
+    </div>
+    <div id="sm-share" style="position:fixed;z-index:1000;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.75);padding:16px">
+      <div class="mod-inner" style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;max-height:92vh;overflow:auto">
+        <div class="sm-card-head"><span>📤 Paylaşım Kartı</span><button type="button" class="ap2-sos-close" id="sm-share-close" style="cursor:pointer">✕</button></div>
+        <div id="sm-share-card"></div>
+        <textarea id="sm-share-text" rows="5" readonly class="sm-share-txt"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn solid" id="sm-copy" style="flex:1">Kopyala</button><button type="button" class="btn solid" id="sm-png" style="flex:1">⬇ PNG</button></div>
+      </div>
+    </div>
+  </div>
+
   <div id="page-mentoring" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🤝</span>
@@ -10588,7 +10654,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
+  const VALID_PAGES = ['home','butce','sosyalmetre','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -11722,7 +11788,7 @@ function showPage(name, skipAnim) {
   dtRowFocus = null;
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
-  const pages = ['home', 'butce', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'butce', 'sosyalmetre', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -11749,6 +11815,7 @@ function showPage(name, skipAnim) {
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
+  if (name === 'sosyalmetre') renderSosyal();
   if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
@@ -16066,7 +16133,6 @@ function renderAlfaPortfoy2() {
     if (shareArea) shareArea.innerHTML = '';
     var gr0 = document.getElementById('ap2-growth');
     if (gr0) gr0.innerHTML = '';
-    ap2SosRefresh();
     ap2RenderIdeas();
     ap2RenderMonthly();
     return;
@@ -16243,7 +16309,6 @@ function renderAlfaPortfoy2() {
   ap2RebalCalc();
   ap2RenderIdeas();
   ap2RenderMonthly();
-  ap2SosRefresh();
 }
 function ap2RebalCalc() {
   const resultEl = document.getElementById('ap2-rebal-result');
@@ -16647,241 +16712,251 @@ function ap2IdeaNotify(idea) {
   lines.push('', 'alfa-trader.com');
   ap2TgNotify(lines.join('\n'));
 }
-const AP2_SOS_PIN_KEY = 'ap2_sos_pin';
-const AP2_SOS_CRIT_KEY = 'ap2_sos_crit';
-const AP2_SOS_M = { karp: 'Kâr %', 'kar$': 'Kâr $', kslik: 'Pozisyon $', gun: 'Tutulan gün', adet: 'Adet', fiyat: 'Fiyat $' };
-let ap2SosUnlocked = false;
-let ap2SosShareOp = null;
-function ap2SosHash(s) { let h = 7; const t = 'alfa::' + s + '::sosyal'; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return 'h' + ((h >>> 0).toString(36)); }
-function ap2SosCrits() { try { return JSON.parse(localStorage.getItem(AP2_SOS_CRIT_KEY) || '[]'); } catch (e) { return []; } }
-function ap2SosSaveCrits(c) { try { localStorage.setItem(AP2_SOS_CRIT_KEY, JSON.stringify(c)); } catch (e) {} }
-function ap2SosTxt(v, suf) { if (v === null || v === undefined || isNaN(v)) return '—'; return '<span class="ap2-sos-' + (v >= 0 ? 'gec' : 'kaldi') + '">' + (v >= 0 ? '+' : '') + (suf === '%' ? v.toFixed(1) + '%' : ap2Fmt(v)) + '</span>'; }
-function ap2SosHint() {
-  const t = document.getElementById('ap2-sos-gate-title');
-  const pinEl = document.getElementById('ap2-sos-pin');
-  const msg = document.getElementById('ap2-sos-pin-msg');
-  if (!t) return;
-  if (localStorage.getItem(AP2_SOS_PIN_KEY)) {
-    t.innerHTML = '<b>Kilitli</b> — sahip PIN ile aç';
-    if (pinEl) pinEl.placeholder = 'Sahip PIN';
-  } else {
-    t.innerHTML = '<b>İlk kurulum</b> — kendine bir sahip PIN belirle';
-    if (pinEl) pinEl.placeholder = 'Yeni PIN belirle';
-  }
-  if (msg) msg.textContent = '';
-  const gate = document.getElementById('ap2-sos-gate'); if (gate) gate.style.display = '';
-  const m = document.getElementById('ap2-sos-main'); if (m) m.classList.add('hidden');
+
+const SM_KEY = 'defter-sosyalmetre-v1';
+let smData = null;
+let smBound = false;
+let smShareTrade = null;
+function smLoad() {
+  try { smData = JSON.parse(localStorage.getItem(SM_KEY) || 'null'); } catch (e) { smData = null; }
+  if (!smData || typeof smData !== 'object') smData = { conds: [], trades: [], th: 'all' };
+  smData.conds = smData.conds || [];
+  smData.trades = smData.trades || [];
+  smData.th = smData.th || 'all';
 }
-function ap2SosToggle() {
-  const box = document.getElementById('ap2-sos');
-  if (!box) return;
-  const opening = box.classList.contains('hidden');
-  box.classList.toggle('hidden');
-  if (opening) {
-    if (ap2SosUnlocked) {
-      const gate = document.getElementById('ap2-sos-gate'); if (gate) gate.style.display = 'none';
-      const m = document.getElementById('ap2-sos-main'); if (m) m.classList.remove('hidden');
-      ap2SosRender();
-    } else ap2SosHint();
-  } else ap2SosUnlocked = false;
+function smSave() { try { localStorage.setItem(SM_KEY, JSON.stringify(smData)); } catch (e) {} }
+function smUid() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function smToday() { const d = new Date(); const z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+function smEval(t) {
+  const conds = smData.conds || [];
+  const total = conds.length;
+  let ticks = 0;
+  conds.forEach(c => { if (t.ticks && t.ticks[c.id]) ticks++; });
+  let need = total;
+  if (smData.th === '75') need = Math.ceil(total * 0.75);
+  else if (smData.th === '50') need = Math.ceil(total * 0.5);
+  return { total: total, ticks: ticks, need: need, pass: total > 0 && need > 0 && ticks >= need };
 }
-function ap2SosUnlock() {
-  const v = (document.getElementById('ap2-sos-pin').value || '').trim();
-  const msg = document.getElementById('ap2-sos-pin-msg');
-  if (!v) { if (msg) msg.textContent = 'PIN girmelisin.'; return; }
-  const stored = localStorage.getItem(AP2_SOS_PIN_KEY);
-  if (!stored) localStorage.setItem(AP2_SOS_PIN_KEY, ap2SosHash(v));
-  else if (stored !== ap2SosHash(v)) { if (msg) msg.textContent = 'Yanlış PIN.'; return; }
-  ap2SosUnlocked = true;
-  if (msg) msg.textContent = '';
-  document.getElementById('ap2-sos-pin').value = '';
-  const gate = document.getElementById('ap2-sos-gate'); if (gate) gate.style.display = 'none';
-  const m = document.getElementById('ap2-sos-main'); if (m) m.classList.remove('hidden');
-  ap2SosRender();
+function smProgressHtml(t) {
+  const e = smEval(t);
+  const pct = e.total ? Math.round(e.ticks / e.total * 100) : 0;
+  const col = e.pass ? 'pass' : (e.total ? 'fail' : '');
+  return '<div class="sm-prog"><div class="sm-bar"><i class="' + col + '" style="width:' + pct + '%"></i></div><span class="sm-prog-txt">' + e.ticks + '/' + e.total + ' şart' + (e.total ? ' · gereken ' + e.need : '') + '</span></div>';
 }
-function ap2SosDayGun(d) { try { const t = new Date(d).getTime(); if (isNaN(t)) return null; return Math.max(0, Math.round((Date.now() - t) / 86400000)); } catch (e) { return null; } }
-function ap2SosOps() {
-  const ops = [];
-  (ap2Data.positions || []).forEach(function (p) {
-    const c = ap2Calc(p);
-    const entry = Number(p.qty) * Number(p.cost);
-    const val = (c && c.value !== null && c.value !== undefined) ? c.value : null;
-    const pnlUsd = val !== null ? val - entry : null;
-    ops.push({ key: 'pos-' + p.id, kind: 'Pozisyon', sym: p.symbol, type: p.type, date: p.date || '', qty: Number(p.qty), price: Number(p.price) || null, met: {
-      'karp': entry > 0 && pnlUsd !== null ? pnlUsd / entry * 100 : null,
-      'kar$': pnlUsd,
-      'kslik': entry,
-      'gun': p.date ? ap2SosDayGun(p.date) : null,
-      'adet': Number(p.qty),
-      'fiyat': Number(p.price) || null
-    } });
-  });
-  (ap2Data.sells || []).forEach(function (s) {
-    const entry = Number(s.cost) > 0 ? Number(s.qty) * Number(s.cost) : null;
-    const profit = (s.profit !== undefined && s.profit !== null && s.profit !== 0) ? Number(s.profit) : (entry !== null ? Number(s.amount) - entry : null);
-    ops.push({ key: 'sell-' + s.id, kind: 'Satış', sym: s.symbol, type: s.type, date: s.ts ? new Date(s.ts).toISOString().slice(0, 10) : '', qty: Number(s.qty), price: Number(s.price) || null, met: {
-      'karp': entry !== null && entry > 0 && profit !== null ? profit / entry * 100 : null,
-      'kar$': profit,
-      'kslik': entry !== null ? entry : Number(s.amount),
-      'gun': (s.days !== undefined && s.days !== null && s.days >= 0) ? Number(s.days) : null,
-      'adet': Number(s.qty),
-      'fiyat': Number(s.price) || null
-    } });
-  });
-  return ops;
-}
-function ap2SosOk(op, cr) { const v = op.met[cr.metric]; if (v === null || v === undefined || isNaN(v)) return false; const n = Number(cr.val); return cr.op === 'le' ? v <= n : v >= n; }
-function ap2SosRenderCrits() {
-  const box = document.getElementById('ap2-sos-crit');
-  if (!box) return;
-  const crits = ap2SosCrits();
-  if (!crits.length) { box.innerHTML = '<span style="font-size:12px;color:var(--text-3)">Henüz kriter yok — yukarıdan ekle.</span>'; return; }
-  box.innerHTML = crits.map(function (c, i) {
-    const lbl = AP2_SOS_M[c.metric] || c.metric;
-    return '<span class="ap2-sos-crit-chip">' + esc(lbl) + ' ' + esc(c.op) + ' ' + esc(c.val) + ' <button type="button" data-sos-del="' + i + '" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:11px;padding:0">✕</button></span>';
+function smCondRowsHtml() {
+  return (smData.conds || []).map(function (c, i) {
+    const up = i === 0 ? ' disabled style="opacity:.3"' : '';
+    const dn = i === smData.conds.length - 1 ? ' disabled style="opacity:.3"' : '';
+    return '<div class="sm-cond-row"><span class="sm-cond-num">' + (i + 1) + '</span><span class="sm-cond-txt">' + esc(c.text) + '</span><span class="sm-cond-actions">' +
+      '<button type="button" title="Yukarı" data-cond-move="up" data-cond-id="' + c.id + '"' + up + '>↑</button>' +
+      '<button type="button" title="Aşağı" data-cond-move="down" data-cond-id="' + c.id + '"' + dn + '>↓</button>' +
+      '<button type="button" title="Düzenle" data-cond-edit="' + c.id + '">✎</button>' +
+      '<button type="button" title="Sil" data-cond-del="' + c.id + '">✕</button></span></div>';
   }).join('');
 }
-function ap2SosRender() {
-  const opsEl = document.getElementById('ap2-sos-ops');
-  if (!opsEl) return;
-  const box = document.getElementById('ap2-sos-crit');
-  if (box) ap2SosRenderCrits();
-  const crits = ap2SosCrits();
-  const ops = ap2SosOps();
-  if (!ops.length) { opsEl.innerHTML = '<div class="ap2-sos-nope">Henüz işlem yok — portföye pozisyon ekle veya satış tamamla.</div>'; return; }
-  if (!crits.length) { opsEl.innerHTML = '<div class="ap2-sos-nope">Değerlendirme için yukarıdan en az bir kriter ekle.</div>'; return; }
-  let html = '<table class="ap2-sos-table"><thead><tr><th>İşlem</th><th>Kâr %</th><th>Kâr $</th><th>Büyüklük</th><th>Gün</th>' + crits.map(function (c) { return '<th>' + esc((AP2_SOS_M[c.metric] || c.metric) + ' ' + c.op + ' ' + c.val) + '</th>'; }).join('') + '<th>Sonuç</th></tr></thead><tbody>';
-  ops.forEach(function (op) {
-    const hits = crits.map(function (c) { return ap2SosOk(op, c); });
-    const ok = hits.length ? hits.every(Boolean) : false;
-    html += '<tr' + (ok ? ' class="ap2-sos-row-hl"' : '') + '>';
-    html += '<td><b>' + esc(op.sym) + '</b> <span style="font-size:10px;color:var(--text-3)">· ' + esc(op.kind) + '</span><div class="ap2-sos-op-btns"><button type="button" data-sos-share="' + esc(op.key) + '">📤 Paylaş</button></div></td>';
-    html += '<td>' + ap2SosTxt(op.met['karp'], '%') + '</td>';
-    html += '<td>' + ap2SosTxt(op.met['kar$'], '$') + '</td>';
-    html += '<td>' + ap2Fmt(op.met['kslik']) + '</td>';
-    html += '<td>' + (op.met['gun'] !== null && op.met['gun'] !== undefined ? esc(String(op.met['gun'])) : '—') + '</td>';
-    for (let i = 0; i < crits.length; i++) html += '<td><span class="ap2-sos-' + (hits[i] ? 'gec' : 'kaldi') + '">' + (hits[i] ? '✓' : '✗') + '</span></td>';
-    html += '<td><span class="ap2-sos-' + (ok ? 'gec' : 'kaldi') + '">' + (ok ? 'GEÇTİ' : 'KALDI') + '</span></td>';
-    html += '</tr>';
+function smTradesHtml() {
+  const conds = smData.conds || [];
+  const noConds = conds.length === 0;
+  return (smData.trades || []).map(function (t) {
+    const e = smEval(t);
+    var chks = noConds
+      ? '<div class="sm-cond-note" style="padding:12px">Önce soldan şart ekle, sonra burada işaretle.</div>'
+      : conds.map(function (c) {
+          const on = !!(t.ticks && t.ticks[c.id]);
+          return '<div class="sm-chk-row"><input type="checkbox" id="tick-' + t.id + '-' + c.id + '"' + (on ? ' checked' : '') + ' data-tick="' + t.id + '" data-tick-c="' + c.id + '"><label for="tick-' + t.id + '-' + c.id + '">' + esc(c.text) + '</label></div>';
+        }).join('');
+    return '<div class="sm-tr"><div class="sm-tr-head"><span class="sm-tr-sym">' + esc(t.sym) + '</span><span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span><span class="sm-tr-date">' + esc(t.date || '') + '</span><button type="button" class="sm-tr-del" data-trade-del="' + t.id + '" title="Sil">✕</button></div>' +
+      (t.note ? '<div class="sm-tr-note">' + esc(t.note) + '</div>' : '') +
+      smProgressHtml(t) +
+      chks +
+      '<div class="sm-tr-foot"><span class="sm-badge ' + (e.pass ? 'sm-uygun' : 'sm-kaldi') + '">' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—') + '</span>' +
+      '<button type="button" class="sm-share-btn" data-share="' + t.id + '">📤 Paylaş</button></div></div>';
+  }).join('');
+}
+function renderSosyal() {
+  if (!smData) smLoad();
+  smBind();
+  const root = document.getElementById('page-sosyalmetre');
+  if (!root) return;
+  const cl = document.getElementById('sm-cond-list'); if (cl) cl.innerHTML = smCondRowsHtml();
+  const cn = document.getElementById('sm-cond-note'); if (cn) cn.style.display = (smData.conds || []).length ? 'none' : '';
+  const tl = document.getElementById('sm-trade-list'); if (tl) tl.innerHTML = smTradesHtml();
+  const tn = document.getElementById('sm-trade-note'); if (tn) tn.style.display = (smData.trades || []).length ? 'none' : '';
+  const th = document.getElementById('sm-th'); if (th && th.value !== smData.th) th.value = smData.th;
+}
+function smBind() {
+  if (smBound) return;
+  const root = document.getElementById('page-sosyalmetre');
+  if (!root) return;
+  function show(id, on) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); }
+  root.addEventListener('click', function (e) {
+    if (e.target.closest('#sm-add-cond')) { show('sm-cond-add', true); const inp = document.getElementById('sm-cond-text'); if (inp) { setTimeout(function () { inp.focus(); }, 0); } return; }
+    if (e.target.closest('#sm-cond-cancel')) { show('sm-cond-add', false); return; }
+    if (e.target.closest('#sm-cond-save')) { smCondAdd(); return; }
+    if (e.target.closest('#sm-add-trade')) { show('sm-trade-add', true); const s = document.getElementById('sm-t-sym'); if (s) { setTimeout(function () { s.focus(); }, 0); } return; }
+    if (e.target.closest('#sm-t-cancel')) { show('sm-trade-add', false); return; }
+    if (e.target.closest('#sm-t-save')) { smTradeAdd(); return; }
+    const cm = e.target.closest('[data-cond-move]');
+    if (cm) { smCondMove(cm.getAttribute('data-cond-move') === 'up' ? -1 : 1, cm.getAttribute('data-cond-id')); return; }
+    const ce = e.target.closest('[data-cond-edit]');
+    if (ce) { smCondEdit(ce.getAttribute('data-cond-id')); return; }
+    const cd = e.target.closest('[data-cond-del]');
+    if (cd) { smCondDel(cd.getAttribute('data-cond-id')); return; }
+    const td = e.target.closest('[data-trade-del]');
+    if (td) { smTradeDel(td.getAttribute('data-trade-del')); return; }
+    const tk = e.target.closest('[data-tick]');
+    if (tk) { smTick(tk.getAttribute('data-tick'), tk.getAttribute('data-tick-c'), tk.checked); return; }
+    const sh = e.target.closest('[data-share]');
+    if (sh) { smShare(sh.getAttribute('data-share')); return; }
+    if (e.target.closest('#sm-share-close')) { smShareClose(); return; }
+    if (e.target.closest('#sm-copy')) { smCopy(); return; }
+    if (e.target.closest('#sm-png')) { smPng(); return; }
+    if (e.target.id === 'sm-share') smShareClose();
   });
-  html += '</tbody></table>';
-  opsEl.innerHTML = html;
+  root.addEventListener('change', function (e) {
+    if (e.target.id === 'sm-th') { smData.th = e.target.value; smSave(); renderSosyal(); }
+  });
+  root.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      if (e.target.id === 'sm-cond-text') { smCondAdd(); return; }
+      if (e.target.id === 'sm-t-sym' || e.target.id === 'sm-t-note') { smTradeAdd(); return; }
+    }
+  });
+  smBound = true;
 }
-function ap2SosRefresh() { if (ap2SosUnlocked) ap2SosRender(); }
-function ap2SosAddCrit() {
-  const metric = document.getElementById('ap2-sos-metric').value;
-  const op = document.getElementById('ap2-sos-op').value;
-  const valEl = document.getElementById('ap2-sos-val');
-  const val = parseFloat(valEl.value);
-  if (isNaN(val)) return;
-  const crits = ap2SosCrits();
-  crits.push({ metric: metric, op: op, val: val >= 0 ? val : 0 });
-  ap2SosSaveCrits(crits);
-  valEl.value = '';
-  ap2SosRender();
+function smCondAdd() {
+  const inp = document.getElementById('sm-cond-text');
+  const v = (inp ? inp.value : '').trim();
+  if (!v) return;
+  smData.conds.push({ id: smUid(), text: v });
+  smSave();
+  if (inp) inp.value = '';
+  const add = document.getElementById('sm-cond-add'); if (add) add.classList.add('hidden');
+  renderSosyal();
 }
-function ap2SosDelCrit(i) {
-  const crits = ap2SosCrits();
-  if (i >= 0 && i < crits.length) { crits.splice(i, 1); ap2SosSaveCrits(crits); }
-  ap2SosRender();
+function smCondMove(dir, id) {
+  const arr = smData.conds;
+  const i = arr.findIndex(c => c.id === id);
+  if (i < 0) return;
+  const j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  smSave(); renderSosyal();
 }
-function ap2SosOpenShare(key) {
-  const op = ap2SosOps().find(o => o.key === key);
-  if (!op) return;
-  ap2SosShareOp = op;
-  const card = document.getElementById('ap2-sos-card');
+function smCondEdit(id) {
+  const c = nmFind(smData.conds, id); if (!c) return;
+  const v = prompt('Şartı düzenle', c.text);
+  if (v && v.trim()) { c.text = v.trim(); smSave(); renderSosyal(); }
+}
+function smCondDel(id) {
+  if (!confirm('Şart silinsin mi?')) return;
+  smData.conds = smData.conds.filter(c => c.id !== id);
+  smSave(); renderSosyal();
+}
+function nmFind(arr, id) { return (arr || []).find(x => x.id === id) || null; }
+function smTradeAdd() {
+  const sym = (document.getElementById('sm-t-sym').value || '').trim().toUpperCase();
+  if (!sym) { stratToast('Sembol gerekiyor'); return; }
+  const dir = document.getElementById('sm-t-dir').value;
+  const date = document.getElementById('sm-t-date').value || smToday();
+  const note = (document.getElementById('sm-t-note').value || '').trim();
+  smData.trades.unshift({ id: smUid(), sym: sym, dir: dir, date: date, note: note, ticks: {} });
+  smSave();
+  const s1 = document.getElementById('sm-t-sym'); if (s1) s1.value = '';
+  const s2 = document.getElementById('sm-t-note'); if (s2) s2.value = '';
+  const add = document.getElementById('sm-trade-add'); if (add) add.classList.add('hidden');
+  renderSosyal();
+}
+function smTradeDel(id) {
+  if (!confirm('İşlem silinsin mi?')) return;
+  smData.trades = smData.trades.filter(t => t.id !== id);
+  smSave(); renderSosyal();
+}
+function smTick(tid, cid, on) {
+  const t = nmFind(smData.trades, tid);
+  if (!t) return;
+  t.ticks = t.ticks || {};
+  if (on) t.ticks[cid] = true; else delete t.ticks[cid];
+  smSave(); renderSosyal();
+}
+function smShare(tid) {
+  const t = nmFind(smData.trades, tid);
+  if (!t) return;
+  smShareTrade = t;
+  const e = smEval(t);
+  const card = document.getElementById('sm-share-card');
   if (card) {
-    const pnlTxt = (op.met['kar$'] !== null) ? ((op.met['kar$'] >= 0 ? '+' : '') + ap2Fmt(op.met['kar$']) + (op.met['karp'] !== null ? ' (' + (op.met['karp'] >= 0 ? '+' : '') + op.met['karp'].toFixed(1) + '%)' : '')) : '—';
-    card.innerHTML =
-      '<h3>' + esc(op.sym) + ' <span style="font-size:10px;color:var(--text-3);font-weight:600">' + esc(op.kind) + '</span></h3>' +
-      '<div class="sub">' + esc(op.date || '') + ' · ' + esc(AP2_TYPES[op.type] || op.type || '') + '</div>' +
-      '<div class="ap2-sos-card-rows">' +
-        '<div><span>Kâr</span><span class="pct ap2-sos-' + ((op.met['kar$'] !== null && op.met['kar$'] >= 0) ? 'gec' : op.met['kar$'] !== null ? 'kaldi' : '') + '">' + pnlTxt + '</span></div>' +
-        '<div><span>Büyüklük</span><span>' + ap2Fmt(op.met['kslik']) + '</span></div>' +
-        '<div><span>Adet</span><span>' + ap2FmtNum(op.qty) + '</span></div>' +
-        '<div><span>Fiyat</span><span>' + (op.met['fiyat'] !== null && op.met['fiyat'] !== undefined ? ap2Fmt(op.met['fiyat']) : '—') + '</span></div>' +
-        '<div><span>Gün</span><span>' + (op.met['gun'] !== null && op.met['gun'] !== undefined ? esc(String(op.met['gun'])) : '—') + '</span></div>' +
-      '</div>';
+    let rows = (smData.conds || []).map(function (c) {
+      const on = !!(t.ticks && t.ticks[c.id]);
+      return '<div><span>' + esc(c.text) + '</span><span class="' + (on ? 'ok' : 'no') + '">' + (on ? '✓' : '✗') + '</span></div>';
+    }).join('');
+    if (!rows) rows = '<div><span>Henüz şart tanımlı değil</span><span>—</span></div>';
+    card.innerHTML = '<div class="sm-share-card"><h3>' + esc(t.sym) + ' <span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span></h3>' +
+      '<div class="sub">' + esc(t.date || '') + ' · ' + e.ticks + '/' + e.total + ' şart (gereken ' + e.need + ')</div>' +
+      '<div class="sm-share-rows">' + rows + '</div>' +
+      '<div style="margin-top:10px"><span class="sm-badge ' + (e.pass ? 'sm-uygun' : 'sm-kaldi') + '">' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—') + '</span></div></div>';
   }
-  const text = document.getElementById('ap2-sos-text');
-  if (text) {
-    const kindTxt = op.kind === 'Satış' ? '📉 Kaptım' : '📈 Pozisyondayım';
-    text.value = kindTxt + ' ' + op.sym + (op.type ? ' (' + op.type + '): ' : ': ') +
-      ((op.met['kar$'] !== null) ? ((op.met['kar$'] >= 0 ? '+' : '') + ap2Fmt(op.met['kar$']) + (op.met['karp'] !== null ? ' (' + (op.met['karp'] >= 0 ? '+' : '') + op.met['karp'].toFixed(1) + '%)' : '')) : 'Kâr: —') +
-      (op.met['gun'] !== null && op.met['gun'] !== undefined ? ' · ' + op.met['gun'] + ' gün' : '') +
-      '\n\n#AlfaTrading';
+  const el = document.getElementById('sm-share-text');
+  if (el) {
+    const line = (smData.conds || []).map(function (c) {
+      const on = !!(t.ticks && t.ticks[c.id]);
+      return (on ? '[✓] ' : '[✗] ') + c.text;
+    }).join('\n');
+    el.value = '📣 ' + t.sym + ' ' + t.dir + ' — ' + (t.date || '') + '\n' +
+      'Şartları: ' + e.ticks + '/' + e.total + (e.total ? ' (gereken ' + e.need + ')' : '') + '\n\n' +
+      (line ? line + '\n\n' : '') +
+      'Sonuç: ' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—') + '\n\n#AlfaTrading';
   }
-  const mod = document.getElementById('ap2-sos-share');
-  if (mod) mod.style.display = 'flex';
+  const mod = document.getElementById('sm-share'); if (mod) mod.style.display = 'flex';
 }
-function ap2SosShareClose() { const mod = document.getElementById('ap2-sos-share'); if (mod) mod.style.display = 'none'; }
-function ap2SosCopy() {
-  const t = document.getElementById('ap2-sos-text');
+function smShareClose() { const mod = document.getElementById('sm-share'); if (mod) mod.style.display = 'none'; }
+function smCopy() {
+  const t = document.getElementById('sm-share-text');
   if (!t) return;
   const v = t.value;
   if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(v).then(function () { stratToast('Kopyalandı ✓'); }).catch(function () {}); }
   else { t.select(); try { document.execCommand('copy'); stratToast('Kopyalandı ✓'); } catch (e) {} }
 }
-function ap2SosDownload() {
-  const op = ap2SosShareOp;
-  if (!op) return;
-  const W = 1080, H = 540, R = 26;
+function smPng() {
+  const t = smShareTrade; if (!t) return;
+  const e = smEval(t);
+  const W = 1080, H = 540;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const c = cv.getContext('2d');
-  const col = { bg: '#0b1220', card: '#131b2e', border: '#26324a', text: '#e9eef7', sub: '#8b98b0', green: '#10b981', red: '#ef4444', ac: '#3b82f6' };
+  const col = { bg: '#0b1220', card: '#131b2e', border: '#26324a', text: '#e9eef7', sub: '#8b98b0', green: '#10b981', red: '#ef4444', ac: '#c084fc' };
   c.fillStyle = col.bg; c.fillRect(0, 0, W, H);
   c.fillStyle = col.ac; c.fillRect(0, 0, W, 10);
-  function rr(x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
-  c.font = '600 30px Arial'; c.fillStyle = col.ac; c.fillText('ALFA PORTFÖY', 64, 78);
-  c.font = '600 28px Arial'; c.fillStyle = col.sub; c.textAlign = 'right'; c.fillText('SOSYALMETRE', W - 64, 78); c.textAlign = 'left';
-  rr(64, 120, W - 128, 360, R); c.fillStyle = col.card; c.fill();
-  c.strokeStyle = col.border; c.lineWidth = 2; c.stroke();
-  c.font = '700 34px Arial'; c.fillStyle = col.sub; c.fillText(op.kind.toUpperCase() + '  ·  ' + (AP2_TYPES[op.type] || op.type || ''), 116, 186);
-  c.font = '700 92px Arial'; c.fillStyle = col.text; c.fillText(op.sym, 112, 286);
-  const pnl = op.met['kar$'];
-  let pnlTxt = '—', pnlCol = col.sub;
-  if (pnl !== null && pnl !== undefined) {
-    pnlTxt = (pnl >= 0 ? '+' : '') + ap2Fmt(pnl) + (op.met['karp'] !== null && op.met['karp'] !== undefined ? '  (' + (op.met['karp'] >= 0 ? '+' : '') + op.met['karp'].toFixed(1) + '%)' : '');
-    pnlCol = pnl >= 0 ? col.green : col.red;
-  }
-  c.font = '800 72px Arial'; c.fillStyle = pnlCol; c.fillText(pnlTxt, 112, 392);
-  c.strokeStyle = col.border; c.lineWidth = 2; c.beginPath(); c.moveTo(116, 420); c.lineTo(W - 116, 420); c.stroke();
-  const rows = [
-    ['Büyüklük', ap2Fmt(op.met['kslik'])],
-    ['Adet', op.qty !== undefined && op.qty !== null ? ap2FmtNum(op.qty) : '—'],
-    ['Fiyat', (op.met['fiyat'] !== null && op.met['fiyat'] !== undefined) ? ap2Fmt(op.met['fiyat']) : '—'],
-    ['Gün', (op.met['gun'] !== null && op.met['gun'] !== undefined) ? String(op.met['gun']) : '—']
-  ];
-  c.font = '600 30px Arial';
-  rows.forEach(function (r2, i) {
-    const x = 116 + (i % 2) * 430, y = 468 + Math.floor(i / 2) * 48;
-    c.fillStyle = col.sub; c.fillText(r2[0], x, y);
-    c.fillStyle = col.text; c.textAlign = 'right'; c.fillText(r2[1], x + 380, y); c.textAlign = 'left';
+  c.font = '600 30px Arial'; c.fillStyle = col.sub; c.fillText('ALFA TRADERS', 64, 78);
+  c.font = '600 28px Arial'; c.fillStyle = col.ac; c.textAlign = 'right'; c.fillText('SOSYALMETRE', W - 64, 78); c.textAlign = 'left';
+  c.font = '800 92px Arial'; c.fillStyle = col.text; c.fillText(t.sym, 112, 205);
+  c.font = '700 40px Arial'; c.fillStyle = t.dir === 'KISA' ? col.red : col.green; c.fillText(t.dir + '  ·  ' + (t.date || ''), 116, 268);
+  let y = 344;
+  const conds = smData.conds || [];
+  const lineH = 42;
+  const max = Math.floor((490 - y) / lineH);
+  c.font = '600 32px Arial';
+  conds.slice(0, max).forEach(function (cd) {
+    const on = !!(t.ticks && t.ticks[cd.id]);
+    c.fillStyle = on ? col.green : col.red;
+    c.fillText((on ? '[✓]  ' : '[✗]  ') + cd.text, 116, y);
+    y += lineH;
   });
-  c.font = '700 34px Arial'; c.fillStyle = col.ac; c.fillText('#AlfaTrading', 116, 506);
-  c.font = '600 30px Arial'; c.fillStyle = col.sub; c.textAlign = 'right'; c.fillText(op.date || '', W - 116, 506); c.textAlign = 'left';
+  if (conds.length > max) { c.fillStyle = col.sub; c.font = '600 28px Arial'; c.fillText('+' + (conds.length - max) + ' şart daha…', 116, y); }
+  c.font = '800 50px Arial';
+  c.fillStyle = e.pass ? col.green : col.red;
+  c.fillText((e.pass ? '✓ UYGUN' : '✗ KALDI') + '  ·  ' + e.ticks + '/' + e.total, 116, 512);
   const a = document.createElement('a');
-  a.download = 'sosyalmetre-' + String(op.sym).replace(/[^A-Za-z0-9]/g, '') + '.png';
+  a.download = 'sosyalmetre-' + String(t.sym).replace(/[^A-Za-z0-9]/g, '') + '.png';
   a.href = cv.toDataURL('image/png');
   a.click();
 }
+
 function bindAlfaPortfoy2() {
   const view = document.getElementById('bd-view-alfaportfoy');
   if (!view) return;
   view.addEventListener('click', e => {
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
     if (e.target.closest('#ap2-deposit')) { ap2Deposit(); return; }
-    if (e.target.closest('#ap2-sos-open')) { ap2SosToggle(); return; }
-    if (e.target.closest('#ap2-sos-close')) { const sb = document.getElementById('ap2-sos'); if (sb) sb.classList.add('hidden'); ap2SosUnlocked = false; return; }
-    if (e.target.closest('#ap2-sos-unlock')) { ap2SosUnlock(); return; }
-    if (e.target.closest('#ap2-sos-add-crit')) { ap2SosAddCrit(); return; }
-    const sosDel = e.target.closest('[data-sos-del]');
-    if (sosDel) { ap2SosDelCrit(parseInt(sosDel.getAttribute('data-sos-del'), 10)); return; }
-    const sosShare = e.target.closest('[data-sos-share]');
-    if (sosShare) { ap2SosOpenShare(sosShare.getAttribute('data-sos-share')); return; }
-    if (e.target.closest('#ap2-sos-share-close')) { ap2SosShareClose(); return; }
-    if (e.target.closest('#ap2-sos-copy')) { ap2SosCopy(); return; }
-    if (e.target.closest('#ap2-sos-download')) { ap2SosDownload(); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
     const ed = e.target.closest('[data-ap2edit]');
