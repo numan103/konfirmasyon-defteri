@@ -113,6 +113,7 @@ function fetchText(u, headers) {
     sosyalmetre_trades: html.includes('sm-trade-list') && html.includes('smTradeAdd') && html.includes('smTick') && html.includes('smEval'),
     sosyalmetre_bands: html.includes('smBandText') && html.includes('KAÇIRMA') && html.includes('TEMKİN') && html.includes('sm-b-yellow'),
     sosyalmetre_share: html.includes('sm-share-card') && html.includes('smShare') && html.includes('smCopy') && html.includes('smShareText'),
+    sosyalmetre_edit: html.includes('data-act') && html.includes('smCondShift') && html.includes('smEditStart') && html.includes('smEditSave') && html.includes('smCondDel') && html.includes('.sm-chip-act') && html.includes('.sm-cond-edit') && html.includes('gone: v.gone === true') && html.includes('smLiveConds'),
     sosyalmetre_img: html.includes('smImg') && html.includes('data-timg') && html.includes('toDataURL') && html.includes('1080'),
     sosyalmetre_save: html.includes('smExport') && html.includes('smImportFile') && html.includes('smReset') && html.includes('sm-stats'),
     sosyalmetre_old_removed: !html.includes('AP2_SOS_PIN_KEY') && !html.includes('ap2-sos-open') && !html.includes('id="ap2-sos"'),

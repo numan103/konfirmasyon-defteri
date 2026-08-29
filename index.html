@@ -1992,6 +1992,16 @@
   .sm-chip .x { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 0 2px; border-radius: 5px; }
   .sm-chip .x:hover { color: var(--red); }
   .sm-chip.on .x { color: rgba(16,185,129,.85); }
+  .sm-chip .t { flex: 1; }
+  .sm-cond-list .sm-chip { width: 100%; }
+  .sm-chip-act { display: flex; gap: 2px; margin-left: 4px; }
+  .sm-chip-act button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 2px 5px; border-radius: 6px; line-height: 1; }
+  .sm-chip-act button:hover { background: var(--bg-2); color: var(--text); }
+  .sm-chip-act button.act-edit:hover { color: var(--pc); }
+  .sm-chip-act button.act-del:hover { color: var(--red); background: rgba(239,68,68,.12); }
+  .sm-chip.on .sm-chip-act button { color: rgba(16,185,129,.9); }
+  .sm-cond-edit { display: flex; gap: 8px; flex: 1; align-items: center; }
+  .sm-cond-edit input { flex: 1; min-width: 120px; padding: 6px 9px; border: 1px solid var(--pc); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 12.5px; }
   .sm-cond-list { display: flex; flex-direction: column; gap: 7px; }
   .sm-cond-add { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
   .sm-cond-add input { flex: 1; min-width: 200px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; }
@@ -16813,6 +16823,7 @@ const SM_PRESETS = {
 let smData = null;
 let smBound = false;
 let smOpen = null;
+let smEditCond = null;
 let smShareTrade = null;
 function smShow(id, on) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); }
 function smNorm(s) { return String(s || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr'); }
@@ -16828,7 +16839,7 @@ function smNormalize(raw) {
   SM_CATS.forEach(cat => {
     const src = (ref.cats && ref.cats[cat.id]) || {};
     const conds = Array.isArray(src.conds) ? src.conds : [];
-    d.cats[cat.id] = { conds: conds.map(cd => { const v = cd || {}; return { id: String(v.id || smUid()), text: String(v.text || ''), pre: v.pre === true, on: v.on !== false }; }).filter(cd => cd.text) };
+    d.cats[cat.id] = { conds: conds.map(cd => { const v = cd || {}; return { id: String(v.id || smUid()), text: String(v.text || ''), pre: v.pre === true, on: v.on !== false, gone: v.gone === true, orig: typeof v.orig === 'string' && v.orig ? v.orig : undefined }; }).filter(cd => cd.text) };
   });
   return d;
 }
@@ -16836,10 +16847,10 @@ function smSeedPresets() {
   SM_CATS.forEach(cat => {
     const mine = smData.cats[cat.id].conds;
     const has = {};
-    mine.forEach(c => { has[smNorm(c.text)] = true; });
+    mine.forEach(c => { has[smNorm(c.text)] = true; if (c.orig) has[smNorm(c.orig)] = true; });
     (SM_PRESETS[cat.id] || []).forEach(txt => {
       const k = smNorm(txt);
-      if (!has[k]) { mine.push({ id: smUid(), text: txt, pre: true, on: true }); has[k] = true; }
+      if (!has[k]) { mine.push({ id: smUid(), text: txt, orig: txt, pre: true, on: true }); has[k] = true; }
     });
   });
 }
@@ -16862,10 +16873,11 @@ function smSave() { try { localStorage.setItem(SM_KEY, JSON.stringify(smData)); 
 function smUid() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function smToday() { const d = new Date(); const z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
 function smCatConds(catId) { const cc = smData.cats[catId]; return (cc && cc.conds) || []; }
+function smLiveConds(catId) { return smCatConds(catId).filter(c => !c.gone); }
 function smEvalConds() {
   const out = [];
   SM_CATS.forEach(cat => {
-    smCatConds(cat.id).forEach(cd => { if (cd.on !== false) out.push({ id: cd.id, text: cd.text, cat: cat.id }); });
+    smCatConds(cat.id).forEach(cd => { if (cd.on !== false && !cd.gone) out.push({ id: cd.id, text: cd.text, cat: cat.id }); });
   });
   return out;
 }
@@ -16877,7 +16889,7 @@ function smBandText(pct) {
 function smEval(t) {
   const per = {};
   SM_CATS.forEach(cat => {
-    const conds = smCatConds(cat.id).filter(cd => cd.on !== false);
+    const conds = smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone);
     let ticks = 0;
     conds.forEach(cd => { if (t.ticks && t.ticks[cd.id]) ticks++; });
     per[cat.id] = { total: conds.length, ticks: ticks, pct: conds.length ? Math.round(ticks / conds.length * 100) : 0, band: null };
@@ -16914,7 +16926,7 @@ function smStatsHtml() {
 }
 function smTabsHtml() {
   return SM_CATS.map(cat => {
-    const onCount = smCatConds(cat.id).filter(cd => cd.on !== false).length;
+    const onCount = smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone).length;
     return '<button type="button" class="sm-tab' + (smData.active === cat.id ? ' on' : '') + '" data-cat="' + cat.id + '">' + cat.icon + ' ' + cat.name + ' <span class="sm-tab-n">' + onCount + '</span></button>';
   }).join('');
 }
@@ -16924,12 +16936,23 @@ function smToolsHtml() {
     '<button type="button" class="sm-tool" id="sm-add-cond" title="Kendi kuralını ekle">＋ Özel şart</button>';
 }
 function smChipsHtml() {
-  const conds = smCatConds(smData.active);
+  const cat = smData.active;
+  const conds = smLiveConds(cat);
   if (!conds.length) return '<div class="sm-cond-note">Bu kategoride şart yok.</div>';
   return conds.map((cd, i) => {
+    if (cd.id === smEditCond) {
+      return '<div class="sm-chip on"><span class="n">✎</span><span class="sm-cond-edit"><input id="sm-edit-input" value="' + esc(cd.text) + '" maxlength="120" autocomplete="off"><button type="button" class="btn solid" data-edit-save="' + cd.id + '" title="Kaydet">✓</button><button type="button" class="btn" data-edit-cancel="' + cd.id + '">✕</button></span></div>';
+    }
     const on = cd.on !== false;
-    return '<div class="sm-chip' + (on ? ' on' : '') + '" data-tog="' + cd.id + '"><span class="n">' + (on ? '✓' : (i + 1)) + '</span>' + esc(cd.text) +
-      (cd.pre ? '' : '<button type="button" class="x" data-tog-del="' + cd.id + '" title="Bu şartı sil">✕</button>') + '</div>';
+    const up = i === 0 ? ' disabled' : '';
+    const dn = i === conds.length - 1 ? ' disabled' : '';
+    return '<div class="sm-chip' + (on ? ' on' : '') + '" data-tog="' + cd.id + '"><span class="n">' + (on ? '✓' : (i + 1)) + '</span><span class="t">' + esc(cd.text) + '</span>' +
+      '<span class="sm-chip-act">' +
+      '<button type="button" title="Yukarı taşı" data-act="up" data-cond-id="' + cd.id + '"' + (up || '') + '>↑</button>' +
+      '<button type="button" title="Aşağı taşı" data-act="down" data-cond-id="' + cd.id + '"' + (dn || '') + '>↓</button>' +
+      '<button type="button" class="act-edit" title="Düzenle" data-act="edit" data-cond-id="' + cd.id + '">✎</button>' +
+      '<button type="button" class="act-del" title="Sil" data-act="del" data-cond-id="' + cd.id + '">✕</button>' +
+      '</span></div>';
   }).join('');
 }
 function smEvalFootHtml(t, e) {
@@ -16989,7 +17012,7 @@ function renderSosyal() {
   const tabs = document.getElementById('sm-tabs'); if (tabs) tabs.innerHTML = smTabsHtml();
   const tools = document.getElementById('sm-tools'); if (tools) tools.innerHTML = smToolsHtml();
   const cl = document.getElementById('sm-cond-list'); if (cl) cl.innerHTML = smChipsHtml();
-  const cn = document.getElementById('sm-cond-note'); if (cn) cn.style.display = (smCatConds(smData.active) || []).length ? 'none' : '';
+  const cn = document.getElementById('sm-cond-note'); if (cn) cn.style.display = (smLiveConds(smData.active) || []).length ? 'none' : '';
   const st = document.getElementById('sm-stats'); if (st) st.innerHTML = smStatsHtml();
   const tl = document.getElementById('sm-trade-list'); if (tl) tl.innerHTML = smTradesHtml();
   const tn = document.getElementById('sm-trade-note'); if (tn) tn.style.display = (smData.trades || []).length ? 'none' : '';
@@ -17006,8 +17029,20 @@ function smBind() {
     if (e.target.closest('#sm-cond-save')) { smCondAdd(); return; }
     if (e.target.closest('#sm-allon')) { smAllToggle(true); return; }
     if (e.target.closest('#sm-alloff')) { smAllToggle(false); return; }
-    const tgD = e.target.closest('[data-tog-del]');
-    if (tgD) { smCondDel(tgD.getAttribute('data-tog-del')); return; }
+    const act = e.target.closest('[data-act]');
+    if (act) {
+      const id = act.getAttribute('data-cond-id');
+      const a = act.getAttribute('data-act');
+      if (a === 'up') smCondShift(-1, id);
+      else if (a === 'down') smCondShift(1, id);
+      else if (a === 'edit') smEditStart(id);
+      else if (a === 'del') smCondDel(id);
+      return;
+    }
+    const esv = e.target.closest('[data-edit-save]');
+    if (esv) { smEditSave(); return; }
+    const eec = e.target.closest('[data-edit-cancel]');
+    if (eec) { smEditCond = null; renderSosyal(); return; }
     const tg = e.target.closest('[data-tog]');
     if (tg) { smTog(tg.getAttribute('data-tog')); return; }
     const tab = e.target.closest('[data-cat]');
@@ -17045,6 +17080,12 @@ function smBind() {
     if (e.target.id === 'sm-filter') renderSosyal();
   });
   root.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== 'Escape') return;
+    if (e.target.id === 'sm-edit-input') {
+      if (e.key === 'Escape') { smEditCond = null; renderSosyal(); }
+      else { smEditSave(); }
+      return;
+    }
     if (e.key !== 'Enter') return;
     if (e.target.id === 'sm-cond-text') { smCondAdd(); return; }
     if (e.target.id === 'sm-t-sym' || e.target.id === 'sm-t-note') { smTradeAdd(); return; }
@@ -17052,13 +17093,45 @@ function smBind() {
   smBound = true;
 }
 function smTog(id) {
-  const cd = nmFind(smCatConds(smData.active), id);
+  const cd = nmFind(smLiveConds(smData.active), id);
   if (!cd) return;
   cd.on = cd.on !== false ? false : true;
   smSave(); renderSosyal();
 }
 function smAllToggle(val) {
-  smCatConds(smData.active).forEach(c => { c.on = val; });
+  smLiveConds(smData.active).forEach(c => { c.on = val; });
+  smSave(); renderSosyal();
+}
+function smCondShift(dir, id) {
+  const live = smLiveConds(smData.active);
+  const i = live.findIndex(c => c.id === id);
+  if (i < 0) return;
+  const j = i + dir;
+  if (j < 0 || j >= live.length) return;
+  const all = smData.cats[smData.active].conds;
+  const ii = all.indexOf(live[i]);
+  const jj = all.indexOf(live[j]);
+  if (ii < 0 || jj < 0) return;
+  const t = all[ii]; all[ii] = all[jj]; all[jj] = t;
+  smSave(); renderSosyal();
+}
+function smEditStart(id) {
+  if (!nmFind(smLiveConds(smData.active), id)) return;
+  smEditCond = id;
+  renderSosyal();
+  const inp = document.getElementById('sm-edit-input');
+  if (inp) setTimeout(function () { inp.focus(); inp.select(); }, 0);
+}
+function smEditSave() {
+  const inp = document.getElementById('sm-edit-input');
+  const v = (inp ? inp.value : '').trim();
+  const cd = smEditCond ? nmFind(smLiveConds(smData.active), smEditCond) : null;
+  if (!cd) return;
+  if (!v) { stratToast('Şart boş olamaz'); return; }
+  const k = smNorm(v);
+  if (smLiveConds(smData.active).some(c => c.id !== cd.id && smNorm(c.text) === k)) { stratToast('Bu şart zaten var'); return; }
+  cd.text = v;
+  smEditCond = null;
   smSave(); renderSosyal();
 }
 function smCondAdd() {
@@ -17066,7 +17139,7 @@ function smCondAdd() {
   const v = (inp ? inp.value : '').trim();
   if (!v) return;
   const k = smNorm(v);
-  if (smCatConds(smData.active).some(c => smNorm(c.text) === k)) { stratToast('Bu şart zaten var'); return; }
+  if (smLiveConds(smData.active).some(c => smNorm(c.text) === k)) { stratToast('Bu şart zaten var'); return; }
   smCatConds(smData.active).push({ id: smUid(), text: v, pre: false, on: true });
   smSave();
   if (inp) inp.value = '';
@@ -17074,8 +17147,11 @@ function smCondAdd() {
   renderSosyal();
 }
 function smCondDel(id) {
-  if (!confirm('Bu özel şartı bankadan sil? (Hazır şartlar sadece kapatılır.)')) return;
-  smData.cats[smData.active].conds = smCatConds(smData.active).filter(c => c.id !== id);
+  if (!confirm('Bu şartı sil?')) return;
+  const cd = nmFind(smCatConds(smData.active), id);
+  if (!cd) return;
+  cd.gone = true;
+  if (smEditCond === id) smEditCond = null;
   smSave(); renderSosyal();
 }
 function nmFind(arr, id) { return (arr || []).find(x => x.id === id) || null; }
@@ -17118,7 +17194,7 @@ function smShareText(t) {
     const p = e.per[cat.id];
     if (!p.total) return;
     s += '\n' + cat.icon + ' ' + cat.name + ': ' + p.ticks + '/' + p.total + ' (%' + p.pct + ')\n';
-    smCatConds(cat.id).filter(cd => cd.on !== false).forEach(cd => {
+    smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone).forEach(cd => {
       const on = !!(t.ticks && t.ticks[cd.id]);
       s += '  ' + (on ? '[✓]' : '[✗]') + ' ' + cd.text + '\n';
     });
@@ -17138,7 +17214,7 @@ function smShare(tid) {
     SM_CATS.forEach(cat => {
       const p = e.per[cat.id];
       if (!p.total) return;
-      const rows = smCatConds(cat.id).filter(cd => cd.on !== false).map(cd => {
+      const rows = smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone).map(cd => {
         const on = !!(t.ticks && t.ticks[cd.id]);
         return '<div><span>' + esc(cd.text) + '</span><span class="' + (on ? 'ok' : 'no') + '">' + (on ? '✓' : '✗') + '</span></div>';
       }).join('');
@@ -17168,7 +17244,7 @@ function smImg(tid) {
   const e = smEval(t);
   const col = { bg: '#0b1220', line: '#1e2a44', text: '#e9eef7', sub: '#8b98b0', green: '#10b981', red: '#ef4444', yellow: '#eab308', orange: '#ea8a2b', ac: '#c084fc' };
   const bandCol = function (pct) { if (pct >= 60) return pct >= 75 ? col.green : col.yellow; if (pct >= 50) return col.orange; return col.red; };
-  const secs = SM_CATS.map(cat => ({ cat: cat, conds: smCatConds(cat.id).filter(cd => cd.on !== false) })).filter(s => s.conds.length);
+  const secs = SM_CATS.map(cat => ({ cat: cat, conds: smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone) })).filter(s => s.conds.length);
   const lineH = 52, secH = 88;
   const totalRows = secs.reduce((s, x) => s + x.conds.length, 0);
   const W = 1080;
