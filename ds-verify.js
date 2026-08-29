@@ -106,6 +106,12 @@ function fetchText(u, headers) {
     ap2_growth_row: html.includes('id="ap2-growth"') && html.includes('ap2-growth-row') && html.includes('Yatirilan') && html.includes('totalInvested'),
     ap2_donut_gaps: html.includes('stroke:var(--card);stroke-width:3'),
     ap2_sym_chips: html.includes('ap2-f-sym-chips') && html.includes('data-sym="BTC"') && html.includes('data-sym="AVAX"'),
+    ap2_sosyalmetre_panel: html.includes('id="ap2-sos"') && html.includes('Sosyalmetre') && html.includes('ap2-sos-open'),
+    ap2_sosyalmetre_pin: html.includes('AP2_SOS_PIN_KEY') && html.includes('ap2-sos-pin') && html.includes('ap2SosUnlock'),
+    ap2_sosyalmetre_crit: html.includes('AP2_SOS_CRIT_KEY') && html.includes('ap2-sos-add-crit') && html.includes('ap2SosAddCrit') && html.includes('AP2_SOS_M'),
+    ap2_sosyalmetre_ops: html.includes('ap2SosOps') && html.includes('data-sos-share') && html.includes('GEÇTİ') && html.includes('KALDI'),
+    ap2_sosyalmetre_share: html.includes('ap2-sos-share') && html.includes('ap2SosOpenShare') && html.includes('ap2SosCopy'),
+    ap2_sosyalmetre_sellmeta: html.includes('cost: _entryCost') && html.includes('profit: _profit') && html.includes('days: _days'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

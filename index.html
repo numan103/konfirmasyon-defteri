@@ -1953,6 +1953,40 @@
   .ap2-growth-cell b.pos { color: var(--green); }
   .ap2-growth-cell b.neg { color: var(--red); }
   .ap2-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .ap2-sos-btn { font-family: 'Inter', sans-serif; }
+  .ap2-sos { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-top: 14px; }
+  .ap2-sos-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .ap2-sos-sub { font-size: 11px; color: var(--text-3); margin-bottom: 14px; }
+  .ap2-sos-crit { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .ap2-sos-crit-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 5px 9px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-2); color: var(--text-2); }
+  .ap2-sos-crit-chip.gec { border-color: var(--green); color: var(--green); }
+  .ap2-sos-crit-chip.kaldi { border-color: var(--red); color: var(--red); }
+  .ap2-sos-miss { font-size: 11px; color: var(--text-3); margin-top: -8px; margin-bottom: 6px; }
+  .ap2-sos-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ap2-sos-table th { text-align: left; font-size: 9px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+  .ap2-sos-table td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+  .ap2-sos-row-hl { background: rgba(16,185,129,.07); }
+  .ap2-sos-gec { color: var(--green); font-weight: 800; }
+  .ap2-sos-kaldi { color: var(--red); font-weight: 800; }
+  .ap2-sos-nope { color: var(--text-3); text-align: center; padding: 20px 0; font-size: 13px; }
+  .ap2-sos-op-btns { display: flex; gap: 4px; white-space: nowrap; }
+  .ap2-sos-op-btns button { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; padding: 4px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-2); cursor: pointer; }
+  .ap2-sos-op-btns button:hover { border-color: var(--pc); color: var(--pc); }
+  .ap2-sos-empty { font-size: 12px; color: var(--text-3); padding: 14px 0; text-align: center; }
+  .ap2-sos-body { font-size: 12px; color: var(--text-2); line-height: 1.6; white-space: pre-wrap; margin: 10px 0; }
+  .ap2-sos-cap { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 2px; }
+  .ap2-sos-cap span b { font-size: 15px; color: var(--text); }
+  .ap2-sos-cap span:last-child { text-align: right; }
+  .ap2-sos-diff { font-size: 16px; font-weight: 800; }
+  .ap2-sos-per { font-size: 11px; font-weight: 800; opacity: .8; }
+  .ap2-sos-gap { width: 100%; }
+  #ap2-sos-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; max-width: 380px; }
+  #ap2-sos-card h3 { margin: 6px 0 2px; font-size: 13px; color: var(--text); }
+  #ap2-sos-card .sub { font-size: 11px; color: var(--text-3); }
+  .ap2-sos-card-rows { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--text-2); }
+  .ap2-sos-card-rows div { display: flex; justify-content: space-between; }
+  #ap2-sos-card .pct { font-size: 16px; font-weight: 800; }
+  .ap2-sos-close { display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text-2); cursor: pointer; }
   .ap2-deposit { display: flex; gap: 6px; }
   .ap2-deposit input { width: 130px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; }
   .ap2-card-livep { font-size: 11px; font-weight: 700; margin-top: 6px; }
@@ -5943,6 +5977,7 @@
       <div id="ap2-gate-content">
       <div class="ap2-tools">
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
+        <button type="button" class="btn ap2-sos-btn" id="ap2-sos-open">📣 Sosyalmetre</button>
         <div class="ap2-deposit">
           <input type="number" id="ap2-deposit-amount" placeholder="Bakiyeye ekle ($)" min="0" step="any">
           <button type="button" class="btn" id="ap2-deposit">💸 Bakiye Ekle</button>
@@ -5953,6 +5988,44 @@
         <div class="ap2-layout-left">
           <div id="ap2-summary-area"></div>
           <div class="ap2-growth-row" id="ap2-growth"></div>
+          <div id="ap2-sos" class="ap2-sos hidden">
+            <div class="ap2-sos-head">
+              <span>📣 Sosyalmetre</span>
+              <button type="button" class="ap2-sos-close" id="ap2-sos-close" title="Kapat">✕</button>
+            </div>
+            <div class="ap2-sos-sub">Yalnızca senin göreceğin panel — işlemleri sosyal medyada paylaşmak için kendi kriterlerini belirle; geçen işlemler için web'de paylaşım kartı üret.</div>
+            <div id="ap2-sos-gate">
+              <div class="ap2-sos-cap"><span id="ap2-sos-gate-title"><b>Kilitli</b></span></div>
+              <div class="ap2-sos-gap" style="display:flex;gap:8px;margin:10px 0">
+                <input type="password" id="ap2-sos-pin" placeholder="Sahip PIN" maxlength="20" autocomplete="off" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
+                <button type="button" class="btn solid" id="ap2-sos-unlock">Aç</button>
+              </div>
+              <div class="ap2-sos-cap" style="color:var(--text-3);font-weight:600;text-transform:none;letter-spacing:0" id="ap2-sos-gate-hint">İlk açılışta sen yeni bir sahip PIN belirlersin; sonraki açılışlarda o PIN sorulur. PIN satın alınan erişim kodundan ayrıdır ve yalnızca sende kalır.</div>
+              <div class="ap2-sos-miss" id="ap2-sos-pin-msg"></div>
+            </div>
+            <div id="ap2-sos-main" class="hidden">
+              <div class="ap2-sos-cap"><span>✍️ Kriterlerin — geçen işlem paylaşıma uygun</span></div>
+              <div id="ap2-sos-crit" class="ap2-sos-crit"></div>
+              <div class="ap2-sos-crit" style="border-top:1px dashed var(--border);padding-top:10px">
+                <select id="ap2-sos-metric" style="padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg-2);color:var(--text-2);font-size:12px;font-weight:600">
+                  <option value="karp">Kâr (fiyat) %</option>
+                  <option value="kar$">Kâr $</option>
+                  <option value="kslik">Pozisyon Büyüklüğü $</option>
+                  <option value="gun">Tutulan gün</option>
+                  <option value="adet">Adet</option>
+                  <option value="fiyat">Fiyat $</option>
+                </select>
+                <select id="ap2-sos-op" style="padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg-2);color:var(--text-2);font-size:12px;font-weight:600">
+                  <option value="ge">≥</option>
+                  <option value="le">≤</option>
+                </select>
+                <input type="number" id="ap2-sos-val" placeholder="Eşik" step="any" style="width:84px;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px">
+                <button type="button" class="btn solid" id="ap2-sos-add-crit">+ Ekle</button>
+              </div>
+              <div class="ap2-sos-cap" style="margin-top:14px"><span><b>Değerlendirme</b></span></div>
+              <div id="ap2-sos-ops" class="ap2-sos-gap"></div>
+            </div>
+          </div>
           <div id="ap2-grid" class="ap2-grid"></div>
           <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
             <h4>Rebalance</h4>
@@ -6099,6 +6172,14 @@
             <button type="button" class="btn" id="ap2-sell-cancel2">Vazgeç</button>
           </div>
           <div class="strat-form-err" id="ap2-sell-err"></div>
+        </div>
+      </div>
+      <div id="ap2-sos-share" style="position:fixed;z-index:1000;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.75);padding:16px">
+        <div class="mod-inner" style="max-width:420px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;max-height:92vh;overflow:auto">
+          <div class="ap2-sos-head"><span>📤 Paylaşım Kartu</span><button type="button" class="ap2-sos-close" id="ap2-sos-share-close">✕</button></div>
+          <div id="ap2-sos-card"></div>
+          <div class="ap2-sos-cap" style="margin-top:12px"><span><b>Hazır metin</b> <button type="button" class="btn solid" id="ap2-sos-copy" style="padding:4px 10px;font-size:11px">Kopyala</button></span></div>
+          <textarea id="ap2-sos-text" rows="5" readonly style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:12px;line-height:1.5;resize:vertical;margin-top:6px"></textarea>
         </div>
       </div>
       </div><!-- /ap2-gate-content -->
@@ -15604,7 +15685,11 @@ function ap2SellConfirm() {
   const amount = sellQty * sellPrice;
   if (!confirm(sellQty + ' ' + pos.symbol + ' → ' + ap2Fmt(sellPrice) + '/adet = ' + ap2Fmt(amount) + ' Satışı onayla?')) return;
   ap2Data.sells = ap2Data.sells || [];
-  ap2Data.sells.push({ id: ap2Id(), posId: pos.id, symbol: pos.symbol, type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now() });
+  const _entryCost = Number(pos.cost) || 0;
+  const _profit = amount - sellQty * _entryCost;
+  let _days = 0;
+  try { const _d0 = new Date(pos.date).getTime(); if (!isNaN(_d0)) _days = Math.max(0, Math.round((Date.now() - _d0) / 86400000)); } catch (e) {}
+  ap2Data.sells.push({ id: ap2Id(), posId: pos.id, symbol: pos.symbol, type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now(), cost: _entryCost, profit: _profit, days: _days, posDate: pos.date });
   pos.qty = Math.round((pos.qty - sellQty) * 1e8) / 1e8;
   ap2Data.cash = (Number(ap2Data.cash) || 0) + amount;
   if (pos.qty > 0) {
@@ -15981,6 +16066,7 @@ function renderAlfaPortfoy2() {
     if (shareArea) shareArea.innerHTML = '';
     var gr0 = document.getElementById('ap2-growth');
     if (gr0) gr0.innerHTML = '';
+    ap2SosRefresh();
     ap2RenderIdeas();
     ap2RenderMonthly();
     return;
@@ -16157,6 +16243,7 @@ function renderAlfaPortfoy2() {
   ap2RebalCalc();
   ap2RenderIdeas();
   ap2RenderMonthly();
+  ap2SosRefresh();
 }
 function ap2RebalCalc() {
   const resultEl = document.getElementById('ap2-rebal-result');
@@ -16560,12 +16647,197 @@ function ap2IdeaNotify(idea) {
   lines.push('', 'alfa-trader.com');
   ap2TgNotify(lines.join('\n'));
 }
+const AP2_SOS_PIN_KEY = 'ap2_sos_pin';
+const AP2_SOS_CRIT_KEY = 'ap2_sos_crit';
+const AP2_SOS_M = { karp: 'Kâr %', 'kar$': 'Kâr $', kslik: 'Pozisyon $', gun: 'Tutulan gün', adet: 'Adet', fiyat: 'Fiyat $' };
+let ap2SosUnlocked = false;
+let ap2SosShareOp = null;
+function ap2SosHash(s) { let h = 7; const t = 'alfa::' + s + '::sosyal'; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return 'h' + ((h >>> 0).toString(36)); }
+function ap2SosCrits() { try { return JSON.parse(localStorage.getItem(AP2_SOS_CRIT_KEY) || '[]'); } catch (e) { return []; } }
+function ap2SosSaveCrits(c) { try { localStorage.setItem(AP2_SOS_CRIT_KEY, JSON.stringify(c)); } catch (e) {} }
+function ap2SosTxt(v, suf) { if (v === null || v === undefined || isNaN(v)) return '—'; return '<span class="ap2-sos-' + (v >= 0 ? 'gec' : 'kaldi') + '">' + (v >= 0 ? '+' : '') + (suf === '%' ? v.toFixed(1) + '%' : ap2Fmt(v)) + '</span>'; }
+function ap2SosHint() {
+  const t = document.getElementById('ap2-sos-gate-title');
+  const pinEl = document.getElementById('ap2-sos-pin');
+  const msg = document.getElementById('ap2-sos-pin-msg');
+  if (!t) return;
+  if (localStorage.getItem(AP2_SOS_PIN_KEY)) {
+    t.innerHTML = '<b>Kilitli</b> — sahip PIN ile aç';
+    if (pinEl) pinEl.placeholder = 'Sahip PIN';
+  } else {
+    t.innerHTML = '<b>İlk kurulum</b> — kendine bir sahip PIN belirle';
+    if (pinEl) pinEl.placeholder = 'Yeni PIN belirle';
+  }
+  if (msg) msg.textContent = '';
+  const gate = document.getElementById('ap2-sos-gate'); if (gate) gate.style.display = '';
+  const m = document.getElementById('ap2-sos-main'); if (m) m.classList.add('hidden');
+}
+function ap2SosToggle() {
+  const box = document.getElementById('ap2-sos');
+  if (!box) return;
+  const opening = box.classList.contains('hidden');
+  box.classList.toggle('hidden');
+  if (opening) {
+    if (ap2SosUnlocked) {
+      const gate = document.getElementById('ap2-sos-gate'); if (gate) gate.style.display = 'none';
+      const m = document.getElementById('ap2-sos-main'); if (m) m.classList.remove('hidden');
+      ap2SosRender();
+    } else ap2SosHint();
+  } else ap2SosUnlocked = false;
+}
+function ap2SosUnlock() {
+  const v = (document.getElementById('ap2-sos-pin').value || '').trim();
+  const msg = document.getElementById('ap2-sos-pin-msg');
+  if (!v) { if (msg) msg.textContent = 'PIN girmelisin.'; return; }
+  const stored = localStorage.getItem(AP2_SOS_PIN_KEY);
+  if (!stored) localStorage.setItem(AP2_SOS_PIN_KEY, ap2SosHash(v));
+  else if (stored !== ap2SosHash(v)) { if (msg) msg.textContent = 'Yanlış PIN.'; return; }
+  ap2SosUnlocked = true;
+  if (msg) msg.textContent = '';
+  document.getElementById('ap2-sos-pin').value = '';
+  const gate = document.getElementById('ap2-sos-gate'); if (gate) gate.style.display = 'none';
+  const m = document.getElementById('ap2-sos-main'); if (m) m.classList.remove('hidden');
+  ap2SosRender();
+}
+function ap2SosDayGun(d) { try { const t = new Date(d).getTime(); if (isNaN(t)) return null; return Math.max(0, Math.round((Date.now() - t) / 86400000)); } catch (e) { return null; } }
+function ap2SosOps() {
+  const ops = [];
+  (ap2Data.positions || []).forEach(function (p) {
+    const c = ap2Calc(p);
+    const entry = Number(p.qty) * Number(p.cost);
+    const val = (c && c.value !== null && c.value !== undefined) ? c.value : null;
+    const pnlUsd = val !== null ? val - entry : null;
+    ops.push({ key: 'pos-' + p.id, kind: 'Pozisyon', sym: p.symbol, type: p.type, date: p.date || '', qty: Number(p.qty), price: Number(p.price) || null, met: {
+      'karp': entry > 0 && pnlUsd !== null ? pnlUsd / entry * 100 : null,
+      'kar$': pnlUsd,
+      'kslik': entry,
+      'gun': p.date ? ap2SosDayGun(p.date) : null,
+      'adet': Number(p.qty),
+      'fiyat': Number(p.price) || null
+    } });
+  });
+  (ap2Data.sells || []).forEach(function (s) {
+    const entry = Number(s.cost) > 0 ? Number(s.qty) * Number(s.cost) : null;
+    const profit = (s.profit !== undefined && s.profit !== null && s.profit !== 0) ? Number(s.profit) : (entry !== null ? Number(s.amount) - entry : null);
+    ops.push({ key: 'sell-' + s.id, kind: 'Satış', sym: s.symbol, type: s.type, date: s.ts ? new Date(s.ts).toISOString().slice(0, 10) : '', qty: Number(s.qty), price: Number(s.price) || null, met: {
+      'karp': entry !== null && entry > 0 && profit !== null ? profit / entry * 100 : null,
+      'kar$': profit,
+      'kslik': entry !== null ? entry : Number(s.amount),
+      'gun': (s.days !== undefined && s.days !== null && s.days >= 0) ? Number(s.days) : null,
+      'adet': Number(s.qty),
+      'fiyat': Number(s.price) || null
+    } });
+  });
+  return ops;
+}
+function ap2SosOk(op, cr) { const v = op.met[cr.metric]; if (v === null || v === undefined || isNaN(v)) return false; const n = Number(cr.val); return cr.op === 'le' ? v <= n : v >= n; }
+function ap2SosRenderCrits() {
+  const box = document.getElementById('ap2-sos-crit');
+  if (!box) return;
+  const crits = ap2SosCrits();
+  if (!crits.length) { box.innerHTML = '<span style="font-size:12px;color:var(--text-3)">Henüz kriter yok — yukarıdan ekle.</span>'; return; }
+  box.innerHTML = crits.map(function (c, i) {
+    const lbl = AP2_SOS_M[c.metric] || c.metric;
+    return '<span class="ap2-sos-crit-chip">' + esc(lbl) + ' ' + esc(c.op) + ' ' + esc(c.val) + ' <button type="button" data-sos-del="' + i + '" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:11px;padding:0">✕</button></span>';
+  }).join('');
+}
+function ap2SosRender() {
+  const opsEl = document.getElementById('ap2-sos-ops');
+  if (!opsEl) return;
+  const box = document.getElementById('ap2-sos-crit');
+  if (box) ap2SosRenderCrits();
+  const crits = ap2SosCrits();
+  const ops = ap2SosOps();
+  if (!ops.length) { opsEl.innerHTML = '<div class="ap2-sos-nope">Henüz işlem yok — portföye pozisyon ekle veya satış tamamla.</div>'; return; }
+  if (!crits.length) { opsEl.innerHTML = '<div class="ap2-sos-nope">Değerlendirme için yukarıdan en az bir kriter ekle.</div>'; return; }
+  let html = '<table class="ap2-sos-table"><thead><tr><th>İşlem</th><th>Kâr %</th><th>Kâr $</th><th>Büyüklük</th><th>Gün</th>' + crits.map(function (c) { return '<th>' + esc((AP2_SOS_M[c.metric] || c.metric) + ' ' + c.op + ' ' + c.val) + '</th>'; }).join('') + '<th>Sonuç</th></tr></thead><tbody>';
+  ops.forEach(function (op) {
+    const hits = crits.map(function (c) { return ap2SosOk(op, c); });
+    const ok = hits.length ? hits.every(Boolean) : false;
+    html += '<tr' + (ok ? ' class="ap2-sos-row-hl"' : '') + '>';
+    html += '<td><b>' + esc(op.sym) + '</b> <span style="font-size:10px;color:var(--text-3)">· ' + esc(op.kind) + '</span><div class="ap2-sos-op-btns"><button type="button" data-sos-share="' + esc(op.key) + '">📤 Paylaş</button></div></td>';
+    html += '<td>' + ap2SosTxt(op.met['karp'], '%') + '</td>';
+    html += '<td>' + ap2SosTxt(op.met['kar$'], '$') + '</td>';
+    html += '<td>' + ap2Fmt(op.met['kslik']) + '</td>';
+    html += '<td>' + (op.met['gun'] !== null && op.met['gun'] !== undefined ? esc(String(op.met['gun'])) : '—') + '</td>';
+    for (let i = 0; i < crits.length; i++) html += '<td><span class="ap2-sos-' + (hits[i] ? 'gec' : 'kaldi') + '">' + (hits[i] ? '✓' : '✗') + '</span></td>';
+    html += '<td><span class="ap2-sos-' + (ok ? 'gec' : 'kaldi') + '">' + (ok ? 'GEÇTİ' : 'KALDI') + '</span></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  opsEl.innerHTML = html;
+}
+function ap2SosRefresh() { if (ap2SosUnlocked) ap2SosRender(); }
+function ap2SosAddCrit() {
+  const metric = document.getElementById('ap2-sos-metric').value;
+  const op = document.getElementById('ap2-sos-op').value;
+  const valEl = document.getElementById('ap2-sos-val');
+  const val = parseFloat(valEl.value);
+  if (isNaN(val)) return;
+  const crits = ap2SosCrits();
+  crits.push({ metric: metric, op: op, val: val >= 0 ? val : 0 });
+  ap2SosSaveCrits(crits);
+  valEl.value = '';
+  ap2SosRender();
+}
+function ap2SosDelCrit(i) {
+  const crits = ap2SosCrits();
+  if (i >= 0 && i < crits.length) { crits.splice(i, 1); ap2SosSaveCrits(crits); }
+  ap2SosRender();
+}
+function ap2SosOpenShare(key) {
+  const op = ap2SosOps().find(o => o.key === key);
+  if (!op) return;
+  ap2SosShareOp = op;
+  const card = document.getElementById('ap2-sos-card');
+  if (card) {
+    const pnlTxt = (op.met['kar$'] !== null) ? ((op.met['kar$'] >= 0 ? '+' : '') + ap2Fmt(op.met['kar$']) + (op.met['karp'] !== null ? ' (' + (op.met['karp'] >= 0 ? '+' : '') + op.met['karp'].toFixed(1) + '%)' : '')) : '—';
+    card.innerHTML =
+      '<h3>' + esc(op.sym) + ' <span style="font-size:10px;color:var(--text-3);font-weight:600">' + esc(op.kind) + '</span></h3>' +
+      '<div class="sub">' + esc(op.date || '') + ' · ' + esc(AP2_TYPES[op.type] || op.type || '') + '</div>' +
+      '<div class="ap2-sos-card-rows">' +
+        '<div><span>Kâr</span><span class="pct ap2-sos-' + ((op.met['kar$'] !== null && op.met['kar$'] >= 0) ? 'gec' : op.met['kar$'] !== null ? 'kaldi' : '') + '">' + pnlTxt + '</span></div>' +
+        '<div><span>Büyüklük</span><span>' + ap2Fmt(op.met['kslik']) + '</span></div>' +
+        '<div><span>Adet</span><span>' + ap2FmtNum(op.qty) + '</span></div>' +
+        '<div><span>Fiyat</span><span>' + (op.met['fiyat'] !== null && op.met['fiyat'] !== undefined ? ap2Fmt(op.met['fiyat']) : '—') + '</span></div>' +
+        '<div><span>Gün</span><span>' + (op.met['gun'] !== null && op.met['gun'] !== undefined ? esc(String(op.met['gun'])) : '—') + '</span></div>' +
+      '</div>';
+  }
+  const text = document.getElementById('ap2-sos-text');
+  if (text) {
+    const kindTxt = op.kind === 'Satış' ? '📉 Kaptım' : '📈 Pozisyondayım';
+    text.value = kindTxt + ' ' + op.sym + (op.type ? ' (' + op.type + '): ' : ': ') +
+      ((op.met['kar$'] !== null) ? ((op.met['kar$'] >= 0 ? '+' : '') + ap2Fmt(op.met['kar$']) + (op.met['karp'] !== null ? ' (' + (op.met['karp'] >= 0 ? '+' : '') + op.met['karp'].toFixed(1) + '%)' : '')) : 'Kâr: —') +
+      (op.met['gun'] !== null && op.met['gun'] !== undefined ? ' · ' + op.met['gun'] + ' gün' : '') +
+      '\n\n#AlfaTrading';
+  }
+  const mod = document.getElementById('ap2-sos-share');
+  if (mod) mod.style.display = 'flex';
+}
+function ap2SosShareClose() { const mod = document.getElementById('ap2-sos-share'); if (mod) mod.style.display = 'none'; }
+function ap2SosCopy() {
+  const t = document.getElementById('ap2-sos-text');
+  if (!t) return;
+  const v = t.value;
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(v).then(function () { stratToast('Kopyalandı ✓'); }).catch(function () {}); }
+  else { t.select(); try { document.execCommand('copy'); stratToast('Kopyalandı ✓'); } catch (e) {} }
+}
 function bindAlfaPortfoy2() {
   const view = document.getElementById('bd-view-alfaportfoy');
   if (!view) return;
   view.addEventListener('click', e => {
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
     if (e.target.closest('#ap2-deposit')) { ap2Deposit(); return; }
+    if (e.target.closest('#ap2-sos-open')) { ap2SosToggle(); return; }
+    if (e.target.closest('#ap2-sos-close')) { const sb = document.getElementById('ap2-sos'); if (sb) sb.classList.add('hidden'); ap2SosUnlocked = false; return; }
+    if (e.target.closest('#ap2-sos-unlock')) { ap2SosUnlock(); return; }
+    if (e.target.closest('#ap2-sos-add-crit')) { ap2SosAddCrit(); return; }
+    const sosDel = e.target.closest('[data-sos-del]');
+    if (sosDel) { ap2SosDelCrit(parseInt(sosDel.getAttribute('data-sos-del'), 10)); return; }
+    const sosShare = e.target.closest('[data-sos-share]');
+    if (sosShare) { ap2SosOpenShare(sosShare.getAttribute('data-sos-share')); return; }
+    if (e.target.closest('#ap2-sos-share-close')) { ap2SosShareClose(); return; }
+    if (e.target.closest('#ap2-sos-copy')) { ap2SosCopy(); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
     const ed = e.target.closest('[data-ap2edit]');
