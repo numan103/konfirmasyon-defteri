@@ -1955,30 +1955,54 @@
   .ap2-growth-cell b.neg { color: var(--red); }
   .ap2-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-  .sm-wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 60px; }
-  .sm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.sm-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px; }
+  .sm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
   .sm-title { margin: 0 0 4px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
-  .sm-sub { margin: 0; font-size: 13px; color: var(--text-3); max-width: 640px; line-height: 1.5; }
+  .sm-sub { margin: 0; font-size: 13px; color: var(--text-3); max-width: 700px; line-height: 1.55; }
+  .sm-sub b { color: var(--pc); }
+  .sm-actions2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .sm-th { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); font-weight: 600; }
   .sm-th select { padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-2); color: var(--text); font-size: 12px; font-weight: 600; }
-  .sm-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; align-items: start; }
+  .sm-tool { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700; padding: 7px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text-2); cursor: pointer; }
+  .sm-tool:hover { border-color: var(--pc); color: var(--pc); }
+  .sm-tool.danger:hover { border-color: var(--red); color: var(--red); }
+  .sm-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .sm-stat { display: flex; flex-direction: column; gap: 3px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); min-width: 92px; }
+  .sm-stat b { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1; }
+  .sm-stat span { font-size: 10.5px; color: var(--text-3); font-weight: 600; letter-spacing: .2px; text-transform: uppercase; }
+  .sm-stat.sm-ok b { color: var(--green); }
+  .sm-stat.sm-bad b { color: var(--red); }
+  .sm-stat.sm-ac b { color: var(--pc); }
+  .sm-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 16px; align-items: start; }
   .sm-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
   .sm-card-head { display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 13px; color: var(--text); margin-bottom: 12px; gap: 8px; }
+  .sm-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sm-tab { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text-2); cursor: pointer; }
+  .sm-tab:hover { border-color: var(--pc); }
+  .sm-tab.on { background: var(--pc-soft); border-color: var(--pc); color: var(--pc); }
+  .sm-tab-n { display: inline-block; min-width: 18px; padding: 1px 5px; border-radius: 999px; background: var(--bg-2); color: var(--text-3); font-size: 10px; font-weight: 800; margin-left: 4px; }
+  .sm-tab.on .sm-tab-n { background: var(--pc); color: #fff; }
+  .sm-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sm-tools .sm-tool { border-style: dashed; }
+  .sm-chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text-2); font-size: 12.5px; font-weight: 600; cursor: pointer; line-height: 1.35; transition: background .12s, border-color .12s, color .12s; }
+  .sm-chip .n { min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; background: var(--bg-2); color: var(--text-3); font-size: 10px; font-weight: 800; }
+  .sm-chip:hover { border-color: var(--pc); }
+  .sm-chip.on { background: rgba(16,185,129,.13); border-color: rgba(16,185,129,.65); color: var(--green); }
+  .sm-chip.on .n { background: var(--green); color: #06251c; }
+  .sm-chip .x { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 0 2px; border-radius: 5px; }
+  .sm-chip .x:hover { color: var(--red); }
+  .sm-chip.on .x { color: rgba(16,185,129,.85); }
+  .sm-cond-list { display: flex; flex-direction: column; gap: 7px; }
   .sm-cond-add { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
   .sm-cond-add input { flex: 1; min-width: 200px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; }
-  .sm-cond-list { display: flex; flex-direction: column; gap: 6px; }
-  .sm-cond-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
-  .sm-cond-num { min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; background: var(--pc-soft); color: var(--pc); font-size: 11px; font-weight: 800; }
-  .sm-cond-txt { flex: 1; font-size: 13px; color: var(--text-2); line-height: 1.45; }
-  .sm-cond-actions { display: flex; gap: 2px; }
-  .sm-cond-actions button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 13px; padding: 3px 5px; border-radius: 6px; }
-  .sm-cond-actions button:hover { background: var(--bg-2); color: var(--text); }
-  .sm-cond-note { color: var(--text-3); font-size: 12.5px; text-align: center; padding: 26px 8px; border: 1px dashed var(--border); border-radius: 12px; }
+  .sm-cond-note { color: var(--text-3); font-size: 12.5px; text-align: center; padding: 24px 8px; border: 1px dashed var(--border); border-radius: 12px; }
   .sm-trade-add { display: grid; grid-template-columns: 1fr auto auto 1fr; gap: 8px; margin-bottom: 12px; }
   .sm-trade-add input, .sm-trade-add select { padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; }
   .sm-trade-add .sm-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .sm-filter { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; margin-bottom: 12px; }
   .sm-tr { border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--card); }
-  .sm-tr-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .sm-tr.sm-open { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc-soft); }
+  .sm-tr-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
   .sm-tr-sym { font-weight: 800; font-size: 15px; color: var(--text); letter-spacing: 0.2px; }
   .sm-tr-dir { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; letter-spacing: .4px; }
   .sm-tr-dir.LONG { background: rgba(16,185,129,.15); color: var(--green); }
@@ -1987,30 +2011,52 @@
   .sm-tr-del { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 13px; margin-left: 6px; }
   .sm-tr-del:hover { color: var(--red); }
   .sm-tr-note { font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
-  .sm-prog { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .sm-bar { flex: 1; height: 6px; background: var(--bg-2); border-radius: 999px; overflow: hidden; }
+  .sm-catline { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-3); padding: 3px 0; }
+  .sm-catline b { font-weight: 800; color: var(--text-2); font-size: 11.5px; }
+  .sm-bar { flex: 1; height: 5px; background: var(--bg-2); border-radius: 999px; overflow: hidden; min-width: 50px; }
   .sm-bar i { display: block; height: 100%; border-radius: 999px; }
-  .sm-bar i.pass { background: var(--green); }
-  .sm-bar i.fail { background: var(--red); }
+  .sm-bar i.g { background: var(--green); }
+  .sm-bar i.r { background: var(--red); }
+  .sm-bar i.y { background: #eab308; }
+  .sm-cap { font-weight: 700; color: var(--text-2); white-space: nowrap; font-size: 11px; }
+  .sm-prog { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .sm-prog-txt { font-size: 11px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
-  .sm-chk-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
-  .sm-chk-row input { accent-color: var(--pc); width: 15px; height: 15px; cursor: pointer; }
-  .sm-chk-row label { font-size: 12.5px; color: var(--text-2); cursor: pointer; line-height: 1.4; }
-  .sm-tr-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 8px; flex-wrap: wrap; }
-  .sm-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: .3px; }
-  .sm-uygun { background: rgba(16,185,129,.15); color: var(--green); }
-  .sm-kaldi { background: rgba(239,68,68,.15); color: var(--red); }
+  .sm-tr-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px; flex-wrap: wrap; }
+  .sm-total { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .sm-band { font-size: 10.5px; font-weight: 800; padding: 4px 9px; border-radius: 8px; letter-spacing: .3px; }
+  .sm-b-green { background: rgba(16,185,129,.15); color: var(--green); }
+  .sm-b-red { background: rgba(239,68,68,.15); color: var(--red); }
+  .sm-b-yellow { background: rgba(234,179,8,.15); color: #eab308; }
+  .sm-b-orange { background: rgba(234,138,43,.15); color: #ea8a2b; }
+  .sm-b-neutral { background: var(--bg-2); color: var(--text-3); }
+  .sm-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sm-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; padding: 5px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-2); cursor: pointer; }
+  .sm-btn:hover { border-color: var(--pc); color: var(--pc); }
+  .sm-btn.g:hover { border-color: var(--green); color: var(--green); }
+  .sm-eval { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; }
+  .sm-eval-sec { margin-bottom: 8px; }
+  .sm-eval-sec-h { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; color: var(--text-2); margin: 6px 0 8px; }
+  .sm-eval-ok { color: var(--green); font-weight: 800; }
+  .sm-eval-foot { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .sm-eval-empty { font-size: 12px; color: var(--text-3); text-align: center; padding: 14px; border: 1px dashed var(--border); border-radius: 10px; }
+  .sm-chk-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 9px; margin-bottom: 5px; cursor: pointer; background: var(--bg); }
+  .sm-chk-row:hover { border-color: var(--pc); }
+  .sm-chk-row input { accent-color: var(--green); width: 15px; height: 15px; cursor: pointer; }
+  .sm-chk-row label { font-size: 12.5px; color: var(--text-2); cursor: pointer; line-height: 1.4; flex: 1; }
+  .sm-chk-row.on { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.6); }
+  .sm-chk-row.on label { color: var(--green); }
   .sm-share-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; padding: 5px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-2); cursor: pointer; }
   .sm-share-btn:hover { border-color: var(--pc); color: var(--pc); }
   .sm-share-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; max-width: 380px; }
   .sm-share-card h3 { margin: 6px 0 2px; font-size: 14px; color: var(--text); }
   .sm-share-card .sub { font-size: 11px; color: var(--text-3); }
-  .sm-share-rows { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2); margin-top: 8px; }
+  .sm-share-rows { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2); margin-top: 6px; }
   .sm-share-rows div { display: flex; justify-content: space-between; gap: 10px; }
   .sm-share-rows .ok { color: var(--green); font-weight: 700; }
   .sm-share-rows .no { color: var(--red); font-weight: 700; }
   .sm-share-txt { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 12px; line-height: 1.5; resize: vertical; margin-top: 6px; }
-  @media (max-width: 760px) { .sm-grid { grid-template-columns: 1fr; } .sm-trade-add { grid-template-columns: 1fr 1fr; } .sm-trade-add input[type=date], .sm-trade-add input#sm-t-note { grid-column: 1 / -1; } }
+  @media (max-width: 900px) { .sm-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .sm-trade-add { grid-template-columns: 1fr 1fr; } .sm-trade-add input[type=date], .sm-trade-add input#sm-t-note { grid-column: 1 / -1; } }
 
   .ap2-sos-btn { font-family: 'Inter', sans-serif; }
   .ap2-sos { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-top: 14px; }
@@ -6200,32 +6246,41 @@
     </div><!-- /bd-view-alfaportfoy -->
   </div><!-- /page-butce -->
 
-  <div id="page-sosyalmetre" class="hidden">
+<div id="page-sosyalmetre" class="hidden">
     <div class="sm-wrap">
       <div class="sm-head">
         <div>
           <h2 class="sm-title">📣 Sosyalmetre</h2>
-          <p class="sm-sub">İşlem şartların için checklist oluştur; her işlemde hangi şartların sağlandığını işaretle. Tümü (veya seçtiğin eşik) sağlanırsa işlem <b>UYGUN</b> sayılır ve paylaşım kartı hazırlanır.</p>
+          <p class="sm-sub">3 şart kategorisi: <b>X & Alfa Traders</b> · <b>Alfa Traders Public</b> · <b>Alfa Traders</b>. İşlemde sağlanan şartlara dokununca yeşile döner; skor dilimine göre <b>KAÇIRMA / AT / DİKKAT / TEMKİN / KALDI</b> kararı çıkar. Her işlemin sonuç resmini PNG olarak kaydedebilirsin.</p>
         </div>
-        <div class="sm-th">
-          <label for="sm-th">Uygunluk eşiği</label>
-          <select id="sm-th">
-            <option value="all">Tüm şartlar (hepsi)</option>
-            <option value="75">Şartların ≥ %75'i</option>
-            <option value="50">Şartların ≥ %50'si</option>
-          </select>
+        <div class="sm-actions2">
+          <div class="sm-th">
+            <label for="sm-th">Eşik</label>
+            <select id="sm-th">
+              <option value="all">Tüm şartlar</option>
+              <option value="75">≥ %75</option>
+              <option value="50">≥ %50</option>
+            </select>
+          </div>
+          <button type="button" class="sm-tool" id="sm-export" title="Tüm verileri JSON olarak indir">↧ Yedek</button>
+          <button type="button" class="sm-tool" id="sm-import" title="Yedek dosyasından geri yükle">↥ Yükle</button>
+          <button type="button" class="sm-tool danger" id="sm-reset" title="Tüm verileri sıfırla">🗑</button>
+          <input type="file" id="sm-import-file" accept=".json,application/json" style="display:none">
         </div>
       </div>
+      <div class="sm-stats" id="sm-stats"></div>
       <div class="sm-grid">
         <div class="sm-card">
-          <div class="sm-card-head"><span>📋 Şartlarım (checklist)</span><button type="button" class="btn solid" id="sm-add-cond">+ Şart</button></div>
+          <div class="sm-card-head"><span>📋 Şart Bankası</span></div>
+          <div class="sm-tabs" id="sm-tabs"></div>
+          <div class="sm-tools" id="sm-tools"></div>
           <div class="sm-cond-add hidden" id="sm-cond-add">
             <input id="sm-cond-text" placeholder="Örn: RR en az 3:1 olmalı" maxlength="120" autocomplete="off">
             <button type="button" class="btn solid" id="sm-cond-save">Ekle</button>
             <button type="button" class="btn" id="sm-cond-cancel">Vazgeç</button>
           </div>
           <div class="sm-cond-list" id="sm-cond-list"></div>
-          <div class="sm-cond-note" id="sm-cond-note">Henüz şart yok — "+ Şart" ile işlem şartlarını ekle (Alfa Traders / Telegram kurallarından ilham alabilirsin).</div>
+          <div class="sm-cond-note hidden" id="sm-cond-note">Henüz şart yok — hazır şartlardan yeşillendir ya da "+ Özel Şart" ile kendi kuralını ekle.</div>
         </div>
         <div class="sm-card">
           <div class="sm-card-head"><span>🎯 İşlemler</span><button type="button" class="btn solid" id="sm-add-trade">+ İşlem</button></div>
@@ -6236,8 +6291,9 @@
             <input id="sm-t-note" placeholder="Not (opsiyonel)" maxlength="200" autocomplete="off">
             <div class="sm-actions"><button type="button" class="btn solid" id="sm-t-save">Ekle</button><button type="button" class="btn" id="sm-t-cancel">Vazgeç</button></div>
           </div>
+          <input class="sm-filter" id="sm-filter" placeholder="🔍 Sembol ve notta ara…" autocomplete="off">
           <div id="sm-trade-list"></div>
-          <div class="sm-cond-note" id="sm-trade-note">Henüz işlem yok — "+ İşlem" ile ekle, şartları işaretle.</div>
+          <div class="sm-cond-note hidden" id="sm-trade-note">Henüz işlem yok — "+ İşlem" ile ekle; kayıtlar aşağı doğru birikir.</div>
         </div>
       </div>
     </div>
@@ -16713,64 +16769,216 @@ function ap2IdeaNotify(idea) {
   ap2TgNotify(lines.join('\n'));
 }
 
-const SM_KEY = 'defter-sosyalmetre-v1';
+const SM_KEY = 'defter-sosyalmetre-v2';
+const SM_OLD_KEY = 'defter-sosyalmetre-v1';
+const SM_CATS = [
+  { id: 'xalfa', icon: '𝕏', name: 'X & Alfa Traders' },
+  { id: 'apub', icon: '📢', name: 'Alfa Traders Public' },
+  { id: 'acourse', icon: '🎓', name: 'Alfa Traders' }
+];
+const SM_PRESETS = {
+  xalfa: [
+    'Sinyal kaynağı doğrulandı (doğru X / Alfa Traders hesabı)',
+    'Fiyat hâlâ sinyal giriş bölgesinde',
+    'Sinyalde TP ve SL net tanımlı',
+    'RR ≥ 3 : 1',
+    'Hacim/sızıntı yok — fiyat tükenmiyor',
+    'Stop, giriş desteğinin altında',
+    'Likidite ve spread işleme uygun',
+    'Bağımsız kaynakta aynı yön teyidi'
+  ],
+  apub: [
+    'Trend yönünde işlem (M15/H1)',
+    'BTC hakimiyeti / piyasa riski uygun',
+    'Yatay direnç hemen üstte değil',
+    'Haber anında işlem açmıyorum',
+    'Stop ve hedef yazılı (risk tanımlı)',
+    'Pozisyon büyüklüğü max %1–2 bakiye risk',
+    'RR < 1.5 işleme girmem',
+    'Huzursuz hissediyorsam vazgeçerim'
+  ],
+  acourse: [
+    'İşlem planı günlüğe yazıldı (setup + gerekçe)',
+    'Kondisyon / duygusal denge kontrolü yapıldı',
+    'Kayıp serisi sonrası mola kuralı uygulanıyor',
+    '2 farklı zaman diliminde teyit',
+    'Koruma stop emir olarak önceden kondu',
+    'Risk/ödül oranı günlük kurala uyuyor',
+    'Haftalık adet/hedef kuralı aşılmıyor',
+    'Komisyon + slipaj RR oranını bozmuyor',
+    'Alım bölgesi / likidite havuzu teyidi',
+    'Dünkü sonuç kararı etkilemiyor (revenge yok)'
+  ]
+};
 let smData = null;
 let smBound = false;
+let smOpen = null;
 let smShareTrade = null;
+function smShow(id, on) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); }
+function smNorm(s) { return String(s || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr'); }
+function smNormalize(raw) {
+  const ref = raw && typeof raw === 'object' ? raw : {};
+  const d = {
+    active: ref.active === 'apub' || ref.active === 'acourse' ? ref.active : 'xalfa',
+    th: ref.th === '75' || ref.th === '50' ? ref.th : 'all',
+    cats: {},
+    trades: []
+  };
+  if (Array.isArray(ref.trades)) d.trades = ref.trades.filter(t => t && typeof t === 'object').map(t => ({ id: String(t.id || smUid()), sym: String(t.sym || ''), dir: t.dir === 'KISA' ? 'KISA' : 'LONG', date: String(t.date || ''), note: String(t.note || ''), ticks: t.ticks && typeof t.ticks === 'object' ? t.ticks : {} }));
+  SM_CATS.forEach(cat => {
+    const src = (ref.cats && ref.cats[cat.id]) || {};
+    const conds = Array.isArray(src.conds) ? src.conds : [];
+    d.cats[cat.id] = { conds: conds.map(cd => { const v = cd || {}; return { id: String(v.id || smUid()), text: String(v.text || ''), pre: v.pre === true, on: v.on !== false }; }).filter(cd => cd.text) };
+  });
+  return d;
+}
+function smSeedPresets() {
+  SM_CATS.forEach(cat => {
+    const mine = smData.cats[cat.id].conds;
+    const has = {};
+    mine.forEach(c => { has[smNorm(c.text)] = true; });
+    (SM_PRESETS[cat.id] || []).forEach(txt => {
+      const k = smNorm(txt);
+      if (!has[k]) { mine.push({ id: smUid(), text: txt, pre: true, on: true }); has[k] = true; }
+    });
+  });
+}
 function smLoad() {
-  try { smData = JSON.parse(localStorage.getItem(SM_KEY) || 'null'); } catch (e) { smData = null; }
-  if (!smData || typeof smData !== 'object') smData = { conds: [], trades: [], th: 'all' };
-  smData.conds = smData.conds || [];
-  smData.trades = smData.trades || [];
-  smData.th = smData.th || 'all';
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(SM_KEY) || 'null'); } catch (e) { raw = null; }
+  if (!raw && !localStorage.getItem(SM_KEY)) {
+    try {
+      const v1 = JSON.parse(localStorage.getItem(SM_OLD_KEY) || 'null');
+      if (v1 && typeof v1 === 'object') {
+        const c1 = (Array.isArray(v1.conds) ? v1.conds : []).map(cd => ({ id: cd.id || smUid(), text: String(cd.text || ''), pre: false, on: true })).filter(cd => cd.text);
+        raw = { th: v1.th, active: 'xalfa', cats: { xalfa: { conds: [] }, apub: { conds: [] }, acourse: { conds: c1 } }, trades: Array.isArray(v1.trades) ? v1.trades : [] };
+      }
+    } catch (e) {}
+  }
+  smData = smNormalize(raw);
+  smSeedPresets();
 }
 function smSave() { try { localStorage.setItem(SM_KEY, JSON.stringify(smData)); } catch (e) {} }
 function smUid() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function smToday() { const d = new Date(); const z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+function smCatConds(catId) { const cc = smData.cats[catId]; return (cc && cc.conds) || []; }
+function smEvalConds() {
+  const out = [];
+  SM_CATS.forEach(cat => {
+    smCatConds(cat.id).forEach(cd => { if (cd.on !== false) out.push({ id: cd.id, text: cd.text, cat: cat.id }); });
+  });
+  return out;
+}
+function smBandText(pct) {
+  const B = [[90, 'KAÇIRMA', 'sm-b-green', '🚀'], [75, 'AT', 'sm-b-green', '🟢'], [60, 'DİKKAT', 'sm-b-yellow', '🟡'], [50, 'TEMKİN', 'sm-b-orange', '🟠']];
+  for (let i = 0; i < B.length; i++) { if (pct >= B[i][0]) return { t: B[i][1], cls: B[i][2], ico: B[i][3] }; }
+  return { t: 'KALDI', cls: 'sm-b-red', ico: '🔴' };
+}
 function smEval(t) {
-  const conds = smData.conds || [];
-  const total = conds.length;
-  let ticks = 0;
-  conds.forEach(c => { if (t.ticks && t.ticks[c.id]) ticks++; });
+  const per = {};
+  SM_CATS.forEach(cat => {
+    const conds = smCatConds(cat.id).filter(cd => cd.on !== false);
+    let ticks = 0;
+    conds.forEach(cd => { if (t.ticks && t.ticks[cd.id]) ticks++; });
+    per[cat.id] = { total: conds.length, ticks: ticks, pct: conds.length ? Math.round(ticks / conds.length * 100) : 0, band: null };
+    per[cat.id].band = per[cat.id].total ? smBandText(per[cat.id].pct) : null;
+  });
+  let total = 0, ticks = 0;
+  SM_CATS.forEach(cat => { total += per[cat.id].total; ticks += per[cat.id].ticks; });
   let need = total;
   if (smData.th === '75') need = Math.ceil(total * 0.75);
   else if (smData.th === '50') need = Math.ceil(total * 0.5);
-  return { total: total, ticks: ticks, need: need, pass: total > 0 && need > 0 && ticks >= need };
+  const pct = total ? Math.round(ticks / total * 100) : 0;
+  return { per: per, total: total, ticks: ticks, need: need, pct: pct, band: total ? smBandText(pct) : null, pass: total > 0 && ticks >= need };
 }
-function smProgressHtml(t) {
-  const e = smEval(t);
-  const pct = e.total ? Math.round(e.ticks / e.total * 100) : 0;
-  const col = e.pass ? 'pass' : (e.total ? 'fail' : '');
-  return '<div class="sm-prog"><div class="sm-bar"><i class="' + col + '" style="width:' + pct + '%"></i></div><span class="sm-prog-txt">' + e.ticks + '/' + e.total + ' şart' + (e.total ? ' · gereken ' + e.need : '') + '</span></div>';
+function smBarHtml(pct) {
+  const cls = pct >= 75 ? 'g' : (pct >= 50 ? 'y' : 'r');
+  return '<span class="sm-bar"><i class="' + cls + '" style="width:' + pct + '%"></i></span>';
 }
-function smCondRowsHtml() {
-  return (smData.conds || []).map(function (c, i) {
-    const up = i === 0 ? ' disabled style="opacity:.3"' : '';
-    const dn = i === smData.conds.length - 1 ? ' disabled style="opacity:.3"' : '';
-    return '<div class="sm-cond-row"><span class="sm-cond-num">' + (i + 1) + '</span><span class="sm-cond-txt">' + esc(c.text) + '</span><span class="sm-cond-actions">' +
-      '<button type="button" title="Yukarı" data-cond-move="up" data-cond-id="' + c.id + '"' + up + '>↑</button>' +
-      '<button type="button" title="Aşağı" data-cond-move="down" data-cond-id="' + c.id + '"' + dn + '>↓</button>' +
-      '<button type="button" title="Düzenle" data-cond-edit="' + c.id + '">✎</button>' +
-      '<button type="button" title="Sil" data-cond-del="' + c.id + '">✕</button></span></div>';
+function smBandHtml(b) { return b ? '<span class="sm-band ' + b.cls + '">' + b.ico + ' ' + b.t + '</span>' : ''; }
+function smCatLineHtml(cat, e) {
+  const p = e.per[cat.id];
+  if (!p.total) return '';
+  return '<div class="sm-catline"><span>' + cat.icon + '</span><b>' + cat.name + '</b>' + smBarHtml(p.pct) + '<span class="sm-cap">' + p.ticks + '/' + p.total + ' · %' + p.pct + '</span>' + (p.band ? smBandHtml(p.band) : '') + '</div>';
+}
+function smStatsHtml() {
+  const trs = smData.trades || [];
+  const cnt = { KAÇIRMA: 0, AT: 0, DİKKAT: 0, TEMKİN: 0, KALDI: 0 };
+  let pass = 0, sumPct = 0;
+  trs.forEach(t => { const e = smEval(t); if (e.band) cnt[e.band.t]++; if (e.pass) pass++; sumPct += e.pct; });
+  const avg = trs.length ? Math.round(sumPct / trs.length) : 0;
+  const stat = (k, extra) => '<div class="sm-stat ' + (extra || '') + '"><b>' + cnt[k] + '</b><span>' + k + '</span></div>';
+  return stat('KAÇIRMA', 'sm-ac') + stat('AT', 'sm-ok') + stat('DİKKAT') + stat('TEMKİN') + stat('KALDI', 'sm-bad') +
+    '<div class="sm-stat sm-ok"><b>' + pass + '</b><span>UYGUN (eşik)</span></div>' +
+    '<div class="sm-stat ' + (trs.length ? 'sm-ac' : '') + '"><b>' + (trs.length ? avg + '%' : '—') + '</b><span>Ort. uyum · ' + trs.length + ' işlem</span></div>';
+}
+function smTabsHtml() {
+  return SM_CATS.map(cat => {
+    const onCount = smCatConds(cat.id).filter(cd => cd.on !== false).length;
+    return '<button type="button" class="sm-tab' + (smData.active === cat.id ? ' on' : '') + '" data-cat="' + cat.id + '">' + cat.icon + ' ' + cat.name + ' <span class="sm-tab-n">' + onCount + '</span></button>';
   }).join('');
 }
+function smToolsHtml() {
+  return '<button type="button" class="sm-tool" id="sm-allon" title="Bu kategorideki tüm şartları yeşillendir">✓ Hepsi yeşil</button>' +
+    '<button type="button" class="sm-tool" id="sm-alloff" title="Bu kategorideki tüm şartları kapat">◌ Hepsini kapat</button>' +
+    '<button type="button" class="sm-tool" id="sm-add-cond" title="Kendi kuralını ekle">＋ Özel şart</button>';
+}
+function smChipsHtml() {
+  const conds = smCatConds(smData.active);
+  if (!conds.length) return '<div class="sm-cond-note">Bu kategoride şart yok.</div>';
+  return conds.map((cd, i) => {
+    const on = cd.on !== false;
+    return '<div class="sm-chip' + (on ? ' on' : '') + '" data-tog="' + cd.id + '"><span class="n">' + (on ? '✓' : (i + 1)) + '</span>' + esc(cd.text) +
+      (cd.pre ? '' : '<button type="button" class="x" data-tog-del="' + cd.id + '" title="Bu şartı sil">✕</button>') + '</div>';
+  }).join('');
+}
+function smEvalFootHtml(t, e) {
+  const badge = e.band ? smBandHtml(e.band) : '<span class="sm-band sm-b-neutral">Şart yok</span>';
+  const res = e.total ? (e.pass ? '<span class="sm-band sm-b-green">✓ UYGUN</span>' : '<span class="sm-band sm-b-red">✗ KALDI</span>') : '';
+  return '<div class="sm-total">' + badge + '<span class="sm-prog-txt">' + e.ticks + '/' + e.total + ' · %' + e.pct + (e.total ? ' · gereken ' + e.need : '') + '</span>' + res + '</div>';
+}
+function smEvalHtml(t, e) {
+  const conds = smEvalConds();
+  if (!conds.length) return "<div class=\"sm-eval\"><div class=\"sm-eval-empty\">Önce soldaki Şart Bankası'ndan şartları yeşillendir — sonra burada işaretleme yapılıyor.</div></div>";
+  let html = '<div class="sm-eval">';
+  SM_CATS.forEach(cat => {
+    const sec = conds.filter(c => c.cat === cat.id);
+    if (!sec.length) return;
+    const p = e.per[cat.id];
+    html += '<div class="sm-eval-sec"><div class="sm-eval-sec-h"><span>' + cat.icon + '</span><b>' + cat.name + '</b>' + smBarHtml(p.pct) + '<span class="sm-prog-txt">' + p.ticks + '/' + p.total + ' · %' + p.pct + '</span>' + (p.band ? smBandHtml(p.band) : '') + '</div>';
+    sec.forEach(cd => {
+      const on = !!(t.ticks && t.ticks[cd.id]);
+      html += '<div class="sm-chk-row' + (on ? ' on' : '') + '"><input type="checkbox" id="evk-' + t.id + '-' + cd.id + '"' + (on ? ' checked' : '') + ' data-evalc="' + cd.id + '" data-tid="' + t.id + '"><label for="evk-' + t.id + '-' + cd.id + '">' + esc(cd.text) + '</label>' + (on ? '<span class="sm-eval-ok">✓</span>' : '') + '</div>';
+    });
+    html += '</div>';
+  });
+  html += '<div class="sm-eval-foot"><button type="button" class="sm-btn g" data-eval-all="' + t.id + '">Hepsi ✓</button>' +
+    '<button type="button" class="sm-btn" data-eval-clr="' + t.id + '">Temizle</button>' +
+    '<button type="button" class="sm-btn" data-timg="' + t.id + '">🖼 Resim</button>' +
+    '<button type="button" class="sm-btn" data-share="' + t.id + '">📤 Paylaş</button></div></div>';
+  return html;
+}
 function smTradesHtml() {
-  const conds = smData.conds || [];
-  const noConds = conds.length === 0;
-  return (smData.trades || []).map(function (t) {
+  const filt = document.getElementById('sm-filter');
+  const f = (filt ? filt.value : '').trim().toLowerCase();
+  const trs = (smData.trades || []).filter(t => {
+    if (!f) return true;
+    return String(t.sym).toLowerCase().indexOf(f) > -1 || String(t.note || '').toLowerCase().indexOf(f) > -1;
+  });
+  return trs.map(t => {
     const e = smEval(t);
-    var chks = noConds
-      ? '<div class="sm-cond-note" style="padding:12px">Önce soldan şart ekle, sonra burada işaretle.</div>'
-      : conds.map(function (c) {
-          const on = !!(t.ticks && t.ticks[c.id]);
-          return '<div class="sm-chk-row"><input type="checkbox" id="tick-' + t.id + '-' + c.id + '"' + (on ? ' checked' : '') + ' data-tick="' + t.id + '" data-tick-c="' + c.id + '"><label for="tick-' + t.id + '-' + c.id + '">' + esc(c.text) + '</label></div>';
-        }).join('');
-    return '<div class="sm-tr"><div class="sm-tr-head"><span class="sm-tr-sym">' + esc(t.sym) + '</span><span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span><span class="sm-tr-date">' + esc(t.date || '') + '</span><button type="button" class="sm-tr-del" data-trade-del="' + t.id + '" title="Sil">✕</button></div>' +
-      (t.note ? '<div class="sm-tr-note">' + esc(t.note) + '</div>' : '') +
-      smProgressHtml(t) +
-      chks +
-      '<div class="sm-tr-foot"><span class="sm-badge ' + (e.pass ? 'sm-uygun' : 'sm-kaldi') + '">' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—') + '</span>' +
-      '<button type="button" class="sm-share-btn" data-share="' + t.id + '">📤 Paylaş</button></div></div>';
+    const open = smOpen === t.id;
+    let html = '<div class="sm-tr' + (open ? ' sm-open' : '') + '">' +
+      '<div class="sm-tr-head"><span class="sm-tr-sym">' + esc(t.sym) + '</span><span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span><span class="sm-tr-date">' + esc(t.date || '') + '</span><button type="button" class="sm-tr-del" data-trade-del="' + t.id + '" title="Sil">✕</button></div>';
+    if (t.note) html += '<div class="sm-tr-note">' + esc(t.note) + '</div>';
+    html += SM_CATS.map(cat => smCatLineHtml(cat, e)).join('');
+    html += '<div class="sm-tr-foot">' + smEvalFootHtml(t, e) +
+      '<div class="sm-btns"><button type="button" class="sm-btn" data-eval-toggle="' + t.id + '">' + (open ? '✕ Kapat' : '✓ Değerlendir') + '</button>' +
+      '<button type="button" class="sm-btn" data-timg="' + t.id + '" title="Sonuç resmini PNG indir">🖼 Resim</button>' +
+      '<button type="button" class="sm-btn" data-share="' + t.id + '">📤 Paylaş</button></div></div>';
+    if (open) html += smEvalHtml(t, e);
+    html += '</div>';
+    return html;
   }).join('');
 }
 function renderSosyal() {
@@ -16778,79 +16986,96 @@ function renderSosyal() {
   smBind();
   const root = document.getElementById('page-sosyalmetre');
   if (!root) return;
-  const cl = document.getElementById('sm-cond-list'); if (cl) cl.innerHTML = smCondRowsHtml();
-  const cn = document.getElementById('sm-cond-note'); if (cn) cn.style.display = (smData.conds || []).length ? 'none' : '';
+  const tabs = document.getElementById('sm-tabs'); if (tabs) tabs.innerHTML = smTabsHtml();
+  const tools = document.getElementById('sm-tools'); if (tools) tools.innerHTML = smToolsHtml();
+  const cl = document.getElementById('sm-cond-list'); if (cl) cl.innerHTML = smChipsHtml();
+  const cn = document.getElementById('sm-cond-note'); if (cn) cn.style.display = (smCatConds(smData.active) || []).length ? 'none' : '';
+  const st = document.getElementById('sm-stats'); if (st) st.innerHTML = smStatsHtml();
   const tl = document.getElementById('sm-trade-list'); if (tl) tl.innerHTML = smTradesHtml();
   const tn = document.getElementById('sm-trade-note'); if (tn) tn.style.display = (smData.trades || []).length ? 'none' : '';
-  const th = document.getElementById('sm-th'); if (th && th.value !== smData.th) th.value = smData.th;
+  const th = document.getElementById('sm-th');
+  if (th && th.value !== smData.th) th.value = smData.th;
 }
 function smBind() {
   if (smBound) return;
   const root = document.getElementById('page-sosyalmetre');
   if (!root) return;
-  function show(id, on) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); }
   root.addEventListener('click', function (e) {
-    if (e.target.closest('#sm-add-cond')) { show('sm-cond-add', true); const inp = document.getElementById('sm-cond-text'); if (inp) { setTimeout(function () { inp.focus(); }, 0); } return; }
-    if (e.target.closest('#sm-cond-cancel')) { show('sm-cond-add', false); return; }
+    if (e.target.closest('#sm-add-cond')) { smShow('sm-cond-add', true); const inp = document.getElementById('sm-cond-text'); if (inp) setTimeout(function () { inp.focus(); }, 0); return; }
+    if (e.target.closest('#sm-cond-cancel')) { smShow('sm-cond-add', false); return; }
     if (e.target.closest('#sm-cond-save')) { smCondAdd(); return; }
-    if (e.target.closest('#sm-add-trade')) { show('sm-trade-add', true); const s = document.getElementById('sm-t-sym'); if (s) { setTimeout(function () { s.focus(); }, 0); } return; }
-    if (e.target.closest('#sm-t-cancel')) { show('sm-trade-add', false); return; }
+    if (e.target.closest('#sm-allon')) { smAllToggle(true); return; }
+    if (e.target.closest('#sm-alloff')) { smAllToggle(false); return; }
+    const tgD = e.target.closest('[data-tog-del]');
+    if (tgD) { smCondDel(tgD.getAttribute('data-tog-del')); return; }
+    const tg = e.target.closest('[data-tog]');
+    if (tg) { smTog(tg.getAttribute('data-tog')); return; }
+    const tab = e.target.closest('[data-cat]');
+    if (tab) { smData.active = tab.getAttribute('data-cat'); smSave(); renderSosyal(); return; }
+    if (e.target.closest('#sm-add-trade')) { smShow('sm-trade-add', true); const s = document.getElementById('sm-t-sym'); if (s) setTimeout(function () { s.focus(); }, 0); return; }
+    if (e.target.closest('#sm-t-cancel')) { smShow('sm-trade-add', false); return; }
     if (e.target.closest('#sm-t-save')) { smTradeAdd(); return; }
-    const cm = e.target.closest('[data-cond-move]');
-    if (cm) { smCondMove(cm.getAttribute('data-cond-move') === 'up' ? -1 : 1, cm.getAttribute('data-cond-id')); return; }
-    const ce = e.target.closest('[data-cond-edit]');
-    if (ce) { smCondEdit(ce.getAttribute('data-cond-id')); return; }
-    const cd = e.target.closest('[data-cond-del]');
-    if (cd) { smCondDel(cd.getAttribute('data-cond-id')); return; }
+    if (e.target.closest('#sm-export')) { smExport(); return; }
+    if (e.target.closest('#sm-import')) { const fi = document.getElementById('sm-import-file'); if (fi) fi.click(); return; }
+    if (e.target.closest('#sm-reset')) { smReset(); return; }
     const td = e.target.closest('[data-trade-del]');
     if (td) { smTradeDel(td.getAttribute('data-trade-del')); return; }
-    const tk = e.target.closest('[data-tick]');
-    if (tk) { smTick(tk.getAttribute('data-tick'), tk.getAttribute('data-tick-c'), tk.checked); return; }
+    const et = e.target.closest('[data-eval-toggle]');
+    if (et) { const id = et.getAttribute('data-eval-toggle'); smOpen = smOpen === id ? null : id; renderSosyal(); return; }
+    const tim = e.target.closest('[data-timg]');
+    if (tim) { smImg(tim.getAttribute('data-timg')); return; }
     const sh = e.target.closest('[data-share]');
     if (sh) { smShare(sh.getAttribute('data-share')); return; }
+    const ea = e.target.closest('[data-eval-all]');
+    if (ea) { smEvalAll(ea.getAttribute('data-eval-all'), true); return; }
+    const ec = e.target.closest('[data-eval-clr]');
+    if (ec) { smEvalAll(ec.getAttribute('data-eval-clr'), false); return; }
     if (e.target.closest('#sm-share-close')) { smShareClose(); return; }
     if (e.target.closest('#sm-copy')) { smCopy(); return; }
     if (e.target.closest('#sm-png')) { smPng(); return; }
     if (e.target.id === 'sm-share') smShareClose();
   });
   root.addEventListener('change', function (e) {
-    if (e.target.id === 'sm-th') { smData.th = e.target.value; smSave(); renderSosyal(); }
+    if (e.target.id === 'sm-th') { smData.th = e.target.value; smSave(); renderSosyal(); return; }
+    if (e.target.id === 'sm-import-file') { smImportFile(); return; }
+    const ev = e.target.closest('[data-evalc]');
+    if (ev && e.target.type === 'checkbox') { smTick(ev.getAttribute('data-tid'), ev.getAttribute('data-evalc'), e.target.checked); return; }
+  });
+  root.addEventListener('input', function (e) {
+    if (e.target.id === 'sm-filter') renderSosyal();
   });
   root.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      if (e.target.id === 'sm-cond-text') { smCondAdd(); return; }
-      if (e.target.id === 'sm-t-sym' || e.target.id === 'sm-t-note') { smTradeAdd(); return; }
-    }
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'sm-cond-text') { smCondAdd(); return; }
+    if (e.target.id === 'sm-t-sym' || e.target.id === 'sm-t-note') { smTradeAdd(); return; }
   });
   smBound = true;
+}
+function smTog(id) {
+  const cd = nmFind(smCatConds(smData.active), id);
+  if (!cd) return;
+  cd.on = cd.on !== false ? false : true;
+  smSave(); renderSosyal();
+}
+function smAllToggle(val) {
+  smCatConds(smData.active).forEach(c => { c.on = val; });
+  smSave(); renderSosyal();
 }
 function smCondAdd() {
   const inp = document.getElementById('sm-cond-text');
   const v = (inp ? inp.value : '').trim();
   if (!v) return;
-  smData.conds.push({ id: smUid(), text: v });
+  const k = smNorm(v);
+  if (smCatConds(smData.active).some(c => smNorm(c.text) === k)) { stratToast('Bu şart zaten var'); return; }
+  smCatConds(smData.active).push({ id: smUid(), text: v, pre: false, on: true });
   smSave();
   if (inp) inp.value = '';
-  const add = document.getElementById('sm-cond-add'); if (add) add.classList.add('hidden');
+  smShow('sm-cond-add', false);
   renderSosyal();
 }
-function smCondMove(dir, id) {
-  const arr = smData.conds;
-  const i = arr.findIndex(c => c.id === id);
-  if (i < 0) return;
-  const j = i + dir;
-  if (j < 0 || j >= arr.length) return;
-  const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-  smSave(); renderSosyal();
-}
-function smCondEdit(id) {
-  const c = nmFind(smData.conds, id); if (!c) return;
-  const v = prompt('Şartı düzenle', c.text);
-  if (v && v.trim()) { c.text = v.trim(); smSave(); renderSosyal(); }
-}
 function smCondDel(id) {
-  if (!confirm('Şart silinsin mi?')) return;
-  smData.conds = smData.conds.filter(c => c.id !== id);
+  if (!confirm('Bu özel şartı bankadan sil? (Hazır şartlar sadece kapatılır.)')) return;
+  smData.cats[smData.active].conds = smCatConds(smData.active).filter(c => c.id !== id);
   smSave(); renderSosyal();
 }
 function nmFind(arr, id) { return (arr || []).find(x => x.id === id) || null; }
@@ -16864,7 +17089,7 @@ function smTradeAdd() {
   smSave();
   const s1 = document.getElementById('sm-t-sym'); if (s1) s1.value = '';
   const s2 = document.getElementById('sm-t-note'); if (s2) s2.value = '';
-  const add = document.getElementById('sm-trade-add'); if (add) add.classList.add('hidden');
+  smShow('sm-trade-add', false);
   renderSosyal();
 }
 function smTradeDel(id) {
@@ -16879,6 +17104,29 @@ function smTick(tid, cid, on) {
   if (on) t.ticks[cid] = true; else delete t.ticks[cid];
   smSave(); renderSosyal();
 }
+function smEvalAll(tid, on) {
+  const t = nmFind(smData.trades, tid);
+  if (!t) return;
+  t.ticks = t.ticks || {};
+  smEvalConds().forEach(c => { if (on) t.ticks[c.id] = true; else delete t.ticks[c.id]; });
+  smSave(); renderSosyal();
+}
+function smShareText(t) {
+  const e = smEval(t);
+  let s = '📣 ' + t.sym + ' ' + t.dir + ' — ' + (t.date || '') + '\n';
+  SM_CATS.forEach(cat => {
+    const p = e.per[cat.id];
+    if (!p.total) return;
+    s += '\n' + cat.icon + ' ' + cat.name + ': ' + p.ticks + '/' + p.total + ' (%' + p.pct + ')\n';
+    smCatConds(cat.id).filter(cd => cd.on !== false).forEach(cd => {
+      const on = !!(t.ticks && t.ticks[cd.id]);
+      s += '  ' + (on ? '[✓]' : '[✗]') + ' ' + cd.text + '\n';
+    });
+  });
+  s += '\nSonuç: ' + e.ticks + '/' + e.total + ' · %' + e.pct + ' → ' + (e.band ? e.band.ico + ' ' + e.band.t : '—') + ' · ' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—');
+  s += '\n\n#AlfaTrading #Sosyalmetre';
+  return s;
+}
 function smShare(tid) {
   const t = nmFind(smData.trades, tid);
   if (!t) return;
@@ -16886,27 +17134,24 @@ function smShare(tid) {
   const e = smEval(t);
   const card = document.getElementById('sm-share-card');
   if (card) {
-    let rows = (smData.conds || []).map(function (c) {
-      const on = !!(t.ticks && t.ticks[c.id]);
-      return '<div><span>' + esc(c.text) + '</span><span class="' + (on ? 'ok' : 'no') + '">' + (on ? '✓' : '✗') + '</span></div>';
-    }).join('');
-    if (!rows) rows = '<div><span>Henüz şart tanımlı değil</span><span>—</span></div>';
+    let secs = '';
+    SM_CATS.forEach(cat => {
+      const p = e.per[cat.id];
+      if (!p.total) return;
+      const rows = smCatConds(cat.id).filter(cd => cd.on !== false).map(cd => {
+        const on = !!(t.ticks && t.ticks[cd.id]);
+        return '<div><span>' + esc(cd.text) + '</span><span class="' + (on ? 'ok' : 'no') + '">' + (on ? '✓' : '✗') + '</span></div>';
+      }).join('');
+      secs += '<div style="margin-top:8px;font-size:11px;font-weight:800;color:var(--text-2)">' + cat.icon + ' ' + cat.name + ' · ' + p.ticks + '/' + p.total + ' · %' + p.pct + '</div><div class="sm-share-rows">' + rows + '</div>';
+    });
+    if (!secs) secs = '<div class="sm-share-rows"><div><span>Değerlendirilecek şart yok</span><span>—</span></div></div>';
     card.innerHTML = '<div class="sm-share-card"><h3>' + esc(t.sym) + ' <span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span></h3>' +
-      '<div class="sub">' + esc(t.date || '') + ' · ' + e.ticks + '/' + e.total + ' şart (gereken ' + e.need + ')</div>' +
-      '<div class="sm-share-rows">' + rows + '</div>' +
-      '<div style="margin-top:10px"><span class="sm-badge ' + (e.pass ? 'sm-uygun' : 'sm-kaldi') + '">' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—') + '</span></div></div>';
+      '<div class="sub">' + esc(t.date || '') + ' · ' + e.ticks + '/' + e.total + ' şart' + (e.total ? ' (gereken ' + e.need + ')' : '') + '</div>' +
+      secs +
+      '<div style="margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">' + (e.band ? smBandHtml(e.band) : '') + (e.total ? '<span class="sm-band ' + (e.pass ? 'sm-b-green' : 'sm-b-red') + '">' + (e.pass ? '✓ UYGUN' : '✗ KALDI') + '</span>' : '') + '</div></div>';
   }
   const el = document.getElementById('sm-share-text');
-  if (el) {
-    const line = (smData.conds || []).map(function (c) {
-      const on = !!(t.ticks && t.ticks[c.id]);
-      return (on ? '[✓] ' : '[✗] ') + c.text;
-    }).join('\n');
-    el.value = '📣 ' + t.sym + ' ' + t.dir + ' — ' + (t.date || '') + '\n' +
-      'Şartları: ' + e.ticks + '/' + e.total + (e.total ? ' (gereken ' + e.need + ')' : '') + '\n\n' +
-      (line ? line + '\n\n' : '') +
-      'Sonuç: ' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : '—') + '\n\n#AlfaTrading';
-  }
+  if (el) el.value = smShareText(t);
   const mod = document.getElementById('sm-share'); if (mod) mod.style.display = 'flex';
 }
 function smShareClose() { const mod = document.getElementById('sm-share'); if (mod) mod.style.display = 'none'; }
@@ -16917,38 +17162,93 @@ function smCopy() {
   if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(v).then(function () { stratToast('Kopyalandı ✓'); }).catch(function () {}); }
   else { t.select(); try { document.execCommand('copy'); stratToast('Kopyalandı ✓'); } catch (e) {} }
 }
-function smPng() {
-  const t = smShareTrade; if (!t) return;
+function smImg(tid) {
+  const t = nmFind(smData.trades, tid);
+  if (!t) return;
   const e = smEval(t);
-  const W = 1080, H = 540;
+  const col = { bg: '#0b1220', line: '#1e2a44', text: '#e9eef7', sub: '#8b98b0', green: '#10b981', red: '#ef4444', yellow: '#eab308', orange: '#ea8a2b', ac: '#c084fc' };
+  const bandCol = function (pct) { if (pct >= 60) return pct >= 75 ? col.green : col.yellow; if (pct >= 50) return col.orange; return col.red; };
+  const secs = SM_CATS.map(cat => ({ cat: cat, conds: smCatConds(cat.id).filter(cd => cd.on !== false) })).filter(s => s.conds.length);
+  const lineH = 52, secH = 88;
+  const totalRows = secs.reduce((s, x) => s + x.conds.length, 0);
+  const W = 1080;
+  const H = 250 + secs.length * secH + totalRows * lineH;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const c = cv.getContext('2d');
-  const col = { bg: '#0b1220', card: '#131b2e', border: '#26324a', text: '#e9eef7', sub: '#8b98b0', green: '#10b981', red: '#ef4444', ac: '#c084fc' };
+  const pad = 72;
   c.fillStyle = col.bg; c.fillRect(0, 0, W, H);
-  c.fillStyle = col.ac; c.fillRect(0, 0, W, 10);
-  c.font = '600 30px Arial'; c.fillStyle = col.sub; c.fillText('ALFA TRADERS', 64, 78);
-  c.font = '600 28px Arial'; c.fillStyle = col.ac; c.textAlign = 'right'; c.fillText('SOSYALMETRE', W - 64, 78); c.textAlign = 'left';
-  c.font = '800 92px Arial'; c.fillStyle = col.text; c.fillText(t.sym, 112, 205);
-  c.font = '700 40px Arial'; c.fillStyle = t.dir === 'KISA' ? col.red : col.green; c.fillText(t.dir + '  ·  ' + (t.date || ''), 116, 268);
-  let y = 344;
-  const conds = smData.conds || [];
-  const lineH = 42;
-  const max = Math.floor((490 - y) / lineH);
-  c.font = '600 32px Arial';
-  conds.slice(0, max).forEach(function (cd) {
-    const on = !!(t.ticks && t.ticks[cd.id]);
-    c.fillStyle = on ? col.green : col.red;
-    c.fillText((on ? '[✓]  ' : '[✗]  ') + cd.text, 116, y);
-    y += lineH;
+  c.fillStyle = col.ac; c.fillRect(0, 0, W, 12);
+  c.font = '600 30px Arial'; c.fillStyle = col.sub; c.fillText('ALFA TRADERS · SOSYALMETRE', pad, 64);
+  c.font = '800 92px Arial'; c.fillStyle = col.text; c.fillText(t.sym, pad, 168);
+  c.font = '700 38px Arial'; c.fillStyle = t.dir === 'KISA' ? col.red : col.green;
+  const noteStr = t.note ? '   •   ' + t.note.slice(0, 60) : '';
+  c.fillText(t.dir + '  ·  ' + (t.date || '') + noteStr, pad, 226);
+  c.fillStyle = col.line; c.fillRect(pad, 244, W - pad * 2, 2);
+  let y = 282;
+  secs.forEach(function (s) {
+    const p = e.per[s.cat.id];
+    c.fillStyle = col.ac; c.font = '600 32px Arial';
+    c.fillText(s.cat.icon + '  ' + s.cat.name.toUpperCase(), pad, y);
+    c.fillStyle = col.sub; c.font = '600 28px Arial';
+    c.fillText(p.ticks + '/' + p.total + '  ·  %' + p.pct, W - pad, y);
+    y += 40;
+    s.conds.forEach(function (cd) {
+      const on = !!(t.ticks && t.ticks[cd.id]);
+      c.fillStyle = on ? col.green : col.red;
+      c.font = '600 30px Arial';
+      c.fillText((on ? '[✓]  ' : '[✗]  ') + cd.text.slice(0, 52), pad + 18, y);
+      y += lineH;
+    });
+    y += 26;
   });
-  if (conds.length > max) { c.fillStyle = col.sub; c.font = '600 28px Arial'; c.fillText('+' + (conds.length - max) + ' şart daha…', 116, y); }
-  c.font = '800 50px Arial';
-  c.fillStyle = e.pass ? col.green : col.red;
-  c.fillText((e.pass ? '✓ UYGUN' : '✗ KALDI') + '  ·  ' + e.ticks + '/' + e.total, 116, 512);
+  c.fillStyle = col.line; c.fillRect(pad, H - 102, W - pad * 2, 2);
+  c.font = '800 46px Arial';
+  c.fillStyle = e.band ? bandCol(e.pct) : col.sub;
+  c.fillText(e.band ? e.band.t : '—', pad + 8, H - 46);
+  c.textAlign = 'right'; c.fillStyle = col.sub; c.font = '600 32px Arial';
+  c.fillText(t.sym + ' · %' + e.pct + ' · ' + e.ticks + '/' + e.total + '  ' + (e.pass ? '✓ UYGUN' : e.total ? '✗ KALDI' : ''), W - pad, H - 46);
+  c.textAlign = 'left';
   const a = document.createElement('a');
-  a.download = 'sosyalmetre-' + String(t.sym).replace(/[^A-Za-z0-9]/g, '') + '.png';
+  a.download = 'sosyalmetre-' + String(t.sym).replace(/[^A-Za-z0-9]/g, '') + '-' + String(t.date || smToday()).replace(/-/g, '') + '.png';
   a.href = cv.toDataURL('image/png');
   a.click();
+}
+function smPng() { const t = smShareTrade; if (t) smImg(t.id); }
+function smExport() {
+  const blob = new Blob([JSON.stringify(smData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.download = 'sosyalmetre-yedek-' + smToday() + '.json';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 500);
+  stratToast('Yedek indirildi ✓');
+}
+function smReset() {
+  if (!confirm('Tüm Sosyalmetre verileri (şartlar + işlemler) silinecek. Devam?')) return;
+  smData = smNormalize(null);
+  smSeedPresets();
+  smOpen = null;
+  smSave(); renderSosyal();
+  stratToast('Sıfırlandı — hazır şartlar geri yüklendi');
+}
+function smImportFile() {
+  const fi = document.getElementById('sm-import-file');
+  if (!fi || !fi.files || !fi.files[0]) return;
+  const r = new FileReader();
+  r.onload = function () {
+    try {
+      const obj = JSON.parse(String(r.result));
+      if (!obj || typeof obj !== 'object' || !obj.cats || !Array.isArray(obj.trades)) throw new Error('bad');
+      if (!confirm('Mevcut verilerin yerine yüklenecek. Devam?')) return;
+      smData = smNormalize(obj);
+      smSeedPresets();
+      smOpen = null;
+      smSave(); renderSosyal();
+      stratToast('Yedek yüklendi ✓');
+    } catch (err) { stratToast('Geçersiz yedek dosyası'); }
+    if (fi) fi.value = '';
+  };
+  r.readAsText(fi.files[0]);
 }
 
 function bindAlfaPortfoy2() {
