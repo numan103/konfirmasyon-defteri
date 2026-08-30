@@ -21,7 +21,8 @@ const mk = [
   ['smCss', h.includes('.sm-wrap {') && h.includes('.sm-tabs') && h.includes('.sm-band {') && h.includes('.sm-chip {') && h.includes('.sm-stats {')],
   ['edit', h.includes('data-act') && h.includes('smCondShift') && h.includes('smEditStart') && h.includes('smEditSave') && h.includes('smCondDel') && h.includes('.sm-chip-act') && h.includes('.sm-cond-edit') && h.includes('gone: v.gone === true') && h.includes('smLiveConds')],
   ['cleanhead', !h.includes('bd-backup') && !h.includes('bd-restore') && !h.includes('bd-blur') && !h.includes('bd-add') && !h.includes('butceBackup') && !h.includes('butceRestoreFile')],
-  ['rename', h.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && h.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm')]
+  ['rename', h.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && h.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm')],
+  ['smPrivate', h.includes("name === 'sosyalmetre' && !amAllowed()") && h.includes('id="mnav-sosyalmetre"') && h.includes("const smTab = document.getElementById('tab-sosyalmetre')") && h.includes("if (smTab) smTab.style.display = isAdmin ? '' : 'none';")]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }

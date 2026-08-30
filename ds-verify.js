@@ -121,6 +121,7 @@ function fetchText(u, headers) {
     ap2_sellmeta: html.includes('cost: _entryCost') && html.includes('profit: _profit') && html.includes('days: _days'),
     butce_cleanhead: !html.includes('bd-backup') && !html.includes('bd-restore') && !html.includes('bd-blur') && !html.includes('bd-add') && !html.includes('butceBackup') && !html.includes('butceRestoreFile'),
     butce_rename: html.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && html.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm'),
+    sosyalmetre_private: html.includes("name === 'sosyalmetre' && !amAllowed()") && html.includes('id="mnav-sosyalmetre"') && html.includes("const smTab = document.getElementById('tab-sosyalmetre')") && html.includes("if (smTab) smTab.style.display = isAdmin ? '' : 'none';"),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

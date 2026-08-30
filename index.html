@@ -4418,7 +4418,7 @@
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" data-i18n="app.butce">💰 Alfa Defter</a>
-      <a href="?page=sosyalmetre" class="mnav-link" data-nav data-mnav="sosyalmetre">📣 Sosyalmetre</a>
+      <a href="?page=sosyalmetre" class="mnav-link" id="mnav-sosyalmetre" data-nav data-mnav="sosyalmetre">📣 Sosyalmetre</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
       <a href="?page=data" class="mnav-link" data-nav data-mnav="data" data-i18n="app.journal">📈 Trade Günlüğü</a>
@@ -11823,6 +11823,7 @@ function showPage(name, skipAnim) {
   if (name === 'alfa' && !amAllowed()) name = 'home';
   if (name === 'apps' && !appsAllowed()) name = 'home';
   if (name === 'basvuru' && !amAllowed()) name = 'home';
+  if (name === 'sosyalmetre' && !amAllowed()) name = 'home';
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
@@ -22229,6 +22230,11 @@ async function onAuthed(user) {
   if (bsTab) bsTab.style.display = isAdmin ? '' : 'none';
   if (bsMob) bsMob.style.display = isAdmin ? '' : 'none';
   if (bsHome) bsHome.style.display = isAdmin ? '' : 'none';
+  // Sosyalmetre: sadece admin hesabında
+  const smTab = document.getElementById('tab-sosyalmetre');
+  const smMob = document.getElementById('mnav-sosyalmetre');
+  if (smTab) smTab.style.display = isAdmin ? '' : 'none';
+  if (smMob) smMob.style.display = isAdmin ? '' : 'none';
   // Mentoring erişimi: sadece Ahmet + Çağatay (e-postası sonradan eklenecek)
   const mtDesk = document.getElementById('tab-mentoring');
   const mtMob = document.getElementById('mnav-mentoring');
