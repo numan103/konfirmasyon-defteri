@@ -99,6 +99,7 @@ function fetchText(u, headers) {
     alfa_portfoy_share_canvas_dom: html.includes('card.getBoundingClientRect') && html.includes("'SON AYLAR (%)', pad"),
     alfa_portfoy_tg_idea_notify: html.includes('function ap2IdeaNotify') && html.includes('ap2IdeaNotify(idea);') && !html.includes('ap2-share-tg'),
     alfa_portfoy_no_tg_daily: !html.includes('ap2TgDaily') && !html.includes('ap2_tg_last') && !html.includes('ap2TgText'),
+    alfa_portfoy_ui: html.includes('id="ap2-search"') && html.includes('class="ap2-hd"') && html.includes('class="ap2-btn-primary"') && html.includes('act-hedge') && html.includes('.ap2-sell-pf') && html.includes('ap2SearchTerm') && html.includes('ap2-grid-empty'),
     alfa_portfoy_hedge: html.includes('data-ap2hedge') && html.includes('function ap2OpenHedge') && html.includes('function ap2HedgeStrip') && html.includes('id="ap2-hedge-strip"') && html.includes('ap2-f-side') && html.includes('function ap2PnlOf') && html.includes("p.side === 'SHORT' ? 'SHORT' : 'LONG'"),
     alfa_portfoy_tg_endpoint: html.includes('/api/tg?notify=1') && html.includes('function ap2TgNotify'),
     alfa_portfoy_tg_pnl_events: html.includes('Yeni pozisyon') && html.includes('tamamen kapatıldı') && html.includes('Silindi') && html.includes('Kısmi satış'),

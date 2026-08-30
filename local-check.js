@@ -27,7 +27,8 @@ const mk = [
   ['catEdit', h.includes("{ id: 'xalfa', icon: '\u{1D54F}', name: 'X' }") && h.includes('function smCatName') && h.includes('function smCatEditSave') && h.includes('sm-cat-edit-input')],
   ['imgNotes', h.includes('sm-img-paste') && h.includes('smAttachFor') && h.includes('smImgView') && h.includes('smTradeSetImg') && h.includes('data-imgdel') && h.includes("addEventListener('paste'")],
   ['ap2hedge', h.includes('data-ap2hedge') && h.includes('function ap2OpenHedge') && h.includes('function ap2HedgeStrip') && h.includes('function ap2HedgeInfo') && h.includes('id="ap2-hedge-strip"') && h.includes('ap2-f-side') && h.includes('data-ap2side')],
-  ['ap2short', h.includes('function ap2PnlOf') && h.includes("p.side === 'SHORT' ? 'SHORT' : 'LONG'") && h.includes('const _profit = ap2PnlOf(pos.side, sellQty * _entryCost, amount);') && h.includes('🛡 Karşı Pozisyon (hedge)')]
+  ['ap2short', h.includes('function ap2PnlOf') && h.includes("p.side === 'SHORT' ? 'SHORT' : 'LONG'") && h.includes('const _profit = ap2PnlOf(pos.side, sellQty * _entryCost, amount);') && h.includes('🛡 Karşı Pozisyon (hedge)')],
+  ['ap2ui', h.includes('id="ap2-search"') && h.includes('class="ap2-hd"') && h.includes('class="ap2-btn-primary"') && h.includes('act-hedge') && h.includes('act-del') && h.includes('.ap2-sell-pf') && h.includes('ap2SearchTerm') && h.includes('ap2-grid-empty')]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
