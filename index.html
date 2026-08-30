@@ -2297,6 +2297,9 @@
   .ap2-sell-val.zero { color: var(--text-3); }
   .ap2-sell-pf { display: block; font-size: 10px; opacity: .8; }
   .ap2-ideas { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .ap2-hist-badge { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); display: inline-block; margin-left: 4px; }
+  .ap2-hist-badge.ok { color: var(--green); border-color: rgba(34, 197, 94, .35); }
+  .ap2-hist-badge.warn { color: var(--amber); border-color: rgba(245, 158, 11, .35); }
   .ap2-ideas-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .ap2-ideas-head h4 { margin: 0; font-size: 13px; font-weight: 700; color: var(--text); }
   .ap2-btn-ghost { font-size: 12px; font-weight: 600; padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text-2); cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s; }
@@ -6277,6 +6280,18 @@
             <button type="button" class="btn" id="ap2-sell-cancel2">Vazgeç</button>
           </div>
           <div class="strat-form-err" id="ap2-sell-err"></div>
+        </div>
+      </div>
+      <div id="ap2-hist" class="strat-form hidden">
+        <div class="strat-form-head"><span>🛡 Giriş fiyatı doğrulaması</span><button type="button" id="ap2-hist-cancel" class="strat-form-x">✕</button></div>
+        <div class="strat-form-body">
+          <div id="ap2-hist-info"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+            <button type="button" class="btn solid" id="ap2-hist-keep" style="background:var(--amber);color:#000">Yine de kaydet</button>
+            <button type="button" class="btn" id="ap2-hist-usehist">Tarihteki fiyatı kullan</button>
+            <button type="button" class="btn" id="ap2-hist-cancel2">Vazgeç</button>
+          </div>
+          <div class="strat-form-err" id="ap2-hist-err"></div>
         </div>
       </div>
       </div><!-- /ap2-gate-content -->
@@ -15574,6 +15589,72 @@ function ap2RenderTeaserTarget(data, prefix) {
 function ap2PnlOf(side, totalCost, value) {
   return side === 'SHORT' ? totalCost - value : value - totalCost;
 }
+const AP2_CG_IDS = { BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', SOL: 'solana', XRP: 'ripple', DOGE: 'dogecoin', LTC: 'litecoin', ADA: 'cardano', AVAX: 'avalanche-2', DOT: 'polkadot', MATIC: 'matic-network', LINK: 'chainlink', TRX: 'tron', TON: 'the-open-network', SUI: 'sui', ARB: 'arbitrum', SHIB: 'shiba-inu', PEPE: 'pepe', NEAR: 'near', APT: 'aptos', ATOM: 'cosmos', ALGO: 'algorand', FIL: 'filecoin', AAVE: 'aave', LDO: 'lido-dao', KAS: 'kaspa', INJ: 'injective-protocol', OP: 'optimism', FTM: 'fantom', RUNE: 'thorchain', RNDR: 'render-token', GRT: 'the-graph', XLM: 'stellar', HBAR: 'hedera-hashgraph', ICP: 'internet-computer', VET: 'vechain', CRO: 'crypto-com-chain', EOS: 'eos', MKR: 'maker', UNI: 'uniswap', CRV: 'curve-dao-token', WLD: 'worldcoin-wld', SEI: 'sei-network', TIA: 'celestia', FET: 'fetch-ai' };
+const AP2_HIST_TOL = 0.08;
+let ap2HistPend = null;
+let ap2HistOverride = false;
+function ap2HistUrl(sym, dateStr) {
+  const s = String(sym || '').toUpperCase();
+  const id = AP2_CG_IDS[s];
+  if (!id) return null;
+  const m = String(dateStr || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  if (dateStr >= today) return null;
+  return 'https://api.coingecko.com/api/v3/coins/' + id + '/history?date=' + m[3] + '-' + m[2] + '-' + m[1] + '&localization=false';
+}
+async function ap2FetchHist(sym, dateStr) {
+  const u = ap2HistUrl(sym, dateStr);
+  if (!u) return null;
+  try {
+    const r = await fetch(u);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const p = pfNum(j && j.market_data && j.market_data.current_price && j.market_data.current_price.usd);
+    return p > 0 ? p : null;
+  } catch (e) { return null; }
+}
+function ap2ShowHistConfirm() {
+  const dlg = document.getElementById('ap2-hist');
+  if (!dlg || !ap2HistPend) return;
+  const sym = ap2HistPend.pos.symbol, d = ap2HistPend.pos.date, hp = ap2HistPend.hp, cost = ap2HistPend.pos.cost;
+  const diff = ((cost - hp) / hp) * 100;
+  const info = document.getElementById('ap2-hist-info');
+  if (info) info.innerHTML = '<div style="margin-bottom:8px"><b>' + sym + '</b> · giriş tarihi ' + d + '</div>' +
+    '<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px"><span>O tarihteki piyasa fiyatı</span><b style="color:var(--pc)">' + ap2Fmt(hp) + '</b></div>' +
+    '<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:4px"><span>Girdiğin maliyet</span><b>' + ap2Fmt(cost) + '</b></div>' +
+    '<div style="display:flex;justify-content:space-between;gap:8px"><span>Fark</span><b style="color:var(--amber)">%' + Math.abs(diff).toFixed(1) + '</b></div>';
+  const err = document.getElementById('ap2-hist-err');
+  if (err) err.textContent = 'Fark, %' + Math.round(AP2_HIST_TOL * 100) + ' toleransının üstünde. Takipçiler giriş fiyatını tarihle kıyaslayabilir — bu girişi teyit etmen gerekir.';
+  dlg.classList.remove('hidden');
+}
+function ap2CommitPosition(pos, total, qty, histRec) {
+  if (histRec) pos.hist = histRec;
+  ap2HistPend = null;
+  ap2HistOverride = false;
+  if (ap2EditId) {
+    const idx = ap2Data.positions.findIndex(x => x.id === ap2EditId);
+    if (idx >= 0) {
+      const old = ap2Data.positions[idx];
+      const oldCost = (Number(old.qty) || 0) * (Number(old.cost) || 0);
+      const cash = (Number(ap2Data.cash) || 0) + oldCost;
+      if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
+      ap2Data.cash = cash - total;
+      ap2Data.positions[idx] = { ...pos, id: ap2EditId };
+    }
+  } else {
+    const cash = Number(ap2Data.cash) || 0;
+    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
+    ap2Data.cash = cash - total;
+    ap2Data.positions.push(pos);
+    ap2TgNotify((ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' ✅' : (histRec ? ' ⚠' : '')) + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost) + '\n\nalfa-trader.com');
+  }
+  ap2Save();
+  document.getElementById('ap2-form').classList.add('hidden');
+  const dlg = document.getElementById('ap2-hist'); if (dlg) dlg.classList.add('hidden');
+  ap2EditId = null;
+  renderAlfaPortfoy2();
+}
 function ap2Calc(p) {
   const qty = Number(p.qty) || 0;
   const cost = Number(p.cost) || 0;
@@ -15762,27 +15843,24 @@ function ap2SaveForm() {
     qty, cost, price,
     note: document.getElementById('ap2-f-note').value.trim()
   };
-  if (ap2EditId) {
-    const idx = ap2Data.positions.findIndex(x => x.id === ap2EditId);
-    if (idx >= 0) {
-      const old = ap2Data.positions[idx];
-      const oldCost = (Number(old.qty) || 0) * (Number(old.cost) || 0);
-      const cash = (Number(ap2Data.cash) || 0) + oldCost;
-      if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
-      ap2Data.cash = cash - total;
-      ap2Data.positions[idx] = pos;
-    }
-  } else {
-    const cash = Number(ap2Data.cash) || 0;
-    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
-    ap2Data.cash = cash - total;
-    ap2Data.positions.push(pos);
-    ap2TgNotify((ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost) + '\n\nalfa-trader.com');
+  const overridden = ap2HistOverride;
+  ap2HistOverride = false;
+  const u = overridden ? null : ap2HistUrl(pos.symbol, pos.date);
+  if (u) {
+    ap2HistPend = { pos: pos, total: total, qty: qty };
+    const info = document.getElementById('ap2-f-preview') || document.getElementById('ap2-f-err');
+    if (info) info.textContent = '🛡 ' + pos.symbol + ' · ' + pos.date + ' günü piyasa fiyatı doğrulanıyor…';
+    ap2FetchHist(pos.symbol, pos.date).then(function(hp) {
+      if (!ap2HistPend) return;
+      ap2HistPend.hp = hp;
+      if (hp === null) { ap2CommitPosition(pos, total, qty, null); return; }
+      const diff = Math.abs(pos.cost - hp) / pos.cost;
+      if (diff <= AP2_HIST_TOL) { ap2CommitPosition(pos, total, qty, { d: pos.date, p: hp, ok: true }); return; }
+      ap2ShowHistConfirm();
+    });
+    return;
   }
-  ap2Save();
-  document.getElementById('ap2-form').classList.add('hidden');
-  ap2EditId = null;
-  renderAlfaPortfoy2();
+  ap2CommitPosition(pos, total, qty, overridden ? { d: pos.date, p: pos.cost, ok: true } : null);
 }
 function ap2Delete(id) {
   if (!confirm('Bu enstrümanı silmek istediğine emin misin?')) return;
@@ -16331,7 +16409,7 @@ function renderAlfaPortfoy2() {
         '<div><div class="ap2-card-pnl-val ' + pnlCls + '">' + (c.pnl !== null ? pnlSign + ap2Fmt(c.pnl) : '\u2014') + '</div></div>' +
         '<div class="ap2-card-pnl-pct ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '\u2014') + '</div>' +
       '</div>' +
-      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + (c.value === null && p.type === 'kripto' ? ' <span style="color:var(--text-3)">\u00b7 fiyat yüklenemedi — ✎ Düzenle ile güncel fiyatı gir</span>' : '') + '</div>' +
+      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + (p.hist && p.hist.p ? ' <span class="ap2-hist-badge ' + (p.hist.ok ? 'ok' : 'warn') + '" title="Giriş tarihindeki piyasa fiyatı: ' + ap2Fmt(p.hist.p) + (p.hist.ok ? '' : ' — maliyetten sapma teyitli') + '">' + (p.hist.ok ? '\u2714' : '\u26a0') + ' ' + ap2Fmt(p.hist.p) + '</span>' : '') + (c.value === null && p.type === 'kripto' ? ' <span style="color:var(--text-3)">\u00b7 fiyat yüklenemedi — ✎ Düzenle ile güncel fiyatı gir</span>' : '') + '</div>' +
     '</div>';
   }).join('');
   if (q && positions.length && !shown.length) gridEl.innerHTML += '<div class="ap2-grid-empty">Aramayla eşleşen pozisyon yok — farklı bir sembol ya da kelime dene.</div>';
@@ -16453,7 +16531,7 @@ async function ap2LoadPrices() {
       });
     }
   } catch (e) { /* OKX de yok */ }
-  const AP2_CG_IDS = { BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', SOL: 'solana', XRP: 'ripple', DOGE: 'dogecoin', LTC: 'litecoin', ADA: 'cardano', AVAX: 'avalanche-2', DOT: 'polkadot', MATIC: 'matic-network', LINK: 'chainlink', TRX: 'tron', TON: 'the-open-network', SUI: 'sui', ARB: 'arbitrum', SHIB: 'shiba-inu', PEPE: 'pepe', NEAR: 'near', APT: 'aptos', ATOM: 'cosmos', ALGO: 'algorand', FIL: 'filecoin', AAVE: 'aave', LDO: 'lido-dao', KAS: 'kaspa', INJ: 'injective-protocol', OP: 'optimism', FTM: 'fantom', RUNE: 'thorchain', RNDR: 'render-token', GRT: 'the-graph', XLM: 'stellar', HBAR: 'hedera-hashgraph', ICP: 'internet-computer', VET: 'vechain', CRO: 'crypto-com-chain', EOS: 'eos', MKR: 'maker', UNI: 'uniswap', CRV: 'curve-dao-token', WLD: 'worldcoin-wld', SEI: 'sei-network', TIA: 'celestia', FET: 'fetch-ai' };
+  // AP2_CG_IDS küresel tanımlı (ap2HistUrl ile paylaşılır)
   try {
     const cgMissing = syms.filter(s => !cryptos[s]);
     const cgMapped = cgMissing.map(s => ({ s: s, id: AP2_CG_IDS[s] })).filter(m => m.id);
@@ -17512,6 +17590,9 @@ function bindAlfaPortfoy2() {
     if (hg) { ap2OpenHedge(hg.getAttribute('data-ap2hedge')); return; }
     if (e.target.closest('#ap2-sell-confirm')) { ap2SellConfirm(); return; }
     if (e.target.closest('#ap2-sell-cancel') || e.target.closest('#ap2-sell-cancel2')) { document.getElementById('ap2-sell-form').classList.add('hidden'); ap2SellId = null; return; }
+    if (e.target.closest('#ap2-hist-keep')) { const p = ap2HistPend; if (p && p.hp) ap2CommitPosition(p.pos, p.total, p.qty, { d: p.pos.date, p: p.hp, ok: false }); return; }
+    if (e.target.closest('#ap2-hist-usehist')) { const p = ap2HistPend; if (p && p.hp) { const c = document.getElementById('ap2-f-cost'); if (c) c.value = String(p.hp); ap2FormCalc(); ap2HistOverride = true; const dlg = document.getElementById('ap2-hist'); if (dlg) dlg.classList.add('hidden'); ap2SaveForm(); } return; }
+    if (e.target.closest('#ap2-hist-cancel') || e.target.closest('#ap2-hist-cancel2')) { ap2HistPend = null; const dlg = document.getElementById('ap2-hist'); if (dlg) dlg.classList.add('hidden'); return; }
     if (e.target.closest('#ap2-share-copy')) { ap2ShareCopy(); return; }
     if (e.target.closest('#ap2-share-dl')) { ap2ShareDownload(); return; }
     if (e.target.closest('#ap2-share-native')) { ap2ShareNative(); return; }

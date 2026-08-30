@@ -5,7 +5,7 @@ const b = h.indexOf('function bindAlfaPortfoy2');
 if (a < 0 || b < a) { console.log('ap2 slice markers bad'); process.exit(1); }
 const src = h.slice(a, b);
 global.pfAmt = n => '$' + Number(n).toFixed(2);
-const ap2 = new Function(src + '\n;return { ap2PnlOf, ap2Calc, ap2Summary, ap2HedgeInfo, ap2HedgeStrip };')();
+const ap2 = new Function(src + '\n;return { ap2PnlOf, ap2Calc, ap2Summary, ap2HedgeInfo, ap2HedgeStrip, ap2HistUrl };')();
 ap2Data = { startBalance: 0, cash: 0, positions: [], sells: [] };
 let fails = 0;
 const check = (name, cond) => { if (cond) console.log('OK   ' + name); else { console.log('MISS ' + name); fails++; } };
@@ -42,6 +42,12 @@ ap2Data = { startBalance: 200, cash: 0, positions: [
 ], sells: [] };
 const s = ap2.ap2Summary();
 check('summary nets hedge to 0 pnl', s.portfolioValue === 200 && Math.abs(s.pnl) < 1e-9);
+
+const hu = ap2.ap2HistUrl;
+check('histUrl ltc formatted', hu('LTC', '2026-08-24') && hu('LTC', '2026-08-24').indexOf('litecoin/history?date=24-08-2026') >= 0);
+check('histUrl today null', hu('LTC', new Date().toISOString().slice(0, 10)) === null);
+check('histUrl unknown sym null', hu('ZZZZ', '2026-08-24') === null);
+check('histUrl bad date null', hu('LTC', '2026-13-99') === null);
 
 console.log(fails ? 'SIM-AP2 FAIL' : 'SIM-AP2 ALL OK');
 process.exit(fails ? 1 : 0);
