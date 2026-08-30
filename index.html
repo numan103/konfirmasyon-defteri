@@ -2102,8 +2102,6 @@
   .ap2-sos-card-rows div { display: flex; justify-content: space-between; }
   #ap2-sos-card .pct { font-size: 16px; font-weight: 800; }
   .ap2-sos-close { display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text-2); cursor: pointer; }
-  .ap2-deposit { display: flex; gap: 6px; }
-  .ap2-deposit input { width: 130px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 13px; }
   .ap2-card-livep { font-size: 11px; font-weight: 700; margin-top: 6px; }
   .ap2-chart-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
   .ap2-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -2256,10 +2254,6 @@
   .ap2-card-target-labels { display: flex; justify-content: space-between; font-size: 10px; }
   .ap2-card-target-labels span:first-child { font-weight: 700; }
   .ap2-card-target-labels span:last-child { color: var(--text-3); }
-  .ap2-rebal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
-  .ap2-rebal h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-  .ap2-rebal-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .ap2-rebal-row:last-child { border-bottom: none; }
   .ap2-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
   .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
   .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
@@ -6094,10 +6088,6 @@
       <div id="ap2-gate-content">
       <div class="ap2-tools">
         <button type="button" class="btn solid" id="ap2-add">+ Yeni</button>
-                <div class="ap2-deposit">
-          <input type="number" id="ap2-deposit-amount" placeholder="Bakiyeye ekle ($)" min="0" step="any">
-          <button type="button" class="btn" id="ap2-deposit">💸 Bakiye Ekle</button>
-        </div>
       </div>
       <div id="ap2-empty" class="data-empty">Henüz enstrüman yok. "+ Yeni" ile başla.</div>
       <div class="ap2-layout">
@@ -6105,15 +6095,6 @@
           <div id="ap2-summary-area"></div>
           <div class="ap2-growth-row" id="ap2-growth"></div>
           <div id="ap2-grid" class="ap2-grid"></div>
-          <div id="ap2-rebalance" class="ap2-rebal" style="display:none">
-            <h4>Rebalance</h4>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-              <label style="margin:0;font-size:13px;font-weight:600">Bu ay ekle:</label>
-              <input type="number" id="ap2-rebal-amount" placeholder="500" min="0" step="any" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px">
-              <span id="ap2-rebal-total-pct" style="font-size:12px;color:var(--text-3)"></span>
-            </div>
-            <div id="ap2-rebal-result"></div>
-          </div>
           <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
             <h4>Satis Gecmisi</h4>
             <div id="ap2-sell-hist-body"></div>
@@ -6185,6 +6166,7 @@
             <button type="button" data-sym="BNB">BNB</button>
             <button type="button" data-sym="XRP">XRP</button>
             <button type="button" data-sym="DOGE">Ð DOGE</button>
+            <button type="button" data-sym="LTC">Ł LTC</button>
             <button type="button" data-sym="ADA">ADA</button>
             <button type="button" data-sym="AVAX">AVAX</button>
           </div>
@@ -6218,8 +6200,6 @@
           <input type="number" id="ap2-f-cost" placeholder="Örn: 35000" step="any" min="0">
           <label>Güncel fiyat ($) <span style="color:var(--text-3);font-weight:400;font-size:11px">— boş bırakırsan canlı fiyat dene</span></label>
           <input type="number" id="ap2-f-price" placeholder="Otomatik getirilecek" step="any" min="0">
-          <label>Hedef Dağılım (%) <span style="color:var(--text-3);font-weight:400;font-size:11px">— portföydeki hedef oranı (rebalance)</span></label>
-          <input type="number" id="ap2-f-target" placeholder="Örn: 25" step="any" min="0" max="100">
           <label>Not</label>
           <input type="text" id="ap2-f-note" placeholder="Opsiyonel not..." maxlength="120">
           <div class="ap2-form-preview" id="ap2-f-preview"></div>
@@ -15692,16 +15672,6 @@ function ap2FormBind() {
   var symInp = document.getElementById('ap2-f-sym');
   if (symInp) symInp.addEventListener('change', function() { ap2FormFetchPrice(symInp.value); });
 }
-function ap2Deposit() {
-  var amt = parseFloat(document.getElementById('ap2-deposit-amount').value) || 0;
-  if (!(amt > 0)) return;
-  ap2Data.cash = (Number(ap2Data.cash) || 0) + amt;
-  ap2Data.startBalance = (Number(ap2Data.startBalance) || 0) + amt;
-  ap2Save();
-  renderAlfaPortfoy2();
-  document.getElementById('ap2-deposit-amount').value = '';
-  stratToast('💸 ' + ap2Fmt(amt) + ' bakiyeye eklendi (başlangıç da güncellendi).');
-}
 function ap2OpenForm(p) {
   ap2FormBind();
   ap2EditId = p ? p.id : null;
@@ -15711,7 +15681,6 @@ function ap2OpenForm(p) {
   document.getElementById('ap2-f-qty').value = p ? (p.qty || '') : '';
   document.getElementById('ap2-f-cost').value = p ? (p.cost || '') : '';
   document.getElementById('ap2-f-price').value = p ? (p.price || '') : '';
-  document.getElementById('ap2-f-target').value = (p && p.target != null) ? p.target : '';
   document.getElementById('ap2-f-note').value = p ? (p.note || '') : '';
   if (p) {
     document.getElementById('ap2-f-amount').value = (Number(p.qty) || 0) * (Number(p.cost) || 0);
@@ -15751,14 +15720,12 @@ function ap2SaveForm() {
   if (qty <= 0) { document.getElementById('ap2-f-err').textContent = 'Adet 0\'dan büyük olmalı (harcama ve maliyeti kontrol et)'; return; }
   const priceRaw = document.getElementById('ap2-f-price').value;
   const price = priceRaw !== '' ? parseFloat(priceRaw) : null;
-  const targetRaw = document.getElementById('ap2-f-target').value;
-  const target = targetRaw !== '' ? parseFloat(targetRaw) : null;
   const pos = {
     id: ap2EditId || ap2Id(),
     symbol: sym.toUpperCase(),
     type: ap2GetFormType(),
     date: document.getElementById('ap2-f-date').value || new Date().toISOString().slice(0, 10),
-    qty, cost, price, target,
+    qty, cost, price,
     note: document.getElementById('ap2-f-note').value.trim()
   };
   if (ap2EditId) {
@@ -15773,10 +15740,10 @@ function ap2SaveForm() {
     }
   } else {
     const cash = Number(ap2Data.cash) || 0;
-    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash) + '. Önce "💸 Bakiye Ekle" ile yükle.'; return; }
+    if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
     ap2Data.cash = cash - total;
     ap2Data.positions.push(pos);
-    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost) + (pos.target != null ? '\nHedef: %' + pos.target : '') + '\n\nalfa-trader.com');
+    ap2TgNotify('📈 Yeni pozisyon — ' + pos.symbol + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost) + '\n\nalfa-trader.com');
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
@@ -16184,7 +16151,6 @@ function renderAlfaPortfoy2() {
   var emptyEl = document.getElementById('ap2-empty');
   var sumEl = document.getElementById('ap2-summary-area');
   var gridEl = document.getElementById('ap2-grid');
-  var rebalEl = document.getElementById('ap2-rebalance');
   var donutPanel = document.getElementById('ap2-donut-panel');
   var chartPanel = document.getElementById('ap2-chart-panel');
   var layoutEl = document.querySelector('.ap2-layout');
@@ -16194,7 +16160,6 @@ function renderAlfaPortfoy2() {
     if (emptyEl) emptyEl.style.display = '';
     if (sumEl) sumEl.innerHTML = '';
     if (gridEl) gridEl.innerHTML = '';
-    if (rebalEl) rebalEl.style.display = 'none';
     if (layoutEl) layoutEl.style.display = 'none';
     if (shareArea) shareArea.innerHTML = '';
     var gr0 = document.getElementById('ap2-growth');
@@ -16243,8 +16208,6 @@ function renderAlfaPortfoy2() {
   try { var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); ap2RenderChart(hist); } catch (e) { ap2RenderChart([]); }
   var rngBtns = document.querySelectorAll('#ap2-chart-range button');
   if (rngBtns.length) rngBtns.forEach(function(b) { b.classList.toggle('on', (b.getAttribute('data-ap2r') || 'all') === ap2ChartRange); });
-  var hasTargets = positions.some(function(p) { return p.target != null && p.target > 0; });
-  if (rebalEl) rebalEl.style.display = hasTargets ? '' : 'none';
   gridEl.innerHTML = positions.map(function(p) {
     var c = ap2Calc(p);
     var val = c.value !== null ? c.value : c.totalCost;
@@ -16252,25 +16215,6 @@ function renderAlfaPortfoy2() {
     var pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : 'zero';
     var color = AP2_TYPE_CLR[p.type] || '#3b82f6';
     var chipTxt = AP2_TYPES[p.type] || p.type;
-    var curPct = sum.portfolioValue > 0 ? val / sum.portfolioValue * 100 : 0;
-    var tgtPct = p.target || 0;
-    var diff = tgtPct > 0 ? curPct - tgtPct : 0;
-    var diffSign = diff >= 0 ? '+' : '';
-    var diffColor = Math.abs(diff) < 2 ? 'var(--green)' : diff > 0 ? 'var(--amber)' : 'var(--pc)';
-    var targetHtml = '';
-    if (tgtPct > 0) {
-      var barW = Math.min(curPct, 100);
-      var tgtW = Math.min(tgtPct, 100);
-      targetHtml = '<div class="ap2-card-target">' +
-        '<div class="ap2-card-target-bar">' +
-          '<div class="ap2-card-target-fill" style="width:' + barW + '%;background:' + color + '"></div>' +
-          '<div class="ap2-card-target-marker" style="left:' + tgtW + '%"></div>' +
-        '</div>' +
-        '<div class="ap2-card-target-labels">' +
-          '<span style="color:' + color + '">' + curPct.toFixed(1) + '% / ' + tgtPct.toFixed(1) + '%</span>' +
-          '<span style="color:' + diffColor + '">' + diffSign + diff.toFixed(1) + '</span>' +
-        '</div></div>';
-    }
     return '<div class="ap2-card" data-ap2id="' + p.id + '">' +
       '<div class="ap2-card-top"><div class="ap2-card-sym">' + p.symbol + '<span class="ap2-card-type-badge">' + chipTxt + '</span></div>' +
       '<div class="ap2-card-actions">' +
@@ -16286,8 +16230,7 @@ function renderAlfaPortfoy2() {
         '<div><div class="ap2-card-pnl-val ' + pnlCls + '">' + (c.pnl !== null ? pnlSign + ap2Fmt(c.pnl) : '\u2014') + '</div></div>' +
         '<div class="ap2-card-pnl-pct ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '\u2014') + '</div>' +
       '</div>' +
-      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + '</div>' +
-      targetHtml +
+      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + (c.value === null && p.type === 'kripto' ? ' <span style="color:var(--text-3)">\u00b7 fiyat yüklenemedi — ✎ Düzenle ile güncel fiyatı gir</span>' : '') + '</div>' +
     '</div>';
   }).join('');
   var sellHistEl = document.getElementById('ap2-sell-hist');
@@ -16372,48 +16315,8 @@ function renderAlfaPortfoy2() {
       '</div>' +
     '</div>';
   if (shareArea) shareArea.innerHTML = shareHtml;
-  ap2RebalCalc();
   ap2RenderIdeas();
   ap2RenderMonthly();
-}
-function ap2RebalCalc() {
-  const resultEl = document.getElementById('ap2-rebal-result');
-  const totalPctEl = document.getElementById('ap2-rebal-total-pct');
-  if (!resultEl) return;
-  const amount = parseFloat(document.getElementById('ap2-rebal-amount').value) || 0;
-  const positions = ap2Data.positions || [];
-  const withTarget = positions.filter(p => p.target != null && p.target > 0);
-  if (!withTarget.length) { resultEl.innerHTML = ''; if (totalPctEl) totalPctEl.textContent = ''; return; }
-  const totalTarget = withTarget.reduce((s, p) => s + p.target, 0);
-  if (totalPctEl) totalPctEl.textContent = 'toplam hedef: ' + totalTarget.toFixed(0) + '%' + (Math.abs(totalTarget - 100) > 1 ? ' ⚠️ 100 değil!' : ' ✓');
-  if (amount <= 0) {
-    const sum = ap2Summary();
-    resultEl.innerHTML = withTarget.map(p => {
-      const c = ap2Calc(p);
-      const val = c.value !== null ? c.value : c.totalCost;
-      const curPct = sum.portfolioValue > 0 ? (val / sum.portfolioValue * 100) : 0;
-      const diff = curPct - p.target;
-      const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
-      const diffSign = diff >= 0 ? '+' : '';
-      const diffColor = Math.abs(diff) < 2 ? 'var(--green)' : diff > 0 ? 'var(--amber)' : 'var(--pc)';
-      return '<div class="ap2-rebal-row"><span style="color:' + color + ';font-weight:700">' + p.symbol + '</span><span style="color:var(--text-3)">' + curPct.toFixed(1) + '% → ' + p.target.toFixed(1) + '%</span><span style="color:' + diffColor + ';font-weight:600">' + diffSign + diff.toFixed(1) + '%</span></div>';
-    }).join('');
-    return;
-  }
-  const sum = ap2Summary();
-  const newTotal = sum.portfolioValue + amount;
-  resultEl.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:var(--text)">$' + amount.toLocaleString('en-US') + ' eklenirse</div>' +
-    withTarget.map(p => {
-      const c = ap2Calc(p);
-      const val = c.value !== null ? c.value : c.totalCost;
-      const curPct = sum.portfolioValue > 0 ? (val / sum.portfolioValue * 100) : 0;
-      const targetVal = newTotal * (p.target / 100);
-      const need = targetVal - val;
-      const addNow = Math.max(0, need);
-      const color = AP2_TYPE_CLR[p.type] || '#3b82f6';
-      const pctAfter = newTotal > 0 ? (targetVal / newTotal * 100) : 0;
-      return '<div class="ap2-rebal-row"><span style="color:' + color + ';font-weight:700;min-width:50px">' + p.symbol + '</span><span style="color:var(--text-3);min-width:90px">' + curPct.toFixed(1) + '% → ' + pctAfter.toFixed(1) + '%</span><span style="font-weight:700;color:var(--text);min-width:80px">' + (addNow > 0 ? '+' + ap2Fmt(addNow) : '—') + '</span></div>';
-    }).join('');
 }
 let ap2Pricing = false;
 async function ap2LoadPrices() {
@@ -16446,6 +16349,16 @@ async function ap2LoadPrices() {
       });
     }
   } catch (e) { /* OKX de yok */ }
+  const AP2_CG_IDS = { BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', SOL: 'solana', XRP: 'ripple', DOGE: 'dogecoin', LTC: 'litecoin', ADA: 'cardano', AVAX: 'avalanche-2', DOT: 'polkadot', MATIC: 'matic-network', LINK: 'chainlink', TRX: 'tron', TON: 'the-open-network', SUI: 'sui', ARB: 'arbitrum', SHIB: 'shiba-inu', PEPE: 'pepe', NEAR: 'near', APT: 'aptos', ATOM: 'cosmos', ALGO: 'algorand', FIL: 'filecoin', AAVE: 'aave', LDO: 'lido-dao', KAS: 'kaspa', INJ: 'injective-protocol', OP: 'optimism', FTM: 'fantom', RUNE: 'thorchain', RNDR: 'render-token', GRT: 'the-graph', XLM: 'stellar', HBAR: 'hedera-hashgraph', ICP: 'internet-computer', VET: 'vechain', CRO: 'crypto-com-chain', EOS: 'eos', MKR: 'maker', UNI: 'uniswap', CRV: 'curve-dao-token', WLD: 'worldcoin-wld', SEI: 'sei-network', TIA: 'celestia', FET: 'fetch-ai' };
+  try {
+    const cgMissing = syms.filter(s => !cryptos[s]);
+    const cgMapped = cgMissing.map(s => ({ s: s, id: AP2_CG_IDS[s] })).filter(m => m.id);
+    if (cgMapped.length) {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + encodeURIComponent(cgMapped.map(m => m.id).join(',')) + '&vs_currencies=usd&include_24hr_change=true');
+      const j = await r.json();
+      cgMapped.forEach(function(m) { if (j && j[m.id]) cryptos[m.s] = { usd: pfNum(j[m.id].usd), pct: pfNum(j[m.id].usd_24h_change) }; });
+    }
+  } catch (e) { /* CoinGecko toplu yok */ }
   try {
     const stillMissing = syms.filter(s => !cryptos[s]);
     for (const sym of stillMissing) {
@@ -17332,7 +17245,6 @@ function bindAlfaPortfoy2() {
   if (!view) return;
   view.addEventListener('click', e => {
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
-    if (e.target.closest('#ap2-deposit')) { ap2Deposit(); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
     const ed = e.target.closest('[data-ap2edit]');
@@ -17366,8 +17278,6 @@ function bindAlfaPortfoy2() {
       document.querySelectorAll('#ap2-f-type .ap2-type-chip').forEach(b => b.classList.toggle('on', b === chip));
     }
   });
-  const rebalInput = document.getElementById('ap2-rebal-amount');
-  if (rebalInput) rebalInput.addEventListener('input', () => ap2RebalCalc());
   const sellQty = document.getElementById('ap2-sell-qty');
   const sellPrice = document.getElementById('ap2-sell-price');
   const sellAmt = document.getElementById('ap2-sell-amount');
