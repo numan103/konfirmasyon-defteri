@@ -5780,17 +5780,10 @@
         <div class="strat-title">💰 Alfa Defter</div>
         <div class="strat-sub">Aylık gelir / gider takibi. Ne kadar kazandın, nereye ne kadar harcadın — pasta dilimleriyle. Bu bölüm yalnızca senin cihazında.</div>
       </div>
-      <div class="strat-head-actions">
-        <button type="button" class="btn" id="bd-blur" title="Tutarları gizle / göster">👁️ Gizle</button>
-        <button type="button" class="btn solid" id="bd-add">＋ Kayıt Ekle</button>
-        <button type="button" class="btn" id="bd-backup" title="Tüm veriyi JSON olarak indir">💾 Yedekle</button>
-        <button type="button" class="btn" id="bd-restore" title="JSON yedeğinden geri yükle">📂 Yükle</button>
-        <input type="file" id="bd-restore-file" accept="application/json" class="hidden">
-      </div>
     </div>
     <div class="bd-tabs" id="bd-tabs">
-      <button type="button" class="bd-tab on" data-bdt="defter">📒 Defter</button>
-      <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföy</button>
+      <button type="button" class="bd-tab on" data-bdt="defter">📒 Gelir Gider</button>
+      <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföyüm</button>
       <button type="button" class="bd-tab" data-bdt="alfaportfoy">📊 Alfa Portföy</button>
     </div>
     <div id="bd-view-defter">
@@ -5839,7 +5832,7 @@
       <div class="panel-h">🧾 İşlemler <span class="bd-panel-sub" id="bd-list-sub"></span></div>
       <button type="button" class="bd-clear-filter" id="bd-clear-cat">✕ Tümünü Gör <span>· filtre temizle</span></button>
       <div id="bd-list" class="bd-list"></div>
-      <div id="bd-empty" class="data-empty">Bu aya ait kayıt yok. "＋ Kayıt Ekle" ile başla.</div>
+      <div id="bd-empty" class="data-empty">Bu aya ait kayıt yok. "⚡ Hızlı Kayıt" ile başla.</div>
     </section>
     <div id="bd-form" class="strat-form hidden">
       <div class="strat-form-h" id="bd-form-title">Yeni Kayıt</div>
@@ -14602,16 +14595,8 @@ let butceCatF = '';
 let butceQ = '';
 let butceEditId = null;
 let butceFormTypeV = 'gider';
-var butceBlur = (function () { try { return localStorage.getItem('defter-butce-gizli') === '1'; } catch (e) { return false; } })();
+var butceBlur = false;
 function butceAmt(n) { return butceBlur ? '***' : butceMoney(n); }
-function butceSetBlur(on) {
-  butceBlur = !!on;
-  try { localStorage.setItem('defter-butce-gizli', butceBlur ? '1' : '0'); } catch (e) { }
-  const btn = document.getElementById('bd-blur');
-  if (btn) btn.innerHTML = butceBlur ? '🙈 Göster' : '👁️ Gizle';
-  renderButce();
-  renderPortfoy();
-}
 function butceNum(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 function butceMoney(n) { return butceNum(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'; }
 function butceMonthKey(d) {
@@ -14815,8 +14800,6 @@ function renderButce() {
   cf.innerHTML = '<option value="">Tüm kategoriler</option>' + butceCatList('gider').map(c => '<option value="' + c.id + '"' + (c.id === butceCatF ? ' selected' : '') + '>' + c.icon + ' ' + esc(c.name) + '</option>').join('');
   document.querySelectorAll('#bd-typeseg button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bt') === butceTypeF));
   document.querySelectorAll('#bd-form-type button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bt') === butceFormTypeV));
-  const bbtn = document.getElementById('bd-blur');
-  if (bbtn) bbtn.innerHTML = butceBlur ? '🙈 Göster' : '👁️ Gizle';
   renderIconPick();
   const cfBtn = document.getElementById('bd-clear-cat');
   if (cfBtn) {
@@ -14883,38 +14866,10 @@ function renderIconPick() {
   if (!el) return;
   el.innerHTML = BUTCE_ICONS.map(ico => '<button type="button" class="bd-iconpick-btn' + (ico === butceIconSel ? ' sel' : '') + '" data-ico="' + ico + '">' + ico + '</button>').join('');
 }
-function butceBackup() {
-  try {
-    const blob = new Blob([JSON.stringify({ app: 'alfa-defter', ver: 1, data: butceData })], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'alfa-defter-yedek-' + butceMk + '.json';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-    stratToast('💾 Yedek indirildi');
-  } catch (e) { stratToast('⚠️ Yedek alınamadı'); }
-}
-function butceRestoreFile(f) {
-  const r = new FileReader();
-  r.onload = () => {
-    try {
-      const o = JSON.parse(r.result);
-      const d = o && o.data && Array.isArray(o.data.entries) ? o.data : o;
-      if (!d || !Array.isArray(d.entries)) throw new Error('format');
-      butceData = { entries: d.entries, cats: Array.isArray(d.cats) ? d.cats : [], budget: (d.budget && d.budget.monthly != null) ? d.budget : { monthly: 0 } };
-      saveButce().then(() => { stratToast('📂 ' + butceData.entries.length + ' kayıt yüklendi'); renderButce(); });
-    } catch (e) { stratToast('⚠️ Yedek dosyası okunamadı'); }
-  };
-  r.readAsText(f);
-}
 function bindButcePage() {
   const pg = document.getElementById('page-butce');
   if (!pg) return;
   pg.addEventListener('click', e => {
-    if (e.target.closest('#bd-blur')) { butceSetBlur(!butceBlur); return; }
-    if (e.target.closest('#bd-add')) { butceOpenForm(null); return; }
-    if (e.target.closest('#bd-backup')) { butceBackup(); return; }
-    if (e.target.closest('#bd-restore')) { document.getElementById('bd-restore-file').click(); return; }
     if (e.target.closest('#bd-prev')) { butceMk = butceMonthShift(butceMk, -1); butceCatF = ''; renderButce(); return; }
     if (e.target.closest('#bd-next')) { butceMk = butceMonthShift(butceMk, 1); butceCatF = ''; renderButce(); return; }
     if (e.target.closest('#bd-today')) { butceMk = butceMonthKey(new Date()); butceCatF = ''; butceTypeF = 'all'; butceQ = ''; const q = document.getElementById('bd-q'); if (q) q.value = ''; renderButce(); return; }
@@ -14953,11 +14908,6 @@ function bindButcePage() {
     if (!t) return;
     if (t.id === 'bd-catf') { butceCatF = t.value; renderButce(); }
     else if (t.id === 'bd-budget-in') { butceData.budget.monthly = butceNum(t.value); saveButce().then(() => renderButce()); }
-    else if (t.id === 'bd-restore-file') {
-      const f = t.files && t.files[0];
-      t.value = '';
-      if (f) butceRestoreFile(f);
-    }
   });
   pg.addEventListener('input', e => {
     if (e.target && e.target.id === 'bd-q') { butceQ = e.target.value; butceRenderList(butceFilterMonth(butceData.entries, butceMk)); }

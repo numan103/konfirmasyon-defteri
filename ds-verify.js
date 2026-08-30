@@ -119,6 +119,8 @@ function fetchText(u, headers) {
     sosyalmetre_save: html.includes('smExport') && html.includes('smImportFile') && html.includes('smReset') && html.includes('sm-stats'),
     sosyalmetre_old_removed: !html.includes('AP2_SOS_PIN_KEY') && !html.includes('ap2-sos-open') && !html.includes('id="ap2-sos"'),
     ap2_sellmeta: html.includes('cost: _entryCost') && html.includes('profit: _profit') && html.includes('days: _days'),
+    butce_cleanhead: !html.includes('bd-backup') && !html.includes('bd-restore') && !html.includes('bd-blur') && !html.includes('bd-add') && !html.includes('butceBackup') && !html.includes('butceRestoreFile'),
+    butce_rename: html.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && html.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

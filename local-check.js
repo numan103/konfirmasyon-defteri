@@ -1,0 +1,29 @@
+const fs = require('fs');
+const h = fs.readFileSync('index.html', 'utf8');
+const mk = [
+  ['old_removed', !h.includes('AP2_SOS_PIN_KEY') && !h.includes('ap2-sos-open') && !h.includes('id="ap2-sos"')],
+  ['page', h.includes('id="page-sosyalmetre"') && h.includes('id="tab-sosyalmetre"') && h.includes('renderSosyal')],
+  ['route', h.includes("'sosyalmetre'") && h.includes("name === 'sosyalmetre'")],
+  ['tabs', h.includes('sm-tabs') && h.includes('data-cat') && h.includes('SM_CATS') && h.includes('SM_PRESETS')],
+  ['checklist', h.includes('sm-cond-list') && h.includes('smChipsHtml') && h.includes('data-tog') && h.includes('sm-allon')],
+  ['trades', h.includes('sm-trade-list') && h.includes('smTradeAdd') && h.includes('smTick') && h.includes('smEval')],
+  ['bands', h.includes('smBandText') && h.includes('KAÇIRMA') && h.includes('TEMKİN') && h.includes('sm-b-yellow')],
+  ['share', h.includes('sm-share-card') && h.includes('smShare') && h.includes('smCopy') && h.includes('smShareText')],
+  ['img', h.includes('smImg') && h.includes('data-timg') && h.includes('toDataURL') && h.includes('1080')],
+  ['save', h.includes('smExport') && h.includes('smImportFile') && h.includes('smReset') && h.includes('sm-stats')],
+  ['sellmeta', h.includes('cost: _entryCost') && h.includes('profit: _profit') && h.includes('days: _days')],
+  ['growth', h.includes('id="ap2-growth"') && h.includes('totalInvested')],
+  ['form', h.includes('ap2-f-mode') && h.includes('ap2FormCalc')],
+  ['deposit', !h.includes('#ap2-deposit') && !h.includes('ap2Deposit')],
+  ['notarget', !h.includes('ap2-f-target') && !h.includes('ap2-rebal') && !h.includes('ap2RebalCalc')],
+  ['pricefix', h.includes("const AP2_CG_IDS") && h.includes("LTC: 'litecoin'") && h.includes('data-sym="LTC"') && h.includes('fiyat yüklenemedi')],
+  ['gaps', h.includes('stroke:var(--card);stroke-width:3')],
+  ['smCss', h.includes('.sm-wrap {') && h.includes('.sm-tabs') && h.includes('.sm-band {') && h.includes('.sm-chip {') && h.includes('.sm-stats {')],
+  ['edit', h.includes('data-act') && h.includes('smCondShift') && h.includes('smEditStart') && h.includes('smEditSave') && h.includes('smCondDel') && h.includes('.sm-chip-act') && h.includes('.sm-cond-edit') && h.includes('gone: v.gone === true') && h.includes('smLiveConds')],
+  ['cleanhead', !h.includes('bd-backup') && !h.includes('bd-restore') && !h.includes('bd-blur') && !h.includes('bd-add') && !h.includes('butceBackup') && !h.includes('butceRestoreFile')],
+  ['rename', h.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && h.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm')]
+];
+let ok = true;
+for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
+console.log(ok ? 'ALL LOCAL MARKERS OK' : 'MISSING');
+process.exit(ok ? 0 : 1);
