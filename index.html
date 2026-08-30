@@ -2009,6 +2009,16 @@
   .sm-trade-add { display: grid; grid-template-columns: 1fr auto auto 1fr; gap: 8px; margin-bottom: 12px; }
   .sm-trade-add input, .sm-trade-add select { padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; }
   .sm-trade-add .sm-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .sm-img-paste { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border: 1px dashed var(--border); border-radius: 10px; color: var(--text-3); font-size: 12.5px; cursor: pointer; flex-wrap: wrap; padding: 6px; }
+  .sm-img-paste:focus { outline: 2px solid var(--pc); }
+  .sm-img-prev { max-height: 120px; max-width: 100%; border-radius: 8px; }
+  .sm-img-del { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); color: var(--text-2); cursor: pointer; font-size: 11px; line-height: 1; }
+  .sm-tr-imgwrap { position: relative; display: inline-block; margin-top: 6px; max-width: 100%; }
+  .sm-tr-img { max-height: 180px; max-width: 100%; border-radius: 10px; cursor: zoom-in; display: block; }
+  .sm-tr-imgwrap .sm-img-del { position: absolute; top: -9px; right: -9px; }
+  .sm-tr-imgadd { margin-top: 6px; }
+  .sm-ghost { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
+  .sm-cat-edit { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
   .sm-filter { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 13px; margin-bottom: 12px; }
   .sm-tr { border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--card); }
   .sm-tr.sm-open { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc-soft); }
@@ -6234,7 +6244,7 @@
       <div class="sm-head">
         <div>
           <h2 class="sm-title">📣 Sosyalmetre</h2>
-          <p class="sm-sub">3 şart kategorisi: <b>X & Alfa Traders</b> · <b>Alfa Traders Public</b> · <b>Alfa Traders</b>. İşlemde sağlanan şartlara dokununca yeşile döner; skor dilimine göre <b>KAÇIRMA / AT / DİKKAT / TEMKİN / KALDI</b> kararı çıkar. Her işlemin sonuç resmini PNG olarak kaydedebilirsin.</p>
+          <p class="sm-sub">3 kategori: <b>X</b> · <b>Alfa Traders Public</b> · <b>Alfa Traders</b> (adı düzenlenebilir). İşlemde sağlanan şartlara dokununca yeşile döner; skor dilimine göre <b>KAÇIRMA / AT / DİKKAT / TEMKİN / KALDI</b> kararı çıkar. Her işlemin sonuç resmini PNG olarak kaydedebilirsin.</p>
         </div>
         <div class="sm-actions2">
           <div class="sm-th">
@@ -6254,7 +6264,7 @@
       <div class="sm-stats" id="sm-stats"></div>
       <div class="sm-grid">
         <div class="sm-card">
-          <div class="sm-card-head"><span>📋 Şart Bankası</span></div>
+          <div class="sm-card-head"><span>🧾 Kural Listesi</span></div>
           <div class="sm-tabs" id="sm-tabs"></div>
           <div class="sm-tools" id="sm-tools"></div>
           <div class="sm-cond-add hidden" id="sm-cond-add">
@@ -6272,8 +6282,14 @@
             <select id="sm-t-dir"><option value="LONG">LONG</option><option value="KISA">KISA</option></select>
             <input type="date" id="sm-t-date">
             <input id="sm-t-note" placeholder="Not (opsiyonel)" maxlength="200" autocomplete="off">
+            <div class="sm-img-paste" id="sm-t-img-paste" tabindex="0" title="Ctrl+V ile panodan görsel yapıştır">
+              <span id="sm-t-img-txt">📋 Görsel yapıştır (Ctrl+V)</span>
+              <img id="sm-t-img-prev" class="sm-img-prev hidden" alt="işlem görseli">
+              <button type="button" class="sm-img-del hidden" id="sm-t-img-clear" title="Görseli kaldır">✕</button>
+            </div>
             <div class="sm-actions"><button type="button" class="btn solid" id="sm-t-save">Ekle</button><button type="button" class="btn" id="sm-t-cancel">Vazgeç</button></div>
           </div>
+          <input id="sm-paste-ghost" class="sm-ghost" autocomplete="off" tabindex="-1" aria-label="Görsel yapıştırma alanı">
           <input class="sm-filter" id="sm-filter" placeholder="🔍 Sembol ve notta ara…" autocomplete="off">
           <div id="sm-trade-list"></div>
           <div class="sm-cond-note hidden" id="sm-trade-note">Henüz işlem yok — "+ İşlem" ile ekle; kayıtlar aşağı doğru birikir.</div>
@@ -6286,6 +6302,12 @@
         <div id="sm-share-card"></div>
         <textarea id="sm-share-text" rows="5" readonly class="sm-share-txt"></textarea>
         <div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn solid" id="sm-copy" style="flex:1">Kopyala</button><button type="button" class="btn solid" id="sm-png" style="flex:1">⬇ PNG</button></div>
+</div>
+    </div>
+    <div id="sm-imgview" style="position:fixed;z-index:1100;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.85);padding:16px">
+      <div style="position:relative;max-width:94vw;max-height:92vh">
+        <img id="sm-imgview-img" alt="" style="max-width:94vw;max-height:92vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)">
+        <button type="button" id="sm-imgview-close" title="Kapat" style="position:absolute;top:-12px;right:-12px;width:32px;height:32px;border-radius:50%;background:var(--card);border:1px solid var(--border);cursor:pointer;font-size:14px">✕</button>
       </div>
     </div>
   </div>
@@ -7146,6 +7168,7 @@
 // ===== İletişim / sosyal bağlantılar (tek yerden düzenle) =====
 const SOCIAL = {
   telegram: 'https://t.me/alfatradersweb',
+  tgTop: 'https://t.me/alfatraderspublic',
   x: 'https://x.com/traderahmet_',
   youtube: 'https://www.youtube.com/@cryptotraderahmet',
 };
@@ -7251,7 +7274,8 @@ function applySocial() {
       if (m) { m.style.animation = ''; m.style.transform = ''; m.style.willChange = ''; }
     });
   })();
-  set(['nc-tg', 'nc-tg-m', 'lps-tg', 'lp-comm-tg', 'bas-ask-tg'], SOCIAL.telegram);
+  set(['nc-tg', 'nc-tg-m'], SOCIAL.tgTop || SOCIAL.telegram);
+  set(['lps-tg', 'lp-comm-tg', 'bas-ask-tg'], SOCIAL.telegram);
   set(['nc-x', 'nc-x-m', 'lps-x', 'bas-ask-x'], SOCIAL.x);
   set(['nc-yt', 'nc-yt-m', 'lps-yt'], SOCIAL.youtube);
 }
@@ -16646,7 +16670,7 @@ function ap2IdeaNotify(idea) {
 const SM_KEY = 'defter-sosyalmetre-v2';
 const SM_OLD_KEY = 'defter-sosyalmetre-v1';
 const SM_CATS = [
-  { id: 'xalfa', icon: '𝕏', name: 'X & Alfa Traders' },
+  { id: 'xalfa', icon: '𝕏', name: 'X' },
   { id: 'apub', icon: '📢', name: 'Alfa Traders Public' },
   { id: 'acourse', icon: '🎓', name: 'Alfa Traders' }
 ];
@@ -16688,6 +16712,9 @@ let smData = null;
 let smBound = false;
 let smOpen = null;
 let smEditCond = null;
+let smEditCat = null;
+let smStageImg = null;
+let smAttachFor = null;
 let smShareTrade = null;
 function smShow(id, on) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); }
 function smNorm(s) { return String(s || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr'); }
@@ -16697,9 +16724,13 @@ function smNormalize(raw) {
     active: ref.active === 'apub' || ref.active === 'acourse' ? ref.active : 'xalfa',
     th: ref.th === '75' || ref.th === '50' ? ref.th : 'all',
     cats: {},
+    catNames: {},
     trades: []
   };
-  if (Array.isArray(ref.trades)) d.trades = ref.trades.filter(t => t && typeof t === 'object').map(t => ({ id: String(t.id || smUid()), sym: String(t.sym || ''), dir: t.dir === 'KISA' ? 'KISA' : 'LONG', date: String(t.date || ''), note: String(t.note || ''), ticks: t.ticks && typeof t.ticks === 'object' ? t.ticks : {} }));
+  if (ref.catNames && typeof ref.catNames === 'object') {
+    SM_CATS.forEach(cat => { const v = ref.catNames[cat.id]; if (typeof v === 'string' && v.trim()) d.catNames[cat.id] = v.trim().slice(0, 24); });
+  }
+  if (Array.isArray(ref.trades)) d.trades = ref.trades.filter(t => t && typeof t === 'object').map(t => ({ id: String(t.id || smUid()), sym: String(t.sym || ''), dir: t.dir === 'KISA' ? 'KISA' : 'LONG', date: String(t.date || ''), note: String(t.note || ''), img: typeof t.img === 'string' && t.img ? t.img : undefined, ticks: t.ticks && typeof t.ticks === 'object' ? t.ticks : {} }));
   SM_CATS.forEach(cat => {
     const src = (ref.cats && ref.cats[cat.id]) || {};
     const conds = Array.isArray(src.conds) ? src.conds : [];
@@ -16737,6 +16768,7 @@ function smSave() { try { localStorage.setItem(SM_KEY, JSON.stringify(smData)); 
 function smUid() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function smToday() { const d = new Date(); const z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
 function smCatConds(catId) { const cc = smData.cats[catId]; return (cc && cc.conds) || []; }
+function smCatName(cat) { return (smData && smData.catNames && smData.catNames[cat.id]) ? smData.catNames[cat.id] : cat.name; }
 function smLiveConds(catId) { return smCatConds(catId).filter(c => !c.gone); }
 function smEvalConds() {
   const out = [];
@@ -16775,7 +16807,7 @@ function smBandHtml(b) { return b ? '<span class="sm-band ' + b.cls + '">' + b.i
 function smCatLineHtml(cat, e) {
   const p = e.per[cat.id];
   if (!p.total) return '';
-  return '<div class="sm-catline"><span>' + cat.icon + '</span><b>' + cat.name + '</b>' + smBarHtml(p.pct) + '<span class="sm-cap">' + p.ticks + '/' + p.total + ' · %' + p.pct + '</span>' + (p.band ? smBandHtml(p.band) : '') + '</div>';
+  return '<div class="sm-catline"><span>' + cat.icon + '</span><b>' + smCatName(cat) + '</b>' + smBarHtml(p.pct) + '<span class="sm-cap">' + p.ticks + '/' + p.total + ' · %' + p.pct + '</span>' + (p.band ? smBandHtml(p.band) : '') + '</div>';
 }
 function smStatsHtml() {
   const trs = smData.trades || [];
@@ -16791,12 +16823,16 @@ function smStatsHtml() {
 function smTabsHtml() {
   return SM_CATS.map(cat => {
     const onCount = smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone).length;
-    return '<button type="button" class="sm-tab' + (smData.active === cat.id ? ' on' : '') + '" data-cat="' + cat.id + '">' + cat.icon + ' ' + cat.name + ' <span class="sm-tab-n">' + onCount + '</span></button>';
+    if (smEditCat === cat.id) {
+      return '<div class="sm-cat-edit"><input id="sm-cat-edit-input" value="' + esc(smCatName(cat)) + '" maxlength="24" autocomplete="off"><button type="button" class="btn solid" data-cat-edit-save="' + cat.id + '" title="Kaydet">✓</button><button type="button" class="btn" data-cat-edit-cancel title="Vazgeç">✕</button></div>';
+    }
+    return '<button type="button" class="sm-tab' + (smData.active === cat.id ? ' on' : '') + '" data-cat="' + cat.id + '" title="Adı düzenlemek için: ✎ Kategori adı">' + cat.icon + ' ' + smCatName(cat) + ' <span class="sm-tab-n">' + onCount + '</span></button>';
   }).join('');
 }
 function smToolsHtml() {
   return '<button type="button" class="sm-tool" id="sm-allon" title="Bu kategorideki tüm şartları yeşillendir">✓ Hepsi yeşil</button>' +
     '<button type="button" class="sm-tool" id="sm-alloff" title="Bu kategorideki tüm şartları kapat">◌ Hepsini kapat</button>' +
+    '<button type="button" class="sm-tool" id="sm-cat-edit" title="Aktif kategori adını düzenle">✎ Kategori adı</button>' +
     '<button type="button" class="sm-tool" id="sm-add-cond" title="Kendi kuralını ekle">＋ Özel şart</button>';
 }
 function smChipsHtml() {
@@ -16826,13 +16862,13 @@ function smEvalFootHtml(t, e) {
 }
 function smEvalHtml(t, e) {
   const conds = smEvalConds();
-  if (!conds.length) return "<div class=\"sm-eval\"><div class=\"sm-eval-empty\">Önce soldaki Şart Bankası'ndan şartları yeşillendir — sonra burada işaretleme yapılıyor.</div></div>";
+  if (!conds.length) return "<div class=\"sm-eval\"><div class=\"sm-eval-empty\">Önce soldaki Kural Listesi'nden kuralları yeşillendir — sonra burada işaretleme yapılıyor.</div></div>";
   let html = '<div class="sm-eval">';
   SM_CATS.forEach(cat => {
     const sec = conds.filter(c => c.cat === cat.id);
     if (!sec.length) return;
     const p = e.per[cat.id];
-    html += '<div class="sm-eval-sec"><div class="sm-eval-sec-h"><span>' + cat.icon + '</span><b>' + cat.name + '</b>' + smBarHtml(p.pct) + '<span class="sm-prog-txt">' + p.ticks + '/' + p.total + ' · %' + p.pct + '</span>' + (p.band ? smBandHtml(p.band) : '') + '</div>';
+    html += '<div class="sm-eval-sec"><div class="sm-eval-sec-h"><span>' + cat.icon + '</span><b>' + smCatName(cat) + '</b>' + smBarHtml(p.pct) + '<span class="sm-prog-txt">' + p.ticks + '/' + p.total + ' · %' + p.pct + '</span>' + (p.band ? smBandHtml(p.band) : '') + '</div>';
     sec.forEach(cd => {
       const on = !!(t.ticks && t.ticks[cd.id]);
       html += '<div class="sm-chk-row' + (on ? ' on' : '') + '"><input type="checkbox" id="evk-' + t.id + '-' + cd.id + '"' + (on ? ' checked' : '') + ' data-evalc="' + cd.id + '" data-tid="' + t.id + '"><label for="evk-' + t.id + '-' + cd.id + '">' + esc(cd.text) + '</label>' + (on ? '<span class="sm-eval-ok">✓</span>' : '') + '</div>';
@@ -16858,6 +16894,8 @@ function smTradesHtml() {
     let html = '<div class="sm-tr' + (open ? ' sm-open' : '') + '">' +
       '<div class="sm-tr-head"><span class="sm-tr-sym">' + esc(t.sym) + '</span><span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span><span class="sm-tr-date">' + esc(t.date || '') + '</span><button type="button" class="sm-tr-del" data-trade-del="' + t.id + '" title="Sil">✕</button></div>';
     if (t.note) html += '<div class="sm-tr-note">' + esc(t.note) + '</div>';
+    if (t.img) html += '<div class="sm-tr-imgwrap"><img class="sm-tr-img" data-imgview="' + t.id + '" src="' + t.img + '" alt="işlem görseli"><button type="button" class="sm-img-del" data-imgdel="' + t.id + '" title="Görseli kaldır">✕</button></div>';
+    else html += '<div class="sm-tr-imgadd"><button type="button" class="sm-btn" data-imgadd="' + t.id + '" title="Ctrl+V ile işlem görseli yapıştır">📎 Görsel ekle</button></div>';
     html += SM_CATS.map(cat => smCatLineHtml(cat, e)).join('');
     html += '<div class="sm-tr-foot">' + smEvalFootHtml(t, e) +
       '<div class="sm-btns"><button type="button" class="sm-btn" data-eval-toggle="' + t.id + '">' + (open ? '✕ Kapat' : '✓ Değerlendir') + '</button>' +
@@ -16893,6 +16931,11 @@ function smBind() {
     if (e.target.closest('#sm-cond-save')) { smCondAdd(); return; }
     if (e.target.closest('#sm-allon')) { smAllToggle(true); return; }
     if (e.target.closest('#sm-alloff')) { smAllToggle(false); return; }
+    if (e.target.closest('#sm-cat-edit')) { smEditCat = smData.active; renderSosyal(); const ci = document.getElementById('sm-cat-edit-input'); if (ci) setTimeout(function () { ci.focus(); ci.select(); }, 0); return; }
+    const cse = e.target.closest('[data-cat-edit-save]');
+    if (cse) { smCatEditSave(); return; }
+    const cce = e.target.closest('[data-cat-edit-cancel]');
+    if (cce) { smEditCat = null; renderSosyal(); return; }
     const act = e.target.closest('[data-act]');
     if (act) {
       const id = act.getAttribute('data-cond-id');
@@ -16911,14 +16954,31 @@ function smBind() {
     if (tg) { smTog(tg.getAttribute('data-tog')); return; }
     const tab = e.target.closest('[data-cat]');
     if (tab) { smData.active = tab.getAttribute('data-cat'); smSave(); renderSosyal(); return; }
-    if (e.target.closest('#sm-add-trade')) { smShow('sm-trade-add', true); const s = document.getElementById('sm-t-sym'); if (s) setTimeout(function () { s.focus(); }, 0); return; }
-    if (e.target.closest('#sm-t-cancel')) { smShow('sm-trade-add', false); return; }
+    if (e.target.closest('#sm-add-trade')) { smShow('sm-trade-add', true); smStageImg = null; smRenderStageImg(); const s = document.getElementById('sm-t-sym'); if (s) setTimeout(function () { s.focus(); }, 0); return; }
+    if (e.target.closest('#sm-t-cancel')) { smShow('sm-trade-add', false); smStageImg = null; smRenderStageImg(); return; }
     if (e.target.closest('#sm-t-save')) { smTradeAdd(); return; }
+    if (e.target.closest('#sm-t-img-paste')) { const pp = document.getElementById('sm-t-img-paste'); if (pp) pp.focus(); return; }
+    if (e.target.closest('#sm-t-img-clear')) { smStageImg = null; smRenderStageImg(); return; }
     if (e.target.closest('#sm-export')) { smExport(); return; }
     if (e.target.closest('#sm-import')) { const fi = document.getElementById('sm-import-file'); if (fi) fi.click(); return; }
     if (e.target.closest('#sm-reset')) { smReset(); return; }
     const td = e.target.closest('[data-trade-del]');
     if (td) { smTradeDel(td.getAttribute('data-trade-del')); return; }
+    const iad = e.target.closest('[data-imgadd]');
+    if (iad) {
+      const id = iad.getAttribute('data-imgadd');
+      if (!nmFind(smData.trades, id)) return;
+      smAttachFor = id;
+      const ghost = document.getElementById('sm-paste-ghost');
+      if (ghost) ghost.focus();
+      stratToast('Ctrl+V ile işlem görselini yapıştır');
+      return;
+    }
+    const idv = e.target.closest('[data-imgview]');
+    if (idv) { smImgView(idv.getAttribute('data-imgview')); return; }
+    const idd = e.target.closest('[data-imgdel]');
+    if (idd) { smTradeDelImg(idd.getAttribute('data-imgdel')); return; }
+    if (e.target.id === 'sm-imgview' || e.target.closest('#sm-imgview-close')) { smImgViewClose(); return; }
     const et = e.target.closest('[data-eval-toggle]');
     if (et) { const id = et.getAttribute('data-eval-toggle'); smOpen = smOpen === id ? null : id; renderSosyal(); return; }
     const tim = e.target.closest('[data-timg]');
@@ -16943,11 +17003,33 @@ function smBind() {
   root.addEventListener('input', function (e) {
     if (e.target.id === 'sm-filter') renderSosyal();
   });
+  root.addEventListener('paste', function (e) {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf('image') === 0) {
+        e.preventDefault();
+        const file = items[i].getAsFile && items[i].getAsFile();
+        if (file) smHandlePastedImg(file);
+        break;
+      }
+    }
+  });
   root.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (e.target.id === 'sm-paste-ghost') { smAttachFor = null; if (e.target) e.target.blur(); return; }
+      const iv = document.getElementById('sm-imgview');
+      if (iv && iv.style.display === 'flex') { smImgViewClose(); return; }
+    }
     if (e.key !== 'Enter' && e.key !== 'Escape') return;
     if (e.target.id === 'sm-edit-input') {
       if (e.key === 'Escape') { smEditCond = null; renderSosyal(); }
       else { smEditSave(); }
+      return;
+    }
+    if (e.target.id === 'sm-cat-edit-input') {
+      if (e.key === 'Escape') { smEditCat = null; renderSosyal(); }
+      else { smCatEditSave(); }
       return;
     }
     if (e.key !== 'Enter') return;
@@ -17019,14 +17101,107 @@ function smCondDel(id) {
   smSave(); renderSosyal();
 }
 function nmFind(arr, id) { return (arr || []).find(x => x.id === id) || null; }
+function smCatEditSave() {
+  const inp = document.getElementById('sm-cat-edit-input');
+  const v = (inp ? inp.value : '').trim();
+  if (!smEditCat) return;
+  if (!v) { stratToast('Kategori adı boş olamaz'); return; }
+  smData.catNames = smData.catNames || {};
+  smData.catNames[smEditCat] = v.slice(0, 24);
+  smEditCat = null;
+  smSave(); renderSosyal();
+}
+function smRenderStageImg() {
+  const pr = document.getElementById('sm-t-img-prev');
+  const cl = document.getElementById('sm-t-img-clear');
+  const tx = document.getElementById('sm-t-img-txt');
+  if (pr) {
+    if (smStageImg) { pr.src = smStageImg; pr.classList.remove('hidden'); if (tx) tx.textContent = 'Görsel eklendi — Ctrl+V ile değiştir'; }
+    else { pr.src = ''; pr.classList.add('hidden'); if (tx) tx.textContent = '📋 Görsel yapıştır (Ctrl+V)'; }
+  }
+  if (cl) cl.classList.toggle('hidden', !smStageImg);
+}
+function smTradeSetImg(id, dataUrl) {
+  const t = nmFind(smData.trades, id);
+  if (!t || !dataUrl) return;
+  t.img = dataUrl;
+  smSave(); renderSosyal();
+}
+function smTradeDelImg(id) {
+  const t = nmFind(smData.trades, id);
+  if (!t || !t.img) return;
+  if (!confirm('İşlem görseli silinsin mi?')) return;
+  t.img = undefined;
+  smSave(); renderSosyal();
+}
+function smImgView(id) {
+  const t = nmFind(smData.trades, id);
+  if (!t || !t.img) return;
+  const img = document.getElementById('sm-imgview-img');
+  if (img) img.src = t.img;
+  const mod = document.getElementById('sm-imgview');
+  if (mod) mod.style.display = 'flex';
+}
+function smImgViewClose() {
+  const mod = document.getElementById('sm-imgview');
+  if (mod) mod.style.display = 'none';
+  const gh = document.getElementById('sm-paste-ghost');
+  if (gh) gh.blur();
+}
+function smHandlePastedImg(file) {
+  const fr = new FileReader();
+  fr.onload = function () { smImgCompress(fr.result, function (dataUrl) { smApplyImg(dataUrl); }); };
+  fr.readAsDataURL(file);
+}
+function smImgCompress(dataUrl, cb) {
+  try {
+    if (typeof Image === 'undefined') { cb(dataUrl); return; }
+    const img = new Image();
+    img.onload = function () {
+      try {
+        const MAX = 1100;
+        const sc = Math.min(1, MAX / Math.max(img.width || 1, img.height || 1));
+        const cw = Math.max(1, Math.round((img.width || 1) * sc));
+        const ch = Math.max(1, Math.round((img.height || 1) * sc));
+        const cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        const ctx = cv.getContext('2d');
+        if (ctx) { ctx.drawImage(img, 0, 0, cw, ch); cb(cv.toDataURL('image/jpeg', 0.8)); return; }
+      } catch (e) {}
+      cb(dataUrl);
+    };
+    img.onerror = function () { cb(dataUrl); };
+    img.src = dataUrl;
+  } catch (e) { cb(dataUrl); }
+}
+function smApplyImg(dataUrl) {
+  const addForm = document.getElementById('sm-trade-add');
+  if (addForm && !addForm.classList.contains('hidden')) {
+    smStageImg = dataUrl;
+    smRenderStageImg();
+    stratToast('Görsel eklendi — Ekle ile işlemi kaydet');
+    return;
+  }
+  if (smAttachFor) {
+    smTradeSetImg(smAttachFor, dataUrl);
+    smAttachFor = null;
+    const gh = document.getElementById('sm-paste-ghost');
+    if (gh) gh.blur();
+    stratToast('Görsel işleme eklendi');
+    return;
+  }
+  stratToast('Önce "+ İşlem" aç ya da işlemde "📎 Görsel ekle"yi seç');
+}
 function smTradeAdd() {
   const sym = (document.getElementById('sm-t-sym').value || '').trim().toUpperCase();
   if (!sym) { stratToast('Sembol gerekiyor'); return; }
   const dir = document.getElementById('sm-t-dir').value;
   const date = document.getElementById('sm-t-date').value || smToday();
   const note = (document.getElementById('sm-t-note').value || '').trim();
-  smData.trades.unshift({ id: smUid(), sym: sym, dir: dir, date: date, note: note, ticks: {} });
+  const img = smStageImg || undefined;
+  smData.trades.unshift({ id: smUid(), sym: sym, dir: dir, date: date, note: note, img: img, ticks: {} });
   smSave();
+  smStageImg = null; smRenderStageImg();
   const s1 = document.getElementById('sm-t-sym'); if (s1) s1.value = '';
   const s2 = document.getElementById('sm-t-note'); if (s2) s2.value = '';
   smShow('sm-trade-add', false);
@@ -17057,7 +17232,7 @@ function smShareText(t) {
   SM_CATS.forEach(cat => {
     const p = e.per[cat.id];
     if (!p.total) return;
-    s += '\n' + cat.icon + ' ' + cat.name + ': ' + p.ticks + '/' + p.total + ' (%' + p.pct + ')\n';
+    s += '\n' + cat.icon + ' ' + smCatName(cat) + ': ' + p.ticks + '/' + p.total + ' (%' + p.pct + ')\n';
     smCatConds(cat.id).filter(cd => cd.on !== false && !cd.gone).forEach(cd => {
       const on = !!(t.ticks && t.ticks[cd.id]);
       s += '  ' + (on ? '[✓]' : '[✗]') + ' ' + cd.text + '\n';
@@ -17082,7 +17257,7 @@ function smShare(tid) {
         const on = !!(t.ticks && t.ticks[cd.id]);
         return '<div><span>' + esc(cd.text) + '</span><span class="' + (on ? 'ok' : 'no') + '">' + (on ? '✓' : '✗') + '</span></div>';
       }).join('');
-      secs += '<div style="margin-top:8px;font-size:11px;font-weight:800;color:var(--text-2)">' + cat.icon + ' ' + cat.name + ' · ' + p.ticks + '/' + p.total + ' · %' + p.pct + '</div><div class="sm-share-rows">' + rows + '</div>';
+      secs += '<div style="margin-top:8px;font-size:11px;font-weight:800;color:var(--text-2)">' + cat.icon + ' ' + smCatName(cat) + ' · ' + p.ticks + '/' + p.total + ' · %' + p.pct + '</div><div class="sm-share-rows">' + rows + '</div>';
     });
     if (!secs) secs = '<div class="sm-share-rows"><div><span>Değerlendirilecek şart yok</span><span>—</span></div></div>';
     card.innerHTML = '<div class="sm-share-card"><h3>' + esc(t.sym) + ' <span class="sm-tr-dir ' + esc(t.dir) + '">' + esc(t.dir) + '</span></h3>' +
@@ -17128,7 +17303,7 @@ function smImg(tid) {
   secs.forEach(function (s) {
     const p = e.per[s.cat.id];
     c.fillStyle = col.ac; c.font = '600 32px Arial';
-    c.fillText(s.cat.icon + '  ' + s.cat.name.toUpperCase(), pad, y);
+    c.fillText(s.cat.icon + '  ' + smCatName(s.cat).toUpperCase(), pad, y);
     c.fillStyle = col.sub; c.font = '600 28px Arial';
     c.fillText(p.ticks + '/' + p.total + '  ·  %' + p.pct, W - pad, y);
     y += 40;

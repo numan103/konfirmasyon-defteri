@@ -122,6 +122,9 @@ function fetchText(u, headers) {
     butce_cleanhead: !html.includes('bd-backup') && !html.includes('bd-restore') && !html.includes('bd-blur') && !html.includes('bd-add') && !html.includes('butceBackup') && !html.includes('butceRestoreFile'),
     butce_rename: html.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && html.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm'),
     sosyalmetre_private: html.includes("name === 'sosyalmetre' && !amAllowed()") && html.includes('id="mnav-sosyalmetre"') && html.includes("const smTab = document.getElementById('tab-sosyalmetre')") && html.includes("if (smTab) smTab.style.display = isAdmin ? '' : 'none';"),
+    sosyalmetre_rules: html.includes('\u{1F9FE} Kural Listesi') && !html.includes('Şart Bankası'),
+    sosyalmetre_catedit: html.includes("{ id: 'xalfa', icon: '\u{1D54F}', name: 'X' }") && html.includes('function smCatName') && html.includes('function smCatEditSave') && html.includes('sm-cat-edit-input'),
+    sosyalmetre_img: html.includes('sm-img-paste') && html.includes('smAttachFor') && html.includes('smImgView') && html.includes('smTradeSetImg') && html.includes('data-imgdel') && html.includes("addEventListener('paste'"),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

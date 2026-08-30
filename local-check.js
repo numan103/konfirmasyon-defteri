@@ -22,7 +22,10 @@ const mk = [
   ['edit', h.includes('data-act') && h.includes('smCondShift') && h.includes('smEditStart') && h.includes('smEditSave') && h.includes('smCondDel') && h.includes('.sm-chip-act') && h.includes('.sm-cond-edit') && h.includes('gone: v.gone === true') && h.includes('smLiveConds')],
   ['cleanhead', !h.includes('bd-backup') && !h.includes('bd-restore') && !h.includes('bd-blur') && !h.includes('bd-add') && !h.includes('butceBackup') && !h.includes('butceRestoreFile')],
   ['rename', h.includes('data-bdt="defter">\u{1F4D2} Gelir Gider') && h.includes('data-bdt="portfoy">\u{1F4BC} Portföyüm')],
-  ['smPrivate', h.includes("name === 'sosyalmetre' && !amAllowed()") && h.includes('id="mnav-sosyalmetre"') && h.includes("const smTab = document.getElementById('tab-sosyalmetre')") && h.includes("if (smTab) smTab.style.display = isAdmin ? '' : 'none';")]
+  ['smPrivate', h.includes("name === 'sosyalmetre' && !amAllowed()") && h.includes('id="mnav-sosyalmetre"') && h.includes("const smTab = document.getElementById('tab-sosyalmetre')") && h.includes("if (smTab) smTab.style.display = isAdmin ? '' : 'none';")],
+  ['rules', h.includes('\u{1F9FE} Kural Listesi') && !h.includes('Şart Bankası')],
+  ['catEdit', h.includes("{ id: 'xalfa', icon: '\u{1D54F}', name: 'X' }") && h.includes('function smCatName') && h.includes('function smCatEditSave') && h.includes('sm-cat-edit-input')],
+  ['imgNotes', h.includes('sm-img-paste') && h.includes('smAttachFor') && h.includes('smImgView') && h.includes('smTradeSetImg') && h.includes('data-imgdel') && h.includes("addEventListener('paste'")]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
