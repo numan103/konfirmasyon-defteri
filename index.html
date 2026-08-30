@@ -2261,6 +2261,10 @@
   .ap2-card-actions button.act-hedge:hover { border-color: var(--green); background: rgba(16,185,129,.08); color: var(--green); }
   .ap2-card-actions button.act-sell:hover { border-color: var(--amber); background: rgba(245,158,11,.08); color: var(--amber); }
   .ap2-card-actions button.act-del:hover { border-color: var(--red); background: rgba(239,68,68,.08); color: var(--red); }
+  .ap2-card-actions button.act-fill:hover { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
+  .ap2-card.ap2-card-pend { border-color: rgba(245, 158, 11, .45); }
+  .ap2-pos-chip-pend { background: rgba(245,158,11,.15); color: var(--amber); border-color: rgba(245,158,11,.35); }
+  .ap2-card-pend-note { font-size: 11.5px; font-weight: 500; color: var(--amber); margin: 8px 0 10px; padding: 7px 9px; background: rgba(245,158,11,.06); border-radius: 8px; line-height: 1.4; }
   .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
   .ap2-card-price-box { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
   .ap2-card-price-lbl { font-size: 9px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
@@ -15507,7 +15511,7 @@ const AP2_CLOUD_KEY = 'alfa_portfoy_public';
 let ap2CloudData = null;
 let ap2CloudLoading = false;
 function ap2CloudSummary() {
-  var positions = ap2Data.positions || [];
+  var positions = (ap2Data.positions || []).filter(function(p) { return !ap2IsPending(p); });
   var sum = ap2Summary();
   var hist = [];
   try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) {}
@@ -15632,15 +15636,39 @@ function ap2CommitPosition(pos, total, qty, histRec) {
   if (histRec) pos.hist = histRec;
   ap2HistPend = null;
   ap2HistOverride = false;
-  if (ap2EditId) {
-    const idx = ap2Data.positions.findIndex(x => x.id === ap2EditId);
-    if (idx >= 0) {
-      const old = ap2Data.positions[idx];
+  const pr = Number(pos.price);
+  const fillable = pr > 0 && (pos.side === 'SHORT' ? pr >= Number(pos.cost) : pr <= Number(pos.cost));
+  const editing = !!ap2EditId;
+  const idx = editing ? ap2Data.positions.findIndex(x => x.id === ap2EditId) : -1;
+  const prev = editing && idx >= 0 ? ap2Data.positions[idx] : null;
+  if (editing) pos.id = ap2EditId;
+  const prevPending = !!prev && ap2IsPending(prev);
+  const pendNow = editing ? (prevPending && !fillable) : !(pr > 0 && fillable);
+  if (prev && prev.lim) pos.lim = true;
+  if (pendNow) {
+    pos.lim = true; pos.filled = null;
+    if (editing && idx >= 0) {
+      ap2Data.positions[idx] = pos;
+    } else {
+      ap2Data.positions.push(pos);
+      ap2TgNotify('⏳ Yeni limit emri — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\n' + (pr > 0 ? 'Güncel fiyat ' + ap2Fmt(pr) + ' — limitine gelince otomatik dolacak.' : 'Güncel fiyat bekleniyor; limitine gelince otomatik dolacak.') + '\nBakiye bu arada düşülmez.\n\nalfa-trader.com');
+    }
+  } else if (editing && idx >= 0) {
+    if (prevPending) {
+      const cash = Number(ap2Data.cash) || 0;
+      if (total <= cash) {
+        pos.filled = new Date().toISOString().slice(0, 10);
+        ap2Data.cash = cash - total;
+        ap2TgNotify('✅ Limit emri doldu — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nAdet: ' + ap2FmtNum(qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com');
+      } else { pos.filled = null; }
+      ap2Data.positions[idx] = pos;
+    } else {
+      const old = prev;
       const oldCost = (Number(old.qty) || 0) * (Number(old.cost) || 0);
       const cash = (Number(ap2Data.cash) || 0) + oldCost;
       if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
       ap2Data.cash = cash - total;
-      ap2Data.positions[idx] = { ...pos, id: ap2EditId };
+      ap2Data.positions[idx] = pos;
     }
   } else {
     const cash = Number(ap2Data.cash) || 0;
@@ -15666,8 +15694,42 @@ function ap2Calc(p) {
   const pnlPct = (pnl !== null && totalCost > 0) ? pnl / totalCost * 100 : null;
   return { totalCost, value, pnl, pnlPct };
 }
+function ap2IsPending(p) { return !!(p && p.lim && !p.filled); }
+function ap2Active() { return (ap2Data.positions || []).filter(function(p) { return !ap2IsPending(p); }); }
+function ap2Fillable(p) {
+  const pr = Number(p.price); const c = Number(p.cost);
+  if (!(pr > 0) || !(c > 0)) return false;
+  return p.side === 'SHORT' ? pr >= c : pr <= c;
+}
+function ap2FillsCheck() {
+  let filled = false;
+  (ap2Data.positions || []).forEach(function(p) {
+    if (!ap2IsPending(p) || !ap2Fillable(p)) return;
+    const total = (Number(p.qty) || 0) * (Number(p.cost) || 0);
+    const cash = Number(ap2Data.cash) || 0;
+    if (total > cash) return;
+    p.filled = new Date().toISOString().slice(0, 10);
+    ap2Data.cash = cash - total;
+    filled = true;
+    ap2TgNotify('✅ Limit emri doldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost) + '\n\nAdet: ' + ap2FmtNum(p.qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com');
+  });
+  if (filled) ap2Save();
+  return filled;
+}
+function ap2FillPos(id) {
+  const p = (ap2Data.positions || []).find(x => x.id === id);
+  if (!p || !ap2IsPending(p)) return;
+  const total = (Number(p.qty) || 0) * (Number(p.cost) || 0);
+  const cash = Number(ap2Data.cash) || 0;
+  if (total > cash) { alert('Bakiye yetersiz: ' + ap2Fmt(total) + ' gerekli, kalan ' + ap2Fmt(cash)); return; }
+  p.filled = new Date().toISOString().slice(0, 10);
+  ap2Data.cash = cash - total;
+  ap2TgNotify('⚡ Limit emri el ile dolduruldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost) + '\n\nAdet: ' + ap2FmtNum(p.qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com');
+  ap2Save();
+  renderAlfaPortfoy2();
+}
 function ap2Summary() {
-  const positions = ap2Data.positions || [];
+  const positions = ap2Active();
   const sells = ap2Data.sells || [];
   const startBalance = Number(ap2Data.startBalance) || 1000;
   const cash = Number(ap2Data.cash) || 0;
@@ -15865,7 +15927,13 @@ function ap2SaveForm() {
 function ap2Delete(id) {
   if (!confirm('Bu enstrümanı silmek istediğine emin misin?')) return;
   const pos = ap2Data.positions.find(x => x.id === id);
-  if (pos) { const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; ap2TgNotify('🗑 Silindi — ' + pos.symbol + ' pozisyonu portföyden kaldırıldı\n\n' + pos.qty + ' adet · maliyet: ' + ap2Fmt(c.totalCost) + '\n\nalfa-trader.com'); }
+  if (pos) {
+    if (ap2IsPending(pos)) {
+      ap2TgNotify('🗑 Bekleyen emir iptal — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nBakiye de\u011fi\u015fmedi.\n\nalfa-trader.com');
+    } else {
+      const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; ap2TgNotify('🗑 Silindi — ' + pos.symbol + ' pozisyonu portföyden kaldırıldı\n\n' + pos.qty + ' adet · maliyet: ' + ap2Fmt(c.totalCost) + '\n\nalfa-trader.com');
+    }
+  }
   ap2Data.positions = ap2Data.positions.filter(x => x.id !== id);
   ap2Save();
   renderAlfaPortfoy2();
@@ -15944,7 +16012,7 @@ function ap2OpenHedge(id) {
 function ap2HedgeInfo() {
   const by = {};
   (ap2Data.positions || []).forEach(p => {
-    if (!p.symbol) return;
+    if (!p.symbol || ap2IsPending(p)) return;
     const g = by[p.symbol] || (by[p.symbol] = { long: 0, short: 0, hasL: false, hasS: false });
     const not = (Number(p.qty) || 0) * (Number(p.cost) || 0);
     if (p.side === 'SHORT') { g.short += not; g.hasS = true; } else { g.long += not; g.hasL = true; }
@@ -16145,7 +16213,7 @@ function ap2RenderMonthly() {
 
   var hist = [];
   try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch (e) {}
-  var positions = ap2Data.positions || [];
+  var positions = (ap2Data.positions || []).filter(function(p) { return !ap2IsPending(p); });
   var sells = ap2Data.sells || [];
   var sum = ap2Summary();
   var now = Date.now();
@@ -16359,7 +16427,7 @@ function renderAlfaPortfoy2() {
   }
   var slices = [];
   var groupMap = {};
-  positions.forEach(function(p, i) {
+  ap2Active().forEach(function(p, i) {
     var c = ap2Calc(p);
     var val = c.value !== null ? c.value : c.totalCost;
     if (val <= 0) return;
@@ -16377,13 +16445,29 @@ function renderAlfaPortfoy2() {
   var rngBtns = document.querySelectorAll('#ap2-chart-range button');
   if (rngBtns.length) rngBtns.forEach(function(b) { b.classList.toggle('on', (b.getAttribute('data-ap2r') || 'all') === ap2ChartRange); });
   var symOpp = {};
-  positions.forEach(function(p) {
+  ap2Active().forEach(function(p) {
     var o = symOpp[p.symbol] || (symOpp[p.symbol] = { l: 0, s: 0 });
     if (p.side === 'SHORT') o.s++; else o.l++;
   });
   var hedgeStripEl = document.getElementById('ap2-hedge-strip');
   if (hedgeStripEl) hedgeStripEl.innerHTML = ap2HedgeStrip();
   gridEl.innerHTML = shown.map(function(p) {
+    if (ap2IsPending(p)) {
+      return '<div class="ap2-card ap2-card-pend" data-ap2id="' + p.id + '">' +
+        '<div class="ap2-card-top"><div class="ap2-card-sym">' + p.symbol + (p.side === 'SHORT' ? '<span class="ap2-side-badge s">KISA</span>' : '<span class="ap2-side-badge l">UZUN</span>') + '<span class="ap2-card-type-badge ap2-pos-chip-pend">\u23f3 BEKLEYEN EM\u0130R</span></div>' +
+        '<div class="ap2-card-actions">' +
+          '<button type="button" data-ap2fill="' + p.id + '" class="act-fill" title="Hemen doldur">\u26a1</button>' +
+          '<button type="button" data-ap2edit="' + p.id + '" title="D\u00fczenle">\u270f\ufe0f</button>' +
+          '<button type="button" data-ap2del="' + p.id + '" class="act-del" title="\u0130ptal">\ud83d\uddd1\ufe0f</button>' +
+        '</div></div>' +
+        '<div class="ap2-card-prices">' +
+          '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Limit / Maliyet</div><div class="ap2-card-price-val">' + ap2Fmt(p.cost) + '</div></div>' +
+          '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">G\u00fcncel</div><div class="ap2-card-price-val">' + (Number(p.price) > 0 ? ap2Fmt(p.price) : '<span style="color:var(--text-3)">\u2014</span>') + '</div></div>' +
+        '</div>' +
+        '<div class="ap2-card-pend-note">' + (Number(p.price) > 0 ? 'Fiyat, limite (' + ap2Fmt(p.cost) + ') ' + (p.side === 'SHORT' ? 'y\u00fckselince' : 'd\u00fc\u015f\u00fcnce') + ' otomatik dolacak \u2014 bakiye \u015fimdilik d\u00fc\u015f\u00fclmedi.' : 'G\u00fcncel fiyat \u00e7ekilince emir otomatik de\u011ferlendirilir \u2014 bakiye hen\u00fcz d\u00fc\u015f\u00fclmedi.') + '</div>' +
+        '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + '</div>' +
+      '</div>';
+    }
     var c = ap2Calc(p);
     var val = c.value !== null ? c.value : c.totalCost;
     var pnlSign = c.pnl !== null ? (c.pnl >= 0 ? '+' : '') : '';
@@ -16430,7 +16514,7 @@ function renderAlfaPortfoy2() {
     }).join('');
   }
   var sharePosHtml = '';
-  positions.forEach(function(p) {
+  ap2Active().forEach(function(p) {
     var c = ap2Calc(p);
     var val = c.value !== null ? c.value : c.totalCost;
     var pnlCls = c.pnl !== null ? (c.pnl >= 0 ? 'pos' : 'neg') : '';
@@ -16566,6 +16650,7 @@ async function ap2LoadPrices() {
     }
   });
   if (updated > 0) ap2Save();
+  ap2FillsCheck();
   ap2Pricing = false;
   renderAlfaPortfoy2();
 }
@@ -16599,7 +16684,7 @@ function ap2ShareMonthlyStrip() {
 }
 function ap2ShareCanvas() {
   var sum = ap2Summary();
-  var positions = ap2Data.positions || [];
+  var positions = (ap2Data.positions || []).filter(function(p) { return !ap2IsPending(p); });
   var pad = 20;
   var card = document.querySelector('.ap2-share-card');
   var cardRect = card ? card.getBoundingClientRect() : null;
@@ -17588,6 +17673,8 @@ function bindAlfaPortfoy2() {
     if (sl) { ap2OpenSell(sl.getAttribute('data-ap2sell')); return; }
     const hg = e.target.closest('[data-ap2hedge]');
     if (hg) { ap2OpenHedge(hg.getAttribute('data-ap2hedge')); return; }
+    const fl = e.target.closest('[data-ap2fill]');
+    if (fl) { ap2FillPos(fl.getAttribute('data-ap2fill')); return; }
     if (e.target.closest('#ap2-sell-confirm')) { ap2SellConfirm(); return; }
     if (e.target.closest('#ap2-sell-cancel') || e.target.closest('#ap2-sell-cancel2')) { document.getElementById('ap2-sell-form').classList.add('hidden'); ap2SellId = null; return; }
     if (e.target.closest('#ap2-hist-keep')) { const p = ap2HistPend; if (p && p.hp) ap2CommitPosition(p.pos, p.total, p.qty, { d: p.pos.date, p: p.hp, ok: false }); return; }

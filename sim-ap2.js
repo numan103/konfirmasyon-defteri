@@ -5,7 +5,7 @@ const b = h.indexOf('function bindAlfaPortfoy2');
 if (a < 0 || b < a) { console.log('ap2 slice markers bad'); process.exit(1); }
 const src = h.slice(a, b);
 global.pfAmt = n => '$' + Number(n).toFixed(2);
-const ap2 = new Function(src + '\n;return { ap2PnlOf, ap2Calc, ap2Summary, ap2HedgeInfo, ap2HedgeStrip, ap2HistUrl };')();
+const ap2 = new Function(src + '\n;return { ap2PnlOf, ap2Calc, ap2Summary, ap2HedgeInfo, ap2HedgeStrip, ap2HistUrl, ap2IsPending, ap2Active, ap2Fillable };')();
 ap2Data = { startBalance: 0, cash: 0, positions: [], sells: [] };
 let fails = 0;
 const check = (name, cond) => { if (cond) console.log('OK   ' + name); else { console.log('MISS ' + name); fails++; } };
@@ -48,6 +48,22 @@ check('histUrl ltc formatted', hu('LTC', '2026-08-24') && hu('LTC', '2026-08-24'
 check('histUrl today null', hu('LTC', new Date().toISOString().slice(0, 10)) === null);
 check('histUrl unknown sym null', hu('ZZZZ', '2026-08-24') === null);
 check('histUrl bad date null', hu('LTC', '2026-13-99') === null);
+
+ap2Data = { startBalance: 0, cash: 100, positions: [] };
+ap2Data.positions.push({ id: 'x', symbol: 'LTC', qty: 1, cost: 47.7, price: 48, side: 'LONG', date: '2026-08-30', lim: true, filled: null });
+check('limit above market -> pending', ap2.ap2IsPending(ap2Data.positions[0]) === true);
+check('pending excluded from summary', ap2.ap2Summary().count === 0);
+const pf2 = { symbol: 'BTC', qty: 1, cost: 50, price: 49, side: 'SHORT' };
+check('short waits below limit', ap2.ap2Fillable(pf2) === false);
+pf2.price = 51;
+check('short fillable at/above limit', ap2.ap2Fillable(pf2) === true);
+ap2Data.positions[0].price = 47.5;
+check('long fillable at/below limit', ap2.ap2Fillable(ap2Data.positions[0]) === true);
+ap2Data.positions[0].filled = '2026-08-30';
+check('filled limit is active', ap2.ap2IsPending(ap2Data.positions[0]) === false);
+ap2Data.positions.push({ id: 'y', symbol: 'ETH', qty: 1, cost: 100, price: 100, side: 'LONG', date: '2026-08-30' });
+check('active filter ignores pending', ap2.ap2Active().length === 2);
+check('active counts in summary', ap2.ap2Summary().count === 2);
 
 console.log(fails ? 'SIM-AP2 FAIL' : 'SIM-AP2 ALL OK');
 process.exit(fails ? 1 : 0);

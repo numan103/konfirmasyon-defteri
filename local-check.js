@@ -28,6 +28,7 @@ const mk = [
   ['imgNotes', h.includes('sm-img-paste') && h.includes('smAttachFor') && h.includes('smImgView') && h.includes('smTradeSetImg') && h.includes('data-imgdel') && h.includes("addEventListener('paste'")],
   ['ap2hedge', h.includes('data-ap2hedge') && h.includes('function ap2OpenHedge') && h.includes('function ap2HedgeStrip') && h.includes('function ap2HedgeInfo') && h.includes('id="ap2-hedge-strip"') && h.includes('ap2-f-side') && h.includes('data-ap2side')],
   ['ap2short', h.includes('function ap2PnlOf') && h.includes("p.side === 'SHORT' ? 'SHORT' : 'LONG'") && h.includes('const _profit = ap2PnlOf(pos.side, sellQty * _entryCost, amount);') && h.includes('🛡 Karşı Pozisyon (hedge)')],
+  ['ap2limit', h.includes('function ap2IsPending') && h.includes('function ap2Fillable') && h.includes('function ap2FillsCheck') && h.includes('data-ap2fill') && h.includes('ap2-card-pend') && h.includes('BEKLEYEN EM')],
   ['ap2hist', h.includes('const AP2_CG_IDS') && h.includes('function ap2HistUrl') && h.includes('async function ap2FetchHist') && h.includes('function ap2ShowHistConfirm') && h.includes('function ap2CommitPosition') && h.includes('id="ap2-hist-keep"') && h.includes('pos.hist') && h.includes('AP2_HIST_TOL')],
   ['ap2ui', h.includes('id="ap2-search"') && h.includes('class="ap2-hd"') && h.includes('class="ap2-btn-primary"') && h.includes('act-hedge') && h.includes('act-del') && h.includes('.ap2-sell-pf') && h.includes('ap2SearchTerm') && h.includes('ap2-grid-empty')]
 ];
