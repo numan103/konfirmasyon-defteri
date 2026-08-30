@@ -25,7 +25,9 @@ const mk = [
   ['smPrivate', h.includes("name === 'sosyalmetre' && !amAllowed()") && h.includes('id="mnav-sosyalmetre"') && h.includes("const smTab = document.getElementById('tab-sosyalmetre')") && h.includes("if (smTab) smTab.style.display = isAdmin ? '' : 'none';")],
   ['rules', h.includes('\u{1F9FE} Kural Listesi') && !h.includes('Şart Bankası')],
   ['catEdit', h.includes("{ id: 'xalfa', icon: '\u{1D54F}', name: 'X' }") && h.includes('function smCatName') && h.includes('function smCatEditSave') && h.includes('sm-cat-edit-input')],
-  ['imgNotes', h.includes('sm-img-paste') && h.includes('smAttachFor') && h.includes('smImgView') && h.includes('smTradeSetImg') && h.includes('data-imgdel') && h.includes("addEventListener('paste'")]
+  ['imgNotes', h.includes('sm-img-paste') && h.includes('smAttachFor') && h.includes('smImgView') && h.includes('smTradeSetImg') && h.includes('data-imgdel') && h.includes("addEventListener('paste'")],
+  ['ap2hedge', h.includes('data-ap2hedge') && h.includes('function ap2OpenHedge') && h.includes('function ap2HedgeStrip') && h.includes('function ap2HedgeInfo') && h.includes('id="ap2-hedge-strip"') && h.includes('ap2-f-side') && h.includes('data-ap2side')],
+  ['ap2short', h.includes('function ap2PnlOf') && h.includes("p.side === 'SHORT' ? 'SHORT' : 'LONG'") && h.includes('const _profit = ap2PnlOf(pos.side, sellQty * _entryCost, amount);') && h.includes('🛡 Karşı Pozisyon (hedge)')]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
