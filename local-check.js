@@ -35,7 +35,8 @@ const mk = [
   ['uyap_autolink', h.includes('uyap-f-url') && h.includes('function uyapFetchOg') && h.includes('uyapFetchOgImg') && h.includes('allorigins')],
   ['uyap_notes', h.includes('id="uyap-notes-panel"') && h.includes('function uyapRenderNotes') && h.includes('function uyapNoteSave') && h.includes('uyap-note-tag') && h.includes("uyapData.notes")],
   ['uyap_timeline', h.includes('class="uyap-composer"') && h.includes('uyap-comp-text') && h.includes('uyap-comp-count') && h.includes('uyap-note-imgbtn') && h.includes('uyap-tl-item') && h.includes('function uyapNoteTimeStr') && h.includes('uyap-note-imgprev')],
-  ['stats_admin', h.includes('function statsLiveOnly') && h.includes('if (amAllowed()) { statsRefresh(); return; }') && h.includes('if (amAllowed()) { statsFetchTotal(); return; }') && h.includes('Math.max(0, STATS_REG - 1)')]
+  ['stats_admin', h.includes('function statsLiveOnly') && h.includes('if (amAllowed()) { statsRefresh(); return; }') && h.includes('if (amAllowed()) { statsFetchTotal(); return; }') && h.includes('Math.max(0, STATS_REG - 1)')],
+  ['karne_ek', !h.includes('tab-karne') && !h.includes('mnav-karne') && !h.includes('hm.c11.t') && h.includes("{ icon: '\u{1FA9E}', page: 'karne'") && h.includes('id="page-karne"')]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
