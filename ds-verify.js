@@ -131,6 +131,7 @@ function fetchText(u, headers) {
     sosyalmetre_img: html.includes('sm-img-paste') && html.includes('smAttachFor') && html.includes('smImgView') && html.includes('smTradeSetImg') && html.includes('data-imgdel') && html.includes("addEventListener('paste'"),
     uyap: html.includes('id="page-uyap"') && html.includes('id="tab-uyap"') && html.includes('function renderUyap') && html.includes('UYAP_KEY') && html.includes('function uyapSaveForm') && html.includes('uyap-img-drop'),
     uyap_notes: html.includes('id="uyap-notes-panel"') && html.includes('function uyapRenderNotes') && html.includes('function uyapNoteSave') && html.includes('uyap-note-tag'),
+    uyap_timeline: html.includes('class="uyap-composer"') && html.includes('uyap-comp-text') && html.includes('uyap-note-imgbtn') && html.includes('uyap-tl-item') && html.includes('function uyapNoteTimeStr'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

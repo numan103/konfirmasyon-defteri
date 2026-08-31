@@ -33,7 +33,8 @@ const mk = [
   ['ap2ui', h.includes('id="ap2-search"') && h.includes('class="ap2-hd"') && h.includes('class="ap2-btn-primary"') && h.includes('act-hedge') && h.includes('act-del') && h.includes('.ap2-sell-pf') && h.includes('ap2SearchTerm') && h.includes('ap2-grid-empty')],
   ['uyap', h.includes('id="page-uyap"') && h.includes('id="tab-uyap"') && h.includes('function renderUyap') && h.includes('UYAP_KEY') && h.includes('function uyapSaveForm') && h.includes('uyap-img-drop')],
   ['uyap_autolink', h.includes('uyap-f-url') && h.includes('function uyapFetchOg') && h.includes('uyapFetchOgImg') && h.includes('allorigins')],
-  ['uyap_notes', h.includes('id="uyap-notes-panel"') && h.includes('function uyapRenderNotes') && h.includes('function uyapNoteSave') && h.includes('uyap-note-tag') && h.includes("uyapData.notes")]
+  ['uyap_notes', h.includes('id="uyap-notes-panel"') && h.includes('function uyapRenderNotes') && h.includes('function uyapNoteSave') && h.includes('uyap-note-tag') && h.includes("uyapData.notes")],
+  ['uyap_timeline', h.includes('class="uyap-composer"') && h.includes('uyap-comp-text') && h.includes('uyap-comp-count') && h.includes('uyap-note-imgbtn') && h.includes('uyap-tl-item') && h.includes('function uyapNoteTimeStr') && h.includes('uyap-note-imgprev')]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }

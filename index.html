@@ -4002,34 +4002,79 @@
   .uyap-q-tpl-list { display: flex; flex-wrap: wrap; gap: 4px; }
   .uyap-q-tpl-btn { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; background: var(--bg); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; transition: all .15s; white-space: nowrap; }
   .uyap-q-tpl-btn:hover { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
-  .uyap-notes-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-top: 20px; box-shadow: var(--shadow); }
-  .uyap-notes-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
-  .uyap-notes-title { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
-  .uyap-notes-sub { margin: 3px 0 0; font-size: 12px; color: var(--text-3); }
-  .uyap-note-addbtn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #fff; background: var(--pc); border: 1px solid var(--pc); border-radius: 10px; padding: 9px 16px; cursor: pointer; transition: all .15s; box-shadow: 0 1px 2px rgba(0,0,0,.18); }
-  .uyap-note-addbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-  .uyap-note-form { border: 1px dashed var(--pc); background: var(--pc-soft); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
-  .uyap-note-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
-  @media (max-width: 640px) { .uyap-note-form-grid { grid-template-columns: 1fr; } }
-  .uyap-notes-search { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .uyap-notes-search .uyap-search { flex: 1; min-width: 0; }
-  .uyap-note-filter { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; }
-  .uyap-note-filter:focus { outline: none; border-color: var(--pc); }
-  .uyap-notes-list { display: flex; flex-direction: column; gap: 8px; }
-  .uyap-note-item { display: flex; gap: 10px; align-items: flex-start; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
-  .uyap-note-icon { font-size: 16px; flex-shrink: 0; }
-  .uyap-note-body { flex: 1; min-width: 0; }
-  .uyap-note-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }
-  .uyap-note-type { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; background: var(--pc-soft); color: var(--pc); border-radius: 5px; padding: 1px 6px; }
-  .uyap-note-type.soru { background: rgba(96,165,250,.12); color: #60a5fa; }
-  .uyap-note-type.cevap { background: rgba(34,197,94,.12); color: var(--green); }
-  .uyap-note-tag { font-size: 11px; font-weight: 700; color: var(--pc); background: var(--pc-soft); border-radius: 5px; padding: 1px 6px; }
-  .uyap-note-tag::before { content: '#'; }
-  .uyap-note-date { font-size: 10px; color: var(--text-3); margin-left: auto; }
-  .uyap-note-text { font-size: 13px; color: var(--text); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-  .uyap-note-rm { width: 26px; height: 26px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); border-radius: 7px; cursor: pointer; font-size: 12px; flex-shrink: 0; transition: all .15s; }
-  .uyap-note-rm:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.08); }
-  .uyap-notes-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
+  .uyap-notes-panel { background: transparent; border: none; padding: 0; margin-top: 28px; }
+  .uyap-notes-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .uyap-notes-head-t { min-width: 0; }
+  .uyap-notes-title { margin: 0; font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
+  .uyap-notes-sub { margin: 4px 0 0; font-size: 13px; color: var(--text-3); }
+
+  /* ── Komposer (Twitter benzeri) ── */
+  .uyap-composer { display: flex; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); transition: border-color .2s, box-shadow .2s; }
+  .uyap-composer.uyap-comp-focus { border-color: var(--pc); box-shadow: 0 6px 24px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05); }
+  .uyap-comp-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--pc), var(--glow-a)); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  .uyap-comp-main { flex: 1; min-width: 0; }
+  .uyap-comp-text { width: 100%; box-sizing: border-box; background: transparent; border: none; outline: none; resize: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 18px; line-height: 1.5; min-height: 60px; }
+  .uyap-comp-text::placeholder { color: var(--text-3); }
+  .uyap-comp-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0 4px; }
+  .uyap-comp-tag { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--pc); cursor: pointer; transition: all .15s; }
+  .uyap-comp-tag:hover { background: var(--pc-soft); border-color: var(--pc); }
+  .uyap-comp-taginput { width: 110px; background: var(--bg); border: 1px dashed var(--border); border-radius: 20px; padding: 3px 10px; color: var(--text-2); font-size: 12px; font-family: 'Inter', sans-serif; }
+  .uyap-comp-taginput:focus { outline: none; border-color: var(--pc); }
+  .uyap-comp-preview { position: relative; margin-top: 6px; }
+  .uyap-comp-preview img { max-width: 100%; max-height: 200px; border-radius: 12px; display: block; }
+  .uyap-comp-preview button { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; border: none; cursor: pointer; font-size: 12px; }
+  .uyap-comp-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); gap: 10px; flex-wrap: wrap; }
+  .uyap-comp-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .uyap-comp-type { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; }
+  .uyap-comp-type:focus { outline: none; border-color: var(--pc); }
+  .uyap-comp-imgbtn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); color: var(--pc); font-size: 16px; cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; justify-content: center; }
+  .uyap-comp-imgbtn:hover { background: var(--pc-soft); border-color: var(--pc); }
+  .uyap-comp-right { display: flex; align-items: center; gap: 12px; }
+  .uyap-comp-count { font-size: 12px; font-weight: 600; color: var(--text-3); }
+  .uyap-comp-submit { background: var(--pc); color: #fff; border: none; border-radius: 999px; padding: 9px 22px; font-size: 14px; font-weight: 800; font-family: 'Inter', sans-serif; cursor: pointer; transition: filter .15s, transform .15s, opacity .15s; box-shadow: 0 4px 14px var(--pc-soft); }
+  .uyap-comp-submit:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .uyap-comp-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ── Timeline ── */
+  .uyap-timeline { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
+  .uyap-timeline-tabs { display: flex; gap: 4px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .uyap-tl-tab { padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 700; background: transparent; border: none; color: var(--text-3); cursor: pointer; transition: all .15s; }
+  .uyap-tl-tab.on { background: var(--pc-soft); color: var(--pc); }
+  .uyap-tl-tab:hover { color: var(--pc); }
+  .uyap-tl-search { margin-left: auto; }
+  .uyap-tl-search input { background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; color: var(--text); font-size: 12px; font-family: 'Inter', sans-serif; width: 160px; }
+  .uyap-tl-search input:focus { outline: none; border-color: var(--pc); }
+  .uyap-notes-list { border-radius: 0 0 18px 18px; }
+  .uyap-tl-item { display: flex; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); transition: background .15s; }
+  .uyap-tl-item:last-child { border-bottom: none; }
+  .uyap-tl-item:hover { background: var(--bg); }
+  .uyap-tl-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .uyap-tl-main { flex: 1; min-width: 0; }
+  .uyap-tl-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .uyap-tl-author { font-size: 14px; font-weight: 800; color: var(--text); }
+  .uyap-tl-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .uyap-tl-badge.not { background: var(--pc-soft); color: var(--pc); }
+  .uyap-tl-badge.soru { background: rgba(96,165,250,.14); color: #60a5fa; }
+  .uyap-tl-badge.cevap { background: rgba(34,197,94,.14); color: var(--green); }
+  .uyap-tl-time { font-size: 12px; color: var(--text-3); margin-left: auto; }
+  .uyap-tl-text { font-size: 15px; line-height: 1.55; color: var(--text); white-space: pre-wrap; word-break: break-word; margin-bottom: 8px; }
+  .uyap-tl-tag { display: inline-block; font-size: 12px; font-weight: 600; color: var(--pc); background: var(--pc-soft); border-radius: 6px; padding: 1px 7px; margin: 2px 2px 0 0; }
+  .uyap-tl-tag::before { content: '#'; }
+  .uyap-tl-img { margin-top: 8px; }
+  .uyap-tl-img img { max-width: 100%; max-height: 320px; border-radius: 12px; cursor: pointer; display: block; border: 1px solid var(--border); }
+  .uyap-tl-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .uyap-tl-act { width: 32px; height: 32px; border-radius: 50%; background: transparent; border: none; color: var(--text-3); font-size: 15px; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; }
+  .uyap-tl-act:hover { background: var(--pc-soft); color: var(--pc); transform: scale(1.1); }
+  .uyap-tl-act.on { color: var(--red); }
+  .uyap-notes-empty { text-align: center; padding: 50px 20px; color: var(--text-3); font-size: 14px; }
+  @media (max-width: 640px) {
+    .uyap-timeline-tabs { gap: 2px; }
+    .uyap-tl-search { margin-left: 0; width: 100%; }
+    .uyap-tl-search input { width: 100%; box-sizing: border-box; }
+    .uyap-comp-submit { padding: 8px 18px; }
+    .uyap-comp-avatar { width: 36px; height: 36px; font-size: 17px; }
+    .uyap-tl-avatar { width: 36px; height: 36px; font-size: 16px; }
+  }
   </style>
   <script>
   (function () {
@@ -6563,36 +6608,53 @@
 
     <div class="uyap-notes-panel" id="uyap-notes-panel">
       <div class="uyap-notes-head">
-        <div>
+        <div class="uyap-notes-head-t">
           <h3 class="uyap-notes-title">📝 Notlar & Sorular</h3>
-          <p class="uyap-notes-sub">Genel notların, soruların ve cevapların. Hangisiyle ilgili olduğunu etiketle (örn. <b>#bahçelievler</b>, <b>#genel</b>, <b>#hukuk</b>).</p>
-        </div>
-        <button type="button" class="uyap-note-addbtn" id="uyap-note-add">+ Not Ekle</button>
-      </div>
-
-      <div class="uyap-note-form hidden" id="uyap-note-form">
-        <div class="uyap-note-form-grid">
-          <div class="uyap-f"><label>Etiket</label><input id="uyap-note-tag" placeholder="#bahçelievler" maxlength="40" autocomplete="off"></div>
-          <div class="uyap-f"><label>Tip</label><select id="uyap-note-type"><option value="not">Not</option><option value="soru">Soru</option><option value="cevap">Cevap</option></select></div>
-          <div class="uyap-f-full"><label>Metin</label><textarea id="uyap-note-text" placeholder="Ne düşünüyorsun, ne sormak istiyorsun?" rows="3" maxlength="800"></textarea></div>
-        </div>
-        <div class="uyap-form-btns">
-          <button type="button" class="btn" id="uyap-note-cancel">Vazgeç</button>
-          <button type="button" class="btn primary" id="uyap-note-save">Ekle</button>
+          <p class="uyap-notes-sub">Ne düşünüyorsan yaz. Hangisiyle ilgiliyse etiketle — Twettir tarzı akış.</p>
         </div>
       </div>
 
-      <div class="uyap-notes-search" id="uyap-notes-searchbox">
-        <input type="search" id="uyap-notes-search" class="uyap-search" placeholder="Notlarda ara…" autocomplete="off">
-        <select id="uyap-notes-filter" class="uyap-note-filter">
-          <option value="all">Tümü</option>
-          <option value="not">Not</option>
-          <option value="soru">Soru</option>
-          <option value="cevap">Cevap</option>
-        </select>
+      <div class="uyap-composer" id="uyap-note-form">
+        <div class="uyap-comp-avatar" id="uyap-note-avatar">👤</div>
+        <div class="uyap-comp-main">
+          <textarea id="uyap-note-text" class="uyap-comp-text" placeholder="Ne var ne yok? Soru sor, not düş…" maxlength="800" rows="2"></textarea>
+          <div class="uyap-comp-tags" id="uyap-comp-tags">
+            <button type="button" class="uyap-comp-tag" data-uyap-quicktag="genel">#genel</button>
+            <button type="button" class="uyap-comp-tag" data-uyap-quicktag="bahçelievler">#bahçelievler</button>
+            <button type="button" class="uyap-comp-tag" data-uyap-quicktag="hukuk">#hukuk</button>
+            <button type="button" class="uyap-comp-tag" data-uyap-quicktag="mali">#mali</button>
+            <input id="uyap-note-tag" class="uyap-comp-taginput" placeholder="# özel etiket" maxlength="40" autocomplete="off">
+          </div>
+          <div class="uyap-comp-preview hidden" id="uyap-note-imgprev"><img id="uyap-note-imgprev-img" alt=""><button type="button" id="uyap-note-imgrm">✕</button></div>
+          <div class="uyap-comp-footer">
+            <div class="uyap-comp-tools">
+              <select id="uyap-note-type" class="uyap-comp-type">
+                <option value="not">📝 Not</option>
+                <option value="soru">❓ Soru</option>
+                <option value="cevap">💬 Cevap</option>
+              </select>
+              <button type="button" class="uyap-comp-imgbtn" id="uyap-note-imgbtn" title="Görsel ekle (Ctrl+V)">🖼️</button>
+              <input type="file" id="uyap-note-imgfile" accept="image/*" hidden>
+            </div>
+            <div class="uyap-comp-right">
+              <span class="uyap-comp-count" id="uyap-note-count">0/800</span>
+              <button type="button" class="uyap-comp-submit" id="uyap-note-save">Paylaş</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="uyap-notes-list" id="uyap-notes-list"></div>
-      <div class="uyap-notes-empty" id="uyap-notes-empty">Henüz not yok — "+ Not Ekle" ile başla.</div>
+
+      <div class="uyap-timeline">
+        <div class="uyap-timeline-tabs">
+          <button type="button" class="uyap-tl-tab on" data-uyap-tl="all">Tümü</button>
+          <button type="button" class="uyap-tl-tab" data-uyap-tl="soru">❓ Sorular</button>
+          <button type="button" class="uyap-tl-tab" data-uyap-tl="not">📝 Notlar</button>
+          <button type="button" class="uyap-tl-tab" data-uyap-tl="cevap">💬 Cevaplar</button>
+          <div class="uyap-tl-search"><input type="search" id="uyap-notes-search" placeholder="Akışta ara…" autocomplete="off"></div>
+        </div>
+        <div class="uyap-notes-list" id="uyap-notes-list"></div>
+        <div class="uyap-notes-empty" id="uyap-notes-empty">Henüz bir şey paylaşmadın — yukarıya ilk notunu yaz!</div>
+      </div>
     </div>
   </div>
 
@@ -26260,7 +26322,21 @@ function renderUyap() {
 }
 
 /* ── Genel Notlar & Sorular ── */
-var uyapNotesFilter = 'all';
+var uyapNotesTab = 'all';
+var uyapNoteImg = null;
+
+function uyapNoteTimeStr(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  var now = new Date();
+  var diff = now - d;
+  if (diff < 60000) return 'Şimdi';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' dk';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + ' sa';
+  var days = Math.floor(diff / 86400000);
+  if (days < 7) return days + ' g';
+  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+}
 
 function uyapRenderNotes() {
   var list = document.getElementById('uyap-notes-list');
@@ -26268,9 +26344,8 @@ function uyapRenderNotes() {
   if (!list) return;
   var q = (document.getElementById('uyap-notes-search') || {}).value || '';
   q = q.toLowerCase();
-  var f = (document.getElementById('uyap-notes-filter') || {}).value || 'all';
   var notes = (uyapData.notes || []).filter(function (n) {
-    if (f !== 'all' && n.type !== f) return false;
+    if (uyapNotesTab !== 'all' && n.type !== uyapNotesTab) return false;
     if (q && (n.text || '').toLowerCase().indexOf(q) === -1 && (n.tag || '').toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
@@ -26281,17 +26356,36 @@ function uyapRenderNotes() {
     return;
   }
   if (empty) empty.classList.add('hidden');
+  var typeBadge = { not: { c: 'not', t: '📝 Not' }, soru: { c: 'soru', t: '❓ Soru' }, cevap: { c: 'cevap', t: '💬 Cevap' } };
   var typeIcons = { not: '📝', soru: '❓', cevap: '💬' };
   var html = '';
   notes.forEach(function (n) {
-    var tagHtml = n.tag ? '<span class="uyap-note-tag">' + n.tag + '</span>' : '';
-    html += '<div class="uyap-note-item uyap-note-' + (n.type || 'not') + '">'
-      + '<div class="uyap-note-icon">' + (typeIcons[n.type] || '📝') + '</div>'
-      + '<div class="uyap-note-body">'
-      + '<div class="uyap-note-top"><span class="uyap-note-type">' + (n.type || 'not') + '</span>' + tagHtml + '<span class="uyap-note-date">' + (n.date || '') + '</span></div>'
-      + '<div class="uyap-note-text">' + n.text + '</div>'
+    var b = typeBadge[n.type] || typeBadge.not;
+    var tagHtml = '';
+    if (n.tag) {
+      var tags = n.tag.split(/[\s,]+/).filter(function (x) { return x; });
+      tagHtml = tags.map(function (tg) { return '<span class="uyap-tl-tag">#' + tg + '</span>'; }).join('');
+    }
+    var imgHtml = n.img ? '<div class="uyap-tl-img"><img src="' + n.img + '" alt="" data-uyap-tlimgview="' + n.img + '"></div>' : '';
+    var likeCls = n.liked ? ' on' : '';
+    var impCls = n.imp ? ' on' : '';
+    html += '<div class="uyap-tl-item uyap-tl-' + n.type + '">'
+      + '<div class="uyap-tl-avatar" data-uyap-noteavatar="' + n.id + '">👤</div>'
+      + '<div class="uyap-tl-main">'
+      + '<div class="uyap-tl-top">'
+      + '<span class="uyap-tl-author">Alfa Uyap</span>'
+      + '<span class="uyap-tl-badge ' + b.c + '">' + b.t + '</span>'
+      + '<span class="uyap-tl-time">' + uyapNoteTimeStr(n.ts) + '</span>'
       + '</div>'
-      + '<button type="button" class="uyap-note-rm" data-uyap-noterm="' + n.id + '" title="Sil">🗑️</button>'
+      + '<div class="uyap-tl-text">' + n.text + '</div>'
+      + tagHtml
+      + imgHtml
+      + '</div>'
+      + '<div class="uyap-tl-actions">'
+      + '<button type="button" class="uyap-tl-act' + impCls + '" data-uyap-noteact="imp:' + n.id + '" title="Önemli">⭐</button>'
+      + '<button type="button" class="uyap-tl-act' + likeCls + '" data-uyap-noteact="like:' + n.id + '" title="Beğen">♥</button>'
+      + '<button type="button" class="uyap-tl-act" data-uyap-noteact="del:' + n.id + '" title="Sil">🗑️</button>'
+      + '</div>'
       + '</div>';
   });
   list.innerHTML = html;
@@ -26299,35 +26393,65 @@ function uyapRenderNotes() {
 
 function uyapNoteOpenForm() {
   var f = document.getElementById('uyap-note-form');
-  if (f) f.classList.remove('hidden');
-  var btn = document.getElementById('uyap-note-add');
-  if (btn) btn.classList.add('hidden');
-  document.getElementById('uyap-note-tag').focus();
+  if (f) f.classList.add('uyap-comp-focus');
+  document.getElementById('uyap-note-text').focus();
 }
 
 function uyapNoteCloseForm() {
   var f = document.getElementById('uyap-note-form');
-  if (f) f.classList.add('hidden');
-  var btn = document.getElementById('uyap-note-add');
-  if (btn) btn.classList.remove('hidden');
+  if (f) f.classList.remove('uyap-comp-focus');
+}
+
+function uyapRenderNoteCount() {
+  var el = document.getElementById('uyap-note-count');
+  var ta = document.getElementById('uyap-note-text');
+  if (el && ta) el.textContent = ta.value.length + '/800';
 }
 
 function uyapNoteSave() {
   var tag = (document.getElementById('uyap-note-tag').value || '').trim();
   var type = document.getElementById('uyap-note-type').value;
   var text = (document.getElementById('uyap-note-text').value || '').trim();
-  if (!text) { alert('Metin gerekli.'); return; }
+  if (!text) { alert('Önce bir şeyler yaz.'); return; }
   if (!uyapData.notes) uyapData.notes = [];
   uyapData.notes.push({
     id: 'unote_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
-    tag: tag, type: type, text: text,
+    tag: tag, type: type, text: text, img: uyapNoteImg || null,
+    liked: false, imp: false,
     date: new Date().toISOString().slice(0, 10), ts: Date.now()
   });
   uyapSave();
   document.getElementById('uyap-note-tag').value = '';
   document.getElementById('uyap-note-text').value = '';
+  uyapNoteImg = null;
+  document.getElementById('uyap-note-imgprev').classList.add('hidden');
+  document.getElementById('uyap-note-imgfile').value = '';
+  uyapRenderNoteCount();
   uyapNoteCloseForm();
   uyapRenderNotes();
+}
+
+function uyapNoteDel(id) {
+  if (!confirm('Bu notu sil?')) return;
+  uyapData.notes = (uyapData.notes || []).filter(function (n) { return n.id !== id; });
+  uyapSave(); uyapRenderNotes();
+}
+
+function uyapNoteToggle(act, id) {
+  var n = (uyapData.notes || []).find(function (x) { return x.id === id; });
+  if (!n) return;
+  if (act === 'like') n.liked = !n.liked;
+  if (act === 'imp') { n.imp = !n.imp; if (n.imp) n.saved = true; }
+  uyapSave(); uyapRenderNotes();
+}
+
+function uyapNoteSetImg(src) {
+  uyapImgCompress(src, function (compressed) {
+    uyapNoteImg = compressed;
+    var prev = document.getElementById('uyap-note-imgprev');
+    var img = document.getElementById('uyap-note-imgprev-img');
+    if (prev && img) { img.src = compressed; prev.classList.remove('hidden'); }
+  });
 }
 
 function uyapNoteDel(id) {
@@ -26565,11 +26689,39 @@ document.addEventListener('click', function (e) {
   if (delBtn) { uyapDelProp(delBtn.getAttribute('data-uyap-del')); return; }
   var filterBtn = t.closest('[data-uyap-f]');
   if (filterBtn) { uyapFilter = filterBtn.getAttribute('data-uyap-f'); uyapRenderFilters(); uyapRenderGrid(); return; }
-  if (t.id === 'uyap-note-add') { uyapNoteOpenForm(); return; }
-  if (t.id === 'uyap-note-cancel') { uyapNoteCloseForm(); return; }
   if (t.id === 'uyap-note-save') { uyapNoteSave(); return; }
-  var noteRm = t.closest('[data-uyap-noterm]');
-  if (noteRm) { uyapNoteDel(noteRm.getAttribute('data-uyap-noterm')); return; }
+  if (t.id === 'uyap-note-imgbtn' || t.closest('#uyap-note-imgbtn')) {
+    var imgfile = document.getElementById('uyap-note-imgfile');
+    if (imgfile) imgfile.click();
+    return;
+  }
+  if (t.id === 'uyap-note-imgrm') {
+    uyapNoteImg = null;
+    document.getElementById('uyap-note-imgprev').classList.add('hidden');
+    return;
+  }
+  var quickTag = t.closest('[data-uyap-quicktag]');
+  if (quickTag) {
+    document.getElementById('uyap-note-tag').value = quickTag.getAttribute('data-uyap-quicktag');
+    return;
+  }
+  var tlTab = t.closest('[data-uyap-tl]');
+  if (tlTab) {
+    uyapNotesTab = tlTab.getAttribute('data-uyap-tl');
+    document.querySelectorAll('[data-uyap-tl]').forEach(function (b) { b.classList.toggle('on', b === tlTab); });
+    uyapRenderNotes();
+    return;
+  }
+  var noteAct = t.closest('[data-uyap-noteact]');
+  if (noteAct) {
+    var actStr = noteAct.getAttribute('data-uyap-noteact');
+    var sep = actStr.indexOf(':');
+    var act = actStr.slice(0, sep), nid = actStr.slice(sep + 1);
+    if (act === 'del') uyapNoteDel(nid); else uyapNoteToggle(act, nid);
+    return;
+  }
+  var tlImg = t.closest('[data-uyap-tlimgview]');
+  if (tlImg) { uyapImgView(tlImg.getAttribute('data-uyap-tlimgview')); return; }
   var imgRm = t.closest('[data-uyap-img-rm]');
   if (imgRm) {
     var idx = parseInt(imgRm.getAttribute('data-uyap-img-rm'));
@@ -26605,12 +26757,20 @@ document.addEventListener('keyup', function (e) {
   if (e.key === 'Escape') { uyapCloseForm(); uyapImgClose(); uyapNoteCloseForm(); }
   if (e.target.id === 'uyap-search') { uyapRenderGrid(); }
   if (e.target.id === 'uyap-notes-search') { uyapRenderNotes(); }
+  if (e.target.id === 'uyap-note-text') { uyapRenderNoteCount(); }
 });
 
 document.addEventListener('input', function (e) {
   var t = e.target;
   if (t.matches('#uyap-f-costs-list input')) { uyapUpdateCostTotal(); }
-  if (t.id === 'uyap-notes-filter') { uyapRenderNotes(); }
+  if (t.id === 'uyap-note-text') { uyapRenderNoteCount(); }
+});
+
+document.addEventListener('focusin', function (e) {
+  if (e.target && e.target.id === 'uyap-note-text') {
+    var comp = document.getElementById('uyap-note-form');
+    if (comp) comp.classList.add('uyap-comp-focus');
+  }
 });
 
 document.addEventListener('blur', function (e) {
@@ -26650,18 +26810,34 @@ document.addEventListener('blur', function (e) {
       input.value = '';
     });
   }
+  var noteImgFile = document.getElementById('uyap-note-imgfile');
+  if (noteImgFile) {
+    noteImgFile.addEventListener('change', function () {
+      var files = noteImgFile.files;
+      for (var i = 0; i < files.length; i++) {
+        if (!files[i].type.startsWith('image/')) continue;
+        var fr = new FileReader();
+        fr.onload = function () { uyapNoteSetImg(fr.result); };
+        fr.readAsDataURL(files[i]);
+      }
+      noteImgFile.value = '';
+    });
+  }
 })();
 
 /* ── Clipboard paste for images ── */
 document.addEventListener('paste', function (e) {
-  if (!document.getElementById('uyap-form') || !document.getElementById('uyap-form').classList.contains('on')) return;
   var items = (e.clipboardData || {}).items;
   if (!items) return;
   for (var i = 0; i < items.length; i++) {
     if (items[i].type.startsWith('image/')) {
       var blob = items[i].getAsFile();
       var fr = new FileReader();
-      fr.onload = function () { uyapAddImg(fr.result); };
+      var emlakFormOpen = document.getElementById('uyap-form') && document.getElementById('uyap-form').classList.contains('on');
+      fr.onload = function () {
+        if (emlakFormOpen) uyapAddImg(fr.result);
+        else uyapNoteSetImg(fr.result);
+      };
       fr.readAsDataURL(blob);
       break;
     }
