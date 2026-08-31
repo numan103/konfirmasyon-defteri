@@ -104,6 +104,7 @@
   body[data-page="designer"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.18); --glow-b: rgba(132,204,22,.10); }
   body[data-page="alfatrading"] { --pc: #2aabee; --pc-soft: rgba(42,171,238,.16); --glow-a: rgba(42,171,238,.18); --glow-b: rgba(14,165,233,.10); }
   body[data-page="karne"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.20); --glow-b: rgba(132,204,22,.10); }
+  body[data-page="uyap"] { --pc: #f59e0b; --pc-soft: rgba(245,158,11,.16); --glow-a: rgba(245,158,11,.18); --glow-b: rgba(217,119,6,.10); }
   .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
 
   .tophead { padding: 18px 0 4px; }
@@ -3866,6 +3867,116 @@
     .bd-life-rows { grid-template-columns: 1fr; }
     .bd-life-box { height: 40px; }
   }
+
+  /* ── UYAP ── */
+  #page-uyap .uyap-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px; }
+  .uyap-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 16px 18px; margin-bottom: 14px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(245,158,11,.02) 60%, transparent); box-shadow: var(--shadow); }
+  .uyap-head-t h2 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
+  .uyap-head-t p { margin: 3px 0 0; font-size: 12px; color: var(--text-3); }
+  .uyap-head-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .uyap-search { width: 190px; max-width: 100%; box-sizing: border-box; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; transition: border-color .15s, box-shadow .15s; }
+  .uyap-search:focus { outline: none; border-color: var(--pc); box-shadow: 0 0 0 3px var(--pc-soft); }
+  .uyap-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .uyap-stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; text-align: center; }
+  .uyap-stat-lbl { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 4px; }
+  .uyap-stat-val { font-size: 16px; font-weight: 800; color: var(--text); }
+  .uyap-stat-val.pos { color: var(--green); }
+  .uyap-stat-val.neg { color: var(--red); }
+  @media (max-width: 640px) { .uyap-stats { grid-template-columns: 1fr 1fr; } .uyap-head { align-items: stretch; } .uyap-head-actions { width: 100%; } .uyap-search { flex: 1; min-width: 0; } }
+  .uyap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 720px) { .uyap-grid { grid-template-columns: 1fr; } }
+  .uyap-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; transition: border-color .2s, box-shadow .2s, transform .15s; position: relative; display: flex; flex-direction: column; }
+  .uyap-card:hover { border-color: var(--pc); box-shadow: 0 6px 20px rgba(0,0,0,.18); transform: translateY(-1px); }
+  .uyap-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+  .uyap-card-title { font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -.3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .uyap-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .uyap-card-actions button { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 1px solid var(--border); background: var(--bg); color: var(--text-2); border-radius: 8px; font-size: 13px; line-height: 1; cursor: pointer; transition: all .15s; }
+  .uyap-card-actions button:hover { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
+  .uyap-card-actions button.uyap-del:hover { border-color: var(--red); background: rgba(239,68,68,.08); color: var(--red); }
+  .uyap-badge { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; letter-spacing: .3px; display: inline-block; }
+  .uyap-badge.potansiyel { background: rgba(245,158,11,.12); color: var(--amber); }
+  .uyap-badge.inceleniyor { background: rgba(59,130,246,.12); color: var(--blue-txt); }
+  .uyap-badge.alindi { background: rgba(34,197,94,.12); color: var(--green); }
+  .uyap-badge.satildi { background: rgba(168,85,247,.12); color: #a78bfa; }
+  .uyap-type-chip { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 5px; background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+  .uyap-card-loc { font-size: 12px; color: var(--text-3); margin-bottom: 10px; }
+  .uyap-card-img { width: 100%; border-radius: 10px; margin-bottom: 12px; max-height: 220px; object-fit: cover; cursor: pointer; transition: opacity .15s; }
+  .uyap-card-img:hover { opacity: .85; }
+  .uyap-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .uyap-card-pbox { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+  .uyap-card-plbl { font-size: 9px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
+  .uyap-card-pval { font-size: 14px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .uyap-card-calc { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; }
+  .uyap-card-calc.pos { background: rgba(16,185,129,.08); }
+  .uyap-card-calc.neg { background: rgba(239,68,68,.08); }
+  .uyap-card-calc.zero { background: var(--bg); }
+  .uyap-card-calc-lbl { font-size: 12px; font-weight: 600; color: var(--text-3); }
+  .uyap-card-calc-val { font-size: 15px; font-weight: 800; }
+  .uyap-card-calc-val.pos { color: var(--green); }
+  .uyap-card-calc-val.neg { color: var(--red); }
+  .uyap-card-calc-val.zero { color: var(--text-3); }
+  .uyap-card-calc-pct { font-size: 12px; font-weight: 700; margin-left: 6px; }
+  .uyap-card-calc-pct.pos { color: var(--green); }
+  .uyap-card-calc-pct.neg { color: var(--red); }
+  .uyap-card-meta { font-size: 10px; color: var(--text-3); margin-bottom: 6px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .uyap-card-notes { font-size: 12px; color: var(--text-2); margin-bottom: 10px; line-height: 1.5; }
+  .uyap-card-qs { border-top: 1px dashed var(--border); padding-top: 8px; }
+  .uyap-card-qs-h { font-size: 11px; font-weight: 700; color: var(--text-3); margin-bottom: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .uyap-card-qs-h .cnt { background: var(--pc-soft); color: var(--pc); border-radius: 5px; padding: 1px 6px; font-size: 10px; font-weight: 800; }
+  .uyap-card-q { font-size: 11px; color: var(--text-2); padding: 4px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+  .uyap-card-q:last-child { border-bottom: none; }
+  .uyap-card-q b { color: var(--text); }
+  .uyap-q-add { display: flex; gap: 4px; margin-top: 6px; }
+  .uyap-q-add input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; color: var(--text); font-size: 11px; font-family: 'Inter', sans-serif; }
+  .uyap-q-add input:focus { outline: none; border-color: var(--pc); }
+  .uyap-q-add button { padding: 6px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; background: var(--pc); color: #fff; border: none; cursor: pointer; }
+  .uyap-empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
+  .uyap-empty .ico { font-size: 48px; margin-bottom: 12px; }
+  .uyap-empty p { font-size: 14px; margin-bottom: 16px; }
+  .uyap-form { position: fixed; inset: 0; z-index: 900; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,.75); padding: 16px; }
+  .uyap-form.on { display: flex; }
+  .uyap-form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; max-width: 560px; width: 100%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .uyap-form-h { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .uyap-form-h button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 18px; }
+  .uyap-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+  .uyap-f { display: flex; flex-direction: column; gap: 4px; }
+  .uyap-f-full { grid-column: 1 / -1; }
+  .uyap-f label { font-size: 11px; font-weight: 700; color: var(--text-3); }
+  .uyap-f input, .uyap-f select, .uyap-f textarea { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; width: 100%; box-sizing: border-box; }
+  .uyap-f textarea { resize: vertical; min-height: 60px; }
+  .uyap-f input:focus, .uyap-f select:focus, .uyap-f textarea:focus { outline: none; border-color: var(--pc); }
+  .uyap-f-sec { font-size: 13px; font-weight: 800; color: var(--text-2); margin: 14px 0 8px; padding-top: 12px; border-top: 1px dashed var(--border); grid-column: 1 / -1; }
+  .uyap-costs { display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1; }
+  .uyap-cost-row { display: flex; gap: 6px; align-items: center; }
+  .uyap-cost-row input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; color: var(--text); font-size: 12px; font-family: 'Inter', sans-serif; }
+  .uyap-cost-row input:focus { outline: none; border-color: var(--pc); }
+  .uyap-cost-row .num { max-width: 120px; }
+  .uyap-cost-rm { width: 28px; height: 28px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); border-radius: 7px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .uyap-cost-rm:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.08); }
+  .uyap-cost-add { font-size: 11px; font-weight: 700; color: var(--pc); background: none; border: 1px dashed var(--pc); border-radius: 8px; padding: 6px 10px; cursor: pointer; grid-column: 1 / -1; }
+  .uyap-cost-add:hover { background: var(--pc-soft); }
+  .uyap-img-drop { border: 2px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; grid-column: 1 / -1; position: relative; }
+  .uyap-img-drop:hover, .uyap-img-drop.over { border-color: var(--pc); background: var(--pc-soft); }
+  .uyap-img-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .uyap-img-drop span { font-size: 12px; color: var(--text-3); }
+  .uyap-img-thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; grid-column: 1 / -1; }
+  .uyap-img-thumb { position: relative; width: 70px; height: 70px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .uyap-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .uyap-img-thumb button { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; border: none; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+  .uyap-form-btns { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; grid-column: 1 / -1; }
+  .uyap-form-btns .btn { padding: 9px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-2); font-family: 'Inter', sans-serif; transition: all .15s; }
+  .uyap-form-btns .btn.primary { background: var(--pc); color: #fff; border-color: var(--pc); }
+  .uyap-form-btns .btn.primary:hover { filter: brightness(1.08); }
+  .uyap-form-btns .btn:hover { border-color: var(--pc); }
+  .uyap-imgview { position: fixed; inset: 0; z-index: 1100; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,.85); padding: 16px; }
+  .uyap-imgview.on { display: flex; }
+  .uyap-imgview-inner { position: relative; max-width: 94vw; max-height: 92vh; }
+  .uyap-imgview-inner img { max-width: 94vw; max-height: 92vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+  .uyap-imgview-close { position: absolute; top: -12px; right: -12px; width: 32px; height: 32px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); cursor: pointer; font-size: 14px; }
+  .uyap-filters { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .uyap-filter-btn { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text-3); cursor: pointer; transition: all .15s; }
+  .uyap-filter-btn.on { background: var(--pc-soft); color: var(--pc); border-color: var(--pc); }
+  .uyap-filter-btn:hover { border-color: var(--pc); }
   </style>
   <script>
   (function () {
@@ -4410,6 +4521,7 @@
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Alfa Defter</a>
       <a href="?page=sosyalmetre" class="nav-link" id="tab-sosyalmetre" data-nav>📣 Sosyalmetre</a>
+      <a href="?page=uyap" class="nav-link" id="tab-uyap" data-nav>🏠 Uyap</a>
       <div class="nav-drop">
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
         <div class="drop-menu">
@@ -4468,6 +4580,7 @@
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" data-i18n="app.butce">💰 Alfa Defter</a>
       <a href="?page=sosyalmetre" class="mnav-link" id="mnav-sosyalmetre" data-nav data-mnav="sosyalmetre">📣 Sosyalmetre</a>
+      <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Uyap</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
       <a href="?page=data" class="mnav-link" data-nav data-mnav="data" data-i18n="app.journal">📈 Trade Günlüğü</a>
@@ -6374,6 +6487,67 @@
       </div>
     </div>
   </div>
+
+<div id="page-uyap" class="hidden">
+  <div class="uyap-wrap">
+    <div class="uyap-head">
+      <div class="uyap-head-t">
+        <h2>🏠 Uyap — Gayrimenkul Takip</h2>
+        <p>Potansiyel evler, gayrimenkuller, kâr/maliyet hesaplama ve notlar. Sadece sen görebilirsin.</p>
+      </div>
+      <div class="uyap-head-actions">
+        <input type="search" id="uyap-search" class="uyap-search" placeholder="Ev adı / konum ara…" autocomplete="off">
+        <button type="button" class="ap2-btn-primary" id="uyap-add-btn">＋ Yeni Emlak</button>
+      </div>
+    </div>
+    <div class="uyap-stats" id="uyap-stats"></div>
+    <div class="uyap-filters" id="uyap-filters"></div>
+    <div class="uyap-grid" id="uyap-grid"></div>
+    <div class="uyap-empty hidden" id="uyap-empty">
+      <div class="ico">🏡</div>
+      <p>Henüz emlak eklenmemiş.<br>＋ butonuyla ilk gayrimenkulünü ekle.</p>
+    </div>
+  </div>
+
+  <div class="uyap-form" id="uyap-form">
+    <div class="uyap-form-card">
+      <div class="uyap-form-h"><span id="uyap-form-title">Yeni Emlak</span><button type="button" id="uyap-form-close">✕</button></div>
+      <div class="uyap-form-grid">
+        <div class="uyap-f"><label>Emlak Adı</label><input id="uyap-f-name" placeholder="Örn: Bahçelievler Daire" maxlength="80" autocomplete="off"></div>
+        <div class="uyap-f"><label>Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
+        <div class="uyap-f"><label>Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
+        <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="potansiyel">Potansiyel</option><option value="inceleniyor">İnceleniyor</option><option value="alindi">Alındı</option><option value="satildi">Satıldı</option></select></div>
+        <div class="uyap-f"><label>Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
+        <div class="uyap-f"><label>Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
+        <div class="uyap-f"><label>Ek Masraf Toplamı (₺)</label><input type="number" id="uyap-f-costs" placeholder="0" min="0" step="1000" readonly></div>
+        <div class="uyap-f"><label>Metrekare (m²)</label><input type="number" id="uyap-f-sqm" placeholder="0" min="0" step="1"></div>
+        <div class="uyap-f"><label>Oda Sayısı</label><input id="uyap-f-rooms" placeholder="Örn: 3+1" maxlength="10" autocomplete="off"></div>
+        <div class="uyap-f"><label>Yıl</label><input type="number" id="uyap-f-year" placeholder="2024" min="1900" max="2030"></div>
+        <div class="uyap-f-full"><label>Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
+        <div class="uyap-f-sec">Ek Masraflar</div>
+        <div class="uyap-costs" id="uyap-f-costs-list"></div>
+        <button type="button" class="uyap-cost-add" id="uyap-f-cost-add">+ Masraf Ekle</button>
+        <div class="uyap-f-sec">Fotoğraflar</div>
+        <div class="uyap-img-drop" id="uyap-f-img-drop">
+          <input type="file" id="uyap-f-img-input" accept="image/*" multiple>
+          <span>📷 Fotoğraf eklemek için tıkla veya sürükle</span>
+        </div>
+        <div class="uyap-img-thumbs" id="uyap-f-img-thumbs"></div>
+        <div class="uyap-form-btns">
+          <button type="button" class="btn" id="uyap-form-cancel">Vazgeç</button>
+          <button type="button" class="btn primary" id="uyap-form-save">Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="uyap-imgview" id="uyap-imgview">
+    <div class="uyap-imgview-inner">
+      <img id="uyap-imgview-img" alt="">
+      <button type="button" class="uyap-imgview-close" id="uyap-imgview-close">✕</button>
+    </div>
+  </div>
+</div>
 
   <div id="page-mentoring" class="hidden">
     <div class="eg-brand">
@@ -11911,11 +12085,12 @@ function showPage(name, skipAnim) {
   if (name === 'apps' && !appsAllowed()) name = 'home';
   if (name === 'basvuru' && !amAllowed()) name = 'home';
   if (name === 'sosyalmetre' && !amAllowed()) name = 'home';
+  if (name === 'uyap' && !amAllowed()) name = 'home';
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
-  const pages = ['home', 'butce', 'sosyalmetre', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -11943,6 +12118,7 @@ function showPage(name, skipAnim) {
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
   if (name === 'sosyalmetre') renderSosyal();
+  if (name === 'uyap') renderUyap();
   if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
@@ -25870,6 +26046,448 @@ loadSfx();
     document.getElementById('bd-life-save').addEventListener('click', function () {
       if (krLife) krLifeSave();
     });
+
+/* ══════════════════════════════════════════════════════════
+   UYAP — Gayrimenkul Takip
+   ══════════════════════════════════════════════════════════ */
+var UYAP_KEY = 'alfa-uyap-v1';
+var uyapData = { properties: [] };
+var uyapFilter = 'all';
+var uyapEditId = null;
+var uyapFormImgs = [];
+
+function uyapId() { return 'uyap_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
+
+function uyapLoad() {
+  try { var raw = localStorage.getItem(UYAP_KEY); if (raw) uyapData = JSON.parse(raw); } catch (e) {}
+  if (!uyapData || !uyapData.properties) uyapData = { properties: [] };
+}
+
+function uyapSave() {
+  try { localStorage.setItem(UYAP_KEY, JSON.stringify(uyapData)); } catch (e) {}
+}
+
+function uyapFmt(n) {
+  if (n == null || isNaN(n)) return '₺0';
+  return '₺' + Math.round(n).toLocaleString('tr-TR');
+}
+
+function uyapCalc(p) {
+  var cost = (p.additionalCosts || []).reduce(function (s, c) { return s + (parseFloat(c.amount) || 0); }, 0);
+  var total = (parseFloat(p.purchasePrice) || 0) + cost;
+  var sale = parseFloat(p.salePrice) || 0;
+  var profit = sale - total;
+  var pct = total > 0 ? (profit / total * 100) : 0;
+  return { cost: cost, total: total, sale: sale, profit: profit, pct: pct };
+}
+
+function uyapRenderStats() {
+  var el = document.getElementById('uyap-stats');
+  if (!el) return;
+  var ps = uyapData.properties;
+  var totalInv = 0, totalExp = 0, count = ps.length;
+  var byStatus = { potansiyel: 0, inceleniyor: 0, alindi: 0, satildi: 0 };
+  ps.forEach(function (p) {
+    var c = uyapCalc(p);
+    totalInv += c.total;
+    totalExp += c.profit;
+    if (byStatus[p.status] !== undefined) byStatus[p.status]++;
+  });
+  el.innerHTML =
+    '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Yatırım</div><div class="uyap-stat-val">' + uyapFmt(totalInv) + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Beklenen Kâr</div><div class="uyap-stat-val ' + (totalExp >= 0 ? 'pos' : 'neg') + '">' + uyapFmt(totalExp) + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Emlak</div><div class="uyap-stat-val">' + count + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Aktif / İncelenen</div><div class="uyap-stat-val">' + (byStatus.potansiyel + byStatus.inceleniyor) + '</div></div>';
+}
+
+function uyapRenderFilters() {
+  var el = document.getElementById('uyap-filters');
+  if (!el) return;
+  var labels = { all: 'Tümü', potansiyel: 'Potansiyel', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
+  var html = '';
+  Object.keys(labels).forEach(function (k) {
+    html += '<button type="button" class="uyap-filter-btn' + (uyapFilter === k ? ' on' : '') + '" data-uyap-f="' + k + '">' + labels[k] + '</button>';
+  });
+  el.innerHTML = html;
+}
+
+function uyapRenderGrid() {
+  var grid = document.getElementById('uyap-grid');
+  var empty = document.getElementById('uyap-empty');
+  if (!grid) return;
+  var q = (document.getElementById('uyap-search') || {}).value || '';
+  q = q.toLowerCase();
+  var ps = uyapData.properties.filter(function (p) {
+    if (uyapFilter !== 'all' && p.status !== uyapFilter) return false;
+    if (q && (p.name || '').toLowerCase().indexOf(q) === -1 && (p.location || '').toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  ps.sort(function (a, b) { return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || ''); });
+  if (!ps.length) {
+    grid.innerHTML = '';
+    if (empty) empty.classList.remove('hidden');
+    return;
+  }
+  if (empty) empty.classList.add('hidden');
+  var statusLabels = { potansiyel: 'Potansiyel', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
+  var typeLabels = { daire: 'Daire', villa: 'Villa', arsa: 'Arsa', isyeri: 'İşyeri', diger: 'Diğer' };
+  var html = '';
+  ps.forEach(function (p) {
+    var c = uyapCalc(p);
+    var cls = c.profit > 0 ? 'pos' : (c.profit < 0 ? 'neg' : 'zero');
+    var imgHtml = '';
+    if (p.images && p.images.length) {
+      imgHtml = '<img class="uyap-card-img" src="' + p.images[0] + '" alt="' + (p.name || '') + '" data-uyap-imgview="' + (p.images[0] || '') + '">';
+    }
+    var metaParts = [];
+    if (p.sqm) metaParts.push(p.sqm + ' m²');
+    if (p.rooms) metaParts.push(p.rooms);
+    if (p.year) metaParts.push(p.year);
+    var metaHtml = metaParts.length ? '<div class="uyap-card-meta">' + metaParts.map(function (m) { return '<span>' + m + '</span>'; }).join('') + '</div>' : '';
+    var qs = p.questions || [];
+    var qsHtml = '<div class="uyap-card-qs">'
+      + '<div class="uyap-card-qs-h" data-uyap-qstoggle="' + p.id + '">❓ Sorular <span class="cnt">' + qs.length + '</span> <span style="font-size:10px;color:var(--text-3);margin-left:auto">' + (qs.length ? '▾' : '') + '</span></div>'
+      + '<div class="uyap-card-qs-list' + (qs.length ? '' : ' hidden') + '" data-uyap-qslist="' + p.id + '">';
+    qs.slice(-5).forEach(function (q) {
+      qsHtml += '<div class="uyap-card-q"><b>' + (q.q || '') + '</b><br>' + (q.a || '') + '</div>';
+    });
+    qsHtml += '<div class="uyap-q-add"><input placeholder="Soru ekle…" data-uyap-qinput="' + p.id + '" maxlength="200" autocomplete="off"><button type="button" data-uyap-qbtn="' + p.id + '">+</button></div>';
+    qsHtml += '</div></div>';
+    html += '<div class="uyap-card" data-uyap-card="' + p.id + '">'
+      + '<div class="uyap-card-top"><div class="uyap-card-title">'
+      + '<span class="uyap-badge ' + (p.status || 'potansiyel') + '">' + (statusLabels[p.status] || p.status) + '</span>'
+      + ' ' + (p.name || 'İsimsiz')
+      + ' <span class="uyap-type-chip">' + (typeLabels[p.type] || p.type || '') + '</span>'
+      + '</div><div class="uyap-card-actions">'
+      + '<button type="button" data-uyap-edit="' + p.id + '" title="Düzenle">✏️</button>'
+      + '<button type="button" data-uyap-del="' + p.id + '" class="uyap-del" title="Sil">🗑️</button>'
+      + '</div></div>'
+      + (p.location ? '<div class="uyap-card-loc">📍 ' + p.location + '</div>' : '')
+      + imgHtml
+      + '<div class="uyap-card-prices">'
+      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Satın Alma</div><div class="uyap-card-pval">' + uyapFmt(p.purchasePrice) + '</div></div>'
+      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Hedef Satış</div><div class="uyap-card-pval">' + (c.sale ? uyapFmt(c.sale) : '—') + '</div></div>'
+      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Ek Masraf</div><div class="uyap-card-pval">' + uyapFmt(c.cost) + '</div></div>'
+      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Toplam Maliyet</div><div class="uyap-card-pval">' + uyapFmt(c.total) + '</div></div>'
+      + '</div>'
+      + '<div class="uyap-card-calc ' + cls + '">'
+      + '<div><span class="uyap-card-calc-lbl">Beklenen Kâr</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
+      + '<span class="uyap-card-calc-pct ' + cls + '">' + (c.sale ? ('%' + c.pct.toFixed(1)) : '—') + '</span>'
+      + '</div>'
+      + metaHtml
+      + (p.notes ? '<div class="uyap-card-notes">' + p.notes + '</div>' : '')
+      + qsHtml
+      + '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+function renderUyap() {
+  uyapLoad();
+  uyapRenderStats();
+  uyapRenderFilters();
+  uyapRenderGrid();
+}
+
+/* ── Form ── */
+function uyapOpenForm(id) {
+  var form = document.getElementById('uyap-form');
+  if (!form) return;
+  uyapFormImgs = [];
+  if (id) {
+    var p = uyapData.properties.find(function (x) { return x.id === id; });
+    if (!p) return;
+    uyapEditId = id;
+    document.getElementById('uyap-form-title').textContent = 'Emlak Düzenle';
+    document.getElementById('uyap-f-name').value = p.name || '';
+    document.getElementById('uyap-f-loc').value = p.location || '';
+    document.getElementById('uyap-f-type').value = p.type || 'daire';
+    document.getElementById('uyap-f-status').value = p.status || 'potansiyel';
+    document.getElementById('uyap-f-price').value = p.purchasePrice || '';
+    document.getElementById('uyap-f-sale').value = p.salePrice || '';
+    document.getElementById('uyap-f-sqm').value = p.sqm || '';
+    document.getElementById('uyap-f-rooms').value = p.rooms || '';
+    document.getElementById('uyap-f-year').value = p.year || '';
+    document.getElementById('uyap-f-notes').value = p.notes || '';
+    uyapFormImgs = (p.images || []).slice();
+  } else {
+    uyapEditId = null;
+    document.getElementById('uyap-form-title').textContent = 'Yeni Emlak';
+    document.getElementById('uyap-f-name').value = '';
+    document.getElementById('uyap-f-loc').value = '';
+    document.getElementById('uyap-f-type').value = 'daire';
+    document.getElementById('uyap-f-status').value = 'potansiyel';
+    document.getElementById('uyap-f-price').value = '';
+    document.getElementById('uyap-f-sale').value = '';
+    document.getElementById('uyap-f-sqm').value = '';
+    document.getElementById('uyap-f-rooms').value = '';
+    document.getElementById('uyap-f-year').value = '';
+    document.getElementById('uyap-f-notes').value = '';
+  }
+  uyapRenderCostRows(id);
+  uyapRenderFormImgs();
+  form.classList.add('on');
+}
+
+function uyapCloseForm() {
+  var form = document.getElementById('uyap-form');
+  if (form) form.classList.remove('on');
+  uyapEditId = null;
+  uyapFormImgs = [];
+}
+
+function uyapRenderCostRows() {
+  var list = document.getElementById('uyap-f-costs-list');
+  var totalEl = document.getElementById('uyap-f-costs');
+  if (!list) return;
+  var p = null;
+  if (uyapEditId) p = uyapData.properties.find(function (x) { return x.id === uyapEditId; });
+  var costs = (p && p.additionalCosts) ? p.additionalCosts.slice() : [];
+  if (!costs.length) costs = [{ name: '', amount: '' }];
+  var html = '';
+  costs.forEach(function (c, i) {
+    html += '<div class="uyap-cost-row">'
+      + '<input placeholder="Masraf adı" data-uyap-cn="' + i + '" value="' + (c.name || '') + '" maxlength="40" autocomplete="off">'
+      + '<input type="number" class="num" placeholder="₺" data-uyap-ca="' + i + '" value="' + (c.amount || '') + '" min="0" step="1000">'
+      + '<button type="button" class="uyap-cost-rm" data-uyap-cr="' + i + '">✕</button>'
+      + '</div>';
+  });
+  list.innerHTML = html;
+  uyapUpdateCostTotal();
+}
+
+function uyapUpdateCostTotal() {
+  var total = 0;
+  document.querySelectorAll('#uyap-f-costs-list .num').forEach(function (el) {
+    total += parseFloat(el.value) || 0;
+  });
+  var totalEl = document.getElementById('uyap-f-costs');
+  if (totalEl) totalEl.value = total;
+}
+
+function uyapSaveForm() {
+  var name = (document.getElementById('uyap-f-name').value || '').trim();
+  if (!name) { alert('Emlak adı gerekli.'); return; }
+  var location = (document.getElementById('uyap-f-loc').value || '').trim();
+  var type = document.getElementById('uyap-f-type').value;
+  var status = document.getElementById('uyap-f-status').value;
+  var price = parseFloat(document.getElementById('uyap-f-price').value) || 0;
+  var sale = parseFloat(document.getElementById('uyap-f-sale').value) || 0;
+  var sqm = parseFloat(document.getElementById('uyap-f-sqm').value) || 0;
+  var rooms = (document.getElementById('uyap-f-rooms').value || '').trim();
+  var year = parseInt(document.getElementById('uyap-f-year').value) || 0;
+  var notes = (document.getElementById('uyap-f-notes').value || '').trim();
+  var costs = [];
+  document.querySelectorAll('#uyap-f-costs-list .uyap-cost-row').forEach(function (row) {
+    var cn = row.querySelector('[data-uyap-cn]');
+    var ca = row.querySelector('[data-uyap-ca]');
+    if (cn && ca && (cn.value.trim() || ca.value)) {
+      costs.push({ name: cn.value.trim(), amount: parseFloat(ca.value) || 0 });
+    }
+  });
+  var now = new Date().toISOString();
+  if (uyapEditId) {
+    var p = uyapData.properties.find(function (x) { return x.id === uyapEditId; });
+    if (p) {
+      p.name = name; p.location = location; p.type = type; p.status = status;
+      p.purchasePrice = price; p.salePrice = sale; p.sqm = sqm;
+      p.rooms = rooms; p.year = year; p.notes = notes;
+      p.additionalCosts = costs; p.images = uyapFormImgs.slice(); p.updatedAt = now;
+    }
+  } else {
+    uyapData.properties.push({
+      id: uyapId(), name: name, location: location, type: type, status: status,
+      purchasePrice: price, salePrice: sale, sqm: sqm, rooms: rooms, year: year,
+      notes: notes, additionalCosts: costs, images: uyapFormImgs.slice(),
+      questions: [], createdAt: now, updatedAt: now
+    });
+  }
+  uyapSave();
+  uyapCloseForm();
+  renderUyap();
+}
+
+function uyapDelProp(id) {
+  if (!confirm('Bu emlak silinsin mi?')) return;
+  uyapData.properties = uyapData.properties.filter(function (x) { return x.id !== id; });
+  uyapSave(); renderUyap();
+}
+
+function uyapRenderFormImgs() {
+  var box = document.getElementById('uyap-f-img-thumbs');
+  if (!box) return;
+  var html = '';
+  uyapFormImgs.forEach(function (src, i) {
+    html += '<div class="uyap-img-thumb"><img src="' + src + '" alt=""><button type="button" data-uyap-img-rm="' + i + '">✕</button></div>';
+  });
+  box.innerHTML = html;
+}
+
+function uyapImgCompress(dataUrl, cb) {
+  try {
+    if (typeof Image === 'undefined') { cb(dataUrl); return; }
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var MAX = 1100;
+        var sc = Math.min(1, MAX / Math.max(img.width || 1, img.height || 1));
+        var cw = Math.max(1, Math.round((img.width || 1) * sc));
+        var ch = Math.max(1, Math.round((img.height || 1) * sc));
+        var cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        var ctx = cv.getContext('2d');
+        if (ctx) { ctx.drawImage(img, 0, 0, cw, ch); cb(cv.toDataURL('image/jpeg', 0.8)); return; }
+      } catch (e) {}
+      cb(dataUrl);
+    };
+    img.onerror = function () { cb(dataUrl); };
+    img.src = dataUrl;
+  } catch (e) { cb(dataUrl); }
+}
+
+function uyapAddImg(dataUrl) {
+  uyapImgCompress(dataUrl, function (compressed) {
+    uyapFormImgs.push(compressed);
+    uyapRenderFormImgs();
+  });
+}
+
+function uyapAddQuestion(id, text) {
+  var p = uyapData.properties.find(function (x) { return x.id === id; });
+  if (!p || !text.trim()) return;
+  if (!p.questions) p.questions = [];
+  p.questions.push({ q: text.trim(), a: '', date: new Date().toISOString().slice(0, 10) });
+  p.updatedAt = new Date().toISOString();
+  uyapSave(); renderUyap();
+}
+
+function uyapImgView(src) {
+  var el = document.getElementById('uyap-imgview');
+  var img = document.getElementById('uyap-imgview-img');
+  if (!el || !img) return;
+  img.src = src; el.classList.add('on');
+}
+
+function uyapImgClose() {
+  var el = document.getElementById('uyap-imgview');
+  if (el) el.classList.remove('on');
+}
+
+/* ── Event delegation ── */
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (t.id === 'uyap-add-btn' || t.closest('#uyap-add-btn')) { uyapOpenForm(null); return; }
+  if (t.id === 'uyap-form-close' || t.id === 'uyap-form-cancel') { uyapCloseForm(); return; }
+  if (t.id === 'uyap-form-save') { uyapSaveForm(); return; }
+  var editBtn = t.closest('[data-uyap-edit]');
+  if (editBtn) { uyapOpenForm(editBtn.getAttribute('data-uyap-edit')); return; }
+  var delBtn = t.closest('[data-uyap-del]');
+  if (delBtn) { uyapDelProp(delBtn.getAttribute('data-uyap-del')); return; }
+  var filterBtn = t.closest('[data-uyap-f]');
+  if (filterBtn) { uyapFilter = filterBtn.getAttribute('data-uyap-f'); uyapRenderFilters(); uyapRenderGrid(); return; }
+  var qsToggle = t.closest('[data-uyap-qstoggle]');
+  if (qsToggle) {
+    var qid = qsToggle.getAttribute('data-uyap-qstoggle');
+    var list = document.querySelector('[data-uyap-qslist="' + qid + '"]');
+    if (list) list.classList.toggle('hidden');
+    return;
+  }
+  var qBtn = t.closest('[data-uyap-qbtn]');
+  if (qBtn) {
+    var qid2 = qBtn.getAttribute('data-uyap-qbtn');
+    var inp = document.querySelector('[data-uyap-qinput="' + qid2 + '"]');
+    if (inp && inp.value.trim()) { uyapAddQuestion(qid2, inp.value); }
+    return;
+  }
+  var imgRm = t.closest('[data-uyap-img-rm]');
+  if (imgRm) {
+    var idx = parseInt(imgRm.getAttribute('data-uyap-img-rm'));
+    uyapFormImgs.splice(idx, 1); uyapRenderFormImgs(); return;
+  }
+  var costAdd = t.closest('#uyap-f-cost-add');
+  if (costAdd) {
+    var list2 = document.getElementById('uyap-f-costs-list');
+    if (list2) {
+      var rows = list2.querySelectorAll('.uyap-cost-row');
+      var ni = rows.length;
+      var row = document.createElement('div');
+      row.className = 'uyap-cost-row';
+      row.innerHTML = '<input placeholder="Masraf adı" data-uyap-cn="' + ni + '" maxlength="40" autocomplete="off"><input type="number" class="num" placeholder="₺" data-uyap-ca="' + ni + '" min="0" step="1000"><button type="button" class="uyap-cost-rm" data-uyap-cr="' + ni + '">✕</button>';
+      list2.appendChild(row);
+    }
+    return;
+  }
+  var costRm = t.closest('[data-uyap-cr]');
+  if (costRm) {
+    var row2 = costRm.closest('.uyap-cost-row');
+    if (row2) row2.remove();
+    uyapUpdateCostTotal();
+    return;
+  }
+  var imgView = t.closest('[data-uyap-imgview]');
+  if (imgView) { uyapImgView(imgView.getAttribute('data-uyap-imgview')); return; }
+  if (t.id === 'uyap-imgview-close' || t.closest('#uyap-imgview-close')) { uyapImgClose(); return; }
+  if (t.id === 'uyap-imgview') { uyapImgClose(); return; }
+});
+
+document.addEventListener('keyup', function (e) {
+  if (e.key === 'Escape') { uyapCloseForm(); uyapImgClose(); }
+  if (e.target.id === 'uyap-search') { uyapRenderGrid(); }
+});
+
+document.addEventListener('input', function (e) {
+  var t = e.target;
+  if (t.matches('#uyap-f-costs-list input')) { uyapUpdateCostTotal(); }
+});
+
+/* ── Image upload ── */
+(function () {
+  var drop = document.getElementById('uyap-f-img-drop');
+  var input = document.getElementById('uyap-f-img-input');
+  if (drop) {
+    drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', function () { drop.classList.remove('over'); });
+    drop.addEventListener('drop', function (e) {
+      e.preventDefault(); drop.classList.remove('over');
+      var files = e.dataTransfer.files;
+      for (var i = 0; i < files.length; i++) {
+        if (!files[i].type.startsWith('image/')) continue;
+        var fr = new FileReader();
+        fr.onload = function () { uyapAddImg(fr.result); };
+        fr.readAsDataURL(files[i]);
+      }
+    });
+  }
+  if (input) {
+    input.addEventListener('change', function () {
+      var files = input.files;
+      for (var i = 0; i < files.length; i++) {
+        if (!files[i].type.startsWith('image/')) continue;
+        var fr = new FileReader();
+        fr.onload = function () { uyapAddImg(fr.result); };
+        fr.readAsDataURL(files[i]);
+      }
+      input.value = '';
+    });
+  }
+})();
+
+/* ── Clipboard paste for images ── */
+document.addEventListener('paste', function (e) {
+  if (!document.getElementById('uyap-form') || !document.getElementById('uyap-form').classList.contains('on')) return;
+  var items = (e.clipboardData || {}).items;
+  if (!items) return;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.startsWith('image/')) {
+      var blob = items[i].getAsFile();
+      var fr = new FileReader();
+      fr.onload = function () { uyapAddImg(fr.result); };
+      fr.readAsDataURL(blob);
+      break;
+    }
+  }
+});
+
     </script>
 </body>
 </html>
