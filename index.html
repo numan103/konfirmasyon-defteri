@@ -3977,6 +3977,31 @@
   .uyap-filter-btn { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text-3); cursor: pointer; transition: all .15s; }
   .uyap-filter-btn.on { background: var(--pc-soft); color: var(--pc); border-color: var(--pc); }
   .uyap-filter-btn:hover { border-color: var(--pc); }
+  .uyap-f-hint { font-size: 10px; color: var(--text-3); min-height: 12px; }
+  .uyap-f-hint.ok { color: var(--green); }
+  .uyap-card-link { display: block; font-size: 12px; font-weight: 600; color: var(--pc); text-decoration: none; margin-bottom: 10px; }
+  .uyap-card-link:hover { text-decoration: underline; }
+  .uyap-q-cats { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+  .uyap-qcat-chip { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text-3); cursor: pointer; transition: all .15s; }
+  .uyap-qcat-chip.on { background: var(--pc-soft); color: var(--pc); border-color: var(--pc); }
+  .uyap-qcat-chip:hover { border-color: var(--pc); }
+  .uyap-q-list { margin-bottom: 8px; }
+  .uyap-card-q { font-size: 11px; color: var(--text-2); padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+  .uyap-card-q:last-child { border-bottom: none; }
+  .uyap-card-q b { color: var(--text); }
+  .uyap-q-cat { font-size: 10px; }
+  .uyap-q-ans { color: var(--green); }
+  .uyap-q-date { float: right; font-size: 9px; color: var(--text-3); }
+  .uyap-q-add { display: flex; gap: 4px; margin-bottom: 6px; }
+  .uyap-q-add .uyap-q-catsel { background: var(--bg2); border: 1px solid var(--border); border-radius: 7px; padding: 6px; color: var(--text); font-size: 11px; font-family: 'Inter', sans-serif; flex-shrink: 0; }
+  .uyap-q-add input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; color: var(--text); font-size: 11px; font-family: 'Inter', sans-serif; min-width: 0; }
+  .uyap-q-add input:focus { outline: none; border-color: var(--pc); }
+  .uyap-q-add button { padding: 6px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; background: var(--pc); color: #fff; border: none; cursor: pointer; flex-shrink: 0; }
+  .uyap-q-tpl { border-top: 1px dashed var(--border); padding-top: 6px; }
+  .uyap-q-tpl-title { font-size: 10px; font-weight: 700; color: var(--text-3); margin-bottom: 4px; }
+  .uyap-q-tpl-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .uyap-q-tpl-btn { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; background: var(--bg); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .uyap-q-tpl-btn:hover { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
   </style>
   <script>
   (function () {
@@ -6513,16 +6538,13 @@
     <div class="uyap-form-card">
       <div class="uyap-form-h"><span id="uyap-form-title">Yeni Emlak</span><button type="button" id="uyap-form-close">✕</button></div>
       <div class="uyap-form-grid">
-        <div class="uyap-f"><label>Emlak Adı</label><input id="uyap-f-name" placeholder="Örn: Bahçelievler Daire" maxlength="80" autocomplete="off"></div>
+        <div class="uyap-f-full"><label>🔗 Link (URL) — yapıştır, otomatik doldursun</label><input id="uyap-f-url" placeholder="https://sahibinden.com/... veya hepsiemlak.com/..." maxlength="500" autocomplete="off"><span class="uyap-f-hint" id="uyap-url-status"></span></div>
+        <div class="uyap-f"><label>Emlak Adı</label><input id="uyap-f-name" placeholder="Otomatik doldur veya yaz" maxlength="80" autocomplete="off"></div>
         <div class="uyap-f"><label>Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
         <div class="uyap-f"><label>Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
         <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="potansiyel">Potansiyel</option><option value="inceleniyor">İnceleniyor</option><option value="alindi">Alındı</option><option value="satildi">Satıldı</option></select></div>
         <div class="uyap-f"><label>Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
         <div class="uyap-f"><label>Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
-        <div class="uyap-f"><label>Ek Masraf Toplamı (₺)</label><input type="number" id="uyap-f-costs" placeholder="0" min="0" step="1000" readonly></div>
-        <div class="uyap-f"><label>Metrekare (m²)</label><input type="number" id="uyap-f-sqm" placeholder="0" min="0" step="1"></div>
-        <div class="uyap-f"><label>Oda Sayısı</label><input id="uyap-f-rooms" placeholder="Örn: 3+1" maxlength="10" autocomplete="off"></div>
-        <div class="uyap-f"><label>Yıl</label><input type="number" id="uyap-f-year" placeholder="2024" min="1900" max="2030"></div>
         <div class="uyap-f-full"><label>Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
         <div class="uyap-f-sec">Ek Masraflar</div>
         <div class="uyap-costs" id="uyap-f-costs-list"></div>
@@ -26055,6 +26077,20 @@ var uyapData = { properties: [] };
 var uyapFilter = 'all';
 var uyapEditId = null;
 var uyapFormImgs = [];
+var UYAP_QCATS = [
+  { id: 'hukuki', icon: '\u{1F4CB}', name: 'Hukuki' },
+  { id: 'mali', icon: '\u{1F4B0}', name: 'Mali' },
+  { id: 'teknik', icon: '\u{1F527}', name: 'Teknik' },
+  { id: 'risk', icon: '\u{26A0}\u{FE0F}', name: 'Riskler' },
+  { id: 'genel', icon: '\u{1F4DD}', name: 'Genel' }
+];
+var UYAP_QTEMPLATES = {
+  hukuki: ['Tapu durumu nedir?', 'Ipotek/haciz var mi?', 'Imar durumu ne?', 'Kat mulkiyeti var mi?'],
+  mali: ['KDV var mi?', 'Tapu harci ne kadar?', 'Pazarlik payi var mi?', 'Aidat ne kadar?'],
+  teknik: ['Bina yasi kac?', 'Deprem raporu var mi?', 'Isitma sistemi ne?', 'Bakim durumu nasil?'],
+  risk: ['Bolge guvensiz mi?', 'Altyapi sorunu var mi?', 'Imar degisikligi plani?', 'Komsu sorunlari?'],
+  genel: ['Neden satilik?', 'Acil durum var mi?', 'Alternatif evler kac tane?', 'Kac gundur satilmadi?']
+};
 
 function uyapId() { return 'uyap_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
 
@@ -26119,7 +26155,7 @@ function uyapRenderGrid() {
   q = q.toLowerCase();
   var ps = uyapData.properties.filter(function (p) {
     if (uyapFilter !== 'all' && p.status !== uyapFilter) return false;
-    if (q && (p.name || '').toLowerCase().indexOf(q) === -1 && (p.location || '').toLowerCase().indexOf(q) === -1) return false;
+    if (q && (p.name || '').toLowerCase().indexOf(q) === -1 && (p.location || '').toLowerCase().indexOf(q) === -1 && (p.url || '').toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
   ps.sort(function (a, b) { return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || ''); });
@@ -26139,19 +26175,45 @@ function uyapRenderGrid() {
     if (p.images && p.images.length) {
       imgHtml = '<img class="uyap-card-img" src="' + p.images[0] + '" alt="' + (p.name || '') + '" data-uyap-imgview="' + (p.images[0] || '') + '">';
     }
-    var metaParts = [];
-    if (p.sqm) metaParts.push(p.sqm + ' m²');
-    if (p.rooms) metaParts.push(p.rooms);
-    if (p.year) metaParts.push(p.year);
-    var metaHtml = metaParts.length ? '<div class="uyap-card-meta">' + metaParts.map(function (m) { return '<span>' + m + '</span>'; }).join('') + '</div>' : '';
+    var linkHtml = p.url ? '<a class="uyap-card-link" href="' + p.url + '" target="_blank" rel="noopener noreferrer" title="İlanı aç">🔗 İlanı Gör</a>' : '';
     var qs = p.questions || [];
+    var catCounts = {};
+    UYAP_QCATS.forEach(function (cat) { catCounts[cat.id] = 0; });
+    qs.forEach(function (q) { if (catCounts[q.cat] !== undefined) catCounts[q.cat]++; });
     var qsHtml = '<div class="uyap-card-qs">'
-      + '<div class="uyap-card-qs-h" data-uyap-qstoggle="' + p.id + '">❓ Sorular <span class="cnt">' + qs.length + '</span> <span style="font-size:10px;color:var(--text-3);margin-left:auto">' + (qs.length ? '▾' : '') + '</span></div>'
-      + '<div class="uyap-card-qs-list' + (qs.length ? '' : ' hidden') + '" data-uyap-qslist="' + p.id + '">';
-    qs.slice(-5).forEach(function (q) {
-      qsHtml += '<div class="uyap-card-q"><b>' + (q.q || '') + '</b><br>' + (q.a || '') + '</div>';
+      + '<div class="uyap-card-qs-h" data-uyap-qstoggle="' + p.id + '">❓ Soru & Notlar <span class="cnt">' + qs.length + '</span> <span style="font-size:10px;color:var(--text-3);margin-left:auto">' + (qs.length ? '▾' : '') + '</span></div>'
+      + '<div class="uyap-card-qs-body' + (qs.length ? '' : ' hidden') + '" data-uyap-qslist="' + p.id + '">';
+    var catTabs = '<div class="uyap-q-cats">';
+    UYAP_QCATS.forEach(function (cat) {
+      catTabs += '<button type="button" class="uyap-qcat-chip' + '" data-uyap-qcat="' + p.id + ':' + cat.id + '">' + cat.icon + ' ' + cat.name + (catCounts[cat.id] ? ' (' + catCounts[cat.id] + ')' : '') + '</button>';
     });
-    qsHtml += '<div class="uyap-q-add"><input placeholder="Soru ekle…" data-uyap-qinput="' + p.id + '" maxlength="200" autocomplete="off"><button type="button" data-uyap-qbtn="' + p.id + '">+</button></div>';
+    catTabs += '<button type="button" class="uyap-qcat-chip uyap-qcat-all on" data-uyap-qcat="' + p.id + ':all">Tümü (' + qs.length + ')</button></div>';
+    qsHtml += catTabs;
+    qsHtml += '<div class="uyap-q-list" data-uyap-qlist="' + p.id + '">';
+    qs.forEach(function (q, qi) {
+      var catObj = UYAP_QCATS.find(function (ct) { return ct.id === q.cat; }) || UYAP_QCATS[4];
+      qsHtml += '<div class="uyap-card-q" data-qcat="' + (q.cat || 'genel') + '"><span class="uyap-q-cat">' + catObj.icon + '</span> <b>' + (q.q || '') + '</b>';
+      if (q.a) qsHtml += '<br><span class="uyap-q-ans">' + q.a + '</span>';
+      qsHtml += '<span class="uyap-q-date">' + (q.date || '') + '</span>';
+      qsHtml += '</div>';
+    });
+    qsHtml += '</div>';
+    qsHtml += '<div class="uyap-q-add">';
+    qsHtml += '<select data-uyap-qcatsel="' + p.id + '" class="uyap-q-catsel">';
+    UYAP_QCATS.forEach(function (cat) { qsHtml += '<option value="' + cat.id + '">' + cat.icon + ' ' + cat.name + '</option>'; });
+    qsHtml += '</select>';
+    qsHtml += '<input placeholder="Soru veya not yaz…" data-uyap-qinput="' + p.id + '" maxlength="200" autocomplete="off">';
+    qsHtml += '<button type="button" data-uyap-qbtn="' + p.id + '">+</button>';
+    qsHtml += '</div>';
+    qsHtml += '<div class="uyap-q-tpl">';
+    qsHtml += '<div class="uyap-q-tpl-title">Şablonlar:</div>';
+    qsHtml += '<div class="uyap-q-tpl-list">';
+    UYAP_QCATS.forEach(function (cat) {
+      (UYAP_QTEMPLATES[cat.id] || []).forEach(function (t) {
+        qsHtml += '<button type="button" class="uyap-q-tpl-btn" data-uyap-qtpl="' + p.id + '" data-tpl-cat="' + cat.id + '" data-tpl-text="' + t + '">' + cat.icon + ' ' + t + '</button>';
+      });
+    });
+    qsHtml += '</div></div>';
     qsHtml += '</div></div>';
     html += '<div class="uyap-card" data-uyap-card="' + p.id + '">'
       + '<div class="uyap-card-top"><div class="uyap-card-title">'
@@ -26163,7 +26225,7 @@ function uyapRenderGrid() {
       + '<button type="button" data-uyap-del="' + p.id + '" class="uyap-del" title="Sil">🗑️</button>'
       + '</div></div>'
       + (p.location ? '<div class="uyap-card-loc">📍 ' + p.location + '</div>' : '')
-      + imgHtml
+      + imgHtml + linkHtml
       + '<div class="uyap-card-prices">'
       + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Satın Alma</div><div class="uyap-card-pval">' + uyapFmt(p.purchasePrice) + '</div></div>'
       + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Hedef Satış</div><div class="uyap-card-pval">' + (c.sale ? uyapFmt(c.sale) : '—') + '</div></div>'
@@ -26174,7 +26236,6 @@ function uyapRenderGrid() {
       + '<div><span class="uyap-card-calc-lbl">Beklenen Kâr</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
       + '<span class="uyap-card-calc-pct ' + cls + '">' + (c.sale ? ('%' + c.pct.toFixed(1)) : '—') + '</span>'
       + '</div>'
-      + metaHtml
       + (p.notes ? '<div class="uyap-card-notes">' + p.notes + '</div>' : '')
       + qsHtml
       + '</div>';
@@ -26199,31 +26260,28 @@ function uyapOpenForm(id) {
     if (!p) return;
     uyapEditId = id;
     document.getElementById('uyap-form-title').textContent = 'Emlak Düzenle';
+    document.getElementById('uyap-f-url').value = p.url || '';
     document.getElementById('uyap-f-name').value = p.name || '';
     document.getElementById('uyap-f-loc').value = p.location || '';
     document.getElementById('uyap-f-type').value = p.type || 'daire';
     document.getElementById('uyap-f-status').value = p.status || 'potansiyel';
     document.getElementById('uyap-f-price').value = p.purchasePrice || '';
     document.getElementById('uyap-f-sale').value = p.salePrice || '';
-    document.getElementById('uyap-f-sqm').value = p.sqm || '';
-    document.getElementById('uyap-f-rooms').value = p.rooms || '';
-    document.getElementById('uyap-f-year').value = p.year || '';
     document.getElementById('uyap-f-notes').value = p.notes || '';
     uyapFormImgs = (p.images || []).slice();
   } else {
     uyapEditId = null;
     document.getElementById('uyap-form-title').textContent = 'Yeni Emlak';
+    document.getElementById('uyap-f-url').value = '';
     document.getElementById('uyap-f-name').value = '';
     document.getElementById('uyap-f-loc').value = '';
     document.getElementById('uyap-f-type').value = 'daire';
     document.getElementById('uyap-f-status').value = 'potansiyel';
     document.getElementById('uyap-f-price').value = '';
     document.getElementById('uyap-f-sale').value = '';
-    document.getElementById('uyap-f-sqm').value = '';
-    document.getElementById('uyap-f-rooms').value = '';
-    document.getElementById('uyap-f-year').value = '';
     document.getElementById('uyap-f-notes').value = '';
   }
+  document.getElementById('uyap-url-status').textContent = '';
   uyapRenderCostRows(id);
   uyapRenderFormImgs();
   form.classList.add('on');
@@ -26266,16 +26324,15 @@ function uyapUpdateCostTotal() {
 }
 
 function uyapSaveForm() {
+  var url = (document.getElementById('uyap-f-url').value || '').trim();
   var name = (document.getElementById('uyap-f-name').value || '').trim();
-  if (!name) { alert('Emlak adı gerekli.'); return; }
+  if (!name && !url) { alert('Emlak adı veya link gerekli.'); return; }
+  if (!name && url) { name = url.replace(/^https?:\/\//, '').split('/')[0]; }
   var location = (document.getElementById('uyap-f-loc').value || '').trim();
   var type = document.getElementById('uyap-f-type').value;
   var status = document.getElementById('uyap-f-status').value;
   var price = parseFloat(document.getElementById('uyap-f-price').value) || 0;
   var sale = parseFloat(document.getElementById('uyap-f-sale').value) || 0;
-  var sqm = parseFloat(document.getElementById('uyap-f-sqm').value) || 0;
-  var rooms = (document.getElementById('uyap-f-rooms').value || '').trim();
-  var year = parseInt(document.getElementById('uyap-f-year').value) || 0;
   var notes = (document.getElementById('uyap-f-notes').value || '').trim();
   var costs = [];
   document.querySelectorAll('#uyap-f-costs-list .uyap-cost-row').forEach(function (row) {
@@ -26289,15 +26346,14 @@ function uyapSaveForm() {
   if (uyapEditId) {
     var p = uyapData.properties.find(function (x) { return x.id === uyapEditId; });
     if (p) {
-      p.name = name; p.location = location; p.type = type; p.status = status;
-      p.purchasePrice = price; p.salePrice = sale; p.sqm = sqm;
-      p.rooms = rooms; p.year = year; p.notes = notes;
-      p.additionalCosts = costs; p.images = uyapFormImgs.slice(); p.updatedAt = now;
+      p.url = url; p.name = name; p.location = location; p.type = type; p.status = status;
+      p.purchasePrice = price; p.salePrice = sale;
+      p.notes = notes; p.additionalCosts = costs; p.images = uyapFormImgs.slice(); p.updatedAt = now;
     }
   } else {
     uyapData.properties.push({
-      id: uyapId(), name: name, location: location, type: type, status: status,
-      purchasePrice: price, salePrice: sale, sqm: sqm, rooms: rooms, year: year,
+      id: uyapId(), url: url, name: name, location: location, type: type, status: status,
+      purchasePrice: price, salePrice: sale,
       notes: notes, additionalCosts: costs, images: uyapFormImgs.slice(),
       questions: [], createdAt: now, updatedAt: now
     });
@@ -26352,11 +26408,11 @@ function uyapAddImg(dataUrl) {
   });
 }
 
-function uyapAddQuestion(id, text) {
+function uyapAddQuestion(id, text, cat) {
   var p = uyapData.properties.find(function (x) { return x.id === id; });
   if (!p || !text.trim()) return;
   if (!p.questions) p.questions = [];
-  p.questions.push({ q: text.trim(), a: '', date: new Date().toISOString().slice(0, 10) });
+  p.questions.push({ q: text.trim(), a: '', cat: cat || 'genel', date: new Date().toISOString().slice(0, 10) });
   p.updatedAt = new Date().toISOString();
   uyapSave(); renderUyap();
 }
@@ -26371,6 +26427,54 @@ function uyapImgView(src) {
 function uyapImgClose() {
   var el = document.getElementById('uyap-imgview');
   if (el) el.classList.remove('on');
+}
+
+/* ── Auto-fetch OG tags from URL ── */
+function uyapFetchOg(url) {
+  if (!url || !url.startsWith('http')) return;
+  var statusEl = document.getElementById('uyap-url-status');
+  if (statusEl) statusEl.textContent = 'Yükleniyor…';
+  var proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  fetch(proxy, { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined }).then(function (r) {
+    if (!r.ok) throw new Error('fetch failed');
+    return r.text();
+  }).then(function (html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var title = doc.querySelector('meta[property="og:title"]');
+    var image = doc.querySelector('meta[property="og:image"]');
+    var desc = doc.querySelector('meta[property="og:description"]');
+    var filled = false;
+    if (title) {
+      var nameEl = document.getElementById('uyap-f-name');
+      if (nameEl && !nameEl.value) { nameEl.value = title.getAttribute('content') || ''; filled = true; }
+    }
+    if (desc) {
+      var notesEl = document.getElementById('uyap-f-notes');
+      if (notesEl && !notesEl.value) { notesEl.value = desc.getAttribute('content') || ''; filled = true; }
+    }
+    if (image) {
+      var imgSrc = image.getAttribute('content');
+      if (imgSrc && !uyapFormImgs.length) {
+        uyapFetchOgImg(imgSrc);
+      }
+    }
+    if (statusEl) statusEl.textContent = filled ? '✓ Otomatik dolduruldu' : 'Link kaydedildi';
+  }).catch(function () {
+    if (statusEl) statusEl.textContent = 'Link kaydedildi (otomatik doldurma başarısız)';
+  });
+}
+
+function uyapFetchOgImg(imgUrl) {
+  if (!imgUrl) return;
+  var proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imgUrl);
+  fetch(proxy, { signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined }).then(function (r) {
+    if (!r.ok) throw new Error('img fetch failed');
+    return r.blob();
+  }).then(function (blob) {
+    var fr = new FileReader();
+    fr.onload = function () { uyapAddImg(fr.result); };
+    fr.readAsDataURL(blob);
+  }).catch(function () {});
 }
 
 /* ── Event delegation ── */
@@ -26388,15 +26492,40 @@ document.addEventListener('click', function (e) {
   var qsToggle = t.closest('[data-uyap-qstoggle]');
   if (qsToggle) {
     var qid = qsToggle.getAttribute('data-uyap-qstoggle');
-    var list = document.querySelector('[data-uyap-qslist="' + qid + '"]');
-    if (list) list.classList.toggle('hidden');
+    var body = document.querySelector('[data-uyap-qslist="' + qid + '"]');
+    if (body) body.classList.toggle('hidden');
+    return;
+  }
+  var qCatChip = t.closest('[data-uyap-qcat]');
+  if (qCatChip) {
+    var parts = qCatChip.getAttribute('data-uyap-qcat').split(':');
+    var pid = parts[0], catId = parts[1];
+    var qsList = document.querySelector('[data-uyap-qlist="' + pid + '"]');
+    if (qsList) {
+      qsList.querySelectorAll('.uyap-card-q').forEach(function (el) {
+        el.style.display = (catId === 'all' || el.getAttribute('data-qcat') === catId) ? '' : 'none';
+      });
+    }
+    var catContainer = qCatChip.closest('.uyap-q-cats');
+    if (catContainer) catContainer.querySelectorAll('.uyap-qcat-chip').forEach(function (b) { b.classList.remove('on'); });
+    qCatChip.classList.add('on');
+    return;
+  }
+  var qTpl = t.closest('[data-uyap-qtpl]');
+  if (qTpl) {
+    var tplPid = qTpl.getAttribute('data-uyap-qtpl');
+    var tplCat = qTpl.getAttribute('data-tpl-cat');
+    var tplText = qTpl.getAttribute('data-tpl-text');
+    uyapAddQuestion(tplPid, tplText, tplCat);
     return;
   }
   var qBtn = t.closest('[data-uyap-qbtn]');
   if (qBtn) {
     var qid2 = qBtn.getAttribute('data-uyap-qbtn');
     var inp = document.querySelector('[data-uyap-qinput="' + qid2 + '"]');
-    if (inp && inp.value.trim()) { uyapAddQuestion(qid2, inp.value); }
+    var catSel = document.querySelector('[data-uyap-qcatsel="' + qid2 + '"]');
+    var catVal = catSel ? catSel.value : 'genel';
+    if (inp && inp.value.trim()) { uyapAddQuestion(qid2, inp.value, catVal); }
     return;
   }
   var imgRm = t.closest('[data-uyap-img-rm]');
@@ -26439,6 +26568,13 @@ document.addEventListener('input', function (e) {
   var t = e.target;
   if (t.matches('#uyap-f-costs-list input')) { uyapUpdateCostTotal(); }
 });
+
+document.addEventListener('blur', function (e) {
+  if (e.target.id === 'uyap-f-url') {
+    var url = (e.target.value || '').trim();
+    if (url && url.startsWith('http')) uyapFetchOg(url);
+  }
+}, true);
 
 /* ── Image upload ── */
 (function () {
