@@ -134,6 +134,7 @@ function fetchText(u, headers) {
     uyap_timeline: html.includes('class="uyap-composer"') && html.includes('uyap-comp-text') && html.includes('uyap-note-imgbtn') && html.includes('uyap-tl-item') && html.includes('function uyapNoteTimeStr'),
     stats_admin: html.includes('function statsLiveOnly') && html.includes('if (amAllowed()) { statsRefresh(); return; }') && html.includes('if (amAllowed()) { statsFetchTotal(); return; }') && html.includes('Math.max(0, STATS_REG - 1)'),
     karne_ek: !html.includes('tab-karne') && !html.includes('mnav-karne') && !html.includes('hm.c11.t') && html.includes("{ icon: '\u{1FA9E}', page: 'karne'") && html.includes('id="page-karne"'),
+    uyap_hide: html.includes("const uyapTab = document.getElementById('tab-uyap')") && html.includes("const uyapMob = document.getElementById('mnav-uyap')") && html.includes("uyapTab.style.display = isAdmin ? '' : 'none'") && html.includes("name === 'uyap' && !amAllowed()"),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

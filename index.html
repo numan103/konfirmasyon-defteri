@@ -23030,6 +23030,11 @@ async function onAuthed(user) {
   const smMob = document.getElementById('mnav-sosyalmetre');
   if (smTab) smTab.style.display = isAdmin ? '' : 'none';
   if (smMob) smMob.style.display = isAdmin ? '' : 'none';
+  // Uyap: sadece admin hesabında
+  const uyapTab = document.getElementById('tab-uyap');
+  const uyapMob = document.getElementById('mnav-uyap');
+  if (uyapTab) uyapTab.style.display = isAdmin ? '' : 'none';
+  if (uyapMob) uyapMob.style.display = isAdmin ? '' : 'none';
   // Mentoring erişimi: sadece Ahmet + Çağatay (e-postası sonradan eklenecek)
   const mtDesk = document.getElementById('tab-mentoring');
   const mtMob = document.getElementById('mnav-mentoring');
