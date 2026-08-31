@@ -4002,6 +4002,34 @@
   .uyap-q-tpl-list { display: flex; flex-wrap: wrap; gap: 4px; }
   .uyap-q-tpl-btn { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; background: var(--bg); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; transition: all .15s; white-space: nowrap; }
   .uyap-q-tpl-btn:hover { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
+  .uyap-notes-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-top: 20px; box-shadow: var(--shadow); }
+  .uyap-notes-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .uyap-notes-title { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+  .uyap-notes-sub { margin: 3px 0 0; font-size: 12px; color: var(--text-3); }
+  .uyap-note-addbtn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #fff; background: var(--pc); border: 1px solid var(--pc); border-radius: 10px; padding: 9px 16px; cursor: pointer; transition: all .15s; box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+  .uyap-note-addbtn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .uyap-note-form { border: 1px dashed var(--pc); background: var(--pc-soft); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+  .uyap-note-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+  @media (max-width: 640px) { .uyap-note-form-grid { grid-template-columns: 1fr; } }
+  .uyap-notes-search { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .uyap-notes-search .uyap-search { flex: 1; min-width: 0; }
+  .uyap-note-filter { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; }
+  .uyap-note-filter:focus { outline: none; border-color: var(--pc); }
+  .uyap-notes-list { display: flex; flex-direction: column; gap: 8px; }
+  .uyap-note-item { display: flex; gap: 10px; align-items: flex-start; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .uyap-note-icon { font-size: 16px; flex-shrink: 0; }
+  .uyap-note-body { flex: 1; min-width: 0; }
+  .uyap-note-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }
+  .uyap-note-type { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; background: var(--pc-soft); color: var(--pc); border-radius: 5px; padding: 1px 6px; }
+  .uyap-note-type.soru { background: rgba(96,165,250,.12); color: #60a5fa; }
+  .uyap-note-type.cevap { background: rgba(34,197,94,.12); color: var(--green); }
+  .uyap-note-tag { font-size: 11px; font-weight: 700; color: var(--pc); background: var(--pc-soft); border-radius: 5px; padding: 1px 6px; }
+  .uyap-note-tag::before { content: '#'; }
+  .uyap-note-date { font-size: 10px; color: var(--text-3); margin-left: auto; }
+  .uyap-note-text { font-size: 13px; color: var(--text); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .uyap-note-rm { width: 26px; height: 26px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); border-radius: 7px; cursor: pointer; font-size: 12px; flex-shrink: 0; transition: all .15s; }
+  .uyap-note-rm:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.08); }
+  .uyap-notes-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
   </style>
   <script>
   (function () {
@@ -6531,6 +6559,40 @@
     <div class="uyap-empty hidden" id="uyap-empty">
       <div class="ico">🏡</div>
       <p>Henüz emlak eklenmemiş.<br>＋ butonuyla ilk gayrimenkulünü ekle.</p>
+    </div>
+
+    <div class="uyap-notes-panel" id="uyap-notes-panel">
+      <div class="uyap-notes-head">
+        <div>
+          <h3 class="uyap-notes-title">📝 Notlar & Sorular</h3>
+          <p class="uyap-notes-sub">Genel notların, soruların ve cevapların. Hangisiyle ilgili olduğunu etiketle (örn. <b>#bahçelievler</b>, <b>#genel</b>, <b>#hukuk</b>).</p>
+        </div>
+        <button type="button" class="uyap-note-addbtn" id="uyap-note-add">+ Not Ekle</button>
+      </div>
+
+      <div class="uyap-note-form hidden" id="uyap-note-form">
+        <div class="uyap-note-form-grid">
+          <div class="uyap-f"><label>Etiket</label><input id="uyap-note-tag" placeholder="#bahçelievler" maxlength="40" autocomplete="off"></div>
+          <div class="uyap-f"><label>Tip</label><select id="uyap-note-type"><option value="not">Not</option><option value="soru">Soru</option><option value="cevap">Cevap</option></select></div>
+          <div class="uyap-f-full"><label>Metin</label><textarea id="uyap-note-text" placeholder="Ne düşünüyorsun, ne sormak istiyorsun?" rows="3" maxlength="800"></textarea></div>
+        </div>
+        <div class="uyap-form-btns">
+          <button type="button" class="btn" id="uyap-note-cancel">Vazgeç</button>
+          <button type="button" class="btn primary" id="uyap-note-save">Ekle</button>
+        </div>
+      </div>
+
+      <div class="uyap-notes-search" id="uyap-notes-searchbox">
+        <input type="search" id="uyap-notes-search" class="uyap-search" placeholder="Notlarda ara…" autocomplete="off">
+        <select id="uyap-notes-filter" class="uyap-note-filter">
+          <option value="all">Tümü</option>
+          <option value="not">Not</option>
+          <option value="soru">Soru</option>
+          <option value="cevap">Cevap</option>
+        </select>
+      </div>
+      <div class="uyap-notes-list" id="uyap-notes-list"></div>
+      <div class="uyap-notes-empty" id="uyap-notes-empty">Henüz not yok — "+ Not Ekle" ile başla.</div>
     </div>
   </div>
 
@@ -26077,20 +26139,6 @@ var uyapData = { properties: [] };
 var uyapFilter = 'all';
 var uyapEditId = null;
 var uyapFormImgs = [];
-var UYAP_QCATS = [
-  { id: 'hukuki', icon: '\u{1F4CB}', name: 'Hukuki' },
-  { id: 'mali', icon: '\u{1F4B0}', name: 'Mali' },
-  { id: 'teknik', icon: '\u{1F527}', name: 'Teknik' },
-  { id: 'risk', icon: '\u{26A0}\u{FE0F}', name: 'Riskler' },
-  { id: 'genel', icon: '\u{1F4DD}', name: 'Genel' }
-];
-var UYAP_QTEMPLATES = {
-  hukuki: ['Tapu durumu nedir?', 'Ipotek/haciz var mi?', 'Imar durumu ne?', 'Kat mulkiyeti var mi?'],
-  mali: ['KDV var mi?', 'Tapu harci ne kadar?', 'Pazarlik payi var mi?', 'Aidat ne kadar?'],
-  teknik: ['Bina yasi kac?', 'Deprem raporu var mi?', 'Isitma sistemi ne?', 'Bakim durumu nasil?'],
-  risk: ['Bolge guvensiz mi?', 'Altyapi sorunu var mi?', 'Imar degisikligi plani?', 'Komsu sorunlari?'],
-  genel: ['Neden satilik?', 'Acil durum var mi?', 'Alternatif evler kac tane?', 'Kac gundur satilmadi?']
-};
 
 function uyapId() { return 'uyap_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
 
@@ -26176,45 +26224,6 @@ function uyapRenderGrid() {
       imgHtml = '<img class="uyap-card-img" src="' + p.images[0] + '" alt="' + (p.name || '') + '" data-uyap-imgview="' + (p.images[0] || '') + '">';
     }
     var linkHtml = p.url ? '<a class="uyap-card-link" href="' + p.url + '" target="_blank" rel="noopener noreferrer" title="İlanı aç">🔗 İlanı Gör</a>' : '';
-    var qs = p.questions || [];
-    var catCounts = {};
-    UYAP_QCATS.forEach(function (cat) { catCounts[cat.id] = 0; });
-    qs.forEach(function (q) { if (catCounts[q.cat] !== undefined) catCounts[q.cat]++; });
-    var qsHtml = '<div class="uyap-card-qs">'
-      + '<div class="uyap-card-qs-h" data-uyap-qstoggle="' + p.id + '">❓ Soru & Notlar <span class="cnt">' + qs.length + '</span> <span style="font-size:10px;color:var(--text-3);margin-left:auto">' + (qs.length ? '▾' : '') + '</span></div>'
-      + '<div class="uyap-card-qs-body' + (qs.length ? '' : ' hidden') + '" data-uyap-qslist="' + p.id + '">';
-    var catTabs = '<div class="uyap-q-cats">';
-    UYAP_QCATS.forEach(function (cat) {
-      catTabs += '<button type="button" class="uyap-qcat-chip' + '" data-uyap-qcat="' + p.id + ':' + cat.id + '">' + cat.icon + ' ' + cat.name + (catCounts[cat.id] ? ' (' + catCounts[cat.id] + ')' : '') + '</button>';
-    });
-    catTabs += '<button type="button" class="uyap-qcat-chip uyap-qcat-all on" data-uyap-qcat="' + p.id + ':all">Tümü (' + qs.length + ')</button></div>';
-    qsHtml += catTabs;
-    qsHtml += '<div class="uyap-q-list" data-uyap-qlist="' + p.id + '">';
-    qs.forEach(function (q, qi) {
-      var catObj = UYAP_QCATS.find(function (ct) { return ct.id === q.cat; }) || UYAP_QCATS[4];
-      qsHtml += '<div class="uyap-card-q" data-qcat="' + (q.cat || 'genel') + '"><span class="uyap-q-cat">' + catObj.icon + '</span> <b>' + (q.q || '') + '</b>';
-      if (q.a) qsHtml += '<br><span class="uyap-q-ans">' + q.a + '</span>';
-      qsHtml += '<span class="uyap-q-date">' + (q.date || '') + '</span>';
-      qsHtml += '</div>';
-    });
-    qsHtml += '</div>';
-    qsHtml += '<div class="uyap-q-add">';
-    qsHtml += '<select data-uyap-qcatsel="' + p.id + '" class="uyap-q-catsel">';
-    UYAP_QCATS.forEach(function (cat) { qsHtml += '<option value="' + cat.id + '">' + cat.icon + ' ' + cat.name + '</option>'; });
-    qsHtml += '</select>';
-    qsHtml += '<input placeholder="Soru veya not yaz…" data-uyap-qinput="' + p.id + '" maxlength="200" autocomplete="off">';
-    qsHtml += '<button type="button" data-uyap-qbtn="' + p.id + '">+</button>';
-    qsHtml += '</div>';
-    qsHtml += '<div class="uyap-q-tpl">';
-    qsHtml += '<div class="uyap-q-tpl-title">Şablonlar:</div>';
-    qsHtml += '<div class="uyap-q-tpl-list">';
-    UYAP_QCATS.forEach(function (cat) {
-      (UYAP_QTEMPLATES[cat.id] || []).forEach(function (t) {
-        qsHtml += '<button type="button" class="uyap-q-tpl-btn" data-uyap-qtpl="' + p.id + '" data-tpl-cat="' + cat.id + '" data-tpl-text="' + t + '">' + cat.icon + ' ' + t + '</button>';
-      });
-    });
-    qsHtml += '</div></div>';
-    qsHtml += '</div></div>';
     html += '<div class="uyap-card" data-uyap-card="' + p.id + '">'
       + '<div class="uyap-card-top"><div class="uyap-card-title">'
       + '<span class="uyap-badge ' + (p.status || 'potansiyel') + '">' + (statusLabels[p.status] || p.status) + '</span>'
@@ -26236,8 +26245,7 @@ function uyapRenderGrid() {
       + '<div><span class="uyap-card-calc-lbl">Beklenen Kâr</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
       + '<span class="uyap-card-calc-pct ' + cls + '">' + (c.sale ? ('%' + c.pct.toFixed(1)) : '—') + '</span>'
       + '</div>'
-      + (p.notes ? '<div class="uyap-card-notes">' + p.notes + '</div>' : '')
-      + qsHtml
+      + (p.notes ? '<div class="uyap-card-notes">📝 ' + p.notes + '</div>' : '')
       + '</div>';
   });
   grid.innerHTML = html;
@@ -26248,6 +26256,83 @@ function renderUyap() {
   uyapRenderStats();
   uyapRenderFilters();
   uyapRenderGrid();
+  uyapRenderNotes();
+}
+
+/* ── Genel Notlar & Sorular ── */
+var uyapNotesFilter = 'all';
+
+function uyapRenderNotes() {
+  var list = document.getElementById('uyap-notes-list');
+  var empty = document.getElementById('uyap-notes-empty');
+  if (!list) return;
+  var q = (document.getElementById('uyap-notes-search') || {}).value || '';
+  q = q.toLowerCase();
+  var f = (document.getElementById('uyap-notes-filter') || {}).value || 'all';
+  var notes = (uyapData.notes || []).filter(function (n) {
+    if (f !== 'all' && n.type !== f) return false;
+    if (q && (n.text || '').toLowerCase().indexOf(q) === -1 && (n.tag || '').toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  notes.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+  if (!notes.length) {
+    list.innerHTML = '';
+    if (empty) empty.classList.remove('hidden');
+    return;
+  }
+  if (empty) empty.classList.add('hidden');
+  var typeIcons = { not: '📝', soru: '❓', cevap: '💬' };
+  var html = '';
+  notes.forEach(function (n) {
+    var tagHtml = n.tag ? '<span class="uyap-note-tag">' + n.tag + '</span>' : '';
+    html += '<div class="uyap-note-item uyap-note-' + (n.type || 'not') + '">'
+      + '<div class="uyap-note-icon">' + (typeIcons[n.type] || '📝') + '</div>'
+      + '<div class="uyap-note-body">'
+      + '<div class="uyap-note-top"><span class="uyap-note-type">' + (n.type || 'not') + '</span>' + tagHtml + '<span class="uyap-note-date">' + (n.date || '') + '</span></div>'
+      + '<div class="uyap-note-text">' + n.text + '</div>'
+      + '</div>'
+      + '<button type="button" class="uyap-note-rm" data-uyap-noterm="' + n.id + '" title="Sil">🗑️</button>'
+      + '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function uyapNoteOpenForm() {
+  var f = document.getElementById('uyap-note-form');
+  if (f) f.classList.remove('hidden');
+  var btn = document.getElementById('uyap-note-add');
+  if (btn) btn.classList.add('hidden');
+  document.getElementById('uyap-note-tag').focus();
+}
+
+function uyapNoteCloseForm() {
+  var f = document.getElementById('uyap-note-form');
+  if (f) f.classList.add('hidden');
+  var btn = document.getElementById('uyap-note-add');
+  if (btn) btn.classList.remove('hidden');
+}
+
+function uyapNoteSave() {
+  var tag = (document.getElementById('uyap-note-tag').value || '').trim();
+  var type = document.getElementById('uyap-note-type').value;
+  var text = (document.getElementById('uyap-note-text').value || '').trim();
+  if (!text) { alert('Metin gerekli.'); return; }
+  if (!uyapData.notes) uyapData.notes = [];
+  uyapData.notes.push({
+    id: 'unote_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
+    tag: tag, type: type, text: text,
+    date: new Date().toISOString().slice(0, 10), ts: Date.now()
+  });
+  uyapSave();
+  document.getElementById('uyap-note-tag').value = '';
+  document.getElementById('uyap-note-text').value = '';
+  uyapNoteCloseForm();
+  uyapRenderNotes();
+}
+
+function uyapNoteDel(id) {
+  uyapData.notes = (uyapData.notes || []).filter(function (n) { return n.id !== id; });
+  uyapSave(); uyapRenderNotes();
 }
 
 /* ── Form ── */
@@ -26408,15 +26493,6 @@ function uyapAddImg(dataUrl) {
   });
 }
 
-function uyapAddQuestion(id, text, cat) {
-  var p = uyapData.properties.find(function (x) { return x.id === id; });
-  if (!p || !text.trim()) return;
-  if (!p.questions) p.questions = [];
-  p.questions.push({ q: text.trim(), a: '', cat: cat || 'genel', date: new Date().toISOString().slice(0, 10) });
-  p.updatedAt = new Date().toISOString();
-  uyapSave(); renderUyap();
-}
-
 function uyapImgView(src) {
   var el = document.getElementById('uyap-imgview');
   var img = document.getElementById('uyap-imgview-img');
@@ -26489,45 +26565,11 @@ document.addEventListener('click', function (e) {
   if (delBtn) { uyapDelProp(delBtn.getAttribute('data-uyap-del')); return; }
   var filterBtn = t.closest('[data-uyap-f]');
   if (filterBtn) { uyapFilter = filterBtn.getAttribute('data-uyap-f'); uyapRenderFilters(); uyapRenderGrid(); return; }
-  var qsToggle = t.closest('[data-uyap-qstoggle]');
-  if (qsToggle) {
-    var qid = qsToggle.getAttribute('data-uyap-qstoggle');
-    var body = document.querySelector('[data-uyap-qslist="' + qid + '"]');
-    if (body) body.classList.toggle('hidden');
-    return;
-  }
-  var qCatChip = t.closest('[data-uyap-qcat]');
-  if (qCatChip) {
-    var parts = qCatChip.getAttribute('data-uyap-qcat').split(':');
-    var pid = parts[0], catId = parts[1];
-    var qsList = document.querySelector('[data-uyap-qlist="' + pid + '"]');
-    if (qsList) {
-      qsList.querySelectorAll('.uyap-card-q').forEach(function (el) {
-        el.style.display = (catId === 'all' || el.getAttribute('data-qcat') === catId) ? '' : 'none';
-      });
-    }
-    var catContainer = qCatChip.closest('.uyap-q-cats');
-    if (catContainer) catContainer.querySelectorAll('.uyap-qcat-chip').forEach(function (b) { b.classList.remove('on'); });
-    qCatChip.classList.add('on');
-    return;
-  }
-  var qTpl = t.closest('[data-uyap-qtpl]');
-  if (qTpl) {
-    var tplPid = qTpl.getAttribute('data-uyap-qtpl');
-    var tplCat = qTpl.getAttribute('data-tpl-cat');
-    var tplText = qTpl.getAttribute('data-tpl-text');
-    uyapAddQuestion(tplPid, tplText, tplCat);
-    return;
-  }
-  var qBtn = t.closest('[data-uyap-qbtn]');
-  if (qBtn) {
-    var qid2 = qBtn.getAttribute('data-uyap-qbtn');
-    var inp = document.querySelector('[data-uyap-qinput="' + qid2 + '"]');
-    var catSel = document.querySelector('[data-uyap-qcatsel="' + qid2 + '"]');
-    var catVal = catSel ? catSel.value : 'genel';
-    if (inp && inp.value.trim()) { uyapAddQuestion(qid2, inp.value, catVal); }
-    return;
-  }
+  if (t.id === 'uyap-note-add') { uyapNoteOpenForm(); return; }
+  if (t.id === 'uyap-note-cancel') { uyapNoteCloseForm(); return; }
+  if (t.id === 'uyap-note-save') { uyapNoteSave(); return; }
+  var noteRm = t.closest('[data-uyap-noterm]');
+  if (noteRm) { uyapNoteDel(noteRm.getAttribute('data-uyap-noterm')); return; }
   var imgRm = t.closest('[data-uyap-img-rm]');
   if (imgRm) {
     var idx = parseInt(imgRm.getAttribute('data-uyap-img-rm'));
@@ -26560,13 +26602,15 @@ document.addEventListener('click', function (e) {
 });
 
 document.addEventListener('keyup', function (e) {
-  if (e.key === 'Escape') { uyapCloseForm(); uyapImgClose(); }
+  if (e.key === 'Escape') { uyapCloseForm(); uyapImgClose(); uyapNoteCloseForm(); }
   if (e.target.id === 'uyap-search') { uyapRenderGrid(); }
+  if (e.target.id === 'uyap-notes-search') { uyapRenderNotes(); }
 });
 
 document.addEventListener('input', function (e) {
   var t = e.target;
   if (t.matches('#uyap-f-costs-list input')) { uyapUpdateCostTotal(); }
+  if (t.id === 'uyap-notes-filter') { uyapRenderNotes(); }
 });
 
 document.addEventListener('blur', function (e) {

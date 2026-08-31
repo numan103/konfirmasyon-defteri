@@ -31,9 +31,9 @@ const mk = [
   ['ap2limit', h.includes('function ap2IsPending') && h.includes('function ap2Fillable') && h.includes('function ap2FillsCheck') && h.includes('data-ap2fill') && h.includes('ap2-card-pend') && h.includes('BEKLEYEN EM')],
   ['ap2hist', h.includes('const AP2_CG_IDS') && h.includes('function ap2HistUrl') && h.includes('async function ap2FetchHist') && h.includes('function ap2ShowHistConfirm') && h.includes('function ap2CommitPosition') && h.includes('id="ap2-hist-keep"') && h.includes('pos.hist') && h.includes('AP2_HIST_TOL')],
   ['ap2ui', h.includes('id="ap2-search"') && h.includes('class="ap2-hd"') && h.includes('class="ap2-btn-primary"') && h.includes('act-hedge') && h.includes('act-del') && h.includes('.ap2-sell-pf') && h.includes('ap2SearchTerm') && h.includes('ap2-grid-empty')],
-  ['uyap', h.includes('id="page-uyap"') && h.includes('id="tab-uyap"') && h.includes('function renderUyap') && h.includes('UYAP_KEY') && h.includes('function uyapSaveForm') && h.includes('uyap-img-drop') && h.includes('function uyapAddQuestion')],
+  ['uyap', h.includes('id="page-uyap"') && h.includes('id="tab-uyap"') && h.includes('function renderUyap') && h.includes('UYAP_KEY') && h.includes('function uyapSaveForm') && h.includes('uyap-img-drop')],
   ['uyap_autolink', h.includes('uyap-f-url') && h.includes('function uyapFetchOg') && h.includes('uyapFetchOgImg') && h.includes('allorigins')],
-  ['uyap_qcat', h.includes('UYAP_QCATS') && h.includes('uyap-q-catsel') && h.includes('data-uyap-qcat') && h.includes('UYAP_QTEMPLATES') && h.includes('data-uyap-qtpl')]
+  ['uyap_notes', h.includes('id="uyap-notes-panel"') && h.includes('function uyapRenderNotes') && h.includes('function uyapNoteSave') && h.includes('uyap-note-tag') && h.includes("uyapData.notes")]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
