@@ -132,6 +132,7 @@ function fetchText(u, headers) {
     uyap: html.includes('id="page-uyap"') && html.includes('id="tab-uyap"') && html.includes('function renderUyap') && html.includes('UYAP_KEY') && html.includes('function uyapSaveForm') && html.includes('uyap-img-drop'),
     uyap_notes: html.includes('id="uyap-notes-panel"') && html.includes('function uyapRenderNotes') && html.includes('function uyapNoteSave') && html.includes('uyap-note-tag'),
     uyap_timeline: html.includes('class="uyap-composer"') && html.includes('uyap-comp-text') && html.includes('uyap-note-imgbtn') && html.includes('uyap-tl-item') && html.includes('function uyapNoteTimeStr'),
+    stats_admin: html.includes('function statsLiveOnly') && html.includes('if (amAllowed()) { statsRefresh(); return; }') && html.includes('if (amAllowed()) { statsFetchTotal(); return; }') && html.includes('Math.max(0, STATS_REG - 1)'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

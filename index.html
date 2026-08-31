@@ -23235,7 +23235,8 @@ function statsRender(online) {
     var e4 = document.getElementById('lp-live-total'); if (e4) e4.textContent = t;
   }
   if (typeof STATS_REG === 'number') {
-    var r = STATS_REG.toLocaleString('tr-TR');
+    var regShown = amAllowed() ? Math.max(0, STATS_REG - 1) : STATS_REG;
+    var r = regShown.toLocaleString('tr-TR');
     var e5 = document.getElementById('nav-live-reg'); if (e5) e5.textContent = r;
     var e6 = document.getElementById('lp-live-reg'); if (e6) e6.textContent = r;
     var e7 = document.getElementById('lp-proof-users'); if (e7) e7.textContent = r;
@@ -23255,6 +23256,8 @@ function statsRefresh() {
 
 function statsHeartbeat() {
   if (!AUTH || !AUTH.client) return;
+  statsLiveOnly(amAllowed());
+  if (amAllowed()) { statsRefresh(); return; }
   var vid = statsVid();
   AUTH.client.from('presence')
     .upsert({ visitor_id: vid, last_seen: new Date().toISOString() }, { onConflict: 'visitor_id' })
@@ -23265,6 +23268,13 @@ function statsHeartbeat() {
     })
     .then(function () { statsRefresh(); })
     .catch(function () {});
+}
+
+function statsLiveOnly(isAdmin) {
+  var nav = document.getElementById('nav-live');
+  var lp = document.getElementById('lp-live');
+  if (nav) nav.style.display = isAdmin ? '' : 'none';
+  if (lp) lp.style.display = isAdmin ? '' : 'none';
 }
 
 function statsFetchTotal() {
@@ -23297,6 +23307,7 @@ function statsFetchReg() {
 
 function statsCountTotal() {
   if (!AUTH || !AUTH.client) return;
+  if (amAllowed()) { statsFetchTotal(); return; }
   AUTH.client.rpc('increment_total')
     .then(function (r) {
       if (r && !r.error && typeof r.data === 'number') {
