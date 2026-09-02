@@ -135,6 +135,9 @@ function fetchText(u, headers) {
     stats_admin: html.includes('function statsLiveOnly') && html.includes('if (amAllowed()) { statsRefresh(); return; }') && html.includes('if (amAllowed()) { statsFetchTotal(); return; }') && html.includes('Math.max(0, STATS_REG - 1)'),
     karne_ek: !html.includes('tab-karne') && !html.includes('mnav-karne') && !html.includes('hm.c11.t') && html.includes("{ icon: '\u{1FA9E}', page: 'karne'") && html.includes('id="page-karne"'),
     uyap_hide: html.includes("const uyapTab = document.getElementById('tab-uyap')") && html.includes("const uyapMob = document.getElementById('mnav-uyap')") && html.includes("uyapTab.style.display = isAdmin ? '' : 'none'") && html.includes("name === 'uyap' && !amAllowed()"),
+    zaman_page: html.includes('id="page-zaman"') && html.includes('id="tab-zaman"') && html.includes('id="mnav-zaman"') && html.includes("if (name === 'zaman') zmRender();") && html.includes("var ZM_KEY = 'alfa-zaman-v1'"),
+    zaman_css: html.includes('.zm-row {') && html.includes('.zm-bar {') && html.includes('.zm-cat-card {') && html.includes('.zm-week-grid'),
+    strat_stage: html.includes('var STRAT_STAGES = [') && html.includes('function stratSetStage') && html.includes('function stratSaveStageNote') && html.includes('data-strat-stage') && html.includes('data-stage-save'),
   };
   let ok = true;
   for (const [k, v] of Object.entries(marks)) {

@@ -37,7 +37,10 @@ const mk = [
   ['uyap_timeline', h.includes('class="uyap-composer"') && h.includes('uyap-comp-text') && h.includes('uyap-comp-count') && h.includes('uyap-note-imgbtn') && h.includes('uyap-tl-item') && h.includes('function uyapNoteTimeStr') && h.includes('uyap-note-imgprev')],
   ['stats_admin', h.includes('function statsLiveOnly') && h.includes('if (amAllowed()) { statsRefresh(); return; }') && h.includes('if (amAllowed()) { statsFetchTotal(); return; }') && h.includes('Math.max(0, STATS_REG - 1)')],
   ['karne_ek', !h.includes('tab-karne') && !h.includes('mnav-karne') && !h.includes('hm.c11.t') && h.includes("{ icon: '\u{1FA9E}', page: 'karne'") && h.includes('id="page-karne"')],
-  ['uyap_hide', h.includes("const uyapTab = document.getElementById('tab-uyap')") && h.includes("const uyapMob = document.getElementById('mnav-uyap')") && h.includes("uyapTab.style.display = isAdmin ? '' : 'none'") && h.includes("uyapMob.style.display = isAdmin ? '' : 'none'") && h.includes("name === 'uyap' && !amAllowed()")]
+  ['uyap_hide', h.includes("const uyapTab = document.getElementById('tab-uyap')") && h.includes("const uyapMob = document.getElementById('mnav-uyap')") && h.includes("uyapTab.style.display = isAdmin ? '' : 'none'") && h.includes("uyapMob.style.display = isAdmin ? '' : 'none'") && h.includes("name === 'uyap' && !amAllowed()")],
+  ['zaman_page', h.includes('id="page-zaman"') && h.includes('id="tab-zaman"') && h.includes('id="mnav-zaman"') && h.includes('if (name === \'zaman\') zmRender();') && h.includes("'zaman'") && h.includes("var ZM_KEY = 'alfa-zaman-v1'")],
+  ['zaman_css', h.includes('.zm-row {') && h.includes('.zm-bar {') && h.includes('.zm-cat-card {') && h.includes('.zm-week-grid')],
+  ['strat_stage', h.includes('var STRAT_STAGES = [') && h.includes('function stratSetStage') && h.includes('function stratSaveStageNote') && h.includes('data-strat-stage') && h.includes('data-stage-save') && h.includes('sd-stage-note') && h.includes('stratStepHtml')]
 ];
 let ok = true;
 for (const [k, v] of mk) { console.log((v ? 'OK   ' : 'MISS ') + 'sosyalmetre/' + k); if (!v) ok = false; }
