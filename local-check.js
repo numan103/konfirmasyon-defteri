@@ -40,6 +40,8 @@ const mk = [
   ['uyap_hide', h.includes("const uyapTab = document.getElementById('tab-uyap')") && h.includes("const uyapMob = document.getElementById('mnav-uyap')") && h.includes("uyapTab.style.display = isAdmin ? '' : 'none'") && h.includes("uyapMob.style.display = isAdmin ? '' : 'none'") && h.includes("name === 'uyap' && !amAllowed()")],
   ['zaman_page', h.includes('id="page-zaman"') && h.includes('id="tab-zaman"') && h.includes('id="mnav-zaman"') && h.includes('if (name === \'zaman\') zmRender();') && h.includes("'zaman'") && h.includes("var ZM_KEY = 'alfa-zaman-v1'")],
   ['zaman_css', h.includes('.zm-row {') && h.includes('.zm-bar {') && h.includes('.zm-cat-card {') && h.includes('.zm-week-grid')],
+  ['zaman_yildiz', h.includes('ZM_BASE_CATS') && h.includes('.zm-stars {') && h.includes('data-zm-star') && h.includes("zmSetToday(catId, zmTodayVal(catId)") && h.includes("if (now) { zmSetToday(now.getAttribute('data-zm-now'), now.value);") && !h.includes('zm-save-today')],
+  ['strateji_v2', h.includes('id="page-strateji"') && h.includes('id="tab-strateji"') && h.includes('id="mnav-strateji"') && h.includes('if (name === \'strateji\') st2Render();') && h.includes("var ST2_KEY = 'alfa-strateji-v1'") && h.includes('data-st2-stage') && h.includes('data-st2-edit') && h.includes('.st2-grid')],
   ['strat_stage', h.includes('var STRAT_STAGES = [') && h.includes('function stratSetStage') && h.includes('function stratSaveStageNote') && h.includes('data-strat-stage') && h.includes('data-stage-save') && h.includes('sd-stage-note') && h.includes('stratStepHtml')]
 ];
 let ok = true;

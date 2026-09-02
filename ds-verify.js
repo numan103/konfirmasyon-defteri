@@ -137,6 +137,8 @@ function fetchText(u, headers) {
     uyap_hide: html.includes("const uyapTab = document.getElementById('tab-uyap')") && html.includes("const uyapMob = document.getElementById('mnav-uyap')") && html.includes("uyapTab.style.display = isAdmin ? '' : 'none'") && html.includes("name === 'uyap' && !amAllowed()"),
     zaman_page: html.includes('id="page-zaman"') && html.includes('id="tab-zaman"') && html.includes('id="mnav-zaman"') && html.includes("if (name === 'zaman') zmRender();") && html.includes("var ZM_KEY = 'alfa-zaman-v1'"),
     zaman_css: html.includes('.zm-row {') && html.includes('.zm-bar {') && html.includes('.zm-cat-card {') && html.includes('.zm-week-grid'),
+    zaman_yildiz: html.includes('ZM_BASE_CATS') && html.includes('data-zm-star') && html.includes("zmSetToday(catId, zmTodayVal(catId)") && !html.includes('zm-save-today'),
+    strateji_v2: html.includes('id="page-strateji"') && html.includes('id="tab-strateji"') && html.includes('id="mnav-strateji"') && html.includes("if (name === 'strateji') st2Render();") && html.includes("var ST2_KEY = 'alfa-strateji-v1'") && html.includes('data-st2-stage'),
     strat_stage: html.includes('var STRAT_STAGES = [') && html.includes('function stratSetStage') && html.includes('function stratSaveStageNote') && html.includes('data-strat-stage') && html.includes('data-stage-save'),
   };
   let ok = true;

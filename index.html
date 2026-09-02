@@ -4101,6 +4101,17 @@
   .zm-row-goal { font-size: 11.5px; color: var(--text-3); }
   .zm-row-input { width: 90px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 7px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; text-align: center; }
   .zm-row-input:focus { outline: none; border-color: var(--pc); }
+  .zm-stars { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+  .zm-star { font-size: 20px; line-height: 1; color: var(--border); cursor: pointer; transition: color .15s, transform .1s; user-select: none; }
+  .zm-star:hover { transform: scale(1.15); }
+  .zm-star.on { color: #f59e0b; }
+  .zm-row-ctrl { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .zm-row-ctrl .zm-row-input { width: 74px; }
+  .zm-btn { width: 30px; height: 30px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 16px; line-height: 1; font-weight: 700; }
+  .zm-btn:hover { border-color: var(--pc); color: var(--pc); }
+  .zm-btn:active { transform: scale(.95); }
+  .zm-row-sa { font-size: 11px; color: var(--text-3); }
+  .zm-goals-suf { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
   .zm-today-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
   .zm-week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
   .zm-cat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
@@ -4130,6 +4141,31 @@
   .zm-hist-items { display: flex; flex-wrap: wrap; gap: 6px; }
   .zm-hist-chip { font-size: 11px; font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3px 8px; color: var(--text-2); }
   .zm-hist-chip b { color: var(--text); }
+  .st2-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 20px 0 16px; flex-wrap: wrap; }
+  .st2-form { margin: 0 0 18px; }
+  .st2-form-in { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .st2-f { display: flex; flex-direction: column; gap: 5px; }
+  .st2-f-full { grid-column: 1 / -1; }
+  .st2-f label { font-size: 11.5px; font-weight: 700; color: var(--text-3); }
+  .st2-f input, .st2-f select, .st2-f textarea { background: var(--bg2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; width: 100%; box-sizing: border-box; }
+  .st2-f textarea { resize: vertical; }
+  .st2-form-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .st2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .st2-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; }
+  .st2-card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .st2-card-title { font-weight: 800; font-size: 15px; color: var(--text); }
+  .st2-card-stage { font-size: 11px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; color: var(--pc); flex-shrink: 0; }
+  .st2-card-tag { font-size: 10.5px; font-weight: 800; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; }
+  .st2-todo { margin: 0; padding: 0 0 0 18px; font-size: 12.5px; color: var(--text-2); line-height: 1.55; }
+  .st2-todo li { margin: 3px 0; }
+  .st2-todo li.st2-none { list-style: none; margin-left: -18px; color: var(--text-3); }
+  .st2-note { font-size: 12px; color: var(--text-2); background: var(--bg); border-radius: 10px; padding: 9px 11px; border-left: 3px solid var(--pc); white-space: pre-wrap; }
+  .st2-stages { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+  .st2-chip { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg2); color: var(--text-3); cursor: pointer; transition: all .15s; }
+  .st2-chip:hover { border-color: var(--pc); color: var(--text); }
+  .st2-chip.on { background: var(--pc); border-color: var(--pc); color: #fff; }
+  .st2-card-actions { display: flex; gap: 6px; margin-top: 2px; }
+  .st2-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
   </style>
   <script>
   (function () {
@@ -4682,6 +4718,7 @@
           <a href="?page=data" class="nav-link" id="tab-data" data-nav data-i18n="app.journal">📈 Trade Günlüğü</a>
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav data-i18n="app.calc">🧮 Alfa Calculator</a>
           <a href="?page=zaman" class="nav-link" id="tab-zaman" data-nav>⏱️ Zaman</a>
+          <a href="?page=strateji" class="nav-link" id="tab-strateji" data-nav>🧭 Strateji</a>
         </div>
       </div>
       <div class="nav-drop">
@@ -4739,6 +4776,7 @@
       <a href="?page=data" class="mnav-link" data-nav data-mnav="data" data-i18n="app.journal">📈 Trade Günlüğü</a>
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
+      <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
       <a href="?page=strategies" class="mnav-link" data-nav data-mnav="strategies" data-i18n="app.strategies">🧪 Stratejiler</a>
@@ -7593,21 +7631,16 @@
     <div class="zm-head">
       <div>
         <h1 style="font-size:22px;margin:0;letter-spacing:-.02em;">⏱️ Zaman Takibi</h1>
-        <p style="font-size:12.5px;color:var(--dim);margin:6px 0 0;">Neye ne kadar zaman harcadığını izle — haftalık hedef koy, günlük gir, kademeli ilerle.</p>
+        <p style="font-size:12.5px;color:var(--dim);margin:6px 0 0;">Neye ne kadar ayırdığını izle — yıldıza tıkla, zaman anında işlensin. Kaydetmekle uğraşma.</p>
       </div>
       <div class="zm-week" id="zm-week"><span id="zm-week-range">—</span></div>
     </div>
 
     <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">🔥 Bugünkü Kayıt</span><span class="zm-hint">bugün için boş bırakırsan o satır kaydedilmeden kalır</span></div>
+      <div class="zm-gap-head"><span class="zm-gap-title">🔥 Bugün</span><span class="zm-hint">⭐ yıldıza tık = +1 saat · hücreye yaz = saat gir · saniyesinde kaydedilir</span></div>
     </div>
-
     <div class="zm-today-card">
       <div id="zm-today-rows"></div>
-      <div class="zm-today-actions">
-        <button type="button" class="btn solid" id="zm-save-today">💾 Bugünü Kaydet</button>
-        <span class="hint" id="zm-today-status" style="margin:0;font-size:12px;"></span>
-      </div>
     </div>
 
     <div class="zm-gap">
@@ -7616,22 +7649,57 @@
     <div id="zm-week-grid"></div>
 
     <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">🎯 Hedefler & Kategoriler</span><span class="zm-hint">hedef saatlerini istediğin gibi yükselt — kademeli ilerleme</span></div>
+      <div class="zm-gap-head"><span class="zm-gap-title">🎯 Doldurulması gereken süre</span><span class="zm-hint">her kategori için haftalık süreyi belirle — yükselttikçe adım adım ilerle</span></div>
     </div>
     <div class="zm-goals-card">
       <div id="zm-goals-list"></div>
-      <div class="zm-add-row">
-        <input id="zm-new-name" placeholder="Yeni kategori (örn. Spor)" maxlength="40" autocomplete="off">
-        <input type="number" id="zm-new-goal" placeholder="Hedef saat" min="0" step="0.5" style="width:110px;">
-        <button type="button" class="btn" id="zm-add-cat">＋ Ekle</button>
+    </div>
+  </div>
+</div>
+
+<div id="page-strateji" class="hidden">
+  <div class="wrap">
+    <div class="st2-head">
+      <div>
+        <h1 style="font-size:22px;margin:0;letter-spacing:-.02em;">🧭 Strateji İzleme</h1>
+        <p style="font-size:12.5px;color:var(--dim);margin:6px 0 0;">Kendi stratejilerini gir — hangi aşamada olduğunu gör, sıradaki adımı not et.</p>
+      </div>
+      <button type="button" class="btn solid" id="st2-new">＋ Yeni Strateji</button>
+    </div>
+
+    <div class="st2-form hidden" id="st2-form">
+      <div class="st2-form-in">
+        <div class="st2-f">
+          <label>Strateji adı</label>
+          <input id="st2-name" maxlength="80" placeholder="örn. CVD Momentum Breakout" autocomplete="off">
+        </div>
+        <div class="st2-f">
+          <label>Aşama</label>
+          <select id="st2-stage">
+            <option value="fikir">💡 Fikir</option>
+            <option value="backtest">📊 Backtest</option>
+            <option value="dogrulama">🧪 Doğrulama</option>
+            <option value="canli">🟢 Canlı</option>
+            <option value="kanitlandi">🏆 Kanıtlandı</option>
+          </select>
+        </div>
+        <div class="st2-f st2-f-full">
+          <label>Sıradaki adım / yapılacaklar</label>
+          <textarea id="st2-todo" rows="2" maxlength="500" placeholder="Her satıra bir madde — örn.&#10;· 2021 momentum rulebook'unu backtest et&#10;· 100 işlemde PF &gt; 1.5 doğrula"></textarea>
+        </div>
+        <div class="st2-f st2-f-full">
+          <label>Not</label>
+          <textarea id="st2-note" rows="2" maxlength="800" placeholder="Not / bağlam / önemli detaylar…"></textarea>
+        </div>
+        <div class="st2-form-actions">
+          <button type="button" class="btn solid" id="st2-save">💾 Kaydet</button>
+          <button type="button" class="btn" id="st2-cancel">İptal</button>
+        </div>
       </div>
     </div>
 
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">🗓️ Geçmiş Günler</span></div>
-    </div>
-    <div class="zm-hist-card" id="zm-hist"></div>
-    <div class="zm-empty" id="zm-empty">Henüz veri yok — bugünkü kaydını gir, haftalık özetin burada oluşsun.</div>
+    <div class="st2-empty" id="st2-empty">Henüz strateji yok — "＋ Yeni Strateji" ile ekle.</div>
+    <div class="st2-grid" id="st2-grid"></div>
   </div>
 </div>
 
@@ -11199,7 +11267,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
+  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -12336,7 +12404,8 @@ function showPage(name, skipAnim) {
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
   if (name === 'zaman') zmRender();
-  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  if (name === 'strateji') st2Render();
+  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -27029,16 +27098,18 @@ document.addEventListener('paste', function (e) {
 var ZM_KEY = 'alfa-zaman-v1';
 var zmData = null;
 var ZM_DEF_COLORS = ['#f59e0b', '#3b82f6', '#8b5cf6', '#22c55e', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'];
+var ZM_BASE_CATS = [
+  { id: 'trading', name: 'Trading' },
+  { id: 'preply', name: 'Preply' },
+  { id: 'okul', name: 'Okul' },
+  { id: 'bos', name: 'Boş Zaman' }
+];
+var ZM_MAX_STARS = 9;
 
 function zmDefaultCats() {
-  return [
-    { id: 'trading', name: 'Trading', goal: 0, color: ZM_DEF_COLORS[0] },
-    { id: 'preply', name: 'Preply', goal: 0, color: ZM_DEF_COLORS[1] },
-    { id: 'okul', name: 'Okul', goal: 0, color: ZM_DEF_COLORS[2] },
-    { id: 'bos', name: 'Boş Zaman', goal: 0, color: ZM_DEF_COLORS[3] },
-    { id: 'spor', name: 'Spor', goal: 0, color: ZM_DEF_COLORS[4] },
-    { id: 'uyku', name: 'Uyku', goal: 0, color: ZM_DEF_COLORS[5] }
-  ];
+  return ZM_BASE_CATS.map(function (b, i) {
+    return { id: b.id, name: b.name, goal: 0, color: ZM_DEF_COLORS[i % ZM_DEF_COLORS.length] };
+  });
 }
 
 function zmLoad() {
@@ -27050,6 +27121,13 @@ function zmLoad() {
     zmData = { cats: zmDefaultCats(), days: {} };
   }
   if (!zmData.days) zmData.days = {};
+  // Eski/gereksiz kategorileri süz; sabit 4 kategoriye sabitle (spor, uyku vb. kaldırıldı)
+  var newCats = [];
+  ZM_BASE_CATS.forEach(function (b, i) {
+    var old = zmData.cats.find(function (c) { return c.id === b.id; });
+    newCats.push({ id: b.id, name: b.name, goal: (old && old.goal) || 0, color: ZM_DEF_COLORS[i % ZM_DEF_COLORS.length] });
+  });
+  zmData.cats = newCats;
   return zmData;
 }
 
@@ -27107,24 +27185,46 @@ function zmWeekGrand() {
 
 function zmTodayKey() { return zmDateKey(new Date()); }
 
+function zmTodayVal(catId) {
+  var rec = zmData.days[zmTodayKey()] || {};
+  return parseFloat(rec[catId]) || 0;
+}
+
+function zmStarsHtml(catId, val, goal) {
+  var max = Math.max(1, Math.min(ZM_MAX_STARS, zoom(goal) || 5));
+  var filled = Math.round(val);
+  var html = '<div class="zm-stars" data-zm-stars="' + catId + '">';
+  for (var i = 1; i <= max; i++) {
+    html += '<span class="zm-star' + (i <= filled ? ' on' : '') + '" data-zm-star="' + i + '">★</span>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function zoom(v) { return Math.round(parseFloat(v) || 0); }
+
 function zmRender() {
   zmLoad();
   var days = zmWeekDays();
   var rangeEl = document.getElementById('zm-week-range');
   if (rangeEl) rangeEl.textContent = days[0].d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ' – ' + days[6].d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 
-  // Bugünkü kayıt satırları
+  // Bugünkü kayıt satırları (yıldız + elle saat, otomatik kayıt)
   var rows = document.getElementById('zm-today-rows');
   if (rows) {
-    var tk = zmTodayKey();
-    var today = zmData.days[tk] || {};
     var html = '';
     zmData.cats.forEach(function (c) {
+      var v = zmTodayVal(c.id);
       html += '<div class="zm-row">'
         + '<span class="zm-row-dot" style="background:' + c.color + '"></span>'
         + '<span class="zm-row-name">' + c.name + '</span>'
-        + '<span class="zm-row-goal">hedef ' + zmNum(c.goal) + ' sa</span>'
-        + '<input type="number" class="zm-row-input" data-zm-now="' + c.id + '" min="0" step="0.5" placeholder="0" value="' + (today[c.id] != null ? today[c.id] : '') + '">'
+        + zmStarsHtml(c.id, v, c.goal)
+        + '<div class="zm-row-ctrl">'
+          + '<button type="button" class="zm-btn" data-zm-dec="' + c.id + '">−</button>'
+          + '<input type="number" class="zm-row-input" data-zm-now="' + c.id + '" min="0" step="0.5" value="' + zmNum(v) + '">'
+          + '<button type="button" class="zm-btn" data-zm-inc="' + c.id + '">+</button>'
+          + '<span class="zm-row-sa">sa</span>'
+        + '</div>'
         + '</div>';
     });
     rows.innerHTML = html;
@@ -27138,7 +27238,7 @@ function zmRender() {
       var t = zmWeekTotal(c.id);
       var goal = c.goal || 0;
       var pct = goal > 0 ? Math.min(100, Math.round(t / goal * 100)) : 0;
-      var status = goal > 0 ? (t >= goal ? '<div class="zm-cat-status ok">✓ Hedef tamam</div>' : '<div class="zm-cat-status due">' + (goal - t).toFixed(1) + ' sa kaldı</div>') : '';
+      var status = goal > 0 ? (t >= goal ? '<div class="zm-cat-status ok">✓ Dolduruldu</div>' : '<div class="zm-cat-status due">' + (goal - t).toFixed(1) + ' sa kaldı</div>') : '';
       ghtml += '<div class="zm-cat-card">'
         + '<div class="zm-cat-top"><span class="zm-row-dot" style="background:' + c.color + '"></span><span class="zm-cat-name">' + c.name + '</span><span class="zm-cat-nums">' + zmNum(t) + '<b>/</b>' + zmNum(goal) + ' sa</span></div>'
         + '<div class="zm-bar"><div class="zm-bar-fill" style="width:' + pct + '%;background:' + c.color + '"></div></div>'
@@ -27150,7 +27250,7 @@ function zmRender() {
     if (hint) hint.textContent = 'toplam ' + zmNum(zmWeekGrand()) + ' sa / bu hafta';
   }
 
-  // Hedefler & kategoriler
+  // Doldurulması gereken süreler
   var gl = document.getElementById('zm-goals-list');
   if (gl) {
     var lhtml = '';
@@ -27159,38 +27259,10 @@ function zmRender() {
         + '<span class="zm-row-dot" style="background:' + c.color + '"></span>'
         + '<span class="zm-goals-name">' + c.name + '</span>'
         + '<input type="number" class="zm-goals-input" data-zm-goal="' + c.id + '" min="0" step="0.5" value="' + (c.goal || 0) + '">'
-        + '<button type="button" class="zm-goals-rm" data-zm-del="' + c.id + '" title="Sil">🗑️</button>'
+        + '<span class="zm-goals-suf">sa / hafta</span>'
         + '</div>';
     });
     gl.innerHTML = lhtml;
-  }
-
-  // Geçmiş günler
-  var hist = document.getElementById('zm-hist');
-  var empty = document.getElementById('zm-empty');
-  if (hist) {
-    var keys = Object.keys(zmData.days).sort().reverse().slice(0, 14);
-    if (!keys.length) {
-      hist.innerHTML = '';
-      if (empty) empty.classList.remove('hidden');
-    } else {
-      if (empty) empty.classList.add('hidden');
-      var hhtml = '';
-      keys.forEach(function (k) {
-        var rec = zmData.days[k];
-        var total = 0;
-        var chips = '';
-        Object.keys(rec).forEach(function (cid) {
-          var v = parseFloat(rec[cid]) || 0;
-          if (v <= 0) return;
-          total += v;
-          var c = zmCat(cid);
-          chips += '<span class="zm-hist-chip"><span class="zm-row-dot" style="background:' + (c ? c.color : '#888') + '"></span>' + (c ? c.name : cid) + ' <b>' + zmNum(v) + '</b></span>';
-        });
-        hhtml += '<div class="zm-hist-day"><div class="zm-hist-date"><span>' + zmFmtDate(k) + '</span><span class="zm-hist-total">' + zmNum(total) + ' sa</span></div><div class="zm-hist-items">' + chips + '</div></div>';
-      });
-      hist.innerHTML = hhtml;
-    }
   }
 }
 
@@ -27200,50 +27272,30 @@ function zmNum(v) {
   return n.toFixed(1);
 }
 
-function zmSaveToday() {
-  var tk = zmTodayKey();
-  var rec = {};
-  document.querySelectorAll('[data-zm-now]').forEach(function (input) {
-    var id = input.getAttribute('data-zm-now');
-    var val = input.value;
-    if (val !== '') { rec[id] = Math.max(0, parseFloat(val) || 0); }
-  });
-  zmData.days[tk] = rec;
-  zmSave();
-  var st = document.getElementById('zm-today-status');
-  if (st) { st.textContent = '✓ Kaydedildi'; setTimeout(function () { st.textContent = ''; }, 2000); }
-  zmRender();
-}
-
-function zmAddCat() {
-  var nameEl = document.getElementById('zm-new-name');
-  var goalEl = document.getElementById('zm-new-goal');
-  var name = (nameEl.value || '').trim();
-  if (!name) { alert('Kategori adı gir.'); return; }
-  zmData.cats.push({
-    id: 'c' + Date.now().toString(36),
-    name: name,
-    goal: Math.max(0, parseFloat(goalEl.value) || 0),
-    color: ZM_DEF_COLORS[zmData.cats.length % ZM_DEF_COLORS.length]
-  });
-  zmSave();
-  nameEl.value = ''; goalEl.value = '';
-  zmRender();
-}
-
-function zmDelCat(id) {
-  if (!confirm('Bu kategori silinsin mi? (geçmiş gün kayıtları kalır)')) return;
-  zmData.cats = zmData.cats.filter(function (c) { return c.id !== id; });
+function zmSetToday(catId, val) {
+  var rec = zmData.days[zmTodayKey()] || {};
+  rec[catId] = Math.max(0, parseFloat(val) || 0);
+  zmData.days[zmTodayKey()] = rec;
   zmSave();
   zmRender();
 }
 
 document.addEventListener('click', function (e) {
   var t = e.target;
-  if (t.id === 'zm-save-today') { zmSaveToday(); return; }
-  if (t.id === 'zm-add-cat') { zmAddCat(); return; }
-  var del = t.closest('[data-zm-del]');
-  if (del) { zmDelCat(del.getAttribute('data-zm-del')); return; }
+  var inc = t.closest('[data-zm-inc]');
+  if (inc) { zmSetToday(inc.getAttribute('data-zm-inc'), zmTodayVal(inc.getAttribute('data-zm-inc')) + 1); return; }
+  var dec = t.closest('[data-zm-dec]');
+  if (dec) { zmSetToday(dec.getAttribute('data-zm-dec'), zmTodayVal(dec.getAttribute('data-zm-dec')) - 1); return; }
+  var star = t.closest('[data-zm-star]');
+  if (star) {
+    var group = star.closest('[data-zm-stars]');
+    if (group) {
+      var catId = group.getAttribute('data-zm-stars');
+      var idx = parseInt(star.getAttribute('data-zm-star'), 10);
+      zmSetToday(catId, zmTodayVal(catId) === idx ? idx - 1 : idx);
+    }
+    return;
+  }
 });
 
 document.addEventListener('change', function (e) {
@@ -27253,6 +27305,136 @@ document.addEventListener('change', function (e) {
     if (c) { c.goal = Math.max(0, parseFloat(goal.value) || 0); zmSave(); zmRender(); }
     return;
   }
+  var now = e.target.getAttribute && e.target.closest && e.target.closest('[data-zm-now]');
+  if (now) { zmSetToday(now.getAttribute('data-zm-now'), now.value); return; }
+});
+
+document.addEventListener('input', function (e) {
+  var now = e.target.getAttribute && e.target.closest && e.target.closest('[data-zm-now]');
+  if (now) { zmSetToday(now.getAttribute('data-zm-now'), now.value); return; }
+});
+
+/* ── Strateji İzleme (sade giriş + aşama takibi) ── */
+var ST2_KEY = 'alfa-strateji-v1';
+var st2Data = { list: [] };
+var st2EditId = null;
+var ST2_STAGES = [
+  { id: 'fikir', label: '💡 Fikir' },
+  { id: 'backtest', label: '📊 Backtest' },
+  { id: 'dogrulama', label: '🧪 Doğrulama' },
+  { id: 'canli', label: '🟢 Canlı' },
+  { id: 'kanitlandi', label: '🏆 Kanıtlandı' }
+];
+function st2StageLabel(id) {
+  var m = ST2_STAGES.find(function (x) { return x.id === id; });
+  return m ? m.label : '💡 Fikir';
+}
+function st2Load() {
+  try {
+    var raw = localStorage.getItem(ST2_KEY);
+    if (raw) { var d = JSON.parse(raw); if (d && Array.isArray(d.list)) st2Data = d; }
+  } catch (e) {}
+  if (!Array.isArray(st2Data.list)) st2Data.list = [];
+  return st2Data;
+}
+function st2Save() {
+  try { localStorage.setItem(ST2_KEY, JSON.stringify(st2Data)); } catch (e) {}
+}
+function st2Render() {
+  st2Load();
+  var emptyEl = document.getElementById('st2-empty');
+  var grid = document.getElementById('st2-grid');
+  var formEl = document.getElementById('st2-form');
+  if (formEl) formEl.classList.toggle('hidden', st2EditId === null);
+  if (st2EditId === 'new') {
+    document.getElementById('st2-name').value = '';
+    document.getElementById('st2-stage').value = 'fikir';
+    document.getElementById('st2-todo').value = '';
+    document.getElementById('st2-note').value = '';
+  } else if (st2EditId) {
+    var s = st2Data.list.find(function (x) { return x.id === st2EditId; });
+    if (s) {
+      document.getElementById('st2-name').value = s.name || '';
+      document.getElementById('st2-stage').value = s.stage || 'fikir';
+      document.getElementById('st2-todo').value = s.todo || '';
+      document.getElementById('st2-note').value = s.note || '';
+    }
+  }
+  if (!grid) return;
+  if (emptyEl) emptyEl.style.display = st2Data.list.length ? 'none' : 'block';
+  grid.innerHTML = st2Data.list.map(function (s) {
+    var todoItems = (s.todo || '').split(/\n/).filter(function (l) { return l.trim(); });
+    var todoHtml = todoItems.length
+      ? todoItems.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('')
+      : '<li class="st2-none">— yapılacak yok —</li>';
+    var chips = ST2_STAGES.map(function (m) {
+      return '<button type="button" class="st2-chip' + (m.id === s.stage ? ' on' : '') + '" data-st2-stage="' + m.id + '" data-st2-id="' + s.id + '">' + m.label + '</button>';
+    }).join('');
+    return '<div class="st2-card" data-st2="' + s.id + '">' +
+      '<div class="st2-card-h">' +
+        '<div class="st2-card-title">' + esc(s.name) + '</div>' +
+        '<div class="st2-card-stage">' + st2StageLabel(s.stage) + '</div>' +
+      '</div>' +
+      '<div class="st2-card-tag">Sıradaki adım / yapılacaklar</div>' +
+      '<ul class="st2-todo">' + todoHtml + '</ul>' +
+      (s.note ? '<div class="st2-note">' + esc(s.note) + '</div>' : '') +
+      '<div class="st2-stages">' + chips + '</div>' +
+      '<div class="st2-card-actions">' +
+        '<button type="button" class="btn" data-st2-edit="' + s.id + '">✎ Düzenle</button>' +
+        '<button type="button" class="btn" data-st2-del="' + s.id + '" style="color:var(--red)">🗑 Sil</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function st2FormOpen(id) {
+  st2EditId = id === 'new' ? 'new' : id;
+  st2Render();
+  var formEl = document.getElementById('st2-form');
+  if (formEl) { formEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  var nameEl = document.getElementById('st2-name');
+  if (formEl && !formEl.classList.contains('hidden') && nameEl) nameEl.focus();
+}
+function st2FormClose() { st2EditId = null; st2Render(); }
+function st2SaveItem() {
+  var name = (document.getElementById('st2-name').value || '').trim();
+  if (!name) { alert('Strateji adı gir.'); return; }
+  var stage = document.getElementById('st2-stage').value;
+  var todo = document.getElementById('st2-todo').value;
+  var note = document.getElementById('st2-note').value;
+  if (st2EditId && st2EditId !== 'new') {
+    var s = st2Data.list.find(function (x) { return x.id === st2EditId; });
+    if (s) { s.name = name; s.stage = stage; s.todo = todo; s.note = note; }
+  } else {
+    st2Data.list.push({ id: 's' + Date.now().toString(36), name: name, stage: stage, todo: todo, note: note, created: Date.now() });
+  }
+  st2Save();
+  st2EditId = null;
+  st2Render();
+}
+function st2Del(id) {
+  if (!confirm('Bu stratejiyi sil?')) return;
+  st2Data.list = st2Data.list.filter(function (x) { return x.id !== id; });
+  st2Save();
+  st2Render();
+}
+function st2SetStage(id, stage) {
+  var s = st2Data.list.find(function (x) { return x.id === id; });
+  if (!s) return;
+  s.stage = stage;
+  st2Save();
+  st2Render();
+}
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (t.id === 'st2-new') { st2FormOpen('new'); return; }
+  if (t.id === 'st2-save') { st2SaveItem(); return; }
+  if (t.id === 'st2-cancel') { st2FormClose(); return; }
+  var ed = t.closest('[data-st2-edit]');
+  if (ed) { st2FormOpen(ed.getAttribute('data-st2-edit')); return; }
+  var del = t.closest('[data-st2-del]');
+  if (del) { st2Del(del.getAttribute('data-st2-del')); return; }
+  var chip = t.closest('[data-st2-stage]');
+  if (chip) { st2SetStage(chip.getAttribute('data-st2-id'), chip.getAttribute('data-st2-stage')); return; }
 });
 
     </script>
