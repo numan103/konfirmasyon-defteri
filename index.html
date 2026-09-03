@@ -4153,6 +4153,10 @@
   .zm-nav-today:disabled { opacity: .35; cursor: not-allowed; }
   .zm-row-del { width: 26px; height: 26px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); border-radius: 7px; cursor: pointer; font-size: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
   .zm-row-del:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.08); }
+  .zm-row-deleted { opacity: .55; }
+  .zm-row-deleted .zm-row-name { text-decoration: line-through; }
+  .zm-del-badge { font-size: 9px; font-weight: 700; color: var(--red); border: 1px solid var(--red); border-radius: 6px; padding: 1px 5px; margin-left: 4px; vertical-align: middle; }
+
   .zm-add-cat { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
   .zm-add-cat input[type="text"] { background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 8px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; flex: 1; min-width: 120px; }
   .zm-add-cat input[type="text"]:focus { outline: none; border-color: var(--pc); }
@@ -4161,6 +4165,17 @@
   .zm-add-cat-btn:hover { opacity: .85; }
   .zm-today-label { font-size: 12px; color: var(--text-3); font-weight: 600; margin-top: 8px; text-align: center; }
   .zm-today-label.is-today { color: var(--green); }
+  .zm-weekbar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+  .zm-weekbar-cell { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 6px 2px; text-align: center; cursor: pointer; transition: all .15s; box-shadow: var(--shadow); position: relative; }
+  .zm-weekbar-cell:hover { border-color: var(--pc); transform: translateY(-1px); }
+  .zm-weekbar-cell.active { background: var(--pc); border-color: var(--pc); color: #fff; }
+  .zm-weekbar-cell .wb-dow { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .6; }
+  .zm-weekbar-cell .wb-day { font-size: 14px; font-weight: 800; line-height: 1.2; }
+  .zm-weekbar-cell .wb-mo { font-size: 9px; opacity: .55; font-weight: 600; }
+  .zm-weekbar-cell .wb-tot { font-size: 10px; font-weight: 700; margin-top: 3px; }
+  .zm-weekbar-cell.active .wb-tot { opacity: .9; }
+  .zm-weekbar-cell.has-none { opacity: .45; }
+
   .st2-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 20px 0 16px; flex-wrap: wrap; }
   .st2-form { margin: 0 0 18px; }
   .st2-form-in { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
@@ -7672,6 +7687,8 @@
         <button type="button" class="zm-nav-btn" data-zm-next title="Sonraki gün">→</button>
         <button type="button" class="zm-nav-today" data-zm-today>Bugün</button>
       </div>
+
+      <div class="zm-weekbar" id="zm-weekbar"><!-- haftalık tarih barı --></div>
     </div>
 
     <div class="zm-gap">
@@ -27181,6 +27198,7 @@ function zmLoad() {
     zmData = { cats: zmDefaultCats(), days: {} };
   }
   if (!zmData.days) zmData.days = {};
+  if (!zmData.deletedCats) zmData.deletedCats = {};
   // İlk sürüm (custom değil): default 4 kategoriyi koru. Kullanıcı silme/ekleme yaptıysa (custom) dokunma.
   if (!zmData.custom && zmData.cats.length > 0) {
     // Default kategorilerin eksik olanlarını başa ekle (sadece custom değilse)
@@ -27291,6 +27309,29 @@ function zmRender() {
     todayBtn.textContent = isToday ? 'Bugün' : 'Bugüne Dön';
   }
 
+  // Haftalık tarih barı
+  var weekbar = document.getElementById('zm-weekbar');
+  if (weekbar) {
+    var dLabels = ['Pa','Pt','Sa','Ça','Pe','Cu','Ct'];
+    var wbhtml = '';
+    days.forEach(function (d, i) {
+      var key = zmDateKey(d.d);
+      var tot = 0;
+      var rec = zmData.days[key] || {};
+      Object.keys(rec).forEach(function (k) { tot += parseFloat(rec[k]) || 0; });
+      var isSel = key === zmDateKey(zmSelDate);
+      var isTd = key === zmDateKey(new Date());
+      var cls = 'zm-weekbar-cell' + (isSel ? ' active' : '') + (tot === 0 ? ' has-none' : '');
+      wbhtml += '<div class="' + cls + '" data-zm-day="' + key + '" title="' + d.d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + '">'
+        + '<div class="wb-dow">' + dLabels[i] + '</div>'
+        + '<div class="wb-day">' + d.d.getDate() + '</div>'
+        + '<div class="wb-mo">' + (isTd ? 'bugün' : d.d.toLocaleDateString('tr-TR', { month: 'short' })) + '</div>'
+        + '<div class="wb-tot">' + zmNum(tot) + ' sa</div>'
+        + '</div>';
+    });
+    weekbar.innerHTML = wbhtml;
+  }
+
   // Başlıktaki tarih etiketi
   var todayTitle = document.getElementById('zm-today-title');
   if (todayTitle) {
@@ -27301,20 +27342,30 @@ function zmRender() {
   // Kayıt satırları (seçili tarihe göre, yıldız + elle saat, otomatik kayıt)
   var rows = document.getElementById('zm-today-rows');
   if (rows) {
+    // Bu günde kaydı olan tüm kategori id'leri (aktif + silinmiş) topla
+    var todayRec = zmData.days[zmTodayKey()] || {};
+    var shownIds = [];
+    zmData.cats.forEach(function (c) { shownIds.push(c.id); });
+    Object.keys(todayRec).forEach(function (id) {
+      if (shownIds.indexOf(id) === -1 && parseFloat(todayRec[id]) > 0) shownIds.push(id);
+    });
     var html = '';
-    zmData.cats.forEach(function (c) {
-      var v = zmTodayVal(c.id);
-      html += '<div class="zm-row">'
-        + '<span class="zm-row-dot" style="background:' + c.color + '"></span>'
-        + '<span class="zm-row-name">' + c.name + '</span>'
-        + zmStarsHtml(c.id, v, c.goal)
+    shownIds.forEach(function (cid) {
+      var c = zmCat(cid) || (zmData.deletedCats && zmData.deletedCats[cid]);
+      if (!c) c = { id: cid, name: 'Silinmiş kategori', color: '#9ca3af', deleted: true };
+      var v = zmTodayVal(cid);
+      var isDeleted = !zmCat(cid);
+      html += '<div class="zm-row' + (isDeleted ? ' zm-row-deleted' : '') + '">'
+        + '<span class="zm-row-dot" style="background:' + (c.color || '#9ca3af') + '"></span>'
+        + '<span class="zm-row-name">' + c.name + (isDeleted ? ' <span class="zm-del-badge">kaldırıldı</span>' : '') + '</span>'
+        + zmStarsHtml(cid, v, c.goal)
         + '<div class="zm-row-ctrl">'
-          + '<button type="button" class="zm-btn" data-zm-dec="' + c.id + '">−</button>'
-          + '<input type="number" class="zm-row-input" data-zm-now="' + c.id + '" min="0" step="0.5" value="' + zmNum(v) + '">'
-          + '<button type="button" class="zm-btn" data-zm-inc="' + c.id + '">+</button>'
+          + '<button type="button" class="zm-btn" data-zm-dec="' + cid + '">−</button>'
+          + '<input type="number" class="zm-row-input" data-zm-now="' + cid + '" min="0" step="0.5" value="' + zmNum(v) + '">'
+          + '<button type="button" class="zm-btn" data-zm-inc="' + cid + '">+</button>'
           + '<span class="zm-row-sa">sa</span>'
         + '</div>'
-        + '<button type="button" class="zm-row-del" data-zm-delcat="' + c.id + '" title="Kategoriyi sil">✕</button>'
+        + (isDeleted ? '' : '<button type="button" class="zm-row-del" data-zm-delcat="' + cid + '" title="Kategoriyi sil">✕</button>')
         + '</div>';
     });
     rows.innerHTML = html;
@@ -27388,24 +27439,31 @@ function zmGoToday() {
   zmRender();
 }
 
+function zmKeyToDate(key) {
+  var p = String(key).split('-');
+  return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+}
+
+function zmGoToKey(key) {
+  var d = zmKeyToDate(key);
+  if (isNaN(d.getTime())) return;
+  zmSelDate = d;
+  zmRender();
+}
+
 function zmDeleteCat(catId) {
   var c = zmCat(catId);
   if (!c) return;
-  if (confirm('"' + c.name + '" kategorisi ve bu kategoriye ait tüm geçmiş kayıtlar silinecek. Emin misin?')) {
+  if (confirm('"' + c.name + '" kategorisi silinecek. Geçmişte bu kategoriye eklediğin kayıtlar silinmez, ilgili güne gidince görünmeye devam eder.')) {
     var syc = c.name;
     zmData.custom = true;
+    if (!zmData.deletedCats) zmData.deletedCats = {};
+    zmData.deletedCats[catId] = { id: catId, name: c.name, color: c.color };
     zmData.cats = zmData.cats.filter(function (x) { return x.id !== catId; });
-    // o kategoriye ait tüm gün kayıtlarını temizle
-    var days = zmData.days;
-    Object.keys(days).forEach(function (k) {
-      if (Object.prototype.hasOwnProperty.call(days[k], catId)) {
-        delete days[k][catId];
-      }
-    });
     if (zmData.cats.length === 0) zmData.cats = zmDefaultCats();
     zmSave();
     zmRender();
-    if (typeof showToast === 'function') showToast('"' + syc + '" silindi');
+    if (typeof showToast === 'function') showToast('"' + syc + '" kaldırıldı (geçmiş kayıtlar korundu)');
   }
 }
 
@@ -27430,6 +27488,9 @@ document.addEventListener('click', function (e) {
   if (t.closest('[data-zm-prev]')) { zmGoDay(-1); return; }
   if (t.closest('[data-zm-next]')) { zmGoDay(1); return; }
   if (t.closest('[data-zm-today]')) { zmGoToday(); return; }
+  // Haftalık tarih barı hücresi
+  var daycell = t.closest('[data-zm-day]');
+  if (daycell) { zmGoToKey(daycell.getAttribute('data-zm-day')); return; }
   // Kategori ekle
   if (t.closest('[data-zm-addcat]')) { zmAddCat(); return; }
   // Kategori sil
