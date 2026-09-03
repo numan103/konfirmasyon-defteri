@@ -4165,6 +4165,19 @@
   .st2-chip:hover { border-color: var(--pc); color: var(--text); }
   .st2-chip.on { background: var(--pc); border-color: var(--pc); color: #fff; }
   .st2-card-actions { display: flex; gap: 6px; margin-top: 2px; }
+  .st2-conf { display: flex; align-items: center; gap: 12px; }
+  .st2-conf input[type=range] { flex: 1; accent-color: var(--pc); }
+  .st2-conf-val { font-size: 13px; font-weight: 800; min-width: 44px; text-align: center; color: var(--amber); }
+  .st2-confbar { margin: 8px 0 2px; }
+  .st2-confbar-l { font-size: 11px; font-weight: 700; color: var(--text-3); }
+  .st2-confbar-v { font-size: 12px; font-weight: 800; float: right; }
+  .st2-confbar-track { height: 8px; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 4px; }
+  .st2-confbar-fill { height: 100%; border-radius: 6px; transition: width .3s; }
+  .st2-sbox { background: var(--bg); border-radius: 10px; padding: 9px 11px; margin-top: 6px; }
+  .st2-sbox-t { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+  .st2-strong .st2-sbox-t { color: var(--green); }
+  .st2-weak .st2-sbox-t { color: var(--red); }
+  .st2-sbox-c { font-size: 12px; color: var(--text-2); white-space: pre-wrap; line-height: 1.5; }
   .st2-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
   </style>
   <script>
@@ -7686,6 +7699,21 @@
         <div class="st2-f st2-f-full">
           <label>Sıradaki adım / yapılacaklar</label>
           <textarea id="st2-todo" rows="2" maxlength="500" placeholder="Her satıra bir madde — örn.&#10;· 2021 momentum rulebook'unu backtest et&#10;· 100 işlemde PF &gt; 1.5 doğrula"></textarea>
+        </div>
+        <div class="st2-f">
+          <label>💪 Güçlü yönler (nerede çalışır)</label>
+          <textarea id="st2-strong" rows="2" maxlength="500" placeholder="örn. trendli piyasada çok iyi, düşük DD, yüksek R"></textarea>
+        </div>
+        <div class="st2-f">
+          <label>🪫 Zayıf yönler (nerede zayıf)</label>
+          <textarea id="st2-weak" rows="2" maxlength="500" placeholder="örn. yatay piyasada whipsaw, haber salınımında stoplanır"></textarea>
+        </div>
+        <div class="st2-f st2-f-full">
+          <label>🛡️ Güven</label>
+          <div class="st2-conf">
+            <input type="range" id="st2-conf" min="0" max="100" step="5" value="50">
+            <span class="st2-conf-val" id="st2-conf-val">%50</span>
+          </div>
         </div>
         <div class="st2-f st2-f-full">
           <label>Not</label>
@@ -27335,10 +27363,20 @@ function st2Load() {
     if (raw) { var d = JSON.parse(raw); if (d && Array.isArray(d.list)) st2Data = d; }
   } catch (e) {}
   if (!Array.isArray(st2Data.list)) st2Data.list = [];
+  // alan eksikliği için varsayılanlar
+  st2Data.list = st2Data.list.map(function (s) {
+    if (typeof s.strong !== 'string') s.strong = '';
+    if (typeof s.weak !== 'string') s.weak = '';
+    if (typeof s.confidence !== 'number' || isNaN(s.confidence)) s.confidence = 50;
+    return s;
+  });
   return st2Data;
 }
 function st2Save() {
   try { localStorage.setItem(ST2_KEY, JSON.stringify(st2Data)); } catch (e) {}
+}
+function st2ConfColor(v) {
+  return v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--amber)' : 'var(--red)';
 }
 function st2Render() {
   st2Load();
@@ -27350,14 +27388,22 @@ function st2Render() {
     document.getElementById('st2-name').value = '';
     document.getElementById('st2-stage').value = 'fikir';
     document.getElementById('st2-todo').value = '';
+    document.getElementById('st2-strong').value = '';
+    document.getElementById('st2-weak').value = '';
     document.getElementById('st2-note').value = '';
+    if (document.getElementById('st2-conf')) document.getElementById('st2-conf').value = 50;
+    st2ConfNum();
   } else if (st2EditId) {
     var s = st2Data.list.find(function (x) { return x.id === st2EditId; });
     if (s) {
       document.getElementById('st2-name').value = s.name || '';
       document.getElementById('st2-stage').value = s.stage || 'fikir';
       document.getElementById('st2-todo').value = s.todo || '';
+      document.getElementById('st2-strong').value = s.strong || '';
+      document.getElementById('st2-weak').value = s.weak || '';
       document.getElementById('st2-note').value = s.note || '';
+      if (document.getElementById('st2-conf')) document.getElementById('st2-conf').value = s.confidence || 50;
+      st2ConfNum();
     }
   }
   if (!grid) return;
@@ -27367,24 +27413,35 @@ function st2Render() {
     var todoHtml = todoItems.length
       ? todoItems.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('')
       : '<li class="st2-none">— yapılacak yok —</li>';
-    var chips = ST2_STAGES.map(function (m) {
-      return '<button type="button" class="st2-chip' + (m.id === s.stage ? ' on' : '') + '" data-st2-stage="' + m.id + '" data-st2-id="' + s.id + '">' + m.label + '</button>';
-    }).join('');
+    var sv = Math.max(0, Math.min(100, s.confidence || 0));
+    var confCol = st2ConfColor(sv);
+    var strongHtml = (s.strong || '').trim()
+      ? '<div class="st2-sbox st2-strong"><div class="st2-sbox-t">💪 Güçlü yönler</div><div class="st2-sbox-c">' + esc(s.strong) + '</div></div>'
+      : '';
+    var weakHtml = (s.weak || '').trim()
+      ? '<div class="st2-sbox st2-weak"><div class="st2-sbox-t">🪫 Zayıf yönler</div><div class="st2-sbox-c">' + esc(s.weak) + '</div></div>'
+      : '';
     return '<div class="st2-card" data-st2="' + s.id + '">' +
       '<div class="st2-card-h">' +
         '<div class="st2-card-title">' + esc(s.name) + '</div>' +
         '<div class="st2-card-stage">' + st2StageLabel(s.stage) + '</div>' +
       '</div>' +
+      '<div class="st2-confbar"><span class="st2-confbar-l">🛡️ Güven</span><span class="st2-confbar-v" style="color:' + confCol + '">%' + sv + '</span><div class="st2-confbar-track"><div class="st2-confbar-fill" style="width:' + sv + '%;background:' + confCol + '"></div></div></div>' +
       '<div class="st2-card-tag">Sıradaki adım / yapılacaklar</div>' +
       '<ul class="st2-todo">' + todoHtml + '</ul>' +
+      (strongHtml + weakHtml) +
       (s.note ? '<div class="st2-note">' + esc(s.note) + '</div>' : '') +
-      '<div class="st2-stages">' + chips + '</div>' +
       '<div class="st2-card-actions">' +
         '<button type="button" class="btn" data-st2-edit="' + s.id + '">✎ Düzenle</button>' +
         '<button type="button" class="btn" data-st2-del="' + s.id + '" style="color:var(--red)">🗑 Sil</button>' +
       '</div>' +
     '</div>';
   }).join('');
+}
+function st2ConfNum() {
+  var r = document.getElementById('st2-conf');
+  var v = document.getElementById('st2-conf-val');
+  if (r && v) { v.textContent = '%' + r.value; v.style.color = st2ConfColor(parseInt(r.value, 10)); }
 }
 function st2FormOpen(id) {
   st2EditId = id === 'new' ? 'new' : id;
@@ -27400,12 +27457,15 @@ function st2SaveItem() {
   if (!name) { alert('Strateji adı gir.'); return; }
   var stage = document.getElementById('st2-stage').value;
   var todo = document.getElementById('st2-todo').value;
+  var strong = document.getElementById('st2-strong').value;
+  var weak = document.getElementById('st2-weak').value;
+  var conf = parseInt(document.getElementById('st2-conf').value, 10) || 0;
   var note = document.getElementById('st2-note').value;
   if (st2EditId && st2EditId !== 'new') {
     var s = st2Data.list.find(function (x) { return x.id === st2EditId; });
-    if (s) { s.name = name; s.stage = stage; s.todo = todo; s.note = note; }
+    if (s) { s.name = name; s.stage = stage; s.todo = todo; s.strong = strong; s.weak = weak; s.confidence = conf; s.note = note; }
   } else {
-    st2Data.list.push({ id: 's' + Date.now().toString(36), name: name, stage: stage, todo: todo, note: note, created: Date.now() });
+    st2Data.list.push({ id: 's' + Date.now().toString(36), name: name, stage: stage, todo: todo, strong: strong, weak: weak, confidence: conf, note: note, created: Date.now() });
   }
   st2Save();
   st2EditId = null;
@@ -27414,13 +27474,6 @@ function st2SaveItem() {
 function st2Del(id) {
   if (!confirm('Bu stratejiyi sil?')) return;
   st2Data.list = st2Data.list.filter(function (x) { return x.id !== id; });
-  st2Save();
-  st2Render();
-}
-function st2SetStage(id, stage) {
-  var s = st2Data.list.find(function (x) { return x.id === id; });
-  if (!s) return;
-  s.stage = stage;
   st2Save();
   st2Render();
 }
@@ -27433,8 +27486,10 @@ document.addEventListener('click', function (e) {
   if (ed) { st2FormOpen(ed.getAttribute('data-st2-edit')); return; }
   var del = t.closest('[data-st2-del]');
   if (del) { st2Del(del.getAttribute('data-st2-del')); return; }
-  var chip = t.closest('[data-st2-stage]');
-  if (chip) { st2SetStage(chip.getAttribute('data-st2-id'), chip.getAttribute('data-st2-stage')); return; }
+});
+document.addEventListener('input', function (e) {
+  var conf = e.target.getAttribute && e.target.closest && e.target.closest('#st2-conf');
+  if (conf) { st2ConfNum(); return; }
 });
 
     </script>
