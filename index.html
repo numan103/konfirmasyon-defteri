@@ -4187,17 +4187,34 @@
   .zm-hidden-show:hover { border-color: var(--green); color: var(--green); }
 
   /* Günlük renkli yığılmış bar */
-  #zm-daily-bar { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; margin-bottom: 8px; }
+  .zm-bar-wrap { display: flex; align-items: stretch; gap: 8px; }
+  .zm-bar-nav { width: 36px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 10px; cursor: pointer; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: all .15s; box-shadow: var(--shadow); flex-shrink: 0; }
+  .zm-bar-nav:hover { border-color: var(--pc); color: var(--pc); }
+  #zm-daily-bar { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; margin-bottom: 8px; flex: 1; }
   .zdb-day { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 5px 2px; border-radius: 9px; transition: all .15s; }
   .zdb-day:hover { background: var(--bg); }
   .zdb-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 10px; }
   .zdb-day.td .zdb-lbl b { color: var(--green); }
-  .zdb-lbl { font-size: 9.5px; color: var(--text-3); font-weight: 600; text-align: center; line-height: 1.15; }
-  .zdb-lbl b { display: block; font-size: 12px; color: var(--text); font-weight: 800; }
-  .zdb-bar { width: 100%; height: 90px; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; position: relative; }
-  .zdb-seg { width: 100%; transition: height .2s; }
+  .zdb-lbl { font-size: 9px; color: var(--text-3); font-weight: 600; text-align: center; line-height: 1.2; }
+  .zdb-lbl b { display: block; font-size: 13px; color: var(--text); font-weight: 800; }
+  .zdb-bar { width: 100%; height: 150px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; }
+  .zdb-seg { width: 100%; transition: height .2s; position: relative; }
   .zdb-empty { background: transparent !important; }
   .zdb-tot { font-size: 10px; font-weight: 700; color: var(--text); }
+  .zdb-tip, .zm-tip { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 5px); background: rgba(15,23,42,.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+  .zdb-day:hover .zdb-tip { opacity: 1; }
+
+  /* Günlük % dağılım barı */
+  .zpct-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; }
+  .zpct-day { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 1px; border-radius: 8px; transition: all .15s; }
+  .zpct-day:hover { background: var(--bg); }
+  .zpct-day.sel { box-shadow: inset 0 0 0 2px var(--pc); }
+  .zpct-day.td .zpct-lbl { color: var(--green); font-weight: 800; }
+  .zpct-lbl { font-size: 9px; color: var(--text-3); font-weight: 600; }
+  .zpct-bar { width: 100%; height: 26px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: flex; overflow: hidden; position: relative; }
+  .zpct-seg { height: 100%; position: relative; }
+  .zpct-empty { background: var(--bg) !important; }
+  .zpct-day:hover .zm-tip { opacity: 1; }
 
   /* Kategori şablon havuzu */
   #zm-cat-pool { display: flex; flex-direction: column; gap: 7px; }
@@ -7729,6 +7746,14 @@
       </div>
     </div>
 
+    <div class="zm-nav">
+      <button type="button" class="zm-nav-btn" data-zm-prev title="Önceki gün">←</button>
+      <div class="zm-nav-date"><span id="zm-nav-date">—</span><small id="zm-nav-week">—</small></div>
+      <button type="button" class="zm-nav-btn" data-zm-next title="Sonraki gün">→</button>
+      <button type="button" class="zm-nav-today" data-zm-today>Bugün</button>
+    </div>
+    <div class="zm-weekbar" id="zm-weekbar"><!-- haftalık tarih barı --></div>
+
     <div class="zm-quickrow">
       <div class="zm-quick-title"><span>⌛ <span id="zm-today-title">Bugün</span></span><span class="zm-quick-sub" id="zm-today-label"></span></div>
       <div class="zm-quick-add">
@@ -7743,9 +7768,18 @@
     </div>
 
     <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">📊 Gün gün harcama</span><span class="zm-hint">her renk bir kategori — çubuğa tıkla o güne git</span></div>
+      <div class="zm-gap-head"><span class="zm-gap-title">📊 Gün gün harcama</span><span class="zm-hint" id="zm-bar-range">—</span></div>
     </div>
-    <div id="zm-daily-bar"></div>
+    <div class="zm-bar-wrap">
+      <button type="button" class="zm-bar-nav" data-zm-barshift="-14" title="14 gün geri">‹</button>
+      <div id="zm-daily-bar"></div>
+      <button type="button" class="zm-bar-nav" data-zm-barshift="14" title="14 gün ileri">›</button>
+    </div>
+
+    <div class="zm-gap">
+      <div class="zm-gap-head"><span class="zm-gap-title">🧮 Günlük % dağılım</span><span class="zm-hint">her gün kategorilerin yüzde payı</span></div>
+    </div>
+    <div id="zm-daily-pct"></div>
 
     <div class="zm-gap">
       <div class="zm-gap-head"><span class="zm-gap-title">🗂 Kategori şablonları</span><span class="zm-hint">şablonu tıkla &uarr; o güne ekle · gözle güne özel gizle · çöp genel kaldır</span></div>
@@ -7763,17 +7797,6 @@
     <div class="zm-goals-card">
       <div id="zm-goals-list"></div>
     </div>
-
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">📅 Gün seç</span><span class="zm-hint">oklarla gez · tarih çubuğundan atla</span></div>
-    </div>
-    <div class="zm-nav">
-      <button type="button" class="zm-nav-btn" data-zm-prev title="Önceki gün">←</button>
-      <div class="zm-nav-date"><span id="zm-nav-date">—</span><small id="zm-nav-week">—</small></div>
-      <button type="button" class="zm-nav-btn" data-zm-next title="Sonraki gün">→</button>
-      <button type="button" class="zm-nav-today" data-zm-today>Bugün</button>
-    </div>
-    <div class="zm-weekbar" id="zm-weekbar"><!-- haftalık tarih barı --></div>
   </div>
 </div>
 
@@ -27233,6 +27256,7 @@ document.addEventListener('paste', function (e) {
 var ZM_KEY = 'alfa-zaman-v1';
 var zmData = null;
 var zmSelDate = new Date(); // seçili görünen tarih
+var zmBarOffset = 0; // günlük bar penceresi kaydırma (adım: 14 gün)
 var ZM_DEF_COLORS = ['#f59e0b', '#3b82f6', '#8b5cf6', '#22c55e', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'];
 var ZM_BASE_CATS = [
   { id: 'trading', name: 'Trading' },
@@ -27392,29 +27416,31 @@ function zmRender() {
     weekbar.innerHTML = wbhtml;
   }
 
-  // Günlük renkli yığılmış bar (son 14 gün)
+  // Günlük renkli yığılmış bar (14 gün penceresi, oklarla kaydırılabilir)
   var dbar = document.getElementById('zm-daily-bar');
   if (dbar) {
-    var last14 = [];
-    for (var li = 13; li >= 0; li--) {
-      var dd = new Date(zmSelDate);
-      dd.setDate(dd.getDate() - li);
-      last14.push(dd);
+    // pencere merkezi = seçili gün + zmBarOffset (offset gün cinsinden kaydırma)
+    var center = new Date(zmSelDate);
+    center.setDate(center.getDate() + (zmBarOffset || 0));
+    var pen = [];
+    for (var pi = -6; pi <= 7; pi++) {
+      var dd = new Date(center);
+      dd.setDate(center.getDate() + pi);
+      pen.push(dd);
     }
     var maxTot = 1;
-    last14.forEach(function (dd) {
+    pen.forEach(function (dd) {
       var rr = zmData.days[zmDateKey(dd)] || {};
       var s = 0;
       Object.keys(rr).forEach(function (kk) { s += parseFloat(rr[kk]) || 0; });
       if (s > maxTot) maxTot = s;
     });
     var dhtml = '';
-    last14.forEach(function (dd) {
+    pen.forEach(function (dd) {
       var key = zmDateKey(dd);
       var rr = zmData.days[key] || {};
       var seg = '';
       var tot = 0;
-      // kategorileri sabit sırada topla (aktif önce, sonra kayıtlı diğerleri)
       var catIds = [];
       zmData.cats.forEach(function (c) { catIds.push(c.id); });
       Object.keys(rr).forEach(function (k) {
@@ -27428,17 +27454,64 @@ function zmRender() {
       }).filter(function (x) { return x.val > 0; });
       disp.forEach(function (x) {
         var pct = (x.val / maxTot) * 100;
-        seg += '<div class="zdb-seg" style="height:' + pct.toFixed(2) + '%;background:' + (x.c.color || '#9ca3af') + '" title="' + x.c.name + ': ' + zmNum(x.val) + ' sa"></div>';
+        seg += '<div class="zdb-seg" style="height:' + pct.toFixed(2) + '%;background:' + (x.c.color || '#9ca3af') + '"><div class="zdb-tip">' + x.c.name + ': ' + zmNum(x.val) + ' sa</div></div>';
       });
       var isSel = key === zmDateKey(zmSelDate);
       var isTd = key === zmDateKey(new Date());
       dhtml += '<div class="zdb-day' + (isSel ? ' sel' : '') + (isTd ? ' td' : '') + '" data-zm-day="' + key + '" title="' + dd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + ' · toplam ' + zmNum(tot) + ' sa">'
-        + '<div class="zdb-lbl">' + ['Pa','Pt','Sa','Ça','Pe','Cu','Ct'][dd.getDay()] + '<b>' + dd.getDate() + '</b>' + (isTd ? '' : dd.toLocaleDateString('tr-TR', { month: 'short' })) + '</div>'
+        + '<div class="zdb-lbl">' + ['Pa','Pt','Sa','Ça','Pe','Cu','Ct'][dd.getDay()] + '<b>' + dd.getDate() + '</b>' + dd.toLocaleDateString('tr-TR', { month: 'short' }) + '</div>'
         + '<div class="zdb-bar">' + (seg || '<div class="zdb-seg zdb-empty" style="height:2%"></div>') + '</div>'
         + '<div class="zdb-tot">' + zmNum(tot) + ' sa</div>'
         + '</div>';
     });
+    // Pencere aralığı etiketi
+    var wr = document.getElementById('zm-bar-range');
+    if (wr) wr.textContent = pen[0].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ' – ' + pen[13].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
     dbar.innerHTML = dhtml;
+  }
+
+  // Günlük % dağılım barı
+  var pctbar = document.getElementById('zm-daily-pct');
+  if (pctbar) {
+    var c2 = new Date(zmSelDate);
+    c2.setDate(c2.getDate() + (zmBarOffset || 0));
+    var pen2 = [];
+    for (var pj = -6; pj <= 7; pj++) {
+      var dj = new Date(c2);
+      dj.setDate(c2.getDate() + pj);
+      pen2.push(dj);
+    }
+    var phtml = '';
+    pen2.forEach(function (dd) {
+      var key = zmDateKey(dd);
+      var rr = zmData.days[key] || {};
+      var tot = 0;
+      var order2 = [];
+      zmData.cats.forEach(function (c) { order2.push(c.id); });
+      Object.keys(rr).forEach(function (k) {
+        if (order2.indexOf(k) === -1 && parseFloat(rr[k]) > 0) order2.push(k);
+      });
+      order2.forEach(function (cid) { tot += parseFloat(rr[cid]) || 0; });
+      var isSel = key === zmDateKey(zmSelDate);
+      var isTd = key === zmDateKey(new Date());
+      var segs = '';
+      if (tot > 0) {
+        order2.forEach(function (cid) {
+          var c = zmCat(cid) || (zmData.deletedCats && zmData.deletedCats[cid]) || { name: '?', color: '#9ca3af' };
+          var val = parseFloat(rr[cid]) || 0;
+          if (val <= 0) return;
+          var p = (val / tot) * 100;
+          segs += '<div class="zpct-seg" style="width:' + p.toFixed(2) + '%;background:' + (c.color || '#9ca3af') + '"><div class="zm-tip">' + c.name + ': %' + p.toFixed(0) + '</div></div>';
+        });
+      } else {
+        segs = '<div class="zpct-seg zpct-empty" style="width:100%"></div>';
+      }
+      phtml += '<div class="zpct-day' + (isSel ? ' sel' : '') + (isTd ? ' td' : '') + '" data-zm-bar-day="' + key + '" title="' + dd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + '">'
+        + '<div class="zpct-lbl">' + dd.getDate() + '/' + (dd.getMonth() + 1) + '</div>'
+        + '<div class="zpct-bar">' + segs + '</div>'
+        + '</div>';
+    });
+    pctbar.innerHTML = '<div class="zpct-grid">' + phtml + '</div>';
   }
 
   // Kategori şablon havuzu
@@ -27590,11 +27663,13 @@ function zmGoDay(offset) {
   var d = new Date(zmSelDate);
   d.setDate(d.getDate() + offset);
   zmSelDate = d;
+  zmBarOffset = 0;
   zmRender();
 }
 
 function zmGoToday() {
   zmSelDate = new Date();
+  zmBarOffset = 0;
   zmRender();
 }
 
@@ -27607,6 +27682,7 @@ function zmGoToKey(key) {
   var d = zmKeyToDate(key);
   if (isNaN(d.getTime())) return;
   zmSelDate = d;
+  zmBarOffset = 0;
   zmRender();
 }
 
@@ -27687,6 +27763,16 @@ document.addEventListener('click', function (e) {
   // Haftalık tarih barı hücresi
   var daycell = t.closest('[data-zm-day]');
   if (daycell) { zmGoToKey(daycell.getAttribute('data-zm-day')); return; }
+  // Günlük bar penceresi kaydırma (sağa/sola)
+  if (t.closest('[data-zm-barshift]')) {
+    var d = parseInt(t.closest('[data-zm-barshift]').getAttribute('data-zm-barshift'), 10) || 0;
+    zmBarOffset = (zmBarOffset || 0) + d;
+    zmRender();
+    return;
+  }
+  // % barındaki güne git
+  var pbday = t.closest('[data-zm-bar-day]');
+  if (pbday) { zmGoToKey(pbday.getAttribute('data-zm-bar-day')); return; }
   // Kategori ekle
   if (t.closest('[data-zm-addcat]')) { zmAddCat(); return; }
   // Güne özel gizle / göster
