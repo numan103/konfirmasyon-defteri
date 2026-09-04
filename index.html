@@ -17131,6 +17131,22 @@ function renderAlfaPortfoy2() {
     if (shareArea) shareArea.innerHTML = '';
     var gr0 = document.getElementById('ap2-growth');
     if (gr0) gr0.innerHTML = '';
+    var sellHistEl = document.getElementById('ap2-sell-hist');
+    var sellHistBody = document.getElementById('ap2-sell-hist-body');
+    var sells = ap2Data.sells || [];
+    if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
+    if (sellHistBody && sells.length) {
+      sellHistBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
+        var d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : (sl.date || '');
+        var pf = Number(sl.pnl || sl.profit || 0);
+        var pfCls = isNaN(pf) || pf === 0 ? 'zero' : (pf > 0 ? 'pos' : 'neg');
+        return '<div class="ap2-sell-row">' +
+          '<span class="ap2-sell-sym">' + sl.symbol + '</span>' +
+          '<span class="ap2-sell-qty">' + sl.qty + ' \u00d7 ' + ap2Fmt(sl.price) + ' \u00b7 ' + d + '</span>' +
+          '<span class="ap2-sell-val ' + pfCls + '">+' + ap2Fmt(sl.amount) + '<span class="ap2-sell-pf">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + '</span></span>' +
+        '</div>';
+      }).join('');
+    }
     ap2RenderIdeas();
     ap2RenderMonthly();
     return;
