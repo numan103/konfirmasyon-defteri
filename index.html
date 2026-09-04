@@ -4197,13 +4197,13 @@
   .zdb-day.td .zdb-lbl b { color: var(--green); }
   .zdb-lbl { font-size: 10px; color: var(--text-3); font-weight: 700; text-align: center; line-height: 1.2; }
   .zdb-lbl b { display: block; font-size: 15px; color: var(--text); font-weight: 800; }
-  .zdb-bar { width: 100%; height: 210px; background: var(--bg); border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; box-shadow: var(--shadow); }
+  .zdb-bar { width: 100%; height: 110px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; box-shadow: var(--shadow); }
   .zdb-seg { width: 100%; transition: height .2s; position: relative; }
   .zdb-empty { background: transparent !important; }
   .zdb-tot { font-size: 12px; font-weight: 800; color: var(--text); }
-  .zdb-tip, .zm-tip { position: absolute; left: 50%; transform: translateX(-50%) translateY(-6px); bottom: calc(100% + 8px); background: rgba(15,23,42,.97); color: #fff; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 60; box-shadow: 0 8px 20px rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.14); }
+  .zdb-tip, .zm-tip { position: absolute; left: 50%; transform: translateX(-50%) translateY(-6px); bottom: calc(100% + 8px); background: rgba(15,23,42,.97); color: #fff; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 999px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 60; box-shadow: 0 8px 20px rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.14); }
   .zdb-tip::after, .zm-tip::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: rgba(15,23,42,.97); }
-  .zdb-day:hover .zdb-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .zdb-seg:hover .zdb-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
   .zdb-seg:hover { outline: 2px solid #fff; outline-offset: -1px; border-radius: 6px; }
 
   /* Günlük % dağılım barı */
@@ -4213,12 +4213,12 @@
   .zpct-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 12px; }
   .zpct-day.td .zpct-lbl { color: var(--green); font-weight: 800; }
   .zpct-lbl { font-size: 11px; font-weight: 700; color: var(--text-2); text-align: center; }
-  .zpct-bar { width: 100%; height: 46px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; display: flex; overflow: visible; position: relative; }
+  .zpct-bar { width: 100%; height: 30px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; display: flex; overflow: visible; position: relative; }
   .zpct-seg { height: 100%; position: relative; transition: filter .15s; }
   .zpct-seg:hover { filter: brightness(1.15); }
   .zpct-empty { background: var(--bg) !important; }
-  .zpct-day:hover .zm-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .zpct-seg .zm-tip { bottom: calc(100% + 8px); }
+  .zpct-seg:hover .zm-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .zpct-seg .zm-tip { bottom: calc(100% + 8px); font-size: 11.5px; }
   .zpct-head { min-height: 22px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 2px; }
   .zpct-leg { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px; }
   .zpct-leg b { color: var(--text); font-weight: 800; }
@@ -27517,36 +27517,9 @@ function zmRender() {
       phtml += '<div class="zpct-day' + (isSel ? ' sel' : '') + (isTd ? ' td' : '') + '" data-zm-bar-day="' + key + '" title="' + dd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + '">'
         + '<div class="zpct-lbl">' + dd.getDate() + '/' + (dd.getMonth() + 1) + '</div>'
         + '<div class="zpct-bar">' + segs + '</div>'
-        + '<div class="zpct-head" id="zpct-head-' + key + '"></div>'
         + '</div>';
     });
     pctbar.innerHTML = '<div class="zpct-grid">' + phtml + '</div>';
-    // Aktif günün üzerinde kalıcı yüzde göstergesi (js ile hover'da tek tek)
-    pctbar.querySelectorAll('.zpct-day').forEach(function (dayEl) {
-      var key = dayEl.getAttribute('data-zm-bar-day');
-      var rr = zmData.days[key] || {};
-      var tot = 0;
-      var cats3 = [];
-      zmData.cats.forEach(function (c) { cats3.push(c.id); });
-      Object.keys(rr).forEach(function (k) {
-        if (cats3.indexOf(k) === -1 && parseFloat(rr[k]) > 0) cats3.push(k);
-      });
-      cats3.forEach(function (cid) { tot += parseFloat(rr[cid]) || 0; });
-      dayEl.addEventListener('mouseenter', function () {
-        var h = document.getElementById('zpct-head-' + key);
-        if (h && tot > 0) {
-          var parts = [];
-          cats3.forEach(function (cid) {
-            var c = zmCat(cid) || (zmData.deletedCats && zmData.deletedCats[cid]) || { name: '?', color: '#9ca3af' };
-            var val = parseFloat(rr[cid]) || 0;
-            if (val <= 0) return;
-            parts.push('<span class="zpct-leg"><span class="zpct-dot" style="background:' + (c.color || '#9ca3af') + '"></span>' + c.name + ' <b>%' + ((val / tot) * 100).toFixed(0) + '</b></span>');
-          });
-          h.innerHTML = parts.join('');
-        }
-      });
-      dayEl.addEventListener('mouseleave', function () { document.getElementById('zpct-head-' + key).innerHTML = ''; });
-    });
   }
 
   // Kategori şablon havuzu
