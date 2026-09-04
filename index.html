@@ -17069,25 +17069,26 @@ function ap2RenderMonthly() {
 
   var barChart = '';
   var barRows = activeRows.filter(function(r) { return r.ret !== null; });
-  if (barRows.length > 1) {
-    var bw = 300, bh = 80, bpad = 16;
+  if (barRows.length >= 1) {
+    var bw = 260, bh = 60, bpad = 8;
     var bmin = 0, bmax = 0;
     barRows.forEach(function(r) { bmin = Math.min(bmin, r.ret); bmax = Math.max(bmax, r.ret); });
     var bRange = (bmax - bmin) || 1;
     var bZero = bpad + (bmax / bRange) * (bh - bpad * 2);
-    var barW = 18, gapX = (bw - 40) / barRows.length;
+    var gapX = (bw - 20) / barRows.length;
+    var barW = Math.min(24, gapX * 0.55);
     var bars = barRows.map(function(r, i) {
-      var valH = Math.max(1.5, Math.abs(r.ret) / bRange * (bh - bpad * 2));
-      var x = 18 + gapX * i + (gapX - barW) / 2;
+      var valH = Math.max(2, Math.abs(r.ret) / bRange * (bh - bpad * 2));
+      var x = 10 + gapX * i + (gapX - barW) / 2;
       var y = r.ret >= 0 ? bZero - valH : bZero;
       var col = r.ret >= 0 ? '#10b981' : '#ef4444';
-      var lbl = r.ret.toFixed(0);
-      return '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + valH + '" rx="3" fill="' + col + '" opacity=".85"></rect>' +
-        '<text x="' + (x + barW / 2) + '" y="' + (r.ret >= 0 ? y - 3 : y + valH + 9) + '" text-anchor="middle" font-size="7" font-weight="700" fill="' + col + '">' + lbl + '</text>';
+      var lbl = (r.ret >= 0 ? '+' : '') + r.ret.toFixed(1);
+      return '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + valH + '" rx="3" fill="' + col + '" opacity=".9"></rect>' +
+        '<text x="' + (x + barW / 2) + '" y="' + (r.ret >= 0 ? y - 4 : y + valH + 10) + '" text-anchor="middle" font-size="8" font-weight="700" fill="' + col + '">' + lbl + '%</text>';
     }).join('');
-    barChart = '<div class="ap2-mn-chart"><div class="ap2-mn-chart-title">Aylık getiri (%)</div>' +
-      '<svg viewBox="0 0 ' + bw + ' ' + bh + '" preserveAspectRatio="none" style="width:100%;height:' + bh + 'px">' +
-      '<line x1="' + bpad + '" y1="' + bZero + '" x2="' + (bw - bpad) + '" y2="' + bZero + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3"></line>' + bars + '</svg>' +
+    barChart = '<div class="ap2-mn-chart"><div class="ap2-mn-chart-title">Aylık Getiri (%)</div>' +
+      '<svg viewBox="0 0 ' + bw + ' ' + bh + '" style="width:100%;height:' + bh + 'px;display:block">' +
+      '<line x1="4" y1="' + bZero + '" x2="' + (bw - 4) + '" y2="' + bZero + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3"></line>' + bars + '</svg>' +
       '<div class="ap2-mn-chart-labels">' + barRows.map(function(r) { var lbl = ap2MonthLabel(r.mk).split(' ')[0]; return '<span>' + lbl + '</span>'; }).join('') + '</div>' +
       '</div>';
   }
