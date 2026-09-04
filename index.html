@@ -4190,35 +4190,35 @@
   .zm-bar-wrap { display: flex; align-items: stretch; gap: 8px; }
   .zm-bar-nav { width: 36px; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 10px; cursor: pointer; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: all .15s; box-shadow: var(--shadow); flex-shrink: 0; }
   .zm-bar-nav:hover { border-color: var(--pc); color: var(--pc); }
-  #zm-daily-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; flex: 1; }
-  .zdb-day { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 6px 4px; border-radius: 11px; transition: all .15s; }
+  #zm-daily-bar { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-bottom: 8px; flex: 1; }
+  .zdb-day { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 5px 1px; border-radius: 10px; transition: all .15s; }
   .zdb-day:hover { background: var(--bg); }
-  .zdb-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 12px; }
+  .zdb-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 11px; }
   .zdb-day.td .zdb-lbl b { color: var(--green); }
-  .zdb-lbl { font-size: 10px; color: var(--text-3); font-weight: 700; text-align: center; line-height: 1.2; }
-  .zdb-lbl b { display: block; font-size: 15px; color: var(--text); font-weight: 800; }
-  .zdb-bar { width: 100%; height: 110px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; box-shadow: var(--shadow); }
+  .zdb-lbl { font-size: 8.5px; color: var(--text-3); font-weight: 700; text-align: center; line-height: 1.15; }
+  .zdb-lbl b { display: block; font-size: 12px; color: var(--text); font-weight: 800; }
+  .zdb-bar { width: 100%; height: 64px; background: var(--bg); border: 2px solid var(--border); border-radius: 999px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; }
   .zdb-seg { width: 100%; transition: height .2s; position: relative; }
   .zdb-empty { background: transparent !important; }
-  .zdb-tot { font-size: 12px; font-weight: 800; color: var(--text); }
+  .zdb-tot { font-size: 10px; font-weight: 800; color: var(--text); }
   .zdb-tip, .zm-tip { position: absolute; left: 50%; transform: translateX(-50%) translateY(-6px); bottom: calc(100% + 8px); background: rgba(15,23,42,.97); color: #fff; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 999px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 60; box-shadow: 0 8px 20px rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.14); }
   .zdb-tip::after, .zm-tip::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: rgba(15,23,42,.97); }
   .zdb-seg:hover .zdb-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .zdb-seg:hover { outline: 2px solid #fff; outline-offset: -1px; border-radius: 6px; }
+  .zdb-seg:hover { outline: 2px solid #fff; outline-offset: -1px; border-radius: 999px; }
 
   /* Günlük % dağılım barı */
-  .zpct-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: start; }
-  .zpct-day { display: flex; flex-direction: column; align-items: stretch; gap: 5px; cursor: pointer; padding: 6px 4px; border-radius: 11px; transition: all .15s; }
+  .zpct-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; align-items: start; }
+  .zpct-day { display: flex; flex-direction: column; align-items: stretch; gap: 3px; cursor: pointer; padding: 5px 1px; border-radius: 10px; transition: all .15s; }
   .zpct-day:hover { background: var(--bg); }
-  .zpct-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 12px; }
+  .zpct-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 11px; }
   .zpct-day.td .zpct-lbl { color: var(--green); font-weight: 800; }
-  .zpct-lbl { font-size: 11px; font-weight: 700; color: var(--text-2); text-align: center; }
-  .zpct-bar { width: 100%; height: 30px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; display: flex; overflow: visible; position: relative; }
+  .zpct-lbl { font-size: 9px; font-weight: 700; color: var(--text-2); text-align: center; }
+  .zpct-bar { width: 100%; height: 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; display: flex; overflow: visible; position: relative; }
   .zpct-seg { height: 100%; position: relative; transition: filter .15s; }
   .zpct-seg:hover { filter: brightness(1.15); }
   .zpct-empty { background: var(--bg) !important; }
   .zpct-seg:hover .zm-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .zpct-seg .zm-tip { bottom: calc(100% + 8px); font-size: 11.5px; }
+  .zpct-seg .zm-tip { bottom: calc(100% + 8px); font-size: 11px; }
   .zpct-head { min-height: 22px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 2px; }
   .zpct-leg { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px; }
   .zpct-leg b { color: var(--text); font-weight: 800; }
@@ -7779,9 +7779,9 @@
       <div class="zm-gap-head"><span class="zm-gap-title">📊 Gün gün harcama</span><span class="zm-hint" id="zm-bar-range">—</span></div>
     </div>
     <div class="zm-bar-wrap">
-      <button type="button" class="zm-bar-nav" data-zm-barshift="-5" title="5 gün geri">‹</button>
+      <button type="button" class="zm-bar-nav" data-zm-barshift="-14" title="14 gün geri">‹</button>
       <div id="zm-daily-bar"></div>
-      <button type="button" class="zm-bar-nav" data-zm-barshift="5" title="5 gün ileri">›</button>
+      <button type="button" class="zm-bar-nav" data-zm-barshift="14" title="14 gün ileri">›</button>
     </div>
 
     <div class="zm-gap">
@@ -27431,7 +27431,7 @@ function zmRender() {
     var center = new Date(zmSelDate);
     center.setDate(center.getDate() + (zmBarOffset || 0));
     var pen = [];
-    for (var pi = -2; pi <= 2; pi++) {
+    for (var pi = -6; pi <= 7; pi++) {
       var dd = new Date(center);
       dd.setDate(center.getDate() + pi);
       pen.push(dd);
@@ -27474,7 +27474,7 @@ function zmRender() {
     });
     // Pencere aralığı etiketi
     var wr = document.getElementById('zm-bar-range');
-    if (wr) wr.textContent = pen[0].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ' – ' + pen[4].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (wr) wr.textContent = pen[0].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) + ' – ' + pen[13].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
     dbar.innerHTML = dhtml;
   }
 
@@ -27484,7 +27484,7 @@ function zmRender() {
     var c2 = new Date(zmSelDate);
     c2.setDate(c2.getDate() + (zmBarOffset || 0));
     var pen2 = [];
-    for (var pj = -2; pj <= 2; pj++) {
+    for (var pj = -6; pj <= 7; pj++) {
       var dj = new Date(c2);
       dj.setDate(c2.getDate() + pj);
       pen2.push(dj);
