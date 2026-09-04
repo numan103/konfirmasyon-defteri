@@ -17446,6 +17446,7 @@ function ap2ShareMonthlyStrip() {
     var hv = byMonth[mk] || [];
     var open = ap2MonthOpenOf(hist, timeline, mk);
     var close = mk === curMk ? sum.portfolioValue : (hv.length ? hv[hv.length - 1] : null);
+    if (open === null && close !== null) open = sum.startBalance;
     var ret = (open !== null && open > 0 && close !== null) ? (close - open) / open * 100 : null;
     var lbl = ap2MonthLabel(mk).split(' ')[0];
     var cls = ret === null ? 'zero' : ret >= 0 ? 'pos' : 'neg';
