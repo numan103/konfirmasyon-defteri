@@ -4287,7 +4287,7 @@
   .st2-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
   </style>
   <script>
-  (function(){try{var k='alfa-fund-v1';var v='v2';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[],"cash":1268.39,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-04T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
+  (function(){try{var k='alfa-fund-v1';var v='v4';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[],"cash":1268.39,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-04T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
   </script>
   <script>
   (function () {
@@ -17123,14 +17123,39 @@ function renderAlfaPortfoy2() {
   try { ap2SyncCloud(); } catch(e) {}
   if (!positions.length) {
     if (emptyEl) emptyEl.style.display = '';
-    if (sumEl) sumEl.innerHTML = '';
-    if (gridEl) gridEl.innerHTML = '';
+    if (layoutEl) layoutEl.style.display = '';
+    if (gridEl) gridEl.innerHTML = '<div class="data-empty">Henüz pozisyon yok — sağ üstteki <b>＋ Yeni Enstrüman</b> ile başla.</div>';
     var h0 = document.getElementById('ap2-hedge-strip');
     if (h0) h0.innerHTML = '';
-    if (layoutEl) layoutEl.style.display = 'none';
     if (shareArea) shareArea.innerHTML = '';
-    var gr0 = document.getElementById('ap2-growth');
-    if (gr0) gr0.innerHTML = '';
+    var ideasEl = document.getElementById('ap2-ideas');
+    if (ideasEl) ideasEl.style.display = 'none';
+    var sum = ap2Summary();
+    if (sumEl) sumEl.innerHTML =
+      '<div class="ap2-sum-row">' +
+        '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Deger</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">$' + sum.startBalance + ' baslangic</div></div>' +
+        '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '</div></div>' +
+        '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Serbest USDT bakiyesi</div></div>' +
+      '</div>';
+    ap2TrackHistory(sum.portfolioValue);
+    var growthEl = document.getElementById('ap2-growth');
+    if (growthEl) {
+      var diff = sum.portfolioValue - sum.startBalance;
+      var diffPct = sum.startBalance > 0 ? diff / sum.startBalance * 100 : 0;
+      growthEl.innerHTML =
+        '<div class="ap2-growth-cell"><span>Baslangic</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
+        '<div class="ap2-growth-cell"><span>Toplam Deger</span><b>' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
+        '<div class="ap2-growth-cell"><span>Buyume</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
+        '<div class="ap2-growth-cell"><span>Serbest Bakiye</span><b>' + ap2Fmt(sum.cash) + '</b></div>';
+    }
+    var slices = [];
+    if (sum.cash > 0) slices.push({ val: sum.cash, color: '#64748b', symbol: 'USDT' });
+    if (donutPanel) donutPanel.style.display = slices.length ? '' : 'none';
+    if (chartPanel) chartPanel.style.display = '';
+    ap2RenderDonut(slices, sum.portfolioValue);
+    try { var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); ap2RenderChart(hist); } catch (e) { ap2RenderChart([]); }
+    var rngBtns = document.querySelectorAll('#ap2-chart-range button');
+    if (rngBtns.length) rngBtns.forEach(function(b) { b.classList.toggle('on', (b.getAttribute('data-ap2r') || 'all') === ap2ChartRange); });
     var sellHistEl = document.getElementById('ap2-sell-hist');
     var sellHistBody = document.getElementById('ap2-sell-hist-body');
     var sells = ap2Data.sells || [];
@@ -17147,7 +17172,6 @@ function renderAlfaPortfoy2() {
         '</div>';
       }).join('');
     }
-    ap2RenderIdeas();
     ap2RenderMonthly();
     return;
   }
