@@ -2304,6 +2304,18 @@
   .ap2-card-target-labels span:last-child { color: var(--text-3); }
   .ap2-sell-hist { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
   .ap2-sell-hist h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+  .ap2-trade-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .ap2-trade-row:last-child { border-bottom: none; }
+  .ap2-trade-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0; }
+  .ap2-trade-info { flex: 1; min-width: 0; }
+  .ap2-trade-sym { font-size: 13px; font-weight: 700; color: var(--text); }
+  .ap2-trade-dates { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+  .ap2-trade-amt { text-align: right; flex-shrink: 0; }
+  .ap2-trade-buy { font-size: 11px; color: var(--text-3); }
+  .ap2-trade-sell { font-size: 12px; font-weight: 700; color: var(--text); }
+  .ap2-trade-pnl { font-size: 12px; font-weight: 800; margin-top: 2px; }
+  .ap2-trade-pnl.pos { color: var(--green); }
+  .ap2-trade-pnl.neg { color: var(--red); }
   .ap2-sell-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .ap2-sell-row:last-child { border-bottom: none; }
   .ap2-sell-sym { font-weight: 700; color: var(--text); flex-shrink: 0; }
@@ -4287,7 +4299,7 @@
   .st2-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
   </style>
   <script>
-  (function(){try{var k='alfa-fund-v1';var v='v4';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[],"cash":1268.39,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-04T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
+  (function(){try{var k='alfa-fund-v1';var v='v5';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[],"cash":1268.39,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","buyDate":"2026-08-19","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","buyDate":"2026-08-19","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","buyDate":"2026-08-30","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-04T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
   </script>
   <script>
   (function () {
@@ -6610,6 +6622,10 @@
           </div>
           <div id="ap2-share-area"></div>
         </div>
+      </div>
+      <div id="ap2-trades" class="ap2-sell-hist" style="display:none">
+        <h4 style="display:flex;align-items:center;gap:8px">Gerçekleşen İşlemler <span style="font-size:11px;font-weight:600;color:var(--text-3)" id="ap2-trades-total"></span></h4>
+        <div id="ap2-trades-body"></div>
       </div>
       <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
         <h4>Satis Gecmisi</h4>
@@ -17175,6 +17191,34 @@ function renderAlfaPortfoy2() {
         '</div>';
       }).join('');
     }
+    var tradesEl = document.getElementById('ap2-trades');
+    var tradesBody = document.getElementById('ap2-trades-body');
+    var tradesTotal = document.getElementById('ap2-trades-total');
+    if (tradesEl) tradesEl.style.display = sells.length ? '' : 'none';
+    if (tradesBody && sells.length) {
+      var totalPnl = sells.reduce(function(s, sl) { return s + Number(sl.pnl || sl.profit || 0); }, 0);
+      if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
+      var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
+      tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
+        var pf = Number(sl.pnl || sl.profit || 0);
+        var pfPct = sl.cost > 0 ? (pf / sl.cost * 100) : 0;
+        var pfCls = pf >= 0 ? 'pos' : 'neg';
+        var bgCol = symColors[sl.symbol] || '#3b82f6';
+        var buyDate = sl.buyDate || '';
+        var sellDate = sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
+        return '<div class="ap2-trade-row">' +
+          '<div class="ap2-trade-icon" style="background:' + bgCol + '">' + sl.symbol.charAt(0) + '</div>' +
+          '<div class="ap2-trade-info">' +
+            '<div class="ap2-trade-sym">' + sl.symbol + '</div>' +
+            '<div class="ap2-trade-dates">' + (buyDate ? buyDate + ' → ' : '') + sellDate + ' · ' + Number(sl.qty).toFixed(4) + ' adet</div>' +
+          '</div>' +
+          '<div class="ap2-trade-amt">' +
+            '<div class="ap2-trade-buy">' + ap2Fmt(sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
+            '<div class="ap2-trade-pnl ' + pfCls + '">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + ' (' + (pfPct >= 0 ? '+' : '') + pfPct.toFixed(1) + '%)</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
     ap2RenderMonthly();
     return;
   }
@@ -17284,6 +17328,34 @@ function renderAlfaPortfoy2() {
         '<span class="ap2-sell-sym">' + sl.symbol + '</span>' +
         '<span class="ap2-sell-qty">' + sl.qty + ' × ' + ap2Fmt(sl.price) + ' · ' + d + '</span>' +
         '<span class="ap2-sell-val ' + pfCls + '">+' + ap2Fmt(sl.amount) + '<span class="ap2-sell-pf">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + '</span></span>' +
+      '</div>';
+    }).join('');
+  }
+  var tradesEl = document.getElementById('ap2-trades');
+  var tradesBody = document.getElementById('ap2-trades-body');
+  var tradesTotal = document.getElementById('ap2-trades-total');
+  if (tradesEl) tradesEl.style.display = sells.length ? '' : 'none';
+  if (tradesBody && sells.length) {
+    var totalPnl = sells.reduce(function(s, sl) { return s + Number(sl.pnl || sl.profit || 0); }, 0);
+    if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
+    var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
+    tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
+      var pf = Number(sl.pnl || sl.profit || 0);
+      var pfPct = sl.cost > 0 ? (pf / sl.cost * 100) : 0;
+      var pfCls = pf >= 0 ? 'pos' : 'neg';
+      var bgCol = symColors[sl.symbol] || '#3b82f6';
+      var buyDate = sl.buyDate || '';
+      var sellDate = sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
+      return '<div class="ap2-trade-row">' +
+        '<div class="ap2-trade-icon" style="background:' + bgCol + '">' + sl.symbol.charAt(0) + '</div>' +
+        '<div class="ap2-trade-info">' +
+          '<div class="ap2-trade-sym">' + sl.symbol + '</div>' +
+          '<div class="ap2-trade-dates">' + (buyDate ? buyDate + ' → ' : '') + sellDate + ' · ' + Number(sl.qty).toFixed(4) + ' adet</div>' +
+        '</div>' +
+        '<div class="ap2-trade-amt">' +
+          '<div class="ap2-trade-buy">' + ap2Fmt(sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
+          '<div class="ap2-trade-pnl ' + pfCls + '">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + ' (' + (pfPct >= 0 ? '+' : '') + pfPct.toFixed(1) + '%)</div>' +
+        '</div>' +
       '</div>';
     }).join('');
   }
