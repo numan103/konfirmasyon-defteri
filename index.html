@@ -4197,24 +4197,32 @@
   .zdb-day.td .zdb-lbl b { color: var(--green); }
   .zdb-lbl { font-size: 9px; color: var(--text-3); font-weight: 600; text-align: center; line-height: 1.2; }
   .zdb-lbl b { display: block; font-size: 13px; color: var(--text); font-weight: 800; }
-  .zdb-bar { width: 100%; height: 150px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; }
+  .zdb-bar { width: 100%; height: 150px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; display: flex; flex-direction: column; justify-content: flex-end; overflow: visible; position: relative; box-shadow: var(--shadow); }
   .zdb-seg { width: 100%; transition: height .2s; position: relative; }
   .zdb-empty { background: transparent !important; }
   .zdb-tot { font-size: 10px; font-weight: 700; color: var(--text); }
-  .zdb-tip, .zm-tip { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 5px); background: rgba(15,23,42,.95); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
-  .zdb-day:hover .zdb-tip { opacity: 1; }
+  .zdb-tip, .zm-tip { position: absolute; left: 50%; transform: translateX(-50%) translateY(-6px); bottom: calc(100% + 6px); background: rgba(15,23,42,.96); color: #fff; font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 60; box-shadow: 0 6px 18px rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.12); }
+  .zdb-tip::after, .zm-tip::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: rgba(15,23,42,.96); }
+  .zdb-day:hover .zdb-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .zdb-seg:hover { outline: 2px solid #fff; outline-offset: -1px; border-radius: 4px; }
 
   /* Günlük % dağılım barı */
-  .zpct-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; }
-  .zpct-day { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 1px; border-radius: 8px; transition: all .15s; }
+  .zpct-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 6px; align-items: start; }
+  .zpct-day { display: flex; flex-direction: column; align-items: stretch; gap: 4px; cursor: pointer; padding: 5px 3px; border-radius: 10px; transition: all .15s; }
   .zpct-day:hover { background: var(--bg); }
-  .zpct-day.sel { box-shadow: inset 0 0 0 2px var(--pc); }
+  .zpct-day.sel { box-shadow: inset 0 0 0 2px var(--pc); border-radius: 11px; }
   .zpct-day.td .zpct-lbl { color: var(--green); font-weight: 800; }
-  .zpct-lbl { font-size: 9px; color: var(--text-3); font-weight: 600; }
-  .zpct-bar { width: 100%; height: 26px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: flex; overflow: hidden; position: relative; }
-  .zpct-seg { height: 100%; position: relative; }
+  .zpct-lbl { font-size: 10px; font-weight: 700; color: var(--text-2); text-align: center; }
+  .zpct-bar { width: 100%; height: 34px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; display: flex; overflow: visible; position: relative; }
+  .zpct-seg { height: 100%; position: relative; transition: filter .15s; }
+  .zpct-seg:hover { filter: brightness(1.15); }
   .zpct-empty { background: var(--bg) !important; }
-  .zpct-day:hover .zm-tip { opacity: 1; }
+  .zpct-day:hover .zm-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .zpct-seg .zm-tip { bottom: calc(100% + 6px); }
+  .zpct-legbox { display: flex; flex-wrap: wrap; gap: 4px 8px; justify-content: center; }
+  .zpct-leg { display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; color: var(--text-2); font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 2px 7px; }
+  .zpct-leg b { color: var(--text); font-weight: 800; }
+  .zpct-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
   /* Kategori şablon havuzu */
   #zm-cat-pool { display: flex; flex-direction: column; gap: 7px; }
@@ -27495,6 +27503,7 @@ function zmRender() {
       var isSel = key === zmDateKey(zmSelDate);
       var isTd = key === zmDateKey(new Date());
       var segs = '';
+      var leg = '';
       if (tot > 0) {
         order2.forEach(function (cid) {
           var c = zmCat(cid) || (zmData.deletedCats && zmData.deletedCats[cid]) || { name: '?', color: '#9ca3af' };
@@ -27502,6 +27511,7 @@ function zmRender() {
           if (val <= 0) return;
           var p = (val / tot) * 100;
           segs += '<div class="zpct-seg" style="width:' + p.toFixed(2) + '%;background:' + (c.color || '#9ca3af') + '"><div class="zm-tip">' + c.name + ': %' + p.toFixed(0) + '</div></div>';
+          leg += '<span class="zpct-leg"><span class="zpct-dot" style="background:' + (c.color || '#9ca3af') + '"></span>' + c.name + ' <b>%' + p.toFixed(0) + '</b></span>';
         });
       } else {
         segs = '<div class="zpct-seg zpct-empty" style="width:100%"></div>';
@@ -27509,6 +27519,7 @@ function zmRender() {
       phtml += '<div class="zpct-day' + (isSel ? ' sel' : '') + (isTd ? ' td' : '') + '" data-zm-bar-day="' + key + '" title="' + dd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + '">'
         + '<div class="zpct-lbl">' + dd.getDate() + '/' + (dd.getMonth() + 1) + '</div>'
         + '<div class="zpct-bar">' + segs + '</div>'
+        + (leg ? '<div class="zpct-legbox">' + leg + '</div>' : '')
         + '</div>';
     });
     pctbar.innerHTML = '<div class="zpct-grid">' + phtml + '</div>';
