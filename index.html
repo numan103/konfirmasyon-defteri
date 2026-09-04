@@ -17030,11 +17030,12 @@ function ap2RenderMonthly() {
 
   var emptyRows = rows.filter(function(r) { return !r.hasActivity && r.hv === 0 && !r.isCurrent; });
   var hasAnyOld = emptyRows.length > 0 && emptyRows.some(function(r) { return r.mk < curMk; });
+  var activeRows = rows.filter(function(r) { return r.hasActivity || r.hv > 0 || r.isCurrent; });
 
   var maxAbs = 1;
-  rows.forEach(function(r) { if (r.ret !== null) maxAbs = Math.max(maxAbs, Math.abs(r.ret)); });
+  activeRows.forEach(function(r) { if (r.ret !== null) maxAbs = Math.max(maxAbs, Math.abs(r.ret)); });
 
-  var rowsHtml = rows.map(function(r) {
+  var rowsHtml = activeRows.map(function(r) {
     var label = ap2MonthLabel(r.mk) + (r.isCurrent ? ' <span style="font-weight:400;color:var(--text-3);font-size:10px">(bu ay)</span>' : '');
     var retTxt, retCls, retFill;
     if (r.ret === null) {
@@ -17067,7 +17068,7 @@ function ap2RenderMonthly() {
   }).join('');
 
   var barChart = '';
-  var barRows = rows.filter(function(r) { return r.ret !== null; });
+  var barRows = activeRows.filter(function(r) { return r.ret !== null; });
   if (barRows.length > 1) {
     var bw = 300, bh = 80, bpad = 16;
     var bmin = 0, bmax = 0;
@@ -17464,7 +17465,7 @@ function ap2ShareCanvas() {
   var w = (cardRect && cardRect.width > 0) ? Math.round(cardRect.width) : 520;
 
   var shareDate = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-  var firstTs = positions.length ? positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity) : Date.now();
+  var firstTs = positions.length ? positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity) : new Date('2026-08-19').getTime();
   var shareStartTxt = isNaN(firstTs) ? '—' : new Date(firstTs).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
 
   var rows = [];
@@ -17506,6 +17507,7 @@ function ap2ShareCanvas() {
     var hv = byMonth[mk] || [];
     var open = ap2MonthOpenOf(hist, timeline, mk);
     var close = mk === curMk ? sum.portfolioValue : (hv.length ? hv[hv.length - 1] : null);
+    if (open === null && close !== null) open = sum.startBalance;
     var ret = (open !== null && open > 0 && close !== null) ? (close - open) / open * 100 : null;
     mCells.push({ lbl: ap2MonthLabel(mk).split(' ')[0], txt: ret === null ? '—' : (ret >= 0 ? '+' : '') + ret.toFixed(0) + '%', cls: ret === null ? 'zero' : (ret >= 0 ? 'pos' : 'neg') });
   });
