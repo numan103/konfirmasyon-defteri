@@ -16389,7 +16389,10 @@ function ap2CommitPosition(pos, total, qty, histRec) {
       ap2Data.positions[idx] = pos;
     } else {
       ap2Data.positions.push(pos);
-      ap2TgNotify('⏳ Yeni limit emri — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\n' + (pr > 0 ? 'Güncel fiyat ' + ap2Fmt(pr) + ' — limitine gelince otomatik dolacak.' : 'Güncel fiyat bekleniyor; limitine gelince otomatik dolacak.') + '\nBakiye bu arada düşülmez.\n\nalfa-trader.com');
+      var tgMsg = '⏳ Yeni limit emri — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\n' + (pr > 0 ? 'Güncel fiyat ' + ap2Fmt(pr) + ' — limitine gelince otomatik dolacak.' : 'Güncel fiyat bekleniyor; limitine gelince otomatik dolacak.') + '\nBakiye bu arada düşülmez.';
+      if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
+      tgMsg += '\n\nalfa-trader.com';
+      ap2TgNotify(tgMsg);
     }
   } else if (editing && idx >= 0) {
     if (prevPending) {
@@ -16397,7 +16400,10 @@ function ap2CommitPosition(pos, total, qty, histRec) {
       if (total <= cash) {
         pos.filled = new Date().toISOString().slice(0, 10);
         ap2Data.cash = cash - total;
-        ap2TgNotify('✅ Limit emri doldu — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nAdet: ' + ap2FmtNum(qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com');
+        var tgMsg = '✅ Limit emri doldu — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nAdet: ' + ap2FmtNum(qty) + ' · Harcama: ' + ap2Fmt(total);
+        if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
+        tgMsg += '\n\nalfa-trader.com';
+        ap2TgNotify(tgMsg);
       } else { pos.filled = null; }
       ap2Data.positions[idx] = pos;
     } else {
@@ -16413,7 +16419,10 @@ function ap2CommitPosition(pos, total, qty, histRec) {
     if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
     ap2Data.cash = cash - total;
     ap2Data.positions.push(pos);
-    ap2TgNotify((ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' ✅' : (histRec ? ' ⚠' : '')) + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost) + '\n\nalfa-trader.com');
+    var tgMsg = (ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' ✅' : (histRec ? ' ⚠' : '')) + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost);
+    if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
+    tgMsg += '\n\nalfa-trader.com';
+    ap2TgNotify(tgMsg);
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
