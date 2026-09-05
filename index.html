@@ -16389,7 +16389,11 @@ function ap2CommitPosition(pos, total, qty, histRec) {
       ap2Data.positions[idx] = pos;
     } else {
       ap2Data.positions.push(pos);
-      var tgMsg = '⏳ Yeni limit emri — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\n' + (pr > 0 ? 'Güncel fiyat ' + ap2Fmt(pr) + ' — limitine gelince otomatik dolacak.' : 'Güncel fiyat bekleniyor; limitine gelince otomatik dolacak.') + '\nBakiye bu arada düşülmez.';
+      var tgMsg = '⏳ Yeni limit emri — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost);
+      tgMsg += '\n\n🔹 ' + ap2FmtNum(qty) + ' adet · ' + ap2Fmt(total) + ' ayrılacak';
+      tgMsg += '\n💰 Mevcut nakit: ' + ap2Fmt(Number(ap2Data.cash) || 0);
+      tgMsg += '\n' + (pr > 0 ? '📈 Güncel fiyat ' + ap2Fmt(pr) + ' — limitine gelince otomatik dolacak.' : '📈 Güncel fiyat bekleniyor; limitine gelince otomatik dolacak.');
+      tgMsg += '\nBakiye bu arada düşülmez.';
       if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
       tgMsg += '\n\nalfa-trader.com';
       ap2TgNotify(tgMsg);
@@ -16400,7 +16404,18 @@ function ap2CommitPosition(pos, total, qty, histRec) {
       if (total <= cash) {
         pos.filled = new Date().toISOString().slice(0, 10);
         ap2Data.cash = cash - total;
-        var tgMsg = '✅ Limit emri doldu — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nAdet: ' + ap2FmtNum(qty) + ' · Harcama: ' + ap2Fmt(total);
+        var newCash = cash - total;
+        var posVal = total;
+        var totalAfter = newCash + posVal;
+        var tgMsg = '✅ Limit emri doldu — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost);
+        tgMsg += '\n\n🔹 ' + ap2FmtNum(qty) + ' adet · ' + ap2Fmt(total) + ' harcandı';
+        tgMsg += '\n💰 Kalan nakit: ' + ap2Fmt(newCash);
+        tgMsg += '\n📊 Portföy: ' + ap2Fmt(totalAfter);
+        if (totalAfter > 0) {
+          var pctPos = (posVal / totalAfter * 100).toFixed(1);
+          var pctCash = (newCash / totalAfter * 100).toFixed(1);
+          tgMsg += '\n📈 ' + pos.symbol + ': %' + pctPos + ' · 💵 Nakit: %' + pctCash;
+        }
         if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
         tgMsg += '\n\nalfa-trader.com';
         ap2TgNotify(tgMsg);
@@ -16419,7 +16434,18 @@ function ap2CommitPosition(pos, total, qty, histRec) {
     if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
     ap2Data.cash = cash - total;
     ap2Data.positions.push(pos);
-    var tgMsg = (ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' ✅' : (histRec ? ' ⚠' : '')) + '\n\nHarcama: ' + ap2Fmt(total) + ' · Adet: ' + ap2FmtNum(qty) + '\nOrtalama maliyet: ' + ap2Fmt(pos.cost);
+    var newCash = cash - total;
+    var totalAfter = newCash + total;
+    var tgMsg = (ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' ✅' : (histRec ? ' ⚠' : ''));
+    tgMsg += '\n\n🔹 ' + ap2FmtNum(qty) + ' adet · ' + ap2Fmt(total) + ' harcandı';
+    tgMsg += '\n💵 Birim maliyet: ' + ap2Fmt(pos.cost);
+    tgMsg += '\n💰 Kalan nakit: ' + ap2Fmt(newCash);
+    tgMsg += '\n📊 Portföy toplam: ' + ap2Fmt(totalAfter);
+    if (totalAfter > 0) {
+      var pctPos = (total / totalAfter * 100).toFixed(1);
+      var pctCash = (newCash / totalAfter * 100).toFixed(1);
+      tgMsg += '\n📈 ' + pos.symbol + ': %' + pctPos + ' · 💵 Nakit: %' + pctCash;
+    }
     if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
     tgMsg += '\n\nalfa-trader.com';
     ap2TgNotify(tgMsg);
