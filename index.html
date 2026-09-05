@@ -4299,7 +4299,7 @@
   .st2-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
   </style>
   <script>
-  (function(){try{var k='alfa-fund-v1';var v='v6';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[{"id":"eth-sep5","symbol":"ETH","type":"kripto","side":"LONG","date":"2026-09-05","qty":0.251,"cost":1992.03,"totalCost":500,"price":2471,"note":"","filled":"2026-09-05","lim":true}],"cash":768.39,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","buyDate":"2026-08-19","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","buyDate":"2026-08-19","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","buyDate":"2026-08-30","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-05T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39},{"d":"2026-09-05","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
+  (function(){try{var k='alfa-fund-v1';var v='v7';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[{"id":"eth-sep5","symbol":"ETH","type":"kripto","side":"LONG","date":"2026-09-05","qty":0.251,"cost":1992.03,"totalCost":500,"price":2471,"note":"","filled":"2026-09-05","lim":true}],"cash":768.39,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","buyDate":"2026-08-19","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","buyDate":"2026-08-19","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","buyDate":"2026-08-30","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-05T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39},{"d":"2026-09-05","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
   </script>
   <script>
   (function () {
@@ -16965,9 +16965,17 @@ function ap2MonthRange(startMk, endMk) {
 }
 function ap2Timeline(hist) {
   var positions = ap2Data.positions || [];
+  var sells = ap2Data.sells || [];
   var startDate = null, startMk = null;
   positions.forEach(function(p) {
     var d = String(p.date || '').slice(0, 10);
+    if (!d || isNaN(new Date(d).getTime())) return;
+    if (!startDate || d < startDate) startDate = d;
+    var mk = ap2MonthKey(new Date(d + 'T12:00:00').getTime());
+    if (!startMk || mk < startMk) startMk = mk;
+  });
+  sells.forEach(function(sl) {
+    var d = String(sl.buyDate || sl.date || '').slice(0, 10);
     if (!d || isNaN(new Date(d).getTime())) return;
     if (!startDate || d < startDate) startDate = d;
     var mk = ap2MonthKey(new Date(d + 'T12:00:00').getTime());
