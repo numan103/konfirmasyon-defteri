@@ -16484,8 +16484,21 @@ function ap2FillsCheck() {
     p.filled = new Date().toISOString().slice(0, 10);
     ap2Data.cash = cash - total;
     filled = true;
-    const _fp = ap2PnlOf(p.side, total, total);
-    ap2TgNotify('✅ Limit emri doldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost) + '\n\nAdet: ' + ap2FmtNum(p.qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com');
+    var _fp = ap2PnlOf(p.side, total, total);
+    var newCash = cash - total;
+    var totalAfter = newCash + total;
+    var tgMsg = '✅ Limit emri doldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost);
+    tgMsg += '\n\n🔹 ' + ap2FmtNum(p.qty) + ' adet · ' + ap2Fmt(total) + ' harcandı';
+    tgMsg += '\n💰 Kalan nakit: ' + ap2Fmt(newCash);
+    tgMsg += '\n📊 Portföy: ' + ap2Fmt(totalAfter);
+    if (totalAfter > 0) {
+      var pctPos = (total / totalAfter * 100).toFixed(1);
+      var pctCash = (newCash / totalAfter * 100).toFixed(1);
+      tgMsg += '\n📈 ' + p.symbol + ': %' + pctPos + ' · 💵 Nakit: %' + pctCash;
+    }
+    if (p.note) tgMsg += '\n📝 Not: ' + p.note;
+    tgMsg += '\n\nalfa-trader.com';
+    ap2TgNotify(tgMsg);
   });
   if (filled) ap2Save();
   return filled;
@@ -18998,7 +19011,7 @@ function bindPortfoy() {
     }
   });
   setInterval(() => { if (bdTab === 'portfoy' && !document.hidden) pfLoadPrices(); }, 60000);
-  setInterval(() => { if (bdTab === 'alfaportfoy' && !document.hidden) ap2LoadPrices(); }, 120000);
+  setInterval(() => { if (bdTab === 'alfaportfoy' && !document.hidden) ap2LoadPrices(); }, 15000);
   pfPlanApplyInputs();
   pfPlanRender();
 }
