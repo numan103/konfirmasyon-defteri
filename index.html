@@ -13220,7 +13220,7 @@ function bindDataPage() {
   const no = g('data-notion-oauth');
   if (no) no.addEventListener('click', () => {
     const state = (typeof AUTH !== 'undefined' && AUTH.user) ? AUTH.user.id : '';
-    window.location.href = '/api/notion-auth' + (state ? '?state=' + encodeURIComponent(state) : '');
+    window.location.href = '/api/notion-callback?action=auth' + (state ? '&state=' + encodeURIComponent(state) : '');
   });
   // Notion DB ID yükleme
   (function loadNdb() {
