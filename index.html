@@ -2278,7 +2278,7 @@
   .ap2-card.ap2-card-pend { border-color: rgba(245, 158, 11, .45); }
   .ap2-pos-chip-pend { background: rgba(245,158,11,.15); color: var(--amber); border-color: rgba(245,158,11,.35); }
   .ap2-card-pend-note { font-size: 11.5px; font-weight: 500; color: var(--amber); margin: 8px 0 10px; padding: 7px 9px; background: rgba(245,158,11,.06); border-radius: 8px; line-height: 1.4; }
-  .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .ap2-card-prices { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
   .ap2-card-price-box { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
   .ap2-card-price-lbl { font-size: 9px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
   .ap2-card-price-val { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -17359,6 +17359,7 @@ function renderAlfaPortfoy2() {
         '<button type="button" data-ap2del="' + p.id + '" class="act-del" title="Sil">🗑️</button>' +
       '</div></div>' +
       '<div class="ap2-card-prices">' +
+        '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Yatırım</div><div class="ap2-card-price-val">' + ap2Fmt(c.totalCost) + '</div></div>' +
         '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Ort. Maliyet</div><div class="ap2-card-price-val">' + ap2Fmt(p.cost) + '</div></div>' +
         '<div class="ap2-card-price-box"><div class="ap2-card-price-lbl">Güncel</div><div class="ap2-card-price-val">' + (c.value !== null ? ap2Fmt(p.price) : '<span style="color:var(--text-3)">\u2014</span>') + '</div></div>' +
       '</div>' +
