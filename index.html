@@ -4843,8 +4843,7 @@
     <div class="nav-links">
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Alfa Defter</a>
-      <a href="?page=sosyalmetre" class="nav-link" id="tab-sosyalmetre" data-nav>📣 Sosyalmetre</a>
-      <a href="?page=uyap" class="nav-link" id="tab-uyap" data-nav>🏠 Uyap</a>
+      <a href="?page=uyap" class="nav-link" id="tab-uyap" data-nav>🏠 Real Estate</a>
       <div class="nav-drop">
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
         <div class="drop-menu">
@@ -4903,8 +4902,7 @@
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" data-i18n="app.butce">💰 Alfa Defter</a>
-      <a href="?page=sosyalmetre" class="mnav-link" id="mnav-sosyalmetre" data-nav data-mnav="sosyalmetre">📣 Sosyalmetre</a>
-      <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Uyap</a>
+      <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
       <a href="?page=data" class="mnav-link" data-nav data-mnav="data" data-i18n="app.journal">📈 Trade Günlüğü</a>
@@ -6817,7 +6815,7 @@
   <div class="uyap-wrap">
     <div class="uyap-head">
       <div class="uyap-head-t">
-        <h2>🏠 Uyap — Gayrimenkul Takip</h2>
+        <h2>🏠 Real Estate — Gayrimenkul Takip</h2>
         <p>Potansiyel evler, gayrimenkuller, kâr/maliyet hesaplama ve notlar. Sadece sen görebilirsin.</p>
       </div>
       <div class="uyap-head-actions">
@@ -11143,6 +11141,7 @@ function renderEk() {
     { icon: '📋', page: 'apps', title: 'Başvurular', desc: 'Gelen üyelik başvuruları' },
     { icon: '💬', page: 'chat-admin', title: 'Canlı Destek', desc: 'Mesajlaşma ve destek talepleri' },
     { icon: '🪞', page: 'karne', title: 'Günün Karnesi', desc: 'Süreç disiplinini 8 maddeyle puanla, 30 günlük eğrini ve serini izle' },
+    { icon: '📣', page: 'sosyalmetre', title: 'Sosyalmetre', desc: 'Sosyal medya analiz ve karar aracı' },
   ];
   grid.innerHTML = cards.map(c => {
     const locked = (c.page === 'alfa' || c.page === 'apps' || c.page === 'basvuru') && typeof amAllowed === 'function' && !amAllowed();
@@ -23577,7 +23576,7 @@ async function onAuthed(user) {
   const smMob = document.getElementById('mnav-sosyalmetre');
   if (smTab) smTab.style.display = isAdmin ? '' : 'none';
   if (smMob) smMob.style.display = isAdmin ? '' : 'none';
-  // Uyap: sadece admin hesabında
+  // Real Estate: sadece admin hesabında
   const uyapTab = document.getElementById('tab-uyap');
   const uyapMob = document.getElementById('mnav-uyap');
   if (uyapTab) uyapTab.style.display = isAdmin ? '' : 'none';
@@ -26750,7 +26749,7 @@ loadSfx();
     });
 
 /* ══════════════════════════════════════════════════════════
-   UYAP — Gayrimenkul Takip
+   REAL ESTATE — Gayrimenkul Takip
    ══════════════════════════════════════════════════════════ */
 var UYAP_KEY = 'alfa-uyap-v1';
 var uyapData = { properties: [] };
@@ -26929,7 +26928,7 @@ function uyapRenderNotes() {
       + '<div class="uyap-tl-avatar" data-uyap-noteavatar="' + n.id + '">👤</div>'
       + '<div class="uyap-tl-main">'
       + '<div class="uyap-tl-top">'
-      + '<span class="uyap-tl-author">Alfa Uyap</span>'
+      + '<span class="uyap-tl-author">Alfa Real Estate</span>'
       + '<span class="uyap-tl-badge ' + b.c + '">' + b.t + '</span>'
       + '<span class="uyap-tl-time">' + uyapNoteTimeStr(n.ts) + '</span>'
       + '</div>'
