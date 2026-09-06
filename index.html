@@ -26836,36 +26836,31 @@ var uyapFormImgs = [];
 
 function uyapId() { return 'uyap_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
 
+var _uyapCloudSynced = false;
+
 function uyapLoad() {
   try { var raw = localStorage.getItem(UYAP_KEY); if (raw) uyapData = JSON.parse(raw); } catch (e) {}
   if (!uyapData || !uyapData.properties) uyapData = { properties: [], notes: [] };
   if (!uyapData.notes) uyapData.notes = [];
-  uyapCloudLoad();
-}
-
-async function uyapCloudLoad() {
-  if (!AUTH.user || !AUTH.client) return;
-  try {
-    var v = await store.get(UYAP_KEY);
-    if (v) {
-      var cloud = typeof v === 'string' ? JSON.parse(v) : v;
-      if (cloud && cloud.properties) {
+  if (AUTH.user && AUTH.cloud && AUTH.cloud[UYAP_KEY]) {
+    try {
+      var cloud = JSON.parse(AUTH.cloud[UYAP_KEY]);
+      if (cloud && cloud.properties && cloud.properties.length >= uyapData.properties.length) {
         uyapData = cloud;
         if (!uyapData.notes) uyapData.notes = [];
-        renderUyap();
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
+  }
 }
 
 function uyapSave() {
   try { localStorage.setItem(UYAP_KEY, JSON.stringify(uyapData)); } catch (e) {}
-  uyapCloudSave();
-}
-
-function uyapCloudSave() {
   if (!AUTH.user || !AUTH.client) return;
-  try { store.set(UYAP_KEY, JSON.stringify(uyapData)); } catch (e) {}
+  try { AUTH.cloud[UYAP_KEY] = JSON.stringify(uyapData); } catch(e) {}
+  clearTimeout(window._uyapSyncTimer);
+  window._uyapSyncTimer = setTimeout(function() {
+    try { AUTH.client.from('journals').upsert({ user_id: AUTH.user.id, data: AUTH.cloud, updated_at: new Date().toISOString() }); } catch(e) {}
+  }, 1500);
 }
 
 function uyapFmt(n) {
