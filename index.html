@@ -4874,6 +4874,8 @@
           <a href="?page=strateji" class="nav-link" id="tab-strateji" data-nav>🧭 Strateji</a>
         </div>
       </div>
+      <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
+      <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
       <div class="nav-drop">
         <a class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</a>
         <div class="drop-menu">
@@ -4921,7 +4923,7 @@
     </div>
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
-      <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" data-i18n="app.butce">💰 Alfa Defter</a>
+      <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" id="mnav-butce" data-i18n="app.butce">💰 Alfa Defter</a>
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
@@ -4929,6 +4931,8 @@
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
+      <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
+      <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
       <a href="?page=strategies" class="mnav-link" data-nav data-mnav="strategies" data-i18n="app.strategies">🧪 Stratejiler</a>
@@ -6285,7 +6289,6 @@
     <div class="bd-tabs" id="bd-tabs">
       <button type="button" class="bd-tab on" data-bdt="defter">📒 Gelir Gider</button>
       <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföyüm</button>
-      <button type="button" class="bd-tab" data-bdt="alfaportfoy">📊 Alfa Portföy</button>
     </div>
     <div id="bd-view-defter">
     <div class="bd-toolbar">
@@ -6538,224 +6541,6 @@
         </div>
       </section>
     </div><!-- /bd-view-portfoy -->
-    <div id="bd-view-alfaportfoy" class="hidden">
-      <div id="ap2-public-teaser" class="ap2-gate-teaser" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Alfa Portföy</div>
-        </div>
-        <div class="ap2-sum-row" id="ap2-pt-cards"></div>
-        <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
-      </div>
-      <div id="ap2-gate" class="ap2-gate hidden">
-        <div class="ap2-gate-card">
-          <div class="ap2-gate-icon">🔒</div>
-          <div class="ap2-gate-title">Alfa Portföy'e Hoş Geldin</div>
-          <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referral linkimle kayıt olman gerekiyor. Kayıt sonrası verilen kodu girerek erişim sağlayabilirsin.</div>
-          <div id="ap2-gate-teaser" class="ap2-gate-teaser" style="display:none">
-            <div class="ap2-sum-row" id="ap2-gt-cards"></div>
-            <div class="ap2-gate-teaser-chart" id="ap2-gt-chart"></div>
-            <div class="ap2-gate-teaser-note">Alfa Portföy — erişim için kayıt ol</div>
-          </div>
-          <div class="ap2-gate-links">
-            <a href="https://www.okx.com/join/CRYPTOAHMET" target="_blank" rel="noopener" class="ap2-gate-link">
-              <div class="ap2-gate-link-icon" style="background:#fff">🟣</div>
-              <div class="ap2-gate-link-text">
-                <div class="ap2-gate-link-name">OKX'te Kayıt Ol</div>
-                <div class="ap2-gate-link-sub">Referral link ile tıkla → hesap aç</div>
-              </div>
-            </a>
-            <a href="https://partner.bybit.com/b/cryptoahmet" target="_blank" rel="noopener" class="ap2-gate-link">
-              <div class="ap2-gate-link-icon" style="background:#f7a600">🟡</div>
-              <div class="ap2-gate-link-text">
-                <div class="ap2-gate-link-name">Bybit'te Kayıt Ol</div>
-                <div class="ap2-gate-link-sub">Referral link ile tıkla → hesap aç</div>
-              </div>
-            </a>
-          </div>
-          <div class="ap2-gate-code-row">
-            <input type="text" id="ap2-gate-code" placeholder="Erişim kodun..." maxlength="40" autocomplete="off">
-            <button type="button" id="ap2-gate-verify">Doğrula</button>
-          </div>
-          <div class="ap2-gate-err" id="ap2-gate-err"></div>
-        </div>
-      </div>
-      <div id="ap2-gate-content">
-      <div class="ap2-hd">
-        <div class="ap2-hd-t">
-          <h2 class="ap2-hd-title">💼 Alfa Portföy</h2>
-          <p class="ap2-hd-sub">Pozisyonların, hedge'ler ve büyüme — tek panelde.</p>
-        </div>
-        <div class="ap2-hd-actions">
-          <input type="search" id="ap2-search" class="ap2-search" placeholder="Sembol / not ara…" autocomplete="off">
-          <button type="button" class="ap2-btn-primary" id="ap2-add">＋ Yeni Enstrüman</button>
-        </div>
-      </div>
-      <div id="ap2-empty" class="data-empty">Henüz pozisyon yok — sağ üstteki <b>＋ Yeni Enstrüman</b> ile başla.</div>
-      <div class="ap2-layout">
-        <div class="ap2-layout-left">
-          <div id="ap2-summary-area"></div>
-          <div class="ap2-growth-row" id="ap2-growth"></div>
-          <div id="ap2-hedge-strip" class="ap2-hedge-strip"></div>
-          <div id="ap2-grid" class="ap2-grid"></div>
-          <div class="ap2-ideas" id="ap2-ideas">
-            <div class="ap2-ideas-head">
-              <h4>💡 Potansiyel Portföy Değerlendirmeleri</h4>
-              <button type="button" class="ap2-btn-ghost" id="ap2-idea-add">+ Not Ekle</button>
-            </div>
-            <div id="ap2-idea-list" style="display:flex;flex-direction:column;gap:8px"></div>
-            <div id="ap2-idea-empty" style="font-size:12px;color:var(--text-3);padding:12px 0;text-align:center">Henüz not yok — potansiyel yatırımlar hakkında değerlendirme notları ekle.</div>
-          </div>
-        </div>
-        <div class="ap2-layout-right">
-          <div class="ap2-donut-panel" id="ap2-donut-panel">
-            <div class="ap2-donut-header">Dagilim</div>
-            <div class="ap2-donut-wrap">
-              <svg id="ap2-donut-svg" viewBox="0 0 200 200" class="ap2-donut-svg"></svg>
-              <div class="ap2-donut-center">
-                <div class="ap2-donut-center-val" id="ap2-donut-center">—</div>
-                <div class="ap2-donut-center-lbl">Toplam</div>
-              </div>
-            </div>
-            <div class="ap2-donut-legend" id="ap2-donut-legend"></div>
-          </div>
-          <div class="ap2-chart-panel" id="ap2-chart-panel">
-            <div class="ap2-chart-header">
-              <span class="ap2-chart-title">📈 Büyüme</span>
-              <span class="ap2-chart-change" id="ap2-chart-change"></span>
-            </div>
-            <div class="ap2-chart-range" id="ap2-chart-range">
-              <button type="button" class="on" data-ap2r="today">Bugün</button>
-              <button type="button" data-ap2r="week">Bu Hafta</button>
-              <button type="button" data-ap2r="month">Bu Ay</button>
-              <button type="button" data-ap2r="all">Tümü</button>
-            </div>
-            <div id="ap2-chart-meta" style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
-              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Başlangıç</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-start">—</div></div>
-              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Süre</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-duration">—</div></div>
-              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Kümülatif</div><div style="font-size:12px;font-weight:700;margin-top:2px" id="ap2-chart-cum">—</div></div>
-            </div>
-            <div class="ap2-chart-canvas" id="ap2-chart-canvas">
-              <svg id="ap2-chart-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
-            </div>
-          </div>
-          <div id="ap2-share-area"></div>
-        </div>
-      </div>
-      <div id="ap2-trades" class="ap2-sell-hist" style="display:none">
-        <h4 style="display:flex;align-items:center;gap:8px">Gerçekleşen İşlemler <span style="font-size:11px;font-weight:600;color:var(--text-3)" id="ap2-trades-total"></span></h4>
-        <div id="ap2-trades-body"></div>
-      </div>
-      <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
-        <h4>Satis Gecmisi</h4>
-        <div id="ap2-sell-hist-body"></div>
-      </div>
-      <div class="ap2-monthly" id="ap2-monthly">
-        <div class="ap2-monthly-head" id="ap2-monthly-head">
-          <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Aylık Performans</span>
-          <span class="ap2-monthly-this" id="ap2-monthly-this"></span>
-          <span class="ap2-monthly-caret" id="ap2-monthly-caret">▾</span>
-        </div>
-        <div class="ap2-monthly-body" id="ap2-monthly-body" style="display:none"></div>
-      </div>
-      <div id="ap2-form" class="strat-form hidden">
-        <div class="strat-form-head">
-          <span id="ap2-form-title">Yeni Enstrüman</span>
-          <button type="button" class="btn" id="ap2-form-cancel">✕</button>
-        </div>
-        <div class="strat-form-body">
-          <label>Enstrüman / Sembol</label>
-          <input type="text" id="ap2-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
-          <div class="ap2-chip-row" id="ap2-f-sym-chips">
-            <button type="button" data-sym="BTC">₿ BTC</button>
-            <button type="button" data-sym="ETH">Ξ ETH</button>
-            <button type="button" data-sym="SOL">◎ SOL</button>
-            <button type="button" data-sym="BNB">BNB</button>
-            <button type="button" data-sym="XRP">XRP</button>
-            <button type="button" data-sym="DOGE">Ð DOGE</button>
-            <button type="button" data-sym="LTC">Ł LTC</button>
-            <button type="button" data-sym="ADA">ADA</button>
-            <button type="button" data-sym="AVAX">AVAX</button>
-          </div>
-          <label>Tür</label>
-          <div id="ap2-f-type" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-            <button type="button" class="ap2-type-chip on" data-ap2t="kripto">🪙 Kripto</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="hisse">📈 Hisse</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="altin">🥇 Altın</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="gumus">🪙 Gümüş</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="emtia">🛢️ Emtia</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="doviz">💵 Döviz</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="endeks">📊 Endeks</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="fon">🏢 Fon</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="custom">✍️ Özel</button>
-          </div>
-          <label>Tarih</label>
-          <input type="date" id="ap2-f-date">
-          <div class="ap2-seg" id="ap2-f-side">
-            <button type="button" class="on" data-ap2side="LONG">📈 UZUN</button>
-            <button type="button" data-ap2side="SHORT">📉 KISA <span style="font-weight:500;opacity:.65">(hedge)</span></button>
-          </div>
-          <div class="ap2-seg" id="ap2-f-mode">
-            <button type="button" class="on" data-ap2m="tutar">💵 Tutar ile</button>
-            <button type="button" data-ap2m="adet">🪙 Adet ile</button>
-          </div>
-          <div id="ap2-f-amount-box">
-            <label>Ne kadar harcadın? ($)</label>
-            <input type="number" id="ap2-f-amount" placeholder="Örn: 500" step="any" min="0">
-          </div>
-          <div id="ap2-f-qty-box" style="display:none">
-            <label>Kaç adet aldın?</label>
-            <input type="number" id="ap2-f-qty" placeholder="Örn: 0.05" step="any" min="0">
-          </div>
-          <label>Birim maliyet (ortalama giriş fiyatı, $)</label>
-          <input type="number" id="ap2-f-cost" placeholder="Örn: 35000" step="any" min="0">
-          <label>Güncel fiyat ($) <span style="color:var(--text-3);font-weight:400;font-size:11px">— boş bırakırsan canlı fiyat dene</span></label>
-          <input type="number" id="ap2-f-price" placeholder="Otomatik getirilecek" step="any" min="0">
-          <label>Not</label>
-          <input type="text" id="ap2-f-note" placeholder="Opsiyonel not..." maxlength="120">
-          <div class="ap2-form-preview" id="ap2-f-preview"></div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button type="button" class="btn solid" id="ap2-f-save">💾 Kaydet</button>
-            <button type="button" class="btn" id="ap2-f-cancel">Vazgeç</button>
-          </div>
-          <div class="strat-form-err" id="ap2-f-err"></div>
-        </div>
-      </div>
-      <div id="ap2-sell-form" class="strat-form hidden">
-        <div class="strat-form-head">
-          <span id="ap2-sell-title">💰 Sat</span>
-          <button type="button" class="btn" id="ap2-sell-cancel">✕</button>
-        </div>
-        <div class="strat-form-body">
-          <div id="ap2-sell-sym" style="font-weight:700;margin-bottom:8px"></div>
-          <div id="ap2-sell-info" style="font-size:12px;color:var(--text-3);margin-bottom:10px"></div>
-          <label>Miktar Sat</label>
-          <input type="number" id="ap2-sell-qty" placeholder="Satılacak miktar" step="any" min="0">
-          <label>Satış Fiyatı ($)</label>
-          <input type="number" id="ap2-sell-price" placeholder="Piyasa fiyatı" step="any" min="0">
-          <div style="margin-top:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px">
-            <span style="color:var(--text-3)">Tutar: </span><strong id="ap2-sell-amount">—</strong>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button type="button" class="btn solid" id="ap2-sell-confirm" style="background:var(--amber);color:#000">💰 Satışı Onayla</button>
-            <button type="button" class="btn" id="ap2-sell-cancel2">Vazgeç</button>
-          </div>
-          <div class="strat-form-err" id="ap2-sell-err"></div>
-        </div>
-      </div>
-      <div id="ap2-hist" class="strat-form hidden">
-        <div class="strat-form-head"><span>🛡 Giriş fiyatı doğrulaması</span><button type="button" id="ap2-hist-cancel" class="strat-form-x">✕</button></div>
-        <div class="strat-form-body">
-          <div id="ap2-hist-info"></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-            <button type="button" class="btn solid" id="ap2-hist-keep" style="background:var(--amber);color:#000">Yine de kaydet</button>
-            <button type="button" class="btn" id="ap2-hist-usehist">Tarihteki fiyatı kullan</button>
-            <button type="button" class="btn" id="ap2-hist-cancel2">Vazgeç</button>
-          </div>
-          <div class="strat-form-err" id="ap2-hist-err"></div>
-        </div>
-      </div>
-      </div><!-- /ap2-gate-content -->
-    </div><!-- /bd-view-alfaportfoy -->
   </div><!-- /page-butce -->
 
 <div id="page-sosyalmetre" class="hidden">
@@ -7014,8 +6799,8 @@
       <div class="at-head-l">
         <span class="at-brand-ico">📢</span>
         <div>
-          <div class="at-brand-name">Alfa Trading</div>
-          <div class="at-brand-sub">Adminlerin coin/bias analizleri ve işlem paylaşımları — beğen, yorum yap, tartış.</div>
+          <div class="at-brand-name">İşlem Kanalı</div>
+          <div class="at-brand-sub">Coin/bias analizleri ve işlem paylaşımları — beğen, yorum yap, tartış.</div>
         </div>
       </div>
       <div class="at-head-btns">
@@ -7126,6 +6911,226 @@
     </div>
   </div>
   <div class="at-toast" id="at-toast"></div>
+
+  <div id="page-portfoy" class="hidden">
+    <div class="wrap">
+      <div class="ap2-hd">
+        <div class="ap2-hd-t">
+          <h2 class="ap2-hd-title">💼 Portföy Yönetimi</h2>
+          <p class="ap2-hd-sub">Pozisyonların, hedge'ler ve büyüme — tek panelde.</p>
+        </div>
+        <div class="ap2-hd-actions">
+          <input type="search" id="ap2-search" class="ap2-search" placeholder="Sembol / not ara…" autocomplete="off">
+          <button type="button" class="ap2-btn-primary" id="ap2-add">＋ Yeni Enstrüman</button>
+        </div>
+      </div>
+      <div id="ap2-empty" class="data-empty">Henüz pozisyon yok — sağ üstteki <b>＋ Yeni Enstrüman</b> ile başla.</div>
+      <div class="ap2-layout">
+        <div class="ap2-layout-left">
+          <div id="ap2-summary-area"></div>
+          <div class="ap2-growth-row" id="ap2-growth"></div>
+          <div id="ap2-hedge-strip" class="ap2-hedge-strip"></div>
+          <div id="ap2-grid" class="ap2-grid"></div>
+          <div class="ap2-ideas" id="ap2-ideas">
+            <div class="ap2-ideas-head">
+              <h4>💡 Potansiyel Portföy Değerlendirmeleri</h4>
+              <button type="button" class="ap2-btn-ghost" id="ap2-idea-add">+ Not Ekle</button>
+            </div>
+            <div id="ap2-idea-list" style="display:flex;flex-direction:column;gap:8px"></div>
+            <div id="ap2-idea-empty" style="font-size:12px;color:var(--text-3);padding:12px 0;text-align:center">Henüz not yok — potansiyel yatırımlar hakkında değerlendirme notları ekle.</div>
+          </div>
+        </div>
+        <div class="ap2-layout-right">
+          <div class="ap2-donut-panel" id="ap2-donut-panel">
+            <div class="ap2-donut-header">Dagilim</div>
+            <div class="ap2-donut-wrap">
+              <svg id="ap2-donut-svg" viewBox="0 0 200 200" class="ap2-donut-svg"></svg>
+              <div class="ap2-donut-center">
+                <div class="ap2-donut-center-val" id="ap2-donut-center">—</div>
+                <div class="ap2-donut-center-lbl">Toplam</div>
+              </div>
+            </div>
+            <div class="ap2-donut-legend" id="ap2-donut-legend"></div>
+          </div>
+          <div class="ap2-chart-panel" id="ap2-chart-panel">
+            <div class="ap2-chart-header">
+              <span class="ap2-chart-title">📈 Büyüme</span>
+              <span class="ap2-chart-change" id="ap2-chart-change"></span>
+            </div>
+            <div class="ap2-chart-range" id="ap2-chart-range">
+              <button type="button" class="on" data-ap2r="today">Bugün</button>
+              <button type="button" data-ap2r="week">Bu Hafta</button>
+              <button type="button" data-ap2r="month">Bu Ay</button>
+              <button type="button" data-ap2r="all">Tümü</button>
+            </div>
+            <div id="ap2-chart-meta" style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Başlangıç</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-start">—</div></div>
+              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Süre</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-top:2px" id="ap2-chart-duration">—</div></div>
+              <div style="flex:1;min-width:100px"><div style="font-size:9px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px">Kümülatif</div><div style="font-size:12px;font-weight:700;margin-top:2px" id="ap2-chart-cum">—</div></div>
+            </div>
+            <div class="ap2-chart-canvas" id="ap2-chart-canvas">
+              <svg id="ap2-chart-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+          <div id="ap2-share-area"></div>
+        </div>
+      </div>
+      <div id="ap2-trades" class="ap2-sell-hist" style="display:none">
+        <h4 style="display:flex;align-items:center;gap:8px">Gerçekleşen İşlemler <span style="font-size:11px;font-weight:600;color:var(--text-3)" id="ap2-trades-total"></span></h4>
+        <div id="ap2-trades-body"></div>
+      </div>
+      <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
+        <h4>Satis Gecmisi</h4>
+        <div id="ap2-sell-hist-body"></div>
+      </div>
+      <div class="ap2-monthly" id="ap2-monthly">
+        <div class="ap2-monthly-head" id="ap2-monthly-head">
+          <span style="font-size:13px;font-weight:700;color:var(--text)">📊 Aylık Performans</span>
+          <span class="ap2-monthly-this" id="ap2-monthly-this"></span>
+          <span class="ap2-monthly-caret" id="ap2-monthly-caret">▾</span>
+        </div>
+        <div class="ap2-monthly-body" id="ap2-monthly-body" style="display:none"></div>
+      </div>
+      <div id="ap2-public-teaser" class="ap2-gate-teaser" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:800;color:#f8fafc">📊 Portföy</div>
+        </div>
+        <div class="ap2-sum-row" id="ap2-pt-cards"></div>
+        <div class="ap2-gate-teaser-chart" id="ap2-pt-chart"></div>
+      </div>
+      <div id="ap2-gate" class="ap2-gate hidden">
+        <div class="ap2-gate-card">
+          <div class="ap2-gate-icon">🔒</div>
+          <div class="ap2-gate-title">Portföy'e Hoş Geldin</div>
+          <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referral linkimle kayıt olman gerekiyor. Kayıt sonrası verilen kodu girerek erişim sağlayabilirsin.</div>
+          <div id="ap2-gate-teaser" class="ap2-gate-teaser" style="display:none">
+            <div class="ap2-sum-row" id="ap2-gt-cards"></div>
+            <div class="ap2-gate-teaser-chart" id="ap2-gt-chart"></div>
+            <div class="ap2-gate-teaser-note">Portföy — erişim için kayıt ol</div>
+          </div>
+          <div class="ap2-gate-links">
+            <a href="https://www.okx.com/join/CRYPTOAHMET" target="_blank" rel="noopener" class="ap2-gate-link">
+              <div class="ap2-gate-link-icon" style="background:#fff">🟣</div>
+              <div class="ap2-gate-link-text">
+                <div class="ap2-gate-link-name">OKX'te Kayıt Ol</div>
+                <div class="ap2-gate-link-sub">Referral link ile tıkla → hesap aç</div>
+              </div>
+            </a>
+            <a href="https://partner.bybit.com/b/cryptoahmet" target="_blank" rel="noopener" class="ap2-gate-link">
+              <div class="ap2-gate-link-icon" style="background:#f7a600">🟡</div>
+              <div class="ap2-gate-link-text">
+                <div class="ap2-gate-link-name">Bybit'te Kayıt Ol</div>
+                <div class="ap2-gate-link-sub">Referral link ile tıkla → hesap aç</div>
+              </div>
+            </a>
+          </div>
+          <div class="ap2-gate-code-row">
+            <input type="text" id="ap2-gate-code" placeholder="Erişim kodun..." maxlength="40" autocomplete="off">
+            <button type="button" id="ap2-gate-verify">Doğrula</button>
+          </div>
+          <div class="ap2-gate-err" id="ap2-gate-err"></div>
+        </div>
+      </div>
+      <div id="ap2-form" class="strat-form hidden">
+        <div class="strat-form-head">
+          <span id="ap2-form-title">Yeni Enstrüman</span>
+          <button type="button" class="btn" id="ap2-form-cancel">✕</button>
+        </div>
+        <div class="strat-form-body">
+          <label>Enstrüman / Sembol</label>
+          <input type="text" id="ap2-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
+          <div class="ap2-chip-row" id="ap2-f-sym-chips">
+            <button type="button" data-sym="BTC">₿ BTC</button>
+            <button type="button" data-sym="ETH">Ξ ETH</button>
+            <button type="button" data-sym="SOL">◎ SOL</button>
+            <button type="button" data-sym="BNB">BNB</button>
+            <button type="button" data-sym="XRP">XRP</button>
+            <button type="button" data-sym="DOGE">Ð DOGE</button>
+            <button type="button" data-sym="LTC">Ł LTC</button>
+            <button type="button" data-sym="ADA">ADA</button>
+            <button type="button" data-sym="AVAX">AVAX</button>
+          </div>
+          <label>Tür</label>
+          <div id="ap2-f-type" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+            <button type="button" class="ap2-type-chip on" data-ap2t="kripto">🪙 Kripto</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="hisse">📈 Hisse</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="altin">🥇 Altın</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="gumus">🪙 Gümüş</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="emtia">🛢️ Emtia</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="doviz">💵 Döviz</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="endeks">📊 Endeks</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="fon">🏢 Fon</button>
+            <button type="button" class="ap2-type-chip" data-ap2t="custom">✍️ Özel</button>
+          </div>
+          <label>Tarih</label>
+          <input type="date" id="ap2-f-date">
+          <div class="ap2-seg" id="ap2-f-side">
+            <button type="button" class="on" data-ap2side="LONG">📈 UZUN</button>
+            <button type="button" data-ap2side="SHORT">📉 KISA <span style="font-weight:500;opacity:.65">(hedge)</span></button>
+          </div>
+          <div class="ap2-seg" id="ap2-f-mode">
+            <button type="button" class="on" data-ap2m="tutar">💵 Tutar ile</button>
+            <button type="button" data-ap2m="adet">🪙 Adet ile</button>
+          </div>
+          <div id="ap2-f-amount-box">
+            <label>Ne kadar harcadın? ($)</label>
+            <input type="number" id="ap2-f-amount" placeholder="Örn: 500" step="any" min="0">
+          </div>
+          <div id="ap2-f-qty-box" style="display:none">
+            <label>Kaç adet aldın?</label>
+            <input type="number" id="ap2-f-qty" placeholder="Örn: 0.05" step="any" min="0">
+          </div>
+          <label>Birim maliyet (ortalama giriş fiyatı, $)</label>
+          <input type="number" id="ap2-f-cost" placeholder="Örn: 35000" step="any" min="0">
+          <label>Güncel fiyat ($) <span style="color:var(--text-3);font-weight:400;font-size:11px">— boş bırakırsan canlı fiyat dene</span></label>
+          <input type="number" id="ap2-f-price" placeholder="Otomatik getirilecek" step="any" min="0">
+          <label>Not</label>
+          <input type="text" id="ap2-f-note" placeholder="Opsiyonel not..." maxlength="120">
+          <div class="ap2-form-preview" id="ap2-f-preview"></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button type="button" class="btn solid" id="ap2-f-save">💾 Kaydet</button>
+            <button type="button" class="btn" id="ap2-f-cancel">Vazgeç</button>
+          </div>
+          <div class="strat-form-err" id="ap2-f-err"></div>
+        </div>
+      </div>
+      <div id="ap2-sell-form" class="strat-form hidden">
+        <div class="strat-form-head">
+          <span id="ap2-sell-title">💰 Sat</span>
+          <button type="button" class="btn" id="ap2-sell-cancel">✕</button>
+        </div>
+        <div class="strat-form-body">
+          <div id="ap2-sell-sym" style="font-weight:700;margin-bottom:8px"></div>
+          <div id="ap2-sell-info" style="font-size:12px;color:var(--text-3);margin-bottom:10px"></div>
+          <label>Miktar Sat</label>
+          <input type="number" id="ap2-sell-qty" placeholder="Satılacak miktar" step="any" min="0">
+          <label>Satış Fiyatı ($)</label>
+          <input type="number" id="ap2-sell-price" placeholder="Piyasa fiyatı" step="any" min="0">
+          <div style="margin-top:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <span style="color:var(--text-3)">Tutar: </span><strong id="ap2-sell-amount">—</strong>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button type="button" class="btn solid" id="ap2-sell-confirm" style="background:var(--amber);color:#000">💰 Satışı Onayla</button>
+            <button type="button" class="btn" id="ap2-sell-cancel2">Vazgeç</button>
+          </div>
+          <div class="strat-form-err" id="ap2-sell-err"></div>
+        </div>
+      </div>
+      <div id="ap2-hist" class="strat-form hidden">
+        <div class="strat-form-head"><span>🛡 Giriş fiyatı doğrulaması</span><button type="button" id="ap2-hist-cancel" class="strat-form-x">✕</button></div>
+        <div class="strat-form-body">
+          <div id="ap2-hist-info"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+            <button type="button" class="btn solid" id="ap2-hist-keep" style="background:var(--amber);color:#000">Yine de kaydet</button>
+            <button type="button" class="btn" id="ap2-hist-usehist">Tarihteki fiyatı kullan</button>
+            <button type="button" class="btn" id="ap2-hist-cancel2">Vazgeç</button>
+          </div>
+          <div class="strat-form-err" id="ap2-hist-err"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="mt-zoom">
     <div class="mtz-inner">
       <img id="mtz-img" alt="Mentoring fotoğrafı">
@@ -11152,7 +11157,6 @@ function renderEk() {
     { icon: '⛓️', page: 'onchain', title: 'Onchain', desc: 'Zincir üstü veri analizi' },
     { icon: '📊', page: 'review', title: 'Haftalık Değerlendirme', desc: 'Haftalık performans ve strateji retrospektifi' },
     { icon: '📉', page: 'trading', title: 'Trading', desc: 'Trading terminali ve grafik' },
-    { icon: '📢', page: 'alfatrading', title: 'Alfa Trading', desc: 'Alfa sinyaller ve trade paylaşımı' },
     { icon: '🛠️', page: 'pano', title: 'Çalışma Panosu', desc: 'Beyaz tahta ve not alanı' },
     { icon: '🤝', page: 'mentoring', title: 'Mentörlük', desc: 'Koçluk ve birebir görüşme' },
     { icon: '🗞️', page: 'news', title: 'Dergi Alfa', desc: 'Haberler, analizler, makaleler' },
@@ -11471,7 +11475,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading'];
+  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -12605,13 +12609,15 @@ function showPage(name, skipAnim) {
   if (name === 'uyap' && !amAllowed()) name = 'home';
   if (name === 'zaman' && !amAllowed()) name = 'home';
   if (name === 'strateji' && !amAllowed()) name = 'home';
+  if (name === 'butce' && !amAllowed()) name = 'home';
+  if (name === 'portfoy' && !amAllowed()) name = 'home';
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
   if (name === 'zaman') zmRender();
   if (name === 'strateji') st2Render();
-  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -12640,12 +12646,13 @@ function showPage(name, skipAnim) {
   if (name === 'analiz') renderAnaliz();
   if (name === 'sosyalmetre') renderSosyal();
   if (name === 'uyap') renderUyap();
-  if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); if (bdTab === 'portfoy') renderPortfoy(); if (bdTab === 'alfaportfoy') { if (!ap2IsMember()) { ap2ShowGate(); } else { ap2HideGate(); renderAlfaPortfoy2(); ap2LoadPrices(); } } }
+  if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); if (bdTab === 'portfoy') renderPortfoy(); }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
   if (name === 'designer') renderDesigner();
   if (name === 'alfatrading') renderAlfaTrading();
+  if (name === 'portfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); }
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
@@ -16172,18 +16179,11 @@ function ap2VerifyCode() {
   }
 }
 function bdSetTab(t) {
-  bdTab = t === 'portfoy' ? 'portfoy' : (t === 'alfaportfoy' ? 'alfaportfoy' : 'defter');
+  bdTab = t === 'portfoy' ? 'portfoy' : 'defter';
   document.getElementById('bd-view-defter').classList.toggle('hidden', bdTab !== 'defter');
   document.getElementById('bd-view-portfoy').classList.toggle('hidden', bdTab !== 'portfoy');
-  document.getElementById('bd-view-alfaportfoy').classList.toggle('hidden', bdTab !== 'alfaportfoy');
   document.querySelectorAll('#bd-tabs button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bdt') === bdTab));
   if (bdTab === 'portfoy') { renderPortfoy(); pfLoadPrices(); }
-  if (bdTab === 'alfaportfoy') {
-    if (!ap2IsMember()) { ap2ShowGate(); return; }
-    ap2HideGate();
-    renderAlfaPortfoy2();
-    ap2LoadPrices();
-  }
 }
 const AP2_KEY = 'alfa-fund-v1';
 const AP2_HIST_KEY = 'alfa-fund-hist-v1';
@@ -18593,7 +18593,7 @@ function smImportFile() {
 }
 
 function bindAlfaPortfoy2() {
-  const view = document.getElementById('bd-view-alfaportfoy');
+  const view = document.getElementById('page-portfoy');
   if (!view) return;
   view.addEventListener('click', e => {
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
@@ -19050,7 +19050,7 @@ function bindPortfoy() {
     }
   });
   setInterval(() => { if (bdTab === 'portfoy' && !document.hidden) pfLoadPrices(); }, 60000);
-  setInterval(() => { if (bdTab === 'alfaportfoy' && !document.hidden) ap2LoadPrices(); }, 15000);
+  setInterval(() => { if (currentPage === 'portfoy' && !document.hidden) ap2LoadPrices(); }, 15000);
   pfPlanApplyInputs();
   pfPlanRender();
 }
@@ -23677,6 +23677,16 @@ async function onAuthed(user) {
   const stMob = document.getElementById('mnav-strateji');
   if (stTab) stTab.style.display = isAdmin ? '' : 'none';
   if (stMob) stMob.style.display = isAdmin ? '' : 'none';
+  // Alfa Defter: sadece admin hesabında
+  const bdTab = document.getElementById('tab-butce');
+  const bdMob = document.getElementById('mnav-butce');
+  if (bdTab) bdTab.style.display = isAdmin ? '' : 'none';
+  if (bdMob) bdMob.style.display = isAdmin ? '' : 'none';
+  // Portföy Yönetimi: sadece admin hesabında
+  const pfTab = document.getElementById('tab-portfoy');
+  const pfMob = document.getElementById('mnav-portfoy');
+  if (pfTab) pfTab.style.display = isAdmin ? '' : 'none';
+  if (pfMob) pfMob.style.display = isAdmin ? '' : 'none';
   // Mentoring erişimi: sadece Ahmet + Çağatay (e-postası sonradan eklenecek)
   const mtDesk = document.getElementById('tab-mentoring');
   const mtMob = document.getElementById('mnav-mentoring');
