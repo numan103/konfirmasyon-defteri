@@ -3918,10 +3918,22 @@
   .uyap-card-actions button:hover { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
   .uyap-card-actions button.uyap-del:hover { border-color: var(--red); background: rgba(239,68,68,.08); color: var(--red); }
   .uyap-badge { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; letter-spacing: .3px; display: inline-block; }
+  .uyap-badge.yeni { background: rgba(16,185,129,.12); color: var(--green); }
   .uyap-badge.potansiyel { background: rgba(245,158,11,.12); color: var(--amber); }
   .uyap-badge.inceleniyor { background: rgba(59,130,246,.12); color: var(--blue-txt); }
   .uyap-badge.alindi { background: rgba(34,197,94,.12); color: var(--green); }
   .uyap-badge.satildi { background: rgba(168,85,247,.12); color: #a78bfa; }
+  .uyap-card-carousel { position: relative; width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 12px; max-height: 220px; }
+  .uyap-card-carousel img { width: 100%; height: 220px; object-fit: cover; display: none; cursor: pointer; transition: opacity .15s; }
+  .uyap-card-carousel img.active { display: block; }
+  .uyap-card-carousel img:hover { opacity: .85; }
+  .uyap-carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+  .uyap-carousel-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; cursor: pointer; transition: background .2s; }
+  .uyap-carousel-dot.active { background: #fff; }
+  .uyap-carousel-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,.45); color: #fff; border: none; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; z-index: 2; transition: background .15s; }
+  .uyap-carousel-nav:hover { background: rgba(0,0,0,.7); }
+  .uyap-carousel-nav.prev { left: 8px; }
+  .uyap-carousel-nav.next { right: 8px; }
   .uyap-type-chip { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 5px; background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
   .uyap-card-loc { font-size: 12px; color: var(--text-3); margin-bottom: 10px; }
   .uyap-card-img { width: 100%; border-radius: 10px; margin-bottom: 12px; max-height: 220px; object-fit: cover; cursor: pointer; transition: opacity .15s; }
@@ -3943,7 +3955,7 @@
   .uyap-card-calc-pct.pos { color: var(--green); }
   .uyap-card-calc-pct.neg { color: var(--red); }
   .uyap-card-meta { font-size: 10px; color: var(--text-3); margin-bottom: 6px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .uyap-card-notes { font-size: 12px; color: var(--text-2); margin-bottom: 10px; line-height: 1.5; }
+  .uyap-card-notes { font-size: 12px; color: var(--text-2); margin-bottom: 10px; line-height: 1.6; padding: 10px 12px; background: var(--bg); border-radius: 8px; border-left: 3px solid var(--pc); }
   .uyap-card-qs { border-top: 1px dashed var(--border); padding-top: 8px; }
   .uyap-card-qs-h { font-size: 11px; font-weight: 700; color: var(--text-3); margin-bottom: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
   .uyap-card-qs-h .cnt { background: var(--pc-soft); color: var(--pc); border-radius: 5px; padding: 1px 6px; font-size: 10px; font-weight: 800; }
@@ -6834,8 +6846,8 @@
     <div class="uyap-notes-panel" id="uyap-notes-panel">
       <div class="uyap-notes-head">
         <div class="uyap-notes-head-t">
-          <h3 class="uyap-notes-title">📝 Notlar & Sorular</h3>
-          <p class="uyap-notes-sub">Ne düşünüyorsan yaz. Hangisiyle ilgiliyse etiketle — Twettir tarzı akış.</p>
+          <h3 class="uyap-notes-title">📝 Yatırım Notları</h3>
+          <p class="uyap-notes-sub">Fırsatlar hakkında notlarını buraya yaz. Her notunu etiketleyebilirsin.</p>
         </div>
       </div>
 
@@ -6878,7 +6890,7 @@
           <div class="uyap-tl-search"><input type="search" id="uyap-notes-search" placeholder="Akışta ara…" autocomplete="off"></div>
         </div>
         <div class="uyap-notes-list" id="uyap-notes-list"></div>
-        <div class="uyap-notes-empty" id="uyap-notes-empty">Henüz bir şey paylaşmadın — yukarıya ilk notunu yaz!</div>
+        <div class="uyap-notes-empty" id="uyap-notes-empty">Henüz not yok — yatırım fırsatları hakkında notlarını buraya ekle.</div>
       </div>
     </div>
   </div>
@@ -6891,7 +6903,7 @@
         <div class="uyap-f"><label>Emlak Adı</label><input id="uyap-f-name" placeholder="Otomatik doldur veya yaz" maxlength="80" autocomplete="off"></div>
         <div class="uyap-f"><label>Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
         <div class="uyap-f"><label>Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
-        <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="potansiyel">Potansiyel</option><option value="inceleniyor">İnceleniyor</option><option value="alindi">Alındı</option><option value="satildi">Satıldı</option></select></div>
+        <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="yeni">Yeni Fırsat</option><option value="inceleniyor">İnceleniyor</option><option value="alindi">Alındı</option><option value="satildi">Satıldı</option></select></div>
         <div class="uyap-f"><label>Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
         <div class="uyap-f"><label>Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
         <div class="uyap-f-full"><label>Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
@@ -26844,24 +26856,26 @@ function uyapRenderStats() {
   if (!el) return;
   var ps = uyapData.properties;
   var totalInv = 0, totalExp = 0, count = ps.length;
-  var byStatus = { potansiyel: 0, inceleniyor: 0, alindi: 0, satildi: 0 };
+  var byStatus = { yeni: 0, potansiyel: 0, inceleniyor: 0, alindi: 0, satildi: 0 };
   ps.forEach(function (p) {
     var c = uyapCalc(p);
     totalInv += c.total;
     totalExp += c.profit;
-    if (byStatus[p.status] !== undefined) byStatus[p.status]++;
+    var st = p.status === 'yeni' ? 'yeni' : (p.status || 'yeni');
+    if (byStatus[st] !== undefined) byStatus[st]++;
+    else byStatus.yeni++;
   });
   el.innerHTML =
     '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Yatırım</div><div class="uyap-stat-val">' + uyapFmt(totalInv) + '</div></div>'
     + '<div class="uyap-stat"><div class="uyap-stat-lbl">Beklenen Kâr</div><div class="uyap-stat-val ' + (totalExp >= 0 ? 'pos' : 'neg') + '">' + uyapFmt(totalExp) + '</div></div>'
     + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Emlak</div><div class="uyap-stat-val">' + count + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Aktif / İncelenen</div><div class="uyap-stat-val">' + (byStatus.potansiyel + byStatus.inceleniyor) + '</div></div>';
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Yeni Fırsatlar</div><div class="uyap-stat-val">' + (byStatus.yeni + byStatus.potansiyel) + '</div></div>';
 }
 
 function uyapRenderFilters() {
   var el = document.getElementById('uyap-filters');
   if (!el) return;
-  var labels = { all: 'Tümü', potansiyel: 'Potansiyel', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
+  var labels = { all: 'Tümü', yeni: 'Yeni Fırsat', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
   var html = '';
   Object.keys(labels).forEach(function (k) {
     html += '<button type="button" class="uyap-filter-btn' + (uyapFilter === k ? ' on' : '') + '" data-uyap-f="' + k + '">' + labels[k] + '</button>';
@@ -26876,7 +26890,8 @@ function uyapRenderGrid() {
   var q = (document.getElementById('uyap-search') || {}).value || '';
   q = q.toLowerCase();
   var ps = uyapData.properties.filter(function (p) {
-    if (uyapFilter !== 'all' && p.status !== uyapFilter) return false;
+    var st = p.status === 'potansiyel' ? 'yeni' : (p.status || 'yeni');
+    if (uyapFilter !== 'all' && st !== uyapFilter) return false;
     if (q && (p.name || '').toLowerCase().indexOf(q) === -1 && (p.location || '').toLowerCase().indexOf(q) === -1 && (p.url || '').toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
@@ -26887,20 +26902,27 @@ function uyapRenderGrid() {
     return;
   }
   if (empty) empty.classList.add('hidden');
-  var statusLabels = { potansiyel: 'Potansiyel', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
+  var statusLabels = { yeni: 'Yeni Fırsat', potansiyel: 'Yeni Fırsat', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
   var typeLabels = { daire: 'Daire', villa: 'Villa', arsa: 'Arsa', isyeri: 'İşyeri', diger: 'Diğer' };
   var html = '';
   ps.forEach(function (p) {
     var c = uyapCalc(p);
     var cls = c.profit > 0 ? 'pos' : (c.profit < 0 ? 'neg' : 'zero');
     var imgHtml = '';
-    if (p.images && p.images.length) {
+    if (p.images && p.images.length > 1) {
+      var imgs = p.images.map(function(src, i) { return '<img class="' + (i === 0 ? 'active' : '') + '" src="' + src + '" alt="' + (p.name || '') + '" data-uyap-imgview="' + src + '">'; }).join('');
+      var dots = p.images.map(function(_, i) { return '<button type="button" class="uyap-carousel-dot' + (i === 0 ? ' active' : '') + '" data-uyap-dot="' + i + '"></button>'; }).join('');
+      imgHtml = '<div class="uyap-card-carousel" data-uyap-carousel="' + p.id + '">' + imgs
+        + '<button type="button" class="uyap-carousel-nav prev" data-uyap-nav="-1">‹</button>'
+        + '<button type="button" class="uyap-carousel-nav next" data-uyap-nav="1">›</button>'
+        + '<div class="uyap-carousel-dots">' + dots + '</div></div>';
+    } else if (p.images && p.images.length === 1) {
       imgHtml = '<img class="uyap-card-img" src="' + p.images[0] + '" alt="' + (p.name || '') + '" data-uyap-imgview="' + (p.images[0] || '') + '">';
     }
     var linkHtml = p.url ? '<a class="uyap-card-link" href="' + p.url + '" target="_blank" rel="noopener noreferrer" title="İlanı aç">🔗 İlanı Gör</a>' : '';
     html += '<div class="uyap-card" data-uyap-card="' + p.id + '">'
       + '<div class="uyap-card-top"><div class="uyap-card-title">'
-      + '<span class="uyap-badge ' + (p.status || 'potansiyel') + '">' + (statusLabels[p.status] || p.status) + '</span>'
+      + '<span class="uyap-badge ' + (p.status === 'potansiyel' ? 'yeni' : (p.status || 'yeni')) + '">' + (statusLabels[p.status] || statusLabels.yeni) + '</span>'
       + ' ' + (p.name || 'İsimsiz')
       + ' <span class="uyap-type-chip">' + (typeLabels[p.type] || p.type || '') + '</span>'
       + '</div><div class="uyap-card-actions">'
@@ -27097,7 +27119,7 @@ function uyapOpenForm(id) {
     document.getElementById('uyap-f-name').value = '';
     document.getElementById('uyap-f-loc').value = '';
     document.getElementById('uyap-f-type').value = 'daire';
-    document.getElementById('uyap-f-status').value = 'potansiyel';
+    document.getElementById('uyap-f-status').value = 'yeni';
     document.getElementById('uyap-f-price').value = '';
     document.getElementById('uyap-f-sale').value = '';
     document.getElementById('uyap-f-notes').value = '';
@@ -27361,6 +27383,31 @@ document.addEventListener('click', function (e) {
   }
   var imgView = t.closest('[data-uyap-imgview]');
   if (imgView) { uyapImgView(imgView.getAttribute('data-uyap-imgview')); return; }
+  var navBtn = t.closest('[data-uyap-nav]');
+  if (navBtn) {
+    var carousel = navBtn.closest('.uyap-card-carousel');
+    if (carousel) {
+      var imgs = carousel.querySelectorAll('img');
+      var dots = carousel.querySelectorAll('.uyap-carousel-dot');
+      var cur = 0;
+      imgs.forEach(function(im, i) { if (im.classList.contains('active')) cur = i; });
+      var dir = parseInt(navBtn.getAttribute('data-uyap-nav'));
+      var next = (cur + dir + imgs.length) % imgs.length;
+      imgs[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      imgs[next].classList.add('active'); dots[next].classList.add('active');
+    }
+    return;
+  }
+  var dotBtn = t.closest('[data-uyap-dot]');
+  if (dotBtn) {
+    var carousel2 = dotBtn.closest('.uyap-card-carousel');
+    if (carousel2) {
+      var idx = parseInt(dotBtn.getAttribute('data-uyap-dot'));
+      carousel2.querySelectorAll('img').forEach(function(im, i) { im.classList.toggle('active', i === idx); });
+      carousel2.querySelectorAll('.uyap-carousel-dot').forEach(function(d, i) { d.classList.toggle('active', i === idx); });
+    }
+    return;
+  }
   if (t.id === 'uyap-imgview-close' || t.closest('#uyap-imgview-close')) { uyapImgClose(); return; }
   if (t.id === 'uyap-imgview') { uyapImgClose(); return; }
 });
