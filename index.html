@@ -16274,6 +16274,10 @@ function ap2CloudSummary() {
   var hist = [];
   try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) {}
   var startDate = positions.length ? (positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity)) : null;
+  (ap2Data.sells || []).forEach(function(sl) {
+    var t = new Date(sl.buyDate || sl.date || Date.now()).getTime();
+    if (t < startDate) startDate = t;
+  });
   var lastUpdate = positions.length ? (positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t > m ? t : m; }, 0)) : null;
   return {
     portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct,
@@ -17615,6 +17619,10 @@ function ap2ShareCanvas() {
 
   var shareDate = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
   var firstTs = positions.length ? positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity) : new Date('2026-08-19').getTime();
+  (ap2Data.sells || []).forEach(function(sl) {
+    var t = new Date(sl.buyDate || sl.date || Date.now()).getTime();
+    if (t < firstTs) firstTs = t;
+  });
   var shareStartTxt = isNaN(firstTs) ? '—' : new Date(firstTs).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
 
   var rows = [];
