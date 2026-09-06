@@ -3981,12 +3981,12 @@
   .uyap-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
   .uyap-f { display: flex; flex-direction: column; gap: 6px; }
   .uyap-f-full { grid-column: 1 / -1; }
-  .uyap-f label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; }
-  .uyap-f input, .uyap-f select, .uyap-f textarea { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; width: 100%; box-sizing: border-box; transition: border-color .2s, box-shadow .2s; }
-  .uyap-f textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .uyap-f label { font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
+  .uyap-f input, .uyap-f select, .uyap-f textarea { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; width: 100%; box-sizing: border-box; transition: border-color .2s, box-shadow .2s; }
+  .uyap-f textarea { resize: vertical; min-height: 100px; line-height: 1.6; padding: 14px; }
   .uyap-f input:focus, .uyap-f select:focus, .uyap-f textarea:focus { outline: none; border-color: var(--pc); box-shadow: 0 0 0 3px var(--pc-soft); }
-  .uyap-f input::placeholder, .uyap-f textarea::placeholder { color: var(--text-3); opacity: .6; }
-  .uyap-f-sec { font-size: 12px; font-weight: 800; color: var(--text-2); margin: 18px 0 10px; padding-top: 14px; border-top: 1px solid var(--border); grid-column: 1 / -1; text-transform: uppercase; letter-spacing: .5px; }
+  .uyap-f input::placeholder, .uyap-f textarea::placeholder { color: var(--text-3); opacity: .5; }
+  .uyap-f-sec { font-size: 13px; font-weight: 800; color: var(--text); margin: 20px 0 10px; padding-top: 16px; border-top: 1px solid var(--border); grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; }
   .uyap-costs { display: flex; flex-direction: column; gap: 8px; grid-column: 1 / -1; }
   .uyap-cost-row { display: flex; gap: 8px; align-items: center; }
   .uyap-cost-row input { flex: 1; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; transition: border-color .2s, box-shadow .2s; }
@@ -6906,18 +6906,18 @@
     <div class="uyap-form-card">
       <div class="uyap-form-h"><span id="uyap-form-title">Yeni Emlak</span><button type="button" id="uyap-form-close">✕</button></div>
       <div class="uyap-form-grid">
-        <div class="uyap-f-full"><label>🔗 Link (URL) — yapıştır, otomatik doldursun</label><input id="uyap-f-url" placeholder="https://sahibinden.com/... veya hepsiemlak.com/..." maxlength="500" autocomplete="off"><span class="uyap-f-hint" id="uyap-url-status"></span></div>
-        <div class="uyap-f"><label>Emlak Adı</label><input id="uyap-f-name" placeholder="Otomatik doldur veya yaz" maxlength="80" autocomplete="off"></div>
-        <div class="uyap-f"><label>Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
-        <div class="uyap-f"><label>Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
-        <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="yeni">Yeni Fırsat</option></select></div>
-        <div class="uyap-f"><label>Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
-        <div class="uyap-f"><label>Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
-        <div class="uyap-f-full"><label>Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
-        <div class="uyap-f-sec">Ek Masraflar</div>
+        <div class="uyap-f-full"><label>🔗 Link (URL)</label><input id="uyap-f-url" placeholder="https://sahibinden.com/... veya hepsiemlak.com/..." maxlength="500" autocomplete="off"><span class="uyap-f-hint" id="uyap-url-status"></span></div>
+        <div class="uyap-f"><label>🏷️ Emlak Adı</label><input id="uyap-f-name" placeholder="Otomatik doldur veya yaz" maxlength="80" autocomplete="off"></div>
+        <div class="uyap-f"><label>📍 Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
+        <div class="uyap-f"><label>🏠 Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
+        <div class="uyap-f"><label>📌 Durum</label><select id="uyap-f-status"><option value="yeni">Yeni Fırsat</option></select></div>
+        <div class="uyap-f"><label>💰 Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
+        <div class="uyap-f"><label>🎯 Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
+        <div class="uyap-f-full"><label>📝 Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
+        <div class="uyap-f-sec">💸 Ek Masraflar</div>
         <div class="uyap-costs" id="uyap-f-costs-list"></div>
         <button type="button" class="uyap-cost-add" id="uyap-f-cost-add">+ Masraf Ekle</button>
-        <div class="uyap-f-sec">Fotoğraflar</div>
+        <div class="uyap-f-sec">📷 Fotoğraflar</div>
         <div class="uyap-img-drop" id="uyap-f-img-drop">
           <input type="file" id="uyap-f-img-input" accept="image/*" multiple>
           <span>📷 Fotoğraf eklemek için tıkla veya sürükle</span>
