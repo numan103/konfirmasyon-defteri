@@ -26829,7 +26829,7 @@ loadSfx();
    REAL ESTATE — Gayrimenkul Takip
    ══════════════════════════════════════════════════════════ */
 var UYAP_KEY = 'alfa-uyap-v1';
-var uyapData = { properties: [] };
+var uyapData = { properties: [], notes: [] };
 var uyapFilter = 'all';
 var uyapEditId = null;
 var uyapFormImgs = [];
@@ -26838,11 +26838,34 @@ function uyapId() { return 'uyap_' + Date.now().toString(36) + '_' + Math.random
 
 function uyapLoad() {
   try { var raw = localStorage.getItem(UYAP_KEY); if (raw) uyapData = JSON.parse(raw); } catch (e) {}
-  if (!uyapData || !uyapData.properties) uyapData = { properties: [] };
+  if (!uyapData || !uyapData.properties) uyapData = { properties: [], notes: [] };
+  if (!uyapData.notes) uyapData.notes = [];
+  uyapCloudLoad();
+}
+
+async function uyapCloudLoad() {
+  if (!AUTH.user || !AUTH.client) return;
+  try {
+    var v = await store.get(UYAP_KEY);
+    if (v) {
+      var cloud = typeof v === 'string' ? JSON.parse(v) : v;
+      if (cloud && cloud.properties) {
+        uyapData = cloud;
+        if (!uyapData.notes) uyapData.notes = [];
+        renderUyap();
+      }
+    }
+  } catch (e) {}
 }
 
 function uyapSave() {
   try { localStorage.setItem(UYAP_KEY, JSON.stringify(uyapData)); } catch (e) {}
+  uyapCloudSave();
+}
+
+function uyapCloudSave() {
+  if (!AUTH.user || !AUTH.client) return;
+  try { store.set(UYAP_KEY, JSON.stringify(uyapData)); } catch (e) {}
 }
 
 function uyapFmt(n) {
