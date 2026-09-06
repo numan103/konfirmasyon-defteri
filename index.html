@@ -12603,6 +12603,8 @@ function showPage(name, skipAnim) {
   if (name === 'basvuru' && !amAllowed()) name = 'home';
   if (name === 'sosyalmetre' && !amAllowed()) name = 'home';
   if (name === 'uyap' && !amAllowed()) name = 'home';
+  if (name === 'zaman' && !amAllowed()) name = 'home';
+  if (name === 'strateji' && !amAllowed()) name = 'home';
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
@@ -23666,6 +23668,15 @@ async function onAuthed(user) {
   const uyapMob = document.getElementById('mnav-uyap');
   if (uyapTab) uyapTab.style.display = isAdmin ? '' : 'none';
   if (uyapMob) uyapMob.style.display = isAdmin ? '' : 'none';
+  // Zaman & Strateji: sadece admin hesabında
+  const zmTab = document.getElementById('tab-zaman');
+  const zmMob = document.getElementById('mnav-zaman');
+  if (zmTab) zmTab.style.display = isAdmin ? '' : 'none';
+  if (zmMob) zmMob.style.display = isAdmin ? '' : 'none';
+  const stTab = document.getElementById('tab-strateji');
+  const stMob = document.getElementById('mnav-strateji');
+  if (stTab) stTab.style.display = isAdmin ? '' : 'none';
+  if (stMob) stMob.style.display = isAdmin ? '' : 'none';
   // Mentoring erişimi: sadece Ahmet + Çağatay (e-postası sonradan eklenecek)
   const mtDesk = document.getElementById('tab-mentoring');
   const mtMob = document.getElementById('mnav-mentoring');
