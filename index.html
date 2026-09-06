@@ -3955,7 +3955,9 @@
   .uyap-card-calc-pct.pos { color: var(--green); }
   .uyap-card-calc-pct.neg { color: var(--red); }
   .uyap-card-meta { font-size: 10px; color: var(--text-3); margin-bottom: 6px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .uyap-card-notes { font-size: 12px; color: var(--text-2); margin-bottom: 10px; line-height: 1.6; padding: 10px 12px; background: var(--bg); border-radius: 8px; border-left: 3px solid var(--pc); }
+  .uyap-card-notes { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--text-2); margin-bottom: 10px; line-height: 1.6; padding: 12px 14px; background: linear-gradient(135deg, var(--bg), rgba(255,255,255,.02)); border-radius: 10px; border: 1px solid var(--border); }
+  .uyap-card-notes-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .uyap-card-notes-text { flex: 1; }
   .uyap-card-qs { border-top: 1px dashed var(--border); padding-top: 8px; }
   .uyap-card-qs-h { font-size: 11px; font-weight: 700; color: var(--text-3); margin-bottom: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
   .uyap-card-qs-h .cnt { background: var(--pc-soft); color: var(--pc); border-radius: 5px; padding: 1px 6px; font-size: 10px; font-weight: 800; }
@@ -26939,7 +26941,7 @@ function uyapRenderGrid() {
       + '<div><span class="uyap-card-calc-lbl">Beklenen Kâr</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
       + '<span class="uyap-card-calc-pct ' + cls + '">' + (c.sale ? ('%' + c.pct.toFixed(1)) : '—') + '</span>'
       + '</div>'
-      + (p.notes ? '<div class="uyap-card-notes">📝 ' + p.notes + '</div>' : '')
+      + (p.notes ? '<div class="uyap-card-notes"><span class="uyap-card-notes-icon">💡</span><div class="uyap-card-notes-text">' + p.notes + '</div></div>' : '')
       + '</div>';
   });
   grid.innerHTML = html;
