@@ -6903,7 +6903,7 @@
         <div class="uyap-f"><label>Emlak Adı</label><input id="uyap-f-name" placeholder="Otomatik doldur veya yaz" maxlength="80" autocomplete="off"></div>
         <div class="uyap-f"><label>Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
         <div class="uyap-f"><label>Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
-        <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="yeni">Yeni Fırsat</option><option value="inceleniyor">İnceleniyor</option><option value="alindi">Alındı</option><option value="satildi">Satıldı</option></select></div>
+        <div class="uyap-f"><label>Durum</label><select id="uyap-f-status"><option value="yeni">Yeni Fırsat</option></select></div>
         <div class="uyap-f"><label>Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
         <div class="uyap-f"><label>Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
         <div class="uyap-f-full"><label>Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
@@ -26856,26 +26856,24 @@ function uyapRenderStats() {
   if (!el) return;
   var ps = uyapData.properties;
   var totalInv = 0, totalExp = 0, count = ps.length;
-  var byStatus = { yeni: 0, potansiyel: 0, inceleniyor: 0, alindi: 0, satildi: 0 };
+  var byStatus = { yeni: 0 };
   ps.forEach(function (p) {
     var c = uyapCalc(p);
     totalInv += c.total;
     totalExp += c.profit;
-    var st = p.status === 'yeni' ? 'yeni' : (p.status || 'yeni');
-    if (byStatus[st] !== undefined) byStatus[st]++;
-    else byStatus.yeni++;
+    byStatus.yeni++;
   });
   el.innerHTML =
     '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Yatırım</div><div class="uyap-stat-val">' + uyapFmt(totalInv) + '</div></div>'
     + '<div class="uyap-stat"><div class="uyap-stat-lbl">Beklenen Kâr</div><div class="uyap-stat-val ' + (totalExp >= 0 ? 'pos' : 'neg') + '">' + uyapFmt(totalExp) + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Emlak</div><div class="uyap-stat-val">' + count + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Yeni Fırsatlar</div><div class="uyap-stat-val">' + (byStatus.yeni + byStatus.potansiyel) + '</div></div>';
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Fırsat</div><div class="uyap-stat-val">' + count + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Aktif</div><div class="uyap-stat-val">' + count + '</div></div>';
 }
 
 function uyapRenderFilters() {
   var el = document.getElementById('uyap-filters');
   if (!el) return;
-  var labels = { all: 'Tümü', yeni: 'Yeni Fırsat', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
+  var labels = { all: 'Tümü', yeni: 'Yeni Fırsat' };
   var html = '';
   Object.keys(labels).forEach(function (k) {
     html += '<button type="button" class="uyap-filter-btn' + (uyapFilter === k ? ' on' : '') + '" data-uyap-f="' + k + '">' + labels[k] + '</button>';
@@ -26902,7 +26900,7 @@ function uyapRenderGrid() {
     return;
   }
   if (empty) empty.classList.add('hidden');
-  var statusLabels = { yeni: 'Yeni Fırsat', potansiyel: 'Yeni Fırsat', inceleniyor: 'İnceleniyor', alindi: 'Alındı', satildi: 'Satıldı' };
+  var statusLabels = { yeni: 'Yeni Fırsat', potansiyel: 'Yeni Fırsat' };
   var typeLabels = { daire: 'Daire', villa: 'Villa', arsa: 'Arsa', isyeri: 'İşyeri', diger: 'Diğer' };
   var html = '';
   ps.forEach(function (p) {
