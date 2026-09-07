@@ -4,34 +4,27 @@
 // Bot API'den gönderilir (Vercel Hobby 12 fonksiyon limiti nedeniyle ayrı endpoint açılmadı).
 const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
 const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
-const TG_TOKEN = process.env.TG_BOT_TOKEN;
-const TG_CHAT = process.env.TG_CHAT_ID;
-const TG_THREAD = process.env.TG_THREAD ? Number(process.env.TG_THREAD) : null;
+const TG_TOKEN = (process.env.TG_BOT_TOKEN || '').trim();
+const TG_CHAT = (process.env.TG_CHAT_ID || '').trim();
+const TG_THREAD = process.env.TG_THREAD ? Number(String(process.env.TG_THREAD).trim()) : null;
 
 async function sendTelegram(text) {
   const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
-  const chatId = Number(TG_CHAT) || TG_CHAT;
-  const payload = { chat_id: chatId, text, disable_web_page_preview: true };
-  if (TG_THREAD) payload.message_thread_id = Number(TG_THREAD);
-  const https = await import('https');
-  return new Promise((resolve) => {
-    const data = JSON.stringify(payload);
-    const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
-      let body = '';
-      res.on('data', (c) => body += c);
-      res.on('end', () => {
-        try { resolve({ http: res.statusCode, ...JSON.parse(body) }); } catch (e) { resolve({ http: res.statusCode, error: body }); }
-      });
-    });
-    req.on('error', (e) => resolve({ http: 0, error: e.message }));
-    req.write(data);
-    req.end();
+  const payload = { chat_id: TG_CHAT, text, disable_web_page_preview: true };
+  if (TG_THREAD) payload.message_thread_id = TG_THREAD;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
+  let out = {};
+  try { out = await res.json(); } catch (e) {}
+  return { http: res.status, ...out };
 }
 }
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (!TG_TOKEN || !TG_CHAT) return res.status(200).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN=' + !!TG_TOKEN + ' TG_CHAT_ID=' + !!TG_CHAT });
+  if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
   let message = null;
   if (req.method === 'POST') {
     let body;
@@ -41,7 +34,7 @@ async function handleNotify(req, res) {
   if (!message) return res.status(400).json({ error: 'message gerekli' });
   const out = await sendTelegram(message);
   if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') });
-  return res.status(200).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http, chatIdRaw: TG_CHAT, chatIdType: typeof TG_CHAT, chatIdNum: Number(TG_CHAT), hasToken: !!TG_TOKEN });
+  return res.status(502).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http });
 }
 
 async function fetchChannelHtml(before) {
