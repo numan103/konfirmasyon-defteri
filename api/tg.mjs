@@ -20,7 +20,7 @@ async function sendTelegram(text) {
   });
   let out = {};
   try { out = await res.json(); } catch (e) {}
-  return { http: res.status, ...out };
+  return { http: res.status, ...out, _sentPayload: { chat_id: chatId, hasThread: !!TG_THREAD } };
 }
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -34,7 +34,7 @@ async function handleNotify(req, res) {
   if (!message) return res.status(400).json({ error: 'message gerekli' });
   const out = await sendTelegram(message);
   if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') });
-  return res.status(200).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http, chatId: String(TG_CHAT).slice(0,5) + '...', hasToken: !!TG_TOKEN, thread: TG_THREAD });
+  return res.status(200).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http, chatIdRaw: TG_CHAT, chatIdType: typeof TG_CHAT, chatIdNum: Number(TG_CHAT), hasToken: !!TG_TOKEN });
 }
 
 async function fetchChannelHtml(before) {
