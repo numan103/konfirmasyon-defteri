@@ -10,8 +10,9 @@ const TG_THREAD = process.env.TG_THREAD ? Number(process.env.TG_THREAD) : null;
 
 async function sendTelegram(text) {
   const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
-  const payload = { chat_id: TG_CHAT, text, disable_web_page_preview: true };
-  if (TG_THREAD) payload.message_thread_id = TG_THREAD;
+  const chatId = Number(TG_CHAT) || TG_CHAT;
+  const payload = { chat_id: chatId, text, disable_web_page_preview: true };
+  if (TG_THREAD) payload.message_thread_id = Number(TG_THREAD);
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -23,7 +24,7 @@ async function sendTelegram(text) {
 }
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
+  if (!TG_TOKEN || !TG_CHAT) return res.status(200).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN=' + !!TG_TOKEN + ' TG_CHAT_ID=' + !!TG_CHAT });
   let message = null;
   if (req.method === 'POST') {
     let body;
@@ -33,7 +34,7 @@ async function handleNotify(req, res) {
   if (!message) return res.status(400).json({ error: 'message gerekli' });
   const out = await sendTelegram(message);
   if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') });
-  return res.status(502).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http });
+  return res.status(200).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http, chatId: String(TG_CHAT).slice(0,5) + '...', hasToken: !!TG_TOKEN, thread: TG_THREAD });
 }
 
 async function fetchChannelHtml(before) {
