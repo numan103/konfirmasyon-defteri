@@ -7109,6 +7109,8 @@
           <div style="margin-top:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px">
             <span style="color:var(--text-3)">Tutar: </span><strong id="ap2-sell-amount">—</strong>
           </div>
+          <label style="margin-top:10px">Not (opsiyonel)</label>
+          <input type="text" id="ap2-sell-note" placeholder="Satış notu..." maxlength="120">
           <div style="display:flex;gap:8px;margin-top:12px">
             <button type="button" class="btn solid" id="ap2-sell-confirm" style="background:var(--amber);color:#000">💰 Satışı Onayla</button>
             <button type="button" class="btn" id="ap2-sell-cancel2">Vazgeç</button>
@@ -16787,19 +16789,23 @@ function ap2SellConfirm() {
   const _profit = ap2PnlOf(pos.side, sellQty * _entryCost, amount);
   let _days = 0;
   try { const _d0 = new Date(pos.date).getTime(); if (!isNaN(_d0)) _days = Math.max(0, Math.round((Date.now() - _d0) / 86400000)); } catch (e) {}
-  ap2Data.sells.push({ id: ap2Id(), posId: pos.id, symbol: pos.symbol, type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now(), cost: _entryCost, profit: _profit, days: _days, posDate: pos.date });
+  const _sellNote = (document.getElementById('ap2-sell-note').value || '').trim();
+  ap2Data.sells.push({ id: ap2Id(), posId: pos.id, symbol: pos.symbol, type: pos.type, qty: sellQty, price: sellPrice, amount: amount, ts: Date.now(), cost: _entryCost, profit: _profit, days: _days, posDate: pos.date, note: _sellNote });
   pos.qty = Math.round((pos.qty - sellQty) * 1e8) / 1e8;
   ap2Data.cash = (Number(ap2Data.cash) || 0) + amount;
   const _profitSign = _profit >= 0 ? '+' : '';
   const _profitEmoji = _profit >= 0 ? '📈' : '📉';
   if (pos.qty > 0) {
-    ap2TgNotify('💰 Kısmi satış — ' + pos.symbol + '\n\n' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nKalan: ' + pos.qty + ' adet\n\nalfa-trader.com');
+    const _tgNote = _sellNote ? '\n📝 Not: ' + _sellNote : '';
+    ap2TgNotify('💰 Kısmi satış — ' + pos.symbol + '\n\n' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nKalan: ' + pos.qty + ' adet' + _tgNote + '\n\nalfa-trader.com');
   } else {
-    ap2TgNotify('🔒 Kapanış — ' + pos.symbol + ' pozisyonu tamamen kapatıldı\n\nSatış: ' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Net Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nGün: ' + _days + ' gün\n\nalfa-trader.com');
+    const _tgNote = _sellNote ? '\n📝 Not: ' + _sellNote : '';
+    ap2TgNotify('🔒 Kapanış — ' + pos.symbol + ' pozisyonu tamamen kapatıldı\n\nSatış: ' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Net Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nGün: ' + _days + ' gün' + _tgNote + '\n\nalfa-trader.com');
     ap2Data.positions = ap2Data.positions.filter(x => x.id !== pos.id);
   }
   ap2Save();
   document.getElementById('ap2-sell-form').classList.add('hidden');
+  document.getElementById('ap2-sell-note').value = '';
   ap2SellId = null;
   renderAlfaPortfoy2();
   stratToast('💰 ' + sellQty + ' ' + pos.symbol + ' satıldı — +' + ap2Fmt(amount));
