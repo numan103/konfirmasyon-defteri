@@ -13,14 +13,21 @@ async function sendTelegram(text) {
   const chatId = Number(TG_CHAT) || TG_CHAT;
   const payload = { chat_id: chatId, text, disable_web_page_preview: true };
   if (TG_THREAD) payload.message_thread_id = Number(TG_THREAD);
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+  const https = await import('https');
+  return new Promise((resolve) => {
+    const data = JSON.stringify(payload);
+    const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
+      let body = '';
+      res.on('data', (c) => body += c);
+      res.on('end', () => {
+        try { resolve({ http: res.statusCode, ...JSON.parse(body) }); } catch (e) { resolve({ http: res.statusCode, error: body }); }
+      });
+    });
+    req.on('error', (e) => resolve({ http: 0, error: e.message }));
+    req.write(data);
+    req.end();
   });
-  let out = {};
-  try { out = await res.json(); } catch (e) {}
-  return { http: res.status, ...out, _sentPayload: { chat_id: chatId, hasThread: !!TG_THREAD } };
+}
 }
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
