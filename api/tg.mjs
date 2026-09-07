@@ -21,7 +21,6 @@ async function sendTelegram(text) {
   try { out = await res.json(); } catch (e) {}
   return { http: res.status, ...out };
 }
-}
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
