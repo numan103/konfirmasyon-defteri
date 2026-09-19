@@ -1854,6 +1854,12 @@
   .bd-clear-filter:hover { background: color-mix(in srgb, var(--pc) 15%, var(--bg-2)); border-style: solid; }
   .bd-clear-filter.show { display: flex; }
   .bd-clear-filter span { opacity: .7; font-weight: 400; }
+  .bd-eye { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-2); color: var(--text); cursor: pointer; font-size: 16px; flex-shrink: 0; transition: all .15s ease; }
+  .bd-eye:hover { border-color: var(--pc); }
+  .bd-eye-inline { background: none; border: none; cursor: pointer; font-size: 18px; vertical-align: middle; margin-left: 6px; transition: opacity .15s; }
+  .bd-eye-inline:hover { opacity: .7; }
+  .bd-hidden .bd-v, .bd-hidden .bd-row-amt, .bd-hidden .bd-legend-v, .bd-hidden .bd-bar-top b, .bd-hidden .bd-budget-txt, .bd-hidden .bd-card .bd-v, .bd-hidden #bd-chart-sub, .bd-hidden .bd-summary .bd-v, .bd-hidden .panel-h .bd-panel-sub, .bd-hidden .bd-donut-c, .bd-hidden .bd-legend-p, .bd-hidden .bd-bar-top .bd-legend-p { filter: blur(8px) !important; user-select: none; }
+  .bd-hidden .bd-eye-inline { opacity: .5; }
   /* Alfa Defter — Defter | Portföy sekmeleri */
   .bd-tabs { display: flex; gap: 6px; margin-bottom: 14px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-2); width: fit-content; max-width: 100%; overflow-x: auto; }
   .bd-tab { border: none; background: transparent; color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 9px; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
@@ -4126,25 +4132,45 @@
   .zm-gap-title { font-size: 15px; font-weight: 800; color: var(--text); }
   .zm-hint { font-size: 11px; color: var(--text-3); }
   .zm-today-card, .zm-goals-card, .zm-hist-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
-  .zm-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .zm-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .zm-row:last-child { border-bottom: none; }
   .zm-row-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
   .zm-row-name { flex: 1; min-width: 0; font-weight: 700; font-size: 13.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .zm-row-goal { font-size: 11.5px; color: var(--text-3); }
-  .zm-row-input { width: 90px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 7px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; text-align: center; }
-  .zm-row-input:focus { outline: none; border-color: var(--pc); }
-  .zm-stars { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
-  .zm-star { font-size: 20px; line-height: 1; color: var(--border); cursor: pointer; transition: color .15s, transform .1s; user-select: none; }
-  .zm-star:hover { transform: scale(1.15); }
-  .zm-star.on { color: #f59e0b; }
-  .zm-row-ctrl { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .zm-row-ctrl .zm-row-input { width: 74px; }
-  .zm-btn { width: 30px; height: 30px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 16px; line-height: 1; font-weight: 700; }
-  .zm-btn:hover { border-color: var(--pc); color: var(--pc); }
-  .zm-btn:active { transform: scale(.95); }
-  .zm-row-sa { font-size: 11px; color: var(--text-3); }
-  .zm-goals-suf { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
-  .zm-today-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+
+  /* 3-Level Butonları */
+  .zm-levels { display: flex; gap: 5px; flex-shrink: 0; }
+  .zm-lvl { padding: 5px 12px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-3); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .zm-lvl:hover { border-color: var(--pc); color: var(--pc); }
+  .zm-lvl.on-1 { background: rgba(239,68,68,.12); border-color: var(--red); color: var(--red); }
+  .zm-lvl.on-2 { background: rgba(245,158,11,.12); border-color: var(--amber); color: var(--amber); }
+  .zm-lvl.on-3 { background: rgba(34,197,94,.12); border-color: var(--green); color: var(--green); }
+  .zm-lvl-hint { font-size: 10px; color: var(--text-3); font-weight: 600; margin-left: 4px; }
+  .zm-lvl-hint.pos { color: var(--green); }
+  .zm-lvl-hint.neg { color: var(--red); }
+
+  .zm-row-acts { display: flex; gap: 5px; flex-shrink: 0; }
+  .zm-row-eye { width: 28px; height: 28px; border: 1px solid var(--border); background: var(--bg); border-radius: 7px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; }
+  .zm-row-eye:hover { border-color: var(--amber); background: rgba(245,158,11,.1); }
+  .zm-water { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); margin-top: 14px; }
+  .zm-water-h { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+  .zm-water-row { display: flex; align-items: center; gap: 12px; justify-content: center; }
+  .zm-water-btn { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 20px; font-weight: 800; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; }
+  .zm-water-btn:hover { border-color: var(--pc); color: var(--pc); }
+  .zm-water-btn:active { transform: scale(.92); }
+  .zm-water-minus { color: var(--red); }
+  .zm-water-plus { background: color-mix(in srgb, var(--pc) 10%, var(--card)); border-color: color-mix(in srgb, var(--pc) 30%, var(--border)); color: var(--pc); }
+  .zm-water-cups { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; flex: 1; }
+  .zm-water-cup { font-size: 24px; cursor: default; transition: transform .15s; }
+  .zm-water-cup.filled { animation: zmCupPop .25s ease; }
+  @keyframes zmCupPop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  .zm-water-info { text-align: center; margin-top: 8px; font-size: 13px; color: var(--text-3); font-weight: 600; }
+  .zm-water-info span { color: var(--text); font-weight: 800; }
+  .zm-water-pct { font-size: 12px; margin-left: 4px; }
+  .zm-water-goal-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--text-3); }
+  .zm-water-gbtn { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s; }
+  .zm-water-gbtn:hover { border-color: var(--pc); color: var(--pc); }
+  #zm-water-goal-val { font-weight: 800; color: var(--text); min-width: 20px; text-align: center; }
   .zm-week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
   .zm-cat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
   .zm-cat-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -4278,6 +4304,88 @@
   .zm-weekbar-cell .wb-tot { font-size: 10px; font-weight: 700; margin-top: 3px; }
   .zm-weekbar-cell.active .wb-tot { opacity: .9; }
   .zm-weekbar-cell.has-none { opacity: .45; }
+
+  /* Zaman Tabs */
+  .zm-tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .zm-tab { flex: 1; padding: 10px 16px; border: none; background: transparent; color: var(--text-3); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 9px; transition: all .2s; text-align: center; }
+  .zm-tab:hover { color: var(--text); background: var(--bg); }
+  .zm-tab.active { background: var(--pc); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .zm-tab-content { display: none; }
+  .zm-tab-content.active { display: block; }
+
+  /* Collapse Sections */
+  .zm-collapse-head { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-top: 12px; box-shadow: var(--shadow); transition: all .15s; user-select: none; }
+  .zm-collapse-head:hover { border-color: var(--pc); }
+  .zm-collapse-head .zm-collapse-icon { font-size: 14px; transition: transform .2s; flex-shrink: 0; }
+  .zm-collapse-head.open .zm-collapse-icon { transform: rotate(90deg); }
+  .zm-collapse-head .zm-collapse-title { font-size: 15px; font-weight: 800; color: var(--text); flex: 1; }
+  .zm-collapse-head .zm-collapse-hint { font-size: 11px; color: var(--text-3); }
+  .zm-collapse-body { display: none; padding: 12px 0 0; }
+  .zm-collapse-body.open { display: block; }
+
+  /* Kişisel Gelişim */
+  .pg-tabs-wrap { margin-bottom: 14px; }
+  .pg-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .pg-head h2 { font-size: 18px; font-weight: 800; color: var(--text); margin: 0; }
+  .pg-add-row { display: flex; gap: 8px; }
+  .pg-add-row input { flex: 1; min-width: 140px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; }
+  .pg-add-row input:focus { outline: none; border-color: var(--pc); }
+  .pg-add-btn { padding: 8px 14px; background: var(--pc); color: #fff; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .pg-add-btn:hover { opacity: .85; }
+
+  .pg-day-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 8px 14px; box-shadow: var(--shadow); }
+  .pg-day-nav button { width: 32px; height: 32px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .pg-day-nav button:hover { border-color: var(--pc); color: var(--pc); }
+  .pg-day-nav .pg-day-label { flex: 1; text-align: center; font-weight: 700; font-size: 14px; color: var(--text); }
+  .pg-day-nav .pg-day-label small { display: block; font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 1px; }
+  .pg-day-today { padding: 5px 12px !important; width: auto !important; border-color: var(--pc) !important; color: var(--pc) !important; background: var(--pc-soft) !important; font-size: 12px !important; }
+  .pg-day-today:hover { background: var(--pc) !important; color: #fff !important; }
+  .pg-day-today:disabled { opacity: .35; cursor: not-allowed; }
+
+  .pg-items { display: flex; flex-direction: column; gap: 8px; }
+  .pg-item { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); transition: all .2s; }
+  .pg-item.lvl-1 { border-color: color-mix(in srgb, var(--red) 40%, var(--border)); }
+  .pg-item.lvl-2 { border-color: color-mix(in srgb, var(--amber) 40%, var(--border)); }
+  .pg-item.lvl-3 { border-color: color-mix(in srgb, var(--green) 40%, var(--border)); }
+  .pg-item-icon { font-size: 22px; flex-shrink: 0; width: 36px; text-align: center; }
+  .pg-item-info { flex: 1; min-width: 0; }
+  .pg-item-name { font-weight: 700; font-size: 14px; color: var(--text); }
+  .pg-item-hint { font-size: 11px; color: var(--text-3); font-weight: 600; margin-top: 1px; }
+  .pg-item-hint.h-1 { color: var(--red); }
+  .pg-item-hint.h-2 { color: var(--amber); }
+  .pg-item-hint.h-3 { color: var(--green); }
+  .pg-item-levels { display: flex; gap: 4px; flex-shrink: 0; }
+  .pg-lvl { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .15s; }
+  .pg-lvl:hover { border-color: var(--pc); }
+  .pg-lvl.on-1 { background: rgba(239,68,68,.15); border-color: var(--red); }
+  .pg-lvl.on-2 { background: rgba(245,158,11,.15); border-color: var(--amber); }
+  .pg-lvl.on-3 { background: rgba(34,197,94,.15); border-color: var(--green); }
+  .pg-item-del { width: 28px; height: 28px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); border-radius: 7px; cursor: pointer; font-size: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .pg-item-del:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.08); }
+
+  .pg-streaks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+  .pg-streak-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; box-shadow: var(--shadow); }
+  .pg-streak-icon { font-size: 24px; margin-bottom: 4px; }
+  .pg-streak-name { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pg-streak-num { font-size: 28px; font-weight: 900; color: var(--text); line-height: 1; }
+  .pg-streak-num.fire { color: #f59e0b; }
+  .pg-streak-label { font-size: 10px; color: var(--text-3); font-weight: 600; margin-top: 2px; }
+
+  .pg-week { margin-top: 18px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+  .pg-week-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+  .pg-week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .pg-week-day { text-align: center; }
+  .pg-week-day .pg-wd-label { font-size: 10px; font-weight: 700; color: var(--text-3); margin-bottom: 4px; }
+  .pg-week-day .pg-wd-dots { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+  .pg-week-day .pg-wd-dot { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+  .pg-week-day .pg-wd-dot.lvl-1 { background: rgba(239,68,68,.15); border-color: var(--red); color: var(--red); }
+  .pg-week-day .pg-wd-dot.lvl-2 { background: rgba(245,158,11,.15); border-color: var(--amber); color: var(--amber); }
+  .pg-week-day .pg-wd-dot.lvl-3 { background: rgba(34,197,94,.15); border-color: var(--green); color: var(--green); }
+  .pg-week-day .pg-wd-dot.missed { background: var(--bg); border-color: var(--border); color: var(--text-3); }
+  .pg-week-day .pg-wd-dot.future { opacity: .3; }
+  .pg-week-day .pg-wd-count { font-size: 10px; font-weight: 700; color: var(--text-3); margin-top: 3px; }
+  .pg-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
+  .pg-empty-icon { font-size: 32px; margin-bottom: 8px; }
 
   .st2-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 20px 0 16px; flex-wrap: wrap; }
   .st2-form { margin: 0 0 18px; }
@@ -6279,10 +6387,10 @@
       <div class="strat-form-btns"><button type="button" class="btn" id="at-close">Kapat</button></div>
     </div>
   </div>
-  <div id="page-butce" class="hidden">
+  <div id="page-butce" class="hidden bd-hidden">
     <div class="strat-head">
       <div>
-        <div class="strat-title">💰 Alfa Defter</div>
+        <div class="strat-title">💰 Alfa Defter <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle/göster">👁️</button></div>
         <div class="strat-sub">Aylık gelir / gider takibi. Ne kadar kazandın, nereye ne kadar harcadın — pasta dilimleriyle. Bu bölüm yalnızca senin cihazında.</div>
       </div>
     </div>
@@ -7793,62 +7901,110 @@
   <div class="wrap">
     <div class="zm-head">
       <div>
-        <h1 style="font-size:22px;margin:0;letter-spacing:-.02em;">⏱️ Zaman Takibi</h1>
-        <p style="font-size:12.5px;color:var(--dim);margin:6px 0 0;">Neye ne kadar ayırdığını izle — yıldıza tıkla, zaman anında işlensin. Kaydetmekle uğraşma.</p>
+        <h1 style="font-size:22px;margin:0;letter-spacing:-.02em;">⏱️ Zaman & Gelişim</h1>
+        <p style="font-size:12.5px;color:var(--dim);margin:6px 0 0;">Zamanını ve kişisel gelişimini takip et</p>
       </div>
     </div>
 
-    <div class="zm-nav">
-      <button type="button" class="zm-nav-btn" data-zm-prev title="Önceki gün">←</button>
-      <div class="zm-nav-date"><span id="zm-nav-date">—</span><small id="zm-nav-week">—</small></div>
-      <button type="button" class="zm-nav-btn" data-zm-next title="Sonraki gün">→</button>
-      <button type="button" class="zm-nav-today" data-zm-today>Bugün</button>
+    <div class="zm-tabs" id="zm-main-tabs">
+      <button type="button" class="zm-tab active" data-zm-tab="time">⏰ Zaman Takibi</button>
+      <button type="button" class="zm-tab" data-zm-tab="personal">🌱 Kişisel Gelişim</button>
     </div>
-    <div class="zm-weekbar" id="zm-weekbar"><!-- haftalık tarih barı --></div>
 
-    <div class="zm-quickrow">
-      <div class="zm-quick-title"><span>⌛ <span id="zm-today-title">Bugün</span></span><span class="zm-quick-sub" id="zm-today-label"></span></div>
-      <div class="zm-quick-add">
-        <input type="text" id="zmNewCatName" placeholder="Kategori adı (örn. Okul)..." maxlength="30" autocomplete="off">
-        <button type="button" class="zm-add-cat-btn" data-zm-addcat title="Hızla ekle (renk otomatik)">＋ Ekle</button>
+    <!-- ═══ ZAMAN TAKİBİ TAB ═══ -->
+    <div class="zm-tab-content active" id="zm-tab-time">
+      <div class="zm-nav">
+        <button type="button" class="zm-nav-btn" data-zm-prev title="Önceki gün">←</button>
+        <div class="zm-nav-date"><span id="zm-nav-date">—</span><small id="zm-nav-week">—</small></div>
+        <button type="button" class="zm-nav-btn" data-zm-next title="Sonraki gün">→</button>
+        <button type="button" class="zm-nav-today" data-zm-today>Bugün</button>
+      </div>
+      <div class="zm-weekbar" id="zm-weekbar"></div>
+
+      <div class="zm-quickrow">
+        <div class="zm-quick-title"><span>⌛ <span id="zm-today-title">Bugün</span></span><span class="zm-quick-sub" id="zm-today-label"></span></div>
+        <div class="zm-quick-add">
+          <input type="text" id="zmNewCatName" placeholder="Kategori adı (örn. Okul)..." maxlength="30" autocomplete="off">
+          <button type="button" class="zm-add-cat-btn" data-zm-addcat title="Hızla ekle (renk otomatik)">＋ Ekle</button>
+        </div>
+      </div>
+
+      <div class="zm-today-card">
+        <div id="zm-today-rows"></div>
+        <div class="zm-today-label hide" id="zm-today-label-alt"></div>
+      </div>
+
+      <div class="zm-water" id="zm-water">
+        <div class="zm-water-h">💧 Su Tüketimi</div>
+        <div class="zm-water-row">
+          <button type="button" class="zm-water-btn zm-water-minus" data-water="-1" title="1 bardak azalt">−</button>
+          <div class="zm-water-cups" id="zm-water-cups"></div>
+          <button type="button" class="zm-water-btn zm-water-plus" data-water="1" title="1 bardak ekle">＋</button>
+        </div>
+        <div class="zm-water-info"><span id="zm-water-count">0</span> / <span id="zm-water-goal">8</span> bardak <span id="zm-water-pct" class="zm-water-pct"></span></div>
+        <div class="zm-water-goal-row">
+          <label>Hedef:</label>
+          <button type="button" class="zm-water-gbtn" data-water-goal="-1">−</button>
+          <span id="zm-water-goal-val">8</span>
+          <button type="button" class="zm-water-gbtn" data-water-goal="1">＋</button>
+        </div>
+      </div>
+
+      <!-- Collapsible: 14 günlük bar -->
+      <div class="zm-collapse-head" data-zm-collapse="bar"><span class="zm-collapse-icon">›</span><span class="zm-collapse-title">📊 Gün gün harcama</span><span class="zm-collapse-hint" id="zm-bar-range">—</span></div>
+      <div class="zm-collapse-body" id="zm-collapse-bar">
+        <div class="zm-bar-wrap">
+          <button type="button" class="zm-bar-nav" data-zm-barshift="-14" title="14 gün geri">‹</button>
+          <div id="zm-daily-bar"></div>
+          <button type="button" class="zm-bar-nav" data-zm-barshift="14" title="14 gün ileri">›</button>
+        </div>
+      </div>
+
+      <!-- Collapsible: günlük % dağılım -->
+      <div class="zm-collapse-head" data-zm-collapse="pct"><span class="zm-collapse-icon">›</span><span class="zm-collapse-title">🧮 Günlük % dağılım</span><span class="zm-collapse-hint">her gün kategorilerin yüzde payı</span></div>
+      <div class="zm-collapse-body" id="zm-collapse-pct">
+        <div id="zm-daily-pct"></div>
+      </div>
+
+      <!-- Collapsible: kategori şablonları -->
+      <div class="zm-collapse-head" data-zm-collapse="pool"><span class="zm-collapse-icon">›</span><span class="zm-collapse-title">🗂 Kategori şablonları</span><span class="zm-collapse-hint">şablonu tıkla ↑ o güne ekle · gözle güne özel gizle · çöp genel kaldır</span></div>
+      <div class="zm-collapse-body" id="zm-collapse-pool">
+        <div id="zm-cat-pool"></div>
+      </div>
+
+      <!-- Collapsible: haftalık özet -->
+      <div class="zm-collapse-head" data-zm-collapse="week"><span class="zm-collapse-icon">›</span><span class="zm-collapse-title">📊 Bu Hafta</span><span class="zm-collapse-hint" id="zm-week-total-hint">toplam —</span></div>
+      <div class="zm-collapse-body" id="zm-collapse-week">
+        <div id="zm-week-grid"></div>
+      </div>
+
+    </div>
+
+    <!-- ═══ KİŞİSEL GELİŞİM TAB ═══ -->
+    <div class="zm-tab-content" id="zm-tab-personal">
+      <div class="pg-day-nav">
+        <button type="button" data-pg-prev>←</button>
+        <div class="pg-day-label"><span id="pg-nav-date">—</span><small id="pg-nav-day">—</small></div>
+        <button type="button" data-pg-next>→</button>
+        <button type="button" class="pg-day-today" data-pg-today>Bugün</button>
+      </div>
+
+      <div id="pg-items"></div>
+
+      <div class="pg-add-row" style="margin-top:12px;">
+        <input type="text" id="pgNewName" placeholder="Yeni hedef ekle (örn. Günlük yürüyüş)..." maxlength="30" autocomplete="off">
+        <input type="text" id="pgNewIcon" placeholder="🧘" maxlength="2" style="width:50px;text-align:center;" autocomplete="off">
+        <button type="button" class="pg-add-btn" data-pg-add>＋ Ekle</button>
+      </div>
+
+      <div class="pg-streaks" id="pg-streaks"></div>
+
+      <div class="pg-week">
+        <div class="pg-week-title">📊 Bu Hafta</div>
+        <div class="pg-week-grid" id="pg-week-grid"></div>
       </div>
     </div>
 
-    <div class="zm-today-card">
-      <div id="zm-today-rows"></div>
-      <div class="zm-today-label hide" id="zm-today-label-alt"></div>
-    </div>
-
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">📊 Gün gün harcama</span><span class="zm-hint" id="zm-bar-range">—</span></div>
-    </div>
-    <div class="zm-bar-wrap">
-      <button type="button" class="zm-bar-nav" data-zm-barshift="-14" title="14 gün geri">‹</button>
-      <div id="zm-daily-bar"></div>
-      <button type="button" class="zm-bar-nav" data-zm-barshift="14" title="14 gün ileri">›</button>
-    </div>
-
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">🧮 Günlük % dağılım</span><span class="zm-hint">her gün kategorilerin yüzde payı</span></div>
-    </div>
-    <div id="zm-daily-pct"></div>
-
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">🗂 Kategori şablonları</span><span class="zm-hint">şablonu tıkla &uarr; o güne ekle · gözle güne özel gizle · çöp genel kaldır</span></div>
-    </div>
-    <div id="zm-cat-pool"></div>
-
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">📊 Bu Hafta</span><span class="zm-hint" id="zm-week-total-hint">toplam —</span></div>
-    </div>
-    <div id="zm-week-grid"></div>
-
-    <div class="zm-gap">
-      <div class="zm-gap-head"><span class="zm-gap-title">🎯 Doldurulması gereken süre</span><span class="zm-hint">her kategori için haftalık süreyi belirle — yükselttikçe adım adım ilerle</span></div>
-    </div>
-    <div class="zm-goals-card">
-      <div id="zm-goals-list"></div>
-    </div>
   </div>
 </div>
 
@@ -15759,6 +15915,7 @@ function bindButcePage() {
     const icoBtn = e.target.closest('.bd-iconpick-btn');
     if (icoBtn) { butceIconSel = icoBtn.getAttribute('data-ico'); renderIconPick(); return; }
     if (e.target.closest('#bd-clear-cat')) { butceCatF = ''; renderButce(); return; }
+    if (e.target.closest('#bd-eye')) { document.getElementById('page-butce').classList.toggle('bd-hidden'); return; }
   });
   pg.addEventListener('change', e => {
     const t = e.target;
@@ -16197,7 +16354,74 @@ let ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
 let ap2Filter = 'all';
 let ap2EditId = null;
 let ap2SellId = null;
-function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; (ap2Data.positions || []).forEach(p => { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; }); if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; } } catch(e) {} }
+function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; (ap2Data.positions || []).forEach(p => { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; }); if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; ap2RecalcCash(); ap2RebuildHistory(); } } catch(e) {} }
+function ap2RebuildHistory() {
+  try {
+    if (!ap2Data) return;
+    var sb = Number(ap2Data.startBalance) || 1000;
+    var sells = (ap2Data.sells || []).slice().sort(function(a, b) {
+      var ta = a.ts || (a.date ? new Date(a.date).getTime() : 0) || (a.posDate ? new Date(a.posDate).getTime() : 0);
+      var tb = b.ts || (b.date ? new Date(b.date).getTime() : 0) || (b.posDate ? new Date(b.posDate).getTime() : 0);
+      return ta - tb;
+    });
+    var positions = ap2Data.positions || [];
+    var startDate = null;
+    positions.forEach(function(p) {
+      if (p.date) {
+        var d = new Date(p.date).getTime();
+        if (!isNaN(d) && (!startDate || d < startDate)) startDate = d;
+      }
+    });
+    sells.forEach(function(s) {
+      var sd = s.date || s.posDate;
+      if (sd) {
+        var d = new Date(sd).getTime();
+        if (!isNaN(d) && (!startDate || d < startDate)) startDate = d;
+      }
+    });
+    if (!startDate) startDate = Date.now() - 30 * 86400000;
+    var hist = [{ d: new Date(startDate).toISOString().slice(0, 10), v: sb }];
+    var cumProfit = 0;
+    var lastDate = hist[0].d;
+    sells.forEach(function(s) {
+      var sellDate = s.date || s.posDate || null;
+      var dd = sellDate || (s.ts ? new Date(s.ts).toISOString().slice(0, 10) : null);
+      if (!dd) return;
+      cumProfit += (function() { var v = Number(s.pnl); if (isNaN(v)) v = Number(s.profit); return isNaN(v) ? 0 : v; })();
+      if (dd === lastDate) {
+        hist[hist.length - 1].v = sb + cumProfit;
+      } else {
+        hist.push({ d: dd, v: sb + cumProfit });
+        lastDate = dd;
+      }
+    });
+    var today = new Date().toISOString().slice(0, 10);
+    var currentVal = sb + cumProfit;
+    if (hist.length && hist[hist.length - 1].d === today) {
+      hist[hist.length - 1].v = currentVal;
+    } else {
+      hist.push({ d: today, v: currentVal });
+    }
+    localStorage.setItem(AP2_HIST_KEY, JSON.stringify(hist));
+  } catch (e) {}
+}
+function ap2RecalcCash() {
+  if (!ap2Data) return;
+  var startBalance = Number(ap2Data.startBalance) || 1000;
+  var totalProfit = 0;
+  (ap2Data.sells || []).forEach(function(sl) {
+    var v = Number(sl.pnl);
+    if (isNaN(v)) v = Number(sl.profit);
+    if (isNaN(v)) v = 0;
+    totalProfit += v;
+  });
+  var activeBuyCost = 0;
+  (ap2Data.positions || []).forEach(function(p) {
+    if (!(p && p.lim && !p.filled)) activeBuyCost += (Number(p.qty) || 0) * (Number(p.cost) || 0);
+  });
+  ap2Data.cash = startBalance - activeBuyCost + totalProfit;
+  ap2Save();
+}
 function ap2Save() { try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} try { ap2SyncCloud(); } catch(e) {} }
 const AP2_IDEAS_KEY = 'alfa-fund-ideas-v1';
 let ap2Ideas = [];
@@ -16808,7 +17032,7 @@ function ap2SellConfirm() {
   document.getElementById('ap2-sell-note').value = '';
   ap2SellId = null;
   renderAlfaPortfoy2();
-  stratToast('💰 ' + sellQty + ' ' + pos.symbol + ' satıldı — +' + ap2Fmt(amount));
+  stratToast('💰 ' + sellQty + ' ' + pos.symbol + ' satıldı — ' + _profitSign + ap2Fmt(_profit));
 }
 function ap2OpenHedge(id) {
   const p = ap2Data.positions.find(x => x.id === id);
@@ -16928,7 +17152,16 @@ function ap2RenderChart(hist) {
   if (!svgEl) return;
   var sum = ap2Summary();
   var startPos = ap2Data.positions || [];
-  var firstDate = startPos.length ? startPos.reduce(function(m,p){ var t=new Date(p.date||Date.now()).getTime(); return t<m?t:m; }, Infinity) : null;
+  var startSells = ap2Data.sells || [];
+  var firstDate = null;
+  startPos.forEach(function(p) {
+    var t = new Date(p.date || Date.now()).getTime();
+    if (!isNaN(t) && (!firstDate || t < firstDate)) firstDate = t;
+  });
+  startSells.forEach(function(s) {
+    var t = new Date(s.posDate || s.buyDate || s.date || '').getTime();
+    if (!isNaN(t) && (!firstDate || t < firstDate)) firstDate = t;
+  });
   var daysSince = firstDate ? Math.max(1, Math.round((Date.now()-firstDate)/864e5)) : 0;
   if (startEl) startEl.textContent = firstDate ? new Date(firstDate).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}) : '—';
   if (durEl) durEl.textContent = daysSince > 0 ? daysSince + ' gün' : '—';
@@ -17007,7 +17240,7 @@ function ap2Timeline(hist) {
     if (!startMk || mk < startMk) startMk = mk;
   });
   sells.forEach(function(sl) {
-    var d = String(sl.buyDate || sl.date || '').slice(0, 10);
+    var d = String(sl.buyDate || sl.posDate || sl.date || '').slice(0, 10);
     if (!d || isNaN(new Date(d).getTime())) return;
     if (!startDate || d < startDate) startDate = d;
     var mk = ap2MonthKey(new Date(d + 'T12:00:00').getTime());
@@ -17095,7 +17328,8 @@ function ap2RenderMonthly() {
   });
   var sellByMonth = {};
   sells.forEach(function(s) {
-    var mk = ap2MonthKey(s.ts || now);
+    var sellDate = s.date || s.posDate || null;
+    var mk = sellDate ? ap2MonthKey(new Date(sellDate + 'T12:00:00').getTime()) : ap2MonthKey(s.ts || now);
     if (!sellByMonth[mk]) sellByMonth[mk] = { count: 0, proceeds: 0 };
     sellByMonth[mk].count++;
     sellByMonth[mk].proceeds += Number(s.amount) || 0;
@@ -17267,28 +17501,29 @@ function renderAlfaPortfoy2() {
     var sells = ap2Data.sells || [];
     if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
     if (sellHistBody && sells.length) {
-      sellHistBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
-        var d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : (sl.date || '');
-        var pf = Number(sl.pnl || sl.profit || 0);
-        var pfCls = isNaN(pf) || pf === 0 ? 'zero' : (pf > 0 ? 'pos' : 'neg');
+      sellHistBody.innerHTML = sells.slice().sort(function(a, b) { var ta = a.ts || (a.date ? new Date(a.date).getTime() : 0); var tb = b.ts || (b.date ? new Date(b.date).getTime() : 0); return tb - ta; }).map(function(sl) {
+        var d = sl.date || sl.posDate || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
+        var dDisp = d && d.match(/^\d{4}-\d{2}-\d{2}$/) ? new Date(d + 'T12:00:00').toLocaleDateString('tr-TR') : d;
+        var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
+        var pfCls = pf === 0 ? 'zero' : (pf > 0 ? 'pos' : 'neg');
         return '<div class="ap2-sell-row">' +
           '<span class="ap2-sell-sym">' + sl.symbol + '</span>' +
-          '<span class="ap2-sell-qty">' + sl.qty + ' \u00d7 ' + ap2Fmt(sl.price) + ' \u00b7 ' + d + '</span>' +
+          '<span class="ap2-sell-qty">' + sl.qty + ' \u00d7 ' + ap2Fmt(sl.price) + ' \u00b7 ' + dDisp + '</span>' +
           '<span class="ap2-sell-val ' + pfCls + '">+' + ap2Fmt(sl.amount) + '<span class="ap2-sell-pf">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + '</span></span>' +
         '</div>';
-      }).join('');
+    }).join('');
     }
     var tradesEl = document.getElementById('ap2-trades');
     var tradesBody = document.getElementById('ap2-trades-body');
     var tradesTotal = document.getElementById('ap2-trades-total');
     if (tradesEl) tradesEl.style.display = sells.length ? '' : 'none';
     if (tradesBody && sells.length) {
-      var totalPnl = sells.reduce(function(s, sl) { return s + Number(sl.pnl || sl.profit || 0); }, 0);
+      var totalPnl = sells.reduce(function(s, sl) { var v = Number(sl.pnl); if (isNaN(v)) v = Number(sl.profit); return s + (isNaN(v) ? 0 : v); }, 0);
       if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
       var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
       tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
-        var pf = Number(sl.pnl || sl.profit || 0);
-        var pfPct = sl.cost > 0 ? (pf / sl.cost * 100) : 0;
+        var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
+        var pfPct = sl.cost > 0 ? (pf / (sl.qty * sl.cost) * 100) : 0;
         var pfCls = pf >= 0 ? 'pos' : 'neg';
         var bgCol = symColors[sl.symbol] || '#3b82f6';
         var buyDate = sl.buyDate || '';
@@ -17300,7 +17535,7 @@ function renderAlfaPortfoy2() {
             '<div class="ap2-trade-dates">' + (buyDate ? buyDate + ' → ' : '') + sellDate + ' · ' + Number(sl.qty).toFixed(4) + ' adet</div>' +
           '</div>' +
           '<div class="ap2-trade-amt">' +
-            '<div class="ap2-trade-buy">' + ap2Fmt(sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
+            '<div class="ap2-trade-buy">' + ap2Fmt(sl.qty * sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
             '<div class="ap2-trade-pnl ' + pfCls + '">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + ' (' + (pfPct >= 0 ? '+' : '') + pfPct.toFixed(1) + '%)</div>' +
           '</div>' +
         '</div>';
@@ -17408,13 +17643,14 @@ function renderAlfaPortfoy2() {
   var sells = ap2Data.sells || [];
   if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
   if (sellHistBody && sells.length) {
-    sellHistBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
-      var d = sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '';
-      var pf = Number(sl.profit);
+    sellHistBody.innerHTML = sells.slice().sort(function(a, b) { var ta = a.ts || (a.date ? new Date(a.date).getTime() : 0); var tb = b.ts || (b.date ? new Date(b.date).getTime() : 0); return tb - ta; }).map(function(sl) {
+      var d = sl.date || sl.posDate || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
+      var dDisp = d && d.match(/^\d{4}-\d{2}-\d{2}$/) ? new Date(d + 'T12:00:00').toLocaleDateString('tr-TR') : d;
+      var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
       var pfCls = isNaN(pf) || pf === 0 ? 'zero' : (pf > 0 ? 'pos' : 'neg');
       return '<div class="ap2-sell-row">' +
         '<span class="ap2-sell-sym">' + sl.symbol + '</span>' +
-        '<span class="ap2-sell-qty">' + sl.qty + ' × ' + ap2Fmt(sl.price) + ' · ' + d + '</span>' +
+        '<span class="ap2-sell-qty">' + sl.qty + ' \u00d7 ' + ap2Fmt(sl.price) + ' \u00b7 ' + dDisp + '</span>' +
         '<span class="ap2-sell-val ' + pfCls + '">+' + ap2Fmt(sl.amount) + '<span class="ap2-sell-pf">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + '</span></span>' +
       '</div>';
     }).join('');
@@ -17424,12 +17660,12 @@ function renderAlfaPortfoy2() {
   var tradesTotal = document.getElementById('ap2-trades-total');
   if (tradesEl) tradesEl.style.display = sells.length ? '' : 'none';
   if (tradesBody && sells.length) {
-    var totalPnl = sells.reduce(function(s, sl) { return s + Number(sl.pnl || sl.profit || 0); }, 0);
+    var totalPnl = sells.reduce(function(s, sl) { var v = Number(sl.pnl); if (isNaN(v)) v = Number(sl.profit); return s + (isNaN(v) ? 0 : v); }, 0);
     if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
     var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
     tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
-      var pf = Number(sl.pnl || sl.profit || 0);
-      var pfPct = sl.cost > 0 ? (pf / sl.cost * 100) : 0;
+      var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
+      var pfPct = sl.cost > 0 ? (pf / (sl.qty * sl.cost) * 100) : 0;
       var pfCls = pf >= 0 ? 'pos' : 'neg';
       var bgCol = symColors[sl.symbol] || '#3b82f6';
       var buyDate = sl.buyDate || '';
@@ -17441,7 +17677,7 @@ function renderAlfaPortfoy2() {
           '<div class="ap2-trade-dates">' + (buyDate ? buyDate + ' → ' : '') + sellDate + ' · ' + Number(sl.qty).toFixed(4) + ' adet</div>' +
         '</div>' +
         '<div class="ap2-trade-amt">' +
-          '<div class="ap2-trade-buy">' + ap2Fmt(sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
+          '<div class="ap2-trade-buy">' + ap2Fmt(sl.qty * sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
           '<div class="ap2-trade-pnl ' + pfCls + '">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + ' (' + (pfPct >= 0 ? '+' : '') + pfPct.toFixed(1) + '%)</div>' +
         '</div>' +
       '</div>';
@@ -17471,7 +17707,10 @@ function renderAlfaPortfoy2() {
       '</div>';
   }
   var shareDate = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-  var shareStartDate = positions.length ? positions.reduce(function(m, p) { var t = new Date(p.date || Date.now()).getTime(); return t < m ? t : m; }, Infinity) : Date.now();
+  var shareStartDate = Infinity;
+  positions.forEach(function(p) { var t = new Date(p.date || Date.now()).getTime(); if (!isNaN(t) && t < shareStartDate) shareStartDate = t; });
+  (ap2Data.sells || []).forEach(function(s) { var t = new Date(s.buyDate || s.posDate || s.date || '').getTime(); if (!isNaN(t) && t < shareStartDate) shareStartDate = t; });
+  if (shareStartDate === Infinity) shareStartDate = Date.now();
   var shareStartTxt = isNaN(shareStartDate) ? '—' : new Date(shareStartDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
   var shareDonutPaths = '';
   var shareSlices = slices.slice(0, 6);
@@ -27554,23 +27793,37 @@ document.addEventListener('paste', function (e) {
   }
 });
 
-/* ── Zaman Takibi (hayat yönetimi) ── */
+/* ── Zaman Takibi (hayat yönetimi — 3-level) ── */
 var ZM_KEY = 'alfa-zaman-v1';
 var zmData = null;
-var zmSelDate = new Date(); // seçili görünen tarih
-var zmBarOffset = 0; // günlük bar penceresi kaydırma (adım: 14 gün)
+var zmSelDate = new Date();
+var zmBarOffset = 0;
 var ZM_DEF_COLORS = ['#f59e0b', '#3b82f6', '#8b5cf6', '#22c55e', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'];
 var ZM_BASE_CATS = [
-  { id: 'trading', name: 'Trading' },
-  { id: 'preply', name: 'Preply' },
-  { id: 'okul', name: 'Okul' },
-  { id: 'bos', name: 'Boş Zaman' }
+  { id: 'trading', name: 'Trading', dir: 'up' },
+  { id: 'preply', name: 'Preply', dir: 'up' },
+  { id: 'okul', name: 'Okul', dir: 'up' },
+  { id: 'bos', name: 'Boş Zaman', dir: 'down' }
 ];
-var ZM_MAX_STARS = 9;
+var ZM_LEVELS = [
+  { val: 1, lbl: 'Az', neg: true },
+  { val: 2, lbl: 'Orta', neg: false },
+  { val: 3, lbl: 'Çok', neg: false }
+];
+function zmLvlLabel(v, dir) {
+  if (v === 1) return dir === 'down' ? 'İyi' : 'Yetersiz';
+  if (v === 2) return 'Fena Değil';
+  if (v === 3) return dir === 'down' ? 'Azalt' : 'Yeterli';
+  return '';
+}
+function zmLvlHintClass(v, dir) {
+  if (dir === 'down') return v === 1 ? 'pos' : (v === 3 ? 'neg' : '');
+  return v === 3 ? 'pos' : (v === 1 ? 'neg' : '');
+}
 
 function zmDefaultCats() {
   return ZM_BASE_CATS.map(function (b, i) {
-    return { id: b.id, name: b.name, goal: 0, color: ZM_DEF_COLORS[i % ZM_DEF_COLORS.length] };
+    return { id: b.id, name: b.name, dir: b.dir || 'up', color: ZM_DEF_COLORS[i % ZM_DEF_COLORS.length] };
   });
 }
 
@@ -27580,11 +27833,38 @@ function zmLoad() {
     if (raw) { zmData = JSON.parse(raw); }
   } catch (e) {}
   if (!zmData || !Array.isArray(zmData.cats)) {
-    zmData = { cats: zmDefaultCats(), days: {} };
+    zmData = { cats: zmDefaultCats(), days: {}, water: {}, waterGoal: 8 };
   }
+  if (!zmData.days || typeof zmData.days !== 'object') zmData.days = {};
+  if (!zmData.water || typeof zmData.water !== 'object') zmData.water = {};
+  if (zmData.waterGoal == null) zmData.waterGoal = 8;
+  if (!zmData.hidden || typeof zmData.hidden !== 'object') zmData.hidden = {};
+  if (!zmData.deletedCats || typeof zmData.deletedCats !== 'object') zmData.deletedCats = {};
+  if (typeof zmData.custom !== 'boolean') zmData.custom = false;
+  // Ensure dir field on cats
+  zmData.cats.forEach(function(c) {
+    if (!c.dir) {
+      var base = ZM_BASE_CATS.find(function(b){ return b.id === c.id; });
+      c.dir = base ? (base.dir || 'up') : 'up';
+    }
+  });
+  // Migrate old hour-based data (floats > 3 → level 3, etc.)
+  Object.keys(zmData.days).forEach(function(key) {
+    var rec = zmData.days[key];
+    Object.keys(rec).forEach(function(catId) {
+      var v = parseFloat(rec[catId]);
+      if (!isNaN(v) && v > 3) {
+        rec[catId] = v >= 6 ? 3 : (v >= 3 ? 2 : 1);
+      } else if (!isNaN(v) && v > 0) {
+        rec[catId] = Math.min(3, Math.max(1, Math.round(v)));
+      }
+    });
+  });
   if (!zmData.days) zmData.days = {};
   if (!zmData.deletedCats) zmData.deletedCats = {};
-  if (!zmData.hidden) zmData.hidden = {}; // hidden[dayKey] = { catId: true } → o güne özel gizli
+  if (!zmData.hidden) zmData.hidden = {};
+  if (!zmData.water) zmData.water = {};
+  if (zmData.waterGoal == null) zmData.waterGoal = 8;
   // İlk sürüm (custom değil): default 4 kategoriyi koru. Kullanıcı silme/ekleme yaptıysa (custom) dokunma.
   if (!zmData.custom && zmData.cats.length > 0) {
     // Default kategorilerin eksik olanlarını başa ekle (sadece custom değilse)
@@ -27664,13 +27944,15 @@ function zmTodayVal(catId) {
   return parseFloat(rec[catId]) || 0;
 }
 
-function zmStarsHtml(catId, val, goal) {
-  var max = Math.max(1, Math.min(ZM_MAX_STARS, zoom(goal) || 5));
-  var filled = Math.round(val);
-  var html = '<div class="zm-stars" data-zm-stars="' + catId + '">';
-  for (var i = 1; i <= max; i++) {
-    html += '<span class="zm-star' + (i <= filled ? ' on' : '') + '" data-zm-star="' + i + '">★</span>';
-  }
+function zmLevelsHtml(catId, val, dir) {
+  var html = '<div class="zm-levels">';
+  ZM_LEVELS.forEach(function(lvl) {
+    var cls = 'zm-lvl' + (val === lvl.val ? ' on-' + lvl.val : '');
+    html += '<button type="button" class="' + cls + '" data-zm-lvl="' + catId + '" data-zm-val="' + lvl.val + '">' + lvl.lbl + '</button>';
+  });
+  var hint = zmLvlLabel(val || 0, dir);
+  var hcls = zmLvlHintClass(val || 0, dir);
+  html += '<span class="zm-lvl-hint' + (hcls ? ' ' + hcls : '') + '">' + hint + '</span>';
   html += '</div>';
   return html;
 }
@@ -27712,7 +27994,7 @@ function zmRender() {
         + '<div class="wb-dow">' + dLabels[i] + '</div>'
         + '<div class="wb-day">' + d.d.getDate() + '</div>'
         + '<div class="wb-mo">' + (isTd ? 'bugün' : d.d.toLocaleDateString('tr-TR', { month: 'short' })) + '</div>'
-        + '<div class="wb-tot">' + zmNum(tot) + ' sa</div>'
+        + '<div class="wb-tot">' + zmNum(tot) + ' puan</div>'
         + '</div>';
     });
     weekbar.innerHTML = wbhtml;
@@ -27756,14 +28038,15 @@ function zmRender() {
       }).filter(function (x) { return x.val > 0; });
       disp.forEach(function (x) {
         var pct = (x.val / maxTot) * 100;
-        seg += '<div class="zdb-seg" style="height:' + pct.toFixed(2) + '%;background:' + (x.c.color || '#9ca3af') + '"><div class="zdb-tip">' + x.c.name + ': ' + zmNum(x.val) + ' sa</div></div>';
+        var lvlLbl = x.val >= 1 && x.val <= 3 ? ZM_LEVELS[x.val - 1].lbl : '';
+        seg += '<div class="zdb-seg" style="height:' + pct.toFixed(2) + '%;background:' + (x.c.color || '#9ca3af') + '"><div class="zdb-tip">' + x.c.name + ': ' + lvlLbl + ' (' + x.val + ')</div></div>';
       });
       var isSel = key === zmDateKey(zmSelDate);
       var isTd = key === zmDateKey(new Date());
-      dhtml += '<div class="zdb-day' + (isSel ? ' sel' : '') + (isTd ? ' td' : '') + '" data-zm-day="' + key + '" title="' + dd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + ' · toplam ' + zmNum(tot) + ' sa">'
+      dhtml += '<div class="zdb-day' + (isSel ? ' sel' : '') + (isTd ? ' td' : '') + '" data-zm-day="' + key + '" title="' + dd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + ' · toplam ' + zmNum(tot) + ' puan">'
         + '<div class="zdb-lbl">' + ['Pa','Pt','Sa','Ça','Pe','Cu','Ct'][dd.getDay()] + '<b>' + dd.getDate() + '</b>' + dd.toLocaleDateString('tr-TR', { month: 'short' }) + '</div>'
         + '<div class="zdb-bar">' + (seg || '<div class="zdb-seg zdb-empty" style="height:2%"></div>') + '</div>'
-        + '<div class="zdb-tot">' + zmNum(tot) + ' sa</div>'
+        + '<div class="zdb-tot">' + zmNum(tot) + ' puan</div>'
         + '</div>';
     });
     // Pencere aralığı etiketi
@@ -27803,7 +28086,8 @@ function zmRender() {
           var val = parseFloat(rr[cid]) || 0;
           if (val <= 0) return;
           var p = (val / tot) * 100;
-          segs += '<div class="zpct-seg" style="width:' + p.toFixed(2) + '%;background:' + (c.color || '#9ca3af') + '"><div class="zm-tip">' + c.name + ': %' + p.toFixed(0) + '</div></div>';
+          var lvlLbl2 = val >= 1 && val <= 3 ? ZM_LEVELS[val - 1].lbl : '';
+          segs += '<div class="zpct-seg" style="width:' + p.toFixed(2) + '%;background:' + (c.color || '#9ca3af') + '"><div class="zm-tip">' + c.name + ': ' + lvlLbl2 + ' (%' + p.toFixed(0) + ')</div></div>';
         });
       } else {
         segs = '<div class="zpct-seg zpct-empty" style="width:100%"></div>';
@@ -27831,7 +28115,6 @@ function zmRender() {
         phtml += '<div class="zm-pool-chip">'
           + '<span class="zm-row-dot" style="background:' + c.color + '"></span>'
           + '<span class="zm-pool-name">' + c.name + '</span>'
-          + '<span class="zm-pool-goal" data-zm-goal-y="' + c.id + '"><input class="zm-pool-goal-in" type="number" min="0" step="0.5" value="' + (c.goal || 0) + '" title="Haftalık hedef (sa)"></span>'
           + '<span class="zm-pool-acts">'
             + '<button type="button" class="zm-pool-act" ' + toggleAttr + '="' + c.id + '" title="Bu günde gizle/göster">' + handle + '</button>'
             + '<button type="button" class="zm-pool-act del" data-zm-delcat="' + c.id + '" title="Genel olarak kaldır">🗑</button>'
@@ -27872,19 +28155,13 @@ function zmRender() {
     });
     (visibleIds.length ? visibleIds : []).forEach(function (cid) {
       var c = zmCat(cid) || (zmData.deletedCats && zmData.deletedCats[cid]);
-      if (!c) c = { id: cid, name: 'Silinmiş kategori', color: '#9ca3af', deleted: true };
+      if (!c) c = { id: cid, name: 'Silinmiş kategori', color: '#9ca3af', dir: 'up', deleted: true };
       var v = zmTodayVal(cid);
       var isDeleted = !zmCat(cid);
       html += '<div class="zm-row' + (isDeleted ? ' zm-row-deleted' : '') + '">'
         + '<span class="zm-row-dot" style="background:' + (c.color || '#9ca3af') + '"></span>'
         + '<span class="zm-row-name">' + c.name + (isDeleted ? ' <span class="zm-del-badge">kaldırıldı</span>' : '') + '</span>'
-        + zmStarsHtml(cid, v, c.goal)
-        + '<div class="zm-row-ctrl">'
-          + '<button type="button" class="zm-btn" data-zm-dec="' + cid + '">−</button>'
-          + '<input type="number" class="zm-row-input" data-zm-now="' + cid + '" min="0" step="0.5" value="' + zmNum(v) + '">'
-          + '<button type="button" class="zm-btn" data-zm-inc="' + cid + '">+</button>'
-          + '<span class="zm-row-sa">sa</span>'
-        + '</div>'
+        + zmLevelsHtml(cid, v, c.dir || 'up')
         + '<div class="zm-row-acts">'
           + (isDeleted ? '' : '<button type="button" class="zm-row-eye" data-zm-hide="' + cid + '" title="Bu günde gizle">🙈</button>')
           + '<button type="button" class="zm-row-del" data-zm-delcat="' + cid + '" title="Genel olarak kaldır">🗑</button>'
@@ -27911,40 +28188,83 @@ function zmRender() {
     }
   }
 
-  // Hafta özeti (seçili günün haftası)
+  // 💧 Su takımı render
+  var waterEl = document.getElementById('zm-water-cups');
+  var waterCountEl = document.getElementById('zm-water-count');
+  var waterGoalEl = document.getElementById('zm-water-goal');
+  var waterPctEl = document.getElementById('zm-water-pct');
+  var waterGoalValEl = document.getElementById('zm-water-goal-val');
+  if (waterEl) {
+    var dk = zmTodayKey();
+    var wc = parseInt(zmData.water[dk]) || 0;
+    var wg = parseInt(zmData.waterGoal) || 8;
+    var whtml = '';
+    for (var wi = 0; wi < wg; wi++) {
+      whtml += '<span class="zm-water-cup' + (wi < wc ? ' filled' : '') + '">' + (wi < wc ? '💧' : '🩶') + '</span>';
+    }
+    waterEl.innerHTML = whtml;
+    if (waterCountEl) waterCountEl.textContent = wc;
+    if (waterGoalEl) waterGoalEl.textContent = wg;
+    if (waterGoalValEl) waterGoalValEl.textContent = wg;
+    if (waterPctEl) {
+      var wpct = wg > 0 ? Math.round(wc / wg * 100) : 0;
+      waterPctEl.textContent = '(' + wpct + '%)';
+      waterPctEl.style.color = wpct >= 100 ? 'var(--green)' : wpct >= 50 ? 'var(--amber)' : 'var(--text-3)';
+    }
+  }
+
+  // Hafta özeti (seçili günün haftası) — level bazlı
   var grid = document.getElementById('zm-week-grid');
   if (grid) {
+    var weekDates = [];
+    var wd = new Date(zmSelDate);
+    var dayOfWeek = wd.getDay();
+    var mondayOffset = (dayOfWeek + 6) % 7;
+    wd.setDate(wd.getDate() - mondayOffset);
+    for (var wi = 0; wi < 7; wi++) {
+      var dd = new Date(wd);
+      dd.setDate(wd.getDate() + wi);
+      weekDates.push(dd);
+    }
+    var dLabels = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
     var ghtml = '';
     zmData.cats.forEach(function (c) {
-      var t = zmWeekTotal(c.id);
-      var goal = c.goal || 0;
-      var pct = goal > 0 ? Math.min(100, Math.round(t / goal * 100)) : 0;
-      var status = goal > 0 ? (t >= goal ? '<div class="zm-cat-status ok">✓ Dolduruldu</div>' : '<div class="zm-cat-status due">' + (goal - t).toFixed(1) + ' sa kaldı</div>') : '';
+      var levels = [0, 0, 0]; // count for level 1, 2, 3
+      weekDates.forEach(function(dd) {
+        var dk = zmDateKey(dd);
+        var rec = zmData.days[dk] || {};
+        var v = parseInt(rec[c.id]) || 0;
+        if (v >= 1 && v <= 3) levels[v - 1]++;
+      });
+      var totalDays = levels[0] + levels[1] + levels[2];
+      var bestLevel = levels[2] > 0 ? 3 : (levels[1] > 0 ? 2 : (levels[0] > 0 ? 1 : 0));
+      var hintLbl = bestLevel ? zmLvlLabel(bestLevel, c.dir || 'up') : '—';
       ghtml += '<div class="zm-cat-card">'
-        + '<div class="zm-cat-top"><span class="zm-row-dot" style="background:' + c.color + '"></span><span class="zm-cat-name">' + c.name + '</span><span class="zm-cat-nums">' + zmNum(t) + '<b>/</b>' + zmNum(goal) + ' sa</span></div>'
-        + '<div class="zm-bar"><div class="zm-bar-fill" style="width:' + pct + '%;background:' + c.color + '"></div></div>'
-        + status
+        + '<div class="zm-cat-top"><span class="zm-row-dot" style="background:' + c.color + '"></span><span class="zm-cat-name">' + c.name + '</span><span class="zm-cat-nums">' + totalDays + ' / 7 gün</span></div>'
+        + '<div style="display:flex;gap:4px;margin-top:6px;">'
+          + '<span style="font-size:11px;color:var(--red);font-weight:700;">Az:' + levels[0] + '</span>'
+          + '<span style="font-size:11px;color:var(--amber);font-weight:700;margin-left:auto;">Orta:' + levels[1] + '</span>'
+          + '<span style="font-size:11px;color:var(--green);font-weight:700;margin-left:auto;">Çok:' + levels[2] + '</span>'
+        + '</div>'
+        + (bestLevel ? '<div class="zm-cat-status ' + (bestLevel === 3 ? 'ok' : 'due') + '">' + hintLbl + '</div>' : '')
         + '</div>';
     });
     grid.innerHTML = ghtml;
     var hint = document.getElementById('zm-week-total-hint');
-    if (hint) hint.textContent = 'toplam ' + zmNum(zmWeekGrand()) + ' sa / bu hafta';
+    if (hint) {
+      var totalActive = 0;
+      zmData.cats.forEach(function(c) {
+        var key = zmDateKey(zmSelDate);
+        var rec = zmData.days[key] || {};
+        if (parseInt(rec[c.id]) > 0) totalActive++;
+      });
+      hint.textContent = 'bugün ' + totalActive + '/' + zmData.cats.length + ' kategori dolduruldu';
+    }
   }
 
-  // Doldurulması gereken süreler
+  // Doldurulması gereken süreler (boş — kaldırıldı)
   var gl = document.getElementById('zm-goals-list');
-  if (gl) {
-    var lhtml = '';
-    zmData.cats.forEach(function (c) {
-      lhtml += '<div class="zm-goals-list-row">'
-        + '<span class="zm-row-dot" style="background:' + c.color + '"></span>'
-        + '<span class="zm-goals-name">' + c.name + '</span>'
-        + '<input type="number" class="zm-goals-input" data-zm-goal="' + c.id + '" min="0" step="0.5" value="' + (c.goal || 0) + '">'
-        + '<span class="zm-goals-suf">sa / hafta</span>'
-        + '</div>';
-    });
-    gl.innerHTML = lhtml;
-  }
+  if (gl) gl.innerHTML = '';
 }
 
 function zmNum(v) {
@@ -28085,37 +28405,36 @@ document.addEventListener('click', function (e) {
   // Kategori sil
   var delcat = t.closest('[data-zm-delcat]');
   if (delcat) { zmDeleteCat(delcat.getAttribute('data-zm-delcat')); return; }
-  var inc = t.closest('[data-zm-inc]');
-  if (inc) { zmSetToday(inc.getAttribute('data-zm-inc'), zmTodayVal(inc.getAttribute('data-zm-inc')) + 1); return; }
-  var dec = t.closest('[data-zm-dec]');
-  if (dec) { zmSetToday(dec.getAttribute('data-zm-dec'), zmTodayVal(dec.getAttribute('data-zm-dec')) - 1); return; }
-  var star = t.closest('[data-zm-star]');
-  if (star) {
-    var group = star.closest('[data-zm-stars]');
-    if (group) {
-      var catId = group.getAttribute('data-zm-stars');
-      var idx = parseInt(star.getAttribute('data-zm-star'), 10);
-      zmSetToday(catId, zmTodayVal(catId) === idx ? idx - 1 : idx);
-    }
+  // 3-Level butonları
+  var lvlBtn = t.closest('[data-zm-lvl]');
+  if (lvlBtn) {
+    var catId = lvlBtn.getAttribute('data-zm-lvl');
+    var val = parseInt(lvlBtn.getAttribute('data-zm-val'), 10);
+    var cur = zmTodayVal(catId);
+    zmSetToday(catId, cur === val ? 0 : val);
+    return;
+  }
+  // 💧 Su butonları
+  var waterBtn = t.closest('[data-water]');
+  if (waterBtn) {
+    var dk2 = zmTodayKey();
+    var wc2 = parseInt(zmData.water[dk2]) || 0;
+    var dir = parseInt(waterBtn.getAttribute('data-water'), 10);
+    wc2 = Math.max(0, wc2 + dir);
+    zmData.water[dk2] = wc2;
+    zmSave(); zmRender();
+    return;
+  }
+  var waterGoalBtn = t.closest('[data-water-goal]');
+  if (waterGoalBtn) {
+    zmData.waterGoal = Math.max(1, Math.min(30, (parseInt(zmData.waterGoal) || 8) + parseInt(waterGoalBtn.getAttribute('data-water-goal'), 10)));
+    zmSave(); zmRender();
     return;
   }
 });
 
 document.addEventListener('change', function (e) {
-  var goal = e.target.getAttribute && e.target.closest && (e.target.closest('[data-zm-goal]') || e.target.closest('[data-zm-goal-y]'));
-  if (goal) {
-    var cid = goal.getAttribute('data-zm-goal') || goal.getAttribute('data-zm-goal-y');
-    var c = zmCat(cid);
-    if (c) { c.goal = Math.max(0, parseFloat(goal.value) || 0); zmSave(); zmRender(); }
-    return;
-  }
-  var now = e.target.getAttribute && e.target.closest && e.target.closest('[data-zm-now]');
-  if (now) { zmSetToday(now.getAttribute('data-zm-now'), now.value); return; }
-});
-
-document.addEventListener('input', function (e) {
-  var now = e.target.getAttribute && e.target.closest && e.target.closest('[data-zm-now]');
-  if (now) { zmSetToday(now.getAttribute('data-zm-now'), now.value); return; }
+  // Goal inputs removed — no-op
 });
 
 // Kategori ekleme kutusu Enter / Escape
@@ -28124,6 +28443,248 @@ document.addEventListener('keydown', function (e) {
   if (t && t.id === 'zmNewCatName') {
     if (e.key === 'Enter') { e.preventDefault(); zmAddCat(); }
     if (e.key === 'Escape') { t.value = ''; t.blur(); }
+  }
+});
+
+/* ══════════════════════════════════════════
+   ZAMAN TABS + COLLAPSE
+   ══════════════════════════════════════════ */
+document.addEventListener('click', function(e) {
+  var tab = e.target.closest && e.target.closest('[data-zm-tab]');
+  if (tab) {
+    var key = tab.getAttribute('data-zm-tab');
+    document.querySelectorAll('.zm-tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.zm-tab-content').forEach(function(c){ c.classList.remove('active'); });
+    tab.classList.add('active');
+    var target = document.getElementById('zm-tab-' + key);
+    if (target) target.classList.add('active');
+    if (key === 'personal') pgRender();
+  }
+  var col = e.target.closest && e.target.closest('[data-zm-collapse]');
+  if (col) {
+    var id = col.getAttribute('data-zm-collapse');
+    var body = document.getElementById('zm-collapse-' + id);
+    if (body) {
+      col.classList.toggle('open');
+      body.classList.toggle('open');
+      if (body.classList.contains('open')) {
+        if (id === 'bar' || id === 'pct') zmRender();
+        if (id === 'pool') zmRender();
+        if (id === 'week') zmRender();
+        if (id === 'goals') zmRender();
+      }
+    }
+  }
+});
+
+/* ══════════════════════════════════════════
+   KİŞİSEL GELİŞİM TAKİBİ
+   ══════════════════════════════════════════ */
+var PG_KEY = 'alfa-kisisel-v1';
+var pgData = { items: [], days: {} };
+var pgSelDate = new Date();
+var PG_DEFAULTS = [
+  { id: 'meditasyon', name: 'Meditasyon', icon: '🧘', dir: 'up' },
+  { id: 'spor', name: 'Spor / Egzersiz', icon: '🏋️', dir: 'up' },
+  { id: 'kendine', name: 'Kendine Zaman', icon: '📖', dir: 'up' },
+  { id: 'uyku', name: 'Uyku Kalitesi', icon: '😴', dir: 'up' },
+  { id: 'ekransiz', name: 'Ekran Dışı Zaman', icon: '📵', dir: 'up' }
+];
+var PG_HINTS = {
+  0: { lbl: 'Yapılmadı', cls: '' },
+  1: { lbl: 'Yetersiz', cls: 'h-1' },
+  2: { lbl: 'Fena Değil', cls: 'h-2' },
+  3: { lbl: 'Yeterli', cls: 'h-3' }
+};
+function pgLoad() {
+  try {
+    var raw = localStorage.getItem(PG_KEY);
+    if (raw) { var d = JSON.parse(raw); if (d && Array.isArray(d.items)) pgData = d; }
+  } catch(e) {}
+  if (!Array.isArray(pgData.items)) pgData.items = [];
+  if (!pgData.days || typeof pgData.days !== 'object') pgData.days = {};
+  if (!pgData.items.length) {
+    PG_DEFAULTS.forEach(function(def) {
+      pgData.items.push({ id: def.id, name: def.name, icon: def.icon, dir: def.dir || 'up', active: true });
+    });
+    pgSave();
+  }
+  pgData.items.forEach(function(it) {
+    if (!it.dir) {
+      var base = PG_DEFAULTS.find(function(d){ return d.id === it.id; });
+      it.dir = base ? (base.dir || 'up') : 'up';
+    }
+  });
+}
+function pgSave() {
+  try { localStorage.setItem(PG_KEY, JSON.stringify(pgData)); } catch(e) {}
+}
+function pgDateKey(d) {
+  var dt = d || new Date();
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+}
+function pgDayRec(key) {
+  if (!pgData.days[key]) pgData.days[key] = {};
+  return pgData.days[key];
+}
+function pgStreak(itemId) {
+  var streak = 0;
+  var d = new Date();
+  for (var i = 0; i < 365; i++) {
+    var key = pgDateKey(d);
+    var rec = pgData.days[key] || {};
+    var v = parseInt(rec[itemId]) || 0;
+    if (v >= 2) { streak++; } else { break; }
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+function pgWeekDates() {
+  var now = new Date();
+  var day = now.getDay();
+  var monday = new Date(now);
+  monday.setDate(now.getDate() - ((day + 6) % 7));
+  var dates = [];
+  for (var i = 0; i < 7; i++) {
+    var dd = new Date(monday);
+    dd.setDate(monday.getDate() + i);
+    dates.push(dd);
+  }
+  return dates;
+}
+function pgRender() {
+  pgLoad();
+  var navDate = document.getElementById('pg-nav-date');
+  var navDay = document.getElementById('pg-nav-day');
+  if (navDate) navDate.textContent = pgSelDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  if (navDay) navDay.textContent = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'][pgSelDate.getDay()];
+  var todayBtn = document.querySelector('[data-pg-today]');
+  if (todayBtn) todayBtn.disabled = pgDateKey(pgSelDate) === pgDateKey(new Date());
+
+  var key = pgDateKey(pgSelDate);
+  var rec = pgDayRec(key);
+  var itemsEl = document.getElementById('pg-items');
+  if (itemsEl) {
+    var active = pgData.items.filter(function(it){ return it.active; });
+    if (!active.length) {
+      itemsEl.innerHTML = '<div class="pg-empty"><div class="pg-empty-icon">🌱</div>Henüz hedef yok — aşağıdan ekle.</div>';
+    } else {
+      var html = '';
+      active.forEach(function(it) {
+        var v = parseInt(rec[it.id]) || 0;
+        var lvlCls = v > 0 ? ' lvl-' + v : '';
+        var hint = PG_HINTS[v] || PG_HINTS[0];
+        html += '<div class="pg-item' + lvlCls + '">'
+          + '<span class="pg-item-icon">' + (it.icon || '✅') + '</span>'
+          + '<div class="pg-item-info"><div class="pg-item-name">' + it.name + '</div>'
+          + '<div class="pg-item-hint ' + hint.cls + '">' + hint.lbl + '</div></div>'
+          + '<div class="pg-item-levels">';
+        [1,2,3].forEach(function(lv) {
+          var onCls = v === lv ? ' on-' + lv : '';
+          html += '<button type="button" class="pg-lvl' + onCls + '" data-pg-lvl="' + it.id + '" data-pg-val="' + lv + '">' + lv + '</button>';
+        });
+        html += '</div>'
+          + '<button type="button" class="pg-item-del" data-pg-del="' + it.id + '" title="Bu hedefi sil">🗑</button>'
+          + '</div>';
+      });
+      itemsEl.innerHTML = html;
+    }
+  }
+
+  // Streaks
+  var streaksEl = document.getElementById('pg-streaks');
+  if (streaksEl) {
+    var active = pgData.items.filter(function(it){ return it.active; });
+    var shtml = '';
+    active.forEach(function(it) {
+      var s = pgStreak(it.id);
+      shtml += '<div class="pg-streak-card">'
+        + '<div class="pg-streak-icon">' + (it.icon || '✅') + '</div>'
+        + '<div class="pg-streak-name">' + it.name + '</div>'
+        + '<div class="pg-streak-num' + (s >= 7 ? ' fire' : '') + '">' + s + '</div>'
+        + '<div class="pg-streak-label">' + (s > 0 ? 'gün seri 🔥' : 'başla') + '</div>'
+        + '</div>';
+    });
+    streaksEl.innerHTML = shtml;
+  }
+
+  // Weekly grid
+  var weekEl = document.getElementById('pg-week-grid');
+  if (weekEl) {
+    var dates = pgWeekDates();
+    var dLabels = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
+    var active = pgData.items.filter(function(it){ return it.active; });
+    var whtml = '';
+    dates.forEach(function(dd, i) {
+      var dk = pgDateKey(dd);
+      var rec = pgData.days[dk] || {};
+      var isFuture = dd > new Date() && dk !== pgDateKey(new Date());
+      var count = 0;
+      active.forEach(function(it) { if (parseInt(rec[it.id]) >= 2) count++; });
+      whtml += '<div class="pg-week-day">'
+        + '<div class="pg-wd-label">' + dLabels[i] + ' ' + dd.getDate() + '</div>'
+        + '<div class="pg-wd-dots">';
+      active.forEach(function(it) {
+        var v = parseInt(rec[it.id]) || 0;
+        var cls = isFuture ? 'future' : (v >= 2 ? 'lvl-' + v : (v > 0 ? 'lvl-' + v : 'missed'));
+        whtml += '<div class="pg-wd-dot ' + cls + '" title="' + it.name + ': ' + (PG_HINTS[v] || PG_HINTS[0]).lbl + '">' + (v > 0 ? v : (isFuture ? '' : '·')) + '</div>';
+      });
+      whtml += '</div><div class="pg-wd-count">' + count + '/' + active.length + '</div></div>';
+    });
+    weekEl.innerHTML = whtml;
+  }
+}
+
+// PG navigation
+document.addEventListener('click', function(e) {
+  var prev = e.target.closest && e.target.closest('[data-pg-prev]');
+  if (prev) { pgSelDate.setDate(pgSelDate.getDate() - 1); pgRender(); return; }
+  var next = e.target.closest && e.target.closest('[data-pg-next]');
+  if (next) { pgSelDate.setDate(pgSelDate.getDate() + 1); pgRender(); return; }
+  var today = e.target.closest && e.target.closest('[data-pg-today]');
+  if (today) { pgSelDate = new Date(); pgRender(); return; }
+  var lvlBtn = e.target.closest && e.target.closest('[data-pg-lvl]');
+  if (lvlBtn) {
+    var itemId = lvlBtn.getAttribute('data-pg-lvl');
+    var val = parseInt(lvlBtn.getAttribute('data-pg-val'), 10);
+    var key = pgDateKey(pgSelDate);
+    var rec = pgDayRec(key);
+    rec[itemId] = rec[itemId] === val ? 0 : val;
+    pgSave();
+    pgRender();
+    return;
+  }
+  var del = e.target.closest && e.target.closest('[data-pg-del]');
+  if (del) {
+    var itemId = del.getAttribute('data-pg-del');
+    if (confirm('Bu hedefi silmek istediğine emin misin? Geçmiş veriler korunacak.')) {
+      pgData.items = pgData.items.filter(function(it){ return it.id !== itemId; });
+      pgSave();
+      pgRender();
+    }
+    return;
+  }
+  var addBtn = e.target.closest && e.target.closest('[data-pg-add]');
+  if (addBtn) {
+    var nameEl = document.getElementById('pgNewName');
+    var iconEl = document.getElementById('pgNewIcon');
+    var name = (nameEl.value || '').trim();
+    var icon = (iconEl.value || '').trim() || '✅';
+    if (!name) return;
+    var id = 'custom_' + Date.now();
+    pgData.items.push({ id: id, name: name, icon: icon, active: true });
+    pgSave();
+    nameEl.value = '';
+    iconEl.value = '';
+    pgRender();
+    return;
+  }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.target && e.target.id === 'pgNewName' && e.key === 'Enter') {
+    e.preventDefault();
+    var btn = document.querySelector('[data-pg-add]');
+    if (btn) btn.click();
   }
 });
 
