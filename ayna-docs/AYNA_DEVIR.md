@@ -162,3 +162,45 @@ FAZ 4: Veri kaynakları ve raporlar (sync, daily/weekly/monthly jobs, archive ta
 8. Büyük karar modunda bir kararı konuşun: "Kararı kaydet" kartı çıkmalı; kaydedince `ayna_decisions` tablosunda satır oluşmalı.
 9. Ayarlar > "Tanışma görüşmesini başlat": koç her mesajda tek soru sormalı; birkaç yanıttan sonra "Tanışmayı bitir" ile özet ekranı açılmalı; yalnızca seçilenler kaydedilmeli.
 10. Ayarlar'dan koçun tonunu değiştirin: sonraki yanıtlar yeni tona uymalı.
+
+---
+
+# FAZ 4 — Veri Kaynakları ve Raporlar
+
+**Tarih:** 2026-09-20
+**Branch:** `ayna`
+**Commit:** `ayna: faz 4 - kaynaklar ve raporlar`
+
+## Tamamlanan İşler
+
+### Sunucu
+- `ayna-server/actions/sync.mjs` — Tam runSync (journals okuma, D16/D18 eşleme, trades/expenses upsert)
+- `ayna-server/jobs/daily.mjs` — Tam runDaily (sync, scribe retry, karar dönüşleri, haftalık/aylık tetikleme)
+- `ayna-server/jobs/weekly.mjs` — Tam runWeekly (weeklyPackage, Claude, insight + belief proposals)
+- `ayna-server/jobs/monthly.mjs` — Tam runMonthly (monthlyPackage, Claude, insight + current_focus)
+- `ayna-server/metrics.mjs` — weeklyPackage ve monthlyPackage eklendi
+
+### İstemci
+- `ayna-today.js` — Kart 7 tamamlandı (işlemler, sembol/yön/R/planlı/duygu, senkron düğmesi)
+- `ayna-archive.js` — J8 tamamlandı (4 alt sekme: Raporlar, İyi anlar, Kararlar, Günlük)
+
+### index.html
+- `?v=` değerleri 4'e güncellendi
+
+## B16 Kontroller
+- ✅ Tüm dosyalar `node --check` geçti
+- ✅ Secret taraması temiz
+
+## Bir Sonraki Faz
+FAZ 5: Veri sahipliği ve son kontroller (ayarlar: izinler, dışa aktarma, silme)
+
+## Kullanıcının Yapacağı Testler
+1. `CRON_SECRET` değişkenini tanımlayıp yeniden deploy edin.
+2. D15≠YOK ise Bugün > "İşlemleri güncelle": bugünkü işlemler listelenmeli. Site kaynağında planlı durumu ve duygu seçilebilmeli; ikinci bir güncelleme bu seçimleri silmemeli.
+3. D17≠YOK ise `ayna_expenses` tablosu dolmalı.
+4. `curl -H "Authorization: Bearer <CRON_SECRET>" "https://<önizleme adresi>/api/ayna?force=weekly&user=<kullanıcı kimliği>"` → `{"ok":true,"processed":1}`; bu hafta en az 2 kayıt varsa Arşiv > Raporlar'da haftalık rapor görünmeli. Komutu tekrarlayın: ikinci rapor oluşmamalı.
+5. Aynı komutu `force=monthly` ile çalıştırın. Önceki ayda en az 5 akşam kaydı yoksa rapor oluşmaması beklenen davranıştır.
+6. Haftalık rapordan sonra (öneri geldiyse) Ayarlar > "Koç seni nasıl görüyor"da öneriler görünmeli; Doğru, Düzelt ve Doğru değil çalışmalı; reddedilen gözlem koçun sonraki yanıtlarında kullanılmamalı.
+7. Supabase'de bir kararın `review_date` değerini bugüne çekip cron komutunu çalıştırın: Raporlar'da "Karar dönüşü" görünmeli; Kararlar'dan sonucu yazınca kaydedilmeli.
+8. Rapor geri bildirim düğmeleri seçimi kaydetmeli.
+9. Production'a alındıktan sonra Vercel proje panelindeki Cron Jobs bölümünde görev listelenmeli.

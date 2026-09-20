@@ -458,25 +458,72 @@ function _bindLoops(c) {
   });
 }
 
+var _TRADE_EMOTIONS = ['heyecanlı','korku','stres','sakin','gurur','pişmanlık','kaybetme korkusu','kazanma hırsı','temkinli','kararlı','aceleci','kararsız'];
+
 function _cardTrades(trades) {
-  if (!trades || !trades.length) return '<div class="ay-card"><h4>' + Ayna.t('today.trades_title') + '</h4><p>' + Ayna.t('today.trades_empty') + '</p>' +
-    '<button class="btn" id="ay-sync">' + Ayna.t('today.sync') + '</button></div>';
   var h = '<div class="ay-card"><h4>' + Ayna.t('today.trades_title') + '</h4>';
-  trades.forEach(function (t) {
-    h += '<div style="margin:4px 0"><strong>' + Ayna.esc(t.symbol || '?') + '</strong> ' + Ayna.t('direction.' + (t.direction || 'long')) + ' ';
-    var pnlColor = t.pnl > 0 ? 'var(--green)' : t.pnl < 0 ? 'var(--red)' : '';
-    h += Ayna.t('label.pnl') + ': <span style="color:' + pnlColor + '">' + Ayna.num(t.pnl) + '</span></div>';
-  });
+  if (!trades || !trades.length) {
+    h += '<p>' + Ayna.t('today.trades_empty') + '</p>';
+  } else {
+    trades.forEach(function (t) {
+      h += '<div class="ay-trade" data-tid="' + t.id + '" style="margin:6px 0;padding:6px;border:1px solid var(--border);border-radius:var(--radius)">';
+      h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+      h += '<strong>' + Ayna.esc(t.symbol || '?') + '</strong> ';
+      h += '<span class="chip">' + Ayna.t('direction.' + (t.direction || 'long')) + '</span> ';
+      var pnlColor = t.pnl > 0 ? 'var(--green)' : t.pnl < 0 ? 'var(--red)' : '';
+      h += Ayna.t('label.pnl') + ': <span style="color:' + pnlColor + '">' + Ayna.num(t.pnl) + '</span>';
+      h += '</div>';
+      h += '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">';
+      var isPlanned = t.planned === true;
+      var isUnplanned = t.planned === false;
+      h += '<button class="chip' + (isPlanned ? ' on' : '') + '" data-tpl="' + t.id + '" data-tpv="true">' + Ayna.t('today.trade_planned') + '</button>';
+      h += '<button class="chip' + (isUnplanned ? ' on' : '') + '" data-tpl="' + t.id + '" data-tpv="false">' + Ayna.t('today.trade_unplanned') + '</button>';
+      h += '</div>';
+      h += '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">';
+      _TRADE_EMOTIONS.forEach(function (em) {
+        var on = t.emotions && t.emotions.indexOf(em) >= 0;
+        h += '<button class="chip' + (on ? ' on' : '') + '" data-tem="' + t.id + '" data-temv="' + Ayna.esc(em) + '">' + Ayna.esc(em) + '</button>';
+      });
+      h += '</div></div>';
+    });
+  }
   h += '<button class="btn" id="ay-sync">' + Ayna.t('today.sync') + '</button></div>';
   return h;
 }
 
 function _bindTrades(c, d) {
   var b = c.querySelector('#ay-sync');
-  if (!b) return;
-  b.addEventListener('click', function () {
-    b.disabled = true;
-    Ayna.api('sync').then(function () { renderToday(c); })
-      .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
+  if (b) {
+    b.addEventListener('click', function () {
+      b.disabled = true;
+      Ayna.api('sync').then(function () { renderToday(c); })
+        .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
+    });
+  }
+  c.querySelectorAll('[data-tpl]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tid = btn.getAttribute('data-tpl');
+      var val = btn.getAttribute('data-tpv') === 'true';
+      btn.disabled = true;
+      Ayna.sb().from('ayna_trades').update({ planned: val }).eq('id', tid).eq('user_id', Ayna.uid)
+        .then(function () { renderToday(c); })
+        .catch(function () { btn.disabled = false; Ayna.flash(Ayna.errText('default')); });
+    });
+  });
+  c.querySelectorAll('[data-tem]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tid = btn.getAttribute('data-tem');
+      var em = btn.getAttribute('data-temv');
+      var trade = null;
+      Ayna.sb().from('ayna_trades').select('emotions').eq('id', tid).eq('user_id', Ayna.uid).single()
+        .then(function (r) {
+          trade = r.data;
+          var list = (trade && trade.emotions) ? trade.emotions.slice() : [];
+          var idx = list.indexOf(em);
+          if (idx >= 0) list.splice(idx, 1); else list.push(em);
+          return Ayna.sb().from('ayna_trades').update({ emotions: list }).eq('id', tid).eq('user_id', Ayna.uid);
+        }).then(function () { renderToday(c); })
+        .catch(function () { Ayna.flash(Ayna.errText('default')); });
+    });
   });
 }
