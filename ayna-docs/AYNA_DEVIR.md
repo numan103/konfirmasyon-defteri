@@ -204,3 +204,98 @@ FAZ 5: Veri sahipliği ve son kontroller (ayarlar: izinler, dışa aktarma, silm
 7. Supabase'de bir kararın `review_date` değerini bugüne çekip cron komutunu çalıştırın: Raporlar'da "Karar dönüşü" görünmeli; Kararlar'dan sonucu yazınca kaydedilmeli.
 8. Rapor geri bildirim düğmeleri seçimi kaydetmeli.
 9. Production'a alındıktan sonra Vercel proje panelindeki Cron Jobs bölümünde görev listelenmeli.
+
+---
+
+# FAZ 5 — Veri Sahipliği ve Son Kontroller
+
+**Tarih:** 2026-09-20
+**Branch:** `ayna`
+**Commit:** `ayna: faz 5 - veri sahipligi`
+
+## Tamamlanan İşler
+
+### İstemci
+- `ayna-settings.js` — J9 tamamlandı: izinler (consent durumu + istatistik toggle), dışa aktarma (JSON + Obsidian/ZIP), silme (SİL onayıyla)
+
+### index.html
+- `?v=` değerleri 5'e güncellendi
+
+## B16 Kontroller (Tüm Dosyalar)
+- ✅ Tüm .mjs/.js dosyaları `node --check` geçti
+- ✅ Secret taraması temiz
+- ✅ Mojibake taraması temiz
+
+## Tüm Ayna Dosyaları
+
+### İstemci (ayna/)
+1. `ayna-core.css` — Tema, yerleşim, tüm stiller (J11)
+2. `ayna-i18n.js` — TR+EN arayüz metinleri (BÖLÜM K)
+3. `ayna-core.js` — Ad alan, durum, API, kurulum akışı (J1+J2)
+4. `ayna-today.js` — Bugün sekmesi: 7 kart (J3)
+5. `ayna-map.js` — Harita sekmesi: SVG, kişi kartı, metrikler (J5)
+6. `ayna-coach.js` — Koç sekmesi: modlar, sohbet, karar (J6)
+7. `ayna-rules.js` — Kurallar sekmesi: kurallar, değerler, hedefler (J7)
+8. `ayna-archive.js` — Arşiv sekmesi: 4 alt sekme (J8)
+9. `ayna-settings.js` — Ayarlar sekmesi: ton, gözlemler, tanışma, izinler, dışa aktarma, silme (J9+J10)
+
+### Sunucu (ayna-server/)
+10. `http.mjs` — JSON yanıt, hata yardımcıları (H2)
+11. `time.mjs` — Tarih fonksiyonları (H2)
+12. `supabase.mjs` — Supabase REST istemcisi (H2)
+13. `anthropic.mjs` — Claude API çağrısı (H2)
+14. `limits.mjs` — Günlük sınırlar (H2)
+15. `prompts.mjs` — AI talimatları (BÖLÜM I, birebir)
+16. `tools.mjs` — Araç şemaları (BÖLÜM I, birebir)
+17. `context.mjs` — Bağlam derleme (H5)
+18. `metrics.mjs` — Metrikler, rapor paketleri (H8)
+19. `actions/ping.mjs` — Ping (H4)
+20. `actions/scribe.mjs` — Katip: 14 adımlı算法 (H4)
+21. `actions/reflect.mjs` — Yansıma (H4)
+22. `actions/coach.mjs` — Koç (H4)
+23. `actions/onboarding-summary.mjs` — Tanışma özeti (H4)
+24. `actions/sync.mjs` — Senkron: trades+expenses (H6)
+25. `jobs/daily.mjs` — Günlük görev (H7)
+26. `jobs/weekly.mjs` — Haftalık rapor (H7)
+27. `jobs/monthly.mjs` — Aylık değerlendirme (H7)
+
+### API & Veritabanı
+28. `api/ayna.mjs` — Tek sunucu fonksiyonu (H1)
+29. `supabase/ayna/001_schema.sql` — 19 tablo, RLS, trigger'lar (BÖLÜM G)
+
+### Yapılandırma
+30. `vercel.json` — functions + crons (F6)
+31. `.vercelignore` — deploy dışı dosyalar (F7)
+
+### Belgeler
+32. `ayna-docs/AYNA_MASTER_PROMPT.md` — Ana talimat
+33. `ayna-docs/AYNA_KESIF_2.md` — FAZ 0 keşif raporu
+34. `ayna-docs/AYNA_KURULUM.md` — Kurulum notları (BÖLÜM N)
+35. `ayna-docs/AYNA_DEVIR.md` — Bu dosya
+36. `ayna-docs/KESIF_RAPORU.md` — Genel keşif raporu
+
+## Ortam Değişkenleri (F5)
+
+| Ad | Durum | Kullanım |
+|---|---|---|
+| `SUPABASE_URL` | Mevcut | Supabase adresi |
+| `SUPABASE_PUBLISHABLE` | Mevcut | Genel anahtar |
+| `SUPABASE_SERVICE_ROLE` | Mevcut | Yalnızca cron |
+| `ANTHROPIC_API_KEY` | Yeni | Claude API |
+| `AYNA_ALLOWED_USER_IDS` | Yeni | Kullanıcı izin listesi |
+| `AYNA_MODEL_SCRIBE` | İsteğe bağlı | Varsayılan: claude-haiku-4-5-20251001 |
+| `AYNA_MODEL_COACH` | İsteğe bağlı | Varsayılan: claude-sonnet-5 |
+| `CRON_SECRET` | Yeni | Cron doğrulaması |
+
+## Canlıya Alma
+1. `ayna` branch'ini `main`'e birleştirin
+2. Ortam değişkenlerini Production ortamına da tanımlayın
+3. SQL aynı Supabase projesinde zaten çalıştırıldıysa tekrar gerekmez
+4. İlk gece cron'un çalıştığını Vercel loglarından doğrulayın
+
+## Kullanıcının Yapacağı Testler (Son)
+1. Ayarlar > İzinlerin: durumlar doğru görünmeli; istatistik katkısını açıp kapatın: `ayna_consents`'e yeni satırlar eklenmeli, eskiler silinmemeli.
+2. "Tam yedek olarak indir": JSON dosyası inmeli ve 19 tablonun tamamını içermeli.
+3. "Obsidian klasörü olarak indir": zip'i açın, klasörü Obsidian'da kasa olarak açın. Grafik görünümünde kişiler ve günler birbirine bağlı görünmeli; Türkçe karakterler bozulmamalı.
+4. Bir test hesabıyla "Tüm Ayna verimi sil": `SİL` yazılmadan düğme çalışmamalı; silince kurulum ekranı gelmeli; Supabase'de bu hesaba ait hiçbir `ayna_` satırı kalmamalı; site hesabı ve diğer sayfalar etkilenmemeli.
+5. Devir notundaki B16 sonuçları temiz olmalı.
