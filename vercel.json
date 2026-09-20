@@ -1,3 +1,9 @@
 {
-  "alias": ["alfatraders.vercel.app"]
+  "alias": ["alfatraders.vercel.app"],
+  "functions": {
+    "api/ayna.mjs": { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/api/ayna", "schedule": "0 17 * * *" }
+  ]
 }

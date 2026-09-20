@@ -20,6 +20,9 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<!-- AYNA:BASLA -->
+<link rel="stylesheet" href="/ayna/ayna-core.css">
+<!-- AYNA:BITIR -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -5001,6 +5004,9 @@
         </div>
       </div>
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
+      <!-- AYNA:BASLA -->
+      <a href="?page=ayna" class="nav-link" id="tab-ayna" data-nav>🪞 Ayna</a>
+      <!-- AYNA:BITIR -->
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
@@ -5050,6 +5056,9 @@
       <div class="mnav-group" data-i18n="app.news">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
+      <!-- AYNA:BASLA -->
+      <a href="?page=ayna" class="mnav-link" data-nav data-mnav="ayna" id="mnav-ayna">🪞 Ayna</a>
+      <!-- AYNA:BITIR -->
       <div class="mnav-contact">
         <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
         <a class="soc-link tg" id="nc-tg-m" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
@@ -8078,6 +8087,12 @@
     <div id="ek-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
   </div>
 </div>
+
+<!-- AYNA:BASLA -->
+<div id="page-ayna" class="hidden">
+  <div id="ayna-root"></div>
+</div>
+<!-- AYNA:BITIR -->
 
 <script>const STORAGE_KEY = 'konfirmasyon-defteri-v3';
 // ===== İletişim / sosyal bağlantılar (tek yerden düzenle) =====
@@ -12769,13 +12784,19 @@ function showPage(name, skipAnim) {
   if (name === 'strateji' && !amAllowed()) name = 'home';
   if (name === 'butce' && !amAllowed()) name = 'home';
   if (name === 'portfoy' && !amAllowed()) name = 'home';
+  // AYNA:BASLA
+  if (name === 'ayna' && !amAllowed()) name = 'home';
+  // AYNA:BITIR
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
   if (name === 'zaman') zmRender();
   if (name === 'strateji') st2Render();
-  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps'];
+  // AYNA:BASLA
+  if (name === 'ayna') Ayna.render();
+  // AYNA:BITIR
+  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -28839,5 +28860,15 @@ document.addEventListener('input', function (e) {
 });
 
     </script>
+<!-- AYNA:BASLA -->
+<script src="/ayna/ayna-i18n.js"></script>
+<script src="/ayna/ayna-core.js"></script>
+<script src="/ayna/ayna-today.js"></script>
+<script src="/ayna/ayna-map.js"></script>
+<script src="/ayna/ayna-coach.js"></script>
+<script src="/ayna/ayna-rules.js"></script>
+<script src="/ayna/ayna-archive.js"></script>
+<script src="/ayna/ayna-settings.js"></script>
+<!-- AYNA:BITIR -->
 </body>
 </html>
