@@ -60,3 +60,58 @@ FAZ 2: Bugünün Modülü (J3_today tam implementasyonu)
 - `main` branch'e dokunulmadı, tüm work `ayna` branch'inde
 - Mevcut CSS/JS dosyalarına dokunulmadı
 - sw.js, middleware.js, package.json değişmedi
+
+---
+
+# FAZ 2 — Günlük, Katip ve Harita
+
+**Tarih:** 2026-09-20
+**Branch:** `ayna`
+**Commit:** `ayna: faz 2 - gunluk, katip, harita`
+
+## Tamamlanan İşler
+
+### Sunucu
+- `ayna-server/actions/scribe.mjs` — Tam 14 adımlı `runScribe` algoritması uygulandı (H4)
+  - Entry okuma, bağlam okuma, Claude KATIP çağrısı, kişi çözümleme, olay ekleme, açık uç, gerçek, bağ, kural kontrolü, entry güncelleme
+
+### İstemci
+- `ayna/ayna-core.js` — J1 tam uygulama (namespace, auth, render) + J2 kurulum akışı (adım 1-3: izinler, ton, başla)
+- `ayna/ayna-today.js` — J3 bugün sekmesi:
+  - Kart 1: Onay bekleyen kişiler bildirimi
+  - Kart 3: Sabah niyeti (14:00'ten önce form, sonra kayıtlı gösterim)
+  - Kart 4: Akşam kapanışı (pusula, kelimeler, uyku, kişiler, kurallar, not + scribe çağrısı)
+  - Kart 5: Hızlı not + scribe çağrısı
+  - Kart 6: Açık uçlar (en fazla 5, vadeye göre)
+  - Kart 7: Bugünkü işlemler (boş durum / senkron düğmesi)
+- `ayna/ayna-map.js` — J5 tam ilişki haritası:
+  - SVG harita (3 halka, 4 dilim, kişi noktaları, uyarı çerçeve)
+  - Kişi kartı (metrikler, uyarı, olaylar, durumlar, açık uçlar, bağlantılar)
+  - Onay bekleyenler listesi (onay, birleştir, sil)
+  - Kişi formu (yeni/düzenle)
+- `ayna/ayna-archive.js` — J8 yalnızca Günlük alt sekmesi (30 kayıt, düzenleme, silme, hata tekrarı)
+- `ayna/ayna-core.css` — J11 tam stiller (pusula, harita, sohbet, olay, kişi kartı, metrik, form, responsive)
+
+### index.html
+- `?v=` değerleri 2'ye güncellendi (tüm AYNA CSS/JS dosyaları için)
+
+## B16 Kontroller
+- ✅ Tüm .mjs/.js dosyaları `node --check` geçti
+- ✅ Secret taraması temiz
+- ✅ Mojibake taraması temiz
+
+## Bir Sonraki Faz
+FAZ 3: Koç (reflect, coach, onboarding-summary, context.mjs, metrics.mjs)
+
+## Kullanıcının Yapacağı Testler
+1. Ayna'yı açın: kurulum ekranı gelmeli; ilk üç kutu işaretlenmeden devam edilememeli.
+2. Ton seçip "Başla" deyin; Bugün sekmesi açılmalı.
+3. Harita'da "Kişi ekle" ile "Annem" (ilişki: anne, Aile, Yakın) ve "Serkan" (ilişki: lise arkadaşı, Arkadaşlar, Güvenilir) ekleyin; doğru dilim ve halkada görünmeliler.
+4. Bugün'de pusuladan bir nokta ve bir kelime seçip şu notla günü kapatın: "Annem aradı, çok güzel konuştuk. Serkan yine 2000 TL borç istedi, verdim. Müdürüm toplantıda beni herkesin önünde övdü." Hata olmamalı; Harita'da müdür onay bekleyen kişi olarak görünmeli; Annem ve Serkan kartlarında olaylar görünmeli; Bugün'de Serkan'a verilen borç açık uç olarak görünmeli.
+5. Onay bekleyen kişiyi "İş / okul" ve "Tanıdık" seçerek onaylayın; haritada görünmeli.
+6. Birkaç hızlı notla Serkan için toplam en az 4 olay oluşturun (en az ikisi talep veya borç). Serkan'ın noktasında turuncu çerçeve, kartında uyarı cümlesi ve dayandığı olaylar görünmeli.
+7. Serkan'ın bir olayını "Kapat"ın: olay soluklaşmalı ve metrikler güncellenmeli.
+8. Arşiv > Günlük'te bir kaydın metnini düzenleyip kaydedin: olaylar çoğalmamalı.
+9. Notu boş bir akşam kaydı oluşturun (ertesi gün veya kaydı silerek): `ayna_usage` tablosunda bu işlem için `model = none` satırı oluşmalı.
+10. Onay bekleyen bir kişiyi mevcut biriyle birleştirin: olayları kalan kişiye geçmeli.
+11. İkinci bir hesapla konsolda `await <D2>.from('ayna_people').select('*')` çalıştırın: boş dizi dönmeli.

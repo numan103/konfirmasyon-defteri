@@ -1,4 +1,4 @@
-/* AYNA core - J1 */
+/* AYNA core - J1 + J2 */
 window.Ayna = (function () {
   var _profile = null;
   var _uid = null;
@@ -31,13 +31,13 @@ window.Ayna = (function () {
     try { return new Intl.DateTimeFormat(lang() === 'en' ? 'en-GB' : 'tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso + 'T12:00:00Z')); } catch (e) { return iso; }
   }
   function ago(iso) { return iso === today() ? t('common.today') : t('common.days_ago', { n: Math.round((Date.now() - new Date(iso + 'T12:00:00Z').getTime()) / 86400000) }); }
-  function num(x, signed) { if (x == null || isNaN(x)) return '—'; var s = Number(x).toLocaleString(lang() === 'en' ? 'en-GB' : 'tr-TR', { maximumFractionDigits: 1 }); return (signed && Number(x) > 0 ? '+' : '') + s; }
+  function num(x, signed) { if (x == null || isNaN(x)) return '\u2014'; var s = Number(x).toLocaleString(lang() === 'en' ? 'en-GB' : 'tr-TR', { maximumFractionDigits: 1 }); return (signed && Number(x) > 0 ? '+' : '') + s; }
 
   function flash(msg) {
     var el = document.getElementById('ayna-flash');
-    if (!el) { el = document.createElement('div'); el.id = 'ayna-flash'; el.className = 'ay-flash'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
-    el.textContent = msg; el.classList.add('ay-on');
-    clearTimeout(flash._t); flash._t = setTimeout(function () { el.classList.remove('ay-on'); }, 4000);
+    if (!el) { el = document.createElement('div'); el.id = 'ayna-flash'; el.className = P + 'flash'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+    el.textContent = msg; el.classList.add(P + 'on');
+    clearTimeout(flash._t); flash._t = setTimeout(function () { el.classList.remove(P + 'on'); }, 4000);
   }
 
   function errText(code) { return t('err.' + code) || t('err.default'); }
@@ -60,35 +60,34 @@ window.Ayna = (function () {
 
   function openEntry(id) {
     try { Ayna._archiveEntry = id; } catch (e) {}
-    var tabBtns = document.querySelectorAll('.ay-tabs button');
-    tabBtns.forEach(function (b) { if (b.getAttribute('data-ay-tab') === 'archive') b.click(); });
-  }
-
-  function render() {
-    var root = document.getElementById('ayna-root');
-    if (!root) return;
-    root.innerHTML = '<div class="ay-card">' + t('common.loading') + '</div>';
-    root.className = 'ay-root';
-
-    if (!sb()) { root.innerHTML = '<div class="ay-card">' + t('app.login_required') + '</div>'; return; }
-
-    sb().auth.getSession().then(function (res) {
-      var session = res && res.data ? res.data.session : null;
-      if (!session || !session.user) { root.innerHTML = '<div class="ay-card">' + t('app.login_required') + '</div>'; return; }
-      _uid = session.user.id;
-      return sb().from('ayna_profiles').select('*').eq('user_id', _uid).maybeSingle().then(function (profRes) {
-        _profile = profRes && profRes.data ? profRes.data : null;
-        if (!_profile || !_profile.onboarding_done) { renderSetup(root); return; }
-        renderApp(root);
-      });
-    }).catch(function () {
-      root.innerHTML = '<div class="ay-card">' + t('err.default') + '</div>';
-    });
+    var tabBtns = document.querySelectorAll('.' + P + 'tabs button');
+    tabBtns.forEach(function (b) { if (b.getAttribute('data-' + P + 'tab') === 'archive') b.click(); });
   }
 
   function renderSetup(root) {
-    root.innerHTML = '<div class="ay-card"><h3>' + t('ob.welcome_title') + '</h3><p>' + t('ob.welcome_body') + '</p>' +
-      '<div style="margin-top:12px"><label style="display:block;margin:6px 0"><input type="checkbox" id="ay-c1"> ' + t('ob.consent_age_18') + '</label>' +
+    if (_profile) {
+      sb().from('ayna_consents').select('kind, granted, created_at')
+        .eq('user_id', _uid).in('kind', ['age_18', 'service', 'sensitive_data'])
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+          var rows = res && res.data ? res.data : [];
+          var latest = {};
+          rows.forEach(function (r) { if (!latest[r.kind]) latest[r.kind] = r; });
+          var allGranted = ['age_18', 'service', 'sensitive_data'].every(function (k) {
+            return latest[k] && latest[k].granted;
+          });
+          if (allGranted) { renderToneStep(root); } else { renderConsentStep(root); }
+        }).catch(function () { renderConsentStep(root); });
+    } else {
+      renderConsentStep(root);
+    }
+  }
+
+  function renderConsentStep(root) {
+    root.innerHTML = '<div class="' + P + 'card"><h3>' + t('ob.welcome_title') + '</h3><p>' + t('ob.welcome_body') + '</p>' +
+      '<p style="margin-top:8px;font-weight:600">' + t('ob.consent_title') + '</p>' +
+      '<div style="margin-top:12px">' +
+      '<label style="display:block;margin:6px 0"><input type="checkbox" id="ay-c1"> ' + t('ob.consent_age_18') + '</label>' +
       '<label style="display:block;margin:6px 0"><input type="checkbox" id="ay-c2"> ' + t('ob.consent_service') + '</label>' +
       '<label style="display:block;margin:6px 0"><input type="checkbox" id="ay-c3"> ' + t('ob.consent_sensitive_data') + '</label>' +
       '<label style="display:block;margin:6px 0"><input type="checkbox" id="ay-c4"> ' + t('ob.consent_statistics') + '</label>' +
@@ -114,7 +113,7 @@ window.Ayna = (function () {
   }
 
   function renderToneStep(root) {
-    root.innerHTML = '<div class="ay-card"><h3>' + t('ob.tone_title') + '</h3>' +
+    root.innerHTML = '<div class="' + P + 'card"><h3>' + t('ob.tone_title') + '</h3>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">' +
       '<button class="btn" data-tone="mentor">' + t('tone.mentor') + '<br><small>' + t('tone.mentor_desc') + '</small></button>' +
       '<button class="btn" data-tone="coach">' + t('tone.coach') + '<br><small>' + t('tone.coach_desc') + '</small></button>' +
@@ -122,14 +121,51 @@ window.Ayna = (function () {
       '</div><button class="btn solid" id="ay-tone-ok">' + t('common.continue') + '</button></div>';
     var selected = 'mentor';
     root.querySelectorAll('[data-tone]').forEach(function (b) {
-      b.addEventListener('click', function () { selected = b.getAttribute('data-tone'); root.querySelectorAll('[data-tone]').forEach(function (x) { x.classList.remove('solid'); }); b.classList.add('solid'); });
+      b.addEventListener('click', function () {
+        selected = b.getAttribute('data-tone');
+        root.querySelectorAll('[data-tone]').forEach(function (x) { x.classList.remove('solid'); });
+        b.classList.add('solid');
+      });
     });
     root.querySelector('[data-tone="mentor"]').classList.add('solid');
     document.getElementById('ay-tone-ok').addEventListener('click', function () {
       sb().from('ayna_profiles').update({ coach_tone: selected }).eq('user_id', _uid).then(function () {
-        _profile = _profile || {}; _profile.coach_tone = selected; _profile.onboarding_done = true;
-        sb().from('ayna_profiles').update({ onboarding_done: true }).eq('user_id', _uid).then(function () { renderApp(root); });
+        _profile = _profile || {}; _profile.coach_tone = selected;
+        renderMeetStep(root);
+      }).catch(function (e) { flash(errText(e.code || 'default')); });
+    });
+  }
+
+  function renderMeetStep(root) {
+    root.innerHTML = '<div class="' + P + 'card"><h3>' + t('ob.meet_title') + '</h3><p>' + t('ob.meet_body') + '</p>' +
+      '<button class="btn solid" id="ay-ob-start" style="margin-top:12px">' + t('ob.start') + '</button></div>';
+    document.getElementById('ay-ob-start').addEventListener('click', function () {
+      sb().from('ayna_profiles').update({ onboarding_done: true }).eq('user_id', _uid).then(function () {
+        _profile.onboarding_done = true;
+        renderApp(document.getElementById('ayna-root'));
+      }).catch(function (e) { flash(errText(e.code || 'default')); });
+    });
+  }
+
+  function render() {
+    var root = document.getElementById('ayna-root');
+    if (!root) return;
+    root.innerHTML = '<div class="' + P + 'card">' + t('common.loading') + '</div>';
+    root.className = P + 'root';
+
+    if (!sb()) { root.innerHTML = '<div class="' + P + 'card">' + t('app.login_required') + '</div>'; return; }
+
+    sb().auth.getSession().then(function (res) {
+      var session = res && res.data ? res.data.session : null;
+      if (!session || !session.user) { root.innerHTML = '<div class="' + P + 'card">' + t('app.login_required') + '</div>'; return; }
+      _uid = session.user.id;
+      return sb().from('ayna_profiles').select('*').eq('user_id', _uid).maybeSingle().then(function (profRes) {
+        _profile = profRes && profRes.data ? profRes.data : null;
+        if (!_profile || !_profile.onboarding_done) { renderSetup(root); return; }
+        renderApp(root);
       });
+    }).catch(function () {
+      root.innerHTML = '<div class="' + P + 'card">' + t('err.default') + '</div>';
     });
   }
 
@@ -139,18 +175,18 @@ window.Ayna = (function () {
     try { savedTab = localStorage.getItem('ayna.tab'); } catch (e) {}
     var activeTab = tabKeys.indexOf(savedTab) >= 0 ? savedTab : 'today';
 
-    root.innerHTML = '<div class="ay-hdr"><h2>' + t('app.title') + '</h2><span class="ay-date">' + fmtDate(today()) + '</span></div>' +
-      '<div class="ay-tabs" id="ay-tabs"></div><div class="ay-content" id="ay-content"></div><div id="ayna-flash" class="ay-flash" aria-live="polite"></div>';
+    root.innerHTML = '<div class="' + P + 'hdr"><h2>' + t('app.title') + '</h2><span class="' + P + 'date">' + fmtDate(today()) + '</span></div>' +
+      '<div class="' + P + 'tabs" id="ay-tabs"></div><div class="' + P + 'content" id="ay-content"></div><div id="ayna-flash" class="' + P + 'flash" aria-live="polite"></div>';
 
     var tabsEl = document.getElementById('ay-tabs');
     tabKeys.forEach(function (k) {
       var btn = document.createElement('button');
       btn.textContent = t('tab.' + k);
-      btn.setAttribute('data-ay-tab', k);
-      if (k === activeTab) btn.className = 'ay-on';
+      btn.setAttribute('data-' + P + 'tab', k);
+      if (k === activeTab) btn.className = P + 'on';
       btn.addEventListener('click', function () {
-        tabsEl.querySelectorAll('button').forEach(function (b) { b.classList.remove('ay-on'); });
-        btn.classList.add('ay-on');
+        tabsEl.querySelectorAll('button').forEach(function (b) { b.classList.remove(P + 'on'); });
+        btn.classList.add(P + 'on');
         try { localStorage.setItem('ayna.tab', k); } catch (e) {}
         renderTab(k);
       });
@@ -162,11 +198,11 @@ window.Ayna = (function () {
   function renderTab(name) {
     var container = document.getElementById('ay-content');
     if (!container) return;
-    container.innerHTML = '<div class="ay-card">' + t('common.loading') + '</div>';
+    container.innerHTML = '<div class="' + P + 'card">' + t('common.loading') + '</div>';
     if (tabs[name] && typeof tabs[name].render === 'function') {
       tabs[name].render(container);
     } else {
-      container.innerHTML = '<div class="ay-card">' + t('common.next_phase') + '</div>';
+      container.innerHTML = '<div class="' + P + 'card">' + t('common.next_phase') + '</div>';
     }
   }
 
