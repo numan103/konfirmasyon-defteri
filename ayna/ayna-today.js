@@ -30,14 +30,17 @@ function renderToday(c) {
     sb.from('ayna_people').select('id,display_name,ring,status').eq('user_id', uid).in('status', ['active','pending']).order('ring', { ascending: true }).order('display_name', { ascending: true }),
     sb.from('ayna_rules').select('id,if_text,then_text,domain').eq('user_id', uid).eq('is_active', true),
     sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open'),
-    sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })
+    sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true }),
+    sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1)
   ]).then(function (r) {
     var pendingCount = r[0].count || 0, entries = r[1].data || [], people = r[2].data || [];
     var rules = r[3].data || [], loops = r[4].data || [], trades = r[5].data || [];
+    var hasCrisis = r[6].data && r[6].data.length > 0;
     var morning = null, evening = null;
     entries.forEach(function (e) { if (e.kind === 'morning' && !morning) morning = e; if (e.kind === 'evening' && !evening) evening = e; });
     var h = '';
     if (pendingCount > 0) h += '<div class="ay-card"><p>' + Ayna.t('today.pending_notice', { n: pendingCount }) + '</p><button class="btn" id="ay-go-map">' + Ayna.t('today.pending_link') + '</button></div>';
+    if (hasCrisis) h += _cardCrisis();
     h += _cardMorning(morning);
     h += evening ? _cardEveningDone(evening) : _cardEveningForm(people, rules);
     h += _cardQuickNote();
@@ -50,12 +53,39 @@ function renderToday(c) {
     _bindQuickNote(c, d);
     _bindLoops(c);
     _bindTrades(c, d);
+    if (evening) _checkEveningReflection(c, evening);
   }).catch(function () { c.innerHTML = '<div class="ay-card">' + Ayna.t('err.default') + '</div>'; });
 }
 
 function _bindPending(c) {
   var b = c.querySelector('#ay-go-map');
   if (b) b.addEventListener('click', function () { _goTab('map'); });
+}
+
+function _cardCrisis() {
+  return '<div class="ay-card" style="border-left:3px solid var(--red);border-radius:0">' +
+    '<h4>' + Ayna.t('crisis.title') + '</h4><p>' + Ayna.t('crisis.body') + '</p></div>';
+}
+
+function _checkEveningReflection(c, evening) {
+  var sb = Ayna.sb();
+  sb.from('ayna_insights').select('id').eq('user_id', Ayna.uid).eq('kind', 'daily').eq('source_entry_id', evening.id).limit(1)
+    .then(function (res) {
+      if (res.data && res.data.length > 0) return;
+      var el = c.querySelector('#ay-ev');
+      if (!el) return;
+      var btnHtml = '<div style="margin-top:8px"><button class="btn" id="ay-ref-retry">' + Ayna.t('common.retry') + '</button></div>';
+      el.insertAdjacentHTML('beforeend', btnHtml);
+      var rb = c.querySelector('#ay-ref-retry');
+      if (rb) rb.addEventListener('click', function () {
+        rb.disabled = true;
+        Ayna.api('reflect', { entry_id: evening.id, kind: 'daily' }).then(function (res) {
+          var html = '<div class="ay-card"><h4>' + Ayna.t('today.reflection_title') + '</h4>' + Ayna.md(res.insight.body) + '</div>';
+          if (res.risk === 'crisis') html += _cardCrisis();
+          el.insertAdjacentHTML('beforeend', html);
+        }).catch(function () { Ayna.flash(Ayna.errText('model_failed')); rb.disabled = false; });
+      });
+    }).catch(function () {});
 }
 
 function _cardMorning(entry) {
@@ -332,12 +362,28 @@ function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
   }).then(function (entryId) {
     var ev = c.querySelector('#ay-ev');
     if (ev) ev.innerHTML = '<p>' + Ayna.t('today.processing') + '</p>';
-    return Ayna.api('scribe', { entry_id: entryId }).then(function () { renderToday(c); }).catch(function (err) {
+    return Ayna.api('scribe', { entry_id: entryId }).then(function (scribeRes) {
+      if (scribeRes.needs_reflection && scribeRes.reflection_kind) {
+        return Ayna.api('reflect', { entry_id: entryId, kind: scribeRes.reflection_kind }).then(function (refRes) {
+          var title = refRes.insight && refRes.insight.kind === 'instant' ? Ayna.t('today.instant_title') : Ayna.t('today.reflection_title');
+          var html = '<div class="ay-card"><h4>' + title + '</h4>' + (refRes.insight ? Ayna.md(refRes.insight.body) : '') + '</div>';
+          if (refRes.risk === 'crisis') html += _cardCrisis();
+          if (ev) ev.insertAdjacentHTML('beforeend', html);
+          renderToday(c);
+        }).catch(function () { renderToday(c); });
+      }
+      renderToday(c);
+    }).catch(function (err) {
       if (ev) ev.innerHTML = '<p>' + Ayna.t('err.scribe_failed') + '</p><button class="btn" id="ay-rs">' + Ayna.t('common.retry') + '</button>';
       var rb = c.querySelector('#ay-rs');
       if (rb) rb.addEventListener('click', function () {
         if (ev) ev.innerHTML = '<p>' + Ayna.t('today.processing') + '</p>';
-        Ayna.api('scribe', { entry_id: entryId }).then(function () { renderToday(c); }).catch(function () { Ayna.flash(Ayna.errText('scribe_failed')); });
+        Ayna.api('scribe', { entry_id: entryId }).then(function (sr) {
+          if (sr.needs_reflection && sr.reflection_kind) {
+            return Ayna.api('reflect', { entry_id: entryId, kind: sr.reflection_kind }).then(function () { renderToday(c); }).catch(function () { renderToday(c); });
+          }
+          renderToday(c);
+        }).catch(function () { Ayna.flash(Ayna.errText('scribe_failed')); });
       });
     });
   }).catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); });
@@ -358,8 +404,21 @@ function _bindQuickNote(c, d) {
     b.disabled = true;
     Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'note', local_date: d, body: v, processed_at: new Date().toISOString() })
       .select('id').single()
-      .then(function (r) { return Ayna.api('scribe', { entry_id: r.data.id }); })
-      .then(function () { renderToday(c); })
+      .then(function (r) { return Ayna.api('scribe', { entry_id: r.data.id }).then(function (sr) {
+        if (sr.needs_reflection && sr.reflection_kind) {
+          return Ayna.api('reflect', { entry_id: r.data.id, kind: sr.reflection_kind }).then(function (refRes) {
+            renderToday(c);
+            var content = c.querySelector('#ay-content');
+            if (content && refRes.insight) {
+              var title = refRes.reflection_kind === 'instant' ? Ayna.t('today.instant_title') : Ayna.t('today.reflection_title');
+              var html = '<div class="ay-card"><h4>' + title + '</h4>' + Ayna.md(refRes.insight.body) + '</div>';
+              if (refRes.risk === 'crisis') html += _cardCrisis();
+              content.insertAdjacentHTML('beforeend', html);
+            }
+          }).catch(function () { renderToday(c); });
+        }
+        renderToday(c);
+      }); })
       .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
   });
 }
