@@ -127,6 +127,7 @@ export default async function coach({ res, auth, user, profile, body }) {
       message_id: assistantMsgId
     });
   } catch (e) {
+    console.error('AYNA_COACH_ERROR:', e.message, e.stack);
     await logUsage(auth, user.id, 'coach', null);
     return fail(res, 500, 'model_failed', e.message);
   }

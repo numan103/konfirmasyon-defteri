@@ -59,6 +59,7 @@ export async function callTool({ model, systemStatic, systemDynamic, messages, t
     }
     if (!res.ok) {
       if (attempt === 0 && RETRY_STATUS.includes(res.status) && Date.now() - started < 15000) { await sleep(2000); continue; }
+      console.error('OPENAI_API_ERROR:', res.status, JSON.stringify(res.data));
       throw new Error(`openai ${res.status} ${res.data && res.data.error ? res.data.error.message : ''}`);
     }
     const data = res.data;
