@@ -281,15 +281,15 @@ FAZ 5: Veri sahipliği ve son kontroller (ayarlar: izinler, dışa aktarma, silm
 | `SUPABASE_URL` | Mevcut | Supabase adresi |
 | `SUPABASE_PUBLISHABLE` | Mevcut | Genel anahtar |
 | `SUPABASE_SERVICE_ROLE` | Mevcut | Yalnızca cron |
-| `ANTHROPIC_API_KEY` | Yeni | Claude API |
+| `OPENAI_API_KEY` | Yeni | OpenAI API |
 | `AYNA_ALLOWED_USER_IDS` | Yeni | Kullanıcı izin listesi |
-| `AYNA_MODEL_SCRIBE` | İsteğe bağlı | Varsayılan: claude-haiku-4-5-20251001 |
-| `AYNA_MODEL_COACH` | İsteğe bağlı | Varsayılan: claude-sonnet-5 |
+| `AYNA_MODEL_SCRIBE` | İsteğe bağlı | Varsayılan: gpt-4o-mini |
+| `AYNA_MODEL_COACH` | İsteğe bağlı | Varsayılan: gpt-4o |
 | `CRON_SECRET` | Yeni | Cron doğrulaması |
 
 ## Canlıya Alma
 1. `ayna` branch'ini `main`'e birleştirin
-2. Ortam değişkenlerini Production ortamına da tanımlayın
+2. Ortam değişkenlerini Production ortamına da tanımlayın (OPENAI_API_KEY, AYNA_ALLOWED_USER_IDS, CRON_SECRET)
 3. SQL aynı Supabase projesinde zaten çalıştırıldıysa tekrar gerekmez
 4. İlk gece cron'un çalıştığını Vercel loglarından doğrulayın
 

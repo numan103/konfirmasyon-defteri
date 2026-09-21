@@ -1,5 +1,5 @@
 import { db, q } from '../supabase.mjs';
-import { callTool, modelFor } from '../anthropic.mjs';
+import { callTool, modelFor } from '../openai.mjs';
 import { localDate } from '../time.mjs';
 import { logUsage } from '../limits.mjs';
 import { KATIP } from '../prompts.mjs';

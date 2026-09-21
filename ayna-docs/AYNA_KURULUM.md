@@ -5,7 +5,7 @@ Supabase panelinde SQL Editor'ı açın, supabase/ayna/001_schema.sql dosyasın�
 
 ## 2. Ortam değişkenleri
 Vercel proje ayarlarındaki Environment Variables bölümüne ekleyin; önce Preview, canlıya alırken Production ortamına:
-- ANTHROPIC_API_KEY: Claude Platform'dan (platform.claude.com) alınan API anahtarı.
+- OPENAI_API_KEY: OpenAI platformundan (platform.openai.com) alınan API anahtarı.
 - AYNA_ALLOWED_USER_IDS: Ayna'yı kullanacak hesapların Supabase kullanıcı kimlikleri, virgülle ayrılmış. Kimlikler Supabase panelinin Authentication bölümündeki kullanıcı listesinde görünür.
 - CRON_SECRET: En az 32 karakterlik rastgele bir dizi.
 - İsteğe bağlı: AYNA_MODEL_SCRIBE ve AYNA_MODEL_COACH (boş bırakılırsa varsayılan modeller kullanılır).
@@ -13,7 +13,7 @@ Vercel proje ayarlarındaki Environment Variables bölümüne ekleyin; önce Pre
 Değişkenleri ekledikten sonra yeniden deploy edin.
 
 ## 3. Maliyet kalkanı
-Claude Platform'da aylık harcama limiti tanımlayın. Ayna kullanıcı başına günlük çağrı sınırları uygular; ayna_usage tablosu tüm çağrıları ve token sayılarını tutar.
+OpenAI platformunda aylık harcama limiti tanımlayın. Ayna kullanıcı başına günlük çağrı sınırları uygular; ayna_usage tablosu tüm çağrıları ve token sayılarını tutar.
 
 ## 4. Bilinmesi gerekenler
 - Vercel Hobby planında cron günde bir kez ve belirtilen saatten sonraki bir saat içinde çalışır; fonksiyon süresi 60 saniyeyle sınırlıdır. Ayna bu sınırlara göre yazılmıştır.

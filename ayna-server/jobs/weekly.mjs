@@ -1,7 +1,7 @@
 import { db, q } from '../supabase.mjs';
 import { localDate } from '../time.mjs';
 import { logUsage } from '../limits.mjs';
-import { callTool, modelFor } from '../anthropic.mjs';
+import { callTool, modelFor } from '../openai.mjs';
 import { GOREV_HAFTALIK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
 import { kocTemel } from '../context.mjs';

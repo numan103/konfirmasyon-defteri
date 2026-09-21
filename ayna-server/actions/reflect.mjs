@@ -1,6 +1,6 @@
 import { send, fail } from '../http.mjs';
 import { db, q } from '../supabase.mjs';
-import { callTool, modelFor } from '../anthropic.mjs';
+import { callTool, modelFor } from '../openai.mjs';
 import { logUsage } from '../limits.mjs';
 import { GOREV_GUNLUK, GOREV_ZOR_GUN, GOREV_ANLIK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
