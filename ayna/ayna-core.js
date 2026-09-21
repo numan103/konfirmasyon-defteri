@@ -46,7 +46,7 @@ window.Ayna = (function () {
     var session = await sb().auth.getSession();
     var token = session && session.data && session.data.session ? session.data.session.access_token : null;
     if (!token) throw { code: 'unauthorized' };
-    var r = await fetch('/api/ayna', {
+    var r = await fetch('/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(Object.assign({ action: action }, payload || {}))
