@@ -32,7 +32,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type'); return res.status(200).end(); }
   if (req.method === 'GET') return cronHandler(req, res);
   const authHeader = req.headers.authorization || '';
-  if (req.method === 'POST' && authHeader.startsWith('Bearer ') && authHeader.slice(7).split('.').length === 3) return aynaHandler(req, res, authHeader.slice(7));
+  const body = req.method === 'POST' ? (req.body || {}) : {};
+  if (authHeader.startsWith('Bearer ') && typeof body.action === 'string') return aynaHandler(req, res, authHeader.slice(7));
   return aiHandler(req, res);
 }
 
