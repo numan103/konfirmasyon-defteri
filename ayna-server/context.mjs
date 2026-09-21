@@ -429,3 +429,14 @@ export async function buildReflectContext(auth, profile, entry) {
 
   return { text: fullText, entryIds };
 }
+
+export async function validEntryIds(auth, userId, ids, start, end) {
+  const uniq = [...new Set((Array.isArray(ids) ? ids : []).filter((id) => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 20);
+  if (!uniq.length) return [];
+  let path = `ayna_entries?user_id=eq.${q(userId)}&id=in.(${uniq.join(',')})&select=id`;
+  if (start) path += `&local_date=gte.${start}`;
+  if (end) path += `&local_date=lte.${end}`;
+  const rows = await db(auth, 'GET', path);
+  const found = new Set(rows.map((r) => r.id));
+  return uniq.filter((id) => found.has(id)).slice(0, 10);
+}

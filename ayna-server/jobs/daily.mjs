@@ -31,7 +31,6 @@ export default async function runDaily({ force, onlyUser } = {}) {
       try {
         await runSync(auth, userId, profile);
       } catch (e) {
-        console.error('[AYNA] daily sync error', userId, e.message);
       }
 
       try {
@@ -43,11 +42,9 @@ export default async function runDaily({ force, onlyUser } = {}) {
             const result = await runScribe(auth, userId, entry.id);
             await logUsage(auth, userId, 'scribe_retry', result);
           } catch (e) {
-            console.error('[AYNA] daily scribe retry error', userId, entry.id, e.message);
           }
         }
       } catch (e) {
-        console.error('[AYNA] daily reprocess error', userId, e.message);
       }
 
       try {
@@ -68,11 +65,9 @@ export default async function runDaily({ force, onlyUser } = {}) {
             }], 'return=minimal');
           } catch (e) {
             if (e.code === '23505') continue;
-            console.error('[AYNA] daily decision review error', userId, d.id, e.message);
           }
         }
       } catch (e) {
-        console.error('[AYNA] daily decisions error', userId, e.message);
       }
 
       try {
@@ -84,12 +79,10 @@ export default async function runDaily({ force, onlyUser } = {}) {
             try {
               await runWeekly(auth, profile, weekStart, lastSunday);
             } catch (e) {
-              console.error('[AYNA] daily weekly error', userId, e.message);
             }
           }
         }
       } catch (e) {
-        console.error('[AYNA] daily weekly check error', userId, e.message);
       }
 
       try {
@@ -100,23 +93,19 @@ export default async function runDaily({ force, onlyUser } = {}) {
             try {
               await runMonthly(auth, profile, start, end);
             } catch (e) {
-              console.error('[AYNA] daily monthly error', userId, e.message);
             }
           }
         }
       } catch (e) {
-        console.error('[AYNA] daily monthly check error', userId, e.message);
       }
 
       try {
         await db(auth, 'PATCH', `ayna_profiles?user_id=eq.${q(userId)}`, { last_daily_job_on: today }, 'return=minimal');
       } catch (e) {
-        console.error('[AYNA] daily profile update error', userId, e.message);
       }
 
       processed++;
     } catch (e) {
-      console.error('[AYNA] daily profile error', userId, e.message);
     }
   }
 

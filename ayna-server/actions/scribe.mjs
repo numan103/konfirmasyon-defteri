@@ -1,5 +1,5 @@
 import { db, q } from '../supabase.mjs';
-import { callTool, modelFor } from '../openai.mjs';
+import { callTool } from '../llm.mjs';
 import { localDate } from '../time.mjs';
 import { logUsage } from '../limits.mjs';
 import { KATIP } from '../prompts.mjs';
@@ -193,7 +193,7 @@ export async function runScribe(auth, userId, entryId) {
     const messages = [{ role: 'user', content: msgLines.join('\n') }];
 
     result = await callTool({
-      model: modelFor('scribe'),
+      kind: 'scribe',
       systemStatic: KATIP,
       systemDynamic,
       messages,

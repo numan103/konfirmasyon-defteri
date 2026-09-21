@@ -71,10 +71,10 @@ async function aiHandler(req, res) {
 
 async function aynaHandler(req, res, jwt) {
   let user = null;
-  try { user = await getUser(jwt); } catch (e) { console.error('AYNA_GETUSER_ERR:', e.message); user = null; }
-  if (!user) { console.error('AYNA_GETUSER_NULL, jwt_len:', jwt.length); return fail(res, 401, 'unauthorized'); }
+  try { user = await getUser(jwt); } catch (e) { console.error('[AYNA] 401', e.message); user = null; }
+  if (!user) { console.error('[AYNA] 401', jwt.slice(0, 8)); return fail(res, 401, 'unauthorized'); }
   const allowed = (process.env.AYNA_ALLOWED_USER_IDS || '').split(',').map((sx) => sx.trim()).filter(Boolean);
-  if (!allowed.includes(user.id)) { console.error('AYNA_NOT_ALLOWED:', user.id); return fail(res, 403, 'not_allowed'); }
+  if (!allowed.includes(user.id)) { console.error('[AYNA] 403'); return fail(res, 403, 'not_allowed'); }
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const action = AYNA_ACTIONS[body.action];
   if (!action) return fail(res, 400, 'bad_request');

@@ -1,10 +1,10 @@
 import { db, q } from '../supabase.mjs';
 import { localDate } from '../time.mjs';
 import { logUsage } from '../limits.mjs';
-import { callTool, modelFor } from '../openai.mjs';
+import { callTool } from '../llm.mjs';
 import { GOREV_HAFTALIK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
-import { kocTemel } from '../context.mjs';
+import { kocTemel, validEntryIds } from '../context.mjs';
 import { weeklyPackage } from '../metrics.mjs';
 
 const truncate = (s, max) => typeof s === 'string' ? s.slice(0, max) : s;
@@ -21,7 +21,7 @@ export default async function runWeekly(auth, profile, start, end) {
     .replace('{BITIS}', end) + '\n\n' + pkg.text;
 
   const result = await callTool({
-    model: modelFor('coach'),
+    kind: 'coach',
     systemStatic: kocTemel(profile),
     systemDynamic,
     messages: [{ role: 'user', content: 'Haftalık raporu hazırla.' }],
@@ -44,9 +44,7 @@ export default async function runWeekly(auth, profile, start, end) {
       title,
       body,
       focus,
-      evidence: Array.isArray(ai.evidence_entry_ids)
-        ? ai.evidence_entry_ids.filter((id) => typeof id === 'string' && id.length === 36).slice(0, 10)
-        : []
+      evidence: await validEntryIds(auth, userId, ai.evidence_entry_ids, start, end)
     }], 'return=minimal');
   } catch (e) {
     if (e.code === '23505') return;
@@ -64,9 +62,7 @@ export default async function runWeekly(auth, profile, start, end) {
       const statement = truncate(bp.statement, 200);
       if (norm(statement) === '' || existingNorms.has(norm(statement))) continue;
 
-      const evidenceIds = Array.isArray(bp.evidence_entry_ids)
-        ? bp.evidence_entry_ids.filter((id) => typeof id === 'string' && id.length === 36)
-        : [];
+      const evidenceIds = await validEntryIds(auth, userId, bp.evidence_entry_ids, start, end);
       if (evidenceIds.length < 3) continue;
 
       try {
@@ -79,7 +75,6 @@ export default async function runWeekly(auth, profile, start, end) {
         added++;
       } catch (e) {
         if (e.code === '23505') continue;
-        console.error('[AYNA] weekly belief insert error', userId, e.message);
       }
     }
   }

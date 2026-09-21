@@ -13,7 +13,7 @@ function authHeaders(auth) {
 
 export async function getUser(jwt) {
   const r = await fetch(`${BASE}/auth/v1/user`, { headers: { apikey: PUB, Authorization: `Bearer ${jwt}` } });
-  if (!r.ok) { const t = await r.text().catch(() => ''); console.error('SUPABASE_GETUSER_FAIL:', r.status, t.slice(0,200)); return null; }
+  if (!r.ok) { const t = await r.text().catch(() => ''); console.error('[AYNA] 500', r.status, t.slice(0,8)); return null; }
   const u = await r.json();
   return u && u.id ? u : null;
 }

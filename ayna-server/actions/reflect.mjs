@@ -1,6 +1,6 @@
 import { send, fail } from '../http.mjs';
 import { db, q } from '../supabase.mjs';
-import { callTool, modelFor } from '../openai.mjs';
+import { callTool } from '../llm.mjs';
 import { logUsage } from '../limits.mjs';
 import { GOREV_GUNLUK, GOREV_ZOR_GUN, GOREV_ANLIK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
@@ -43,16 +43,16 @@ export default async function reflect({ res, auth, user, profile, body }) {
       taskBlock = GOREV_GUNLUK;
     }
 
-    const context = await buildReflectContext(auth, profile, entry);
+    const ctx = await buildReflectContext(auth, profile, entry);
     const maxTokens = kind === 'instant' ? 1200 : 700;
     const message = kind === 'daily'
       ? `Bugünkü kaydıma yansıma yaz. Kayıt: [${entryId}]`
       : `Bu önemli kayda yansıma yaz. Kayıt: [${entryId}]`;
 
     const result = await callTool({
-      model: modelFor('coach'),
+      kind: 'coach',
       systemStatic: kocTemel(profile),
-      systemDynamic: taskBlock + '\n\n' + context,
+      systemDynamic: taskBlock + '\n\n' + ctx.text,
       messages: [{ role: 'user', content: message }],
       tool: TOOLS.record_reflection,
       maxTokens
@@ -64,8 +64,9 @@ export default async function reflect({ res, auth, user, profile, body }) {
     const bodyText = truncate(ai.body || '', 3000);
     const risk = ['none', 'low', 'crisis'].includes(ai.risk) ? ai.risk : 'none';
 
+    const allowedIds = new Set(ctx.entryIds || []);
     const evidenceIds = Array.isArray(ai.evidence_entry_ids)
-      ? [...new Set(ai.evidence_entry_ids.filter((id) => typeof id === 'string' && id.length === 36))].slice(0, 10)
+      ? [...new Set(ai.evidence_entry_ids.filter((id) => typeof id === 'string' && allowedIds.has(id)))].slice(0, 10)
       : [];
 
     await db(auth, 'DELETE', `ayna_insights?user_id=eq.${q(user.id)}&kind=eq.${q(kind)}&source_entry_id=eq.${q(entryId)}`);

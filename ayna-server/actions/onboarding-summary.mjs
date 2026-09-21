@@ -1,6 +1,6 @@
 import { send, fail } from '../http.mjs';
 import { db, q } from '../supabase.mjs';
-import { callTool, modelFor } from '../openai.mjs';
+import { callTool } from '../llm.mjs';
 import { logUsage } from '../limits.mjs';
 import { KATIP_TANISMA } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
@@ -24,7 +24,7 @@ export default async function onboardingSummary({ res, auth, user }) {
     }).join('\n');
 
     const result = await callTool({
-      model: modelFor('coach'),
+      kind: 'coach',
       systemStatic: KATIP_TANISMA,
       systemDynamic: null,
       messages: [{ role: 'user', content: `Tanışma görüşmesi:\n"""\n${transcript}\n"""` }],

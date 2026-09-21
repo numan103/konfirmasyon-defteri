@@ -1,10 +1,9 @@
 const API_URL = 'https://api.openai.com/v1/chat/completions';
-const RETRY_STATUS = [429, 500, 503];
+const RETRY_STATUS = [429, 500, 502, 503];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function modelFor(kind) {
-  if (kind === 'scribe') return process.env.AYNA_MODEL_SCRIBE || 'gpt-4o-mini';
-  return process.env.AYNA_MODEL_COACH || 'gpt-4o';
+export function defaultModel(kind) {
+  return kind === 'scribe' ? 'gpt-4o-mini' : 'gpt-4o';
 }
 
 function toOpenAITool(tool) {
@@ -15,6 +14,17 @@ function toOpenAITool(tool) {
       description: tool.description,
       parameters: tool.input_schema
     }
+  };
+}
+
+function normalizeUsage(u) {
+  u = u || {};
+  const cached = u.prompt_tokens_details && u.prompt_tokens_details.cached_tokens ? u.prompt_tokens_details.cached_tokens : 0;
+  return {
+    input_tokens: u.prompt_tokens || 0,
+    output_tokens: u.completion_tokens || 0,
+    cache_read_input_tokens: cached,
+    cache_creation_input_tokens: 0
   };
 }
 
@@ -39,12 +49,11 @@ async function post(body, timeoutMs) {
 }
 
 export async function callTool({ model, systemStatic, systemDynamic, messages, tool, maxTokens }) {
-  const sysContent = systemDynamic ? systemStatic + '\n\n' + systemDynamic : systemStatic;
-  const oaiMessages = [{ role: 'system', content: sysContent }, ...messages];
+  const system = systemDynamic ? systemStatic + '\n\n' + systemDynamic : systemStatic;
   const body = {
     model,
-    max_tokens: maxTokens,
-    messages: oaiMessages,
+    max_completion_tokens: maxTokens,
+    messages: [{ role: 'system', content: system }, ...messages],
     tools: [toOpenAITool(tool)],
     tool_choice: { type: 'function', function: { name: tool.name } }
   };
@@ -59,8 +68,9 @@ export async function callTool({ model, systemStatic, systemDynamic, messages, t
     }
     if (!res.ok) {
       if (attempt === 0 && RETRY_STATUS.includes(res.status) && Date.now() - started < 15000) { await sleep(2000); continue; }
-      console.error('OPENAI_API_ERROR:', res.status, JSON.stringify(res.data));
-      throw new Error(`openai ${res.status} ${res.data && res.data.error ? res.data.error.message : ''}`);
+      const code = res.data && res.data.error ? (res.data.error.code || res.data.error.type || '') : '';
+      console.error('[AYNA] 502', code);
+      throw new Error(`openai ${res.status} ${code}`);
     }
     const data = res.data;
     if (!data) throw new Error('openai empty');
@@ -73,7 +83,7 @@ export async function callTool({ model, systemStatic, systemDynamic, messages, t
     if (!tc || !tc.function || tc.function.name !== tool.name) throw new Error('openai no_tool_use');
     let input;
     try { input = JSON.parse(tc.function.arguments); } catch (e) { throw new Error('openai invalid_tool_args'); }
-    return { input, usage: data.usage || {}, model };
+    return { input, usage: normalizeUsage(data.usage), model };
   }
   throw new Error('openai retry_exhausted');
 }

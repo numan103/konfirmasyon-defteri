@@ -6,6 +6,6 @@ export function send(res, status, body) {
 }
 
 export function fail(res, status, code, detail) {
-  if (detail) console.error('[AYNA]', code, detail);
+  if (status === 429) console.error('[AYNA] 429', code);
   send(res, status, { error: code });
 }

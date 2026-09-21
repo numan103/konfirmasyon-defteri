@@ -70,7 +70,7 @@ export async function runSync(auth, userId, profile) {
       }
 
       if (rows.length) {
-        await db(auth, 'POST', `ayna_trades?on_conflict=user_id,source,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
+        await db(auth, 'POST', `ayna_trades?on_conflict=user_id,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
       }
       result.trades = { upserted: rows.length };
     }
@@ -121,12 +121,6 @@ export async function runSync(auth, userId, profile) {
           raw: e
         };
 
-        if (e.cat != null && catMap[e.cat] !== undefined) {
-          row.category = catMap[e.cat];
-        } else if (typeof e.cat === 'string') {
-          row.category = e.cat;
-        }
-
         if (typeof e.note === 'string') {
           row.description = e.note.slice(0, 200);
         }
@@ -135,7 +129,7 @@ export async function runSync(auth, userId, profile) {
       }
 
       if (rows.length) {
-        await db(auth, 'POST', `ayna_expenses?on_conflict=user_id,source,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
+        await db(auth, 'POST', `ayna_expenses?on_conflict=user_id,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
       }
       result.expenses = { upserted: rows.length };
     }

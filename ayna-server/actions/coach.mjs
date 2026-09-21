@@ -1,6 +1,6 @@
 import { send, fail } from '../http.mjs';
 import { db, q } from '../supabase.mjs';
-import { callTool, modelFor } from '../openai.mjs';
+import { callTool } from '../llm.mjs';
 import { logUsage } from '../limits.mjs';
 import { KOC_TEMEL, MOD } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
@@ -44,23 +44,23 @@ export default async function coach({ res, auth, user, profile, body }) {
   }
 
   try {
-    const context = await buildCoachContext(auth, profile, message, mode);
+    const ctx = await buildCoachContext(auth, profile, message, mode);
 
     const historyLimit = mode === 'onboarding' ? 40 : 20;
     const historyRows = await db(
       auth,
       'GET',
-      `ayna_chat_messages?user_id=eq.${q(user.id)}&mode=eq.${q(mode)}&order=created_at.asc&limit=${historyLimit}&select=role,content`
+      `ayna_chat_messages?user_id=eq.${q(user.id)}&mode=eq.${q(mode)}&order=created_at.desc&limit=${historyLimit}&select=role,content`
     );
 
-    const historyMsgs = historyRows.map((r) => ({ role: r.role, content: r.content }));
+    const historyMsgs = historyRows.slice().reverse().map((r) => ({ role: r.role, content: r.content }));
     historyMsgs.push({ role: 'user', content: message });
     const messages = normalizeMessages(historyMsgs);
 
     const result = await callTool({
-      model: modelFor('coach'),
+      kind: 'coach',
       systemStatic: kocTemel(profile),
-      systemDynamic: (MOD[mode] || '') + '\n\n' + context,
+      systemDynamic: (MOD[mode] || '') + '\n\n' + ctx.text,
       messages,
       tool: TOOLS.coach_reply,
       maxTokens: 1200
@@ -75,8 +75,9 @@ export default async function coach({ res, auth, user, profile, body }) {
     const reply = ai.message.trim();
     const risk = ['none', 'low', 'crisis'].includes(ai.risk) ? ai.risk : 'none';
 
+    const allowedIds = new Set(ctx.entryIds || []);
     const evidenceIds = Array.isArray(ai.evidence_entry_ids)
-      ? [...new Set(ai.evidence_entry_ids.filter((id) => typeof id === 'string' && id.length === 36))].slice(0, 10)
+      ? [...new Set(ai.evidence_entry_ids.filter((id) => typeof id === 'string' && allowedIds.has(id)))].slice(0, 10)
       : [];
 
     let decisionProposal = null;
@@ -127,7 +128,6 @@ export default async function coach({ res, auth, user, profile, body }) {
       message_id: assistantMsgId
     });
   } catch (e) {
-    console.error('AYNA_COACH_ERROR:', e.message, e.stack);
     await logUsage(auth, user.id, 'coach', null);
     return fail(res, 500, 'model_failed', e.message);
   }
