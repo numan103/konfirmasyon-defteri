@@ -129,6 +129,6 @@ export default async function coach({ res, auth, user, profile, body }) {
     });
   } catch (e) {
     try { await logUsage(auth, user.id, 'coach', null); } catch (e2) {}
-    return fail(res, 500, 'model_failed', 'coach: ' + (e && e.message) + ' | provider=' + (process.env.AYNA_PROVIDER || 'auto') + ' hasGroq=' + !!process.env.GROQ_API_KEY + ' hasGemini=' + !!process.env.GEMINI_API_KEY);
+    return fail(res, 500, 'model_failed', e && e.message);
   }
 }
