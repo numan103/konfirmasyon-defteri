@@ -308,14 +308,54 @@ function _initPeopleChips(c, people, taggedIds) {
   var pi = c.querySelector('#ay-pi');
   var pa = c.querySelector('#ay-pa');
   if (!pc) return;
-  function drawChips() {
-    var h = '';
-    people.forEach(function (p) {
-      var on = taggedIds.indexOf(p.id) >= 0;
-      h += '<button class="chip' + (on ? ' on' : '') + '" data-ap="' + p.id + '">' + Ayna.esc(p.display_name) + '</button>';
+  var showAll = false;
+  var priority = [];
+
+  // "Bugün" kimler: bugün olay geçen, vadesi gelen açık ucu olan ya da halka 1 olan.
+  var today = Ayna.today();
+  var uid = Ayna.uid;
+  Promise.all([
+    Ayna.sb().from('ayna_events').select('person_id').eq('user_id', uid).eq('local_date', today).not('person_id', 'is', null),
+    Ayna.sb().from('ayna_open_loops').select('person_id,due_date').eq('user_id', uid).eq('status', 'open').not('person_id', 'is', null).lte('due_date', today)
+  ]).then(function (r) {
+    var ids = {};
+    ((r[0] && r[0].data) || []).forEach(function (x) { if (x.person_id) ids[x.person_id] = 1; });
+    ((r[1] && r[1].data) || []).forEach(function (x) { if (x.person_id) ids[x.person_id] = 1; });
+    people.forEach(function (p) { if (Number(p.ring) === 1) ids[p.id] = 1; });
+    priority = people.filter(function (p) { return ids[p.id]; });
+    // Etiketli kişi her zaman görünür olsun, yoksa seçim kaybolur.
+    taggedIds.forEach(function (id) {
+      if (priority.some(function (p) { return p.id === id; })) return;
+      var found = people.filter(function (p) { return p.id === id; })[0];
+      if (found) priority.push(found);
     });
+    drawChips();
+  }).catch(function () { drawChips(); });
+
+  function drawChips() {
+    var rest = people.filter(function (p) {
+      return !priority.some(function (q) { return q.id === p.id; });
+    });
+    var h = '';
+    if (priority.length) {
+      h += '<div style="width:100%;font-size:12px;color:var(--text-3);margin:2px 0 2px">' +
+        Ayna.esc(Ayna.t('today.people_today')) + '</div>';
+    }
+    priority.forEach(function (p) { h += _chip(p, taggedIds); });
+    if (rest.length) {
+      h += '<div style="width:100%;margin-top:6px">';
+      if (showAll) {
+        rest.forEach(function (p) { h += _chip(p, taggedIds); });
+        h += '<button class="btn" data-pc-hide style="font-size:12px;padding:2px 8px;margin-top:4px">' +
+          Ayna.esc(Ayna.t('today.people_hide')) + '</button>';
+      } else {
+        h += '<button class="btn" data-pc-all style="font-size:12px;padding:2px 8px">' +
+          Ayna.esc(Ayna.t('today.people_show_all', { n: rest.length })) + '</button>';
+      }
+      h += '</div>';
+    }
     pc.innerHTML = h;
-    pc.querySelectorAll('.chip').forEach(function (b) {
+    pc.querySelectorAll('[data-ap]').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-ap');
         var idx = taggedIds.indexOf(id);
@@ -323,6 +363,10 @@ function _initPeopleChips(c, people, taggedIds) {
         drawChips();
       });
     });
+    var allBtn = pc.querySelector('[data-pc-all]');
+    if (allBtn) allBtn.addEventListener('click', function () { showAll = true; drawChips(); });
+    var hideBtn = pc.querySelector('[data-pc-hide]');
+    if (hideBtn) hideBtn.addEventListener('click', function () { showAll = false; drawChips(); });
   }
   drawChips();
   if (pa) {
@@ -333,11 +377,16 @@ function _initPeopleChips(c, people, taggedIds) {
       Ayna.sb().from('ayna_people').insert({ user_id: Ayna.uid, display_name: name, status: 'active', sector: 'other', ring: 3, created_by: 'user' })
         .select('id,display_name,ring,status').single()
         .then(function (r) {
-          if (r.data) { people.push(r.data); taggedIds.push(r.data.id); }
-          pi.value = ''; pa.disabled = false; drawChips();
+          if (r.data) { people.push(r.data); priority.push(r.data); taggedIds.push(r.data.id); }
+          pi.value = ''; pa.disabled = false; showAll = false; drawChips();
         }).catch(function () { pa.disabled = false; Ayna.flash(Ayna.errText('default')); });
     });
   }
+}
+
+function _chip(p, taggedIds) {
+  var on = taggedIds.indexOf(p.id) >= 0;
+  return '<button class="chip' + (on ? ' on' : '') + '" data-ap="' + p.id + '">' + Ayna.esc(p.display_name) + '</button>';
 }
 
 function _initRules(c, rules, checkMap) {

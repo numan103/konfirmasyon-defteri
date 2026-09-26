@@ -8,20 +8,20 @@ import { send, fail } from '../http.mjs';
 
 const KIND_TR = { morning: 'Sabah niyeti', evening: 'Akşam kapanışı', note: 'Not' };
 
-const norm = (s) => String(s || '').toLocaleLowerCase('tr-TR').trim().replace(/\s+/g, ' ');
+export const norm = (s) => String(s || '').toLocaleLowerCase('tr-TR').trim().replace(/\s+/g, ' ');
 
-function truncate(s, max) {
+export function truncate(s, max) {
   if (typeof s !== 'string') return s;
   return s.length > max ? s.slice(0, max) : s;
 }
 
-function clipNum(v, min, max) {
+export function clipNum(v, min, max) {
   const n = Number(v);
   if (!Number.isFinite(n)) return min;
   return Math.max(min, Math.min(max, Math.round(n)));
 }
 
-function truncateArray(arr, maxLen, maxItem) {
+export function truncateArray(arr, maxLen, maxItem) {
   if (!Array.isArray(arr)) return [];
   return arr.slice(0, maxLen).map((s) => truncate(String(s || ''), maxItem));
 }

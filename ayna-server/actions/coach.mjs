@@ -7,6 +7,9 @@ import { TOOLS } from '../tools.mjs';
 import { kocTemel, buildCoachContext } from '../context.mjs';
 
 const VALID_MODES = ['chat', 'pre_trade', 'pre_conversation', 'big_decision', 'onboarding'];
+// Bu modlarda kullanıcının yazdığı kişi/olay bilgisi kayda çevrilir.
+// pre_trade (işlem) ve onboarding bu çıkarıma girmez.
+const EXTRACT_MODES = ['chat', 'pre_conversation', 'big_decision'];
 
 function truncate(s, max) {
   if (typeof s !== 'string') return s;
@@ -126,7 +129,8 @@ export default async function coach({ res, auth, user, profile, body }) {
       risk,
       decision_proposal: decisionProposal,
       message_id: assistantMsgId,
-      user_message_id: userMsgId
+      user_message_id: userMsgId,
+      extract: EXTRACT_MODES.includes(mode) && message.length >= 12
     });
   } catch (e) {
     // Başarısız çağrı koteden düşülmez; sadece başarılı yanıtlar sayılır.

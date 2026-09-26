@@ -8,10 +8,11 @@ import reflect from '../ayna-server/actions/reflect.mjs';
 import coach from '../ayna-server/actions/coach.mjs';
 import dedupeChat from '../ayna-server/actions/dedupe-chat.mjs';
 import ringSuggest from '../ayna-server/actions/ring-suggest.mjs';
+import chatExtract from '../ayna-server/actions/chat-extract.mjs';
 import onboardingSummary from '../ayna-server/actions/onboarding-summary.mjs';
 import sync from '../ayna-server/actions/sync.mjs';
 
-const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest };
+const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
 
 const SYSTEM_PROMPT = `Sen Alfa Traders topluluğunun AI asistanısın. Kısa, net ve yardımsever cevaplar ver (max 3-4 cümle). Türkçe konuş.
 

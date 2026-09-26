@@ -329,6 +329,11 @@ function sendCoachMessage(text, onDone) {
     });
     _normMsgs();
     paint();
+    // Koça yazdığın bilgi kayda da geçsin. Ayrı istek: coach yanıtını geciktirmez,
+    // başarısız olursa sessizce atlanır (veri bozulmaz).
+    if (res.extract && res.user_message_id) {
+      Ayna.api('chat-extract', { message_id: res.user_message_id }).catch(function () {});
+    }
     var t2 = document.getElementById('ay-coach-ta');
     var s2 = document.getElementById('ay-coach-send');
     if (t2) t2.disabled = false;

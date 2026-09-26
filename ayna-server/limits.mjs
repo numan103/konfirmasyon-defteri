@@ -1,7 +1,7 @@
 import { db, q } from './supabase.mjs';
 import { localDate } from './time.mjs';
 
-export const DAILY_LIMITS = { scribe: 40, reflect: 15, coach: 60, 'onboarding-summary': 3, sync: 10 };
+export const DAILY_LIMITS = { scribe: 40, reflect: 15, coach: 60, 'onboarding-summary': 3, sync: 10, 'chat-extract': 60 };
 
 // Vercel ortam değişkeniyle sınırlar deploy almadan ayarlanabilir: AYNA_LIMITS="coach=500,scribe=100"
 function limitFor(action) {
