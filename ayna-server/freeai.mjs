@@ -99,6 +99,23 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
   throw new Error(`${hostName} retry_exhausted`);
 }
 
+export async function listModels() {
+  const out = {};
+  for (const name of Object.keys(HOSTS)) {
+    if (!process.env[HOSTS[name].key]) continue;
+    try {
+      const r = await fetch(HOSTS[name].base.replace('/chat/completions', '/models'), {
+        headers: { Authorization: `Bearer ${process.env[HOSTS[name].key]}` }
+      });
+      const j = await r.json().catch(() => null);
+      out[name] = j && j.data ? j.data.map((m) => m.id).slice(0, 40) : `http_${r.status}`;
+    } catch (e) {
+      out[name] = 'err_' + e.name;
+    }
+  }
+  return out;
+}
+
 export async function callTool({ kind, ...opts }) {
   const hosts = available();
   const names = Object.keys(hosts);
