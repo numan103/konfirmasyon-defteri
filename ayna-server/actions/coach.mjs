@@ -1,6 +1,6 @@
 import { send, fail } from '../http.mjs';
 import { db, q } from '../supabase.mjs';
-import { callTool } from '../llm.mjs';
+import { callTool, diagnostics } from '../llm.mjs';
 import { logUsage } from '../limits.mjs';
 import { KOC_TEMEL, MOD } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
@@ -129,6 +129,6 @@ export default async function coach({ res, auth, user, profile, body }) {
     });
   } catch (e) {
     try { await logUsage(auth, user.id, 'coach', null); } catch (e2) {}
-    return fail(res, 500, 'model_failed', e && e.message);
+    return fail(res, 500, 'model_failed', JSON.stringify(diagnostics()) + ' >> ' + (e && e.message));
   }
 }
