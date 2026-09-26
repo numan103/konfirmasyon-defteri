@@ -23,7 +23,7 @@ function renderCoach(c) {
     });
 }
 
-function renderCoachContent(c) {
+function renderCoachContent(c, keepInput) {
   var h = '';
 
   h += '<div class="ay-seg" id="ay-coach-modes">';
@@ -48,7 +48,7 @@ function renderCoachContent(c) {
 
   renderCrisisCard(document.getElementById('ay-coach-crisis'));
   renderMessageList(document.getElementById('ay-coach-list'));
-  renderInputArea(document.getElementById('ay-coach-input'));
+  renderInputArea(document.getElementById('ay-coach-input'), keepInput);
 }
 
 function renderCrisisCard(el) {
@@ -184,7 +184,7 @@ function _drawMessages(el) {
   el.scrollTop = el.scrollHeight;
 }
 
-function renderInputArea(el) {
+function renderInputArea(el, keepText) {
   var html = '<div style="display:flex;gap:8px;align-items:flex-end">';
   html += '<textarea id="ay-coach-ta" class="ay-ta" rows="3" maxlength="4000" placeholder="' + Ayna.esc(Ayna.t('coach.placeholder')) + '" style="flex:1"></textarea>';
   html += '<button class="btn solid" id="ay-coach-send">' + Ayna.esc(Ayna.t('coach.send')) + '</button>';
@@ -193,26 +193,34 @@ function renderInputArea(el) {
 
   var ta = document.getElementById('ay-coach-ta');
   var sendBtn = document.getElementById('ay-coach-send');
+  if (keepText) ta.value = keepText;
+
+  var submitting = false;
+  function submit() {
+    if (submitting) return;
+    var text = ta.value.trim();
+    if (!text) return;
+    submitting = true;
+    sendCoachMessage(text, function () { submitting = false; });
+  }
 
   ta.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendBtn.click();
+      submit();
     }
   });
 
-  sendBtn.addEventListener('click', function () {
-    var text = ta.value.trim();
-    if (!text) return;
-    sendCoachMessage(text);
-  });
+  sendBtn.addEventListener('click', submit);
 }
 
-function sendCoachMessage(text) {
+function sendCoachMessage(text, onDone) {
   var ta = document.getElementById('ay-coach-ta');
   var sendBtn = document.getElementById('ay-coach-send');
   var listEl = document.getElementById('ay-coach-list');
+  var done = function () { if (onDone) onDone(); };
 
+  if (!ta || !sendBtn || !listEl || sendBtn.disabled) { done(); return; }
   ta.disabled = true;
   sendBtn.disabled = true;
 
@@ -224,6 +232,7 @@ function sendCoachMessage(text) {
   listEl.scrollTop = listEl.scrollHeight;
 
   Ayna.api('coach', { message: text, mode: _coachMode }).then(function (res) {
+    thinkingDiv.remove();
     _coachMessages.push({
       id: 'temp-user-' + Date.now(),
       mode: _coachMode,
@@ -247,13 +256,15 @@ function sendCoachMessage(text) {
     ta.value = '';
     ta.disabled = false;
     sendBtn.disabled = false;
-    renderCoachContent(document.getElementById('ay-content'));
+    _drawMessages(listEl);
+    done();
   }).catch(function (e) {
     thinkingDiv.remove();
     ta.value = text;
     ta.disabled = false;
     sendBtn.disabled = false;
     Ayna.flash(Ayna.errText(e.code || 'default'));
+    done();
   });
 }
 
