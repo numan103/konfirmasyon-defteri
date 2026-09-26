@@ -48,11 +48,96 @@ function renderMapContent(c) {
     html += '<p style="margin:0 0 10px;font-size:13px;color:var(--text-2)">' + Ayna.t('map.pending_body') + '</p>';
     html += '<div id="ay-pending-list"></div></div>';
   }
+  html += '<div class="ay-card" style="margin-top:12px" id="ay-ring-card"></div>';
   c.innerHTML = html;
   drawMap(document.getElementById('ay-map-svg-wrap'));
   document.getElementById('ay-map-add').addEventListener('click', function () { showPersonForm(null); });
   if (_mapPending.length > 0) renderPendingList(document.getElementById('ay-pending-list'));
+  renderRingCard(document.getElementById('ay-ring-card'));
   injectMapStyle();
+}
+
+function _applyRing(items, c) {
+  if (!items.length || !c) return;
+  var sb = Ayna.sb();
+  var uid = Ayna.uid;
+  // Her kişi kendi önerilen halkasını alır; aynı halkanınkisini toplu güncelle.
+  var groups = {};
+  items.forEach(function (p) {
+    var r = String(p.suggested_ring);
+    if (!groups[r]) groups[r] = [];
+    groups[r].push(p.id);
+  });
+  var jobs = Object.keys(groups).map(function (r) {
+    return sb.from('ayna_people').update({ ring: Number(r) }).in('id', groups[r]).eq('user_id', uid);
+  });
+  Promise.all(jobs).then(function () {
+    items.forEach(function (p) {
+      for (var j = 0; j < _mapPeople.length; j++) {
+        if (_mapPeople[j].id === p.id) _mapPeople[j].ring = p.suggested_ring;
+      }
+    });
+    Ayna.flash(Ayna.t('map.ring_applied'));
+    drawMap(document.getElementById('ay-map-svg-wrap'));
+    renderRingCard(document.getElementById('ay-ring-card'));
+  }).catch(function (e) {
+    Ayna.flash(Ayna.errText(e.code || 'default'));
+  });
+}
+
+function renderRingCard(el) {
+  if (!el) return;
+  el.innerHTML = '<p style="margin:0;font-size:13px;color:var(--text-2)">' + Ayna.t('common.loading') + '</p>';
+  Ayna.api('ring-suggest', {}).then(function (res) {
+    if (!el.isConnected) return;
+    var sug = (res && res.suggestions) || [];
+    var dist = (res && res.distribution) || { 1: 0, 2: 0, 3: 0 };
+    var h = '<h4 style="margin:0 0 6px">' + Ayna.t('map.ring_title') + '</h4>';
+    h += '<p style="margin:0 0 4px;font-size:13px;color:var(--text-2)">' +
+      Ayna.esc(Ayna.t('map.ring_body', { days: (res && res.window_days) || 30 })) + '</p>';
+    h += '<p style="margin:0 0 10px;font-size:12px;color:var(--text-3)">' +
+      Ayna.esc(Ayna.t('map.ring_dist', { r1: dist[1] || 0, r2: dist[2] || 0, r3: dist[3] || 0 })) + '</p>';
+
+    if (!sug.length) {
+      h += '<p style="margin:0;font-size:13px">' + Ayna.esc(Ayna.t('map.ring_none')) + '</p>';
+      el.innerHTML = h;
+      return;
+    }
+
+    sug.forEach(function (p) {
+      var b = p.breakdown || {};
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--border)">';
+      h += '<div style="flex:1;min-width:0">';
+      h += '<strong>' + Ayna.esc(p.display_name) + '</strong> ';
+      h += '<span style="font-size:12px;color:var(--text-3)">' + Ayna.esc(p.score) + ' ' + Ayna.esc(Ayna.t('map.ring_score')) + '</span>';
+      h += '<div style="font-size:12px;color:var(--text-3)">' + Ayna.esc(Ayna.t('map.ring_why', {
+        days: b.days || 0, events: b.events || 0, loops: b.loops || 0, tags: b.tags || 0
+      })) + '</div>';
+      h += '<div style="font-size:12px;color:var(--text-2)">' +
+        Ayna.esc(Ayna.t('map.ring_from', { ring: Ayna.t('ring.' + p.current_ring) })) + ' → ' +
+        Ayna.esc(Ayna.t('map.ring_to', { ring: Ayna.t('ring.' + p.suggested_ring) })) + '</div>';
+      h += '</div>';
+      h += '<button class="btn" data-ring-apply="' + Ayna.esc(p.id) + '">' + Ayna.esc(Ayna.t('map.ring_apply')) + '</button>';
+      h += '</div>';
+    });
+
+    h += '<div style="margin-top:10px"><button class="btn solid" id="ay-ring-all">' +
+      Ayna.esc(Ayna.t('map.ring_apply_all')) + '</button></div>';
+    el.innerHTML = h;
+
+    el.querySelectorAll('[data-ring-apply]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-ring-apply');
+        var one = sug.filter(function (p) { return p.id === id; });
+        _applyRing(one, document.getElementById('ay-content'));
+      });
+    });
+    var all = document.getElementById('ay-ring-all');
+    if (all) all.addEventListener('click', function () { _applyRing(sug, document.getElementById('ay-content')); });
+  }).catch(function (e) {
+    if (el.isConnected) el.innerHTML = '';
+    console.error('[AYNA ring]', e);
+  });
 }
 
 function injectMapStyle() {
