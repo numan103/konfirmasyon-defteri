@@ -47,16 +47,34 @@ function modelMatches(provider, model) {
   return !isClaude && !model.toLowerCase().startsWith('gpt') && !model.toLowerCase().startsWith('gemini');
 }
 
-export function modelFor(kind) {
-  const provider = providerFor(kind);
+export function modelFor(provider, kind) {
   const specific = String((kind === 'scribe' ? process.env.AYNA_MODEL_SCRIBE : process.env.AYNA_MODEL_COACH) || '').trim();
   if (specific && modelMatches(provider, specific)) return specific;
+  if (provider === 'gemini') {
+    return process.env.GEMINI_MODEL || (kind === 'scribe' ? 'gemini-2.5-flash' : 'gemini-2.5-pro');
+  }
+  if (provider === 'groq') {
+    return process.env.GROQ_MODEL || (kind === 'scribe' ? 'llama-3.1-8b-instant' : 'llama-3.3-70b-versatile');
+  }
   return PROVIDERS[provider].defaultModel(kind);
 }
 
 export async function callTool({ kind, systemStatic, systemDynamic, messages, tool, maxTokens }) {
-  const provider = providerFor(kind);
-  if (!hasKey(provider)) throw new Error(`${provider} key_missing`);
-  const result = await PROVIDERS[provider].callTool({ model: modelFor(kind), systemStatic, systemDynamic, messages, tool, maxTokens });
-  return { ...result, provider };
+  const opts = { systemStatic, systemDynamic, messages, tool, maxTokens };
+  const chain = [providerFor(kind)];
+  for (const fb of ['groq', 'gemini']) {
+    if (chain.includes(fb)) continue;
+    if (process.env[FALLBACK[fb]]) chain.push(fb);
+  }
+  let last = null;
+  for (const name of chain) {
+    if (name !== 'groq' && name !== 'gemini' && !hasKey(name)) continue;
+    try {
+      const r = await PROVIDERS[name].callTool({ model: modelFor(name, kind), ...opts });
+      return { ...r, provider: name };
+    } catch (e) {
+      last = e;
+    }
+  }
+  throw last || new Error(`${chain[0]} key_missing`);
 }
