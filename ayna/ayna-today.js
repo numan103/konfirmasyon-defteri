@@ -21,21 +21,48 @@ function _goTab(name) {
   document.querySelectorAll('.ay-tabs button').forEach(function (b) { if (b.getAttribute('data-ay-tab') === name) b.click(); });
 }
 
+// Tek bir sorgu patlarsa sekmenin tamamı çökmemeli; boş sonuçla devam et.
+function _q(name, builder) {
+  return Promise.resolve(builder).then(
+    function (r) {
+      if (r && r.error) console.error('[AYNA today] sorgu hatası:', name, r.error);
+      return r;
+    },
+    function (e) {
+      console.error('[AYNA today] sorgu çöktü:', name, e);
+      return { data: null, error: e };
+    }
+  );
+}
+
 function renderToday(c) {
   c.innerHTML = '<div class="ay-card">' + Ayna.t('common.loading') + '</div>';
   var d = Ayna.today(), uid = Ayna.uid, sb = Ayna.sb();
   Promise.all([
-    sb.from('ayna_people').select('id', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'pending'),
-    sb.from('ayna_entries').select('*').eq('user_id', uid).eq('local_date', d).order('created_at', { ascending: true }),
-    sb.from('ayna_people').select('id,display_name,ring,status').eq('user_id', uid).in('status', ['active','pending']).order('ring', { ascending: true }).order('display_name', { ascending: true }),
-    sb.from('ayna_rules').select('id,if_text,then_text,domain').eq('user_id', uid).eq('is_active', true),
-    sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open'),
-    sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true }),
-    sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1)
+    _q('people:pending', sb.from('ayna_people').select('id', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'pending')),
+    _q('entries', sb.from('ayna_entries').select('*').eq('user_id', uid).eq('local_date', d).order('created_at', { ascending: true })),
+    _q('people', sb.from('ayna_people').select('id,display_name,ring,status').eq('user_id', uid).in('status', ['active','pending']).order('ring', { ascending: true }).order('display_name', { ascending: true })),
+    _q('rules', sb.from('ayna_rules').select('id,if_text,then_text,domain').eq('user_id', uid).eq('is_active', true)),
+    _q('open_loops', sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open')),
+    _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })),
+    _q('crisis', sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1))
   ]).then(function (r) {
-    var pendingCount = r[0].count || 0, entries = r[1].data || [], people = r[2].data || [];
-    var rules = r[3].data || [], loops = r[4].data || [], trades = r[5].data || [];
-    var hasCrisis = r[6].data && r[6].data.length > 0;
+    var pendingCount = (r[0] && r[0].count) || 0, entries = (r[1] && r[1].data) || [], people = (r[2] && r[2].data) || [];
+    var rules = (r[3] && r[3].data) || [], loops = (r[4] && r[4].data) || [], trades = (r[5] && r[5].data) || [];
+    var hasCrisis = !!(r[6] && r[6].data && r[6].data.length);
+    try {
+      renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis);
+    } catch (e2) {
+      console.error('[AYNA today] çizim hatası:', e2);
+      c.innerHTML = '<div class="ay-card">' + Ayna.t('err.default') + '</div>';
+    }
+  }).catch(function (e) {
+    console.error('[AYNA today] yükleme hatası:', e);
+    c.innerHTML = '<div class="ay-card">' + Ayna.t('err.default') + '</div>';
+  });
+}
+
+function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis) {
     var morning = null, evening = null;
     entries.forEach(function (e) { if (e.kind === 'morning' && !morning) morning = e; if (e.kind === 'evening' && !evening) evening = e; });
     var h = '';
@@ -54,7 +81,6 @@ function renderToday(c) {
     _bindLoops(c);
     _bindTrades(c, d);
     if (evening) _checkEveningReflection(c, evening);
-  }).catch(function () { c.innerHTML = '<div class="ay-card">' + Ayna.t('err.default') + '</div>'; });
 }
 
 function _bindPending(c) {

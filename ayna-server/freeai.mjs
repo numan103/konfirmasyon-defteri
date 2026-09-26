@@ -19,11 +19,13 @@ export function hasAnyKey() {
   return Object.keys(available()).length > 0;
 }
 
+// Sıra önemlidir: ilk kullanılabilir model seçilir. Türkçe doğallığı için
+// llama-3.3-70b önceliklidir; gpt-oss-120b/20b yedek, 8b son çare.
 const MODELS = {
   groq: [
+    'llama-3.3-70b-versatile',
     'openai/gpt-oss-120b',
     'openai/gpt-oss-20b',
-    'llama-3.3-70b-versatile',
     'llama-3.1-8b-instant',
     'gemma2-9b-it'
   ],
