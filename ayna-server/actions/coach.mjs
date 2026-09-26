@@ -125,7 +125,8 @@ export default async function coach({ res, auth, user, profile, body }) {
       evidence: evidenceIds,
       risk,
       decision_proposal: decisionProposal,
-      message_id: assistantMsgId
+      message_id: assistantMsgId,
+      user_message_id: userMsgId
     });
   } catch (e) {
     try { await logUsage(auth, user.id, 'coach', null); } catch (e2) {}

@@ -4,6 +4,28 @@ Ayna.tabs.coach = { render: function (c) { renderCoach(c); } };
 var _coachMode = 'chat';
 var _coachMessages = [];
 var _coachEntries = {};
+var _coachLastSend = 0;
+
+function _normMsgs() {
+  var seen = {};
+  var out = [];
+  for (var i = 0; i < _coachMessages.length; i++) {
+    var m = _coachMessages[i];
+    if (!m) continue;
+    var id = m.id || ('x-' + i);
+    var temp = String(id).indexOf('temp-') === 0;
+    if (seen[id] !== undefined) {
+      var prev = seen[id];
+      if (!prev.isTemp && temp) continue;
+      out[prev.idx] = m;
+      prev.isTemp = temp;
+      continue;
+    }
+    seen[id] = { idx: out.length, isTemp: temp };
+    out.push(m);
+  }
+  _coachMessages = out;
+}
 
 var _coachModes = ['chat', 'pre_trade', 'pre_conversation', 'big_decision'];
 var _coachModeLabels = { chat: 'coach.mode_chat', pre_trade: 'coach.mode_pre_trade', pre_conversation: 'coach.mode_pre_conversation', big_decision: 'coach.mode_big_decision' };
@@ -15,7 +37,10 @@ function renderCoach(c) {
   sb.from('ayna_chat_messages').select('id,mode,role,content,evidence,risk,decision_proposal,created_at')
     .eq('user_id', uid).neq('mode', 'onboarding').order('created_at', { ascending: true }).limit(50)
     .then(function (res) {
-      _coachMessages = res.data || [];
+      _coachMessages = (res.data || []).slice().sort(function (a, b) {
+        return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+      });
+      _normMsgs();
       renderCoachContent(c);
     }).catch(function () {
       _coachMessages = [];
@@ -88,6 +113,7 @@ function renderMessageList(el) {
 }
 
 function _drawMessages(el) {
+  _normMsgs();
   var html = '';
   _coachMessages.forEach(function (m) {
     var isUser = m.role === 'user';
@@ -98,7 +124,7 @@ function _drawMessages(el) {
     var modeLabel = Ayna.t(_coachModeLabels[m.mode] || 'coach.mode_chat');
 
     html += '<div style="text-align:' + align + ';margin-bottom:8px;' + ml + '">';
-    html += '<div style="display:inline-block;text-align:left;background:' + bg + ';padding:8px 12px;border-radius:var(--radius);max-width:100%">';
+    html += '<div style="display:inline-block;text-align:left;background:' + bg + ';padding:8px 12px;border-radius:var(--radius);max-width:100%;box-sizing:border-box;overflow-wrap:anywhere">';
     html += '<div style="font-size:11px;color:var(--text-3);margin-bottom:2px">' + Ayna.esc(modeLabel) + ' · ' + Ayna.esc(time) + '</div>';
     html += '<div style="white-space:pre-wrap">' + Ayna.esc(m.content) + '</div>';
 
@@ -221,6 +247,11 @@ function sendCoachMessage(text, onDone) {
   var done = function () { if (onDone) onDone(); };
 
   if (!ta || !sendBtn || !listEl || sendBtn.disabled) { done(); return; }
+
+  var now = Date.now();
+  if (now - _coachLastSend < 1500) { done(); return; }
+  _coachLastSend = now;
+
   ta.disabled = true;
   sendBtn.disabled = true;
 
@@ -233,9 +264,10 @@ function sendCoachMessage(text, onDone) {
 
   Ayna.api('coach', { message: text, mode: _coachMode }).then(function (res) {
     thinkingDiv.remove();
+    var sentMode = _coachMode;
     _coachMessages.push({
-      id: 'temp-user-' + Date.now(),
-      mode: _coachMode,
+      id: res.user_message_id || ('temp-user-' + now),
+      mode: sentMode,
       role: 'user',
       content: text,
       evidence: [],
@@ -244,8 +276,8 @@ function sendCoachMessage(text, onDone) {
       created_at: new Date().toISOString()
     });
     _coachMessages.push({
-      id: res.message_id || ('temp-coach-' + Date.now()),
-      mode: _coachMode,
+      id: res.message_id || ('temp-coach-' + now),
+      mode: sentMode,
       role: 'assistant',
       content: res.reply || '',
       evidence: res.evidence || [],
@@ -253,6 +285,7 @@ function sendCoachMessage(text, onDone) {
       decision_proposal: res.decision_proposal || null,
       created_at: new Date().toISOString()
     });
+    _normMsgs();
     ta.value = '';
     ta.disabled = false;
     sendBtn.disabled = false;
