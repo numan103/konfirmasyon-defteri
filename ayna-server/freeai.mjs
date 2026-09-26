@@ -34,10 +34,11 @@ const MODELS = {
   ]
 };
 
-let cache = { at: 0, ids: null };
+let cache = {};
 
 async function availableModels(name) {
-  if (Date.now() - cache.at < 600000 && cache.ids) return cache.ids;
+  const hit = cache[name];
+  if (hit && Date.now() - hit.at < 600000) return hit.ids;
   const host = HOSTS[name];
   if (!host || !process.env[host.key]) return null;
   try {
@@ -46,8 +47,8 @@ async function availableModels(name) {
     });
     const j = await r.json().catch(() => null);
     if (!j || !Array.isArray(j.data)) return null;
-    cache = { at: Date.now(), ids: j.data.map((m) => m.id) };
-    return cache.ids;
+    cache[name] = { at: Date.now(), ids: j.data.map((m) => m.id) };
+    return cache[name].ids;
   } catch (e) {
     return null;
   }
@@ -94,7 +95,8 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
     max_tokens: maxTokens
   };
   const started = Date.now();
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (Date.now() - started > 25000) break;
     let r;
     try {
       r = await fetch(host.base, {
@@ -103,11 +105,16 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
         body: JSON.stringify(body)
       });
     } catch (e) {
-      if (attempt === 0 && e.name !== 'AbortError' && Date.now() - started < 15000) { await sleep(2000); continue; }
+      if (attempt < 2 && e.name !== 'AbortError') { await sleep(1500 * (attempt + 1)); continue; }
       throw new Error(`${hostName} network ${e.name}`);
     }
     if (!r.ok) {
-      if (attempt === 0 && RETRY_STATUS.includes(r.status) && Date.now() - started < 15000) { await sleep(2000); continue; }
+      if (attempt < 2 && RETRY_STATUS.includes(r.status)) {
+        const ra = Number(r.headers.get('retry-after'));
+        const wait = Number.isFinite(ra) && ra > 0 ? Math.min(ra * 1000, 8000) : 1500 * (attempt + 1);
+        await sleep(wait);
+        continue;
+      }
       const errBody = await r.text().catch(() => '');
       let msg = '';
       try { const j = JSON.parse(errBody); msg = (j.error && (j.error.message || j.error.code)) || ''; } catch (e) { msg = errBody.slice(0, 120); }
@@ -142,9 +149,10 @@ export async function callTool({ kind, ...opts }) {
         return { ...result, provider: name };
       } catch (e) {
         last = e;
-        // Model erişilemiyorsa sıradaki modeli dene; değilse o sağlayıcıyı bırak.
-        if (/does not exist|not found|404/.test(e.message)) continue;
-        break;
+        // Anahtar/geçerlilik hatası model değiştirerek çözülmez, bu sağlayıcıyı bırak.
+        if (/\b(401|403)\b/.test(e.message)) break;
+        // Model bulunamadıysa veya geçici bir hata ise sıradaki modeli dene.
+        continue;
       }
     }
   }
