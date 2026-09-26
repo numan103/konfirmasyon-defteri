@@ -48,7 +48,6 @@ export default async function scribe({ req, res, auth, user, profile, body }) {
       pending_people_count: result.pendingCount || 0
     });
   } catch (e) {
-    await logUsage(auth, user.id, 'scribe', null);
     if (e.status === 404) return fail(res, 404, 'not_found');
     return fail(res, 500, 'scribe_failed', e.message);
   }

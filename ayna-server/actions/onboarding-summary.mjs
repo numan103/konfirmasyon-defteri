@@ -59,7 +59,6 @@ export default async function onboardingSummary({ res, auth, user }) {
       proposal
     });
   } catch (e) {
-    await logUsage(auth, user.id, 'onboarding-summary', null);
     return fail(res, 500, 'model_failed', e.message);
   }
 }

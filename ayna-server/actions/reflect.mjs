@@ -93,7 +93,6 @@ export default async function reflect({ res, auth, user, profile, body }) {
       risk
     });
   } catch (e) {
-    await logUsage(auth, user.id, 'reflect', null);
     if (e.status === 404) return fail(res, 404, 'not_found');
     return fail(res, 500, 'model_failed', e.message);
   }

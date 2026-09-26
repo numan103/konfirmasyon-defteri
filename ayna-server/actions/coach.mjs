@@ -129,7 +129,7 @@ export default async function coach({ res, auth, user, profile, body }) {
       user_message_id: userMsgId
     });
   } catch (e) {
-    try { await logUsage(auth, user.id, 'coach', null); } catch (e2) {}
+    // Başarısız çağrı koteden düşülmez; sadece başarılı yanıtlar sayılır.
     return fail(res, 500, 'model_failed', e && e.message);
   }
 }
