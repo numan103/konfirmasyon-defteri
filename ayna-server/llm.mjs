@@ -60,7 +60,7 @@ export function modelFor(provider, kind) {
 }
 
 export async function callTool({ kind, systemStatic, systemDynamic, messages, tool, maxTokens }) {
-  const opts = { systemStatic, systemDynamic, messages, tool, maxTokens };
+  const opts = { kind, systemStatic, systemDynamic, messages, tool, maxTokens };
   const chain = [providerFor(kind)];
   for (const fb of ['groq', 'gemini']) {
     if (chain.includes(fb)) continue;
@@ -70,7 +70,7 @@ export async function callTool({ kind, systemStatic, systemDynamic, messages, to
   for (const name of chain) {
     if (name !== 'groq' && name !== 'gemini' && !hasKey(name)) continue;
     try {
-      const r = await PROVIDERS[name].callTool({ model: modelFor(name, kind), ...opts });
+      const r = await PROVIDERS[name].callTool({ ...opts, model: modelFor(name, kind) });
       return { ...r, provider: name };
     } catch (e) {
       last = e;

@@ -19,9 +19,19 @@ export function hasAnyKey() {
   return Object.keys(available()).length > 0;
 }
 
+const MODELS = {
+  groq: {
+    scribe: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'gemma2-9b-it'],
+    coach: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']
+  },
+  gemini: {
+    scribe: ['gemini-2.5-flash', 'gemini-2.0-flash'],
+    coach: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
+  }
+};
+
 export function defaultModel(kind) {
-  if (kind === 'scribe') return 'llama-3.1-8b-instant';
-  return 'llama-3.3-70b-versatile';
+  return MODELS.groq[kind][0];
 }
 
 function toOpenAITool(tool) {
@@ -89,17 +99,23 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
   throw new Error(`${hostName} retry_exhausted`);
 }
 
-export async function callTool(opts) {
+export async function callTool({ kind, ...opts }) {
   const hosts = available();
   const names = Object.keys(hosts);
   if (!names.length) throw new Error('no_provider_key');
   let last = null;
   for (const name of names) {
-    try {
-      const result = await callToolFor(hosts[name], name, opts);
-      return { ...result, provider: name };
-    } catch (e) {
-      last = e;
+    const candidates = MODELS[name] && MODELS[name][kind] ? MODELS[name][kind].slice() : [opts.model];
+    for (const model of candidates) {
+      try {
+        const result = await callToolFor(hosts[name], name, { ...opts, model });
+        return { ...result, provider: name };
+      } catch (e) {
+        last = e;
+        // Model erişilemiyorsa sıradaki modeli dene; değilse o sağlayıcıyı bırak.
+        if (/does not exist|not found|404/.test(e.message)) continue;
+        break;
+      }
     }
   }
   throw last;
