@@ -20,18 +20,49 @@ export function hasAnyKey() {
 }
 
 const MODELS = {
-  groq: {
-    scribe: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'gemma2-9b-it'],
-    coach: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']
-  },
-  gemini: {
-    scribe: ['gemini-2.5-flash', 'gemini-2.0-flash'],
-    coach: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash']
-  }
+  groq: [
+    'openai/gpt-oss-120b',
+    'openai/gpt-oss-20b',
+    'llama-3.3-70b-versatile',
+    'llama-3.1-8b-instant',
+    'gemma2-9b-it'
+  ],
+  gemini: [
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash'
+  ]
 };
 
+let cache = { at: 0, ids: null };
+
+async function availableModels(name) {
+  if (Date.now() - cache.at < 600000 && cache.ids) return cache.ids;
+  const host = HOSTS[name];
+  if (!host || !process.env[host.key]) return null;
+  try {
+    const r = await fetch(host.base.replace('/chat/completions', '/models'), {
+      headers: { Authorization: `Bearer ${process.env[host.key]}` }
+    });
+    const j = await r.json().catch(() => null);
+    if (!j || !Array.isArray(j.data)) return null;
+    cache = { at: Date.now(), ids: j.data.map((m) => m.id) };
+    return cache.ids;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function pickModels(name, kind) {
+  const preferred = MODELS[name].slice();
+  if (kind === 'scribe') preferred.push('openai/gpt-oss-20b', 'llama-3.1-8b-instant');
+  const ids = await availableModels(name);
+  const usable = ids ? preferred.filter((m) => ids.includes(m)) : preferred;
+  return usable.length ? usable : preferred;
+}
+
 export function defaultModel(kind) {
-  return MODELS.groq[kind][0];
+  return MODELS.groq[0];
 }
 
 function toOpenAITool(tool) {
@@ -60,7 +91,6 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
     tools: [toOpenAITool(tool)],
     tool_choice: { type: 'function', function: { name: tool.name } },
     parallel_tool_calls: false,
-    temperature: 0.3,
     max_tokens: maxTokens
   };
   const started = Date.now();
@@ -122,7 +152,7 @@ export async function callTool({ kind, ...opts }) {
   if (!names.length) throw new Error('no_provider_key');
   let last = null;
   for (const name of names) {
-    const candidates = MODELS[name] && MODELS[name][kind] ? MODELS[name][kind].slice() : [opts.model];
+    const candidates = (await pickModels(name, kind)).slice();
     for (const model of candidates) {
       try {
         const result = await callToolFor(hosts[name], name, { ...opts, model });
