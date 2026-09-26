@@ -168,6 +168,19 @@ function _cardEveningForm(people, rules) {
     '<p>' + Ayna.t('today.compass_title') + '</p></div></div>';
 }
 
+// Yeni akşam kaydı: iskelet çizildikten sonra asıl formu doldurur.
+function _bindEveningForm(c, d, people, rules) {
+  var q = Ayna.sb().from('ayna_rule_checks').select('rule_id,result').eq('user_id', Ayna.uid).eq('local_date', d);
+  Promise.resolve(q).then(
+    function (r) {
+      var checks = {};
+      ((r && r.data) || []).forEach(function (rc) { checks[rc.rule_id] = rc.result; });
+      _renderEveningForm(c, d, people, rules, null, [], checks);
+    },
+    function () { _renderEveningForm(c, d, people, rules, null, [], {}); }
+  );
+}
+
 function _renderEveningForm(c, d, people, rules, entry, taggedIds, checkMap) {
   var isEdit = !!entry;
   var p = isEdit ? entry.pleasantness : null, e = isEdit ? entry.energy : null;
