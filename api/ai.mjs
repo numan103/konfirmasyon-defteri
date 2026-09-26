@@ -87,7 +87,7 @@ async function aynaHandler(req, res, jwt) {
     return await action({ req, res, auth, user, profile: profiles[0], body });
   } catch (e) {
     console.error('[AYNA] HANDLER_DEBUG', body.action, e && e.message);
-    return fail(res, 500, 'server_error', e.message);
+    return fail(res, 500, 'server_error', (body.action || '?') + ' | ' + (e && e.message));
   }
 }
 

@@ -130,6 +130,6 @@ export default async function coach({ res, auth, user, profile, body }) {
   } catch (e) {
     console.error('[AYNA] COACH_DEBUG', e && e.message);
     try { await logUsage(auth, user.id, 'coach', null); } catch (e2) {}
-    return fail(res, 500, 'model_failed', e.message);
+    return fail(res, 500, 'model_failed', e && e.message);
   }
 }
