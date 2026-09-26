@@ -78,15 +78,3 @@ export async function callTool({ kind, systemStatic, systemDynamic, messages, to
   }
   throw last || new Error(`${chain[0]} key_missing`);
 }
-
-export function diagnostics() {
-  return {
-    provider_env: process.env.AYNA_PROVIDER || 'unset',
-    has_groq: !!process.env.GROQ_API_KEY,
-    has_gemini: !!process.env.GEMINI_API_KEY,
-    has_openai: !!process.env.OPENAI_API_KEY,
-    has_supabase_url: !!process.env.SUPABASE_URL,
-    resolved_coach: providerFor('coach'),
-    resolved_scribe: providerFor('scribe')
-  };
-}
