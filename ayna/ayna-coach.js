@@ -5,6 +5,8 @@ var _coachMode = 'chat';
 var _coachMessages = [];
 var _coachEntries = {};
 var _coachLastSend = 0;
+// Sunucuya gönderilmiş ama yanıtı beklenen mesajlar. Sekme değişse de kaybolmaz.
+var _coachPending = [];
 
 function _normMsgs() {
   var seen = {};
@@ -27,6 +29,13 @@ function _normMsgs() {
   _coachMessages = out;
 }
 
+// Uçuşta olan mesajları DB sonucunun sonuna ekler.
+function _mergePending() {
+  if (!_coachPending.length) return;
+  _coachMessages = _coachMessages.concat(_coachPending);
+  _normMsgs();
+}
+
 var _coachModes = ['chat', 'pre_trade', 'pre_conversation', 'big_decision'];
 var _coachModeLabels = { chat: 'coach.mode_chat', pre_trade: 'coach.mode_pre_trade', pre_conversation: 'coach.mode_pre_conversation', big_decision: 'coach.mode_big_decision' };
 var _coachModeHelp = { chat: 'coach.help_chat', pre_trade: 'coach.help_pre_trade', pre_conversation: 'coach.help_pre_conversation', big_decision: 'coach.help_big_decision' };
@@ -35,16 +44,17 @@ function renderCoach(c) {
   c.innerHTML = '<div class="ay-card">' + Ayna.t('common.loading') + '</div>';
   var uid = Ayna.uid, sb = Ayna.sb();
   _runDedupe();
+  // En yeni 50 kayıt alınır, sonra eskiye doğru sıralanır.
   sb.from('ayna_chat_messages').select('id,mode,role,content,evidence,risk,decision_proposal,created_at')
-    .eq('user_id', uid).neq('mode', 'onboarding').order('created_at', { ascending: true }).limit(50)
+    .eq('user_id', uid).neq('mode', 'onboarding').order('created_at', { ascending: false }).limit(50)
     .then(function (res) {
-      _coachMessages = (res.data || []).slice().sort(function (a, b) {
-        return String(a.created_at || '').localeCompare(String(b.created_at || ''));
-      });
+      _coachMessages = (res.data || []).slice().reverse();
       _normMsgs();
+      _mergePending();
       renderCoachContent(c);
     }).catch(function () {
       _coachMessages = [];
+      _mergePending();
       renderCoachContent(c);
     });
 }
@@ -129,6 +139,7 @@ function _drawMessages(el) {
   var html = '';
   _coachMessages.forEach(function (m) {
     var isUser = m.role === 'user';
+    var waiting = !isUser && (m.content === null || m.content === undefined);
     var align = isUser ? 'right' : 'left';
     var bg = isUser ? 'var(--acc-soft)' : 'var(--card-2)';
     var ml = isUser ? 'margin-left:40px' : 'margin-right:40px';
@@ -138,7 +149,11 @@ function _drawMessages(el) {
     html += '<div style="text-align:' + align + ';margin-bottom:8px;' + ml + '">';
     html += '<div style="display:inline-block;text-align:left;background:' + bg + ';padding:8px 12px;border-radius:var(--radius);max-width:100%;box-sizing:border-box;overflow-wrap:anywhere">';
     html += '<div style="font-size:11px;color:var(--text-3);margin-bottom:2px">' + Ayna.esc(modeLabel) + ' · ' + Ayna.esc(time) + '</div>';
-    html += '<div style="white-space:pre-wrap">' + Ayna.esc(m.content) + '</div>';
+    if (waiting) {
+      html += '<div style="color:var(--text-2)">' + Ayna.esc(Ayna.t('coach.thinking')) + '</div>';
+    } else {
+      html += '<div style="white-space:pre-wrap">' + Ayna.esc(m.content) + '</div>';
+    }
 
     if (!isUser && m.evidence && m.evidence.length) {
       html += '<div style="margin-top:6px">';
@@ -264,19 +279,34 @@ function sendCoachMessage(text, onDone) {
   if (now - _coachLastSend < 1500) { done(); return; }
   _coachLastSend = now;
 
+  var sentMode = _coachMode;
+  var stamp = new Date().toISOString();
+  var key = 'pend-' + now;
+  var userMsg = { id: key + '-u', mode: sentMode, role: 'user', content: text, evidence: [], risk: null, decision_proposal: null, created_at: stamp };
+  var thinkMsg = { id: key + '-a', mode: sentMode, role: 'assistant', content: null, evidence: [], risk: null, decision_proposal: null, created_at: stamp };
+
+  _coachPending.push(userMsg, thinkMsg);
+  _coachMessages.push(userMsg, thinkMsg);
+  _normMsgs();
+  _drawMessages(listEl);
+  ta.value = '';
   ta.disabled = true;
   sendBtn.disabled = true;
 
-  var thinkingDiv = document.createElement('div');
-  thinkingDiv.style.cssText = 'text-align:left;margin-bottom:8px;margin-right:40px';
-  thinkingDiv.innerHTML = '<div style="display:inline-block;background:var(--card-2);padding:8px 12px;border-radius:var(--radius);font-size:13px;color:var(--text-2)">' + Ayna.t('coach.thinking') + '</div>';
-  thinkingDiv.setAttribute('aria-live', 'polite');
-  listEl.appendChild(thinkingDiv);
-  listEl.scrollTop = listEl.scrollHeight;
+  function dropPending() {
+    _coachPending = _coachPending.filter(function (m) { return m.id !== key + '-u' && m.id !== key + '-a'; });
+  }
 
-  Ayna.api('coach', { message: text, mode: _coachMode }).then(function (res) {
-    thinkingDiv.remove();
-    var sentMode = _coachMode;
+  function paint() {
+    // Sekme değişmiş olabilir; canlı listeyi bul, yoksa sekmeyi yeniden çiz.
+    var live = document.getElementById('ay-coach-list');
+    if (live && live.isConnected) _drawMessages(live);
+    else if (document.getElementById('ay-content')) renderCoach(document.getElementById('ay-content'));
+  }
+
+  Ayna.api('coach', { message: text, mode: sentMode }).then(function (res) {
+    dropPending();
+    _coachMessages = _coachMessages.filter(function (m) { return m.id !== key + '-u' && m.id !== key + '-a'; });
     _coachMessages.push({
       id: res.user_message_id || ('temp-user-' + now),
       mode: sentMode,
@@ -285,7 +315,7 @@ function sendCoachMessage(text, onDone) {
       evidence: [],
       risk: null,
       decision_proposal: null,
-      created_at: new Date().toISOString()
+      created_at: stamp
     });
     _coachMessages.push({
       id: res.message_id || ('temp-coach-' + now),
@@ -295,19 +325,24 @@ function sendCoachMessage(text, onDone) {
       evidence: res.evidence || [],
       risk: res.risk || 'none',
       decision_proposal: res.decision_proposal || null,
-      created_at: new Date().toISOString()
+      created_at: stamp
     });
     _normMsgs();
-    ta.value = '';
-    ta.disabled = false;
-    sendBtn.disabled = false;
-    _drawMessages(listEl);
+    paint();
+    var t2 = document.getElementById('ay-coach-ta');
+    var s2 = document.getElementById('ay-coach-send');
+    if (t2) t2.disabled = false;
+    if (s2) s2.disabled = false;
     done();
   }).catch(function (e) {
-    thinkingDiv.remove();
-    ta.value = text;
-    ta.disabled = false;
-    sendBtn.disabled = false;
+    dropPending();
+    _coachMessages = _coachMessages.filter(function (m) { return m.id !== key + '-u' && m.id !== key + '-a'; });
+    _normMsgs();
+    var t3 = document.getElementById('ay-coach-ta');
+    var s3 = document.getElementById('ay-coach-send');
+    if (t3) { t3.value = text; t3.disabled = false; }
+    if (s3) s3.disabled = false;
+    paint();
     Ayna.flash(Ayna.errText(e.code || 'default'));
     done();
   });
