@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v30';
-const BUILD_ID = 'b88';
+﻿const CACHE = 'alfa-v31';
+const BUILD_ID = 'b89';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
@@ -26,7 +26,10 @@ self.addEventListener('fetch', e => {
   }
   e.respondWith(
     caches.open(CACHE).then(async c => {
-      const cached = await c.match(e.request, { ignoreSearch: true });
+      // Sorgu dizesi burada OZEL OLCEK KIYMETIN PARCASIDIR. index.html'deki ?v=N
+      // surum belirteci ancak bu sekilde yeni dosyalari zorlar; once ignoreSearch
+      // kullaniliyordu ve guncel surum hicbir zaman yuklenmiyordu.
+      const cached = await c.match(e.request);
       const fresh = fetch(e.request).then(res => {
         if (res && res.ok && res.type === 'basic') c.put(e.request, res.clone());
         return res;
