@@ -49,6 +49,8 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
     messages: [{ role: 'system', content: system }, ...messages],
     tools: [toOpenAITool(tool)],
     tool_choice: { type: 'function', function: { name: tool.name } },
+    parallel_tool_calls: false,
+    temperature: 0.3,
     max_tokens: maxTokens
   };
   const started = Date.now();
@@ -66,7 +68,10 @@ async function callToolFor(host, hostName, { model, systemStatic, systemDynamic,
     }
     if (!r.ok) {
       if (attempt === 0 && RETRY_STATUS.includes(r.status) && Date.now() - started < 15000) { await sleep(2000); continue; }
-      throw new Error(`${hostName} ${r.status}`);
+      const errBody = await r.text().catch(() => '');
+      let msg = '';
+      try { const j = JSON.parse(errBody); msg = (j.error && (j.error.message || j.error.code)) || ''; } catch (e) { msg = errBody.slice(0, 120); }
+      throw new Error(`${hostName} ${r.status} ${String(msg).slice(0, 160)}`);
     }
     const data = await r.json().catch(() => null);
     if (!data) throw new Error(`${hostName} empty`);
