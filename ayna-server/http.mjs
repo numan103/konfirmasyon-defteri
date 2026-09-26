@@ -7,5 +7,5 @@ export function send(res, status, body) {
 
 export function fail(res, status, code, detail) {
   if (status === 429) console.error('[AYNA] 429', code);
-  send(res, status, detail ? { error: code, debug_detail: String(detail).slice(0, 300) } : { error: code });
+  send(res, status, { error: code });
 }

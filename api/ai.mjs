@@ -86,8 +86,7 @@ async function aynaHandler(req, res, jwt) {
     if (!(await underLimit(auth, user.id, body.action))) return fail(res, 429, 'daily_limit');
     return await action({ req, res, auth, user, profile: profiles[0], body });
   } catch (e) {
-    console.error('[AYNA] HANDLER_DEBUG', body.action, e && e.message);
-    return fail(res, 500, 'server_error', (body.action || '?') + ' | ' + (e && e.message));
+    return fail(res, 500, 'server_error', e.message);
   }
 }
 
