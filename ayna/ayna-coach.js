@@ -34,6 +34,7 @@ var _coachModeHelp = { chat: 'coach.help_chat', pre_trade: 'coach.help_pre_trade
 function renderCoach(c) {
   c.innerHTML = '<div class="ay-card">' + Ayna.t('common.loading') + '</div>';
   var uid = Ayna.uid, sb = Ayna.sb();
+  _runDedupe();
   sb.from('ayna_chat_messages').select('id,mode,role,content,evidence,risk,decision_proposal,created_at')
     .eq('user_id', uid).neq('mode', 'onboarding').order('created_at', { ascending: true }).limit(50)
     .then(function (res) {
@@ -46,6 +47,17 @@ function renderCoach(c) {
       _coachMessages = [];
       renderCoachContent(c);
     });
+}
+
+function _runDedupe() {
+  var flag = 'ayna.dedupe.v1';
+  var done = false;
+  try { done = localStorage.getItem(flag) === '1'; } catch (e) {}
+  if (done) return;
+  try { localStorage.setItem(flag, '1'); } catch (e) {}
+  Ayna.api('dedupe-chat', {}).then(function (res) {
+    if (res && res.removed > 0) renderCoach(document.getElementById('ay-content'));
+  }).catch(function () {});
 }
 
 function renderCoachContent(c, keepInput) {

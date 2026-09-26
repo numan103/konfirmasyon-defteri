@@ -6,10 +6,11 @@ import ping from '../ayna-server/actions/ping.mjs';
 import scribe from '../ayna-server/actions/scribe.mjs';
 import reflect from '../ayna-server/actions/reflect.mjs';
 import coach from '../ayna-server/actions/coach.mjs';
+import dedupeChat from '../ayna-server/actions/dedupe-chat.mjs';
 import onboardingSummary from '../ayna-server/actions/onboarding-summary.mjs';
 import sync from '../ayna-server/actions/sync.mjs';
 
-const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'onboarding-summary': onboardingSummary, sync };
+const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat };
 
 const SYSTEM_PROMPT = `Sen Alfa Traders topluluğunun AI asistanısın. Kısa, net ve yardımsever cevaplar ver (max 3-4 cümle). Türkçe konuş.
 
@@ -80,7 +81,7 @@ async function aynaHandler(req, res, jwt) {
   if (!action) return fail(res, 400, 'bad_request');
   const auth = { jwt };
   try {
-    if (body.action === 'ping') return await action({ req, res, auth, user, profile: null, body });
+    if (body.action === 'ping' || body.action === 'dedupe-chat') return await action({ req, res, auth, user, profile: null, body });
     const profiles = await db(auth, 'GET', `ayna_profiles?user_id=eq.${q(user.id)}&select=*`);
     if (!profiles.length) return fail(res, 409, 'no_profile');
     if (!(await underLimit(auth, user.id, body.action))) return fail(res, 429, 'daily_limit');
