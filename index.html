@@ -5364,18 +5364,6 @@
           <div class="hc-body"><h2 data-i18n="hm.c9.t">🤝 Alfa Ol</h2><p data-i18n="hm.c9.s">Topluluk akışı, PnL performansı, referansla katıl.</p></div>
         </a>
       </div>
-      <div class="home-tips">
-        <h2 data-i18n="hm.tips">💡 Verimli Kullanım İpuçları</h2>
-        <ul>
-          <li data-i18n-html="hm.tips.1"><strong>Alfa-Check List</strong> — Her işlem öncesi pair'ini seç, kriterleri puanla. Eşikler otomatik karar versin. Seans kalitesini gir, günlük plan yap.</li>
-          <li data-i18n-html="hm.tips.2"><strong>Trade Günlüğü</strong> — İşlem sonrası R değerini gir. Notion'a bağlanıp otomatik çek. CSV yükleme ile broker geçmişini içe aktar. Kümülatif eğriyi takip et.</li>
-          <li data-i18n-html="hm.tips.3"><strong>Haftalık Değerlendirme</strong> — Her hafta kripto/fx RR'yi gir. Değerlendirme bölümleri ekle, ölçütler belirle. trendini izle.</li>
-          <li data-i18n-html="hm.tips.4"><strong>Alfa Edu</strong> — Bölüm seç (Teknik Analiz'de Temel/Orta/İleri seviye filtresi var), konu aç, video ekle. İzledim işaretle.</li>
-          <li data-i18n-html="hm.tips.5"><strong>Onchain</strong> — Coinglass Supercharts tek sayfada. Onchain Analizi eğitim bölümü de eklendi.</li>
-          <li data-i18n-html="hm.tips.6"><strong>Notion Senkronu</strong> — "Notion'a Bağlan" ile OAuth yap, database ID'lerini ayarlardan gir. Tek tuşla trade'lerini çek.</li>
-          <li data-i18n-html="hm.tips.7"><strong>Portföy &amp; Birikim Planı</strong> — Kripto, altın ve kendi araçlarını ekle; eldeki dağılımı ve ay ay birikim planını pastalarla gör, hedef pozisyonları belirle.</li>
-        </ul>
-      </div>
     <div class="hm-rv" id="hm-rv">
       <div class="hm-rv-head">
         <h2 data-i18n="hm.rv.t">⭐ Üyeler ne diyor?</h2>
@@ -18098,6 +18086,30 @@ function ap2RenderMonthly() {
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
+  if (!siteIsAdmin()) {
+    // Salt okunur: sadece yoneticinin paylastigi portfoy gorunur
+    var _add = document.getElementById('ap2-add'); if (_add) _add.style.display = 'none';
+    var _idea = document.getElementById('ap2-idea-add'); if (_idea) _idea.style.display = 'none';
+    var _empty = document.getElementById('ap2-empty');
+    var _layout = document.querySelector('.ap2-layout');
+    var _sumEl = document.getElementById('ap2-summary-area');
+    var _grid = document.getElementById('ap2-grid');
+    ap2FetchCloud().then(function(d) {
+      if (d && d.portfolioValue != null) {
+        if (_empty) _empty.style.display = 'none';
+        if (_layout) _layout.style.display = '';
+        if (_sumEl) ap2RenderTeaserTarget(d, 'ap2-pt');
+        if (_grid) _grid.innerHTML = '<div class="data-empty" style="padding:18px;text-align:center;color:var(--text-3);">Salt okunur görünüm — pozisyon detayları yönetici tarafından paylaşılmaktadır.</div>';
+        var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
+      } else {
+        if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Henüz paylaşılan portföy yok.'; }
+        if (_layout) _layout.style.display = 'none';
+      }
+    }).catch(function() {
+      if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Portföy yüklenemedi.'; }
+    });
+    return;
+  }
   var positions = ap2Data.positions || [];
   var q = (ap2SearchTerm || '').toLowerCase().trim();
   var shown = q ? positions.filter(function(p) { return (p.symbol || '').toLowerCase().indexOf(q) >= 0 || (p.note || '').toLowerCase().indexOf(q) >= 0; }) : positions;
@@ -19494,6 +19506,7 @@ function bindAlfaPortfoy2() {
   const view = document.getElementById('page-portfoy');
   if (!view) return;
   view.addEventListener('click', e => {
+    if (!siteIsAdmin() && e.target.closest('#ap2-add, #ap2-f-save, #ap2-f-cancel, [data-ap2edit], [data-ap2del], [data-ap2sell], [data-ap2hedge], [data-ap2fill], #ap2-sell-confirm, #ap2-idea-add, [data-idea-del], [data-idea-edit], #ap2-hist-keep, #ap2-hist-usehist, #ap2-hist-cancel, #ap2-hist-cancel2')) return;
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
@@ -25852,7 +25865,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b104';
+const APP_BUILD = 'b105';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
