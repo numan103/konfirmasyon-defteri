@@ -385,7 +385,7 @@ export default async function handler(req, res) {
     const op = body.op || 'status';
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);
-    if (op === 'approve' || op === 'reject' || op === 'revoke') return adminOpHandler(res, user, body);
+    if (op === 'approve' || op === 'reject' || op === 'revoke' || op === 'setvolume') return adminOpHandler(res, user, body);
     return fail(res, 400, 'bad_request');
   }
 
