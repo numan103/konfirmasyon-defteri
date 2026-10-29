@@ -12894,19 +12894,21 @@ async function adminAccessOp(op, userId, email, volume) {
       const j = await r.json().catch(function () { return null; });
       if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ("HTTP " + r.status));
       if (msg) msg.textContent = "Hacim kaydedildi: " + vol;
+      // alert("Hacim kaydedildi: " + vol);
       // Yerel listeyi aninda guncelle
       try {
-        const rr = adminAccessRows || [];
-        for (let i = 0; i < rr.length; i++) { if (rr[i] && rr[i].user_id === userId) rr[i].volume = vol; }
+        if (!Array.isArray(adminAccessRows)) adminAccessRows = [];
+        for (let i = 0; i < adminAccessRows.length; i++) { if (adminAccessRows[i] && adminAccessRows[i].user_id === userId) adminAccessRows[i].volume = vol; }
         renderAdminAccess();
-      } catch (e2) {}
+        console.log('setvolume ok, volume=', vol, 'rows=', adminAccessRows.length);
+      } catch (e2) { console.error('render err', e2); }
     } catch (e) {
       if (msg) msg.textContent = "Hacim kaydedilemedi: " + (e.message || "hata");
       console.error('setvolume err', e);
+      alert("Hacim kaydedilemedi: " + (e.message || "hata"));
     }
     adminAccessBusy = false;
-    // Refresh arka planda (UI zaten guncel); takilirsa UI etkilenmez
-    try { loadAdminAccess(true).catch(function () {}); } catch (e3) {}
+    // Listeyi yenileme (Yukleniyor... takilmasini onler); kullanici "Yenile" ile sync edebilir
     return;
   }
   if (adminAccessBusy) return;
