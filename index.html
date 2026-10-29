@@ -12891,6 +12891,12 @@ async function adminAccessOp(op, userId, email, volume) {
       const j = await r.json().catch(function () { return null; });
       if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ("HTTP " + r.status));
       if (msg) msg.textContent = "Hacim kaydedildi: " + vol;
+      // Yerel listeyi aninda guncelle (API select gecikmesine karsi)
+      try {
+        const rr = adminAccessRows || [];
+        for (let i = 0; i < rr.length; i++) { if (rr[i] && rr[i].user_id === userId) rr[i].volume = vol; }
+        renderAdminAccess();
+      } catch (e2) {}
     } catch (e) {
       if (msg) msg.textContent = "Hacim kaydedilemedi: " + (e.message || "hata");
     }
@@ -25773,7 +25779,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b99';
+const APP_BUILD = 'b100';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
