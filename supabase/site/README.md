@@ -91,3 +91,22 @@ Site tek dosya (`index.html`) ve içerik HTML'in içinde. Bu yüzden sayfa kapı
 Not: `site_access` tablosu yokken kapı bilinçli olarak kapalıdır (herkes `ref`), yani yukarıdaki `ref` kontrolleri de gevşer. Tablo kurulunca hepsi devreye girer.
 
 İçeriği gerçekten sunucu arkasına almak istersen sonraki adım: premium veriyi `edu_shared`'dan çıkarıp JWT + `site_access` kontrolü yapan bir uçtan servis etmek.
+
+
+### Notion uçları (b93)
+
+| Uç | Kural |
+|---|---|
+| `/api/notion-sync` | Giriş + `ref`/`admin` — site sahibinin Notion defterine yazar |
+| `/api/notion-trades` | Giriş + `ref`/`admin` — defteri okur (`?mode=options` dahil) |
+| `/api/notion-week` | Giriş + `ref`/`admin` — haftalık değerlendirme push/pull |
+| `/api/notion-callback` | Açık — OAuth yönlendirme adresi; token `#notion-token=` fragment'ında döner |
+
+### Hâlâ açık uçlar
+
+| Uç | Durum |
+|---|---|
+| `/api/ai` | Girişsiz (misafir asistanı + landing). Kötüye kullanımda Groq kotası tükenebilir; gerekirse hız sınırı eklenmeli. |
+| `/api/ai-checklist` | Girişsiz. Aynı risk. |
+| `/api/edu-shared` | Herkese açık (eğitim içeriği paylaşımı). |
+| `/api/eco-cal` | Herkese açık (ekonomik takvim, 5 dk cache). |
