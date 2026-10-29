@@ -26,6 +26,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+  #page-portfoy.ap2-viewer #ap2-add,
+  #page-portfoy.ap2-viewer #ap2-reset,
+  #page-portfoy.ap2-viewer #ap2-idea-add,
+  #page-portfoy.ap2-viewer [data-ap2edit],
+  #page-portfoy.ap2-viewer [data-ap2del],
+  #page-portfoy.ap2-viewer [data-ap2sell],
+  #page-portfoy.ap2-viewer [data-ap2hedge],
+  #page-portfoy.ap2-viewer [data-ap2fill],
+  #page-portfoy.ap2-viewer [data-idea-edit],
+  #page-portfoy.ap2-viewer [data-idea-del] { display: none !important; }
   :root {
     --bg: #0c0d1b;
     --bg-2: #121426;
@@ -12703,7 +12713,9 @@ function applyTierUi() {
     const links = d.querySelectorAll('.drop-menu .nav-link');
     let any = false;
     links.forEach(function (a) { if (a.style.display !== 'none') any = true; });
-    if (links.length) d.style.display = any ? '' : 'none';
+    const label = d.querySelector('.drop-btn');
+    const privateMenu = label && ['app.trader', 'app.news'].includes(label.getAttribute('data-i18n'));
+    if (links.length) d.style.display = (!isAdmin && privateMenu) ? 'none' : (any ? '' : 'none');
   });
   // Admin-only sayfalarin ana sayfa kartlarini non-admin'de gizle
   ['defter', 'data', 'review', 'karne', 'news', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
@@ -17002,6 +17014,7 @@ let ap2EditId = null;
 let ap2SellId = null;
 function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; (ap2Data.positions || []).forEach(p => { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; }); if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; ap2RecalcCash(); ap2RebuildHistory(); } } catch(e) {} }
 function ap2RebuildHistory() {
+  if (!siteIsAdmin()) return;
   try {
     if (!ap2Data) return;
     var sb = Number(ap2Data.startBalance) || 1000;
@@ -17068,11 +17081,11 @@ function ap2RecalcCash() {
   ap2Data.cash = startBalance - activeBuyCost + totalProfit;
   ap2Save();
 }
-function ap2Save() { try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} try { ap2SyncCloud(); } catch(e) {} }
+function ap2Save() { if (!siteIsAdmin()) return; try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} try { ap2SyncCloud(); } catch(e) {} }
 const AP2_IDEAS_KEY = 'alfa-fund-ideas-v1';
 let ap2Ideas = [];
-function ap2IdeasLoad() { try { const raw = localStorage.getItem(AP2_IDEAS_KEY); if (raw) ap2Ideas = JSON.parse(raw); } catch(e) {} if (!Array.isArray(ap2Ideas)) ap2Ideas = []; }
-function ap2IdeasSave() { try { localStorage.setItem(AP2_IDEAS_KEY, JSON.stringify(ap2Ideas)); } catch(e) {} }
+function ap2IdeasLoad() { if (!siteIsAdmin()) return; try { const raw = localStorage.getItem(AP2_IDEAS_KEY); if (raw) ap2Ideas = JSON.parse(raw); } catch(e) {} if (!Array.isArray(ap2Ideas)) ap2Ideas = []; }
+function ap2IdeasSave() { if (!siteIsAdmin()) return; try { localStorage.setItem(AP2_IDEAS_KEY, JSON.stringify(ap2Ideas)); } catch(e) {} ap2SyncCloud(); }
 function ap2IdeaDate(d) { if (!d) return '—'; const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1].slice(2) : String(d); }
 function ap2RenderIdeas() {
   ap2IdeasLoad();
@@ -17170,7 +17183,7 @@ function ap2CloudSummary() {
 async function ap2SyncCloud() {
   if (!amAllowed()) return;
   try {
-    var data = { v: 2, positions: (ap2Data.positions || []).slice(), sells: (ap2Data.sells || []).slice(), startBalance: ap2Data.startBalance, cash: ap2Data.cash, ideas: (typeof ap2Ideas !== 'undefined' ? ap2Ideas.slice() : []) };
+    var data = Object.assign(ap2CloudSummary(), { v: 2, positions: (ap2Data.positions || []).slice(), sells: (ap2Data.sells || []).slice(), startBalance: ap2Data.startBalance, cash: ap2Data.cash, ideas: (typeof ap2Ideas !== 'undefined' ? ap2Ideas.slice() : []) });
     var url = SUPABASE_URL + '/rest/v1/edu_shared';
     await fetch(url, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ id: AP2_CLOUD_KEY, data: data }) });
   } catch(e) { console.error('ap2SyncCloud err', e); }
@@ -17733,6 +17746,7 @@ function ap2HedgeStrip() {
   }).join('');
 }
 function ap2TrackHistory(value) {
+  if (!siteIsAdmin()) return;
   try {
     let hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]');
     const today = new Date().toISOString().slice(0, 10);
@@ -17790,6 +17804,7 @@ function ap2ChartWindow(hist, sel) {
   return out.length >= 2 ? out : hist.slice(-2);
 }
 function ap2RenderChart(hist) {
+  if (!siteIsAdmin()) hist = (ap2CloudData && ap2CloudData.history) || [];
   var svgEl = document.getElementById('ap2-chart-svg');
   var changeEl = document.getElementById('ap2-chart-change');
   var startEl = document.getElementById('ap2-chart-start');
@@ -17925,7 +17940,8 @@ function ap2RenderMonthly() {
   if (!ap2MonthlyOpen) return;
 
   var hist = [];
-  try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch (e) {}
+  if (!siteIsAdmin()) hist = (ap2CloudData && ap2CloudData.history) || [];
+  else try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch (e) {}
   var positions = (ap2Data.positions || []).filter(function(p) { return !ap2IsPending(p); });
   var sells = ap2Data.sells || [];
   var sum = ap2Summary();
@@ -18112,28 +18128,29 @@ function ap2ResetAll() {
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
+  document.getElementById('page-portfoy').classList.toggle('ap2-viewer', !siteIsAdmin());
+  if (!siteIsAdmin() && ap2ReadOnlyLoaded && (!ap2ReadOnly || !ap2CloudData || ap2CloudData.v !== 2)) return;
   var _resetBtn = document.getElementById('ap2-reset'); if (_resetBtn) _resetBtn.style.display = siteIsAdmin() ? '' : 'none';
   if (!siteIsAdmin() && !ap2ReadOnlyLoaded) {
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = false;
+    var oldLayout = document.querySelector('#page-portfoy .ap2-layout'); if (oldLayout) oldLayout.style.display = 'none';
     var _empty = document.getElementById('ap2-empty');
     if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Paylaşılan portföy yükleniyor...'; }
     ap2FetchCloud(true).then(function(d) {
-      console.log('ap2 cloud for non-admin:', d);
-      if (d && d.v === 2 && d.data) {
-        ap2Data = d.data;
+      if (d && d.v === 2 && Array.isArray((d.data || d).positions)) {
+        ap2Data = JSON.parse(JSON.stringify(d.data || d));
         if (ap2Data.startBalance == null) ap2Data.startBalance = 1000;
         if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(function(p) { var c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); }
         (ap2Data.positions || []).forEach(function(p) { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; });
         if (!Array.isArray(ap2Data.sells)) ap2Data.sells = [];
         if (Array.isArray(d.ideas)) ap2Ideas = d.ideas;
-        ap2RebuildHistory();
         ap2ReadOnly = true;
         renderAlfaPortfoy2();
         // Salt okunur: duzenleme butonlarini gizle + banner
         try {
           document.querySelectorAll('#ap2-add, #ap2-idea-add, [data-ap2edit], [data-ap2del], [data-ap2sell], [data-ap2hedge], [data-ap2fill], [data-idea-del], [data-idea-edit]').forEach(function(el){ el.style.display = 'none'; });
-          var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
+          var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = '';
           // Salt okunur banner
           var _hd = document.querySelector('#page-portfoy .ap2-hd');
           if (_hd && !document.getElementById('ap2-readonly-banner')) {
@@ -18167,11 +18184,10 @@ function renderAlfaPortfoy2() {
     });
     return;
   }
-  // Salt okunur modda duzenleme butonlarini gizle
   if (ap2ReadOnly && !siteIsAdmin()) {
     var _add = document.getElementById('ap2-add'); if (_add) _add.style.display = 'none';
     var _idea = document.getElementById('ap2-idea-add'); if (_idea) _idea.style.display = 'none';
-    var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
+    var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = '';
   }
   var positions = ap2Data.positions || [];
   var q = (ap2SearchTerm || '').toLowerCase().trim();
@@ -18265,6 +18281,7 @@ function renderAlfaPortfoy2() {
       }).join('');
     }
     ap2RenderMonthly();
+    ap2RenderIdeas();
     return;
   }
   if (emptyEl) emptyEl.style.display = 'none';
@@ -18482,6 +18499,7 @@ function renderAlfaPortfoy2() {
 }
 let ap2Pricing = false;
 async function ap2LoadPrices() {
+  if (!siteIsAdmin()) return;
   if (ap2Pricing) return;
   const positions = (ap2Data.positions || []).filter(p => p.type === 'kripto' && p.symbol);
   if (!positions.length) return;
@@ -25929,7 +25947,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b116';
+const APP_BUILD = 'b117';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -29593,4 +29611,4 @@ document.addEventListener('input', function (e) {
 <!-- AYNA:BITIR -->
 </body>
 </html>
-
+
