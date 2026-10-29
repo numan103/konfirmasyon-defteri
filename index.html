@@ -13461,7 +13461,7 @@ function showPage(name, skipAnim) {
   if (name === 'indicators') renderIndicators();
   if (name === 'designer') renderDesigner();
   if (name === 'alfatrading') renderAlfaTrading();
-  if (name === 'portfoy') { renderAlfaPortfoy2(); ap2LoadPrices(); }
+  if (name === 'portfoy') { ap2ReadOnlyLoaded = false; ap2ReadOnly = false; renderAlfaPortfoy2(); ap2LoadPrices(); }
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
@@ -16994,6 +16994,8 @@ const AP2_TYPES = { kripto:'Kripto', hisse:'Hisse', altin:'Altin', gumus:'Gumus'
 const AP2_TYPE_CLS = { kripto:'pf-crypto', hisse:'pf-hisse', altin:'pf-altin', gumus:'pf-gumus', emtia:'pf-emtia', doviz:'pf-doviz', endeks:'pf-endeks', fon:'pf-fon', custom:'pf-custom' };
 const AP2_TYPE_CLR = { kripto:'#3b82f6', hisse:'#8b5cf6', altin:'#f59e0b', gumus:'#94a3b8', emtia:'#78350f', doviz:'#10b981', endeks:'#06b6d4', fon:'#ec4899', custom:'#6366f1' };
 let ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
+let ap2ReadOnly = false;
+let ap2ReadOnlyLoaded = false;
 let ap2Filter = 'all';
 let ap2EditId = null;
 let ap2SellId = null;
@@ -17167,10 +17169,10 @@ function ap2CloudSummary() {
 async function ap2SyncCloud() {
   if (!amAllowed()) return;
   try {
-    var data = ap2CloudSummary();
+    var data = { v: 2, positions: (ap2Data.positions || []).slice(), sells: (ap2Data.sells || []).slice(), startBalance: ap2Data.startBalance, cash: ap2Data.cash, ideas: (typeof ap2Ideas !== 'undefined' ? ap2Ideas.slice() : []) };
     var url = SUPABASE_URL + '/rest/v1/edu_shared';
     await fetch(url, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ id: AP2_CLOUD_KEY, data: data }) });
-  } catch(e) {}
+  } catch(e) { console.error('ap2SyncCloud err', e); }
 }
 async function ap2FetchCloud(force) {
   if (ap2CloudData && !force) return ap2CloudData;
@@ -18093,32 +18095,56 @@ function ap2RenderMonthly() {
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
-  if (!siteIsAdmin()) {
-    // Salt okunur: sadece yoneticinin paylastigi portfoy gorunur
-    var _add = document.getElementById('ap2-add'); if (_add) _add.style.display = 'none';
-    var _idea = document.getElementById('ap2-idea-add'); if (_idea) _idea.style.display = 'none';
+  if (!siteIsAdmin() && !ap2ReadOnlyLoaded) {
+    ap2ReadOnlyLoaded = true;
+    ap2ReadOnly = false;
     var _empty = document.getElementById('ap2-empty');
-    var _layout = document.querySelector('.ap2-layout');
-    var _sumEl = document.getElementById('ap2-summary-area');
-    var _grid = document.getElementById('ap2-grid');
-    var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
     if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Paylaşılan portföy yükleniyor...'; }
     ap2FetchCloud(true).then(function(d) {
       console.log('ap2 cloud for non-admin:', d);
-      if (d && (d.portfolioValue != null || d.count)) {
+      if (d && d.v === 2 && d.data) {
+        ap2Data = d.data;
+        if (ap2Data.startBalance == null) ap2Data.startBalance = 1000;
+        if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(function(p) { var c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); }
+        (ap2Data.positions || []).forEach(function(p) { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; });
+        if (!Array.isArray(ap2Data.sells)) ap2Data.sells = [];
+        if (Array.isArray(d.ideas)) ap2Ideas = d.ideas;
+        ap2RebuildHistory();
+        ap2ReadOnly = true;
+        renderAlfaPortfoy2();
+        // Salt okunur: duzenleme butonlarini gizle
+        try {
+          document.querySelectorAll('#ap2-add, #ap2-idea-add, [data-ap2edit], [data-ap2del], [data-ap2sell], [data-ap2hedge], [data-ap2fill], [data-idea-del], [data-idea-edit]').forEach(function(el){ el.style.display = 'none'; });
+          var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
+        } catch(e) {}
+      } else if (d && d.portfolioValue != null) {
+        // Eski ozet formati: teaser goster
+        ap2ReadOnly = true;
         if (_empty) _empty.style.display = 'none';
+        var _layout = document.querySelector('.ap2-layout');
         if (_layout) _layout.style.display = 'none';
         var _pubTeaser = document.getElementById('ap2-public-teaser'); if (_pubTeaser) _pubTeaser.style.display = '';
+        var _sumEl = document.getElementById('ap2-summary-area');
         if (_sumEl) ap2RenderTeaserTarget(d, 'ap2-pt');
+        var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
       } else {
+        ap2ReadOnly = true;
         if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Henüz paylaşılan portföy yok. Yönetici portföyünü paylaşmadı.'; }
-        if (_layout) _layout.style.display = 'none';
+        var _layout2 = document.querySelector('.ap2-layout'); if (_layout2) _layout2.style.display = 'none';
       }
     }).catch(function(e) {
       console.error('ap2 cloud err', e);
-      if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Portföy yüklenemedi: ' + (e && e.message ? e.message : 'hata'); }
+      ap2ReadOnly = true;
+      var _empty2 = document.getElementById('ap2-empty');
+      if (_empty2) { _empty2.style.display = ''; _empty2.innerHTML = 'Portföy yüklenemedi: ' + (e && e.message ? e.message : 'hata'); }
     });
     return;
+  }
+  // Salt okunur modda duzenleme butonlarini gizle
+  if (ap2ReadOnly && !siteIsAdmin()) {
+    var _add = document.getElementById('ap2-add'); if (_add) _add.style.display = 'none';
+    var _idea = document.getElementById('ap2-idea-add'); if (_idea) _idea.style.display = 'none';
+    var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
   }
   var positions = ap2Data.positions || [];
   var q = (ap2SearchTerm || '').toLowerCase().trim();
@@ -25875,7 +25901,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b112';
+const APP_BUILD = 'b114';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
