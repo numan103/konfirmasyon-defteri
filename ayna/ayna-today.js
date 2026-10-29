@@ -42,6 +42,7 @@ function _q(name, builder) {
 }
 
 function renderToday(c) {
+  if (Ayna.voice) Ayna.voice.cancel();
   var draft = _journalDraft(Ayna.today());
   ['ay-qn', 'ay-nb', 'ay-sl'].forEach(function (id) {
     var input = c.querySelector('#' + id);
@@ -267,6 +268,7 @@ function _renderEveningForm(c, d, people, rules, entry, taggedIds, checkMap) {
   h += '<p style="margin-top:10px">' + Ayna.t('today.rules_title') + '</p><div id="ay-rc"></div>';
   h += '<p style="margin-top:10px">' + Ayna.t('today.note_title') + '</p>';
   h += '<textarea class="ay-inp" id="ay-nb" maxlength="5000" rows="4" placeholder="' + Ayna.esc(Ayna.t('today.note_placeholder')) + '">' + Ayna.esc(body) + '</textarea>';
+  if (Ayna.voice) h += Ayna.voice.markup('ay-nb');
   h += '<button class="btn solid" id="ay-cd">' + Ayna.t('today.close_day') + '</button>';
   h += '</div></div>';
   var host = c.querySelector('#ay-evening-host');
@@ -276,6 +278,7 @@ function _renderEveningForm(c, d, people, rules, entry, taggedIds, checkMap) {
   _initWords(c, p, e, words);
   _initPeopleChips(c, people, taggedIds);
   _initRules(c, rules, checkMap);
+  if (Ayna.voice) Ayna.voice.bind(c);
   c.querySelector('#ay-cd').addEventListener('click', function () {
     _closeDay(c, d, entry, p, e, words, people, rules, checkMap);
   });
@@ -549,6 +552,7 @@ function _cardQuickNote() {
   prompts += '</div>';
   return '<div class="ay-card" id="ay-quick-note"><h4>' + Ayna.t('today.quick_note_title') + '</h4>' + prompts +
     '<textarea class="ay-inp" id="ay-qn" maxlength="5000" rows="3" placeholder="' + Ayna.esc(Ayna.t('today.quick_note_placeholder')) + '"></textarea>' +
+    (Ayna.voice ? Ayna.voice.markup('ay-qn') : '') +
     '<button class="btn solid" id="ay-qns">' + Ayna.t('common.save') + '</button></div>';
 }
 
@@ -556,6 +560,7 @@ function _bindQuickNote(c, d) {
   var b = c.querySelector('#ay-qns'), ta = c.querySelector('#ay-qn');
   if (!b || !ta) return;
   ta.value = _journalDraft(d)['ay-qn'] || '';
+  if (Ayna.voice) Ayna.voice.bind(c);
   c.querySelectorAll('[data-ay-prompt]').forEach(function (prompt) {
     prompt.addEventListener('click', function () {
       var text = Ayna.t('journal.prompt.' + prompt.getAttribute('data-ay-prompt')) + ': ';
@@ -573,17 +578,14 @@ function _bindQuickNote(c, d) {
       .then(function (r) { Ayna.checked(r); ta.value = ''; _journalDraft(d)['ay-qn'] = ''; Ayna.flash(Ayna.t('common.saved')); renderToday(c); return Ayna.api('scribe', { entry_id: r.data.id }).then(function (sr) {
         if (sr.needs_reflection && sr.reflection_kind) {
           return Ayna.api('reflect', { entry_id: r.data.id, kind: sr.reflection_kind }).then(function (refRes) {
-            renderToday(c);
-            var content = c.querySelector('#ay-content');
-            if (content && refRes.insight) {
+            if (c.isConnected && refRes.insight) {
               var title = refRes.reflection_kind === 'instant' ? Ayna.t('today.instant_title') : Ayna.t('today.reflection_title');
               var html = '<div class="ay-card"><h4>' + title + '</h4>' + Ayna.md(refRes.insight.body) + '</div>';
               if (refRes.risk === 'crisis') html += _cardCrisis();
-              content.insertAdjacentHTML('beforeend', html);
+              c.insertAdjacentHTML('beforeend', html);
             }
-          }).catch(function () { renderToday(c); });
+          }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); });
         }
-        renderToday(c);
        }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); }); })
       .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
   });

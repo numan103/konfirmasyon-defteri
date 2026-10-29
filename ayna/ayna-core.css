@@ -13,6 +13,11 @@ body[data-page="ayna"]{--pc:#a5b4fc;--pc-soft:rgba(165,180,252,.16);--glow-a:rgb
 .ay-week p{color:var(--text-3);font-size:12px;margin:4px 0 0;}
 .ay-prompts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;align-items:center;}
 .ay-prompts>span{width:100%;font-size:12px;color:var(--text-3);}
+.ay-voice{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0;}
+.ay-voice small{flex-basis:100%;color:var(--text-3);line-height:1.6;}
+.ay-voice-status{font-size:12px;color:var(--text-3);overflow-wrap:anywhere;}
+.ay-voice button[aria-pressed="true"]{border-color:var(--red,#f87171);color:var(--red,#f87171);}
+.ay-voice button:disabled{cursor:not-allowed;opacity:.65;}
 .ay-prompts .btn{font-size:12px;white-space:normal;text-align:left;}
 .ay-journal-note{border-top:1px solid var(--border);padding:12px 0;}
 .ay-journal-note p,.ay-journal-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;}

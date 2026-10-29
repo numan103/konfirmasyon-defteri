@@ -421,6 +421,7 @@ window.Ayna = (function () {
   }
 
   function renderTab(name) {
+    if (Ayna.voice) Ayna.voice.cancel();
     var container = document.getElementById('ay-content');
     if (!container) return;
     container.innerHTML = '<div class="' + P + 'card">' + t('common.loading') + '</div>';
