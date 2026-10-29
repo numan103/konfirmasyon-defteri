@@ -8128,6 +8128,7 @@
         </label>
       </div>
       <div id="acc-admin-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="acc-admin-totals" class="hint" style="margin-top:10px;font-size:13px;color:var(--green,var(--text));font-weight:600;"></div>
       <div id="acc-admin-months" class="hint" style="margin-top:10px;font-size:12.5px;color:var(--text-3,var(--dim));"></div>
       <div id="acc-admin-msg" class="hint" style="min-height:18px;margin-top:8px;"></div>
     </div>
@@ -12816,6 +12817,12 @@ function renderAdminAccess() {
   const pending = rows.filter(function (r) { return r.status === 'pending'; }).length;
   const visible = rows.filter(function (r) { return showAll ? true : r.status === 'pending'; });
   if (count) count.textContent = pending + ' bekliyor';
+  const totalsEl = document.getElementById('acc-admin-totals');
+  if (totalsEl) {
+    const approved = rows.filter(function (r) { return r.status === 'verified'; }).length;
+    const rejected = rows.filter(function (r) { return r.status === 'rejected'; }).length;
+    totalsEl.textContent = 'Toplam: ' + rows.length + ' kayıt · Onaylı: ' + approved + ' · Reddedilen: ' + rejected;
+  }
   const monthsEl = document.getElementById('acc-admin-months');
   if (monthsEl) {
     monthsEl.innerHTML = '';
@@ -25720,7 +25727,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b98';
+const APP_BUILD = 'b99';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
