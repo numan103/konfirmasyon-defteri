@@ -115,3 +115,5 @@ Not: `site_access` tablosu yokken kapı bilinçli olarak kapalıdır (herkes `re
 ### Panelden onay (b96)
 
 Yonetici hesapla giris yapip **Erisim** sayfasini ac: "Uyelik onaylari" panelinde UID gonderen uyeler listelenir (e-posta + borsa + UID). `Onayla` aninda premium erisim verir, `Reddet` / `Geri al` erisimi kapatir. Bu islemler `/api/access` uzerinden service-role ile yazilir; arayuz yalnizca `SITE_ADMIN_EMAILS` listesindeki hesaplara acilir.
+
+> Bu dosya env guncellemesi sonrasi guncellendi.
