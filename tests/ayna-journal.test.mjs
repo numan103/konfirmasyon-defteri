@@ -13,6 +13,20 @@ function setup() {
   return context;
 }
 
+test('journal page is outside the access page, not hidden by its parent', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const start = html.indexOf('<div id="page-erisim"');
+  const end = html.indexOf('<div id="page-ayna"', start);
+  assert.ok(start >= 0 && end > start);
+  const tags = html.slice(start, end).match(/<\/?div\b[^>]*>/g) || [];
+  let depth = 0;
+  for (const tag of tags) {
+    depth += tag.startsWith('</') ? -1 : 1;
+    assert.ok(depth >= 0, 'unexpected extra closing div');
+  }
+  assert.equal(depth, 0, 'access page must be fully closed before journal page');
+});
+
 test('journal title is translated consistently', () => {
   const c = setup();
   assert.equal(c.Ayna.t('app.title'), 'Kişisel Günlük Asistan');

@@ -8157,7 +8157,6 @@
       <h2><span>Üyelik onayları</span><span class="n" id="acc-admin-count">—</span></h2>
       <p class="hint" style="margin:0 0 10px;">UID gönderen üyeler burada listelenir. Onayladığında üye anında premium erişim alır.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
         <button class="btn" id="acc-admin-refresh" type="button">Yenile</button>
         <select id="acc-admin-status" style="padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;min-width:150px;">
           <option value="all">Tumu</option>
@@ -25949,7 +25948,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b118';
+const APP_BUILD = 'b119';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
