@@ -193,9 +193,11 @@ async function listHandler(res, user) {
     if (r.status !== 'verified') return;
     const d = r.created_at ? String(r.created_at).slice(0, 7) : '';
     if (!d) return;
-    byMonth[d] = (byMonth[d] || 0) + 1;
+    if (!byMonth[d]) byMonth[d] = { n: 0, v: 0 };
+    byMonth[d].n = (byMonth[d].n || 0) + 1;
+    byMonth[d].v = (byMonth[d].v || 0) + (Number(r.volume) || 0);
   });
-  const monthList = Object.keys(byMonth).sort().map((k) => ({ month: k, verified: byMonth[k] }));
+  const monthList = Object.keys(byMonth).sort().map((k) => ({ month: k, verified: byMonth[k].n, volume: byMonth[k].v }));
   return send(res, 200, { ok: true, rows: out, open: process.env.SITE_ACCESS_OPEN === '1', byMonth: monthList });
 }
 
@@ -216,6 +218,10 @@ async function adminOpHandler(res, user, body) {
       status: 'rejected', verified_by: 'manual', verified_at: null,
       note: String(body.note || 'manual reject').slice(0, 200)
     };
+  } else if (op === 'setvolume') {
+    const vol = Number(body.volume);
+    if (!isFinite(vol) || vol < 0) return fail(res, 400, 'bad_volume');
+    patch = { volume: vol };
   } else if (op === 'revoke') {
     patch = { status: 'rejected', verified_by: 'manual', verified_at: null, note: 'revoked' };
   } else {
