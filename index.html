@@ -12537,6 +12537,7 @@ const SITE_REF_LINKS = {
 const SITE = {
   loaded: false,
   tier: 'free',           // free | ref | admin
+  admin: false,           // sunucunun onayladigi yonetici
   status: 'none',         // none | pending | verified | rejected
   exchange: null,
   exchange_uid: null,
@@ -12550,8 +12551,12 @@ const SITE = {
 let accessNextPage = '';
 let accessBound = false;
 
-function siteIsAdmin() {
+function siteIsAdminEmail() {
   return !!(typeof AUTH !== 'undefined' && AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL);
+}
+
+function siteIsAdmin() {
+  return !!(SITE.admin || siteIsAdminEmail());
 }
 
 // Eski cagri noktalari icin korunuyor: amAllowed artik "yonetici mi" demek.
@@ -12596,7 +12601,8 @@ async function siteFetch(url, opts) {
 
 function siteApplyAccess(j) {
   if (!j) return;
-  SITE.tier = siteIsAdmin() ? 'admin' : (j.tier || 'free');
+  SITE.admin = !!j.admin || siteIsAdminEmail();
+  SITE.tier = SITE.admin ? 'admin' : (j.tier || 'free');
   SITE.status = j.status || 'none';
   SITE.exchange = j.exchange || null;
   SITE.exchange_uid = j.exchange_uid || null;
@@ -12614,6 +12620,7 @@ function siteApplyAccess(j) {
 async function loadSiteAccess() {
   const token = await siteAccessToken();
   if (!token) {
+    SITE.admin = false;
     SITE.tier = siteIsAdmin() ? 'admin' : 'free';
     SITE.loaded = true;
     return SITE;
@@ -12622,9 +12629,10 @@ async function loadSiteAccess() {
     const r = await fetch('/api/access', { headers: { Authorization: 'Bearer ' + token } });
     const j = await r.json().catch(function () { return null; });
     if (r.ok && j && j.ok) siteApplyAccess(j);
-    else SITE.tier = siteIsAdmin() ? 'admin' : 'free';
+    else { SITE.admin = false; SITE.tier = siteIsAdmin() ? 'admin' : 'free'; }
   } catch (e) {
     // Uc erisilemezse kimse "yanlislikla" dogrulanmis sayilmaz.
+    SITE.admin = false;
     SITE.tier = siteIsAdmin() ? 'admin' : 'free';
   }
   SITE.loaded = true;
@@ -25695,7 +25703,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b94';
+const APP_BUILD = 'b95';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
