@@ -12566,6 +12566,14 @@ async function siteAccessToken() {
   } catch (e) { return ''; }
 }
 
+// Korumali uclara (contrib/chat/tg) giden istekler icin Authorization basligi.
+async function siteAuthHeaders(extra) {
+  const h = Object.assign({}, extra || {});
+  const t = await siteAccessToken();
+  if (t) h.Authorization = 'Bearer ' + t;
+  return h;
+}
+
 function siteApplyAccess(j) {
   if (!j) return;
   SITE.tier = siteIsAdmin() ? 'admin' : (j.tier || 'free');
@@ -18458,14 +18466,19 @@ function ap2ShareNative() {
 }
 function ap2TgNotify(text) {
   if (!text) return;
-  fetch('/api/tg?notify=1', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: text })
-  }).then(function(r) { return r.json().catch(function() { return {}; }); })
+  siteAuthHeaders({ 'Content-Type': 'application/json' })
+    .then(function (h) {
+      return fetch('/api/tg?notify=1', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({ message: text })
+      });
+    })
+    .then(function(r) { return r.json().catch(function() { return {}; }); })
     .then(function(j) {
       var link = j && j.link ? ' — ' + j.link : '';
       if (j && j.ok) stratToast('Telegram\'a gönderildi ✓' + link);
+      else if (j && j.error === 'referral_required') stratToast('Telegram bildirimi için referans doğrulaması gerekli.');
       else stratToast('Telegram ayarlı değil (TG_BOT_TOKEN eksik).');
     })
     .catch(function() { stratToast('Gönderilemedi.'); });
@@ -22074,7 +22087,7 @@ async function panoSave() {
   try {
     const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await siteAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ data: panoObjs }),
     });
     const d = await res.json();
@@ -22091,7 +22104,7 @@ async function panoPoll() {
   if (!document.body || document.body.dataset.page !== 'pano') return;
   const r = panoRoomId();
   try {
-    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), { cache: 'no-store' });
+    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), { cache: 'no-store', headers: await siteAuthHeaders() });
     const d = await res.json();
     if (panoPendingSave || panoInteracting) return;
     if (!d || !d.ok || !Array.isArray(d.data)) return;
@@ -22112,7 +22125,7 @@ async function panoLoadBoard() {
     if (Array.isArray(local)) { panoObjs = local; panoDraw(); }
   } catch (e) {}
   try {
-    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), { cache: 'no-store' });
+    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), { cache: 'no-store', headers: await siteAuthHeaders() });
     const d = await res.json();
     if (d && d.ok && Array.isArray(d.data) && d.data.length) {
       panoObjs = d.data;
@@ -23537,16 +23550,16 @@ function atTimeAgo(ts) {
 }
 async function atApi(action, payload) {
   const res = await fetch('/api/contrib?store=alfatrading', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: await siteAuthHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(Object.assign({ action }, payload || {})),
   });
   return res.json();
 }
 async function loadAlfaTrading() {
   try {
-    const res = await fetch('/api/contrib?store=alfatrading', { cache: 'no-store' });
+    const res = await fetch('/api/contrib?store=alfatrading', { cache: 'no-store', headers: await siteAuthHeaders() });
     const data = await res.json();
-    alfaPosts = Array.isArray(data.posts) ? data.posts : [];
+    alfaPosts = (data && Array.isArray(data.posts)) ? data.posts : [];
   } catch (e) { alfaPosts = []; }
   alfaLoaded = true;
   renderAlfaFeed();
@@ -24136,7 +24149,7 @@ function bindAdminChat() {
     if (!text || !caSelectedSid) return;
     input.value = '';
     caReadSessions.add(caSelectedSid);
-    fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: caSelectedSid, role: 'admin', text }) })
+    chatFetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: caSelectedSid, role: 'admin', text }) })
       .then(() => renderAdminChat())
       .catch(() => {});
   });
@@ -25538,7 +25551,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b91';
+const APP_BUILD = 'b92';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -26041,6 +26054,12 @@ async function deleteApplication(id, queued) {
 // ============ Chat Widget ============
 const CHAT_KEY = 'alfa-chat-v3';
 const CHAT_API = '/api/chat-admin';
+// Destek uclari kimlik istiyor: her cagriya oturum basligi ekliyoruz.
+async function chatFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = await siteAuthHeaders(opts.headers || {});
+  return fetch(url, opts);
+}
 let chatHistory = [];
 let chatFallbackCount = 0;
 let chatLiveRequested = false;
@@ -26129,7 +26148,7 @@ function caDelete(sid) {
   caReadSessions.delete(sid);
   updateChatBadge();
   renderAdminChat();
-  fetch(CHAT_API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) }).catch(() => {});
+  chatFetch(CHAT_API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) }).catch(() => {});
 }
 function getChatUserInfo() {
   try { return JSON.parse(localStorage.getItem('alfa-chat-user')) || { firstName:'', lastName:'', email:'' }; } catch(e) { return { firstName:'', lastName:'', email:'' }; }
@@ -26150,7 +26169,7 @@ function submitLiveSupport() {
   chatHistory.push({ role: 'admin', text: '📞 Canlı destek talebin alındı. En kısa sürede sana dönüş yapacağız.', time: new Date().toISOString() });
   saveChat(); renderChat();
   const sid = chatSid();
-  fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', name: fullName, text: 'Canlı destek talebi - ' + fullName + (email ? ' (' + email + ')' : '') }) }).catch(() => {});
+  chatFetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', name: fullName, text: 'Canlı destek talebi - ' + fullName + (email ? ' (' + email + ')' : '') }) }).catch(() => {});
 }
 const AI_URL = '/api/ai';
 function sendChatMsg() {
@@ -26167,7 +26186,7 @@ function sendChatMsg() {
   // Sadece canlı destek aktifken admin API'ına gönder
   if (chatLiveRequested) {
     const sid = chatSid();
-    fetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text }) }).catch(() => {});
+    chatFetch(CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, role: 'user', text }) }).catch(() => {});
   }
   if (BAS_GS_URL) {
     fetch(BAS_GS_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type: 'chat', message: text, date: new Date().toISOString() }) }).catch(() => {});
@@ -26203,7 +26222,7 @@ function startChatPoll() {
     const p = document.getElementById('chat-popup');
     if (!p || !p.classList.contains('open')) return;
     const sid = chatSid();
-    fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
+    chatFetch(CHAT_API + '?sid=' + encodeURIComponent(sid) + '&t=' + Date.now()).then(r => r.json()).then(msgs => {
       const myMsgs = msgs.filter(m => m.sessionId === sid);
       // Session silinmişse (admin tarafından) local history'i temizle
       if (!myMsgs.length && chatHistory.some(h => h.role === 'admin')) {
@@ -26262,7 +26281,7 @@ function updateChatBadge() {
 }
 
 function renderAdminChat() {
-  fetch(CHAT_API + '?t=' + Date.now()).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(msgs => {
+  chatFetch(CHAT_API + '?t=' + Date.now()).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(msgs => {
     const newCount = (msgs || []).length;
     const changed = newCount !== caLastCount;
     caAllMsgs = msgs || [];
@@ -26328,9 +26347,10 @@ function startAdminChatPoll() {
     renderAdminChat();
   }, 5000);
 }
-// Nav'da bildirim rozetini güncelle (her 8 sn'de bir)
+// Nav'da bildirim rozetini güncelle (her 8 sn'de bir) — yalnızca yönetici.
 setInterval(() => {
-  fetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
+  if (!siteIsAdmin()) return;
+  chatFetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
     caAllMsgs = msgs || [];
     updateChatBadge();
   }).catch(() => {});

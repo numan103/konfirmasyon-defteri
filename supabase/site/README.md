@@ -78,4 +78,16 @@ Site tek dosya (`index.html`) ve içerik HTML'in içinde. Bu yüzden sayfa kapı
 - `edu_shared` — herkese açık okuma (eğitim içeriği burada). Kapatmak istersen okuma politikasını değiştirmek gerekir.
 - `/api/access` — yazma service-role ile, istemci durumu değiştiremez.
 
+### API uçlarının yetkileri
+
+| Uç | Kural |
+|---|---|
+| `/api/access` | Giriş zorunlu; yazma service-role ile |
+| `/api/tg?notify=1` | Giriş + `ref`/`admin` + 3 sn throttle (anonim spam kapalı) |
+| `/api/contrib?store=alfatrading` | **GET açık** (paylaşılan gönderi linkleri için); `add/edit/delPost/delComment/status/profileUpdate` → admin; `like/comment` → giriş |
+| `/api/contrib?store=pano` | Giriş + `ref`/`admin` |
+| `/api/chat-admin` | Giriş; kullanıcı yalnızca kendi `?sid=` oturumunu okur, admin hepsini; `role='admin'` ve DELETE → admin |
+
+Not: `site_access` tablosu yokken kapı bilinçli olarak kapalıdır (herkes `ref`), yani yukarıdaki `ref` kontrolleri de gevşer. Tablo kurulunca hepsi devreye girer.
+
 İçeriği gerçekten sunucu arkasına almak istersen sonraki adım: premium veriyi `edu_shared`'dan çıkarıp JWT + `site_access` kontrolü yapan bir uçtan servis etmek.

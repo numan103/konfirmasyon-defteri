@@ -1,4 +1,6 @@
 // Topluluk Katkıları + Çalışma Panosu — Supabase üzerinden paylaşım (edu_shared tablosunun ayrı satırları).
+import { requestUser, requestTier } from '../lib/auth.mjs';
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
 const ROW_CONTRIB = 'contribs';
@@ -78,7 +80,7 @@ function atRepost(rp) {
     title: atClip(rp.title, 160), text: atClip(rp.text, 320), img: atClip(rp.img, 800000),
   };
 }
-async function alfaTrading(req, res) {
+async function alfaTrading(req, res, user) {
   const r = await readShared(AT_ROW);
   const posts = (r.data && Array.isArray(r.data.posts)) ? r.data.posts : [];
   const save = () => writeShared(AT_ROW, { posts });
@@ -88,6 +90,15 @@ async function alfaTrading(req, res) {
   let body;
   try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'bad json' }); }
   const action = body.action;
+
+  // Yazma yetkisi: yonetici post yonetir; begeni/yorum icin giris yeterli.
+  const adminActions = ['add', 'edit', 'delPost', 'delComment', 'status', 'profileUpdate'];
+  if (adminActions.indexOf(action) >= 0) {
+    if (!user || !user.admin) return res.status(403).json({ error: 'forbidden' });
+  } else if (action === 'like' || action === 'comment') {
+    if (!user) return res.status(401).json({ error: 'unauthorized' });
+  }
+
   if (action === 'add') {
     const p = body.post || {};
     const post = {
@@ -150,11 +161,20 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  if (req.query.store === 'alfatrading') return alfaTrading(req, res);
+  if (req.query.store === 'alfatrading') return alfaTrading(req, res, await requestUser(req));
 
   const store = req.query.store === 'pano' ? 'pano' : 'contrib';
   const rowId = store === 'pano' ? ROW_PANO : ROW_CONTRIB;
   const room = cleanRoom(req.query.room);
+
+  // Calisma Panosu (pano) referans uyelerine ait: yazma ve okuma icin
+  // dogrulanmis uyelik istiyoruz. Tablo kurulu degilse kapi kapali (fail-open).
+  if (store === 'pano') {
+    const u = await requestUser(req);
+    if (!u) return res.status(401).json({ error: 'unauthorized' });
+    const tier = await requestTier(u);
+    if (tier !== 'ref' && tier !== 'admin') return res.status(403).json({ error: 'referral_required' });
+  }
 
   if (req.method === 'GET') {
     const r = await readShared(rowId);

@@ -2,6 +2,8 @@
 // Kanal embed iframe'leri X-Frame-Options ile engellendiği için sunucu tarafı çözüm kullanıldı.
 // Ayrıca ?notify=1 (veya POST {message}) ile Alfa Portföy "potansiyel fikir" bildirimleri
 // Bot API'den gönderilir (Vercel Hobby 12 fonksiyon limiti nedeniyle ayrı endpoint açılmadı).
+import { requestUser, requestTier, throttle } from '../lib/auth.mjs';
+
 const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
 const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
 const TG_TOKEN = (process.env.TG_BOT_TOKEN || '').trim();
@@ -24,6 +26,19 @@ async function sendTelegram(text) {
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
+
+  // Bu uç resmi Telegram kanalına mesaj atıyor: yalnızca referansı doğrulanmış
+  // üye veya yönetici kullanabilir. Anonim spam'i burada kesiyoruz.
+  const user = await requestUser(req);
+  if (!user) return res.status(401).json({ ok: false, error: 'unauthorized' });
+  const tier = await requestTier(user);
+  if (tier !== 'ref' && tier !== 'admin') {
+    return res.status(403).json({ ok: false, error: 'referral_required' });
+  }
+  if (!throttle('tg:' + user.id, 3000)) {
+    return res.status(429).json({ ok: false, error: 'too_many_requests' });
+  }
+
   let message = null;
   if (req.method === 'POST') {
     let body;
