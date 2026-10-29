@@ -110,3 +110,8 @@ Not: `site_access` tablosu yokken kapı bilinçli olarak kapalıdır (herkes `re
 | `/api/ai-checklist` | Girişsiz. Aynı risk. |
 | `/api/edu-shared` | Herkese açık (eğitim içeriği paylaşımı). |
 | `/api/eco-cal` | Herkese açık (ekonomik takvim, 5 dk cache). |
+
+
+### Panelden onay (b96)
+
+Yonetici hesapla giris yapip **Erisim** sayfasini ac: "Uyelik onaylari" panelinde UID gonderen uyeler listelenir (e-posta + borsa + UID). `Onayla` aninda premium erisim verir, `Reddet` / `Geri al` erisimi kapatir. Bu islemler `/api/access` uzerinden service-role ile yazilir; arayuz yalnizca `SITE_ADMIN_EMAILS` listesindeki hesaplara acilir.

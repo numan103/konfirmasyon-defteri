@@ -12789,7 +12789,10 @@ async function loadAdminAccess(force) {
     const j = await r.json().catch(function () { return null; });
     if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
     adminAccessRows = Array.isArray(j.rows) ? j.rows : [];
-    if (msg) msg.textContent = j.open ? 'DİKKAT: SITE_ACCESS_OPEN=1 — kapı şu an herkese açık.' : '';
+    if (msg) {
+      if (j.open) msg.textContent = 'DİKKAT: SITE_ACCESS_OPEN=1 — kapı şu an herkese açık.';
+      else if (/^Yükleniyor/.test(msg.textContent || '')) msg.textContent = '';
+    }
   } catch (e) {
     adminAccessRows = [];
     if (msg) msg.textContent = 'Liste alınamadı: ' + (e.message || 'hata');
@@ -25703,7 +25706,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b95';
+const APP_BUILD = 'b96';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
