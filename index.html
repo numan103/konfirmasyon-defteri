@@ -8128,6 +8128,7 @@
         </label>
       </div>
       <div id="acc-admin-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="acc-admin-months" class="hint" style="margin-top:10px;font-size:12.5px;color:var(--text-3,var(--dim));"></div>
       <div id="acc-admin-msg" class="hint" style="min-height:18px;margin-top:8px;"></div>
     </div>
 
@@ -12789,17 +12790,21 @@ async function loadAdminAccess(force) {
     const j = await r.json().catch(function () { return null; });
     if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
     adminAccessRows = Array.isArray(j.rows) ? j.rows : [];
+    adminByMonth = Array.isArray(j.byMonth) ? j.byMonth : [];
     if (msg) {
       if (j.open) msg.textContent = 'DİKKAT: SITE_ACCESS_OPEN=1 — kapı şu an herkese açık.';
       else if (/^Yükleniyor/.test(msg.textContent || '')) msg.textContent = '';
     }
   } catch (e) {
     adminAccessRows = [];
+    adminByMonth = [];
     if (msg) msg.textContent = 'Liste alınamadı: ' + (e.message || 'hata');
   }
   adminAccessBusy = false;
   renderAdminAccess();
 }
+
+let adminByMonth = [];
 
 function renderAdminAccess() {
   const box = document.getElementById('acc-admin-list');
@@ -12811,6 +12816,15 @@ function renderAdminAccess() {
   const pending = rows.filter(function (r) { return r.status === 'pending'; }).length;
   const visible = rows.filter(function (r) { return showAll ? true : r.status === 'pending'; });
   if (count) count.textContent = pending + ' bekliyor';
+  const monthsEl = document.getElementById('acc-admin-months');
+  if (monthsEl) {
+    monthsEl.innerHTML = '';
+    (adminByMonth || []).forEach(function (m) {
+      const d = document.createElement('div');
+      d.textContent = (m.month || '') + ' → ' + (m.verified || 0) + ' doğrulanan';
+      monthsEl.appendChild(d);
+    });
+  }
   if (!visible.length) {
     box.innerHTML = '<p class="hint" style="margin:0;">Bekleyen başvuru yok.</p>';
     return;
@@ -25706,7 +25720,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b96';
+const APP_BUILD = 'b97';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

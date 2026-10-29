@@ -187,7 +187,16 @@ async function listHandler(res, user) {
     created_at: r.created_at,
     updated_at: r.updated_at
   }));
-  return send(res, 200, { ok: true, rows: out, open: process.env.SITE_ACCESS_OPEN === '1' });
+  // Aylık sistem: dogrulanan referans sayilarini ay bazinda ozetle.
+  const byMonth = {};
+  (Array.isArray(rows) ? rows : []).forEach((r) => {
+    if (r.status !== 'verified') return;
+    const d = r.created_at ? String(r.created_at).slice(0, 7) : '';
+    if (!d) return;
+    byMonth[d] = (byMonth[d] || 0) + 1;
+  });
+  const monthList = Object.keys(byMonth).sort().map((k) => ({ month: k, verified: byMonth[k] }));
+  return send(res, 200, { ok: true, rows: out, open: process.env.SITE_ACCESS_OPEN === '1', byMonth: monthList });
 }
 
 async function adminOpHandler(res, user, body) {
@@ -221,6 +230,23 @@ async function adminOpHandler(res, user, body) {
     return fail(res, 500, 'store_error');
   }
   if (!row) return fail(res, 404, 'not_found');
+  // Onay sonrasi yoneticiye bilgilendirme (best-effort).
+  if (op === 'approve') {
+    try {
+      const tgb = process.env.TG_BOT_TOKEN;
+      const tgc = process.env.TG_CHAT_ID;
+      if (tgb && tgc) {
+        await fetch('https://api.telegram.org/bot' + tgb + '/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: tgc,
+            text: 'Referans onaylandi: ' + (user.email || 'yonetici') + ' adli hesabin UID onaylandi.'
+          })
+        });
+      }
+    } catch (e) { /* bildirim sessiz kalir */ }
+  }
   return send(res, 200, { ok: true, status: row.status, user_id: row.user_id });
 }
 
