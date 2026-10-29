@@ -12863,7 +12863,7 @@ function renderAdminAccess() {
         '<div style="font-size:13px;font-weight:600;word-break:break-all;">' + accEsc(mail) + '</div>' +
         '<div class="hint" style="margin:2px 0 0;">' + accEsc(ex) + ' · UID ' + accEsc(uidTxt) + ' · ' + st + ' · hacim $' + (r.volume || 0) + ' · ' + adminAccessFmt(r.created_at) + '</div>' +
       '</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + act + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + act + '<button class="btn" data-acc-op="setvolume" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-vol="' + (r.volume || 0) + '">Hacim gir</button>' + '</div>' +
     '</div>';
   }).join('');
 }
