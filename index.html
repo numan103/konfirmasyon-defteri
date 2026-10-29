@@ -12868,8 +12868,37 @@ function renderAdminAccess() {
   }).join('');
 }
 
-async function adminAccessOp(op, userId, email) {
-  if (!userId || adminAccessBusy) return;
+async function adminAccessOp(op, userId, email, volume) {
+  if (!userId) return;
+  if (op === "setvolume") {
+    const raw = window.prompt("Hacim gir (USD):", String(Number(volume) || 0));
+    const vol = raw === null ? NaN : Number(raw);
+    if (!isFinite(vol) || vol < 0) {
+      const msg = document.getElementById("acc-admin-msg");
+      if (msg) msg.textContent = "Hacim gecersiz.";
+      return;
+    }
+    if (adminAccessBusy) return;
+    adminAccessBusy = true;
+    const msg = document.getElementById("acc-admin-msg");
+    if (msg) msg.textContent = "Hacim kaydediliyor...";
+    try {
+      const r = await siteFetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ op: "setvolume", user_id: userId, volume: vol })
+      });
+      const j = await r.json().catch(function () { return null; });
+      if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ("HTTP " + r.status));
+      if (msg) msg.textContent = "Hacim kaydedildi: " + vol;
+    } catch (e) {
+      if (msg) msg.textContent = "Hacim kaydedilemedi: " + (e.message || "hata");
+    }
+    adminAccessBusy = false;
+    await loadAdminAccess(true);
+    return;
+  }
+  if (adminAccessBusy) return;
   if (op !== 'approve') {
     const who = email || 'bu üye';
     const q = op === 'reject'
@@ -12920,7 +12949,12 @@ function bindAccessForm() {
   if (accList) accList.addEventListener('click', function (e) {
     const b = e.target && e.target.closest ? e.target.closest('[data-acc-op]') : null;
     if (!b) return;
-    adminAccessOp(b.getAttribute('data-acc-op'), b.getAttribute('data-acc-uid'), b.getAttribute('data-acc-mail'));
+    const op2 = b.getAttribute("data-acc-op");
+    const uid2 = b.getAttribute("data-acc-uid");
+    const mail2 = b.getAttribute("data-acc-mail");
+    const vol2 = b.getAttribute("data-acc-vol");
+    if (op2 === "setvolume") { adminAccessOp("setvolume", uid2, mail2, vol2); return; }
+    adminAccessOp(op2, uid2, mail2);
   });
 }
 
@@ -29403,3 +29437,4 @@ document.addEventListener('input', function (e) {
 <!-- AYNA:BITIR -->
 </body>
 </html>
+
