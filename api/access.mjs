@@ -167,7 +167,7 @@ async function listHandler(res, user) {
   try {
     rows = await svcRead(
       '/rest/v1/site_access?select=user_id,exchange,exchange_uid,status,note,attempts,' +
-      'verified_at,verified_by,created_at,updated_at&order=created_at.desc&limit=200'
+      'verified_at,verified_by,created_at,updated_at,volume&order=created_at.desc&limit=200'
     );
   } catch (e) {
     console.error('[ACCESS] list', e && e.message);
