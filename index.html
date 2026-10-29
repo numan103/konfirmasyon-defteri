@@ -4516,7 +4516,7 @@
   </section>
   <div class="lp-hero-shot">
     <div class="hsw">
-      <div class="hsw-bar"><span></span><span></span><span></span><em>Alfa Traders — Panel</em></div>
+      <div class="hsw-bar"><span></span><span></span><span></span><em>Alfa Traders — Panel · örnek görünüm</em></div>
       <div class="hsw-body">
         <div class="hsw-metrics">
           <div class="hsw-m"><label data-i18n="hsw.cur">Kümülatif R</label><b class="up">+52.4R</b><i class="up" data-i18n="hsw.year">▲ bu yıl</i></div>
@@ -4779,39 +4779,39 @@
   </div>
   <div class="lp-pricing">
     <div class="lp-price-card">
-      <div class="lp-price-name">Ücretsiz</div>
-      <div class="lp-price-desc">Temel araçlarla başla,_limitsiz.</div>
+      <div class="lp-price-name">Kısıtlı</div>
+      <div class="lp-price-desc">Kayıt ol, sonuçları takip et, temel araçları kullan.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b></div>
-      <div class="lp-price-period">Ömür boyu ücretsiz</div>
+      <div class="lp-price-period">Herkese açık — kayıt yeterli</div>
       <ul class="lp-price-feats">
-        <li>Alfa Edu — eğitim videoları</li>
-        <li>Ekonomik Takvim — 3 yıldız makro veriler</li>
-        <li>Trading Terminali — canlı grafik &amp; watchlist</li>
+        <li>İşlem Kanalı — paylaşılan işlem sonuçları</li>
+        <li>AlfaNews — haftalık piyasa analizleri</li>
         <li>Alfa Calculator — pozisyon boyutlandırma</li>
-        <li>Dergi — haftalık piyasa analizleri</li>
-        <li class="disabled">Trade Günlüğü</li>
+        <li>Ekonomik Takvim — 3 yıldız makro veriler</li>
+        <li class="disabled">Trade Günlüğü &amp; Check List</li>
         <li class="disabled">Portföy &amp; Birikim Planı</li>
-        <li class="disabled">Onchain veriler &amp; indikatörler</li>
+        <li class="disabled">Alfa Edu &amp; Stratejiler</li>
+        <li class="disabled">Onchain &amp; indikatörler</li>
       </ul>
       <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
     </div>
     <div class="lp-price-card featured">
-      <div class="lp-price-badge">En popüler</div>
-      <div class="lp-price-name">Pro</div>
-      <div class="lp-price-desc">Disiplinli trading için tüm araçlar tek yerde.</div>
-      <div class="lp-price-val"><b>$7</b><span>/ ay</span></div>
-      <div class="lp-price-period">İstediğin zaman iptal et</div>
+      <div class="lp-price-badge">Tam erişim</div>
+      <div class="lp-price-name">Referans Üye</div>
+      <div class="lp-price-desc">OKX veya Bybit referansıyla üye ol, ürünün tamamını kullan.</div>
+      <div class="lp-price-val"><b class="lp-free">$0</b><span> / aidat yok</span></div>
+      <div class="lp-price-period">Erişim, referans doğrulamasıyla açılır</div>
       <ul class="lp-price-feats">
-        <li>Ücretsiz planın tüm özellikleri</li>
+        <li>Kısıtlı planın tüm özellikleri</li>
         <li>Trade Günlüğü — R cinsinden kayıt &amp; istatistik</li>
         <li>Portföy &amp; Birikim Planı — kripto, altın, özel varlık</li>
         <li>Haftalık Değerlendirme — RR ve retrospektif</li>
+        <li>Alfa Edu — eğitim videoları ve stratejiler</li>
         <li>Onchain veriler — funding, CVD, akış</li>
         <li>İndikatörler — Aggr, Alfa Levels, Flow</li>
-        <li>Alfa Portföy — topluluk performansı</li>
-        <li>Canlı Destek — anında yanıt</li>
+        <li>Çalışma Panosu &amp; trading terminali</li>
       </ul>
-      <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Pro'ya geç →</button>
+      <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Referansla aç →</button>
     </div>
   </div>
 
@@ -4964,6 +4964,10 @@
 </div>
 
 <div class="wrap">
+<div id="tier-banner" style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.03));font-size:12.5px;color:var(--text);">
+  <span>🔒 Kısıtlı erişimdesin: portföy, işlem günlüğü ve eğitim referans doğrulamasıyla açılır.</span>
+  <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Referansla aç</button>
+</div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
 <nav class="navbar">
     <button id="rvFab" class="rv-fab" type="button" title="Websitesi hakkında yorum yap" data-i18n-title="fab.b"><b data-i18n="fab.b">Websitesi Hakkında</b><span data-i18n="fab.main">Yorum Yap</span></button>
@@ -5004,6 +5008,7 @@
         </div>
       </div>
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
+      <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
       <!-- AYNA:BASLA -->
       <a href="?page=ayna" class="nav-link" id="tab-ayna" data-nav>🪞 Ayna</a>
       <!-- AYNA:BITIR -->
@@ -5056,6 +5061,7 @@
       <div class="mnav-group" data-i18n="app.news">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
+      <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Referansla Aç</a>
       <!-- AYNA:BASLA -->
       <a href="?page=ayna" class="mnav-link" data-nav data-mnav="ayna" id="mnav-ayna">🪞 Ayna</a>
       <!-- AYNA:BITIR -->
@@ -8085,6 +8091,50 @@
       <p style="font-size:12px;color:var(--dim);margin:6px 0 0;">Kullanılmayan veya nadir erişilen sayfalar burada toplandı.</p>
     </div>
     <div id="ek-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
+  </div>
+</div>
+
+<div id="page-erisim" class="hidden">
+  <div class="wrap" style="max-width:780px;">
+    <div class="eg-brand">
+      <span class="eg-brand-ico">🔓</span>
+      <span class="eg-brand-name">Referansla Erişim</span>
+      <span class="eg-brand-sub">OKX veya Bybit üzerinden referansla üye ol, sonra UID'ni doğrula. Doğrulama borsadan yapılır.</span>
+    </div>
+
+    <div class="panel">
+      <h2><span>Durum</span><span class="n" id="acc-status-badge">—</span></h2>
+      <p class="hint" id="acc-status-text" style="margin:0 0 4px;"></p>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px;">
+        <a class="btn solid" id="acc-link-okx" target="_blank" rel="noopener noreferrer" style="display:none;">OKX'te üye ol ↗</a>
+        <a class="btn solid" id="acc-link-bybit" target="_blank" rel="noopener noreferrer" style="display:none;">Bybit'te üye ol ↗</a>
+      </div>
+      <p class="hint" id="acc-links-missing" style="display:none;margin:0;">Referans bağlantısı henüz ayarlanmadı. Yöneticiye başvur.</p>
+      <div id="acc-go-wrap" style="display:none;margin-top:14px;">
+        <button class="btn solid" id="acc-go" type="button">Panele git →</button>
+      </div>
+    </div>
+
+    <div class="panel" id="acc-form-panel">
+      <h2><span>UID doğrula</span><span class="n">1 adım</span></h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 6px;">
+        <select id="acc-exchange" class="btn" style="min-width:120px;">
+          <option value="bybit">Bybit</option>
+          <option value="okx">OKX</option>
+        </select>
+        <input id="acc-uid" type="text" inputmode="text" autocomplete="off" placeholder="Borsa UID numaran"
+          style="flex:1;min-width:170px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;" />
+        <button class="btn solid" id="acc-submit" type="button">Doğrula</button>
+      </div>
+      <p class="hint" style="margin:0;">UID, borsa hesabının profil sayfasında yazar. Yalnızca kendi UID'ni gir.</p>
+      <div id="acc-msg" class="hint" style="min-height:18px;margin-top:8px;"></div>
+    </div>
+
+    <div class="panel">
+      <h2><span>Neler açılır?</span></h2>
+      <div id="acc-benefits" style="font-size:12.5px;line-height:1.9;color:var(--text-3,var(--dim));"></div>
+    </div>
   </div>
 </div>
 
@@ -11339,14 +11389,17 @@ function renderEk() {
     { icon: '💬', page: 'chat-admin', title: 'Canlı Destek', desc: 'Mesajlaşma ve destek talepleri' },
     { icon: '🪞', page: 'karne', title: 'Günün Karnesi', desc: 'Süreç disiplinini 8 maddeyle puanla, 30 günlük eğrini ve serini izle' },
     { icon: '📣', page: 'sosyalmetre', title: 'Sosyalmetre', desc: 'Sosyal medya analiz ve karar aracı' },
+    { icon: '🔓', page: 'erisim', title: 'Erişim', desc: 'Referans doğrulaması ve üyelik durumu' },
   ];
   grid.innerHTML = cards.map(c => {
-    const locked = (c.page === 'alfa' || c.page === 'apps' || c.page === 'basvuru') && typeof amAllowed === 'function' && !amAllowed();
+    const canOpen = (typeof siteCanOpen === 'function') ? siteCanOpen(c.page) : true;
+    const need = (typeof sitePageTier === 'function') ? sitePageTier(c.page) : 'free';
+    const lockText = need === 'admin' ? '🔒 Yönetici erişimi' : '🔒 Referansla açılır';
     return '<a href="?page=' + c.page + '" data-nav onclick="event.preventDefault();showPage(\'' + c.page + '\')" style="display:block;padding:18px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);transition:box-shadow .15s,border-color .15s;">' +
       '<div style="font-size:26px;margin-bottom:8px;">' + c.icon + '</div>' +
       '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + c.title + '</div>' +
       '<div style="font-size:11.5px;color:var(--dim);line-height:1.45;">' + c.desc + '</div>' +
-      (locked ? '<div style="margin-top:8px;font-size:10px;color:var(--amber);">🔒 Üyelik gerekli</div>' : '') +
+      (canOpen ? '' : '<div style="margin-top:8px;font-size:10px;color:var(--amber);">' + lockText + '</div>') +
       '</a>';
   }).join('');
 }
@@ -11648,7 +11701,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy'];
+  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -12377,7 +12430,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps'];
+  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps', 'erisim'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -12440,9 +12493,276 @@ const AM_PLAN = [
   { d: 'Pazar', e: 'Dinlenme' }
 ];
 
-function amAllowed() {
+// ============ Uyelik / referans erisim katmani ============
+// Sayfa seviyeleri:
+//   free  : kayitli herkes (sinirli icerik + sonuclar)
+//   ref   : OKX/Bybit referansi dogrulanmis uye (asil urun)
+//   admin : yonetici
+// Gercek karar sunucudadir (/api/access + site_access tablosu). Buradaki harita
+// yalnizca arayuzu ve yonlendirmeyi belirler; veri erisimi Supabase RLS + API
+// tarafinda korunur.
+const PAGE_TIER = {
+  home: 'free', news: 'free', calc: 'free', calendar: 'free', ek: 'free',
+  alfatrading: 'free', erisim: 'free',
+  defter: 'ref', data: 'ref', review: 'ref', karne: 'ref', trading: 'ref',
+  egitim: 'ref', strategies: 'ref', analiz: 'ref', indicators: 'ref', designer: 'ref',
+  pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
+  alfa: 'admin', apps: 'admin', basvuru: 'admin', 'chat-admin': 'admin',
+  sosyalmetre: 'admin', uyap: 'admin', zaman: 'admin', strateji: 'admin',
+  ayna: 'admin', mentoring: 'admin'
+};
+
+const SITE = {
+  loaded: false,
+  tier: 'free',           // free | ref | admin
+  status: 'none',         // none | pending | verified | rejected
+  exchange: null,
+  exchange_uid: null,
+  verified_at: null,
+  verified_by: null,
+  store_missing: false,
+  configured: { okx: false, bybit: false },
+  links: { okx: '', bybit: '' }
+};
+
+let accessNextPage = '';
+let accessBound = false;
+
+function siteIsAdmin() {
   return !!(typeof AUTH !== 'undefined' && AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL);
 }
+
+// Eski cagri noktalari icin korunuyor: amAllowed artik "yonetici mi" demek.
+function amAllowed() { return siteIsAdmin(); }
+
+function refUnlocked() { return siteIsAdmin() || SITE.tier === 'ref'; }
+
+function sitePageTier(page) { return PAGE_TIER[page] || 'free'; }
+
+function siteCanOpen(page) {
+  if (page === 'mentoring') {
+    try { return mtAllowed(); } catch (e) { return siteIsAdmin(); }
+  }
+  const need = sitePageTier(page);
+  if (need === 'free') return true;
+  if (need === 'admin') return siteIsAdmin();
+  return refUnlocked();
+}
+
+async function siteAccessToken() {
+  try {
+    if (!AUTH.client) return '';
+    const r = await AUTH.client.auth.getSession();
+    return (r && r.data && r.data.session && r.data.session.access_token) || '';
+  } catch (e) { return ''; }
+}
+
+function siteApplyAccess(j) {
+  if (!j) return;
+  SITE.tier = siteIsAdmin() ? 'admin' : (j.tier || 'free');
+  SITE.status = j.status || 'none';
+  SITE.exchange = j.exchange || null;
+  SITE.exchange_uid = j.exchange_uid || null;
+  SITE.verified_at = j.verified_at || null;
+  SITE.verified_by = j.verified_by || null;
+  SITE.store_missing = !!j.store_missing;
+  SITE.configured = j.configured || { okx: false, bybit: false };
+  SITE.links = j.links || { okx: '', bybit: '' };
+}
+
+async function loadSiteAccess() {
+  const token = await siteAccessToken();
+  if (!token) {
+    SITE.tier = siteIsAdmin() ? 'admin' : 'free';
+    SITE.loaded = true;
+    return SITE;
+  }
+  try {
+    const r = await fetch('/api/access', { headers: { Authorization: 'Bearer ' + token } });
+    const j = await r.json().catch(function () { return null; });
+    if (r.ok && j && j.ok) siteApplyAccess(j);
+    else SITE.tier = siteIsAdmin() ? 'admin' : 'free';
+  } catch (e) {
+    // Uc erisilemezse kimse "yanlislikla" dogrulanmis sayilmaz.
+    SITE.tier = siteIsAdmin() ? 'admin' : 'free';
+  }
+  SITE.loaded = true;
+  return SITE;
+}
+
+function applyTierUi() {
+  const isAdmin = siteIsAdmin();
+  const ref = refUnlocked();
+  Object.keys(PAGE_TIER).forEach(function (p) {
+    let ok;
+    if (p === 'mentoring') ok = siteCanOpen('mentoring');
+    else {
+      const need = PAGE_TIER[p];
+      ok = need === 'free' || (need === 'ref' ? ref : isAdmin);
+    }
+    ['tab-', 'mnav-'].forEach(function (pre) {
+      const el = document.getElementById(pre + p);
+      if (el) el.style.display = ok ? '' : 'none';
+    });
+  });
+  // Erisim linki sadece dogrulanmamis kullanicida gorunur
+  ['tab-erisim', 'mnav-erisim'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (ref || isAdmin) ? 'none' : '';
+  });
+  // Ust bilgi seridi (kisitli erisim)
+  const banner = document.getElementById('tier-banner');
+  if (banner) banner.style.display = (ref || isAdmin) ? 'none' : 'flex';
+  // Tamami gizlenen acilir menuleri kapat
+  document.querySelectorAll('.nav-drop').forEach(function (d) {
+    const links = d.querySelectorAll('.drop-menu .nav-link');
+    let any = false;
+    links.forEach(function (a) { if (a.style.display !== 'none') any = true; });
+    if (links.length) d.style.display = any ? '' : 'none';
+  });
+  // Mobil grup basliklari (Edu / Trader) bos kalirsa gizle
+  document.querySelectorAll('.mnav-group').forEach(function (g) {
+    let el = g.nextElementSibling, any = false;
+    while (el && !el.classList.contains('mnav-group')) {
+      if (el.classList.contains('mnav-link') && el.style.display !== 'none') { any = true; break; }
+      el = el.nextElementSibling;
+    }
+    g.style.display = any ? '' : 'none';
+  });
+  bindAccessForm();
+}
+
+function accessErrText(code) {
+  const map = {
+    bad_uid: 'UID 3-32 karakter olmalı, harf ve rakam içerebilir.',
+    bad_exchange: 'Borsa seçilemedi.',
+    too_soon: 'Çok sık denedin. 20 saniye sonra tekrar dene.',
+    too_many_attempts: 'Deneme sınırı doldu. Yöneticiye başvur.',
+    uid_taken: 'Bu UID başka bir hesaba bağlı. Kendi hesabını kullan.',
+    access_store: 'Kayıt yazılamadı. Yöneticiye başvur.',
+    store_error: 'Erişim kaydı okunamadı. Yöneticiye başvur.',
+    unauthorized: 'Oturum süresi doldu, tekrar giriş yap.'
+  };
+  return map[code] || 'Bir hata oldu, tekrar dene.';
+}
+
+function renderAccessPage() {
+  const badge = document.getElementById('acc-status-badge');
+  const text = document.getElementById('acc-status-text');
+  const msg = document.getElementById('acc-msg');
+  const submitBtn = document.getElementById('acc-submit');
+  const formPanel = document.getElementById('acc-form-panel');
+  if (!badge || !text) return;
+
+  const isAdmin = siteIsAdmin();
+  const verified = isAdmin || SITE.tier === 'ref';
+
+  if (SITE.store_missing) {
+    badge.textContent = 'Kurulum eksik';
+    text.textContent = 'Erişim tablosu kurulmamış; kapı devre dışı. Yönetici supabase/site/001_access.sql dosyasını çalıştırmalı.';
+  } else if (isAdmin) { badge.textContent = 'Yönetici'; text.textContent = 'Yönetici hesabı: tüm sayfalar açık.'; }
+  else if (verified) { badge.textContent = 'Doğrulandı'; text.textContent = 'Referansın doğrulandı. Tüm ürün erişimine sahipsin.'; }
+  else if (SITE.status === 'pending') { badge.textContent = 'Onay bekliyor'; text.textContent = 'Başvurun alındı. Yönetici onayladığında erişim açılır.'; }
+  else if (SITE.status === 'rejected') { badge.textContent = 'Doğrulanamadı'; text.textContent = 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup tekrar dene.'; }
+  else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı referans doğrulamasıyla açılır.'; }
+
+  const okx = document.getElementById('acc-link-okx');
+  const bybit = document.getElementById('acc-link-bybit');
+  const missing = document.getElementById('acc-links-missing');
+  if (okx) { if (SITE.links && SITE.links.okx) { okx.href = SITE.links.okx; okx.style.display = ''; } else okx.style.display = 'none'; }
+  if (bybit) { if (SITE.links && SITE.links.bybit) { bybit.href = SITE.links.bybit; bybit.style.display = ''; } else bybit.style.display = 'none'; }
+  if (missing) missing.style.display = (SITE.links && (SITE.links.okx || SITE.links.bybit)) ? 'none' : '';
+
+  if (formPanel) formPanel.style.display = verified ? 'none' : '';
+  const goWrap = document.getElementById('acc-go-wrap');
+  if (goWrap) goWrap.style.display = verified ? '' : 'none';
+  if (submitBtn) submitBtn.disabled = false;
+  if (msg && !msg.textContent) msg.textContent = '';
+
+  const benefits = document.getElementById('acc-benefits');
+  if (benefits) {
+    const refPages = [
+      ['Portföy Yönetimi', 'portfoy'], ['Alfa Defter (bütçe)', 'butce'],
+      ['Trade Günlüğü', 'data'], ['Check List', 'defter'],
+      ['Alfa Edu', 'egitim'], ['Stratejiler', 'strategies'],
+      ['Analiz Köşesi', 'analiz'], ['Günün Karnesi', 'karne'],
+      ['Haftalık Değerlendirme', 'review'], ['Onchain', 'onchain'],
+      ['İndikatörler', 'indicators'], ['Alfa Designer', 'designer'],
+      ['Trading terminali', 'trading'], ['Çalışma Panosu', 'pano']
+    ];
+    benefits.innerHTML = refPages.map(function (r) {
+      const tier = sitePageTier(r[1]);
+      const open = siteCanOpen(r[1]);
+      const mark = open ? '✅' : (tier === 'free' ? '✅' : '🔒');
+      return '<div>' + mark + ' ' + r[0] + '</div>';
+    }).join('') +
+      '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, İşlem Kanalı (sonuçlar), AlfaNews, Hesaplayıcı, Ekonomik Takvim.</div>';
+  }
+
+  bindAccessForm();
+}
+
+function bindAccessForm() {
+  if (accessBound) return;
+  const btn = document.getElementById('acc-submit');
+  if (!btn) return;
+  accessBound = true;
+  btn.addEventListener('click', submitAccess);
+  const bannerBtn = document.getElementById('tier-banner-btn');
+  if (bannerBtn) bannerBtn.addEventListener('click', function () { showPage('erisim'); });
+  const goBtn = document.getElementById('acc-go');
+  if (goBtn) goBtn.addEventListener('click', function () { showPage(accessNextPage || 'home'); accessNextPage = ''; });
+  const uid = document.getElementById('acc-uid');
+  if (uid) uid.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitAccess(); } });
+}
+
+async function submitAccess() {
+  const btn = document.getElementById('acc-submit');
+  const msg = document.getElementById('acc-msg');
+  if (!btn) return;
+  const uid = (document.getElementById('acc-uid').value || '').trim().replace(/\s+/g, '');
+  const exchange = document.getElementById('acc-exchange').value;
+  if (!/^[A-Za-z0-9]{3,32}$/.test(uid)) { if (msg) msg.textContent = accessErrText('bad_uid'); return; }
+
+  btn.disabled = true;
+  if (msg) msg.textContent = 'Kontrol ediliyor…';
+
+  const token = await siteAccessToken();
+  if (!token) { btn.disabled = false; if (msg) msg.textContent = accessErrText('unauthorized'); showGate(); return; }
+
+  let outcome = null;
+  try {
+    const r = await fetch('/api/access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ op: 'submit', exchange: exchange, uid: uid })
+    });
+    const j = await r.json().catch(function () { return null; });
+    if (r.ok && j && j.ok) outcome = j;
+    else if (msg) msg.textContent = accessErrText(j && j.error);
+  } catch (e) {
+    if (msg) msg.textContent = 'Bağlantı hatası, tekrar dene.';
+  }
+
+  btn.disabled = false;
+  if (!outcome) return;
+
+  await loadSiteAccess();
+  applyTierUi();
+
+  if (outcome.status === 'verified') {
+    if (msg) msg.textContent = 'Doğrulandı, açılıyor…';
+    setTimeout(function () { showPage(accessNextPage || 'home'); accessNextPage = ''; }, 450);
+    return;
+  }
+  if (outcome.status === 'pending') {
+    if (msg) msg.textContent = 'Başvurun alındı, onay bekliyor. Onaylandığında erişim açılır.';
+  } else {
+    if (msg) msg.textContent = 'Bu UID referans listemizde görünmüyor. Linkten üye olduğundan emin olup tekrar dene.';
+  }
+  renderAccessPage();
+}
+
 function amTodayKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -12775,18 +13095,12 @@ function amRenderPlan() {
 }
 
 function showPage(name, skipAnim) {
-  if (name === 'alfa' && !amAllowed()) name = 'home';
-  if (name === 'apps' && !appsAllowed()) name = 'home';
-  if (name === 'basvuru' && !amAllowed()) name = 'home';
-  if (name === 'sosyalmetre' && !amAllowed()) name = 'home';
-  if (name === 'uyap' && !amAllowed()) name = 'home';
-  if (name === 'zaman' && !amAllowed()) name = 'home';
-  if (name === 'strateji' && !amAllowed()) name = 'home';
-  if (name === 'butce' && !amAllowed()) name = 'home';
-  if (name === 'portfoy' && !amAllowed()) name = 'home';
-  // AYNA:BASLA
-  if (name === 'ayna' && !amAllowed()) name = 'home';
-  // AYNA:BITIR
+  // Erisim katmani: sayfa, uyelik seviyesine gore acilir. Yetki yoksa
+  // kullanici erisim sayfasina yonlendirilir ve hedef saklanir.
+  if (!siteCanOpen(name)) {
+    if (name !== 'erisim') accessNextPage = name;
+    name = 'erisim';
+  }
   currentPage = name;
   dtRowFocus = null;
   document.body.dataset.page = name;
@@ -12796,7 +13110,7 @@ function showPage(name, skipAnim) {
   // AYNA:BASLA
   if (name === 'ayna') Ayna.render();
   // AYNA:BITIR
-  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna'];
+  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -12837,6 +13151,7 @@ function showPage(name, skipAnim) {
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
   if (name === 'alfa') { renderAlfaMan(); }
   if (name === 'apps') { renderApps(); }
+  if (name === 'erisim') { renderAccessPage(); }
 }
 
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
@@ -23959,6 +24274,9 @@ async function onAuthed(user) {
   const mtOk = mtAllowed();
   if (mtDesk) mtDesk.style.display = mtOk ? '' : 'none';
   if (mtMob) mtMob.style.display = mtOk ? '' : 'none';
+  // Uyelik seviyesi (free / ref / admin): navigasyon ve sayfa erisimi buna gore.
+  await loadSiteAccess();
+  applyTierUi();
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
@@ -25213,7 +25531,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b89';
+const APP_BUILD = 'b90';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
