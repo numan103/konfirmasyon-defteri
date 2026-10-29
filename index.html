@@ -18107,9 +18107,9 @@ function renderAlfaPortfoy2() {
       console.log('ap2 cloud for non-admin:', d);
       if (d && (d.portfolioValue != null || d.count)) {
         if (_empty) _empty.style.display = 'none';
-        if (_layout) _layout.style.display = '';
+        if (_layout) _layout.style.display = 'none';
+        var _pubTeaser = document.getElementById('ap2-public-teaser'); if (_pubTeaser) _pubTeaser.style.display = '';
         if (_sumEl) ap2RenderTeaserTarget(d, 'ap2-pt');
-        if (_grid) _grid.innerHTML = '<div class="data-empty" style="padding:18px;text-align:center;color:var(--text-3);">Salt okunur görünüm — pozisyon detayları yönetici tarafından paylaşılmaktadır. Toplam: ' + (d.count || 0) + ' pozisyon.</div>';
       } else {
         if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Henüz paylaşılan portföy yok. Yönetici portföyünü paylaşmadı.'; }
         if (_layout) _layout.style.display = 'none';
@@ -25875,7 +25875,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b108';
+const APP_BUILD = 'b109';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
