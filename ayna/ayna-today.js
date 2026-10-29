@@ -1,5 +1,11 @@
 /* AYNA Today tab - J3 */
 Ayna.tabs.today = { render: function (c) { renderToday(c); } };
+// Unsaved text stays in memory only, scoped to the current account and date.
+var _journalDrafts = {};
+function _journalDraft(d) {
+  var key = Ayna.uid + ':' + d;
+  return _journalDrafts[key] || (_journalDrafts[key] = {});
+}
 var _W_HH = ['heyecanlı','coşkulu','umutlu','gururlu','meraklı','odaklı','neşeli','istekli'];
 var _W_HU = ['gergin','öfkeli','kaygılı','stresli','sabırsız','huzursuz','sinirli','panik içinde'];
 var _W_LU = ['yorgun','üzgün','kırgın','bıkkın','yalnız','hayal kırıklıgına uğramış','tükkenmiş','umutsuz'];
@@ -36,6 +42,11 @@ function _q(name, builder) {
 }
 
 function renderToday(c) {
+  var draft = _journalDraft(Ayna.today());
+  ['ay-qn', 'ay-nb', 'ay-sl'].forEach(function (id) {
+    var input = c.querySelector('#' + id);
+    if (input) draft[id] = input.value;
+  });
   c.innerHTML = '<div class="ay-card">' + Ayna.t('common.loading') + '</div>';
   var d = Ayna.today(), uid = Ayna.uid, sb = Ayna.sb();
   Promise.all([
@@ -45,13 +56,15 @@ function renderToday(c) {
     _q('rules', sb.from('ayna_rules').select('id,if_text,then_text,domain').eq('user_id', uid).eq('is_active', true)),
     _q('open_loops', sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open')),
     _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })),
-    _q('crisis', sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1))
+    _q('crisis', sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1)),
+    _q('week', sb.from('ayna_entries').select('local_date,sleep_hours').eq('user_id', uid).gte('local_date', Ayna.addDays(d, -6)).lte('local_date', d))
   ]).then(function (r) {
     var pendingCount = (r[0] && r[0].count) || 0, entries = (r[1] && r[1].data) || [], people = (r[2] && r[2].data) || [];
     var rules = (r[3] && r[3].data) || [], loops = (r[4] && r[4].data) || [], trades = (r[5] && r[5].data) || [];
     var hasCrisis = !!(r[6] && r[6].data && r[6].data.length);
     try {
-      renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis);
+      if (r[1] && r[1].error) throw r[1].error;
+      renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis, (r[7] && !r[7].error) ? r[7].data : null);
     } catch (e2) {
       console.error('[AYNA today] çizim hatası:', e2);
       c.innerHTML = '<div class="ay-card">' + Ayna.t('err.default') + '</div>';
@@ -62,25 +75,65 @@ function renderToday(c) {
   });
 }
 
-function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis) {
+function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis, week) {
     var morning = null, evening = null;
-    entries.forEach(function (e) { if (e.kind === 'morning' && !morning) morning = e; if (e.kind === 'evening' && !evening) evening = e; });
-    var h = '';
+    entries.forEach(function (e) { if (e.kind === 'morning') morning = e; if (e.kind === 'evening') evening = e; });
+    var notes = entries.filter(function (e) { return e.kind === 'note'; });
+    var h = _cardRhythm(morning, evening, notes, week);
     if (pendingCount > 0) h += '<div class="ay-card"><p>' + Ayna.t('today.pending_notice', { n: pendingCount }) + '</p><button class="btn" id="ay-go-map">' + Ayna.t('today.pending_link') + '</button></div>';
     if (hasCrisis) h += _cardCrisis();
     h += _cardMorning(morning);
-    h += evening ? _cardEveningDone(evening) : _cardEveningForm(people, rules);
     h += _cardQuickNote();
+    h += _cardJournalNotes(notes);
+    h += evening ? _cardEveningDone(evening) : _cardEveningForm(people, rules);
     h += _cardLoops(loops);
     h += _cardTrades(trades);
     c.innerHTML = h;
     _bindPending(c);
-    _bindMorning(c, d);
+    _bindRhythm(c);
+    _bindMorning(c, d, morning);
     if (evening) _bindEveningEdit(c, d, evening); else _bindEveningForm(c, d, people, rules);
     _bindQuickNote(c, d);
     _bindLoops(c);
     _bindTrades(c, d);
     if (evening) _checkEveningReflection(c, evening);
+}
+
+function _cardRhythm(morning, evening, notes, week) {
+  var h = '<section class="ay-card ay-rhythm"><h3>' + Ayna.t('journal.rhythm') + '</h3><div class="ay-rhythm-grid">';
+  [['ay-morning', 'journal.plan', !!morning], ['ay-quick-note', 'journal.capture', notes.length > 0], ['ay-evening-host', 'journal.reflect', !!evening]].forEach(function (step) {
+    h += '<button type="button" class="ay-step" data-ay-jump="' + step[0] + '"><strong>' + Ayna.t(step[1]) + '</strong><span>' + Ayna.t(step[2] ? 'journal.done' : 'journal.start') + '</span></button>';
+  });
+  h += '</div>';
+  if (Array.isArray(week)) {
+    var days = {}, sleeps = [];
+    week.forEach(function (e) { days[e.local_date] = true; if (e.sleep_hours != null && Number.isFinite(Number(e.sleep_hours))) sleeps.push(Number(e.sleep_hours)); });
+    h += '<div class="ay-week"><strong>' + Ayna.t('journal.week') + '</strong> · ' + Ayna.t('journal.days', { n: Object.keys(days).length });
+    if (sleeps.length) h += ' · ' + Ayna.t('journal.sleep', { n: Ayna.num(sleeps.reduce(function (a, b) { return a + b; }, 0) / sleeps.length) });
+    h += '<p>' + Ayna.t('journal.week_hint') + '</p></div>';
+  }
+  return h + '</section>';
+}
+
+function _cardJournalNotes(notes) {
+  var h = '<section class="ay-card"><h4>' + Ayna.t('journal.notes') + '</h4>';
+  if (!notes.length) h += '<p>' + Ayna.t('journal.empty') + '</p>';
+  notes.slice().reverse().forEach(function (entry) {
+    h += '<article class="ay-journal-note"><p>' + Ayna.esc(entry.body || '') + '</p><button type="button" class="btn" data-ay-entry="' + Ayna.esc(entry.id) + '">' + Ayna.t('common.edit') + ' → ' + Ayna.t('tab.archive') + '</button></article>';
+  });
+  return h + '</section>';
+}
+
+function _bindRhythm(c) {
+  c.querySelectorAll('[data-ay-jump]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var target = c.querySelector('#' + b.getAttribute('data-ay-jump'));
+      if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); var input = target.querySelector('input,textarea,button'); if (input) input.focus({ preventScroll: true }); }
+    });
+  });
+  c.querySelectorAll('[data-ay-entry]').forEach(function (b) {
+    b.addEventListener('click', function () { Ayna.openEntry(b.getAttribute('data-ay-entry')); });
+  });
 }
 
 function _bindPending(c) {
@@ -115,33 +168,35 @@ function _checkEveningReflection(c, evening) {
 }
 
 function _cardMorning(entry) {
-  if (entry) return '<div class="ay-card"><h4>' + Ayna.t('today.morning_saved') + '</h4><p>' + Ayna.esc(entry.intention || '') + '</p></div>';
-  if (_localHour() >= 14) return '';
-  return '<div class="ay-card"><h4>' + Ayna.t('today.morning_title') + '</h4><p>' + Ayna.t('today.morning_prompt') + '</p>' +
-    '<input type="text" class="ay-inp" id="ay-mi" maxlength="200" placeholder="' + Ayna.esc(Ayna.t('today.morning_placeholder')) + '">' +
+  return '<div class="ay-card" id="ay-morning"><h4>' + Ayna.t(entry ? 'today.morning_saved' : 'today.morning_title') + '</h4><p>' + Ayna.t('today.morning_prompt') + '</p>' +
+    '<input type="text" class="ay-inp" id="ay-mi" maxlength="200" value="' + Ayna.esc(entry ? entry.intention : '') + '" aria-label="' + Ayna.esc(Ayna.t('today.morning_title')) + '" placeholder="' + Ayna.esc(Ayna.t('today.morning_placeholder')) + '">' +
     '<button class="btn solid" id="ay-ms">' + Ayna.t('common.save') + '</button></div>';
 }
 
-function _bindMorning(c, d) {
+function _bindMorning(c, d, entry) {
   var b = c.querySelector('#ay-ms'), i = c.querySelector('#ay-mi');
   if (!b || !i) return;
   b.addEventListener('click', function () {
     var v = i.value.trim();
     if (!v) return;
     b.disabled = true;
-    Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'morning', local_date: d, intention: v, processed_at: new Date().toISOString() })
-      .then(function () { renderToday(c); })
+    var query = entry
+      ? Ayna.sb().from('ayna_entries').update({ intention: v }).eq('user_id', Ayna.uid).eq('id', entry.id)
+      : Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'morning', local_date: d, intention: v, processed_at: new Date().toISOString() });
+    query.select('id').single()
+      .then(function (r) { Ayna.checked(r); Ayna.flash(Ayna.t('common.saved')); renderToday(c); })
       .catch(function (e) { b.disabled = false; Ayna.flash(Ayna.errText(e.code || 'default')); });
   });
 }
 
 function _cardEveningDone(entry) {
-  var h = '<div class="ay-card"><h4>' + Ayna.t('today.evening_done') + '</h4>';
+  var h = '<div class="ay-card" id="ay-evening-host"><h4>' + Ayna.t('today.evening_done') + '</h4>';
   if (entry.pleasantness != null && entry.energy != null)
     h += '<p>' + Ayna.t('today.compass_value', { p: Ayna.num(entry.pleasantness, true), e: Ayna.num(entry.energy, true) }) + '</p>';
   if (entry.mood_words && entry.mood_words.length)
     h += '<p>' + Ayna.t('label.words') + ': ' + entry.mood_words.map(function (w) { return Ayna.esc(w); }).join(', ') + '</p>';
-  h += '<button class="btn" id="ay-ee">' + Ayna.t('common.edit') + '</button></div>';
+  if (entry.body) h += '<p class="ay-journal-text">' + Ayna.esc(entry.body) + '</p>';
+  h += '<button class="btn" id="ay-ee">' + Ayna.t('common.edit') + '</button><div id="ay-ev"></div></div>';
   return h;
 }
 
@@ -164,7 +219,7 @@ function _bindEveningEdit(c, d, entry) {
 }
 
 function _cardEveningForm(people, rules) {
-  return '<div class="ay-card"><h4>' + Ayna.t('today.evening_title') + '</h4><div id="ay-ev">' +
+  return '<div class="ay-card" id="ay-evening-host"><h4>' + Ayna.t('today.evening_title') + '</h4><div id="ay-ev">' +
     '<p>' + Ayna.t('today.compass_title') + '</p></div></div>';
 }
 
@@ -187,7 +242,12 @@ function _renderEveningForm(c, d, people, rules, entry, taggedIds, checkMap) {
   var words = isEdit && entry.mood_words ? entry.mood_words.slice() : [];
   var sleep = isEdit && entry.sleep_hours != null ? entry.sleep_hours : '';
   var body = isEdit && entry.body ? entry.body : '';
-  var h = '<div class="ay-card"><h4>' + Ayna.t('today.evening_title') + '</h4>';
+  if (!isEdit) {
+    var draft = _journalDraft(d);
+    if (draft['ay-nb'] != null) body = draft['ay-nb'];
+    if (draft['ay-sl'] != null) sleep = draft['ay-sl'];
+  }
+  var h = '<div class="ay-evening-editor"><h4>' + Ayna.t('today.evening_title') + '</h4>';
   h += '<div id="ay-ev">';
   h += '<p>' + Ayna.t('today.compass_title') + '</p>';
   h += '<div id="ay-compass-box" class="ay-compass" tabindex="0" role="group" aria-label="' + Ayna.esc(Ayna.t('today.compass_title')) + '"></div>';
@@ -209,7 +269,9 @@ function _renderEveningForm(c, d, people, rules, entry, taggedIds, checkMap) {
   h += '<textarea class="ay-inp" id="ay-nb" maxlength="5000" rows="4" placeholder="' + Ayna.esc(Ayna.t('today.note_placeholder')) + '">' + Ayna.esc(body) + '</textarea>';
   h += '<button class="btn solid" id="ay-cd">' + Ayna.t('today.close_day') + '</button>';
   h += '</div></div>';
-  c.innerHTML = h;
+  var host = c.querySelector('#ay-evening-host');
+  if (!host) return;
+  host.innerHTML = h;
   _initCompass(c, p, e, function (np, ne) { p = np; e = ne; });
   _initWords(c, p, e, words);
   _initPeopleChips(c, people, taggedIds);
@@ -277,7 +339,8 @@ function _initWords(c, p, e, selected) {
   var qp = (p != null && e != null) ? _qw(p, e) : _W_HH;
   function drawChips() {
     var h = '';
-    qp.forEach(function (w) {
+    var visible = qp.concat(selected.filter(function (word) { return qp.indexOf(word) < 0; }));
+    visible.forEach(function (w) {
       var on = selected.indexOf(w) >= 0;
       h += '<button class="chip' + (on ? ' on' : '') + '" data-aw="' + Ayna.esc(w) + '">' + Ayna.esc(w) + '</button>';
     });
@@ -414,6 +477,9 @@ function _initRules(c, rules, checkMap) {
 
 function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
   if (p == null || e == null) { Ayna.flash(Ayna.t('today.compass_required')); return; }
+  var saveButton = c.querySelector('#ay-cd');
+  if (saveButton && saveButton.disabled) return;
+  if (saveButton) saveButton.disabled = true;
   var sb = Ayna.sb();
   var payload = {
     local_date: d, kind: 'evening', pleasantness: p, energy: e,
@@ -433,11 +499,11 @@ function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
   var promise;
   if (entry) {
     payload.id = entry.id;
-    promise = sb.from('ayna_entries').update(payload).eq('id', entry.id).eq('user_id', Ayna.uid).then(function () { return entry.id; });
+    promise = sb.from('ayna_entries').update(payload).eq('id', entry.id).eq('user_id', Ayna.uid).select('id').single().then(function (r) { Ayna.checked(r); return r.data.id; });
   } else {
     payload.user_id = Ayna.uid;
     payload.processed_at = new Date().toISOString();
-    promise = sb.from('ayna_entries').insert(payload).select('id').single().then(function (r) { return r.data.id; });
+    promise = sb.from('ayna_entries').insert(payload).select('id').single().then(function (r) { Ayna.checked(r); return r.data.id; });
   }
   promise.then(function (entryId) {
     return savePeople(entryId).then(function () {
@@ -474,11 +540,14 @@ function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
         }).catch(function () { Ayna.flash(Ayna.errText('scribe_failed')); });
       });
     });
-  }).catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); });
+  }).catch(function (err) { if (saveButton) saveButton.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
 }
 
 function _cardQuickNote() {
-  return '<div class="ay-card"><h4>' + Ayna.t('today.quick_note_title') + '</h4>' +
+  var prompts = '<div class="ay-prompts"><span>' + Ayna.t('journal.prompts') + '</span>';
+  ['good', 'hard', 'next'].forEach(function (key) { prompts += '<button type="button" class="btn" data-ay-prompt="' + key + '">' + Ayna.t('journal.prompt.' + key) + '</button>'; });
+  prompts += '</div>';
+  return '<div class="ay-card" id="ay-quick-note"><h4>' + Ayna.t('today.quick_note_title') + '</h4>' + prompts +
     '<textarea class="ay-inp" id="ay-qn" maxlength="5000" rows="3" placeholder="' + Ayna.esc(Ayna.t('today.quick_note_placeholder')) + '"></textarea>' +
     '<button class="btn solid" id="ay-qns">' + Ayna.t('common.save') + '</button></div>';
 }
@@ -486,13 +555,22 @@ function _cardQuickNote() {
 function _bindQuickNote(c, d) {
   var b = c.querySelector('#ay-qns'), ta = c.querySelector('#ay-qn');
   if (!b || !ta) return;
+  ta.value = _journalDraft(d)['ay-qn'] || '';
+  c.querySelectorAll('[data-ay-prompt]').forEach(function (prompt) {
+    prompt.addEventListener('click', function () {
+      var text = Ayna.t('journal.prompt.' + prompt.getAttribute('data-ay-prompt')) + ': ';
+      if (ta.value.length + text.length + 2 > ta.maxLength) return;
+      ta.value += (ta.value ? '\n\n' : '') + text;
+      ta.focus();
+    });
+  });
   b.addEventListener('click', function () {
     var v = ta.value.trim();
     if (!v) return;
     b.disabled = true;
     Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'note', local_date: d, body: v, processed_at: new Date().toISOString() })
       .select('id').single()
-      .then(function (r) { return Ayna.api('scribe', { entry_id: r.data.id }).then(function (sr) {
+      .then(function (r) { Ayna.checked(r); ta.value = ''; _journalDraft(d)['ay-qn'] = ''; Ayna.flash(Ayna.t('common.saved')); renderToday(c); return Ayna.api('scribe', { entry_id: r.data.id }).then(function (sr) {
         if (sr.needs_reflection && sr.reflection_kind) {
           return Ayna.api('reflect', { entry_id: r.data.id, kind: sr.reflection_kind }).then(function (refRes) {
             renderToday(c);
@@ -506,7 +584,7 @@ function _bindQuickNote(c, d) {
           }).catch(function () { renderToday(c); });
         }
         renderToday(c);
-      }); })
+       }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); }); })
       .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
   });
 }

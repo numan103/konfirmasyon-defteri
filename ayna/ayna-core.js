@@ -5,7 +5,11 @@ window.Ayna = (function () {
   var P = 'ay-';
   var I18N = window.AYNA_I18N || { tr: {}, en: {} };
 
-  function sb() { return AUTH.client; }
+  function sb() { return typeof AUTH !== 'undefined' ? AUTH.client : null; }
+  function checked(result) {
+    if (result && result.error) throw result.error;
+    return result;
+  }
   function lang() {
     try { return (window.LANG === 'en') ? 'en' : 'tr'; } catch (e) { return 'tr'; }
   }
@@ -40,7 +44,7 @@ window.Ayna = (function () {
     clearTimeout(flash._t); flash._t = setTimeout(function () { el.classList.remove(P + 'on'); }, 4000);
   }
 
-  function errText(code) { return t('err.' + code) || t('err.default'); }
+  function errText(code) { var key = 'err.' + code, text = t(key); return text === key ? t('err.default') : text; }
 
   async function api(action, payload) {
     var session = await sb().auth.getSession();
@@ -98,7 +102,8 @@ window.Ayna = (function () {
         flash(t('ob.consent_required')); return;
       }
       var profileData = { user_id: _uid, onboarding_done: false };
-      sb().from('ayna_profiles').upsert(profileData, { onConflict: 'user_id' }).then(function () {
+      sb().from('ayna_profiles').upsert(profileData, { onConflict: 'user_id' }).then(function (result) {
+        checked(result);
         var consents = [
           { user_id: _uid, kind: 'age_18', granted: document.getElementById('ay-c1').checked, text_version: 'taslak-1' },
           { user_id: _uid, kind: 'service', granted: document.getElementById('ay-c2').checked, text_version: 'taslak-1' },
@@ -106,7 +111,8 @@ window.Ayna = (function () {
           { user_id: _uid, kind: 'statistics', granted: document.getElementById('ay-c4').checked, text_version: 'taslak-1' }
         ];
         return sb().from('ayna_consents').insert(consents);
-      }).then(function () {
+      }).then(function (result) {
+        checked(result);
         renderToneStep(root);
       }).catch(function (e) { flash(errText(e.code || 'default')); });
     });
@@ -129,7 +135,8 @@ window.Ayna = (function () {
     });
     root.querySelector('[data-tone="mentor"]').classList.add('solid');
     document.getElementById('ay-tone-ok').addEventListener('click', function () {
-      sb().from('ayna_profiles').update({ coach_tone: selected }).eq('user_id', _uid).then(function () {
+      sb().from('ayna_profiles').update({ coach_tone: selected }).eq('user_id', _uid).then(function (result) {
+        checked(result);
         _profile = _profile || {}; _profile.coach_tone = selected;
         renderMeetStep(root);
       }).catch(function (e) { flash(errText(e.code || 'default')); });
@@ -146,7 +153,9 @@ window.Ayna = (function () {
       renderMeetingView(root);
     });
     document.getElementById('ay-ob-meet-later').addEventListener('click', function () {
-      sb().from('ayna_profiles').update({ onboarding_done: true }).eq('user_id', _uid).then(function () {
+      sb().from('ayna_profiles').update({ onboarding_done: true }).eq('user_id', _uid).then(function (result) {
+        checked(result);
+        _profile = _profile || {};
         _profile.onboarding_done = true;
         renderApp(document.getElementById('ayna-root'));
       }).catch(function (e) { flash(errText(e.code || 'default')); });
@@ -375,6 +384,7 @@ window.Ayna = (function () {
       if (!session || !session.user) { root.innerHTML = '<div class="' + P + 'card">' + t('app.login_required') + '</div>'; return; }
       _uid = session.user.id;
       return sb().from('ayna_profiles').select('*').eq('user_id', _uid).maybeSingle().then(function (profRes) {
+        checked(profRes);
         _profile = profRes && profRes.data ? profRes.data : null;
         if (!_profile || !_profile.onboarding_done) { renderSetup(root); return; }
         renderApp(root);
@@ -390,7 +400,7 @@ window.Ayna = (function () {
     try { savedTab = localStorage.getItem('ayna.tab'); } catch (e) {}
     var activeTab = tabKeys.indexOf(savedTab) >= 0 ? savedTab : 'today';
 
-    root.innerHTML = '<div class="' + P + 'hdr"><h2>' + t('app.title') + '</h2><span class="' + P + 'date">' + fmtDate(today()) + '</span></div>' +
+    root.innerHTML = '<div class="' + P + 'hdr"><div><h2>' + t('app.title') + '</h2><p class="ay-subtitle">' + t('app.subtitle') + '</p></div><span class="' + P + 'date">' + fmtDate(today()) + '</span></div>' +
       '<div class="' + P + 'tabs" id="ay-tabs"></div><div class="' + P + 'content" id="ay-content"></div><div id="ayna-flash" class="' + P + 'flash" aria-live="polite"></div>';
 
     var tabsEl = document.getElementById('ay-tabs');
@@ -424,6 +434,6 @@ window.Ayna = (function () {
   return {
     sb: sb, get uid() { return _uid; }, get profile() { return _profile; },
     lang: lang, t: t, esc: esc, md: md, today: today, addDays: addDays, fmtDate: fmtDate, ago: ago, num: num,
-    flash: flash, errText: errText, api: api, tabs: tabs, openEntry: openEntry, render: render, P: P
+    flash: flash, errText: errText, checked: checked, api: api, tabs: tabs, openEntry: openEntry, render: render, P: P
   };
 })();

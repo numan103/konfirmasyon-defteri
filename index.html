@@ -21,11 +21,12 @@
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <!-- AYNA:BASLA -->
-<link rel="stylesheet" href="/ayna/ayna-core.css?v=5">
+<link rel="stylesheet" href="/ayna/ayna-core.css?v=6">
 <!-- AYNA:BITIR -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+  #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
   #page-portfoy.ap2-viewer #ap2-reset,
   #page-portfoy.ap2-viewer #ap2-idea-add,
@@ -4988,6 +4989,7 @@
     </a>
     <div class="nav-links">
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
+      <a href="?page=ayna" class="nav-link" id="tab-ayna" data-nav>📓 Kişisel Günlük Asistan</a>
       <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="nav-link" id="tab-uyap" data-nav>🏠 Real Estate</a>
       <div class="nav-drop">
@@ -5020,9 +5022,6 @@
       </div>
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
-      <!-- AYNA:BASLA -->
-      <a href="?page=ayna" class="nav-link" id="tab-ayna" data-nav>🪞 Kişisel Günlük Asistan</a>
-      <!-- AYNA:BITIR -->
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
@@ -5053,6 +5052,7 @@
     </div>
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
+      <a href="?page=ayna" class="mnav-link" data-nav data-mnav="ayna" id="mnav-ayna">📓 Kişisel Günlük Asistan</a>
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" id="mnav-butce" data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
@@ -5073,9 +5073,6 @@
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Referansla Aç</a>
-      <!-- AYNA:BASLA -->
-      <a href="?page=ayna" class="mnav-link" data-nav data-mnav="ayna" id="mnav-ayna">🪞 Kişisel Günlük Asistan</a>
-      <!-- AYNA:BITIR -->
       <div class="mnav-contact">
         <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
         <a class="soc-link tg" id="nc-tg-m" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
@@ -5242,6 +5239,9 @@
         <h1>Alfa Traders</h1>
         <p class="home-sub" data-i18n="hm.sub">Trader'lar için disiplin, analiz ve öğrenme platformu</p>
        </div>
+       <a id="home-diary-link" href="?page=ayna" data-nav hidden style="margin:12px 0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;">
+         <strong>📓 Kişisel Günlük Asistan →</strong><br><span class="hint">Sana özel alanın: gününü planla, düşüncelerini kaydet, akşam küçük bir sonraki adım belirle.</span>
+       </a>
        <div class="home-premium" style="margin:18px auto 6px;max-width:980px;padding:18px 20px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(123,120,245,.10),rgba(167,139,250,.04));">
          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
            <span style="font-size:22px;">⭐</span>
@@ -11760,7 +11760,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim'];
+  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -12701,6 +12701,8 @@ function applyTierUi() {
     });
   });
   // Erisim linki: dogrulanmamis kullanicida + yoneticide (onay paneli) gorunur
+  const diaryLink = document.getElementById('home-diary-link');
+  if (diaryLink) diaryLink.hidden = !isAdmin;
   ['tab-erisim', 'mnav-erisim'].forEach(function (id) {
     const el = document.getElementById(id);
     if (el) el.style.display = (ref && !isAdmin) ? 'none' : '';
@@ -25947,7 +25949,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b117';
+const APP_BUILD = 'b118';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -29600,9 +29602,9 @@ document.addEventListener('input', function (e) {
 
     </script>
 <!-- AYNA:BASLA -->
-<script src="/ayna/ayna-i18n.js?v=7"></script>
-<script src="/ayna/ayna-core.js?v=5"></script>
-<script src="/ayna/ayna-today.js?v=8"></script>
+<script src="/ayna/ayna-i18n.js?v=8"></script>
+<script src="/ayna/ayna-core.js?v=6"></script>
+<script src="/ayna/ayna-today.js?v=9"></script>
 <script src="/ayna/ayna-map.js?v=6"></script>
 <script src="/ayna/ayna-coach.js?v=12"></script>
 <script src="/ayna/ayna-rules.js?v=5"></script>

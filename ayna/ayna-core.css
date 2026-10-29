@@ -1,6 +1,25 @@
 /* AYNA core CSS - J11 */
 body[data-page="ayna"]{--pc:#a5b4fc;--pc-soft:rgba(165,180,252,.16);--glow-a:rgba(165,180,252,.18);--glow-b:rgba(165,180,252,.10);}
 .ay-root{padding:16px;max-width:960px;margin:0 auto;}
+.ay-subtitle{max-width:640px;color:var(--text-3);font-size:13px;line-height:1.6;margin:8px 0 0;}
+.ay-hdr{gap:16px;flex-wrap:wrap;}
+.ay-rhythm{background:linear-gradient(135deg,var(--card),var(--pc-soft));}
+.ay-rhythm h3{margin:0 0 14px;}
+.ay-rhythm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.ay-step{display:flex;flex-direction:column;gap:8px;text-align:left;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);cursor:pointer;min-height:88px;font:inherit;}
+.ay-step span{font-size:12px;color:var(--text-3);}
+.ay-step:hover,.ay-step:focus-visible{border-color:var(--pc);outline:2px solid var(--pc-soft);}
+.ay-week{margin-top:16px;font-size:13px;line-height:1.7;}
+.ay-week p{color:var(--text-3);font-size:12px;margin:4px 0 0;}
+.ay-prompts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;align-items:center;}
+.ay-prompts>span{width:100%;font-size:12px;color:var(--text-3);}
+.ay-prompts .btn{font-size:12px;white-space:normal;text-align:left;}
+.ay-journal-note{border-top:1px solid var(--border);padding:12px 0;}
+.ay-journal-note p,.ay-journal-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;}
+#ay-morning,#ay-quick-note,#ay-evening-host{scroll-margin-top:100px;}
+.ay-card>.btn.solid{margin-top:10px;}
+@media(max-width:600px){.ay-rhythm-grid{grid-template-columns:1fr;}.ay-step{min-height:0;}.ay-root{padding:12px 4px;}.ay-hdr h2{font-size:19px;}}
+@media(prefers-reduced-motion:reduce){.ay-root *{scroll-behavior:auto!important;transition:none!important;}}
 .ay-tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:3px 3px;box-shadow:var(--shadow);flex-wrap:wrap;margin-bottom:16px;}
 .ay-tabs button{font-family:'Inter',sans-serif;font-weight:600;font-size:13px;padding:8px 16px;background:transparent;border:none;border-radius:999px;color:var(--text-3);cursor:pointer;transition:all .15s ease;}
 .ay-tabs button.ay-on{color:#fff;background:var(--pc);background:linear-gradient(135deg,var(--pc),color-mix(in srgb,var(--pc) 40%,var(--btn-tone)));box-shadow:0 3px 10px color-mix(in srgb,var(--pc) 30%,transparent);}
