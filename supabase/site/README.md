@@ -27,8 +27,8 @@ Referans kapısı için:
 
 | Değişken | Ne için |
 |---|---|
-| `SITE_OKX_REF_LINK` | OKX referans linkin (boşsa buton gizlenir) |
-| `SITE_BYBIT_REF_LINK` | Bybit referans linkin |
+| `SITE_OKX_REF_LINK` | OKX referans linkin (boşsa `https://www.okx.com/join/CRYPTOAHMET`) |
+| `SITE_BYBIT_REF_LINK` | Bybit referans linkin (boşsa `https://partner.bybit.com/b/cryptoahmet`) |
 | `SITE_ADMIN_EMAILS` | Virgülle ayrılmış admin e-postaları (boşsa `ahmetnuman20@gmail.com`) |
 | `SITE_ACCESS_OPEN` | `1` yaparsan **her giriş yapmış kullanıcı tam erişim** alır (acil durum vanası) |
 
@@ -66,8 +66,8 @@ select user_id, exchange, exchange_uid, status, note, created_at
 
 `index.html` içindeki `PAGE_TIER` haritası:
 
-- **free** — kayıtlı herkes: `home`, `alfatrading` (işlem sonuçları), `news`, `calc`, `calendar`, `ek`
-- **ref** — referansı doğrulanmış: `defter`, `data`, `review`, `karne`, `trading`, `egitim`, `strategies`, `analiz`, `indicators`, `designer`, `pano`, `onchain`, `portfoy`, `butce`
+- **free** — kayıtlı herkes: `home`, `news`, `calc`, `calendar`, `ek`
+- **ref** — referansı doğrulanmış: `alfatrading` (işlem kanalı), `defter`, `data`, `review`, `karne`, `trading`, `egitim`, `strategies`, `analiz`, `indicators`, `designer`, `pano`, `onchain`, `portfoy`, `butce`
 - **admin** — `alfa`, `apps`, `basvuru`, `chat-admin`, `sosyalmetre`, `uyap`, `zaman`, `strateji`, `ayna`, `mentoring`
 
 ## 5. Bilinen sınır

@@ -4780,14 +4780,14 @@
   <div class="lp-pricing">
     <div class="lp-price-card">
       <div class="lp-price-name">Kısıtlı</div>
-      <div class="lp-price-desc">Kayıt ol, sonuçları takip et, temel araçları kullan.</div>
+      <div class="lp-price-desc">Kayıt ol, piyasa notlarını ve temel araçları kullan.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b></div>
       <div class="lp-price-period">Herkese açık — kayıt yeterli</div>
       <ul class="lp-price-feats">
-        <li>İşlem Kanalı — paylaşılan işlem sonuçları</li>
         <li>AlfaNews — haftalık piyasa analizleri</li>
         <li>Alfa Calculator — pozisyon boyutlandırma</li>
         <li>Ekonomik Takvim — 3 yıldız makro veriler</li>
+        <li class="disabled">İşlem Kanalı — işlem paylaşımları</li>
         <li class="disabled">Trade Günlüğü &amp; Check List</li>
         <li class="disabled">Portföy &amp; Birikim Planı</li>
         <li class="disabled">Alfa Edu &amp; Stratejiler</li>
@@ -4802,6 +4802,7 @@
       <div class="lp-price-val"><b class="lp-free">$0</b><span> / aidat yok</span></div>
       <div class="lp-price-period">Erişim, referans doğrulamasıyla açılır</div>
       <ul class="lp-price-feats">
+        <li>İşlem Kanalı — canlı işlem paylaşımları ve sonuçlar</li>
         <li>Kısıtlı planın tüm özellikleri</li>
         <li>Trade Günlüğü — R cinsinden kayıt &amp; istatistik</li>
         <li>Portföy &amp; Birikim Planı — kripto, altın, özel varlık</li>
@@ -4965,7 +4966,7 @@
 
 <div class="wrap">
 <div id="tier-banner" style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.03));font-size:12.5px;color:var(--text);">
-  <span>🔒 Kısıtlı erişimdesin: portföy, işlem günlüğü ve eğitim referans doğrulamasıyla açılır.</span>
+  <span>🔒 Kısıtlı erişimdesin: işlem kanalı, portföy, işlem günlüğü ve eğitim referans doğrulamasıyla açılır.</span>
   <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Referansla aç</button>
 </div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
@@ -7125,7 +7126,7 @@
         <div class="ap2-gate-card">
           <div class="ap2-gate-icon">🔒</div>
           <div class="ap2-gate-title">Portföy'e Hoş Geldin</div>
-          <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referral linkimle kayıt olman gerekiyor. Kayıt sonrası verilen kodu girerek erişim sağlayabilirsin.</div>
+          <div class="ap2-gate-desc">Bu sayfaya erişim için OKX veya Bybit'e referans linkimle kayıt olman gerekiyor. Kayıt sonrası borsa UID'ni doğrula, erişim otomatik açılır.</div>
           <div id="ap2-gate-teaser" class="ap2-gate-teaser" style="display:none">
             <div class="ap2-sum-row" id="ap2-gt-cards"></div>
             <div class="ap2-gate-teaser-chart" id="ap2-gt-chart"></div>
@@ -7147,10 +7148,11 @@
               </div>
             </a>
           </div>
-          <div class="ap2-gate-code-row">
+          <div class="ap2-gate-code-row" style="display:none">
             <input type="text" id="ap2-gate-code" placeholder="Erişim kodun..." maxlength="40" autocomplete="off">
             <button type="button" id="ap2-gate-verify">Doğrula</button>
           </div>
+          <button type="button" class="btn solid" id="ap2-gate-cta" style="width:100%">Referansla aç →</button>
           <div class="ap2-gate-err" id="ap2-gate-err"></div>
         </div>
       </div>
@@ -12502,14 +12504,21 @@ const AM_PLAN = [
 // yalnizca arayuzu ve yonlendirmeyi belirler; veri erisimi Supabase RLS + API
 // tarafinda korunur.
 const PAGE_TIER = {
-  home: 'free', news: 'free', calc: 'free', calendar: 'free', ek: 'free',
-  alfatrading: 'free', erisim: 'free',
+  home: 'free', news: 'free', calc: 'free', calendar: 'free', ek: 'free', erisim: 'free',
+  alfatrading: 'ref',
   defter: 'ref', data: 'ref', review: 'ref', karne: 'ref', trading: 'ref',
   egitim: 'ref', strategies: 'ref', analiz: 'ref', indicators: 'ref', designer: 'ref',
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
   alfa: 'admin', apps: 'admin', basvuru: 'admin', 'chat-admin': 'admin',
   sosyalmetre: 'admin', uyap: 'admin', zaman: 'admin', strateji: 'admin',
   ayna: 'admin', mentoring: 'admin'
+};
+
+// Referans linkleri: sunucu (SITE_OKX_REF_LINK / SITE_BYBIT_REF_LINK) bos
+// donerse buradaki varsayilanlar kullanilir. Linkler API'den de gelir.
+const SITE_REF_LINKS = {
+  okx: 'https://www.okx.com/join/CRYPTOAHMET',
+  bybit: 'https://partner.bybit.com/b/cryptoahmet'
 };
 
 const SITE = {
@@ -12522,7 +12531,7 @@ const SITE = {
   verified_by: null,
   store_missing: false,
   configured: { okx: false, bybit: false },
-  links: { okx: '', bybit: '' }
+  links: { okx: SITE_REF_LINKS.okx, bybit: SITE_REF_LINKS.bybit }
 };
 
 let accessNextPage = '';
@@ -12567,7 +12576,11 @@ function siteApplyAccess(j) {
   SITE.verified_by = j.verified_by || null;
   SITE.store_missing = !!j.store_missing;
   SITE.configured = j.configured || { okx: false, bybit: false };
-  SITE.links = j.links || { okx: '', bybit: '' };
+  const L = j.links || {};
+  SITE.links = {
+    okx: L.okx || SITE_REF_LINKS.okx,
+    bybit: L.bybit || SITE_REF_LINKS.bybit
+  };
 }
 
 async function loadSiteAccess() {
@@ -12682,7 +12695,8 @@ function renderAccessPage() {
   const benefits = document.getElementById('acc-benefits');
   if (benefits) {
     const refPages = [
-      ['Portföy Yönetimi', 'portfoy'], ['Alfa Defter (bütçe)', 'butce'],
+      ['İşlem Kanalı', 'alfatrading'], ['Portföy Yönetimi', 'portfoy'],
+      ['Alfa Defter (bütçe)', 'butce'],
       ['Trade Günlüğü', 'data'], ['Check List', 'defter'],
       ['Alfa Edu', 'egitim'], ['Stratejiler', 'strategies'],
       ['Analiz Köşesi', 'analiz'], ['Günün Karnesi', 'karne'],
@@ -12696,7 +12710,7 @@ function renderAccessPage() {
       const mark = open ? '✅' : (tier === 'free' ? '✅' : '🔒');
       return '<div>' + mark + ' ' + r[0] + '</div>';
     }).join('') +
-      '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, İşlem Kanalı (sonuçlar), AlfaNews, Hesaplayıcı, Ekonomik Takvim.</div>';
+      '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, AlfaNews, Hesaplayıcı, Ekonomik Takvim.</div>';
   }
 
   bindAccessForm();
@@ -16607,9 +16621,9 @@ function renderPortfoy() {
   pfRenderSellHist();
   if (document.getElementById('bd-sim-panel')) pfPlanRender();
 }
-const AP2_MEMBER_KEY = 'alfa-fund-member-v1';
-const AP2_MEMBER_SECRET = 'ALFA2024';
-function ap2IsMember() { return amAllowed() || localStorage.getItem(AP2_MEMBER_KEY) === 'approved'; }
+// Eski paylasilan kod (ALFA2024) ve localStorage izni kaldirildi: portfoy
+// erisimi artik referans dogrulamasindan (SITE.tier === 'ref') gelir.
+function ap2IsMember() { return refUnlocked(); }
 function ap2ShowGate() {
   var gate = document.getElementById('ap2-gate');
   var content = document.getElementById('ap2-gate-content');
@@ -16659,19 +16673,10 @@ function ap2HideGate() {
   if (content) content.style.display = '';
 }
 function ap2VerifyCode() {
-  var inp = document.getElementById('ap2-gate-code');
+  // Eski kod girisi kaldirildi: erisim referans dogrulamasindan gelir.
   var err = document.getElementById('ap2-gate-err');
-  var code = (inp ? inp.value : '').trim();
-  if (!code) { if (err) err.textContent = 'Lütfen kodu gir.'; return; }
-  if (code === AP2_MEMBER_SECRET) {
-    localStorage.setItem(AP2_MEMBER_KEY, 'approved');
-    ap2HideGate();
-    renderAlfaPortfoy2();
-    ap2LoadPrices();
-    stratToast('Alfa Portföy erişimi aktif!');
-  } else {
-    if (err) err.textContent = 'Geçersiz kod. Kodu doğrulayın.';
-  }
+  if (err) err.textContent = 'Erişim artık referans doğrulamasıyla açılıyor.';
+  showPage('erisim');
 }
 function bdSetTab(t) {
   bdTab = t === 'portfoy' ? 'portfoy' : 'defter';
@@ -19244,6 +19249,8 @@ function bindAlfaPortfoy2() {
   if (sellPrice) sellPrice.addEventListener('input', ap2SellCalcAmount);
   var gateVerify = document.getElementById('ap2-gate-verify');
   if (gateVerify) gateVerify.addEventListener('click', ap2VerifyCode);
+  var gateCta = document.getElementById('ap2-gate-cta');
+  if (gateCta) gateCta.addEventListener('click', function() { showPage('erisim'); });
   var gateCode = document.getElementById('ap2-gate-code');
   if (gateCode) gateCode.addEventListener('keydown', function(e) { if (e.key === 'Enter') ap2VerifyCode(); });
   var ap2srch = document.getElementById('ap2-search');
@@ -25531,7 +25538,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b90';
+const APP_BUILD = 'b91';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

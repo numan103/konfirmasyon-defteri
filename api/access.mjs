@@ -47,10 +47,16 @@ function isAdminUser(user) {
   return !!mail && adminEmails().indexOf(mail) >= 0;
 }
 
+// Varsayilan referans linkleri (site sahibinin hesaplari). Env ile ezilebilir.
+const DEFAULT_REF_LINKS = {
+  okx: 'https://www.okx.com/join/CRYPTOAHMET',
+  bybit: 'https://partner.bybit.com/b/cryptoahmet'
+};
+
 function links() {
   return {
-    okx: process.env.SITE_OKX_REF_LINK || '',
-    bybit: process.env.SITE_BYBIT_REF_LINK || ''
+    okx: process.env.SITE_OKX_REF_LINK || DEFAULT_REF_LINKS.okx,
+    bybit: process.env.SITE_BYBIT_REF_LINK || DEFAULT_REF_LINKS.bybit
   };
 }
 
