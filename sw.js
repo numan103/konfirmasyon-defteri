@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v51';
-const BUILD_ID = 'b109';
+﻿const CACHE = 'alfa-v53';
+const BUILD_ID = 'b112';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
