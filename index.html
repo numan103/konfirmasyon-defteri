@@ -1863,7 +1863,7 @@
   .bd-eye-inline:hover { opacity: .7; }
   .bd-hidden .bd-v, .bd-hidden .bd-row-amt, .bd-hidden .bd-legend-v, .bd-hidden .bd-bar-top b, .bd-hidden .bd-budget-txt, .bd-hidden .bd-card .bd-v, .bd-hidden #bd-chart-sub, .bd-hidden .bd-summary .bd-v, .bd-hidden .panel-h .bd-panel-sub, .bd-hidden .bd-donut-c, .bd-hidden .bd-legend-p, .bd-hidden .bd-bar-top .bd-legend-p { filter: blur(8px) !important; user-select: none; }
   .bd-hidden .bd-eye-inline { opacity: .5; }
-  /* Alfa Defter — Defter | Portföy sekmeleri */
+  /* Gelir/Gider — Defter | Portföy sekmeleri */
   .bd-tabs { display: flex; gap: 6px; margin-bottom: 14px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-2); width: fit-content; max-width: 100%; overflow-x: auto; }
   .bd-tab { border: none; background: transparent; color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 9px; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
   .bd-tab:hover { color: var(--text); }
@@ -4978,7 +4978,7 @@
     </a>
     <div class="nav-links">
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
-      <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Alfa Defter</a>
+      <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="nav-link" id="tab-uyap" data-nav>🏠 Real Estate</a>
       <div class="nav-drop">
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
@@ -5011,7 +5011,7 @@
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
       <!-- AYNA:BASLA -->
-      <a href="?page=ayna" class="nav-link" id="tab-ayna" data-nav>🪞 Ayna</a>
+      <a href="?page=ayna" class="nav-link" id="tab-ayna" data-nav>🪞 Kişisel Günlük Asistan</a>
       <!-- AYNA:BITIR -->
     </div>
     <div class="nav-contact" id="nav-contact">
@@ -5043,7 +5043,7 @@
     </div>
     <div class="nav-mobile-body">
       <a href="?page=home" class="mnav-link" data-nav data-mnav="home" data-i18n="app.home">🏠 Ana Menü</a>
-      <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" id="mnav-butce" data-i18n="app.butce">💰 Alfa Defter</a>
+      <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" id="mnav-butce" data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
@@ -5064,7 +5064,7 @@
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Referansla Aç</a>
       <!-- AYNA:BASLA -->
-      <a href="?page=ayna" class="mnav-link" data-nav data-mnav="ayna" id="mnav-ayna">🪞 Ayna</a>
+      <a href="?page=ayna" class="mnav-link" data-nav data-mnav="ayna" id="mnav-ayna">🪞 Kişisel Günlük Asistan</a>
       <!-- AYNA:BITIR -->
       <div class="mnav-contact">
         <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
@@ -5231,8 +5231,44 @@
         <div class="home-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M8.5 26 16 6.5 23.5 26" stroke="#7b78f5" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#7b78f5" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
         <h1>Alfa Traders</h1>
         <p class="home-sub" data-i18n="hm.sub">Trader'lar için disiplin, analiz ve öğrenme platformu</p>
-      </div>
-      <div class="home-survey" id="home-survey" hidden>
+       </div>
+       <div class="home-premium" style="margin:18px auto 6px;max-width:980px;padding:18px 20px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(123,120,245,.10),rgba(167,139,250,.04));">
+         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+           <span style="font-size:22px;">⭐</span>
+           <h2 style="margin:0;font-size:18px;font-weight:700;">Premium'a geç, tüm avantajları aç</h2>
+           <span style="font-size:12px;color:var(--text-3);margin-left:auto;">Referans doğrulamasıyla ücretsiz açılır</span>
+         </div>
+         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+           <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+             <div style="font-weight:600;margin-bottom:4px;">📢 İşlem Kanalı</div>
+             <div style="font-size:12.5px;color:var(--text-3);">Canlı işlem paylaşımları, giriş/çıkış ve gerekçe.</div>
+           </div>
+           <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+             <div style="font-weight:600;margin-bottom:4px;">💼 Portföy Yönetimi</div>
+             <div style="font-size:12.5px;color:var(--text-3);">Portföyünü takip et, ay ay birikim planı kur.</div>
+           </div>
+           <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+             <div style="font-weight:600;margin-bottom:4px;">📈 Trade Günlüğü</div>
+             <div style="font-size:12.5px;color:var(--text-3);">İşlem karnesi, istatistik ve disiplin takibi.</div>
+           </div>
+           <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+             <div style="font-weight:600;margin-bottom:4px;">🎓 Eğitim & Kaynak</div>
+             <div style="font-size:12.5px;color:var(--text-3);">Dersler, stratejiler, analiz köşesi ve indikatörler.</div>
+           </div>
+           <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+             <div style="font-weight:600;margin-bottom:4px;">🪞 Kişisel Günlük Asistan</div>
+             <div style="font-size:12.5px;color:var(--text-3);">Günlük plan, not ve kişisel asistan.</div>
+           </div>
+           <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+             <div style="font-weight:600;margin-bottom:4px;">💰 Gelir/Gider</div>
+             <div style="font-size:12.5px;color:var(--text-3);">Bütçe, gelir/gider ve portföy takibi.</div>
+           </div>
+         </div>
+         <div style="margin-top:12px;text-align:center;">
+           <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:10px 22px;">Referansla premium'a geç →</button>
+         </div>
+       </div>
+       <div class="home-survey" id="home-survey" hidden>
         <div class="hs-head">
           <h2 data-i18n="hs.h">🎯 Sana daha iyi yardımcı olabilmemiz için</h2>
           <p data-i18n="hs.p">30 saniye — neye ihtiyacın olduğunu söyle, biz ona göre içerik hazırlayalım.</p>
@@ -5301,7 +5337,7 @@
         </a>
         <a href="?page=butce" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvB)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-dasharray="126 170" transform="rotate(-90 105 54)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-dasharray="44 170" transform="rotate(60 105 54)" opacity=".85"/><text x="105" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">60%</text><text x="105" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">ELİMDE</text><circle cx="195" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="195" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="152 170" transform="rotate(-90 195 54)"/><circle cx="195" cy="54" r="27" fill="none" stroke="#f5a623" stroke-width="11" stroke-dasharray="64 170" transform="rotate(-20 195 54)"/><text x="195" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">35%</text><text x="195" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">AYLIK</text></svg></div>
-          <div class="hc-body"><h2 data-i18n="hm.c10.t">💼 Alfa Defter · Portföy &amp; Plan</h2><p data-i18n="hm.c10.s">Araçlarınla portföyünü takip et, ay ay birikim planı kur, hedefleri gör.</p></div>
+          <div class="hc-body"><h2 data-i18n="hm.c10.t">💼 Gelir/Gider · Portföy &amp; Plan</h2><p data-i18n="hm.c10.s">Araçlarınla portföyünü takip et, ay ay birikim planı kur, hedefleri gör.</p></div>
         </a>
         <a href="?page=egitim" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv4)"/><rect x="30" y="26" width="112" height="64" rx="10" fill="var(--pc)" opacity=".16"/><circle cx="86" cy="58" r="19" fill="var(--pc)"/><path d="M80 49 l13 9 -13 9 z" fill="#fff"/><rect x="162" y="38" width="98" height="10" rx="5" fill="var(--pc)" opacity=".55"/><rect x="162" y="56" width="78" height="10" rx="5" fill="var(--border)"/><rect x="162" y="74" width="90" height="10" rx="5" fill="var(--border)"/></svg></div>
@@ -6406,7 +6442,7 @@
   <div id="page-butce" class="hidden bd-hidden">
     <div class="strat-head">
       <div>
-        <div class="strat-title">💰 Alfa Defter <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle/göster">👁️</button></div>
+        <div class="strat-title">💰 Gelir/Gider <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle/göster">👁️</button></div>
         <div class="strat-sub">Aylık gelir / gider takibi. Ne kadar kazandın, nereye ne kadar harcadın — pasta dilimleriyle. Bu bölüm yalnızca senin cihazında.</div>
       </div>
     </div>
@@ -12741,7 +12777,7 @@ function renderAccessPage() {
   if (benefits) {
     const refPages = [
       ['İşlem Kanalı', 'alfatrading'], ['Portföy Yönetimi', 'portfoy'],
-      ['Alfa Defter (bütçe)', 'butce'],
+      ['Gelir/Gider (bütçe)', 'butce'],
       ['Trade Günlüğü', 'data'], ['Check List', 'defter'],
       ['Alfa Edu', 'egitim'], ['Stratejiler', 'strategies'],
       ['Analiz Köşesi', 'analiz'], ['Günün Karnesi', 'karne'],
@@ -16196,7 +16232,7 @@ function stratDelEduVideo(id, vid2) {
   saveStrat().then(() => { stratRenderDetail(s); stratToast('▶️ Video silindi'); });
 }
 
-// ============ Alfa Defter (Bütçe) ============
+// ============ Gelir/Gider (Bütçe) ============
 const BUTCE_KEY = 'defter-butce-v1';
 const BUTCE_COLORS = ['#3b82f6', '#38bdf8', '#818cf8', '#22d3ee', '#6366f1', '#93c5fd', '#0ea5e9', '#a5b4fc', '#2563eb', '#7dd3fc', '#4f46e5', '#94a3b8', '#60a5fa', '#06b6d4', '#1d4ed8', '#c7d2fe', '#0284c7'];
 const BUTCE_ICONS = ['💳','🏦','🛒','🍽️','🚗','💡','🏠','🎮','👕','💊','📚','📺','🎁','🧾','💼','🚀','📈','💰','🏷️'];
@@ -24541,7 +24577,7 @@ async function onAuthed(user) {
   const stMob = document.getElementById('mnav-strateji');
   if (stTab) stTab.style.display = isAdmin ? '' : 'none';
   if (stMob) stMob.style.display = isAdmin ? '' : 'none';
-  // Alfa Defter: sadece admin hesabında
+  // Gelir/Gider: sadece admin hesabında
   const bdTab = document.getElementById('tab-butce');
   const bdMob = document.getElementById('mnav-butce');
   if (bdTab) bdTab.style.display = isAdmin ? '' : 'none';
@@ -25816,7 +25852,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b103';
+const APP_BUILD = 'b104';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -26771,7 +26807,7 @@ loadSfx();
     'app.eduPage': { tr: '🎓 Alfa Edu', en: '🎓 Alfa Edu' },
     'app.strategies': { tr: '🧪 Stratejiler', en: '🧪 Strategies' },
     'app.analiz': { tr: '🧭 Analiz Köşesi', en: '🧭 Analysis Corner' },
-    'app.butce': { tr: '💰 Alfa Defter', en: '💰 Alfa Ledger' },
+    'app.butce': { tr: '💰 Gelir/Gider', en: '💰 Income/Expense' },
     'app.pano': { tr: '🛠️ Çalışma Panosu', en: '🛠️ Work Board' },
     'app.mentoring': { tr: '🤝 Mentoring', en: '🤝 Mentoring' },
     'app.indicators': { tr: '📐 İndikatörler', en: '📐 Indicators' },
@@ -27191,7 +27227,7 @@ loadSfx();
     'hm.c8.s': { tr: '3 yıldızlı yüksek etkili makro haberleri kaçırma.', en: 'Don\'t miss 3-star high-impact macro news.' },
     'hm.c9.t': { tr: '🤝 Alfa Ol', en: '🤝 Become Alfa' },
     'hm.c9.s': { tr: 'Topluluk akışı, PnL performansı, referansla katıl.', en: 'Community feed, PnL performance, join by referral.' },
-    'hm.c10.t': { tr: '💼 Alfa Defter · Portföy & Plan', en: '💼 Alfa Ledger · Portfolio & Plan' },
+    'hm.c10.t': { tr: '💼 Gelir/Gider · Portföy & Plan', en: '💼 Income/Expense · Portfolio & Plan' },
     'hm.c10.s': { tr: 'Araçlarınla portföyünü takip et, ay ay birikim planı kur, hedefleri gör.', en: 'Track your portfolio with your assets, set up a monthly savings plan, see targets.' },
     'hm.tips': { tr: '💡 Verimli Kullanım İpuçları', en: '💡 Tips for Efficient Use' },
     'hm.tips.1': { tr: '<strong>Alfa-Check List</strong> — Her işlem öncesi pair\'ini seç, kriterleri puanla. Eşikler otomatik karar versin. Seans kalitesini gir, günlük plan yap.', en: '<strong>Alfa-Check List</strong> — Pick your pair before every trade and score the criteria. Let the thresholds decide automatically. Log session quality and make a daily plan.' },
