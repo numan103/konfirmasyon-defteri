@@ -17140,7 +17140,7 @@ const AP2_CLOUD_KEY = 'alfa_portfoy_public';
 let ap2CloudData = null;
 let ap2CloudLoading = false;
 function ap2CloudSummary() {
-  var positions = (ap2Data.positions || []).filter(function(p) { return !ap2IsPending(p); });
+  var positions = (ap2Data.positions || []).slice();
   var sum = ap2Summary();
   var hist = [];
   try { hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) {}
