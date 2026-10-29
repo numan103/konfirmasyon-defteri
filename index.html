@@ -4966,7 +4966,7 @@
 
 <div class="wrap">
 <div id="tier-banner" style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.03));font-size:12.5px;color:var(--text);">
-  <span>🔒 Kısıtlı erişimdesin: işlem kanalı, portföy, işlem günlüğü ve eğitim referans doğrulamasıyla açılır.</span>
+  <span>🔒 Kısıtlı erişimdesin: işlem kanalı, portföy ve eğitim referans doğrulamasıyla açılır.</span>
   <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Referansla aç</button>
 </div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
@@ -12550,11 +12550,13 @@ const AM_PLAN = [
 // yalnizca arayuzu ve yonlendirmeyi belirler; veri erisimi Supabase RLS + API
 // tarafinda korunur.
 const PAGE_TIER = {
-  home: 'free', news: 'free', calc: 'free', calendar: 'free', ek: 'free', erisim: 'free',
+  home: 'free', calc: 'free', calendar: 'free', erisim: 'free',
   alfatrading: 'ref',
-  defter: 'ref', data: 'ref', review: 'ref', karne: 'ref', trading: 'ref',
+  trading: 'ref',
   egitim: 'ref', strategies: 'ref', analiz: 'ref', indicators: 'ref', designer: 'ref',
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
+  // Asagidakiler sadece yonetici (admin) gorur:
+  news: 'admin', ek: 'admin', defter: 'admin', data: 'admin', review: 'admin', karne: 'admin',
   alfa: 'admin', apps: 'admin', basvuru: 'admin', 'chat-admin': 'admin',
   sosyalmetre: 'admin', uyap: 'admin', zaman: 'admin', strateji: 'admin',
   ayna: 'admin', mentoring: 'admin'
@@ -12701,6 +12703,11 @@ function applyTierUi() {
     let any = false;
     links.forEach(function (a) { if (a.style.display !== 'none') any = true; });
     if (links.length) d.style.display = any ? '' : 'none';
+  });
+  // Admin-only sayfalarin ana sayfa kartlarini non-admin'de gizle
+  ['defter', 'data', 'review', 'karne', 'news', 'ek'].forEach(function (p) {
+    const card = document.querySelector('.home-card[href="?page=' + p + '"]');
+    if (card) card.style.display = isAdmin ? '' : 'none';
   });
   // Mobil grup basliklari (Edu / Trader) bos kalirsa gizle
   document.querySelectorAll('.mnav-group').forEach(function (g) {
@@ -25865,7 +25872,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b105';
+const APP_BUILD = 'b106';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
