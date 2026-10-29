@@ -7070,6 +7070,7 @@
         <div class="ap2-hd-actions">
           <input type="search" id="ap2-search" class="ap2-search" placeholder="Sembol / not ara…" autocomplete="off">
           <button type="button" class="ap2-btn-primary" id="ap2-add">＋ Yeni Enstrüman</button>
+           <button type="button" class="ap2-btn-ghost" id="ap2-reset" style="display:none;color:var(--red,#f87171);border-color:var(--red,#f87171);">🗑 Veriyi Sıfırla</button>
         </div>
       </div>
       <div id="ap2-empty" class="data-empty">Henüz pozisyon yok — sağ üstteki <b>＋ Yeni Enstrüman</b> ile başla.</div>
@@ -18093,8 +18094,25 @@ function ap2RenderMonthly() {
 
   body.innerHTML = barChart + netHeader + grid;
 }
+function ap2ResetAll() {
+  if (!siteIsAdmin()) return;
+  if (!confirm('Tüm portföy verisi (pozisyonlar, satışlar, geçmiş) silinecek. Emin misin?')) return;
+  try {
+    ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
+    ap2Ideas = [];
+    try { localStorage.removeItem('defter-portfoy-v1'); } catch(e) {}
+    try { localStorage.removeItem('defter-portfoy-sim-v3'); } catch(e) {}
+    try { localStorage.removeItem('alfa-fund-ideas-v1'); } catch(e) {}
+    try { localStorage.removeItem('defter-portfoy-sim-v2'); } catch(e) {}
+    ap2Save();
+    ap2SyncCloud();
+    renderAlfaPortfoy2();
+    alert('Portföy verisi sıfırlandı.');
+  } catch (e) { alert('Hata: ' + (e && e.message ? e.message : 'bilinmeyen')); }
+}
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
+  var _resetBtn = document.getElementById('ap2-reset'); if (_resetBtn) _resetBtn.style.display = siteIsAdmin() ? '' : 'none';
   if (!siteIsAdmin() && !ap2ReadOnlyLoaded) {
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = false;
@@ -19553,6 +19571,7 @@ function bindAlfaPortfoy2() {
   view.addEventListener('click', e => {
     if (!siteIsAdmin() && e.target.closest('#ap2-add, #ap2-f-save, #ap2-f-cancel, [data-ap2edit], [data-ap2del], [data-ap2sell], [data-ap2hedge], [data-ap2fill], #ap2-sell-confirm, #ap2-idea-add, [data-idea-del], [data-idea-edit], #ap2-hist-keep, #ap2-hist-usehist, #ap2-hist-cancel, #ap2-hist-cancel2')) return;
     if (e.target.closest('#ap2-add')) { ap2OpenForm(null); return; }
+    if (e.target.closest('#ap2-reset')) { ap2ResetAll(); return; }
     if (e.target.closest('#ap2-f-save')) { ap2SaveForm(); return; }
     if (e.target.closest('#ap2-f-cancel')) { document.getElementById('ap2-form').classList.add('hidden'); ap2EditId = null; return; }
     const ed = e.target.closest('[data-ap2edit]');
@@ -25910,7 +25929,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b115';
+const APP_BUILD = 'b116';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
