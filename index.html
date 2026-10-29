@@ -8538,7 +8538,7 @@ function modelsFor(p) {
 // Notion'dan strateji ve entry model seçeneklerini getirip listeye sürekli birleştirir
 async function loadNotionOptions() {
   try {
-    const res = await fetch('/api/notion-trades?mode=options');
+    const res = await siteFetch('/api/notion-trades?mode=options');
     const j = await res.json().catch(() => ({}));
     if (!j || (!Array.isArray(j.strategies) && !Array.isArray(j.models))) return;
     let changed = false;
@@ -10714,7 +10714,7 @@ async function syncDefterToJournal(t) {
     note: noteText, images: cur.images || [], stars: cur.stars || 0,
     notionId: cur.notionId || undefined, syncedImages: cur.imgSynced || []
   };
-  fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nt) })
+  siteFetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nt) })
     .then(r => r.json().catch(() => ({})))
     .then(j => {
       const rr = Array.isArray(j.results) ? j.results[0] : null;
@@ -12574,6 +12574,13 @@ async function siteAuthHeaders(extra) {
   return h;
 }
 
+// Korumali uclara giden istekler: oturum basligi otomatik eklenir.
+async function siteFetch(url, opts) {
+  opts = Object.assign({}, opts || {});
+  opts.headers = await siteAuthHeaders(opts.headers || {});
+  return fetch(url, opts);
+}
+
 function siteApplyAccess(j) {
   if (!j) return;
   SITE.tier = siteIsAdmin() ? 'admin' : (j.tier || 'free');
@@ -13334,7 +13341,7 @@ async function syncDataTradeNotion(t) {
   if (t.model) parts.push('Entry Model: ' + t.model);
   const payload = { id: t.id, ts: t.ts || Date.now(), date: t.date || '', pair: t.pair || '', dir: t.dir || '', r: dnum(t.r) || 0, strat: t.strat || '', model: t.model || '', note: parts.join(' · '), stars: 0, notionId: t.notionId || undefined, images: t.images || [], syncedImages: t.imgSynced || [], kKalite: t.kKalite || '' };
   try {
-    const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const resp = await siteFetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const j = await resp.json();
     const rr = Array.isArray(j.results) ? j.results[0] : null;
     if (rr && rr.ok && rr.notionId && !t.notionId) {
@@ -13550,7 +13557,7 @@ async function addDataTrade() {
   if (last.model) noteParts.push('Entry Model: ' + last.model);
   const ntrade = { id: last.id, ts: last.ts, date: last.date || '', pair: last.pair, dir: last.dir, r: last.r, strat: last.strat, model: last.model, kKalite: last.kKalite || '', note: noteParts.join(' · '), stars: 0, images: last.images || [], syncedImages: last.imgSynced || [] };
   try {
-    const resp = await fetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) });
+    const resp = await siteFetch('/api/notion-sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ntrade) });
     const j = await resp.json();
     const rr = Array.isArray(j.results) ? j.results[0] : null;
     if (rr && rr.ok && rr.notionId) { last.notionId = rr.notionId; }
@@ -13673,7 +13680,7 @@ async function importFromNotion() {
     url += (nt ? '&' : '?') + 'dbs=' + encodeURIComponent(JSON.stringify(dbs));
   }
   try {
-    const r = await fetch(url);
+    const r = await siteFetch(url);
     let j = {};
     try { j = await r.json(); } catch (e) { throw new Error('Sunucu yanıtı okunamadı (arka uç yüklü mü?)'); }
     if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status));
@@ -14392,7 +14399,7 @@ async function syncWeekToNotion() {
   status.textContent = 'Notion\'a yazılıyor…';
   status.style.color = '';
   try {
-    const resp = await fetch('/api/notion-week', {
+    const resp = await siteFetch('/api/notion-week', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'push', dbId, week: wk, rr: { kripto: rr.kripto, fx: rr.fx }, sections, metrics })
@@ -14419,7 +14426,7 @@ async function pullWeeksFromNotion() {
   status.textContent = 'Notion\'dan çekiliyor…';
   status.style.color = '';
   try {
-    const resp = await fetch('/api/notion-week', {
+    const resp = await siteFetch('/api/notion-week', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'pull', dbId })
@@ -24333,11 +24340,11 @@ function bootAuth() {
   // Şifre sıfırlama bağlantısıyla mı gelindi? (URL'de recovery işareti)
   let recovering = /type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search);
   const msg = (t, cls) => { const el = $('au-msg'); el.textContent = t; el.className = 'auth-msg' + (cls ? ' ' + cls : ''); };
-  // "Beni hatırla" — giriş bilgilerini bu cihazda sakla, form açılınca doldur
+  // "Beni hatırla" — yalnızca e-posta saklanır. Şifre asla yazılmaz.
   const REM_KEY = 'alfa-login-rem';
-  const saveRemember = (email, pass, remember) => {
+  const saveRemember = (email, remember) => {
     try {
-      if (remember) localStorage.setItem(REM_KEY, JSON.stringify({ email, pass }));
+      if (remember && email) localStorage.setItem(REM_KEY, JSON.stringify({ email }));
       else localStorage.removeItem(REM_KEY);
     } catch (e) {}
   };
@@ -24345,9 +24352,11 @@ function bootAuth() {
     try {
       const raw = localStorage.getItem(REM_KEY);
       if (!raw) return;
-      const d = JSON.parse(raw);
-      if (d.email) $('au-email').value = d.email;
-      if (d.pass) $('au-pass').value = d.pass;
+      const d = JSON.parse(raw) || {};
+      // Eski sürümler şifreyi düz metin saklıyordu: kalıntıyı temizle.
+      if (d.pass) { d.pass = undefined; localStorage.setItem(REM_KEY, JSON.stringify({ email: d.email || '' })); }
+      if (!d.email) { localStorage.removeItem(REM_KEY); return; }
+      $('au-email').value = d.email;
       const chk = document.getElementById('au-remember');
       if (chk) chk.checked = true;
     } catch (e) {}
@@ -24425,7 +24434,7 @@ function bootAuth() {
         if (!name) { msg('Lütfen isminizi yazın.', 'err'); return; }
         const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name } } });
         if (error) throw error;
-        if (data && data.session && data.user) { saveRemember(email, pass, true); await onAuthed(data.user); return; }
+        if (data && data.session && data.user) { saveRemember(email, true); await onAuthed(data.user); return; }
         msg('Kayıt alındı. E-posta onayı gerekiyorsa gelen kutunu kontrol et, sonra giriş yap.', 'ok');
         setMode('login');
       } else {
@@ -24440,7 +24449,7 @@ function bootAuth() {
         }
         const { data, error } = await AUTH.client.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;
-        saveRemember(email, pass, remember);
+        saveRemember(email, remember);
         await onAuthed(data.user);
       }
     } catch (err) {
@@ -25551,7 +25560,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b92';
+const APP_BUILD = 'b93';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -26056,9 +26065,7 @@ const CHAT_KEY = 'alfa-chat-v3';
 const CHAT_API = '/api/chat-admin';
 // Destek uclari kimlik istiyor: her cagriya oturum basligi ekliyoruz.
 async function chatFetch(url, opts) {
-  opts = opts || {};
-  opts.headers = await siteAuthHeaders(opts.headers || {});
-  return fetch(url, opts);
+  return siteFetch(url, opts);
 }
 let chatHistory = [];
 let chatFallbackCount = 0;

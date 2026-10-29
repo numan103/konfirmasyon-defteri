@@ -1,3 +1,5 @@
+import { requestUser, requestTier } from '../lib/auth.mjs';
+
 const NOTION_VERSION = '2022-06-28';
 
 async function notion(url, opts, token) {
@@ -160,6 +162,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST gerekli' });
+
+  // Haftalik degerlendirme defteri site sahibine ait: anonim erisim kapali.
+  const user = await requestUser(req);
+  if (!user) return res.status(401).json({ error: 'unauthorized' });
+  const tier = await requestTier(user);
+  if (tier !== 'ref' && tier !== 'admin') return res.status(403).json({ error: 'referral_required' });
 
   const token = process.env.NOTION_TOKEN;
   if (!token) return res.status(500).json({ error: 'NOTION_TOKEN env var ayarlı değil.' });
