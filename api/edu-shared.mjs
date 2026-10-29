@@ -6,7 +6,7 @@
 //  - ?kind=channel  => trader kanalları (id='channels', journals ...e002)
 //  - varsayılan     => Alfa Edu kurs içeriği (id='v1', journals ...e000)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
   shared: { rowId: 'v1', journalUid: '00000000-0000-0000-0000-00000000e000' },
   channel: { rowId: 'channels', journalUid: '00000000-0000-0000-0000-00000000e002' },

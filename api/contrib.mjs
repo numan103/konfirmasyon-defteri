@@ -2,7 +2,7 @@
 import { requestUser, requestTier } from '../lib/auth.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROW_CONTRIB = 'contribs';
 const ROW_PANO = 'panos';
 const JOURNAL_UID = '00000000-0000-0000-0000-00000000e001';
