@@ -18101,19 +18101,22 @@ function renderAlfaPortfoy2() {
     var _layout = document.querySelector('.ap2-layout');
     var _sumEl = document.getElementById('ap2-summary-area');
     var _grid = document.getElementById('ap2-grid');
+    var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
+    if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Paylaşılan portföy yükleniyor...'; }
     ap2FetchCloud(true).then(function(d) {
-      if (d && d.portfolioValue != null) {
+      console.log('ap2 cloud for non-admin:', d);
+      if (d && (d.portfolioValue != null || d.count)) {
         if (_empty) _empty.style.display = 'none';
         if (_layout) _layout.style.display = '';
         if (_sumEl) ap2RenderTeaserTarget(d, 'ap2-pt');
-        if (_grid) _grid.innerHTML = '<div class="data-empty" style="padding:18px;text-align:center;color:var(--text-3);">Salt okunur görünüm — pozisyon detayları yönetici tarafından paylaşılmaktadır.</div>';
-        var _ideas = document.getElementById('ap2-ideas'); if (_ideas) _ideas.style.display = 'none';
+        if (_grid) _grid.innerHTML = '<div class="data-empty" style="padding:18px;text-align:center;color:var(--text-3);">Salt okunur görünüm — pozisyon detayları yönetici tarafından paylaşılmaktadır. Toplam: ' + (d.count || 0) + ' pozisyon.</div>';
       } else {
-        if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Henüz paylaşılan portföy yok.'; }
+        if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Henüz paylaşılan portföy yok. Yönetici portföyünü paylaşmadı.'; }
         if (_layout) _layout.style.display = 'none';
       }
-    }).catch(function() {
-      if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Portföy yüklenemedi.'; }
+    }).catch(function(e) {
+      console.error('ap2 cloud err', e);
+      if (_empty) { _empty.style.display = ''; _empty.innerHTML = 'Portföy yüklenemedi: ' + (e && e.message ? e.message : 'hata'); }
     });
     return;
   }
@@ -25872,7 +25875,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b107';
+const APP_BUILD = 'b108';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
