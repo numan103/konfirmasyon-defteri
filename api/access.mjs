@@ -1,8 +1,11 @@
 // ALFA TRADERS - uyelik / referans erisim ucu
 //
 // GET  /api/access            -> kullanicinin erisim durumu
+// GET  /api/access?op=list    -> (yonetici) tum basvurular + e-posta
 // POST /api/access {op:'submit', exchange:'okx'|'bybit', uid:'...'}
 //                             -> UID'yi borsaya sorar, sonucu kaydeder
+// POST /api/access {op:'approve'|'reject'|'revoke', user_id:'...'}
+//                             -> (yonetici) basvuruyu onaylar/reddeder
 //
 // Kimlik: Authorization: Bearer <supabase access token>
 // Okuma: kullanicinin kendi JWT'si (RLS ile yalniz kendi satiri)
@@ -117,6 +120,108 @@ function tierOf(user, status) {
   if (isAdminUser(user)) return 'admin';
   if (status === 'verified') return 'ref';
   return 'free';
+}
+
+// ---- Yonetici islemleri (service role gerekir) ----
+
+async function svcRead(path) {
+  const key = process.env.SUPABASE_SERVICE_ROLE || '';
+  if (!key) throw new Error('service role missing');
+  const r = await fetch(SUPABASE_URL + path, { headers: svcHeaders() });
+  if (!r.ok) throw new Error('read ' + r.status);
+  return r.json();
+}
+
+async function svcPatch(userId, patch) {
+  const key = process.env.SUPABASE_SERVICE_ROLE || '';
+  if (!key) throw new Error('service role missing');
+  const r = await fetch(
+    SUPABASE_URL + '/rest/v1/site_access?user_id=eq.' + encodeURIComponent(userId),
+    {
+      method: 'PATCH',
+      headers: { ...svcHeaders(), Prefer: 'return=representation' },
+      body: JSON.stringify(patch)
+    }
+  );
+  if (!r.ok) throw new Error('patch ' + r.status);
+  const rows = await r.json().catch(() => []);
+  return rows && rows[0] ? rows[0] : null;
+}
+
+// Kullanici e-postalari: tek istekte haritalanir (yonetici listesi icin).
+async function emailMap() {
+  const map = {};
+  try {
+    const page = await svcRead('/auth/v1/admin/users?page=1&per_page=1000');
+    const list = (page && page.users) || [];
+    list.forEach((u) => { if (u && u.id) map[u.id] = u.email || ''; });
+  } catch (e) {
+    console.error('[ACCESS] email map', e && e.message);
+  }
+  return map;
+}
+
+async function listHandler(res, user) {
+  if (!isAdminUser(user)) return fail(res, 403, 'admin_only');
+  let rows;
+  try {
+    rows = await svcRead(
+      '/rest/v1/site_access?select=user_id,exchange,exchange_uid,status,note,attempts,' +
+      'verified_at,verified_by,created_at,updated_at&order=created_at.desc&limit=200'
+    );
+  } catch (e) {
+    console.error('[ACCESS] list', e && e.message);
+    return fail(res, 500, 'store_error');
+  }
+  const mails = await emailMap();
+  const out = (Array.isArray(rows) ? rows : []).map((r) => ({
+    user_id: r.user_id,
+    email: mails[r.user_id] || '',
+    exchange: r.exchange,
+    exchange_uid: r.exchange_uid,
+    status: r.status,
+    note: r.note,
+    attempts: r.attempts,
+    verified_at: r.verified_at,
+    verified_by: r.verified_by,
+    created_at: r.created_at,
+    updated_at: r.updated_at
+  }));
+  return send(res, 200, { ok: true, rows: out, open: process.env.SITE_ACCESS_OPEN === '1' });
+}
+
+async function adminOpHandler(res, user, body) {
+  if (!isAdminUser(user)) return fail(res, 403, 'admin_only');
+  const op = String(body.op || '');
+  const userId = String(body.user_id || '').trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+    return fail(res, 400, 'bad_user');
+  }
+  if (userId === user.id) return fail(res, 400, 'self');
+
+  let patch;
+  if (op === 'approve') {
+    patch = { status: 'verified', verified_by: 'manual', verified_at: new Date().toISOString(), note: null };
+  } else if (op === 'reject') {
+    patch = {
+      status: 'rejected', verified_by: 'manual', verified_at: null,
+      note: String(body.note || 'manual reject').slice(0, 200)
+    };
+  } else if (op === 'revoke') {
+    patch = { status: 'rejected', verified_by: 'manual', verified_at: null, note: 'revoked' };
+  } else {
+    return fail(res, 400, 'bad_op');
+  }
+
+  let row;
+  try {
+    row = await svcPatch(userId, patch);
+  } catch (e) {
+    console.error('[ACCESS] admin op', e && e.message);
+    return fail(res, 500, 'store_error');
+  }
+  if (!row) return fail(res, 404, 'not_found');
+  return send(res, 200, { ok: true, status: row.status, user_id: row.user_id });
 }
 
 async function statusHandler(res, user, jwt) {
@@ -238,13 +343,17 @@ export default async function handler(req, res) {
   const user = await getUser(jwt);
   if (!user) return fail(res, 401, 'unauthorized');
 
-  if (req.method === 'GET') return statusHandler(res, user, jwt);
+  if (req.method === 'GET') {
+    if (req.query && req.query.op === 'list') return listHandler(res, user);
+    return statusHandler(res, user, jwt);
+  }
 
   if (req.method === 'POST') {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const op = body.op || 'status';
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);
+    if (op === 'approve' || op === 'reject' || op === 'revoke') return adminOpHandler(res, user, body);
     return fail(res, 400, 'bad_request');
   }
 

@@ -8118,6 +8118,19 @@
       </div>
     </div>
 
+    <div class="panel" id="acc-admin-panel" style="display:none;">
+      <h2><span>Üyelik onayları</span><span class="n" id="acc-admin-count">—</span></h2>
+      <p class="hint" style="margin:0 0 10px;">UID gönderen üyeler burada listelenir. Onayladığında üye anında premium erişim alır.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
+        <button class="btn" id="acc-admin-refresh" type="button">Yenile</button>
+        <label class="hint" style="display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;">
+          <input type="checkbox" id="acc-admin-all"> Reddedilenler de görünsün
+        </label>
+      </div>
+      <div id="acc-admin-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="acc-admin-msg" class="hint" style="min-height:18px;margin-top:8px;"></div>
+    </div>
+
     <div class="panel" id="acc-form-panel">
       <h2><span>UID doğrula</span><span class="n">1 adım</span></h2>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 6px;">
@@ -12633,10 +12646,10 @@ function applyTierUi() {
       if (el) el.style.display = ok ? '' : 'none';
     });
   });
-  // Erisim linki sadece dogrulanmamis kullanicida gorunur
+  // Erisim linki: dogrulanmamis kullanicida + yoneticide (onay paneli) gorunur
   ['tab-erisim', 'mnav-erisim'].forEach(function (id) {
     const el = document.getElementById(id);
-    if (el) el.style.display = (ref || isAdmin) ? 'none' : '';
+    if (el) el.style.display = (ref && !isAdmin) ? 'none' : '';
   });
   // Ust bilgi seridi (kisitli erisim)
   const banner = document.getElementById('tier-banner');
@@ -12728,7 +12741,119 @@ function renderAccessPage() {
       '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, AlfaNews, Hesaplayıcı, Ekonomik Takvim.</div>';
   }
 
+  // Yonetici: bekleyen UID basvurulari
+  const adminPanel = document.getElementById('acc-admin-panel');
+  if (adminPanel) {
+    adminPanel.style.display = isAdmin ? '' : 'none';
+    if (isAdmin) loadAdminAccess(true);
+  }
+
   bindAccessForm();
+}
+
+// ---- Yonetici onay paneli ----
+let adminAccessRows = null;
+let adminAccessBusy = false;
+
+function accEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function adminAccessFmt(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleString('tr-TR', {
+      day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
+    });
+  } catch (e) { return '—'; }
+}
+
+async function loadAdminAccess(force) {
+  if (adminAccessBusy) return;
+  if (adminAccessRows && !force) { renderAdminAccess(); return; }
+  adminAccessBusy = true;
+  const msg = document.getElementById('acc-admin-msg');
+  if (msg) msg.textContent = 'Yükleniyor…';
+  try {
+    const r = await siteFetch('/api/access?op=list', { cache: 'no-store' });
+    const j = await r.json().catch(function () { return null; });
+    if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+    adminAccessRows = Array.isArray(j.rows) ? j.rows : [];
+    if (msg) msg.textContent = j.open ? 'DİKKAT: SITE_ACCESS_OPEN=1 — kapı şu an herkese açık.' : '';
+  } catch (e) {
+    adminAccessRows = [];
+    if (msg) msg.textContent = 'Liste alınamadı: ' + (e.message || 'hata');
+  }
+  adminAccessBusy = false;
+  renderAdminAccess();
+}
+
+function renderAdminAccess() {
+  const box = document.getElementById('acc-admin-list');
+  const count = document.getElementById('acc-admin-count');
+  if (!box) return;
+  const rows = adminAccessRows || [];
+  const allEl = document.getElementById('acc-admin-all');
+  const showAll = !!(allEl && allEl.checked);
+  const pending = rows.filter(function (r) { return r.status === 'pending'; }).length;
+  const visible = rows.filter(function (r) { return showAll ? true : r.status === 'pending'; });
+  if (count) count.textContent = pending + ' bekliyor';
+  if (!visible.length) {
+    box.innerHTML = '<p class="hint" style="margin:0;">Bekleyen başvuru yok.</p>';
+    return;
+  }
+  box.innerHTML = visible.map(function (r) {
+    const st = r.status === 'verified' ? 'Doğrulandı'
+      : (r.status === 'pending' ? 'Onay bekliyor'
+        : (r.status === 'rejected' ? 'Reddedildi' : '—'));
+    const ex = (r.exchange || '').toUpperCase() || '—';
+    const mail = r.email || r.user_id;
+    const uidTxt = r.exchange_uid || '—';
+    const attrs = ' data-acc-op="%OP%" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-mail="' + accEsc(mail) + '" type="button"';
+    const act = r.status === 'verified'
+      ? ('<button class="btn"' + attrs.replace('%OP%', 'revoke') + '>Geri al</button>')
+      : ('<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
+        '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>');
+    return '<div style="border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--card);display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;">' +
+      '<div style="min-width:190px;">' +
+        '<div style="font-size:13px;font-weight:600;word-break:break-all;">' + accEsc(mail) + '</div>' +
+        '<div class="hint" style="margin:2px 0 0;">' + accEsc(ex) + ' · UID ' + accEsc(uidTxt) + ' · ' + st + ' · ' + adminAccessFmt(r.created_at) + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + act + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function adminAccessOp(op, userId, email) {
+  if (!userId || adminAccessBusy) return;
+  if (op !== 'approve') {
+    const who = email || 'bu üye';
+    const q = op === 'reject'
+      ? '"' + who + '" başvurusunu reddetmek istiyor musun?'
+      : '"' + who + '" premium erişimini geri almak istiyor musun?';
+    if (!window.confirm(q)) return;
+  }
+  adminAccessBusy = true;
+  const msg = document.getElementById('acc-admin-msg');
+  if (msg) msg.textContent = op === 'approve' ? 'Onaylanıyor…' : 'İşleniyor…';
+  try {
+    const r = await siteFetch('/api/access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ op: op, user_id: userId })
+    });
+    const j = await r.json().catch(function () { return null; });
+    if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+    if (msg) msg.textContent = op === 'approve' ? 'Onaylandı ✓' : (op === 'reject' ? 'Reddedildi.' : 'Erişim geri alındı.');
+    await loadSiteAccess();
+    applyTierUi();
+  } catch (e) {
+    if (msg) msg.textContent = 'İşlem başarısız: ' + (e.message || 'hata');
+  }
+  adminAccessBusy = false;
+  await loadAdminAccess(true);
 }
 
 function bindAccessForm() {
@@ -12743,6 +12868,16 @@ function bindAccessForm() {
   if (goBtn) goBtn.addEventListener('click', function () { showPage(accessNextPage || 'home'); accessNextPage = ''; });
   const uid = document.getElementById('acc-uid');
   if (uid) uid.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitAccess(); } });
+  const accRefresh = document.getElementById('acc-admin-refresh');
+  if (accRefresh) accRefresh.addEventListener('click', function () { loadAdminAccess(true); });
+  const accAll = document.getElementById('acc-admin-all');
+  if (accAll) accAll.addEventListener('change', renderAdminAccess);
+  const accList = document.getElementById('acc-admin-list');
+  if (accList) accList.addEventListener('click', function (e) {
+    const b = e.target && e.target.closest ? e.target.closest('[data-acc-op]') : null;
+    if (!b) return;
+    adminAccessOp(b.getAttribute('data-acc-op'), b.getAttribute('data-acc-uid'), b.getAttribute('data-acc-mail'));
+  });
 }
 
 async function submitAccess() {
@@ -25560,7 +25695,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b93';
+const APP_BUILD = 'b94';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
