@@ -222,6 +222,8 @@ async function adminOpHandler(res, user, body) {
     const vol = Number(body.volume);
     if (!isFinite(vol) || vol < 0) return fail(res, 400, 'bad_volume');
     patch = { volume: vol };
+  } else if (op === 'delvolume') {
+    patch = { volume: null };
   } else if (op === 'revoke') {
     patch = { status: 'rejected', verified_by: 'manual', verified_at: null, note: 'revoked' };
   } else {
@@ -385,7 +387,7 @@ export default async function handler(req, res) {
     const op = body.op || 'status';
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);
-    if (op === 'approve' || op === 'reject' || op === 'revoke' || op === 'setvolume') return adminOpHandler(res, user, body);
+    if (op === 'approve' || op === 'reject' || op === 'revoke' || op === 'setvolume' || op === 'delvolume') return adminOpHandler(res, user, body);
     return fail(res, 400, 'bad_request');
   }
 

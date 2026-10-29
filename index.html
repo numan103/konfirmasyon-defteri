@@ -12863,7 +12863,7 @@ function renderAdminAccess() {
         '<div style="font-size:13px;font-weight:600;word-break:break-all;">' + accEsc(mail) + '</div>' +
         '<div class="hint" style="margin:2px 0 0;">' + accEsc(ex) + ' · UID ' + accEsc(uidTxt) + ' · ' + st + ' · hacim $' + (r.volume || 0) + ' · ' + adminAccessFmt(r.created_at) + '</div>' +
       '</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' + act + '<input type="number" data-acc-vol-input="' + accEsc(r.user_id) + '" value="' + (r.volume || 0) + '" placeholder="Hacim (USD)" style="width:96px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">' + '<button class="btn solid" data-acc-op="setvolume" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-vol="INPUT">Kaydet</button>' + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' + act + '<input type="number" data-acc-vol-input="' + accEsc(r.user_id) + '" value="' + (r.volume || 0) + '" placeholder="Hacim (USD)" style="width:96px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">' + '<button class="btn solid" data-acc-op="setvolume" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-vol="INPUT">Kaydet</button>' + '<button class="btn" data-acc-op="delvolume" data-acc-uid="' + accEsc(r.user_id) + '">Sil</button>' + '</div>' +
     '</div>';
   }).join('');
 }
@@ -12909,6 +12909,34 @@ async function adminAccessOp(op, userId, email, volume) {
     }
     adminAccessBusy = false;
     // Listeyi yenileme (Yukleniyor... takilmasini onler); kullanici "Yenile" ile sync edebilir
+    return;
+  }
+  if (op === "delvolume") {
+    if (adminAccessBusy) return;
+    if (!window.confirm("Bu uyenin hacmini silmek istiyor musun?")) return;
+    adminAccessBusy = true;
+    const msg = document.getElementById("acc-admin-msg");
+    if (msg) msg.textContent = "Hacim siliniyor...";
+    try {
+      const r = await siteFetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ op: "delvolume", user_id: userId })
+      });
+      const j = await r.json().catch(function () { return null; });
+      if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ("HTTP " + r.status));
+      if (msg) msg.textContent = "Hacim silindi.";
+      try {
+        if (!Array.isArray(adminAccessRows)) adminAccessRows = [];
+        for (let i = 0; i < adminAccessRows.length; i++) { if (adminAccessRows[i] && adminAccessRows[i].user_id === userId) adminAccessRows[i].volume = null; }
+        renderAdminAccess();
+      } catch (e2) { console.error('render err', e2); }
+    } catch (e) {
+      if (msg) msg.textContent = "Hacim silinemedi: " + (e.message || "hata");
+      console.error('delvolume err', e);
+      alert("Hacim silinemedi: " + (e.message || "hata"));
+    }
+    adminAccessBusy = false;
     return;
   }
   if (adminAccessBusy) return;
@@ -12968,6 +12996,7 @@ function bindAccessForm() {
     const volInput = b.parentElement ? b.parentElement.querySelector('input[data-acc-vol-input]') : null;
     const vol2 = (volInput && volInput.value !== '') ? volInput.value : null;
     if (op2 === "setvolume") { adminAccessOp("setvolume", uid2, mail2, vol2); return; }
+    if (op2 === "delvolume") { adminAccessOp("delvolume", uid2, mail2, null); return; }
     adminAccessOp(op2, uid2, mail2);
   });
 }
@@ -25787,7 +25816,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b102';
+const APP_BUILD = 'b103';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
