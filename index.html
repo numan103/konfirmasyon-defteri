@@ -12553,7 +12553,7 @@ const PAGE_TIER = {
   home: 'free', calc: 'free', calendar: 'free', erisim: 'free',
   alfatrading: 'ref',
   trading: 'ref',
-  egitim: 'ref', strategies: 'ref', analiz: 'ref', indicators: 'ref', designer: 'ref',
+  egitim: 'ref', strategies: 'admin', analiz: 'admin', indicators: 'admin', designer: 'admin',
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
   // Asagidakiler sadece yonetici (admin) gorur:
   news: 'admin', ek: 'admin', defter: 'admin', data: 'admin', review: 'admin', karne: 'admin',
@@ -12705,7 +12705,7 @@ function applyTierUi() {
     if (links.length) d.style.display = any ? '' : 'none';
   });
   // Admin-only sayfalarin ana sayfa kartlarini non-admin'de gizle
-  ['defter', 'data', 'review', 'karne', 'news', 'ek'].forEach(function (p) {
+  ['defter', 'data', 'review', 'karne', 'news', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
     const card = document.querySelector('.home-card[href="?page=' + p + '"]');
     if (card) card.style.display = isAdmin ? '' : 'none';
   });
@@ -17172,17 +17172,17 @@ async function ap2SyncCloud() {
     await fetch(url, { method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ id: AP2_CLOUD_KEY, data: data }) });
   } catch(e) {}
 }
-async function ap2FetchCloud() {
-  if (ap2CloudData) return ap2CloudData;
-  if (ap2CloudLoading) return null;
+async function ap2FetchCloud(force) {
+  if (ap2CloudData && !force) return ap2CloudData;
+  if (ap2CloudLoading) return ap2CloudData || null;
   ap2CloudLoading = true;
   try {
-    var r = await fetch(SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + AP2_CLOUD_KEY + '&select=data', { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
+    var r = await fetch(SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + AP2_CLOUD_KEY + '&select=data', { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Cache-Control': 'no-cache' } });
     var j = await r.json();
-    if (j && j.length && j[0].data) { ap2CloudData = j[0].data; return ap2CloudData; }
-  } catch(e) {}
+    if (j && j.length && j[0] && j[0].data) { ap2CloudData = j[0].data; ap2CloudLoading = false; return ap2CloudData; }
+  } catch(e) { console.error('ap2FetchCloud err', e); }
   ap2CloudLoading = false;
-  return null;
+  return ap2CloudData || null;
 }
 function ap2RenderTeaserTarget(data, prefix) {
   if (!data) return;
@@ -18101,7 +18101,7 @@ function renderAlfaPortfoy2() {
     var _layout = document.querySelector('.ap2-layout');
     var _sumEl = document.getElementById('ap2-summary-area');
     var _grid = document.getElementById('ap2-grid');
-    ap2FetchCloud().then(function(d) {
+    ap2FetchCloud(true).then(function(d) {
       if (d && d.portfolioValue != null) {
         if (_empty) _empty.style.display = 'none';
         if (_layout) _layout.style.display = '';
@@ -25872,7 +25872,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b106';
+const APP_BUILD = 'b107';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
