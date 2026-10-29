@@ -8122,9 +8122,16 @@
       <h2><span>Üyelik onayları</span><span class="n" id="acc-admin-count">—</span></h2>
       <p class="hint" style="margin:0 0 10px;">UID gönderen üyeler burada listelenir. Onayladığında üye anında premium erişim alır.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
         <button class="btn" id="acc-admin-refresh" type="button">Yenile</button>
+        <select id="acc-admin-status" style="padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;min-width:150px;">
+          <option value="all">Tumu</option>
+          <option value="pending">Bekleyen</option>
+          <option value="verified">Onayli</option>
+          <option value="rejected">Reddedilen</option>
+        </select>
         <label class="hint" style="display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;">
-          <input type="checkbox" id="acc-admin-all"> Reddedilenler de görünsün
+          <input type="checkbox" id="acc-admin-all"> Reddedilenler de gorunsun
         </label>
       </div>
       <div id="acc-admin-list" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -12813,9 +12820,12 @@ function renderAdminAccess() {
   if (!box) return;
   const rows = adminAccessRows || [];
   const allEl = document.getElementById('acc-admin-all');
-  const showAll = !!(allEl && allEl.checked);
+  const allChecked = !!(allEl && allEl.checked);
+  const selEl = document.getElementById('acc-admin-status');
+  const f = selEl ? selEl.value : 'pending';
+  const statusOk = function (r) { return f === 'all' ? true : r.status === f; };
+  const visible = rows.filter(statusOk);
   const pending = rows.filter(function (r) { return r.status === 'pending'; }).length;
-  const visible = rows.filter(function (r) { return showAll ? true : r.status === 'pending'; });
   if (count) count.textContent = pending + ' bekliyor';
   const totalsEl = document.getElementById('acc-admin-totals');
   if (totalsEl) {
@@ -12904,6 +12914,8 @@ function bindAccessForm() {
   if (accRefresh) accRefresh.addEventListener('click', function () { loadAdminAccess(true); });
   const accAll = document.getElementById('acc-admin-all');
   if (accAll) accAll.addEventListener('change', renderAdminAccess);
+  const accStatus = document.getElementById('acc-admin-status');
+  if (accStatus) accStatus.addEventListener('change', renderAdminAccess);
   const accList = document.getElementById('acc-admin-list');
   if (accList) accList.addEventListener('click', function (e) {
     const b = e.target && e.target.closest ? e.target.closest('[data-acc-op]') : null;
