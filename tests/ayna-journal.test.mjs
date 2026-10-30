@@ -79,3 +79,59 @@ test('evening editor replaces only its host, leaving other journal sections inta
   assert.equal(container.innerHTML, 'morning and quick note');
   assert.match(host.innerHTML, /id="ay-nb"/);
 });
+
+test('morning saves update in place and later saves update the same entry', async () => {
+  const c = setup();
+  let click, inserts = 0, updates = 0;
+  const button = { disabled: false, addEventListener: (_, fn) => { click = fn; } };
+  const input = { value: 'One priority' };
+  const container = { querySelector: selector => selector === '#ay-ms' ? button : selector === '#ay-mi' ? input : { textContent: '' } };
+  const query = { insert() { inserts++; return this; }, update() { updates++; return this; }, eq() { return this; }, select() { return this; }, single() { return Promise.resolve({ data: { id: 'morning-1' } }); } };
+  c.Ayna.sb = () => ({ from: () => query });
+  c.Ayna.flash = () => {};
+  c.renderToday = () => { throw new Error('must not redraw'); };
+  c._bindMorning(container, '2026-10-29', null);
+  click(); await new Promise(setImmediate);
+  input.value = 'Adjusted priority'; click(); await new Promise(setImmediate);
+  assert.equal(inserts, 1);
+  assert.equal(updates, 1);
+  assert.equal(button.disabled, false);
+});
+
+test('coach analysis can be requested for an ordinary note, without importance threshold', async () => {
+  const c = setup(); let request;
+  const result = { textContent: '', innerHTML: '' }, button = { disabled: false };
+  const container = { isConnected: true, querySelector: id => id === '#ay-analyze' ? button : result };
+  c.Ayna.api = async (action, payload) => { request = { action, payload }; return { insight: { title: 'A reflection', body: 'One useful step' } }; };
+  await c._runJournalAnalysis(container, { id: 'entry-1', kind: 'note', body: 'A quiet day' });
+  assert.equal(request.action, 'reflect');
+  assert.equal(request.payload.overview, true);
+  assert.equal(request.payload.kind, 'instant');
+  assert.match(result.innerHTML, /One useful step/);
+  assert.equal(button.disabled, false);
+});
+
+test('empty people map still has an addressable card for the add-person form', () => {
+  const c = setup();
+  c.document = { getElementById: () => ({ addEventListener() {} }) };
+  vm.runInContext(fs.readFileSync(new URL('../ayna/ayna-map.js', import.meta.url), 'utf8'), c);
+  for (const name of ['drawMap', 'renderRingCard', 'injectMapStyle']) c[name] = () => {};
+  const container = { innerHTML: '' };
+  c.renderMapContent(container);
+  assert.match(container.innerHTML, /id="ay-map-card"/);
+  assert.match(container.innerHTML, /id="ay-person-picker"/);
+});
+
+test('relationship metrics ignore closed events and events older than 90 days', () => {
+  const c = setup();
+  vm.runInContext(fs.readFileSync(new URL('../ayna/ayna-map.js', import.meta.url), 'utf8'), c);
+  c.Ayna.today = () => '2026-10-29';
+  c._mapEvents = [
+    { person_id: 'friend', local_date: '2026-10-29', impact: 2 },
+    { person_id: 'friend', local_date: '2026-10-28', impact: -2, is_closed: true },
+    { person_id: 'friend', local_date: '2025-01-01', impact: -2 }
+  ];
+  const metrics = c.calcMetrics('friend');
+  assert.equal(metrics.n, 1);
+  assert.equal(metrics.avgImpact, 2);
+});

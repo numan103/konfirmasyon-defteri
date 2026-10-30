@@ -42,6 +42,7 @@ function _q(name, builder) {
 }
 
 function renderToday(c) {
+  c._ayAnalysisVersion = (c._ayAnalysisVersion || 0) + 1;
   if (Ayna.voice) Ayna.voice.cancel();
   var draft = _journalDraft(Ayna.today());
   ['ay-qn', 'ay-nb', 'ay-sl'].forEach(function (id) {
@@ -58,7 +59,8 @@ function renderToday(c) {
     _q('open_loops', sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open')),
     _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })),
     _q('crisis', sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1)),
-    _q('week', sb.from('ayna_entries').select('local_date,sleep_hours').eq('user_id', uid).gte('local_date', Ayna.addDays(d, -6)).lte('local_date', d))
+    _q('week', sb.from('ayna_entries').select('local_date,sleep_hours').eq('user_id', uid).gte('local_date', Ayna.addDays(d, -6)).lte('local_date', d)),
+    _q('insights', sb.from('ayna_insights').select('*').eq('user_id', uid).eq('period_start', d).in('kind', ['daily', 'instant']).order('created_at', { ascending: false }).limit(20))
   ]).then(function (r) {
     var pendingCount = (r[0] && r[0].count) || 0, entries = (r[1] && r[1].data) || [], people = (r[2] && r[2].data) || [];
     var rules = (r[3] && r[3].data) || [], loops = (r[4] && r[4].data) || [], trades = (r[5] && r[5].data) || [];
@@ -66,6 +68,10 @@ function renderToday(c) {
     try {
       if (r[1] && r[1].error) throw r[1].error;
       renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis, (r[7] && !r[7].error) ? r[7].data : null);
+      var insights = (r[8] && r[8].data) || [];
+      var latest = _journalAnalysisEntry(c);
+      var insight = insights.find(function (item) { return latest && item.source_entry_id === latest.id; });
+      if (insight) _showJournalAnalysis(c, insight);
     } catch (e2) {
       console.error('[AYNA today] çizim hatası:', e2);
       c.innerHTML = '<div class="ay-card">' + Ayna.t('err.default') + '</div>';
@@ -77,8 +83,10 @@ function renderToday(c) {
 }
 
 function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, trades, hasCrisis, week) {
+    c._ayEntries = entries.slice();
     var morning = null, evening = null;
     entries.forEach(function (e) { if (e.kind === 'morning') morning = e; if (e.kind === 'evening') evening = e; });
+    c._ayEveningEntry = evening;
     var notes = entries.filter(function (e) { return e.kind === 'note'; });
     var h = _cardRhythm(morning, evening, notes, week);
     if (pendingCount > 0) h += '<div class="ay-card"><p>' + Ayna.t('today.pending_notice', { n: pendingCount }) + '</p><button class="btn" id="ay-go-map">' + Ayna.t('today.pending_link') + '</button></div>';
@@ -87,6 +95,7 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
     h += _cardQuickNote();
     h += _cardJournalNotes(notes);
     h += evening ? _cardEveningDone(evening) : _cardEveningForm(people, rules);
+    h += '<section class="ay-card" id="ay-daily-analysis"><h4>' + Ayna.t('journal.analysis') + '</h4><p>' + Ayna.t('journal.analysis_hint') + '</p><button type="button" class="btn" id="ay-analyze">' + Ayna.t('journal.analyze') + '</button><div id="ay-analysis-result" aria-live="polite"></div></section>';
     h += _cardLoops(loops);
     h += _cardTrades(trades);
     c.innerHTML = h;
@@ -97,7 +106,41 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
     _bindQuickNote(c, d);
     _bindLoops(c);
     _bindTrades(c, d);
-    if (evening) _checkEveningReflection(c, evening);
+    var analyze = c.querySelector('#ay-analyze');
+    analyze.disabled = !_journalAnalysisEntry(c);
+    analyze.addEventListener('click', function () { var entry = _journalAnalysisEntry(c); if (entry) _runJournalAnalysis(c, entry); });
+}
+
+function _journalAnalysisEntry(c) {
+  var rows = (c._ayEntries || []).filter(function (e) { return !!(e.body || '').trim(); });
+  return rows.length ? rows[rows.length - 1] : null;
+}
+function _rememberJournalEntry(c, entry) {
+  var rows = c._ayEntries || [];
+  c._ayEntries = rows.filter(function (e) { return e.id !== entry.id; }).concat([entry]);
+  c._ayAnalysisVersion = (c._ayAnalysisVersion || 0) + 1;
+  var button = c.querySelector('#ay-analyze');
+  if (button) button.disabled = false;
+}
+function _showJournalAnalysis(c, insight) {
+  var result = c.querySelector('#ay-analysis-result');
+  if (result) result.innerHTML = '<h4>' + Ayna.esc(insight.title || '') + '</h4>' + Ayna.md(insight.body || '');
+}
+function _runJournalAnalysis(c, entry) {
+  if (!entry) return Promise.resolve();
+  var latest = _journalAnalysisEntry(c);
+  if (latest && (latest.id !== entry.id || latest.body !== entry.body)) return Promise.resolve();
+  var version = c._ayAnalysisVersion = (c._ayAnalysisVersion || 0) + 1;
+  var result = c.querySelector('#ay-analysis-result'), button = c.querySelector('#ay-analyze');
+  if (button) button.disabled = true;
+  if (result) result.textContent = Ayna.t('journal.analyzing');
+  return Ayna.api('reflect', { entry_id: entry.id, kind: entry.kind === 'evening' ? 'daily' : 'instant', overview: true }).then(function (res) {
+    if (!c.isConnected || c._ayAnalysisVersion !== version) return;
+    _showJournalAnalysis(c, res.insight || {});
+    if (res.risk === 'crisis' && result) result.insertAdjacentHTML('beforeend', _cardCrisis());
+  }).catch(function (err) {
+    if (c.isConnected && c._ayAnalysisVersion === version && result) result.textContent = Ayna.t('journal.analysis_failed') + ' ' + Ayna.errText(err.code || 'default');
+  }).finally(function () { if (c.isConnected && c._ayAnalysisVersion === version && button) button.disabled = false; });
 }
 
 function _cardRhythm(morning, evening, notes, week) {
@@ -117,12 +160,19 @@ function _cardRhythm(morning, evening, notes, week) {
 }
 
 function _cardJournalNotes(notes) {
-  var h = '<section class="ay-card"><h4>' + Ayna.t('journal.notes') + '</h4>';
-  if (!notes.length) h += '<p>' + Ayna.t('journal.empty') + '</p>';
+  var h = '<section class="ay-card" id="ay-journal-notes"><h4>' + Ayna.t('journal.notes') + '</h4><div class="ay-notes-list">';
+  if (!notes.length) h += '<p class="ay-notes-empty">' + Ayna.t('journal.empty') + '</p>';
   notes.slice().reverse().forEach(function (entry) {
-    h += '<article class="ay-journal-note"><p>' + Ayna.esc(entry.body || '') + '</p><button type="button" class="btn" data-ay-entry="' + Ayna.esc(entry.id) + '">' + Ayna.t('common.edit') + ' → ' + Ayna.t('tab.archive') + '</button></article>';
+    h += _journalNoteMarkup(entry);
   });
-  return h + '</section>';
+  return h + '</div></section>';
+}
+function _journalNoteMarkup(entry) {
+  return '<article class="ay-journal-note"><p>' + Ayna.esc(entry.body || '') + '</p><button type="button" class="btn" data-ay-entry="' + Ayna.esc(entry.id) + '">' + Ayna.t('common.edit') + ' → ' + Ayna.t('tab.archive') + '</button></article>';
+}
+function _markJournalStep(c, id) {
+  var label = c.querySelector('[data-ay-jump="' + id + '"] span');
+  if (label) label.textContent = Ayna.t('journal.done');
 }
 
 function _bindRhythm(c) {
@@ -185,7 +235,7 @@ function _bindMorning(c, d, entry) {
       ? Ayna.sb().from('ayna_entries').update({ intention: v }).eq('user_id', Ayna.uid).eq('id', entry.id)
       : Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'morning', local_date: d, intention: v, processed_at: new Date().toISOString() });
     query.select('id').single()
-      .then(function (r) { Ayna.checked(r); Ayna.flash(Ayna.t('common.saved')); renderToday(c); })
+      .then(function (r) { Ayna.checked(r); entry = { id: r.data.id }; b.disabled = false; _markJournalStep(c, 'ay-morning'); Ayna.flash(Ayna.t('common.saved')); })
       .catch(function (e) { b.disabled = false; Ayna.flash(Ayna.errText(e.code || 'default')); });
   });
 }
@@ -479,6 +529,7 @@ function _initRules(c, rules, checkMap) {
 }
 
 function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
+  entry = c._ayEveningEntry || entry;
   if (p == null || e == null) { Ayna.flash(Ayna.t('today.compass_required')); return; }
   var saveButton = c.querySelector('#ay-cd');
   if (saveButton && saveButton.disabled) return;
@@ -493,10 +544,11 @@ function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
   var pc = c.querySelector('#ay-pc');
   if (pc) pc.querySelectorAll('.chip.on').forEach(function (b) { taggedIds.push(b.getAttribute('data-ap')); });
   var savePeople = function (entryId) {
-    return sb.from('ayna_entry_people').delete().eq('user_id', Ayna.uid).eq('entry_id', entryId).then(function () {
+    return sb.from('ayna_entry_people').delete().eq('user_id', Ayna.uid).eq('entry_id', entryId).then(function (r) {
+      Ayna.checked(r);
       if (!taggedIds.length) return;
       var rows = taggedIds.map(function (pid) { return { entry_id: entryId, person_id: pid, user_id: Ayna.uid }; });
-      return sb.from('ayna_entry_people').insert(rows);
+      return sb.from('ayna_entry_people').insert(rows).then(Ayna.checked);
     });
   };
   var promise;
@@ -508,41 +560,22 @@ function _closeDay(c, d, entry, p, e, words, people, rules, checkMap) {
     payload.processed_at = new Date().toISOString();
     promise = sb.from('ayna_entries').insert(payload).select('id').single().then(function (r) { Ayna.checked(r); return r.data.id; });
   }
-  promise.then(function (entryId) {
+  return promise.then(function (entryId) {
+    c._ayEveningEntry = Object.assign({}, payload, { id: entryId });
     return savePeople(entryId).then(function () {
       var checks = [];
       Object.keys(checkMap).forEach(function (rid) {
         checks.push({ user_id: Ayna.uid, rule_id: rid, local_date: d, result: checkMap[rid], source: 'user' });
       });
-      if (checks.length) return sb.from('ayna_rule_checks').upsert(checks, { onConflict: 'user_id,rule_id,local_date' });
+      if (checks.length) return sb.from('ayna_rule_checks').upsert(checks, { onConflict: 'user_id,rule_id,local_date' }).then(Ayna.checked);
     }).then(function () { return entryId; });
   }).then(function (entryId) {
-    var ev = c.querySelector('#ay-ev');
-    if (ev) ev.innerHTML = '<p>' + Ayna.t('today.processing') + '</p>';
-    return Ayna.api('scribe', { entry_id: entryId }).then(function (scribeRes) {
-      if (scribeRes.needs_reflection && scribeRes.reflection_kind) {
-        return Ayna.api('reflect', { entry_id: entryId, kind: scribeRes.reflection_kind }).then(function (refRes) {
-          var title = refRes.insight && refRes.insight.kind === 'instant' ? Ayna.t('today.instant_title') : Ayna.t('today.reflection_title');
-          var html = '<div class="ay-card"><h4>' + title + '</h4>' + (refRes.insight ? Ayna.md(refRes.insight.body) : '') + '</div>';
-          if (refRes.risk === 'crisis') html += _cardCrisis();
-          if (ev) ev.insertAdjacentHTML('beforeend', html);
-          renderToday(c);
-        }).catch(function () { renderToday(c); });
-      }
-      renderToday(c);
-    }).catch(function (err) {
-      if (ev) ev.innerHTML = '<p>' + Ayna.t('err.scribe_failed') + '</p><button class="btn" id="ay-rs">' + Ayna.t('common.retry') + '</button>';
-      var rb = c.querySelector('#ay-rs');
-      if (rb) rb.addEventListener('click', function () {
-        if (ev) ev.innerHTML = '<p>' + Ayna.t('today.processing') + '</p>';
-        Ayna.api('scribe', { entry_id: entryId }).then(function (sr) {
-          if (sr.needs_reflection && sr.reflection_kind) {
-            return Ayna.api('reflect', { entry_id: entryId, kind: sr.reflection_kind }).then(function () { renderToday(c); }).catch(function () { renderToday(c); });
-          }
-          renderToday(c);
-        }).catch(function () { Ayna.flash(Ayna.errText('scribe_failed')); });
-      });
-    });
+    var saved = Object.assign({}, payload, { id: entryId });
+    c._ayEveningEntry = saved;
+    _rememberJournalEntry(c, saved); _markJournalStep(c, 'ay-evening-host');
+    if (saveButton) { saveButton.disabled = false; saveButton.textContent = Ayna.t('common.saved'); }
+    Ayna.flash(Ayna.t('common.saved'));
+    return Ayna.api('scribe', { entry_id: entryId }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); }).then(function () { return _runJournalAnalysis(c, saved); });
   }).catch(function (err) { if (saveButton) saveButton.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
 }
 
@@ -574,19 +607,22 @@ function _bindQuickNote(c, d) {
     if (!v) return;
     b.disabled = true;
     Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'note', local_date: d, body: v, processed_at: new Date().toISOString() })
-      .select('id').single()
-      .then(function (r) { Ayna.checked(r); ta.value = ''; _journalDraft(d)['ay-qn'] = ''; Ayna.flash(Ayna.t('common.saved')); renderToday(c); return Ayna.api('scribe', { entry_id: r.data.id }).then(function (sr) {
-        if (sr.needs_reflection && sr.reflection_kind) {
-          return Ayna.api('reflect', { entry_id: r.data.id, kind: sr.reflection_kind }).then(function (refRes) {
-            if (c.isConnected && refRes.insight) {
-              var title = refRes.reflection_kind === 'instant' ? Ayna.t('today.instant_title') : Ayna.t('today.reflection_title');
-              var html = '<div class="ay-card"><h4>' + title + '</h4>' + Ayna.md(refRes.insight.body) + '</div>';
-              if (refRes.risk === 'crisis') html += _cardCrisis();
-              c.insertAdjacentHTML('beforeend', html);
-            }
-          }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); });
+      .select('*').single()
+      .then(function (r) {
+        Ayna.checked(r);
+        var entry = r.data;
+        ta.value = ''; _journalDraft(d)['ay-qn'] = ''; b.disabled = false;
+        _rememberJournalEntry(c, entry);
+        var list = c.querySelector('.ay-notes-list');
+        if (list) {
+          var empty = list.querySelector('.ay-notes-empty'); if (empty) empty.remove();
+          list.insertAdjacentHTML('afterbegin', _journalNoteMarkup(entry));
+          var open = list.querySelector('[data-ay-entry]');
+          if (open) open.addEventListener('click', function () { Ayna.openEntry(entry.id); });
         }
-       }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); }); })
+        _markJournalStep(c, 'ay-quick-note'); Ayna.flash(Ayna.t('common.saved'));
+        return Ayna.api('scribe', { entry_id: entry.id }).catch(function () { Ayna.flash(Ayna.t('journal.saved_ai')); }).then(function () { return _runJournalAnalysis(c, entry); });
+      })
       .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
   });
 }

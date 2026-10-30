@@ -35,7 +35,9 @@ export default async function reflect({ res, auth, user, profile, body }) {
     }
 
     let taskBlock;
-    if (kind === 'instant') {
+    if (body.overview === true) {
+      taskBlock = GOREV_GUNLUK;
+    } else if (kind === 'instant') {
       taskBlock = GOREV_ANLIK;
     } else if (entry.pleasantness != null && entry.pleasantness <= -3) {
       taskBlock = GOREV_ZOR_GUN;
@@ -44,7 +46,7 @@ export default async function reflect({ res, auth, user, profile, body }) {
     }
 
     const ctx = await buildReflectContext(auth, profile, entry);
-    const maxTokens = kind === 'instant' ? 1200 : 700;
+    const maxTokens = kind === 'instant' || body.overview === true ? 1200 : 700;
     const message = kind === 'daily'
       ? `Bugünkü kaydıma yansıma yaz. Kayıt: [${entryId}]`
       : `Bu önemli kayda yansıma yaz. Kayıt: [${entryId}]`;

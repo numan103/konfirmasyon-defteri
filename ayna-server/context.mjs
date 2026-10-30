@@ -368,6 +368,15 @@ export async function buildReflectContext(auth, profile, entry) {
 
   let recentText = await recentEntriesText(auth, userId, 7, 400);
   parts.push(recentText);
+  parts.push(`## Analiz edilen kayıt [${entry.id}]\n${String(entry.body || entry.intention || '').slice(0, 5000)}`);
+  const dayEntries = await db(auth, 'GET', `ayna_entries?user_id=eq.${q(userId)}&local_date=eq.${q(entry.local_date)}&select=id,kind,body,intention&order=created_at.desc&limit=20`);
+  parts.push('## Aynı günün diğer günlük kayıtları\n' + dayEntries.filter((e) => e.id !== entry.id).map((e) => `[${e.id}] ${TRLabels.entry[e.kind] || e.kind}: ${String(e.body || e.intention || '').slice(0, 1500)}`).join('\n').slice(0, 10000));
+  const dayEvents = await db(auth, 'GET', `ayna_events?user_id=eq.${q(userId)}&local_date=eq.${q(entry.local_date)}&select=person_id,event_type,summary,impact,is_closed&order=created_at.desc&limit=30`);
+  if (dayEvents.length) {
+    const people = await db(auth, 'GET', `ayna_people?user_id=eq.${q(userId)}&select=id,display_name`);
+    const names = new Map(people.map((p) => [p.id, p.display_name]));
+    parts.push('## Gün içinde kişilerle yaşanan olaylar (kullanıcının kaydı)\n' + dayEvents.map((e) => `${names.get(e.person_id) || 'Kişi belirtilmemiş'}: ${TRLabels.event[e.event_type] || e.event_type}; ${String(e.summary).slice(0, 600)}; etki: ${e.impact}; konu kapalı: ${e.is_closed ? 'evet' : 'hayır'}`).join('\n').slice(0, 12000));
+  }
 
   const entryPeople = await db(auth, 'GET', `ayna_entry_people?user_id=eq.${q(userId)}&entry_id=eq.${q(entry.id)}&select=person_id`);
   if (entryPeople.length) {

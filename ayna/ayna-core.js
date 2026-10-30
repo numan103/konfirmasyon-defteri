@@ -10,6 +10,11 @@ window.Ayna = (function () {
     if (result && result.error) throw result.error;
     return result;
   }
+  function keepPosition(work) {
+    var x = window.scrollX || 0, y = window.scrollY || 0;
+    work();
+    (window.requestAnimationFrame || function (fn) { fn(); })(function () { window.scrollTo(x, y); });
+  }
   function lang() {
     try { return (window.LANG === 'en') ? 'en' : 'tr'; } catch (e) { return 'tr'; }
   }
@@ -435,6 +440,6 @@ window.Ayna = (function () {
   return {
     sb: sb, get uid() { return _uid; }, get profile() { return _profile; },
     lang: lang, t: t, esc: esc, md: md, today: today, addDays: addDays, fmtDate: fmtDate, ago: ago, num: num,
-    flash: flash, errText: errText, checked: checked, api: api, tabs: tabs, openEntry: openEntry, render: render, P: P
+    flash: flash, errText: errText, checked: checked, keepPosition: keepPosition, api: api, tabs: tabs, openEntry: openEntry, render: render, P: P
   };
 })();

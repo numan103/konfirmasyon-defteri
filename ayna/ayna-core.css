@@ -21,6 +21,10 @@ body[data-page="ayna"]{--pc:#a5b4fc;--pc-soft:rgba(165,180,252,.16);--glow-a:rgb
 .ay-prompts .btn{font-size:12px;white-space:normal;text-align:left;}
 .ay-journal-note{border-top:1px solid var(--border);padding:12px 0;}
 .ay-journal-note p,.ay-journal-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;}
+.ay-person-picker{display:block;margin:0 0 14px;font-size:13px;line-height:1.7;}
+.ay-map-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+#ay-event-form label{display:block;margin:10px 0;font-size:13px;line-height:1.7;}
+#ay-analysis-result{margin-top:12px;line-height:1.75;overflow-wrap:anywhere;}
 #ay-morning,#ay-quick-note,#ay-evening-host{scroll-margin-top:100px;}
 .ay-card>.btn.solid{margin-top:10px;}
 @media(max-width:600px){.ay-rhythm-grid{grid-template-columns:1fr;}.ay-step{min-height:0;}.ay-root{padding:12px 4px;}.ay-hdr h2{font-size:19px;}}

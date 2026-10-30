@@ -17,9 +17,10 @@ function renderMap(c) {
   Promise.all([
     sb.from('ayna_people').select('*').eq('user_id', uid).eq('status', 'active'),
     sb.from('ayna_people').select('*').eq('user_id', uid).eq('status', 'pending'),
-    sb.from('ayna_events').select('*').eq('user_id', uid).gte('local_date', d90).eq('is_closed', false),
+    sb.from('ayna_events').select('*').eq('user_id', uid).order('local_date', { ascending: false }).limit(300),
     sb.from('ayna_entries').select('local_date,pleasantness').eq('user_id', uid).eq('kind', 'evening').not('pleasantness', 'is', null).gte('local_date', d90)
   ]).then(function (results) {
+    results.forEach(Ayna.checked);
     _mapPeople = (results[0].data || []).sort(function (a, b) { return a.display_name.localeCompare(b.display_name, 'tr-TR'); });
     _mapPending = results[1].data || [];
     _mapEvents = results[2].data || [];
@@ -35,12 +36,15 @@ function renderMapContent(c) {
   var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
   html += '<h3 style="margin:0;font-family:var(--font-display)">' + Ayna.t('map.title') + '</h3>';
   html += '<button class="btn solid" id="ay-map-add">' + Ayna.t('map.add_person') + '</button></div>';
+  html += '<label class="ay-person-picker">' + Ayna.t('map.choose_person') + '<select class="ay-sel" id="ay-person-picker"><option value="">' + Ayna.t('map.select_hint') + '</option>';
+  _mapPeople.forEach(function (p) { html += '<option value="' + Ayna.esc(p.id) + '">' + Ayna.esc(p.display_name) + '</option>'; });
+  html += '</select></label>';
   if (hasPeople) {
     html += '<div class="ay-map-wrap" id="ay-map-wrap"><div id="ay-map-svg-wrap"></div>';
     html += '<div id="ay-map-card" class="ay-map-card">' + Ayna.t('map.select_hint') + '</div></div>';
   } else {
     html += '<div class="ay-map-wrap"><div id="ay-map-svg-wrap"></div>';
-    html += '<div class="ay-map-card">' + Ayna.t('map.select_hint') + '</div></div>';
+    html += '<div id="ay-map-card" class="ay-map-card">' + Ayna.t('map.select_hint') + '</div></div>';
   }
   if (_mapPending.length > 0) {
     html += '<div class="ay-card" style="margin-top:12px">';
@@ -52,6 +56,7 @@ function renderMapContent(c) {
   c.innerHTML = html;
   drawMap(document.getElementById('ay-map-svg-wrap'));
   document.getElementById('ay-map-add').addEventListener('click', function () { showPersonForm(null); });
+  document.getElementById('ay-person-picker').addEventListener('change', function (e) { selectPerson(e.target.value); });
   if (_mapPending.length > 0) renderPendingList(document.getElementById('ay-pending-list'));
   renderRingCard(document.getElementById('ay-ring-card'));
   injectMapStyle();
@@ -252,11 +257,12 @@ function selectPerson(pid) {
   var p = _mapPeople.find(function (x) { return x.id === pid; });
   if (!p) return;
   _mapSelected = p;
+  var picker = document.getElementById('ay-person-picker'); if (picker) picker.value = pid;
   showPersonCard(p);
   drawMap(document.getElementById('ay-map-svg-wrap'));
 }
 function calcMetrics(personId) {
-  var W = _mapEvents.filter(function (e) { return e.person_id === personId; });
+  var W = _mapEvents.filter(function (e) { return e.person_id === personId && !e.is_closed && e.local_date >= Ayna.addDays(Ayna.today(), -89); });
   var n = W.length;
   var avgImpact = null;
   var requestRatio = null;
@@ -311,7 +317,13 @@ function showPersonCard(p) {
   html += '<h3 style="margin:0;font-family:var(--font-display)">' + Ayna.esc(p.display_name) + '</h3>';
   if (p.relation) html += '<span style="font-size:12px;color:var(--text-2)">' + Ayna.esc(p.relation) + '</span>';
   html += '</div>';
+  html += '<label>' + Ayna.t('map.form_ring') + '<select class="ay-sel" id="ay-person-ring">';
+  [1, 2, 3].forEach(function (ring) { html += '<option value="' + ring + '"' + (Number(p.ring) === ring ? ' selected' : '') + '>' + Ayna.t('ring.' + ring) + '</option>'; });
+  html += '</select></label>';
   html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">';
+  html += '<button class="btn" id="ay-card-edit">' + Ayna.t('common.edit') + '</button> ';
+  html += '<button class="btn" id="ay-card-archive">' + Ayna.t('map.archive_person') + '</button> ';
+  html += '<button class="btn danger" id="ay-card-delete">' + Ayna.t('common.delete') + '</button>';
   html += '<span class="ay-chip" style="cursor:default">' + Ayna.esc(Ayna.t('sector.' + p.sector)) + '</span>';
   html += '<span class="ay-chip" style="cursor:default">' + Ayna.esc(Ayna.t('ring.' + p.ring)) + '</span>';
   html += '</div>';
@@ -341,6 +353,7 @@ function showPersonCard(p) {
     html += '</div>';
   }
   html += '<h4 style="margin:12px 0 4px">' + Ayna.t('map.events_title') + '</h4>';
+  html += '<button type="button" class="btn solid" id="ay-event-add">' + Ayna.t('map.add_event') + '</button><div id="ay-event-form"></div>';
   html += '<p style="margin:0 0 6px;font-size:11px;color:var(--text-3)">' + Ayna.esc(Ayna.t('map.event_close_hint')) + '</p>';
   var sorted = events.slice().sort(function (a, b) { return b.local_date > a.local_date ? 1 : b.local_date < a.local_date ? -1 : 0; });
   var shown = sorted.slice(0, 20);
@@ -356,6 +369,7 @@ function showPersonCard(p) {
       html += '<br>' + Ayna.esc(ev.summary);
       html += ' <span style="font-size:11px;color:var(--text-3)">' + Ayna.t('label.impact', { x: Ayna.num(ev.impact, true) }) + '</span>';
       html += '<div style="margin-top:4px">';
+      html += '<button type="button" class="btn" data-edit-event="' + ev.id + '">' + Ayna.t('common.edit') + '</button> ';
       if (ev.is_closed) {
         html += '<button class="btn" data-reopen="' + ev.id + '">' + Ayna.t('common.reopen') + '</button> ';
       } else {
@@ -367,51 +381,61 @@ function showPersonCard(p) {
   html += '<div id="ay-map-facts"></div>';
   html += '<div id="ay-map-loops"></div>';
   html += '<div id="ay-map-links"></div>';
-  html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">';
-  html += '<button class="btn" id="ay-card-edit">' + Ayna.t('common.edit') + '</button> ';
-  html += '<button class="btn" id="ay-card-archive">' + Ayna.t('map.archive_person') + '</button> ';
-  html += '<button class="btn danger" id="ay-card-delete">' + Ayna.t('common.delete') + '</button>';
-  html += '</div>';
   cardEl.innerHTML = html;
   var uid = Ayna.uid;
   var sb = Ayna.sb();
+  document.getElementById('ay-event-add').addEventListener('click', function () { showEventForm(p); });
+  document.getElementById('ay-person-ring').addEventListener('change', function (e) {
+    var select = e.target, ring = Number(select.value), previous = p.ring;
+    select.disabled = true;
+    sb.from('ayna_people').update({ ring: ring }).eq('id', p.id).eq('user_id', uid).select('id').single().then(function (r) {
+      Ayna.checked(r); p.ring = ring; drawMap(document.getElementById('ay-map-svg-wrap')); Ayna.flash(Ayna.t('common.saved'));
+    }).catch(function (err) { select.value = previous; Ayna.flash(Ayna.errText(err.code || 'default')); }).finally(function () { select.disabled = false; });
+  });
+  cardEl.querySelectorAll('[data-edit-event]').forEach(function (b) {
+    b.addEventListener('click', function () { showEventForm(p, _mapEvents.find(function (e) { return e.id === b.getAttribute('data-edit-event'); })); });
+  });
   cardEl.querySelectorAll('[data-closeev]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var eid = btn.getAttribute('data-closeev');
-      sb.from('ayna_events').update({ is_closed: true, closed_at: new Date().toISOString() }).eq('id', eid).eq('user_id', uid).then(function () {
+      sb.from('ayna_events').update({ is_closed: true, closed_at: new Date().toISOString() }).eq('id', eid).eq('user_id', uid).then(function (r) {
+        Ayna.checked(r);
         var ev = _mapEvents.find(function (x) { return x.id === eid; });
         if (ev) { ev.is_closed = true; ev.closed_at = new Date().toISOString(); }
         showPersonCard(_mapSelected);
         drawMap(document.getElementById('ay-map-svg-wrap'));
-      });
+      }).catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); });
     });
   });
   cardEl.querySelectorAll('[data-reopen]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var eid = btn.getAttribute('data-reopen');
-      sb.from('ayna_events').update({ is_closed: false, closed_at: null }).eq('id', eid).eq('user_id', uid).then(function () {
+      sb.from('ayna_events').update({ is_closed: false, closed_at: null }).eq('id', eid).eq('user_id', uid).then(function (r) {
+        Ayna.checked(r);
         var ev = _mapEvents.find(function (x) { return x.id === eid; });
         if (ev) { ev.is_closed = false; ev.closed_at = null; }
         showPersonCard(_mapSelected);
         drawMap(document.getElementById('ay-map-svg-wrap'));
-      });
+      }).catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); });
     });
   });
   document.getElementById('ay-card-edit').addEventListener('click', function () { showPersonForm(p); });
   document.getElementById('ay-card-archive').addEventListener('click', function () {
-    sb.from('ayna_people').update({ status: 'archived' }).eq('id', p.id).eq('user_id', uid).then(function () {
+    sb.from('ayna_people').update({ status: 'archived' }).eq('id', p.id).eq('user_id', uid).then(function (r) {
+      Ayna.checked(r);
       _mapPeople = _mapPeople.filter(function (x) { return x.id !== p.id; });
       _mapSelected = null;
-      renderMapContent(cardEl.parentElement.parentElement);
-    });
+      Ayna.keepPosition(function () { renderMapContent(cardEl.parentElement.parentElement); });
+    }).catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); });
   });
   document.getElementById('ay-card-delete').addEventListener('click', function () {
     if (!confirm(Ayna.t('common.confirm_delete'))) return;
-    sb.from('ayna_people').delete().eq('id', p.id).eq('user_id', uid).then(function () {
+    sb.from('ayna_people').delete().eq('id', p.id).eq('user_id', uid).then(function (r) {
+      Ayna.checked(r);
       _mapPeople = _mapPeople.filter(function (x) { return x.id !== p.id; });
       _mapSelected = null;
-      renderMapContent(cardEl.parentElement.parentElement);
-    });
+      Ayna.keepPosition(function () { renderMapContent(cardEl.parentElement.parentElement); });
+    }).catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); });
   });
   loadCardFacts(p);
   loadCardLoops(p);
@@ -583,6 +607,46 @@ function renderPendingList(container) {
     });
   });
 }
+function showEventForm(person, event) {
+  var host = document.getElementById('ay-event-form');
+  if (!host) return;
+  var types = ['support_received', 'support_given', 'request', 'lent_money', 'borrowed_money', 'conflict', 'time_together', 'praise', 'criticism', 'promise', 'other'];
+  var html = '<div class="ay-card"><h4>' + Ayna.t('map.add_event') + ' · ' + Ayna.esc(person.display_name) + '</h4>';
+  html += '<label>' + Ayna.t('map.event_date') + '<input type="date" class="ay-inp" id="ay-event-date" max="' + Ayna.today() + '" value="' + Ayna.esc(event ? event.local_date : Ayna.today()) + '" required></label>';
+  html += '<label>' + Ayna.t('map.event_type') + '<select class="ay-sel" id="ay-event-type">';
+  types.forEach(function (type) { html += '<option value="' + type + '"' + ((event ? event.event_type : 'other') === type ? ' selected' : '') + '>' + Ayna.t('event.' + type) + '</option>'; });
+  html += '</select></label><label>' + Ayna.t('map.event_impact') + '<select class="ay-sel" id="ay-event-impact">';
+  [-2, -1, 0, 1, 2].forEach(function (impact) { html += '<option value="' + impact + '"' + (Number(event ? event.impact : 0) === impact ? ' selected' : '') + '>' + (impact > 0 ? '+' : '') + impact + '</option>'; });
+  html += '</select></label><label>' + Ayna.t('map.event_summary') + '<textarea class="ay-ta" rows="4" maxlength="1000" id="ay-event-summary">' + Ayna.esc(event ? event.summary : '') + '</textarea></label>';
+  html += '<div class="ay-map-actions"><button type="button" class="btn solid" id="ay-event-save">' + Ayna.t('common.save') + '</button><button type="button" class="btn" id="ay-event-cancel">' + Ayna.t('common.cancel') + '</button>';
+  if (event) html += '<button type="button" class="btn" id="ay-event-delete">' + Ayna.t('common.delete') + '</button>';
+  host.innerHTML = html + '</div></div>';
+  host.querySelector('#ay-event-cancel').addEventListener('click', function () { host.innerHTML = ''; });
+  host.querySelector('#ay-event-save').addEventListener('click', function () {
+    var button = this, date = host.querySelector('#ay-event-date'), summary = host.querySelector('#ay-event-summary');
+    if (!summary.value.trim()) { summary.focus(); return; }
+    if (!date.value || !date.checkValidity()) { date.reportValidity(); return; }
+    var payload = { local_date: date.value, event_type: host.querySelector('#ay-event-type').value, impact: Number(host.querySelector('#ay-event-impact').value), summary: summary.value.trim() };
+    button.disabled = true;
+    var query = event
+      ? Ayna.sb().from('ayna_events').update(payload).eq('id', event.id).eq('user_id', Ayna.uid)
+      : Ayna.sb().from('ayna_events').insert(Object.assign({ user_id: Ayna.uid, person_id: person.id }, payload));
+    query.select('*').single().then(function (r) {
+      Ayna.checked(r);
+      _mapEvents = _mapEvents.filter(function (item) { return item.id !== r.data.id; }).concat([r.data]);
+      showPersonCard(person); drawMap(document.getElementById('ay-map-svg-wrap')); Ayna.flash(Ayna.t('common.saved'));
+    }).catch(function (err) { button.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
+  });
+  var remove = host.querySelector('#ay-event-delete');
+  if (remove) remove.addEventListener('click', function () {
+    if (!confirm(Ayna.t('common.confirm_delete'))) return;
+    remove.disabled = true;
+    Ayna.sb().from('ayna_events').delete().eq('id', event.id).eq('user_id', Ayna.uid).then(function (r) {
+      Ayna.checked(r); _mapEvents = _mapEvents.filter(function (item) { return item.id !== event.id; }); showPersonCard(person); drawMap(document.getElementById('ay-map-svg-wrap'));
+    }).catch(function (err) { remove.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
+  });
+}
+
 function showPersonForm(person) {
   _mapFormEdit = person;
   var isNew = !person;
@@ -644,14 +708,14 @@ function showPersonForm(person) {
       payload.created_by = 'user';
       promise = sb.from('ayna_people').insert(payload);
     }
-    promise.then(function () {
+    var saveButton = document.getElementById('ay-fsave'); saveButton.disabled = true;
+    promise.select('*').single().then(function (res) {
+      Ayna.checked(res);
       _mapFormEdit = null;
-      return sb.from('ayna_people').select('*').eq('user_id', uid).eq('status', 'active');
-    }).then(function (res) {
-      _mapPeople = (res.data || []).sort(function (a, b) { return a.display_name.localeCompare(b.display_name, 'tr-TR'); });
-      _mapSelected = null;
-      renderMapContent(cardEl.parentElement.parentElement);
-    }).catch(function (e) { Ayna.flash(Ayna.errText(e.code || 'default')); });
+      _mapPeople = _mapPeople.filter(function (item) { return item.id !== res.data.id; }).concat([res.data]).sort(function (a, b) { return a.display_name.localeCompare(b.display_name, 'tr-TR'); });
+      Ayna.keepPosition(function () { renderMapContent(cardEl.parentElement.parentElement); selectPerson(res.data.id); });
+      Ayna.flash(Ayna.t('common.saved'));
+    }).catch(function (e) { saveButton.disabled = false; Ayna.flash(Ayna.errText(e.code || 'default')); });
   });
   document.getElementById('ay-fcancel').addEventListener('click', function () {
     _mapFormEdit = null;
