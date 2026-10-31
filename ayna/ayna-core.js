@@ -55,14 +55,22 @@ window.Ayna = (function () {
     var session = await sb().auth.getSession();
     var token = session && session.data && session.data.session ? session.data.session.access_token : null;
     if (!token) throw { code: 'unauthorized' };
-    var r = await fetch('/api/ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(Object.assign({ action: action }, payload || {}))
-    });
-    var json = await r.json().catch(function () { return null; });
-    if (!r.ok || !json || json.error) throw { code: (json && json.error) || 'default' };
-    return json;
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 75000);
+    try {
+      var r = await fetch('/api/ai', {
+        method: 'POST', signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+      });
+      var json = await r.json().catch(function () { return null; });
+      if (!r.ok || !json || json.error) throw { code: (json && json.error) || (r.status === 504 ? 'timeout' : 'default') };
+      return json;
+    } catch (e) {
+      if (e.name === 'AbortError' || ctrl.signal.aborted) throw { code: 'timeout' };
+      if (!e.code) throw { code: 'network' };
+      throw e;
+    } finally { clearTimeout(timer); }
   }
 
   var tabs = {};

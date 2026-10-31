@@ -6,6 +6,7 @@ import { GOREV_GUNLUK, GOREV_ZOR_GUN, GOREV_ANLIK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
 import { localDate } from '../time.mjs';
 import { kocTemel, buildReflectContext } from '../context.mjs';
+import { aiErrorCode } from '../ai-error.mjs';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -61,6 +62,9 @@ export default async function reflect({ res, auth, user, profile, body }) {
     });
 
     const ai = result.input;
+    if (!ai || typeof ai.body !== 'string' || !ai.body.trim()) {
+      throw new Error('invalid_reflection');
+    }
 
     const title = truncate(ai.title || '', 80);
     const bodyText = truncate(ai.body || '', 3000);
@@ -96,6 +100,8 @@ export default async function reflect({ res, auth, user, profile, body }) {
     });
   } catch (e) {
     if (e.status === 404) return fail(res, 404, 'not_found');
-    return fail(res, 500, 'model_failed', e.message);
+    const code = aiErrorCode(e);
+    console.error('[AYNA reflect]', code);
+    return fail(res, 500, code);
   }
 }

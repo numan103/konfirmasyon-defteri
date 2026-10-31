@@ -111,6 +111,13 @@ test('coach analysis can be requested for an ordinary note, without importance t
   assert.equal(button.disabled, false);
 });
 
+test('morning intention and structured evening data can be analysed without body text', () => {
+  const c = setup();
+  assert.equal(c._journalAnalysisEntry({ _ayEntries: [{ id: 'morning', intention: 'Bir önemli iş' }] }).id, 'morning');
+  assert.equal(c._journalAnalysisEntry({ _ayEntries: [{ id: 'evening', pleasantness: 0, sleep_hours: 7 }] }).id, 'evening');
+  assert.equal(c._journalAnalysisEntry({ _ayEntries: [{ id: 'empty', body: '' }] }), null);
+});
+
 test('empty people map still has an addressable card for the add-person form', () => {
   const c = setup();
   c.document = { getElementById: () => ({ addEventListener() {} }) };

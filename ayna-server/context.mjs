@@ -101,6 +101,33 @@ export async function recentEntriesText(auth, userId, days, bodyLimit) {
   }
   return lines.join('\n');
 }
+// Keep today's actual journal separate from the shorter historical summaries.
+// The coach must not miss the main event because it appeared after character 600.
+export function journalEntriesText(entries, date) {
+  const rows = entries || [];
+  const lines = [`## ${date} tarihindeki kaydedilmiş günlük (${rows.length} kayıt)`];
+  if (!rows.length) return lines.concat('- Bu tarih için kaydedilmiş günlük yok. Kullanıcıdan günlüğünü yeniden anlatmasını istemeden önce bunu açıkça belirt.').join('\n');
+  let remaining = 22000;
+  for (const e of rows) {
+    const meta = [`[${e.id}] ${TRLabels.entry[e.kind] || e.kind}`];
+    if (e.intention) meta.push(`Sabah önceliği: ${e.intention}`);
+    if (e.sleep_hours != null) meta.push(`Uyku: ${e.sleep_hours} saat`);
+    if (e.pleasantness != null) meta.push(`Hoşluk: ${e.pleasantness}`);
+    if (e.energy != null) meta.push(`Enerji: ${e.energy}`);
+    if (e.mood_words?.length) meta.push(`Duygular: ${e.mood_words.join(', ')}`);
+    const text = String(e.body || '');
+    const available = Math.min(5000, Math.max(0, remaining));
+    lines.push(meta.join(' | ') + (text ? '\n' + text.slice(0, available) : ''));
+    if (text.length > available) lines.push('[Uzunluk sınırı nedeniyle bu kaydın devamı bağlama alınmadı; görmediğin bölümü tahmin etme.]');
+    remaining -= Math.min(text.length, available);
+  }
+  return lines.join('\n\n');
+}
+
+async function journalDayText(auth, userId, date) {
+  const rows = await db(auth, 'GET', `ayna_entries?user_id=eq.${q(userId)}&local_date=eq.${q(date)}&select=id,kind,body,intention,sleep_hours,pleasantness,energy,mood_words&order=created_at.desc&limit=30`);
+  return journalEntriesText(rows, date);
+}
 function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -157,6 +184,7 @@ export async function buildCoachContext(auth, profile, message, mode) {
 
   let recentText = await recentEntriesText(auth, userId, 7, 600);
   parts.push(recentText);
+  const journalText = await journalDayText(auth, userId, today);
 
   const trades = await db(auth, 'GET', `ayna_trades?user_id=eq.${q(userId)}&local_date=eq.${today}&select=symbol,direction,pnl,planned,emotions&order=opened_at.asc`);
   const todayRules = await db(auth, 'GET', `ayna_rules?user_id=eq.${q(userId)}&is_active=eq.true&select=id,domain,if_text,then_text`);
@@ -346,6 +374,8 @@ export async function buildCoachContext(auth, profile, message, mode) {
     fullText = parts.join('\n\n');
   }
 
+  // Append after reducing historical context so the current journal isn't shortened.
+  fullText += '\n\n' + journalText;
   const entryIds = [...fullText.matchAll(/\[([0-9a-f-]{36})\]/g)].map((m) => m[1]);
 
   const history = await db(auth, 'GET', `ayna_chat_messages?user_id=eq.${q(userId)}&mode=eq.${q(mode)}&select=role,content&order=created_at.asc&limit=${mode === 'onboarding' ? 40 : 20}`);
@@ -368,9 +398,8 @@ export async function buildReflectContext(auth, profile, entry) {
 
   let recentText = await recentEntriesText(auth, userId, 7, 400);
   parts.push(recentText);
-  parts.push(`## Analiz edilen kayıt [${entry.id}]\n${String(entry.body || entry.intention || '').slice(0, 5000)}`);
-  const dayEntries = await db(auth, 'GET', `ayna_entries?user_id=eq.${q(userId)}&local_date=eq.${q(entry.local_date)}&select=id,kind,body,intention&order=created_at.desc&limit=20`);
-  parts.push('## Aynı günün diğer günlük kayıtları\n' + dayEntries.filter((e) => e.id !== entry.id).map((e) => `[${e.id}] ${TRLabels.entry[e.kind] || e.kind}: ${String(e.body || e.intention || '').slice(0, 1500)}`).join('\n').slice(0, 10000));
+  parts.push(`## Analiz tarihi: ${entry.local_date}; kaynak kayıt [${entry.id}]`);
+  parts.push(await journalDayText(auth, userId, entry.local_date));
   const dayEvents = await db(auth, 'GET', `ayna_events?user_id=eq.${q(userId)}&local_date=eq.${q(entry.local_date)}&select=person_id,event_type,summary,impact,is_closed&order=created_at.desc&limit=30`);
   if (dayEvents.length) {
     const people = await db(auth, 'GET', `ayna_people?user_id=eq.${q(userId)}&select=id,display_name`);

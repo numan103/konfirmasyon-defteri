@@ -2,9 +2,10 @@ import { send, fail } from '../http.mjs';
 import { db, q } from '../supabase.mjs';
 import { callTool } from '../llm.mjs';
 import { logUsage } from '../limits.mjs';
-import { KOC_TEMEL, MOD } from '../prompts.mjs';
+import { KOC_TEMEL, MOD, GOREV_GUNLUK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
 import { kocTemel, buildCoachContext } from '../context.mjs';
+import { aiErrorCode } from '../ai-error.mjs';
 
 const VALID_MODES = ['chat', 'pre_trade', 'pre_conversation', 'big_decision', 'onboarding'];
 // Bu modlarda kullanıcının yazdığı kişi/olay bilgisi kayda çevrilir.
@@ -63,7 +64,7 @@ export default async function coach({ res, auth, user, profile, body }) {
     const result = await callTool({
       kind: 'coach',
       systemStatic: kocTemel(profile),
-      systemDynamic: (MOD[mode] || '') + '\n\n' + ctx.text,
+      systemDynamic: (mode === 'chat' && body.review_day === true ? GOREV_GUNLUK : (MOD[mode] || '')) + '\n\n' + ctx.text,
       messages,
       tool: TOOLS.coach_reply,
       maxTokens: 1200
@@ -134,6 +135,8 @@ export default async function coach({ res, auth, user, profile, body }) {
     });
   } catch (e) {
     // Başarısız çağrı koteden düşülmez; sadece başarılı yanıtlar sayılır.
-    return fail(res, 500, 'model_failed', e && e.message);
+    const code = aiErrorCode(e);
+    console.error('[AYNA coach]', code);
+    return fail(res, 500, code);
   }
 }

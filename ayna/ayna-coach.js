@@ -79,8 +79,12 @@ function renderCoachContent(c, keepInput) {
   });
   h += '</div>';
   h += '<p style="margin:6px 0 12px;font-size:13px;color:var(--text-2)">' + Ayna.t(_coachModeHelp[_coachMode]) + '</p>';
+  if (_coachMode === 'chat') {
+    h += '<section class="ay-card ay-coach-guide"><h4>' + Ayna.t('coach.journal_title') + '</h4><p>' + Ayna.t('coach.journal_help') + '</p><p class="ay-coach-context" id="ay-coach-context" aria-live="polite">' + Ayna.t('common.loading') + '</p><button type="button" class="btn" id="ay-coach-review">' + Ayna.t('coach.journal_review') + '</button><span class="ay-coach-context"> ' + Ayna.t('coach.journal_send_hint') + '</span></section>';
+  }
 
   h += '<div id="ay-coach-crisis"></div>';
+  h += '<div id="ay-coach-error" class="ay-coach-error" role="status" hidden></div>';
   h += '<div id="ay-coach-list" class="ay-coach-list"></div>';
   h += '<div id="ay-coach-input" class="ay-coach-input-wrap"></div>';
 
@@ -96,6 +100,21 @@ function renderCoachContent(c, keepInput) {
   renderCrisisCard(document.getElementById('ay-coach-crisis'));
   renderMessageList(document.getElementById('ay-coach-list'));
   renderInputArea(document.getElementById('ay-coach-input'), keepInput);
+  var review = c.querySelector('#ay-coach-review');
+  if (review) {
+    review.addEventListener('click', function () {
+      var ta = document.getElementById('ay-coach-ta');
+      if (!ta || ta.disabled) return;
+      ta.value = Ayna.t('coach.journal_request');
+      ta.dataset.reviewDay = '1';
+      ta.focus();
+    });
+    var context = c.querySelector('#ay-coach-context');
+    Ayna.sb().from('ayna_entries').select('id', { count: 'exact', head: true }).eq('user_id', Ayna.uid).eq('local_date', Ayna.today()).then(function (res) {
+      if (!context.isConnected) return;
+      context.textContent = res.error ? Ayna.t('coach.journal_context_error') : Ayna.t('coach.journal_context', { n: res.count || 0, date: Ayna.fmtDate(Ayna.today()) });
+    }).catch(function () { if (context.isConnected) context.textContent = Ayna.t('coach.journal_context_error'); });
+  }
 }
 
 function renderCrisisCard(el) {
@@ -152,7 +171,7 @@ function _drawMessages(el) {
     if (waiting) {
       html += '<div style="color:var(--text-2)">' + Ayna.esc(Ayna.t('coach.thinking')) + '</div>';
     } else {
-      html += '<div style="white-space:pre-wrap">' + Ayna.esc(m.content) + '</div>';
+      html += '<div style="white-space:pre-wrap">' + (isUser ? Ayna.esc(m.content) : Ayna.md(m.content)) + '</div>';
     }
 
     if (!isUser && m.evidence && m.evidence.length) {
@@ -280,6 +299,9 @@ function sendCoachMessage(text, onDone) {
   _coachLastSend = now;
 
   var sentMode = _coachMode;
+  var reviewDay = sentMode === 'chat' && ta.dataset.reviewDay === '1';
+  var errorBox = document.getElementById('ay-coach-error');
+  if (errorBox) { errorBox.hidden = true; errorBox.textContent = ''; }
   var stamp = new Date().toISOString();
   var key = 'pend-' + now;
   var userMsg = { id: key + '-u', mode: sentMode, role: 'user', content: text, evidence: [], risk: null, decision_proposal: null, created_at: stamp };
@@ -304,7 +326,7 @@ function sendCoachMessage(text, onDone) {
     else if (document.getElementById('ay-content')) renderCoach(document.getElementById('ay-content'));
   }
 
-  Ayna.api('coach', { message: text, mode: sentMode }).then(function (res) {
+  Ayna.api('coach', { message: text, mode: sentMode, review_day: reviewDay }).then(function (res) {
     dropPending();
     _coachMessages = _coachMessages.filter(function (m) { return m.id !== key + '-u' && m.id !== key + '-a'; });
     _coachMessages.push({
@@ -336,7 +358,7 @@ function sendCoachMessage(text, onDone) {
     }
     var t2 = document.getElementById('ay-coach-ta');
     var s2 = document.getElementById('ay-coach-send');
-    if (t2) t2.disabled = false;
+    if (t2) { t2.disabled = false; delete t2.dataset.reviewDay; }
     if (s2) s2.disabled = false;
     done();
   }).catch(function (e) {
@@ -349,6 +371,8 @@ function sendCoachMessage(text, onDone) {
     if (s3) s3.disabled = false;
     paint();
     Ayna.flash(Ayna.errText(e.code || 'default'));
+    var errorBox = document.getElementById('ay-coach-error');
+    if (errorBox) { errorBox.hidden = false; errorBox.textContent = Ayna.errText(e.code || 'default') + ' ' + Ayna.t('coach.retry_kept'); }
     done();
   });
 }

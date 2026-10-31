@@ -161,3 +161,7 @@ body[data-page="ayna"]{--pc:#a5b4fc;--pc-soft:rgba(165,180,252,.16);--glow-a:rgb
 @media (max-width:900px){.ay-map-wrap{flex-direction:column;}.ay-pcard-metrics{grid-template-columns:repeat(2,1fr);}}
 /* J11 - Responsive 640px */
 @media (max-width:640px){.ay-root{padding:12px;}.ay-tabs{gap:2px;padding:2px;}.ay-tabs button{padding:6px 10px;font-size:12px;}.ay-seg{gap:2px;padding:2px;}.ay-seg button{padding:5px 10px;font-size:11.5px;}.ay-pcard-metrics{grid-template-columns:1fr 1fr;}.ay-metrics{grid-template-columns:1fr 1fr;}.ay-chat-msg{max-width:90%;}.ay-map svg{max-width:100%;}}
+/* Journal coaching: explicit source context and persistent failures. */
+.ay-coach-guide p { color: var(--text-2); font-size: 13px; line-height: 1.7; }
+.ay-coach-context { color: var(--text-3); font-size: 11px; line-height: 1.7; }
+.ay-coach-error:not([hidden]) { display: block; padding: 12px 14px; margin: 10px 0; border: 1px solid var(--amber); border-radius: 10px; color: var(--text); font-size: 13px; }

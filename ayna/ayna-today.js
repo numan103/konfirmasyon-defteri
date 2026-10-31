@@ -112,7 +112,9 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
 }
 
 function _journalAnalysisEntry(c) {
-  var rows = (c._ayEntries || []).filter(function (e) { return !!(e.body || '').trim(); });
+  var rows = (c._ayEntries || []).filter(function (e) {
+    return !!(e.body || e.intention || '').trim() || e.sleep_hours != null || e.pleasantness != null || e.energy != null;
+  });
   return rows.length ? rows[rows.length - 1] : null;
 }
 function _rememberJournalEntry(c, entry) {
@@ -235,7 +237,11 @@ function _bindMorning(c, d, entry) {
       ? Ayna.sb().from('ayna_entries').update({ intention: v }).eq('user_id', Ayna.uid).eq('id', entry.id)
       : Ayna.sb().from('ayna_entries').insert({ user_id: Ayna.uid, kind: 'morning', local_date: d, intention: v, processed_at: new Date().toISOString() });
     query.select('id').single()
-      .then(function (r) { Ayna.checked(r); entry = { id: r.data.id }; b.disabled = false; _markJournalStep(c, 'ay-morning'); Ayna.flash(Ayna.t('common.saved')); })
+      .then(function (r) {
+        Ayna.checked(r); entry = { id: r.data.id, kind: 'morning', local_date: d, intention: v };
+        _rememberJournalEntry(c, entry);
+        b.disabled = false; _markJournalStep(c, 'ay-morning'); Ayna.flash(Ayna.t('common.saved'));
+      })
       .catch(function (e) { b.disabled = false; Ayna.flash(Ayna.errText(e.code || 'default')); });
   });
 }

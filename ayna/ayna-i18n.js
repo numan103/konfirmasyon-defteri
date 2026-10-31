@@ -1,6 +1,18 @@
 /* AYNA i18n - BÖLÜM K */
 window.AYNA_I18N = {
   tr: {
+    'coach.journal_title': 'Günlüğünden başlayalım',
+    'coach.journal_help': 'Koç kaydedilmiş sabah önceliğini, gün içi notlarını ve akşam kaydını okur. Taslakları görmez. Önce somut bir gözlem, ardından bir bağlantı, uygulanabilir tek adım ve bir soru sunmalı.',
+    'coach.journal_context': '{date}: {n} kayıt kaydedilmiş.',
+    'coach.journal_context_error': 'Günlük kayıt sayısı kontrol edilemedi. Bağlantını kontrol edip yeniden dene.',
+    'coach.journal_review': 'Bugünkü günlüğümü değerlendir',
+    'coach.journal_send_hint': 'İsteği hazırlar; Gönder ile başlatırsın.',
+    'coach.journal_request': 'Bugünkü kaydedilmiş günlüğümü bütün olarak değerlendir. Sabah önceliğimi, gün içi notlarımı ve akşam kaydımı birlikte ele al. Önce yazdıklarımdan somut bir gözlem yap; sonra olası bir bağlantı, yarın için ne zaman ve nasıl yapabileceğim tek küçük adım ve düşünmemi sağlayacak bir soru ver. Zaten yazdıklarımı yeniden sorma; veri eksikse açıkça belirt.',
+    'coach.retry_kept': 'Mesajın yazı alanında korundu; yeniden gönderebilirsin.',
+    'err.timeout': 'Yanıt beklenenden uzun sürdü. Günlüğün silinmedi; biraz sonra yeniden dene.',
+    'err.network': 'Sunucuya bağlanılamadı. İnternet bağlantını kontrol et.',
+    'err.ai_unconfigured': 'Koçun yapay zekâ bağlantısı yapılandırılmamış veya sağlayıcı erişimi reddediyor. Yönetici ayarları kontrol edilmeli; günlük kayıtların güvende.',
+    'err.provider_busy': 'Yapay zekâ sağlayıcısının kotasına veya hız sınırına takıldık. Bu, günlük kaydının eksik olduğu anlamına gelmiyor. Bir süre sonra tekrar dene.',
     'journal.analysis': 'Koçun günlük analizi',
     'journal.analysis_hint': 'Kaydettiğin olaylar, duygular ve aynı gün kişilerle yaşadıkların üzerinden bağlantılar ve küçük bir sonraki adım. Notlar kaydedilince analiz başlar; istersen yeniden isteyebilirsin.',
     'journal.analyze': 'Günümü analiz et / Yenile',
@@ -351,6 +363,18 @@ window.AYNA_I18N = {
     'settings.deleted': 'Ayna verilerin silindi.'
   },
   en: {
+    'coach.journal_title': 'Start with your journal',
+    'coach.journal_help': 'The coach reads your saved morning priority, daytime notes and evening entry, not drafts. Expect a concrete observation, a possible connection, one actionable step and a question.',
+    'coach.journal_context': '{date}: {n} saved entries.',
+    'coach.journal_context_error': 'Unable to check your saved entries. Check your connection and retry.',
+    'coach.journal_review': 'Review today’s journal',
+    'coach.journal_send_hint': 'Prepares the request. Press Send to start.',
+    'coach.journal_request': 'Review my entire saved journal for today, including my morning priority, daytime notes and evening entry. Give a concrete observation based on my words, a possible connection, one small step with a time and method for tomorrow, and one useful question. Do not ask me to repeat information I already wrote; say clearly when information is missing.',
+    'coach.retry_kept': 'Your message is kept in the input. You can send it again.',
+    'err.timeout': 'The response took too long. Your journal is safe; please retry shortly.',
+    'err.network': 'Unable to reach the server. Please check your internet connection.',
+    'err.ai_unconfigured': 'The coach AI connection is not configured or the provider denied access. An administrator needs to check configuration. Your journal is safe.',
+    'err.provider_busy': 'The AI provider is rate-limited or out of quota. Your journal is saved. Please retry later.',
     'journal.analysis': 'Your coach’s daily analysis',
     'journal.analysis_hint': 'Connections and a small next step based on your saved events, feelings and interactions that day. Saving an entry starts analysis; you can request it again.',
     'journal.analyze': 'Analyze my day / Refresh',
