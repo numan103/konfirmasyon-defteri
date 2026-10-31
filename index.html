@@ -4082,8 +4082,14 @@
   .uyap-filter-btn:hover { border-color: var(--pc); }
   .uyap-f-hint { font-size: 10px; color: var(--text-3); min-height: 12px; }
   .uyap-f-hint.ok { color: var(--green); }
-  .uyap-card-link { display: block; font-size: 12px; font-weight: 600; color: var(--pc); text-decoration: none; margin-bottom: 10px; }
-  .uyap-card-link:hover { text-decoration: underline; }
+  .uyap-card-linkbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .uyap-card-link { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 12px; border-radius: 8px; background: var(--pc-soft); border: 1px solid var(--pc); color: var(--pc); font-size: 12.5px; font-weight: 700; text-decoration: none; transition: all .15s; }
+  .uyap-card-link:hover { background: var(--pc); color: #fff; }
+  .uyap-card-copy { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .uyap-card-copy:hover { border-color: var(--pc); color: var(--pc); }
+  .uyap-card-url { font-size: 11px; color: var(--text-3); margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .uyap-btn-ghost { padding: 9px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .uyap-btn-ghost:hover { border-color: var(--pc); color: var(--pc); }
   .uyap-q-cats { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
   .uyap-qcat-chip { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text-3); cursor: pointer; transition: all .15s; }
   .uyap-qcat-chip.on { background: var(--pc-soft); color: var(--pc); border-color: var(--pc); }
@@ -6756,6 +6762,7 @@
       </div>
       <div class="uyap-head-actions">
         <input type="search" id="uyap-search" class="uyap-search" placeholder="Ev adı / konum ara…" autocomplete="off">
+        <button type="button" class="uyap-btn-ghost" id="uyap-copy-all-btn" title="Tüm ilan linklerini kopyala" onclick="uyapCopyAll()">🔗 Linkleri Kopyala</button>
         <button type="button" class="ap2-btn-primary" id="uyap-add-btn">＋ Yeni Emlak</button>
       </div>
     </div>
@@ -26087,7 +26094,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b135';
+const APP_BUILD = 'b138';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -28048,18 +28055,17 @@ function uyapRenderStats() {
   if (!el) return;
   var ps = uyapData.properties;
   var totalInv = 0, totalExp = 0, count = ps.length;
-  var byStatus = { yeni: 0 };
+  var linkCount = ps.filter(function (p) { return !!p.url; }).length;
   ps.forEach(function (p) {
     var c = uyapCalc(p);
     totalInv += c.total;
     totalExp += c.profit;
-    byStatus.yeni++;
   });
   el.innerHTML =
-    '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Yatırım</div><div class="uyap-stat-val">' + uyapFmt(totalInv) + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Beklenen Kâr</div><div class="uyap-stat-val ' + (totalExp >= 0 ? 'pos' : 'neg') + '">' + uyapFmt(totalExp) + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Fırsat</div><div class="uyap-stat-val">' + count + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Aktif</div><div class="uyap-stat-val">' + count + '</div></div>';
+    '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Fırsat</div><div class="uyap-stat-val">' + count + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Linkli İlan</div><div class="uyap-stat-val">' + linkCount + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Maliyet</div><div class="uyap-stat-val">' + uyapFmt(totalInv) + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Beklenen Kâr</div><div class="uyap-stat-val">' + uyapFmt(totalExp) + '</div></div>';
 }
 
 function uyapRenderFilters() {
@@ -28109,7 +28115,13 @@ function uyapRenderGrid() {
     } else if (p.images && p.images.length === 1) {
       imgHtml = '<img class="uyap-card-img" src="' + p.images[0] + '" alt="' + (p.name || '') + '" data-uyap-imgview="' + (p.images[0] || '') + '">';
     }
-    var linkHtml = p.url ? '<a class="uyap-card-link" href="' + p.url + '" target="_blank" rel="noopener noreferrer" title="İlanı aç">🔗 İlanı Gör</a>' : '';
+    var _uyapDomain = '';
+    try { _uyapDomain = new URL(p.url).hostname.replace(/^www\\./, ''); } catch (e) { _uyapDomain = p.url; }
+    var linkHtml = p.url ? '<div class="uyap-card-linkbar">'
+      + '<a class="uyap-card-link" href="' + p.url + '" target="_blank" rel="noopener noreferrer" title="İlanı yeni sekmede aç">🔗 İlanı Aç</a>'
+      + '<button type="button" class="uyap-card-copy" data-uyap-url="' + p.url + '" title="Linki kopyala" onclick="uyapCopyOne(this)">Kopyala</button>'
+      + '</div>'
+      + '<div class="uyap-card-url" title="' + p.url + '">' + _uyapDomain + '</div>' : '';
     html += '<div class="uyap-card" data-uyap-card="' + p.id + '">'
       + '<div class="uyap-card-top"><div class="uyap-card-title">'
       + '<span class="uyap-badge ' + (p.status === 'potansiyel' ? 'yeni' : (p.status || 'yeni')) + '">' + (statusLabels[p.status] || statusLabels.yeni) + '</span>'
@@ -28137,6 +28149,40 @@ function uyapRenderGrid() {
   grid.innerHTML = html;
 }
 
+function uyapCopyAll() {
+  var _urls = (uyapData.properties || []).map(function (p) { return p.url; }).filter(Boolean);
+  if (!_urls.length) { alert('Kopyalanacak ilan linki yok.'); return; }
+  var _all = _urls.join('\\n');
+  var btn = document.getElementById('uyap-copy-all-btn');
+  var _done = function () { if (btn) { var old = btn.textContent; btn.textContent = 'Kopyalandı ✓'; setTimeout(function () { btn.textContent = old; }, 1500); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_all).then(_done).catch(function () { _done(); });
+    setTimeout(_done, 400);
+  } else {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = _all; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    } catch (e) {}
+    _done();
+  }
+}
+function uyapCopyOne(btn) {
+  var _u = btn.getAttribute('data-uyap-url');
+  if (!_u) return;
+  var _done = function () { btn.textContent = 'Kopyalandı ✓'; setTimeout(function () { btn.textContent = 'Kopyala'; }, 1500); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_u).then(_done).catch(function () { _done(); });
+    setTimeout(_done, 400);
+  } else {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = _u; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    } catch (e) {}
+    _done();
+  }
+}
 function renderUyap() {
   uyapLoad();
   uyapRenderStats();
@@ -28505,12 +28551,50 @@ function uyapFetchOgImg(imgUrl) {
 document.addEventListener('click', function (e) {
   var t = e.target;
   if (t.id === 'uyap-add-btn' || t.closest('#uyap-add-btn')) { uyapOpenForm(null); return; }
+  if (t.id === 'uyap-copy-all-btn' || t.closest('#uyap-copy-all-btn')) {
+    var _urls = (uyapData.properties || []).map(function (p) { return p.url; }).filter(Boolean);
+    if (!_urls.length) { alert('Kopyalanacak ilan linki yok.'); return; }
+    var _all = _urls.join('\n');
+    var _doneAll = function () {
+      var btn = document.getElementById('uyap-copy-all-btn');
+      if (btn) { var old = btn.textContent; btn.textContent = 'Kopyalandı ✓'; setTimeout(function () { btn.textContent = old; }, 1500); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(_all).then(_doneAll).catch(function () { _doneAll(); });
+    } else {
+      try {
+        var ta2 = document.createElement('textarea');
+        ta2.value = _all; ta2.style.position = 'fixed'; ta2.style.opacity = '0';
+        document.body.appendChild(ta2); ta2.select(); document.execCommand('copy'); document.body.removeChild(ta2);
+      } catch (e) {}
+      _doneAll();
+    }
+    return;
+  }
   if (t.id === 'uyap-form-close' || t.id === 'uyap-form-cancel') { uyapCloseForm(); return; }
   if (t.id === 'uyap-form-save') { uyapSaveForm(); return; }
   var editBtn = t.closest('[data-uyap-edit]');
   if (editBtn) { uyapOpenForm(editBtn.getAttribute('data-uyap-edit')); return; }
   var delBtn = t.closest('[data-uyap-del]');
   if (delBtn) { uyapDelProp(delBtn.getAttribute('data-uyap-del')); return; }
+  var copyBtn = t.closest('[data-uyap-url]');
+  if (copyBtn) {
+    var _u = copyBtn.getAttribute('data-uyap-url');
+    if (_u) {
+      var _done = function () { copyBtn.textContent = 'Kopyalandı ✓'; setTimeout(function () { copyBtn.textContent = 'Kopyala'; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(_u).then(_done).catch(function () { _done(); });
+      } else {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = _u; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        } catch (e) {}
+        _done();
+      }
+    }
+    return;
+  }
   var filterBtn = t.closest('[data-uyap-f]');
   if (filterBtn) { uyapFilter = filterBtn.getAttribute('data-uyap-f'); uyapRenderFilters(); uyapRenderGrid(); return; }
   if (t.id === 'uyap-note-save') { uyapNoteSave(); return; }
