@@ -4002,6 +4002,8 @@
   .uyap-card-pbox:hover { border-color: var(--pc); }
   .uyap-card-plbl { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
   .uyap-card-pval { font-size: 15px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+  .uyap-card-pbox.cost { border-color: var(--amber); }
+  .uyap-card-pbox.cost .uyap-card-pval { color: var(--amber); }
   .uyap-card-calc { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
   .uyap-card-calc.pos { background: linear-gradient(135deg, rgba(16,185,129,.06), rgba(16,185,129,.02)); border-color: rgba(16,185,129,.2); }
   .uyap-card-calc.neg { background: linear-gradient(135deg, rgba(239,68,68,.06), rgba(239,68,68,.02)); border-color: rgba(239,68,68,.2); }
@@ -4053,12 +4055,6 @@
   .uyap-cost-row input:focus { outline: none; border-color: var(--pc); box-shadow: 0 0 0 3px var(--pc-soft); }
   .uyap-cost-row input { min-width: 0; }
   .uyap-cost-row .num { flex: 0 1 170px; width: 170px; max-width: 48%; font-variant-numeric: tabular-nums; }
-  .uyap-cost-breakdown { margin: 10px 0 14px; padding: 12px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; }
-  .uyap-cost-breakdown h4 { margin: 0 0 9px; font-size: 11px; color: var(--text-3); }
-  .uyap-cost-breakdown dl { margin: 0; }
-  .uyap-cost-breakdown dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; font-size: 12px; }
-  .uyap-cost-breakdown dt { color: var(--text-2); overflow-wrap: anywhere; }
-  .uyap-cost-breakdown dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .uyap-note-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
   .uyap-note-heading .uyap-note-label { margin: 0; }
   .uyap-note-edit-btn { background: var(--card); border: 1px solid var(--border); color: var(--pc); padding: 5px 8px; border-radius: 6px; font: inherit; font-size: 11px; cursor: pointer; }
@@ -26122,7 +26118,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b140';
+const APP_BUILD = 'b141';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -28070,9 +28066,9 @@ function uyapFmt(n) {
 }
 
 function uyapCalc(p) {
-  var cost = (p.additionalCosts || []).reduce(function (s, c) { return s + (parseFloat(c.amount) || 0); }, 0);
-  var total = (parseFloat(p.purchasePrice) || 0) + cost;
-  var sale = parseFloat(p.salePrice) || 0;
+  var cost = (p.additionalCosts || []).reduce(function (s, c) { return s + uyapMoneyParse(c.amount); }, 0);
+  var total = uyapMoneyParse(p.purchasePrice) + cost;
+  var sale = uyapMoneyParse(p.salePrice);
   var profit = sale - total;
   var pct = total > 0 ? (profit / total * 100) : 0;
   return { cost: cost, total: total, sale: sale, profit: profit, pct: pct };
@@ -28082,16 +28078,16 @@ function uyapRenderStats() {
   var el = document.getElementById('uyap-stats');
   if (!el) return;
   var ps = uyapData.properties;
-  var totalInv = 0, totalExp = 0, count = ps.length;
-  var linkCount = ps.filter(function (p) { return !!p.url; }).length;
+  var totalInv = 0, totalExp = 0, totalCosts = 0, count = ps.length;
   ps.forEach(function (p) {
     var c = uyapCalc(p);
     totalInv += c.total;
     totalExp += c.profit;
+    totalCosts += c.cost;
   });
   el.innerHTML =
     '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Fırsat</div><div class="uyap-stat-val">' + count + '</div></div>'
-    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Linkli İlan</div><div class="uyap-stat-val">' + linkCount + '</div></div>'
+    + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Ek Masraf</div><div class="uyap-stat-val">' + uyapFmt(totalCosts) + '</div></div>'
     + '<div class="uyap-stat"><div class="uyap-stat-lbl">Toplam Maliyet</div><div class="uyap-stat-val">' + uyapFmt(totalInv) + '</div></div>'
     + '<div class="uyap-stat"><div class="uyap-stat-lbl">Beklenen Kâr</div><div class="uyap-stat-val">' + uyapFmt(totalExp) + '</div></div>';
 }
@@ -28162,13 +28158,12 @@ function uyapRenderGrid() {
       + imgHtml
       + '<div class="uyap-card-prices">'
       + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Satın Alma</div><div class="uyap-card-pval">' + uyapFmt(p.purchasePrice) + '</div></div>'
-      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Hedef Satış</div><div class="uyap-card-pval">' + (c.sale ? uyapFmt(c.sale) : '—') + '</div></div>'
-      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Ek Masraf</div><div class="uyap-card-pval">' + uyapFmt(c.cost) + '</div></div>'
+      + '<div class="uyap-card-pbox cost"><div class="uyap-card-plbl">Ek Masraf</div><div class="uyap-card-pval">' + uyapFmt(c.cost) + '</div></div>'
       + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Toplam Maliyet</div><div class="uyap-card-pval">' + uyapFmt(c.total) + '</div></div>'
+      + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Hedef Satış</div><div class="uyap-card-pval">' + (c.sale ? uyapFmt(c.sale) : '—') + '</div></div>'
       + '</div>'
-      + uyapCostBreakdown(p)
       + '<div class="uyap-card-calc ' + cls + '">'
-      + '<div><span class="uyap-card-calc-lbl">Beklenen Kâr</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
+      + '<div><span class="uyap-card-calc-lbl">Beklenen Net Kâr (masraf sonrası)</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
       + '<span class="uyap-card-calc-pct ' + cls + '">' + (c.sale ? ('%' + c.pct.toFixed(1)) : '—') + '</span>'
       + '</div>'
       + '<div class="uyap-card-notes" data-uyap-notes-host="' + esc(p.id) + '">'
@@ -28368,14 +28363,8 @@ function uyapMoneyFormat(value) {
 }
 function uyapMoneyParse(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (/^\d+\.\d{1,2}$/.test(String(value || '').trim())) return Number(value);
   return Number(String(value || '').replace(/\./g, '').replace(',', '.')) || 0;
-}
-function uyapCostBreakdown(p) {
-  var costs = Array.isArray(p.additionalCosts) ? p.additionalCosts : [];
-  if (!costs.length) return '';
-  return '<section class="uyap-cost-breakdown"><h4>EK MASRAF DETAYI</h4><dl>' + costs.map(function (cost) {
-    return '<div><dt>' + esc(cost.name || 'Masraf') + '</dt><dd>' + uyapFmt(cost.amount) + '</dd></div>';
-  }).join('') + '</dl></section>';
 }
 function uyapNotePreview(p) {
   return '<div class="uyap-note-heading"><span class="uyap-note-label">YATIRIM NOTU</span><button type="button" class="uyap-note-edit-btn" data-uyap-notes-edit="' + esc(p.id) + '">✎ Düzenle</button></div><div class="uyap-card-notes-text">' + esc(p.notes || 'Henüz not eklenmedi.') + '</div>';

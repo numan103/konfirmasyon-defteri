@@ -52,13 +52,24 @@ test('photo area focuses on click and only opens picker on double click', () => 
 
 test('property note text is selectable and edit is a separate header button', () => {
   const context = vm.createContext({ esc: (s) => String(s), uyapFmt: (n) => Number(n).toLocaleString('tr-TR') });
-  vm.runInContext(section('function uyapCostBreakdown(', 'function uyapQuickNote('), context);
+  vm.runInContext(section('function uyapNotePreview(', 'function uyapQuickNote('), context);
   const preview = context.uyapNotePreview({ id: 'one', notes: 'Read me' });
   assert.match(preview, /class="uyap-note-edit-btn"/);
   assert.match(preview, /<\/button><\/div><div class="uyap-card-notes-text">Read me<\/div>/);
-  const costs = context.uyapCostBreakdown({ additionalCosts: [{ name: 'Tapu', amount: 1250000 }] });
-  assert.match(costs, /Tapu/);
-  assert.match(costs, /1\.250\.000/);
+  assert.ok(!html.includes('uyap-cost-breakdown'));
   assert.ok(html.includes('id="uyap-f-costs" readonly'));
   assert.ok(html.includes('totalEl.value = uyapMoneyFormat(total)'));
+});
+
+test('top expense total reduces net profit and return against full invested cost', () => {
+  const context = vm.createContext({});
+  vm.runInContext(section('function uyapMoneyParse(', 'function uyapNotePreview('), context);
+  vm.runInContext(section('function uyapCalc(', 'function uyapRenderStats('), context);
+  const result = context.uyapCalc({ purchasePrice: 1000000, salePrice: 1500000, additionalCosts: [{ amount: '100.000' }, { amount: 150000 }] });
+  assert.equal(result.cost, 250000);
+  assert.equal(result.total, 1250000);
+  assert.equal(result.profit, 250000);
+  assert.equal(result.pct, 20);
+  assert.ok(html.includes('class="uyap-card-pbox cost"'));
+  assert.ok(html.includes('Beklenen Net Kâr (masraf sonrası)'));
 });
