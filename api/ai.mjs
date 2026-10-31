@@ -1,6 +1,7 @@
 import { send, fail } from '../ayna-server/http.mjs';
 import { getUser, db, q } from '../ayna-server/supabase.mjs';
 import { underLimit } from '../ayna-server/limits.mjs';
+import { canUseAyna } from '../ayna-server/access.mjs';
 import runDaily from '../ayna-server/jobs/daily.mjs';
 import ping from '../ayna-server/actions/ping.mjs';
 import scribe from '../ayna-server/actions/scribe.mjs';
@@ -79,8 +80,7 @@ async function aynaHandler(req, res, jwt) {
     return fail(res, 503, 'auth_unavailable');
   }
   if (!user) { console.error('[AYNA] 401'); return fail(res, 401, 'unauthorized'); }
-  const allowed = (process.env.AYNA_ALLOWED_USER_IDS || '').split(',').map((sx) => sx.trim()).filter(Boolean);
-  if (!allowed.includes(user.id)) { console.error('[AYNA] 403'); return fail(res, 403, 'not_allowed'); }
+  if (!canUseAyna(user)) { console.error('[AYNA] 403'); return fail(res, 403, 'not_allowed'); }
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const action = AYNA_ACTIONS[body.action];
   if (!action) return fail(res, 400, 'bad_request');
