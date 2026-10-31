@@ -1,7 +1,9 @@
 // Telegram kanalındaki son gönderileri t.me/s/ sayfasından parse edip JSON döndürür.
 // Kanal embed iframe'leri X-Frame-Options ile engellendiği için sunucu tarafı çözüm kullanıldı.
-// Ayrıca ?notify=1 (veya POST {message}) ile Alfa Portföy "potansiyel fikir" bildirimleri
+// Ayrıca ?notify=1 (veya POST {message, publicMessage}) ile Alfa Portföy bildirimleri
 // Bot API'den gönderilir (Vercel Hobby 12 fonksiyon limiti nedeniyle ayrı endpoint açılmadı).
+// Herkese açık kanal (TG_CHAT_ID) yalnızca genel/davet edici metni alır; ayrıntılı metin
+// varsa ve TG_PREMIUM_CHAT_ID tanımlıysa sadece premium kanalına gider.
 import { requestUser, requestTier, throttle } from '../lib/auth.mjs';
 
 const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
@@ -9,11 +11,21 @@ const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
 const TG_TOKEN = (process.env.TG_BOT_TOKEN || '').trim();
 const TG_CHAT = (process.env.TG_CHAT_ID || '').trim();
 const TG_THREAD = process.env.TG_THREAD ? Number(String(process.env.TG_THREAD).trim()) : null;
+// Premium uyelerin detayli bildirim aldigi ozel kanal/grup (opsiyonel).
+// Tanimli degilse ayrintili mesaj Telegram'a gitmez; premium uyeler detayi
+// sitedeki canli portfoyden gorur. Boylece herkese acik kanalda yalnizca
+// premium'a tesvik eden genel mesaj kalir.
+const TG_PREMIUM_CHAT = (process.env.TG_PREMIUM_CHAT_ID || '').trim();
+const TG_PREMIUM_THREAD = process.env.TG_PREMIUM_THREAD ? Number(String(process.env.TG_PREMIUM_THREAD).trim()) : null;
 
-async function sendTelegram(text) {
+const PUBLIC_FALLBACK = '🔔 Portföyde yeni bir hamle yapıldı.\n\nİşlem detayları, miktar ve portföy etkisi premium üyeler için açık.\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
+const PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] };
+
+async function sendTelegram(text, chatId = TG_CHAT, threadId = TG_THREAD, replyMarkup = null) {
   const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
-  const payload = { chat_id: TG_CHAT, text, disable_web_page_preview: true };
-  if (TG_THREAD) payload.message_thread_id = TG_THREAD;
+  const payload = { chat_id: chatId, text, disable_web_page_preview: true };
+  if (threadId) payload.message_thread_id = threadId;
+  if (replyMarkup) payload.reply_markup = replyMarkup;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -40,15 +52,29 @@ async function handleNotify(req, res) {
   }
 
   let message = null;
+  let teaser = null;
   if (req.method === 'POST') {
     let body;
     try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
     message = String((body && (body.message || body.text)) || '').trim().slice(0, 4000);
+    teaser = String((body && (body.publicMessage || body.teaser)) || '').trim().slice(0, 1200);
   }
-  if (!message) return res.status(400).json({ error: 'message gerekli' });
-  const out = await sendTelegram(message);
-  if (out.ok) return res.status(200).json({ ok: true, link: 'https://t.me/' + CHANNEL + '/' + (out.result && out.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') });
-  return res.status(502).json({ ok: false, error: out.description || 'Telegram gönderimi başarısız', http: out.http });
+  if (!message && !teaser) return res.status(400).json({ error: 'message gerekli' });
+
+  // Herkese acik kanal yalnizca genel/davet edici metni alir. Ayrintili metin
+  // (miktar, fiyat, kâr/zarar) sadece premium kanalina gider. publicMessage
+  // gelmezse guvenli tarafta kalip genel metni yollariz; ayrinti asla sizmaz.
+  const publicOut = await sendTelegram(teaser || PUBLIC_FALLBACK, TG_CHAT, TG_THREAD, PUBLIC_BUTTON);
+  const result = {
+    ok: !!publicOut.ok,
+    link: publicOut.ok ? 'https://t.me/' + CHANNEL + '/' + (publicOut.result && publicOut.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') : undefined,
+  };
+  if (TG_PREMIUM_CHAT && message && tier === 'admin') {
+    const premiumOut = await sendTelegram(message, TG_PREMIUM_CHAT, TG_PREMIUM_THREAD);
+    result.premium = premiumOut.ok ? { ok: true } : { ok: false, error: premiumOut.description || 'premium_send_failed' };
+  }
+  if (result.ok) return res.status(200).json(result);
+  return res.status(502).json({ ok: false, error: publicOut.description || 'Telegram gönderimi başarısız', http: publicOut.http });
 }
 
 async function fetchChannelHtml(before) {

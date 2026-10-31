@@ -249,7 +249,8 @@ async function adminOpHandler(res, user, body) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: tgc,
-            text: 'Referans onaylandi: ' + (user.email || 'yonetici') + ' adli hesabin UID onaylandi.'
+            text: '🎉 Yeni bir üye premium\'a katıldı.\n\nDetaylar → https://alfa-trader.com/?page=erisim',
+            reply_markup: { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] }
           })
         });
       }

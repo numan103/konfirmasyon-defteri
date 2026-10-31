@@ -17309,7 +17309,7 @@ function ap2CommitPosition(pos, total, qty, histRec) {
       tgMsg += '\nBakiye bu arada düşülmez.';
       if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
       tgMsg += '\n\nalfa-trader.com';
-      ap2TgNotify(tgMsg);
+      ap2TgNotify(tgMsg, ap2TgTeaser('yeni bir limit emri hazırlandı', pos.symbol));
     }
   } else if (editing && idx >= 0) {
     if (prevPending) {
@@ -17331,7 +17331,7 @@ function ap2CommitPosition(pos, total, qty, histRec) {
         }
         if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
         tgMsg += '\n\nalfa-trader.com';
-        ap2TgNotify(tgMsg);
+        ap2TgNotify(tgMsg, ap2TgTeaser('yeni bir hamle yapıldı', pos.symbol));
       } else { pos.filled = null; }
       ap2Data.positions[idx] = pos;
     } else {
@@ -17361,7 +17361,7 @@ function ap2CommitPosition(pos, total, qty, histRec) {
     }
     if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
     tgMsg += '\n\nalfa-trader.com';
-    ap2TgNotify(tgMsg);
+    ap2TgNotify(tgMsg, ap2TgTeaser('yeni bir hamle yapıldı', pos.symbol));
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
@@ -17411,7 +17411,7 @@ function ap2FillsCheck() {
     }
     if (p.note) tgMsg += '\n📝 Not: ' + p.note;
     tgMsg += '\n\nalfa-trader.com';
-    ap2TgNotify(tgMsg);
+    ap2TgNotify(tgMsg, ap2TgTeaser('yeni bir hamle yapıldı', p.symbol));
   });
   if (filled) ap2Save();
   return filled;
@@ -17424,7 +17424,7 @@ function ap2FillPos(id) {
   if (total > cash) { alert('Bakiye yetersiz: ' + ap2Fmt(total) + ' gerekli, kalan ' + ap2Fmt(cash)); return; }
   p.filled = new Date().toISOString().slice(0, 10);
   ap2Data.cash = cash - total;
-  ap2TgNotify('⚡ Limit emri el ile dolduruldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost) + '\n\nAdet: ' + ap2FmtNum(p.qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com');
+  ap2TgNotify('⚡ Limit emri el ile dolduruldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost) + '\n\nAdet: ' + ap2FmtNum(p.qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com', ap2TgTeaser('yeni bir hamle yapıldı', p.symbol));
   ap2Save();
   renderAlfaPortfoy2();
 }
@@ -17629,9 +17629,9 @@ function ap2Delete(id) {
   const pos = ap2Data.positions.find(x => x.id === id);
   if (pos) {
     if (ap2IsPending(pos)) {
-      ap2TgNotify('🗑 Bekleyen emir iptal — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nBakiye de\u011fi\u015fmedi.\n\nalfa-trader.com');
+      ap2TgNotify('🗑 Bekleyen emir iptal — ' + pos.symbol + ' 🔒 ' + ap2Fmt(pos.cost) + '\n\nBakiye de\u011fi\u015fmedi.\n\nalfa-trader.com', ap2TgTeaser('bekleyen bir emir iptal edildi', pos.symbol));
     } else {
-      const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; ap2TgNotify('🗑 Silindi — ' + pos.symbol + ' pozisyonu portföyden kaldırıldı\n\n' + pos.qty + ' adet · maliyet: ' + ap2Fmt(c.totalCost) + '\n\nalfa-trader.com');
+      const c = ap2Calc(pos); ap2Data.cash = (Number(ap2Data.cash) || 0) + c.totalCost; ap2TgNotify('🗑 Silindi — ' + pos.symbol + ' pozisyonu portföyden kaldırıldı\n\n' + pos.qty + ' adet · maliyet: ' + ap2Fmt(c.totalCost) + '\n\nalfa-trader.com', ap2TgTeaser('portföyden bir enstrüman çıkarıldı', pos.symbol));
     }
   }
   ap2Data.positions = ap2Data.positions.filter(x => x.id !== id);
@@ -17682,10 +17682,10 @@ function ap2SellConfirm() {
   const _profitEmoji = _profit >= 0 ? '📈' : '📉';
   if (pos.qty > 0) {
     const _tgNote = _sellNote ? '\n📝 Not: ' + _sellNote : '';
-    ap2TgNotify('💰 Kısmi satış — ' + pos.symbol + '\n\n' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nKalan: ' + pos.qty + ' adet' + _tgNote + '\n\nalfa-trader.com');
+    ap2TgNotify('💰 Kısmi satış — ' + pos.symbol + '\n\n' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nKalan: ' + pos.qty + ' adet' + _tgNote + '\n\nalfa-trader.com', ap2TgTeaser('kısmi bir çıkış yapıldı', pos.symbol));
   } else {
     const _tgNote = _sellNote ? '\n📝 Not: ' + _sellNote : '';
-    ap2TgNotify('🔒 Kapanış — ' + pos.symbol + ' pozisyonu tamamen kapatıldı\n\nSatış: ' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Net Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nGün: ' + _days + ' gün' + _tgNote + '\n\nalfa-trader.com');
+    ap2TgNotify('🔒 Kapanış — ' + pos.symbol + ' pozisyonu tamamen kapatıldı\n\nSatış: ' + sellQty + ' adet @ ' + ap2Fmt(sellPrice) + ' = ' + ap2Fmt(amount) + '\n' + _profitEmoji + ' Net Kâr/Zarar: ' + _profitSign + ap2Fmt(_profit) + ' (%' + (((_profit) / (sellQty * _entryCost)) * 100).toFixed(1) + ')\nGün: ' + _days + ' gün' + _tgNote + '\n\nalfa-trader.com', ap2TgTeaser('bir pozisyon kapatıldı', pos.symbol));
     ap2Data.positions = ap2Data.positions.filter(x => x.id !== pos.id);
   }
   ap2Save();
@@ -18858,20 +18858,54 @@ function ap2ShareNative() {
     navigator.clipboard.writeText(text).then(function() { stratToast('Paylaşılamadı, metin kopyalandı!'); }).catch(function() {});
   }
 }
-function ap2TgNotify(text) {
+// Herkese acik kanala giden genel metin: ayrintisiz, premium'a tesvik eden.
+// Ayrintili metin yalnizca premium kanalina (TG_PREMIUM_CHAT_ID) gider.
+const AP2_TG_ASSETS = {
+  XAU: 'Altın', GOLD: 'Altın', GC: 'Altın', GCF: 'Altın',
+  XAG: 'Gümüş', SILVER: 'Gümüş', SI: 'Gümüş', SIF: 'Gümüş',
+  XPT: 'Platin', PLATIN: 'Platin',
+  BRENT: 'Petrol', BRN: 'Petrol', USOIL: 'Petrol', WTI: 'Petrol', CL: 'Petrol', CLF: 'Petrol',
+  BTC: 'Bitcoin', ETH: 'Ethereum', SOL: 'Solana', BNB: 'BNB', XRP: 'XRP', ADA: 'Cardano', DOGE: 'Dogecoin',
+  US100: 'Nasdaq 100', NAS100: 'Nasdaq 100', NDX: 'Nasdaq 100', QQQ: 'Nasdaq 100',
+  US500: 'S&P 500', SPX: 'S&P 500', SP500: 'S&P 500', ES: 'S&P 500', ESF: 'S&P 500',
+  US30: 'Dow Jones', DJI: 'Dow Jones', DOW: 'Dow Jones',
+  DE40: 'DAX', DAX: 'DAX',
+  EURUSD: 'Euro / Dolar', USDTRY: 'Dolar / TL',
+  XU100: 'BIST 100', BIST100: 'BIST 100', BIST: 'BIST 100'
+};
+function ap2TgAsset(symbol) {
+  const s = String(symbol || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!s) return '';
+  if (AP2_TG_ASSETS[s]) return AP2_TG_ASSETS[s];
+  const base = s.replace(/(USDT|USDC|USD|TRY|PERP|FUT)$/, '');
+  if (base && AP2_TG_ASSETS[base]) return AP2_TG_ASSETS[base];
+  return s.replace(/USDT$/i, '').slice(0, 12);
+}
+function ap2TgTeaser(headline, symbol) {
+  const asset = ap2TgAsset(symbol);
+  return '🔔 ' + (asset ? asset + ' tarafında ' : '') + headline +
+    '\n\nİşlem detayları, miktar ve portföy etkisi premium üyeler için açık.' +
+    '\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
+}
+function ap2TgNotify(text, teaser) {
   if (!text) return;
+  const payload = { message: text };
+  if (teaser) payload.publicMessage = teaser;
   siteAuthHeaders({ 'Content-Type': 'application/json' })
     .then(function (h) {
       return fetch('/api/tg?notify=1', {
         method: 'POST',
         headers: h,
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify(payload)
       });
     })
     .then(function(r) { return r.json().catch(function() { return {}; }); })
     .then(function(j) {
       var link = j && j.link ? ' — ' + j.link : '';
-      if (j && j.ok) stratToast('Telegram\'a gönderildi ✓' + link);
+      if (j && j.ok) {
+        var detail = j.premium ? (j.premium.ok ? 'ayrıntı premium kanalda' : 'ayrıntı premium kanala gitmedi') : 'ayrıntı sitede';
+        stratToast('Telegram\'a gönderildi ✓ (' + detail + ')' + link);
+      }
       else if (j && j.error === 'referral_required') stratToast('Telegram bildirimi için referans doğrulaması gerekli.');
       else stratToast('Telegram ayarlı değil (TG_BOT_TOKEN eksik).');
     })
@@ -18883,7 +18917,7 @@ function ap2IdeaNotify(idea) {
   if (idea.note) lines.push(idea.note);
   if (tagTxt) lines.push('', tagTxt);
   lines.push('', 'alfa-trader.com');
-  ap2TgNotify(lines.join('\n'));
+  ap2TgNotify(lines.join('\n'), ap2TgTeaser('yeni bir fikir paylaşıldı', idea.symbol));
 }
 
 const SM_KEY = 'defter-sosyalmetre-v2';
@@ -25949,7 +25983,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b121';
+const APP_BUILD = 'b122';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
