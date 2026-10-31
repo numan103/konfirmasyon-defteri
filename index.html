@@ -18884,7 +18884,7 @@ function ap2TgAsset(symbol) {
 function ap2TgTeaser(headline, symbol) {
   const asset = ap2TgAsset(symbol);
   return '🔔 ' + (asset ? asset + ' tarafında ' : '') + headline +
-    '\n\nİşlem detayları, miktar ve portföy etkisi premium üyeler için açık.' +
+    '\n\nAyrıntılar ve canlı portföy premium üyeler için açık.' +
     '\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
 }
 function ap2TgNotify(text, teaser) {
@@ -25983,7 +25983,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b122';
+const APP_BUILD = 'b123';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

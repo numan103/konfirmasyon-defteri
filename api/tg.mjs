@@ -18,7 +18,7 @@ const TG_THREAD = process.env.TG_THREAD ? Number(String(process.env.TG_THREAD).t
 const TG_PREMIUM_CHAT = (process.env.TG_PREMIUM_CHAT_ID || '').trim();
 const TG_PREMIUM_THREAD = process.env.TG_PREMIUM_THREAD ? Number(String(process.env.TG_PREMIUM_THREAD).trim()) : null;
 
-const PUBLIC_FALLBACK = '🔔 Portföyde yeni bir hamle yapıldı.\n\nİşlem detayları, miktar ve portföy etkisi premium üyeler için açık.\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
+const PUBLIC_FALLBACK = '🔔 Portföyde yeni bir hamle yapıldı.\n\nAyrıntılar ve canlı portföy premium üyeler için açık.\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
 const PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] };
 
 async function sendTelegram(text, chatId = TG_CHAT, threadId = TG_THREAD, replyMarkup = null) {
