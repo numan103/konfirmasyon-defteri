@@ -5309,8 +5309,8 @@
       </div>
       <div class="home-teaser" id="home-teaser" hidden>
         <div class="ht-head">
-          <h2>📈 Son 7 Günün İşlem Sonuçları</h2>
-          <span class="ht-sub" id="ht-sub">Yöneticinin paylaştığı portföyden — salt okunur önizleme</span>
+          <h2>💼 Portföy — Son Kapanan İşlemler</h2>
+          <span class="ht-sub" id="ht-sub">Portföy yönetimi (paylaşımlı) — işlem kanalından ayrı, salt okunur</span>
         </div>
         <div class="ht-chart-wrap"><canvas id="ht-chart" width="600" height="120"></canvas></div>
         <div class="ht-list" id="ht-list"><div class="hd-empty">Yükleniyor…</div></div>
@@ -13394,6 +13394,7 @@ function amRenderPlan() {
   });
 }
 
+let _popStateNavigating = false;
 function showPage(name, skipAnim) {
   if (name !== 'ayna' && window.Ayna && Ayna.voice) Ayna.voice.cancel();
   // Erisim katmani: sayfa, uyelik seviyesine gore acilir. Yetki yoksa
@@ -13403,6 +13404,12 @@ function showPage(name, skipAnim) {
     name = 'erisim';
   }
   currentPage = name;
+  if (!_popStateNavigating) {
+    try {
+      const _cur = new URLSearchParams(location.search).get('page');
+      if (_cur !== name) history.pushState({ page: name }, '', '?page=' + encodeURIComponent(name));
+    } catch (e) {}
+  }
   dtRowFocus = null;
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
@@ -13528,6 +13535,15 @@ async function renderHomeTeaser() {
     }
   }
 }
+window.addEventListener('popstate', function (e) {
+  try {
+    _popStateNavigating = true;
+    const p = (e.state && e.state.page) || new URLSearchParams(location.search).get('page') || 'home';
+    if (typeof showPage === 'function') showPage(p, true);
+  } catch (err) {}
+  _popStateNavigating = false;
+});
+
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
 
 let dfFilter = 'all';
@@ -26022,7 +26038,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b127';
+const APP_BUILD = 'b128';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
