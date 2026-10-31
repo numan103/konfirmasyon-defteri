@@ -1,5 +1,6 @@
-const BASE = process.env.SUPABASE_URL;
-const PUB = process.env.SUPABASE_PUBLISHABLE;
+// Match the site's existing project defaults when optional Vercel vars are absent.
+const BASE = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 
 function authHeaders(auth) {
   if (auth && auth.service) {
@@ -12,10 +13,20 @@ function authHeaders(auth) {
 }
 
 export async function getUser(jwt) {
-  const r = await fetch(`${BASE}/auth/v1/user`, { headers: { apikey: PUB, Authorization: `Bearer ${jwt}` } });
-  if (!r.ok) { const t = await r.text().catch(() => ''); console.error('[AYNA] 500', r.status, t.slice(0,8)); return null; }
-  const u = await r.json();
-  return u && u.id ? u : null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const r = await fetch(`${BASE}/auth/v1/user`, { signal: ctrl.signal, headers: { apikey: PUB, Authorization: `Bearer ${jwt}` } });
+    const data = await r.json().catch(() => null);
+    if (!r.ok) {
+      // An invalid project key / auth outage is NOT an expired user session.
+      if (/api.?key|publishable key/i.test(String(data?.message || data?.msg || ''))) throw new Error('auth_unavailable');
+      if (r.status === 401 || r.status === 403) return null;
+      throw new Error('auth_unavailable');
+    }
+    if (!data?.id) throw new Error('auth_unavailable');
+    return data;
+  } finally { clearTimeout(timer); }
 }
 
 export async function db(auth, method, path, body, prefer) {

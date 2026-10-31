@@ -74,8 +74,11 @@ async function aiHandler(req, res) {
 
 async function aynaHandler(req, res, jwt) {
   let user = null;
-  try { user = await getUser(jwt); } catch (e) { console.error('[AYNA] 401', e.message); user = null; }
-  if (!user) { console.error('[AYNA] 401', jwt.slice(0, 8)); return fail(res, 401, 'unauthorized'); }
+  try { user = await getUser(jwt); } catch (e) {
+    console.error('[AYNA] auth service unavailable');
+    return fail(res, 503, 'auth_unavailable');
+  }
+  if (!user) { console.error('[AYNA] 401'); return fail(res, 401, 'unauthorized'); }
   const allowed = (process.env.AYNA_ALLOWED_USER_IDS || '').split(',').map((sx) => sx.trim()).filter(Boolean);
   if (!allowed.includes(user.id)) { console.error('[AYNA] 403'); return fail(res, 403, 'not_allowed'); }
   const body = req.body && typeof req.body === 'object' ? req.body : {};

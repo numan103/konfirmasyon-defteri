@@ -51,21 +51,42 @@ window.Ayna = (function () {
 
   function errText(code) { var key = 'err.' + code, text = t(key); return text === key ? t('err.default') : text; }
 
+  var _apiRefresh = null;
+  async function apiToken(refresh) {
+    var client = sb();
+    if (!client) throw { code: 'unauthorized' };
+    var result = await client.auth.getSession();
+    var session = result && result.data && result.data.session;
+    if (!session || !session.access_token) throw { code: 'unauthorized' };
+    if (refresh || (session.expires_at && session.expires_at * 1000 <= Date.now() + 30000)) {
+      if (!_apiRefresh) {
+        _apiRefresh = client.auth.refreshSession().finally(function () { _apiRefresh = null; });
+      }
+      result = await _apiRefresh;
+      session = result && result.data && result.data.session;
+      if ((result && result.error) || !session || !session.access_token) throw { code: 'unauthorized' };
+    }
+    return session.access_token;
+  }
   async function api(action, payload) {
-    var session = await sb().auth.getSession();
-    var token = session && session.data && session.data.session ? session.data.session.access_token : null;
-    if (!token) throw { code: 'unauthorized' };
+    var token = await apiToken(false);
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, 75000);
     try {
-      var r = await fetch('/api/ai', {
-        method: 'POST', signal: ctrl.signal,
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify(Object.assign({ action: action }, payload || {}))
-      });
-      var json = await r.json().catch(function () { return null; });
-      if (!r.ok || !json || json.error) throw { code: (json && json.error) || (r.status === 504 ? 'timeout' : 'default') };
-      return json;
+      for (var attempt = 0; attempt < 2; attempt++) {
+        var r = await fetch('/api/ai', {
+          method: 'POST', signal: ctrl.signal,
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+        });
+        var json = await r.json().catch(function () { return null; });
+        if (attempt === 0 && r.status === 401 && json && json.error === 'unauthorized') {
+          token = await apiToken(true);
+          continue;
+        }
+        if (!r.ok || !json || json.error) throw { code: (json && json.error) || (r.status === 504 ? 'timeout' : 'default') };
+        return json;
+      }
     } catch (e) {
       if (e.name === 'AbortError' || ctrl.signal.aborted) throw { code: 'timeout' };
       if (!e.code) throw { code: 'network' };
