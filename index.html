@@ -4088,6 +4088,21 @@
   .uyap-card-copy { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
   .uyap-card-copy:hover { border-color: var(--pc); color: var(--pc); }
   .uyap-card-url { font-size: 11px; color: var(--text-3); margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .uyap-card-linkbar { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .uyap-card-copy { min-height: 42px; }
+  .uyap-card-copy:disabled { opacity: .65; cursor: wait; }
+  .uyap-note-preview { display: block; width: 100%; background: none; border: none; padding: 0; text-align: left; cursor: pointer; color: var(--text); font: inherit; }
+  .uyap-note-preview:hover .uyap-note-label { color: var(--pc); }
+  .uyap-note-label { display: block; color: var(--text-3); font-size: 10px; letter-spacing: .08em; line-height: 1.6; margin-bottom: 7px; }
+  .uyap-note-label > span { float: right; letter-spacing: 0; }
+  .uyap-quick-note { display: block; width: 100%; min-height: 96px; resize: vertical; margin-top: 8px; padding: 10px; font: inherit; font-size: 13px; letter-spacing: normal; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+  .uyap-quick-note:focus { outline: 2px solid var(--pc); outline-offset: 2px; }
+  .uyap-note-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .uyap-note-tools button { font: inherit; font-size: 12px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; cursor: pointer; }
+  .uyap-note-tools button:first-child { color: var(--pc); border-color: var(--pc); }
+  .uyap-note-hint { display: block; color: var(--text-3); font-size: 10px; margin-top: 8px; }
+  #uyap-f-img-drop:focus { outline: 2px solid var(--pc); outline-offset: 3px; background: var(--pc-soft); }
+  #uyap-f-img-input { display: none; }
   .uyap-btn-ghost { padding: 9px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
   .uyap-btn-ghost:hover { border-color: var(--pc); color: var(--pc); }
   .uyap-q-cats { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -6835,17 +6850,18 @@
         <div class="uyap-f"><label>📍 Konum</label><input id="uyap-f-loc" placeholder="İl / İlçe / Mahalle" maxlength="100" autocomplete="off"></div>
         <div class="uyap-f"><label>🏠 Tür</label><select id="uyap-f-type"><option value="daire">Daire</option><option value="villa">Villa</option><option value="arsa">Arsa</option><option value="isyeri">İşyeri</option><option value="diger">Diğer</option></select></div>
         <div class="uyap-f"><label>📌 Durum</label><select id="uyap-f-status"><option value="yeni">Yeni Fırsat</option></select></div>
-        <div class="uyap-f"><label>💰 Satın Alma Fiyatı (₺)</label><input type="number" id="uyap-f-price" placeholder="0" min="0" step="1000"></div>
-        <div class="uyap-f"><label>🎯 Hedef Satış Fiyatı (₺)</label><input type="number" id="uyap-f-sale" placeholder="0" min="0" step="1000"></div>
+        <div class="uyap-f"><label for="uyap-f-price">💰 Satın Alma Fiyatı (₺)</label><input type="text" inputmode="decimal" data-uyap-money id="uyap-f-price" placeholder="1.000.000" autocomplete="off"></div>
+        <div class="uyap-f"><label for="uyap-f-sale">🎯 Hedef Satış Fiyatı (₺)</label><input type="text" inputmode="decimal" data-uyap-money id="uyap-f-sale" placeholder="1.000.000" autocomplete="off"></div>
         <div class="uyap-f-full"><label>📝 Notlar</label><textarea id="uyap-f-notes" placeholder="Detaylı bilgi, gözlem, not…" rows="3" maxlength="500"></textarea></div>
         <div class="uyap-f-sec">💸 Ek Masraflar</div>
         <div class="uyap-costs" id="uyap-f-costs-list"></div>
         <button type="button" class="uyap-cost-add" id="uyap-f-cost-add">+ Masraf Ekle</button>
         <div class="uyap-f-sec">📷 Fotoğraflar</div>
-        <div class="uyap-img-drop" id="uyap-f-img-drop">
-          <input type="file" id="uyap-f-img-input" accept="image/*" multiple>
-          <span>📷 Fotoğraf eklemek için tıkla veya sürükle</span>
+        <div class="uyap-img-drop" id="uyap-f-img-drop" tabindex="0" role="group" aria-label="Fotoğraf yapıştırma alanı. Ctrl+V ile yapıştır, çift tıkla dosya seç.">
+          <input type="file" id="uyap-f-img-input" accept="image/*" multiple hidden>
+          <span>📷 Bir kez tıkla, Ctrl+V ile fotoğraf yapıştır<br><small>Dosya seçmek için çift tıkla veya fotoğrafı buraya sürükle.</small></span>
         </div>
+        <button type="button" class="uyap-btn-ghost" id="uyap-pick-photos">Bilgisayardan fotoğraf seç</button>
         <div class="uyap-img-thumbs" id="uyap-f-img-thumbs"></div>
         <div class="uyap-form-btns">
           <button type="button" class="btn" id="uyap-form-cancel">Vazgeç</button>
@@ -26094,7 +26110,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b138';
+const APP_BUILD = 'b139';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -28132,7 +28148,7 @@ function uyapRenderGrid() {
       + '<button type="button" data-uyap-del="' + p.id + '" class="uyap-del" title="Sil">🗑️</button>'
       + '</div></div>'
       + (p.location ? '<div class="uyap-card-loc">📍 ' + p.location + '</div>' : '')
-      + imgHtml + linkHtml
+      + imgHtml
       + '<div class="uyap-card-prices">'
       + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Satın Alma</div><div class="uyap-card-pval">' + uyapFmt(p.purchasePrice) + '</div></div>'
       + '<div class="uyap-card-pbox"><div class="uyap-card-plbl">Hedef Satış</div><div class="uyap-card-pval">' + (c.sale ? uyapFmt(c.sale) : '—') + '</div></div>'
@@ -28143,7 +28159,9 @@ function uyapRenderGrid() {
       + '<div><span class="uyap-card-calc-lbl">Beklenen Kâr</span><span class="uyap-card-calc-val ' + cls + '">' + uyapFmt(c.profit) + '</span></div>'
       + '<span class="uyap-card-calc-pct ' + cls + '">' + (c.sale ? ('%' + c.pct.toFixed(1)) : '—') + '</span>'
       + '</div>'
-      + (p.notes ? '<div class="uyap-card-notes"><span class="uyap-card-notes-icon">💡</span><div class="uyap-card-notes-text">' + p.notes + '</div></div>' : '')
+      + '<div class="uyap-card-notes" data-uyap-notes-host="' + esc(p.id) + '">'
+      + '<button type="button" class="uyap-note-preview" data-uyap-notes-edit="' + esc(p.id) + '"><span class="uyap-note-label">YATIRIM NOTU <span>✎ Düzenle</span></span><span class="uyap-card-notes-text">' + esc(p.notes || 'Not eklemek için tıkla…') + '</span></button></div>'
+      + linkHtml
       + '</div>';
   });
   grid.innerHTML = html;
@@ -28152,35 +28170,35 @@ function uyapRenderGrid() {
 function uyapCopyAll() {
   var _urls = (uyapData.properties || []).map(function (p) { return p.url; }).filter(Boolean);
   if (!_urls.length) { alert('Kopyalanacak ilan linki yok.'); return; }
-  var _all = _urls.join('\\n');
+  var _all = _urls.join('\n');
   var btn = document.getElementById('uyap-copy-all-btn');
-  var _done = function () { if (btn) { var old = btn.textContent; btn.textContent = 'Kopyalandı ✓'; setTimeout(function () { btn.textContent = old; }, 1500); } };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(_all).then(_done).catch(function () { _done(); });
-    setTimeout(_done, 400);
-  } else {
-    try {
-      var ta = document.createElement('textarea');
-      ta.value = _all; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    } catch (e) {}
-    _done();
-  }
+  uyapCopyText(_all, btn);
 }
 function uyapCopyOne(btn) {
   var _u = btn.getAttribute('data-uyap-url');
   if (!_u) return;
-  var _done = function () { btn.textContent = 'Kopyalandı ✓'; setTimeout(function () { btn.textContent = 'Kopyala'; }, 1500); };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(_u).then(_done).catch(function () { _done(); });
-    setTimeout(_done, 400);
-  } else {
-    try {
+  uyapCopyText(_u, btn);
+}
+async function uyapCopyText(text, btn) {
+  if (!btn || btn.disabled) return;
+  var original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Kopyalanıyor…';
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+    else {
       var ta = document.createElement('textarea');
-      ta.value = _u; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    } catch (e) {}
-    _done();
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      try { ta.select(); if (!document.execCommand('copy')) throw new Error('copy'); }
+      finally { ta.remove(); btn.focus(); }
+    }
+    btn.textContent = 'Kopyalandı ✓';
+  } catch (e) {
+    btn.textContent = 'Kopyalanamadı';
+  } finally {
+    btn.disabled = false;
+    setTimeout(function () { btn.textContent = original; }, 1800);
   }
 }
 function renderUyap() {
@@ -28330,6 +28348,34 @@ function uyapNoteDel(id) {
 }
 
 /* ── Form ── */
+function uyapMoneyFormat(value) {
+  if (typeof value === 'number') return value.toLocaleString('tr-TR', { maximumFractionDigits: 2, useGrouping: true });
+  var parts = String(value || '').replace(/[^\d,]/g, '').split(',');
+  var whole = parts[0].replace(/^0+(?=\d)/, '');
+  return whole.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (parts.length > 1 ? ',' + parts[1].slice(0, 2) : '');
+}
+function uyapMoneyParse(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  return Number(String(value || '').replace(/\./g, '').replace(',', '.')) || 0;
+}
+function uyapQuickNote(host, id, edit) {
+  var p = uyapData.properties.find(function (item) { return item.id === id; });
+  if (!p || !host) return;
+  if (!edit) {
+    host.innerHTML = '<button type="button" class="uyap-note-preview" data-uyap-notes-edit="' + esc(id) + '"><span class="uyap-note-label">YATIRIM NOTU <span>✎ Düzenle</span></span><span class="uyap-card-notes-text">' + esc(p.notes || 'Not eklemek için tıkla…') + '</span></button>';
+    return;
+  }
+  host.innerHTML = '<label class="uyap-note-label">YATIRIM NOTU<textarea class="uyap-quick-note" maxlength="500" aria-label="Emlak notu">' + esc(p.notes || '') + '</textarea></label><div class="uyap-note-tools"><button type="button" data-uyap-notes-save="' + esc(id) + '">Kaydet</button><button type="button" data-uyap-notes-cancel="' + esc(id) + '">Vazgeç</button><button type="button" data-uyap-notes-clear="' + esc(id) + '">Notu kaldır</button></div><span class="uyap-note-hint">Ctrl+Enter ile kaydet</span>';
+  host.querySelector('textarea').focus();
+}
+function uyapQuickNoteSave(host, id, clear) {
+  var p = uyapData.properties.find(function (item) { return item.id === id; });
+  if (!p || !host) return;
+  p.notes = clear ? '' : host.querySelector('textarea').value.trim();
+  p.updatedAt = new Date().toISOString();
+  uyapSave();
+  uyapQuickNote(host, id, false);
+}
 function uyapOpenForm(id) {
   var form = document.getElementById('uyap-form');
   if (!form) return;
@@ -28344,8 +28390,8 @@ function uyapOpenForm(id) {
     document.getElementById('uyap-f-loc').value = p.location || '';
     document.getElementById('uyap-f-type').value = p.type || 'daire';
     document.getElementById('uyap-f-status').value = p.status || 'potansiyel';
-    document.getElementById('uyap-f-price').value = p.purchasePrice || '';
-    document.getElementById('uyap-f-sale').value = p.salePrice || '';
+    document.getElementById('uyap-f-price').value = uyapMoneyFormat(p.purchasePrice || '');
+    document.getElementById('uyap-f-sale').value = uyapMoneyFormat(p.salePrice || '');
     document.getElementById('uyap-f-notes').value = p.notes || '';
     uyapFormImgs = (p.images || []).slice();
   } else {
@@ -28385,7 +28431,7 @@ function uyapRenderCostRows() {
   costs.forEach(function (c, i) {
     html += '<div class="uyap-cost-row">'
       + '<input placeholder="Masraf adı" data-uyap-cn="' + i + '" value="' + (c.name || '') + '" maxlength="40" autocomplete="off">'
-      + '<input type="number" class="num" placeholder="₺" data-uyap-ca="' + i + '" value="' + (c.amount || '') + '" min="0" step="1000">'
+      + '<input type="text" inputmode="decimal" data-uyap-money class="num" placeholder="₺" data-uyap-ca="' + i + '" value="' + uyapMoneyFormat(c.amount || '') + '">'
       + '<button type="button" class="uyap-cost-rm" data-uyap-cr="' + i + '">✕</button>'
       + '</div>';
   });
@@ -28396,7 +28442,7 @@ function uyapRenderCostRows() {
 function uyapUpdateCostTotal() {
   var total = 0;
   document.querySelectorAll('#uyap-f-costs-list .num').forEach(function (el) {
-    total += parseFloat(el.value) || 0;
+    total += uyapMoneyParse(el.value);
   });
   var totalEl = document.getElementById('uyap-f-costs');
   if (totalEl) totalEl.value = total;
@@ -28410,15 +28456,15 @@ function uyapSaveForm() {
   var location = (document.getElementById('uyap-f-loc').value || '').trim();
   var type = document.getElementById('uyap-f-type').value;
   var status = document.getElementById('uyap-f-status').value;
-  var price = parseFloat(document.getElementById('uyap-f-price').value) || 0;
-  var sale = parseFloat(document.getElementById('uyap-f-sale').value) || 0;
+  var price = uyapMoneyParse(document.getElementById('uyap-f-price').value);
+  var sale = uyapMoneyParse(document.getElementById('uyap-f-sale').value);
   var notes = (document.getElementById('uyap-f-notes').value || '').trim();
   var costs = [];
   document.querySelectorAll('#uyap-f-costs-list .uyap-cost-row').forEach(function (row) {
     var cn = row.querySelector('[data-uyap-cn]');
     var ca = row.querySelector('[data-uyap-ca]');
     if (cn && ca && (cn.value.trim() || ca.value)) {
-      costs.push({ name: cn.value.trim(), amount: parseFloat(ca.value) || 0 });
+      costs.push({ name: cn.value.trim(), amount: uyapMoneyParse(ca.value) });
     }
   });
   var now = new Date().toISOString();
@@ -28550,25 +28596,17 @@ function uyapFetchOgImg(imgUrl) {
 /* ── Event delegation ── */
 document.addEventListener('click', function (e) {
   var t = e.target;
+  var noteAction = t.closest('[data-uyap-notes-edit], [data-uyap-notes-save], [data-uyap-notes-cancel], [data-uyap-notes-clear]');
+  if (noteAction) {
+    var host = noteAction.closest('[data-uyap-notes-host]');
+    var id = host.getAttribute('data-uyap-notes-host');
+    if (noteAction.hasAttribute('data-uyap-notes-edit')) uyapQuickNote(host, id, true);
+    else if (noteAction.hasAttribute('data-uyap-notes-cancel')) uyapQuickNote(host, id, false);
+    else uyapQuickNoteSave(host, id, noteAction.hasAttribute('data-uyap-notes-clear'));
+    return;
+  }
   if (t.id === 'uyap-add-btn' || t.closest('#uyap-add-btn')) { uyapOpenForm(null); return; }
   if (t.id === 'uyap-copy-all-btn' || t.closest('#uyap-copy-all-btn')) {
-    var _urls = (uyapData.properties || []).map(function (p) { return p.url; }).filter(Boolean);
-    if (!_urls.length) { alert('Kopyalanacak ilan linki yok.'); return; }
-    var _all = _urls.join('\n');
-    var _doneAll = function () {
-      var btn = document.getElementById('uyap-copy-all-btn');
-      if (btn) { var old = btn.textContent; btn.textContent = 'Kopyalandı ✓'; setTimeout(function () { btn.textContent = old; }, 1500); }
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(_all).then(_doneAll).catch(function () { _doneAll(); });
-    } else {
-      try {
-        var ta2 = document.createElement('textarea');
-        ta2.value = _all; ta2.style.position = 'fixed'; ta2.style.opacity = '0';
-        document.body.appendChild(ta2); ta2.select(); document.execCommand('copy'); document.body.removeChild(ta2);
-      } catch (e) {}
-      _doneAll();
-    }
     return;
   }
   if (t.id === 'uyap-form-close' || t.id === 'uyap-form-cancel') { uyapCloseForm(); return; }
@@ -28579,20 +28617,6 @@ document.addEventListener('click', function (e) {
   if (delBtn) { uyapDelProp(delBtn.getAttribute('data-uyap-del')); return; }
   var copyBtn = t.closest('[data-uyap-url]');
   if (copyBtn) {
-    var _u = copyBtn.getAttribute('data-uyap-url');
-    if (_u) {
-      var _done = function () { copyBtn.textContent = 'Kopyalandı ✓'; setTimeout(function () { copyBtn.textContent = 'Kopyala'; }, 1500); };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(_u).then(_done).catch(function () { _done(); });
-      } else {
-        try {
-          var ta = document.createElement('textarea');
-          ta.value = _u; ta.style.position = 'fixed'; ta.style.opacity = '0';
-          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-        } catch (e) {}
-        _done();
-      }
-    }
     return;
   }
   var filterBtn = t.closest('[data-uyap-f]');
@@ -28643,7 +28667,7 @@ document.addEventListener('click', function (e) {
       var ni = rows.length;
       var row = document.createElement('div');
       row.className = 'uyap-cost-row';
-      row.innerHTML = '<input placeholder="Masraf adı" data-uyap-cn="' + ni + '" maxlength="40" autocomplete="off"><input type="number" class="num" placeholder="₺" data-uyap-ca="' + ni + '" min="0" step="1000"><button type="button" class="uyap-cost-rm" data-uyap-cr="' + ni + '">✕</button>';
+      row.innerHTML = '<input placeholder="Masraf adı" data-uyap-cn="' + ni + '" maxlength="40" autocomplete="off"><input type="text" inputmode="decimal" data-uyap-money class="num" placeholder="₺" data-uyap-ca="' + ni + '"><button type="button" class="uyap-cost-rm" data-uyap-cr="' + ni + '">✕</button>';
       list2.appendChild(row);
     }
     return;
@@ -28695,6 +28719,14 @@ document.addEventListener('keyup', function (e) {
 
 document.addEventListener('input', function (e) {
   var t = e.target;
+  if (t.matches('[data-uyap-money]')) {
+    var caret = t.selectionStart;
+    var before = t.value.slice(0, caret).replace(/\./g, '').length;
+    t.value = uyapMoneyFormat(t.value);
+    var pos = 0, seen = 0;
+    while (pos < t.value.length && seen < before) { if (t.value[pos] !== '.') seen++; pos++; }
+    t.setSelectionRange(pos, pos);
+  }
   if (t.matches('#uyap-f-costs-list input')) { uyapUpdateCostTotal(); }
   if (t.id === 'uyap-note-text') { uyapRenderNoteCount(); }
 });
@@ -28718,6 +28750,9 @@ document.addEventListener('blur', function (e) {
   var drop = document.getElementById('uyap-f-img-drop');
   var input = document.getElementById('uyap-f-img-input');
   if (drop) {
+    drop.addEventListener('click', function () { drop.focus(); });
+    drop.addEventListener('dblclick', function (e) { if (e.target !== input) input.click(); });
+    drop.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); input.click(); } });
     drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('over'); });
     drop.addEventListener('dragleave', function () { drop.classList.remove('over'); });
     drop.addEventListener('drop', function (e) {
@@ -28725,9 +28760,7 @@ document.addEventListener('blur', function (e) {
       var files = e.dataTransfer.files;
       for (var i = 0; i < files.length; i++) {
         if (!files[i].type.startsWith('image/')) continue;
-        var fr = new FileReader();
-        fr.onload = function () { uyapAddImg(fr.result); };
-        fr.readAsDataURL(files[i]);
+        uyapReadPhoto(files[i]);
       }
     });
   }
@@ -28736,13 +28769,13 @@ document.addEventListener('blur', function (e) {
       var files = input.files;
       for (var i = 0; i < files.length; i++) {
         if (!files[i].type.startsWith('image/')) continue;
-        var fr = new FileReader();
-        fr.onload = function () { uyapAddImg(fr.result); };
-        fr.readAsDataURL(files[i]);
+        uyapReadPhoto(files[i]);
       }
       input.value = '';
     });
   }
+  var pickPhotos = document.getElementById('uyap-pick-photos');
+  if (pickPhotos && input) pickPhotos.addEventListener('click', function () { input.click(); });
   var noteImgFile = document.getElementById('uyap-note-imgfile');
   if (noteImgFile) {
     noteImgFile.addEventListener('change', function () {
@@ -28759,11 +28792,26 @@ document.addEventListener('blur', function (e) {
 })();
 
 /* ── Clipboard paste for images ── */
+function uyapReadPhoto(file) {
+  var reader = new FileReader();
+  reader.onload = function () { uyapAddImg(reader.result); };
+  reader.readAsDataURL(file);
+}
+document.addEventListener('keydown', function (e) {
+  if (e.target.matches('.uyap-quick-note') && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    var host = e.target.closest('[data-uyap-notes-host]');
+    uyapQuickNoteSave(host, host.getAttribute('data-uyap-notes-host'), false);
+  }
+});
 document.addEventListener('paste', function (e) {
+  var page = document.getElementById('page-uyap');
+  if (!page || page.classList.contains('hidden')) return;
   var items = (e.clipboardData || {}).items;
   if (!items) return;
   for (var i = 0; i < items.length; i++) {
     if (items[i].type.startsWith('image/')) {
+      e.preventDefault();
       var blob = items[i].getAsFile();
       var fr = new FileReader();
       var emlakFormOpen = document.getElementById('uyap-form') && document.getElementById('uyap-form').classList.contains('on');
