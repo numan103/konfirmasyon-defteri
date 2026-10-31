@@ -490,6 +490,21 @@
   .home-quick { display: flex; flex-wrap: wrap; gap: 8px; max-width: 980px; margin: 0 auto 22px; }
   .home-quick a { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-2); text-decoration: none; transition: all .12s; }
   .home-quick a:hover { border-color: var(--pc); color: var(--pc); }
+  .home-teaser { max-width: 980px; margin: 0 auto 18px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+  .ht-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ht-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
+  .ht-sub { font-size: 11.5px; color: var(--text-3); }
+  .ht-chart-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 8px; margin-bottom: 12px; }
+  .ht-chart-wrap canvas { width: 100%; height: 120px; display: block; }
+  .ht-list { padding: 4px 0; }
+  .ht-cta { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 12.5px; color: var(--text-2); }
+  .home-edu { max-width: 980px; margin: 0 auto 22px; display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid var(--border); border-radius: 16px; background: linear-gradient(135deg, rgba(123,120,245,.08), transparent); }
+  .he-ico { font-size: 28px; }
+  .he-body { flex: 1; }
+  .he-body h3 { font-size: 14px; font-weight: 800; margin: 0 0 3px; }
+  .he-body p { font-size: 12.5px; color: var(--text-2); margin: 0; line-height: 1.45; }
+  .he-link { background: var(--pc); color: #fff; border: none; border-radius: 999px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .he-link:hover { background: #4c4cc4; color: #fff; }
   /* --- Trade Günlüğü pano düzeni --- */
   .data-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 900px) {
@@ -5291,6 +5306,26 @@
         <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
         <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
         <a href="?page=portfoy" data-nav data-ref-only>💼 Portföy</a>
+      </div>
+      <div class="home-teaser" id="home-teaser" hidden>
+        <div class="ht-head">
+          <h2>📈 Son 7 Günün İşlem Sonuçları</h2>
+          <span class="ht-sub" id="ht-sub">Yöneticinin paylaştığı portföyden — salt okunur önizleme</span>
+        </div>
+        <div class="ht-chart-wrap"><canvas id="ht-chart" width="600" height="120"></canvas></div>
+        <div class="ht-list" id="ht-list"><div class="hd-empty">Yükleniyor…</div></div>
+        <div class="ht-cta" id="ht-cta">
+          <span>Tüm portföy, açık pozisyonlar ve detaylar için</span>
+          <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:8px 16px;">Premium'a geç →</button>
+        </div>
+      </div>
+      <div class="home-edu" id="home-edu">
+        <div class="he-ico">🎓</div>
+        <div class="he-body">
+          <h3>Öne çıkan ders: Risk Yönetimi</h3>
+          <p>Stop disiplini, pozisyon boyutlandırma ve R-multiple hesaplama — video eğitim ve checklist.</p>
+        </div>
+        <a href="?page=egitim" class="he-link" data-nav>Eğitime git →</a>
       </div>
 <div class="home-grid">
         <a href="?page=butce" class="home-card" data-nav>
@@ -13013,6 +13048,7 @@ async function submitAccess() {
   await loadSiteAccess();
   applyTierUi();
   try { renderHomeDash(); } catch (e) {}
+  try { renderHomeTeaser(); } catch (e) {}
 
   if (outcome.status === 'verified') {
     if (msg) msg.textContent = 'Doğrulandı, açılıyor…';
@@ -13392,7 +13428,7 @@ function showPage(name, skipAnim) {
   const shown = document.getElementById('page-' + name);
   if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   try { localStorage.setItem('df-last-page', name); } catch (e) {}
-  if (name === 'home') { try { renderHomeDash(); } catch (e) {} }
+  if (name === 'home') { try { renderHomeDash(); } catch (e) {} try { renderHomeTeaser(); } catch (e) {} }
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   const tvBar = document.querySelector('.tv-bar');
   if (tvBar) tvBar.style.display = name === 'home' ? '' : 'none';
@@ -13420,6 +13456,78 @@ function showPage(name, skipAnim) {
   if (name === 'erisim') { renderAccessPage(); }
 }
 
+async function renderHomeTeaser() {
+  const teaser = document.getElementById('home-teaser');
+  if (!teaser) return;
+  const ref = refUnlocked();
+  teaser.hidden = ref;
+  if (ref) return;
+  const sub = document.getElementById('ht-sub');
+  const list = document.getElementById('ht-list');
+  const chart = document.getElementById('ht-chart');
+  let d = null;
+  try { d = await ap2FetchCloud(false); } catch (e) {}
+  if (!d) { try { d = await ap2FetchCloud(true); } catch (e) {} }
+  if (!d) {
+    if (list) list.innerHTML = '<div class="hd-empty">Önizleme verisi yüklenemedi.</div>';
+    return;
+  }
+  const sells = Array.isArray(d.sells) ? d.sells : [];
+  const now = Date.now();
+  const weekMs = 7 * 24 * 3600 * 1000;
+  let recent = sells.filter(function (sl) {
+    const t = Number(sl.ts) || (sl.date ? new Date(sl.date).getTime() : 0);
+    return t && (now - t) <= weekMs;
+  }).sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); }).slice(0, 6);
+  if (!recent.length) {
+    recent = sells.slice().sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); }).slice(0, 5);
+  }
+  if (list) {
+    list.innerHTML = recent.length ? recent.map(function (sl) {
+      const profit = Number(sl.profit != null ? sl.profit : sl.pnl);
+      const hasP = isFinite(profit);
+      return '<div class="hd-row"><span class="hd-sym">' + (sl.symbol || '—') + '</span><span class="hd-mut">' + (sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '')) + '</span><span class="hd-amt ' + (hasP ? (profit >= 0 ? 'pos' : 'neg') : '') + '" style="margin-left:auto;">' + (hasP ? (profit >= 0 ? '+' : '') + ap2Fmt(profit) : ap2Fmt(sl.amount)) + '</span></div>';
+    }).join('') : '<div class="hd-empty">Bu hafta kapanan işlem yok.</div>';
+  }
+  if (sub) {
+    const pnl = Number(d.pnl || 0);
+    const pv = Number(d.portfolioValue || 0);
+    const wkPnl = recent.reduce(function (a, sl) { const p = Number(sl.profit != null ? sl.profit : sl.pnl); return a + (isFinite(p) ? p : 0); }, 0);
+    const wkCount = recent.length;
+    sub.textContent = 'Portföy: ' + ap2Fmt(pv) + ' · Kümülatif K/Z: ' + (pnl >= 0 ? '+' : '') + ap2Fmt(pnl) + (wkCount ? ' · Son kapanan ' + wkCount + ' işlem: ' + (wkPnl >= 0 ? '+' : '') + ap2Fmt(wkPnl) : '');
+  }
+  if (chart) {
+    const ctx = chart.getContext('2d');
+    const hist = Array.isArray(d.history) ? d.history.slice(-30) : [];
+    const W = chart.width, H = chart.height;
+    ctx.clearRect(0, 0, W, H);
+    if (hist.length >= 2) {
+      const vals = hist.map(function (h) { return Number(h.v); });
+      const min = Math.min.apply(null, vals);
+      const max = Math.max.apply(null, vals);
+      const range = (max - min) || 1;
+      ctx.strokeStyle = '#7b78f5';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      vals.forEach(function (v, i) {
+        const x = (i / (vals.length - 1)) * (W - 20) + 10;
+        const y = H - 10 - ((v - min) / range) * (H - 20);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.lineTo(W - 10, H - 10);
+      ctx.lineTo(10, H - 10);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(123,120,245,.12)';
+      ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,.35)';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Grafik verisi yok', W / 2, H / 2);
+    }
+  }
+}
 function sortedData() { return dataTrades.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0)); }
 
 let dfFilter = 'all';
@@ -24735,6 +24843,7 @@ async function onAuthed(user) {
   await loadSiteAccess();
   applyTierUi();
   try { renderHomeDash(); } catch (e) {}
+  try { renderHomeTeaser(); } catch (e) {}
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
@@ -25913,7 +26022,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b125';
+const APP_BUILD = 'b127';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
