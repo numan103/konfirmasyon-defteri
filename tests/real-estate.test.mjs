@@ -49,3 +49,16 @@ test('photo area focuses on click and only opens picker on double click', () => 
   assert.ok(html.includes("drop.addEventListener('dblclick'"));
   assert.ok(html.includes("if (!page || page.classList.contains('hidden')) return;"));
 });
+
+test('property note text is selectable and edit is a separate header button', () => {
+  const context = vm.createContext({ esc: (s) => String(s), uyapFmt: (n) => Number(n).toLocaleString('tr-TR') });
+  vm.runInContext(section('function uyapCostBreakdown(', 'function uyapQuickNote('), context);
+  const preview = context.uyapNotePreview({ id: 'one', notes: 'Read me' });
+  assert.match(preview, /class="uyap-note-edit-btn"/);
+  assert.match(preview, /<\/button><\/div><div class="uyap-card-notes-text">Read me<\/div>/);
+  const costs = context.uyapCostBreakdown({ additionalCosts: [{ name: 'Tapu', amount: 1250000 }] });
+  assert.match(costs, /Tapu/);
+  assert.match(costs, /1\.250\.000/);
+  assert.ok(html.includes('id="uyap-f-costs" readonly'));
+  assert.ok(html.includes('totalEl.value = uyapMoneyFormat(total)'));
+});
