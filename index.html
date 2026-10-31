@@ -454,31 +454,42 @@
   .home-tips ul { margin: 0; padding: 0 0 0 18px; }
   .home-tips li { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 8px; }
   .home-tips li strong { color: var(--text); }
-  /* --- Ana sayfa anketi --- */
-  .home-survey { position: relative; background: linear-gradient(135deg, var(--acc-soft, rgba(123,120,245,.08)), transparent); border: 1px solid var(--pc); border-radius: 16px; padding: 22px 24px; margin-bottom: 24px; }
-  .hs-head { position: relative; margin-bottom: 16px; }
-  .hs-head h2 { font-size: 17px; margin: 0 0 4px; letter-spacing: -.01em; }
-  .hs-head p { font-size: 12.5px; color: var(--text-2); margin: 0; max-width: 90%; }
-  .hs-skip { position: absolute; top: -4px; right: -4px; background: transparent; border: none; color: var(--text-3); font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px; }
-  .hs-skip:hover { color: var(--text); }
-  .hs-body { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
-  @media (max-width: 640px) { .hs-body { grid-template-columns: 1fr; } .hs-head p { max-width: 100%; } }
-  .hs-q label { display: block; font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 8px; }
-  .hs-opts { display: flex; flex-wrap: wrap; gap: 7px; }
-  .hs-opts button { background: var(--card); border: 1px solid var(--border); color: var(--text-2); border-radius: 999px; padding: 6px 13px; font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all .12s; }
-  .hs-opts button:hover { border-color: var(--pc); color: var(--text); }
-  .hs-opts button.on { background: var(--pc); border-color: var(--pc); color: #fff; }
-  .hs-foot { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
-  .hs-send { background: var(--pc); color: #fff; border: none; border-radius: 10px; padding: 9px 22px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
-  .hs-send:disabled { opacity: .45; cursor: not-allowed; }
-  .hs-hint { font-size: 11.5px; color: var(--text-3); }
-  .hs-done { text-align: center; padding: 12px 10px; }
-  .hs-done-ic { width: 44px; height: 44px; border-radius: 50%; background: var(--green-soft, rgba(34,197,94,.15)); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; margin: 0 auto 10px; }
-  .hs-done h3 { font-size: 17px; margin: 0 0 5px; }
-  .hs-done p { font-size: 13px; color: var(--text-2); margin: 0 0 14px; }
-  .hs-done-links { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-  .hs-done-links a { background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 8px 15px; font-size: 12.5px; font-weight: 600; text-decoration: none; }
-  .hs-done-links a:hover { border-color: var(--pc); color: var(--pc); }
+  /* --- Ana sayfa paneli --- */
+  .home-dash { margin: 0 auto 18px; max-width: 980px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+  .hd-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .hd-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
+  .hd-sub { font-size: 11.5px; color: var(--text-3); }
+  .hd-link { font-size: 12.5px; font-weight: 700; color: var(--pc); text-decoration: none; }
+  .hd-link:hover { text-decoration: underline; }
+  .hd-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .hd-kpi { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .hd-kpi-l { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+  .hd-kpi-v { font-size: 20px; font-weight: 800; margin-top: 3px; }
+  .hd-kpi-v.pos { color: var(--green); }
+  .hd-kpi-v.neg { color: var(--red); }
+  .hd-kpi-s { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .hd-cols { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 720px) { .hd-cols { grid-template-columns: 1fr 1fr; } }
+  .hd-panel { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .hd-panel-h { padding: 9px 12px; font-size: 12px; font-weight: 700; background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .hd-badge { background: var(--pc-soft); color: var(--pc); border-radius: 999px; padding: 1px 8px; font-size: 10.5px; font-weight: 700; }
+  .hd-list { padding: 6px; }
+  .hd-row { display: flex; align-items: center; gap: 8px; padding: 7px 6px; border-bottom: 1px dashed var(--border); font-size: 12.5px; }
+  .hd-row:last-child { border-bottom: none; }
+  .hd-sym { font-weight: 800; min-width: 48px; }
+  .hd-tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: var(--bg2); color: var(--text-3); border: 1px solid var(--border); }
+  .hd-tag.long { color: var(--green); border-color: rgba(34,197,94,.35); }
+  .hd-tag.short { color: var(--red); border-color: rgba(239,68,68,.35); }
+  .hd-mut { color: var(--text-3); font-size: 11.5px; }
+  .hd-amt { margin-left: auto; font-weight: 700; }
+  .hd-amt.pos { color: var(--green); }
+  .hd-amt.neg { color: var(--red); }
+  .hd-empty { padding: 14px; text-align: center; color: var(--text-3); font-size: 12px; }
+  .hd-skel { height: 64px; border-radius: 12px; background: linear-gradient(90deg, var(--bg2), var(--card), var(--bg2)); background-size: 200% 100%; animation: hdShine 1.2s infinite linear; }
+  @keyframes hdShine { to { background-position: -200% 0; } }
+  .home-quick { display: flex; flex-wrap: wrap; gap: 8px; max-width: 980px; margin: 0 auto 22px; }
+  .home-quick a { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-2); text-decoration: none; transition: all .12s; }
+  .home-quick a:hover { border-color: var(--pc); color: var(--pc); }
   /* --- Trade Günlüğü pano düzeni --- */
   .data-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 900px) {
@@ -4489,12 +4500,6 @@
           <div class="sub">Trader'lar için Disiplin Aracı</div>
         </div>
       </div>
-      <div class="lp-rv-pill-wrap">
-        <button class="lp-rv-pill" id="lp-nav-rv-btn" type="button" aria-expanded="false"><span class="lp-rv-pill-star">★</span> Yorum Yap</button>
-        <div class="lp-nav-rv-pop" id="lp-nav-rv-pop" hidden>
-          <div class="lp-rv-form" id="lp-nav-rv-form"></div>
-        </div>
-      </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="nav-lang" id="lang-btn" type="button" title="Dil / Language">EN</button>
@@ -4517,8 +4522,6 @@
         <span style="background:linear-gradient(135deg,#e5484d,#b42318)"></span>
       </div>
       <div class="lp-proof-txt"><b id="lp-proof-users">—</b><span data-i18n="hero.proof.txt">kayıtlı trader disiplinle işlem yapıyor</span></div>
-      <div class="lp-proof-div"></div>
-      <div class="lp-proof-stars"><span class="p-stars" aria-label="4.8 / 5"><span class="p-stars-bg">★★★★★</span><span class="p-stars-fg">★★★★★</span></span><span class="p-stars-meta"><b id="lp-proof-rating">4.8 / 5</b> <span data-i18n="hero.proof.rating">topluluk puanı</span></span></div>
     </div>
     <div class="lp-live" id="lp-live">
       <span class="nl-dot"></span>
@@ -4827,24 +4830,6 @@
     </div>
   </div>
 
-  <div class="lp-section-head">
-    <div class="lp-eyebrow" data-i18n="sec.reviews.eyebrow">Üye yorumları</div>
-    <h3 data-i18n="sec.reviews.h">Üyeler ne diyor?</h3>
-    <p data-i18n="sec.reviews.p">Gerçek deneyimler, gerçek trader'lar. Yorumunu yazarken ismini gösterebilir ya da anonim kalabilirsin — seçim senin.</p>
-  </div>
-  <div class="lp-rv" id="lp-rv">
-    <div class="lp-rv-head">
-      <span class="lp-rv-score"><b id="lp-rv-avg">—</b><em data-i18n="rv.per5">/ 5</em></span>
-      <div class="lp-rv-score-r">
-        <span class="lp-rv-stars" id="lp-rv-avgstars">☆☆☆☆☆</span>
-        <span class="lp-rv-count" id="lp-rv-count">— yorum</span>
-      </div>
-    </div>
-    <div class="lp-rv-grid" id="lp-rv-grid"><div class="lp-rv-empty" data-i18n="rv.loading">Yorumlar yükleniyor…</div></div>
-    <button class="lp-rv-more hidden" id="lp-rv-more" type="button" data-i18n="rv.more">Daha fazla yorum gör ↓</button>
-    <div class="lp-rv-form" id="lp-rv-form"></div>
-  </div>
-
   <div class="lp-stats">
     <div class="lp-stat"><b>10+</b><span data-i18n="stats.tools">Araç &amp; modül</span></div>
     <div class="lp-stat"><b>A+ · B</b><span data-i18n="stats.quality">Kalite kararı</span></div>
@@ -4982,7 +4967,7 @@
 </div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
 <nav class="navbar">
-    <button id="rvFab" class="rv-fab" type="button" title="Websitesi hakkında yorum yap" data-i18n-title="fab.b"><b data-i18n="fab.b">Websitesi Hakkında</b><span data-i18n="fab.main">Yorum Yap</span></button>
+    
     <a href="?page=home" class="nav-brand" id="nav-home" data-nav>
       <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
       <span>Alfa Traders</span>
@@ -5278,61 +5263,36 @@
            <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:10px 22px;">Referansla premium'a geç →</button>
          </div>
        </div>
-       <div class="home-survey" id="home-survey" hidden>
-        <div class="hs-head">
-          <h2 data-i18n="hs.h">🎯 Sana daha iyi yardımcı olabilmemiz için</h2>
-          <p data-i18n="hs.p">30 saniye — neye ihtiyacın olduğunu söyle, biz ona göre içerik hazırlayalım.</p>
-          <button type="button" class="hs-skip" id="hs-skip" data-i18n="hs.skip" data-i18n-aria="hs.skipAria" aria-label="Kapat">Şimdi değil ✕</button>
+       
+            <div class="home-dash" id="home-dash" hidden>
+        <div class="hd-head">
+          <div><h2>📌 Paylaşılan Portföy</h2><span class="hd-sub" id="hd-sub">Yöneticinin paylaştığı portföy — salt okunur</span></div>
+          <a href="?page=portfoy" class="hd-link" data-nav>Portföyü aç →</a>
         </div>
-        <div class="hs-body">
-          <div class="hs-q" data-q="zorluk">
-            <label data-i18n="hs.q1">En çok nerede zorlanıyorsun?</label>
-            <div class="hs-opts">
-              <button type="button" data-v="disiplin" data-i18n="hs.q1.o1">Disiplin</button>
-              <button type="button" data-v="risk" data-i18n="hs.q1.o2">Risk yönetimi</button>
-              <button type="button" data-v="teknik" data-i18n="hs.q1.o3">Teknik analiz</button>
-              <button type="button" data-v="psikoloji" data-i18n="hs.q1.o4">Psikoloji</button>
-              <button type="button" data-v="strateji" data-i18n="hs.q1.o5">Strateji</button>
-            </div>
-          </div>
-          <div class="hs-q" data-q="deneyim">
-            <label data-i18n="hs.q2">Ne kadar zamandır trade yapıyorsun?</label>
-            <div class="hs-opts">
-              <button type="button" data-v="yeni" data-i18n="hs.q2.o1">Yeni başladım</button>
-              <button type="button" data-v="1-3" data-i18n="hs.q2.o2">1-3 yıl</button>
-              <button type="button" data-v="3+" data-i18n="hs.q2.o3">3+ yıl</button>
-            </div>
-          </div>
-          <div class="hs-q" data-q="piyasa">
-            <label data-i18n="hs.q3">Hangi piyasada işlem yapıyorsun?</label>
-            <div class="hs-opts">
-              <button type="button" data-v="kripto" data-i18n="hs.q3.o1">Kripto</button>
-              <button type="button" data-v="fx" data-i18n="hs.q3.o2">FX</button>
-              <button type="button" data-v="hisse" data-i18n="hs.q3.o3">Hisse</button>
-            </div>
-          </div>
-          <div class="hs-q" data-q="ihtiyac">
-            <label data-i18n="hs.q4">Şu an en çok ne arıyorsun?</label>
-            <div class="hs-opts">
-              <button type="button" data-v="egitim" data-i18n="hs.q4.o1">Eğitim</button>
-              <button type="button" data-v="topluluk" data-i18n="hs.q4.o2">Topluluk</button>
-              <button type="button" data-v="araclar" data-i18n="hs.q4.o3">Araçlar</button>
-              <button type="button" data-v="mentorluk" data-i18n="hs.q4.o4">Mentorluk</button>
-            </div>
-          </div>
+        <div class="hd-kpis" id="hd-kpis">
+          <div class="hd-skel"></div><div class="hd-skel"></div><div class="hd-skel"></div>
         </div>
-        <div class="hs-foot">
-          <button type="button" class="hs-send" id="hs-send" disabled data-i18n="hs.send">Gönder</button>
-          <span class="hs-hint" id="hs-hint" data-i18n="hs.hint">Tüm soruları yanıtla</span>
-        </div>
-        <div class="hs-done" id="hs-done" hidden>
-          <div class="hs-done-ic">✓</div>
-          <h3 data-i18n="hs.done.t">Teşekkürler!</h3>
-          <p id="hs-done-msg" data-i18n="hs.done.msg">Cevaplarına göre sana en uygun bölümleri öneriyoruz.</p>
-          <div class="hs-done-links" id="hs-done-links"></div>
+        <div class="hd-cols">
+          <div class="hd-panel">
+            <div class="hd-panel-h">Açık Pozisyonlar <span class="hd-badge" id="hd-pos-count">0</span></div>
+            <div class="hd-list" id="hd-pos-list"><div class="hd-empty">Yükleniyor…</div></div>
+          </div>
+          <div class="hd-panel">
+            <div class="hd-panel-h">Son Kapananlar</div>
+            <div class="hd-list" id="hd-sell-list"><div class="hd-empty">Yükleniyor…</div></div>
+          </div>
         </div>
       </div>
-      <div class="home-grid">
+      <div class="home-quick" id="home-quick">
+        <a href="?page=calc" data-nav>🧮 Calculator</a>
+        <a href="?page=calendar" data-nav>📅 Takvim</a>
+        <a href="?page=butce" data-nav>💰 Gelir/Gider</a>
+        <a href="?page=trading" data-nav data-ref-only>📉 Terminal</a>
+        <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
+        <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
+        <a href="?page=portfoy" data-nav data-ref-only>💼 Portföy</a>
+      </div>
+<div class="home-grid">
         <a href="?page=butce" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvB)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-dasharray="126 170" transform="rotate(-90 105 54)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-dasharray="44 170" transform="rotate(60 105 54)" opacity=".85"/><text x="105" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">60%</text><text x="105" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">ELİMDE</text><circle cx="195" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="195" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="152 170" transform="rotate(-90 195 54)"/><circle cx="195" cy="54" r="27" fill="none" stroke="#f5a623" stroke-width="11" stroke-dasharray="64 170" transform="rotate(-20 195 54)"/><text x="195" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">35%</text><text x="195" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">AYLIK</text></svg></div>
           <div class="hc-body"><h2 data-i18n="hm.c10.t">💼 Gelir/Gider · Portföy &amp; Plan</h2><p data-i18n="hm.c10.s">Araçlarınla portföyünü takip et, ay ay birikim planı kur, hedefleri gör.</p></div>
@@ -5354,17 +5314,7 @@
           <div class="hc-body"><h2 data-i18n="hm.c9.t">🤝 Alfa Ol</h2><p data-i18n="hm.c9.s">Topluluk akışı, PnL performansı, referansla katıl.</p></div>
         </a>
       </div>
-    <div class="hm-rv" id="hm-rv">
-      <div class="hm-rv-head">
-        <h2 data-i18n="hm.rv.t">⭐ Üyeler ne diyor?</h2>
-        <p data-i18n="hm.rv.s">Siteyi beğendin mi? Deneyimini paylaş, yeni trader'lara yol göster.</p>
-        <span class="lp-rv-stars" id="hm-rv-avgstars">☆☆☆☆☆</span>
-        <span class="hm-rv-count" id="hm-rv-count">— yorum</span>
-      </div>
-      <div class="lp-rv-grid" id="hm-rv-grid"><div class="lp-rv-empty" data-i18n="rv.loading">Yorumlar yükleniyor…</div></div>
-      <button class="lp-rv-more hidden" id="hm-rv-more" type="button" data-i18n="hm.rv.more">Daha fazla yorum gör ↓</button>
-      <div class="lp-rv-form" id="hm-rv-form"></div>
-    </div>
+    
     </div>
   </div>
   <div id="page-trading" class="hidden">
@@ -13062,6 +13012,7 @@ async function submitAccess() {
 
   await loadSiteAccess();
   applyTierUi();
+  try { renderHomeDash(); } catch (e) {}
 
   if (outcome.status === 'verified') {
     if (msg) msg.textContent = 'Doğrulandı, açılıyor…';
@@ -13441,6 +13392,7 @@ function showPage(name, skipAnim) {
   const shown = document.getElementById('page-' + name);
   if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   try { localStorage.setItem('df-last-page', name); } catch (e) {}
+  if (name === 'home') { try { renderHomeDash(); } catch (e) {} }
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   const tvBar = document.querySelector('.tv-bar');
   if (tvBar) tvBar.style.display = name === 'home' ? '' : 'none';
@@ -17184,6 +17136,78 @@ async function ap2FetchCloud(force) {
   } catch(e) { console.error('ap2FetchCloud err', e); }
   ap2CloudLoading = false;
   return ap2CloudData || null;
+}
+let _homeDashBusy = false;
+let _homeDashAt = 0;
+function _hdRow(html) { return '<div class="hd-row">' + html + '</div>'; }
+async function renderHomeDash() {
+  const dash = document.getElementById('home-dash');
+  if (!dash) return;
+  const ref = refUnlocked();
+  dash.hidden = !ref;
+  document.querySelectorAll('#home-quick [data-ref-only]').forEach(function (a) { a.style.display = ref ? '' : 'none'; });
+  if (!ref) return;
+  const kpis = document.getElementById('hd-kpis');
+  const posBox = document.getElementById('hd-pos-list');
+  const sellBox = document.getElementById('hd-sell-list');
+  const posCount = document.getElementById('hd-pos-count');
+  const sub = document.getElementById('hd-sub');
+  if (_homeDashBusy) return;
+  // 5 dakika icinde yuklendiyse tekrar istek atma
+  if (_homeDashAt && Date.now() - _homeDashAt < 300000 && kpis && kpis.dataset.loaded) return;
+  _homeDashBusy = true;
+  if (kpis && !kpis.dataset.loaded) kpis.innerHTML = '<div class="hd-skel"></div><div class="hd-skel"></div><div class="hd-skel"></div>';
+  try {
+    let d = null;
+    try { d = await ap2FetchCloud(false); } catch (e) {}
+    if (!d) { try { d = await ap2FetchCloud(true); } catch (e) {} }
+    if (!d && siteIsAdmin()) { try { ap2Load(); d = ap2CloudSummary(); } catch (e) {} }
+    if (!d) {
+      if (kpis) kpis.innerHTML = '';
+      if (posBox) posBox.innerHTML = '<div class="hd-empty">Paylaşılan portföy henüz yok.</div>';
+      if (sellBox) sellBox.innerHTML = '<div class="hd-empty">—</div>';
+      if (sub) sub.textContent = 'Yönetici portföyünü henüz paylaşmadı.';
+      _homeDashAt = Date.now();
+      return;
+    }
+    const pos = Array.isArray(d.positions) ? d.positions : [];
+    const sells = Array.isArray(d.sells) ? d.sells : [];
+    const pf = Number(d.portfolioValue || 0);
+    const pnl = Number(d.pnl || 0);
+    const pct = Number(d.pnlPct || 0);
+    const cash = Number(d.cash || 0);
+    if (kpis) {
+      kpis.dataset.loaded = '1';
+      kpis.innerHTML =
+        '<div class="hd-kpi"><div class="hd-kpi-l">Toplam Değer</div><div class="hd-kpi-v">' + ap2Fmt(pf) + '</div><div class="hd-kpi-s">' + pos.length + ' açık pozisyon</div></div>' +
+        '<div class="hd-kpi"><div class="hd-kpi-l">Kümülatif K/Z</div><div class="hd-kpi-v ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + (pnl >= 0 ? '+' : '') + ap2Fmt(pnl) + '</div><div class="hd-kpi-s">' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% getiri</div></div>' +
+        '<div class="hd-kpi"><div class="hd-kpi-l">Serbest Bakiye</div><div class="hd-kpi-v">' + ap2Fmt(cash) + '</div><div class="hd-kpi-s">USDT</div></div>';
+    }
+    if (posCount) posCount.textContent = String(pos.length);
+    if (sub) sub.textContent = d.syncedAt ? ('Son güncelleme: ' + new Date(d.syncedAt).toLocaleString('tr-TR')) : 'Yöneticinin paylaştığı portföy — salt okunur';
+    if (posBox) {
+      const list = pos.slice().sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); }).slice(0, 5);
+      posBox.innerHTML = list.length ? list.map(function (p) {
+        const c = ap2Calc(p);
+        const val = c.value !== null ? c.value : c.totalCost;
+        const side = p.side === 'SHORT' ? 'short' : 'long';
+        return _hdRow('<span class="hd-sym">' + (p.symbol || '—') + '</span><span class="hd-tag ' + side + '">' + (p.side === 'SHORT' ? 'SHORT' : 'LONG') + '</span><span class="hd-mut">' + (p.date || '') + '</span><span class="hd-amt">' + ap2Fmt(val) + '</span>');
+      }).join('') : '<div class="hd-empty">Açık pozisyon yok.</div>';
+    }
+    if (sellBox) {
+      const list = sells.slice().sort(function (a, b) { return Number(b.ts || 0) - Number(a.ts || 0); }).slice(0, 5);
+      sellBox.innerHTML = list.length ? list.map(function (sl) {
+        const profit = Number(sl.profit != null ? sl.profit : sl.pnl);
+        const hasP = isFinite(profit);
+        return _hdRow('<span class="hd-sym">' + (sl.symbol || '—') + '</span><span class="hd-mut">' + (sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '')) + '</span><span class="hd-amt ' + (hasP ? (profit >= 0 ? 'pos' : 'neg') : '') + '" style="margin-left:auto;">' + (hasP ? (profit >= 0 ? '+' : '') + ap2Fmt(profit) : ap2Fmt(sl.amount)) + '</span>');
+      }).join('') : '<div class="hd-empty">Henüz kapanan işlem yok.</div>';
+    }
+    _homeDashAt = Date.now();
+  } catch (e) {
+    if (kpis) kpis.innerHTML = '';
+    if (posBox) posBox.innerHTML = '<div class="hd-empty">Portföy özeti yüklenemedi.</div>';
+    if (sellBox) sellBox.innerHTML = '<div class="hd-empty">—</div>';
+  } finally { _homeDashBusy = false; }
 }
 function ap2RenderTeaserTarget(data, prefix) {
   if (!data) return;
@@ -24710,6 +24734,7 @@ async function onAuthed(user) {
   // Uyelik seviyesi (free / ref / admin): navigasyon ve sayfa erisimi buna gore.
   await loadSiteAccess();
   applyTierUi();
+  try { renderHomeDash(); } catch (e) {}
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
@@ -25684,84 +25709,6 @@ if (AUTH_ENABLED) {
   if (pg && !pg.classList.contains('hidden')) startChart();
 })();
 
-// ============ Ana Sayfa Anketi (localStorage) ============
-(function () {
-  const KEY = 'alfa-survey-v1';
-  const card = document.getElementById('home-survey');
-  if (!card) return;
-  // Zaten cevaplanmış/atlanmışsa hiç gösterme
-  if (localStorage.getItem(KEY)) return;
-  card.hidden = false;
-
-  const answers = {};
-  const sendBtn = document.getElementById('hs-send');
-  const hint = document.getElementById('hs-hint');
-  const qCount = card.querySelectorAll('.hs-q').length;
-
-  // Öneri eşlemesi — cevaba göre en uygun bölüm
-  const REC = {
-    zorluk: {
-      disiplin:  { t: 'Alfa-Check List', p: 'defter' },
-      risk:      { t: 'Trade Günlüğü', p: 'data' },
-      teknik:    { t: 'Alfa Edu', p: 'egitim' },
-      psikoloji: { t: 'Alfa Edu — Psikoloji', p: 'egitim' },
-      strateji:  { t: 'Haftalık Değerlendirme', p: 'review' },
-    },
-    ihtiyac: {
-      egitim:    { t: 'Alfa Edu', p: 'egitim' },
-      topluluk:  { t: 'Alfa Ol', p: 'basvuru' },
-      araclar:   { t: 'İndikatörler', p: 'indicators' },
-      mentorluk: { t: 'Alfa Ol', p: 'basvuru' },
-    },
-  };
-
-  card.querySelectorAll('.hs-opts button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const q = btn.closest('.hs-q').getAttribute('data-q');
-      btn.closest('.hs-opts').querySelectorAll('button').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      answers[q] = btn.getAttribute('data-v');
-      const done = Object.keys(answers).length;
-      sendBtn.disabled = done < qCount;
-      hint.textContent = done < qCount ? (qCount - done) + ' soru kaldı' : 'Hazır!';
-    });
-  });
-
-  document.getElementById('hs-skip').addEventListener('click', () => {
-    localStorage.setItem(KEY, JSON.stringify({ skipped: true, ts: Date.now() }));
-    card.hidden = true;
-  });
-
-  sendBtn.addEventListener('click', () => {
-    if (Object.keys(answers).length < qCount) return;
-    localStorage.setItem(KEY, JSON.stringify({ answers, ts: Date.now() }));
-    // Öneri linkleri oluştur
-    const recs = [];
-    const seen = new Set();
-    [REC.zorluk[answers.zorluk], REC.ihtiyac[answers.ihtiyac]].forEach(r => {
-      if (r && !seen.has(r.p)) { seen.add(r.p); recs.push(r); }
-    });
-    const linksBox = document.getElementById('hs-done-links');
-    linksBox.innerHTML = '';
-    recs.forEach(r => {
-      const a = document.createElement('a');
-      a.href = '?page=' + r.p; a.textContent = r.t + ' →';
-      a.addEventListener('click', e => {
-        if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
-        e.preventDefault();
-        if (typeof showPage === 'function') showPage(r.p);
-      });
-      linksBox.appendChild(a);
-    });
-    document.getElementById('hs-done-msg').textContent = recs.length
-      ? 'Cevaplarına göre şunlarla başlamanı öneriyoruz:'
-      : 'Cevapların kaydedildi — sana en uygun içerikleri hazırlıyoruz.';
-    card.querySelector('.hs-body').hidden = true;
-    card.querySelector('.hs-foot').hidden = true;
-    document.getElementById('hs-done').hidden = false;
-  });
-})();
-
 // ============ Alfa Trader Ol — Topluluk Akışı ============
 const BAS_FEED_KEY = 'alfa-feed-v1';
 let basFeed = [];
@@ -25966,7 +25913,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b124';
+const APP_BUILD = 'b125';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
