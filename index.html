@@ -4478,6 +4478,62 @@
   .st2-weak .st2-sbox-t { color: var(--red); }
   .st2-sbox-c { font-size: 12px; color: var(--text-2); white-space: pre-wrap; line-height: 1.5; }
   .st2-empty { text-align: center; padding: 30px 16px; color: var(--text-3); font-size: 13px; }
+  /* Landing: restrained typography, consistent spacing and explicit access levels. */
+  #landing { --lp-accent: #9b93ff; }
+  #landing .lp-hero-band { background: var(--bg); border-bottom: 1px solid var(--border); overflow: hidden; }
+  #landing .lp-orb, #landing .lp-grid-bg { display: none; }
+  #landing .lp-nav { max-width: 1120px; padding: 26px 32px; }
+  #landing .lp-brand .sub { display: none; }
+  #landing .lp-hero { max-width: 920px; margin: 0 auto; padding: 88px 24px 90px; }
+  #landing .lp-badge { background: transparent; border: none; color: var(--lp-accent); font-size: 11px; letter-spacing: .18em; padding: 0; margin-bottom: 24px; box-shadow: none; }
+  #landing .lp-hero h2 { font-size: clamp(34px, 5.6vw, 66px); line-height: 1.12; letter-spacing: -.045em; color: var(--text); }
+  #landing .lp-hero .grad { background: none; color: var(--lp-accent); -webkit-text-fill-color: currentColor; }
+  #landing .lp-hero p { max-width: 640px; margin: 24px auto 0; color: var(--text-2); font-size: 17px; line-height: 1.8; }
+  #landing .lp-cta { margin-top: 30px; }
+  #landing .lp-cta button { border-radius: 8px; padding: 13px 24px; box-shadow: none; }
+  #landing .lp-assurance { margin-top: 22px; font-size: 12px; line-height: 1.8; color: var(--text-3); }
+  #landing .lp-section-head { max-width: 760px; padding: 70px 24px 0; margin: 0 auto; }
+  #landing .lp-eyebrow { font-size: 10px; letter-spacing: .18em; color: var(--lp-accent); margin-bottom: 14px; }
+  #landing .lp-section-head h3 { font-size: clamp(25px, 3vw, 36px); line-height: 1.25; letter-spacing: -.035em; }
+  #landing .lp-section-head p { color: var(--text-2); line-height: 1.7; margin-top: 14px; }
+  #landing .lp-features { max-width: 1120px; padding: 32px 32px 0; gap: 16px; }
+  #landing .lp-card { border-radius: 12px; box-shadow: none; background: var(--card); }
+  #landing .lp-card:hover { transform: translateY(-3px); border-color: var(--lp-accent); box-shadow: none; }
+  #landing .lp-card-body { padding: 26px; display: flex; flex-direction: column; height: 100%; }
+  #landing .lp-feature-label { font-size: 10px; letter-spacing: .13em; color: var(--text-3); margin-bottom: 24px; }
+  #landing .lp-card-body h3 { font-size: 18px; margin-bottom: 12px; }
+  #landing .lp-card-body p { font-size: 13px; line-height: 1.8; color: var(--text-2); flex: 1; }
+  #landing .lp-feature-access { color: var(--lp-accent); font-size: 11px; margin-top: 24px; }
+  #landing .lp-feature-access.free { color: var(--green); }
+  #landing .lp-pricing { max-width: 960px; padding: 32px 32px 0; gap: 24px; }
+  #landing .lp-price-card { border-radius: 12px; box-shadow: none; }
+  #landing .lp-price-card.featured { border-color: var(--lp-accent); transform: none; background: var(--card); }
+  #landing .lp-price-btn { border-radius: 8px; }
+  #landing .lp-start { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+  #landing .lp-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; margin-top: 36px; }
+  #landing .lp-steps > div { border-top: 1px solid var(--border); padding-top: 20px; }
+  #landing .lp-steps span { color: var(--lp-accent); font-size: 12px; }
+  #landing .lp-steps h4 { font-size: 16px; margin: 14px 0 10px; }
+  #landing .lp-steps p, #landing .lp-disclosure { font-size: 13px; line-height: 1.8; color: var(--text-2); }
+  #landing .lp-disclosure { margin-top: 30px; font-size: 11px; color: var(--text-3); }
+  #landing .lp-cta-band { margin-top: 64px; background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  #landing .lp-cta-inner { padding: 54px 24px; }
+  #landing .lp-cta-inner h3 { font-size: clamp(24px, 3vw, 32px); letter-spacing: -.03em; }
+  #landing .lp-cta-inner p { color: var(--text-2); }
+  #landing .lp-foot { max-width: 860px; margin: 0 auto; padding: 34px 24px; line-height: 1.8; }
+  #landing .lp-foot strong { font-size: 14px; color: var(--text); }
+  #landing .lp-foot p { margin-top: 8px; }
+  @media (max-width: 640px) {
+    #landing .lp-nav { padding: 20px; }
+    #landing .lp-hero { padding: 54px 20px 58px; }
+    #landing .lp-hero p { font-size: 15px; }
+    #landing .lp-features { grid-template-columns: 1fr; padding: 24px 20px 0; }
+    #landing .lp-section-head { padding-top: 48px; }
+    #landing .lp-pricing { padding: 24px 20px 0; }
+    #landing .lp-start { padding: 0 20px; }
+    #landing .lp-steps { grid-template-columns: 1fr; gap: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) { #landing *, #landing *::before, #landing *::after { animation: none !important; transition: none !important; } }
   </style>
   <script>
   (function(){try{var k='alfa-fund-v1';var v='v8';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[{"id":"eth-sep5","symbol":"ETH","type":"kripto","side":"LONG","date":"2026-09-05","qty":0.251,"cost":2471,"price":2471,"note":"","filled":"2026-09-05","lim":true}],"cash":648.17,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","buyDate":"2026-08-19","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","buyDate":"2026-08-19","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","buyDate":"2026-08-30","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-05T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39},{"d":"2026-09-05","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
@@ -4535,153 +4591,87 @@
     </div>
   </nav>
   <section class="lp-hero">
-    <span class="lp-badge" data-i18n="hero.badge">✦ Trader'lar için hepsi bir arada platform</span>
-    <h2 data-i18n-html="hero.h2">Öğren, uygula,<br><span class="grad">disiplinini koru.</span></h2>
-    <p data-i18n="hero.p">İşlem kanalı, portföy &amp; birikim planı, trading terminali, onchain veriler, Alfa Edu ve kişisel günlük asistan — bir trader'ın ihtiyacı olan her şey tek çatı altında. Referansla ücretsiz premium.</p>
+    <span class="lp-badge">ANALİZ · EĞİTİM · TAKİP</span>
+    <h2>Piyasayı takip et.<br><span class="grad">Kararının arkasını gör.</span></h2>
+    <p>İşlem kanalındaki analizleri incele, paylaşılan portföyü takip et, Alfa Edu ile bilgini geliştir. İhtiyacın olan araçları tek bir çalışma alanında bul.</p>
     <div class="lp-cta">
       <button class="primary" id="hero-register" type="button" data-i18n="hero.register">Ücretsiz başla →</button>
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
-    <div class="lp-proof">
-      <div class="lp-proof-av">
-        <span style="background:linear-gradient(135deg,#7b78f5,#4f45d8)"></span>
-        <span style="background:linear-gradient(135deg,#34d399,#0e7a37)"></span>
-        <span style="background:linear-gradient(135deg,#f5a623,#d97706)"></span>
-        <span style="background:linear-gradient(135deg,#e5484d,#b42318)"></span>
-      </div>
-      <div class="lp-proof-txt"><b id="lp-proof-users">—</b><span data-i18n="hero.proof.txt">kayıtlı trader disiplinle işlem yapıyor</span></div>
-    </div>
-    <div class="lp-live" id="lp-live">
-      <span class="nl-dot"></span>
-      <span><b id="lp-live-online">—</b> <span data-i18n="hero.live.online">kişi şu an çevrimiçi</span> · <b id="lp-live-total">—</b> <span data-i18n="hero.live.total">toplam ziyaret</span> · <b id="lp-live-reg">—</b> <span data-i18n="hero.live.members">kayıtlı üye</span></span>
-    </div>
+    <div class="lp-assurance">Ücretsiz hesap · Abonelik ücreti yok · Referans doğrulamasıyla premium</div>
   </section>
-  <div class="lp-hero-shot">
-    <div class="hsw">
-      <div class="hsw-bar"><span></span><span></span><span></span><em>Alfa Traders — Panel · örnek görünüm</em></div>
-      <div class="hsw-body">
-        <div class="hsw-metrics">
-          <div class="hsw-m"><label data-i18n="hsw.cur">Kümülatif R</label><b class="up">+52.4R</b><i class="up" data-i18n="hsw.year">▲ bu yıl</i></div>
-          <div class="hsw-m"><label data-i18n="hsw.wr">Win Rate</label><b>%61</b><i data-i18n="hsw.trades">148 işlem</i></div>
-          <div class="hsw-m"><label data-i18n="hsw.best">En iyi ay</label><b class="up">+19R</b><i data-i18n="hsw.month">Haziran</i></div>
-        </div>
-        <div class="hsw-main">
-          <div class="hsw-chart">
-            <div class="hsw-chart-h"><span>Equity Curve</span><span class="up">2026 · +52R</span></div>
-            <div class="hseq-wrap" id="hseq-wrap">
-              <svg id="hseq-svg" viewBox="0 0 400 128" preserveAspectRatio="none" aria-hidden="true"></svg>
-              <div class="hseq-pts" id="hseq-pts"></div>
-            </div>
-          </div>
-          <div class="hsw-side">
-            <div class="hsw-side-h" data-i18n="hsw.recent">Son İşlemler</div>
-            <div class="hsw-tr"><span class="dot g"></span>BTC · Long<b class="up">+3.2R</b></div>
-            <div class="hsw-tr"><span class="dot g"></span>XAU · Short<b class="up">+1.8R</b></div>
-            <div class="hsw-tr"><span class="dot r"></span>ETH · Long<b class="down">−1.0R</b></div>
-            <div class="hsw-tr"><span class="dot g"></span>EUR · Short<b class="up">+2.4R</b></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   </div>
   <div class="lp-section-head">
-    <div class="lp-eyebrow" data-i18n="sec.features.eyebrow">Neler var?</div>
-    <h3 data-i18n="sec.features.h">Bir trader'ın ihtiyacı olan her şey</h3>
-    <p data-i18n="sec.features.p">Eğitimden analize, defterden topluluğa — hepsi tek platformda. Ücretsiz başla, referansla premium'a geç.</p>
+    <div class="lp-eyebrow">ÇALIŞMA ALANIN</div>
+    <h3>Daha fazla sekme değil,<br>daha net bir akış.</h3>
+    <p>Analizi, öğrenmeyi ve takibi birbirine bağlayan araçlar.</p>
   </div>
     <section class="lp-features">
-    <div class="lp-card"><div class="lp-card-body"><h3>📡 İşlem Kanalı</h3><p>Canlı işlem paylaşımları, giriş/çıkış, gerekçe ve sonuçlar. Son başarılı işlemler ana sayfada önizleme.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>💼 Portföy & Birikim Planı</h3><p>Kripto, altın ve özel varlıklarını takip et; ay ay birikim planı ve hedef dağılımları.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>📉 Trading Terminali</h3><p>Canlı grafik, watchlist ve çalışma alanı tek panelde.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>🎓 Alfa Edu</h3><p>Bölüm → konu → video; teknikten psikolojiye ücretsiz eğitim.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>⛓️ Onchain Verileri</h3><p>Coinglass funding, CVD ve open interest tek ekranda.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>📅 Ekonomik Takvim</h3><p>3 yıldızlı yüksek etkili makro haberleri kaçırma.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>🧮 Alfa Calculator</h3><p>Riske göre pozisyon boyutu ve kaldıraç hesaplama.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>💰 Gelir / Gider</h3><p>Bütçe, gelir/gider ve portföy takibi.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>📓 Kişisel Günlük Asistan</h3><p>Günlük plan, not ve akşam yansıması ile disiplin.</p></div></div>
-    <div class="lp-card"><div class="lp-card-body"><h3>🤝 Alfa Ol</h3><p>Topluluk akışı, PnL performansı ve referansla katılım.</p></div></div>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">01 / ANALİZ</span><h3>İşlem Kanalı</h3><p>Grafikler, analizler ve işlem güncellemeleri. Yalnızca sonucu değil, paylaşılan gerekçeyi de incele.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">02 / TAKİP</span><h3>Paylaşılan Portföy</h3><p>Yöneticinin pozisyonlarını, satışlarını, notlarını ve portföy grafiğini salt okunur olarak takip et. İşlem kanalından ayrı bir görünüm.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">03 / ÖĞRENME</span><h3>Alfa Edu</h3><p>Konulara ayrılmış video eğitimler ve kaynaklarla bilgini adım adım geliştir. İhtiyacın olan derse kolayca dön.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">04 / ÇALIŞMA</span><h3>Trading Terminali</h3><p>Canlı grafik ve watchlist ile takip ettiğin piyasaları aynı çalışma alanında incele.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">05 / VERİ</span><h3>Onchain Verileri</h3><p>Funding, CVD ve open interest görünümlerini bir arada inceleyerek fiyat hareketine farklı açılardan bak.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">06 / HAZIRLIK</span><h3>Calculator &amp; Takvim</h3><p>Riske göre pozisyon boyutunu hesapla; önemli ekonomik veri açıklamalarını işlem öncesinde kontrol et.</p><span class="lp-feature-access free">Ücretsiz üyelik</span></div></article>
     </section>
 
 
   <div class="lp-section-head">
-    <div class="lp-eyebrow">Ücretlendirme</div>
-    <h3>Her trader'a uygun plan</h3>
-    <p>Ücretsiz başla, ihtiyacın olduğunda Pro'ya geç. Tüm verilerin cihazında güvende.</p>
+    <div class="lp-eyebrow">ERİŞİM SEÇENEKLERİ</div>
+    <h3>Önce keşfet. Sonra derinleş.</h3>
+    <p>Üyelik ücretsiz. Premium, aylık abonelikle değil referans doğrulamasıyla açılır.</p>
   </div>
   <div class="lp-pricing">
     <div class="lp-price-card">
-      <div class="lp-price-name">Kısıtlı</div>
-      <div class="lp-price-desc">Kayıt ol, piyasa notlarını ve temel araçları kullan.</div>
+      <div class="lp-price-name">Ücretsiz Üye</div>
+      <div class="lp-price-desc">Platformu tanı, temel araçlarla başla.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b></div>
       <div class="lp-price-period">Herkese açık — kayıt yeterli</div>
       <ul class="lp-price-feats">
-        <li>AlfaNews — haftalık piyasa analizleri</li>
-        <li>Alfa Calculator — pozisyon boyutlandırma</li>
-        <li>Ekonomik Takvim — 3 yıldız makro veriler</li>
-        <li>Kişisel Günlük Asistan — temel kullanım</li>
-        <li class="disabled">İşlem Kanalı — işlem paylaşımları ve sonuçlar</li>
-        <li class="disabled">Portföy &amp; Birikim Planı</li>
-        <li class="disabled">Trading Terminali</li>
-        <li class="disabled">Alfa Edu — eğitim videoları</li>
-        <li class="disabled">Onchain veriler</li>
-        <li class="disabled">Gelir / Gider</li>
+        <li>Alfa Calculator ile pozisyon boyutlandırma</li>
+        <li>Ekonomik takvim ve önemli veri açıklamaları</li>
+        <li>Ana sayfada seçili işlem sonuçlarının önizlemesi</li>
+        <li>Paylaşılan portföyün özet görünümü</li>
       </ul>
       <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
     </div>
     <div class="lp-price-card featured">
       <div class="lp-price-badge">Tam erişim</div>
-      <div class="lp-price-name">Referans Üye</div>
-      <div class="lp-price-desc">OKX veya Bybit referansıyla üye ol, ürünün tamamını kullan.</div>
+      <div class="lp-price-name">Premium</div>
+      <div class="lp-price-desc">Analizden eğitime, daha kapsamlı bir çalışma alanı.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b><span> / aidat yok</span></div>
       <div class="lp-price-period">Erişim, referans doğrulamasıyla açılır</div>
       <ul class="lp-price-feats">
         <li>İşlem Kanalı — canlı işlem paylaşımları ve sonuçlar</li>
-        <li>Kısıtlı planın tüm özellikleri</li>
-        <li>Portföy &amp; Birikim Planı — kripto, altın, özel varlık</li>
+        <li>Ücretsiz üyeliğin tüm özellikleri</li>
+        <li>Paylaşılan portföy — pozisyonlar, satışlar ve notlar</li>
         <li>Trading Terminali — canlı grafik ve watchlist</li>
-        <li>Alfa Edu — eğitim videoları ve stratejiler</li>
+        <li>Alfa Edu — video eğitimler ve kaynaklar</li>
         <li>Onchain veriler — funding, CVD, akış</li>
         <li>Gelir / Gider — bütçe ve takip</li>
-        <li>Kişisel Günlük Asistan — tam kullanım</li>
-        <li>Çalışma Panosu &amp; trading terminali</li>
-        <li>Alfa Ol — topluluk akışı</li>
+        <li>Çalışma Panosu</li>
       </ul>
       <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Referansla aç →</button>
     </div>
   </div>
 
-  <div class="lp-stats">
-    <div class="lp-stat"><b>12+</b><span data-i18n="stats.tools">Araç &amp; modül</span></div>
-    <div class="lp-stat"><b>A+ · B</b><span data-i18n="stats.quality">Kalite kararı</span></div>
-    <div class="lp-stat"><b>Notion</b><span data-i18n="stats.sync">Otomatik senkron</span></div>
-    <div class="lp-stat"><b>Ücretsiz</b><span data-i18n="stats.free">Cihazlar arası erişim</span></div>
-  </div>
-  <div class="lp-comm">
-    <div class="lp-comm-inner">
-      <div class="lp-comm-icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 3.2c.4-.2.8.1.8.5l-3 18c-.1.5-.7.7-1.1.4l-4.8-3.5-2.4 2.7c-.3.3-.8.1-.8-.3l.1-5.1L18 5.6c.2-.2 0-.4-.2-.3L6.6 12.3 2.2 10.8c-.5-.2-.5-1 0-1.2L21.9 3.2z"/></svg>
-      </div>
-      <h3 data-i18n="comm.h">Bir fikrin mi var? Bize yardım etmek ister misin?</h3>
-      <p data-i18n="comm.p">İstediğin özelliği söyle, düşüncelerini paylaş. Siteye yön veren topluluğa Telegram'dan katıl, orada birebir konuşalım.</p>
-      <a id="lp-comm-tg" href="#" target="_blank" rel="noopener noreferrer" class="lp-comm-btn"><span data-i18n="comm.btn">Telegram topluluğuna katıl</span>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
+  <section class="lp-start" aria-labelledby="lp-start-title">
+    <div class="lp-section-head"><div class="lp-eyebrow">NASIL BAŞLARSIN?</div><h3 id="lp-start-title">Üç adımda çalışma alanın hazır.</h3></div>
+    <div class="lp-steps">
+      <div><span>01</span><h4>Hesabını oluştur</h4><p>Ücretsiz kayıt ol. Temel araçları ve ana sayfadaki önizlemeleri keşfet.</p></div>
+      <div><span>02</span><h4>Referansını doğrulat</h4><p>OKX veya Bybit referans bağlantısıyla oluşturduğun hesabın UID bilgisini erişim sayfasından ilet.</p></div>
+      <div><span>03</span><h4>Premium'u aç</h4><p>Doğrulama onaylandığında işlem kanalı, Alfa Edu ve diğer premium araçlara eriş.</p></div>
     </div>
-  </div>
+    <p class="lp-disclosure">Platform için abonelik ücreti alınmaz. Referans bağlantıları üzerinden borsalardan komisyon kazanabiliriz. Borsanın işlem ücretleri ve koşulları geçerlidir.</p>
+  </section>
   <div class="lp-cta-band">
     <div class="lp-cta-inner">
-      <h3 data-i18n="cta.h">Bir sonraki işlemin daha disiplinli olsun</h3>
-      <p data-i18n="cta.p">Hesabını oluştur, defterin her cihazdan seninle olsun. Saniyeler sürer.</p>
+      <h3>Bir sonraki adımın daha bilinçli olsun.</h3>
+      <p>Önce platformu keşfet. Daha fazlası için referansla premium erişimini aç.</p>
       <button id="cta-register" type="button" data-i18n="cta.btn">Ücretsiz kayıt ol</button>
     </div>
   </div>
-  <div class="lp-quote">
-    <span class="lp-quote-mark">“</span>
-    <p data-i18n="quote.p">Kazan ya da kaybet, herkes piyasadan istediğini alır.</p>
-    <cite data-i18n="quote.cite">— Ed Seykota</cite>
-  </div>
-  <div class="lp-foot" data-i18n="foot">Alfa Traders · Alfa trader'lar için disiplin aracı · Verilerin sana özel, hesabında güvende.</div>
+  <footer class="lp-foot"><strong>Alfa Traders</strong><p>Analiz, eğitim ve takip için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p></footer>
 </div>
 <div id="auth-gate">
   <div class="auth-box">
@@ -4725,13 +4715,13 @@
       <div class="auth-price">
         <div class="auth-price-name">Ücretsiz</div>
         <div class="auth-price-val"><span class="auth-price-free">$0</span></div>
-        <div class="auth-price-desc">Eğitim, grafik, takvim</div>
+        <div class="auth-price-desc">Calculator, takvim ve önizlemeler</div>
       </div>
       <div class="auth-price featured">
         <div class="auth-price-badge">En popüler</div>
-        <div class="auth-price-name">Pro</div>
-        <div class="auth-price-val">$7<span>/ ay</span></div>
-        <div class="auth-price-desc">Tüm araçlar + destek</div>
+        <div class="auth-price-name">Premium</div>
+        <div class="auth-price-val">$0<span>/ aidat yok</span></div>
+        <div class="auth-price-desc">Referans doğrulamasıyla erişim</div>
       </div>
     </div>
   </div>
@@ -25904,7 +25894,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b132';
+const APP_BUILD = 'b133';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
