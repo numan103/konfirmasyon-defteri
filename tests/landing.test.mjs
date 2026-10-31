@@ -54,3 +54,21 @@ test('product tabs support click and arrow keys without autoplay', () => {
   assert.ok(html.includes('prefers-reduced-motion: reduce'));
   assert.ok(fs.existsSync(new URL('../assets/landing-workspace.svg', import.meta.url)));
 });
+
+test('editorial photos are local, lazy loaded and have alternative text', () => {
+  const photos = [...landing.matchAll(/<img src="(\/assets\/landing-[^"]+-photo\.jpg)"[^>]+>/g)];
+  assert.equal(photos.length, 3);
+  for (const [tag, src] of photos) {
+    assert.match(tag, /loading="lazy"/);
+    assert.match(tag, /alt="[^"]+"/);
+    assert.match(tag, /width="\d+" height="\d+"/);
+    const bytes = fs.readFileSync(new URL(`..${src}`, import.meta.url));
+    assert.equal(bytes[0], 0xff);
+    assert.equal(bytes[1], 0xd8);
+    assert.ok(bytes.length < 300000, `${src} should stay lightweight`);
+  }
+  for (const target of ['lp-showcase', 'lp-features-title', 'lp-access-title']) {
+    assert.ok(landing.includes(`href="#${target}"`));
+    assert.ok(landing.includes(`id="${target}"`));
+  }
+});
