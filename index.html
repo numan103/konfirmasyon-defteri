@@ -13591,12 +13591,18 @@ async function renderHomeChannel() {
   const box = document.getElementById('hc2-list');
   if (!box) return;
   const ref = refUnlocked();
-  if (!ref) {
-    box.innerHTML = '<div class="hd-empty">Islem kanali premium uyelere acik. Son guncellemeleri ve analizleri gormek icin premium\'a gec.</div>';
-    return;
-  }
   if (!alfaLoaded) { try { await loadAlfaTrading(); } catch (e) {} }
-  const posts = (alfaPosts || []).slice().sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); }).slice(0, 3);
+  let posts = (alfaPosts || []).slice().sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); });
+  if (!ref) {
+    const ok = posts.filter(function (p) { return p.type === 'islem' && p.status === 'tp'; });
+    posts = (ok.length ? ok : posts.filter(function (p) { return p.type === 'islem'; })).slice(0, 3);
+    if (!posts.length) {
+      box.innerHTML = '<div class="hd-empty">Islem kanali premium uyelere acik. Son guncellemeleri ve analizleri gormek icin premium\'a gec.</div>';
+      return;
+    }
+  } else {
+    posts = posts.slice(0, 3);
+  }
   if (!posts.length) {
     box.innerHTML = '<div class="hd-empty">Henuz paylasim yok.</div>';
     return;
@@ -26105,7 +26111,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b130';
+const APP_BUILD = 'b131';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
