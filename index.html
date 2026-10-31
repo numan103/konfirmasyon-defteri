@@ -4533,7 +4533,62 @@
     #landing .lp-start { padding: 0 20px; }
     #landing .lp-steps { grid-template-columns: 1fr; gap: 24px; }
   }
-  @media (prefers-reduced-motion: reduce) { #landing *, #landing *::before, #landing *::after { animation: none !important; transition: none !important; } }
+  /* Editorial product illustrations and lightweight motion. */
+  #landing .lp-hero-band { background: radial-gradient(ellipse at 82% 40%, rgba(135,112,255,.1), transparent 55%), var(--bg); }
+  #landing .lp-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; max-width: 1200px; padding: 52px 32px 76px; gap: 12px; text-align: left; }
+  #landing .lp-hero h2 { font-size: clamp(36px, 4.6vw, 60px); }
+  #landing .lp-hero p { font-size: 16px; margin-left: 0; }
+  #landing .lp-cta { justify-content: flex-start; }
+  #landing .lp-assurance { max-width: 420px; }
+  #landing .lp-explore { display: inline-flex; gap: 14px; align-items: center; color: var(--text-2); font-size: 12px; margin-top: 30px; text-decoration: none; }
+  #landing .lp-explore span { transition: transform .2s; }
+  #landing .lp-explore:hover span { transform: translateY(4px); }
+  #landing .lp-art { position: relative; min-width: 0; isolation: isolate; }
+  #landing .lp-art img { display: block; width: 112%; max-width: none; height: auto; margin-left: -6%; animation: lpFloat 9s ease-in-out infinite; }
+  #landing .lp-art-halo { position: absolute; inset: 20%; z-index: -1; background: radial-gradient(circle, rgba(132,103,255,.2), transparent 70%); }
+  #landing .lp-art-note { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11px; color: var(--text-3); }
+  #landing .lp-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px rgba(52,211,153,.35); }
+  #landing .lp-showcase { display: grid; grid-template-columns: .7fr 1.3fr; gap: 48px; align-items: center; max-width: 1120px; margin: 0 auto; padding: 80px 32px 12px; scroll-margin-top: 24px; }
+  #landing .lp-showcase-heading h3 { font-family: var(--font-display); font-size: clamp(26px, 3vw, 36px); line-height: 1.25; letter-spacing: -.04em; margin: 18px 0; }
+  #landing .lp-showcase-heading p { font-size: 14px; line-height: 1.8; color: var(--text-2); }
+  #landing .lp-demo { min-width: 0; border: 1px solid var(--border); border-radius: 20px; background: var(--card); padding: 10px; box-shadow: 0 24px 64px rgba(0,0,0,.1); }
+  #landing .lp-demo-tabs { display: flex; gap: 4px; padding: 4px; border-bottom: 1px solid var(--border); }
+  #landing .lp-demo-tabs button { flex: 1; font: inherit; font-size: 12px; font-weight: 600; border: none; background: none; color: var(--text-3); border-radius: 8px; padding: 12px 6px; cursor: pointer; transition: color .2s, background .2s; }
+  #landing .lp-demo-tabs button[aria-selected="true"] { color: var(--text); background: var(--pc-soft); }
+  #landing .lp-demo-tabs button:focus-visible, #landing a:focus-visible, #landing button:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 4px; }
+  #landing .lp-demo-panel:not([hidden]) { display: block; animation: lpPanelIn .35s ease both; }
+  #landing .lp-demo-graphic { padding: 16px 16px 10px; color: #a89aff; background: radial-gradient(ellipse at 50% 20%, rgba(155,147,255,.09), transparent 75%); text-align: center; }
+  #landing .lp-demo-graphic svg { width: 100%; height: 170px; display: block; }
+  #landing .lp-demo-graphic > span { font-size: 10px; letter-spacing: .12em; color: var(--text-3); }
+  #landing .lp-portfolio-graphic { color: #55bca8; }
+  #landing .lp-education-graphic { color: #c6a0df; }
+  #landing .lp-demo-detail { padding: 24px; }
+  #landing .lp-demo-kicker { font-size: 9px; letter-spacing: .12em; color: var(--lp-accent); }
+  #landing .lp-demo-detail h4 { font-size: 20px; letter-spacing: -.02em; margin: 10px 0; }
+  #landing .lp-demo-detail p { color: var(--text-2); font-size: 13px; line-height: 1.8; }
+  #landing .lp-demo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  #landing .lp-demo-chips span { padding: 5px 9px; border: 1px solid var(--border); border-radius: 6px; color: var(--text-3); font-size: 10px; }
+  #landing .lp-demo-caption { border-top: 1px solid var(--border); margin: 0 14px; padding: 12px 0 4px; color: var(--text-3); font-size: 10px; line-height: 1.6; }
+  #landing .lp-card { position: relative; overflow: hidden; transition: transform .25s, border-color .25s, box-shadow .25s; }
+  #landing .lp-card::before { content: ''; position: absolute; top: 0; left: 26px; right: 26px; height: 1px; background: linear-gradient(90deg, transparent, var(--lp-accent), transparent); opacity: .4; }
+  #landing .lp-card:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,.12); }
+  #landing .lp-price-card.featured { background: radial-gradient(ellipse at 80% 0%, rgba(155,147,255,.1), transparent 60%), var(--card); }
+  #landing .lp-cta-band { position: relative; overflow: hidden; background: radial-gradient(ellipse at 50% 100%, rgba(155,147,255,.15), transparent 70%), var(--card); }
+  #landing .lp-reveal { opacity: 0; transform: translateY(22px); transition: opacity .65s ease, transform .65s ease; }
+  #landing .lp-reveal.lp-visible { opacity: 1; transform: none; }
+  @keyframes lpFloat { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+  @keyframes lpPanelIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 850px) {
+    #landing .lp-hero { grid-template-columns: 1fr; text-align: center; gap: 16px; padding-top: 44px; }
+    #landing .lp-hero p, #landing .lp-assurance { margin-left: auto; margin-right: auto; }
+    #landing .lp-cta { justify-content: center; }
+    #landing .lp-art { width: min(100%, 480px); margin: 0 auto; }
+    #landing .lp-art img { width: 100%; margin-left: 0; }
+    #landing .lp-showcase { grid-template-columns: 1fr; gap: 28px; padding-top: 54px; }
+    #landing .lp-showcase-heading { text-align: center; }
+  }
+  @media (max-width: 640px) { #landing .lp-hero { padding: 40px 20px; } #landing .lp-showcase { padding-left: 20px; padding-right: 20px; } #landing .lp-demo-detail { padding: 20px 14px; } }
+  @media (prefers-reduced-motion: reduce) { #landing *, #landing *::before, #landing *::after { animation: none !important; transition: none !important; } #landing .lp-reveal { opacity: 1; transform: none; } }
   </style>
   <script>
   (function(){try{var k='alfa-fund-v1';var v='v8';var cv=localStorage.getItem('_ap_v');if(cv!==v){var d={"positions":[{"id":"eth-sep5","symbol":"ETH","type":"kripto","side":"LONG","date":"2026-09-05","qty":0.251,"cost":2471,"price":2471,"note":"","filled":"2026-09-05","lim":true}],"cash":648.17,"startBalance":1000,"sells":[{"symbol":"ETH","qty":0.271,"price":2327,"cost":500,"date":"2026-08-20","buyDate":"2026-08-19","amount":630.62,"pnl":130.62,"ts":1755657600000},{"symbol":"ETH","qty":0.251,"price":2469,"cost":500,"date":"2026-09-04","buyDate":"2026-08-19","amount":619.72,"pnl":119.72,"ts":1756953600000},{"symbol":"LTC","qty":6.28930818,"price":50.57,"cost":300,"date":"2026-09-04","buyDate":"2026-08-30","amount":318.05,"pnl":18.05,"ts":1756953600000}],"lastUpdate":"2026-09-05T00:00:00.000Z"};localStorage.setItem(k,JSON.stringify(d));localStorage.setItem('alfa-fund-hist-v1',JSON.stringify([{"d":"2026-08-01","v":1000},{"d":"2026-08-19","v":1000},{"d":"2026-08-20","v":1130.62},{"d":"2026-08-31","v":1130.62},{"d":"2026-09-04","v":1268.39},{"d":"2026-09-05","v":1268.39}]));localStorage.setItem('_ap_v',v);}}catch(e){}})();
@@ -4591,6 +4646,7 @@
     </div>
   </nav>
   <section class="lp-hero">
+    <div class="lp-hero-copy">
     <span class="lp-badge">ANALİZ · EĞİTİM · TAKİP</span>
     <h2>Piyasayı takip et.<br><span class="grad">Kararının arkasını gör.</span></h2>
     <p>İşlem kanalındaki analizleri incele, paylaşılan portföyü takip et, Alfa Edu ile bilgini geliştir. İhtiyacın olan araçları tek bir çalışma alanında bul.</p>
@@ -4599,8 +4655,38 @@
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
     <div class="lp-assurance">Ücretsiz hesap · Abonelik ücreti yok · Referans doğrulamasıyla premium</div>
+    <a class="lp-explore" href="#lp-showcase">Çalışma alanını keşfet <span aria-hidden="true">↓</span></a>
+    </div>
+    <div class="lp-art">
+      <div class="lp-art-halo" aria-hidden="true"></div>
+      <img src="/assets/landing-workspace.svg" width="720" height="600" alt="Ethereum simgesi etrafında analiz ve takip kartlarını gösteren ürün illüstrasyonu" fetchpriority="high">
+      <div class="lp-art-note"><span class="lp-status-dot" aria-hidden="true"></span>Bir piyasa. Birden fazla bakış açısı.</div>
+    </div>
   </section>
   </div>
+  <section class="lp-showcase" id="lp-showcase" aria-labelledby="lp-showcase-title">
+    <div class="lp-showcase-heading"><span class="lp-eyebrow">TEK ALAN, ÜÇ PERSPEKTİF</span><h3 id="lp-showcase-title">Sadece bakma.<br>Bağlantıyı kur.</h3><p>Analizi incele, portföyü ayrı takip et, öğrendiklerini derinleştir.</p></div>
+    <div class="lp-demo">
+      <div class="lp-demo-tabs" role="tablist" aria-label="Platform bölümleri">
+        <button type="button" role="tab" id="lp-demo-tab-analysis" aria-controls="lp-demo-analysis" aria-selected="true" data-lp-tab="analysis">İşlem Kanalı</button>
+        <button type="button" role="tab" id="lp-demo-tab-portfolio" aria-controls="lp-demo-portfolio" aria-selected="false" tabindex="-1" data-lp-tab="portfolio">Portföy</button>
+        <button type="button" role="tab" id="lp-demo-tab-education" aria-controls="lp-demo-education" aria-selected="false" tabindex="-1" data-lp-tab="education">Alfa Edu</button>
+      </div>
+      <div class="lp-demo-panel" id="lp-demo-analysis" role="tabpanel" aria-labelledby="lp-demo-tab-analysis">
+        <div class="lp-demo-graphic lp-analysis-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><path d="M20 42h380M20 95h380M20 148h380M85 20v150M168 20v150M251 20v150M334 20v150" stroke="currentColor" opacity=".1"/><rect x="64" y="71" width="276" height="39" rx="6" fill="currentColor" opacity=".07"/><path d="m35 137 43-31 39 15 43-67 42 37 41-15 45 39 43-55 48 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="288" cy="115" r="12" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4"/><path d="M315 121h63" stroke="currentColor" stroke-dasharray="3 5"/></svg><span>Fiyat · Bölge · Senaryo</span></div>
+        <div class="lp-demo-detail"><span class="lp-demo-kicker">ANALİZİN ARKASINDAKİ FİKİR</span><h4>Grafikten gerekçeye.</h4><p>İşlem kanalındaki görselleri, analiz notlarını ve güncellemeleri aynı akışta incele.</p><div class="lp-demo-chips"><span>Analiz görselleri</span><span>İşlem güncellemeleri</span></div></div>
+      </div>
+      <div class="lp-demo-panel" id="lp-demo-portfolio" role="tabpanel" aria-labelledby="lp-demo-tab-portfolio" hidden>
+        <div class="lp-demo-graphic lp-portfolio-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><circle cx="130" cy="95" r="63" stroke="currentColor" stroke-width="20" opacity=".1"/><circle cx="130" cy="95" r="63" stroke="currentColor" stroke-width="20" stroke-dasharray="160 396" transform="rotate(-90 130 95)"/><circle cx="130" cy="95" r="63" stroke="#AEA0FF" stroke-width="20" stroke-dasharray="90 396" stroke-dashoffset="-168" transform="rotate(-90 130 95)"/><path d="M243 56h139M243 96h139M243 136h139" stroke="currentColor" stroke-width="7" stroke-linecap="round" opacity=".2"/><circle cx="242" cy="56" r="4" fill="currentColor"/><circle cx="242" cy="96" r="4" fill="#AEA0FF"/></svg><span>Pozisyon · Dağılım · Notlar</span></div>
+        <div class="lp-demo-detail"><span class="lp-demo-kicker">İŞLEM KANALINDAN AYRI</span><h4>Büyük resmi takip et.</h4><p>Yöneticinin paylaştığı portföyde pozisyonları, satışları ve notları salt okunur görünümde incele.</p><div class="lp-demo-chips"><span>Paylaşılan portföy</span><span>Salt okunur</span></div></div>
+      </div>
+      <div class="lp-demo-panel" id="lp-demo-education" role="tabpanel" aria-labelledby="lp-demo-tab-education" hidden>
+        <div class="lp-demo-graphic lp-education-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><rect x="53" y="28" width="201" height="132" rx="14" fill="currentColor" opacity=".08"/><circle cx="153" cy="94" r="30" stroke="currentColor" stroke-width="2"/><path d="m146 80 22 14-22 14V80Z" fill="currentColor"/><path d="M282 55h90m-90 40h66m-66 40h80" stroke="currentColor" stroke-width="7" stroke-linecap="round" opacity=".3"/></svg><span>Bölüm · Konu · Video</span></div>
+        <div class="lp-demo-detail"><span class="lp-demo-kicker">KENDİ HIZINDA İLERLE</span><h4>Bilgiyi adım adım kur.</h4><p>Alfa Edu içindeki konulara ayrılmış video eğitimler ve kaynaklarla ihtiyaç duyduğun başlığa odaklan.</p><div class="lp-demo-chips"><span>Video eğitimler</span><span>Konu bazlı kaynaklar</span></div></div>
+      </div>
+      <p class="lp-demo-caption">Ürün akışını anlatan temsili çizimlerdir; canlı veri veya işlem sonucu göstermez.</p>
+    </div>
+  </section>
   <div class="lp-section-head">
     <div class="lp-eyebrow">ÇALIŞMA ALANIN</div>
     <h3>Daha fazla sekme değil,<br>daha net bir akış.</h3>
@@ -4673,6 +4759,49 @@
   </div>
   <footer class="lp-foot"><strong>Alfa Traders</strong><p>Analiz, eğitim ve takip için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p></footer>
 </div>
+<script>
+(function () {
+  const root = document.getElementById('landing');
+  if (!root) return;
+  const tabs = Array.from(root.querySelectorAll('[data-lp-tab]'));
+  function select(tab) {
+    tabs.forEach(function (item) {
+      const active = item === tab;
+      item.setAttribute('aria-selected', String(active));
+      item.tabIndex = active ? 0 : -1;
+      const panel = document.getElementById(item.getAttribute('aria-controls'));
+      if (panel) panel.hidden = !active;
+    });
+  }
+  tabs.forEach(function (tab, index) {
+    tab.addEventListener('click', function () { select(tab); });
+    tab.addEventListener('keydown', function (event) {
+      let next;
+      if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      select(tabs[next]);
+      tabs[next].focus();
+    });
+  });
+  // Progressive enhancement: content is visible without JS or animation support.
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('lp-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: .08 });
+  root.querySelectorAll('.lp-showcase-heading, .lp-demo, .lp-card, .lp-price-card, .lp-steps > div').forEach(function (node) {
+    node.classList.add('lp-reveal');
+    observer.observe(node);
+  });
+})();
+</script>
 <div id="auth-gate">
   <div class="auth-box">
     <button class="auth-x" id="auth-close" type="button" aria-label="Kapat" data-i18n-aria="auth.close">&times;</button>
@@ -25894,7 +26023,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b133';
+const APP_BUILD = 'b134';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
