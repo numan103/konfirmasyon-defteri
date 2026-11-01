@@ -152,6 +152,32 @@ export default async function handler(req, res) {
   if (tier !== 'ref' && tier !== 'admin') return res.status(403).json({ error: 'referral_required' });
 
   res.setHeader('Cache-Control', 'no-store');
+  if (req.query.mode === 'search') {
+    if (tier !== 'admin') return res.status(403).json({ error: 'admin_required' });
+    const token = process.env.NOTION_TOKEN;
+    if (!token) return res.status(500).json({ error: 'NOTION_TOKEN env var ayarlı değil.' });
+    const NOTION_VERSION = '2022-06-28';
+    try {
+      const r = await fetch('https://api.notion.com/v1/search', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Notion-Version': NOTION_VERSION, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filter: { value: 'database', property: 'object' }, page_size: 100 }),
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return res.status(502).json({ error: 'notion_' + r.status, detail: text.slice(0, 500) });
+      }
+      const data = await r.json();
+      const databases = (data.results || []).map((db) => ({
+        id: String(db.id || '').replace(/-/g, ''),
+        title: (db.title || []).map((t) => t.plain_text).join('') || '(başlıksız)',
+        url: db.url || null,
+      }));
+      return res.status(200).json({ databases });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
   const token = req.query.token || process.env.NOTION_TOKEN;
   if (!token) return res.status(500).json({ error: 'NOTION_TOKEN env var ayarlı değil veya token gönderilmedi.' });
   // Kullanıcıya özel database ID'leri
