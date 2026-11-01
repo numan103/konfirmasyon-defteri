@@ -4,8 +4,10 @@ import { handleWeek } from '../lib/notion-week.mjs';
 const NOTION_VERSION = '2022-06-28';
 
 let DBS = [
-  { id: '380f561953ab8088b5f9ffd53a397de9', market: 'Kripto' },
-  { id: '380f561953ab80938bdbfc07fcef2de1', market: 'Fx' },
+  { id: '3d5f561953ab80cfa99cf95749ad82a2', market: 'Kripto' },
+  { id: '3d2f561953ab805e8703d571dbb858e9', market: 'Kripto' },
+  { id: '3b4f561953ab80c49b58d4c4cd60b6c9', market: 'Kripto' },
+  { id: '3e2f561953ab80508627f53a094a2d01', market: 'Kripto' },
 ];
 
 async function queryDB(token, dbId) {
