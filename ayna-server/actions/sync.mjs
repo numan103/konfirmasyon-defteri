@@ -70,7 +70,7 @@ export async function runSync(auth, userId, profile) {
       }
 
       if (rows.length) {
-        await db(auth, 'POST', `ayna_trades?on_conflict=user_id,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
+        await db(auth, 'POST', `ayna_trades?on_conflict=user_id,source,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
       }
       result.trades = { upserted: rows.length };
     }
@@ -129,7 +129,7 @@ export async function runSync(auth, userId, profile) {
       }
 
       if (rows.length) {
-        await db(auth, 'POST', `ayna_expenses?on_conflict=user_id,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
+        await db(auth, 'POST', `ayna_expenses?on_conflict=user_id,source,source_id`, rows, 'resolution=merge-duplicates,return=minimal');
       }
       result.expenses = { upserted: rows.length };
     }

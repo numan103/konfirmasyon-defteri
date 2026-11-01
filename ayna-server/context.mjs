@@ -3,6 +3,7 @@ import { localDate, addDays, formatTR } from './time.mjs';
 import { KOC_TEMEL, TON } from './prompts.mjs';
 import { dependencyFlag } from './metrics.mjs';
 import { followupContext } from './followups.mjs';
+import { rejectedBiasLabels } from './biases.mjs';
 
 const norm = (s) => String(s || '').toLocaleLowerCase('tr-TR').trim().replace(/\s+/g, ' ');
 
@@ -78,6 +79,33 @@ export async function userModelText(auth, profile) {
     lines.push('- yok');
   }
 
+  const rejected = await rejectedBiasLabels(auth, userId);
+  if (rejected.length) {
+    lines.push('Kullanıcının reddettiği bilişsel hata yorumları (tekrar önerme, kanıt olmadan geri getirme):');
+    for (const statement of rejected) lines.push(`- ${statement}`);
+  }
+
+  return lines.join('\n');
+}
+
+// Trade notes are the user's own words. They are included verbatim so the
+// coach can point to evidence instead of guessing at a pattern.
+export async function tradeNotesText(auth, userId, since, through) {
+  const rows = await db(auth, 'GET', `ayna_trades?user_id=eq.${q(userId)}&local_date=gte.${since}&local_date=lte.${through}&note=not.is.null&select=local_date,symbol,direction,pnl,planned,note,source&order=local_date.desc&limit=60`);
+  const trades = rows.filter((t) => typeof t.note === 'string' && t.note.trim());
+  const head = `## İşlem notları (${since} – ${through})`;
+  if (!trades.length) return `${head}\n- Not yazılmış işlem yok. Not yoksa bilişsel hata çıkarımı yapma.`;
+  const lines = [head, 'Notlar kullanıcının kendi ifadeleridir. Bilişsel hata gözlemi için kanıt olarak kullan; notta olmayan bir niyeti okuma.'];
+  let remaining = 9000;
+  for (const t of trades) {
+    const note = String(t.note).trim().slice(0, Math.max(0, Math.min(600, remaining)));
+    if (!note) break;
+    const dir = TRLabels.direction[t.direction] || t.direction || '';
+    const planned = t.planned === true ? 'planlı' : t.planned === false ? 'plan dışı' : 'bilinmiyor';
+    lines.push(`- ${t.local_date} ${t.symbol || '?'} ${dir} R: ${t.pnl ?? '—'} (${planned}, ${t.source === 'notion' ? 'Notion' : 'site'}) | ${note}`);
+    remaining -= note.length;
+    if (remaining <= 0) break;
+  }
   return lines.join('\n');
 }
 export async function recentEntriesText(auth, userId, days, bodyLimit) {
@@ -187,7 +215,7 @@ export async function buildCoachContext(auth, profile, message, mode) {
   parts.push(recentText);
   const journalText = await journalDayText(auth, userId, today);
 
-  const trades = await db(auth, 'GET', `ayna_trades?user_id=eq.${q(userId)}&local_date=eq.${today}&select=symbol,direction,pnl,planned,emotions&order=opened_at.asc`);
+  const trades = await db(auth, 'GET', `ayna_trades?user_id=eq.${q(userId)}&local_date=eq.${today}&select=symbol,direction,pnl,planned,emotions,note,source&order=opened_at.asc`);
   const todayRules = await db(auth, 'GET', `ayna_rules?user_id=eq.${q(userId)}&is_active=eq.true&select=id,domain,if_text,then_text`);
   const todayChecks = await db(auth, 'GET', `ayna_rule_checks?user_id=eq.${q(userId)}&local_date=eq.${today}&select=rule_id,result`);
 
@@ -197,10 +225,10 @@ export async function buildCoachContext(auth, profile, message, mode) {
       const dir = TRLabels.direction[t.direction] || t.direction || '';
       const planned = t.planned === true ? 'evet' : t.planned === false ? 'hayır' : 'bilinmiyor';
       const emotions = t.emotions && t.emotions.length ? t.emotions.join(', ') : '';
-      tradeSection += `- ${t.symbol || ''} ${dir} R: ${t.pnl ?? ''} | planlı: ${planned} | duygu: ${emotions}\n`;
+      tradeSection += `- ${t.symbol || ''} ${dir} R: ${t.pnl ?? ''} | planlı: ${planned} | duygu: ${emotions}${t.note ? ' | not: ' + String(t.note).slice(0, 400) : ''}\n`;
     }
   } else {
-    tradeSection += '- işlem yok\n';
+    tradeSection += '- işlem yok (Notion eşitlemesi henüz çalışmamış olabilir; işlem uydurma)\n';
   }
 
   tradeSection += '## Bugünkü kural kontrolleri\n';
@@ -377,6 +405,7 @@ export async function buildCoachContext(auth, profile, message, mode) {
 
   // Append after reducing historical context so the current journal isn't shortened.
   fullText += '\n\n' + journalText;
+  fullText += '\n\n' + await tradeNotesText(auth, userId, addDays(today, -20), today);
   fullText += '\n\n' + await followupContext(auth, userId, addDays(today, -13), today);
   const entryIds = [...fullText.matchAll(/\[([0-9a-f-]{36})\]/g)].map((m) => m[1]);
 
@@ -427,7 +456,7 @@ export async function buildReflectContext(auth, profile, entry) {
     }
   }
 
-  const trades = await db(auth, 'GET', `ayna_trades?user_id=eq.${q(userId)}&local_date=eq.${entry.local_date}&select=symbol,direction,pnl,planned&order=opened_at.asc`);
+  const trades = await db(auth, 'GET', `ayna_trades?user_id=eq.${q(userId)}&local_date=eq.${entry.local_date}&select=symbol,direction,pnl,planned,note,source&order=opened_at.asc`);
   const todayRules = await db(auth, 'GET', `ayna_rules?user_id=eq.${q(userId)}&is_active=eq.true&select=id,domain,if_text,then_text`);
   const todayChecks = await db(auth, 'GET', `ayna_rule_checks?user_id=eq.${q(userId)}&local_date=eq.${entry.local_date}&select=rule_id,result`);
 
@@ -437,7 +466,7 @@ export async function buildReflectContext(auth, profile, entry) {
     for (const t of trades) {
       const dir = TRLabels.direction[t.direction] || t.direction || '';
       const planned = t.planned === true ? 'evet' : t.planned === false ? 'hayır' : 'bilinmiyor';
-      tradeSection += `- ${t.symbol || ''} ${dir} R: ${t.pnl ?? ''} | planlı: ${planned}\n`;
+      tradeSection += `- ${t.symbol || ''} ${dir} R: ${t.pnl ?? ''} | planlı: ${planned}${t.note ? ' | not: ' + String(t.note).slice(0, 500) : ''}\n`;
     }
     for (const r of todayRules) {
       const check = todayChecks.find((c) => c.rule_id === r.id);
@@ -464,6 +493,7 @@ export async function buildReflectContext(auth, profile, entry) {
     parts.push(loopSection);
   }
 
+  parts.push(await tradeNotesText(auth, userId, addDays(entry.local_date, -20), entry.local_date));
   parts.push(await followupContext(auth, userId, addDays(entry.local_date, -13), entry.local_date));
   const fullText = parts.join('\n\n');
   const entryIds = [...fullText.matchAll(/\[([0-9a-f-]{36})\]/g)].map((m) => m[1]);

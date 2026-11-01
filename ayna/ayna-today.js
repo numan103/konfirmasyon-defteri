@@ -57,7 +57,7 @@ function renderToday(c) {
     _q('people', sb.from('ayna_people').select('id,display_name,ring,status').eq('user_id', uid).in('status', ['active','pending']).order('ring', { ascending: true }).order('display_name', { ascending: true })),
     _q('rules', sb.from('ayna_rules').select('id,if_text,then_text,domain').eq('user_id', uid).eq('is_active', true)),
     _q('open_loops', sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open')),
-    _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })),
+    _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions,note,source').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })),
     _q('crisis', sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1)),
     _q('week', sb.from('ayna_entries').select('local_date,sleep_hours').eq('user_id', uid).gte('local_date', Ayna.addDays(d, -6)).lte('local_date', d)),
     _q('insights', sb.from('ayna_insights').select('*').eq('user_id', uid).eq('period_start', d).in('kind', ['daily', 'instant']).order('created_at', { ascending: false }).limit(20))
@@ -98,6 +98,7 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
     h += '<section class="ay-card" id="ay-daily-analysis"><h4>' + Ayna.t('journal.analysis') + '</h4><p>' + Ayna.t('journal.analysis_hint') + '</p><button type="button" class="btn" id="ay-analyze">' + Ayna.t('journal.analyze') + '</button><div id="ay-analysis-result" aria-live="polite"></div></section>';
     h += '<section class="ay-card" id="ay-followup-steps" hidden></section>';
     h += _cardLoops(loops);
+    h += '<section class="ay-card" id="ay-bias-card" hidden></section>';
     h += _cardTrades(trades);
     c.innerHTML = h;
     _bindPending(c);
@@ -108,6 +109,8 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
     _bindLoops(c);
     _bindTrades(c, d);
     if (Ayna.followup) Ayna.followup.pending(c);
+    if (Ayna.bias) Ayna.bias.pending(c);
+    if (Ayna.notion) Ayna.notion.mount(c);
     var analyze = c.querySelector('#ay-analyze');
     analyze.disabled = !_journalAnalysisEntry(c);
     analyze.addEventListener('click', function () { var entry = _journalAnalysisEntry(c); if (entry) _runJournalAnalysis(c, entry); });
@@ -126,10 +129,12 @@ function _rememberJournalEntry(c, entry) {
   var button = c.querySelector('#ay-analyze');
   if (button) button.disabled = false;
 }
-function _showJournalAnalysis(c, insight, risk) {
+function _showJournalAnalysis(c, insight, risk, biases) {
   var result = c.querySelector('#ay-analysis-result');
   if (result) result.innerHTML = '<h4>' + Ayna.esc(insight.title || '') + '</h4>' + Ayna.md(insight.body || '');
   if (Ayna.followup) Ayna.followup.mount(c, insight, risk);
+  // Bias observations are proposals next to the analysis that produced them.
+  if (Ayna.bias && biases) Ayna.bias.attach(c, biases);
 }
 function _runJournalAnalysis(c, entry) {
   if (!entry) return Promise.resolve();
@@ -141,7 +146,7 @@ function _runJournalAnalysis(c, entry) {
   if (result) result.textContent = Ayna.t('journal.analyzing');
   return Ayna.api('reflect', { entry_id: entry.id, kind: entry.kind === 'evening' ? 'daily' : 'instant', overview: true }).then(function (res) {
     if (!c.isConnected || c._ayAnalysisVersion !== version) return;
-    _showJournalAnalysis(c, res.insight || {}, res.risk);
+    _showJournalAnalysis(c, res.insight || {}, res.risk, res.biases || []);
     if (res.risk === 'crisis' && result) result.insertAdjacentHTML('beforeend', _cardCrisis());
   }).catch(function (err) {
     if (c.isConnected && c._ayAnalysisVersion === version && result) result.textContent = Ayna.t('journal.analysis_failed') + ' ' + Ayna.errText(err.code || 'default');
@@ -673,53 +678,70 @@ function _bindLoops(c) {
 
 var _TRADE_EMOTIONS = ['heyecanlı','korku','stres','sakin','gurur','pişmanlık','kaybetme korkusu','kazanma hırsı','temkinli','kararlı','aceleci','kararsız'];
 
-function _cardTrades(trades) {
-  var h = '<div class="ay-card"><h4>' + Ayna.t('today.trades_title') + '</h4>';
-  if (!trades || !trades.length) {
-    h += '<p>' + Ayna.t('today.trades_empty') + '</p>';
-  } else {
-    trades.forEach(function (t) {
-      h += '<div class="ay-trade" data-tid="' + t.id + '" style="margin:6px 0;padding:6px;border:1px solid var(--border);border-radius:var(--radius)">';
-      h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
-      h += '<strong>' + Ayna.esc(t.symbol || '?') + '</strong> ';
-      h += '<span class="chip">' + Ayna.t('direction.' + (t.direction || 'long')) + '</span> ';
-      var pnlColor = t.pnl > 0 ? 'var(--green)' : t.pnl < 0 ? 'var(--red)' : '';
-      h += Ayna.t('label.pnl') + ': <span style="color:' + pnlColor + '">' + Ayna.num(t.pnl) + '</span>';
-      h += '</div>';
-      h += '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">';
-      var isPlanned = t.planned === true;
-      var isUnplanned = t.planned === false;
-      h += '<button class="chip' + (isPlanned ? ' on' : '') + '" data-tpl="' + t.id + '" data-tpv="true">' + Ayna.t('today.trade_planned') + '</button>';
-      h += '<button class="chip' + (isUnplanned ? ' on' : '') + '" data-tpl="' + t.id + '" data-tpv="false">' + Ayna.t('today.trade_unplanned') + '</button>';
-      h += '</div>';
-      h += '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">';
-      _TRADE_EMOTIONS.forEach(function (em) {
-        var on = t.emotions && t.emotions.indexOf(em) >= 0;
-        h += '<button class="chip' + (on ? ' on' : '') + '" data-tem="' + t.id + '" data-temv="' + Ayna.esc(em) + '">' + Ayna.esc(em) + '</button>';
-      });
-      h += '</div></div>';
-    });
+function _tradeRow(t) {
+  var h = '<div class="ay-trade" data-tid="' + Ayna.esc(t.id) + '">';
+  h += '<div class="ay-trade-head">';
+  h += '<strong>' + Ayna.esc(t.symbol || '?') + '</strong>';
+  h += '<span class="chip">' + Ayna.t('direction.' + (t.direction || 'long')) + '</span>';
+  if (t.source === 'notion') h += '<span class="ay-trade-source">' + Ayna.t('today.trade_source_notion') + '</span>';
+  var pnlColor = t.pnl > 0 ? 'var(--green)' : t.pnl < 0 ? 'var(--red)' : '';
+  h += '<span class="ay-trade-pnl" style="color:' + pnlColor + '">' + Ayna.t('label.pnl') + ': ' + Ayna.num(t.pnl) + '</span>';
+  h += '</div>';
+  if (t.note && String(t.note).trim()) {
+    h += '<details class="ay-trade-note"><summary>' + Ayna.t('today.trade_note') + '</summary><p>' + Ayna.esc(String(t.note).trim()) + '</p></details>';
   }
-  h += '<button class="btn" id="ay-sync">' + Ayna.t('today.sync') + '</button></div>';
+  h += '<div class="ay-trade-chips">';
+  h += '<button class="chip' + (t.planned === true ? ' on' : '') + '" data-tpl="' + Ayna.esc(t.id) + '" data-tpv="true">' + Ayna.t('today.trade_planned') + '</button>';
+  h += '<button class="chip' + (t.planned === false ? ' on' : '') + '" data-tpl="' + Ayna.esc(t.id) + '" data-tpv="false">' + Ayna.t('today.trade_unplanned') + '</button>';
+  h += '</div>';
+  h += '<div class="ay-trade-chips">';
+  _TRADE_EMOTIONS.forEach(function (em) {
+    var on = t.emotions && t.emotions.indexOf(em) >= 0;
+    h += '<button class="chip' + (on ? ' on' : '') + '" data-tem="' + Ayna.esc(t.id) + '" data-temv="' + Ayna.esc(em) + '">' + Ayna.esc(em) + '</button>';
+  });
+  h += '</div></div>';
   return h;
 }
 
-function _bindTrades(c, d) {
-  var b = c.querySelector('#ay-sync');
-  if (b) {
-    b.addEventListener('click', function () {
-      b.disabled = true;
-      Ayna.api('sync').then(function () { renderToday(c); })
-        .catch(function (err) { b.disabled = false; Ayna.flash(Ayna.errText(err.code || 'default')); });
+function _tradesListMarkup(trades) {
+  if (!trades || !trades.length) return '<p>' + Ayna.t('today.trades_empty') + '</p>';
+  return trades.map(_tradeRow).join('');
+}
+
+function _cardTrades(trades) {
+  var h = '<section class="ay-card ay-trades" id="ay-trades"><h4>' + Ayna.t('today.trades_title') + '</h4>';
+  h += '<div id="ay-trades-body">' + _tradesListMarkup(trades) + '</div>';
+  h += '<div class="ay-trades-tools">';
+  h += '<button type="button" class="btn" id="ay-sync">' + Ayna.t('today.sync_site') + '</button>';
+  h += '<button type="button" class="btn" id="ay-notion-sync">' + Ayna.t('today.sync_notion') + '</button>';
+  h += '</div><p class="ay-notion-status" id="ay-notion-status" role="status"></p></section>';
+  return h;
+}
+
+// Re-query only the trade list so notes, drafts and scroll position survive.
+function _refreshTodayTrades(c) {
+  var host = c.querySelector('#ay-trades-body');
+  if (!host) return Promise.resolve();
+  var uid = Ayna.uid, day = Ayna.today();
+  return Ayna.sb().from('ayna_trades')
+    .select('id,symbol,direction,opened_at,pnl,planned,emotions,note,source')
+    .eq('user_id', uid).eq('local_date', day).order('opened_at', { ascending: true })
+    .then(function (res) {
+      if (res && res.error) throw res.error;
+      if (!c.isConnected || Ayna.uid !== uid) return;
+      host.innerHTML = _tradesListMarkup((res && res.data) || []);
+      _bindTradeRows(c);
     });
-  }
+}
+
+function _bindTradeRows(c) {
   c.querySelectorAll('[data-tpl]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var tid = btn.getAttribute('data-tpl');
       var val = btn.getAttribute('data-tpv') === 'true';
       btn.disabled = true;
       Ayna.sb().from('ayna_trades').update({ planned: val }).eq('id', tid).eq('user_id', Ayna.uid)
-        .then(function () { renderToday(c); })
+        .then(function () { return _refreshTodayTrades(c); })
         .catch(function () { btn.disabled = false; Ayna.flash(Ayna.errText('default')); });
     });
   });
@@ -735,8 +757,24 @@ function _bindTrades(c, d) {
           var idx = list.indexOf(em);
           if (idx >= 0) list.splice(idx, 1); else list.push(em);
           return Ayna.sb().from('ayna_trades').update({ emotions: list }).eq('id', tid).eq('user_id', Ayna.uid);
-        }).then(function () { renderToday(c); })
+        }).then(function () { return _refreshTodayTrades(c); })
         .catch(function () { Ayna.flash(Ayna.errText('default')); });
     });
   });
 }
+
+function _bindTrades(c, d) {
+  var b = c.querySelector('#ay-sync');
+  if (b) {
+    b.addEventListener('click', function () {
+      if (b.disabled) return;
+      b.disabled = true;
+      Ayna.api('sync').then(function () { return _refreshTodayTrades(c); })
+        .catch(function (err) { Ayna.flash(Ayna.errText(err.code || 'default')); })
+        .finally(function () { b.disabled = false; });
+    });
+  }
+  _bindTradeRows(c);
+}
+
+Ayna.todayTrades = { refresh: _refreshTodayTrades };

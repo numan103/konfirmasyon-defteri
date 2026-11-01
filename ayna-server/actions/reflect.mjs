@@ -7,6 +7,7 @@ import { TOOLS } from '../tools.mjs';
 import { localDate } from '../time.mjs';
 import { kocTemel, buildReflectContext } from '../context.mjs';
 import { aiErrorCode } from '../ai-error.mjs';
+import { persistBiases } from '../biases.mjs';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -36,14 +37,18 @@ export default async function reflect({ res, auth, user, profile, body }) {
     }
 
     let taskBlock;
+    let allowBiases = false;
     if (body.overview === true) {
       taskBlock = GOREV_GUNLUK;
+      allowBiases = true;
     } else if (kind === 'instant') {
       taskBlock = GOREV_ANLIK;
+      allowBiases = true;
     } else if (entry.pleasantness != null && entry.pleasantness <= -3) {
       taskBlock = GOREV_ZOR_GUN;
     } else {
       taskBlock = GOREV_GUNLUK;
+      allowBiases = true;
     }
 
     const ctx = await buildReflectContext(auth, profile, entry);
@@ -95,12 +100,24 @@ export default async function reflect({ res, auth, user, profile, body }) {
       : await db(auth, 'POST', 'ayna_insights', [insight], 'return=representation');
     const savedInsight = inserted && inserted.length ? inserted[0] : insight;
 
+    // Bias observations stay proposals until the user confirms or rejects
+    // them. A crisis response never turns into a behavioral label.
+    let biases = [];
+    if (allowBiases && risk !== 'crisis') {
+      try {
+        biases = await persistBiases(auth, user.id, ai.biases, evidenceIds.length ? evidenceIds : [entry.local_date + ' günlük kaydı']);
+      } catch (e) {
+        console.error('[AYNA reflect] bias kaydı başarısız');
+      }
+    }
+
     await logUsage(auth, user.id, 'reflect', result);
 
     return send(res, 200, {
       ok: true,
       insight: savedInsight,
-      risk
+      risk,
+      biases: biases.filter((b) => !b.hidden)
     });
   } catch (e) {
     if (e.status === 404) return fail(res, 404, 'not_found');

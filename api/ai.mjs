@@ -13,8 +13,9 @@ import chatExtract from '../ayna-server/actions/chat-extract.mjs';
 import onboardingSummary from '../ayna-server/actions/onboarding-summary.mjs';
 import sync from '../ayna-server/actions/sync.mjs';
 import journalFollowup from '../ayna-server/actions/journal-followup.mjs';
+import notionSyncAction from '../ayna-server/actions/notion-sync.mjs';
 
-const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'journal-followup': journalFollowup, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
+const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'journal-followup': journalFollowup, 'notion-sync': notionSyncAction, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
 
 const SYSTEM_PROMPT = `Sen Alfa Traders topluluğunun AI asistanısın. Kısa, net ve yardımsever cevaplar ver (max 3-4 cümle). Türkçe konuş.
 

@@ -111,6 +111,21 @@ export const TOOLS = {
         "title": { "type": "string" },
         "body": { "type": "string" },
         "small_step": { "type": ["string", "null"], "description": "Kullanıcının kabul edip takibe alabileceği tek küçük öneri; ne zaman/ne yapacağı dahil en fazla 200 karakter. Krizde null." },
+        "biases": {
+          "type": "array",
+          "maxItems": 3,
+          "description": "Yalnızca işlem notlarındaki somut kanıtlarla desteklenen bilişsel hata gözlemleri. Kanıt yoksa boş dizi.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string", "enum": ["revenge_trading", "loss_chasing", "overconfidence", "confirmation_bias", "fomo", "anchoring", "disposition_effect", "plan_deviation", "position_sizing", "recency_bias", "hindsight_bias", "sunk_cost", "outcome_bias"] },
+              "observation": { "type": "string", "description": "Notlardaki kanıta dayanan, kişilik etiketi içermeyen tek cümlelik gözlem." },
+              "evidence": { "type": "array", "items": { "type": "string" }, "description": "Tarih ve sembol içeren kısa alıntılar; örneğin '12 Temmuz BTC notu: stop sonrası tekrar girdim'." },
+              "question": { "type": "string", "description": "Kullanıcının kendi kanıtını değerlendirmesini sağlayan tek hedefli soru." }
+            },
+            "required": ["code", "observation", "evidence", "question"]
+          }
+        },
         "evidence_entry_ids": { "type": "array", "items": { "type": "string" } },
         "risk": { "type": "string", "enum": ["none", "low", "crisis"] }
       },

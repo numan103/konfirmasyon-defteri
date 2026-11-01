@@ -2,6 +2,7 @@ import { db, q } from '../supabase.mjs';
 import { send, fail } from '../http.mjs';
 import { localDate } from '../time.mjs';
 import { ownedInsight, insightMessages, linkedSteps, FEEDBACK, OUTCOMES, REPLY_PREFIX, STEP_PREFIX, isUuid } from '../followups.mjs';
+import { listBiasBeliefs } from '../biases.mjs';
 
 const text = (value, max) => typeof value === 'string' && value.trim().length <= max ? value.trim() : null;
 
@@ -9,6 +10,7 @@ export default async function journalFollowup({ res, auth, user, body }) {
   const op = body.op;
   try {
     if (op === 'steps') return send(res, 200, { ok: true, steps: await linkedSteps(auth, user.id) });
+    if (op === 'biases') return send(res, 200, { ok: true, biases: await listBiasBeliefs(auth, user.id) });
     if (op === 'outcome') {
       if (!isUuid(body.decision_id) || !Object.hasOwn(OUTCOMES, body.status)) return fail(res, 400, 'bad_request');
       const note = text(body.note || '', 2000);
