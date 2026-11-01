@@ -165,6 +165,6 @@ test('the journal page mounts the bias card and Notion sync', () => {
   assert.ok(today.includes('Ayna.bias.attach(c, biases)'));
   assert.ok(today.includes('note,source'));
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.ok(html.includes('/ayna/ayna-notion.js?v=1'));
-  assert.ok(html.includes('/ayna/ayna-bias.js?v=1'));
+  assert.match(html, /\/ayna\/ayna-notion\.js\?v=\d+/);
+  assert.match(html, /\/ayna\/ayna-bias\.js\?v=\d+/);
 });

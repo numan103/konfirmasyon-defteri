@@ -14,6 +14,7 @@ function renderSettings(c) {
     var consents = r[2].data || [];
     var h = '';
     h += _settingsTone(profile.coach_tone || 'mentor');
+    h += _settingsNotion();
     h += _settingsBeliefs(beliefs);
     h += _settingsMeet();
     h += _settingsConsents(consents);
@@ -21,6 +22,7 @@ function renderSettings(c) {
     h += _settingsDelete();
     c.innerHTML = h;
     _bindTone(c, uid, profile);
+    _bindNotion(c);
     _bindBeliefs(c, uid, beliefs);
     _bindMeet(c, uid);
     _bindConsents(c, uid, consents);
@@ -122,6 +124,14 @@ function _bindBeliefs(c, uid, beliefs) {
       }
     });
   });
+}
+
+function _settingsNotion() {
+  return (Ayna.notion && typeof Ayna.notion.settingsCard === 'function') ? Ayna.notion.settingsCard() : '';
+}
+
+function _bindNotion(c) {
+  if (Ayna.notion && typeof Ayna.notion.mountSettings === 'function') Ayna.notion.mountSettings(c);
 }
 
 function _settingsMeet() {

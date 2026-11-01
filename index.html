@@ -5013,7 +5013,6 @@
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
         <div class="drop-menu">
           <a href="?page=defter" class="nav-link" id="tab-defter" data-nav data-i18n="app.check">✅ Check List</a>
-          <a href="?page=data" class="nav-link" id="tab-data" data-nav data-i18n="app.journal">📈 Trade Günlüğü</a>
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav data-i18n="app.calc">🧮 Alfa Calculator</a>
           <a href="?page=zaman" class="nav-link" id="tab-zaman" data-nav>⏱️ Zaman</a>
           <a href="?page=strateji" class="nav-link" id="tab-strateji" data-nav>🧭 Strateji</a>
@@ -5074,7 +5073,6 @@
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
-      <a href="?page=data" class="mnav-link" data-nav data-mnav="data" data-i18n="app.journal">📈 Trade Günlüğü</a>
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
@@ -5880,52 +5878,14 @@
     </div>
   </div>
   <div id="page-data" class="hidden">
-    <div class="eg-brand"><span class="eg-brand-ico">📈</span><span class="eg-brand-name" data-i18n="pg.data.t">Trade Günlüğü</span><span class="eg-brand-sub" data-i18n="pg.data.s">İşlemlerini kaydet, kümülatif R eğrisini izle.</span></div>
+    <div class="eg-brand"><span class="eg-brand-ico">📈</span><span class="eg-brand-name" data-i18n="pg.data.t">Notion İşlemleri</span><span class="eg-brand-sub" data-i18n="pg.data.s">İşlemler Notion'dan okunur; sitede elle kayıt eklenmez.</span></div>
     <div class="data-kpis" id="data-kpis"></div>
     <div class="panel" style="margin-bottom:14px;">
-      <h2><span data-i18n="pg.data.newTrade">+ Yeni İşlem</span></h2>
-      <div class="df-form" id="df-form">
-        <div class="df-row"><span class="df-lbl" data-i18n="pg.data.lDate">Tarih</span><input type="date" id="df-date"></div>
-        <div class="df-row"><span class="df-lbl" data-i18n="pg.data.lPair">Parite</span><input type="text" id="df-pair" data-i18n-ph="pg.data.phPair" placeholder="BTC, XAU…" maxlength="12"></div>
-        <div class="df-row"><span class="df-lbl" data-i18n="pg.data.lDir">Yön</span><div class="df-seg"><button type="button" class="long on" id="df-long">LONG</button><button type="button" class="short" id="df-short">SHORT</button></div></div>
-        <div class="df-row"><span class="df-lbl" data-i18n="pg.data.lR">R</span><input type="number" step="0.01" id="df-r" data-i18n-ph="pg.data.phR" placeholder="+2.5 / -0.3 — kayıp için (-) ile gir"></div>
-        <div class="df-row"><span class="df-lbl" data-i18n="pg.data.lStrat">Strateji</span><input type="text" id="df-strat" data-i18n-ph="pg.data.phStrat" placeholder="Breaker, FVG…"></div>
-        <div class="df-row"><span class="df-lbl" data-i18n="pg.data.lModel">Entry Model</span><input type="text" id="df-model" data-i18n-ph="pg.data.phModel" placeholder="ör. H1 FVG + M15 iBOS"></div>
-        <div class="df-row df-row-note"><span class="df-lbl" data-i18n="pg.data.lNote">Not</span><textarea id="df-note" data-i18n-ph="pg.data.phNote" placeholder="İşlemle ilgili notların…" rows="2"></textarea></div>
-        <div class="df-crits">
-          <label data-i18n="pg.data.cSetup">Setup <input type="range" id="df-c-setup" min="0" max="10" value="4" class="crit-range"><span class="crit-val" id="df-c-setup-v">4</span></label>
-          <label data-i18n="pg.data.cEntry">Entry <input type="range" id="df-c-entry" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-entry-v">5</span></label>
-          <label data-i18n="pg.data.cExit">Exit <input type="range" id="df-c-exit" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-exit-v">5</span></label>
-          <label data-i18n="pg.data.cRisk">Risk <input type="range" id="df-c-risk" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-risk-v">5</span></label>
-          <label data-i18n="pg.data.cPsycho">Psikoloji <input type="range" id="df-c-psycho" min="0" max="10" value="5" class="crit-range"><span class="crit-val" id="df-c-psycho-v">5</span></label>
-        </div>
-        <div class="k-kalite-wrap" id="kk-data-wrap">
-          <div class="k-kalite-lbl">Karar Kalitesi <span class="k-kalite-locked" id="kk-data-lock" style="display:none;">🔒</span></div>
-          <div class="k-kalite-btns" id="kk-data-btns">
-            <button type="button" data-kk="Kurallı">Kurallı</button>
-            <button type="button" data-kk="Zorlama">Zorlama</button>
-            <button type="button" data-kk="Kaçan-Korku">Kaçan-Korku</button>
-            <button type="button" data-kk="Doğru-Pas">Doğru-Pas</button>
-          </div>
-        </div>
-        <div class="df-imgs" id="df-imgs-area">
-          <div class="df-img-drop" id="df-img-drop">
-            <span data-i18n="pg.data.imgDrop">📷 Resim sürükle/bırak veya Ctrl+V yapıştır</span>
-            <input type="file" id="df-img-file" accept="image/*" multiple style="display:none">
-          </div>
-          <div class="df-img-previews" id="df-img-previews"></div>
-        </div>
-        <button class="btn solid df-full" id="df-add" style="margin-top:8px;" data-i18n="pg.defter.saveTrade">İşlemi Kaydet</button>
-      </div>
-    </div>
-    <div class="panel" style="margin-bottom:14px;">
-      <h2><span data-i18n="pg.data.importT">İçe Aktar</span></h2>
+      <h2><span data-i18n="pg.data.importT">Notion Bağlantısı</span></h2>
+      <p class="hint" data-i18n="pg.data.notionFirst">Tek kaynak Notion. Bu sayfa sadece okur; yeni işlem, CSV veya Check List aktarımı yok. Bağlantıyı Ayna → Ayarlar'dan da yönetebilirsin.</p>
       <div class="actions" style="justify-content:flex-start;flex-wrap:wrap;">
-        <button class="btn" id="data-import-defter" data-i18n="pg.data.importDefter">Check List işlemlerini aktar</button>
         <button class="btn solid" id="data-notion" data-i18n="pg.data.pullNotion">⬇ Notion'dan çek</button>
         <button class="btn" id="data-notion-oauth" data-i18n="pg.data.connectNotion">🔗 Notion'a Bağlan</button>
-        <button class="btn" id="data-csv-btn" data-i18n="pg.data.csvBtn">CSV yükle (broker/MetaTrader)</button>
-        <input type="file" id="data-csv-file" accept=".csv,text/csv" style="display:none;">
       </div>
       <details style="margin-top:8px;font-size:13px;">
         <summary style="cursor:pointer;color:var(--text-2);font-weight:600;" data-i18n="pg.data.ndbSummary">⚙ Notion Database Ayarları</summary>
@@ -5937,7 +5897,6 @@
           <span id="ndb-note" class="hint" style="grid-column:1/-1;"></span>
         </div>
       </details>
-      <p class="hint" data-i18n="pg.data.importHint">Alfa-Check List işlemleri R sonuçlarıyla buraya gelir. CSV: broker geçmişini yükle (date, symbol, type, profit).</p>
       <div id="data-note" class="hint"></div>
     </div>
     <div class="panel">
@@ -13938,6 +13897,7 @@ const DF_PP = 20;
 function dfAddImg(dataUrl) {
   dfImages.push(dataUrl);
   const p = document.getElementById('df-img-previews');
+  if (!p) return;
   const d = document.createElement('div'); d.className = 'thmb';
   d.innerHTML = '<img src="' + dataUrl + '"><button class="del" data-i="' + (dfImages.length - 1) + '">×</button>';
   d.querySelector('.del').onclick = () => { dfImages.splice(parseInt(d.querySelector('.del').dataset.i), 1); renderDfPreviews(); };
@@ -14111,7 +14071,7 @@ function saveNotionDbIds(kripto, fx, week) {
 async function importFromNotion() {
   const note = document.getElementById('data-note');
   const btn = document.getElementById('data-notion');
-  note.textContent = 'Notion\'dan çekiliyor…';
+  if (note) note.textContent = 'Notion\'dan çekiliyor…';
   if (btn) btn.disabled = true;
   const nt = getNotionToken();
   const dbs = getNotionDbIds();
@@ -14170,9 +14130,9 @@ async function importFromNotion() {
     const parts = [];
     if (added) parts.push(added + ' yeni eklendi');
     if (updated) parts.push(updated + ' güncellendi');
-    note.textContent = parts.length ? parts.join(' · ') + ' — Notion senkronu tamam.' : 'Zaten güncel — çekilecek yeni kayıt yok.';
+    if (note) note.textContent = parts.length ? parts.join(' · ') + ' — Notion senkronu tamam.' : 'Zaten güncel — çekilecek yeni kayıt yok.';
   } catch (e) {
-    note.textContent = 'Notion\'dan çekilemedi: ' + ((e && e.message) || e);
+    if (note) note.textContent = 'Notion\'dan çekilemedi: ' + ((e && e.message) || e);
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -14196,12 +14156,19 @@ function handleNotionHash() {
       window.location.hash = '';
       const note = document.getElementById('data-note');
       if (note) note.textContent = '✅ Notion hesabın bağlandı! Veriler çekiliyor…';
+      // OAuth dönüşü her zaman site köküne gelir; kullanıcıyı bağlantı
+      // kartının bulunduğu Ayna → Ayarlar ekranına geri götür.
+      if (typeof currentPage !== 'undefined' && currentPage !== 'ayna') {
+        window.location.replace('/?page=ayna');
+        return;
+      }
       setTimeout(importFromNotion, 500);
     } else if (h.startsWith('#notion-error=')) {
       const err = decodeURIComponent(h.slice(14));
       window.location.hash = '';
       const note = document.getElementById('data-note');
       if (note) note.textContent = '❌ Notion bağlantı hatası: ' + err;
+      if (window.Ayna && typeof Ayna.flash === 'function') Ayna.flash('Notion: ' + err);
     }
   } catch (e) { /* hash hatası */ }
 }
@@ -14228,9 +14195,9 @@ function bindDataPage() {
     const nn = g('ndb-note');
     if (nn) { nn.textContent = '✅ Database ID\'ler kaydedildi.'; setTimeout(() => { nn.textContent = ''; }, 2000); }
   });
-  g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
-  g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
-  g('df-add').addEventListener('click', addDataTrade);
+  if (g('df-long')) g('df-long').addEventListener('click', () => { dfDir = 'LONG'; g('df-long').classList.add('on'); g('df-short').classList.remove('on'); });
+  if (g('df-short')) g('df-short').addEventListener('click', () => { dfDir = 'SHORT'; g('df-short').classList.add('on'); g('df-long').classList.remove('on'); });
+  if (g('df-add')) g('df-add').addEventListener('click', addDataTrade);
   document.querySelectorAll('#kk-data-btns button').forEach(b => {
     b.addEventListener('click', () => {
       if (kkDataLocked) return;
@@ -14249,8 +14216,8 @@ function bindDataPage() {
       renderData();
     });
   });
-  g('data-import-defter').addEventListener('click', importFromDefter);
-  g('data-clear').addEventListener('click', async () => {
+  if (g('data-import-defter')) g('data-import-defter').addEventListener('click', importFromDefter);
+  if (g('data-clear')) g('data-clear').addEventListener('click', async () => {
     if (!dataTrades.length) return;
     if (!confirm('Data Takibi\'ndeki tüm işlemler silinecek. Emin misin? (Konfirmasyon Defteri etkilenmez)')) return;
     dataTrades = [];
@@ -14258,8 +14225,8 @@ function bindDataPage() {
     document.getElementById('data-note').textContent = 'Tüm işlemler silindi.';
   });
 
-  g('data-csv-btn').addEventListener('click', () => g('data-csv-file').click());
-  g('data-csv-file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importCsv(f); e.target.value = ''; });
+  if (g('data-csv-btn')) g('data-csv-btn').addEventListener('click', () => g('data-csv-file').click());
+  if (g('data-csv-file')) g('data-csv-file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importCsv(f); e.target.value = ''; });
   // Kriter slider canlı gösterim
   document.querySelectorAll('.crit-range').forEach(r => {
     r.addEventListener('input', () => {
@@ -26118,7 +26085,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b146';
+const APP_BUILD = 'b147';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -27190,8 +27157,8 @@ loadSfx();
     'pg.defter.copy': { tr: 'Kopyala', en: 'Copy' },
     'pg.defter.exportNote': { tr: 'Tümünü kopyala ve analiz için Claude\'a yapıştır.', en: 'Copy everything and paste it to Claude for analysis.' },
     'pg.defter.anT': { tr: 'Kriter Analizi', en: 'Criteria Analysis' },
-    'pg.data.t': { tr: 'Trade Günlüğü', en: 'Trade Journal' },
-    'pg.data.s': { tr: 'İşlemlerini kaydet, kümülatif R eğrisini izle.', en: 'Log your trades and track the cumulative R curve.' },
+    'pg.data.t': { tr: 'Notion İşlemleri', en: 'Notion Trades' },
+    'pg.data.s': { tr: 'İşlemler Notion\'dan okunur; sitede elle kayıt eklenmez.', en: 'Trades are read from Notion; no manual entry on the site.' },
     'pg.data.newTrade': { tr: '+ Yeni İşlem', en: '+ New Trade' },
     'pg.data.lDate': { tr: 'Tarih', en: 'Date' },
     'pg.data.lPair': { tr: 'Parite', en: 'Pair' },
@@ -27211,7 +27178,7 @@ loadSfx();
     'pg.data.cRisk': { tr: 'Risk', en: 'Risk' },
     'pg.data.cPsycho': { tr: 'Psikoloji', en: 'Psychology' },
     'pg.data.imgDrop': { tr: '📷 Resim sürükle/bırak veya Ctrl+V yapıştır', en: '📷 Drag & drop an image or press Ctrl+V' },
-    'pg.data.importT': { tr: 'İçe Aktar', en: 'Import' },
+    'pg.data.importT': { tr: 'Notion Bağlantısı', en: 'Notion Connection' },
     'pg.data.importDefter': { tr: 'Check List işlemlerini aktar', en: 'Import Check List trades' },
     'pg.data.pullNotion': { tr: '⬇ Notion\'dan çek', en: '⬇ Pull from Notion' },
     'pg.data.connectNotion': { tr: '🔗 Notion\'a Bağlan', en: '🔗 Connect to Notion' },
@@ -27223,6 +27190,7 @@ loadSfx();
     'pg.data.ndbWeekPh': { tr: 'Haftalık değerlendirme database id', en: 'Weekly review database id' },
     'pg.data.save': { tr: 'Kaydet', en: 'Save' },
     'pg.data.importHint': { tr: 'Alfa-Check List işlemleri R sonuçlarıyla buraya gelir. CSV: broker geçmişini yükle (date, symbol, type, profit).', en: 'Alfa-Check List trades come here with their R results. CSV: upload broker history (date, symbol, type, profit).' },
+    'pg.data.notionFirst': { tr: 'Tek kaynak Notion. Bu sayfa sadece okur; yeni işlem, CSV veya Check List aktarımı yok. Bağlantıyı Ayna → Ayarlar\'dan da yönetebilirsin.', en: 'Notion is the single source. This page only reads; there is no new trade, CSV or Check List import. You can also manage the connection in Ayna → Settings.' },
     'pg.data.allTrades': { tr: 'Tüm İşlemler', en: 'All Trades' },
     'pg.data.clearAll': { tr: 'Tümünü temizle', en: 'Clear all' },
     'pg.data.aiT': { tr: '🧠 Trading Coach — YZ Analiz', en: '🧠 Trading Coach — AI Analysis' },
@@ -29883,18 +29851,18 @@ document.addEventListener('input', function (e) {
 
     </script>
 <!-- AYNA:BASLA -->
-<script src="/ayna/ayna-i18n.js?v=14"></script>
+<script src="/ayna/ayna-i18n.js?v=15"></script>
 <script src="/ayna/ayna-core.js?v=10"></script>
 <script src="/ayna/ayna-voice.js?v=1"></script>
 <script src="/ayna/ayna-followup.js?v=1"></script>
-<script src="/ayna/ayna-notion.js?v=1"></script>
+<script src="/ayna/ayna-notion.js?v=2"></script>
 <script src="/ayna/ayna-bias.js?v=1"></script>
 <script src="/ayna/ayna-today.js?v=14"></script>
 <script src="/ayna/ayna-map.js?v=7"></script>
 <script src="/ayna/ayna-coach.js?v=14"></script>
 <script src="/ayna/ayna-rules.js?v=5"></script>
 <script src="/ayna/ayna-archive.js?v=5"></script>
-<script src="/ayna/ayna-settings.js?v=5"></script>
+<script src="/ayna/ayna-settings.js?v=6"></script>
 <!-- AYNA:BITIR -->
 </body>
 </html>

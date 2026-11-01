@@ -117,6 +117,126 @@
     }).catch(function () {});
   }
 
+  // OAuth: the API handler redirects to Notion and back to /#notion-token=...
+  function connect() {
+    var state = Ayna.uid ? '&state=' + encodeURIComponent(Ayna.uid) : '';
+    window.location.href = '/api/notion-callback?action=auth' + state;
+  }
+
+  // Internal integration secret (ntn_...) or an OAuth token. No redirect URI
+  // dance needed; the token is kept in this browser and in the user's cloud row.
+  function saveToken(value) {
+    var token = String(value || '').trim();
+    if (token.length < 20) return false;
+    try {
+      if (typeof setNotionToken === 'function') setNotionToken(token);
+      else localStorage.setItem('notion_oauth_token', token);
+    } catch (e) {
+      try { localStorage.setItem('notion_oauth_token', token); } catch (e2) { return false; }
+    }
+    return true;
+  }
+
+  function disconnect() {
+    try { localStorage.removeItem('notion_oauth_token'); } catch (e) {}
+    try {
+      if (typeof AUTH !== 'undefined' && AUTH.cloud) {
+        delete AUTH.cloud.notion_oauth_token;
+        if (typeof scheduleCloudSync === 'function') scheduleCloudSync();
+      }
+    } catch (e) {}
+    try { localStorage.removeItem(stateKey()); } catch (e) {}
+  }
+
+  function redirectUri() {
+    return window.location.origin + '/api/notion-callback';
+  }
+
+  function settingsCard() {
+    var h = '<div class="ay-card" id="ay-notion-card"><h4>' + t('settings_title') + '</h4>';
+    h += '<p class="ay-notion-status" id="ay-notion-settings-status" role="status">' + Ayna.esc(statusText()) + '</p>';
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">';
+    h += '<button type="button" class="btn solid" id="ay-notion-connect">' + t('connect') + '</button>';
+    h += '<button type="button" class="btn" id="ay-notion-settings-sync">' + t('sync') + '</button>';
+    if (connected()) h += '<button type="button" class="btn" id="ay-notion-disconnect">' + t('disconnect') + '</button>';
+    h += '</div>';
+    h += '<details class="ay-notion-help"><summary>' + t('help_summary') + '</summary>';
+    h += '<p>' + t('help_oauth') + '</p>';
+    h += '<p class="ay-notion-uri"><code id="ay-notion-uri">' + Ayna.esc(redirectUri()) + '</code> ';
+    h += '<button type="button" class="btn" id="ay-notion-copy-uri">' + t('copy') + '</button></p>';
+    h += '<p>' + t('help_token') + '</p>';
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    h += '<input type="password" class="ay-inp" id="ay-notion-token" autocomplete="off" spellcheck="false" placeholder="ntn_..." style="flex:1;min-width:200px">';
+    h += '<button type="button" class="btn solid" id="ay-notion-save-token">' + t('save_token') + '</button>';
+    h += '</div></details></div>';
+    return h;
+  }
+
+  function mountSettings(container) {
+    var status = container.querySelector('#ay-notion-settings-status');
+    function setStatus(text) { if (status) status.textContent = text; }
+
+    var connectBtn = container.querySelector('#ay-notion-connect');
+    if (connectBtn) connectBtn.addEventListener('click', connect);
+
+    var disconnectBtn = container.querySelector('#ay-notion-disconnect');
+    if (disconnectBtn) disconnectBtn.addEventListener('click', function () {
+      disconnect();
+      Ayna.render();
+    });
+
+    var copyBtn = container.querySelector('#ay-notion-copy-uri');
+    if (copyBtn) copyBtn.addEventListener('click', function () {
+      var uri = redirectUri();
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(uri);
+        else {
+          var tmp = document.createElement('textarea');
+          tmp.value = uri; document.body.appendChild(tmp); tmp.select();
+          document.execCommand('copy'); document.body.removeChild(tmp);
+        }
+        copyBtn.textContent = t('copied');
+      } catch (e) {
+        setStatus(uri);
+      }
+    });
+
+    var saveBtn = container.querySelector('#ay-notion-save-token');
+    if (saveBtn) saveBtn.addEventListener('click', function () {
+      var input = container.querySelector('#ay-notion-token');
+      var value = input ? input.value : '';
+      if (!saveToken(value)) { setStatus(t('invalid_token')); return; }
+      if (input) input.value = '';
+      setStatus(t('syncing'));
+      sync().then(function (res) {
+        setStatus(res && res.upserted ? t('done', { n: res.upserted, notes: res.withNotes || 0 }) : t('empty'));
+        return refreshTrades(container);
+      }).catch(function (error) {
+        setStatus(Ayna.errText(error.code || 'default'));
+      });
+    });
+
+    var syncBtn = container.querySelector('#ay-notion-settings-sync');
+    if (syncBtn) syncBtn.addEventListener('click', function () {
+      if (!connected()) { setStatus(t('not_connected')); return; }
+      syncBtn.disabled = true;
+      setStatus(t('syncing'));
+      sync().then(function (res) {
+        setStatus(res && res.upserted ? t('done', { n: res.upserted, notes: res.withNotes || 0 }) : t('empty'));
+        return refreshTrades(container);
+      }).catch(function (error) {
+        setStatus(Ayna.errText(error.code || 'default'));
+      }).finally(function () { syncBtn.disabled = false; });
+    });
+
+    if (connected()) {
+      auto().then(function (res) {
+        if (status) status.textContent = statusText();
+        if (res && res.upserted) refreshTrades(container);
+      }).catch(function () {});
+    }
+  }
+
   Ayna.notion = {
     connected: connected,
     status: statusText,
@@ -124,6 +244,12 @@
     sync: sync,
     auto: auto,
     mount: mount,
+    mountSettings: mountSettings,
+    settingsCard: settingsCard,
+    connect: connect,
+    saveToken: saveToken,
+    disconnect: disconnect,
+    redirectUri: redirectUri,
     refreshTrades: refreshTrades
   };
 })();
