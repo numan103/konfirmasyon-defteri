@@ -171,7 +171,12 @@ function _drawMessages(el) {
     if (waiting) {
       html += '<div style="color:var(--text-2)">' + Ayna.esc(Ayna.t('coach.thinking')) + '</div>';
     } else {
-      html += '<div style="white-space:pre-wrap">' + (isUser ? Ayna.esc(m.content) : Ayna.md(m.content)) + '</div>';
+      var sourceAt = isUser && String(m.content || '').indexOf('Günlük analizine yanıt') === 0 ? m.content.lastIndexOf('\nYanıtım:\n') : -1;
+      if (sourceAt >= 0) {
+        html += '<div style="white-space:pre-wrap">' + Ayna.esc(m.content.slice(sourceAt + '\nYanıtım:\n'.length)) + '</div><details><summary>' + Ayna.t('followup.source') + '</summary><div style="white-space:pre-wrap">' + Ayna.esc(m.content.slice(0, sourceAt)) + '</div></details>';
+      } else {
+        html += '<div style="white-space:pre-wrap">' + (isUser ? Ayna.esc(m.content) : Ayna.md(m.content)) + '</div>';
+      }
     }
 
     if (!isUser && m.evidence && m.evidence.length) {

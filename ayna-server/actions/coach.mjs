@@ -6,6 +6,7 @@ import { KOC_TEMEL, MOD, GOREV_GUNLUK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
 import { kocTemel, buildCoachContext } from '../context.mjs';
 import { aiErrorCode } from '../ai-error.mjs';
+import { ownedInsight, isUuid, REPLY_PREFIX } from '../followups.mjs';
 
 const VALID_MODES = ['chat', 'pre_trade', 'pre_conversation', 'big_decision', 'onboarding'];
 // Bu modlarda kullanıcının yazdığı kişi/olay bilgisi kayda çevrilir.
@@ -48,16 +49,30 @@ export default async function coach({ res, auth, user, profile, body }) {
   }
 
   try {
+    let followup = null;
+    let linkedInsight = null;
+    if (body.followup_message_id) {
+      if (mode !== 'chat' || !isUuid(body.followup_message_id)) return fail(res, 400, 'bad_request');
+      linkedInsight = await ownedInsight(auth, user.id, body.insight_id);
+      if (!linkedInsight) return fail(res, 404, 'not_found');
+      const rows = await db(auth, 'GET', `ayna_chat_messages?user_id=eq.${q(user.id)}&id=eq.${q(body.followup_message_id)}&mode=eq.chat&role=eq.user&select=*`);
+      followup = rows[0];
+      if (!followup || !followup.content.startsWith(REPLY_PREFIX) || !(followup.evidence || []).includes(linkedInsight.source_entry_id)) return fail(res, 404, 'not_found');
+    }
     const ctx = await buildCoachContext(auth, profile, message, mode);
+    if (followup) {
+      ctx.text += `\n\n## Kullanıcının yanıt verdiği analiz [${linkedInsight.source_entry_id}]\n${followup.content}\nGörev: Kullanıcının bu yanıtını konuş. İtirazını veya düzeltmesini ciddiye al; eski koç çıkarımını gerçek sayma. Günlüğü baştan özetleme. En fazla bir somut sonraki adım veya tek açıklayıcı soru sun. Kullanıcı kabul etmeden görev veya kalıcı kişilik özelliği üretme.`;
+      ctx.entryIds.push(linkedInsight.source_entry_id);
+    }
 
     const historyLimit = mode === 'onboarding' ? 40 : 20;
     const historyRows = await db(
       auth,
       'GET',
-      `ayna_chat_messages?user_id=eq.${q(user.id)}&mode=eq.${q(mode)}&order=created_at.desc&limit=${historyLimit}&select=role,content`
+      `ayna_chat_messages?user_id=eq.${q(user.id)}&mode=eq.${q(mode)}&order=created_at.desc&limit=${historyLimit}&select=id,role,content`
     );
 
-    const historyMsgs = historyRows.slice().reverse().map((r) => ({ role: r.role, content: r.content }));
+    const historyMsgs = historyRows.filter((r) => !followup || r.id !== followup.id).slice().reverse().map((r) => ({ role: r.role, content: r.content }));
     historyMsgs.push({ role: 'user', content: message });
     const messages = normalizeMessages(historyMsgs);
 
@@ -80,9 +95,10 @@ export default async function coach({ res, auth, user, profile, body }) {
     const risk = ['none', 'low', 'crisis'].includes(ai.risk) ? ai.risk : 'none';
 
     const allowedIds = new Set(ctx.entryIds || []);
-    const evidenceIds = Array.isArray(ai.evidence_entry_ids)
+    let evidenceIds = Array.isArray(ai.evidence_entry_ids)
       ? [...new Set(ai.evidence_entry_ids.filter((id) => typeof id === 'string' && allowedIds.has(id)))].slice(0, 10)
       : [];
+    if (followup) evidenceIds = [...new Set([linkedInsight.source_entry_id, ...evidenceIds])].slice(0, 10);
 
     let decisionProposal = null;
     if (mode === 'big_decision' && ai.decision_proposal) {
@@ -107,7 +123,7 @@ export default async function coach({ res, auth, user, profile, body }) {
       evidence: [],
       risk: null
     };
-    const userInserted = await db(auth, 'POST', 'ayna_chat_messages', [userRow], 'return=representation');
+    const userInserted = followup ? [followup] : await db(auth, 'POST', 'ayna_chat_messages', [userRow], 'return=representation');
     const userMsgId = userInserted && userInserted.length ? userInserted[0].id : null;
 
     const assistantRow = {
@@ -131,7 +147,7 @@ export default async function coach({ res, auth, user, profile, body }) {
       decision_proposal: decisionProposal,
       message_id: assistantMsgId,
       user_message_id: userMsgId,
-      extract: EXTRACT_MODES.includes(mode) && message.length >= 12
+      extract: !followup && EXTRACT_MODES.includes(mode) && message.length >= 12
     });
   } catch (e) {
     // Başarısız çağrı koteden düşülmez; sadece başarılı yanıtlar sayılır.

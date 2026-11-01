@@ -165,3 +165,16 @@ body[data-page="ayna"]{--pc:#a5b4fc;--pc-soft:rgba(165,180,252,.16);--glow-a:rgb
 .ay-coach-guide p { color: var(--text-2); font-size: 13px; line-height: 1.7; }
 .ay-coach-context { color: var(--text-3); font-size: 11px; line-height: 1.7; }
 .ay-coach-error:not([hidden]) { display: block; padding: 12px 14px; margin: 10px 0; border: 1px solid var(--amber); border-radius: 10px; color: var(--text); font-size: 13px; }
+.ay-followup { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+.ay-followup > p, .ay-followup-plan > p, #ay-followup-steps > p { font-size: 12px; line-height: 1.7; color: var(--text-2); }
+.ay-followup label, .ay-followup-step label { display: block; margin: 12px 0; font-size: 12px; color: var(--text-2); }
+.ay-followup label .ay-inp, .ay-followup-step label .ay-inp { display: block; width: 100%; margin-top: 6px; box-sizing: border-box; }
+.ay-followup-messages { display: grid; gap: 10px; margin-top: 14px; }
+.ay-followup-message, .ay-followup-step { padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-2); }
+.ay-followup-message > strong { display: block; font-size: 11px; color: var(--pc); margin-bottom: 7px; }
+.ay-followup-message > div, .ay-followup-message details p, .ay-followup-outcome { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; }
+.ay-followup-message .btn { margin-top: 10px; }
+.ay-followup details summary, .ay-followup-step summary { font-size: 12px; cursor: pointer; color: var(--pc); padding: 8px 0; }
+.ay-followup-plan { margin-top: 20px; }
+.ay-followup-meta { color: var(--text-3); font-size: 11px; }
+#ay-followup-steps .ay-followup-step { margin-top: 10px; }

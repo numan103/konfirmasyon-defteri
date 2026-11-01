@@ -110,10 +110,11 @@ export const TOOLS = {
       "properties": {
         "title": { "type": "string" },
         "body": { "type": "string" },
+        "small_step": { "type": ["string", "null"], "description": "Kullanıcının kabul edip takibe alabileceği tek küçük öneri; ne zaman/ne yapacağı dahil en fazla 200 karakter. Krizde null." },
         "evidence_entry_ids": { "type": "array", "items": { "type": "string" } },
         "risk": { "type": "string", "enum": ["none", "low", "crisis"] }
       },
-      "required": ["title", "body", "evidence_entry_ids", "risk"]
+      "required": ["title", "body", "small_step", "evidence_entry_ids", "risk"]
     }
   },
   coach_reply: {

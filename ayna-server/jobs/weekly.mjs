@@ -6,6 +6,7 @@ import { GOREV_HAFTALIK } from '../prompts.mjs';
 import { TOOLS } from '../tools.mjs';
 import { kocTemel, validEntryIds } from '../context.mjs';
 import { weeklyPackage } from '../metrics.mjs';
+import { followupContext } from '../followups.mjs';
 
 const truncate = (s, max) => typeof s === 'string' ? s.slice(0, max) : s;
 const norm = (s) => String(s || '').toLocaleLowerCase('tr-TR').trim().replace(/\s+/g, ' ');
@@ -18,7 +19,7 @@ export default async function runWeekly(auth, profile, start, end) {
 
   const systemDynamic = GOREV_HAFTALIK
     .replace('{BASLANGIC}', start)
-    .replace('{BITIS}', end) + '\n\n' + pkg.text;
+    .replace('{BITIS}', end) + '\n\n' + pkg.text + '\n\n' + await followupContext(auth, userId, start, end);
 
   const result = await callTool({
     kind: 'coach',

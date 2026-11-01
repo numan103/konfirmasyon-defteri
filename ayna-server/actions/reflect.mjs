@@ -75,8 +75,6 @@ export default async function reflect({ res, auth, user, profile, body }) {
       ? [...new Set(ai.evidence_entry_ids.filter((id) => typeof id === 'string' && allowedIds.has(id)))].slice(0, 10)
       : [];
 
-    await db(auth, 'DELETE', `ayna_insights?user_id=eq.${q(user.id)}&kind=eq.${q(kind)}&source_entry_id=eq.${q(entryId)}`);
-
     const insight = {
       user_id: user.id,
       kind,
@@ -84,11 +82,17 @@ export default async function reflect({ res, auth, user, profile, body }) {
       period_end: entry.local_date,
       title,
       body: bodyText,
+      focus: risk !== 'crisis' && typeof ai.small_step === 'string' ? truncate(ai.small_step.trim(), 200) : null,
       evidence: evidenceIds,
       source_entry_id: entryId
     };
 
-    const inserted = await db(auth, 'POST', 'ayna_insights', [insight], 'return=representation');
+    // Keep the stable insight ID and accepted decision link when regenerating.
+    // Replies remain linked; feedback on the previous wording is not copied to the new one.
+    const existing = await db(auth, 'GET', `ayna_insights?user_id=eq.${q(user.id)}&kind=eq.${q(kind)}&source_entry_id=eq.${q(entryId)}&select=id`);
+    const inserted = existing.length
+      ? await db(auth, 'PATCH', `ayna_insights?user_id=eq.${q(user.id)}&id=eq.${q(existing[0].id)}`, { ...insight, feedback: null }, 'return=representation')
+      : await db(auth, 'POST', 'ayna_insights', [insight], 'return=representation');
     const savedInsight = inserted && inserted.length ? inserted[0] : insight;
 
     await logUsage(auth, user.id, 'reflect', result);

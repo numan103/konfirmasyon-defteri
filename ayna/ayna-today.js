@@ -96,6 +96,7 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
     h += _cardJournalNotes(notes);
     h += evening ? _cardEveningDone(evening) : _cardEveningForm(people, rules);
     h += '<section class="ay-card" id="ay-daily-analysis"><h4>' + Ayna.t('journal.analysis') + '</h4><p>' + Ayna.t('journal.analysis_hint') + '</p><button type="button" class="btn" id="ay-analyze">' + Ayna.t('journal.analyze') + '</button><div id="ay-analysis-result" aria-live="polite"></div></section>';
+    h += '<section class="ay-card" id="ay-followup-steps" hidden></section>';
     h += _cardLoops(loops);
     h += _cardTrades(trades);
     c.innerHTML = h;
@@ -106,6 +107,7 @@ function renderTodayCards(c, d, pendingCount, entries, people, rules, loops, tra
     _bindQuickNote(c, d);
     _bindLoops(c);
     _bindTrades(c, d);
+    if (Ayna.followup) Ayna.followup.pending(c);
     var analyze = c.querySelector('#ay-analyze');
     analyze.disabled = !_journalAnalysisEntry(c);
     analyze.addEventListener('click', function () { var entry = _journalAnalysisEntry(c); if (entry) _runJournalAnalysis(c, entry); });
@@ -124,9 +126,10 @@ function _rememberJournalEntry(c, entry) {
   var button = c.querySelector('#ay-analyze');
   if (button) button.disabled = false;
 }
-function _showJournalAnalysis(c, insight) {
+function _showJournalAnalysis(c, insight, risk) {
   var result = c.querySelector('#ay-analysis-result');
   if (result) result.innerHTML = '<h4>' + Ayna.esc(insight.title || '') + '</h4>' + Ayna.md(insight.body || '');
+  if (Ayna.followup) Ayna.followup.mount(c, insight, risk);
 }
 function _runJournalAnalysis(c, entry) {
   if (!entry) return Promise.resolve();
@@ -138,7 +141,7 @@ function _runJournalAnalysis(c, entry) {
   if (result) result.textContent = Ayna.t('journal.analyzing');
   return Ayna.api('reflect', { entry_id: entry.id, kind: entry.kind === 'evening' ? 'daily' : 'instant', overview: true }).then(function (res) {
     if (!c.isConnected || c._ayAnalysisVersion !== version) return;
-    _showJournalAnalysis(c, res.insight || {});
+    _showJournalAnalysis(c, res.insight || {}, res.risk);
     if (res.risk === 'crisis' && result) result.insertAdjacentHTML('beforeend', _cardCrisis());
   }).catch(function (err) {
     if (c.isConnected && c._ayAnalysisVersion === version && result) result.textContent = Ayna.t('journal.analysis_failed') + ' ' + Ayna.errText(err.code || 'default');

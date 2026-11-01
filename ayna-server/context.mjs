@@ -2,6 +2,7 @@
 import { localDate, addDays, formatTR } from './time.mjs';
 import { KOC_TEMEL, TON } from './prompts.mjs';
 import { dependencyFlag } from './metrics.mjs';
+import { followupContext } from './followups.mjs';
 
 const norm = (s) => String(s || '').toLocaleLowerCase('tr-TR').trim().replace(/\s+/g, ' ');
 
@@ -376,6 +377,7 @@ export async function buildCoachContext(auth, profile, message, mode) {
 
   // Append after reducing historical context so the current journal isn't shortened.
   fullText += '\n\n' + journalText;
+  fullText += '\n\n' + await followupContext(auth, userId, addDays(today, -13), today);
   const entryIds = [...fullText.matchAll(/\[([0-9a-f-]{36})\]/g)].map((m) => m[1]);
 
   const history = await db(auth, 'GET', `ayna_chat_messages?user_id=eq.${q(userId)}&mode=eq.${q(mode)}&select=role,content&order=created_at.asc&limit=${mode === 'onboarding' ? 40 : 20}`);
@@ -462,6 +464,7 @@ export async function buildReflectContext(auth, profile, entry) {
     parts.push(loopSection);
   }
 
+  parts.push(await followupContext(auth, userId, addDays(entry.local_date, -13), entry.local_date));
   const fullText = parts.join('\n\n');
   const entryIds = [...fullText.matchAll(/\[([0-9a-f-]{36})\]/g)].map((m) => m[1]);
 
