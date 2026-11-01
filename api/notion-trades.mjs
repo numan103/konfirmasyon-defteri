@@ -160,6 +160,30 @@ export default async function handler(req, res) {
   if (tier !== 'ref' && tier !== 'admin') return res.status(403).json({ error: 'referral_required' });
 
   res.setHeader('Cache-Control', 'no-store');
+  if (req.query.mode === 'schema') {
+    if (tier !== 'admin') return res.status(403).json({ error: 'admin_required' });
+    const token = process.env.NOTION_TOKEN;
+    if (!token) return res.status(500).json({ error: 'NOTION_TOKEN env var ayarlı değil.' });
+    const dbId = (req.query.dbId || '').replace(/-/g, '');
+    if (!/^[0-9a-f]{32}$/i.test(dbId)) return res.status(400).json({ error: 'bad_db_id' });
+    try {
+      const r = await fetch('https://api.notion.com/v1/databases/' + dbId, {
+        headers: { Authorization: 'Bearer ' + token, 'Notion-Version': '2022-06-28' }
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return res.status(502).json({ error: 'notion_' + r.status, detail: text.slice(0, 500) });
+      }
+      const data = await r.json();
+      const props = {};
+      for (const [k, v] of Object.entries(data.properties || {})) {
+        props[k] = v.type;
+      }
+      return res.status(200).json({ id: dbId, title: (data.title || []).map(t => t.plain_text).join(''), properties: props });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
   if (req.query.mode === 'search') {
     if (tier !== 'admin') return res.status(403).json({ error: 'admin_required' });
     const token = process.env.NOTION_TOKEN;
