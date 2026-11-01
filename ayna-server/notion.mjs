@@ -7,10 +7,9 @@ const MAX_AGE_DAYS = 200;
 const MAX_NOTE = 2000;
 
 export const DEFAULT_NOTION_DBS = [
+  { id: '40af561953ab8033954eed347d6bfed4', market: 'Kripto' },
+  { id: '40af561953ab80a4bd9def25375d9e19', market: 'Fx' },
   { id: '3d5f561953ab80cfa99cf95749ad82a2', market: 'Kripto' },
-  { id: '3d2f561953ab805e8703d571dbb858e9', market: 'Kripto' },
-  { id: '3b4f561953ab80c49b58d4c4cd60b6c9', market: 'Kripto' },
-  { id: '3e2f561953ab80508627f53a094a2d01', market: 'Kripto' },
 ];
 
 const DB_ID_RE = /^[0-9a-f]{32}$/i;
