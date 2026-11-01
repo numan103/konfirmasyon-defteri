@@ -14806,7 +14806,7 @@ async function syncWeekToNotion() {
   status.textContent = 'Notion\'a yazılıyor…';
   status.style.color = '';
   try {
-    const resp = await siteFetch('/api/notion-week', {
+    const resp = await siteFetch('/api/notion-trades?mode=week', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'push', dbId, week: wk, rr: { kripto: rr.kripto, fx: rr.fx }, sections, metrics })
@@ -14833,7 +14833,7 @@ async function pullWeeksFromNotion() {
   status.textContent = 'Notion\'dan çekiliyor…';
   status.style.color = '';
   try {
-    const resp = await siteFetch('/api/notion-week', {
+    const resp = await siteFetch('/api/notion-trades?mode=week', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'pull', dbId })

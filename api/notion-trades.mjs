@@ -1,4 +1,5 @@
 import { requestUser, requestTier } from '../lib/auth.mjs';
+import { handleWeek } from '../lib/notion-week.mjs';
 
 const NOTION_VERSION = '2022-06-28';
 
@@ -144,6 +145,13 @@ async function collectOptions(token, dbs) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Weekly review sync was split into its own endpoint; it now lives here so the
+  // project stays within the Hobby plan's serverless function limit.
+  const body = req.method === 'POST' ? (req.body || {}) : {};
+  if (req.query.mode === 'week' || body.action === 'push' || body.action === 'pull') {
+    return handleWeek(req, res);
+  }
 
   // Notion defteri site sahibine ait: anonim okuma kapali.
   const user = await requestUser(req);
