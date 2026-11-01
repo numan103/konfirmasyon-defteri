@@ -104,12 +104,16 @@ export function mapNotionTrade(page, market, userId) {
   if (!Number.isFinite(ts)) return null;
   const day = isoDate(date) || localDate(new Date(ts));
   const directionRaw = String(pickSelect(page, ['Position', 'Yön', 'Yon', 'Direction'])).toLowerCase();
-  const quality = pickSelect(page, ['Karar Kalitesi', 'Kalite', 'Quality']);
+  const quality = pickSelect(page, ['Karar Kalitesi', 'Kalite', 'Quality', 'Plan Uyumu']);
   const qualityKey = String(quality || '').toLocaleLowerCase('tr-TR');
   const planned = qualityKey.indexOf('kural') >= 0 ? true : qualityKey.indexOf('zorla') >= 0 ? false : null;
-  const note = parseRichText(prop(page, 'Not')).trim();
-  const symbol = String(pickSelect(page, ['Pair', 'Parite', 'Symbol']) || '').toUpperCase().slice(0, 30) || null;
-  const pnl = parseNumber(prop(page, 'Profit')) ?? parseNumber(prop(page, 'R')) ?? parseNumber(prop(page, 'Sonuç'));
+  const note = parseRichText(prop(page, 'Not')).trim()
+    || parseRichText(prop(page, 'İşlem Notu')).trim()
+    || parseRichText(prop(page, 'Kısa Not')).trim()
+    || parseRichText(prop(page, 'Notlar')).trim();
+  const symbol = String(pickSelect(page, ['Pair', 'Parite', 'Symbol', 'Sembol']) || '').toUpperCase().slice(0, 30) || null;
+  const pnl = parseNumber(prop(page, 'Profit')) ?? parseNumber(prop(page, 'R')) ?? parseNumber(prop(page, 'Net R')) ?? parseNumber(prop(page, 'Sonuç'));
+  if (!symbol && pnl == null) return null;
   return {
     user_id: userId,
     source: 'notion',
@@ -121,14 +125,14 @@ export function mapNotionTrade(page, market, userId) {
     local_date: day,
     pnl,
     planned,
-    emotions: pickMulti(page, ['Duygu', 'Duygular', 'Emotion', 'Emotions']).slice(0, 8),
+    emotions: pickMulti(page, ['Duygu', 'Duygular', 'Emotion', 'Emotions', 'Duygusal durum']).slice(0, 8),
     note: note ? note.slice(0, MAX_NOTE) : null,
     raw: {
       notion_id: page.id,
       market,
       trade_no: parseTitle(prop(page, 'Trade #')).slice(0, 80),
-      strategy: pickSelect(page, ['Trade Stratejisi', 'Strateji']) || null,
-      entry_model: pickSelect(page, ['Entry Model', 'Model', 'Entry Modeli']) || null,
+      strategy: pickSelect(page, ['Trade Stratejisi', 'Strateji', 'Setup']) || null,
+      entry_model: pickSelect(page, ['Entry Model', 'Model', 'Entry Modeli', 'Giriş Tetikleyicisi', 'Çıkış']) || null,
       quality: quality || null,
       url: page.url || null
     }
