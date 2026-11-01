@@ -57,7 +57,7 @@ function renderToday(c) {
     _q('people', sb.from('ayna_people').select('id,display_name,ring,status').eq('user_id', uid).in('status', ['active','pending']).order('ring', { ascending: true }).order('display_name', { ascending: true })),
     _q('rules', sb.from('ayna_rules').select('id,if_text,then_text,domain').eq('user_id', uid).eq('is_active', true)),
     _q('open_loops', sb.from('ayna_open_loops').select('id,person_id,kind,description,amount,due_date').eq('user_id', uid).eq('status', 'open')),
-    _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions,note,source').eq('user_id', uid).eq('local_date', d).order('opened_at', { ascending: true })),
+    _q('trades', sb.from('ayna_trades').select('id,symbol,direction,opened_at,pnl,planned,emotions,note,source').eq('user_id', uid).order('opened_at', { ascending: false }).limit(10)),
     _q('crisis', sb.from('ayna_chat_messages').select('risk').eq('user_id', uid).eq('role', 'assistant').eq('risk', 'crisis').limit(1)),
     _q('week', sb.from('ayna_entries').select('local_date,sleep_hours').eq('user_id', uid).gte('local_date', Ayna.addDays(d, -6)).lte('local_date', d)),
     _q('insights', sb.from('ayna_insights').select('*').eq('user_id', uid).eq('period_start', d).in('kind', ['daily', 'instant']).order('created_at', { ascending: false }).limit(20))
@@ -725,7 +725,7 @@ function _refreshTodayTrades(c) {
   var uid = Ayna.uid, day = Ayna.today();
   return Ayna.sb().from('ayna_trades')
     .select('id,symbol,direction,opened_at,pnl,planned,emotions,note,source')
-    .eq('user_id', uid).eq('local_date', day).order('opened_at', { ascending: true })
+    .eq('user_id', uid).order('opened_at', { ascending: false }).limit(10)
     .then(function (res) {
       if (res && res.error) throw res.error;
       if (!c.isConnected || Ayna.uid !== uid) return;
