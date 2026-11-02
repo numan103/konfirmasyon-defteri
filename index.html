@@ -18322,6 +18322,23 @@ function renderAlfaPortfoy2() {
   document.getElementById('page-portfoy').classList.toggle('ap2-viewer', !siteIsAdmin());
   if (!siteIsAdmin() && ap2ReadOnlyLoaded && (!ap2ReadOnly || !ap2CloudData || ap2CloudData.v !== 2)) return;
   var _resetBtn = document.getElementById('ap2-reset'); if (_resetBtn) _resetBtn.style.display = siteIsAdmin() ? '' : 'none';
+  // Admin yeni cihazda (telefon): lokal veri bossa cloud'dan al.
+  if (siteIsAdmin() && !(ap2Data.positions || []).length && !ap2ReadOnlyLoaded) {
+    ap2ReadOnlyLoaded = true;
+    ap2FetchCloud(true).then(function(d) {
+      if (d && Array.isArray((d.data || d).positions) && (d.data || d).positions.length) {
+        ap2Data = JSON.parse(JSON.stringify(d.data || d));
+        if (ap2Data.startBalance == null) ap2Data.startBalance = 1000;
+        (ap2Data.positions || []).forEach(function(p) { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; });
+        if (!Array.isArray(ap2Data.sells)) ap2Data.sells = [];
+        if (Array.isArray(d.ideas)) ap2Ideas = d.ideas;
+        try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {}
+      }
+      ap2ReadOnlyLoaded = false;
+      renderAlfaPortfoy2();
+    }).catch(function() { ap2ReadOnlyLoaded = false; renderAlfaPortfoy2(); });
+    return;
+  }
   if (!siteIsAdmin() && !ap2ReadOnlyLoaded) {
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = false;
@@ -26096,7 +26113,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b152';
+const APP_BUILD = 'b153';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
