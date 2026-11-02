@@ -15,7 +15,10 @@ function hydration(local, remote) {
     ap2FetchCloud: async () => remote,
     ap2SyncCloud: async () => { writes++; },
     renderAlfaPortfoy2: () => { renders++; }, ap2LoadPrices: () => {},
-    document: { getElementById: () => ({ textContent: '' }) }
+    document: {
+      getElementById: () => ({ textContent: '', appendChild() {} }),
+      createElement: () => ({}), createTextNode: () => ({})
+    }
   });
   vm.runInContext(html.slice(html.indexOf('let ap2ReadOnlyLoaded ='), html.indexOf("let ap2Filter =")), ctx);
   return { ctx, storage, writes: () => writes, renders: () => renders };
@@ -45,6 +48,37 @@ test('legacy injected ETH seed is never displayed as a current portfolio', async
   assert.equal(h.renders(), 0);
   assert.equal(h.writes(), 0);
   assert.ok(!html.includes("localStorage.setItem('_ap_v',v)"));
+});
+test('failed server auth preserves and displays the real desktop copy read-only', async () => {
+  const local = { positions: [{ id: 'real-current', cost: 2180 }], sells: [] };
+  const h = hydration(local, null);
+  h.ctx.ap2FetchCloud = async () => { throw new Error('401'); };
+  await vm.runInContext('ap2Hydrate()', h.ctx);
+  assert.equal(h.ctx.ap2Data.positions[0].id, 'real-current');
+  assert.equal(vm.runInContext('ap2LocalPreview', h.ctx), true);
+  assert.equal(vm.runInContext('ap2CloudReady', h.ctx), false);
+  assert.equal(h.renders(), 1);
+  assert.equal(h.writes(), 0);
+});
+test('siteFetch refreshes an expired session and retries 401 only once', async () => {
+  let refreshes = 0;
+  const sent = [];
+  const ctx = vm.createContext({
+    AUTH: { client: { auth: {
+      getSession: async () => ({ data: { session: { access_token: 'old' } } }),
+      refreshSession: async () => { refreshes++; return { data: { session: { access_token: 'renewed' } } }; }
+    } } },
+    fetch: async (url, opts) => { sent.push(opts.headers.Authorization); return { status: sent.length === 1 ? 401 : 200 }; }
+  });
+  vm.runInContext(html.slice(html.indexOf('let siteRefreshPromise'), html.indexOf('function siteApplyAccess')), ctx);
+  const res = await vm.runInContext("siteFetch('/api/edu-shared?kind=portfolio')", ctx);
+  assert.equal(res.status, 200);
+  assert.equal(refreshes, 1);
+  assert.deepEqual(sent, ['Bearer old', 'Bearer renewed']);
+  sent.length = 0;
+  ctx.fetch = async (url, opts) => { sent.push(opts.headers.Authorization); return { status: 401 }; };
+  const failed = await vm.runInContext("siteFetch('/api/edu-shared?kind=portfolio')", ctx);
+  assert.equal(failed.status, 401); assert.equal(sent.length, 2);
 });
 test('rendering and quote refresh never save or fill positions', () => {
   const render = html.slice(html.indexOf('function renderAlfaPortfoy2()'), html.indexOf('async function ap2LoadPrices()'));

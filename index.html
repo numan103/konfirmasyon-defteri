@@ -12596,11 +12596,21 @@ function siteCanOpen(page) {
   return refUnlocked();
 }
 
-async function siteAccessToken() {
+let siteRefreshPromise = null;
+async function siteAccessToken(refresh) {
   try {
     if (!AUTH.client) return '';
     const r = await AUTH.client.auth.getSession();
-    return (r && r.data && r.data.session && r.data.session.access_token) || '';
+    var session = r && r.data && r.data.session;
+    if (refresh || (session && session.expires_at && session.expires_at * 1000 < Date.now() + 60000)) {
+      if (!siteRefreshPromise) {
+        siteRefreshPromise = AUTH.client.auth.refreshSession().finally(function() { siteRefreshPromise = null; });
+      }
+      const renewed = await siteRefreshPromise;
+      if (renewed.error) return '';
+      session = renewed.data && renewed.data.session;
+    }
+    return session && session.access_token || '';
   } catch (e) { return ''; }
 }
 
@@ -12616,7 +12626,16 @@ async function siteAuthHeaders(extra) {
 async function siteFetch(url, opts) {
   opts = Object.assign({}, opts || {});
   opts.headers = await siteAuthHeaders(opts.headers || {});
-  return fetch(url, opts);
+  var response = await fetch(url, opts);
+  // One retry only. Never replace a user session with an anonymous/admin key.
+  if (response.status === 401) {
+    var token = await siteAccessToken(true);
+    if (token) {
+      opts.headers = Object.assign({}, opts.headers, { Authorization: 'Bearer ' + token });
+      response = await fetch(url, opts);
+    }
+  }
+  return response;
 }
 
 function siteApplyAccess(j) {
@@ -13475,7 +13494,7 @@ function showPage(name, skipAnim) {
   if (name === 'indicators') renderIndicators();
   if (name === 'designer') renderDesigner();
   if (name === 'alfatrading') renderAlfaTrading();
-  if (name === 'portfoy') { ap2CloudReady = false; ap2ReadOnlyLoaded = false; ap2ReadOnly = false; renderAlfaPortfoy2(); }
+  if (name === 'portfoy') { ap2CloudReady = false; ap2LocalPreview = false; ap2ReadOnlyLoaded = false; ap2ReadOnly = false; renderAlfaPortfoy2(); }
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
@@ -17120,6 +17139,7 @@ let ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
 let ap2ReadOnly = false;
 let ap2ReadOnlyLoaded = false;
 let ap2CloudReady = false;
+let ap2LocalPreview = false;
 let ap2Hydrating = false;
 let ap2Revision = null;
 let ap2WriteQueue = Promise.resolve();
@@ -17135,6 +17155,17 @@ function ap2Status(text) {
     document.querySelector('#page-portfoy .ap2-hd').after(el);
   }
   el.textContent = text;
+}
+function ap2RetryButton() {
+  var status = document.getElementById('ap2-sync-status');
+  if (!status) return;
+  var button = document.createElement('button');
+  button.type = 'button'; button.className = 'btn'; button.textContent = 'Bağlantıyı yeniden dene';
+  button.onclick = function() {
+    ap2LocalPreview = false; ap2CloudReady = false; ap2ReadOnlyLoaded = false;
+    renderAlfaPortfoy2();
+  };
+  status.appendChild(document.createTextNode(' ')); status.appendChild(button);
 }
 async function ap2Hydrate() {
   if (ap2Hydrating) return;
@@ -17159,6 +17190,7 @@ async function ap2Hydrate() {
     ap2Ideas = Array.isArray(d.ideas) ? d.ideas : [];
     if (siteIsAdmin()) localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data));
     ap2CloudReady = true;
+    ap2LocalPreview = false;
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = !siteIsAdmin();
     ap2Status((siteIsAdmin() ? 'Yönetici · ' : 'Salt okunur · ') + 'Sunucuyla eşitlendi · ' + new Date(ap2Revision).toLocaleString('tr-TR'));
@@ -17166,7 +17198,16 @@ async function ap2Hydrate() {
     ap2LoadPrices();
   } catch(e) {
     ap2CloudReady = false;
-    ap2Status('Portföy gösterilemiyor: ' + e.message + ' Yeniden denemek için sayfaya tekrar gir.');
+    ap2LocalPreview = siteIsAdmin() && !ap2LegacySeed(local) && Array.isArray(local.positions) && local.positions.length > 0;
+    if (ap2LocalPreview) {
+      ap2Data = local;
+      ap2ReadOnly = true;
+      renderAlfaPortfoy2();
+      ap2Status('Bu bilgisayardaki portföy gösteriliyor; sunucuyla eşitlenmedi. Diğer cihazlara henüz aktarılmadı. ' + e.message);
+    } else {
+      ap2Status('Portföy yüklenemedi: ' + e.message);
+    }
+    ap2RetryButton();
   } finally { ap2Hydrating = false; }
 }
 let ap2Filter = 'all';
@@ -17370,7 +17411,7 @@ async function ap2FetchCloud(force) {
   if (ap2CloudLoading) return ap2CloudLoading;
   ap2CloudLoading = (async function() {
     var r = await siteFetch('/api/edu-shared?kind=portfolio', { cache: 'no-store' });
-    if (!r.ok) throw new Error('Sunucu bağlantısı başarısız (' + r.status + ').');
+    if (!r.ok) throw new Error(r.status === 401 ? 'Oturum doğrulanamadı. Hesabına yeniden giriş yapman gerekiyor; yerel veriler korunuyor.' : 'Sunucu bağlantısı başarısız (' + r.status + ').');
     var result = await r.json();
     ap2Revision = result.revision; ap2CloudData = result.data;
     return ap2CloudData;
@@ -18377,7 +18418,7 @@ function ap2ResetAll() {
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
-  if (!ap2CloudReady) {
+  if (!ap2CloudReady && !ap2LocalPreview) {
     var layout = document.querySelector('#page-portfoy .ap2-layout');
     if (layout) layout.style.display = 'none';
     ['ap2-empty', 'ap2-add', 'ap2-reset', 'ap2-trades', 'ap2-sell-hist', 'ap2-monthly'].forEach(function(id) {
@@ -18386,10 +18427,10 @@ function renderAlfaPortfoy2() {
     ap2Hydrate();
     return;
   }
-  document.getElementById('page-portfoy').classList.toggle('ap2-viewer', !siteIsAdmin());
-  var addBtn = document.getElementById('ap2-add'); if (addBtn) addBtn.style.display = siteIsAdmin() ? '' : 'none';
+  document.getElementById('page-portfoy').classList.toggle('ap2-viewer', !siteIsAdmin() || ap2LocalPreview);
+  var addBtn = document.getElementById('ap2-add'); if (addBtn) addBtn.style.display = siteIsAdmin() && !ap2LocalPreview ? '' : 'none';
   if (!siteIsAdmin() && ap2ReadOnlyLoaded && (!ap2ReadOnly || !ap2CloudData || ap2CloudData.v !== 2)) return;
-  var _resetBtn = document.getElementById('ap2-reset'); if (_resetBtn) _resetBtn.style.display = siteIsAdmin() ? '' : 'none';
+  var _resetBtn = document.getElementById('ap2-reset'); if (_resetBtn) _resetBtn.style.display = siteIsAdmin() && !ap2LocalPreview ? '' : 'none';
   if (!siteIsAdmin() && !ap2ReadOnlyLoaded) {
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = false;
@@ -26166,7 +26207,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b154';
+const APP_BUILD = 'b155';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
