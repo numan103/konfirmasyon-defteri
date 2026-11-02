@@ -1060,12 +1060,13 @@
   /* --- Giriş / Kayıt ekranı --- */
   #auth-gate {
     display: none; position: fixed; inset: 0; z-index: 200;
-    background: var(--bg); padding: 20px; overflow-y: auto;
+    background: radial-gradient(ellipse at 50% 0%, rgba(123,120,245,.08), transparent 60%), var(--bg);
+    padding: 20px; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   #auth-gate.open { display: flex; }
-  .auth-box { margin: auto; width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 24px; }
+  .auth-box { margin: auto; width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.18); padding: 30px 26px; }
   .auth-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 4px; }
   .auth-brand .logo-mark {
     width: 38px; height: 38px; border-radius: 10px; background: var(--pc); color: #fff;
@@ -1073,38 +1074,46 @@
   }
   .auth-brand h1 { font-size: 18px; font-weight: 700; }
   .auth-brand .sub { font-size: 12px; color: var(--text-3); font-weight: 500; }
-  .auth-tabs { display: flex; gap: 6px; margin: 20px 0 16px; background: var(--seg-bg); padding: 4px; border-radius: 11px; }
+  .auth-tabs { display: flex; gap: 6px; margin: 20px 0 18px; background: var(--seg-bg); padding: 4px; border-radius: 12px; }
   .auth-tabs button {
-    flex: 1; border: none; background: transparent; padding: 9px 0; border-radius: 8px;
+    flex: 1; border: none; background: transparent; padding: 10px 0; border-radius: 9px;
     font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--text-2); cursor: pointer;
+    transition: background .15s, color .15s;
   }
-  .auth-tabs button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(23,25,35,0.08); }
+  .auth-tabs button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(23,25,35,0.1); }
   .auth-tabs.hidden + #auth-form { margin-top: 22px; }
-  .auth-field { margin-bottom: 12px; }
+  .auth-field { margin-bottom: 14px; }
   .auth-field label {
     display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
     color: var(--text-3); text-transform: uppercase; margin-bottom: 6px;
   }
   .auth-field input {
-    width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px;
-    padding: 11px 12px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text);
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 11px;
+    padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text);
+    transition: border-color .15s, box-shadow .15s;
   }
-  .auth-field input:focus { outline: 2px solid var(--pc); border-color: transparent; }
-  .auth-remember { display: flex; align-items: center; gap: 8px; margin: -2px 0 14px; cursor: pointer; font-size: 13px; color: var(--text-2); user-select: none; }
+  .auth-field input:focus { outline: none; border-color: var(--pc); box-shadow: 0 0 0 3px rgba(99,91,255,.15); }
+  .auth-pass-wrap { position: relative; }
+  .auth-pass-wrap input { padding-right: 74px; }
+  .auth-pass-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; color: var(--text-3); cursor: pointer; }
+  .auth-pass-toggle:hover { color: var(--pc); border-color: var(--pc); }
+  .auth-remember { display: flex; align-items: center; gap: 8px; margin: -2px 0 16px; cursor: pointer; font-size: 13px; color: var(--text-2); user-select: none; }
   .auth-remember input { width: 16px; height: 16px; accent-color: var(--pc); cursor: pointer; }
   .auth-submit {
-    width: 100%; background: var(--pc); border: none; color: #fff; border-radius: 10px;
-    padding: 12px 0; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
-    cursor: pointer; margin-top: 4px;
+    width: 100%; background: var(--pc); border: none; color: #fff; border-radius: 11px;
+    padding: 13px 0; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
+    cursor: pointer; margin-top: 6px; transition: background .15s, transform .1s;
   }
   .auth-submit:hover { background: #4c4cc4; }
+  .auth-submit:active { transform: translateY(1px); }
   .auth-submit:disabled { opacity: 0.6; cursor: default; }
-  .auth-alt { display: flex; justify-content: center; gap: 14px; margin-top: 12px; }
+  .auth-alt { display: flex; justify-content: center; gap: 14px; margin-top: 14px; }
   .auth-link { background: transparent; border: none; color: var(--pc); font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 2px; }
   .auth-link:hover { text-decoration: underline; }
-  .auth-msg { font-size: 12.5px; line-height: 1.5; margin-top: 10px; min-height: 16px; text-align: center; }
+  .auth-msg { font-size: 12.5px; line-height: 1.5; margin-top: 12px; min-height: 18px; text-align: center; }
   .auth-msg.err { color: var(--red); }
   .auth-msg.ok { color: var(--green); }
+  .auth-note { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-3); text-align: center; line-height: 1.5; }
   .hidden { display: none !important; }
   /* Başlıktaki kullanıcı rozeti */
   .tophead-inner { justify-content: space-between; }
@@ -1457,15 +1466,15 @@
   #auth-gate .auth-box { position: relative; }
   .auth-x { position: absolute; top: 12px; right: 14px; background: transparent; border: none; font-size: 22px; line-height: 1; color: var(--text-3); cursor: pointer; padding: 4px; }
   .auth-x:hover { color: var(--text); }
-  .auth-pricing { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .auth-pricing { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .auth-price { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 12px; text-align: center; }
   .auth-price.featured { border-color: var(--pc); background: rgba(99,91,255,.06); }
-  .auth-price-name { font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
-  .auth-price-val { font-size: 22px; font-weight: 800; }
+  .auth-price-name { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .auth-price-val { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
   .auth-price-val .auth-price-free { color: var(--green); }
   .auth-price-val span { font-size: 12px; color: var(--text-3); font-weight: 600; }
-  .auth-price-desc { font-size: 11px; color: var(--text-3); margin-top: 4px; line-height: 1.4; }
-  .auth-price-badge { display: inline-block; background: var(--pc); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-bottom: 6px; }
+  .auth-price-desc { font-size: 11px; color: var(--text-3); margin-top: 6px; line-height: 1.4; }
+  .auth-price-badge { display: inline-block; background: var(--pc); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; margin-bottom: 6px; }
   @media (max-width: 400px) { .auth-pricing { grid-template-columns: 1fr; } }
   .daily-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
   @media (min-width: 820px) { .daily-grid { grid-template-columns: 1fr 1fr; } .dg-full { grid-column: 1 / -1; } }
@@ -4939,7 +4948,7 @@
       <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
       <div>
         <h1>Alfa Traders</h1>
-        <div class="sub">Trader'lar için Disiplin Aracı</div>
+        <div class="sub">Disiplinli trading için çalışma alanı</div>
       </div>
     </div>
     <div class="auth-tabs">
@@ -4957,7 +4966,10 @@
       </div>
       <div class="auth-field" id="f-pass">
         <label for="au-pass" data-i18n="auth.pass">Şifre</label>
-        <input type="password" id="au-pass" placeholder="En az 6 karakter" data-i18n-ph="auth.passPh" autocomplete="current-password" minlength="6">
+        <div class="auth-pass-wrap">
+          <input type="password" id="au-pass" placeholder="En az 6 karakter" data-i18n-ph="auth.passPh" autocomplete="current-password" minlength="6">
+          <button type="button" class="auth-pass-toggle" id="au-pass-toggle" aria-label="Şifreyi göster" tabindex="-1">Göster</button>
+        </div>
       </div>
       <label class="auth-remember" id="f-remember" title="Bu cihazda seni hatırlayalım" data-i18n-title="auth.remember">
         <input type="checkbox" id="au-remember" checked>
@@ -4972,17 +4984,18 @@
     </form>
     <div class="auth-pricing">
       <div class="auth-price">
-        <div class="auth-price-name">Ücretsiz</div>
+        <div class="auth-price-name">Ücretsiz Üye</div>
         <div class="auth-price-val"><span class="auth-price-free">$0</span></div>
-        <div class="auth-price-desc">Calculator, takvim ve önizlemeler</div>
+        <div class="auth-price-desc">Calculator, takvim ve portföy özeti</div>
       </div>
       <div class="auth-price featured">
-        <div class="auth-price-badge">En popüler</div>
+        <div class="auth-price-badge">Tam erişim</div>
         <div class="auth-price-name">Premium</div>
         <div class="auth-price-val">$0<span>/ aidat yok</span></div>
-        <div class="auth-price-desc">Referans doğrulamasıyla erişim</div>
+        <div class="auth-price-desc">Referans doğrulamasıyla açılır</div>
       </div>
     </div>
+    <p class="auth-note">Abonelik ücreti alınmaz. Premium, referans doğrulamasıyla açılır; portföy özeti herkese açıktır.</p>
   </div>
 </div>
 
@@ -5032,7 +5045,7 @@
 
 <div class="wrap">
 <div id="tier-banner" style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.03));font-size:12.5px;color:var(--text);">
-  <span>🔒 Kısıtlı erişim: işlem kanalı, eğitim ve portföy detayları referans doğrulamasıyla açılır.</span>
+  <span>🔒 Kısıtlı erişim — işlem kanalı, eğitim ve portföy detayları referans doğrulamasıyla açılır. Portföy özeti herkese açıktır.</span>
   <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Referansla aç</button>
 </div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
@@ -12764,6 +12777,12 @@ function applyTierUi() {
     }
     g.style.display = any ? '' : 'none';
   });
+  const homeSub = document.querySelector('.home-sub');
+  if (homeSub) {
+    if (isAdmin) homeSub.textContent = 'Yönetici görünümü — tüm modüller ve onay panelleri açık.';
+    else if (ref) homeSub.textContent = 'Premium erişim açık — tüm araçlar kullanılabilir.';
+    else homeSub.textContent = 'Temel araçlar ve paylaşılan portföy özeti. Premium, referans doğrulamasıyla açılır.';
+  }
   bindAccessForm();
 }
 
@@ -13566,14 +13585,14 @@ async function renderHomeChannel() {
     const ok = posts.filter(function (p) { return p.type === 'islem' && p.status === 'tp'; });
     posts = (ok.length ? ok : posts.filter(function (p) { return p.type === 'islem'; })).slice(0, 3);
     if (!posts.length) {
-      box.innerHTML = '<div class="hd-empty">Islem kanali premium uyelere acik. Son guncellemeleri ve analizleri gormek icin premium\'a gec.</div>';
+      box.innerHTML = '<div class="hd-empty">İşlem kanalı premium üyelere açık. Son güncellemeleri ve analizleri görmek için premium\'a gec.</div>';
       return;
     }
   } else {
     posts = posts.slice(0, 3);
   }
   if (!posts.length) {
-    box.innerHTML = '<div class="hd-empty">Henuz paylasim yok.</div>';
+    box.innerHTML = '<div class="hd-empty">Henüz paylaşım yok.</div>';
     return;
   }
   box.innerHTML = posts.map(function (p) {
@@ -25074,6 +25093,15 @@ function bootAuth() {
   $('hero-register').addEventListener('click', () => openAuth('register'));
   $('cta-register').addEventListener('click', () => openAuth('register'));
   $('auth-close').addEventListener('click', () => { hideGate(); });
+  const passToggle = document.getElementById('au-pass-toggle');
+  if (passToggle) passToggle.addEventListener('click', function () {
+    const inp = $('au-pass');
+    if (!inp) return;
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    passToggle.textContent = show ? 'Gizle' : 'Göster';
+    passToggle.setAttribute('aria-label', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+  });
   $('btn-logout').addEventListener('click', async () => {
     const to = (p, ms) => Promise.race([Promise.resolve(p).then(v => ({ v })), new Promise(r => setTimeout(() => r({ t: true }), ms))]);
     await to(pushCloud(), 1500);
@@ -26163,7 +26191,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b161';
+const APP_BUILD = 'b162';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
