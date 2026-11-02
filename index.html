@@ -17149,23 +17149,8 @@ function ap2LegacySeed(data) {
     && String(data.lastUpdate || '2026-09-05').slice(0, 10) <= '2026-09-05';
 }
 function ap2Status(text) {
-  var el = document.getElementById('ap2-sync-status');
-  if (!el) {
-    el = document.createElement('p'); el.id = 'ap2-sync-status'; el.setAttribute('role', 'status');
-    document.querySelector('#page-portfoy .ap2-hd').after(el);
-  }
-  el.textContent = text;
-}
-function ap2RetryButton() {
-  var status = document.getElementById('ap2-sync-status');
-  if (!status) return;
-  var button = document.createElement('button');
-  button.type = 'button'; button.className = 'btn'; button.textContent = 'Bağlantıyı yeniden dene';
-  button.onclick = function() {
-    ap2LocalPreview = false; ap2CloudReady = false; ap2ReadOnlyLoaded = false;
-    renderAlfaPortfoy2();
-  };
-  status.appendChild(document.createTextNode(' ')); status.appendChild(button);
+  var el = document.querySelector('#page-portfoy .ap2-hd-sub');
+  if (el) el.textContent = text;
 }
 async function ap2Hydrate() {
   if (ap2Hydrating) return;
@@ -17188,12 +17173,13 @@ async function ap2Hydrate() {
     }
     ap2Data = JSON.parse(JSON.stringify(d.data || d));
     ap2Ideas = Array.isArray(d.ideas) ? d.ideas : [];
+    try { localStorage.setItem(AP2_HIST_KEY, JSON.stringify(Array.isArray(d.history) ? d.history : [])); } catch(e) {}
     if (siteIsAdmin()) localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data));
     ap2CloudReady = true;
     ap2LocalPreview = false;
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = !siteIsAdmin();
-    ap2Status((siteIsAdmin() ? 'Yönetici · ' : 'Salt okunur · ') + 'Sunucuyla eşitlendi · ' + new Date(ap2Revision).toLocaleString('tr-TR'));
+    ap2Status(siteIsAdmin() ? 'Pozisyonların, emirlerin ve satış geçmişin.' : 'Yöneticinin paylaştığı portföy · Salt okunur');
     renderAlfaPortfoy2();
     ap2LoadPrices();
   } catch(e) {
@@ -17203,11 +17189,10 @@ async function ap2Hydrate() {
       ap2Data = local;
       ap2ReadOnly = true;
       renderAlfaPortfoy2();
-      ap2Status('Bu bilgisayardaki portföy gösteriliyor; sunucuyla eşitlenmedi. Diğer cihazlara henüz aktarılmadı. ' + e.message);
+      ap2Status('Bu cihazdaki kopya · Sunucuyla eşitleme bekleniyor.');
     } else {
       ap2Status('Portföy yüklenemedi: ' + e.message);
     }
-    ap2RetryButton();
   } finally { ap2Hydrating = false; }
 }
 let ap2Filter = 'all';
@@ -17401,7 +17386,7 @@ function ap2SyncCloud() {
     }
     var result = await r.json();
     ap2Revision = result.revision; ap2CloudData = data;
-    ap2Status('Sunucuya kaydedildi · tüm cihazlarda aynı portföy.');
+    ap2Status('Pozisyonların, emirlerin ve satış geçmişin.');
   });
   ap2WriteQueue = job.catch(function() {});
   return job;
@@ -26207,7 +26192,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b155';
+const APP_BUILD = 'b156';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

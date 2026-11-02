@@ -9,13 +9,14 @@ function hydration(local, remote) {
   const storage = new Map();
   let writes = 0, renders = 0;
   const ctx = vm.createContext({
-    ap2Data: local, ap2Ideas: [], AP2_KEY: 'fund',
+    ap2Data: local, ap2Ideas: [], AP2_KEY: 'fund', AP2_HIST_KEY: 'fund-history',
     siteIsAdmin: () => true,
     localStorage: { setItem: (k, v) => storage.set(k, v) },
     ap2FetchCloud: async () => remote,
     ap2SyncCloud: async () => { writes++; },
     renderAlfaPortfoy2: () => { renders++; }, ap2LoadPrices: () => {},
     document: {
+      querySelector: () => ({ textContent: '' }),
       getElementById: () => ({ textContent: '', appendChild() {} }),
       createElement: () => ({}), createTextNode: () => ({})
     }
@@ -25,12 +26,13 @@ function hydration(local, remote) {
 }
 test('nonempty stale phone cache is replaced by server data without a write', async () => {
   const local = { positions: [{ id: 'old' }] };
-  const remote = { v: 2, positions: [{ id: 'new', cost: 2180 }], sells: [], cash: 400 };
+  const remote = { v: 2, positions: [{ id: 'new', cost: 2180 }], sells: [], cash: 400, history: [{d:'2026-11-02',v:1200}] };
   const h = hydration(local, remote);
   await vm.runInContext('ap2Hydrate()', h.ctx);
   assert.equal(h.ctx.ap2Data.positions[0].id, 'new');
   assert.equal(h.writes(), 0);
   assert.equal(h.renders(), 1);
+  assert.deepEqual(JSON.parse(h.storage.get('fund-history')), remote.history);
   assert.equal(JSON.parse(h.storage.get('alfa-fund-recovery-v1')).positions[0].id, 'old');
 });
 test('empty shared portfolio loads once, not an infinite hydration loop', async () => {
@@ -86,6 +88,8 @@ test('rendering and quote refresh never save or fill positions', () => {
   const prices = html.slice(html.indexOf('async function ap2LoadPrices()'), html.indexOf('function ap2ShareMonthlyStrip()'));
   assert.ok(!prices.includes('ap2Save()'));
   assert.ok(!prices.includes('ap2FillsCheck()'));
+  assert.ok(!html.includes('function ap2RetryButton'));
+  assert.ok(!html.includes("el.id = 'ap2-sync-status'"));
 });
 
 function response() {
