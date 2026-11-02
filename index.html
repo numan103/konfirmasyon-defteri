@@ -5332,14 +5332,13 @@
         <a href="?page=trading" data-nav data-ref-only>📉 Terminal</a>
         <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
         <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
-        <a href="?page=portfoy" data-nav data-ref-only>💼 Portföy</a>
+        <a href="?page=portfoy" data-nav>💼 Portföy</a>
       </div>
       <div class="home-teaser" id="home-teaser" hidden>
         <div class="ht-head">
-          <h2>💼 Portföy — Son Kapanan İşlemler</h2>
+          <h2>💼 Paylaşılan Portföy</h2>
           <span class="ht-sub" id="ht-sub">Portföy yönetimi (paylaşımlı) — işlem kanalından ayrı, salt okunur</span>
         </div>
-        <div class="ht-chart-wrap"><canvas id="ht-chart" width="600" height="120"></canvas></div>
         <div class="ht-list" id="ht-list"><div class="hd-empty">Yükleniyor…</div></div>
         <div class="ht-cta" id="ht-cta">
           <span>Tüm portföy, açık pozisyonlar ve detaylar için</span>
@@ -12587,6 +12586,7 @@ function refUnlocked() { return siteIsAdmin() || SITE.tier === 'ref'; }
 function sitePageTier(page) { return PAGE_TIER[page] || 'free'; }
 
 function siteCanOpen(page) {
+  if (page === 'portfoy') return true; // Summary is free; position data stays server-gated.
   if (page === 'mentoring') {
     try { return mtAllowed(); } catch (e) { return siteIsAdmin(); }
   }
@@ -12683,7 +12683,8 @@ function applyTierUi() {
   const ref = refUnlocked();
   Object.keys(PAGE_TIER).forEach(function (p) {
     let ok;
-    if (p === 'mentoring') ok = siteCanOpen('mentoring');
+    if (p === 'portfoy') ok = true;
+    else if (p === 'mentoring') ok = siteCanOpen('mentoring');
     else {
       const need = PAGE_TIER[p];
       ok = need === 'free' || (need === 'ref' ? ref : isAdmin);
@@ -13511,69 +13512,14 @@ async function renderHomeTeaser() {
   if (ref) return;
   const sub = document.getElementById('ht-sub');
   const list = document.getElementById('ht-list');
-  const chart = document.getElementById('ht-chart');
   let d = null;
-  try { d = await ap2FetchCloud(false); } catch (e) {}
-  if (!d) { try { d = await ap2FetchCloud(true); } catch (e) {} }
+  try { d = await ap2FetchSummary(); } catch (e) {}
   if (!d) {
     if (list) list.innerHTML = '<div class="hd-empty">Önizleme verisi yüklenemedi.</div>';
     return;
   }
-  const sells = Array.isArray(d.sells) ? d.sells : [];
-  const now = Date.now();
-  const weekMs = 7 * 24 * 3600 * 1000;
-  let recent = sells.filter(function (sl) {
-    const t = Number(sl.ts) || (sl.date ? new Date(sl.date).getTime() : 0);
-    return t && (now - t) <= weekMs;
-  }).sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); }).slice(0, 6);
-  if (!recent.length) {
-    recent = sells.slice().sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); }).slice(0, 5);
-  }
-  if (list) {
-    list.innerHTML = recent.length ? recent.map(function (sl) {
-      const profit = Number(sl.profit != null ? sl.profit : sl.pnl);
-      const hasP = isFinite(profit);
-      return '<div class="hd-row"><span class="hd-sym">' + (sl.symbol || '—') + '</span><span class="hd-mut">' + (sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '')) + '</span><span class="hd-amt ' + (hasP ? (profit >= 0 ? 'pos' : 'neg') : '') + '" style="margin-left:auto;">' + (hasP ? (profit >= 0 ? '+' : '') + ap2Fmt(profit) : ap2Fmt(sl.amount)) + '</span></div>';
-    }).join('') : '<div class="hd-empty">Bu hafta kapanan işlem yok.</div>';
-  }
-  if (sub) {
-    const pnl = Number(d.pnl || 0);
-    const pv = Number(d.portfolioValue || 0);
-    const wkPnl = recent.reduce(function (a, sl) { const p = Number(sl.profit != null ? sl.profit : sl.pnl); return a + (isFinite(p) ? p : 0); }, 0);
-    const wkCount = recent.length;
-    sub.textContent = 'Portföy: ' + ap2Fmt(pv) + ' · Kümülatif K/Z: ' + (pnl >= 0 ? '+' : '') + ap2Fmt(pnl) + (wkCount ? ' · Son kapanan ' + wkCount + ' işlem: ' + (wkPnl >= 0 ? '+' : '') + ap2Fmt(wkPnl) : '');
-  }
-  if (chart) {
-    const ctx = chart.getContext('2d');
-    const hist = Array.isArray(d.history) ? d.history.slice(-30) : [];
-    const W = chart.width, H = chart.height;
-    ctx.clearRect(0, 0, W, H);
-    if (hist.length >= 2) {
-      const vals = hist.map(function (h) { return Number(h.v); });
-      const min = Math.min.apply(null, vals);
-      const max = Math.max.apply(null, vals);
-      const range = (max - min) || 1;
-      ctx.strokeStyle = '#7b78f5';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      vals.forEach(function (v, i) {
-        const x = (i / (vals.length - 1)) * (W - 20) + 10;
-        const y = H - 10 - ((v - min) / range) * (H - 20);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      ctx.lineTo(W - 10, H - 10);
-      ctx.lineTo(10, H - 10);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(123,120,245,.12)';
-      ctx.fill();
-    } else {
-      ctx.fillStyle = 'rgba(255,255,255,.35)';
-      ctx.font = '12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Grafik verisi yok', W / 2, H / 2);
-    }
-  }
+  if (list) list.innerHTML = ap2SummaryMarkup(d);
+  if (sub) sub.textContent = ap2SummaryCaption(d);
 }
 window.addEventListener('popstate', function (e) {
   try {
@@ -17077,31 +17023,47 @@ function renderPortfoy() {
 // Eski paylasilan kod (ALFA2024) ve localStorage izni kaldirildi: portfoy
 // erisimi artik referans dogrulamasindan (SITE.tier === 'ref') gelir.
 function ap2IsMember() { return refUnlocked(); }
-function ap2ShowGate() {
-  var gate = document.getElementById('ap2-gate');
-  var content = document.getElementById('ap2-gate-content');
-  if (gate) gate.classList.remove('hidden');
-  if (content) content.style.display = 'none';
-  ap2Load();
-  var positions = ap2Data.positions || [];
-  var teaser = document.getElementById('ap2-gate-teaser');
-  if (teaser) {
-    teaser.style.display = '';
-    if (positions.length) {
-      var sum = ap2Summary();
-      ap2RenderTeaserTarget({ portfolioValue: sum.portfolioValue, pnl: sum.pnl, pnlPct: sum.pnlPct, cash: sum.cash, count: sum.count, startBalance: sum.startBalance, totalValue: sum.totalValue, history: (function(){ try { return JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); } catch(e) { return []; } })() }, 'ap2-gt');
-    } else {
-      var gtTotal = document.getElementById('ap2-gt-total');
-      if (gtTotal) { gtTotal.textContent = 'Yükleniyor...'; }
-      var gtPnl = document.getElementById('ap2-gt-pnl');
-      if (gtPnl) { gtPnl.textContent = '—'; }
-      var gtPct = document.getElementById('ap2-gt-pct');
-      if (gtPct) { gtPct.textContent = '—'; }
-      ap2FetchCloud().then(function(d) {
-        if (d && d.portfolioValue) { ap2RenderTeaserTarget(d, 'ap2-gt'); }
-      });
-    }
+let ap2SummaryCache = null;
+let ap2SummaryRequest = null;
+async function ap2FetchSummary() {
+  if (ap2SummaryCache && Date.now() - ap2SummaryCache.at < 30000) return ap2SummaryCache.data;
+  if (ap2SummaryRequest) return ap2SummaryRequest;
+  ap2SummaryRequest = (async function() {
+    var r = await siteFetch('/api/edu-shared?kind=portfolio&view=summary', { cache: 'no-store' });
+    if (!r.ok) throw new Error('summary_unavailable');
+    var result = await r.json();
+    ap2SummaryCache = { at: Date.now(), data: result.summary };
+    return result.summary;
+  })();
+  try { return await ap2SummaryRequest; } finally { ap2SummaryRequest = null; }
+}
+function ap2SummaryCaption(d) {
+  var date = d.asOf ? new Date(d.asOf) : null;
+  return (d.live ? 'Güncel değerleme' : 'Son kayıtlı değerleme') + (date && !isNaN(date) ? ' · ' + date.toLocaleString('tr-TR') : '');
+}
+function ap2SummaryMarkup(d) {
+  var sign = d.pnl >= 0 ? '+' : '', cls = d.pnl >= 0 ? 'green' : 'red';
+  function cell(label, value, accent) {
+    return '<div class="ap2-sum-sm" data-accent="' + accent + '"><div class="ap2-sum-sm-lbl">' + label + '</div><div class="ap2-sum-sm-val">' + value + '</div></div>';
   }
+  return '<div class="ap2-sum-row">' + cell('Portföy toplamı', ap2Fmt(d.portfolioValue), 'pc') +
+    cell('Toplam kâr / zarar', sign + ap2Fmt(d.pnl), cls) +
+    cell('Toplam getiri', d.pnlPct == null ? '—' : sign + Number(d.pnlPct).toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + '%', cls) + '</div>';
+}
+function ap2ShowGate() {
+  document.getElementById('page-portfoy').classList.add('ap2-viewer');
+  document.querySelector('#page-portfoy .ap2-hd-actions').style.display = 'none';
+  document.querySelector('#page-portfoy .ap2-layout').style.display = 'none';
+  ['ap2-trades', 'ap2-sell-hist', 'ap2-monthly'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  var target = document.getElementById('ap2-empty');
+  target.style.display = '';
+  if (!target.querySelector('.ap2-sum-row')) target.textContent = 'Portföy özeti yükleniyor…';
+  ap2FetchSummary().then(function(d) {
+    if (ap2IsMember()) return;
+    if (!d) { target.textContent = 'Henüz paylaşılan portföy yok.'; return; }
+    ap2Status(ap2SummaryCaption(d));
+    target.innerHTML = ap2SummaryMarkup(d) + '<p>Açık pozisyonlar, emirler ve satış detayları premium üyeler içindir.</p><a href="?page=erisim" class="hd-link" onclick="showPage(\'erisim\');return false;">Referansını doğrula, premium erişimini aç →</a><p class="hint">Geçmiş performans gelecekteki getiriyi garanti etmez.</p>';
+  }).catch(function() { target.textContent = 'Portföy özeti şu an yüklenemedi.'; });
 }
 function ap2RenderPublicTeaser() {
   var el = document.getElementById('ap2-public-teaser');
@@ -18403,6 +18365,7 @@ function ap2ResetAll() {
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
+  document.querySelector('#page-portfoy .ap2-hd-actions').style.display = '';
   if (!ap2CloudReady && !ap2LocalPreview) {
     var layout = document.querySelector('#page-portfoy .ap2-layout');
     if (layout) layout.style.display = 'none';
@@ -20365,7 +20328,7 @@ function bindPortfoy() {
     }
   });
   setInterval(() => { if (bdTab === 'portfoy' && !document.hidden) pfLoadPrices(); }, 60000);
-  setInterval(() => { if (currentPage === 'portfoy' && !document.hidden) ap2LoadPrices(); }, 15000);
+  setInterval(() => { if (document.hidden) return; if (currentPage === 'portfoy') { if (ap2IsMember()) ap2LoadPrices(); else ap2ShowGate(); } else if (currentPage === 'home' && !refUnlocked()) renderHomeTeaser(); }, 15000);
   pfPlanApplyInputs();
   pfPlanRender();
 }
@@ -26192,7 +26155,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b156';
+const APP_BUILD = 'b157';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
