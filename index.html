@@ -18690,10 +18690,9 @@ function renderAlfaPortfoy2() {
 }
 let ap2Pricing = false;
 async function ap2LoadPrices() {
-  if (!siteIsAdmin()) return;
-  if (ap2Pricing) return;
   const positions = (ap2Data.positions || []).filter(p => p.type === 'kripto' && p.symbol);
   if (!positions.length) return;
+  if (ap2Pricing) return;
   ap2Pricing = true;
   const syms = [...new Set(positions.map(p => pfNorm(p.symbol)).filter(Boolean))];
   const cryptos = {};
@@ -18754,7 +18753,7 @@ async function ap2LoadPrices() {
       updated++;
     }
   });
-  if (updated > 0) ap2Save();
+  if (updated > 0 && siteIsAdmin()) ap2Save();
   ap2FillsCheck();
   ap2Pricing = false;
   renderAlfaPortfoy2();
@@ -26097,7 +26096,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b150';
+const APP_BUILD = 'b151';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
