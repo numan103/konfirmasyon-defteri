@@ -14,7 +14,8 @@ test('summary uses active positions and current quotes, excluding pending orders
   assert.equal(d.pnl, 50);
   assert.equal(d.pnlPct, 5);
   assert.equal(d.live, true);
-  assert.deepEqual(Object.keys(d).sort(), ['portfolioValue', 'pnl', 'pnlPct', 'asOf', 'live'].sort());
+  assert.equal(d.count, 1);
+  assert.deepEqual(Object.keys(d).sort(), ['portfolioValue', 'count', 'pnl', 'pnlPct', 'asOf', 'live'].sort());
 });
 test('quote failure is explicitly a saved valuation, not a live quote', () => {
   const d = summarizePortfolio({ startBalance: 1000, cash: 700, syncedAt: '2026-10-31', positions: [{ symbol: 'ETH', qty: 1, cost: 300, price: 250 }] }, {}, '2026-11-02');
@@ -38,6 +39,7 @@ test('new members receive aggregates, never portfolio details; writes remain for
     assert.equal(read.code, 200);
     assert.equal(read.body.summary.pnl, 200);
     assert.equal(read.body.summary.pnlPct, 20);
+    assert.equal(read.body.summary.count, 0);
     assert.ok(!JSON.stringify(read.body).includes('private'));
     assert.equal(read.body.data, undefined);
     assert.equal(read.body.revision, undefined);

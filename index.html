@@ -537,6 +537,10 @@
   #data-chart-wrap { width: 100%; overflow: hidden; }
   #data-chart { width: 100%; display: block; }
   .data-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 26px 10px; }
+  .data-empty.ap2-summary-only { text-align: left; color: var(--text-2); padding: 4px 0 8px; }
+  .data-empty.ap2-summary-only .ap2-sum-row { margin-bottom: 12px; }
+  .data-empty.ap2-summary-only p { margin: 10px 0 8px; }
+  .data-empty.ap2-summary-only .hd-link { display: inline-flex; align-items: center; min-height: 36px; margin-bottom: 6px; }
   .df-form { padding:4px 0; }
   .df-row { display:flex; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid var(--border); }
   .df-row .df-lbl { flex:none; width:72px; font-size:11.5px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.04em; }
@@ -4667,6 +4671,24 @@
   @media (max-width: 850px) { #landing .lp-section-nav { display: none; } #landing .lp-stories-intro { align-items: start; flex-direction: column; gap: 14px; } #landing .lp-stories-intro > p { max-width: 100%; } }
   @media (max-width: 640px) { #landing .lp-stories { padding: 56px 20px 0; } #landing .lp-photo-grid { grid-template-columns: 1fr; grid-template-rows: 360px 280px 280px; } #landing .lp-photo-main { grid-row: auto; } #landing .lp-photo-copy { padding: 24px; } #landing .lp-features .lp-reveal { transition-delay: 0ms; } }
   @media (prefers-reduced-motion: reduce) { #landing *, #landing *::before, #landing *::after { animation: none !important; transition: none !important; } #landing .lp-reveal { opacity: 1; transform: none; } }
+  /* Mobil: dokunma hedefleri en az ~36px (kucuk ama kullanilabilir) */
+  @media (max-width: 680px) {
+    .navbar .user-badge .logout { min-height: 38px; padding: 8px 12px; }
+    #tier-banner { padding: 10px 14px; }
+    #tier-banner-btn { min-height: 38px; padding: 8px 14px !important; }
+    .hd-link { display: inline-flex; align-items: center; min-height: 36px; }
+    #acc-link-okx, #acc-link-bybit { min-height: 38px; padding: 9px 14px !important; }
+    #ap2-chart-range button { min-height: 36px; padding: 6px 10px; }
+    .bd-eye-inline { min-width: 34px; min-height: 34px; }
+    #bd-catf, #bd-q, #bd-budget-in { min-height: 34px; }
+    .bd-qplus { min-width: 34px; min-height: 34px; }
+    .tv-acc-link a, .wl-add { display: inline-flex; align-items: center; min-height: 36px; padding: 7px 10px; }
+    .pano-room, .pano-apply { min-height: 36px; }
+    .pano-tools .pt, .pano-zoom { min-width: 34px; min-height: 34px; }
+    #pano-color, #pano-size { min-width: 34px; min-height: 34px; }
+    #landing .lp-explore { display: inline-flex; align-items: center; min-height: 40px; }
+    #landing .lp-photo-copy a { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 0; }
+  }
   </style>
   <script>
   // Portfolio data is loaded from the shared server record, never seeded here.
@@ -5006,7 +5028,7 @@
 
 <div class="wrap">
 <div id="tier-banner" style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.03));font-size:12.5px;color:var(--text);">
-  <span>🔒 Kısıtlı erişimdesin: işlem kanalı, portföy ve eğitim referans doğrulamasıyla açılır.</span>
+  <span>🔒 Kısıtlı erişim: işlem kanalı, eğitim ve portföy detayları referans doğrulamasıyla açılır.</span>
   <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Referansla aç</button>
 </div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
@@ -5269,6 +5291,17 @@
        <a id="home-diary-link" href="?page=ayna" data-nav hidden style="margin:12px 0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;">
          <strong>📓 Kişisel Günlük Asistan →</strong><br><span class="hint">Sana özel alanın: gününü planla, düşüncelerini kaydet, akşam küçük bir sonraki adım belirle.</span>
        </a>
+      <div class="home-teaser" id="home-teaser" hidden>
+        <div class="ht-head">
+          <h2>💼 Paylaşılan Portföy</h2>
+          <span class="ht-sub" id="ht-sub">Portföy yönetimi (paylaşımlı) — işlem kanalından ayrı, salt okunur</span>
+        </div>
+        <div class="ht-list" id="ht-list"><div class="hd-empty">Yükleniyor…</div></div>
+        <div class="ht-cta" id="ht-cta">
+          <span>Tüm portföy, açık pozisyonlar ve detaylar için</span>
+          <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:8px 16px;">Premium'a geç →</button>
+        </div>
+      </div>
        <div class="home-premium" style="margin:18px auto 6px;max-width:980px;padding:18px 20px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(123,120,245,.10),rgba(167,139,250,.04));">
          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
            <span style="font-size:22px;">⭐</span>
@@ -5281,8 +5314,8 @@
               <div style="font-size:12.5px;color:var(--text-3);">Canlı işlem paylaşımları, giriş/çıkış ve gerekçe.</div>
             </div>
             <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
-              <div style="font-weight:600;margin-bottom:4px;">💼 Portföy Yönetimi</div>
-              <div style="font-size:12.5px;color:var(--text-3);">Portföyünü takip et, ay ay birikim planı kur.</div>
+              <div style="font-weight:600;margin-bottom:4px;">💼 Portföy Detayları</div>
+              <div style="font-size:12.5px;color:var(--text-3);">Açık pozisyonlar, emirler ve satış geçmişi. Özet herkese açık.</div>
             </div>
             <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
               <div style="font-weight:600;margin-bottom:4px;">📊 Trading Terminali</div>
@@ -5328,22 +5361,11 @@
       <div class="home-quick" id="home-quick">
         <a href="?page=calc" data-nav>🧮 Calculator</a>
         <a href="?page=calendar" data-nav>📅 Takvim</a>
-        <a href="?page=butce" data-nav>💰 Gelir/Gider</a>
+        <a href="?page=butce" data-nav data-ref-only>💰 Gelir/Gider</a>
         <a href="?page=trading" data-nav data-ref-only>📉 Terminal</a>
         <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
         <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
         <a href="?page=portfoy" data-nav>💼 Portföy</a>
-      </div>
-      <div class="home-teaser" id="home-teaser" hidden>
-        <div class="ht-head">
-          <h2>💼 Paylaşılan Portföy</h2>
-          <span class="ht-sub" id="ht-sub">Portföy yönetimi (paylaşımlı) — işlem kanalından ayrı, salt okunur</span>
-        </div>
-        <div class="ht-list" id="ht-list"><div class="hd-empty">Yükleniyor…</div></div>
-        <div class="ht-cta" id="ht-cta">
-          <span>Tüm portföy, açık pozisyonlar ve detaylar için</span>
-          <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:8px 16px;">Premium'a geç →</button>
-        </div>
       </div>
       <div class="home-edu" id="home-edu">
         <div class="he-ico">🎓</div>
@@ -5356,7 +5378,7 @@
       <div class="home-channel" id="home-channel">
         <div class="hc2-head">
           <h2>📡 İşlem Kanalı — Son Güncellemeler</h2>
-          <a href="?page=alfatrading" class="hd-link" data-nav>İşlem kanalına git →</a>
+          <a href="?page=alfatrading" class="hd-link" data-nav data-ref-only>İşlem kanalına git →</a>
         </div>
         <div class="hc2-list" id="hc2-list"><div class="hd-empty">Yükleniyor…</div></div>
       </div>
@@ -5373,7 +5395,7 @@
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvAt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvAt)"/><rect x="30" y="30" width="100" height="56" rx="8" fill="var(--pc)" opacity=".18"/><rect x="40" y="40" width="80" height="8" rx="4" fill="var(--pc)" opacity=".5"/><rect x="40" y="56" width="60" height="8" rx="4" fill="var(--border)"/><rect x="150" y="20" width="120" height="76" rx="8" fill="var(--card)" stroke="var(--border)"/><rect x="160" y="30" width="100" height="8" rx="4" fill="var(--pc)" opacity=".4"/><rect x="160" y="46" width="80" height="8" rx="4" fill="var(--border)"/><rect x="160" y="62" width="90" height="8" rx="4" fill="var(--border)"/></svg></div>
           <div class="hc-body"><h2 data-i18n="hm.c13.t">📡 İşlem Kanalı</h2><p data-i18n="hm.c13.s">Canlı işlem paylaşımları, giriş/çıkış ve gerekçe.</p></div>
         </a>
-        <a href="?page=butce" class="home-card" data-nav>
+        <a href="?page=butce" class="home-card" data-nav data-ref-only>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvB)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-dasharray="126 170" transform="rotate(-90 105 54)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-dasharray="44 170" transform="rotate(60 105 54)" opacity=".85"/><text x="105" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">60%</text><text x="105" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">ELİMDE</text><circle cx="195" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="195" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="152 170" transform="rotate(-90 195 54)"/><circle cx="195" cy="54" r="27" fill="none" stroke="#f5a623" stroke-width="11" stroke-dasharray="64 170" transform="rotate(-20 195 54)"/><text x="195" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">35%</text><text x="195" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">AYLIK</text></svg></div>
           <div class="hc-body"><h2 data-i18n="hm.c10.t">💼 Gelir/Gider · Portföy &amp; Plan</h2><p data-i18n="hm.c10.s">Araçlarınla portföyünü takip et, ay ay birikim planı kur, hedefleri gör.</p></div>
         </a>
@@ -5400,7 +5422,7 @@
   <div id="page-trading" class="hidden">
     <div class="eg-brand" style="padding:2px 0 0;margin-bottom:0;"><span class="eg-brand-ico">📉</span><span class="eg-brand-name" style="font-size:17px;" data-i18n="pg.trading.t">Trading Terminali</span><span class="eg-brand-sub" data-i18n="pg.trading.s">Canlı grafik burada çalışır (giriş gerekmez). Hesabını/watchlist'ini bağlamak için aşağıdaki butonla TradingView'da giriş yap — aynı tarayıcıda girince widget otomatik tanır.</span><span class="tv-acc-link" style="margin-left:auto;"><a href="https://www.tradingview.com/accounts/signin/" target="_blank" rel="noopener" data-i18n="pg.trading.loginTv">🔑 TradingView'a giriş</a><a href="https://www.tradingview.com/" target="_blank" rel="noopener" class="ghost" data-i18n="pg.trading.openTv">TradingView'da aç</a></span></div>
     <div class="tv-wl">
-      <span class="wl-head">⭐ Watchlist</span>
+      <span class="wl-head" lang="en">⭐ Watchlist</span>
       <div class="wl-items" id="wl-items"></div>
       <span class="wl-empty" id="wl-empty">Boş — grafiğe eklediğin sembolü "＋" ile kaydet; her açışta burada kalır (giriş yaptıysan tüm cihazlarında).</span>
       <button type="button" class="wl-add" id="wl-add">＋ Grafikteki sembolü ekle</button>
@@ -5490,7 +5512,7 @@
     })();
     </script>
     <div class="tv-notes">
-      <div class="tv-notes-head">📝 Trading Notları</div>
+      <div class="tv-notes-head" lang="en">📝 Trading Notları</div>
       <textarea id="tv-notes-ta" placeholder="Önemli hatırlatmalarını buraya yaz — otomatik kaydedilir (ör. BTC 68k üstü manipülasyon riski, XAU 2400 direnci…)"></textarea>
     </div>
     <script>
@@ -5930,7 +5952,7 @@
     </div>
     <div class="panel" id="data-ai-panel">
       <h2 class="cat-h2" onclick="document.getElementById('data-ai-body').classList.toggle('open');this.querySelector('.df-toggle').classList.toggle('open');" style="cursor:pointer;">
-        <span data-i18n="pg.data.aiT">🧠 Trading Coach — YZ Analiz</span>
+        <span data-i18n="pg.data.aiT" lang="en">🧠 Trading Coach — YZ Analiz</span>
         <span class="df-toggle open">▼</span>
       </h2>
       <div id="data-ai-body" class="open" style="font-size:13px;color:var(--text-2);">
@@ -7075,7 +7097,7 @@
         </div>
         <div class="ap2-layout-right">
           <div class="ap2-donut-panel" id="ap2-donut-panel">
-            <div class="ap2-donut-header">Dagilim</div>
+            <div class="ap2-donut-header">Dağılım</div>
             <div class="ap2-donut-wrap">
               <svg id="ap2-donut-svg" viewBox="0 0 200 200" class="ap2-donut-svg"></svg>
               <div class="ap2-donut-center">
@@ -7111,10 +7133,6 @@
       <div id="ap2-trades" class="ap2-sell-hist" style="display:none">
         <h4 style="display:flex;align-items:center;gap:8px">Gerçekleşen İşlemler <span style="font-size:11px;font-weight:600;color:var(--text-3)" id="ap2-trades-total"></span></h4>
         <div id="ap2-trades-body"></div>
-      </div>
-      <div id="ap2-sell-hist" class="ap2-sell-hist" style="display:none">
-        <h4>Satis Gecmisi</h4>
-        <div id="ap2-sell-hist-body"></div>
       </div>
       <div class="ap2-monthly" id="ap2-monthly">
         <div class="ap2-monthly-head" id="ap2-monthly-head">
@@ -7344,14 +7362,14 @@
     <div id="onchain-grid" style="display:grid;gap:16px;padding:16px;max-width:1400px;margin:0 auto;">
       <div class="panel">
         <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <span>Coinglass Supercharts — Funding / CVD / OI</span>
+          <span lang="en">Coinglass Supercharts — Funding / CVD / OI</span>
           <a href="https://www.coinglass.com/tv/tr/Binance_BTCUSDT" target="_blank" rel="noopener noreferrer" class="btn" style="font-size:12px;padding:4px 12px;margin-left:auto;" data-i18n="pg.onchain.newTab">Yeni Sekmede Aç ↗</a>
         </h2>
         <iframe src="https://www.coinglass.com/tv/tr/Binance_BTCUSDT" style="width:100%;height:600px;border:none;border-radius:10px;background:var(--bg);" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
       </div>
       <div class="panel" style="text-align:center;">
         <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
-          <span>Aggr Trade — BTC CVD + Spot/Perp Delta + CB Premium</span>
+          <span lang="en">Aggr Trade — BTC CVD + Spot/Perp Delta + CB Premium</span>
         </h2>
         <p style="padding:8px 0 16px;color:var(--text-2);font-size:13px;" data-i18n="pg.onchain.blocked">Bu site iframe'i engelliyor. Yeni sekmede açın:</p>
         <a href="https://aggr.trade/btc-cvd-spot-perp-delta-cb-premium" target="_blank" rel="noopener noreferrer" class="btn" style="font-size:14px;padding:10px 24px;" data-i18n="pg.onchain.open">Aç ↗</a>
@@ -12693,6 +12711,16 @@ function applyTierUi() {
       const el = document.getElementById(pre + p);
       if (el) el.style.display = ok ? '' : 'none';
     });
+    // Mobil menude her baglantinin id'si yok; data-mnav ile de esle.
+    document.querySelectorAll('[data-mnav="' + p + '"]').forEach(function (el) {
+      el.style.display = ok ? '' : 'none';
+    });
+  });
+  // Uyelige gore portfoy adi: yonetici disindakiler paylasilan ozeti gorur.
+  const pfName = (ref || isAdmin) ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
+  ['tab-portfoy', 'mnav-portfoy'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = pfName;
   });
   // Erisim linki: dogrulanmamis kullanicida + yoneticide (onay paneli) gorunur
   const diaryLink = document.getElementById('home-diary-link');
@@ -12704,19 +12732,11 @@ function applyTierUi() {
   // Ust bilgi seridi (kisitli erisim)
   const banner = document.getElementById('tier-banner');
   if (banner) banner.style.display = (ref || isAdmin) ? 'none' : 'flex';
-  // Premium tanitim bandi: premium uyede "moduller" olarak, degilse "premium'a gec" olarak goster.
+  // Premium tanitim bandi yalnizca ucretsiz uyeye gorunur.
   const premiumBand = document.querySelector('.home-premium');
-  if (premiumBand) {
-    premiumBand.style.display = '';
-    const h2 = premiumBand.querySelector('h2');
-    if (h2) h2.textContent = ref ? 'Moduller - tum avantajlar acik' : "Premium'a gec, tum avantajlari ac";
-    const sub = premiumBand.querySelector('span[style*="margin-left:auto"]');
-    if (sub) sub.textContent = ref ? 'Referans dogrulamasiyla acildi' : 'Referans dogrulamasiyla ucretsiz acilir';
-    const cta = premiumBand.querySelector('div[style*="text-align:center"]');
-    if (cta) cta.style.display = ref ? 'none' : '';
-  }
-  // Ana sayfa modul kartlari: ref olmayan kullaniciya gizle
-  document.querySelectorAll('#page-home .home-card[data-ref-only]').forEach(function (a) { a.style.display = ref ? '' : 'none'; });
+  if (premiumBand) premiumBand.style.display = (ref || isAdmin) ? 'none' : '';
+  // Ana sayfa modul kartlari ve kilitli kisayollar: ref olmayan kullaniciya gizle
+  document.querySelectorAll('#page-home .home-card[data-ref-only], #home-quick [data-ref-only], #home-channel [data-ref-only]').forEach(function (a) { a.style.display = ref ? '' : 'none'; });
   // Tamami gizlenen acilir menuleri kapat
   document.querySelectorAll('.nav-drop').forEach(function (d) {
     const links = d.querySelectorAll('.drop-menu .nav-link');
@@ -16744,7 +16764,7 @@ let pfPrices = { usdTry: null, xauUsd: null, cryptos: {}, loadedAt: 0 };
 let pfPricing = false;
 let bdTab = 'defter';
 function pfNum(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
-function pfUsd(n) { return '$' + (pfNum(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function pfUsd(n) { const v = pfNum(n) || 0; return (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function pfTry(n) { const u = pfNum(pfPrices.usdTry); return (u !== null && n != null) ? u * n : null; }
 function pfAmtTl(n) { if (butceBlur) return '***'; const t = pfTry(n); return t === null ? '' : '≈ ' + t.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'; }
 function pfAmt(n) { return butceBlur ? '***' : pfUsd(n); }
@@ -17043,10 +17063,10 @@ function ap2SummaryCaption(d) {
 }
 function ap2SummaryMarkup(d) {
   var sign = d.pnl >= 0 ? '+' : '', cls = d.pnl >= 0 ? 'green' : 'red';
-  function cell(label, value, accent) {
-    return '<div class="ap2-sum-sm" data-accent="' + accent + '"><div class="ap2-sum-sm-lbl">' + label + '</div><div class="ap2-sum-sm-val">' + value + '</div></div>';
+  function cell(label, value, accent, sub) {
+    return '<div class="ap2-sum-sm" data-accent="' + accent + '"><div class="ap2-sum-sm-lbl">' + label + '</div><div class="ap2-sum-sm-val">' + value + '</div>' + (sub ? '<div class="ap2-sum-sm-sub">' + sub + '</div>' : '') + '</div>';
   }
-  return '<div class="ap2-sum-row">' + cell('Portföy toplamı', ap2Fmt(d.portfolioValue), 'pc') +
+  return '<div class="ap2-sum-row">' + cell('Portföy toplamı', ap2Fmt(d.portfolioValue), 'pc', d.count > 0 ? d.count + ' açık pozisyon' : '') +
     cell('Toplam kâr / zarar', sign + ap2Fmt(d.pnl), cls) +
     cell('Toplam getiri', d.pnlPct == null ? '—' : sign + Number(d.pnlPct).toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + '%', cls) + '</div>';
 }
@@ -17054,9 +17074,10 @@ function ap2ShowGate() {
   document.getElementById('page-portfoy').classList.add('ap2-viewer');
   document.querySelector('#page-portfoy .ap2-hd-actions').style.display = 'none';
   document.querySelector('#page-portfoy .ap2-layout').style.display = 'none';
-  ['ap2-trades', 'ap2-sell-hist', 'ap2-monthly'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  ['ap2-trades', 'ap2-monthly'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
   var target = document.getElementById('ap2-empty');
   target.style.display = '';
+  target.classList.add('ap2-summary-only');
   if (!target.querySelector('.ap2-sum-row')) target.textContent = 'Portföy özeti yükleniyor…';
   ap2FetchSummary().then(function(d) {
     if (ap2IsMember()) return;
@@ -17113,6 +17134,8 @@ function ap2LegacySeed(data) {
 function ap2Status(text) {
   var el = document.querySelector('#page-portfoy .ap2-hd-sub');
   if (el) el.textContent = text;
+  var title = document.querySelector('#page-portfoy .ap2-hd-title');
+  if (title) title.textContent = siteIsAdmin() ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
 }
 async function ap2Hydrate() {
   if (ap2Hydrating) return;
@@ -17677,6 +17700,15 @@ function ap2Summary() {
   return { totalValue, totalCost, cash, portfolioValue, pnl, pnlPct, startBalance, totalSellAmount, totalInvested: totalCost, count: positions.length, priced, sellCount: sells.length };
 }
 function ap2Fmt(n) { return pfAmt(n); }
+// Satislarda "yatirilan" tutar: satis hasilati eksi kâr. Eski kayitlarda cost
+// bazen birim maliyet, bazen toplam tutar oldugu icin bu yontem ikisinde de dogru.
+function ap2SellInvested(sl, profit) {
+  var amt = pfNum(sl && sl.amount), pf = pfNum(profit);
+  if (amt !== null && pf !== null) return Math.max(0, amt - pf);
+  var c = pfNum(sl && sl.cost), q = pfNum(sl && sl.qty);
+  if (c === null) return 0;
+  return q !== null ? c * q : c;
+}
 function ap2Id() { return 'ap2_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
 let ap2FormMode = 'tutar';
 let ap2FormSide = 'LONG';
@@ -18063,7 +18095,7 @@ function ap2RenderChart(hist) {
   var daysSince = firstDate ? Math.max(1, Math.round((Date.now()-firstDate)/864e5)) : 0;
   if (startEl) startEl.textContent = firstDate ? new Date(firstDate).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}) : '—';
   if (durEl) durEl.textContent = daysSince > 0 ? daysSince + ' gün' : '—';
-  if (cumEl) { cumEl.textContent = (sum.pnl>=0?'+':'') + pfPct(sum.pnlPct); cumEl.style.color = sum.pnl>=0?'var(--green)':'var(--red)'; }
+  if (cumEl) { cumEl.textContent = pfPct(sum.pnlPct); cumEl.style.color = sum.pnl>=0?'var(--green)':'var(--red)'; }
   var rangeSel = ap2ChartRange || 'all';
   var tlCh = ap2Timeline(hist);
   if (rangeSel === 'all' && tlCh.baseV !== null && tlCh.startDate) hist = [{ d: tlCh.startDate, v: tlCh.baseV }].concat(hist || []);
@@ -18369,7 +18401,7 @@ function renderAlfaPortfoy2() {
   if (!ap2CloudReady && !ap2LocalPreview) {
     var layout = document.querySelector('#page-portfoy .ap2-layout');
     if (layout) layout.style.display = 'none';
-    ['ap2-empty', 'ap2-add', 'ap2-reset', 'ap2-trades', 'ap2-sell-hist', 'ap2-monthly'].forEach(function(id) {
+    ['ap2-empty', 'ap2-add', 'ap2-reset', 'ap2-trades', 'ap2-monthly'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.style.display = 'none';
     });
     ap2Hydrate();
@@ -18460,7 +18492,7 @@ function renderAlfaPortfoy2() {
     var sum = ap2Summary();
     if (sumEl) sumEl.innerHTML =
       '<div class="ap2-sum-row">' +
-        '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Deger</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">$' + sum.startBalance + ' baslangic</div></div>' +
+        '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Değer</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">' + ap2Fmt(sum.startBalance) + ' başlangıç</div></div>' +
         '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '</div></div>' +
         '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Serbest USDT bakiyesi</div></div>' +
       '</div>';
@@ -18470,9 +18502,9 @@ function renderAlfaPortfoy2() {
       var diff = sum.portfolioValue - sum.startBalance;
       var diffPct = sum.startBalance > 0 ? diff / sum.startBalance * 100 : 0;
       growthEl.innerHTML =
-        '<div class="ap2-growth-cell"><span>Baslangic</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
-        '<div class="ap2-growth-cell"><span>Toplam Deger</span><b>' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
-        '<div class="ap2-growth-cell"><span>Buyume</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
+        '<div class="ap2-growth-cell"><span>Başlangıç</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
+        '<div class="ap2-growth-cell"><span>Toplam Değer</span><b>' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
+        '<div class="ap2-growth-cell"><span>Büyüme</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
         '<div class="ap2-growth-cell"><span>Serbest Bakiye</span><b>' + ap2Fmt(sum.cash) + '</b></div>';
     }
     var slices = [];
@@ -18483,23 +18515,7 @@ function renderAlfaPortfoy2() {
     try { var hist = JSON.parse(localStorage.getItem(AP2_HIST_KEY) || '[]'); ap2RenderChart(hist); } catch (e) { ap2RenderChart([]); }
     var rngBtns = document.querySelectorAll('#ap2-chart-range button');
     if (rngBtns.length) rngBtns.forEach(function(b) { b.classList.toggle('on', (b.getAttribute('data-ap2r') || 'all') === ap2ChartRange); });
-    var sellHistEl = document.getElementById('ap2-sell-hist');
-    var sellHistBody = document.getElementById('ap2-sell-hist-body');
     var sells = ap2Data.sells || [];
-    if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
-    if (sellHistBody && sells.length) {
-      sellHistBody.innerHTML = sells.slice().sort(function(a, b) { var ta = a.ts || (a.date ? new Date(a.date).getTime() : 0); var tb = b.ts || (b.date ? new Date(b.date).getTime() : 0); return tb - ta; }).map(function(sl) {
-        var d = sl.date || sl.posDate || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
-        var dDisp = d && d.match(/^\d{4}-\d{2}-\d{2}$/) ? new Date(d + 'T12:00:00').toLocaleDateString('tr-TR') : d;
-        var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
-        var pfCls = pf === 0 ? 'zero' : (pf > 0 ? 'pos' : 'neg');
-        return '<div class="ap2-sell-row">' +
-          '<span class="ap2-sell-sym">' + sl.symbol + '</span>' +
-          '<span class="ap2-sell-qty">' + sl.qty + ' \u00d7 ' + ap2Fmt(sl.price) + ' \u00b7 ' + dDisp + '</span>' +
-          '<span class="ap2-sell-val ' + pfCls + '">+' + ap2Fmt(sl.amount) + '<span class="ap2-sell-pf">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + '</span></span>' +
-        '</div>';
-    }).join('');
-    }
     var tradesEl = document.getElementById('ap2-trades');
     var tradesBody = document.getElementById('ap2-trades-body');
     var tradesTotal = document.getElementById('ap2-trades-total');
@@ -18510,7 +18526,8 @@ function renderAlfaPortfoy2() {
       var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
       tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
         var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
-        var pfPct = sl.cost > 0 ? (pf / (sl.qty * sl.cost) * 100) : 0;
+        var invested = ap2SellInvested(sl, pf);
+        var pfPct = invested > 0 ? (pf / invested * 100) : 0;
         var pfCls = pf >= 0 ? 'pos' : 'neg';
         var bgCol = symColors[sl.symbol] || '#3b82f6';
         var buyDate = sl.buyDate || '';
@@ -18522,7 +18539,7 @@ function renderAlfaPortfoy2() {
             '<div class="ap2-trade-dates">' + (buyDate ? buyDate + ' → ' : '') + sellDate + ' · ' + Number(sl.qty).toFixed(4) + ' adet</div>' +
           '</div>' +
           '<div class="ap2-trade-amt">' +
-            '<div class="ap2-trade-buy">' + ap2Fmt(sl.qty * sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
+            '<div class="ap2-trade-buy">' + ap2Fmt(invested) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
             '<div class="ap2-trade-pnl ' + pfCls + '">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + ' (' + (pfPct >= 0 ? '+' : '') + pfPct.toFixed(1) + '%)</div>' +
           '</div>' +
         '</div>';
@@ -18537,7 +18554,7 @@ function renderAlfaPortfoy2() {
   var sum = ap2Summary();
   sumEl.innerHTML =
     '<div class="ap2-sum-row">' +
-      '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Deger</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">$' + sum.startBalance + ' baslangic</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Değer</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">' + ap2Fmt(sum.startBalance) + ' başlangıç</div></div>' +
       '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '</div></div>' +
       '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Serbest USDT bakiyesi</div></div>' +
     '</div>';
@@ -18547,10 +18564,10 @@ function renderAlfaPortfoy2() {
     var diff = sum.portfolioValue - sum.startBalance;
     var diffPct = sum.startBalance > 0 ? diff / sum.startBalance * 100 : 0;
     growthEl.innerHTML =
-      '<div class="ap2-growth-cell"><span>Baslangic</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
-      '<div class="ap2-growth-cell"><span>Yatirilan</span><b>' + ap2Fmt(sum.totalInvested) + '</b></div>' +
-      '<div class="ap2-growth-cell"><span>Toplam Deger</span><b>' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
-      '<div class="ap2-growth-cell"><span>Buyume</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
+      '<div class="ap2-growth-cell"><span>Başlangıç</span><b>' + ap2Fmt(sum.startBalance) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Yatırılan</span><b>' + ap2Fmt(sum.totalInvested) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Toplam Değer</span><b>' + ap2Fmt(sum.portfolioValue) + '</b></div>' +
+      '<div class="ap2-growth-cell"><span>Büyüme</span><b class="' + (diff >= 0 ? 'pos' : 'neg') + '">' + (diff >= 0 ? '+' : '') + ap2Fmt(diff) + ' (' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%)</b></div>' +
       '<div class="ap2-growth-cell"><span>Serbest Bakiye</span><b>' + ap2Fmt(sum.cash) + '</b></div>';
   }
   var slices = [];
@@ -18626,23 +18643,7 @@ function renderAlfaPortfoy2() {
     '</div>';
   }).join('');
   if (q && positions.length && !shown.length) gridEl.innerHTML += '<div class="ap2-grid-empty">Aramayla eşleşen pozisyon yok — farklı bir sembol ya da kelime dene.</div>';
-  var sellHistEl = document.getElementById('ap2-sell-hist');
-  var sellHistBody = document.getElementById('ap2-sell-hist-body');
   var sells = ap2Data.sells || [];
-  if (sellHistEl) sellHistEl.style.display = sells.length ? '' : 'none';
-  if (sellHistBody && sells.length) {
-    sellHistBody.innerHTML = sells.slice().sort(function(a, b) { var ta = a.ts || (a.date ? new Date(a.date).getTime() : 0); var tb = b.ts || (b.date ? new Date(b.date).getTime() : 0); return tb - ta; }).map(function(sl) {
-      var d = sl.date || sl.posDate || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
-      var dDisp = d && d.match(/^\d{4}-\d{2}-\d{2}$/) ? new Date(d + 'T12:00:00').toLocaleDateString('tr-TR') : d;
-      var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
-      var pfCls = isNaN(pf) || pf === 0 ? 'zero' : (pf > 0 ? 'pos' : 'neg');
-      return '<div class="ap2-sell-row">' +
-        '<span class="ap2-sell-sym">' + sl.symbol + '</span>' +
-        '<span class="ap2-sell-qty">' + sl.qty + ' \u00d7 ' + ap2Fmt(sl.price) + ' \u00b7 ' + dDisp + '</span>' +
-        '<span class="ap2-sell-val ' + pfCls + '">+' + ap2Fmt(sl.amount) + '<span class="ap2-sell-pf">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + '</span></span>' +
-      '</div>';
-    }).join('');
-  }
   var tradesEl = document.getElementById('ap2-trades');
   var tradesBody = document.getElementById('ap2-trades-body');
   var tradesTotal = document.getElementById('ap2-trades-total');
@@ -18653,7 +18654,8 @@ function renderAlfaPortfoy2() {
     var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
     tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
       var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
-      var pfPct = sl.cost > 0 ? (pf / (sl.qty * sl.cost) * 100) : 0;
+      var invested = ap2SellInvested(sl, pf);
+      var pfPct = invested > 0 ? (pf / invested * 100) : 0;
       var pfCls = pf >= 0 ? 'pos' : 'neg';
       var bgCol = symColors[sl.symbol] || '#3b82f6';
       var buyDate = sl.buyDate || '';
@@ -18665,7 +18667,7 @@ function renderAlfaPortfoy2() {
           '<div class="ap2-trade-dates">' + (buyDate ? buyDate + ' → ' : '') + sellDate + ' · ' + Number(sl.qty).toFixed(4) + ' adet</div>' +
         '</div>' +
         '<div class="ap2-trade-amt">' +
-          '<div class="ap2-trade-buy">' + ap2Fmt(sl.qty * sl.cost) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
+          '<div class="ap2-trade-buy">' + ap2Fmt(invested) + ' → ' + ap2Fmt(sl.amount) + '</div>' +
           '<div class="ap2-trade-pnl ' + pfCls + '">' + (pf >= 0 ? '+' : '') + ap2Fmt(pf) + ' (' + (pfPct >= 0 ? '+' : '') + pfPct.toFixed(1) + '%)</div>' +
         '</div>' +
       '</div>';
@@ -26155,7 +26157,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b157';
+const APP_BUILD = 'b158';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
