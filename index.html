@@ -4678,6 +4678,10 @@
     #tier-banner-btn { min-height: 38px; padding: 8px 14px !important; }
     .hd-link { display: inline-flex; align-items: center; min-height: 36px; }
     #acc-link-okx, #acc-link-bybit { min-height: 38px; padding: 9px 14px !important; }
+    #acc-exchange { min-height: 36px; font-size: 13px; }
+    #page-onchain h2 .btn { display: inline-flex; align-items: center; min-height: 36px; }
+    .soc-link { width: 34px; height: 34px; }
+    #themeToggleM::after { content: ''; position: absolute; inset: -8px; }
     #ap2-chart-range button { min-height: 36px; padding: 6px 10px; }
     .bd-eye-inline { min-width: 34px; min-height: 34px; }
     #bd-catf, #bd-q, #bd-budget-in { min-height: 34px; }
@@ -5294,7 +5298,7 @@
       <div class="home-teaser" id="home-teaser" hidden>
         <div class="ht-head">
           <h2>💼 Paylaşılan Portföy</h2>
-          <span class="ht-sub" id="ht-sub">Portföy yönetimi (paylaşımlı) — işlem kanalından ayrı, salt okunur</span>
+          <span class="ht-sub" id="ht-sub">Yöneticinin paylaştığı portföy özeti · Salt okunur</span>
         </div>
         <div class="ht-list" id="ht-list"><div class="hd-empty">Yükleniyor…</div></div>
         <div class="ht-cta" id="ht-cta">
@@ -12813,7 +12817,7 @@ function renderAccessPage() {
   const benefits = document.getElementById('acc-benefits');
   if (benefits) {
     const refPages = [
-      ['İşlem Kanalı', 'alfatrading'], ['Portföy Yönetimi', 'portfoy'],
+      ['İşlem Kanalı', 'alfatrading'], ['Portföy detayları (özet herkese açık)', 'portfoy'],
       ['Gelir/Gider (bütçe)', 'butce'],
       ['Trade Günlüğü', 'data'], ['Check List', 'defter'],
       ['Alfa Edu', 'egitim'], ['Stratejiler', 'strategies'],
@@ -12825,10 +12829,12 @@ function renderAccessPage() {
     benefits.innerHTML = refPages.map(function (r) {
       const tier = sitePageTier(r[1]);
       const open = siteCanOpen(r[1]);
-      const mark = open ? '✅' : (tier === 'free' ? '✅' : '🔒');
+      // Portfoy sayfasi herkese acik ama pozisyon/emir detaylari referansla acilir.
+      const unlocked = r[1] === 'portfoy' ? (siteIsAdmin() || refUnlocked()) : open;
+      const mark = unlocked ? '✅' : (tier === 'free' ? '✅' : '🔒');
       return '<div>' + mark + ' ' + r[0] + '</div>';
     }).join('') +
-      '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, AlfaNews, Hesaplayıcı, Ekonomik Takvim.</div>';
+      '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, Hesaplayıcı, Ekonomik Takvim ve paylaşılan portföy özeti.</div>';
   }
 
   // Yonetici: bekleyen UID basvurulari
@@ -17068,7 +17074,7 @@ function ap2SummaryMarkup(d) {
   }
   return '<div class="ap2-sum-row">' + cell('Portföy toplamı', ap2Fmt(d.portfolioValue), 'pc', d.count > 0 ? d.count + ' açık pozisyon' : '') +
     cell('Toplam kâr / zarar', sign + ap2Fmt(d.pnl), cls) +
-    cell('Toplam getiri', d.pnlPct == null ? '—' : sign + Number(d.pnlPct).toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + '%', cls) + '</div>';
+    cell('Toplam getiri', d.pnlPct == null ? '—' : pfPct(d.pnlPct), cls) + '</div>';
 }
 function ap2ShowGate() {
   document.getElementById('page-portfoy').classList.add('ap2-viewer');
@@ -26157,7 +26163,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b158';
+const APP_BUILD = 'b160';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

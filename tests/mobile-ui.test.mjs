@@ -28,6 +28,15 @@ test('free summary is left aligned and shows the active position count', () => {
   assert.ok(html.includes('.data-empty.ap2-summary-only { text-align: left;'));
   const markup = html.slice(html.indexOf('function ap2SummaryMarkup(d)'), html.indexOf('function ap2ShowGate()'));
   assert.ok(markup.includes("d.count + ' açık pozisyon'"));
+  assert.ok(markup.includes('pfPct(d.pnlPct)'));
+  assert.ok(!markup.includes("toLocaleString('tr-TR', { maximumFractionDigits: 2 })"));
+});
+
+test('access page describes portfolio details, not full management, as locked', () => {
+  assert.ok(html.includes("['Portföy detayları (özet herkese açık)', 'portfoy']"));
+  assert.ok(html.includes("const unlocked = r[1] === 'portfoy'"));
+  assert.ok(html.includes('Ekonomik Takvim ve paylaşılan portföy özeti'));
+  assert.ok(!html.includes('Ana Menü, AlfaNews, Hesaplayıcı, Ekonomik Takvim.'));
 });
 
 test('duplicate sell history list is removed; one trade list remains', () => {
@@ -39,6 +48,7 @@ test('duplicate sell history list is removed; one trade list remains', () => {
 test('mobile tap targets are raised for the small controls', () => {
   const mobile = html.slice(html.indexOf('/* Mobil: dokunma hedefleri'), html.indexOf('</style>'));
   for (const selector of ['#tier-banner-btn', '.navbar .user-badge .logout', '.hd-link', '#acc-link-okx',
+    '#acc-link-bybit', '#acc-exchange', '#page-onchain h2 .btn', '.soc-link', '#themeToggleM::after',
     '#ap2-chart-range button', '.bd-qplus', '.pano-tools .pt', '#landing .lp-explore']) {
     assert.ok(mobile.includes(selector), selector);
   }
