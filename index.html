@@ -6516,6 +6516,7 @@
       </div>
       <div class="strat-form-btns" style="margin-top:8px;">
         <button type="button" class="btn" id="bd-import-cancel">Kapat</button>
+        <button type="button" class="btn" id="bd-import-clean">Metni Temizle</button>
         <button type="button" class="btn" id="bd-import-parse">Önizle</button>
         <button type="button" class="btn solid" id="bd-import-commit" disabled>Onayla ve Ekle</button>
       </div>
@@ -16743,6 +16744,18 @@ function butceNumTr(s) {
   const n = parseFloat(t);
   return isNaN(n) ? 0 : n;
 }
+function butceCleanImportText() {
+  const ta = document.getElementById('bd-import-text');
+  if (!ta) return;
+  let t = ta.value;
+  // mojibake / garbage temizliği: tek başına anlamsız semboller ve kontrol karakterleri
+  t = t.replace(/[^\S\r\n]+/g, ' ');
+  t = t.replace(/[^\w\s.,;:/\-()%₺$€£ğüşıöçĞÜŞİÖÇ]/g, ' ');
+  t = t.replace(/\s{2,}/g, ' ');
+  t = t.split(/\n/).map(l => l.trim()).filter(l => l.length > 3).join('\n');
+  ta.value = t;
+  stratToast('🧹 Metin temizlendi. Kontrol edip Önizle\'ye basın.');
+}
 function butceParseImport() {
   const ta = document.getElementById('bd-import-text');
   const mode = (document.getElementById('bd-import-mode') || {}).value || 'csv';
@@ -16756,6 +16769,8 @@ function butceParseImport() {
   lines.forEach(line => {
     const l = line.trim();
     if (!l) return;
+    const alnum = l.replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g, '');
+    if (alnum.length < 4) return;
     let date = new Date().toISOString().slice(0, 10);
     let type = 'gider';
     let catName = '';
@@ -16888,7 +16903,7 @@ async function butceImportFile(file) {
       let full = '';
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
-        const tc = await page.getTextContent();
+        const tc = await page.getTextContent({ normalizeWhitespace: true });
         full += tc.items.map(it => it.str).join(' ') + '\n';
       }
       if (ta) ta.value = full;
@@ -16979,6 +16994,7 @@ function bindButcePage() {
     }
     if (e.target.closest('#bd-import-btn')) { document.getElementById('bd-import').classList.toggle('hidden'); return; }
     if (e.target.closest('#bd-import-cancel')) { document.getElementById('bd-import').classList.add('hidden'); return; }
+    if (e.target.closest('#bd-import-clean')) { butceCleanImportText(); return; }
     if (e.target.closest('#bd-import-parse')) { butceParseImport(); return; }
     if (e.target.closest('#bd-import-commit')) { butceCommitImport(); return; }
     if (e.target.closest('#bd-view-toggle')) {
@@ -26470,7 +26486,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b170';
+const APP_BUILD = 'b171';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
