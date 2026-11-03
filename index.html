@@ -16728,8 +16728,10 @@ function butceEnsureCategory(type, name) {
   if (!butceData.categories) butceData.categories = [];
   let cat = butceData.categories.find(c => c.type === type && c.name.toLowerCase() === (name || '').toLowerCase());
   if (cat) return cat;
-  const fallback = butceData.categories.find(c => c.type === type);
-  if (fallback) return fallback;
+  if (!name) {
+    const fallback = butceData.categories.find(c => c.type === type);
+    if (fallback) return fallback;
+  }
   const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
   const catNew = { id, name: name || (type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider'), icon: type === 'gelir' ? '💵' : '💳', color: type === 'gelir' ? '#22c55e' : '#ef4444', type };
   butceData.categories.push(catNew);
@@ -26544,7 +26546,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b173';
+const APP_BUILD = 'b174';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
