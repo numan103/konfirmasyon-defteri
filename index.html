@@ -6501,8 +6501,15 @@
     <div class="bd-summary" id="bd-summary"></div>
     <div id="bd-import" class="strat-form hidden" style="margin:10px 0;">
       <div class="strat-form-h">📥 Hesap Ekstresi İçe Aktar</div>
-      <p style="font-size:12px;color:var(--text-3);margin:0 0 8px;">Her satır: tarih(YYYY-MM-DD); tür(gelir/gider); kategori; tutar; not (opsiyonel)</p>
-      <textarea id="bd-import-text" rows="6" style="width:100%;font-family:monospace;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);"></textarea>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <select id="bd-import-mode" style="padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);">
+          <option value="csv">CSV / noktalı virgül</option>
+          <option value="text">Banka ekstresi metni (yapıştır)</option>
+        </select>
+        <span style="font-size:11px;color:var(--text-3);">Metin modunda satırlar otomatik sınıflandırılır.</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-3);margin:0 0 8px;">CSV: tarih(YYYY-MM-DD); tür(gelir/gider); kategori; tutar; not</p>
+      <textarea id="bd-import-text" rows="8" style="width:100%;font-family:monospace;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);"></textarea>
       <div class="strat-form-btns" style="margin-top:8px;">
         <button type="button" class="btn" id="bd-import-cancel">Kapat</button>
         <button type="button" class="btn solid" id="bd-import-run">İçe Aktar</button>
@@ -16699,19 +16706,62 @@ function butceDelete(id) {
   butceData.entries = butceData.entries.filter(e => e.id !== id);
   saveButce().then(() => { stratToast('🗑 Kayıt silindi'); renderButce(); });
 }
+function butceNumTr(s) {
+  if (s == null) return 0;
+  let t = String(s).trim();
+  // Turkish format: 1.234,56 -> 1234.56
+  if (/\d\.\d{3}/.test(t) && t.indexOf(',') !== -1) t = t.replace(/\./g, '').replace(',', '.');
+  else t = t.replace(',', '.');
+  t = t.replace(/[^\d.\-]/g, '');
+  const n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
 function butceImport() {
   const ta = document.getElementById('bd-import-text');
+  const mode = (document.getElementById('bd-import-mode') || {}).value || 'csv';
   if (!ta) return;
-  const lines = ta.value.trim().split(/\n/);
+  const text = ta.value.trim();
+  if (!text) return;
+  const lines = text.split(/\n/);
   let count = 0;
+  const gelirKeys = ['gelen', 'yatır', 'maaş', 'maas', 'faiz', 'iade', 'kira gelir', 'satış', 'satis'];
+  const giderKeys = ['giden', 'ödeme', 'odeme', 'çekim', 'cekim', 'harç', 'harc', 'komisyon', 'fatura', 'aidat', 'kira'];
   lines.forEach(line => {
-    const parts = line.split(/[;,]/).map(s => s.trim());
-    if (parts.length < 4) return;
-    const date = parts[0] || new Date().toISOString().slice(0, 10);
-    const type = (parts[1].toLowerCase() === 'gider') ? 'gider' : 'gelir';
-    const catName = parts[2];
-    const amount = butceNum(parts[3]);
-    const note = parts.slice(4).join(' ').trim();
+    const l = line.trim();
+    if (!l) return;
+    let date = new Date().toISOString().slice(0, 10);
+    let type = 'gider';
+    let catName = '';
+    let amount = 0;
+    let note = l;
+    if (mode === 'csv') {
+      const parts = l.split(/[;,]/).map(s => s.trim());
+      if (parts.length < 4) return;
+      date = parts[0] || date;
+      type = (parts[1].toLowerCase() === 'gider') ? 'gider' : 'gelir';
+      catName = parts[2];
+      amount = butceNum(parts[3]);
+      note = parts.slice(4).join(' ').trim() || l;
+    } else {
+      // Tarih yakala
+      const dm = l.match(/(\d{1,2})[./](\d{1,2})[./](\d{2,4})/) || l.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (dm) {
+        if (dm[0].indexOf('-') !== -1) date = dm[0];
+        else {
+          const d = dm[1].padStart(2, '0'), m = dm[2].padStart(2, '0');
+          let y = dm[3]; if (y.length === 2) y = '20' + y;
+          date = y + '-' + m + '-' + d;
+        }
+      }
+      const low = l.toLowerCase();
+      if (gelirKeys.some(k => low.indexOf(k) !== -1)) type = 'gelir';
+      if (giderKeys.some(k => low.indexOf(k) !== -1)) type = 'gider';
+      // Tutar: son sayısal token
+      const nums = l.match(/-?\d{1,3}(?:[.\s]\d{3})*(?:,\d+)?|-?\d+(?:[.,]\d+)?/g);
+      if (nums && nums.length) amount = butceNumTr(nums[nums.length - 1]);
+      // Kategori ipucu: ilk kelime grubu
+      catName = type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider';
+    }
     if (!(amount > 0)) return;
     let cat = (butceData.categories || []).find(c => c.type === type && c.name.toLowerCase() === catName.toLowerCase());
     if (!cat) cat = (butceData.categories || []).find(c => c.type === type);
@@ -26280,7 +26330,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b167';
+const APP_BUILD = 'b168';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
