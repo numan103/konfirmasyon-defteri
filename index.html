@@ -1934,6 +1934,7 @@
   .bd-eye:hover { border-color: var(--pc); }
   .bd-eye-inline { background: none; border: none; cursor: pointer; font-size: 18px; vertical-align: middle; margin-left: 6px; transition: opacity .15s; }
   .bd-eye-inline:hover { opacity: .7; }
+  .bd-hide-hint { font-size: 11.5px; color: var(--text-3); margin-top: 6px; line-height: 1.4; }
   .bd-hidden .bd-v, .bd-hidden .bd-row-amt, .bd-hidden .bd-legend-v, .bd-hidden .bd-bar-top b, .bd-hidden .bd-budget-txt, .bd-hidden .bd-card .bd-v, .bd-hidden #bd-chart-sub, .bd-hidden .bd-summary .bd-v, .bd-hidden .panel-h .bd-panel-sub, .bd-hidden .bd-donut-c, .bd-hidden .bd-legend-p, .bd-hidden .bd-bar-top .bd-legend-p { filter: blur(8px) !important; user-select: none; }
   .bd-hidden .bd-eye-inline { opacity: .5; }
   /* Gelir/Gider — Defter | Portföy sekmeleri */
@@ -6477,8 +6478,8 @@
       <div>
         <div class="strat-title">💰 Gelir/Gider
           <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle">🔒</button>
-          <button type="button" class="bd-eye-inline" id="bd-view-toggle" title="Portföy görünümü">💼 Portföyüm</button>
         </div>
+        <div class="bd-hide-hint" id="bd-hide-hint">🔒 Miktarları gizlemek için kilide tıklayın; tekrar tıklayınca gösterilir.</div>
         <div class="strat-sub">Aylık gelir / gider takibi. Ne kadar kazandın, nereye ne kadar harcadın — pasta dilimleriyle. Bu bölüm yalnızca senin cihazında.</div>
       </div>
     </div>
@@ -6488,6 +6489,7 @@
       <span class="bd-month" id="bd-month">—</span>
       <button type="button" class="bd-nav" id="bd-next" title="Sonraki ay">›</button>
       <button type="button" class="btn bd-today" id="bd-today">Bugün</button>
+      <button type="button" class="btn" id="bd-import-btn" title="Hesap ekstresi içe aktar">📥 İçe Aktar</button>
       <div class="seg" id="bd-typeseg">
         <button type="button" class="on" data-bt="all">Tümü</button>
         <button type="button" data-bt="gelir">💵 Gelir</button>
@@ -6497,6 +6499,15 @@
       <input type="text" id="bd-q" placeholder="Ara…" class="bd-q" autocomplete="off">
     </div>
     <div class="bd-summary" id="bd-summary"></div>
+    <div id="bd-import" class="strat-form hidden" style="margin:10px 0;">
+      <div class="strat-form-h">📥 Hesap Ekstresi İçe Aktar</div>
+      <p style="font-size:12px;color:var(--text-3);margin:0 0 8px;">Her satır: tarih(YYYY-MM-DD); tür(gelir/gider); kategori; tutar; not (opsiyonel)</p>
+      <textarea id="bd-import-text" rows="6" style="width:100%;font-family:monospace;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);"></textarea>
+      <div class="strat-form-btns" style="margin-top:8px;">
+        <button type="button" class="btn" id="bd-import-cancel">Kapat</button>
+        <button type="button" class="btn solid" id="bd-import-run">İçe Aktar</button>
+      </div>
+    </div>
     <div class="bd-quick" id="bd-quick">
       <div class="bd-quick-label">
         <span class="bd-quick-title">⚡ Hızlı Kayıt</span>
@@ -6569,8 +6580,8 @@
       </div>
     </div>
     </div><!-- /bd-view-defter -->
-    <div id="bd-view-portfoy" class="hidden">
-      <div class="bd-pf-summary" id="bd-pf-summary"></div>
+    <!-- portföy görünümü kaldırıldı -->
+    <div id="bd-view-portfoy" class="hidden" style="display:none">
       <div class="bd-pf-tools">
         <span id="bd-pf-live-wrap" class="bd-pf-live"></span>
         <span style="flex:1"></span>
@@ -13568,7 +13579,7 @@ function showPage(name, skipAnim) {
   if (name === 'analiz') renderAnaliz();
   if (name === 'sosyalmetre') renderSosyal();
   if (name === 'uyap') renderUyap();
-  if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); if (bdTab === 'portfoy') renderPortfoy(); }
+  if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); }
   if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
@@ -16688,6 +16699,34 @@ function butceDelete(id) {
   butceData.entries = butceData.entries.filter(e => e.id !== id);
   saveButce().then(() => { stratToast('🗑 Kayıt silindi'); renderButce(); });
 }
+function butceImport() {
+  const ta = document.getElementById('bd-import-text');
+  if (!ta) return;
+  const lines = ta.value.trim().split(/\n/);
+  let count = 0;
+  lines.forEach(line => {
+    const parts = line.split(/[;,]/).map(s => s.trim());
+    if (parts.length < 4) return;
+    const date = parts[0] || new Date().toISOString().slice(0, 10);
+    const type = (parts[1].toLowerCase() === 'gider') ? 'gider' : 'gelir';
+    const catName = parts[2];
+    const amount = butceNum(parts[3]);
+    const note = parts.slice(4).join(' ').trim();
+    if (!(amount > 0)) return;
+    let cat = (butceData.categories || []).find(c => c.type === type && c.name.toLowerCase() === catName.toLowerCase());
+    if (!cat) cat = (butceData.categories || []).find(c => c.type === type);
+    if (!cat) return;
+    butceData.entries.push({ id: butceUid(), type, cat: cat.id, date, amount, note, created: Date.now() });
+    count++;
+  });
+  saveButce().then(() => {
+    const panel = document.getElementById('bd-import');
+    if (panel) panel.classList.add('hidden');
+    ta.value = '';
+    stratToast('📥 ' + count + ' kayıt içe aktarıldı');
+    renderButce();
+  });
+}
 function butceAddCat() {
   const n = document.getElementById('bd-newcat-name').value.trim();
   if (!n) { stratToast('⚠️ Kategori adı girmelisin.'); return; }
@@ -16750,6 +16789,9 @@ function bindButcePage() {
       if (btn) { btn.textContent = hidden ? '🔓' : '🔒'; btn.title = hidden ? 'Miktarları göster' : 'Miktarları gizle'; }
       return;
     }
+    if (e.target.closest('#bd-import-btn')) { document.getElementById('bd-import').classList.toggle('hidden'); return; }
+    if (e.target.closest('#bd-import-cancel')) { document.getElementById('bd-import').classList.add('hidden'); return; }
+    if (e.target.closest('#bd-import-run')) { butceImport(); return; }
     if (e.target.closest('#bd-view-toggle')) {
       const cur = (typeof bdTab !== 'undefined' && bdTab === 'portfoy') ? 'defter' : 'portfoy';
       bdSetTab(cur);
@@ -17178,13 +17220,11 @@ function ap2VerifyCode() {
   showPage('erisim');
 }
 function bdSetTab(t) {
-  bdTab = t === 'portfoy' ? 'portfoy' : 'defter';
-  document.getElementById('bd-view-defter').classList.toggle('hidden', bdTab !== 'defter');
-  document.getElementById('bd-view-portfoy').classList.toggle('hidden', bdTab !== 'portfoy');
-  document.querySelectorAll('#bd-tabs button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bdt') === bdTab));
-  const vt = document.getElementById('bd-view-toggle');
-  if (vt) { vt.textContent = (bdTab === 'portfoy') ? '📒 Gelir Gider' : '💼 Portföyüm'; vt.title = (bdTab === 'portfoy') ? 'Gelir/Gider görünümü' : 'Portföy görünümü'; }
-  if (bdTab === 'portfoy') { renderPortfoy(); pfLoadPrices(); }
+  // Portföy görünümü kaldırıldı; her zaman gelir/gider görünümü.
+  bdTab = 'defter';
+  const defter = document.getElementById('bd-view-defter');
+  if (defter) defter.classList.remove('hidden');
+  return;
 }
 const AP2_KEY = 'alfa-fund-v1';
 const AP2_HIST_KEY = 'alfa-fund-hist-v1';
@@ -26240,7 +26280,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b166';
+const APP_BUILD = 'b167';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
