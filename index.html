@@ -16906,8 +16906,32 @@ async function butceImportFile(file) {
         const tc = await page.getTextContent({ normalizeWhitespace: true });
         full += tc.items.map(it => it.str).join(' ') + '\n';
       }
+      const alnum = full.replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g, '');
+      const good = full.trim().length > 80 && (alnum.length / Math.max(1, full.length)) > 0.35;
+      if (!good && doc.numPages > 0) {
+        if (!window.Tesseract) {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+        const page = await doc.getPage(1);
+        const vp = page.getViewport({ scale: 2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width; canvas.height = vp.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        const { data } = await window.Tesseract.recognize(canvas, 'tur+eng');
+        full = (data && data.text) ? data.text : full;
+        stratToast('PDF taranmış göründü, OCR ile metin çıkarıldı.');
+      } else {
+        stratToast('PDF metni çıkarıldı.');
+      }
       if (ta) ta.value = full;
       if (modeSel) modeSel.value = 'text';
+      butceCleanImportText();
       butceParseImport();
     } else if (file.type.startsWith('image/')) {
       if (!window.Tesseract) {
@@ -26486,7 +26510,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b171';
+const APP_BUILD = 'b172';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
