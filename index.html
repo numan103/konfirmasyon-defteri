@@ -6510,6 +6510,10 @@
       </div>
       <p style="font-size:12px;color:var(--text-3);margin:0 0 8px;">CSV: tarih(YYYY-MM-DD); tür(gelir/gider); kategori; tutar; not</p>
       <textarea id="bd-import-text" rows="8" style="width:100%;font-family:monospace;font-size:12px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);"></textarea>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="file" id="bd-import-file" accept="application/pdf,image/*" style="font-size:12px;">
+        <span style="font-size:11px;color:var(--text-3);">PDF veya fotoğraf seçin; metin çıkarılıp sınıflandırılacak.</span>
+      </div>
       <div class="strat-form-btns" style="margin-top:8px;">
         <button type="button" class="btn" id="bd-import-cancel">Kapat</button>
         <button type="button" class="btn solid" id="bd-import-run">İçe Aktar</button>
@@ -16777,6 +16781,56 @@ function butceImport() {
     renderButce();
   });
 }
+async function butceImportFile(file) {
+  if (!file) return;
+  const ta = document.getElementById('bd-import-text');
+  const modeSel = document.getElementById('bd-import-mode');
+  stratToast('⏳ Dosya işleniyor…');
+  try {
+    if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+      if (!window.pdfjsLib) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+      }
+      const buf = await file.arrayBuffer();
+      const doc = await window.pdfjsLib.getDocument({ data: buf }).promise;
+      let full = '';
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const tc = await page.getTextContent();
+        full += tc.items.map(it => it.str).join(' ') + '\n';
+      }
+      if (ta) ta.value = full;
+      if (modeSel) modeSel.value = 'text';
+      butceImport();
+    } else if (file.type.startsWith('image/')) {
+      if (!window.Tesseract) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      const { data } = await window.Tesseract.recognize(file, 'tur+eng');
+      if (ta) ta.value = (data && data.text) ? data.text : '';
+      if (modeSel) modeSel.value = 'text';
+      butceImport();
+    } else {
+      stratToast('⚠️ Desteklenmeyen dosya türü.');
+    }
+  } catch (e) {
+    console.error(e);
+    stratToast('⚠️ Dosya işlenemedi: ' + (e && e.message ? e.message : e));
+  }
+}
 function butceAddCat() {
   const n = document.getElementById('bd-newcat-name').value.trim();
   if (!n) { stratToast('⚠️ Kategori adı girmelisin.'); return; }
@@ -16855,6 +16909,7 @@ function bindButcePage() {
     if (!t) return;
     if (t.id === 'bd-catf') { butceCatF = t.value; renderButce(); }
     else if (t.id === 'bd-budget-in') { butceData.budget.monthly = butceNum(t.value); saveButce().then(() => renderButce()); }
+    else if (t.id === 'bd-import-file') { butceImportFile(t.files && t.files[0]); t.value = ''; }
   });
   pg.addEventListener('input', e => {
     if (e.target && e.target.id === 'bd-q') { butceQ = e.target.value; butceRenderList(butceFilterMonth(butceData.entries, butceMk)); }
@@ -26330,7 +26385,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b168';
+const APP_BUILD = 'b169';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
