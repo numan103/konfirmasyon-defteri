@@ -6472,16 +6472,15 @@
       <div class="strat-form-btns"><button type="button" class="btn" id="at-close">Kapat</button></div>
     </div>
   </div>
-  <div id="page-butce" class="hidden bd-hidden">
+  <div id="page-butce" class="hidden">
     <div class="strat-head">
       <div>
-        <div class="strat-title">💰 Gelir/Gider <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle/göster">👁️</button></div>
+        <div class="strat-title">💰 Gelir/Gider
+          <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle">🔒</button>
+          <button type="button" class="bd-eye-inline" id="bd-view-toggle" title="Portföy görünümü">💼 Portföyüm</button>
+        </div>
         <div class="strat-sub">Aylık gelir / gider takibi. Ne kadar kazandın, nereye ne kadar harcadın — pasta dilimleriyle. Bu bölüm yalnızca senin cihazında.</div>
       </div>
-    </div>
-    <div class="bd-tabs" id="bd-tabs">
-      <button type="button" class="bd-tab on" data-bdt="defter">📒 Gelir Gider</button>
-      <button type="button" class="bd-tab" data-bdt="portfoy">💼 Portföyüm</button>
     </div>
     <div id="bd-view-defter">
     <div class="bd-toolbar">
@@ -16744,7 +16743,20 @@ function bindButcePage() {
     const icoBtn = e.target.closest('.bd-iconpick-btn');
     if (icoBtn) { butceIconSel = icoBtn.getAttribute('data-ico'); renderIconPick(); return; }
     if (e.target.closest('#bd-clear-cat')) { butceCatF = ''; renderButce(); return; }
-    if (e.target.closest('#bd-eye')) { document.getElementById('page-butce').classList.toggle('bd-hidden'); return; }
+    if (e.target.closest('#bd-eye')) {
+      const pg = document.getElementById('page-butce');
+      const hidden = pg.classList.toggle('bd-hidden');
+      const btn = document.getElementById('bd-eye');
+      if (btn) { btn.textContent = hidden ? '🔓' : '🔒'; btn.title = hidden ? 'Miktarları göster' : 'Miktarları gizle'; }
+      return;
+    }
+    if (e.target.closest('#bd-view-toggle')) {
+      const cur = (typeof bdTab !== 'undefined' && bdTab === 'portfoy') ? 'defter' : 'portfoy';
+      bdSetTab(cur);
+      const btn = document.getElementById('bd-view-toggle');
+      if (btn) { btn.textContent = (cur === 'portfoy') ? '📒 Gelir Gider' : '💼 Portföyüm'; btn.title = (cur === 'portfoy') ? 'Gelir/Gider görünümü' : 'Portföy görünümü'; }
+      return;
+    }
   });
   pg.addEventListener('change', e => {
     const t = e.target;
@@ -17170,6 +17182,8 @@ function bdSetTab(t) {
   document.getElementById('bd-view-defter').classList.toggle('hidden', bdTab !== 'defter');
   document.getElementById('bd-view-portfoy').classList.toggle('hidden', bdTab !== 'portfoy');
   document.querySelectorAll('#bd-tabs button').forEach(b => b.classList.toggle('on', b.getAttribute('data-bdt') === bdTab));
+  const vt = document.getElementById('bd-view-toggle');
+  if (vt) { vt.textContent = (bdTab === 'portfoy') ? '📒 Gelir Gider' : '💼 Portföyüm'; vt.title = (bdTab === 'portfoy') ? 'Gelir/Gider görünümü' : 'Portföy görünümü'; }
   if (bdTab === 'portfoy') { renderPortfoy(); pfLoadPrices(); }
 }
 const AP2_KEY = 'alfa-fund-v1';
@@ -20218,8 +20232,8 @@ function savePortfoy() { return store.set(PORTFOY_KEY, JSON.stringify(pfData)).c
 function bindPortfoy() {
   const tabs = document.getElementById('bd-tabs');
   const view = document.getElementById('bd-view-portfoy');
-  if (!tabs || !view) return;
-  tabs.addEventListener('click', e => {
+  if (!view) return;
+  if (tabs) tabs.addEventListener('click', e => {
     const b = e.target.closest('.bd-tab');
     if (b) bdSetTab(b.getAttribute('data-bdt'));
   });
@@ -26226,7 +26240,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b165';
+const APP_BUILD = 'b166';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
