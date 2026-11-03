@@ -6516,8 +6516,10 @@
       </div>
       <div class="strat-form-btns" style="margin-top:8px;">
         <button type="button" class="btn" id="bd-import-cancel">Kapat</button>
-        <button type="button" class="btn solid" id="bd-import-run">İçe Aktar</button>
+        <button type="button" class="btn" id="bd-import-parse">Önizle</button>
+        <button type="button" class="btn solid" id="bd-import-commit" disabled>Onayla ve Ekle</button>
       </div>
+      <div id="bd-import-preview" style="margin-top:10px;max-height:260px;overflow:auto;"></div>
     </div>
     <div class="bd-quick" id="bd-quick">
       <div class="bd-quick-label">
@@ -16720,16 +16722,37 @@ function butceNumTr(s) {
   const n = parseFloat(t);
   return isNaN(n) ? 0 : n;
 }
-function butceImport() {
+let butceImportCandidates = [];
+function butceEnsureCategory(type, name) {
+  if (!butceData.categories) butceData.categories = [];
+  let cat = butceData.categories.find(c => c.type === type && c.name.toLowerCase() === (name || '').toLowerCase());
+  if (cat) return cat;
+  const fallback = butceData.categories.find(c => c.type === type);
+  if (fallback) return fallback;
+  const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const catNew = { id, name: name || (type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider'), icon: type === 'gelir' ? '💵' : '💳', color: type === 'gelir' ? '#22c55e' : '#ef4444', type };
+  butceData.categories.push(catNew);
+  return catNew;
+}
+function butceNumTr(s) {
+  if (s == null) return 0;
+  let t = String(s).trim();
+  if (/\d\.\d{3}/.test(t) && t.indexOf(',') !== -1) t = t.replace(/\./g, '').replace(',', '.');
+  else t = t.replace(',', '.');
+  t = t.replace(/[^\d.\-]/g, '');
+  const n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
+function butceParseImport() {
   const ta = document.getElementById('bd-import-text');
   const mode = (document.getElementById('bd-import-mode') || {}).value || 'csv';
   if (!ta) return;
   const text = ta.value.trim();
-  if (!text) return;
+  if (!text) { stratToast('Metin boş.'); return; }
   const lines = text.split(/\n/);
-  let count = 0;
-  const gelirKeys = ['gelen', 'yatır', 'maaş', 'maas', 'faiz', 'iade', 'kira gelir', 'satış', 'satis'];
-  const giderKeys = ['giden', 'ödeme', 'odeme', 'çekim', 'cekim', 'harç', 'harc', 'komisyon', 'fatura', 'aidat', 'kira'];
+  const gelirKeys = ['gelen', 'yatır', 'yatir', 'maaş', 'maas', 'faiz', 'iade', 'satış', 'satis', 'gelir'];
+  const giderKeys = ['giden', 'ödeme', 'odeme', 'çekim', 'cekim', 'harç', 'harc', 'komisyon', 'fatura', 'aidat', 'kira', 'gider'];
+  butceImportCandidates = [];
   lines.forEach(line => {
     const l = line.trim();
     if (!l) return;
@@ -16747,7 +16770,6 @@ function butceImport() {
       amount = butceNum(parts[3]);
       note = parts.slice(4).join(' ').trim() || l;
     } else {
-      // Tarih yakala
       const dm = l.match(/(\d{1,2})[./](\d{1,2})[./](\d{2,4})/) || l.match(/(\d{4})-(\d{2})-(\d{2})/);
       if (dm) {
         if (dm[0].indexOf('-') !== -1) date = dm[0];
@@ -16758,29 +16780,91 @@ function butceImport() {
         }
       }
       const low = l.toLowerCase();
-      if (gelirKeys.some(k => low.indexOf(k) !== -1)) type = 'gelir';
-      if (giderKeys.some(k => low.indexOf(k) !== -1)) type = 'gider';
-      // Tutar: son sayısal token
+      const gHit = gelirKeys.some(k => low.indexOf(k) !== -1);
+      const dHit = giderKeys.some(k => low.indexOf(k) !== -1);
+      if (gHit && !dHit) type = 'gelir';
+      else if (dHit) type = 'gider';
       const nums = l.match(/-?\d{1,3}(?:[.\s]\d{3})*(?:,\d+)?|-?\d+(?:[.,]\d+)?/g);
-      if (nums && nums.length) amount = butceNumTr(nums[nums.length - 1]);
-      // Kategori ipucu: ilk kelime grubu
+      if (nums && nums.length) {
+        const parsed = nums.map(n => butceNumTr(n)).filter(n => n > 0);
+        if (parsed.length) amount = Math.max.apply(null, parsed);
+      }
       catName = type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider';
     }
     if (!(amount > 0)) return;
-    let cat = (butceData.categories || []).find(c => c.type === type && c.name.toLowerCase() === catName.toLowerCase());
-    if (!cat) cat = (butceData.categories || []).find(c => c.type === type);
-    if (!cat) return;
-    butceData.entries.push({ id: butceUid(), type, cat: cat.id, date, amount, note, created: Date.now() });
-    count++;
+    const cat = butceEnsureCategory(type, catName || (type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider'));
+    butceImportCandidates.push({ id: butceUid(), type, cat: cat.id, date, amount, note, include: true });
+  });
+  butceRenderImportPreview();
+  const commit = document.getElementById('bd-import-commit');
+  if (commit) commit.disabled = butceImportCandidates.length === 0;
+  stratToast(butceImportCandidates.length + ' kayıt önizlendi. Kontrol edip onaylayın.');
+}
+function butceRenderImportPreview() {
+  const box = document.getElementById('bd-import-preview');
+  if (!box) return;
+  if (!butceImportCandidates.length) { box.innerHTML = '<div style="color:var(--text-3);font-size:12px;">Kayıt bulunamadı.</div>'; return; }
+  const opts = (butceData.categories || []).map(c => '<option value="' + c.id + '">' + c.icon + ' ' + c.name + '</option>').join('');
+  box.innerHTML = '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+    '<thead><tr><th style="text-align:left;padding:4px;">✓</th><th style="text-align:left;padding:4px;">Tarih</th><th style="text-align:left;padding:4px;">Tür</th><th style="text-align:left;padding:4px;">Kategori</th><th style="text-align:right;padding:4px;">Tutar</th><th style="text-align:left;padding:4px;">Not</th></tr></thead>' +
+    '<tbody>' + butceImportCandidates.map((c, i) => {
+      return '<tr>' +
+        '<td style="padding:4px;"><input type="checkbox" data-imp-idx="' + i + '" ' + (c.include ? 'checked' : '') + '></td>' +
+        '<td style="padding:4px;"><input type="date" data-imp-field="date" data-imp-idx="' + i + '" value="' + c.date + '" style="width:110px;"></td>' +
+        '<td style="padding:4px;"><select data-imp-field="type" data-imp-idx="' + i + '"><option value="gelir"' + (c.type === 'gelir' ? ' selected' : '') + '>Gelir</option><option value="gider"' + (c.type === 'gider' ? ' selected' : '') + '>Gider</option></select></td>' +
+        '<td style="padding:4px;"><select data-imp-field="cat" data-imp-idx="' + i + '">' + opts.replace('value="' + c.cat + '"', 'value="' + c.cat + '" selected') + '</select></td>' +
+        '<td style="padding:4px;text-align:right;"><input type="number" step="0.01" data-imp-field="amount" data-imp-idx="' + i + '" value="' + c.amount + '" style="width:90px;text-align:right;"></td>' +
+        '<td style="padding:4px;"><input type="text" data-imp-field="note" data-imp-idx="' + i + '" value="' + (c.note || '').replace(/"/g, '&quot;') + '" style="width:160px;"></td>' +
+        '</tr>';
+    }).join('') + '</tbody></table>';
+  box.querySelectorAll('input,select').forEach(el => {
+    el.addEventListener('change', e => {
+      const idx = parseInt(e.target.getAttribute('data-imp-idx'), 10);
+      const field = e.target.getAttribute('data-imp-field');
+      if (isNaN(idx) || !field) {
+        if (e.target.type === 'checkbox') {
+          const i = parseInt(e.target.getAttribute('data-imp-idx'), 10);
+          if (!isNaN(i) && butceImportCandidates[i]) butceImportCandidates[i].include = e.target.checked;
+        }
+        return;
+      }
+      const cand = butceImportCandidates[idx];
+      if (!cand) return;
+      if (field === 'date') cand.date = e.target.value;
+      else if (field === 'type') cand.type = e.target.value;
+      else if (field === 'cat') cand.cat = e.target.value;
+      else if (field === 'amount') cand.amount = butceNum(e.target.value);
+      else if (field === 'note') cand.note = e.target.value;
+    });
+  });
+  box.querySelectorAll('input[type="checkbox"]').forEach(el => {
+    el.addEventListener('change', e => {
+      const idx = parseInt(e.target.getAttribute('data-imp-idx'), 10);
+      if (!isNaN(idx) && butceImportCandidates[idx]) butceImportCandidates[idx].include = e.target.checked;
+    });
+  });
+}
+function butceCommitImport() {
+  const toAdd = butceImportCandidates.filter(c => c.include);
+  if (!toAdd.length) { stratToast('Seçili kayıt yok.'); return; }
+  toAdd.forEach(c => {
+    butceData.entries.push({ id: butceUid(), type: c.type, cat: c.cat, date: c.date, amount: c.amount, note: c.note, created: Date.now() });
   });
   saveButce().then(() => {
     const panel = document.getElementById('bd-import');
     if (panel) panel.classList.add('hidden');
-    ta.value = '';
-    stratToast('📥 ' + count + ' kayıt içe aktarıldı');
+    const ta = document.getElementById('bd-import-text');
+    if (ta) ta.value = '';
+    const pv = document.getElementById('bd-import-preview');
+    if (pv) pv.innerHTML = '';
+    butceImportCandidates = [];
+    const commit = document.getElementById('bd-import-commit');
+    if (commit) commit.disabled = true;
+    stratToast(toAdd.length + ' kayıt eklendi');
     renderButce();
   });
 }
+
 async function butceImportFile(file) {
   if (!file) return;
   const ta = document.getElementById('bd-import-text');
@@ -16809,7 +16893,7 @@ async function butceImportFile(file) {
       }
       if (ta) ta.value = full;
       if (modeSel) modeSel.value = 'text';
-      butceImport();
+      butceParseImport();
     } else if (file.type.startsWith('image/')) {
       if (!window.Tesseract) {
         await new Promise((resolve, reject) => {
@@ -16822,7 +16906,7 @@ async function butceImportFile(file) {
       const { data } = await window.Tesseract.recognize(file, 'tur+eng');
       if (ta) ta.value = (data && data.text) ? data.text : '';
       if (modeSel) modeSel.value = 'text';
-      butceImport();
+      butceParseImport();
     } else {
       stratToast('⚠️ Desteklenmeyen dosya türü.');
     }
@@ -16895,7 +16979,8 @@ function bindButcePage() {
     }
     if (e.target.closest('#bd-import-btn')) { document.getElementById('bd-import').classList.toggle('hidden'); return; }
     if (e.target.closest('#bd-import-cancel')) { document.getElementById('bd-import').classList.add('hidden'); return; }
-    if (e.target.closest('#bd-import-run')) { butceImport(); return; }
+    if (e.target.closest('#bd-import-parse')) { butceParseImport(); return; }
+    if (e.target.closest('#bd-import-commit')) { butceCommitImport(); return; }
     if (e.target.closest('#bd-view-toggle')) {
       const cur = (typeof bdTab !== 'undefined' && bdTab === 'portfoy') ? 'defter' : 'portfoy';
       bdSetTab(cur);
@@ -26385,7 +26470,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b169';
+const APP_BUILD = 'b170';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
