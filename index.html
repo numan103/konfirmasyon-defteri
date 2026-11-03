@@ -6473,13 +6473,13 @@
       <div class="strat-form-btns"><button type="button" class="btn" id="at-close">Kapat</button></div>
     </div>
   </div>
-  <div id="page-butce" class="hidden">
+  <div id="page-butce" class="hidden bd-hidden">
     <div class="strat-head">
       <div>
         <div class="strat-title">💰 Gelir/Gider
-          <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları gizle">🔒</button>
+          <button type="button" class="bd-eye-inline" id="bd-eye" title="Miktarları göster">🔓</button>
         </div>
-        <div class="bd-hide-hint" id="bd-hide-hint">🔒 Miktarları gizlemek için kilide tıklayın; tekrar tıklayınca gösterilir.</div>
+        <div class="bd-hide-hint" id="bd-hide-hint">🔒 Miktarlar gizli. Göstermek için kilide tıklayın.</div>
         <div class="strat-sub">Aylık gelir / gider takibi. Ne kadar kazandın, nereye ne kadar harcadın — pasta dilimleriyle. Bu bölüm yalnızca senin cihazında.</div>
       </div>
     </div>
@@ -16756,6 +16756,40 @@ function butceCleanImportText() {
   ta.value = t;
   stratToast('🧹 Metin temizlendi. Kontrol edip Önizle\'ye basın.');
 }
+function butceGuessCategory(type, text) {
+  const low = (text || '').toLowerCase();
+  const pairs = type === 'gelir' ? [
+    [['maaş','maas','salary','ücret'], 'Maaş'],
+    [['faiz','interest'], 'Faiz'],
+    [['kira'], 'Kira Geliri'],
+    [['satış','satis','sale'], 'Satış'],
+    [['iade','refund'], 'İade'],
+  ] : [
+    [['market','migros','bim','a101','şok','carrefour','grocery'], 'Market'],
+    [['fatura','elektrik','su','doğalgaz','dogalgaz','internet','telefon'], 'Fatura'],
+    [['kira'], 'Kira'],
+    [['komisyon','commission'], 'Komisyon'],
+    [['yemek','restaurant','restoran','cafe','kahve'], 'Yemek'],
+    [['akaryakıt','benzin','mazot','ulaşım','ulasim','taksi','otobüs','benzin'], 'Ulaşım'],
+    [['sağlık','saglik','eczane','hastane','doktor'], 'Sağlık'],
+    [['eğitim','egitim','kurs','okul'], 'Eğitim'],
+    [['giyim','kiyafet','ayakkabı'], 'Giyim'],
+  ];
+  let name = '';
+  for (const [keys, cat] of pairs) {
+    if (keys.some(k => low.indexOf(k) !== -1)) { name = cat; break; }
+  }
+  if (!name) name = type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider';
+  return butceEnsureCategory(type, name);
+}
+function butceCleanNote(text) {
+  let t = (text || '').trim();
+  // hesap numaraları / uzun rakam dizilerini maskele
+  t = t.replace(/\b\d{6,}\b/g, '***');
+  // çok uzun notları kısalt
+  if (t.length > 80) t = t.slice(0, 77) + '…';
+  return t;
+}
 function butceParseImport() {
   const ta = document.getElementById('bd-import-text');
   const mode = (document.getElementById('bd-import-mode') || {}).value || 'csv';
@@ -16804,11 +16838,11 @@ function butceParseImport() {
         const parsed = nums.map(n => butceNumTr(n)).filter(n => n > 0);
         if (parsed.length) amount = Math.max.apply(null, parsed);
       }
-      catName = type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider';
+      catName = ''; // kategori butceGuessCategory ile belirlenecek
     }
     if (!(amount > 0)) return;
-    const cat = butceEnsureCategory(type, catName || (type === 'gelir' ? 'Diğer Gelir' : 'Diğer Gider'));
-    butceImportCandidates.push({ id: butceUid(), type, cat: cat.id, date, amount, note, include: true });
+    const cat = butceGuessCategory(type, (catName || '') + ' ' + (note || ''));
+    butceImportCandidates.push({ id: butceUid(), type, cat: cat.id, date, amount, note: butceCleanNote(note), include: true });
   });
   butceRenderImportPreview();
   const commit = document.getElementById('bd-import-commit');
@@ -26510,7 +26544,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b172';
+const APP_BUILD = 'b173';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
