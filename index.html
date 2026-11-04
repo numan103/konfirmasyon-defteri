@@ -1076,8 +1076,9 @@
     -webkit-overflow-scrolling: touch;
   }
   #auth-gate.open { display: flex; }
-  .auth-box { margin: auto; width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border);
-    border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.18); padding: 30px 26px; }
+  .auth-box { margin: auto; width: 100%; max-width: 880px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.3); padding: 0; display: grid;
+    grid-template-columns: 1.04fr .96fr; overflow: hidden; }
   .auth-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 4px; }
   .auth-brand .logo-mark {
     width: 38px; height: 38px; border-radius: 10px; background: var(--pc); color: #fff;
@@ -1125,6 +1126,53 @@
   .auth-msg.err { color: var(--red); }
   .auth-msg.ok { color: var(--green); }
   .auth-note { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-3); text-align: center; line-height: 1.5; }
+  /* Giriş ekranı: fırsat odaklı iki sütun */
+  .auth-pitch { position: relative; overflow: hidden; padding: 36px 34px 30px; color: #fff;
+    background: radial-gradient(520px 320px at 8% 0%, rgba(155,147,255,.32), transparent 62%),
+                radial-gradient(420px 280px at 96% 100%, rgba(45,212,191,.14), transparent 65%),
+                linear-gradient(158deg, #191c33 0%, #0c0d18 72%); display: flex; flex-direction: column; }
+  .auth-pitch::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 40px 40px; -webkit-mask-image: radial-gradient(ellipse 80% 70% at 30% 0%, #000 30%, transparent 78%);
+    mask-image: radial-gradient(ellipse 80% 70% at 30% 0%, #000 30%, transparent 78%); }
+  .auth-pitch > * { position: relative; z-index: 1; }
+  .auth-pitch .auth-brand { margin-bottom: 24px; }
+  .auth-pitch .auth-brand h1 { color: #fff; }
+  .auth-pitch .auth-brand .sub { color: rgba(255,255,255,.55); }
+  .auth-kicker { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: .2em; color: #c7c1ff; margin-bottom: 12px; }
+  .auth-pitch h2 { font-family: var(--font-display); font-size: clamp(23px, 2.5vw, 30px); line-height: 1.22; letter-spacing: -.035em; margin: 0 0 12px; color: #fff; }
+  .auth-pitch h2 em { font-style: normal; color: #b9b1ff; }
+  .auth-pitch > p { font-size: 12.5px; line-height: 1.75; color: rgba(255,255,255,.68); margin: 0 0 18px; }
+  .auth-perks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .auth-perks li { display: flex; align-items: flex-start; gap: 11px; padding: 9px 0; border-top: 1px solid rgba(255,255,255,.09); }
+  .auth-perks li:last-child { border-bottom: 1px solid rgba(255,255,255,.09); }
+  .auth-perks .ap-ico { width: 28px; height: 28px; flex: none; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    background: rgba(155,147,255,.14); border: 1px solid rgba(155,147,255,.28); font-size: 13px; }
+  .auth-perks b { display: block; font-size: 12px; color: #fff; font-weight: 700; margin-bottom: 2px; }
+  .auth-perks span { display: block; font-size: 11px; line-height: 1.5; color: rgba(255,255,255,.56); }
+  .auth-trust { margin-top: auto; padding-top: 18px; font-size: 10px; line-height: 1.6; color: rgba(255,255,255,.4); }
+  .auth-form-col { padding: 32px 30px 26px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .auth-form-col .auth-tabs { margin-top: 0; }
+  .auth-form-col .auth-note { margin-top: 16px; }
+  .auth-x { color: #fff; background: rgba(15,17,28,.55); border: 1px solid rgba(255,255,255,.16); width: 30px; height: 30px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; z-index: 3; }
+  .auth-x:hover { color: #fff; background: rgba(15,17,28,.8); }
+  @media (max-width: 780px) {
+    .auth-box { grid-template-columns: 1fr; max-width: 470px; }
+    .auth-pitch { padding: 22px 20px 18px; }
+    .auth-pitch .auth-brand { margin-bottom: 16px; }
+    .auth-pitch h2 { font-size: 22px; margin-bottom: 8px; }
+    .auth-pitch > p { font-size: 12px; margin-bottom: 14px; }
+    .auth-kicker { margin-bottom: 9px; }
+    .auth-perks { grid-template-columns: 1fr 1fr; gap: 0 14px; }
+    .auth-perks li { border-top: none; padding: 5px 0; }
+    .auth-perks li:last-child { border-bottom: none; }
+    .auth-perks .ap-ico { width: 22px; height: 22px; border-radius: 7px; font-size: 11px; }
+    .auth-perks b { font-size: 11.5px; margin-bottom: 0; }
+    .auth-perks span { display: none; }
+    .auth-trust { display: none; }
+    .auth-form-col { padding: 20px 20px 22px; }
+  }
   .hidden { display: none !important; }
   /* Başlıktaki kullanıcı rozeti */
   .tophead-inner { justify-content: space-between; }
@@ -4609,7 +4657,33 @@
   #landing .lp-explore span { transition: transform .2s; }
   #landing .lp-explore:hover span { transform: translateY(4px); }
   #landing .lp-art { position: relative; min-width: 0; isolation: isolate; }
-  #landing .lp-art img { display: block; width: 112%; max-width: none; height: auto; margin-left: -6%; animation: lpFloat 9s ease-in-out infinite; }
+  #landing .lp-signal-board { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 20px; background: linear-gradient(160deg, rgba(33,35,62,.92), rgba(12,13,24,.97)); box-shadow: 0 30px 74px rgba(0,0,0,.4); animation: lpBoardFloat 10s ease-in-out infinite; }
+  #landing .lp-signal-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(255,255,255,.03); color: rgba(255,255,255,.72); font-size: 11px; }
+  #landing .lp-signal-top em { margin-left: auto; font-style: normal; color: rgba(255,255,255,.38); font-size: 10px; }
+  #landing .lp-signal-card { padding: 13px 14px; border: 1px solid rgba(255,255,255,.09); border-radius: 14px; background: rgba(255,255,255,.045); color: #fff; }
+  #landing .lp-sig-trade { grid-column: 1 / -1; }
+  #landing .lp-sig-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  #landing .lp-sig-type { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.82); }
+  #landing .lp-sig-badge { font-size: 9px; letter-spacing: .07em; font-weight: 800; padding: 3px 7px; border-radius: 5px; border: 1px solid transparent; white-space: nowrap; }
+  #landing .lp-sig-badge.long { color: #6ee7b7; background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.35); }
+  #landing .lp-sig-badge.neutral { color: #c4b5fd; background: rgba(155,147,255,.12); border-color: rgba(155,147,255,.32); }
+  #landing .lp-sig-badge.soft { color: rgba(255,255,255,.55); background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); font-weight: 600; }
+  #landing .lp-sig-pair { font-size: 15px; font-weight: 700; letter-spacing: .02em; margin-bottom: 10px; }
+  #landing .lp-sig-pair em { font-style: normal; font-size: 10px; font-weight: 500; color: rgba(255,255,255,.42); margin-left: 4px; }
+  #landing .lp-sig-levels { display: grid; gap: 6px; }
+  #landing .lp-sig-levels div { display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 8px; }
+  #landing .lp-sig-levels span { font-size: 9.5px; color: rgba(255,255,255,.45); }
+  #landing .lp-sig-levels i { height: 5px; width: var(--w); border-radius: 999px; background: linear-gradient(90deg, rgba(155,147,255,.9), rgba(94,234,212,.85)); }
+  #landing .lp-sig-levels div:nth-child(3) i { background: linear-gradient(90deg, rgba(248,113,113,.85), rgba(248,113,113,.3)); }
+  #landing .lp-hero .lp-sig-note { margin: 9px 0 0; font-size: 10px; line-height: 1.5; color: rgba(255,255,255,.45); }
+  #landing .lp-sig-spark { display: block; width: 100%; height: 46px; color: #a89aff; margin-top: 2px; }
+  #landing .lp-sig-bars { display: flex; align-items: flex-end; gap: 5px; height: 46px; margin-top: 4px; }
+  #landing .lp-sig-bars i { flex: 1; height: var(--h); border-radius: 3px 3px 1px 1px; background: linear-gradient(180deg, rgba(94,234,212,.75), rgba(155,147,255,.18)); }
+  #landing .lp-sig-community { position: absolute; right: 22px; bottom: -16px; display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: 999px; background: #f3f4ff; color: #22243a; font-size: 10.5px; font-weight: 500; box-shadow: 0 12px 30px rgba(0,0,0,.32); }
+  #landing .lp-sig-community b { font-weight: 800; }
+  #landing .lp-hero-pillars { display: flex; flex-wrap: wrap; gap: 8px; max-width: 540px; margin-top: 22px; }
+  #landing .lp-hero-pillars > span { display: inline-flex; align-items: baseline; gap: 7px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 11px; color: var(--text-3); background: var(--card); }
+  #landing .lp-hero-pillars b { font-size: 11.5px; color: var(--text); font-weight: 700; }
   #landing .lp-art-halo { position: absolute; inset: 20%; z-index: -1; background: radial-gradient(circle, rgba(132,103,255,.2), transparent 70%); }
   #landing .lp-art-note { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11px; color: var(--text-3); }
   #landing .lp-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px rgba(52,211,153,.35); }
@@ -4626,6 +4700,7 @@
   #landing .lp-demo-graphic svg { width: 100%; height: 170px; display: block; }
   #landing .lp-demo-graphic > span { font-size: 10px; letter-spacing: .12em; color: var(--text-3); }
   #landing .lp-portfolio-graphic { color: #55bca8; }
+  #landing .lp-onchain-graphic { color: #5ec8db; }
   #landing .lp-education-graphic { color: #c6a0df; }
   #landing .lp-demo-detail { padding: 24px; }
   #landing .lp-demo-kicker { font-size: 9px; letter-spacing: .12em; color: var(--lp-accent); }
@@ -4642,6 +4717,7 @@
   #landing .lp-reveal { opacity: 0; transform: translateY(22px); transition: opacity .65s ease, transform .65s ease; }
   #landing .lp-reveal.lp-visible { opacity: 1; transform: none; }
   @keyframes lpFloat { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+  @keyframes lpBoardFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
   @keyframes lpPanelIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
   @media (max-width: 850px) {
     #landing .lp-hero { grid-template-columns: 1fr; text-align: center; gap: 16px; padding-top: 44px; }
@@ -4777,64 +4853,93 @@
   </nav>
   <section class="lp-hero">
     <div class="lp-hero-copy">
-    <span class="lp-badge">ANALİZ · EĞİTİM · TAKİP</span>
-    <h2>Piyasayı takip et.<br><span class="grad">Kararının arkasını gör.</span></h2>
-    <p>İşlem kanalındaki analizleri incele, paylaşılan portföyü takip et, Alfa Edu ile bilgini geliştir. İhtiyacın olan araçları tek bir çalışma alanında bul.</p>
+    <span class="lp-badge">İŞLEM · BİAS · PORTFÖY · TOPLULUK</span>
+    <h2>Fırsatı gör.<br><span class="grad">Gerekçesini oku.</span></h2>
+    <p>İşlemlerimizi, biaslarımızı ve portföy yaklaşımımızı açıkça paylaşıyoruz. Grafiğin arkasındaki gerekçeyi incele, toplulukta fikir alışverişi yap, kendi kararını daha bilinçli ver.</p>
     <div class="lp-cta">
       <button class="primary" id="hero-register" type="button" data-i18n="hero.register">Ücretsiz başla →</button>
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
-    <div class="lp-assurance">Ücretsiz hesap · Abonelik ücreti yok · Referans doğrulamasıyla premium</div>
+    <div class="lp-assurance">Ücretsiz üyelik · Aidat yok · Premium referans doğrulamasıyla</div>
+    <div class="lp-hero-pillars" aria-label="Platformun dört odağı">
+      <span><b>📈 İşlem</b>Giriş · hedef · gerekçe</span>
+      <span><b>🧭 Bias</b>Yön görüşü · onchain</span>
+      <span><b>💼 Portföy</b>Paylaşılan yaklaşım</span>
+      <span><b>💬 Topluluk</b>Fikir alışverişi</span>
+    </div>
     <a class="lp-explore" href="#lp-showcase">Çalışma alanını keşfet <span aria-hidden="true">↓</span></a>
     </div>
     <div class="lp-art">
       <div class="lp-art-halo" aria-hidden="true"></div>
-      <img src="/assets/landing-workspace.svg" width="720" height="600" alt="Ethereum simgesi etrafında analiz ve takip kartlarını gösteren ürün illüstrasyonu" fetchpriority="high">
-      <div class="lp-art-note"><span class="lp-status-dot" aria-hidden="true"></span>Bir piyasa. Birden fazla bakış açısı.</div>
+      <div class="lp-signal-board" role="img" aria-label="İşlem, bias ve portföy paylaşımını gösteren temsili arayüz">
+        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span> Alfa akışı <em>temsili görünüm</em></div>
+        <article class="lp-signal-card lp-sig-trade">
+          <div class="lp-sig-head"><span class="lp-sig-type">📈 İşlem paylaşımı</span><b class="lp-sig-badge long" lang="en">LONG</b></div>
+          <div class="lp-sig-pair">BTC / USDT <em>4s</em></div>
+          <div class="lp-sig-levels">
+            <div><span>Giriş</span><i style="--w:34%"></i></div>
+            <div><span>Hedef</span><i style="--w:78%"></i></div>
+            <div><span>Stop</span><i style="--w:52%"></i></div>
+          </div>
+          <p class="lp-sig-note">“Talep bölgesi + hacim onayı”</p>
+        </article>
+        <article class="lp-signal-card">
+          <div class="lp-sig-head"><span class="lp-sig-type">🧭 Bias</span><b class="lp-sig-badge neutral">NÖTR</b></div>
+          <svg class="lp-sig-spark" viewBox="0 0 120 46" fill="none" aria-hidden="true"><path d="M2 33h15l8-13 9 18 12-24 10 15 14-9 12 6 12-12 14 5h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 33h116" stroke="currentColor" stroke-width="1" opacity=".18"/></svg>
+          <p class="lp-sig-note">Funding dengeli · CVD yatay</p>
+        </article>
+        <article class="lp-signal-card">
+          <div class="lp-sig-head"><span class="lp-sig-type">💼 Portföy</span><b class="lp-sig-badge soft">Salt okunur</b></div>
+          <div class="lp-sig-bars" aria-hidden="true"><i style="--h:44%"></i><i style="--h:66%"></i><i style="--h:52%"></i><i style="--h:82%"></i><i style="--h:61%"></i><i style="--h:74%"></i></div>
+          <p class="lp-sig-note">Dağılım · pozisyon · not</p>
+        </article>
+        <div class="lp-sig-community">💬 <b>Topluluk</b> fikir alışverişi</div>
+      </div>
+      <div class="lp-art-note">Temsili arayüz — canlı veri veya performans sonucu değildir.</div>
     </div>
   </section>
   </div>
   <section class="lp-showcase" id="lp-showcase" aria-labelledby="lp-showcase-title">
-    <div class="lp-showcase-heading"><span class="lp-eyebrow">TEK ALAN, ÜÇ PERSPEKTİF</span><h3 id="lp-showcase-title">Sadece bakma.<br>Bağlantıyı kur.</h3><p>Analizi incele, portföyü ayrı takip et, öğrendiklerini derinleştir.</p></div>
+    <div class="lp-showcase-heading"><span class="lp-eyebrow">TEK ALAN, ÜÇ BAKIŞ</span><h3 id="lp-showcase-title">İşlem, veri ve portföy.<br>Aynı akışta.</h3><p>İşlemleri gerekçesiyle incele, bias ve onchain verisini oku, paylaşılan portföy yaklaşımını takip et.</p></div>
     <div class="lp-demo">
       <div class="lp-demo-tabs" role="tablist" aria-label="Platform bölümleri">
-        <button type="button" role="tab" id="lp-demo-tab-analysis" aria-controls="lp-demo-analysis" aria-selected="true" data-lp-tab="analysis">İşlem Kanalı</button>
-        <button type="button" role="tab" id="lp-demo-tab-portfolio" aria-controls="lp-demo-portfolio" aria-selected="false" tabindex="-1" data-lp-tab="portfolio">Portföy</button>
-        <button type="button" role="tab" id="lp-demo-tab-education" aria-controls="lp-demo-education" aria-selected="false" tabindex="-1" data-lp-tab="education">Alfa Edu</button>
+        <button type="button" role="tab" id="lp-demo-tab-analysis" aria-controls="lp-demo-analysis" aria-selected="true" data-lp-tab="analysis">İşlemler</button>
+        <button type="button" role="tab" id="lp-demo-tab-portfolio" aria-controls="lp-demo-portfolio" aria-selected="false" tabindex="-1" data-lp-tab="portfolio">Bias &amp; Onchain</button>
+        <button type="button" role="tab" id="lp-demo-tab-education" aria-controls="lp-demo-education" aria-selected="false" tabindex="-1" data-lp-tab="education">Portföy</button>
       </div>
       <div class="lp-demo-panel" id="lp-demo-analysis" role="tabpanel" aria-labelledby="lp-demo-tab-analysis">
-        <div class="lp-demo-graphic lp-analysis-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><path d="M20 42h380M20 95h380M20 148h380M85 20v150M168 20v150M251 20v150M334 20v150" stroke="currentColor" opacity=".1"/><rect x="64" y="71" width="276" height="39" rx="6" fill="currentColor" opacity=".07"/><path d="m35 137 43-31 39 15 43-67 42 37 41-15 45 39 43-55 48 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="288" cy="115" r="12" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4"/><path d="M315 121h63" stroke="currentColor" stroke-dasharray="3 5"/></svg><span>Fiyat · Bölge · Senaryo</span></div>
-        <div class="lp-demo-detail"><span class="lp-demo-kicker">ANALİZİN ARKASINDAKİ FİKİR</span><h4>Grafikten gerekçeye.</h4><p>İşlem kanalındaki görselleri, analiz notlarını ve güncellemeleri aynı akışta incele.</p><div class="lp-demo-chips"><span>Analiz görselleri</span><span>İşlem güncellemeleri</span></div></div>
+        <div class="lp-demo-graphic lp-analysis-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><path d="M20 42h380M20 95h380M20 148h380M85 20v150M168 20v150M251 20v150M334 20v150" stroke="currentColor" opacity=".1"/><rect x="64" y="71" width="276" height="39" rx="6" fill="currentColor" opacity=".07"/><path d="m35 137 43-31 39 15 43-67 42 37 41-15 45 39 43-55 48 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="288" cy="115" r="12" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4"/><path d="M315 121h63" stroke="currentColor" stroke-dasharray="3 5"/></svg><span>Giriş · Hedef · Stop</span></div>
+        <div class="lp-demo-detail"><span class="lp-demo-kicker">İŞLEMİN ARKASINDAKİ FİKİR</span><h4>Grafikten gerekçeye.</h4><p>İşlemleri giriş, hedef, stop ve senaryo notlarıyla birlikte incele. Sonucu değil, kararın mantığını gör.</p><div class="lp-demo-chips"><span>İşlem paylaşımları</span><span>Gerekçe notları</span></div></div>
       </div>
       <div class="lp-demo-panel" id="lp-demo-portfolio" role="tabpanel" aria-labelledby="lp-demo-tab-portfolio" hidden>
-        <div class="lp-demo-graphic lp-portfolio-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><circle cx="130" cy="95" r="63" stroke="currentColor" stroke-width="20" opacity=".1"/><circle cx="130" cy="95" r="63" stroke="currentColor" stroke-width="20" stroke-dasharray="160 396" transform="rotate(-90 130 95)"/><circle cx="130" cy="95" r="63" stroke="#AEA0FF" stroke-width="20" stroke-dasharray="90 396" stroke-dashoffset="-168" transform="rotate(-90 130 95)"/><path d="M243 56h139M243 96h139M243 136h139" stroke="currentColor" stroke-width="7" stroke-linecap="round" opacity=".2"/><circle cx="242" cy="56" r="4" fill="currentColor"/><circle cx="242" cy="96" r="4" fill="#AEA0FF"/></svg><span>Pozisyon · Dağılım · Notlar</span></div>
-        <div class="lp-demo-detail"><span class="lp-demo-kicker">İŞLEM KANALINDAN AYRI</span><h4>Büyük resmi takip et.</h4><p>Yöneticinin paylaştığı portföyde pozisyonları, satışları ve notları salt okunur görünümde incele.</p><div class="lp-demo-chips"><span>Paylaşılan portföy</span><span>Salt okunur</span></div></div>
+        <div class="lp-demo-graphic lp-onchain-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><path d="M24 44h372M24 92h372M24 140h372" stroke="currentColor" opacity=".1"/><path d="M34 138c26-8 32-46 60-42s30 36 56 24 26-48 54-44 30 42 58 30 34-40 62-26 40 22 52 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="72" y="96" width="9" height="36" rx="3" fill="currentColor" opacity=".45"/><rect x="126" y="76" width="9" height="56" rx="3" fill="currentColor" opacity=".3"/><rect x="238" y="64" width="9" height="68" rx="3" fill="currentColor" opacity=".45"/><rect x="330" y="88" width="9" height="44" rx="3" fill="currentColor" opacity=".3"/><circle cx="180" cy="122" r="5" fill="#5EEAD4"/><circle cx="300" cy="94" r="5" fill="#AEA0FF"/><path d="M180 122 300 94" stroke="#5EEAD4" stroke-dasharray="3 5"/></svg><span>Funding · CVD · Akış</span></div>
+        <div class="lp-demo-detail"><span class="lp-demo-kicker">FİYATIN ARKASINDAKİ VERİ</span><h4>Yönü veriyle oku.</h4><p>Bias görüşünü funding, CVD ve akış verileriyle birlikte değerlendir; fiyat hareketinin nedenini gör.</p><div class="lp-demo-chips"><span>Bias notları</span><span>Onchain metrikleri</span></div></div>
       </div>
       <div class="lp-demo-panel" id="lp-demo-education" role="tabpanel" aria-labelledby="lp-demo-tab-education" hidden>
-        <div class="lp-demo-graphic lp-education-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><rect x="53" y="28" width="201" height="132" rx="14" fill="currentColor" opacity=".08"/><circle cx="153" cy="94" r="30" stroke="currentColor" stroke-width="2"/><path d="m146 80 22 14-22 14V80Z" fill="currentColor"/><path d="M282 55h90m-90 40h66m-66 40h80" stroke="currentColor" stroke-width="7" stroke-linecap="round" opacity=".3"/></svg><span>Bölüm · Konu · Video</span></div>
-        <div class="lp-demo-detail"><span class="lp-demo-kicker">KENDİ HIZINDA İLERLE</span><h4>Bilgiyi adım adım kur.</h4><p>Alfa Edu içindeki konulara ayrılmış video eğitimler ve kaynaklarla ihtiyaç duyduğun başlığa odaklan.</p><div class="lp-demo-chips"><span>Video eğitimler</span><span>Konu bazlı kaynaklar</span></div></div>
+        <div class="lp-demo-graphic lp-portfolio-graphic" aria-hidden="true"><svg viewBox="0 0 420 190" fill="none"><circle cx="130" cy="95" r="63" stroke="currentColor" stroke-width="20" opacity=".1"/><circle cx="130" cy="95" r="63" stroke="currentColor" stroke-width="20" stroke-dasharray="160 396" transform="rotate(-90 130 95)"/><circle cx="130" cy="95" r="63" stroke="#AEA0FF" stroke-width="20" stroke-dasharray="90 396" stroke-dashoffset="-168" transform="rotate(-90 130 95)"/><path d="M243 56h139M243 96h139M243 136h139" stroke="currentColor" stroke-width="7" stroke-linecap="round" opacity=".2"/><circle cx="242" cy="56" r="4" fill="currentColor"/><circle cx="242" cy="96" r="4" fill="#AEA0FF"/></svg><span>Pozisyon · Dağılım · Notlar</span></div>
+        <div class="lp-demo-detail"><span class="lp-demo-kicker">İŞLEM KANALINDAN AYRI</span><h4>Büyük resmi takip et.</h4><p>Yöneticinin paylaştığı portföyde pozisyonları, satışları ve notları salt okunur görünümde incele.</p><div class="lp-demo-chips"><span>Paylaşılan portföy</span><span>Salt okunur</span></div></div>
       </div>
       <p class="lp-demo-caption">Ürün akışını anlatan temsili çizimlerdir; canlı veri veya işlem sonucu göstermez.</p>
     </div>
   </section>
   <section class="lp-stories" aria-labelledby="lp-stories-title">
-    <div class="lp-stories-intro"><div><span class="lp-eyebrow">DAHA BİLİNÇLİ BİR RUTİN</span><h3 id="lp-stories-title">Ekranın ötesinde,<br>bir çalışma düzeni.</h3></div><p>Her hareketi yakalamak zorunda değilsin. Önce hazırlan, sonra incele; öğrenmeye yer aç.</p></div>
+    <div class="lp-stories-intro"><div><span class="lp-eyebrow">BİRLİKTE OKUMAK</span><h3 id="lp-stories-title">Tek başına bakmak<br>zorunda değilsin.</h3></div><p>İşlemleri ve biasları paylaşıyor, gerekçeleri birlikte tartışıyoruz. Sorunu sor, fikrini söyle, topluluğun okumasını gör.</p></div>
     <div class="lp-photo-grid">
       <article class="lp-photo-card lp-photo-main">
-        <img src="/assets/landing-workspace-photo.jpg" alt="Sade bir masada dizüstü bilgisayarla hazırlanmış çalışma alanı" width="1100" height="733" loading="lazy" decoding="async">
+        <img src="/assets/landing-workspace-scene.svg" alt="Çok ekranlı trading masası ve grafik panellerini gösteren illüstrasyon" width="1100" height="733" loading="lazy" decoding="async">
         <div class="lp-photo-shade" aria-hidden="true"></div>
-        <div class="lp-photo-copy"><span>01 — ODAKLAN</span><h4>Kendi alanını kur.</h4><p>Grafiklerin, takip listen ve araçların aynı yerde. Daha az dağınıklık, daha net bir başlangıç.</p><a href="#lp-showcase">Çalışma alanını incele <span aria-hidden="true">↗</span></a></div>
-        <span class="lp-photo-tag" aria-hidden="true">ALFA / WORKSPACE</span>
+        <div class="lp-photo-copy"><span>01 — İŞLEM</span><h4>Gerekçesiyle paylaşılan işlemler.</h4><p>Grafik, seviye ve senaryo aynı akışta. Sonucu değil, kararın arkasındaki mantığı gör.</p><a href="#lp-showcase">İşlem kanalını incele <span aria-hidden="true">↗</span></a></div>
+        <span class="lp-photo-tag" aria-hidden="true">ALFA / TRADES</span>
       </article>
       <article class="lp-photo-card">
-        <img src="/assets/landing-research-photo.jpg" alt="Masa üzerinde notlar ve verilerle yapılan araştırma" width="900" height="600" loading="lazy" decoding="async">
+        <img src="/assets/landing-research-scene.svg" alt="Onchain veri akışını ve piyasa yönünü gösteren soyut illüstrasyon" width="900" height="600" loading="lazy" decoding="async">
         <div class="lp-photo-shade" aria-hidden="true"></div>
-        <div class="lp-photo-copy"><span>02 — İNCELE</span><h4>Sonuçtan önce gerekçe.</h4><p>Analiz notları ve görsellerle paylaşılan fikrin arkasındaki yaklaşımı incele.</p></div>
+        <div class="lp-photo-copy"><span>02 — VERİ</span><h4>Bias ve onchain okuması.</h4><p>Yön görüşünü funding, CVD ve akış verileriyle birlikte oku; fiyatın neden hareket ettiğini gör.</p></div>
       </article>
       <article class="lp-photo-card">
-        <img src="/assets/landing-learning-photo.jpg" alt="Bilgisayar başında birlikte çalışan ve öğrenen kişiler" width="900" height="600" loading="lazy" decoding="async">
+        <img src="/assets/landing-community-scene.svg" alt="Tartışan ve fikir alışverişi yapan bir trader topluluğu illüstrasyonu" width="900" height="600" loading="lazy" decoding="async">
         <div class="lp-photo-shade" aria-hidden="true"></div>
-        <div class="lp-photo-copy"><span>03 — GELİŞTİR</span><h4>Öğrenmek, sürecin parçası.</h4><p>Alfa Edu ile ihtiyaç duyduğun konuya dön; bilgini kendi hızında derinleştir.</p></div>
+        <div class="lp-photo-copy"><span>03 — TOPLULUK</span><h4>Fikrini paylaş, tartış.</h4><p>Sorular sor, alternatif görüşleri dinle, kendi yaklaşımını geliştir. Topluluk akışı herkese açık.</p></div>
       </article>
     </div>
   </section>
@@ -4844,12 +4949,12 @@
     <p>Analizi, öğrenmeyi ve takibi birbirine bağlayan araçlar.</p>
   </div>
     <section class="lp-features">
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">01 / ANALİZ</span><h3>İşlem Kanalı</h3><p>Grafikler, analizler ve işlem güncellemeleri. Yalnızca sonucu değil, paylaşılan gerekçeyi de incele.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">01 / İŞLEM</span><h3>İşlem Kanalı</h3><p>Giriş, hedef, stop ve gerekçe aynı akışta. Yalnızca sonucu değil, kararın arkasındaki senaryoyu da incele.</p><span class="lp-feature-access">Premium</span></div></article>
     <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">02 / TAKİP</span><h3>Paylaşılan Portföy</h3><p>Yöneticinin pozisyonlarını, satışlarını, notlarını ve portföy grafiğini salt okunur olarak takip et. İşlem kanalından ayrı bir görünüm.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">03 / ÖĞRENME</span><h3>Alfa Edu</h3><p>Konulara ayrılmış video eğitimler ve kaynaklarla bilgini adım adım geliştir. İhtiyacın olan derse kolayca dön.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">04 / ÇALIŞMA</span><h3>Trading Terminali</h3><p>Canlı grafik ve watchlist ile takip ettiğin piyasaları aynı çalışma alanında incele.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">05 / VERİ</span><h3>Onchain Verileri</h3><p>Funding, CVD ve open interest görünümlerini bir arada inceleyerek fiyat hareketine farklı açılardan bak.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">06 / HAZIRLIK</span><h3>Calculator &amp; Takvim</h3><p>Riske göre pozisyon boyutunu hesapla; önemli ekonomik veri açıklamalarını işlem öncesinde kontrol et.</p><span class="lp-feature-access free">Ücretsiz üyelik</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">03 / VERİ</span><h3>Bias &amp; Onchain</h3><p>Yön görüşünü funding, CVD ve açık pozisyon verileriyle birlikte oku. Fiyat hareketine farklı açılardan bak.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">04 / ÖĞRENME</span><h3>Alfa Edu</h3><p>Konulara ayrılmış video eğitimler ve kaynaklarla bilgini adım adım geliştir. İhtiyacın olan derse kolayca dön.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">05 / ÇALIŞMA</span><h3>Trading Terminali</h3><p>Canlı grafik ve watchlist ile takip ettiğin piyasaları aynı çalışma alanında incele.</p><span class="lp-feature-access">Premium</span></div></article>
+    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">06 / TOPLULUK</span><h3>Topluluk</h3><p>İşlemleri ve fikirleri paylaş, soru sor, alternatif okumaları dinle. Fikir alışverişi ücretsiz üyelere açık.</p><span class="lp-feature-access free">Ücretsiz üyelik</span></div></article>
     </section>
 
 
@@ -4861,7 +4966,7 @@
   <div class="lp-pricing">
     <div class="lp-price-card">
       <div class="lp-price-name">Ücretsiz Üye</div>
-      <div class="lp-price-desc">Platformu tanı, temel araçlarla başla.</div>
+      <div class="lp-price-desc">Platformu tanı, temel araçlarla başla, toplulukta fikir alışverişi yap.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b></div>
       <div class="lp-price-period">Herkese açık — kayıt yeterli</div>
       <ul class="lp-price-feats">
@@ -4869,13 +4974,14 @@
         <li>Ekonomik takvim ve önemli veri açıklamaları</li>
         <li>Ana sayfada seçili işlem sonuçlarının önizlemesi</li>
         <li>Paylaşılan portföyün özet görünümü</li>
+        <li>Topluluk akışında fikir alışverişi</li>
       </ul>
       <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
     </div>
     <div class="lp-price-card featured">
       <div class="lp-price-badge">Tam erişim</div>
       <div class="lp-price-name">Premium</div>
-      <div class="lp-price-desc">Analizden eğitime, daha kapsamlı bir çalışma alanı.</div>
+      <div class="lp-price-desc">İşlemlerden veriye, eğitime kadar daha kapsamlı bir çalışma alanı.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b><span> / aidat yok</span></div>
       <div class="lp-price-period">Erişim, referans doğrulamasıyla açılır</div>
       <ul class="lp-price-feats">
@@ -4884,7 +4990,7 @@
         <li>Paylaşılan portföy — pozisyonlar, satışlar ve notlar</li>
         <li>Trading Terminali — canlı grafik ve watchlist</li>
         <li>Alfa Edu — video eğitimler ve kaynaklar</li>
-        <li>Onchain veriler — funding, CVD, akış</li>
+        <li>Bias &amp; Onchain — yön görüşü, funding, CVD, akış</li>
         <li>Gelir / Gider — bütçe ve takip</li>
         <li>Çalışma Panosu</li>
       </ul>
@@ -4897,18 +5003,18 @@
     <div class="lp-steps">
       <div><span>01</span><h4>Hesabını oluştur</h4><p>Ücretsiz kayıt ol. Temel araçları ve ana sayfadaki önizlemeleri keşfet.</p></div>
       <div><span>02</span><h4>Referansını doğrulat</h4><p>OKX veya Bybit referans bağlantısıyla oluşturduğun hesabın UID bilgisini erişim sayfasından ilet.</p></div>
-      <div><span>03</span><h4>Premium'u aç</h4><p>Doğrulama onaylandığında işlem kanalı, Alfa Edu ve diğer premium araçlara eriş.</p></div>
+      <div><span>03</span><h4>Premium'u aç</h4><p>Doğrulama onaylandığında işlem kanalı, bias verileri, paylaşılan portföy ve Alfa Edu erişimine kavuş.</p></div>
     </div>
     <p class="lp-disclosure">Platform için abonelik ücreti alınmaz. Referans bağlantıları üzerinden borsalardan komisyon kazanabiliriz. Borsanın işlem ücretleri ve koşulları geçerlidir.</p>
   </section>
   <div class="lp-cta-band">
     <div class="lp-cta-inner">
-      <h3>Bir sonraki adımın daha bilinçli olsun.</h3>
-      <p>Önce platformu keşfet. Daha fazlası için referansla premium erişimini aç.</p>
+      <h3>Fırsatları birlikte okuyalım.</h3>
+      <p>Önce platformu keşfet; işlemleri, biasları ve topluluk akışını gör. Daha fazlası için referansla premium erişimini aç.</p>
       <button id="cta-register" type="button" data-i18n="cta.btn">Ücretsiz kayıt ol</button>
     </div>
   </div>
-  <footer class="lp-foot"><strong>Alfa Traders</strong><p>Analiz, eğitim ve takip için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p></footer>
+  <footer class="lp-foot"><strong>Alfa Traders</strong><p>İşlem, bias, portföy ve topluluk için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p></footer>
 </div>
 <script>
 (function () {
@@ -4956,58 +5062,72 @@
 <div id="auth-gate">
   <div class="auth-box">
     <button class="auth-x" id="auth-close" type="button" aria-label="Kapat" data-i18n-aria="auth.close">&times;</button>
-    <div class="auth-brand">
-      <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
-      <div>
-        <h1>Alfa Traders</h1>
-        <div class="sub">Disiplinli trading için çalışma alanı</div>
-      </div>
-    </div>
-    <div class="auth-tabs">
-      <button id="tab-login" class="on" type="button" data-i18n="nav.login">Giriş yap</button>
-      <button id="tab-register" type="button" data-i18n="nav.register">Kayıt ol</button>
-    </div>
-    <form id="auth-form" autocomplete="on">
-      <div class="auth-field hidden" id="f-name">
-        <label for="au-name" data-i18n="auth.name">İsim</label>
-        <input type="text" id="au-name" placeholder="Adın" data-i18n-ph="auth.namePh" autocomplete="name" maxlength="40">
-      </div>
-      <div class="auth-field" id="f-email">
-        <label for="au-email" data-i18n="auth.email">E-posta</label>
-        <input type="email" id="au-email" placeholder="ornek@mail.com" autocomplete="email">
-      </div>
-      <div class="auth-field" id="f-pass">
-        <label for="au-pass" data-i18n="auth.pass">Şifre</label>
-        <div class="auth-pass-wrap">
-          <input type="password" id="au-pass" placeholder="En az 6 karakter" data-i18n-ph="auth.passPh" autocomplete="current-password" minlength="6">
-          <button type="button" class="auth-pass-toggle" id="au-pass-toggle" aria-label="Şifreyi göster" tabindex="-1">Göster</button>
+    <div class="auth-pitch">
+      <div class="auth-brand">
+        <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
+        <div>
+          <h1>Alfa Traders</h1>
+          <div class="sub">İşlem · bias · portföy · topluluk</div>
         </div>
       </div>
-      <label class="auth-remember" id="f-remember" title="Bu cihazda seni hatırlayalım" data-i18n-title="auth.remember">
-        <input type="checkbox" id="au-remember" checked>
-        <span data-i18n="auth.remember">Beni hatırla</span>
-      </label>
-      <button type="submit" class="auth-submit" id="au-submit" data-i18n="nav.login">Giriş yap</button>
-      <div class="auth-alt">
-        <button type="button" class="auth-link" id="forgot-link" data-i18n="auth.forgot">Şifreni mi unuttun?</button>
-        <button type="button" class="auth-link hidden" id="back-login" data-i18n="auth.back">← Girişe dön</button>
-      </div>
-      <div class="auth-msg" id="au-msg"></div>
-    </form>
-    <div class="auth-pricing">
-      <div class="auth-price">
-        <div class="auth-price-name">Ücretsiz Üye</div>
-        <div class="auth-price-val"><span class="auth-price-free">$0</span></div>
-        <div class="auth-price-desc">Calculator, takvim ve portföy özeti</div>
-      </div>
-      <div class="auth-price featured">
-        <div class="auth-price-badge">Tam erişim</div>
-        <div class="auth-price-name">Premium</div>
-        <div class="auth-price-val">$0<span>/ aidat yok</span></div>
-        <div class="auth-price-desc">Referans doğrulamasıyla açılır</div>
-      </div>
+      <span class="auth-kicker">FIRSATLARI BİRLİKTE OKUYORUZ</span>
+      <h2>İşlemleri gör.<br>Gerekçeyi oku.<br><em>Topluluğa katıl.</em></h2>
+      <p>Paylaştığımız işlemleri, biasları ve portföy yaklaşımını takip et; toplulukta fikir alışverişi yap. Kararlarını kendi hesabında, kendi riskinle uygularsın.</p>
+      <ul class="auth-perks">
+        <li><span class="ap-ico" aria-hidden="true">📈</span><div><b>İşlem paylaşımı</b><span>Giriş, hedef, stop ve gerekçe aynı akışta.</span></div></li>
+        <li><span class="ap-ico" aria-hidden="true">🧭</span><div><b>Bias &amp; onchain</b><span>Yön görüşü ve veri okuması bir arada.</span></div></li>
+        <li><span class="ap-ico" aria-hidden="true">💼</span><div><b>Portföy yaklaşımı</b><span>Paylaşılan portföyü salt okunur izle.</span></div></li>
+        <li><span class="ap-ico" aria-hidden="true">💬</span><div><b>Topluluk</b><span>Sor, tartış, fikrini paylaş.</span></div></li>
+      </ul>
+      <div class="auth-trust">Ücretsiz üyelik · Aidat yok · Premium referans doğrulamasıyla açılır. Fonların senin hesabında kalır.</div>
     </div>
-    <p class="auth-note">Abonelik ücreti alınmaz. Premium, referans doğrulamasıyla açılır; portföy özeti herkese açıktır.</p>
+    <div class="auth-form-col">
+      <div class="auth-tabs">
+        <button id="tab-login" class="on" type="button" data-i18n="nav.login">Giriş yap</button>
+        <button id="tab-register" type="button" data-i18n="nav.register">Kayıt ol</button>
+      </div>
+      <form id="auth-form" autocomplete="on">
+        <div class="auth-field hidden" id="f-name">
+          <label for="au-name" data-i18n="auth.name">İsim</label>
+          <input type="text" id="au-name" placeholder="Adın" data-i18n-ph="auth.namePh" autocomplete="name" maxlength="40">
+        </div>
+        <div class="auth-field" id="f-email">
+          <label for="au-email" data-i18n="auth.email">E-posta</label>
+          <input type="email" id="au-email" placeholder="ornek@mail.com" autocomplete="email">
+        </div>
+        <div class="auth-field" id="f-pass">
+          <label for="au-pass" data-i18n="auth.pass">Şifre</label>
+          <div class="auth-pass-wrap">
+            <input type="password" id="au-pass" placeholder="En az 6 karakter" data-i18n-ph="auth.passPh" autocomplete="current-password" minlength="6">
+            <button type="button" class="auth-pass-toggle" id="au-pass-toggle" aria-label="Şifreyi göster" tabindex="-1">Göster</button>
+          </div>
+        </div>
+        <label class="auth-remember" id="f-remember" title="Bu cihazda seni hatırlayalım" data-i18n-title="auth.remember">
+          <input type="checkbox" id="au-remember" checked>
+          <span data-i18n="auth.remember">Beni hatırla</span>
+        </label>
+        <button type="submit" class="auth-submit" id="au-submit" data-i18n="nav.login">Giriş yap</button>
+        <div class="auth-alt">
+          <button type="button" class="auth-link" id="forgot-link" data-i18n="auth.forgot">Şifreni mi unuttun?</button>
+          <button type="button" class="auth-link hidden" id="back-login" data-i18n="auth.back">← Girişe dön</button>
+        </div>
+        <div class="auth-msg" id="au-msg"></div>
+      </form>
+      <div class="auth-pricing">
+        <div class="auth-price">
+          <div class="auth-price-name">Ücretsiz Üye</div>
+          <div class="auth-price-val"><span class="auth-price-free">$0</span></div>
+          <div class="auth-price-desc">Calculator, takvim, portföy özeti ve topluluk</div>
+        </div>
+        <div class="auth-price featured">
+          <div class="auth-price-badge">Tam erişim</div>
+          <div class="auth-price-name">Premium</div>
+          <div class="auth-price-val">$0<span>/ aidat yok</span></div>
+          <div class="auth-price-desc">Referans doğrulamasıyla açılır</div>
+        </div>
+      </div>
+      <p class="auth-note">Abonelik ücreti alınmaz. Premium, referans doğrulamasıyla açılır; portföy özeti ve topluluk herkese açıktır.</p>
+    </div>
   </div>
 </div>
 
@@ -26549,7 +26669,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b175';
+const APP_BUILD = 'b176';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

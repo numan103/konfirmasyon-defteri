@@ -52,20 +52,27 @@ test('product tabs support click and arrow keys without autoplay', () => {
   assert.equal(tabs[2].focused, true);
   assert.equal(tabs[1].tabIndex, -1);
   assert.ok(html.includes('prefers-reduced-motion: reduce'));
-  assert.ok(fs.existsSync(new URL('../assets/landing-workspace.svg', import.meta.url)));
 });
 
-test('editorial photos are local, lazy loaded and have alternative text', () => {
-  const photos = [...landing.matchAll(/<img src="(\/assets\/landing-[^"]+-photo\.jpg)"[^>]+>/g)];
-  assert.equal(photos.length, 3);
-  for (const [tag, src] of photos) {
+test('hero uses a representative signal board instead of a crypto token visual', () => {
+  assert.ok(landing.includes('class="lp-signal-board"'));
+  assert.ok(landing.includes('lp-signal-card'));
+  assert.ok(!landing.includes('Ethereum'));
+  assert.ok(!landing.includes('landing-workspace.svg'));
+  assert.ok(landing.includes('Temsili arayüz'));
+});
+
+test('story scenes are local, lazy loaded and have alternative text', () => {
+  const scenes = [...landing.matchAll(/<img src="(\/assets\/landing-[^"]+-scene\.svg)"[^>]+>/g)];
+  assert.equal(scenes.length, 3);
+  for (const [tag, src] of scenes) {
     assert.match(tag, /loading="lazy"/);
     assert.match(tag, /alt="[^"]+"/);
     assert.match(tag, /width="\d+" height="\d+"/);
-    const bytes = fs.readFileSync(new URL(`..${src}`, import.meta.url));
-    assert.equal(bytes[0], 0xff);
-    assert.equal(bytes[1], 0xd8);
-    assert.ok(bytes.length < 300000, `${src} should stay lightweight`);
+    const svg = fs.readFileSync(new URL(`..${src}`, import.meta.url), 'utf8');
+    assert.ok(svg.startsWith('<svg'), `${src} should be an SVG scene`);
+    assert.ok(svg.includes('<title'), `${src} should describe itself`);
+    assert.ok(svg.length < 20000, `${src} should stay lightweight`);
   }
   for (const target of ['lp-showcase', 'lp-features-title', 'lp-access-title']) {
     assert.ok(landing.includes(`href="#${target}"`));
