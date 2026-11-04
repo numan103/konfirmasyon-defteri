@@ -513,6 +513,7 @@
   .hc2-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--bg2); border: 1px solid var(--border); color: var(--text-3); white-space: nowrap; }
   .hc2-badge.islem { color: var(--green); border-color: rgba(34,197,94,.35); }
   .hc2-badge.analiz { color: var(--pc); border-color: rgba(123,120,245,.35); }
+  .hc2-badge.onchain { color: #06b6d4; border-color: rgba(6,182,212,.35); }
   .home-teaser { max-width: 980px; margin: 0 auto 18px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
   .ht-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
   .ht-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
@@ -7030,8 +7031,9 @@
     </div>
     <div class="at-filters" id="at-filters">
       <button type="button" class="at-fbtn on" data-atf="all">Hepsi</button>
-      <button type="button" class="at-fbtn" data-atf="analiz">📝 Analiz</button>
+      <button type="button" class="at-fbtn" data-atf="analiz">📢 Kanal</button>
       <button type="button" class="at-fbtn" data-atf="islem">📊 İşlem</button>
+      <button type="button" class="at-fbtn" data-atf="onchain">📡 Onchain & Bias</button>
       <input type="text" id="at-coin-search" class="at-coin-search" placeholder="Coin ara (BTC, ETH…)" autocomplete="off">
     </div>
     <div class="at-feed" id="at-feed">
@@ -7043,8 +7045,9 @@
       <div class="at-modal-hd"><span id="at-modal-title">Yeni Paylaşım</span><button type="button" class="at-modal-x" id="at-modal-x" aria-label="Kapat">✕</button></div>
       <div class="at-modal-body">
         <div class="at-typeseg" id="at-typeseg">
-          <button type="button" class="at-type on" data-attype="analiz">📝 Analiz</button>
+          <button type="button" class="at-type on" data-attype="analiz">📢 Kanal</button>
           <button type="button" class="at-type" data-attype="islem">📊 İşlem</button>
+          <button type="button" class="at-type" data-attype="onchain">📡 Onchain & Bias</button>
         </div>
         <div class="at-frow">
           <input type="text" id="at-f-coin" class="at-inp" placeholder="Coin / Sembol (örn. BTC)" maxlength="20">
@@ -13655,8 +13658,8 @@ async function renderHomeChannel() {
     return;
   }
   box.innerHTML = posts.map(function (p) {
-    const badge = p.type === 'islem' ? 'islem' : 'analiz';
-    const label = p.type === 'islem' ? 'Islem' : 'Analiz';
+    const badge = p.type === 'islem' ? 'islem' : (p.type === 'onchain' ? 'onchain' : 'analiz');
+    const label = p.type === 'islem' ? 'İşlem' : (p.type === 'onchain' ? 'Onchain' : 'Kanal');
     const thumb = p.img ? '<img class="hc2-thumb" src="' + esc(p.img) + '" alt="">' : '<div class="hc2-thumb"></div>';
     const title = p.title || p.text || 'Paylasim';
     return '<div class="hc2-row">' + thumb + '<div class="hc2-body"><div class="hc2-title">' + esc(title) + '</div><div class="hc2-meta">' + (p.coin ? esc(p.coin) + ' · ' : '') + (typeof atTimeAgo === 'function' ? atTimeAgo(p.ts) : '') + '</div></div><span class="hc2-badge ' + badge + '">' + label + '</span></div>';
@@ -24663,7 +24666,7 @@ function atCardHtml(p) {
   const ncom = (p.comments || []).length;
   const av = (p.author || 'A').trim().charAt(0).toUpperCase();
   let badges = '';
-  badges += '<span class="at-tag type">' + (p.type === 'islem' ? '📊 İşlem' : '📝 Analiz') + '</span>';
+  badges += '<span class="at-tag type">' + (p.type === 'islem' ? '📊 İşlem' : (p.type === 'onchain' ? '📡 Onchain & Bias' : '📢 Kanal')) + '</span>';
   if (p.coin) badges += '<span class="at-tag coin">' + esc(p.coin) + '</span>';
   if (p.bias) badges += '<span class="at-tag ' + p.bias + '">' + (p.bias === 'long' ? '🟢 Long bias' : p.bias === 'short' ? '🔴 Short bias' : '⚪ Nötr') + '</span>';
   if (p.type === 'islem' && p.dir) badges += '<span class="at-tag ' + p.dir + '">' + (p.dir === 'long' ? '🟢 LONG' : '🔴 SHORT') + '</span>';
@@ -26546,7 +26549,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b174';
+const APP_BUILD = 'b175';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
