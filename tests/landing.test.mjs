@@ -65,6 +65,46 @@ test('hero uses a representative signal board instead of a crypto token visual',
   assert.ok(landing.includes('Temsili arayüz'));
 });
 
+test('hero preview explains access and supports keyboard navigation and actions', () => {
+  const panels = new Map();
+  const tabs = ['trade', 'bias', 'portfolio', 'community'].map(name => {
+    const attrs = { 'aria-controls': `lp-sig-panel-${name}` };
+    panels.set(attrs['aria-controls'], { hidden: name !== 'trade' });
+    return {
+      attrs, handlers: {},
+      addEventListener(name, fn) { this.handlers[name] = fn; },
+      getAttribute(name) { return attrs[name]; },
+      setAttribute(name, value) { attrs[name] = value; },
+      focus() { this.focused = true; },
+    };
+  });
+  let opened = false;
+  let jumped = false;
+  const link = { handlers: {}, getAttribute: () => 'analysis', addEventListener(name, fn) { this.handlers[name] = fn; } };
+  const button = { handlers: {}, addEventListener(name, fn) { this.handlers[name] = fn; } };
+  const root = {
+    querySelectorAll: selector => selector === '[data-lp-hero-tab]' ? tabs : selector === '[data-lp-hero-jump]' ? [link] : [button],
+    querySelector: () => ({ click() { jumped = true; } }),
+  };
+  const source = [...landing.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map(match => match[1]).find(script => script.includes('[data-lp-hero-tab]'));
+  vm.runInNewContext(source, {
+    document: { getElementById: id => id === 'landing' ? root : id === 'auth-gate' ? { classList: { add() { opened = true; } } } : panels.get(id) },
+  });
+  tabs[1].handlers.click();
+  assert.equal(panels.get('lp-sig-panel-bias').hidden, false);
+  assert.equal(panels.get('lp-sig-panel-trade').hidden, true);
+  tabs[1].handlers.keydown({ key: 'End', preventDefault() {} });
+  assert.equal(tabs[3].attrs['aria-selected'], 'true');
+  assert.equal(tabs[3].focused, true);
+  link.handlers.click();
+  button.handlers.click();
+  assert.equal(jumped, true);
+  assert.equal(opened, true);
+  assert.equal((landing.match(/class="lp-preview-summary"/g) || []).length, 4);
+  assert.ok(landing.includes('ÖZET ÜCRETSİZ · DETAYLAR PREMIUM'));
+});
+
 test('story scenes are local, lazy loaded and have alternative text', () => {
   const scenes = [...landing.matchAll(/<img src="(\/assets\/landing-[^"]+-scene\.svg)"[^>]+>/g)];
   assert.equal(scenes.length, 3);

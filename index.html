@@ -4849,6 +4849,53 @@
   #landing .lp-demo-tabs button[aria-selected="true"]::after { content: ''; position: absolute; bottom: 0; left: 25%; right: 25%; height: 2px; background: var(--lp-accent); border-radius: 2px; }
   @media (max-width: 850px) { #landing .lp-section-nav { display: none; } #landing .lp-stories-intro { align-items: start; flex-direction: column; gap: 14px; } #landing .lp-stories-intro > p { max-width: 100%; } }
   @media (max-width: 640px) { #landing .lp-stories { padding: 56px 20px 0; } #landing .lp-photo-grid { grid-template-columns: 1fr; grid-template-rows: 360px 280px 280px; } #landing .lp-photo-main { grid-row: auto; } #landing .lp-photo-copy { padding: 24px; } #landing .lp-features .lp-reveal { transition-delay: 0ms; } }
+  /* A readable, hands-on product preview rather than a decorative dashboard. */
+  #landing .lp-signal-board { --preview-accent: #b7a9ff; padding: 20px; gap: 16px; animation: none; border-radius: 24px; box-shadow: 0 24px 72px rgba(0,0,0,.32), 0 0 70px rgba(139,124,246,.08); }
+  #landing .lp-signal-board:has(#lp-sig-tab-trade[aria-selected="true"]) { --preview-accent: #6ee7b7; }
+  #landing .lp-signal-board:has(#lp-sig-tab-portfolio[aria-selected="true"]) { --preview-accent: #5eead4; }
+  #landing .lp-signal-board:has(#lp-sig-tab-community[aria-selected="true"]) { --preview-accent: #fcd981; }
+  #landing .lp-signal-top { border: 0; padding: 0; background: transparent; border-radius: 0; }
+  #landing .lp-signal-top b { font-size: 9px; letter-spacing: .14em; color: #b4b8d2; }
+  #landing .lp-signal-top em { color: #9298b6; font-size: 9px; letter-spacing: .02em; text-transform: none; }
+  #landing .lp-preview-intro { grid-column: 1 / -1; }
+  #landing .lp-preview-intro h3 { margin: 0 0 6px; color: #f5f4ff; font-family: var(--font-display); font-size: clamp(18px, 1.8vw, 24px); letter-spacing: -.035em; line-height: 1.25; }
+  #landing .lp-preview-intro > span { color: #a2a8c5; font-size: 12px; line-height: 1.6; }
+  #landing .lp-signal-tabs { gap: 5px; padding: 5px; background: #101222; border-color: #30344f; border-radius: 12px; }
+  #landing .lp-signal-tabs button { min-width: 0; min-height: 44px; padding: 8px 3px; font-size: 11px; color: #aeb4d0; border-radius: 8px; }
+  #landing .lp-signal-tabs button[aria-selected="true"] { color: #fff; background: #30314c; box-shadow: inset 0 -2px var(--preview-accent), 0 2px 10px #0003; }
+  #landing .lp-sig-panel { grid-row: 4; min-height: 390px; gap: 14px; min-width: 0; }
+  #landing .lp-sig-panel[hidden] { display: flex; visibility: hidden; pointer-events: none; animation: none; }
+  #landing .lp-preview-summary { order: -1; }
+  #landing .lp-preview-access { font-size: 8px; letter-spacing: .12em; font-weight: 700; color: var(--preview-accent); }
+  #landing .lp-preview-summary h4 { font-family: var(--font-display); color: #f5f4ff; font-size: 18px; letter-spacing: -.025em; line-height: 1.4; margin: 6px 0; }
+  #landing .lp-hero .lp-preview-summary p { margin: 0; max-width: none; font-size: 12px; line-height: 1.75; color: #b5bbd4; }
+  #landing .lp-signal-card { padding: 14px; background: linear-gradient(150deg, #20243d, #15182a); border-color: #353a55; }
+  #landing .lp-sig-head { min-width: 0; }
+  #landing .lp-sig-chart svg { height: 92px; }
+  #landing .lp-sig-levels span { font-size: 10px; color: #abb2ce; }
+  #landing .lp-sig-levels b { font-size: 12px; }
+  #landing .lp-sig-type { font-size: 11px; }
+  #landing .lp-sig-rows div { font-size: 11px; padding: 7px 8px; }
+  #landing .lp-sig-rows span, #landing .lp-sig-risk span { color: #aeb5d0; }
+  #landing .lp-sig-meta span { font-size: 9px; color: #b6bdd7; }
+  #landing .lp-hero .lp-sig-msg p { margin: 0; font-size: 11px; line-height: 1.6; color: #e2e5f4; }
+  #landing .lp-sig-msg b { color: #aeb6d2; font-size: 10px; }
+  #landing .lp-sig-link { min-height: 44px; padding: 12px 14px; font-size: 12px; border-color: #515073; background: linear-gradient(110deg, #353151, #25283f); }
+  #landing .lp-sig-foot { grid-row: 5; font-size: 10px; color: #929ab9; }
+  #landing .lp-sig-hint { color: #b5bdd6; }
+  #landing .lp-art-note { margin-top: 16px; font-size: 10px; }
+  @media (max-width: 640px) {
+    #landing .lp-signal-board { padding: 14px; gap: 14px; border-radius: 20px; text-align: left; }
+    #landing .lp-signal-tabs button { font-size: 10px; gap: 4px; }
+    #landing .lp-preview-summary h4 { font-size: 17px; }
+    #landing .lp-sig-panel { min-height: 415px; }
+    #landing .lp-sig-pair-cards { gap: 8px; }
+    #landing .lp-sig-pair-cards .lp-signal-card { padding: 10px 8px; }
+    #landing .lp-sig-pair-cards .lp-sig-head { flex-wrap: wrap; }
+    #landing .lp-sig-risk { flex-wrap: wrap; }
+    #landing .lp-sig-pair-row { flex-wrap: wrap; }
+    #landing .lp-sig-foot { flex-wrap: wrap; font-size: 9px; gap: 6px; }
+  }
   @media (prefers-reduced-motion: reduce) { #landing *, #landing *::before, #landing *::after { animation: none !important; transition: none !important; } #landing .lp-reveal { opacity: 1; transform: none; } }
   /* Mobil: dokunma hedefleri en az ~36px (kucuk ama kullanilabilir) */
   @media (max-width: 680px) {
@@ -4919,7 +4966,7 @@
         <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
         <div>
           <h1>Alfa Traders</h1>
-          <div class="sub">Trader'lar için Disiplin Aracı</div>
+          <div class="sub">İşlem, veri ve fikir paylaşımı</div>
         </div>
       </div>
     </div>
@@ -4966,7 +5013,8 @@
     <div class="lp-art">
       <div class="lp-art-halo" aria-hidden="true"></div>
             <div class="lp-signal-board" role="group" aria-label="Platform önizlemesi: işlem, bias, portföy ve topluluk sekmeleri">
-        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>Alfa akışı</b><span class="lp-signal-live">içeride ne var?</span><em>temsili</em></div>
+        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>PLATFORMU DENE</b><em>temsili önizleme</em></div>
+        <div class="lp-preview-intro"><h3>İçeride seni ne bekliyor?</h3><span>Bir bölüm seç. Paylaşımları yakından tanı.</span></div>
         <div class="lp-signal-tabs" role="tablist" aria-label="Önizleme sekmeleri">
           <button type="button" role="tab" id="lp-sig-tab-trade" aria-controls="lp-sig-panel-trade" aria-selected="true" data-lp-hero-tab="trade"><span class="lp-tab-dot green" aria-hidden="true"></span>İşlem</button>
           <button type="button" role="tab" id="lp-sig-tab-bias" aria-controls="lp-sig-panel-bias" aria-selected="false" tabindex="-1" data-lp-hero-tab="bias"><span class="lp-tab-dot violet" aria-hidden="true"></span>Bias</button>
@@ -4976,7 +5024,7 @@
         <div class="lp-sig-panel" id="lp-sig-panel-trade" role="tabpanel" aria-labelledby="lp-sig-tab-trade" data-lp-hero-panel="trade">
           <article class="lp-signal-card">
             <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-avatar" aria-hidden="true">A</span> İşlem paylaşımı</span><b class="lp-sig-badge long" lang="en">LONG</b></div>
-            <div class="lp-sig-pair-row"><div class="lp-sig-pair">BTC / USDT <em>4s · swing</em></div><span class="lp-sig-rr">R:R <b>1:2.4</b></span></div>
+            <div class="lp-sig-pair-row"><div class="lp-sig-pair">BTC / USDT <em>4s · swing</em></div><span class="lp-sig-rr">R:R <b>1:1.7</b></span></div>
             <div class="lp-sig-chart" aria-hidden="true">
               <svg viewBox="0 0 320 90" fill="none" preserveAspectRatio="none">
                 <defs>
@@ -5008,7 +5056,7 @@
             </div>
             <p class="lp-sig-note">“Talep bölgesi + hacim onayı”</p>
           </article>
-          <p class="lp-sig-what"><b>İşlem kanalı</b> — giriş, hedef, stop ve gerekçe aynı kartta.</p>
+          <div class="lp-preview-summary"><span class="lp-preview-access">PREMIUM</span><h4>Sadece yön değil, işlem planı.</h4><p>Hangi seviyeden, hangi hedefle, nerede stop? Paylaştığımız işlemleri gerekçesiyle birlikte gör.</p></div>
           <a class="lp-sig-link" href="#lp-showcase" data-lp-hero-jump="analysis">İşlem kanalını gör <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-bias" role="tabpanel" aria-labelledby="lp-sig-tab-bias" data-lp-hero-panel="bias" hidden>
@@ -5035,7 +5083,7 @@
               <div class="lp-sig-meta"><span>Risk %1</span><span>Stop mesafesi</span></div>
             </article>
           </div>
-          <p class="lp-sig-what"><b>Bias &amp; onchain</b> — yön görüşü, funding, CVD ve risk planı.</p>
+          <div class="lp-preview-summary"><span class="lp-preview-access">PREMIUM</span><h4>Piyasaya hangi gözle bakıyoruz?</h4><p>Bias, yani yön görüşümüzü; funding, CVD ve pozisyon verileriyle birlikte takip et.</p></div>
           <a class="lp-sig-link" href="#lp-showcase" data-lp-hero-jump="portfolio">Bias &amp; onchain'i gör <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-portfolio" role="tabpanel" aria-labelledby="lp-sig-tab-portfolio" data-lp-hero-panel="portfolio" hidden>
@@ -5062,7 +5110,7 @@
               <div><span>Notlar &amp; gerekçe</span><b>Salt okunur</b></div>
             </div>
           </article>
-          <p class="lp-sig-what"><b>Paylaşılan portföy</b> — özet herkese açık, detaylar salt okunur.</p>
+          <div class="lp-preview-summary"><span class="lp-preview-access">ÖZET ÜCRETSİZ · DETAYLAR PREMIUM</span><h4>Portföyün arkasındaki yaklaşım.</h4><p>Paylaşılan portföyün özetini gör. Premium ile pozisyonları, satışları ve notları salt okunur incele.</p></div>
           <a class="lp-sig-link" href="#lp-showcase" data-lp-hero-jump="education">Portföy yaklaşımını gör <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-community" role="tabpanel" aria-labelledby="lp-sig-tab-community" data-lp-hero-panel="community" hidden>
@@ -5075,7 +5123,7 @@
             </div>
             <div class="lp-sig-meta"><span>Soru &amp; cevap</span><span>Fikir paylaşımı</span><span>Tartışma</span></div>
           </article>
-          <p class="lp-sig-what"><b>Topluluk</b> — soru sor, fikir paylaş, alternatif okumaları dinle.</p>
+          <div class="lp-preview-summary"><span class="lp-preview-access free">ÜCRETSİZ ÜYELİK</span><h4>Tek başına okumak zorunda değilsin.</h4><p>Sorunu sor, kendi fikrini paylaş. Farklı senaryoları ve piyasa okumalarını birlikte tartış.</p></div>
           <button type="button" class="lp-sig-link" data-lp-hero-auth>Topluluğa katıl <span aria-hidden="true">→</span></button>
         </div>
         <div class="lp-sig-foot"><span class="lp-sig-hint"><span class="lp-sig-pulse" aria-hidden="true"></span>Sekmeye tıkla, içeriği gör</span><span>temsili önizleme</span></div>
@@ -26920,7 +26968,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b179';
+const APP_BUILD = 'b180';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
