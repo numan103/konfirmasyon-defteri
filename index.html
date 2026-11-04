@@ -4623,13 +4623,21 @@
   #landing .lp-price-card.featured { border-color: var(--lp-accent); transform: none; background: var(--card); }
   #landing .lp-price-tag { display: inline-block; font-size: 9.5px; letter-spacing: .14em; font-weight: 700; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
   #landing .lp-price-list-title { font-size: 9.5px; letter-spacing: .14em; font-weight: 700; text-transform: uppercase; color: var(--text-3); margin: 0 0 8px; }
+  #landing .lp-price-feats { flex: none; margin-bottom: 16px; }
   #landing .lp-price-feats li b { color: var(--text); font-weight: 700; }
-  #landing .lp-price-how { margin-top: 18px; padding: 13px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+  #landing .lp-price-points { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  #landing .lp-price-points li { display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; line-height: 1.45; color: var(--text-2); }
+  #landing .lp-price-points li::before { content: ''; flex: none; width: 14px; height: 14px; margin-top: 1px; border-radius: 50%; background: rgba(34,197,94,.12) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 11.5 3.5 8.5l1-1 2 2 4.5-4.5 1 1z' fill='%2322c55e'/%3E%3C/svg%3E") center/10px no-repeat; }
+  #landing .lp-price-note { margin: 13px 0 0; font-size: 11px; line-height: 1.55; color: var(--text-3); }
+  #landing .lp-price-note b { color: var(--text-2); font-weight: 700; }
+  #landing .lp-price-how { padding: 13px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+  #landing .lp-price-how-free { margin-top: auto; }
   #landing .lp-price-how-t { font-size: 9.5px; letter-spacing: .13em; font-weight: 700; text-transform: uppercase; color: var(--lp-accent); margin-bottom: 8px; }
   #landing .lp-price-how ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
   #landing .lp-price-how li { display: flex; gap: 8px; font-size: 11.5px; line-height: 1.55; color: var(--text-2); }
   #landing .lp-price-how li span { flex: none; width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--pc-soft); color: var(--pc); font-size: 9px; font-weight: 800; }
-  #landing .lp-price-btn { border-radius: 8px; }
+  #landing .lp-price-btn { border-radius: 8px; margin-top: 16px; }
+  #landing .lp-price-foot { max-width: 720px; margin: 18px auto 0; padding: 0 20px; text-align: center; font-size: 11.5px; line-height: 1.7; color: var(--text-3); }
   #landing .lp-start { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
   #landing .lp-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; margin-top: 36px; }
   #landing .lp-steps > div { border-top: 1px solid var(--border); padding-top: 20px; }
@@ -4657,7 +4665,7 @@
   /* Editorial product illustrations and lightweight motion. */
   #landing .lp-hero-band { background: radial-gradient(ellipse at 82% 40%, rgba(135,112,255,.1), transparent 55%), var(--bg); }
   #landing .lp-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; max-width: 1200px; padding: 104px 32px 76px; gap: 12px; text-align: left; }
-  #landing .lp-hero h2 { font-size: clamp(36px, 4.6vw, 60px); }
+  #landing .lp-hero h2 { font-size: clamp(34px, 4.4vw, 52px); line-height: 1.08; }
   #landing .lp-hero p { font-size: 16px; margin-left: 0; }
   #landing .lp-cta { justify-content: flex-start; }
   #landing .lp-assurance { max-width: 420px; }
@@ -4764,7 +4772,7 @@
     #landing .lp-showcase { grid-template-columns: 1fr; gap: 28px; padding-top: 54px; }
     #landing .lp-showcase-heading { text-align: center; }
   }
-  @media (max-width: 640px) { #landing .lp-hero { padding: 96px 20px 48px; } #landing .lp-showcase { padding-left: 20px; padding-right: 20px; } #landing .lp-demo-detail { padding: 20px 14px; } }
+  @media (max-width: 640px) { #landing .lp-hero { padding: 96px 20px 48px; } #landing .lp-showcase { padding-left: 20px; padding-right: 20px; } #landing .lp-demo-detail { padding: 20px 14px; } #landing .lp-art-note { display: none; } #landing .lp-sig-chart svg { height: 78px; } }
   #landing .lp-section-nav { display: flex; gap: 25px; }
   #landing .lp-section-nav a { color: var(--text-2); text-decoration: none; font-size: 12px; transition: color .2s; }
   #landing .lp-section-nav a:hover { color: var(--lp-accent); }
@@ -4891,7 +4899,7 @@
     <div class="lp-hero-copy">
     <span class="lp-badge">İŞLEM · BİAS · PORTFÖY · TOPLULUK</span>
     <h2>Fırsatı gör.<br><span class="grad">Kararın tamamını oku.</span></h2>
-    <p>İşlemlerimizi giriş–hedef–stop ve gerekçesiyle paylaşıyoruz. Bias ve onchain okumamızı aynı akışta gör, paylaşılan portföyü izle, toplulukta fikrini tartış.</p>
+    <p>İşlemleri giriş–hedef–stop ve gerekçesiyle paylaşıyoruz. Bias, onchain, portföy ve topluluk aynı akışta.</p>
     <div class="lp-cta">
       <button class="primary" id="hero-register" type="button" data-i18n="hero.register">Ücretsiz başla →</button>
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
@@ -4927,6 +4935,12 @@
           <div class="lp-sig-pair-row"><div class="lp-sig-pair">BTC / USDT <em>4s · swing</em></div><span class="lp-sig-rr">R:R <b>1:2.4</b></span></div>
           <div class="lp-sig-chart" aria-hidden="true">
             <svg viewBox="0 0 320 90" fill="none" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="lpChartFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#a89aff" stop-opacity=".3"/>
+                  <stop offset="1" stop-color="#a89aff" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
               <g stroke="#93a1d4" stroke-opacity=".1"><path d="M0 22h320M0 47h320M0 72h320M64 0v90M128 0v90M192 0v90M256 0v90"/></g>
               <rect x="0" y="43" width="320" height="12" fill="#8b7cf6" opacity=".13"/>
               <path d="M0 43h320M0 55h320" stroke="#a89aff" stroke-dasharray="3 4" opacity=".45"/>
@@ -4938,6 +4952,7 @@
               <g fill="#5eead4">
                 <rect x="30" y="64" width="8" height="12" rx="1.5" opacity=".7"/><rect x="54" y="58" width="8" height="10" rx="1.5" opacity=".9"/><rect x="78" y="50" width="8" height="14" rx="1.5" opacity=".7"/><rect x="102" y="44" width="8" height="10" rx="1.5" opacity=".9"/><rect x="126" y="54" width="8" height="8" rx="1.5" opacity=".7"/><rect x="150" y="38" width="8" height="12" rx="1.5" opacity=".9"/><rect x="174" y="42" width="8" height="8" rx="1.5" opacity=".7"/><rect x="198" y="32" width="8" height="10" rx="1.5" opacity=".9"/><rect x="222" y="36" width="8" height="6" rx="1.5" opacity=".7"/><rect x="246" y="26" width="8" height="8" rx="1.5" opacity=".9"/><rect x="270" y="32" width="8" height="4" rx="1.5" opacity=".7"/><rect x="294" y="24" width="8" height="6" rx="1.5" opacity=".9"/>
               </g>
+              <path d="M0 78c26-4 40-18 60-16s32 10 52 2 30-24 50-20 26 12 46 4 30-18 50-24 32-4 62-8V90H0Z" fill="url(#lpChartFill)"/>
               <path d="M0 78c26-4 40-18 60-16s32 10 52 2 30-24 50-20 26 12 46 4 30-18 50-24 32-4 62-8" stroke="#a89aff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
               <circle cx="300" cy="24" r="3.2" fill="#5eead4"/><circle cx="300" cy="24" r="7" stroke="#5eead4" opacity=".35"/>
             </svg>
@@ -5051,6 +5066,15 @@
         <li><b>Alfa Calculator</b> — Pozisyon boyutunu ve riskini planla.</li>
         <li><b>Ekonomik takvim</b> — Veri saatlerini kaçırma.</li>
       </ul>
+      <div class="lp-price-how lp-price-how-free">
+        <div class="lp-price-how-t">Neden ücretsiz?</div>
+        <ul class="lp-price-points">
+          <li>Abonelik ücreti yok; kart bilgisi istenmez.</li>
+          <li>Gelir, referans borsa hesabındaki komisyondan gelir.</li>
+          <li>Fonlar senin hesabında kalır; ek ücret yansımaz.</li>
+        </ul>
+      </div>
+      <p class="lp-price-note"><b>Hazır olduğunda:</b> borsanı bağla, premium ücretsiz açılsın.</p>
       <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
     </div>
     <div class="lp-price-card featured">
@@ -5068,8 +5092,7 @@
         <li><b>Paylaşılan portföy</b> — Pozisyonlar, satışlar ve notlar; salt okunur.</li>
         <li><b>Trading Terminali</b> — Canlı grafik ve watchlist.</li>
         <li><b>Alfa Edu</b> — Video eğitimler ve kaynaklar.</li>
-        <li><b>Gelir / Gider</b> — Bütçe ve harcama takibi.</li>
-        <li><b>Çalışma Panosu</b> — Planları ve fikirleri tek yerde topla.</li>
+        <li><b>Bütçe &amp; plan</b> — Gelir / Gider ve Çalışma Panosu.</li>
       </ul>
       <div class="lp-price-how">
         <div class="lp-price-how-t">Nasıl açılır?</div>
@@ -5082,6 +5105,7 @@
       <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Borsanı bağla, ücretsiz aç →</button>
     </div>
   </div>
+  <p class="lp-price-foot">Taahhüt yok · İstediğin an ayrıl · Fonlar senin borsa hesabında kalır.</p>
 
   <section class="lp-start" aria-labelledby="lp-start-title">
     <div class="lp-section-head"><div class="lp-eyebrow">NASIL BAŞLARSIN?</div><h3 id="lp-start-title">Üç adımda çalışma alanın hazır.</h3></div>
@@ -5355,7 +5379,7 @@
       <div class="mnav-group" data-i18n="app.news">📰 AlfaNews</div>
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
-      <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Referansla Aç</a>
+      <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
       <div class="mnav-contact">
         <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
         <a class="soc-link tg" id="nc-tg-m" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
@@ -5540,8 +5564,8 @@
        <div class="home-premium" style="margin:18px auto 6px;max-width:980px;padding:18px 20px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(123,120,245,.10),rgba(167,139,250,.04));">
          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
            <span style="font-size:22px;">⭐</span>
-           <h2 style="margin:0;font-size:18px;font-weight:700;">Premium'a geç, tüm avantajları aç</h2>
-           <span style="font-size:12px;color:var(--text-3);margin-left:auto;">Referans doğrulamasıyla ücretsiz açılır</span>
+           <h2 style="margin:0;font-size:18px;font-weight:700;">Borsanı bağla, tüm avantajları aç</h2>
+           <span style="font-size:12px;color:var(--text-3);margin-left:auto;">Kart yok · Aidat yok</span>
          </div>
          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
             <div style="padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
@@ -5570,7 +5594,7 @@
             </div>
           </div>
           <div style="margin-top:12px;text-align:center;">
-           <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:10px 22px;">Referansla premium'a geç →</button>
+           <button type="button" class="btn solid" onclick="showPage('erisim')" style="padding:10px 22px;">Borsanı bağla, premium'u aç →</button>
          </div>
        </div>
        
@@ -7453,7 +7477,7 @@
             <input type="text" id="ap2-gate-code" placeholder="Erişim kodun..." maxlength="40" autocomplete="off">
             <button type="button" id="ap2-gate-verify">Doğrula</button>
           </div>
-          <button type="button" class="btn solid" id="ap2-gate-cta" style="width:100%">Referansla aç →</button>
+          <button type="button" class="btn solid" id="ap2-gate-cta" style="width:100%">Borsanı bağla, aç →</button>
           <div class="ap2-gate-err" id="ap2-gate-err"></div>
         </div>
       </div>
@@ -26754,7 +26778,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b177';
+const APP_BUILD = 'b178';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
