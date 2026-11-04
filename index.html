@@ -4884,6 +4884,18 @@
   #landing .lp-sig-foot { grid-row: 5; font-size: 10px; color: #929ab9; }
   #landing .lp-sig-hint { color: #b5bdd6; }
   #landing .lp-art-note { margin-top: 16px; font-size: 10px; }
+  #landing .lp-live-card { min-width: 0; }
+  #landing .lp-live-label { display: block; font-size: 10px; line-height: 1.6; color: #b6bed9; }
+  #landing .lp-live-return { display: block; font-family: var(--font-display); font-size: clamp(32px, 3.8vw, 46px); line-height: 1.2; letter-spacing: -.045em; margin: 6px 0; }
+  #landing .positive { color: #6ee7b7; }
+  #landing .negative { color: #fca5a5; }
+  #landing .lp-hero .lp-live-caption { margin: 7px 0; font-size: 9px; line-height: 1.65; color: #a4aecb; overflow-wrap: anywhere; }
+  #landing .lp-hero .lp-live-state { margin: 16px 0; font-size: 12px; line-height: 1.8; color: #b5bbd4; }
+  #landing .lp-live-chart { width: 100%; height: 115px; display: block; margin-top: 12px; background: repeating-linear-gradient(0deg, transparent 0 27px, #ffffff09 28px 29px); border-radius: 8px; }
+  #landing .lp-live-range { display: flex; justify-content: space-between; gap: 12px; color: #b6bed9; font-size: 9px; }
+  #landing #lp-live-trades .lp-sig-rows { margin: 8px 0 12px; }
+  #landing .lp-hero .lp-live-post { margin: 12px 0; font-size: 12px; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; color: #e1e5f4; }
+  #landing .lp-live-post-link { color: #b7a9ff; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
   @media (max-width: 640px) {
     #landing .lp-signal-board { padding: 14px; gap: 14px; border-radius: 20px; text-align: left; }
     #landing .lp-signal-tabs button { font-size: 10px; gap: 4px; }
@@ -5013,123 +5025,41 @@
     <div class="lp-art">
       <div class="lp-art-halo" aria-hidden="true"></div>
             <div class="lp-signal-board" role="group" aria-label="Platform önizlemesi: işlem, bias, portföy ve topluluk sekmeleri">
-        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>PLATFORMU DENE</b><em>temsili önizleme</em></div>
-        <div class="lp-preview-intro"><h3>İçeride seni ne bekliyor?</h3><span>Bir bölüm seç. Paylaşımları yakından tanı.</span></div>
+        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>ALFA'NIN İÇİNDEN</b><em>gerçek kayıtlar</em></div>
+        <div class="lp-preview-intro"><h3>Alfa, gerçek verilerle.</h3><span>Portföyü ve kayıtlı işlem sonuçlarını keşfet.</span></div>
         <div class="lp-signal-tabs" role="tablist" aria-label="Önizleme sekmeleri">
-          <button type="button" role="tab" id="lp-sig-tab-trade" aria-controls="lp-sig-panel-trade" aria-selected="true" data-lp-hero-tab="trade"><span class="lp-tab-dot green" aria-hidden="true"></span>İşlem</button>
+          <button type="button" role="tab" id="lp-sig-tab-portfolio" aria-controls="lp-sig-panel-portfolio" aria-selected="true" data-lp-hero-tab="portfolio"><span class="lp-tab-dot teal" aria-hidden="true"></span>Portföy</button>
+          <button type="button" role="tab" id="lp-sig-tab-trade" aria-controls="lp-sig-panel-trade" aria-selected="false" tabindex="-1" data-lp-hero-tab="trade"><span class="lp-tab-dot green" aria-hidden="true"></span>Sonuçlar</button>
           <button type="button" role="tab" id="lp-sig-tab-bias" aria-controls="lp-sig-panel-bias" aria-selected="false" tabindex="-1" data-lp-hero-tab="bias"><span class="lp-tab-dot violet" aria-hidden="true"></span>Bias</button>
-          <button type="button" role="tab" id="lp-sig-tab-portfolio" aria-controls="lp-sig-panel-portfolio" aria-selected="false" tabindex="-1" data-lp-hero-tab="portfolio"><span class="lp-tab-dot teal" aria-hidden="true"></span>Portföy</button>
           <button type="button" role="tab" id="lp-sig-tab-community" aria-controls="lp-sig-panel-community" aria-selected="false" tabindex="-1" data-lp-hero-tab="community"><span class="lp-tab-dot amber" aria-hidden="true"></span>Topluluk</button>
         </div>
-        <div class="lp-sig-panel" id="lp-sig-panel-trade" role="tabpanel" aria-labelledby="lp-sig-tab-trade" data-lp-hero-panel="trade">
-          <article class="lp-signal-card">
-            <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-avatar" aria-hidden="true">A</span> İşlem paylaşımı</span><b class="lp-sig-badge long" lang="en">LONG</b></div>
-            <div class="lp-sig-pair-row"><div class="lp-sig-pair">BTC / USDT <em>4s · swing</em></div><span class="lp-sig-rr">R:R <b>1:1.7</b></span></div>
-            <div class="lp-sig-chart" aria-hidden="true">
-              <svg viewBox="0 0 320 90" fill="none" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="lpChartFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#a89aff" stop-opacity=".3"/>
-                    <stop offset="1" stop-color="#a89aff" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <g stroke="#93a1d4" stroke-opacity=".1"><path d="M0 22h320M0 47h320M0 72h320M64 0v90M128 0v90M192 0v90M256 0v90"/></g>
-                <rect x="0" y="43" width="320" height="12" fill="#8b7cf6" opacity=".13"/>
-                <path d="M0 43h320M0 55h320" stroke="#a89aff" stroke-dasharray="3 4" opacity=".45"/>
-                <path d="M0 21h320" stroke="#34d399" stroke-dasharray="4 5" opacity=".5"/>
-                <path d="M0 74h320" stroke="#f87171" stroke-dasharray="4 5" opacity=".45"/>
-                <g stroke="#5eead4" stroke-width="1.3">
-                  <path d="M34 60v20M58 54v18M82 46v22M106 40v18M130 50v16M154 34v20M178 38v16M202 28v18M226 32v14M250 22v16M274 28v12M298 20v14"/>
-                </g>
-                <g fill="#5eead4">
-                  <rect x="30" y="64" width="8" height="12" rx="1.5" opacity=".7"/><rect x="54" y="58" width="8" height="10" rx="1.5" opacity=".9"/><rect x="78" y="50" width="8" height="14" rx="1.5" opacity=".7"/><rect x="102" y="44" width="8" height="10" rx="1.5" opacity=".9"/><rect x="126" y="54" width="8" height="8" rx="1.5" opacity=".7"/><rect x="150" y="38" width="8" height="12" rx="1.5" opacity=".9"/><rect x="174" y="42" width="8" height="8" rx="1.5" opacity=".7"/><rect x="198" y="32" width="8" height="10" rx="1.5" opacity=".9"/><rect x="222" y="36" width="8" height="6" rx="1.5" opacity=".7"/><rect x="246" y="26" width="8" height="8" rx="1.5" opacity=".9"/><rect x="270" y="32" width="8" height="4" rx="1.5" opacity=".7"/><rect x="294" y="24" width="8" height="6" rx="1.5" opacity=".9"/>
-                </g>
-                <path d="M0 78c26-4 40-18 60-16s32 10 52 2 30-24 50-20 26 12 46 4 30-18 50-24 32-4 62-8V90H0Z" fill="url(#lpChartFill)"/>
-                <path d="M0 78c26-4 40-18 60-16s32 10 52 2 30-24 50-20 26 12 46 4 30-18 50-24 32-4 62-8" stroke="#a89aff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
-                <circle cx="300" cy="24" r="3.2" fill="#5eead4"/><circle cx="300" cy="24" r="7" stroke="#5eead4" opacity=".35"/>
-              </svg>
-            </div>
-            <div class="lp-sig-levels">
-              <div><span>Giriş</span><b>64.2K</b></div>
-              <div><span>Hedef</span><b class="up">67.8K</b></div>
-              <div><span>Stop</span><b class="down">62.1K</b></div>
-            </div>
-            <p class="lp-sig-note">“Talep bölgesi + hacim onayı”</p>
-          </article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">PREMIUM</span><h4>Sadece yön değil, işlem planı.</h4><p>Hangi seviyeden, hangi hedefle, nerede stop? Paylaştığımız işlemleri gerekçesiyle birlikte gör.</p></div>
+        <div class="lp-sig-panel" id="lp-sig-panel-trade" role="tabpanel" aria-labelledby="lp-sig-tab-trade" data-lp-hero-panel="trade" hidden>
+          <article class="lp-signal-card lp-live-card" id="lp-live-trades" aria-live="polite"><p class="lp-live-state">Notion işlem sonuçları yükleniyor…</p></article>
+          <div class="lp-preview-summary"><span class="lp-preview-access">NOTION · KAYITLI SONUÇLAR</span><h4>Sonucu girilmiş işlemler.</h4><p>Kazanç, kayıp ve başabaş sonuçlar birlikte. R, başlangıçta alınan riskin katıdır; portföy getiri yüzdesi değildir.</p></div>
           <a class="lp-sig-link" href="#lp-showcase" data-lp-hero-jump="analysis">İşlem kanalını gör <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-bias" role="tabpanel" aria-labelledby="lp-sig-tab-bias" data-lp-hero-panel="bias" hidden>
-          <div class="lp-sig-pair-cards">
-            <article class="lp-signal-card">
-              <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot violet" aria-hidden="true"></span> Bias</span><b class="lp-sig-badge neutral">NÖTR</b></div>
-              <svg class="lp-sig-gauge" viewBox="0 0 120 62" fill="none" aria-hidden="true">
-                <path d="M12 54a48 48 0 0 1 96 0" stroke="rgba(255,255,255,.09)" stroke-width="9" stroke-linecap="round"/>
-                <path d="M12 54a48 48 0 0 1 24-41.6" stroke="#f87171" stroke-width="9" stroke-linecap="round" opacity=".7"/>
-                <path d="M84 12.4a48 48 0 0 1 24 41.6" stroke="#34d399" stroke-width="9" stroke-linecap="round" opacity=".8"/>
-                <path d="M60 54V27" stroke="#e5e7ff" stroke-width="2.2" stroke-linecap="round"/>
-                <circle cx="60" cy="54" r="3.6" fill="#e5e7ff"/><circle cx="60" cy="54" r="7.5" stroke="rgba(255,255,255,.2)"/>
-              </svg>
-              <div class="lp-sig-rows">
-                <div><span>Funding</span><b>Dengeli</b></div>
-                <div><span>CVD</span><b>Yatay</b></div>
-                <div><span>Long / Short</span><b>52 / 48</b></div>
-              </div>
-            </article>
-            <article class="lp-signal-card">
-              <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot teal" aria-hidden="true"></span> Risk aracı</span><b class="lp-sig-badge soft">1R</b></div>
-              <div class="lp-sig-risk"><b>0.42</b><span>BTC pozisyon</span></div>
-              <div class="lp-sig-riskbar" aria-hidden="true"><i style="--w:42%"></i></div>
-              <div class="lp-sig-meta"><span>Risk %1</span><span>Stop mesafesi</span></div>
-            </article>
-          </div>
+          <article class="lp-signal-card"><div class="lp-sig-head"><span class="lp-sig-type">Bias &amp; onchain</span><b class="lp-sig-badge soft">premium</b></div><div class="lp-sig-rows"><div><span>Yön görüşü</span><b>Bias notları</b></div><div><span>Funding · CVD</span><b>Veri okuması</b></div><div><span>Giriş · stop</span><b>Risk planı</b></div></div><p class="lp-live-state">Güncel yön görüşleri ve ayrıntılı analizler üye alanında. Burada örnek piyasa sinyali gösterilmez.</p></article>
           <div class="lp-preview-summary"><span class="lp-preview-access">PREMIUM</span><h4>Piyasaya hangi gözle bakıyoruz?</h4><p>Bias, yani yön görüşümüzü; funding, CVD ve pozisyon verileriyle birlikte takip et.</p></div>
           <a class="lp-sig-link" href="#lp-showcase" data-lp-hero-jump="portfolio">Bias &amp; onchain'i gör <span aria-hidden="true">→</span></a>
         </div>
-        <div class="lp-sig-panel" id="lp-sig-panel-portfolio" role="tabpanel" aria-labelledby="lp-sig-tab-portfolio" data-lp-hero-panel="portfolio" hidden>
-          <article class="lp-signal-card">
-            <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot teal" aria-hidden="true"></span> Paylaşılan portföy</span><b class="lp-sig-badge soft">salt okunur</b></div>
-            <div class="lp-sig-alloc">
-              <svg viewBox="0 0 120 120" fill="none" aria-hidden="true">
-                <circle cx="60" cy="60" r="42" stroke="rgba(255,255,255,.08)" stroke-width="14"/>
-                <circle cx="60" cy="60" r="42" stroke="#5eead4" stroke-width="14" stroke-dasharray="111 264" transform="rotate(-90 60 60)"/>
-                <circle cx="60" cy="60" r="42" stroke="#a89aff" stroke-width="14" stroke-dasharray="74 264" stroke-dashoffset="-111" transform="rotate(-90 60 60)"/>
-                <circle cx="60" cy="60" r="42" stroke="#34d399" stroke-width="14" stroke-dasharray="79 264" stroke-dashoffset="-185" transform="rotate(-90 60 60)"/>
-                <text x="60" y="57" text-anchor="middle" fill="#fff" font-size="13" font-weight="800" font-family="Sora,Inter,sans-serif">4</text>
-                <text x="60" y="71" text-anchor="middle" fill="rgba(255,255,255,.45)" font-size="7.5" font-family="Inter,sans-serif" letter-spacing=".08em">POZİSYON</text>
-              </svg>
-              <div class="lp-sig-alloc-list">
-                <div><i class="teal" aria-hidden="true"></i><span>BTC</span><b>42%</b></div>
-                <div><i class="violet" aria-hidden="true"></i><span>ETH</span><b>28%</b></div>
-                <div><i class="green" aria-hidden="true"></i><span>Stable</span><b>30%</b></div>
-              </div>
-            </div>
-            <div class="lp-sig-rows">
-              <div><span>Portföy özeti</span><b class="free">Herkese açık</b></div>
-              <div><span>Pozisyon &amp; satış</span><b>Salt okunur</b></div>
-              <div><span>Notlar &amp; gerekçe</span><b>Salt okunur</b></div>
-            </div>
-          </article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">ÖZET ÜCRETSİZ · DETAYLAR PREMIUM</span><h4>Portföyün arkasındaki yaklaşım.</h4><p>Paylaşılan portföyün özetini gör. Premium ile pozisyonları, satışları ve notları salt okunur incele.</p></div>
-          <a class="lp-sig-link" href="#lp-showcase" data-lp-hero-jump="education">Portföy yaklaşımını gör <span aria-hidden="true">→</span></a>
+        <div class="lp-sig-panel" id="lp-sig-panel-portfolio" role="tabpanel" aria-labelledby="lp-sig-tab-portfolio" data-lp-hero-panel="portfolio">
+          <article class="lp-signal-card lp-live-card" id="lp-live-portfolio" aria-live="polite"><p class="lp-live-state">Paylaşılan portföy yükleniyor…</p></article>
+          <div class="lp-preview-summary"><span class="lp-preview-access">ÖZET ÜCRETSİZ · DETAYLAR PREMIUM</span><h4>Portföyün gerçek seyri.</h4><p>Başlangıç bakiyesine göre getiri yüzdesi herkese açık. Parasal tutarlar üyelere, pozisyon detayları premium'a özel.</p></div>
+          <button type="button" class="lp-sig-link" data-lp-hero-auth>Portföyü incelemek için katıl <span aria-hidden="true">→</span></button>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-community" role="tabpanel" aria-labelledby="lp-sig-tab-community" data-lp-hero-panel="community" hidden>
           <article class="lp-signal-card">
-            <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot amber" aria-hidden="true"></span> Topluluk akışı</span><b class="lp-sig-badge soft">ücretsiz</b></div>
-            <div class="lp-sig-thread">
-              <div class="lp-sig-msg"><span class="lp-sig-avatar alt" aria-hidden="true">S</span><div><b>Soru</b><p>“Bu bölgede risk nasıl kurulur?”</p></div></div>
-              <div class="lp-sig-msg"><span class="lp-sig-avatar alt2" aria-hidden="true">C</span><div><b>Yanıt</b><p>“Girişi kademelendir, stopu yapıya koy.”</p></div></div>
-              <div class="lp-sig-msg"><span class="lp-sig-avatar" aria-hidden="true">T</span><div><b>Tartışma</b><p>“Hangi senaryoda bu fikir geçersiz olur?”</p></div></div>
-            </div>
-            <div class="lp-sig-meta"><span>Soru &amp; cevap</span><span>Fikir paylaşımı</span><span>Tartışma</span></div>
+            <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot amber" aria-hidden="true"></span> Son herkese açık paylaşım</span><b class="lp-sig-badge soft">kanal</b></div>
+            <div id="lp-live-posts" aria-live="polite"><p class="lp-live-state">Kanal paylaşımı yükleniyor…</p></div>
           </article>
           <div class="lp-preview-summary"><span class="lp-preview-access free">ÜCRETSİZ ÜYELİK</span><h4>Tek başına okumak zorunda değilsin.</h4><p>Sorunu sor, kendi fikrini paylaş. Farklı senaryoları ve piyasa okumalarını birlikte tartış.</p></div>
           <button type="button" class="lp-sig-link" data-lp-hero-auth>Topluluğa katıl <span aria-hidden="true">→</span></button>
         </div>
-        <div class="lp-sig-foot"><span class="lp-sig-hint"><span class="lp-sig-pulse" aria-hidden="true"></span>Sekmeye tıkla, içeriği gör</span><span>temsili önizleme</span></div>
+        <div class="lp-sig-foot"><span class="lp-sig-hint">Kaynak: paylaşılan portföy · Notion</span><span>Yalnızca genel özet</span></div>
       </div>
       
-      <div class="lp-art-note">Temsili arayüz — canlı veri veya performans sonucu değildir.</div>
+      <div class="lp-art-note">Geçmiş sonuçlar gelecekteki getiriyi garanti etmez.</div>
     </div>
   </section>
   </div>
@@ -5358,6 +5288,7 @@
   });
 })();
 </script>
+<script src="/assets/landing-live.js?v=181" defer></script>
 <div id="auth-gate">
   <div class="auth-box">
     <button class="auth-x" id="auth-close" type="button" aria-label="Kapat" data-i18n-aria="auth.close">&times;</button>
@@ -26968,7 +26899,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b180';
+const APP_BUILD = 'b181';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

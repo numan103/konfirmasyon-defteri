@@ -57,12 +57,15 @@ test('product tabs support click and arrow keys without autoplay', () => {
   assert.ok(html.includes('prefers-reduced-motion: reduce'));
 });
 
-test('hero uses a representative signal board instead of a crypto token visual', () => {
+test('hero uses real public projections instead of sample financial figures', () => {
   assert.ok(landing.includes('class="lp-signal-board"'));
   assert.ok(landing.includes('lp-signal-card'));
   assert.ok(!landing.includes('Ethereum'));
   assert.ok(!landing.includes('landing-workspace.svg'));
-  assert.ok(landing.includes('Temsili arayüz'));
+  assert.ok(landing.includes('id="lp-live-portfolio"'));
+  assert.ok(landing.includes('/assets/landing-live.js?v=181'));
+  const hero = landing.slice(landing.indexOf('<div class="lp-art">'), landing.indexOf('<section class="lp-showcase"'));
+  for (const sample of ['64.2K', '67.8K', '62.1K', '0.42', '52 / 48', '42%', '28%', 'Bu bölgede risk nasıl']) assert.ok(!hero.includes(sample), sample);
 });
 
 test('hero preview explains access and supports keyboard navigation and actions', () => {

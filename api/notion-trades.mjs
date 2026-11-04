@@ -1,13 +1,10 @@
 import { requestUser, requestTier } from '../lib/auth.mjs';
 import { handleWeek } from '../lib/notion-week.mjs';
+import { TRADE_DATABASES } from '../lib/notion-databases.mjs';
 
 const NOTION_VERSION = '2022-06-28';
 
-let DBS = [
-  { id: '40af561953ab8033954eed347d6bfed4', market: 'Kripto' },
-  { id: '40af561953ab80a4bd9def25375d9e19', market: 'Fx' },
-  { id: '3d5f561953ab80cfa99cf95749ad82a2', market: 'Kripto' },
-];
+let DBS = TRADE_DATABASES;
 
 async function queryDB(token, dbId) {
   const rows = [];

@@ -6,6 +6,7 @@
 //  - ?kind=channel  => trader kanalları (id='channels', journals ...e002)
 //  - varsayılan     => Alfa Edu kurs içeriği (id='v1', journals ...e000)
 import portfolio from '../lib/portfolio.mjs';
+import landing from '../lib/landing.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -138,6 +139,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.query?.kind === 'portfolio') return portfolio(req, res);
+  if (req.query?.kind === 'landing') return landing(req, res);
 
   const isChannel = String(req.query && req.query.kind) === 'channel';
   const isShort = String(req.query && req.query.kind) === 'short';
