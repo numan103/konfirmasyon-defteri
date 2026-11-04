@@ -17,24 +17,29 @@ test('public portfolio projection exposes only percentages and dates, never mone
   assert.equal(publicPortfolio({ startBalance: 1000, positions: [{ id: 'eth-sep5' }] }, { pnlPct: 99 }), null);
 });
 
+const NOW = Date.now();
 function post(id, type, ts, extra = {}) {
-  return { id, type, ts, isAdmin: true, title: 'Gerçek başlık', text: 'Kısa açıklama', img: 'https://example.com/chart.png', authorEmail: 'SECRET', entry: 'PRIVATE', tp: 'PRIVATE', sl: 'PRIVATE', comments: [{ text: 'PRIVATE' }], quote: { note: 'PRIVATE' }, ...extra };
+  return { id, type, ts: NOW - 10000 + ts, isAdmin: true, title: 'Gerçek başlık', text: 'Kısa açıklama', img: 'https://example.com/chart.png', authorEmail: 'SECRET', entry: 'PRIVATE', tp: 'PRIVATE', sl: 'PRIVATE', comments: [{ text: 'PRIVATE' }], quote: { note: 'PRIVATE' }, ...extra };
 }
 test('channel previews use actual admin posts with real images, direction and status, not Notion results', () => {
-  const data = { posts: [post('trade-1', 'islem', 1000, { status: 'sl' }), post('trade-2', 'islem', 2000, { status: 'aktif' }), post('bias-1', 'analiz', 3000, { bias: 'short' }), post('bias-2', 'onchain', 4000, { bias: 'long' }), post('user', 'analiz', 5000, { isAdmin: false }), post('bad', 'analiz', NaN)] };
-  const c = publicChannel(data);
+  const data = { posts: [post('trade-1', 'islem', 1000, { status: 'sl' }), post('trade-2', 'islem', 2000, { status: 'aktif' }), post('bias-1', 'analiz', 3000, { bias: 'short' }), post('bias-2', 'onchain', 4000, { bias: 'long' }), post('user', 'analiz', 5000, { isAdmin: false }), post('bad', 'analiz', NaN), post('old', 'islem', -8 * 86400000), post('future', 'analiz', 86400000)] };
+  const c = publicChannel(data, NOW);
   assert.equal(c.trades.count, 2);
   assert.equal(c.trades.sl, 1); assert.equal(c.trades.tp, 0);
   assert.equal(c.trades.latest[0].id, 'trade-2');
   assert.equal(c.trades.latest[0].status, 'aktif');
   assert.equal(c.biases.count, 2);
   assert.equal(c.biases.latest[0].direction, 'long');
-  assert.equal(c.biases.latest[0].image, 'https://example.com/chart.png');
+  assert.equal(c.biases.latest[0].image, '/api/edu-shared?kind=landing&image=bias-2');
+  assert.equal(c.biases.latest.length, 2);
+  assert.equal(c.from, new Date(NOW - 7 * 86400000).toISOString());
   assert.equal(c.biases.latest[0].title, 'Gerçek başlık');
   assert.ok(!JSON.stringify(c).includes('SECRET'));
   assert.ok(!JSON.stringify(c).includes('PRIVATE'));
   assert.equal(c.trades.totalR, undefined);
-  assert.deepEqual(publicChannel(null), { trades: { count: 0, tp: 0, sl: 0, latest: [] }, biases: { count: 0, latest: [] } });
+  assert.equal(publicChannel(null, NOW).trades.count, 0);
+  assert.deepEqual(publicChannel(null, NOW).biases.latest, []);
+  assert.equal(publicChannel({ posts: [{ ...post('edge', 'islem', 0), ts: NOW - 7 * 86400000 }] }, NOW).trades.count, 1);
 });
 
 test('preview images permit raster images and HTTPS, never executable schemes or SVG payloads', () => {
@@ -52,10 +57,10 @@ test('anonymous landing endpoint is GET-only, reads approved sources, isolates f
   global.fetch = async (url, options) => {
     calls.push({ url, options });
     if (url.includes('id=eq.alfa_portfoy_public')) return { ok: true, json: async () => [{ data: { startBalance: 1000, cash: 1050, positions: [], history: [{ d: '2026-10-01', v: 1000 }] }, updated_at: '2026-10-02' }] };
-    if (url.includes('id=eq.alfa_trading')) return { ok: true, json: async () => [{ data: { posts: [post('trade', 'islem', 1000), post('bias', 'analiz', 2000)] } }] };
+    if (url.includes('id=eq.alfa_trading')) return { ok: true, json: async () => [{ data: { posts: [post('trade', 'islem', 1000, { img: 'data:image/png;base64,aGVsbG8=' }), post('bias', 'analiz', 2000), post('old', 'analiz', -8 * 86400000)] } }] };
     throw new Error('unexpected URL');
   };
-  const response = () => ({ headers: {}, setHeader(k, v) { this.headers[k] = v; }, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } });
+  const response = () => ({ headers: {}, setHeader(k, v) { this.headers[k] = v; }, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, send(body) { this.body = body; return this; }, redirect(code, url) { this.code = code; this.url = url; return this; } });
   try {
     const { default: handler } = await import('../lib/landing.mjs?success');
     const denied = response(); await handler({ method: 'POST', headers: {} }, denied);
@@ -69,6 +74,20 @@ test('anonymous landing endpoint is GET-only, reads approved sources, isolates f
     assert.equal(calls.filter(x => x.url.includes('notion')).length, 0);
     const count = calls.length;
     await handler({ method: 'GET' }, response());
+    assert.equal(calls.length, count);
+    const image = response(); await handler({ method: 'GET', query: { image: 'trade' } }, image);
+    assert.equal(image.code, 200);
+    assert.equal(image.headers['Content-Type'], 'image/png');
+    assert.equal(image.body.toString(), 'hello');
+    const external = response(); await handler({ method: 'GET', query: { image: 'bias' } }, external);
+    assert.equal(external.code, 302);
+    assert.equal(external.url, 'https://example.com/chart.png');
+    for (const id of ['old', 'missing']) {
+      const hidden = response(); await handler({ method: 'GET', query: { image: id } }, hidden);
+      assert.equal(hidden.code, 404);
+    }
+    const invalid = response(); await handler({ method: 'GET', query: { image: '../secret' } }, invalid);
+    assert.equal(invalid.code, 400);
     assert.equal(calls.length, count);
     global.fetch = async url => {
       if (url.includes('id=eq.alfa_portfoy_public')) return { ok: true, json: async () => [{ data: { startBalance: 1000, cash: 900, positions: [] }, updated_at: '2026-10-02' }] };
