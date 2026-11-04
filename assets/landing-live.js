@@ -2,8 +2,8 @@
   'use strict';
   const portfolio = document.getElementById('lp-live-portfolio');
   const trades = document.getElementById('lp-live-trades');
-  const posts = document.getElementById('lp-live-posts');
-  if (!portfolio || !trades || !posts) return;
+  const bias = document.getElementById('lp-live-bias');
+  if (!portfolio || !trades || !bias) return;
   const finite = n => typeof n === 'number' && Number.isFinite(n);
   const date = value => {
     const d = new Date(value || '');
@@ -21,11 +21,6 @@
     return node;
   }
   function state(host, text) { host.replaceChildren(el('p', text, 'lp-live-state')); }
-  function line(label, value) {
-    const row = el('div');
-    row.append(el('span', label), el('b', value));
-    return row;
-  }
   function renderPortfolio(p, status) {
     if (!p || !finite(p.returnPct)) return state(portfolio, status === 'empty' ? 'Henüz yayınlanabilir portföy kaydı yok.' : 'Portföy verisi şu an alınamıyor.');
     const sign = p.returnPct >= 0 ? 'positive' : 'negative';
@@ -63,19 +58,41 @@
     }
     portfolio.append(el('p', 'Portföy kaydı: ' + stamp(p.recordedAt), 'lp-live-caption'));
   }
-  function renderTrades(t, status, fetchedAt) {
-    if (!t || !finite(t.totalR) || !finite(t.count)) return state(trades, status === 'empty' ? 'Henüz tarihli ve R sonucu girilmiş işlem yok.' : 'İşlem sonuçları şu an alınamıyor.');
-    trades.replaceChildren(el('span', 'Kayıtlı işlemlerin toplamı', 'lp-live-label'), el('strong', signed(t.totalR) + 'R', 'lp-live-return ' + (t.totalR >= 0 ? 'positive' : 'negative')));
-    trades.append(el('p', date(t.from) + ' – ' + date(t.to), 'lp-live-caption'));
-    trades.append(el('p', number(t.count) + ' işlem · ' + t.wins + ' kazanç · ' + t.losses + ' kayıp · ' + t.breakeven + ' başabaş', 'lp-live-caption'), el('span', 'Son 3 kayıt · işlem tarihi', 'lp-live-label'));
-    const latest = el('div', null, 'lp-sig-rows');
-    for (const item of Array.isArray(t.latest) ? t.latest.slice(0, 3) : []) {
-      if (!finite(item.r)) continue;
-      const row = line(date(item.date) + ' · ' + item.market, signed(item.r) + 'R');
-      row.lastChild.className = item.r >= 0 ? 'positive' : 'negative';
-      latest.append(row);
+  function renderPost(host, group, status, kind) {
+    const post = group?.latest?.[0];
+    if (!post) return state(host, status === 'unavailable' ? 'Kanal paylaşımı şu an alınamıyor.' : kind === 'trade' ? 'Henüz yayınlanmış işlem paylaşımı yok.' : 'Henüz yayınlanmış bias veya analiz yok.');
+    const tags = el('div', null, 'lp-sig-meta');
+    tags.append(el('span', kind === 'trade' ? 'İşlem Kanalı' : 'Bias & analiz'));
+    if (post.coin) tags.append(el('span', post.coin));
+    const direction = { long: 'LONG', short: 'SHORT', notr: 'NÖTR' }[post.direction];
+    if (direction) {
+      const tag = el('span', direction);
+      tag.lang = 'en';
+      tags.append(tag);
     }
-    trades.append(latest, el('p', 'Kripto · Fx · arşiv dahil. R sonucu boş kayıtlar hariç. Güncelleme: ' + stamp(fetchedAt), 'lp-live-caption'));
+    const statusLabel = { aktif: 'Aktif', tp: 'TP geldi', sl: 'SL', iptal: 'İptal' }[post.status];
+    if (statusLabel) tags.append(el('span', statusLabel));
+    host.replaceChildren(tags, el('h5', post.title || (kind === 'trade' ? 'İşlem paylaşımı' : 'Bias & analiz paylaşımı'), 'lp-post-title'), el('p', stamp(post.date), 'lp-live-caption'));
+    const href = '?page=alfatrading&post=' + encodeURIComponent(post.id);
+    if (typeof post.image === 'string' && (/^https:\/\//.test(post.image) || /^data:image\/(png|jpeg|webp|gif);base64,/.test(post.image))) {
+      const link = el('a', null, 'lp-post-image-link');
+      link.href = href;
+      link.setAttribute('aria-label', 'Paylaşımı aç: ' + (post.title || 'Kanal paylaşımı'));
+      const image = el('img');
+      image.className = 'lp-post-image';
+      image.src = post.image;
+      image.alt = post.title || 'Yöneticinin paylaştığı grafik';
+      image.loading = 'lazy';
+      image.referrerPolicy = 'no-referrer';
+      image.addEventListener('error', () => link.remove(), { once: true });
+      link.append(image);
+      host.append(link);
+    }
+    if (post.excerpt) host.append(el('p', post.excerpt, 'lp-post-excerpt'));
+    const open = el('a', 'Paylaşımı incele →', 'lp-live-post-link lp-post-open');
+    open.href = href;
+    host.append(open);
+    host.append(el('p', number(group.count) + (kind === 'trade' ? ' işlem paylaşımı · kaynak: İşlem Kanalı' : ' bias / analiz paylaşımı · kaynak: İşlem Kanalı'), 'lp-live-caption'));
   }
   async function load() {
     try {
@@ -83,30 +100,14 @@
       if (!response.ok) throw new Error('unavailable');
       const data = await response.json();
       renderPortfolio(data.portfolio, data.status?.portfolio);
-      renderTrades(data.trades, data.status?.trades, data.fetchedAt);
+      renderPost(trades, data.channel?.trades, data.status?.channel, 'trade');
+      renderPost(bias, data.channel?.biases, data.status?.channel, 'bias');
     } catch (_) {
       state(portfolio, 'Portföy verisi şu an alınamıyor.');
-      state(trades, 'İşlem sonuçları şu an alınamıyor.');
+      state(trades, 'İşlem paylaşımı şu an alınamıyor.');
+      state(bias, 'Bias paylaşımı şu an alınamıyor.');
     }
-  }
-  async function loadPosts() {
-    try {
-      const response = await fetch('/api/tg', { signal: AbortSignal.timeout(15000) });
-      if (!response.ok) throw new Error('unavailable');
-      const data = await response.json();
-      const post = Array.isArray(data) && data.find(p => typeof p.text === 'string' && p.text.trim());
-      if (!post) return state(posts, 'Henüz herkese açık metin paylaşımı yok.');
-      posts.replaceChildren(el('p', post.text.slice(0, 260) + (post.text.length > 260 ? '…' : ''), 'lp-live-post'), el('p', date(post.date), 'lp-live-caption'));
-      if (typeof post.link === 'string' && /^https:\/\/t\.me\/[a-zA-Z0-9_]+\/\d+$/.test(post.link)) {
-        const link = el('a', 'Paylaşımın tamamını oku ↗', 'lp-live-post-link');
-        link.href = post.link;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        posts.append(link);
-      }
-    } catch (_) { state(posts, 'Kanal paylaşımı şu an alınamıyor.'); }
   }
   // No polling or browser portfolio state: only the server's public projections.
   load();
-  loadPosts();
 })();

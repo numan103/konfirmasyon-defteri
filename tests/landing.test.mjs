@@ -63,9 +63,13 @@ test('hero uses real public projections instead of sample financial figures', ()
   assert.ok(!landing.includes('Ethereum'));
   assert.ok(!landing.includes('landing-workspace.svg'));
   assert.ok(landing.includes('id="lp-live-portfolio"'));
-  assert.ok(landing.includes('/assets/landing-live.js?v=181'));
+  assert.ok(landing.includes('/assets/landing-live.js?v=182'));
   const hero = landing.slice(landing.indexOf('<div class="lp-art">'), landing.indexOf('<section class="lp-showcase"'));
   for (const sample of ['64.2K', '67.8K', '62.1K', '0.42', '52 / 48', '42%', '28%', 'Bu bölgede risk nasıl']) assert.ok(!hero.includes(sample), sample);
+  assert.ok(!hero.includes('Notion'));
+  assert.ok(hero.includes('id="lp-live-bias"'));
+  assert.ok(hero.includes('src="/assets/landing-telegram.svg"'));
+  assert.ok(hero.includes('href="https://t.me/alfatradersweb"'));
 });
 
 test('hero preview explains access and supports keyboard navigation and actions', () => {

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" fill="none">
+  <title>Telegram topluluğu: piyasa sohbeti, soru cevap ve fikir alışverişi</title>
+  <defs>
+    <linearGradient id="tg-bg" x2="480" y2="200" gradientUnits="userSpaceOnUse"><stop stop-color="#132f4c"/><stop offset="1" stop-color="#142036"/></linearGradient>
+    <linearGradient id="tg-icon" x1="190" y1="50" x2="280" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#51c8ff"/><stop offset="1" stop-color="#168cd0"/></linearGradient>
+  </defs>
+  <rect x="1" y="1" width="478" height="198" rx="18" fill="url(#tg-bg)" stroke="#315573"/>
+  <circle cx="240" cy="100" r="80" stroke="#329dd1" stroke-opacity=".14" stroke-dasharray="4 7"/>
+  <circle cx="240" cy="100" r="61" fill="#239ad6" fill-opacity=".08"/>
+  <path d="M140 57 199 80M282 80l54-22M139 145l61-26M282 121l51 24" stroke="#4298c7" stroke-opacity=".45" stroke-dasharray="4 5"/>
+  <circle cx="240" cy="100" r="44" fill="url(#tg-icon)"/>
+  <path d="m215 98 51-20c2-.8 3 .5 2.5 2.7l-8.7 41c-.5 2.3-1.8 2.8-3.7 1.5l-13.3-9.8-6.4 6.2c-.7.7-1.2 1.2-2.5 1.2l.9-13.6 24.8-22.4c1.1-1 .1-1.5-1.6-.4L227.3 104l-13.2-4.1c-2.9-.9-2.9-2.9.9-4.4" fill="white"/>
+  <g font-family="Inter,Arial,sans-serif" font-size="12" fill="#d7edff">
+    <rect x="27" y="35" width="130" height="42" rx="12" fill="#1c3b56" stroke="#365b78"/><path d="m48 77 8 7v-7" fill="#1c3b56"/><text x="92" y="61" text-anchor="middle">Soru &amp; cevap</text>
+    <rect x="323" y="35" width="130" height="42" rx="12" fill="#1c3b56" stroke="#365b78"/><path d="m421 77-8 7v-7" fill="#1c3b56"/><text x="388" y="61" text-anchor="middle">Piyasa sohbeti</text>
+    <rect x="27" y="126" width="130" height="42" rx="12" fill="#1c3b56" stroke="#365b78"/><text x="92" y="152" text-anchor="middle">Fikir alışverişi</text>
+    <rect x="323" y="126" width="130" height="42" rx="12" fill="#1c3b56" stroke="#365b78"/><text x="388" y="152" text-anchor="middle">Birlikte takip</text>
+  </g>
+</svg>
