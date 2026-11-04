@@ -18,7 +18,10 @@ test('landing keeps registration hooks and accurate premium descriptions', () =>
   }
   assert.equal((landing.match(/<article class="lp-card">/g) || []).length, 6);
   assert.ok(landing.includes('salt okunur'));
-  assert.ok(landing.includes('referans doğrulamasıyla'));
+  assert.ok(landing.includes('Borsanı bağla'));
+  assert.ok(landing.includes('aidat yok'));
+  assert.ok(!landing.includes('Referansla aç'));
+  assert.ok(!landing.includes('onaylandığında'));
   assert.ok(landing.includes('komisyon kazanabiliriz'));
   assert.ok(landing.includes('Geçmiş sonuçlar gelecekteki getiriyi garanti etmez'));
 });

@@ -4619,8 +4619,16 @@
   #landing .lp-feature-access { color: var(--lp-accent); font-size: 11px; margin-top: 24px; }
   #landing .lp-feature-access.free { color: var(--green); }
   #landing .lp-pricing { max-width: 960px; padding: 32px 32px 0; gap: 24px; }
-  #landing .lp-price-card { border-radius: 12px; box-shadow: none; }
+  #landing .lp-price-card { border-radius: 14px; box-shadow: none; padding: 30px 26px 26px; }
   #landing .lp-price-card.featured { border-color: var(--lp-accent); transform: none; background: var(--card); }
+  #landing .lp-price-tag { display: inline-block; font-size: 9.5px; letter-spacing: .14em; font-weight: 700; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+  #landing .lp-price-list-title { font-size: 9.5px; letter-spacing: .14em; font-weight: 700; text-transform: uppercase; color: var(--text-3); margin: 0 0 8px; }
+  #landing .lp-price-feats li b { color: var(--text); font-weight: 700; }
+  #landing .lp-price-how { margin-top: 18px; padding: 13px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+  #landing .lp-price-how-t { font-size: 9.5px; letter-spacing: .13em; font-weight: 700; text-transform: uppercase; color: var(--lp-accent); margin-bottom: 8px; }
+  #landing .lp-price-how ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  #landing .lp-price-how li { display: flex; gap: 8px; font-size: 11.5px; line-height: 1.55; color: var(--text-2); }
+  #landing .lp-price-how li span { flex: none; width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--pc-soft); color: var(--pc); font-size: 9px; font-weight: 800; }
   #landing .lp-price-btn { border-radius: 8px; }
   #landing .lp-start { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
   #landing .lp-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; margin-top: 36px; }
@@ -4648,7 +4656,7 @@
   }
   /* Editorial product illustrations and lightweight motion. */
   #landing .lp-hero-band { background: radial-gradient(ellipse at 82% 40%, rgba(135,112,255,.1), transparent 55%), var(--bg); }
-  #landing .lp-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; max-width: 1200px; padding: 52px 32px 76px; gap: 12px; text-align: left; }
+  #landing .lp-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; max-width: 1200px; padding: 104px 32px 76px; gap: 12px; text-align: left; }
   #landing .lp-hero h2 { font-size: clamp(36px, 4.6vw, 60px); }
   #landing .lp-hero p { font-size: 16px; margin-left: 0; }
   #landing .lp-cta { justify-content: flex-start; }
@@ -4656,36 +4664,63 @@
   #landing .lp-explore { display: inline-flex; gap: 14px; align-items: center; color: var(--text-2); font-size: 12px; margin-top: 30px; text-decoration: none; }
   #landing .lp-explore span { transition: transform .2s; }
   #landing .lp-explore:hover span { transform: translateY(4px); }
-  #landing .lp-art { position: relative; min-width: 0; isolation: isolate; }
-  #landing .lp-signal-board { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 20px; background: linear-gradient(160deg, rgba(33,35,62,.92), rgba(12,13,24,.97)); box-shadow: 0 30px 74px rgba(0,0,0,.4); animation: lpBoardFloat 10s ease-in-out infinite; }
-  #landing .lp-signal-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(255,255,255,.03); color: rgba(255,255,255,.72); font-size: 11px; }
-  #landing .lp-signal-top em { margin-left: auto; font-style: normal; color: rgba(255,255,255,.38); font-size: 10px; }
-  #landing .lp-signal-card { padding: 13px 14px; border: 1px solid rgba(255,255,255,.09); border-radius: 14px; background: rgba(255,255,255,.045); color: #fff; }
+  #landing .lp-art { position: relative; min-width: 0; isolation: isolate; padding-bottom: 10px; }
+  #landing .lp-signal-board { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 13px; border: 1px solid transparent; border-radius: 22px;
+    background: linear-gradient(165deg, rgba(31,34,62,.97), rgba(10,11,21,.99)) padding-box,
+                linear-gradient(150deg, rgba(155,147,255,.6), rgba(94,234,212,.2) 46%, rgba(255,255,255,.06)) border-box;
+    box-shadow: 0 34px 80px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.06); animation: lpBoardFloat 10s ease-in-out infinite; }
+  #landing .lp-signal-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.07); border-radius: 999px; background: rgba(255,255,255,.035); color: rgba(255,255,255,.78); font-size: 11px; }
+  #landing .lp-signal-top b { font-weight: 700; color: #fff; }
+  #landing .lp-signal-live { font-size: 9.5px; color: rgba(255,255,255,.4); }
+  #landing .lp-signal-top em { margin-left: auto; font-style: normal; color: rgba(255,255,255,.34); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+  #landing .lp-signal-tabs { grid-column: 1 / -1; display: flex; gap: 4px; padding: 4px; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; background: rgba(255,255,255,.025); }
+  #landing .lp-signal-tabs span { flex: 1; text-align: center; padding: 6px 0; border-radius: 7px; font-size: 10px; font-weight: 600; color: rgba(255,255,255,.42); }
+  #landing .lp-signal-tabs span.on { background: rgba(155,147,255,.18); color: #fff; box-shadow: inset 0 0 0 1px rgba(155,147,255,.3); }
+  #landing .lp-signal-card { padding: 13px 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025)); color: #fff; }
   #landing .lp-sig-trade { grid-column: 1 / -1; }
-  #landing .lp-sig-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-  #landing .lp-sig-type { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.82); }
+  #landing .lp-sig-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+  #landing .lp-sig-type { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.84); }
+  #landing .lp-sig-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  #landing .lp-sig-dot.green { background: #34d399; box-shadow: 0 0 10px rgba(52,211,153,.6); }
+  #landing .lp-sig-dot.violet { background: #a89aff; box-shadow: 0 0 10px rgba(168,154,255,.55); }
+  #landing .lp-sig-dot.teal { background: #5eead4; box-shadow: 0 0 10px rgba(94,234,212,.5); }
+  #landing .lp-sig-avatar { width: 18px; height: 18px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(140deg,#8b7cf6,#4f46c8); color: #fff; font-size: 9px; font-weight: 800; }
   #landing .lp-sig-badge { font-size: 9px; letter-spacing: .07em; font-weight: 800; padding: 3px 7px; border-radius: 5px; border: 1px solid transparent; white-space: nowrap; }
   #landing .lp-sig-badge.long { color: #6ee7b7; background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.35); }
   #landing .lp-sig-badge.neutral { color: #c4b5fd; background: rgba(155,147,255,.12); border-color: rgba(155,147,255,.32); }
-  #landing .lp-sig-badge.soft { color: rgba(255,255,255,.55); background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); font-weight: 600; }
-  #landing .lp-sig-pair { font-size: 15px; font-weight: 700; letter-spacing: .02em; margin-bottom: 10px; }
-  #landing .lp-sig-pair em { font-style: normal; font-size: 10px; font-weight: 500; color: rgba(255,255,255,.42); margin-left: 4px; }
-  #landing .lp-sig-levels { display: grid; gap: 6px; }
-  #landing .lp-sig-levels div { display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 8px; }
-  #landing .lp-sig-levels span { font-size: 9.5px; color: rgba(255,255,255,.45); }
-  #landing .lp-sig-levels i { height: 5px; width: var(--w); border-radius: 999px; background: linear-gradient(90deg, rgba(155,147,255,.9), rgba(94,234,212,.85)); }
-  #landing .lp-sig-levels div:nth-child(3) i { background: linear-gradient(90deg, rgba(248,113,113,.85), rgba(248,113,113,.3)); }
+  #landing .lp-sig-badge.soft { color: rgba(255,255,255,.6); background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); font-weight: 600; }
+  #landing .lp-sig-pair-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  #landing .lp-sig-pair { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+  #landing .lp-sig-pair em { font-style: normal; font-size: 10px; font-weight: 500; color: rgba(255,255,255,.4); margin-left: 5px; }
+  #landing .lp-sig-rr { font-size: 9.5px; letter-spacing: .06em; color: rgba(255,255,255,.4); white-space: nowrap; }
+  #landing .lp-sig-rr b { color: #a7f3d0; margin-left: 3px; }
+  #landing .lp-sig-chart { position: relative; border-radius: 10px; overflow: hidden; background: rgba(8,10,20,.55); border: 1px solid rgba(255,255,255,.05); }
+  #landing .lp-sig-chart svg { display: block; width: 100%; height: 90px; }
+  #landing .lp-sig-levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 9px; }
+  #landing .lp-sig-levels div { padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.05); min-width: 0; }
+  #landing .lp-sig-levels span { display: block; font-size: 8.5px; letter-spacing: .06em; color: rgba(255,255,255,.4); margin-bottom: 2px; }
+  #landing .lp-sig-levels b { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.9); }
+  #landing .lp-sig-levels b.up { color: #6ee7b7; }
+  #landing .lp-sig-levels b.down { color: #fca5a5; }
   #landing .lp-hero .lp-sig-note { margin: 9px 0 0; font-size: 10px; line-height: 1.5; color: rgba(255,255,255,.45); }
-  #landing .lp-sig-spark { display: block; width: 100%; height: 46px; color: #a89aff; margin-top: 2px; }
-  #landing .lp-sig-bars { display: flex; align-items: flex-end; gap: 5px; height: 46px; margin-top: 4px; }
-  #landing .lp-sig-bars i { flex: 1; height: var(--h); border-radius: 3px 3px 1px 1px; background: linear-gradient(180deg, rgba(94,234,212,.75), rgba(155,147,255,.18)); }
-  #landing .lp-sig-community { position: absolute; right: 22px; bottom: -16px; display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: 999px; background: #f3f4ff; color: #22243a; font-size: 10.5px; font-weight: 500; box-shadow: 0 12px 30px rgba(0,0,0,.32); }
+  #landing .lp-sig-gauge { display: block; width: 100%; height: 58px; margin: 2px 0 4px; }
+  #landing .lp-sig-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  #landing .lp-sig-meta span { font-size: 8.5px; color: rgba(255,255,255,.52); padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.06); }
+  #landing .lp-sig-risk { display: flex; align-items: baseline; gap: 6px; margin: 12px 0 8px; }
+  #landing .lp-sig-risk b { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  #landing .lp-sig-risk span { font-size: 9px; color: rgba(255,255,255,.42); }
+  #landing .lp-sig-riskbar { height: 6px; border-radius: 999px; background: rgba(255,255,255,.07); overflow: hidden; margin-bottom: 10px; }
+  #landing .lp-sig-riskbar i { display: block; height: 100%; width: var(--w); border-radius: inherit; background: linear-gradient(90deg, #8b7cf6, #5eead4); }
+  #landing .lp-sig-community { position: absolute; right: 20px; bottom: -15px; display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: 999px; background: #f3f4ff; color: #22243a; font-size: 10.5px; font-weight: 500; box-shadow: 0 12px 30px rgba(0,0,0,.32); }
   #landing .lp-sig-community b { font-weight: 800; }
-  #landing .lp-hero-pillars { display: flex; flex-wrap: wrap; gap: 8px; max-width: 540px; margin-top: 22px; }
-  #landing .lp-hero-pillars > span { display: inline-flex; align-items: baseline; gap: 7px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 11px; color: var(--text-3); background: var(--card); }
-  #landing .lp-hero-pillars b { font-size: 11.5px; color: var(--text); font-weight: 700; }
+  #landing .lp-hero-values { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; max-width: 520px; margin-top: 28px; text-align: left; }
+  #landing .lp-hero-value { display: flex; align-items: flex-start; gap: 10px; }
+  #landing .lp-hv-ico { width: 32px; height: 32px; flex: none; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--lp-accent); background: var(--pc-soft); border: 1px solid var(--border); }
+  #landing .lp-hv-ico svg { width: 17px; height: 17px; }
+  #landing .lp-hero-value b { display: block; font-size: 12.5px; color: var(--text); font-weight: 700; line-height: 1.35; }
+  #landing .lp-hero-value > div span { display: block; font-size: 11px; color: var(--text-3); line-height: 1.5; margin-top: 2px; }
   #landing .lp-art-halo { position: absolute; inset: 20%; z-index: -1; background: radial-gradient(circle, rgba(132,103,255,.2), transparent 70%); }
-  #landing .lp-art-note { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11px; color: var(--text-3); }
+  #landing .lp-art-note { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11px; color: var(--text-3); margin-top: 26px; }
   #landing .lp-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px rgba(52,211,153,.35); }
   #landing .lp-showcase { display: grid; grid-template-columns: .7fr 1.3fr; gap: 48px; align-items: center; max-width: 1120px; margin: 0 auto; padding: 80px 32px 12px; scroll-margin-top: 24px; }
   #landing .lp-showcase-heading h3 { font-family: var(--font-display); font-size: clamp(26px, 3vw, 36px); line-height: 1.25; letter-spacing: -.04em; margin: 18px 0; }
@@ -4720,15 +4755,16 @@
   @keyframes lpBoardFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
   @keyframes lpPanelIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
   @media (max-width: 850px) {
-    #landing .lp-hero { grid-template-columns: 1fr; text-align: center; gap: 16px; padding-top: 44px; }
+    #landing .lp-hero { grid-template-columns: 1fr; text-align: center; gap: 16px; padding-top: 96px; }
     #landing .lp-hero p, #landing .lp-assurance { margin-left: auto; margin-right: auto; }
+    #landing .lp-hero-values { margin-left: auto; margin-right: auto; }
     #landing .lp-cta { justify-content: center; }
     #landing .lp-art { width: min(100%, 480px); margin: 0 auto; }
     #landing .lp-art img { width: 100%; margin-left: 0; }
     #landing .lp-showcase { grid-template-columns: 1fr; gap: 28px; padding-top: 54px; }
     #landing .lp-showcase-heading { text-align: center; }
   }
-  @media (max-width: 640px) { #landing .lp-hero { padding: 40px 20px; } #landing .lp-showcase { padding-left: 20px; padding-right: 20px; } #landing .lp-demo-detail { padding: 20px 14px; } }
+  @media (max-width: 640px) { #landing .lp-hero { padding: 96px 20px 48px; } #landing .lp-showcase { padding-left: 20px; padding-right: 20px; } #landing .lp-demo-detail { padding: 20px 14px; } }
   #landing .lp-section-nav { display: flex; gap: 25px; }
   #landing .lp-section-nav a { color: var(--text-2); text-decoration: none; font-size: 12px; transition: color .2s; }
   #landing .lp-section-nav a:hover { color: var(--lp-accent); }
@@ -4854,44 +4890,81 @@
   <section class="lp-hero">
     <div class="lp-hero-copy">
     <span class="lp-badge">İŞLEM · BİAS · PORTFÖY · TOPLULUK</span>
-    <h2>Fırsatı gör.<br><span class="grad">Gerekçesini oku.</span></h2>
-    <p>İşlemlerimizi, biaslarımızı ve portföy yaklaşımımızı açıkça paylaşıyoruz. Grafiğin arkasındaki gerekçeyi incele, toplulukta fikir alışverişi yap, kendi kararını daha bilinçli ver.</p>
+    <h2>Fırsatı gör.<br><span class="grad">Kararın tamamını oku.</span></h2>
+    <p>İşlemlerimizi giriş–hedef–stop ve gerekçesiyle paylaşıyoruz. Bias ve onchain okumamızı aynı akışta gör, paylaşılan portföyü izle, toplulukta fikrini tartış.</p>
     <div class="lp-cta">
       <button class="primary" id="hero-register" type="button" data-i18n="hero.register">Ücretsiz başla →</button>
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
-    <div class="lp-assurance">Ücretsiz üyelik · Aidat yok · Premium referans doğrulamasıyla</div>
-    <div class="lp-hero-pillars" aria-label="Platformun dört odağı">
-      <span><b>📈 İşlem</b>Giriş · hedef · gerekçe</span>
-      <span><b>🧭 Bias</b>Yön görüşü · onchain</span>
-      <span><b>💼 Portföy</b>Paylaşılan yaklaşım</span>
-      <span><b>💬 Topluluk</b>Fikir alışverişi</span>
+    <div class="lp-assurance">Kredi kartı yok · Aidat yok · Borsanı bağla, premium ücretsiz</div>
+    <div class="lp-hero-values" aria-label="Platformun dört odağı">
+      <div class="lp-hero-value">
+        <span class="lp-hv-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16.5 9 11l3.4 3.4L20 6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6.8H20v4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>İşlem paylaşımı</b><span>Giriş, hedef, stop ve gerekçe</span></div>
+      </div>
+      <div class="lp-hero-value">
+        <span class="lp-hv-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m12 12 4.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg></span>
+        <div><b>Bias &amp; onchain</b><span>Funding, CVD ve yön görüşü</span></div>
+      </div>
+      <div class="lp-hero-value">
+        <span class="lp-hv-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 9.5 12 5l8 4.5-8 4.5-8-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m4 13 8 4.5 8-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Paylaşılan portföy</b><span>Pozisyonlar salt okunur</span></div>
+      </div>
+      <div class="lp-hero-value">
+        <span class="lp-hv-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5h14v9H9l-4 3v-12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 10.5h6M9 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+        <div><b>Topluluk</b><span>Soru sor, fikir paylaş</span></div>
+      </div>
     </div>
-    <a class="lp-explore" href="#lp-showcase">Çalışma alanını keşfet <span aria-hidden="true">↓</span></a>
+    <a class="lp-explore" href="#lp-showcase">Platformu keşfet <span aria-hidden="true">↓</span></a>
     </div>
     <div class="lp-art">
       <div class="lp-art-halo" aria-hidden="true"></div>
-      <div class="lp-signal-board" role="img" aria-label="İşlem, bias ve portföy paylaşımını gösteren temsili arayüz">
-        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span> Alfa akışı <em>temsili görünüm</em></div>
+      <div class="lp-signal-board" role="img" aria-label="İşlem, bias ve risk aracı paylaşımını gösteren temsili arayüz">
+        <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>Alfa akışı</b><span class="lp-signal-live">son paylaşımlar</span><em>temsili</em></div>
+        <div class="lp-signal-tabs" aria-hidden="true"><span class="on">İşlem</span><span>Bias</span><span>Portföy</span></div>
         <article class="lp-signal-card lp-sig-trade">
-          <div class="lp-sig-head"><span class="lp-sig-type">📈 İşlem paylaşımı</span><b class="lp-sig-badge long" lang="en">LONG</b></div>
-          <div class="lp-sig-pair">BTC / USDT <em>4s</em></div>
+          <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-avatar" aria-hidden="true">A</span> İşlem paylaşımı</span><b class="lp-sig-badge long" lang="en">LONG</b></div>
+          <div class="lp-sig-pair-row"><div class="lp-sig-pair">BTC / USDT <em>4s · swing</em></div><span class="lp-sig-rr">R:R <b>1:2.4</b></span></div>
+          <div class="lp-sig-chart" aria-hidden="true">
+            <svg viewBox="0 0 320 90" fill="none" preserveAspectRatio="none">
+              <g stroke="#93a1d4" stroke-opacity=".1"><path d="M0 22h320M0 47h320M0 72h320M64 0v90M128 0v90M192 0v90M256 0v90"/></g>
+              <rect x="0" y="43" width="320" height="12" fill="#8b7cf6" opacity=".13"/>
+              <path d="M0 43h320M0 55h320" stroke="#a89aff" stroke-dasharray="3 4" opacity=".45"/>
+              <path d="M0 21h320" stroke="#34d399" stroke-dasharray="4 5" opacity=".5"/>
+              <path d="M0 74h320" stroke="#f87171" stroke-dasharray="4 5" opacity=".45"/>
+              <g stroke="#5eead4" stroke-width="1.3">
+                <path d="M34 60v20M58 54v18M82 46v22M106 40v18M130 50v16M154 34v20M178 38v16M202 28v18M226 32v14M250 22v16M274 28v12M298 20v14"/>
+              </g>
+              <g fill="#5eead4">
+                <rect x="30" y="64" width="8" height="12" rx="1.5" opacity=".7"/><rect x="54" y="58" width="8" height="10" rx="1.5" opacity=".9"/><rect x="78" y="50" width="8" height="14" rx="1.5" opacity=".7"/><rect x="102" y="44" width="8" height="10" rx="1.5" opacity=".9"/><rect x="126" y="54" width="8" height="8" rx="1.5" opacity=".7"/><rect x="150" y="38" width="8" height="12" rx="1.5" opacity=".9"/><rect x="174" y="42" width="8" height="8" rx="1.5" opacity=".7"/><rect x="198" y="32" width="8" height="10" rx="1.5" opacity=".9"/><rect x="222" y="36" width="8" height="6" rx="1.5" opacity=".7"/><rect x="246" y="26" width="8" height="8" rx="1.5" opacity=".9"/><rect x="270" y="32" width="8" height="4" rx="1.5" opacity=".7"/><rect x="294" y="24" width="8" height="6" rx="1.5" opacity=".9"/>
+              </g>
+              <path d="M0 78c26-4 40-18 60-16s32 10 52 2 30-24 50-20 26 12 46 4 30-18 50-24 32-4 62-8" stroke="#a89aff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+              <circle cx="300" cy="24" r="3.2" fill="#5eead4"/><circle cx="300" cy="24" r="7" stroke="#5eead4" opacity=".35"/>
+            </svg>
+          </div>
           <div class="lp-sig-levels">
-            <div><span>Giriş</span><i style="--w:34%"></i></div>
-            <div><span>Hedef</span><i style="--w:78%"></i></div>
-            <div><span>Stop</span><i style="--w:52%"></i></div>
+            <div><span>Giriş</span><b>64.2K</b></div>
+            <div><span>Hedef</span><b class="up">67.8K</b></div>
+            <div><span>Stop</span><b class="down">62.1K</b></div>
           </div>
           <p class="lp-sig-note">“Talep bölgesi + hacim onayı”</p>
         </article>
         <article class="lp-signal-card">
-          <div class="lp-sig-head"><span class="lp-sig-type">🧭 Bias</span><b class="lp-sig-badge neutral">NÖTR</b></div>
-          <svg class="lp-sig-spark" viewBox="0 0 120 46" fill="none" aria-hidden="true"><path d="M2 33h15l8-13 9 18 12-24 10 15 14-9 12 6 12-12 14 5h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 33h116" stroke="currentColor" stroke-width="1" opacity=".18"/></svg>
-          <p class="lp-sig-note">Funding dengeli · CVD yatay</p>
+          <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot violet" aria-hidden="true"></span> Bias</span><b class="lp-sig-badge neutral">NÖTR</b></div>
+          <svg class="lp-sig-gauge" viewBox="0 0 120 62" fill="none" aria-hidden="true">
+            <path d="M12 54a48 48 0 0 1 96 0" stroke="rgba(255,255,255,.09)" stroke-width="9" stroke-linecap="round"/>
+            <path d="M12 54a48 48 0 0 1 24-41.6" stroke="#f87171" stroke-width="9" stroke-linecap="round" opacity=".7"/>
+            <path d="M84 12.4a48 48 0 0 1 24 41.6" stroke="#34d399" stroke-width="9" stroke-linecap="round" opacity=".8"/>
+            <path d="M60 54V27" stroke="#e5e7ff" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="60" cy="54" r="3.6" fill="#e5e7ff"/><circle cx="60" cy="54" r="7.5" stroke="rgba(255,255,255,.2)"/>
+          </svg>
+          <div class="lp-sig-meta"><span>Funding dengeli</span><span>CVD yatay</span></div>
         </article>
         <article class="lp-signal-card">
-          <div class="lp-sig-head"><span class="lp-sig-type">💼 Portföy</span><b class="lp-sig-badge soft">Salt okunur</b></div>
-          <div class="lp-sig-bars" aria-hidden="true"><i style="--h:44%"></i><i style="--h:66%"></i><i style="--h:52%"></i><i style="--h:82%"></i><i style="--h:61%"></i><i style="--h:74%"></i></div>
-          <p class="lp-sig-note">Dağılım · pozisyon · not</p>
+          <div class="lp-sig-head"><span class="lp-sig-type"><span class="lp-sig-dot teal" aria-hidden="true"></span> Risk aracı</span><b class="lp-sig-badge soft">1R</b></div>
+          <div class="lp-sig-risk"><b>0.42</b><span>BTC pozisyon</span></div>
+          <div class="lp-sig-riskbar" aria-hidden="true"><i style="--w:42%"></i></div>
+          <div class="lp-sig-meta"><span>Risk %1</span><span>Stop mesafesi</span></div>
         </article>
         <div class="lp-sig-community">💬 <b>Topluluk</b> fikir alışverişi</div>
       </div>
@@ -4960,57 +5033,69 @@
 
   <div class="lp-section-head">
     <div class="lp-eyebrow">ERİŞİM SEÇENEKLERİ</div>
-    <h3 id="lp-access-title">Önce keşfet. Sonra derinleş.</h3>
-    <p>Üyelik ücretsiz. Premium, aylık abonelikle değil referans doğrulamasıyla açılır.</p>
+    <h3 id="lp-access-title">Ücretsiz başla.<br>Borsanı bağla, premium'u ücretsiz aç.</h3>
+    <p>Aidat yok, kredi kartı yok. Referans bağlantımızla açtığın borsa hesabını bağla; premium erişim ücretsiz açılsın.</p>
   </div>
   <div class="lp-pricing">
     <div class="lp-price-card">
+      <div class="lp-price-tag">Başlangıç</div>
       <div class="lp-price-name">Ücretsiz Üye</div>
-      <div class="lp-price-desc">Platformu tanı, temel araçlarla başla, toplulukta fikir alışverişi yap.</div>
-      <div class="lp-price-val"><b class="lp-free">$0</b></div>
-      <div class="lp-price-period">Herkese açık — kayıt yeterli</div>
+      <div class="lp-price-desc">Platformu tanı, piyasayı takip et, topluluğa katıl.</div>
+      <div class="lp-price-val"><b class="lp-free">$0</b><span> / her zaman</span></div>
+      <div class="lp-price-period">Kayıt yeterli · kart gerekmez</div>
+      <div class="lp-price-list-title">Neler açık?</div>
       <ul class="lp-price-feats">
-        <li>Alfa Calculator ile pozisyon boyutlandırma</li>
-        <li>Ekonomik takvim ve önemli veri açıklamaları</li>
-        <li>Ana sayfada seçili işlem sonuçlarının önizlemesi</li>
-        <li>Paylaşılan portföyün özet görünümü</li>
-        <li>Topluluk akışında fikir alışverişi</li>
+        <li><b>Topluluk akışı</b> — Soru sor, fikir paylaş, tartış.</li>
+        <li><b>Portföy özeti</b> — Paylaşılan portföyün büyük resmini gör.</li>
+        <li><b>İşlem önizlemeleri</b> — Son paylaşımlardan haberdar ol.</li>
+        <li><b>Alfa Calculator</b> — Pozisyon boyutunu ve riskini planla.</li>
+        <li><b>Ekonomik takvim</b> — Veri saatlerini kaçırma.</li>
       </ul>
       <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
     </div>
     <div class="lp-price-card featured">
-      <div class="lp-price-badge">Tam erişim</div>
+      <div class="lp-price-badge">Borsanı bağla · ücretsiz</div>
+      <div class="lp-price-tag">Tam erişim</div>
       <div class="lp-price-name">Premium</div>
-      <div class="lp-price-desc">İşlemlerden veriye, eğitime kadar daha kapsamlı bir çalışma alanı.</div>
+      <div class="lp-price-desc">İşlemden veriye, portföyden eğitime kadar tam çalışma alanı.</div>
       <div class="lp-price-val"><b class="lp-free">$0</b><span> / aidat yok</span></div>
-      <div class="lp-price-period">Erişim, referans doğrulamasıyla açılır</div>
+      <div class="lp-price-period">Borsanı bağla · kart gerekmez</div>
+      <div class="lp-price-list-title">Tam erişimde neler var?</div>
       <ul class="lp-price-feats">
-        <li>İşlem Kanalı — canlı işlem paylaşımları ve sonuçlar</li>
-        <li>Ücretsiz üyeliğin tüm özellikleri</li>
-        <li>Paylaşılan portföy — pozisyonlar, satışlar ve notlar</li>
-        <li>Trading Terminali — canlı grafik ve watchlist</li>
-        <li>Alfa Edu — video eğitimler ve kaynaklar</li>
-        <li>Bias &amp; Onchain — yön görüşü, funding, CVD, akış</li>
-        <li>Gelir / Gider — bütçe ve takip</li>
-        <li>Çalışma Panosu</li>
+        <li><b>Ücretsiz üyelikteki her şey</b> — Başlangıç özellikleri dahil.</li>
+        <li><b>İşlem Kanalı</b> — Giriş, hedef, stop ve gerekçe aynı akışta.</li>
+        <li><b>Bias &amp; Onchain</b> — Funding, CVD ve açık pozisyon okuması.</li>
+        <li><b>Paylaşılan portföy</b> — Pozisyonlar, satışlar ve notlar; salt okunur.</li>
+        <li><b>Trading Terminali</b> — Canlı grafik ve watchlist.</li>
+        <li><b>Alfa Edu</b> — Video eğitimler ve kaynaklar.</li>
+        <li><b>Gelir / Gider</b> — Bütçe ve harcama takibi.</li>
+        <li><b>Çalışma Panosu</b> — Planları ve fikirleri tek yerde topla.</li>
       </ul>
-      <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Referansla aç →</button>
+      <div class="lp-price-how">
+        <div class="lp-price-how-t">Nasıl açılır?</div>
+        <ol>
+          <li><span>1</span> Borsa hesabını referans bağlantımızla aç.</li>
+          <li><span>2</span> Hesabını bağla, UID'ni bir kez doğrula.</li>
+          <li><span>3</span> Premium ücretsiz açılır; aidat ödemezsin.</li>
+        </ol>
+      </div>
+      <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Borsanı bağla, ücretsiz aç →</button>
     </div>
   </div>
 
   <section class="lp-start" aria-labelledby="lp-start-title">
     <div class="lp-section-head"><div class="lp-eyebrow">NASIL BAŞLARSIN?</div><h3 id="lp-start-title">Üç adımda çalışma alanın hazır.</h3></div>
     <div class="lp-steps">
-      <div><span>01</span><h4>Hesabını oluştur</h4><p>Ücretsiz kayıt ol. Temel araçları ve ana sayfadaki önizlemeleri keşfet.</p></div>
-      <div><span>02</span><h4>Referansını doğrulat</h4><p>OKX veya Bybit referans bağlantısıyla oluşturduğun hesabın UID bilgisini erişim sayfasından ilet.</p></div>
-      <div><span>03</span><h4>Premium'u aç</h4><p>Doğrulama onaylandığında işlem kanalı, bias verileri, paylaşılan portföy ve Alfa Edu erişimine kavuş.</p></div>
+      <div><span>01</span><h4>Hesabını oluştur</h4><p>Ücretsiz kayıt ol; topluluğu, işlem önizlemelerini ve portföy özetini gör.</p></div>
+      <div><span>02</span><h4>Borsanı bağla</h4><p>Referans bağlantımızla açtığın OKX veya Bybit hesabını bağla, UID'ni bir kez doğrula.</p></div>
+      <div><span>03</span><h4>Premium'u kullan</h4><p>İşlem kanalı, bias verileri, paylaşılan portföy ve Alfa Edu ücretsiz açılır.</p></div>
     </div>
     <p class="lp-disclosure">Platform için abonelik ücreti alınmaz. Referans bağlantıları üzerinden borsalardan komisyon kazanabiliriz. Borsanın işlem ücretleri ve koşulları geçerlidir.</p>
   </section>
   <div class="lp-cta-band">
     <div class="lp-cta-inner">
       <h3>Fırsatları birlikte okuyalım.</h3>
-      <p>Önce platformu keşfet; işlemleri, biasları ve topluluk akışını gör. Daha fazlası için referansla premium erişimini aç.</p>
+      <p>Önce platformu keşfet; işlemleri, biasları ve topluluk akışını gör. Daha fazlası için borsanı bağla, premium'u ücretsiz aç.</p>
       <button id="cta-register" type="button" data-i18n="cta.btn">Ücretsiz kayıt ol</button>
     </div>
   </div>
@@ -5079,7 +5164,7 @@
         <li><span class="ap-ico" aria-hidden="true">💼</span><div><b>Portföy yaklaşımı</b><span>Paylaşılan portföyü salt okunur izle.</span></div></li>
         <li><span class="ap-ico" aria-hidden="true">💬</span><div><b>Topluluk</b><span>Sor, tartış, fikrini paylaş.</span></div></li>
       </ul>
-      <div class="auth-trust">Ücretsiz üyelik · Aidat yok · Premium referans doğrulamasıyla açılır. Fonların senin hesabında kalır.</div>
+      <div class="auth-trust">Ücretsiz üyelik · Aidat yok · Borsanı bağla, premium ücretsiz. Fonların senin hesabında kalır.</div>
     </div>
     <div class="auth-form-col">
       <div class="auth-tabs">
@@ -5123,10 +5208,10 @@
           <div class="auth-price-badge">Tam erişim</div>
           <div class="auth-price-name">Premium</div>
           <div class="auth-price-val">$0<span>/ aidat yok</span></div>
-          <div class="auth-price-desc">Referans doğrulamasıyla açılır</div>
+          <div class="auth-price-desc">Borsanı bağla, ücretsiz aç</div>
         </div>
       </div>
-      <p class="auth-note">Abonelik ücreti alınmaz. Premium, referans doğrulamasıyla açılır; portföy özeti ve topluluk herkese açıktır.</p>
+      <p class="auth-note">Abonelik ücreti alınmaz. Borsanı bağla, premium'u ücretsiz kullan; portföy özeti ve topluluk herkese açıktır.</p>
     </div>
   </div>
 </div>
@@ -5177,8 +5262,8 @@
 
 <div class="wrap">
 <div id="tier-banner" style="display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.03));font-size:12.5px;color:var(--text);">
-  <span>🔒 Kısıtlı erişim — işlem kanalı, eğitim ve portföy detayları referans doğrulamasıyla açılır. Portföy özeti herkese açıktır.</span>
-  <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Referansla aç</button>
+  <span>🔒 Kısıtlı erişim — işlem kanalı, eğitim ve portföy detayları için borsanı bağla; premium ücretsiz açılır. Portföy özeti herkese açıktır.</span>
+  <button type="button" id="tier-banner-btn" class="btn solid" style="padding:6px 12px;font-size:12px;">Borsanı bağla</button>
 </div>
 <div class="nav-hover-zone" aria-hidden="true"></div>
 <nav class="navbar">
@@ -12953,7 +13038,7 @@ function applyTierUi() {
   if (homeSub) {
     if (isAdmin) homeSub.textContent = 'Yönetici görünümü — tüm modüller ve onay panelleri açık.';
     else if (ref) homeSub.textContent = 'Premium erişim açık — tüm araçlar kullanılabilir.';
-    else homeSub.textContent = 'Temel araçlar ve paylaşılan portföy özeti. Premium, referans doğrulamasıyla açılır.';
+    else homeSub.textContent = 'Temel araçlar ve paylaşılan portföy özeti. Premium, borsanı bağlayınca ücretsiz açılır.';
   }
   const homeStatus = document.getElementById('home-status');
   if (homeStatus) {
@@ -13000,7 +13085,7 @@ function renderAccessPage() {
   else if (verified) { badge.textContent = 'Doğrulandı'; text.textContent = 'Referansın doğrulandı. Tüm ürün erişimine sahipsin.'; }
   else if (SITE.status === 'pending') { badge.textContent = 'Onay bekliyor'; text.textContent = 'Başvurun alındı. Yönetici onayladığında erişim açılır.'; }
   else if (SITE.status === 'rejected') { badge.textContent = 'Doğrulanamadı'; text.textContent = 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup tekrar dene.'; }
-  else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı referans doğrulamasıyla açılır.'; }
+  else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı borsanı bağlayınca açılır.'; }
 
   const okx = document.getElementById('acc-link-okx');
   const bybit = document.getElementById('acc-link-bybit');
@@ -26669,7 +26754,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b176';
+const APP_BUILD = 'b177';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

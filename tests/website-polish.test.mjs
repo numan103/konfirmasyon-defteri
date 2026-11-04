@@ -13,7 +13,7 @@ test('auth gate offers password visibility toggle and clear access note', () => 
 test('home subtitle is role-aware', () => {
   assert.ok(html.includes("Yönetici görünümü — tüm modüller ve onay panelleri açık."));
   assert.ok(html.includes("Premium erişim açık — tüm araçlar kullanılabilir."));
-  assert.ok(html.includes("Temel araçlar ve paylaşılan portföy özeti. Premium, referans doğrulamasıyla açılır."));
+  assert.ok(html.includes("Temel araçlar ve paylaşılan portföy özeti. Premium, borsanı bağlayınca ücretsiz açılır."));
 });
 
 test('premium empty states use proper Turkish copy', () => {
