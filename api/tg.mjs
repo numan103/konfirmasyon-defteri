@@ -5,6 +5,7 @@
 // Herkese açık kanal (TG_CHAT_ID) yalnızca genel/davet edici metni alır; ayrıntılı metin
 // varsa ve TG_PREMIUM_CHAT_ID tanımlıysa sadece premium kanalına gider.
 import { requestUser, requestTier, throttle } from '../lib/auth.mjs';
+import { sendTelegram } from '../lib/telegram.mjs';
 
 const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
 const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
@@ -21,20 +22,6 @@ const TG_PREMIUM_THREAD = process.env.TG_PREMIUM_THREAD ? Number(String(process.
 const PUBLIC_FALLBACK = '🔔 Portföyde yeni bir hamle yapıldı.\n\nAyrıntılar ve canlı portföy premium üyeler için açık.\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
 const PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] };
 
-async function sendTelegram(text, chatId = TG_CHAT, threadId = TG_THREAD, replyMarkup = null) {
-  const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
-  const payload = { chat_id: chatId, text, disable_web_page_preview: true };
-  if (threadId) payload.message_thread_id = threadId;
-  if (replyMarkup) payload.reply_markup = replyMarkup;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  let out = {};
-  try { out = await res.json(); } catch (e) {}
-  return { http: res.status, ...out };
-}
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });

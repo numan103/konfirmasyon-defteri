@@ -1,0 +1,11 @@
+.macro-admin { width: min(900px, 94vw); max-height: 92dvh; overflow: auto; margin: auto; padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg); color: var(--text); }
+.macro-admin::backdrop { background: #050914df; }
+.macro-admin header, .macro-admin-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.macro-admin header h2 { flex: 1; font-size: 20px; }
+.macro-admin button { min-height: 44px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font: inherit; cursor: pointer; }
+.macro-admin button:disabled { opacity: .45; cursor: default; }
+.macro-admin button:focus-visible { outline: 2px solid var(--pc); outline-offset: 2px; }
+.macro-admin pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; border: 1px solid var(--border); background: var(--card); font: 13px/1.8 Inter, sans-serif; border-radius: 8px; margin: 12px 0; }
+.macro-admin p, .macro-admin label { display: block; font-size: 13px; line-height: 1.8; margin: 10px 0; }
+.macro-admin-target { font-weight: 700; color: var(--pc); }
+.macro-admin-error { color: var(--red); }

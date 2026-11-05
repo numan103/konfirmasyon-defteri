@@ -20,6 +20,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <!-- AYNA:BASLA -->
 <link rel="stylesheet" href="/ayna/ayna-core.css?v=10">
 <!-- AYNA:BITIR -->
@@ -5319,6 +5320,7 @@
 })();
 </script>
 <script src="/assets/landing-live.js?v=183" defer></script>
+<script src="/assets/macro-admin.js?v=185" defer></script>
 <div id="auth-gate">
   <div class="auth-box">
     <button class="auth-x" id="auth-close" type="button" aria-label="Kapat" data-i18n-aria="auth.close">&times;</button>
@@ -5834,6 +5836,7 @@
 <div class="home-section" id="home-sec-admin" style="display:none">
   <div class="home-section-head">Yönetim</div>
   <div class="home-grid">
+        <button type="button" class="home-card" data-macro-open style="text-align:left;font:inherit"><div class="hc-body"><h2>🌐 Alfa Makro Analist</h2><p>09.00 raporu, hedef kontrolü, önizleme ve onaylı test gönderimi.</p></div></button>
         <a href="?page=basvuru" class="home-card" data-nav id="home-basvuru-card" style="display:none">
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv9)"/><circle cx="114" cy="50" r="19" fill="var(--pc)" stroke="var(--card)" stroke-width="4"/><circle cx="150" cy="50" r="19" fill="#7c3aed" stroke="var(--card)" stroke-width="4"/><circle cx="186" cy="50" r="19" fill="var(--green)" stroke="var(--card)" stroke-width="4"/><rect x="122" y="78" width="56" height="22" rx="11" fill="var(--green)"/><text x="150" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">+52R</text></svg></div>
           <div class="hc-body"><h2>🤝 Alfa Ol</h2><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
@@ -26929,7 +26932,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b183';
+const APP_BUILD = 'b185';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

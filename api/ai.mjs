@@ -14,6 +14,7 @@ import onboardingSummary from '../ayna-server/actions/onboarding-summary.mjs';
 import sync from '../ayna-server/actions/sync.mjs';
 import journalFollowup from '../ayna-server/actions/journal-followup.mjs';
 import notionSyncAction from '../ayna-server/actions/notion-sync.mjs';
+import macroHandler from '../lib/macro/handler.mjs';
 
 const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'journal-followup': journalFollowup, 'notion-sync': notionSyncAction, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
 
@@ -35,6 +36,7 @@ const GROQ_MODEL = 'llama-3.1-8b-instant';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export default async function handler(req, res) {
+  if (req.query?.macro === '1' || (req.method === 'POST' && typeof req.body?.action === 'string' && req.body.action.startsWith('macro-'))) return macroHandler(req, res);
   if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type'); return res.status(200).end(); }
   if (req.method === 'GET') return cronHandler(req, res);
   const authHeader = req.headers.authorization || '';
