@@ -1,10 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dayKey, isDue, zonedUTC, calendarEvents, splitTelegram, publicUrl } from '../lib/macro/core.mjs';
+import { dayKey, hash, isDue, zonedUTC, calendarEvents, splitTelegram, singleTelegram, publicUrl } from '../lib/macro/core.mjs';
 import { validateReport } from '../lib/macro/report.mjs';
+import { numberVariants, marketNumbers } from '../lib/macro/report.mjs';
+import { reportSchema } from '../lib/macro/report.mjs';
 import { macroService } from '../lib/macro/job.mjs';
 import macroHandler from '../lib/macro/handler.mjs';
 import { readSource } from '../lib/macro/research.mjs';
+import { groq } from '../lib/macro/research.mjs';
+import { sourceDate, parseDateValue } from '../lib/macro/research.mjs';
+import { xmlItems, listingItems, csvHead, usDate } from '../lib/macro/research.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 import { macroStore } from '../lib/macro/store.mjs';
 
@@ -37,6 +42,184 @@ function modelKey(t) {
   t.after(() => { if (old === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = old; });
 }
 
+test('failure diagnostics persist privately and can never be mistaken for a deliverable report', async t => {
+  modelKey(t);
+  const store = memoryStore();
+  let sent = 0;
+  const diagnostic = { format: 'flat-v1', draft: { invalid: true }, evidence: { sources: [] }, failure: 'model_invalid_json' };
+  const svc = service(store, {
+    generate: async () => { const e = new Error('model_invalid_json'); e.diagnostic = diagnostic; throw e; },
+    send: async () => { sent++; },
+    modelAvailability: async () => ({ available: true }),
+  });
+  await assert.rejects(() => svc.preview(), /model_invalid_json/);
+  const row = await store.read();
+  assert.equal(row.payload.phase, 'research_failed');
+  assert.equal(row.payload.report, undefined);
+  assert.deepEqual((await svc.failureDiagnostic()).diagnostic, diagnostic);
+  const status = await svc.status();
+  assert.equal(status.report.report, null);
+  assert.equal(status.report.diagnostic, undefined);
+  await assert.rejects(() => svc.testSend({ confirmSend: true }), /confirmation_required/);
+  assert.equal(sent, 0);
+});
+
+test('editorial rejection blocks a cached report and preserves its audit copy on the next bounded attempt', async t => {
+  modelKey(t);
+  const store = memoryStore();
+  const svc = service(store);
+  await svc.preview();
+  const ready = await store.read();
+  await store.save(ready, { ...ready.payload, phase: 'research_failed', report: null, rejectedReport: ready.payload.report, earlierRejectedReport: { reportHash: 'earlier' }, rejectedReportHistory: [{ reportHash: 'archived' }], maintenanceReason: 'Explicit manual review', preModelRefund: true, preModelRefundReason: 'cutoff_boundary_bug_pre_model', reviewReason: 'Editorial rejection' });
+  await assert.rejects(() => svc.testSend({ confirmSend: true, reportHash: 'report-hash', targetHash: 'target-hash' }), /confirmation_required/);
+  await svc.preview();
+  const retried = await store.read();
+  assert.equal(retried.payload.attempts, 2);
+  assert.equal(retried.payload.rejectedReport.reportHash, 'report-hash');
+  assert.equal(retried.payload.reviewReason, 'Editorial rejection');
+  assert.equal(retried.payload.earlierRejectedReport.reportHash, 'earlier');
+  assert.deepEqual(retried.payload.rejectedReportHistory, [{ reportHash: 'archived' }]);
+  assert.equal(retried.payload.maintenanceReason, 'Explicit manual review');
+  assert.equal(retried.payload.preModelRefund, true);
+  assert.equal(retried.payload.preModelRefundReason, 'cutoff_boundary_bug_pre_model');
+});
+
+test('single test sends once with correctly shifted source links and durable acknowledgement', async t => {
+  modelKey(t);
+  const sources = [{ url: 'https://www.bls.gov/test' }];
+  const text = '🔎 Rapor\nKaynak\n' + sources[0].url;
+  const telegram = singleTelegram(text, sources);
+  const report = { ...draft(), text, sources, chunks: [telegram.text], telegramFormat: 'single-v1' };
+  const store = memoryStore();
+  const calls = [];
+  const svc = service(store, { generate: async () => report, send: async (...args) => { calls.push(args); return { ok: true, result: { message_id: 123 } }; } });
+  await svc.preview();
+  assert.deepEqual(await svc.testSend({ confirmSend: true, reportHash: report.reportHash, targetHash: 'target-hash' }), { phase: 'sent', parts: 1 });
+  assert.equal(calls.length, 1);
+  const [sentText, , , , options] = calls[0];
+  assert.ok(sentText.startsWith('TEST GÖNDERİMİ\n'));
+  const entity = options.entities[0];
+  assert.equal(sentText.slice(entity.offset, entity.offset + entity.length), 'Kaynağı aç');
+  assert.equal(entity.url, sources[0].url);
+  const row = await store.read();
+  assert.equal(row.payload.delivery[0].messageId, 123);
+  await assert.rejects(() => svc.testSend({ confirmSend: true, reportHash: report.reportHash, targetHash: 'target-hash' }), /already_claimed/);
+  assert.equal(calls.length, 1);
+});
+
+test('legacy multipart drafts cannot send after switching to one-message delivery', async t => {
+  modelKey(t);
+  const store = memoryStore();
+  let sends = 0;
+  const svc = service(store, { generate: async () => ({ ...draft(), chunks: ['İlk parça', 'İkinci parça'] }), send: async () => { sends++; } });
+  await svc.preview();
+  await assert.rejects(() => svc.testSend({ confirmSend: true, reportHash: 'report-hash', targetHash: 'target-hash' }), /invalid_chunks/);
+  assert.equal(sends, 0);
+  assert.equal((await store.read()).payload.phase, 'ready');
+});
+
+test('analyst narrative sends exactly its plain text while keeping sources out of the Telegram message', async t => {
+  modelKey(t);
+  const store = memoryStore();
+  const text = 'ALFA MAKRO\nAkıcı değerlendirme; görünür kaynak ve madde listesi yok.';
+  const report = { ...draft(), text, chunks: [text], telegramFormat: 'narrative-v1', sources: [{ url: 'https://www.bls.gov/test' }] };
+  const calls = [];
+  const svc = service(store, { generate: async () => report, send: async (...args) => { calls.push(args); return { ok: true, result: { message_id: 123 } }; } });
+  await svc.preview();
+  await svc.testSend({ confirmSend: true, reportHash: report.reportHash, targetHash: 'target-hash' });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], 'TEST GÖNDERİMİ\n' + text);
+  assert.deepEqual(calls[0][4].entities, []);
+  assert.ok(!calls[0][0].includes('https://'));
+  assert.equal((await store.read()).payload.report.sources.length, 1);
+});
+
+async function topicCopyFixture(t, { uncertain = false, failedAck = false } = {}) {
+  modelKey(t);
+  const store = memoryStore();
+  const text = 'Bugünkü özgün rapor; veri saati değiştirilmez.\nhttps://www.bls.gov/test';
+  const report = { ...draft(), text, reportHash: hash(text), sources: [{ url: 'https://www.bls.gov/test' }] };
+  let now = NOW, currentTarget = target, sendCalls = 0;
+  const svc = service(store, { clock: () => now, target: async () => currentTarget, generate: async () => report,
+    send: async (message, _chat, thread, _markup, options) => {
+      sendCalls++;
+      if (sendCalls > 1) {
+        assert.equal(thread, 772);
+        assert.match(message, /^KONU TESTİ · Bugünkü raporun kopyası/);
+        assert.equal(Object.values((await store.settings()).payload.topicCopies)[0].phase, 'sending');
+        const link = options.entities[0];
+        assert.equal(message.slice(link.offset, link.offset + link.length), 'Kaynağı aç');
+        if (uncertain) throw new Error('network timeout');
+      }
+      return { ok: true, result: { message_id: sendCalls } };
+    },
+  });
+  await svc.preview();
+  await svc.testSend({ confirmSend: true, reportHash: report.reportHash, targetHash: target.public.targetHash });
+  const before = await store.read();
+  currentTarget = { ...target, threadId: 772, public: { ...target.public, targetHash: 'new-topic-hash' } };
+  now += 20 * 60000; // Explicit copy of today's archive, NOT a fresh-report fallback.
+  if (failedAck) {
+    const save = store.saveSettings;
+    let saves = 0;
+    store.saveSettings = async (...args) => { if (++saves === 2) throw new Error('macro_storage_unavailable'); return save(...args); };
+  }
+  const body = { confirmSend: true, confirmArchivedCopy: true, reportHash: report.reportHash, targetHash: currentTarget.public.targetHash };
+  return { store, svc, body, before, calls: () => sendCalls, advanceDay: () => { now += 24 * 3600000; }, sameTarget: () => { currentTarget = target; } };
+}
+
+test('explicit archived topic copy is one independent claim and never resets the daily sent record', async t => {
+  const f = await topicCopyFixture(t);
+  const result = await f.svc.testTopicCopy(f.body);
+  assert.equal(result.parts, 1);
+  assert.equal(result.archivedCopy, true);
+  assert.equal(result.cutoff, new Date(NOW).toISOString());
+  assert.deepEqual(await f.store.read(), f.before);
+  const settings = await f.store.settings();
+  assert.equal(settings.payload.enabled, false);
+  assert.equal(settings.payload.testedTargetHash, 'new-topic-hash');
+  const entry = Object.values(settings.payload.topicCopies)[0];
+  assert.equal(entry.phase, 'sent');
+  assert.equal(entry.messageId, 2);
+  await assert.rejects(() => f.svc.testTopicCopy(f.body), /already_claimed/);
+  assert.equal(f.calls(), 2); // Original daily test + one explicitly requested topic copy.
+});
+
+test('topic copy requires explicit archive approval and a different, hash-matched target today', async t => {
+  const f = await topicCopyFixture(t);
+  await assert.rejects(() => f.svc.testTopicCopy({ ...f.body, confirmArchivedCopy: false }), /confirmation_required/);
+  await assert.rejects(() => f.svc.testTopicCopy({ ...f.body, targetHash: 'other' }), /confirmation_required/);
+  f.sameTarget();
+  await assert.rejects(() => f.svc.testTopicCopy({ ...f.body, targetHash: target.public.targetHash }), /not_allowed/);
+  f.advanceDay();
+  await assert.rejects(() => f.svc.testTopicCopy({ ...f.body, targetHash: target.public.targetHash }), /not_allowed/);
+  assert.equal(f.calls(), 1);
+});
+
+test('parallel topic-copy requests cannot acquire two delivery claims', async t => {
+  const f = await topicCopyFixture(t);
+  const result = await Promise.allSettled([f.svc.testTopicCopy(f.body), f.svc.testTopicCopy(f.body)]);
+  assert.equal(result.filter(r => r.status === 'fulfilled').length, 1);
+  assert.equal(f.calls(), 2);
+});
+
+test('uncertain topic-copy delivery is terminal and never retried', async t => {
+  const f = await topicCopyFixture(t, { uncertain: true });
+  await assert.rejects(() => f.svc.testTopicCopy(f.body), /delivery_unknown/);
+  assert.equal(Object.values((await f.store.settings()).payload.topicCopies)[0].phase, 'delivery_unknown');
+  await assert.rejects(() => f.svc.testTopicCopy(f.body), /already_claimed/);
+  assert.equal(f.calls(), 2);
+  assert.deepEqual(await f.store.read(), f.before);
+});
+
+test('lost topic-copy acknowledgement commit leaves a durable claim and blocks blind resend', async t => {
+  const f = await topicCopyFixture(t, { failedAck: true });
+  await assert.rejects(() => f.svc.testTopicCopy(f.body), /storage_unavailable/);
+  assert.equal(Object.values((await f.store.settings()).payload.topicCopies)[0].phase, 'sending');
+  await assert.rejects(() => f.svc.testTopicCopy(f.body), /already_claimed/);
+  assert.equal(f.calls(), 2);
+});
+
 test('Istanbul date boundaries, due window and US summer/winter calendar conversion are correct', () => {
   assert.equal(dayKey(new Date('2026-11-04T22:00:00Z')), '2026-11-05');
   assert.equal(isDue(new Date(NOW)), true);
@@ -59,10 +242,56 @@ test('Telegram splitting preserves complete URLs, emoji and plain-text formattin
   assert.throws(() => splitTelegram('https://' + 'a'.repeat(4000)), /token_too_long/);
 });
 
+test('publication dates come from article metadata, nearby visible dates or nearby <time> tags', () => {
+  const now = Date.parse('2026-11-05T12:00:00Z');
+  assert.equal(parseDateValue('2026-11-05T04:00:00Z', now), '2026-11-05T04:00:00Z');
+  assert.equal(parseDateValue('November 4, 2026', now), '2026-11-04');
+  assert.equal(parseDateValue('2026-11-06T18:00:00Z', now), null); // future is not a publication date
+  assert.equal(parseDateValue('2026-02-31', now), null);
+  assert.equal(sourceDate('<meta property="article:published_time" content="2026-11-05T04:00:00Z">', '', now), '2026-11-05T04:00:00Z');
+  const listing = '<main><h2>Latest release</h2><p>Liquidity and the dollar moved together this week.</p><time datetime="2026-11-04T08:30:00-05:00">Nov 4</time></main>';
+  assert.equal(sourceDate(listing, 'Liquidity and the dollar moved together this week.', now), '2026-11-04T08:30:00-05:00');
+  const visible = '<main><h1>CPI</h1><p>Transmission channel text for the dollar and rates.</p><p>October 14, 2026</p></main>';
+  assert.equal(sourceDate(visible, 'Transmission channel text for the dollar and rates.', now), '2026-10-14');
+  assert.equal(sourceDate('<main><time datetime="2026-11-06T18:00:00Z">Upcoming</time></main>', '', now), null);
+});
+
+test('official RSS, listing and CSV parsers keep the published date attached to the right item', () => {
+  const now = Date.parse('2026-11-05T20:00:00Z');
+  const fed = '<rss><channel><item><title>Board announces something material</title><link><![CDATA[https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261105a.htm]]></link><description><![CDATA[Board announces something material]]></description><pubDate><![CDATA[Thu, 5 Nov 2026 16:00:00 GMT]]></pubDate></item><item><title>Old item that is not fresh</title><link>https://www.federalreserve.gov/old.htm</link><pubDate>Fri, 30 Oct 2026 15:30:00 GMT</pubDate></item></channel></rss>';
+  const items = xmlItems(fed, now);
+  assert.equal(items.length, 2);
+  assert.equal(items[0].link, 'https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261105a.htm');
+  assert.equal(items[0].publishedAt, '2026-11-05T16:00:00.000Z');
+  assert.ok(Date.parse(items[0].publishedAt) > Date.parse(items[1].publishedAt));
+
+  const bea = '<table><tbody><tr class="release-row"><td><a href="/news/2026/trade-september-2026">U.S. International Trade in Goods and Services</a></td><td><time datetime="2026-11-04T08:30:00-05:00">November 4, 2026</time></td></tr><tr class="release-row"><td><a href="/news/2026/next-release">Next unrelated release headline</a></td><td><time datetime="2026-10-29T08:30:00-04:00">October 29, 2026</time></td></tr></tbody></table>';
+  const beaItems = listingItems(bea, 'https://www.bea.gov', now);
+  assert.equal(beaItems.length, 2);
+  assert.equal(beaItems[0].url, 'https://www.bea.gov/news/2026/trade-september-2026');
+  assert.equal(beaItems[0].publishedAt, '2026-11-04T08:30:00-05:00');
+
+  const treasury = '<div><span><time datetime=2026-11-05T18:00:00Z class=datetime>November 5, 2026</time></span><h3><a href=/news/press-releases/sb0683/>Treasury Targets Global Scam Networks</a></h3></div>';
+  const treasuryItems = listingItems(treasury, 'https://home.treasury.gov', now);
+  assert.equal(treasuryItems.length, 1);
+  assert.equal(treasuryItems[0].url, 'https://home.treasury.gov/news/press-releases/sb0683/');
+  assert.equal(treasuryItems[0].title, 'Treasury Targets Global Scam Networks');
+
+  const { header, row } = csvHead('Date,"5 YR","10 YR","30 YR"\n11/04/2026,2.39,2.64,3.08\n11/03/2026,2.35,2.65,3.09');
+  assert.deepEqual(header, ['Date', '5 YR', '10 YR', '30 YR']);
+  assert.equal(usDate(row[0]), '2026-11-04');
+  assert.equal(row[header.indexOf('10 YR')], '2.64');
+
+  assert.equal(listingItems('<time datetime="2026-11-06T18:00:00Z">Upcoming</time>', 'https://www.bea.gov', now).length, 0);
+});
+
 test('live source fetch refuses unsafe domains and redirects rather than following arbitrary URLs', async () => {
   assert.equal(publicUrl('https://127.0.0.1/'), null);
   assert.equal(publicUrl('http://www.bls.gov/'), null);
   assert.equal(publicUrl('https://www.bls.gov.evil.test/'), null);
+  assert.ok(publicUrl('https://fred.stlouisfed.org/graph/fredgraph.csv?id=DTWEXBGS'));
+  assert.ok(publicUrl('https://api.coinbase.com/v2/prices/BTC-USD/spot'));
+  assert.ok(publicUrl('https://api.gold-api.com/price/XAU'));
   await assert.rejects(() => readSource('https://www.bls.gov/test', null, async () => ({ status: 302, headers: { get: () => 'http://169.254.169.254/' } })), /redirect_not_allowed/);
 });
 
@@ -178,6 +407,9 @@ test('reports validate provenance, dated numbers, election stage, event evidence
   assert.equal(report.sources.length, 3);
   assert.ok(report.text.includes('Doğrulanmış yeni gelişme yok'));
   const bad = structuredClone(d); bad.btc.support.text = 'Kaynakta belirtilen getiri 4.25 olarak kaydedildi.';
+  const undated = evidenceFixture(); undated.sources = undated.sources.map(s => ({ ...s, publishedAt: null }));
+  assert.throws(() => validateReport(bad, undated), /undated_number/);
+  // Publication time cannot substitute for an omitted market observation time.
   assert.throws(() => validateReport(bad, e), /undated_number/);
   bad.btc.support.asOf = '2026-11-05'; bad.btc.support.text = 'Kaynakta belirtilen getiri 99.8 olarak kaydedildi.';
   assert.throws(() => validateReport(bad, e), /unsupported_number/);
@@ -187,6 +419,59 @@ test('reports validate provenance, dated numbers, election stage, event evidence
   assert.throws(() => validateReport(event, e), /unverified_event/);
   const election = structuredClone(d); election.election.stage = 'certified';
   assert.throws(() => validateReport(election, e), /not_certified/);
+});
+
+test('numeric provenance accepts equivalent Turkish formatting and ignores date tokens', () => {
+  assert.ok(numberVariants('76.011,2').has('76011.2'));
+  assert.ok(numberVariants('4,25').has('4.25'));
+  assert.ok(numberVariants('159.044').has('159044'));
+  assert.ok(!numberVariants('99.8').has('4.25'));
+  assert.deepEqual(marketNumbers('3 Kasım 2026 ve 09:30, getiri 4,25'), ['4,25']);
+  assert.deepEqual(marketNumbers('November 5, 2026: 76011.2 USD'), ['76011.2']);
+});
+
+test('strict report schema requires all fact objects without silently repairing invalid evidence', () => {
+  const walk = s => {
+    if (s.type === 'object') {
+      assert.equal(s.additionalProperties, false);
+      assert.deepEqual(s.required, Object.keys(s.properties));
+      Object.values(s.properties).forEach(walk);
+    }
+    if (s.items) walk(s.items);
+  };
+  walk(reportSchema);
+  assert.equal(reportSchema.properties.developments.minItems, 3);
+  assert.equal(reportSchema.properties.developments.maxItems, 3);
+  const d = reportFixture();
+  d.election = undefined;
+  assert.throws(() => validateReport(d, evidenceFixture()), /election_status_missing/);
+});
+
+test('report generation requests strict schema and never accepts rejected provider output', async t => {
+  const oldFetch = global.fetch;
+  const oldKey = process.env.GROQ_API_KEY;
+  process.env.GROQ_API_KEY = 'test-only';
+  t.after(() => {
+    global.fetch = oldFetch;
+    if (oldKey === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = oldKey;
+  });
+  let request;
+  global.fetch = async (_url, init) => {
+    request = JSON.parse(init.body);
+    return { ok: true, json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: '{"ok":true}' } }] }) };
+  };
+  assert.deepEqual(await groq([{ role: 'user', content: 'JSON' }], { schema: reportSchema }), { ok: true });
+  assert.equal(request.response_format.type, 'json_schema');
+  assert.equal(request.response_format.json_schema.strict, true);
+  assert.deepEqual(request.response_format.json_schema.schema, reportSchema);
+  global.fetch = async () => ({ ok: false, status: 400, json: async () => ({ error: { code: 'json_validate_failed', type: 'invalid_request_error', failed_generation: '{"developments":[]}' } }) });
+  await assert.rejects(() => groq([], { schema: reportSchema }), e => {
+    assert.equal(e.message, 'model_invalid_json');
+    assert.deepEqual(e.provider.failedKeys, ['developments']);
+    assert.equal(e.provider.failed_generation, undefined);
+    return true;
+  });
 });
 
 test('scheduler trigger rejects unauthenticated requests before any network call', async () => {
