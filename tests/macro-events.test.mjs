@@ -38,6 +38,9 @@ test('official API verifies correct reference month, chronological continuity, n
   assert.throws(()=>parseMonthlySeries(payrollApi(),'CES0000000001','2026-11'),/period_unconfirmed/);
   assert.throws(()=>parseMonthlySeries(payrollApi().replace('M09','M07'),'CES0000000001','2026-10'),/period_gap/);
   assert.throws(()=>parseMonthlySeries(payrollApi().replace('M09','M10'),'CES0000000001','2026-10'),/api_invalid/);
+  const withGap = api('LNS14000000',[['2026-10',4.1],['2026-09',4.2],['2026-08',4.1],['2025-10','-']]);
+  assert.equal(parseMonthlySeries(withGap,'LNS14000000','2026-10').length,3);
+  assert.throws(()=>parseMonthlySeries(api('LNS14000000',[['2026-10','-'],['2026-09',4.2]]),'LNS14000000','2026-10'),/period_unconfirmed/);
 });
 const release='<h1>THE EMPLOYMENT SITUATION -- OCTOBER 2026</h1><p>Transmission of material in this release is embargoed until 8:30 a.m. (ET) Friday, November 6, 2026</p><p>Total nonfarm payroll employment rose by 165,000 in October. The unemployment rate was little changed at 4.1 percent.</p>';
 test('employment result requires official release date AND matching API observations, not scheduled time alone',async()=>{

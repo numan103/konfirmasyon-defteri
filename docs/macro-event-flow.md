@@ -38,6 +38,10 @@ Gönderimden **önce** CAS ile `sending` yazılır. Telegram message id kalıcı
 
 Hedef mevcut botla yalnız `https://t.me/alfatraderspublic/772`; PC, açık site veya sohbet gerekmez. Günlük ana izin kapatıldığında olay gönderimleri de durur. Günlük izin ile kritik veri izni admin panelinden ayrı onaylanır. Hiçbir yeni bot, ücretli plan veya paket eklenmedi; mevcut sağlayıcı tarifesi/kotası için ücretsiz kullanım garantisi verilmez.
 
+## Geriye dönük paylaşım
+
+Yönetici, geçmiş bir haftanın doğrulanmış verileri için tek seferlik geriye dönük değerlendirme gönderebilir (`macro-retrospective`). Bu akış zamanlayıcıya bağlı değildir; her çağrıda BLS API ve Hazine reel getiri CSV'sini yeniden alır. Mesaj açıkça “geriye dönük veri değerlendirmesi; bugünkü görünüm veya yeni gelişme değildir” der, görünür kaynak listesi içermez ve beklenti sürprizi hesaplamaz. Gönderim tested/approved hedef ve `confirmSend` gerektirir; `retro-<hafta>-<dönem>` anahtarıyla kalıcı olarak bir kez gönderilir. Belirsiz teslim veya ack kaybında kör retry yapılmaz.
+
 ## Güncel doğrulama sınırı
 
 Kurulum tek başına canlı olay teslimi kanıtı değildir. Vercel'de BLS takvimi (ICS/liste/ay görünümü) 403 dönerken BLS API 200 döner; açıklama sayfası da 403 olduğundan veri sonrası doğrulama yalnız API ile yapılabilir ve bu sınırlama mesajda yazılır. BLS takvimi alınamazsa yalnız eksik kurum için Forex Factory ikincil zamanı kullanılabilir; bu saat yaklaşık etiketiyle sunulur ve resmî saatin yerine geçmez. BEA takvimi ve açıklamaları erişilebilir. Forex Factory HTML ve Investing TR sayfaları 403; yalnız FF JSON akışı kullanılabilir. BEA erişimi çalışsa bile resmî sonuç ayrıştırıcısı veya birim/dönem kontrolü başarısızsa uyarı gönderilmez. Kaynak erişim engeli çözülmeden tüm veri takviminin kapsandığı iddia edilemez.

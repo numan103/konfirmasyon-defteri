@@ -138,14 +138,23 @@
 - Sıradaki otomatik sabah çalışması yarın 06:00 UTC (09:00 TSİ) penceresindedir. Takvim 06/12/18 UTC’de yenilenecek; FF JSON yeni haftayı kapsadığında BLS ikincil saatleri kuyruğa girebilir. Gerçek bir veri açıklamasında uçtan uca olay teslimi hâlâ denenmedi.
 - BLS takvimi 403 olduğu sürece olay saatleri ikincil kaynaktan, sonuçlar resmî BLS API’den doğrulanacak; açıklama sayfası engeli mesajda belirtilecek. BEA olaylarında resmî açıklama kullanılmaya devam eder.
 
+## 7 Kasım 13:30 TSİ — geçen haftanın verileriyle geriye dönük gönderi
+
+- Kullanıcı “geçen haftanın verileriyle ilgili gönderi yap” dedi. Zamanlanmış sabah/olay akışından bağımsız, yalnız yönetici tarafından çalıştırılan `macro-retrospective` eklendi. Her çalıştırmada resmî BLS API ve Hazine reel getiri CSV’si yeniden alınır; eski rapor metni kopyalanmaz.
+- Doğrulanan veriler: Ekim 2026 tarım dışı istihdamı **+165 bin** (Eylül seviyelerinden hesaplanan değişim **+60 bin**), işsizlik **%4,1** (Eylül **%4,2**), 10 yıllık ABD reel getirisi **30 Ekim %2,60 → 6 Kasım %2,63**. Eylül’ün +60 bin değeri güncel BLS seviyelerinden hesaplandı; takvimde görülen 29 bin önceki/öncü vintage olabilir ve bu gönderide sürpriz iddiası olarak kullanılmadı.
+- Metin **148 kelime**, tek mesaj, görünür kaynak listesi yok; “geriye dönük değerlendirme; bugünkü görünüm veya yeni gelişme değildir” etiketiyle başlıyor. Beklenti sürprizi hesaplanmadı; yalnız resmî sonuçlar ve önceki ay karşılaştırıldı.
+- Gönderim `confirmSend` ve tested/approved hedef parmak iziyle bir kez yapıldı: **HTTP 200, phase:sent, message id 799**. `https://t.me/alfatraderspublic/799` HTTP 200 döndü ve metni içeriyor. Aynı istek tekrarlandığında **`alreadySent:true`** döndü; ikinci gönderim olmadı. Kalıcı anahtar `retro-2026-11-06-2026-10`.
+- BLS API’de karşılaşılan bir tarihsel “-” değeri nedeniyle aylık seri ayrıştırıcısı düzeltildi: karşılaştırma dışındaki eksik tarihsel ay artık tüm seriyi reddettirmiyor; cari, önceki ve önceki-önceki aylar yine zorunlu ve sayısal. Bu düzeltme olay sonrası doğrulamayı da etkiler.
+- **215/215 test** başarılı. Günlük kayıt `sent` kaldı; olay kuyruğu 0; otomasyon açık. Bu gönderi zamanlanmış akışın uçtan uca olay teslimi kanıtı değildir.
+
 ## Dosyalar
 
 - Değişen: `api/ai.mjs`, `api/tg.mjs`, `index.html`, `sw.js`.
 - Ortak Telegram: `lib/telegram.mjs`.
-- Yeni sunucu modülleri: `lib/macro/core.mjs`, `research.mjs`, `report.mjs`, `store.mjs`, `target.mjs`, `job.mjs`, `handler.mjs`.
+- Yeni sunucu modülleri: `lib/macro/core.mjs`, `research.mjs`, `report.mjs`, `store.mjs`, `target.mjs`, `job.mjs`, `handler.mjs`, `retrospective.mjs`.
 - Admin arayüzü: `assets/macro-admin.js`, `assets/macro-admin.css`.
 - Özel tablolar ve zamanlayıcı: `supabase/site/002_macro.sql`, `supabase/site/003_macro_schedule.sql`.
-- Test: `tests/macro.test.mjs`.
+- Test: `tests/macro.test.mjs`, `tests/macro-events.test.mjs`, `tests/macro-retrospective.test.mjs`.
 - Belgeler: `docs/alfa-makro-analist.md`, `docs/macro-verification.md`.
 
 Kurulum, maliyet ve resmi doküman bağlantıları: [alfa-makro-analist.md](alfa-makro-analist.md).
