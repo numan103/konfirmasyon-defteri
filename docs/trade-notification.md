@@ -46,6 +46,8 @@
 - Var olmayan gönderi kimliği genel `/og.png` görseline düşer.
 
 ## Notlar
+- `delTg` yönetici eylemi yanlış gönderilmiş bir bildirimi geri alır
+  (`action: 'delTg', messageId`). Yalnızca admin kullanabilir.
 - `middleware.js` satır okuması için geçerli bir Supabase **publishable** anahtarı
   gerekir. Üretimde `SUPABASE_PUBLISHABLE` tanımlı değilse dosyadaki doğrulanmış
   yayın anahtarı kullanılır; env anahtarı `401` dönerse bir kez yedek anahtarla

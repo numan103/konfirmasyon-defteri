@@ -58,6 +58,11 @@ function fetchStub(state) {
       if (state.telegram === 'reject') return { ok: false, status: 400, json: async () => ({ ok: false, description: 'Bad Request: chat not found' }) };
       return { ok: true, status: 200, json: async () => ({ ok: true, result: { message_id: 321 } }) };
     }
+    if (u.includes('api.telegram.org') && u.includes('/deleteMessage')) {
+      state.calls.push({ url: u, kind: 'delete', body: JSON.parse(init.body || '{}') });
+      if (state.telegram === 'reject') return { ok: false, status: 400, json: async () => ({ ok: false, description: 'Bad Request: message to delete not found' }) };
+      return { ok: true, status: 200, json: async () => ({ ok: true, result: true }) };
+    }
     return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
   };
 }
@@ -65,6 +70,13 @@ function fetchStub(state) {
 async function addPost(handler, post, extra = {}) {
   const res = makeRes();
   const req = { method: 'POST', headers: { authorization: 'Bearer test-jwt' }, query: { store: 'alfatrading' }, body: { action: 'add', post, ...extra } };
+  await handler(req, res);
+  return res;
+}
+
+async function postAction(handler, body) {
+  const res = makeRes();
+  const req = { method: 'POST', headers: { authorization: 'Bearer test-jwt' }, query: { store: 'alfatrading' }, body };
   await handler(req, res);
   return res;
 }
@@ -199,6 +211,37 @@ test('Telegram ayarlari yoksa paylasim kaydedilir, bildirim disabled kalir', asy
   assert.equal(state.calls.length, 0);
   assert.equal(res.body.notify.phase, 'disabled');
   assert.equal(state.data.posts.length, 1);
+});
+
+test('yonetici yanlis giden Telegram bildirimini silebilir', async () => {
+  const state = makeStore();
+  globalThis.fetch = fetchStub(state);
+  const handler = await loadHandler({
+    TG_BOT_TOKEN: 'token', TG_CHAT_ID: '@charts', TG_THREAD: '434',
+    SITE_ADMIN_EMAILS: 'admin@test.dev',
+  });
+
+  const res = await postAction(handler, { action: 'delTg', messageId: 801 });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.deleted, 801);
+  assert.equal(state.calls.length, 1);
+  assert.equal(state.calls[0].kind, 'delete');
+  assert.equal(state.calls[0].body.chat_id, '@charts');
+  assert.equal(state.calls[0].body.message_id, 801);
+});
+
+test('yonetici olmayan uye Telegram bildirimi silemez', async () => {
+  const state = makeStore();
+  globalThis.fetch = fetchStub(state);
+  // fetchStub admin@test.dev dondurur; admin listesinde olmadigi icin uye sayilir.
+  const handler = await loadHandler({
+    TG_BOT_TOKEN: 'token', TG_CHAT_ID: '@charts',
+    SITE_ADMIN_EMAILS: 'baska@test.dev',
+  });
+
+  const res = await postAction(handler, { action: 'delTg', messageId: 801 });
+  assert.equal(res.statusCode, 403);
+  assert.equal(state.calls.length, 0);
 });
 
 test('bulanik gorsel ucu JPEG baytlarini servis eder, yoksa /og.png fallback yapar', async () => {

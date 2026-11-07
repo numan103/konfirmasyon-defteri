@@ -187,7 +187,7 @@ async function alfaTrading(req, res, user) {
   const action = body.action;
 
   // Yazma yetkisi: yonetici post yonetir; begeni/yorum icin giris yeterli.
-  const adminActions = ['add', 'edit', 'delPost', 'delComment', 'status', 'profileUpdate'];
+  const adminActions = ['add', 'edit', 'delPost', 'delComment', 'delTg', 'status', 'profileUpdate'];
   if (adminActions.indexOf(action) >= 0) {
     if (!user || !user.admin) return res.status(403).json({ error: 'forbidden' });
   } else if (action === 'like' || action === 'comment') {
@@ -259,6 +259,31 @@ async function alfaTrading(req, res, user) {
     await save(); return res.status(200).json({ ok: true, post });
   }
   if (action === 'delPost') { const i = posts.findIndex(p => p.id === body.postId); if (i >= 0) posts.splice(i, 1); await save(); return res.status(200).json({ ok: true }); }
+  if (action === 'delTg') {
+    // Yanlis gonderilmis bildirimi geri almak icin yonetici eylemi.
+    const mid = Math.round(Number(body.messageId));
+    const chat = String(process.env.TG_CHAT_ID || '').trim();
+    const token = String(process.env.TG_BOT_TOKEN || '').trim();
+    if (!Number.isSafeInteger(mid) || mid <= 0 || !chat || !token) {
+      return res.status(400).json({ error: 'telegram_not_configured' });
+    }
+    try {
+      const tg = await fetch('https://api.telegram.org/bot' + token + '/deleteMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chat, message_id: mid }),
+        signal: AbortSignal.timeout(8000),
+      });
+      let out = {};
+      try { out = await tg.json(); } catch { /* teyit yoksa basarili sayma */ }
+      if (!tg.ok || !out || !out.ok) {
+        return res.status(502).json({ error: 'telegram_delete_failed', http: tg.status, description: atClip(out && out.description, 160) });
+      }
+      return res.status(200).json({ ok: true, deleted: mid });
+    } catch (e) {
+      return res.status(502).json({ error: 'telegram_delete_failed' });
+    }
+  }
   if (action === 'delComment') { const post = find(body.postId); if (post && Array.isArray(post.comments)) post.comments = post.comments.filter(c => c.id !== body.commentId); await save(); return res.status(200).json({ ok: true }); }
   if (action === 'status') { const post = find(body.postId); if (post) post.status = ['aktif', 'tp', 'sl', 'iptal'].includes(body.status) ? body.status : post.status; await save(); return res.status(200).json({ ok: true }); }
   if (action === 'profileUpdate') {
