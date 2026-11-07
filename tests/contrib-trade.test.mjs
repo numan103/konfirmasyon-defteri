@@ -88,7 +88,7 @@ test('islem paylasimi public charts hedefine tek bildirim gonderir', async () =>
   const call = state.calls[0];
   assert.equal(call.body.chat_id, '@charts');
   assert.equal(call.body.message_thread_id, 434);
-  assert.equal(call.body.disable_web_page_preview, true);
+  assert.equal(call.body.disable_web_page_preview, false);
   assert.match(call.body.text, /Yeni işlem/);
   assert.match(call.body.text, /BTC/);
   assert.match(call.body.text, /LONG/);
@@ -285,6 +285,18 @@ test('middleware gecersiz env anahtarinda dogrulanmis yayin anahtariyla tekrar o
   assert.match(html, /Fallback/);
   assert.equal(seenKeys[0], 'sb_invalid_env_key');
   assert.equal(seenKeys[1], 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X');
+});
+
+test('varsayilan Telegram gonderiminde link onizlemesi kapali kalir', async () => {
+  const calls = [];
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), body: JSON.parse(init.body || '{}') });
+    return { ok: true, status: 200, json: async () => ({ ok: true, result: { message_id: 9 } }) };
+  };
+  process.env.TG_BOT_TOKEN = 'token';
+  const { sendTelegram } = await import('../lib/telegram.mjs?case=' + Math.random());
+  await sendTelegram('merhaba', '@x', 1);
+  assert.equal(calls[0].body.disable_web_page_preview, true);
 });
 
 test('istemci bulanik kopya uretir ve gonderimde tasir', () => {

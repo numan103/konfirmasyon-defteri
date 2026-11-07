@@ -11,7 +11,11 @@
 - Yalnızca yeni `islem` paylaşımı bildirir. `analiz` paylaşımları ve düzenlemeler
   (`edit`) bildirim üretmez.
 - Metin: `📊 Yeni işlem · <COIN> · <LONG/SHORT>`, başlık, en fazla 240 karakter
-  özet, `Entry/TP/SL/Kaldıraç` ve paylaşım bağlantısı. Görsel baytı gönderilmez.
+  özet, `Entry/TP/SL/Kaldıraç` ve paylaşım bağlantısı. Görsel baytı yüklenmez.
+- Bağlantı önizlemesi bu bildirimde **açıktır**: Telegram gönderi bağlantısından
+  başlık/açıklama ve bulanık `og:image` kartını çıkarır. Böylece işlem, kanalda
+  bağlantıya tıklamadan da görünür. Diğer bildirim türlerinde önizleme kapalı
+  kalır (`disable_web_page_preview: true`).
 - Bağlantı: `https://alfa-trader.com/?page=alfatrading&post=<id>`.
 
 ## Yinelenmeyi önleme

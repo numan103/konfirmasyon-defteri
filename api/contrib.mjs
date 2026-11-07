@@ -133,7 +133,9 @@ async function atNotifyTrade(post, save, dryRun) {
   await save();
   let out;
   try {
-    out = await sendTelegram(text, target.chat, target.thread);
+    // Link onizlemesi acik: Telegram gonderi baglantisindan bulanik karti
+    // (og:image) cikarir; boylece islem kanalda dogrudan gorunur.
+    out = await sendTelegram(text, target.chat, target.thread, null, { preview: true });
   } catch (e) {
     post.tradeNotify = { ...state, phase: 'unknown', error: 'telegram_network' };
     await save();
