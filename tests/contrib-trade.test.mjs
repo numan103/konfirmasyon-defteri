@@ -104,10 +104,11 @@ test('islem paylasimi public charts hedefine tek bildirim gonderir', async () =>
   assert.match(call.body.text, /Yeni işlem/);
   assert.match(call.body.text, /BTC/);
   assert.match(call.body.text, /LONG/);
-  assert.match(call.body.text, /Entry 100/);
-  assert.match(call.body.text, /TP 110/);
-  assert.match(call.body.text, /SL 95/);
-  assert.match(call.body.text, /Kaldıraç 5x/);
+  assert.doesNotMatch(call.body.text, /Entry 100/);
+  assert.doesNotMatch(call.body.text, /TP 110/);
+  assert.doesNotMatch(call.body.text, /SL 95/);
+  assert.doesNotMatch(call.body.text, /Kaldıraç 5x/);
+  assert.doesNotMatch(call.body.text, /Entry|Kaldıraç/);
   assert.ok(call.body.text.includes('https://alfa-trader.com/?page=alfatrading&post=' + res.body.post.id));
   assert.ok(!call.body.text.includes('data:image'));
   assert.equal(res.body.notify.phase, 'sent');
@@ -198,7 +199,8 @@ test('dryRun bildirim metnini dondurur ama gonderim yapmaz', async () => {
   assert.equal(state.calls.length, 0);
   assert.equal(res.body.notify.phase, 'dry_run');
   assert.match(res.body.notify.preview, /XAU/);
-  assert.match(res.body.notify.preview, /Entry 4250/);
+  assert.doesNotMatch(res.body.notify.preview, /Entry 4250/);
+  assert.doesNotMatch(res.body.notify.preview, /Entry|TP|SL|Kaldıraç/);
 });
 
 test('Telegram ayarlari yoksa paylasim kaydedilir, bildirim disabled kalir', async () => {

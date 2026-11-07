@@ -103,12 +103,8 @@ function atTradeText(post) {
   if (post.title) lines.push('', post.title);
   const summary = String(post.text || '').replace(/\s+/g, ' ').trim();
   if (summary) lines.push('', summary.length > 240 ? summary.slice(0, 237) + '…' : summary);
-  const levels = [];
-  if (post.entry) levels.push('Entry ' + post.entry);
-  if (post.tp) levels.push('TP ' + post.tp);
-  if (post.sl) levels.push('SL ' + post.sl);
-  if (post.lev) levels.push('Kaldıraç ' + post.lev);
-  if (levels.length) lines.push('', levels.join(' · '));
+  // Seviyeler (Entry/TP/SL/Kaldıraç) bilinçli olarak gönderilmez: görsel
+  // bulanık önizleme olduğu için metinde de işlem detayı verilmez.
   lines.push('', 'Grafik ve detay: ' + atTradeUrl(post.id));
   return lines.join('\n');
 }
