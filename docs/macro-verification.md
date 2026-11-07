@@ -1,6 +1,6 @@
 # Geliştirme doğrulama kaydı — 5–7 Kasım 2026
 
-**En güncel çalışma:** [sabah + olay güncellemesi düzeni](macro-event-flow.md). Aşağıdaki bölümler tarihsel kayıttır. Son canlı önizleme 7 Kasım **11:48**, 133 kelime, yeni kaynak alımıyla ve model çağrısı olmadan oluşturuldu. Günlük/olay otomasyonu kapalı; BLS takvimine Vercel erişimi hâlâ eksik. En son 12:23 doğrulamasında BLS API 200 verirken BLS açıklama sayfası 403 döndü; bu nedenle yalnız API ile doğrulama ve açık manşet çapraz kontrolü sınırlaması eklendi.
+**En güncel çalışma:** [sabah + olay güncellemesi düzeni](macro-event-flow.md). Aşağıdaki bölümler tarihsel kayıttır. Son canlı önizleme 7 Kasım **11:48**, 133 kelime, yeni kaynak alımıyla ve model çağrısı olmadan oluşturuldu. BLS takvimine Vercel erişimi hâlâ eksik. En son 12:23 doğrulamasında BLS API 200 verirken BLS açıklama sayfası 403 döndü; bu nedenle yalnız API ile doğrulama ve açık manşet çapraz kontrolü sınırlaması eklendi. Kullanıcının açık onayıyla günlük ve olay otomasyonu **7 Kasım 12:30 TSİ itibarıyla açıldı**; etkinleştirme anında mesaj gönderilmedi.
 
 - Canlı hedef `getChat` ile okundu: **Alfa Traders Public**, `supergroup`, herkese açık kullanıcı adı var; mevcut konu seçimi geçerli. Hedef id'si ve anahtarlar bu kayda alınmadı.
 - Groq models API, `openai/gpt-oss-20b` erişimini doğruladı. Bu kontrol ücretsiz metadata sorgusudur; gerçek araştırma veya rapor üretimi başarısı anlamına gelmez.
@@ -129,6 +129,14 @@
 - Yeni testler: ikincil saatlerin yalnız desteklenen göstergeleri kapsaması, GDP aşaması/dönem koruması, çelişkili saat reddi, resmî takvim çalışırken ikincil akışın hiç okunmaması, ikincil saatli olayın sonuç doğrulamasında yine resmî kaynak istemesi, 403 + yeni API dönemiyle `api_only` başarısı ve eski API dönemiyle red. Toplam **209/209 test** başarılı; `assets/macro-admin.js` sözdizimi kontrolü geçti.
 - Production dağıtım **READY**. Canlı `macro-agenda-refresh`: BEA erişilebilir, BLS 403, kuyruğa eklenen olay **0**, ikincil saat **0**, saat çelişkisi yok. FF JSON “thisweek” yalnız içinde bulunulan haftayı kapsadığından cumartesi günü gelecek haftanın olayı yoktur; bu, uçtan uca olay tesliminin kanıtı değildir.
 - Son durum: günlük rapor `sent` (09:36 kaydı korunuyor), günlük otomasyon **kapalı**, `eventUpdatesEnabled:false`, olay gönderimi **0**, yeni Telegram mesajı **yok**. Etkinleştirme ayrı ve açık onay gerektirir.
+
+## 7 Kasım 12:30 TSİ — kullanıcı onayıyla otomasyon açıldı
+
+- Kullanıcı “hepsini yapalım” yanıtıyla hem günlük sabah özeti hem olay güncellemeleri için açık onay verdi. Mevcut hedef parmak izi ve test kaydı eşleştiği için ayrı bir test gönderimi yapılmadı.
+- `macro-enable` ve `macro-events-enable` yönetici işlemleri HTTP 200 döndü: günlük `enabled:true`, olay `enabled:true`, `configured:true`, `requiresDailyEnable:false`. Hedef yine **Alfa Traders Public / /772**.
+- Etkinleştirme anında mesaj gönderilmedi: bugünün sabah penceresi (06:00–07:00 UTC) geçmişti ve günlük kayıt zaten `sent` durumundaydı; olay kuyruğu **0** olduğu için beş dakikalık tetik gönderecek olay bulamıyor. Mevcut 09:36 günlük teslimatı ve `/772` kopyası korunuyor.
+- Sıradaki otomatik sabah çalışması yarın 06:00 UTC (09:00 TSİ) penceresindedir. Takvim 06/12/18 UTC’de yenilenecek; FF JSON yeni haftayı kapsadığında BLS ikincil saatleri kuyruğa girebilir. Gerçek bir veri açıklamasında uçtan uca olay teslimi hâlâ denenmedi.
+- BLS takvimi 403 olduğu sürece olay saatleri ikincil kaynaktan, sonuçlar resmî BLS API’den doğrulanacak; açıklama sayfası engeli mesajda belirtilecek. BEA olaylarında resmî açıklama kullanılmaya devam eder.
 
 ## Dosyalar
 
