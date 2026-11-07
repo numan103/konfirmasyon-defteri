@@ -77,8 +77,8 @@
       const d = await api('macro-event-status'); agendaEvents = d.events;
       eventSelect.replaceChildren();
       const empty = el('option', 'Kritik veri seç'); empty.value = ''; eventSelect.append(empty);
-      for (const event of agendaEvents) { const option = el('option', event.title + ' · ' + new Date(event.at).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })); option.value = event.id; eventSelect.append(option); }
-      eventStatus.textContent = `Veri güncellemeleri: ${d.enabled ? 'açık' : 'kapalı'} · Doğrulanmış olay: ${d.events.length}${d.agenda?.failures?.length ? ' · Eksik resmî takvim: ' + d.agenda.failures.map(f => f.name).join(', ') : ''}`;
+      for (const event of agendaEvents) { const option = el('option', event.title + ' · ' + new Date(event.at).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }) + (event.timeSource === 'secondary_calendar' ? ' · ikincil saat' : '')); option.value = event.id; eventSelect.append(option); }
+      eventStatus.textContent = `Veri güncellemeleri: ${d.enabled ? 'açık' : 'kapalı'} · Doğrulanmış olay: ${d.events.length}${d.agenda?.secondaryCount ? ' · İkincil saatli: ' + d.agenda.secondaryCount : ''}${d.agenda?.failures?.length ? ' · Eksik resmî takvim: ' + d.agenda.failures.map(f => f.name).join(', ') : ''}`;
     };
     const refresh = () => work(async () => {
       const d = await api('macro-status'); show(d); draft = null; confirm.checked = false;
@@ -99,7 +99,7 @@
       report.textContent = d.report?.text || 'Önizleme hazır değil.';
       message.textContent = 'Yeni sabah akışının mesaj göndermeyen önizlemesi. Bugünün gönderim kaydı değiştirilmedi.';
     }));
-    agendaRefresh.addEventListener('click', () => work(async () => { await api('macro-agenda-refresh'); await loadEvents(); message.textContent = 'Resmî takvim ve açıklama öncesi beklenti kesitleri yenilendi. Mesaj gönderilmedi.'; }));
+    agendaRefresh.addEventListener('click', () => work(async () => { await api('macro-agenda-refresh'); await loadEvents(); message.textContent = 'Takvim ve açıklama öncesi beklenti kesitleri yenilendi. Saat kaynağı olay listesinde işaretli; mesaj gönderilmedi.'; }));
     eventSelect.addEventListener('change', () => { prePreview.disabled = !eventSelect.value; postPreview.disabled = !eventSelect.value || Date.now() < Date.parse(agendaEvents.find(e => e.id === eventSelect.value)?.at) + 5 * 60000; });
     for (const [button, stage] of [[prePreview, 'pre'], [postPreview, 'post']]) button.addEventListener('click', () => work(async () => {
       draft = null; confirm.checked = false;

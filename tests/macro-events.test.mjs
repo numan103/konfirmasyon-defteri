@@ -12,7 +12,7 @@ const feed=()=>JSON.stringify([
   {title:'Unemployment Rate',country:'USD',date:new Date(AT).toISOString(),forecast:'4.2%',previous:'4.2%'},
 ]);
 const forecasts=()=>parseForecasts(feed(),event(),new Date(AT-3600000).toISOString());
-const actual=(now=AT+5*60000,value=165)=>({eventId:event().id,eventAt:event().at,releaseDate:'2026-11-06',observedAt:new Date(now).toISOString(),metrics:{payrolls:{value,previous:29,unit:'bin kişi',referencePeriod:'2026-10'},unemployment:{value:4.1,previous:4.2,unit:'%',referencePeriod:'2026-10'}},sources:[{url:'https://www.bls.gov/news.release/empsit.nr0.htm',kind:'primary',text:'Test release',fetchedAt:new Date(now).toISOString()}]});
+const actual=(now=AT+5*60000,value=165)=>({eventId:event().id,eventAt:event().at,releaseDate:'2026-11-06',observedAt:new Date(now).toISOString(),verification:'release_and_api',metrics:{payrolls:{value,previous:29,unit:'bin kişi',referencePeriod:'2026-10'},unemployment:{value:4.1,previous:4.2,unit:'%',referencePeriod:'2026-10'}},sources:[{url:'https://www.bls.gov/news.release/empsit.nr0.htm',kind:'primary',text:'Test release',fetchedAt:new Date(now).toISOString()}]});
 
 test('official calendar alone defines events; source identifiers and DST never come from forecast feed',()=>{
   const e=canonicalEvent({title:'Employment Situation',at:event().at},{kind:'primary',url:'https://www.bls.gov/schedule/news_release/bls.ics',fetchedAt:event().verifiedAt});
@@ -48,6 +48,28 @@ test('employment result requires official release date AND matching API observat
   await assert.rejects(()=>collectActual(event(),{now:AT+4*60000,read}),/not_due/);
   await assert.rejects(()=>collectActual(event(),{now:AT+5*60000,read:async url=>({...await read(url),...(url.includes('nr0')?{text:release.replace('November 6','October 6')}: {})})}),/date_unconfirmed/);
   await assert.rejects(()=>collectActual(event(),{now:AT+5*60000,read:async url=>({...await read(url),...(url.includes('nr0')?{text:release.replace('165,000','166,000')}: {})})}),/crosscheck_failed/);
+});
+test('a blocked BLS release page falls back to API-only verification with an explicit disclosure',async()=>{
+  const read=async url=>{
+    if(url.includes('nr0')){const e=new Error('source_unavailable');e.status=403;throw e;}
+    return {url,fetchedAt:new Date(AT+5*60000).toISOString(),text:url.includes('CES000')?payrollApi():api('LNS14000000',[['2026-10',4.1],['2026-09',4.2],['2026-08',4.2]])};
+  };
+  const out=await collectActual(event(),{now:AT+5*60000,read});
+  assert.equal(out.verification,'api_only');
+  assert.equal(out.metrics.payrolls.value,165);assert.equal(out.metrics.unemployment.value,4.1);
+  assert.equal(out.sources.length,2);
+  assert.ok(out.sources.every(s=>new URL(s.url).hostname==='api.bls.gov'));
+  const p=eventReport({event:event(),stage:'post',actual:out,now:AT+5*60000});
+  assert.match(p.text,/yalnız resmî BLS API üzerinden doğrulandı/);
+  assert.match(p.text,/manşet metniyle çapraz kontrol yapılamadı/);
+});
+test('API-only fallback cannot announce a result before the new official period exists',async()=>{
+  const stale=()=>api('CES0000000001',[['2026-09',159128],['2026-08',159099],['2026-07',159050]]);
+  const read=async url=>{
+    if(url.includes('nr0')){const e=new Error('source_unavailable');e.status=403;throw e;}
+    return {url,fetchedAt:new Date(AT+5*60000).toISOString(),text:url.includes('CES000')?stale():api('LNS14000000',[['2026-10',4.1],['2026-09',4.2],['2026-08',4.2]])};
+  };
+  await assert.rejects(()=>collectActual(event(),{now:AT+5*60000,read}),/period_unconfirmed/);
 });
 test('CPI monthly change uses seasonally adjusted series and crosschecks the official monthly release',async()=>{
   const e={...event(),id:'cpi-test',kind:'cpi',officialTitle:'Consumer Price Index'};
@@ -164,7 +186,7 @@ test('preview outbox cannot consume or deliver the real event slot',async()=>{
 });
 test('official agenda fetch failures produce gaps rather than fabricated events',async()=>{
   const out=await collectEventAgenda({now:AT,read:async()=>{throw new Error('source_unavailable');}});
-  assert.deepEqual(out.events,[]);assert.equal(out.failures.length,2);
+  assert.deepEqual(out.events,[]);assert.deepEqual(out.failures.map(f=>f.name).sort(),['BEA','BLS','ForexFactory']);assert.equal(out.secondaryCount,0);
 });
 test('dated real yield alone can set a conditional morning balance, nominal or old levels cannot',()=>{
   const s={instrument:'real_yield',observedAt:'2026-11-06',previousObservedAt:'2026-11-05',currentTenYearValue:'2.63',previousTenYearValue:'2.60',comparisonDirection:'increase'};

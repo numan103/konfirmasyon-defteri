@@ -1,6 +1,6 @@
 # Geliştirme doğrulama kaydı — 5–7 Kasım 2026
 
-**En güncel çalışma:** [sabah + olay güncellemesi düzeni](macro-event-flow.md). Aşağıdaki bölümler tarihsel kayıttır. Son canlı önizleme 7 Kasım **11:48**, 133 kelime, yeni kaynak alımıyla ve model çağrısı olmadan oluşturuldu. Günlük/olay otomasyonu kapalı; BLS takvimine Vercel erişimi hâlâ eksik.
+**En güncel çalışma:** [sabah + olay güncellemesi düzeni](macro-event-flow.md). Aşağıdaki bölümler tarihsel kayıttır. Son canlı önizleme 7 Kasım **11:48**, 133 kelime, yeni kaynak alımıyla ve model çağrısı olmadan oluşturuldu. Günlük/olay otomasyonu kapalı; BLS takvimine Vercel erişimi hâlâ eksik. En son 12:23 doğrulamasında BLS API 200 verirken BLS açıklama sayfası 403 döndü; bu nedenle yalnız API ile doğrulama ve açık manşet çapraz kontrolü sınırlaması eklendi.
 
 - Canlı hedef `getChat` ile okundu: **Alfa Traders Public**, `supergroup`, herkese açık kullanıcı adı var; mevcut konu seçimi geçerli. Hedef id'si ve anahtarlar bu kayda alınmadı.
 - Groq models API, `openai/gpt-oss-20b` erişimini doğruladı. Bu kontrol ücretsiz metadata sorgusudur; gerçek araştırma veya rapor üretimi başarısı anlamına gelmez.
@@ -119,6 +119,16 @@
 - Canlı takvim yenilemede **BEA erişimi var**, BLS ICS/liste/ay görünümü sunucuda doğrulanamadı; ileri yedi günde kuyruğa eklenen destekli olay sayısı **0**. İkincil takvim saatleri resmî saat yerine geçirilmedi. TÜFE/istihdam otomatik kapsamı tamamlanmış sayılmaz; takvim erişimi çözülmeden bütün akış için tamamlandı/aktif iddiası yoktur.
 - Aynı aylık gözlemler ve reel faiz karşılaştırması tekrarlanırsa kısa devam notu; yeni önemli tarihli politika haberi varsa önce o seçilir. Değişmeyen sonuç, yeni HTTP saati veya küçük ve görüşü değiştirmeyen düzeltme takip mesajı doğurmaz. Belirsiz Telegram yanıtı/ack commit kaybında kör retry yoktur.
 - **202/202 test** başarılı: örnek resmî kaynaklar, anlık beklenti kaydı, eski/yeni dönem ve mevsimsel düzeltme, GDP aşaması, çelişkili sürprizler, eşzamanlı işçiler, sınırlı araştırma/backoff, belirsiz teslim, önizleme izolasyonu, küçük revizyon sessizliği, aylık veri tekrarı ve sayısal kanıt kontrolü kapsanır.
+
+## 7 Kasım 12:23 TSİ — takvim sondası, ikincil saat ve BLS API-only doğrulama
+
+- Kullanıcının Investing TR / Forex Factory sorusu üzerine yalnız sabit adresleri denetleyen yönetici `macro-calendar-probe` eklendi. Çıktı yalnız host, HTTP durumu, bayt ve süre içerir; çağırandan URL almaz, sayfa gövdesi döndürmez.
+- Canlı sonda (Vercel): BLS ICS/liste/ay görünümü/açıklama sayfası **403**; BLS API **200** (3163 bayt). BEA ICS **200** (43.459 bayt), BEA güncel açıklamalar **200** (58.927 bayt). Forex Factory JSON **200** (15.780 bayt); Forex Factory HTML ve Investing TR **403**. Yani zaman/beklenti için yalnız FF JSON, sonuç için BLS API + BEA açıklamaları kullanılabilir.
+- İkincil saat desteği eklendi: resmî BLS veya BEA takvimi alınamazsa FF JSON’dan yalnız desteklenen ABD göstergeleri (istihdam/işsizlik, manşet+çekirdek TÜFE, manşet+çekirdek PCE, GDP aşaması) ve yalnız başarısız kurum için saat türetilir. Saat `secondary_calendar` olarak işaretlenir, mesajda “yaklaşık olabilir, resmî saat diye sunulmaz” denir, aynı gün için çelişen saat reddedilir. Resmî saat varsa ikincil akış hiç okunmaz ve resmî saati geçersiz kılamaz. Admin olay listesi bu kayıtları `· ikincil saat` olarak gösterir.
+- BLS açıklama sayfası 403 döndüğünde sonuç artık yalnız resmî API ile doğrulanabiliyor (`verification:api_only`). Yeni referans dönemi ve sayısal değerler yine zorunlu; eski dönem, dönem boşluğu veya geçersiz birim reddedilir. Veri sonrası mesaj “manşet metniyle çapraz kontrol yapılamadı” açıklamasını taşır. Açıklama sayfası erişilebilirse tam `release_and_api` çapraz kontrolü korunur; BEA sonuçları `release_and_api` olarak işaretlenir.
+- Yeni testler: ikincil saatlerin yalnız desteklenen göstergeleri kapsaması, GDP aşaması/dönem koruması, çelişkili saat reddi, resmî takvim çalışırken ikincil akışın hiç okunmaması, ikincil saatli olayın sonuç doğrulamasında yine resmî kaynak istemesi, 403 + yeni API dönemiyle `api_only` başarısı ve eski API dönemiyle red. Toplam **209/209 test** başarılı; `assets/macro-admin.js` sözdizimi kontrolü geçti.
+- Production dağıtım **READY**. Canlı `macro-agenda-refresh`: BEA erişilebilir, BLS 403, kuyruğa eklenen olay **0**, ikincil saat **0**, saat çelişkisi yok. FF JSON “thisweek” yalnız içinde bulunulan haftayı kapsadığından cumartesi günü gelecek haftanın olayı yoktur; bu, uçtan uca olay tesliminin kanıtı değildir.
+- Son durum: günlük rapor `sent` (09:36 kaydı korunuyor), günlük otomasyon **kapalı**, `eventUpdatesEnabled:false`, olay gönderimi **0**, yeni Telegram mesajı **yok**. Etkinleştirme ayrı ve açık onay gerektirir.
 
 ## Dosyalar
 
