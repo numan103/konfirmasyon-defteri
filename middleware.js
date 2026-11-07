@@ -53,7 +53,14 @@ export default async function middleware(request) {
 
   let meta = DEFAULT;
   if (page === 'alfatrading') {
-    meta = post ? (await fetchPost(post)) || PAGES.alfatrading : PAGES.alfatrading;
+    if (!post) meta = PAGES.alfatrading;
+    else {
+      meta = (await fetchPost(post)) || PAGES.alfatrading;
+      if (meta.blur) {
+        meta.image = url.origin + '/api/contrib?store=alfatrading&image=' + encodeURIComponent(post) +
+          '&v=' + encodeURIComponent(String(meta.v || ''));
+      }
+    }
   } else if (page && PAGES[page]) {
     meta = PAGES[page];
   }
@@ -86,7 +93,14 @@ async function fetchPost(pid) {
     const posts = (data && data.posts) || [];
     const p = posts.find(x => x.id === pid);
     if (!p) return null;
-    return postMeta(p);
+    const meta = postMeta(p);
+    if (p.imgBlur) {
+      meta.blur = true;
+      meta.v = p.editedTs || p.ts || '';
+      meta.w = Number(p.imgBlurW) || 480;
+      meta.h = Number(p.imgBlurH) || 302;
+    }
+    return meta;
   } catch (e) {
     return null;
   }
@@ -134,7 +148,9 @@ function esc(s) {
 
 function render(origin, path, meta, isPost) {
   const url = origin + path;
-  const img = origin + IMG;
+  const img = meta.image || (origin + IMG);
+  const imgW = meta.image ? (meta.w || 480) : 1200;
+  const imgH = meta.image ? (meta.h || 302) : 630;
   const sub = meta.sub ? '<br>' + esc(meta.sub) : '';
   return '<!DOCTYPE html>\n<html lang="tr"><head><meta charset="utf-8">\n' +
     '<title>' + esc(meta.title) + '</title>\n' +
@@ -145,8 +161,9 @@ function render(origin, path, meta, isPost) {
     '<meta property="og:description" content="' + esc(meta.desc) + '">\n' +
     '<meta property="og:url" content="' + esc(url) + '">\n' +
     '<meta property="og:image" content="' + esc(img) + '">\n' +
-    '<meta property="og:image:width" content="1200">\n' +
-    '<meta property="og:image:height" content="630">\n' +
+    (meta.image ? '<meta property="og:image:type" content="image/jpeg">\n' : '') +
+    '<meta property="og:image:width" content="' + imgW + '">\n' +
+    '<meta property="og:image:height" content="' + imgH + '">\n' +
     '<meta name="twitter:card" content="summary_large_image">\n' +
     '<meta name="twitter:title" content="' + esc(meta.title) + '">\n' +
     '<meta name="twitter:description" content="' + esc(meta.desc) + '">\n' +

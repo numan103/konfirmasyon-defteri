@@ -7462,6 +7462,9 @@
           <input type="text" id="at-f-img" class="at-inp" placeholder="Görsel linki (https://…) · ya da yapıştır / yükle">
           <button type="button" class="at-upl" id="at-f-upl">📎 Yükle</button>
           <input type="file" id="at-f-file" accept="image/*" hidden>
+          <input type="hidden" id="at-f-imgblur">
+          <input type="hidden" id="at-f-imgblurw">
+          <input type="hidden" id="at-f-imgblurh">
         </div>
         <div class="at-hint">İpucu: bir görseli kopyalayıp bu pencerede <b>Ctrl+V</b> ile de yapıştırabilirsin.</div>
         <div id="at-f-imgprev" class="at-imgprev"></div>
@@ -25170,11 +25173,53 @@ function atCompressImage(fileOrBlob, maxW, quality) {
     im.src = url;
   });
 }
+// Paylasim onizlemesi icin kucuk, hafif bulanik JPEG uretir. Tam gorsel
+// yalnizca sitede kalir; sosyal botlara bu kucuk kopya servis edilir.
+function atBlurDataUrl(src, maxW) {
+  return new Promise(resolve => {
+    const im = new Image();
+    im.onload = () => {
+      try {
+        const mw = maxW || 480;
+        const scale = Math.min(1, mw / (im.width || mw));
+        const w = Math.max(1, Math.round(im.width * scale));
+        const h = Math.max(1, Math.round(im.height * scale));
+        const small = document.createElement('canvas');
+        small.width = Math.max(8, Math.round(w / 10));
+        small.height = Math.max(8, Math.round(h / 10));
+        small.getContext('2d').drawImage(im, 0, 0, small.width, small.height);
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d');
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        if ('filter' in ctx) ctx.filter = 'blur(6px)';
+        ctx.drawImage(small, -w * 0.02, -h * 0.02, w * 1.04, h * 1.04);
+        resolve({ url: cv.toDataURL('image/jpeg', 0.72), w, h });
+      } catch (e) { resolve(null); }
+    };
+    im.onerror = () => resolve(null);
+    im.src = src;
+  });
+}
+async function atRefreshPostBlur(src) {
+  const b = document.getElementById('at-f-imgblur');
+  const bw = document.getElementById('at-f-imgblurw');
+  const bh = document.getElementById('at-f-imgblurh');
+  const clear = () => { if (b) b.value = ''; if (bw) bw.value = ''; if (bh) bh.value = ''; };
+  const s = String(src || '').trim();
+  if (!s) { clear(); return null; }
+  const out = await atBlurDataUrl(s, 480);
+  if (!out) { clear(); return null; }
+  if (b) b.value = out.url;
+  if (bw) bw.value = out.w;
+  if (bh) bh.value = out.h;
+  return out;
+}
 async function atSetPostImage(blob) {
   try {
     const d = await atCompressImage(blob, 1000, 0.72);
     const el = document.getElementById('at-f-img'); if (el) el.value = d;
     document.getElementById('at-f-imgprev').innerHTML = '<img src="' + d + '" alt="">';
+    await atRefreshPostBlur(d);
     atUpdatePreview();
   } catch (e) { alert('Görsel işlenemedi.'); }
 }
@@ -25240,23 +25285,25 @@ function atStartEdit(pid) {
   alfaComposer.repost = p.repost || null;
   const setv = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
   setv('at-f-coin', p.coin); setv('at-f-title', p.title); setv('at-f-text', p.text); setv('at-f-img', p.img);
+  setv('at-f-imgblur', p.imgBlur); setv('at-f-imgblurw', p.imgBlurW); setv('at-f-imgblurh', p.imgBlurH);
   setv('at-f-entry', p.entry); setv('at-f-tp', p.tp); setv('at-f-sl', p.sl); setv('at-f-lev', p.lev); setv('at-f-risk', p.risk);
   const bias = document.getElementById('at-f-bias'); if (bias) bias.value = p.bias || '';
   document.querySelectorAll('.at-type').forEach(x => x.classList.toggle('on', x.getAttribute('data-attype') === alfaComposer.type));
   document.querySelectorAll('.at-dir').forEach(x => x.classList.toggle('on', x.getAttribute('data-atdir') === alfaComposer.dir));
   document.getElementById('at-islem-fields').style.display = alfaComposer.type === 'islem' ? '' : 'none';
   document.getElementById('at-f-imgprev').innerHTML = p.img ? '<img src="' + esc(p.img) + '" alt="">' : '';
+  if (p.img && !p.imgBlur) atRefreshPostBlur(p.img);
   const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = '✏️ Gönderiyi Düzenle';
   const sb = document.getElementById('at-submit'); if (sb) sb.textContent = 'Kaydet';
   atRenderQuoteBox(); atRenderRepostBox(); atUpdatePreview();
 }
 function atOpenModal() {
-  alfaComposer = { type: 'analiz', dir: 'long', quote: null, repost: null, editId: null };
+  alfaComposer = { type: 'analiz', dir: 'long', quote: null, repost: null, editId: null, clientId: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8) };
   const mt = document.getElementById('at-modal-title'); if (mt) mt.textContent = 'Yeni Paylaşım';
   const sb = document.getElementById('at-submit'); if (sb) sb.textContent = 'Paylaş';
   const ts = document.getElementById('at-typeseg'); if (ts) ts.style.display = '';
   const txt = document.getElementById('at-f-text'); if (txt) txt.placeholder = 'Analiz / açıklama…';
-  ['at-f-coin', 'at-f-title', 'at-f-text', 'at-f-entry', 'at-f-tp', 'at-f-sl', 'at-f-lev', 'at-f-risk', 'at-f-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['at-f-coin', 'at-f-title', 'at-f-text', 'at-f-entry', 'at-f-tp', 'at-f-sl', 'at-f-lev', 'at-f-risk', 'at-f-img', 'at-f-imgblur', 'at-f-imgblurw', 'at-f-imgblurh'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const bias = document.getElementById('at-f-bias'); if (bias) bias.value = '';
   document.querySelectorAll('.at-type').forEach(b => b.classList.toggle('on', b.getAttribute('data-attype') === 'analiz'));
   document.querySelectorAll('.at-dir').forEach(b => b.classList.toggle('on', b.getAttribute('data-atdir') === 'long'));
@@ -25350,6 +25397,7 @@ async function atSubmit() {
     type, author: alfaMyName() || 'Admin', avatar: alfaMyAvatar(), authorEmail: (function () { try { return AUTH && AUTH.user ? AUTH.user.email : ''; } catch (e) { return ''; } })(),
     coin: val('at-f-coin'), bias: (document.getElementById('at-f-bias') || {}).value || '',
     title, text, img: val('at-f-img'),
+    imgBlur: val('at-f-imgblur'), imgBlurW: Number(val('at-f-imgblurw')) || 0, imgBlurH: Number(val('at-f-imgblurh')) || 0,
     dir: type === 'islem' ? alfaComposer.dir : '',
     entry: type === 'islem' ? val('at-f-entry') : '', tp: type === 'islem' ? val('at-f-tp') : '', sl: type === 'islem' ? val('at-f-sl') : '',
     lev: type === 'islem' ? val('at-f-lev') : '', risk: type === 'islem' ? val('at-f-risk') : '',
@@ -25362,11 +25410,14 @@ async function atSubmit() {
     r = await atApi('edit', { postId: alfaComposer.editId, post });
     if (r && r.ok) { const i = alfaPosts.findIndex(x => x.id === alfaComposer.editId); if (i >= 0) Object.assign(alfaPosts[i], post, { edited: true }); }
   } else {
-    r = await atApi('add', { post });
+    r = await atApi('add', { post, clientId: alfaComposer.clientId });
     if (r && r.ok && r.post) alfaPosts.unshift(r.post);
   }
   if (btn) { btn.disabled = false; btn.textContent = editing ? 'Kaydet' : 'Paylaş'; }
-  if (r && r.ok) { atCloseModal(); renderAlfaFeed(); }
+  if (r && r.ok) {
+    atCloseModal(); renderAlfaFeed();
+    if (r.notify && (r.notify.phase === 'failed' || r.notify.phase === 'unknown')) atToast('Paylaşım kaydedildi; Telegram bildirimi doğrulanamadı.');
+  }
   else alert((editing ? 'Kaydedilemedi: ' : 'Paylaşılamadı: ') + ((r && r.error) || 'bilinmeyen hata'));
 }
 /* ---- Dış paylaşım: markalı sonuç görseli + teaser + link ---- */
@@ -25474,7 +25525,10 @@ function bindAlfaTrading() {
     atUpdatePreview();
   }));
   const img = document.getElementById('at-f-img');
-  if (img) img.addEventListener('input', () => { const v = img.value.trim(); document.getElementById('at-f-imgprev').innerHTML = /^https?:\/\//.test(v) ? '<img src="' + esc(v) + '" alt="">' : ''; });
+  if (img) {
+    img.addEventListener('input', () => { const v = img.value.trim(); document.getElementById('at-f-imgprev').innerHTML = /^https?:\/\//.test(v) ? '<img src="' + esc(v) + '" alt="">' : ''; });
+    img.addEventListener('change', () => atRefreshPostBlur(img.value));
+  }
   const mbody = document.querySelector('#at-modal .at-modal-body');
   if (mbody) mbody.addEventListener('input', atUpdatePreview);
   // alıntı butonları
