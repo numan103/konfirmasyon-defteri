@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const ENV_KEYS = [
   'TG_BOT_TOKEN', 'TG_CHAT_ID', 'TG_THREAD', 'TG_TRADE_CHAT_ID', 'TG_TRADE_THREAD',
-  'TG_TRADE_NOTIFY', 'SITE_ADMIN_EMAILS', 'SITE_ACCESS_OPEN',
+  'TG_TRADE_NOTIFY', 'SITE_ADMIN_EMAILS', 'SITE_ACCESS_OPEN', 'SUPABASE_PUBLISHABLE',
 ];
 
 function resetEnv(env = {}) {
@@ -254,6 +254,37 @@ test('middleware bulanik gorsel yoksa genel /og.png gorseline duser', async () =
   assert.match(html, /og:image" content="https:\/\/alfa-trader\.com\/og\.png"/);
   assert.match(html, /og:image:width" content="1200"/);
   assert.match(html, /og:image:height" content="630"/);
+});
+
+test('middleware gecersiz env anahtarinda dogrulanmis yayin anahtariyla tekrar okur', async () => {
+  const state = makeStore();
+  state.data.posts = [{ id: 'p3', type: 'islem', coin: 'BTC', dir: 'long', title: 'Fallback', author: 'Admin', ts: 1700000000000 }];
+  const seenKeys = [];
+  const inner = fetchStub(state);
+  globalThis.fetch = async (url, init = {}) => {
+    if (String(url).includes('/rest/v1/edu_shared')) {
+      const key = init.headers && init.headers.apikey;
+      seenKeys.push(key);
+      if (key === 'sb_invalid_env_key') return { ok: false, status: 401, json: async () => ({}) };
+    }
+    return inner(url, init);
+  };
+  process.env.SUPABASE_PUBLISHABLE = 'sb_invalid_env_key';
+  let middleware;
+  try {
+    middleware = (await import('../middleware.js?case=' + Math.random())).default;
+  } finally {
+    delete process.env.SUPABASE_PUBLISHABLE;
+  }
+
+  const request = new Request('https://alfa-trader.com/?page=alfatrading&post=p3', {
+    headers: { 'user-agent': 'TelegramBot' },
+  });
+  const response = await middleware(request);
+  const html = await response.text();
+  assert.match(html, /Fallback/);
+  assert.equal(seenKeys[0], 'sb_invalid_env_key');
+  assert.equal(seenKeys[1], 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X');
 });
 
 test('istemci bulanik kopya uretir ve gonderimde tasir', () => {

@@ -6,7 +6,11 @@
 // (next/server import'u desteklenmez).
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
+// Yayın (publishable) anahtarı zorunlu: satır okuması anon yetkisiyle yapılır.
+// Üretimde env tanımlı değilse bu doğrulanmış anahtar kullanılır; env'deki
+// anahtar 401 dönerse tek seferlik bu anahtarla tekrar denenir.
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_FALLBACK_KEY = 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const IMG = '/og.png';
 
 const BOT_RE = /(telegrambot|twitterbot|facebookexternalhit|facebookcatalog|linkedinbot|slackbot|discordbot|whatsapp|viber|line-preview|linespider|tumblr|redditbot|snapchat|skypeuripreview|microblog|embedly|ia_archiver|bingbot|googlebot|google-inspectiontool|duckduckbot|petalbot|yandex|baiduspider|curl|wget|python-requests|urllib)/i;
@@ -75,20 +79,33 @@ export default async function middleware(request) {
   });
 }
 
-async function fetchPost(pid) {
+async function readRow(key) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 6000);
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 6000);
     const res = await fetch(
       SUPABASE_URL + '/rest/v1/edu_shared?id=eq.alfa_trading&select=data',
       {
-        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
+        headers: { apikey: key, Authorization: 'Bearer ' + key },
         signal: ctrl.signal,
       }
     );
-    clearTimeout(t);
-    if (!res.ok) return null;
+    if (!res.ok) return { ok: false, status: res.status };
     const rows = await res.json();
+    return { ok: true, rows };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function fetchPost(pid) {
+  try {
+    let out = await readRow(SUPABASE_KEY);
+    if (!out.ok && out.status === 401 && SUPABASE_FALLBACK_KEY !== SUPABASE_KEY) {
+      out = await readRow(SUPABASE_FALLBACK_KEY);
+    }
+    if (!out.ok) return null;
+    const rows = out.rows;
     const data = rows && rows[0] && rows[0].data;
     const posts = (data && data.posts) || [];
     const p = posts.find(x => x.id === pid);
