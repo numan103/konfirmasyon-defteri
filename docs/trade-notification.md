@@ -68,6 +68,15 @@
 - Önizleme ucu: `image/jpeg`, 480 px genişlik, gönderiye özel başlık/açıklama.
 - Var olmayan gönderi kimliği genel `/og.png` görseline düşer.
 
+### Bias ve Kanal canlı testi (2026-11-08)
+- Bias: etiketli `onchain` paylaşımı `mw7ej7gycvbaj` → `messageId 804`,
+  metin `📡 Yeni bias · TEST · LONG`, önizleme gönderiye özel bulanık JPEG.
+- Kanal: etiketli `analiz` paylaşımı `mw7enmxecu73n` → `messageId 805`,
+  metin `📢 Yeni analiz · TEST`, önizleme gönderiye özel bulanık JPEG
+  (genel `/og.png` değil).
+- Her iki testte de aynı `clientId` ikinci kez gönderildi: `duplicate: true`,
+  tek mesaj kaldı. Test mesajları ve paylaşımları silindi; akış 18 gönderiye döndü.
+
 ## Notlar
 - `delTg` yönetici eylemi yanlış gönderilmiş bir bildirimi geri alır
   (`action: 'delTg', messageId`). Yalnızca admin kullanabilir.
