@@ -124,24 +124,22 @@ async function fetchPost(pid) {
 }
 
 function postMeta(p) {
-  const typeLabel = p.type === 'islem' ? 'İşlem' : 'Analiz';
+  const typeLabel = p.type === 'islem' ? 'İşlem' : (p.type === 'onchain' ? 'Onchain & Bias' : 'Kanal');
   const head = [];
   if (p.coin) head.push(p.coin);
   head.push(typeLabel);
   if (p.type === 'islem' && p.dir) head.push(p.dir === 'long' ? 'LONG' : 'SHORT');
+  if (p.type === 'onchain') {
+    if (p.bias === 'long') head.push('LONG bias');
+    else if (p.bias === 'short') head.push('SHORT bias');
+    else if (p.bias === 'notr') head.push('Nötr bias');
+  }
   const headStr = head.join(' · ');
   const title = (p.title ? p.title + ' — ' : '') + headStr;
 
   let desc = String(p.text || '').replace(/\s+/g, ' ').trim();
   if (!desc && p.repost) desc = String(p.repost.text || p.repost.title || '').replace(/\s+/g, ' ').trim();
-  if (!desc && p.type === 'islem') {
-    const parts = [];
-    if (p.entry) parts.push('Entry ' + p.entry);
-    if (p.tp) parts.push('TP ' + p.tp);
-    if (p.sl) parts.push('SL ' + p.sl);
-    if (p.lev) parts.push('Kaldıraç ' + p.lev);
-    desc = parts.join(' · ');
-  }
+  // Islem seviyeleri herkese acik onizlemede gorunmez; kart yalnizca teaser.
   if (!desc) desc = 'Alfa Trading topluluk paylaşımı.';
   if (desc.length > 180) desc = desc.slice(0, 177) + '…';
 

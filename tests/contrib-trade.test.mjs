@@ -149,6 +149,91 @@ test('analiz paylasimi Telegram bildirimi uretmez', async () => {
   assert.equal(state.data.posts[0].tradeNotify, null);
 });
 
+test('onchain/bias paylasimi turunu korur ve public charts hedefine bildirim gonderir', async () => {
+  const state = makeStore();
+  globalThis.fetch = fetchStub(state);
+  const handler = await loadHandler({
+    TG_BOT_TOKEN: 'token', TG_CHAT_ID: '@charts', TG_THREAD: '434',
+    SITE_ADMIN_EMAILS: 'admin@test.dev',
+  });
+
+  const res = await addPost(handler, {
+    type: 'onchain', coin: 'BTC', bias: 'short',
+    title: 'Funding negatif', text: 'CVD zayif, short bias.',
+    entry: '100', tp: '90', sl: '105', lev: '5x',
+  }, { clientId: 'bias-1' });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.post.type, 'onchain');
+  assert.equal(state.data.posts[0].type, 'onchain');
+  assert.equal(state.calls.length, 1);
+  const call = state.calls[0];
+  assert.equal(call.body.chat_id, '@charts');
+  assert.equal(call.body.message_thread_id, 434);
+  assert.equal(call.body.disable_web_page_preview, false);
+  assert.match(call.body.text, /📡 Yeni bias/);
+  assert.match(call.body.text, /BTC/);
+  assert.match(call.body.text, /SHORT/);
+  assert.doesNotMatch(call.body.text, /Entry|TP|SL|Kaldıraç/);
+  assert.ok(call.body.text.includes('https://alfa-trader.com/?page=alfatrading&post=' + res.body.post.id));
+  assert.equal(res.body.notify.phase, 'sent');
+  assert.equal(res.body.notify.kind, 'bias');
+  assert.equal(state.data.posts[0].tradeNotify.phase, 'sent');
+});
+
+test('ayni bias clientId tekrar gonderildiginde ikinci bildirim atmaz', async () => {
+  const state = makeStore();
+  globalThis.fetch = fetchStub(state);
+  const handler = await loadHandler({
+    TG_BOT_TOKEN: 'token', TG_CHAT_ID: '@charts', TG_THREAD: '434',
+    SITE_ADMIN_EMAILS: 'admin@test.dev',
+  });
+
+  await addPost(handler, { type: 'onchain', coin: 'ETH', bias: 'long' }, { clientId: 'bias-same' });
+  const again = await addPost(handler, { type: 'onchain', coin: 'SOL', bias: 'short' }, { clientId: 'bias-same' });
+
+  assert.equal(again.body.duplicate, true);
+  assert.equal(state.calls.length, 1);
+  assert.equal(state.data.posts.length, 1);
+});
+
+test('onchain gonderi duzenlendiginde turu korunur', async () => {
+  const state = makeStore();
+  globalThis.fetch = fetchStub(state);
+  const handler = await loadHandler({ SITE_ADMIN_EMAILS: 'admin@test.dev' });
+
+  const added = await addPost(handler, { type: 'onchain', coin: 'BTC', bias: 'long', title: 'Ilk' });
+  const res = await postAction(handler, {
+    action: 'edit', postId: added.body.post.id,
+    post: { type: 'onchain', coin: 'BTC', bias: 'long', title: 'Guncel' },
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.post.type, 'onchain');
+  assert.equal(state.data.posts[0].title, 'Guncel');
+});
+
+test('yonetici eski Kanal gonderisini bias olarak isaretleyip tek bildirim gonderebilir', async () => {
+  const state = makeStore();
+  state.data.posts = [{ id: 'old-1', type: 'analiz', coin: 'BTC', bias: '', title: 'Fiyat icin anlamli bolgeler', text: '72k', ts: 1 }];
+  globalThis.fetch = fetchStub(state);
+  const handler = await loadHandler({
+    TG_BOT_TOKEN: 'token', TG_CHAT_ID: '@charts', TG_THREAD: '434',
+    SITE_ADMIN_EMAILS: 'admin@test.dev',
+  });
+
+  const res = await postAction(handler, { action: 'notify', postId: 'old-1', markOnchain: true });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.post.type, 'onchain');
+  assert.equal(state.calls.length, 1);
+  assert.match(state.calls[0].body.text, /📡 Yeni bias/);
+
+  const again = await postAction(handler, { action: 'notify', postId: 'old-1', markOnchain: true });
+  assert.equal(again.statusCode, 409);
+  assert.equal(again.body.error, 'already_notified');
+  assert.equal(state.calls.length, 1);
+});
+
 test('ag hatasinda paylasim kaydedilir, durum unknown kalir ve retry edilmez', async () => {
   const state = makeStore();
   state.telegram = 'throw';
@@ -284,6 +369,23 @@ test('middleware paylasim onizlemesinde posta ozel bulanik gorseli kullanir', as
   assert.match(html, /og:image:width" content="480"/);
   assert.match(html, /og:image:height" content="302"/);
   assert.match(html, /og:image:type" content="image\/jpeg"/);
+});
+
+test('middleware onchain onizlemesinde bias etiketini kullanir ve seviye sizdirmaz', async () => {
+  const state = makeStore();
+  state.data.posts = [{
+    id: 'p4', type: 'onchain', coin: 'BTC', bias: 'short', title: 'Funding', author: 'Admin', ts: 1700000000000,
+    entry: '100', tp: '90', sl: '105', lev: '5x',
+  }];
+  globalThis.fetch = fetchStub(state);
+  const middleware = (await import('../middleware.js?case=' + Math.random())).default;
+  const request = new Request('https://alfa-trader.com/?page=alfatrading&post=p4', {
+    headers: { 'user-agent': 'TelegramBot' },
+  });
+  const response = await middleware(request);
+  const html = await response.text();
+  assert.match(html, /BTC · Onchain &amp; Bias · SHORT bias/);
+  assert.doesNotMatch(html, /Entry|TP 90|SL 105|Kaldıraç/);
 });
 
 test('middleware bulanik gorsel yoksa genel /og.png gorseline duser', async () => {

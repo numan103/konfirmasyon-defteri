@@ -95,31 +95,59 @@ function atTradeTarget() {
   const token = String(process.env.TG_BOT_TOKEN || '').trim();
   return { chat, thread, ready: !disabled && !!token && !!chat };
 }
+// Depoda yalnizca uc tip tutulur: islem, onchain (bias) ve analiz (Kanal).
+// Onceden onchain de analiz'e dusuruluyordu; bias paylasimlari bu yuzden
+// Telegram bildirimi uretmiyordu.
+function atPostType(p) {
+  if (p && p.type === 'islem') return 'islem';
+  if (p && p.type === 'onchain') return 'onchain';
+  return 'analiz';
+}
+function atNotifyKind(post) { return post.type === 'onchain' ? 'bias' : 'trade'; }
+function atNotifyWanted(type) { return type === 'islem' || type === 'onchain'; }
+function atSummary(text, max) {
+  const s = String(text || '').replace(/\s+/g, ' ').trim();
+  return s.length > max ? s.slice(0, max - 3) + '…' : s;
+}
 function atTradeText(post) {
   const head = ['📊 Yeni işlem'];
   if (post.coin) head.push(post.coin);
   if (post.dir) head.push(post.dir === 'long' ? 'LONG' : 'SHORT');
   const lines = [head.join(' · ')];
   if (post.title) lines.push('', post.title);
-  const summary = String(post.text || '').replace(/\s+/g, ' ').trim();
-  if (summary) lines.push('', summary.length > 240 ? summary.slice(0, 237) + '…' : summary);
+  const summary = atSummary(post.text, 240);
+  if (summary) lines.push('', summary);
   // Seviyeler (Entry/TP/SL/Kaldıraç) bilinçli olarak gönderilmez: görsel
   // bulanık önizleme olduğu için metinde de işlem detayı verilmez.
   lines.push('', 'Grafik ve detay: ' + atTradeUrl(post.id));
   return lines.join('\n');
 }
-// Islem paylasimi yayinlandiginda public charts hedefine tek bildirim.
+function atBiasText(post) {
+  const head = ['📡 Yeni bias'];
+  if (post.coin) head.push(post.coin);
+  if (post.bias === 'long') head.push('LONG');
+  else if (post.bias === 'short') head.push('SHORT');
+  else if (post.bias === 'notr') head.push('NÖTR');
+  const lines = [head.join(' · ')];
+  if (post.title) lines.push('', post.title);
+  const summary = atSummary(post.text, 240);
+  if (summary) lines.push('', summary);
+  lines.push('', 'Detay: ' + atTradeUrl(post.id));
+  return lines.join('\n');
+}
+function atNotifyText(post, kind) { return kind === 'bias' ? atBiasText(post) : atTradeText(post); }
+// Islem ve bias paylasimi yayinlandiginda public charts hedefine tek bildirim.
 // Kural: once "sending" durumu kalici yazilir; ag cagrisindan sonra teyit
 // yazilamazsa tekrar gonderilmez (belirsiz teslimde kor retry yok).
-async function atNotifyTrade(post, save, dryRun) {
+async function atNotifyPost(post, save, dryRun, kind = atNotifyKind(post)) {
   const target = atTradeTarget();
-  const state = { key: 'trade:' + post.id, at: Date.now() };
+  const state = { key: (kind === 'bias' ? 'bias:' : 'trade:') + post.id, kind, at: Date.now() };
   if (!target.ready) {
     post.tradeNotify = { ...state, phase: 'disabled', reason: target.chat ? 'telegram_disabled' : 'telegram_not_configured' };
     await save();
     return post.tradeNotify;
   }
-  const text = atTradeText(post);
+  const text = atNotifyText(post, kind);
   if (dryRun) {
     post.tradeNotify = { ...state, phase: 'dry_run', preview: text };
     await save();
@@ -130,7 +158,7 @@ async function atNotifyTrade(post, save, dryRun) {
   let out;
   try {
     // Link onizlemesi acik: Telegram gonderi baglantisindan bulanik karti
-    // (og:image) cikarir; boylece islem kanalda dogrudan gorunur.
+    // (og:image) cikarir; boylece paylasim kanalda dogrudan gorunur.
     out = await sendTelegram(text, target.chat, target.thread, null, { preview: true });
   } catch (e) {
     post.tradeNotify = { ...state, phase: 'unknown', error: 'telegram_network' };
@@ -183,7 +211,7 @@ async function alfaTrading(req, res, user) {
   const action = body.action;
 
   // Yazma yetkisi: yonetici post yonetir; begeni/yorum icin giris yeterli.
-  const adminActions = ['add', 'edit', 'delPost', 'delComment', 'delTg', 'status', 'profileUpdate'];
+  const adminActions = ['add', 'edit', 'delPost', 'delComment', 'delTg', 'notify', 'status', 'profileUpdate'];
   if (adminActions.indexOf(action) >= 0) {
     if (!user || !user.admin) return res.status(403).json({ error: 'forbidden' });
   } else if (action === 'like' || action === 'comment') {
@@ -198,7 +226,7 @@ async function alfaTrading(req, res, user) {
       if (seen) return res.status(200).json({ ok: true, post: seen, duplicate: true, notify: seen.tradeNotify || null });
     }
     const id = atUid();
-    const type = p.type === 'islem' ? 'islem' : 'analiz';
+    const type = atPostType(p);
     const post = {
       id, clientId, type,
       author: atClip(p.author, 40) || 'Admin', authorEmail: atClip(p.authorEmail, 120), avatar: atClip(p.avatar, 400000), isAdmin: true,
@@ -210,12 +238,12 @@ async function alfaTrading(req, res, user) {
       title: atClip(p.title, 160), text: atClip(p.text, 4000), img: atClip(p.img, 800000),
       imgBlur: atClip(p.imgBlur, 600000), imgBlurW: atInt(p.imgBlurW, 4000), imgBlurH: atInt(p.imgBlurH, 4000),
       ts: Date.now(), likes: [], comments: [],
-      tradeNotify: type === 'islem' ? { key: 'trade:' + id, phase: 'pending', at: Date.now() } : null,
+      tradeNotify: atNotifyWanted(type) ? { key: (type === 'onchain' ? 'bias:' : 'trade:') + id, kind: type === 'onchain' ? 'bias' : 'trade', phase: 'pending', at: Date.now() } : null,
     };
     posts.unshift(post); if (posts.length > 300) posts.length = 300;
     const w = await save();
     if (!w.ok) return res.status(500).json({ error: w.error || 'store_error' });
-    const notify = type === 'islem' ? await atNotifyTrade(post, save, body.dryRun === true) : null;
+    const notify = atNotifyWanted(type) ? await atNotifyPost(post, save, body.dryRun === true) : null;
     return res.status(200).json({ ok: true, post, notify });
   }
   if (action === 'like') {
@@ -236,7 +264,7 @@ async function alfaTrading(req, res, user) {
     const post = find(body.postId); if (!post) return res.status(404).json({ error: 'post yok' });
     const p = body.post || {};
     const patch = {
-      type: p.type === 'islem' ? 'islem' : 'analiz',
+      type: atPostType(p),
       coin: atClip(p.coin, 20).toUpperCase(), bias: ['long', 'short', 'notr'].includes(p.bias) ? p.bias : '',
       dir: ['long', 'short'].includes(p.dir) ? p.dir : '',
       entry: atClip(p.entry, 40), tp: atClip(p.tp, 40), sl: atClip(p.sl, 40),
@@ -253,6 +281,21 @@ async function alfaTrading(req, res, user) {
     }
     Object.assign(post, patch);
     await save(); return res.status(200).json({ ok: true, post });
+  }
+  if (action === 'notify') {
+    // Var olan bir gonderi icin bildirimi (yeniden) calistirir. Yalnizca admin.
+    // Teslim edilmis/belirsiz kayitta kor tekrar yok; force gerekir.
+    const post = find(body.postId);
+    if (!post) return res.status(404).json({ error: 'post yok' });
+    if (body.markOnchain === true && post.type !== 'islem') post.type = 'onchain';
+    const kind = body.kind === 'bias' ? 'bias' : body.kind === 'trade' ? 'trade' : atNotifyKind(post);
+    const prev = post.tradeNotify || null;
+    const delivered = prev && (prev.phase === 'sent' || prev.phase === 'sending' || prev.phase === 'unknown');
+    if (delivered && body.force !== true) {
+      return res.status(409).json({ error: 'already_notified', notify: prev });
+    }
+    const notify = await atNotifyPost(post, save, body.dryRun === true, kind);
+    return res.status(200).json({ ok: true, post, notify });
   }
   if (action === 'delPost') { const i = posts.findIndex(p => p.id === body.postId); if (i >= 0) posts.splice(i, 1); await save(); return res.status(200).json({ ok: true }); }
   if (action === 'delTg') {
