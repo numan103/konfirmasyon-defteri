@@ -1,21 +1,24 @@
-# İşlem / bias bildirimi ve bulanık önizleme
+# İşlem / bias / Kanal bildirimi ve bulanık önizleme
 
 ## Hedef
-- Yeni **işlem** (`type === 'islem'`) ve **Onchain & Bias** (`type === 'onchain'`)
-  paylaşımları **Alfa Traders Public** grubundaki **charts** konusuna bildirilir.
+- Yeni **işlem** (`type === 'islem'`), **Onchain & Bias** (`type === 'onchain'`) ve
+  **Kanal** (`type === 'analiz'`) paylaşımları **Alfa Traders Public** grubundaki
+  **charts** konusuna bildirilir.
 - Konu: `TG_THREAD` = **/434** (kullanıcı tarafından 2026-11-07'de onaylandı).
 - İsteğe bağlı geçersiz kılmalar: `TG_TRADE_CHAT_ID`, `TG_TRADE_THREAD`.
 - Kaçış kapısı: `TG_TRADE_NOTIFY=off` → bildirim gönderilmez, paylaşım yine kaydedilir.
 
 ## Davranış
-- Yalnızca yeni `islem` ve `onchain` paylaşımı bildirir. `analiz` (📢 Kanal)
-  paylaşımları ve düzenlemeler (`edit`) bildirim üretmez.
+- Yalnızca yeni `islem`, `onchain` ve `analiz` paylaşımı bildirir; düzenlemeler
+  (`edit`) bildirim üretmez. Eski kayıtlar geriye dönük bildirilmez.
 - Tür korunur: `onchain` paylaşımı depoda da `onchain` olarak kalır; böylece akış
   filtresi ve kart etiketi “📡 Onchain & Bias” görünür.
 - İşlem metni: `📊 Yeni işlem · <COIN> · <LONG/SHORT>`, başlık, en fazla 240
   karakter özet ve paylaşım bağlantısı.
 - Bias metni: `📡 Yeni bias · <COIN> · <LONG/SHORT/NÖTR>`, başlık, en fazla 240
   karakter özet ve `Detay: <link>` satırı. Bias yönü seçilmemişse yalnızca coin kalır.
+- Kanal metni: `📢 Yeni analiz · <COIN>`, başlık, en fazla 240 karakter özet ve
+  `Detay: <link>` satırı.
 - **Entry/TP/SL/Kaldıraç hiçbir bildirim metnine yazılmaz**; işlem detayı yalnızca
   sitede (ve bulanık kartın arkasında) kalır. Görsel baytı yüklenmez.
 - Bağlantı önizlemesi bu bildirimlerde **açıktır**: Telegram gönderi bağlantısından
@@ -32,16 +35,18 @@
   yeniden gönderilmez.
 - Terminal durumlar: `sent`, `failed`, `unknown`, `disabled`, `dry_run`.
   `dry_run` yalnızca metni döndürür, gönderim yapmaz.
-- `tradeNotify.kind` alanı `trade` veya `bias` olur; `key` da `trade:<id>` /
-  `bias:<id>` şeklinde ayrışır.
+- `tradeNotify.kind` alanı `trade`, `bias` veya `post` olur; `key` da `trade:<id>` /
+  `bias:<id>` / `post:<id>` şeklinde ayrışır.
 
-## Eski kaydı bias olarak bildirme
-- `analiz` olarak kaydedilmiş bir gönderi, türü kaybedildiği için sonradan
-  bildirilemez. Yönetici şu eylemle bunu düzeltebilir:
-  `{ action: 'notify', postId, markOnchain: true }`.
-- Eylem türü `onchain` yapar, bias bildirimini bir kez gönderir. Kayıt zaten
-  `sent`/`sending`/`unknown` ise **409 `already_notified`** döner; bilinçli tekrar
-  için `force: true` gerekir. `dryRun: true` yalnızca metni döndürür.
+## Eski kaydı yeniden bildirme
+- `analiz` olarak kaydedilmiş bir gönderi normalde yeni bildirim üretmez; ancak
+  yönetici `{ action: 'notify', postId, kind?, markOnchain?, force?, dryRun? }`
+  eylemiyle tek seferlik bildirim gönderebilir.
+- `markOnchain: true` türü `onchain` yapar ve bias metni kullanır. `kind`
+  belirtilmezse türden türetilir (`islem` → `trade`, `onchain` → `bias`,
+  `analiz` → `post`).
+- Kayıt zaten `sent`/`sending`/`unknown` ise **409 `already_notified`** döner;
+  bilinçli tekrar için `force: true` gerekir. `dryRun: true` yalnızca metni döndürür.
 
 ## Bulanık önizleme
 - Paylaşım görseli yüklenirken istemci 480 px genişliğinde, `blur(6px)` uygulanmış

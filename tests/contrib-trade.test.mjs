@@ -134,7 +134,7 @@ test('ayni clientId tekrar gonderildiginde ikinci bildirim atmaz', async () => {
   assert.equal(state.data.posts.length, 1);
 });
 
-test('analiz paylasimi Telegram bildirimi uretmez', async () => {
+test('analiz (Kanal) paylasimi da public charts hedefine tek bildirim gonderir', async () => {
   const state = makeStore();
   globalThis.fetch = fetchStub(state);
   const handler = await loadHandler({
@@ -142,11 +142,36 @@ test('analiz paylasimi Telegram bildirimi uretmez', async () => {
     SITE_ADMIN_EMAILS: 'admin@test.dev',
   });
 
-  const res = await addPost(handler, { type: 'analiz', coin: 'BTC', title: 'Piyasa notu' });
+  const res = await addPost(handler, { type: 'analiz', coin: 'BTC', title: 'Piyasa notu', text: 'Kisa vadeli gorunum.' }, { clientId: 'post-1' });
   assert.equal(res.statusCode, 200);
-  assert.equal(state.calls.length, 0);
-  assert.equal(res.body.notify, null);
-  assert.equal(state.data.posts[0].tradeNotify, null);
+  assert.equal(res.body.post.type, 'analiz');
+  assert.equal(state.calls.length, 1);
+  const call = state.calls[0];
+  assert.equal(call.body.chat_id, '@charts');
+  assert.equal(call.body.message_thread_id, 434);
+  assert.equal(call.body.disable_web_page_preview, false);
+  assert.match(call.body.text, /📢 Yeni analiz/);
+  assert.match(call.body.text, /BTC/);
+  assert.ok(call.body.text.includes('Detay: https://alfa-trader.com/?page=alfatrading&post=' + res.body.post.id));
+  assert.equal(res.body.notify.phase, 'sent');
+  assert.equal(res.body.notify.kind, 'post');
+  assert.equal(state.data.posts[0].tradeNotify.phase, 'sent');
+});
+
+test('ayni analiz clientId tekrar gonderildiginde ikinci bildirim atmaz', async () => {
+  const state = makeStore();
+  globalThis.fetch = fetchStub(state);
+  const handler = await loadHandler({
+    TG_BOT_TOKEN: 'token', TG_CHAT_ID: '@charts', TG_THREAD: '434',
+    SITE_ADMIN_EMAILS: 'admin@test.dev',
+  });
+
+  await addPost(handler, { type: 'analiz', coin: 'BTC' }, { clientId: 'post-same' });
+  const again = await addPost(handler, { type: 'analiz', coin: 'ETH' }, { clientId: 'post-same' });
+
+  assert.equal(again.body.duplicate, true);
+  assert.equal(state.calls.length, 1);
+  assert.equal(state.data.posts.length, 1);
 });
 
 test('onchain/bias paylasimi turunu korur ve public charts hedefine bildirim gonderir', async () => {

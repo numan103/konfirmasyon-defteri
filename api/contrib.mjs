@@ -103,8 +103,16 @@ function atPostType(p) {
   if (p && p.type === 'onchain') return 'onchain';
   return 'analiz';
 }
-function atNotifyKind(post) { return post.type === 'onchain' ? 'bias' : 'trade'; }
-function atNotifyWanted(type) { return type === 'islem' || type === 'onchain'; }
+function atNotifyKind(post) {
+  if (post.type === 'onchain') return 'bias';
+  if (post.type === 'analiz') return 'post';
+  return 'trade';
+}
+const AT_NOTIFY_KINDS = ['trade', 'bias', 'post'];
+// Uc tur de yayinlandiginda charts konusuna bildirilir. Eski kayitlar geriye
+// donuk bildirilmez; yalnizca yeni `add` cagrisi mesaj uretir.
+function atNotifyWanted(type) { return type === 'islem' || type === 'onchain' || type === 'analiz'; }
+function atNotifyPrefix(kind) { return kind === 'bias' ? 'bias:' : kind === 'post' ? 'post:' : 'trade:'; }
 function atSummary(text, max) {
   const s = String(text || '').replace(/\s+/g, ' ').trim();
   return s.length > max ? s.slice(0, max - 3) + '…' : s;
@@ -135,13 +143,27 @@ function atBiasText(post) {
   lines.push('', 'Detay: ' + atTradeUrl(post.id));
   return lines.join('\n');
 }
-function atNotifyText(post, kind) { return kind === 'bias' ? atBiasText(post) : atTradeText(post); }
-// Islem ve bias paylasimi yayinlandiginda public charts hedefine tek bildirim.
-// Kural: once "sending" durumu kalici yazilir; ag cagrisindan sonra teyit
-// yazilamazsa tekrar gonderilmez (belirsiz teslimde kor retry yok).
+function atPostText(post) {
+  const head = ['📢 Yeni analiz'];
+  if (post.coin) head.push(post.coin);
+  const lines = [head.join(' · ')];
+  if (post.title) lines.push('', post.title);
+  const summary = atSummary(post.text, 240);
+  if (summary) lines.push('', summary);
+  lines.push('', 'Detay: ' + atTradeUrl(post.id));
+  return lines.join('\n');
+}
+function atNotifyText(post, kind) {
+  if (kind === 'bias') return atBiasText(post);
+  if (kind === 'post') return atPostText(post);
+  return atTradeText(post);
+}
+// Islem, bias ve Kanal paylasimi yayinlandiginda public charts hedefine tek
+// bildirim. Kural: once "sending" durumu kalici yazilir; ag cagrisindan sonra
+// teyit yazilamazsa tekrar gonderilmez (belirsiz teslimde kor retry yok).
 async function atNotifyPost(post, save, dryRun, kind = atNotifyKind(post)) {
   const target = atTradeTarget();
-  const state = { key: (kind === 'bias' ? 'bias:' : 'trade:') + post.id, kind, at: Date.now() };
+  const state = { key: atNotifyPrefix(kind) + post.id, kind, at: Date.now() };
   if (!target.ready) {
     post.tradeNotify = { ...state, phase: 'disabled', reason: target.chat ? 'telegram_disabled' : 'telegram_not_configured' };
     await save();
@@ -227,6 +249,7 @@ async function alfaTrading(req, res, user) {
     }
     const id = atUid();
     const type = atPostType(p);
+    const kind = atNotifyKind({ type });
     const post = {
       id, clientId, type,
       author: atClip(p.author, 40) || 'Admin', authorEmail: atClip(p.authorEmail, 120), avatar: atClip(p.avatar, 400000), isAdmin: true,
@@ -238,7 +261,7 @@ async function alfaTrading(req, res, user) {
       title: atClip(p.title, 160), text: atClip(p.text, 4000), img: atClip(p.img, 800000),
       imgBlur: atClip(p.imgBlur, 600000), imgBlurW: atInt(p.imgBlurW, 4000), imgBlurH: atInt(p.imgBlurH, 4000),
       ts: Date.now(), likes: [], comments: [],
-      tradeNotify: atNotifyWanted(type) ? { key: (type === 'onchain' ? 'bias:' : 'trade:') + id, kind: type === 'onchain' ? 'bias' : 'trade', phase: 'pending', at: Date.now() } : null,
+      tradeNotify: atNotifyWanted(type) ? { key: atNotifyPrefix(kind) + id, kind, phase: 'pending', at: Date.now() } : null,
     };
     posts.unshift(post); if (posts.length > 300) posts.length = 300;
     const w = await save();
@@ -288,7 +311,7 @@ async function alfaTrading(req, res, user) {
     const post = find(body.postId);
     if (!post) return res.status(404).json({ error: 'post yok' });
     if (body.markOnchain === true && post.type !== 'islem') post.type = 'onchain';
-    const kind = body.kind === 'bias' ? 'bias' : body.kind === 'trade' ? 'trade' : atNotifyKind(post);
+    const kind = AT_NOTIFY_KINDS.includes(body.kind) ? body.kind : atNotifyKind(post);
     const prev = post.tradeNotify || null;
     const delivered = prev && (prev.phase === 'sent' || prev.phase === 'sending' || prev.phase === 'unknown');
     if (delivered && body.force !== true) {
