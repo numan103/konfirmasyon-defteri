@@ -21,10 +21,15 @@
 ## Veri kaynagi ve anlam
 - Resmi Coinalyze API'si (`https://api.coinalyze.net/v1`) ve mevcut
   `COINALYZE_API_KEY` kullanilir. Anahtar yalnizca sunucu tarafinda okunur.
-- Spot marketler `spot-markets` icinden `base_asset === "BTC"` ve
-  `has_buy_sell_data` olanlardan secilir (en fazla 20).
+- Spot marketler Coinalyze BTC CVD sayfasinin varsayilan 19 marketidir
+  (`BTCUD.A ... BTCUSD.P`); CVD bu sabit listeyle hesaplanir.
 - Perpetual marketler `future-markets` icinden `base_asset === "BTC"`,
   `is_perpetual === true` olanlardan secilir.
+- OI, BTC OI sayfasinin varsayilan borsa setinden (Binance, Bitfinex, Bybit,
+  Deribit, Huobi, Hyperliquid, Kraken, OKX, WOO X, dYdX) alinir; perpetual
+  kontratlar once gelir ve en fazla 15 kontrat istenir.
+- Long/Short orani, sayfanin varsayilan bes marketinden alinir
+  (`BTCUSD_PERP.A`, `BTCUSDC_PERP.A`, `BTCUSDT_PERP.A`, `BTCUSD.6`, `BTCUSDT.6`).
 - CVD, 24 saatlik `ohlcv-history` barlarindan `bv - (v - bv)` ile hesaplanir.
   Islem hacmi USD karsiligi `delta * close` ile raporlanir.
 - OI, `open-interest-history` cevabindan `convert_to_usd=true` ile alinir ve
@@ -34,6 +39,8 @@
   market bazinda ortalamasidir; oran `long% / short%` olarak yazilir.
 - Veri eksikse (CVD, OI veya LSR bos/gecersiz) **mesaj gonderilmez**; istek
   `502 coinalyze_incomplete` doner. Eksik veri tahminle tamamlanmaz.
+- API anahtari dakikada 40 cagriya izin verir. Bir kosu 1 market-listesi +
+  19 spot + 15 OI + 5 LSR = **40 cagri** yapar; sinir asilmaz.
 
 ## Mesaj bicimi
 ```
