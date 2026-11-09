@@ -4,6 +4,7 @@
     "api/ai.mjs": { "maxDuration": 60 }
   },
   "crons": [
-    { "path": "/api/ai?cron=1", "schedule": "0 17 * * *" }
+    { "path": "/api/ai?cron=1", "schedule": "0 17 * * *" },
+    { "path": "/api/ai?coinalyze=1", "schedule": "0 8 * * *" }
   ]
 }
