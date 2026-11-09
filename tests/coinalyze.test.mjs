@@ -87,8 +87,8 @@ function makeState(now) {
     daily: null,
     spotMarkets: [{ symbol: 'BTCUSDT.A', base_asset: 'BTC', has_buy_sell_data: true }],
     futureMarkets: [
-      { symbol: 'BTCUSDT_PERP.A', base_asset: 'BTC', is_perpetual: true, oi_lq_vol_denominated_in: 'BASE_ASSET', has_long_short_ratio_data: true },
-      { symbol: 'BTCUSD_PERP.0', base_asset: 'BTC', is_perpetual: true, oi_lq_vol_denominated_in: 'USD', has_long_short_ratio_data: true },
+      { symbol: 'BTCUSDT_PERP.A', base_asset: 'BTC', is_perpetual: true, oi_lq_vol_denominated_in: 'BASE_ASSET', has_long_short_ratio_data: true, exchange: 'Binance', quote_asset: 'USDT' },
+      { symbol: 'BTCUSD_PERP.0', base_asset: 'BTC', is_perpetual: true, oi_lq_vol_denominated_in: 'USD', has_long_short_ratio_data: true, exchange: 'Binance', quote_asset: 'USD' },
     ],
     ohlcv: [{
       symbol: 'BTCUSDT.A',
