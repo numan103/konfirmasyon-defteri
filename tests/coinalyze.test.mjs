@@ -71,8 +71,14 @@ function fetchStub(state, now) {
     if (u.includes('/long-short-ratio-history')) {
       return { ok: true, status: 200, json: async () => state.lsr };
     }
-    if (u.includes('api.telegram.org') && u.includes('/sendMessage')) {
-      state.calls.push({ url: u, body: JSON.parse(init.body || '{}') });
+    if (u.includes('api.telegram.org') && (u.includes('/sendMessage') || u.includes('/sendPhoto'))) {
+      let body = {};
+      if (init.body && typeof init.body.get === 'function') {
+        for (const [k, v] of init.body.entries()) body[k] = v;
+      } else {
+        try { body = JSON.parse(init.body || '{}'); } catch { body = {}; }
+      }
+      state.calls.push({ url: u, body });
       return { ok: true, status: 200, json: async () => ({ ok: true, result: { message_id: 900 } }) };
     }
     return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
@@ -150,7 +156,7 @@ test('zamanlanmis gonderim gun icinde tek mesaj atar', async () => {
   assert.equal(first.body.messageId, 900);
   assert.equal(state.calls.length, 1);
   assert.equal(state.calls[0].body.chat_id, '@charts');
-  assert.equal(state.calls[0].body.message_thread_id, 434);
+  assert.equal(Number(state.calls[0].body.message_thread_id), 434);
 
   const second = makeRes();
   await withNow(NOW, () => mod.default(req, second));

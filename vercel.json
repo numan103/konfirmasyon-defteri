@@ -1,7 +1,7 @@
 {
   "alias": ["alfatraders.vercel.app"],
   "functions": {
-    "api/ai.mjs": { "maxDuration": 60 }
+    "api/ai.mjs": { "maxDuration": 60, "includeFiles": "assets/fonts/**" }
   },
   "crons": [
     { "path": "/api/ai?cron=1", "schedule": "0 17 * * *" },
