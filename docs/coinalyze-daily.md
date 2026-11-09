@@ -56,7 +56,8 @@ Coinalyze agregasyonu.
 ```
 - Sayilar Turkce bicimdedir: binlik `.`, ondalik `,`, negatif `−`.
 - Kaynak listesi, parantezli atif veya Entry/TP/SL/Kaldırac bilgisi yoktur.
-- Mesaj duz metindir; `parse_mode` ve link onizlemesi kullanilmaz.
+- Mesaj duz metindir; `parse_mode` kullanilmaz. Site onchain sayfasina link eklenir
+  ve Telegram link onizlemesi aciktir (site og.png gosterilir).
 
 ## Yinelenmeyi onleme
 - Gunluk durum `edu_shared` tablosunda `id = "coinalyze_daily"` satirinda tutulur:
