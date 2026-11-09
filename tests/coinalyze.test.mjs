@@ -211,8 +211,8 @@ test('sembol secimi dakikalik API limitinin altinda kalir', async () => {
   const count = part => state.requests
     .filter(u => u.includes(part))
     .reduce((sum, u) => sum + (new URL(u).searchParams.get('symbols') || '').split(',').filter(Boolean).length, 0);
-  assert.equal(count('/ohlcv-history'), 10);
-  assert.equal(count('/open-interest-history'), 17);
+  assert.equal(count('/ohlcv-history'), 7);
+  assert.equal(count('/open-interest-history'), 25);
   assert.equal(count('/long-short-ratio-history'), 5);
   assert.ok(2 + count('/ohlcv-history') + count('/open-interest-history') + count('/long-short-ratio-history') <= 40);
 });
