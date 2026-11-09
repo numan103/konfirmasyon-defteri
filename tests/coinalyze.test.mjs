@@ -75,6 +75,12 @@ function fetchStub(state, now) {
       let body = {};
       if (init.body && typeof init.body.get === 'function') {
         for (const [k, v] of init.body.entries()) body[k] = v;
+      } else if (init.body && Buffer.isBuffer(init.body)) {
+        const text = init.body.toString('utf8');
+        const m1 = text.match(/name="chat_id"\r?\n\r?\n([^\r\n]+)/);
+        const m2 = text.match(/name="message_thread_id"\r?\n\r?\n([^\r\n]+)/);
+        if (m1) body.chat_id = m1[1];
+        if (m2) body.message_thread_id = m2[1];
       } else {
         try { body = JSON.parse(init.body || '{}'); } catch { body = {}; }
       }
