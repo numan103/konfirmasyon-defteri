@@ -45,6 +45,7 @@ function fetchStub(state, now) {
   const at = atFor(now);
   return async (url, init = {}) => {
     const u = String(url);
+    if (u.includes('api.coinalyze.net')) state.requests.push(u);
     if (u.includes('/auth/v1/user')) {
       return { ok: true, status: 200, json: async () => ({ id: 'u1', email: 'admin@test.dev' }) };
     }
@@ -58,8 +59,7 @@ function fetchStub(state, now) {
     }
     if (u.includes('/spot-markets')) {
       return { ok: true, status: 200, json: async () => state.spotMarkets };
-    }
-    if (u.includes('/future-markets')) {
+    }    if (u.includes('/future-markets')) {
       return { ok: true, status: 200, json: async () => state.futureMarkets };
     }
     if (u.includes('/ohlcv-history')) {
@@ -83,6 +83,7 @@ function makeState(now) {
   const at = atFor(now);
   return {
     calls: [],
+    requests: [],
     daily: null,
     spotMarkets: [{ symbol: 'BTCUSDT.A', base_asset: 'BTC', has_buy_sell_data: true }],
     futureMarkets: [
@@ -190,4 +191,28 @@ test('veri eksikse mesaj gonderilmez', async () => {
   assert.equal(res.statusCode, 502);
   assert.equal(res.body.error, 'coinalyze_incomplete');
   assert.equal(state.calls.length, 0);
+});
+
+test('sembol secimi dakikalik API limitinin altinda kalir', async () => {
+  const state = makeState(NOW);
+  const exchanges = ['Binance', 'Bybit', 'OKX', 'Bitfinex', 'Coinbase', 'Kraken'];
+  state.spotMarkets = Array.from({ length: 30 }, (_, i) => ({
+    symbol: 'S' + i, base_asset: 'BTC', has_buy_sell_data: true,
+    exchange: exchanges[i % exchanges.length], quote_asset: ['USDT', 'USD', 'USDC'][i % 3],
+  }));
+  state.futureMarkets = Array.from({ length: 30 }, (_, i) => ({
+    symbol: 'BTC_PERP_' + i, base_asset: 'BTC', is_perpetual: true,
+    oi_lq_vol_denominated_in: 'BASE_ASSET', has_long_short_ratio_data: true,
+    exchange: exchanges[i % exchanges.length], quote_asset: ['USDT', 'USD', 'USDC'][i % 3],
+  }));
+  globalThis.fetch = fetchStub(state, NOW);
+  const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@charts', SITE_ADMIN_EMAILS: 'admin@test.dev', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
+  await mod.collectCoinalyzeData(NOW, 'k');
+  const count = part => state.requests
+    .filter(u => u.includes(part))
+    .reduce((sum, u) => sum + (new URL(u).searchParams.get('symbols') || '').split(',').filter(Boolean).length, 0);
+  assert.equal(count('/ohlcv-history'), 10);
+  assert.equal(count('/open-interest-history'), 17);
+  assert.equal(count('/long-short-ratio-history'), 5);
+  assert.ok(2 + count('/ohlcv-history') + count('/open-interest-history') + count('/long-short-ratio-history') <= 40);
 });
