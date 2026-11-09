@@ -205,6 +205,10 @@ test('sembol secimi dakikalik API limitinin altinda kalir', async () => {
     oi_lq_vol_denominated_in: 'BASE_ASSET', has_long_short_ratio_data: true,
     exchange: exchanges[i % exchanges.length], quote_asset: ['USDT', 'USD', 'USDC'][i % 3],
   }));
+  state.futureMarkets.push(
+    { symbol: 'BTCU_PERP.A', base_asset: 'BTC', is_perpetual: true, oi_lq_vol_denominated_in: 'BASE_ASSET', has_long_short_ratio_data: false, exchange: 'Binance', quote_asset: 'U' },
+    { symbol: 'BTCUSD1_PERP.A', base_asset: 'BTC', is_perpetual: true, oi_lq_vol_denominated_in: 'BASE_ASSET', has_long_short_ratio_data: false, exchange: 'Binance', quote_asset: 'USD1' },
+  );
   globalThis.fetch = fetchStub(state, NOW);
   const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@charts', SITE_ADMIN_EMAILS: 'admin@test.dev', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
   await mod.collectCoinalyzeData(NOW, 'k');
@@ -214,5 +218,6 @@ test('sembol secimi dakikalik API limitinin altinda kalir', async () => {
   assert.equal(count('/ohlcv-history'), 19);
   assert.equal(count('/open-interest-history'), 15);
   assert.equal(count('/long-short-ratio-history'), 5);
+  assert.ok(!state.requests.some(u => u.includes('BTCU_PERP') || u.includes('BTCUSD1_PERP')));
   assert.ok(1 + count('/ohlcv-history') + count('/open-interest-history') + count('/long-short-ratio-history') <= 40);
 });

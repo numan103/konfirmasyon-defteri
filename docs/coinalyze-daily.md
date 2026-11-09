@@ -26,8 +26,9 @@
 - Perpetual marketler `future-markets` icinden `base_asset === "BTC"`,
   `is_perpetual === true` olanlardan secilir.
 - OI, BTC OI sayfasinin varsayilan borsa setinden (Binance, Bitfinex, Bybit,
-  Deribit, Huobi, Hyperliquid, Kraken, OKX, WOO X, dYdX) alinir; perpetual
-  kontratlar once gelir ve en fazla 15 kontrat istenir.
+  Deribit, Huobi, Hyperliquid, Kraken, OKX, WOO X, dYdX) alinir; yalnizca
+  USD/USDT/USDC kotali perpetual kontratlar secilir, perpetuallar once gelir ve
+  en fazla 15 kontrat istenir.
 - Long/Short orani, sayfanin varsayilan bes marketinden alinir
   (`BTCUSD_PERP.A`, `BTCUSDC_PERP.A`, `BTCUSDT_PERP.A`, `BTCUSD.6`, `BTCUSDT.6`).
 - CVD, 24 saatlik `ohlcv-history` barlarindan `bv - (v - bv)` ile hesaplanir.
