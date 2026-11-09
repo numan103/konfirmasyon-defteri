@@ -98,3 +98,14 @@ curl -H "Authorization: Bearer <site.token>" \
 curl -H "Authorization: Bearer <site.token>" \
   "https://alfa-trader.com/api/ai?coinalyze=1&force=1"
 ```
+
+## Dogrulama kaydi
+- **2026-11-09 production dry run:** CVD `−777 BTC · −57,4 mn$`, Long/Short
+  `1,65 · Long %62,3 / Short %37,7`, OI `26,02 mlr$ · 24s −1,9%`; hedef
+  `chat -1003939737954`, thread `4`.
+- Ayni gun yonetici gonderimi `messageId 822` ile charts konusuna gitti.
+  Ikinci cagri veri cekmeden `{ skipped: "already_sent" }` dondu.
+- Test mesaji `delTg` ile silindi (`deleted: 822`) ve `coinalyze_daily` satiri
+  temizlendi.
+- **429 notu:** Ayni dakika icinde iki tam kosu (40'ar cagri) limiti asar.
+  Ardisik manuel denemeler arasinda en az 60 saniye beklenmelidir.
