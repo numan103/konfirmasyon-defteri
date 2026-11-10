@@ -74,8 +74,6 @@ export default async function telegramWebhook(req, res) {
       }
     } else {
       console.log('telegram-qa no result:', JSON.stringify(result));
-    } else {
-      console.error('telegram-qa no result:', JSON.stringify(result));
     }
   } catch (e) {
     console.error('telegram-qa handler error:', e?.stack || e?.message || e);
