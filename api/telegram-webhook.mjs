@@ -67,10 +67,12 @@ export default async function telegramWebhook(req, res) {
     const result = await handleTelegramUpdate(update);
     if (result && result.chatId && result.reply) {
       try {
-        await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false });
+        await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
       } catch (sendErr) {
         console.error('telegram-qa send error:', sendErr?.message || sendErr);
       }
+    } else {
+      console.error('telegram-qa no result:', JSON.stringify(result));
     }
   } catch (e) {
     console.error('telegram-qa handler error:', e?.stack || e?.message || e);
