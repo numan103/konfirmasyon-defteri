@@ -69,6 +69,6 @@ export default async function telegramWebhook(req, res) {
       await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false });
     }
   } catch (e) {
-    console.error('telegram-qa error:', e?.message || e);
+    console.error('telegram-qa error:', e?.stack || e?.message || e);
   }
 }
