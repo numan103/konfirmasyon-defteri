@@ -71,15 +71,27 @@ export default async function telegramWebhook(req, res) {
   const text = msg?.text?.trim() || '';
 
   // Basit komutlar: senkron isle ve cevap gonder, sonra 200 don
-  if (text === '/start' || text === '/help' || text === '/data') {
+  if (text === '/start' || text === '/help') {
     try {
       const result = await handleTelegramUpdate(update);
       if (result && result.chatId && result.reply) {
-        const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
-        console.log('telegram-qa sync send result:', JSON.stringify(sendResult).slice(0, 200));
+        await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 15000 });
       }
     } catch (e) {
       console.error('telegram-qa sync error:', e?.stack || e?.message || e);
+    }
+    return res.status(200).json({ ok: true });
+  }
+
+  // /data komutu: senkron isle (10-15s, Telegram 5s timeout'u asabilir ama deneyelim)
+  if (text === '/data') {
+    try {
+      const result = await handleTelegramUpdate(update);
+      if (result && result.chatId && result.reply) {
+        await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 15000 });
+      }
+    } catch (e) {
+      console.error('telegram-qa data error:', e?.stack || e?.message || e);
     }
     return res.status(200).json({ ok: true });
   }
@@ -90,8 +102,8 @@ export default async function telegramWebhook(req, res) {
   try {
     const result = await handleTelegramUpdate(update);
     if (result && result.chatId && result.reply) {
-      const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
-      console.log('telegram-qa send result:', JSON.stringify(sendResult).slice(0, 200));
+      await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
+      console.log('telegram-qa send result: ok');
     } else {
       console.log('telegram-qa no result:', JSON.stringify(result));
     }
