@@ -1,7 +1,8 @@
 {
   "alias": ["alfatraders.vercel.app"],
   "functions": {
-    "api/ai.mjs": { "maxDuration": 60, "includeFiles": "assets/fonts/**" }
+    "api/ai.mjs": { "maxDuration": 60, "includeFiles": "assets/fonts/**" },
+    "api/telegram-webhook.mjs": { "maxDuration": 60 }
   },
   "crons": [
     { "path": "/api/ai?cron=1", "schedule": "0 17 * * *" },
