@@ -29,6 +29,12 @@ export default async function telegramWebhook(req, res) {
       const d = await r.json();
       return res.status(200).json(d);
     }
+    if (action === 'testsend') {
+      const chatId = req.query?.chatId || req.body?.chatId;
+      if (!chatId) return res.status(400).json({ error: 'chatId required' });
+      const r = await sendTelegram('Test mesajı from bot', String(chatId), null, null, { preview: false, timeout: 20000 });
+      return res.status(200).json(r);
+    }
     if (action === 'delete') {
       const r = await fetch('https://api.telegram.org/bot' + token + '/deleteWebhook', { method: 'POST' });
       const d = await r.json();
