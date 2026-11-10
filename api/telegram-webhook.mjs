@@ -102,6 +102,15 @@ export default async function telegramWebhook(req, res) {
 
   waitUntil((async () => {
     try {
+      // Typing gostergesi
+      const token = (process.env.TG_BOT_TOKEN || '').trim();
+      const chatId = msg?.chat?.id;
+      if (token && chatId) {
+        await fetch('https://api.telegram.org/bot' + token + '/sendChatAction', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, action: 'typing' }),
+        }).catch(() => {});
+      }
       const result = await handleTelegramUpdate(update);
       if (result && result.chatId && result.reply) {
         const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 25000 });
