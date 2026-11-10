@@ -67,17 +67,31 @@ export default async function telegramWebhook(req, res) {
   const update = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   if (!update) return res.status(400).json({ error: 'invalid_update' });
 
+  const msg = update?.message || update?.edited_message;
+  const text = msg?.text?.trim() || '';
+
+  // Basit komutlar: senkron isle ve cevap gonder, sonra 200 don
+  if (text === '/start' || text === '/help' || text === '/data') {
+    try {
+      const result = await handleTelegramUpdate(update);
+      if (result && result.chatId && result.reply) {
+        const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
+        console.log('telegram-qa sync send result:', JSON.stringify(sendResult).slice(0, 200));
+      }
+    } catch (e) {
+      console.error('telegram-qa sync error:', e?.stack || e?.message || e);
+    }
+    return res.status(200).json({ ok: true });
+  }
+
+  // Diger mesajlar: async isle
   res.status(200).json({ ok: true });
 
   try {
     const result = await handleTelegramUpdate(update);
     if (result && result.chatId && result.reply) {
-      try {
-        const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
-        console.log('telegram-qa send result:', JSON.stringify(sendResult).slice(0, 200));
-      } catch (sendErr) {
-        console.error('telegram-qa send error:', sendErr?.message || sendErr);
-      }
+      const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
+      console.log('telegram-qa send result:', JSON.stringify(sendResult).slice(0, 200));
     } else {
       console.log('telegram-qa no result:', JSON.stringify(result));
     }
