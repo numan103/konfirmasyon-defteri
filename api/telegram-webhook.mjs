@@ -4,6 +4,7 @@
 import { handleTelegramUpdate } from '../lib/telegram-qa.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 import { requestUser } from '../lib/auth.mjs';
+import { waitUntil } from '@vercel/functions';
 
 const WEBHOOK_URL = 'https://alfa-trader.com/api/telegram-webhook';
 
@@ -96,18 +97,20 @@ export default async function telegramWebhook(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  // Diger mesajlar: async isle
+  // Diger mesajlar: async isle (waitUntil ile fonksiyon hayatta kalir)
   res.status(200).json({ ok: true });
 
-  try {
-    const result = await handleTelegramUpdate(update);
-    if (result && result.chatId && result.reply) {
-      await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
-      console.log('telegram-qa send result: ok');
-    } else {
-      console.log('telegram-qa no result:', JSON.stringify(result));
+  waitUntil((async () => {
+    try {
+      const result = await handleTelegramUpdate(update);
+      if (result && result.chatId && result.reply) {
+        const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 25000 });
+        console.log('telegram-qa send result:', JSON.stringify(sendResult).slice(0, 200));
+      } else {
+        console.log('telegram-qa no result:', JSON.stringify(result));
+      }
+    } catch (e) {
+      console.error('telegram-qa handler error:', e?.stack || e?.message || e);
     }
-  } catch (e) {
-    console.error('telegram-qa handler error:', e?.stack || e?.message || e);
-  }
+  })());
 }
