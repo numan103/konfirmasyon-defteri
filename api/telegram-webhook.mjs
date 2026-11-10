@@ -24,6 +24,11 @@ export default async function telegramWebhook(req, res) {
       const d = await r.json();
       return res.status(200).json(d);
     }
+    if (action === 'botinfo') {
+      const r = await fetch('https://api.telegram.org/bot' + token + '/getMe');
+      const d = await r.json();
+      return res.status(200).json(d);
+    }
     if (action === 'delete') {
       const r = await fetch('https://api.telegram.org/bot' + token + '/deleteWebhook', { method: 'POST' });
       const d = await r.json();
