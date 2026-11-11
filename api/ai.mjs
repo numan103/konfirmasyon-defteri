@@ -39,7 +39,17 @@ const GROQ_MODEL = 'llama-3.1-8b-instant';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export default async function handler(req, res) {
-  if (req.query?.orderbook === '1') return orderbookHandler(req, res);
+  if (req.query?.debug === '1') {
+  const pub = process.env.SUPABASE_PUBLISHABLE || 'NOT_SET';
+  const url = process.env.SUPABASE_URL || 'NOT_SET';
+  return res.status(200).json({ 
+    supabaseUrl: url, 
+    publishablePrefix: pub.slice(0, 10) + '...', 
+    publishableLength: pub.length,
+    adminEmails: process.env.SITE_ADMIN_EMAILS || 'NOT_SET',
+    hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE,
+  });
+}
 if (req.query?.strategies === '1') return strategiesHandler(req, res);
 if (req.query?.['telegram-webhook'] === '1') return telegramWebhookHandler(req, res);
   if (req.query?.macro === '1' || (req.method === 'POST' && typeof req.body?.action === 'string' && req.body.action.startsWith('macro-'))) return macroHandler(req, res);
