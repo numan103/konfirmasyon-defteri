@@ -41,6 +41,16 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 export default async function handler(req, res) {
   if (req.query?.ping === '1') return res.status(200).json({ ok: true, time: new Date().toISOString() });
   if (req.query?.authdebug === '1') {
+    const { requestUser, bearer } = await import('../lib/auth.mjs');
+    const jwt = bearer(req);
+    const user = await requestUser(req);
+    return res.status(200).json({ 
+      hasJwt: !!jwt,
+      jwtPrefix: jwt?.slice(0, 20),
+      user: user ? { email: user.email, admin: user.admin } : null,
+    });
+  }
+  if (req.query?.authdebug === '1') {
     const jwt = (req.headers.authorization || '').replace('Bearer ', '');
     try {
       const r = await fetch('https://zvnjslmptwmnuhftgqsr.supabase.co/auth/v1/user', {
