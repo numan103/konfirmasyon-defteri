@@ -74,8 +74,10 @@ export default async function telegramWebhook(req, res) {
   if (text === '/start' || text === '/help') {
     try {
       const result = await handleTelegramUpdate(update);
+      console.log('telegram-qa sync result:', JSON.stringify(result)?.slice(0, 200));
       if (result && result.chatId && result.reply) {
-        await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 15000 });
+        const sendResult = await sendTelegram(result.reply, String(result.chatId), result.threadId || null, null, { preview: false, timeout: 20000 });
+        console.log('telegram-qa sync send result:', JSON.stringify(sendResult).slice(0, 200));
       }
     } catch (e) {
       console.error('telegram-qa sync error:', e?.stack || e?.message || e);
