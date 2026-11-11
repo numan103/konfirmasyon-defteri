@@ -40,6 +40,18 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export default async function handler(req, res) {
   if (req.query?.ping === '1') return res.status(200).json({ ok: true, time: new Date().toISOString() });
+  if (req.query?.authdebug === '1') {
+    const jwt = (req.headers.authorization || '').replace('Bearer ', '');
+    try {
+      const r = await fetch('https://zvnjslmptwmnuhftgqsr.supabase.co/auth/v1/user', {
+        headers: { apikey: 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X', Authorization: 'Bearer ' + jwt }
+      });
+      const body = await r.text();
+      return res.status(200).json({ supabaseStatus: r.status, body: body.slice(0, 300) });
+    } catch (e) {
+      return res.status(200).json({ error: e.message });
+    }
+  }
   if (req.query?.strategies === '1') return strategiesHandler(req, res);
 if (req.query?.['telegram-webhook'] === '1') return telegramWebhookHandler(req, res);
   if (req.query?.macro === '1' || (req.method === 'POST' && typeof req.body?.action === 'string' && req.body.action.startsWith('macro-'))) return macroHandler(req, res);
