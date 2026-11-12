@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { parseNumber, parsePlan, validatePlan, describePlanErrors, stripPlanLines } from '../lib/trade-plan.mjs';
-import { planTopic } from '../lib/telegram-qa.mjs';
+import { planTopic, structureFromCandles } from '../lib/telegram-qa.mjs';
 
 const BAD_REPORTED = `**Plan**
 
@@ -107,6 +107,19 @@ test('stripPlanLines removes only level lines', () => {
   assert.match(kept, /Verdict/);
 });
 
+test('1h structure is derived from candles and needs enough history', () => {
+  const candles = Array.from({ length: 100 }, (_, i) => ({ h: 100 + i, l: 90 + i, c: 95 + i }));
+  const st = structureFromCandles(candles);
+  assert.equal(st.atr14, 10);
+  assert.equal(st.high24, 199);
+  assert.equal(st.low24, 166);
+  assert.equal(st.swingHigh, 199);
+  assert.equal(st.swingLow, 140);
+  assert.equal(st.trend, 'yukarı');
+  assert.equal(structureFromCandles(candles.slice(0, 59)), null);
+  assert.equal(structureFromCandles(null), null);
+});
+
 test('question topic picks the instrument the user actually asked about', () => {
   assert.equal(planTopic('BTC yönü ne?'), 'btc');
   assert.equal(planTopic('altın ons analizi'), 'gold');
@@ -119,9 +132,14 @@ test('QA bot feeds live price/structure and validates plans before answering', (
   const src = fs.readFileSync(new URL('../lib/telegram-qa.mjs', import.meta.url), 'utf8');
   assert.match(src, /getSpotPrices\(\)/);
   assert.match(src, /getStructure\('BTC'\)/);
+  assert.match(src, /getStructure\('XAUT'\)/);
+  assert.match(src, /okx\.com\/api\/v5\/market\/candles/);
+  assert.match(src, /api\.bybit\.com\/v5\/market\/kline/);
+  assert.match(src, /api\.exchange\.coinbase\.com\/products/);
+  assert.match(src, /ATR satırı yoksa 24s yüksek\/düşük aralığını kullan/);
   assert.match(src, /LONG\/BULLISH: Stop < Giriş < Hedef/);
   assert.match(src, /SHORT\/BEARISH: Hedef < Giriş < Stop/);
   assert.match(src, /validatePlan\(parsePlan\(answer\), ref\)/);
   assert.match(src, /planFallback\(/);
-  assert.match(src, /formatMarketContext\(marketData, spot, \{ BTC: btcStructure, ETH: ethStructure \}\)/);
+  assert.match(src, /formatMarketContext\(marketData, spot, \{ BTC: btcStructure, ETH: ethStructure, XAU: goldStructure \}\)/);
 });
