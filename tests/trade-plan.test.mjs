@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { parseNumber, parsePlan, validatePlan, describePlanErrors, stripPlanLines } from '../lib/trade-plan.mjs';
+import { planTopic } from '../lib/telegram-qa.mjs';
 
 const BAD_REPORTED = `**Plan**
 
@@ -104,6 +105,14 @@ test('stripPlanLines removes only level lines', () => {
   assert.match(kept, /Yön/);
   assert.match(kept, /Gerekçe/);
   assert.match(kept, /Verdict/);
+});
+
+test('question topic picks the instrument the user actually asked about', () => {
+  assert.equal(planTopic('BTC yönü ne?'), 'btc');
+  assert.equal(planTopic('altın ons analizi'), 'gold');
+  assert.equal(planTopic('ETH için plan ver'), 'eth');
+  assert.equal(planTopic('BTC ve altın birlikte nasıl?'), 'btc');
+  assert.equal(planTopic('piyasa nasıl?'), 'btc');
 });
 
 test('QA bot feeds live price/structure and validates plans before answering', () => {
