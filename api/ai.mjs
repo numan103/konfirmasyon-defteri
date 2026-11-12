@@ -54,6 +54,7 @@ export default async function handler(req, res) {
   if (req.query?.strategies === '1') return strategiesHandler(req, res);
 if (req.query?.['telegram-webhook'] === '1') return telegramWebhookHandler(req, res);
   if (req.query?.coinalyze === '1') return coinalyzeHandler(req, res);
+  if (req.query?.orderbook === '1') return orderbookHandler(req, res);
   if (req.query?.macro === '1' || (req.method === 'POST' && typeof req.body?.action === 'string' && req.body.action.startsWith('macro-'))) return macroHandler(req, res);
   if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type'); return res.status(200).end(); }
   if (req.method === 'GET') return cronHandler(req, res);
