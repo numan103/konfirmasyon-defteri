@@ -93,12 +93,35 @@ test('gold and silver positions resolve to the right quote unit', () => {
   assert.equal(metal('{ type: "kripto", symbol: "BTC" }'), 'null');
   assert.equal(metal('{ type: "altin", symbol: "CEYREK" }'), 'null');
 });
-test('live gold quote reaches the position price without saving or filling', () => {
-  const prices = html.slice(html.indexOf('async function ap2LoadPrices()'), html.indexOf('function ap2ShareMonthlyStrip()'));
-  assert.ok(prices.includes("ap2MetalUsd('XAU')") || prices.includes("ap2MetalUsd(wanted[k])"));
-  assert.ok(prices.includes('ap2MetalOf(p)'));
-  assert.ok(!prices.includes('ap2Save()'));
-  assert.ok(!prices.includes('ap2FillsCheck()'));
+test('live gold quote reaches the position price without saving or filling', async () => {
+  const ctx = vm.createContext({
+    ap2Data: { positions: [
+      { id: 'g', symbol: 'XAUUSD', type: 'altin', qty: 0.03896104, cost: 3850, price: null, lim: true, filled: '2026-11-12' },
+      { id: 'tg', symbol: 'GRAMALTIN', type: 'altin', qty: 1, cost: 6000, price: null, lim: true, filled: '2026-11-12' },
+      { id: 'b', symbol: 'BTC', type: 'kripto', qty: 0.01, cost: 50000, price: null }
+    ] },
+    ap2CloudReady: true,
+    ap2IsMember: () => true,
+    ap2Pricing: false,
+    AP2_CG_IDS: {},
+    pfNum: v => { const n = parseFloat(v); return isNaN(n) ? null : n; },
+    pfNorm: s => String(s || '').trim().toUpperCase().replace(/[_\-\s]/g, ''),
+    renderAlfaPortfoy2: () => {},
+    fetch: async url => {
+      const u = String(url);
+      if (u.includes('gold-api.com/price/XAU')) return { json: async () => ({ price: 4000 }) };
+      if (u.includes('frankfurter.dev')) return { json: async () => ({ rates: { TRY: 50 } }) };
+      if (u.includes('binance.com/api/v3/ticker/24hr')) return { json: async () => ([{ symbol: 'BTCUSDT', lastPrice: '100000', priceChangePercent: '1' }]) };
+      if (u.includes('okx.com') || u.includes('coingecko.com')) return { json: async () => ({}) };
+      throw new Error('unexpected fetch ' + u);
+    }
+  });
+  vm.runInContext(html.slice(html.indexOf('const AP2_OZ_GRAM'), html.indexOf('function ap2ShareMonthlyStrip()')), ctx);
+  await vm.runInContext('ap2LoadPrices()', ctx);
+  assert.equal(ctx.ap2Data.positions[0].price, 4000);
+  assert.equal(ctx.ap2Data.positions[1].price, Math.round(4000 * 50 / 31.1034768 * 100) / 100);
+  assert.equal(ctx.ap2Data.positions[2].price, 100000);
+  assert.ok(!html.slice(html.indexOf('async function ap2LoadPrices()'), html.indexOf('function ap2ShareMonthlyStrip()')).includes('ap2Save()'));
 });
 
 test('rendering and quote refresh never save or fill positions', () => {
