@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import portfolio from '../lib/portfolio.mjs';
+import { reconcileCash } from '../lib/portfolio.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 function hydration(local, remote) {
@@ -141,6 +142,44 @@ test('premium can read but cannot write; free users cannot read positions', asyn
     verified = false;
     const free = response(); await portfolio({ ...req, method: 'GET' }, free);
     assert.equal(free.code, 403);
+  } finally {
+    global.fetch = original;
+    if (oldKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE; else process.env.SUPABASE_SERVICE_ROLE = oldKey;
+  }
+});
+
+test('cash is derived from filled positions and realized profit', () => {
+  const data = {
+    startBalance: 1000, cash: 9999,
+    positions: [
+      { qty: 0.275, cost: 2180, lim: true, filled: '2026-10-30' },
+      { qty: 1, cost: 100 },
+      { lim: true, filled: null, qty: 1, cost: 50 },
+    ],
+    sells: [{ pnl: 268.58 }, { profit: -7.52 }, { pnl: '', profit: 1.5 }],
+  };
+  assert.equal(reconcileCash(data), Math.round((1000 - (0.275 * 2180 + 100) + 268.58 - 7.52 + 1.5) * 100) / 100);
+});
+
+test('stored cash drift is corrected on write', async () => {
+  const original = global.fetch;
+  const oldKey = process.env.SUPABASE_SERVICE_ROLE;
+  process.env.SUPABASE_SERVICE_ROLE = 'test-key';
+  let stored = null;
+  global.fetch = async (url, options) => {
+    if (url.endsWith('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin', email: process.env.ADMIN_EMAIL || 'ahmetnuman20@gmail.com' }) };
+    if (url.includes('/site_access?')) return { ok: true, json: async () => [{ status: 'verified' }] };
+    if (url.includes('updated_at=eq.')) return { ok: true, json: async () => [{ updated_at: 'new-revision' }] };
+    if (url.includes('/rest/v1/edu_shared')) return { ok: true, json: async () => [{ data: null, updated_at: 'rev' }] };
+    return { ok: true, json: async () => ({}) };
+  };
+  try {
+    const data = { v: 2, startBalance: 1000, positions: [{ qty: 1, cost: 400 }], sells: [], cash: 1000, lastUpdate: '2026-11-12T00:00:00.000Z' };
+    const write = response();
+    await portfolio({ method: 'POST', headers: { authorization: 'Bearer session' }, body: JSON.stringify({ revision: 'rev', data }), query: {} }, write);
+    assert.equal(write.code, 200);
+    assert.equal(write.body.cash, 600);
+    assert.equal(write.body.cashAdjusted, true);
   } finally {
     global.fetch = original;
     if (oldKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE; else process.env.SUPABASE_SERVICE_ROLE = oldKey;
