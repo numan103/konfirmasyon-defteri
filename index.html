@@ -7656,6 +7656,7 @@
             <button type="button" data-sym="LTC">Ł LTC</button>
             <button type="button" data-sym="ADA">ADA</button>
             <button type="button" data-sym="AVAX">AVAX</button>
+            <button type="button" data-sym="XAUUSD">🥇 XAUUSD</button>
           </div>
           <label>Tür</label>
           <div id="ap2-f-type" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
@@ -18577,6 +18578,25 @@ function ap2FormFetchPrice(sym) {
   if (!sym || !box) return;
   var clean = String(sym).toUpperCase().replace(/USDT$/, '').trim();
   if (!clean) return;
+  var metal = ap2MetalOf({ type: 'altin', symbol: clean });
+  if (metal) {
+    var metalPh = box.placeholder;
+    box.placeholder = 'Fiyat aranıyor…';
+    ap2MetalUsd(metal.metal === 'altin' ? 'XAU' : 'XAG').then(function(oz) {
+      var apply = function(px) {
+        if (px > 0) {
+          px = Math.round(px * 100) / 100;
+          if (!parseFloat(box.value)) box.value = px;
+          var costInp = document.getElementById('ap2-f-cost');
+          if (costInp && !parseFloat(costInp.value)) costInp.value = px;
+          ap2FormCalc();
+        } else { box.placeholder = metalPh; }
+      };
+      if (metal.gram && oz > 0) ap2UsdTryRate().then(function(fx) { apply(fx > 0 ? oz * fx / AP2_OZ_GRAM : null); });
+      else apply(oz);
+    }).catch(function() { box.placeholder = metalPh; });
+    return;
+  }
   var prevPh = box.placeholder;
   box.placeholder = 'Fiyat aranıyor…';
   fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=' + encodeURIComponent(clean + 'USDT'))
@@ -18605,7 +18625,13 @@ function ap2FormBind() {
     if (!b) return;
     chips.querySelectorAll('button').forEach(function(x) { x.classList.toggle('on', x === b); });
     var inp = document.getElementById('ap2-f-sym');
-    if (inp) { inp.value = b.getAttribute('data-sym'); ap2FormFetchPrice(inp.value); ap2FormCalc(); }
+    if (inp) {
+      inp.value = b.getAttribute('data-sym');
+      var _metal = ap2MetalOf({ type: 'altin', symbol: inp.value });
+      if (_metal) document.querySelectorAll('#ap2-f-type .ap2-type-chip').forEach(function(c) { c.classList.toggle('on', c.getAttribute('data-ap2t') === _metal.metal); });
+      ap2FormFetchPrice(inp.value);
+      ap2FormCalc();
+    }
   });
   ['ap2-f-amount', 'ap2-f-qty', 'ap2-f-cost', 'ap2-f-price'].forEach(function(id) {
     var el = document.getElementById(id);
@@ -19439,7 +19465,7 @@ function renderAlfaPortfoy2() {
         '<div><div class="ap2-card-pnl-val ' + pnlCls + '">' + (c.pnl !== null ? pnlSign + ap2Fmt(c.pnl) : '\u2014') + '</div></div>' +
         '<div class="ap2-card-pnl-pct ' + pnlCls + '">' + (c.pnlPct !== null ? pfPct(c.pnlPct) : '\u2014') + '</div>' +
       '</div>' +
-      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + (p.hist && p.hist.p ? ' <span class="ap2-hist-badge ' + (p.hist.ok ? 'ok' : 'warn') + '" title="Giriş tarihindeki piyasa fiyatı: ' + ap2Fmt(p.hist.p) + (p.hist.ok ? '' : ' — maliyetten sapma teyitli') + '">' + (p.hist.ok ? '\u2714' : '\u26a0') + ' ' + ap2Fmt(p.hist.p) + '</span>' : '') + (c.value === null && p.type === 'kripto' ? ' <span style="color:var(--text-3)">\u00b7 fiyat yüklenemedi — ✎ Düzenle ile güncel fiyatı gir</span>' : '') + '</div>' +
+      '<div class="ap2-card-meta">' + p.qty + ' adet \u00b7 ' + (p.date || '') + (p.note ? ' \u00b7 ' + p.note : '') + (p.hist && p.hist.p ? ' <span class="ap2-hist-badge ' + (p.hist.ok ? 'ok' : 'warn') + '" title="Giriş tarihindeki piyasa fiyatı: ' + ap2Fmt(p.hist.p) + (p.hist.ok ? '' : ' — maliyetten sapma teyitli') + '">' + (p.hist.ok ? '\u2714' : '\u26a0') + ' ' + ap2Fmt(p.hist.p) + '</span>' : '') + (c.value === null ? ' <span style="color:var(--text-3)">\u00b7 fiyat yüklenemedi — ✎ Düzenle ile güncel fiyatı gir</span>' : '') + '</div>' +
     '</div>';
   }).join('');
   if (q && positions.length && !shown.length) gridEl.innerHTML += '<div class="ap2-grid-empty">Aramayla eşleşen pozisyon yok — farklı bir sembol ya da kelime dene.</div>';
@@ -19548,15 +19574,71 @@ function renderAlfaPortfoy2() {
   ap2RenderMonthly();
 }
 let ap2Pricing = false;
+// Altın/gümüş: ons sembolleri USD/ons, gram sembolleri TL/gram olarak fiyatlanır.
+const AP2_OZ_GRAM = 31.1034768;
+function ap2MetalOf(p) {
+  if (!p) return null;
+  const type = String(p.type || '').toLowerCase();
+  const sym = String(p.symbol || '').toUpperCase().replace(/[^A-Z]/g, '');
+  const goldSym = /XAU|GOLD|ONS|ALTIN/.test(sym);
+  const silverSym = /XAG|SILVER|GUMUS/.test(sym);
+  const gram = /GRAM/.test(sym) && !/USD|ONS/.test(sym);
+  const gold = /XAU|GOLD/.test(sym) || (type === 'altin' && (!sym || goldSym || gram));
+  const silver = /XAG|SILVER/.test(sym) || (type === 'gumus' && (!sym || silverSym || gram));
+  if (!gold && !silver) return null;
+  return { metal: gold ? 'altin' : 'gumus', gram: gram };
+}
+let ap2MetalCache = {};
+let ap2FxCache = { at: 0, rate: null };
+function ap2MetalUsd(code) {
+  const hit = ap2MetalCache[code];
+  if (hit && Date.now() - hit.at < 60000 && hit.usd > 0) return Promise.resolve(hit.usd);
+  return (async function() {
+    try {
+      const r = await fetch('https://api.gold-api.com/price/' + code);
+      const j = await r.json();
+      const v = pfNum(j && j.price);
+      if (v > 0) { ap2MetalCache[code] = { usd: v, at: Date.now() }; return v; }
+    } catch (e) { /* gold-api yok */ }
+    if (code === 'XAU') {
+      try {
+        const r = await fetch('https://www.okx.com/api/v5/market/ticker?instId=XAUT-USDT');
+        const j = await r.json();
+        const v = pfNum(j && j.data && j.data[0] && j.data[0].last);
+        if (v > 0) { ap2MetalCache[code] = { usd: v, at: Date.now() }; return v; }
+      } catch (e) { /* OKX altın yok */ }
+    }
+    return null;
+  })();
+}
+async function ap2UsdTryRate() {
+  if (ap2FxCache.rate > 0 && Date.now() - ap2FxCache.at < 600000) return ap2FxCache.rate;
+  try {
+    const r = await fetch('https://api.frankfurter.dev/v1/latest?from=USD&to=TRY');
+    const j = await r.json();
+    const v = pfNum(j && j.rates && j.rates.TRY);
+    if (v > 0) { ap2FxCache = { rate: v, at: Date.now() }; return v; }
+  } catch (e) { /* FX yok */ }
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    const j = await r.json();
+    const v = pfNum(j && j.rates && j.rates.TRY);
+    if (v > 0) { ap2FxCache = { rate: v, at: Date.now() }; return v; }
+  } catch (e) { /* FX yok */ }
+  return null;
+}
 async function ap2LoadPrices() {
   if (!ap2CloudReady || !ap2IsMember()) return;
   const portfolioAtStart = ap2Data;
-  const positions = (ap2Data.positions || []).filter(p => p.type === 'kripto' && p.symbol);
-  if (!positions.length) return;
+  const all = (ap2Data.positions || []).filter(p => p.symbol);
+  const positions = all.filter(p => p.type === 'kripto');
+  const metalPositions = all.filter(p => ap2MetalOf(p));
+  if (!positions.length && !metalPositions.length) return;
   if (ap2Pricing) return;
   ap2Pricing = true;
   const syms = [...new Set(positions.map(p => pfNorm(p.symbol)).filter(Boolean))];
   const cryptos = {};
+  if (syms.length) {
   try {
     const q = encodeURIComponent('[' + syms.map(s => '"' + s + 'USDT"').join(',') + ']');
     const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=' + q);
@@ -19605,9 +19687,29 @@ async function ap2LoadPrices() {
       } catch (e) { /* CoinGecko tek coin arama hatası */ }
     }
   } catch (e) { /* CoinGecko yok */ }
+  }
+  const metals = {};
+  let usdTry = null;
+  if (metalPositions.length) {
+    const wanted = {};
+    metalPositions.forEach(p => { const m = ap2MetalOf(p); if (m) wanted[m.metal] = m.metal === 'altin' ? 'XAU' : 'XAG'; });
+    await Promise.all(Object.keys(wanted).map(async function(k) { metals[k] = await ap2MetalUsd(wanted[k]); }));
+    if (metalPositions.some(p => (ap2MetalOf(p) || {}).gram)) usdTry = await ap2UsdTryRate();
+  }
   let updated = 0;
   if (ap2Data !== portfolioAtStart || !ap2CloudReady) { ap2Pricing = false; return; }
   (ap2Data.positions || []).forEach(p => {
+    const mk = ap2MetalOf(p);
+    if (mk) {
+      const oz = Number(metals[mk.metal]);
+      let price = null;
+      if (oz > 0) price = mk.gram ? (usdTry > 0 ? oz * usdTry / AP2_OZ_GRAM : null) : oz;
+      if (price > 0) {
+        p.price = Math.round(price * 100) / 100;
+        updated++;
+      }
+      return;
+    }
     if (p.type !== 'kripto') return;
     const sym = pfNorm(p.symbol);
     if (sym && cryptos[sym] && cryptos[sym].usd !== null && cryptos[sym].usd > 0) {

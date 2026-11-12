@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { summarizePortfolio } from '../lib/portfolio-summary.mjs';
+import { summarizePortfolio, portfolioSummary } from '../lib/portfolio-summary.mjs';
 import portfolio from '../lib/portfolio.mjs';
 
 test('summary uses active positions and current quotes, excluding pending orders', () => {
@@ -22,6 +22,24 @@ test('quote failure is explicitly a saved valuation, not a live quote', () => {
   assert.equal(d.pnl, -50);
   assert.equal(d.live, false);
   assert.equal(d.asOf, '2026-10-31');
+});
+test('gold positions are valued with a live ounce quote in the shared summary', async () => {
+  const original = global.fetch;
+  global.fetch = async url => {
+    if (String(url).includes('api.gold-api.com/price/XAU')) return { ok: true, json: async () => ({ price: 4000 }) };
+    throw new Error('unexpected fetch ' + url);
+  };
+  try {
+    const data = {
+      v: 2, startBalance: 1000, cash: 168.58,
+      positions: [{ symbol: 'XAUUSD', type: 'altin', qty: 0.07674442, cost: 3900, lim: true, filled: '2026-11-12' }]
+    };
+    const s = await portfolioSummary(data, 'gold-live-test');
+    assert.equal(s.live, true);
+    assert.equal(Math.round(s.portfolioValue * 100) / 100, Math.round((168.58 + 0.07674442 * 4000) * 100) / 100);
+  } finally {
+    global.fetch = original;
+  }
 });
 test('new members receive aggregates, never portfolio details; writes remain forbidden', async () => {
   const original = global.fetch, oldKey = process.env.SUPABASE_SERVICE_ROLE;

@@ -83,6 +83,24 @@ test('siteFetch refreshes an expired session and retries 401 only once', async (
   const failed = await vm.runInContext("siteFetch('/api/edu-shared?kind=portfolio')", ctx);
   assert.equal(failed.status, 401); assert.equal(sent.length, 2);
 });
+test('gold and silver positions resolve to the right quote unit', () => {
+  const ctx = vm.createContext({});
+  vm.runInContext(html.slice(html.indexOf('const AP2_OZ_GRAM = 31.1034768'), html.indexOf('async function ap2LoadPrices()')), ctx);
+  const metal = expr => vm.runInContext('JSON.stringify(ap2MetalOf(' + expr + '))', ctx);
+  assert.equal(metal('{ type: "altin", symbol: "XAUUSD" }'), '{"metal":"altin","gram":false}');
+  assert.equal(metal('{ type: "altin", symbol: "gram altın" }'), '{"metal":"altin","gram":true}');
+  assert.equal(metal('{ type: "gumus", symbol: "XAGUSD" }'), '{"metal":"gumus","gram":false}');
+  assert.equal(metal('{ type: "kripto", symbol: "BTC" }'), 'null');
+  assert.equal(metal('{ type: "altin", symbol: "CEYREK" }'), 'null');
+});
+test('live gold quote reaches the position price without saving or filling', () => {
+  const prices = html.slice(html.indexOf('async function ap2LoadPrices()'), html.indexOf('function ap2ShareMonthlyStrip()'));
+  assert.ok(prices.includes("ap2MetalUsd('XAU')") || prices.includes("ap2MetalUsd(wanted[k])"));
+  assert.ok(prices.includes('ap2MetalOf(p)'));
+  assert.ok(!prices.includes('ap2Save()'));
+  assert.ok(!prices.includes('ap2FillsCheck()'));
+});
+
 test('rendering and quote refresh never save or fill positions', () => {
   const render = html.slice(html.indexOf('function renderAlfaPortfoy2()'), html.indexOf('async function ap2LoadPrices()'));
   assert.ok(!render.includes('ap2SyncCloud()'));
