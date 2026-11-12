@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { parseNumber, parsePlan, validatePlan, describePlanErrors, stripPlanLines } from '../lib/trade-plan.mjs';
-import { planTopic, structureFromCandles } from '../lib/telegram-qa.mjs';
+import { planTopic } from '../lib/telegram-qa.mjs';
+import { fibLevel, fibSet, pivots, lastImpulse, fvgs, nearestLevels, inIfvgWindow, istanbulTime, structureFromCandles } from '../lib/market-structure.mjs';
 
 const BAD_REPORTED = `**Plan**
 
@@ -120,6 +121,88 @@ test('1h structure is derived from candles and needs enough history', () => {
   assert.equal(structureFromCandles(null), null);
 });
 
+test('fib retracement levels follow impulse direction', () => {
+  assert.equal(fibLevel(100, 200, 0.382), 161.8);
+  assert.equal(fibLevel(200, 100, 0.382), 138.2);
+  const up = fibSet(100, 200);
+  assert.equal(up.direction, 'up');
+  assert.equal(up.r5, 150);
+  assert.equal(up.r805, 119.5);
+  assert.equal(fibLevel(0, 100, 0.5), null);
+});
+
+test('last impulse and nearest liquidity come from pivots', () => {
+  const c = [
+    { h: 11, l: 9, c: 10 }, { h: 21, l: 19, c: 20 },
+    { h: 15, l: 13, c: 14 }, { h: 19, l: 17, c: 18 },
+    { h: 18, l: 16, c: 17 },
+  ];
+  const p = pivots(c, { left: 1, right: 1 });
+  assert.deepEqual(p.highs.map(x => x.price), [21, 19]);
+  assert.deepEqual(p.lows.map(x => x.price), [13]);
+  const leg = lastImpulse(c, { left: 1, right: 1 });
+  assert.equal(leg.start, 13);
+  assert.equal(leg.end, 19);
+  assert.equal(leg.direction, 'up');
+  assert.deepEqual(nearestLevels(c, 16, { left: 1, right: 1 }), { high: 19, low: 13 });
+});
+
+test('FVG detection marks inverted gaps as IFVG', () => {
+  const bull = [
+    { h: 10, l: 8, c: 9 }, { h: 12, l: 9, c: 11 },
+    { h: 15, l: 12, c: 14 }, { h: 16, l: 13, c: 15 },
+  ];
+  const g = fvgs(bull);
+  assert.equal(g.length, 2);
+  assert.equal(g[0].type, 'bull');
+  assert.equal(g[0].bottom, 10);
+  assert.equal(g[0].top, 12);
+  assert.equal(g[0].inverted, false);
+
+  const failedBull = [...bull.slice(0, 3), { h: 11, l: 8, c: 9 }];
+  assert.equal(fvgs(failedBull).at(-1).inverted, true);
+
+  const bear = [
+    { h: 12, l: 10, c: 11 }, { h: 11, l: 9, c: 9.5 },
+    { h: 8, l: 6, c: 7 }, { h: 11, l: 9, c: 10.5 },
+  ];
+  const bg = fvgs(bear).at(-1);
+  assert.equal(bg.type, 'bear');
+  assert.equal(bg.bottom, 8);
+  assert.equal(bg.top, 10);
+  assert.equal(bg.inverted, true);
+});
+
+test('IFVG window is 08:00-12:00 Istanbul time', () => {
+  assert.deepEqual(istanbulTime(new Date('2026-11-12T05:05:00Z')), { hour: 8, minute: 5 });
+  assert.equal(inIfvgWindow(new Date('2026-11-12T05:30:00Z')), true);
+  assert.equal(inIfvgWindow(new Date('2026-11-12T08:59:00Z')), true);
+  assert.equal(inIfvgWindow(new Date('2026-11-12T09:00:00Z')), false);
+});
+
+test('user-reported tight-stop plan is rejected', () => {
+  const text = `**Strateji:** 0.382
+**Yön:** BEARISH
+**Giriş:** $73.000
+**Stop:** $73.300
+**Hedef:** $70.000
+**Gerekçe:** test
+**Verdict:** BEARISH`;
+  const p = parsePlan(text);
+  assert.equal(p.strategy, '0.382');
+  const v = validatePlan(p, { price: 71943, atr: 474, requireStrategy: true });
+  assert.equal(v.ok, false);
+  assert.ok(v.errors.includes('stop_inside_noise'));
+  assert.match(describePlanErrors(v.errors), /en az 1×ATR/);
+});
+
+test('a plan without a named strategy is rejected when strategy is required', () => {
+  const p = parsePlan(plan('BEARISH', '72.500', '73.500', '70.500'));
+  const v = validatePlan(p, { price: 71943, atr: 474, requireStrategy: true });
+  assert.equal(v.ok, false);
+  assert.ok(v.errors.includes('strategy_missing'));
+});
+
 test('question topic picks the instrument the user actually asked about', () => {
   assert.equal(planTopic('BTC yönü ne?'), 'btc');
   assert.equal(planTopic('altın ons analizi'), 'gold');
@@ -136,10 +219,15 @@ test('QA bot feeds live price/structure and validates plans before answering', (
   assert.match(src, /okx\.com\/api\/v5\/market\/candles/);
   assert.match(src, /api\.bybit\.com\/v5\/market\/kline/);
   assert.match(src, /api\.exchange\.coinbase\.com\/products/);
-  assert.match(src, /ATR satırı yoksa 24s yüksek\/düşük aralığını kullan/);
-  assert.match(src, /LONG\/BULLISH: Stop < Giriş < Hedef/);
-  assert.match(src, /SHORT\/BEARISH: Hedef < Giriş < Stop/);
-  assert.match(src, /validatePlan\(parsePlan\(answer\), ref\)/);
+  assert.match(src, /ATR\/swing satırı eksikse 24s yüksek\/düşük ile kur/);
+  assert.match(src, /formatStrategyContext\(/);
+  assert.match(src, /planRefFor\(/);
+  assert.match(src, /requireStrategy: true/);
+  assert.match(src, /BTC’de 5m IFVG kullanılmıyor/);
+  assert.match(src, /Eski notlardaki fiyatlar/);
+  assert.match(src, /LONG Stop < Giriş < Hedef/);
+  assert.match(src, /SHORT Hedef < Giriş < Stop/);
+  assert.match(src, /validatePlan\(firstPlan, planRefFor\(firstPlan, ref\)\)/);
   assert.match(src, /planFallback\(/);
   assert.match(src, /formatMarketContext\(marketData, spot, \{ BTC: btcStructure, ETH: ethStructure, XAU: goldStructure \}\)/);
 });
