@@ -18,6 +18,7 @@ import macroHandler from '../lib/macro/handler.mjs';
 import orderbookHandler from '../lib/orderbook-levels.mjs';
 import strategiesHandler from '../lib/strategies.mjs';
 import telegramWebhookHandler from '../lib/telegram-webhook.mjs';
+import coinalyzeHandler from '../lib/coinalyze.mjs';
 
 const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'journal-followup': journalFollowup, 'notion-sync': notionSyncAction, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
 
@@ -50,20 +51,9 @@ export default async function handler(req, res) {
       user: user ? { email: user.email, admin: user.admin } : null,
     });
   }
-  if (req.query?.authdebug === '1') {
-    const jwt = (req.headers.authorization || '').replace('Bearer ', '');
-    try {
-      const r = await fetch('https://zvnjslmptwmnuhftgqsr.supabase.co/auth/v1/user', {
-        headers: { apikey: 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X', Authorization: 'Bearer ' + jwt }
-      });
-      const body = await r.text();
-      return res.status(200).json({ supabaseStatus: r.status, body: body.slice(0, 300) });
-    } catch (e) {
-      return res.status(200).json({ error: e.message });
-    }
-  }
   if (req.query?.strategies === '1') return strategiesHandler(req, res);
 if (req.query?.['telegram-webhook'] === '1') return telegramWebhookHandler(req, res);
+  if (req.query?.coinalyze === '1') return coinalyzeHandler(req, res);
   if (req.query?.macro === '1' || (req.method === 'POST' && typeof req.body?.action === 'string' && req.body.action.startsWith('macro-'))) return macroHandler(req, res);
   if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type'); return res.status(200).end(); }
   if (req.method === 'GET') return cronHandler(req, res);
