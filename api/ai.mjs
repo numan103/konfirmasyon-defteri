@@ -19,6 +19,7 @@ import orderbookHandler from '../lib/orderbook-levels.mjs';
 import strategiesHandler from '../lib/strategies.mjs';
 import telegramWebhookHandler from '../lib/telegram-webhook.mjs';
 import coinalyzeHandler from '../lib/coinalyze.mjs';
+import marketNewsHandler from '../lib/market-news.mjs';
 
 const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'journal-followup': journalFollowup, 'notion-sync': notionSyncAction, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
 
@@ -55,6 +56,7 @@ export default async function handler(req, res) {
 if (req.query?.['telegram-webhook'] === '1') return telegramWebhookHandler(req, res);
   if (req.query?.coinalyze === '1') return coinalyzeHandler(req, res);
   if (req.query?.orderbook === '1') return orderbookHandler(req, res);
+  if (req.query?.news === '1') return marketNewsHandler(req, res);
   if (req.query?.macro === '1' || (req.method === 'POST' && typeof req.body?.action === 'string' && req.body.action.startsWith('macro-'))) return macroHandler(req, res);
   if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type'); return res.status(200).end(); }
   if (req.method === 'GET') return cronHandler(req, res);
