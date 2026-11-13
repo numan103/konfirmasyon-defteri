@@ -537,8 +537,20 @@ test('yeni üye doğrudan "OKX" yazınca kayıt ekranına geçilir', async () =>
     assert.equal(handled, true);
     const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
     assert.ok(msg);
-    assert.match(msg.text, /OKX — önce kayıt/i);
-    assert.match(msg.text, /okx\.com\/join\/CRYPTOAHMET/);
+    assert.equal(msg.text, [
+      '⚫ OKX — önce kayıt',
+      '',
+      'UID yazmadan önce hesabının bizim referansımıza bağlı olması gerekir.',
+      '',
+      '1. Aşağıdaki OKX linkinden kaydol.',
+      'https://www.okx.com/join/CRYPTOAHMET',
+      '2. Mevcut OKX hesabın referansa taşınamıyorsa bu linkten YENİ bir hesap açman gerekir.',
+      '3. Hesabına para yatır ve işlemlerini bu hesapta yap.',
+      '4. Hazır olunca "Kaydım hazır, UID\'ye geç" butonuna bas.',
+      '',
+      'Not: OKX yaklaşık 6 ayda bir tekrar giriş isteyebilir; hesabın erişimini kaybetme. Hesap açılışı ve kullanımı borsanın KYC/kullanım koşullarına tabidir.',
+      'Şifre veya API anahtarı istemiyorum, sadece UID.'
+    ].join('\n'));
     const patch = stub.patches().find((p) => p.step === 'await_uid');
     assert.ok(patch);
     assert.equal(patch.draft_exchange, 'okx');
