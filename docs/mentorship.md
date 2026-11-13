@@ -44,6 +44,27 @@
 Yalnızca borsa **kesin olarak** "bu UID senin invitee'n değil" dediğinde reddedilir.
 Anahtar/izin/ağ hatası üyeyi reddetmez; yönetici onayına düşer.
 
+### Telegram içinden akış (site hesabı gerekmez)
+
+Üye doğrudan botla konuşur. Kimlik `telegram_access.telegram_id`'dir; e-posta/site
+hesabı gerekmez. Aynı borsa UID'si iki Telegram hesabına bağlanamaz.
+
+```
+/start → Bybit/OKX butonu → UID → "Doğru mu?" onayı
+   → verifyExchange()
+       verified  → status=verified + tek kullanımlık davet DM'e gönderilir
+       not_found → status=rejected, tekrar dene / destek
+       pending   → status=pending, yöneticiye Onayla/Reddet butonlu bildirim
+```
+
+Komutlar: `/dogrula`, `/durum`, `/link`, `/destek`, `/iptal`, `/sil`, `/yardim`.
+Yönetici: `/bekleyen`, `/grupid`. Üye gruba katılınca `chat_member` güncellemesi
+`mentor_status='joined'` yazar. Bot gruba eklenince `my_chat_member` ile chat id
+yöneticiye bildirilir.
+
+Bot DM'de tanımadığı mesajları Q&A'ya devreder; yani `/ask`, `/data` ve serbest
+piyasa soruları aynı sohbette çalışmaya devam eder.
+
 ## Gerekli kurulum
 
 ### 1. Veritabanı
@@ -56,17 +77,31 @@ Eklenen alanlar: `volume`, `volume_updated_at`, `exchange_joined_at`,
 Dosya çalıştırılmazsa site çökmez: `/api/access` şemayı algılar, mentorship paneli
 "kurulum bekliyor" der, premium erişim normal çalışır.
 
+Ardından `supabase/site/006_telegram_access.sql` dosyasını çalıştır. Bu dosya
+botun DM akışı için `public.telegram_access` tablosunu oluşturur. RLS açık,
+politika yok; yalnızca service-role erişir. Tablo yoksa bot "sistem hazırlanıyor"
+der ve yöneticiye SQL uyarısı gönderir.
+
 ### 2. Telegram mentorship grubu
 
-1. Özel bir grup aç (mentorship/premium).
+1. Özel bir grup aç (mentorship/premium) — grup zaten açıksa tekrar açma.
 2. `@alfaportfoy_bot` botunu gruba ekle.
 3. Botu **yönetici** yap ve **"Davet linkleri oluşturma"** yetkisini ver.
-4. Grubun chat id'sini al: bot `/getChat` ile ya da gruba bir mesaj atıp
-   `https://api.telegram.org/bot<TOKEN>/getUpdates` çıktısından.
-   Chat id `-100...` ile başlar.
+4. Grubun chat id'sini almanın en kolay yolu: gruba `/grupid` yaz (bot yönetici
+   id'sine cevap verir) veya botu gruba ekle; `my_chat_member` bildirimi chat id'yi
+   yöneticiye gönderir. Chat id `-100...` ile başlar.
 5. Vercel → Production env: `TG_MENTORSHIP_CHAT_ID=-100...`
+6. (Opsiyonel) `TG_ADMIN_IDS=5122809433` — Onayla/Reddet butonlarını kullanacak
+   Telegram hesapları. Boşsa varsayılan yönetici id'si kullanılır.
 
 Bot zaten `TG_BOT_TOKEN` ile çalışıyor; yeni bot gerekmez.
+
+Webhook `allowed_updates`: `message`, `callback_query`, `my_chat_member`, `chat_member`.
+Kod deploy edildikten sonra webhook'u yeniden kur (yönetici JWT'siyle):
+
+```
+GET https://alfa-trader.com/api/ai?telegram-webhook=1
+```
 
 ### 3. Borsa affiliate API anahtarları
 
@@ -121,6 +156,12 @@ Env değişiklikleri yeni deployment ister.
 - `Onayla` → premium + davet üretir
 - `Reddet` / `Geri al` → erişimi kapatır, daveti iptal eder
 
+Telegram tarafında yönetici:
+
+- `/bekleyen` → bekleyen başvurular + Onayla/Reddet butonları
+- `/yanit <telegram_id> <mesaj>` → kullanıcıya bot üzerinden DM
+- `/grupid` → içinde bulunulan grubun chat id'si
+
 ## Güvenlik notları
 
 - Davet linki `member_limit=1` ve 7 gün geçerlidir; paylaşılsa bile tek kişi kullanabilir.
@@ -134,16 +175,23 @@ Env değişiklikleri yeni deployment ister.
 ## Testler
 
 ```powershell
-node --test tests\exchanges.test.mjs tests\mentorship.test.mjs
+node --test tests\exchanges.test.mjs tests\mentorship.test.mjs tests\telegram-onboarding.test.mjs
 ```
 
 Kapsam: Bybit/OKX başarı, bulunamadı, auth hatası, rate limit, ağ hatası,
-hacim/katılım alanları, davet oluşturma/iptal, süre kontrolü.
+hacim/katılım alanları, davet oluşturma/iptal, süre kontrolü; bot DM akışının
+saf yardımcıları (UID ayrıştırma, klavyeler, durum etiketleri, yönetici kontrolü).
+
+## Bilinen kurulum sırası
+
+1. `005_mentorship.sql` + `006_telegram_access.sql` çalıştır.
+2. Vercel'e affiliate anahtarlarını ve `TG_MENTORSHIP_CHAT_ID` ekle.
+3. Deploy et, webhook'u yeniden kur.
+4. Botu gruba ekle/yönetici yap; `/grupid` ile id'yi doğrula.
+5. Test hesabıyla uçtan uca dene: `/start` → borsa → UID → davet → gruba katılım.
 
 ## Sonraki adım (opsiyonel)
 
 - Günlük/haftalık yeniden doğrulama: UID artık affiliate listesinde değilse
   `mentor_status='revoked'` + erişim kapatma.
-- `mentor_status='joined'` durumunu Telegram `chat_member` güncellemesiyle
-  otomatik işaretleme (bot webhook'una `chat_member` handler'ı).
 - Hacme göre kademeli mentorship (örn. aylık $10k üstü ek grup).

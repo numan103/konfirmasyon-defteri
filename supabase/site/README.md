@@ -9,10 +9,16 @@ Supabase → SQL Editor → `001_access.sql` içeriğini bir kez çalıştır.
 Ardından `005_mentorship.sql` dosyasını da çalıştır (premium/mentorship katmanı:
 hacim, davet linki, mentorship durumu). Dosya idempotenttir; tekrar çalıştırmak zararsızdır.
 
-> `005` çalıştırılmadan da site çalışır: `/api/access` eksik kolonları algılar,
-> mentorship paneli "kurulum bekliyor" der ve premium erişim normal işler.
+Son olarak `006_telegram_access.sql` dosyasını çalıştır. Bu dosya, üyelerin **bot
+üzerinden** doğrulanmasını sağlayan `public.telegram_access` tablosunu oluşturur
+(site hesabı gerekmez, kimlik Telegram user id'sidir). RLS açıktır ve hiçbir
+politika yoktur; yalnızca service-role erişir.
 
-Oluşan tablo: `public.site_access`.
+> `005` veya `006` çalıştırılmadan da site/bot çökmez: `/api/access` eksik kolonları
+> algılar, mentorship paneli "kurulum bekliyor" der; bot ise "sistem hazırlanıyor"
+> deyip yöneticiye haber verir.
+
+Oluşan tablolar: `public.site_access` (site), `public.telegram_access` (bot).
 
 - Kullanıcı **yalnızca kendi satırını SELECT** edebilir (RLS).
 - INSERT/UPDATE politikası yok → istemci kendini `verified` yapamaz.
@@ -52,6 +58,8 @@ Mentorship (Telegram özel grup) için:
 |---|---|
 | `TG_BOT_TOKEN` | Mevcut bot (zaten tanımlı) |
 | `TG_MENTORSHIP_CHAT_ID` | Mentorship grubunun chat id'si (`-100...`). Bot grupta **yönetici** ve "davet linki oluşturma" yetkisine sahip olmalı |
+| `TG_ADMIN_IDS` | (Opsiyonel) Onay/red butonlarını kullanabilecek Telegram user id'leri, virgülle. Boşsa `5122809433` |
+| `TG_ADMIN_CHAT_ID` | (Opsiyonel) Yönetici bildirimlerinin gideceği chat; boşsa `TG_CHAT_ID` (grup) kullanılır |
 
 > Anahtarlar tanımlı değilse doğrulama **yanlış sonuç üretmez**: başvuru `pending` olarak kaydedilir ve elle onaylanır. `TG_MENTORSHIP_CHAT_ID` yoksa premium erişim yine açılır; yalnızca davet adımı görünmez.
 
@@ -147,4 +155,36 @@ Yonetici hesapla giris yapip **Erisim** sayfasini ac: "Uyelik onaylari" panelind
 
 Yönetici panelinde her üye için `mentor: davetli / grupta / iptal` ve varsa hacim görünür.
 `revoke` işlemi erişimi kapatır, mentorship davetini iptal eder ve durumu `revoked` yapar.
+
+## 7. Telegram içinden doğrulama (site hesabı gerekmez)
+
+Üye `@alfaportfoy_bot` ile DM'de konuşur:
+
+```
+/start
+  → Bybit / OKX seçimi (inline buton)
+  → UID girişi
+  → "Doğru mu?" onayı
+  → bot affiliate API'sinden kontrol eder
+      verified  → tek kullanımlık grup daveti DM'e gelir
+      not_found → "UID bulunamadı", tekrar dene / destek
+      pending   → başvuru kaydedilir, yöneticiye Onayla/Reddet butonu gider
+```
+
+Komutlar: `/dogrula`, `/durum`, `/link` (yeni davet), `/destek`, `/iptal`, `/sil`,
+`/yardim`. Piyasa soruları aynı DM'de `/ask`, `/data`, `/ogren` ile çalışmaya devam eder.
+
+Yönetici tarafı:
+
+- Bot gruba eklenince `my_chat_member` ile **chat id** yöneticiye DM/grup olarak bildirilir.
+- Grup içinde `/grupid` yazınca chat id döner (yalnızca yönetici).
+- `/bekleyen` ile bekleyen başvurular ve Onayla/Reddet butonları listelenir.
+- Üye mentorluk grubuna katılınca `chat_member` güncellemesiyle `mentor_status='joined'` işaretlenir.
+
+Webhook'un bu güncellemeleri alması için `allowed_updates` şunları içermelidir:
+`message`, `callback_query`, `my_chat_member`, `chat_member`. Webhook'u yeniden kurmak için
+yönetici JWT'siyle `GET /api/ai?telegram-webhook=1` çağır.
+
+> Bot, grupta **yönetici** değilse davet linki üretemez. Bu durumda kullanıcı yine
+> doğrulanır, davet adımı "hazırlanıyor" kalır ve yönetici uyarılır.
 
