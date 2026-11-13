@@ -548,7 +548,7 @@ test('yeni üye doğrudan "OKX" yazınca kayıt ekranına geçilir', async () =>
       '3. Hesabına para yatır ve işlemlerini bu hesapta yap.',
       '4. Hazır olunca "Kaydım hazır, UID\'ye geç" butonuna bas.',
       '',
-      'Not: OKX yaklaşık 6 ayda bir tekrar giriş isteyebilir; hesabın erişimini kaybetme. Hesap açılışı ve kullanımı borsanın KYC/kullanım koşullarına tabidir.',
+      'Not: Eğer OKX hesabınız varsa aile bireylerinden birinin üzerine yeni hesap açabilirsiniz; sürekli tekrar login istememektedir. 6 ayda bir giriş yeterlidir.',
       'Şifre veya API anahtarı istemiyorum, sadece UID.'
     ].join('\n'));
     const patch = stub.patches().find((p) => p.step === 'await_uid');
