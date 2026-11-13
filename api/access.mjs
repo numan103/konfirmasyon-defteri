@@ -111,32 +111,36 @@ async function getUser(jwt) {
 // ---- Sema yetenekleri ----
 // 005_mentorship.sql henuz calistirilmamis olabilir. Eksik kolon yuzunden
 // tum uyelik kapisinin kapanmamasi icin bir kez kontrol edip onbellekleriz.
-let capsPromise = null;
+let capsCache = null;
+const CAPS_TTL_MS = 5 * 60 * 1000;
 
 async function accessCaps() {
-  if (capsPromise) return capsPromise;
-  capsPromise = (async () => {
-    const key = process.env.SUPABASE_SERVICE_ROLE || '';
-    if (!key) return { volume: false, mentor: false };
-    const probe = async (cols) => {
-      try {
-        const r = await fetch(
-          SUPABASE_URL + '/rest/v1/site_access?select=' + cols.join(',') + '&limit=1',
-          { headers: svcHeaders() }
-        );
-        return r.ok;
-      } catch (e) {
-        return false;
-      }
-    };
-    const volume = await probe(VOLUME_COLS);
-    const mentor = await probe(MENTOR_COLS);
-    if (!volume || !mentor) {
-      console.warn('[ACCESS] sema eksik: volume=' + volume + ' mentor=' + mentor + ' (005_mentorship.sql)');
+  if (capsCache && Date.now() - capsCache.at < CAPS_TTL_MS) return capsCache.value;
+  const value = await probeCaps();
+  capsCache = { at: Date.now(), value };
+  return value;
+}
+
+async function probeCaps() {
+  const key = process.env.SUPABASE_SERVICE_ROLE || '';
+  if (!key) return { volume: false, mentor: false };
+  const probe = async (cols) => {
+    try {
+      const r = await fetch(
+        SUPABASE_URL + '/rest/v1/site_access?select=' + cols.join(',') + '&limit=1',
+        { headers: svcHeaders() }
+      );
+      return r.ok;
+    } catch (e) {
+      return false;
     }
-    return { volume, mentor };
-  })();
-  return capsPromise;
+  };
+  const volume = await probe(VOLUME_COLS);
+  const mentor = await probe(MENTOR_COLS);
+  if (!volume || !mentor) {
+    console.warn('[ACCESS] sema eksik: volume=' + volume + ' mentor=' + mentor + ' (005_mentorship.sql)');
+  }
+  return { volume, mentor };
 }
 
 function allowedFields(caps) {

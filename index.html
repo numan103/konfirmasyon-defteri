@@ -13501,10 +13501,13 @@ function renderAdminAccess() {
     const mail = r.email || r.user_id;
     const uidTxt = r.exchange_uid || '—';
     const attrs = ' data-acc-op="%OP%" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-mail="' + accEsc(mail) + '" type="button"';
-    const act = r.status === 'verified'
+    const invite = (r.mentor_invite && r.status === 'verified')
+      ? '<a class="btn" href="' + accEsc(r.mentor_invite) + '" target="_blank" rel="noopener noreferrer">Davet</a>'
+      : '';
+    const act = invite + (r.status === 'verified'
       ? ('<button class="btn"' + attrs.replace('%OP%', 'revoke') + '>Geri al</button>')
       : ('<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
-        '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>');
+        '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>'));
     const mentorLbl = r.mentor_status === 'joined' ? 'grupta'
       : (r.mentor_status === 'invited' ? 'davetli'
         : (r.mentor_status === 'revoked' ? 'iptal' : '—'));
