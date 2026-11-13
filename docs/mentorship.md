@@ -10,10 +10,15 @@
 ## Akış
 
 ```
-Üye → Erişim sayfası → UID gönder
-                         │
+Üye → Erişim sayfası → borsayı seç
+                          │
+              referans linkiyle kayıt / hesap taşıma
+              (Bybit: yeni e-posta + video, OKX: yeni hesap)
+                          │
+                    UID gönder
+                          │
               /api/access (submit)
-                         │
+                          │
         ┌────────────────┴─────────────────┐
         │ anahtar var                      │ anahtar yok / hata
         ▼                                  ▼
@@ -32,6 +37,15 @@
   üye gruba katılır → mentor_status = joined
 ```
 
+> **Referans şartı:** Üye, UID yazmadan önce bizim referans linkimizle kayıt
+> olmuş olmalıdır. Bybit'te mevcut hesap taşınabilir (yeni e-posta + hesap kimliği
+> taşıma videosu). OKX'te mevcut hesap referansa taşınamıyorsa linkten yeni hesap
+> açılır. Hesap her durumda üyenin **kendi adına** olmalıdır (KYC).
+>
+> - Bybit: https://partner.bybit.com/b/cryptoahmet
+> - OKX: https://www.okx.com/join/CRYPTOAHMET
+> - Bybit hesap taşıma videosu: https://youtu.be/p0EcYJ40Kt0
+
 ### Dönüş kodları
 
 | Borsa sonucu | Kayıt durumu | Üyeye mesaj |
@@ -45,8 +59,8 @@ Yalnızca borsa **kesin olarak** "bu UID senin invitee'n değil" dediğinde redd
 Anahtar/izin/ağ hatası üyeyi reddetmez; yönetici onayına düşer.
 
 > Affiliate API anahtarı eklenmezse sistem yine çalışır: her başvuru yöneticiye
-> **özelden** UID + Onayla/Reddet olarak düşer. Bu modda onaydan önce UID'yi
-> borsanın affiliate panelinden elle kontrol etmek gerekir.
+> **özelden** UID + Onayla/Reddet olarak düşer. Bu mod kalıcıdır; onaydan önce
+> UID'yi borsanın affiliate panelinden elle kontrol etmek gerekir.
 
 ### Telegram içinden akış (site hesabı gerekmez)
 
@@ -54,7 +68,9 @@ Anahtar/izin/ağ hatası üyeyi reddetmez; yönetici onayına düşer.
 hesabı gerekmez. Aynı borsa UID'si iki Telegram hesabına bağlanamaz.
 
 ```
-/start → Bybit/OKX butonu → UID → "Doğru mu?" onayı
+/start → Bybit/OKX butonu
+   → kayıt/talimat ekranı (referans linki + Bybit video, "Kaydım hazır, UID'ye geç")
+   → UID → "Doğru mu?" onayı
    → verifyExchange()
        verified  → status=verified + tek kullanımlık davet DM'e gönderilir
        not_found → status=rejected, tekrar dene / destek
@@ -192,10 +208,12 @@ saf yardımcıları (UID ayrıştırma, klavyeler, durum etiketleri, yönetici k
 ## Bilinen kurulum sırası
 
 1. `005_mentorship.sql` + `006_telegram_access.sql` çalıştır.
-2. Vercel'e affiliate anahtarlarını ve `TG_MENTORSHIP_CHAT_ID` ekle.
+2. Vercel'e `TG_MENTORSHIP_CHAT_ID` ve `TG_ADMIN_CHAT_ID` ekle. Affiliate anahtarları
+   bilinçli olarak eklenmez; tüm başvurular elle onaylanır.
 3. Deploy et, webhook'u yeniden kur.
 4. Botu gruba ekle/yönetici yap; `/grupid` ile id'yi doğrula.
-5. Test hesabıyla uçtan uca dene: `/start` → borsa → UID → davet → gruba katılım.
+5. Test hesabıyla uçtan uca dene: `/start` → borsa → kayıt ekranı → UID → yönetici
+   onayı → davet → gruba katılım.
 
 ## Sonraki adım (opsiyonel)
 

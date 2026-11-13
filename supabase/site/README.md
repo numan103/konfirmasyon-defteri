@@ -44,7 +44,7 @@ Referans kapısı için:
 | `SITE_ADMIN_EMAILS` | Virgülle ayrılmış admin e-postaları (boşsa `ahmetnuman20@gmail.com`) |
 | `SITE_ACCESS_OPEN` | `1` yaparsan **her giriş yapmış kullanıcı tam erişim** alır (acil durum vanası) |
 
-Borsa doğrulaması için (affiliate API anahtarı):
+Borsa doğrulaması için (affiliate API anahtarı — **opsiyonel**):
 
 | Değişken | Not |
 |---|---|
@@ -61,7 +61,7 @@ Mentorship (Telegram özel grup) için:
 | `TG_ADMIN_IDS` | (Opsiyonel) Onay/red butonlarını kullanabilecek Telegram user id'leri, virgülle. Boşsa `5122809433` |
 | `TG_ADMIN_CHAT_ID` | (Opsiyonel) Yönetici bildirimlerinin gideceği **özel** chat id. Boşsa ilk `TG_ADMIN_IDS` id'sine DM atılır; asla gruba düşmez |
 
-> Anahtarlar tanımlı değilse doğrulama **yanlış sonuç üretmez**: başvuru `pending` olarak kaydedilir ve elle onaylanır. `TG_MENTORSHIP_CHAT_ID` yoksa premium erişim yine açılır; yalnızca davet adımı görünmez.
+> Anahtarlar tanımlı değilse doğrulama **yanlış sonuç üretmez**: başvuru `pending` olarak kaydedilir ve elle onaylanır. Bu projede affiliate anahtarları bilinçli olarak eklenmez; **kalıcı elle onay modu** kullanılır. Onaydan önce UID'yi borsanın affiliate panelinden elle kontrol et. `TG_MENTORSHIP_CHAT_ID` yoksa premium erişim yine açılır; yalnızca davet adımı görünmez.
 
 ## 3. Elle onay / red
 
@@ -141,8 +141,14 @@ Yonetici hesapla giris yapip **Erisim** sayfasini ac: "Uyelik onaylari" panelind
 
 ## 6. Mentorship akisi (premium → Telegram)
 
-1. Üye, Erişim sayfasında borsasını seçip UID'sini gönderir.
-2. Anahtarlar tanımlıysa `/api/access` borsaya sorar:
+1. Üye, Erişim sayfasında **önce borsasını seçer** ve referans linkiyle kayıt
+   olur / hesabını taşır. Bybit'te yeni e-posta ile kayıt + hesap kimliği taşıma
+   videosu; OKX'te mevcut hesap taşınamıyorsa linkten yeni hesap. Hesap üyenin
+   kendi adına olmalıdır (KYC).
+   - Bybit: https://partner.bybit.com/b/cryptoahmet
+   - OKX: https://www.okx.com/join/CRYPTOAHMET
+   - Bybit taşıma videosu: https://youtu.be/p0EcYJ40Kt0
+2. Üye UID'sini gönderir. Anahtarlar tanımlıysa `/api/access` borsaya sorar:
    - `verified` → anında `ref` (premium) + mentorship daveti
    - `not_found` → `rejected` (yalnızca borsa kesin "yok" dediğinde)
    - `not_configured` / `auth_error` / `rate_limited` / `error` → `pending` (yanlış suçlama yok)
@@ -163,6 +169,8 @@ Yönetici panelinde her üye için `mentor: davetli / grupta / iptal` ve varsa h
 ```
 /start
   → Bybit / OKX seçimi (inline buton)
+  → kayıt/talimat ekranı (referans linki + Bybit video)
+  → "Kaydım hazır, UID'ye geç"
   → UID girişi
   → "Doğru mu?" onayı
   → bot affiliate API'sinden kontrol eder

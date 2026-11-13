@@ -8601,9 +8601,35 @@
       </div>
     </div>
 
+    <div class="panel" id="acc-prep-panel">
+      <h2><span>1. Referansla kayıt</span><span class="n">Önce bu adım</span></h2>
+      <p class="hint" style="margin:0 0 10px;">UID yazmadan önce hesabının bizim referansımıza bağlı olması gerekir. Hesap kendi adına olmalı (KYC); başkasının kimliğiyle hesap açma.</p>
+
+      <div style="display:grid;gap:12px;">
+        <div style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+          <b>🟠 Bybit</b>
+          <p class="hint" style="margin:6px 0 8px;">Yeni bir e-posta ile kaydol; mevcut hesabın varsa videodaki adımlarla hesap kimliğini taşı. Sonra hesabına para yatır ve işlemlerini bu hesapta yap.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="btn solid" href="https://partner.bybit.com/b/cryptoahmet" target="_blank" rel="noopener noreferrer">Bybit'e katıl ↗</a>
+            <a class="btn" href="https://youtu.be/p0EcYJ40Kt0" target="_blank" rel="noopener noreferrer">🎬 Hesap taşıma videosu</a>
+          </div>
+        </div>
+
+        <div style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+          <b>⚫ OKX</b>
+          <p class="hint" style="margin:6px 0 8px;">Linkten kaydol. Mevcut OKX hesabın referansa taşınamıyorsa yeni bir hesap açman gerekir. Hesap kendi adına olmalı (KYC).</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a class="btn solid" href="https://www.okx.com/join/CRYPTOAHMET" target="_blank" rel="noopener noreferrer">OKX'e katıl ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint" style="margin:10px 0 0;">Kayıt ve para yatırma tamamlandıktan sonra aşağıdaki Telegram adımına geç. Bot yalnızca UID ister; şifre veya API anahtarı istemez.</p>
+    </div>
+
     <div class="panel" id="acc-tg-panel">
       <h2><span>📱 Telegram'dan doğrula</span><span class="n">En hızlı</span></h2>
-      <p class="hint" style="margin:0 0 12px;">Botu aç, Bybit veya OKX seç, UID'ni yaz. Doğrulanınca mentorluk grubunun sana özel tek kullanımlık davet linkini bot gönderir. Siteye giriş yapmana gerek yok.</p>
+      <p class="hint" style="margin:0 0 12px;">Botu aç, Bybit veya OKX seç. Bot önce kayıt/hesap taşıma linklerini gösterir; hazır olunca UID'ni yazarsın. Doğrulanınca mentorluk grubunun sana özel tek kullanımlık davet linkini bot gönderir. Siteye giriş yapmana gerek yok.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a class="btn solid" href="https://t.me/alfaportfoy_bot?start=dogrula" target="_blank" rel="noopener noreferrer">Telegram'da doğrula ↗</a>
         <a class="btn" href="https://t.me/alfaportfoy_bot?start=durum" target="_blank" rel="noopener noreferrer">Durumumu gör</a>
@@ -8644,6 +8670,10 @@
 
     <div class="panel" id="acc-form-panel">
       <h2><span>UID doğrula</span><span class="n">1 adım</span></h2>
+      <label class="hint" style="display:flex;align-items:flex-start;gap:8px;margin:10px 0 6px;cursor:pointer;line-height:1.5;">
+        <input type="checkbox" id="acc-ref-confirm" style="margin-top:2px;">
+        <span>Hesabımı yukarıdaki <b>referans linkinden</b> açtım / taşıdım. Hesap kendi adıma (KYC) ve UID bu hesaba ait.</span>
+      </label>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 6px;">
         <select id="acc-exchange" class="btn" style="min-width:120px;">
           <option value="bybit">Bybit</option>
@@ -13672,6 +13702,11 @@ async function submitAccess() {
   if (!btn) return;
   const uid = (document.getElementById('acc-uid').value || '').trim().replace(/\s+/g, '');
   const exchange = document.getElementById('acc-exchange').value;
+  const refOk = document.getElementById('acc-ref-confirm');
+  if (refOk && !refOk.checked) {
+    if (msg) msg.textContent = 'Önce referans linkinden kayıt olduğunu onayla. Kayıt adımı yukarıda.';
+    return;
+  }
   if (!/^[A-Za-z0-9]{3,32}$/.test(uid)) { if (msg) msg.textContent = accessErrText('bad_uid'); return; }
 
   btn.disabled = true;

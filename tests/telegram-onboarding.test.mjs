@@ -12,6 +12,7 @@ import {
   welcomeKeyboard,
   exchangeKeyboard,
   uidKeyboard,
+  prepKeyboard,
   confirmKeyboard,
   statusKeyboard,
   adminDecisionKeyboard,
@@ -209,6 +210,105 @@ test('klavyeler doğru callback ve linkleri taşır', () => {
 
   const adm = adminDecisionKeyboard(42);
   assert.deepEqual(adm.inline_keyboard[0].map((b) => b.callback_data), ['adm:ok:42', 'adm:no:42']);
+});
+
+test('kayıt öncesi klavye: referans linkleri, hesap taşıma videosu ve UID geçişi', () => {
+  const bybit = prepKeyboard('bybit').inline_keyboard.flat();
+  const bybitUrls = bybit.map((b) => b.url).filter(Boolean);
+  assert.ok(bybitUrls.includes('https://partner.bybit.com/b/cryptoahmet'));
+  assert.ok(bybitUrls.includes('https://youtu.be/p0EcYJ40Kt0'));
+  const bybitNav = bybit.find((b) => b.callback_data === 'nav:uid');
+  assert.ok(bybitNav);
+  assert.match(bybitNav.text, /UID/i);
+
+  const okx = prepKeyboard('okx').inline_keyboard.flat();
+  const okxUrls = okx.map((b) => b.url).filter(Boolean);
+  assert.deepEqual(okxUrls, ['https://www.okx.com/join/CRYPTOAHMET']);
+  assert.ok(okx.some((b) => b.callback_data === 'nav:uid'));
+});
+
+test('ex: callback önce kayıt/talimat gönderir, UID istemez', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const stub = mockFetch(defaultHandler());
+  try {
+    const handled = await handleOnboardingCallback({
+      id: 'cb-ex',
+      from: { id: 42, first_name: 'Test', username: 'test' },
+      data: 'ex:bybit'
+    });
+    assert.equal(handled, true);
+
+    const patches = stub.patches();
+    assert.equal(patches.length, 1);
+    assert.equal(patches[0].step, 'await_uid');
+    assert.equal(patches[0].draft_exchange, 'bybit');
+
+    const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
+    assert.ok(msg);
+    assert.match(msg.text, /önce kayıt/i);
+    assert.match(msg.text, /partner\.bybit\.com\/b\/cryptoahmet/);
+    assert.match(msg.text, /youtu\.be\/p0EcYJ40Kt0/);
+    assert.doesNotMatch(msg.text, /UID'ni yaz/i);
+    const buttons = msg.reply_markup.inline_keyboard.flat();
+    assert.ok(buttons.some((b) => b.callback_data === 'nav:uid'));
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+test('nav:uid kayıt adımından sonra UID istemine geçer', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const rec = baseRec({ step: 'await_uid', draft_exchange: 'okx' });
+  const stub = mockFetch(defaultHandler({ rows: [rec] }));
+  try {
+    const handled = await handleOnboardingCallback({
+      id: 'cb-uid',
+      from: { id: 42, first_name: 'Test' },
+      data: 'nav:uid'
+    });
+    assert.equal(handled, true);
+
+    const patches = stub.patches();
+    assert.equal(patches.length, 1);
+    assert.equal(patches[0].step, 'await_uid');
+
+    const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
+    assert.ok(msg);
+    assert.match(msg.text, /OKX UID'ni yaz/i);
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+test('prep adımında "hazır" yazınca UID istemine geçilir', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const rec = baseRec({ step: 'await_uid', draft_exchange: 'bybit' });
+  const stub = mockFetch(defaultHandler({ rows: [rec] }));
+  try {
+    const handled = await handlePrivateOnboarding({
+      message: {
+        chat: { id: 42, type: 'private' },
+        from: { id: 42, first_name: 'Test' },
+        text: 'hazır'
+      }
+    });
+    assert.equal(handled, true);
+    const patches = stub.patches();
+    assert.equal(patches[0].step, 'await_uid');
+    const msg = stub.sentMessages()[0];
+    assert.match(msg.text, /Bybit UID'ni yaz/i);
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
 });
 
 test('DM /start: karşılama ve borsa butonları gönderilir', async () => {
