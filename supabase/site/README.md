@@ -189,6 +189,11 @@ Yönetici tarafı:
 - Grup içinde `/grupid` yazınca chat id döner (yalnızca yönetici).
 - `/bekleyen` ile bekleyen başvurular ve Onayla/Reddet butonları listelenir.
 - Üye mentorluk grubuna katılınca `chat_member` güncellemesiyle `mentor_status='joined'` işaretlenir.
+- **Onaysız katılım koruması:** `status='verified'` olmayan biri gruba girerse bot onu
+  banlar ve yöneticiye bildirir. Onay sonrası davet üretilirken ban otomatik kaldırılır.
+  Botun grupta **"Üyeleri banla"** yetkisi olmalıdır.
+- Grup **özel** olmalı; herkese açık `@kullanıcıadı` varsa kaldırılmalı ve ana davet
+  linki sıfırlanmalıdır. Yoksa onaysız kişiler gruba sızabilir.
 
 Webhook'un bu güncellemeleri alması için `allowed_updates` şunları içermelidir:
 `message`, `callback_query`, `my_chat_member`, `chat_member`. Webhook'u yeniden kurmak için

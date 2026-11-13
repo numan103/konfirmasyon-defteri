@@ -188,6 +188,11 @@ Telegram tarafında yönetici:
 
 ## Güvenlik notları
 
+- Grup **özel** olmalıdır; herkese açık kullanıcı adı (`@...`) varsa kaldırılmalı ve
+  ana davet linki sıfırlanmalıdır. Aksi halde UID onayı olmadan gruba girilebilir.
+- Bot gruba girdiğinde/sonradan katılan biri `status='verified'` değilse bot onu
+  **banlar** ve yöneticiye bildirir. Onay/doğrulama sonrası davet üretilirken ban
+  otomatik kaldırılır. Botun grupta **"Üyeleri banla"** yetkisi olmalıdır.
 - Davet linki `member_limit=1` ve 7 gün geçerlidir; paylaşılsa bile tek kişi kullanabilir.
 - Link yalnızca satır sahibine gösterilir (`site_access` RLS: select own).
 - `site_access` tablosunda istemci yazma politikası yoktur; tüm yazma `/api/access`

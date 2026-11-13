@@ -17,7 +17,8 @@ import {
   statusKeyboard,
   adminDecisionKeyboard,
   handlePrivateOnboarding,
-  handleOnboardingCallback
+  handleOnboardingCallback,
+  handleChatMember
 } from '../lib/telegram-onboarding.mjs';
 
 const saved = { ...process.env };
@@ -422,6 +423,71 @@ test('onay: anahtar yoksa pending kaydedilir ve yöneticiye buton gider', async 
     const pendingMsg = userMsgs.find((m) => /Başvurun alındı/.test(m.text));
     assert.ok(pendingMsg);
     assert.doesNotMatch(pendingMsg.text, /bulunamadı/i);
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+
+test('onaysız üye gruba girerse banlanır ve yöneticiye bildirilir', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  process.env.TG_MENTORSHIP_CHAT_ID = '-1004496172434';
+  process.env.TG_ADMIN_CHAT_ID = '999';
+  const rec = baseRec({ status: 'pending', step: 'idle', draft_exchange: 'okx', draft_uid: '559690094576450196' });
+  const base = defaultHandler({ rows: [rec] });
+  const stub = mockFetch((entry) => {
+    if (/\/banChatMember$/.test(entry.url)) return jsonRes({ ok: true, result: true });
+    if (/\/unbanChatMember$/.test(entry.url)) return jsonRes({ ok: true, result: true });
+    return base(entry);
+  });
+  try {
+    const handled = await handleChatMember({
+      chat_member: {
+        chat: { id: -1004496172434, type: 'supergroup', title: 'Alfa Traders Mentorship' },
+        new_chat_member: { status: 'member', user: { id: 42, first_name: 'Özgür Can', username: 'justbread04' } }
+      }
+    });
+    assert.equal(handled, true);
+    assert.ok(stub.calls.some((c) => /\/banChatMember$/.test(c.url)));
+    const patches = stub.patches();
+    assert.ok(patches.some((p) => p.mentor_status === 'revoked'));
+    const adminMsg = stub.sentMessages().find((m) => String(m.chat_id) === '999');
+    assert.ok(adminMsg);
+    assert.match(adminMsg.text, /Onaysız üye gruptan çıkarıldı/);
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+test('doğrulanmış üye gruba girerse banlanmaz ve joined işaretlenir', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  process.env.TG_MENTORSHIP_CHAT_ID = '-1004496172434';
+  process.env.TG_ADMIN_CHAT_ID = '999';
+  const rec = baseRec({ status: 'verified', exchange: 'okx', exchange_uid: '559690094576450196' });
+  const base = defaultHandler({ rows: [rec] });
+  const stub = mockFetch((entry) => {
+    if (/\/banChatMember$/.test(entry.url)) return jsonRes({ ok: true, result: true });
+    return base(entry);
+  });
+  try {
+    const handled = await handleChatMember({
+      chat_member: {
+        chat: { id: -1004496172434, type: 'supergroup', title: 'Alfa Traders Mentorship' },
+        new_chat_member: { status: 'member', user: { id: 42, first_name: 'Test', username: 'test' } }
+      }
+    });
+    assert.equal(handled, true);
+    assert.equal(stub.calls.some((c) => /\/banChatMember$/.test(c.url)), false);
+    const patches = stub.patches();
+    assert.ok(patches.some((p) => p.mentor_status === 'joined'));
+    const adminMsg = stub.sentMessages().find((m) => String(m.chat_id) === '999');
+    assert.match(adminMsg.text, /Mentorluk grubuna katıldı/);
   } finally {
     stub.restore();
     restoreEnv();
