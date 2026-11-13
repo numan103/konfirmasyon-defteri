@@ -93,6 +93,9 @@ der ve yöneticiye SQL uyarısı gönderir.
 5. Vercel → Production env: `TG_MENTORSHIP_CHAT_ID=-100...`
 6. (Opsiyonel) `TG_ADMIN_IDS=5122809433` — Onayla/Reddet butonlarını kullanacak
    Telegram hesapları. Boşsa varsayılan yönetici id'si kullanılır.
+7. (Opsiyonel) `TG_ADMIN_CHAT_ID=5122809433` — UID'li yönetici bildirimlerinin
+   gideceği **özel** sohbet. Tanımlı değilse ilk yönetici id'sine DM atılır.
+   Bildirimler bilinçli olarak gruba gönderilmez; UID'ler grupta görünmez.
 
 Bot zaten `TG_BOT_TOKEN` ile çalışıyor; yeni bot gerekmez.
 

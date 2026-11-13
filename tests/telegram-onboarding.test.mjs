@@ -8,6 +8,7 @@ import {
   verificationPendingText,
   adminTelegramIds,
   isAdminTelegram,
+  adminNotifyChatId,
   welcomeKeyboard,
   exchangeKeyboard,
   uidKeyboard,
@@ -163,6 +164,20 @@ test('yönetici id listesi env ile ezilebilir', () => {
   restoreEnv();
 });
 
+test('yönetici bildirimi gruba değil özel sohbete gider', () => {
+  cleanEnv();
+  process.env.TG_CHAT_ID = '-1004496172434';
+  // TG_CHAT_ID grup olsa bile varsayılan hedef yönetici DM'i.
+  assert.equal(adminNotifyChatId(), '5122809433');
+
+  process.env.TG_ADMIN_IDS = '111,222';
+  assert.equal(adminNotifyChatId(), '111');
+
+  process.env.TG_ADMIN_CHAT_ID = '777';
+  assert.equal(adminNotifyChatId(), '777');
+  restoreEnv();
+});
+
 test('klavyeler doğru callback ve linkleri taşır', () => {
   const welcome = welcomeKeyboard();
   const data = welcome.inline_keyboard.flat().map((b) => b.callback_data);
@@ -278,6 +293,7 @@ test('onay: anahtar yoksa pending kaydedilir ve yöneticiye buton gider', async 
   process.env.TG_BOT_TOKEN = 'test-token';
   process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
   process.env.TG_CHAT_ID = '-100999';
+  process.env.TG_ADMIN_CHAT_ID = '999';
   const rec = baseRec({ step: 'confirm', draft_exchange: 'bybit', draft_uid: '1513500' });
   const stub = mockFetch(defaultHandler({ rows: [rec] }));
   try {
@@ -295,7 +311,7 @@ test('onay: anahtar yoksa pending kaydedilir ve yöneticiye buton gider', async 
     assert.equal(patches[0].exchange_uid, '1513500');
 
     const msgs = stub.sentMessages();
-    const adminMsg = msgs.find((m) => String(m.chat_id) === '-100999');
+    const adminMsg = msgs.find((m) => String(m.chat_id) === '999');
     assert.ok(adminMsg);
     const admCb = adminMsg.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
     assert.ok(admCb.includes('adm:ok:42'));

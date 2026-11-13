@@ -59,7 +59,7 @@ Mentorship (Telegram özel grup) için:
 | `TG_BOT_TOKEN` | Mevcut bot (zaten tanımlı) |
 | `TG_MENTORSHIP_CHAT_ID` | Mentorship grubunun chat id'si (`-100...`). Bot grupta **yönetici** ve "davet linki oluşturma" yetkisine sahip olmalı |
 | `TG_ADMIN_IDS` | (Opsiyonel) Onay/red butonlarını kullanabilecek Telegram user id'leri, virgülle. Boşsa `5122809433` |
-| `TG_ADMIN_CHAT_ID` | (Opsiyonel) Yönetici bildirimlerinin gideceği chat; boşsa `TG_CHAT_ID` (grup) kullanılır |
+| `TG_ADMIN_CHAT_ID` | (Opsiyonel) Yönetici bildirimlerinin gideceği **özel** chat id. Boşsa ilk `TG_ADMIN_IDS` id'sine DM atılır; asla gruba düşmez |
 
 > Anahtarlar tanımlı değilse doğrulama **yanlış sonuç üretmez**: başvuru `pending` olarak kaydedilir ve elle onaylanır. `TG_MENTORSHIP_CHAT_ID` yoksa premium erişim yine açılır; yalnızca davet adımı görünmez.
 

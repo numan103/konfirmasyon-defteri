@@ -28,6 +28,7 @@ import {
   inviteIsLive
 } from '../lib/mentorship.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
+import { adminNotifyChatId } from '../lib/admin-notify.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -260,7 +261,8 @@ async function ensureMentorInvite(userId, row, caps, opts) {
 }
 
 async function notifyAdmin(text) {
-  const chatId = (process.env.TG_CHAT_ID || '').trim();
+  // UID iceren yonetici bildirimleri gruba degil, yoneticinin ozel sohbetine gider.
+  const chatId = adminNotifyChatId();
   if (!chatId || !process.env.TG_BOT_TOKEN) return;
   try {
     await sendTelegram(text, chatId, null, {
