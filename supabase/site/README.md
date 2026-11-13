@@ -168,7 +168,7 @@ Yönetici panelinde her üye için `mentor: davetli / grupta / iptal` ve varsa h
 Üye `@alfaportfoy_bot` ile DM'de konuşur:
 
 ```
-/start
+herhangi bir mesaj (örn. "merhaba") veya /start
   → Bybit / OKX seçimi (inline buton)
   → kayıt/talimat ekranı (referans linki + Bybit video)
   → "Kaydım hazır, UID'ye geç"
@@ -180,8 +180,14 @@ Yönetici panelinde her üye için `mentor: davetli / grupta / iptal` ve varsa h
       pending   → başvuru kaydedilir, yöneticiye Onayla/Reddet butonu gider
 ```
 
+`/start` zorunlu değildir: doğrulanmamış kullanıcı DM'de ne yazarsa yazsın akış
+açılır. "Bybit"/"OKX" yazınca doğrudan o borsanın kayıt ekranı gelir. `pending` veya
+`rejected` durumundaki üye serbest metin yazınca akış sıfırlanmaz, durum özeti görür.
+Doğrulanmış üyelerin serbest metinleri Q&A'ya gider.
+
 Komutlar: `/dogrula`, `/durum`, `/link` (yeni davet), `/destek`, `/iptal`, `/sil`,
-`/yardim`. Piyasa soruları aynı DM'de `/ask`, `/data`, `/ogren` ile çalışmaya devam eder.
+`/yardim`. Piyasa soruları aynı DM'de `/ask`, `/data`, `/ogren` ile çalışmaya devam eder;
+soru olduğu anlaşılan serbest metinler de doğrulama akışını başlatmadan Q&A'ya gider.
 
 Kısa/markalı linkler (`vercel.json` redirect):
 - `https://alfa-trader.com/katil`

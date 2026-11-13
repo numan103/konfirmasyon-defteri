@@ -69,7 +69,8 @@ Anahtar/izin/ağ hatası üyeyi reddetmez; yönetici onayına düşer.
 hesabı gerekmez. Aynı borsa UID'si iki Telegram hesabına bağlanamaz.
 
 ```
-/start → Bybit/OKX butonu
+herhangi bir mesaj (örn. "merhaba") veya /start
+   → Bybit/OKX seçimi (inline buton)
    → kayıt/talimat ekranı (referans linki + Bybit video, "Kaydım hazır, UID'ye geç")
    → UID → "Doğru mu?" onayı
    → verifyExchange()
@@ -77,6 +78,11 @@ hesabı gerekmez. Aynı borsa UID'si iki Telegram hesabına bağlanamaz.
        not_found → status=rejected, tekrar dene / destek
        pending   → status=pending, yöneticiye Onayla/Reddet butonlu bildirim
 ```
+
+Yeni üyenin `/start` yazması gerekmez: doğrulanmamış kullanıcı DM'de herhangi bir
+şey yazdığında akış otomatik açılır. "Bybit" veya "OKX" yazarsa doğrudan o borsanın
+kayıt/talimat ekranına geçilir. Başvurusu `pending`/`rejected` olan üye serbest metin
+yazarsa akış baştan başlamaz; durum özeti ve ilgili butonlar gösterilir.
 
 Komutlar: `/dogrula`, `/durum`, `/link`, `/destek`, `/iptal`, `/sil`, `/yardim`.
 Kısa/markalı katılım linkleri (Vercel redirect):
@@ -88,8 +94,9 @@ Yönetici: `/bekleyen`, `/grupid`. Üye gruba katılınca `chat_member` güncell
 `mentor_status='joined'` yazar. Bot gruba eklenince `my_chat_member` ile chat id
 yöneticiye bildirilir.
 
-Bot DM'de tanımadığı mesajları Q&A'ya devreder; yani `/ask`, `/data` ve serbest
-piyasa soruları aynı sohbette çalışmaya devam eder.
+Piyasa soruları Q&A'ya devam eder: `/ask`, `/data` ve soru olduğu anlaşılan serbest
+metinler ("BTC yönü ne?", fiyat/analiz/altın vb.) doğrulama akışını başlatmaz.
+Doğrulanmış üyelerin serbest metinleri de doğrudan Q&A'ya gider.
 
 ## Gerekli kurulum
 

@@ -493,3 +493,105 @@ test('doğrulanmış üye gruba girerse banlanmaz ve joined işaretlenir', async
     restoreEnv();
   }
 });
+
+test('yeni üye /start yazmadan "merhaba" yazınca borsa seçimi açılır', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const stub = mockFetch(defaultHandler());
+  try {
+    const handled = await handlePrivateOnboarding({
+      message: {
+        chat: { id: 42, type: 'private' },
+        from: { id: 42, first_name: 'Test', username: 'test' },
+        text: 'merhaba'
+      }
+    });
+    assert.equal(handled, true);
+    const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
+    assert.ok(msg);
+    assert.match(msg.text, /borsanı seç/i);
+    const callbacks = msg.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
+    assert.ok(callbacks.includes('ex:bybit'));
+    assert.ok(callbacks.includes('ex:okx'));
+    assert.ok(stub.patches().some((p) => p.step === 'choose_exchange'));
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+test('yeni üye doğrudan "OKX" yazınca kayıt ekranına geçilir', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const stub = mockFetch(defaultHandler());
+  try {
+    const handled = await handlePrivateOnboarding({
+      message: {
+        chat: { id: 42, type: 'private' },
+        from: { id: 42, first_name: 'Test' },
+        text: 'OKX'
+      }
+    });
+    assert.equal(handled, true);
+    const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
+    assert.ok(msg);
+    assert.match(msg.text, /OKX — önce kayıt/i);
+    assert.match(msg.text, /okx\.com\/join\/CRYPTOAHMET/);
+    const patch = stub.patches().find((p) => p.step === 'await_uid');
+    assert.ok(patch);
+    assert.equal(patch.draft_exchange, 'okx');
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+test('bekleyen üye serbest metin yazınca durum özeti görür', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const rec = baseRec({ status: 'pending', exchange: 'okx', exchange_uid: '559690094576450196' });
+  const stub = mockFetch(defaultHandler({ rows: [rec] }));
+  try {
+    const handled = await handlePrivateOnboarding({
+      message: {
+        chat: { id: 42, type: 'private' },
+        from: { id: 42, first_name: 'Test' },
+        text: 'naber'
+      }
+    });
+    assert.equal(handled, true);
+    const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
+    assert.ok(msg);
+    assert.match(msg.text, /Başvurun inceleniyor/i);
+    const callbacks = msg.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
+    assert.ok(callbacks.includes('nav:retry'));
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
+
+test('doğrulanmış üye serbest metin yazınca Q&A devralır', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const rec = baseRec({ status: 'verified', exchange: 'okx', exchange_uid: '559690094576450196' });
+  const stub = mockFetch(defaultHandler({ rows: [rec] }));
+  try {
+    const handled = await handlePrivateOnboarding({
+      message: {
+        chat: { id: 42, type: 'private' },
+        from: { id: 42, first_name: 'Test' },
+        text: 'merhaba'
+      }
+    });
+    assert.equal(handled, false);
+    assert.equal(stub.sentMessages().length, 0);
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
