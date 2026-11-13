@@ -44,6 +44,10 @@
 Yalnızca borsa **kesin olarak** "bu UID senin invitee'n değil" dediğinde reddedilir.
 Anahtar/izin/ağ hatası üyeyi reddetmez; yönetici onayına düşer.
 
+> Affiliate API anahtarı eklenmezse sistem yine çalışır: her başvuru yöneticiye
+> **özelden** UID + Onayla/Reddet olarak düşer. Bu modda onaydan önce UID'yi
+> borsanın affiliate panelinden elle kontrol etmek gerekir.
+
 ### Telegram içinden akış (site hesabı gerekmez)
 
 Üye doğrudan botla konuşur. Kimlik `telegram_access.telegram_id`'dir; e-posta/site
