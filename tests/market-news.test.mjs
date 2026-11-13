@@ -17,6 +17,8 @@ test('generic tech and preview headlines never reach the BTC/gold feed', () => {
     item('Microsoft stock slumps on outage that includes the Copilot tool it has been heavily promoting'),
     item('Russian crude production rebounds after Trump diesel deal, IEA says as oil markets return to surplus'),
     item('Tesla earnings beat expectations as layoffs continue'),
+    item('Gold Price Today: $3,888 Friday on PPI Day After a 13-Month Low, Bull $3,963, Bear $3,800'),
+    item('[MARKET ANALYSIS] Fixed bearish and at fresh WTD lows into US PPI'),
   ];
   for (const n of noise) {
     assert.equal(scoreNews(n), 0, n.title);
