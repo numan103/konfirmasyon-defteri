@@ -607,3 +607,38 @@ test('doğrulanmış üye serbest metin yazınca Q&A devralır', async () => {
     restoreEnv();
   }
 });
+
+test('yönetici Onayla: kayıt verified olur, olmayan verified_by kolonu yazılmaz', async () => {
+  cleanEnv();
+  process.env.TG_BOT_TOKEN = 'test-token';
+  process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
+  const rec = baseRec({
+    telegram_id: 7493339595,
+    first_name: 'Trader Burcu',
+    exchange: 'bybit',
+    exchange_uid: '844565566562',
+    status: 'pending',
+    draft_exchange: 'bybit',
+    draft_uid: '844565566562'
+  });
+  const stub = mockFetch(defaultHandler({ rows: [rec] }));
+  try {
+    const handled = await handleOnboardingCallback({
+      id: 'cb-1',
+      data: 'adm:ok:7493339595',
+      from: { id: 5122809433, first_name: 'Admin' }
+    });
+    assert.equal(handled, true);
+    const patch = stub.patches().find((p) => p.status === 'verified');
+    assert.ok(patch);
+    assert.equal('verified_by' in patch, false);
+    assert.match(patch.check_reason, /admin_approved:5122809433/);
+    assert.equal(patch.step, 'idle');
+    const targetMsg = stub.sentMessages().find((m) => String(m.chat_id) === '7493339595');
+    assert.ok(targetMsg);
+    assert.match(targetMsg.text, /onayland[ıi]/i);
+  } finally {
+    stub.restore();
+    restoreEnv();
+  }
+});
