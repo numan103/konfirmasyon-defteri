@@ -1,5 +1,27 @@
 {
   "alias": ["alfatraders.vercel.app"],
+  "redirects": [
+    {
+      "source": "/katil",
+      "destination": "https://t.me/alfaportfoy_bot?start=dogrula",
+      "permanent": false
+    },
+    {
+      "source": "/mentorluk",
+      "destination": "https://t.me/alfaportfoy_bot?start=dogrula",
+      "permanent": false
+    },
+    {
+      "source": "/premium",
+      "destination": "https://t.me/alfaportfoy_bot?start=dogrula",
+      "permanent": false
+    },
+    {
+      "source": "/durum",
+      "destination": "https://t.me/alfaportfoy_bot?start=durum",
+      "permanent": false
+    }
+  ],
   "functions": {
     "api/ai.mjs": { "maxDuration": 60, "includeFiles": "assets/fonts/**" }
   },

@@ -79,6 +79,11 @@ hesabı gerekmez. Aynı borsa UID'si iki Telegram hesabına bağlanamaz.
 ```
 
 Komutlar: `/dogrula`, `/durum`, `/link`, `/destek`, `/iptal`, `/sil`, `/yardim`.
+Kısa/markalı katılım linkleri (Vercel redirect):
+- `https://alfa-trader.com/katil` → bot doğrulama akışı
+- `https://alfa-trader.com/mentorluk` → bot doğrulama akışı
+- `https://alfa-trader.com/premium` → bot doğrulama akışı
+- `https://alfa-trader.com/durum` → üyelik durumu
 Yönetici: `/bekleyen`, `/grupid`. Üye gruba katılınca `chat_member` güncellemesi
 `mentor_status='joined'` yazar. Bot gruba eklenince `my_chat_member` ile chat id
 yöneticiye bildirilir.

@@ -183,6 +183,15 @@ Yönetici panelinde her üye için `mentor: davetli / grupta / iptal` ve varsa h
 Komutlar: `/dogrula`, `/durum`, `/link` (yeni davet), `/destek`, `/iptal`, `/sil`,
 `/yardim`. Piyasa soruları aynı DM'de `/ask`, `/data`, `/ogren` ile çalışmaya devam eder.
 
+Kısa/markalı linkler (`vercel.json` redirect):
+- `https://alfa-trader.com/katil`
+- `https://alfa-trader.com/mentorluk`
+- `https://alfa-trader.com/premium`
+- `https://alfa-trader.com/durum`
+
+Hepsi `https://t.me/alfaportfoy_bot?start=...` adresine yönlenir; grubun ham davet
+linki paylaşılmaz, davet onaydan sonra kişiye özel üretilir.
+
 Yönetici tarafı:
 
 - Bot gruba eklenince `my_chat_member` ile **chat id** yöneticiye DM/grup olarak bildirilir.
