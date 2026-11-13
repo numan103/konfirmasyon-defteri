@@ -40,7 +40,8 @@
 > **Referans şartı:** Üye, UID yazmadan önce bizim referans linkimizle kayıt
 > olmuş olmalıdır. Bybit'te mevcut hesap taşınabilir (yeni e-posta + hesap kimliği
 > taşıma videosu). OKX'te mevcut hesap referansa taşınamıyorsa linkten yeni hesap
-> açılır. Hesap her durumda üyenin **kendi adına** olmalıdır (KYC).
+> açılır. Hesap açılışı borsanın KYC/kullanım koşullarına tabidir. OKX yaklaşık
+> 6 ayda bir tekrar giriş isteyebilir.
 >
 > - Bybit: https://partner.bybit.com/b/cryptoahmet
 > - OKX: https://www.okx.com/join/CRYPTOAHMET

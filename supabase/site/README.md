@@ -143,8 +143,9 @@ Yonetici hesapla giris yapip **Erisim** sayfasini ac: "Uyelik onaylari" panelind
 
 1. Üye, Erişim sayfasında **önce borsasını seçer** ve referans linkiyle kayıt
    olur / hesabını taşır. Bybit'te yeni e-posta ile kayıt + hesap kimliği taşıma
-   videosu; OKX'te mevcut hesap taşınamıyorsa linkten yeni hesap. Hesap üyenin
-   kendi adına olmalıdır (KYC).
+   videosu; OKX'te mevcut hesap taşınamıyorsa linkten yeni hesap. Hesap açılışı
+   borsanın KYC/kullanım koşullarına tabidir; OKX yaklaşık 6 ayda bir tekrar giriş
+   isteyebilir.
    - Bybit: https://partner.bybit.com/b/cryptoahmet
    - OKX: https://www.okx.com/join/CRYPTOAHMET
    - Bybit taşıma videosu: https://youtu.be/p0EcYJ40Kt0

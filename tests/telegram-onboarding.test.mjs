@@ -279,7 +279,8 @@ test('nav:uid kayıt adımından sonra UID istemine geçer', async () => {
 
     const msg = stub.sentMessages().find((m) => String(m.chat_id) === '42');
     assert.ok(msg);
-    assert.match(msg.text, /OKX UID'ni yaz/i);
+    assert.match(msg.text, /OKX UID'ni aşağıya yaz/);
+    assert.match(msg.text, /👇/);
   } finally {
     stub.restore();
     restoreEnv();
@@ -304,7 +305,7 @@ test('prep adımında "hazır" yazınca UID istemine geçilir', async () => {
     const patches = stub.patches();
     assert.equal(patches[0].step, 'await_uid');
     const msg = stub.sentMessages()[0];
-    assert.match(msg.text, /Bybit UID'ni yaz/i);
+    assert.match(msg.text, /Bybit UID'ni aşağıya yaz/);
   } finally {
     stub.restore();
     restoreEnv();
