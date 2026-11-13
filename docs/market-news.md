@@ -24,7 +24,7 @@
 ## Filtreleme
 1. Zaman penceresi: son 24 saat.
 2. Baslik anahtari (`titleKey`): kucuk harf + Google News kaynak eki (` - CNBC`) temizlenir.
-3. Gurultu dislama (`NOISE_RES`): Nvidia, Microsoft, Outlook/Copilot, Apple, Tesla, Meta, Amazon, OpenAI, kazanc/guidance/layoff/CEO istifasi, spor/eglence.
+3. Gurultu dislama (`NOISE_RES`): Nvidia, Microsoft, Outlook/Copilot, Apple, Tesla, Meta, Amazon, OpenAI, kazanc/guidance/layoff/CEO istifasi, spor/eglence; ayrica "price today", "price prediction", "technical analysis", "market analysis" gibi rutin fiyat yorumlari.
 4. Onizleme dislama (`PREVIEW_RES`): "ahead of", preview, what to watch, "brace for", "focus on", "await", "due", forecast gibi gercek gelisme olmayan basliklar.
 5. Hedef puanlama (`scoreNews`): dogrudan BTC/kripto/altin +3, guclu makro surucu +2, gerceklesmis hareket/karar +1. Puan 0 ise haber gonderilmez.
 6. Sert veri onceligi (`isHardEvent`): PPI, CPI/PCE, tarim disi istihdam/isssizlik, FOMC/faiz karari basliklari **hem veri turunu hem gerceklesmis sonucu** ("0.3%", "rose", "slows", "held") iceriyorsa listede en uste alinir; piyasa fiyat yorumundan once gonderilir.
