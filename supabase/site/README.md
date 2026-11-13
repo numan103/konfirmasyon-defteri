@@ -6,6 +6,12 @@ Bu klasör deploy edilmez (`.vercelignore` içinde `supabase/` var). SQL'i Supab
 
 Supabase → SQL Editor → `001_access.sql` içeriğini bir kez çalıştır.
 
+Ardından `005_mentorship.sql` dosyasını da çalıştır (premium/mentorship katmanı:
+hacim, davet linki, mentorship durumu). Dosya idempotenttir; tekrar çalıştırmak zararsızdır.
+
+> `005` çalıştırılmadan da site çalışır: `/api/access` eksik kolonları algılar,
+> mentorship paneli "kurulum bekliyor" der ve premium erişim normal işler.
+
 Oluşan tablo: `public.site_access`.
 
 - Kullanıcı **yalnızca kendi satırını SELECT** edebilir (RLS).
@@ -36,11 +42,18 @@ Borsa doğrulaması için (affiliate API anahtarı):
 
 | Değişken | Not |
 |---|---|
-| `BYBIT_API_KEY` / `BYBIT_API_SECRET` | Bybit affiliate anahtarı; **yalnızca "Affiliate" izni** verilmeli |
+| `BYBIT_API_KEY` / `BYBIT_API_SECRET` | Bybit affiliate anahtarı; **yalnızca "Affiliate" izni** verilmeli, master UID ile |
 | `OKX_API_KEY` / `OKX_API_SECRET` / `OKX_API_PASSPHRASE` | OKX affiliate kimliği |
-| `OKX_AFFILIATE_PATH` | Varsayılan `/api/v5/affiliate/invitee/list`; OKX farklı yol veriyorsa buradan değiştir |
+| `OKX_AFFILIATE_DETAIL_PATH` | Varsayılan `/api/v5/affiliate/invitee/detail`; OKX farklı yol veriyorsa buradan değiştir |
 
-> Anahtarlar tanımlı değilse doğrulama **yanlış sonuç üretmez**: başvuru `pending` olarak kaydedilir ve elle onaylanır.
+Mentorship (Telegram özel grup) için:
+
+| Değişken | Not |
+|---|---|
+| `TG_BOT_TOKEN` | Mevcut bot (zaten tanımlı) |
+| `TG_MENTORSHIP_CHAT_ID` | Mentorship grubunun chat id'si (`-100...`). Bot grupta **yönetici** ve "davet linki oluşturma" yetkisine sahip olmalı |
+
+> Anahtarlar tanımlı değilse doğrulama **yanlış sonuç üretmez**: başvuru `pending` olarak kaydedilir ve elle onaylanır. `TG_MENTORSHIP_CHAT_ID` yoksa premium erişim yine açılır; yalnızca davet adımı görünmez.
 
 ## 3. Elle onay / red
 
@@ -117,3 +130,21 @@ Not: `site_access` tablosu yokken kapı bilinçli olarak kapalıdır (herkes `re
 Yonetici hesapla giris yapip **Erisim** sayfasini ac: "Uyelik onaylari" panelinde UID gonderen uyeler listelenir (e-posta + borsa + UID). `Onayla` aninda premium erisim verir, `Reddet` / `Geri al` erisimi kapatir. Bu islemler `/api/access` uzerinden service-role ile yazilir; arayuz yalnizca `SITE_ADMIN_EMAILS` listesindeki hesaplara acilir.
 
 > Bu dosya env guncellemesi sonrasi guncellendi.
+
+## 6. Mentorship akisi (premium → Telegram)
+
+1. Üye, Erişim sayfasında borsasını seçip UID'sini gönderir.
+2. Anahtarlar tanımlıysa `/api/access` borsaya sorar:
+   - `verified` → anında `ref` (premium) + mentorship daveti
+   - `not_found` → `rejected` (yalnızca borsa kesin "yok" dediğinde)
+   - `not_configured` / `auth_error` / `rate_limited` / `error` → `pending` (yanlış suçlama yok)
+3. Doğrulanan üye için bot, mentorship grubunda **tek kullanımlık** davet linki üretir
+   (`member_limit=1`, 7 gün). Link `site_access.mentor_invite` alanında tutulur ve
+   yalnızca sahibine gösterilir.
+4. Üye linke tıklayıp gruba katılır. Bağlantı süresi dolmuşsa Erişim sayfasındaki
+   "Davet linkini yenile" butonu yeni link üretir.
+5. Elle onay (`approve`) da aynı davet akışını tetikler.
+
+Yönetici panelinde her üye için `mentor: davetli / grupta / iptal` ve varsa hacim görünür.
+`revoke` işlemi erişimi kapatır, mentorship davetini iptal eder ve durumu `revoked` yapar.
+

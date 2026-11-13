@@ -1,9 +1,11 @@
 // ALFA TRADERS - uyelik / referans erisim ucu
 //
-// GET  /api/access            -> kullanicinin erisim durumu
+// GET  /api/access            -> kullanicinin erisim + mentorship durumu
 // GET  /api/access?op=list    -> (yonetici) tum basvurular + e-posta
 // POST /api/access {op:'submit', exchange:'okx'|'bybit', uid:'...'}
 //                             -> UID'yi borsaya sorar, sonucu kaydeder
+// POST /api/access {op:'mentor'}
+//                             -> dogrulanmis uye icin davet linkini yeniler
 // POST /api/access {op:'approve'|'reject'|'revoke', user_id:'...'}
 //                             -> (yonetici) basvuruyu onaylar/reddeder
 //
@@ -13,8 +15,19 @@
 //
 // Borsa API anahtarlari tanimli degilse dogrulama yapilamaz; basvuru
 // 'pending' olarak kaydedilir ve elle onaylanabilir. Yanlis sonuc uretilmez.
+//
+// Mentorship: dogrulanan uye icin Telegram botu tek kullanimlik davet linki
+// uretir (TG_MENTORSHIP_CHAT_ID). Link uretilemezse premium erisim yine acilir;
+// yalnizca davet adimi "hazir degil" olarak gorunur.
 
-import { verifyExchange, isConfigured } from '../lib/exchanges.mjs';
+import { verifyExchange, isConfigured, submitStatusFor } from '../lib/exchanges.mjs';
+import {
+  mentorshipConfigured,
+  createMentorshipInvite,
+  revokeMentorshipInvite,
+  inviteIsLive
+} from '../lib/mentorship.mjs';
+import { sendTelegram } from '../lib/telegram.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -22,6 +35,16 @@ const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9
 const FALLBACK_ADMIN = 'ahmetnuman20@gmail.com';
 const COOLDOWN_MS = 20000;
 const MAX_ATTEMPTS = 10;
+const MENTOR_REFRESH_MS = 30000;
+
+const BASE_COLS = ['exchange', 'exchange_uid', 'status', 'verified_at', 'verified_by', 'attempts', 'updated_at'];
+const VOLUME_COLS = ['volume'];
+const MENTOR_COLS = [
+  'mentor_status', 'mentor_invite', 'mentor_invite_expires_at',
+  'mentor_invited_at', 'mentor_joined_at',
+  'last_checked_at', 'check_reason',
+  'volume_updated_at', 'exchange_joined_at'
+];
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -85,11 +108,59 @@ async function getUser(jwt) {
   }
 }
 
+// ---- Sema yetenekleri ----
+// 005_mentorship.sql henuz calistirilmamis olabilir. Eksik kolon yuzunden
+// tum uyelik kapisinin kapanmamasi icin bir kez kontrol edip onbellekleriz.
+let capsPromise = null;
+
+async function accessCaps() {
+  if (capsPromise) return capsPromise;
+  capsPromise = (async () => {
+    const key = process.env.SUPABASE_SERVICE_ROLE || '';
+    if (!key) return { volume: false, mentor: false };
+    const probe = async (cols) => {
+      try {
+        const r = await fetch(
+          SUPABASE_URL + '/rest/v1/site_access?select=' + cols.join(',') + '&limit=1',
+          { headers: svcHeaders() }
+        );
+        return r.ok;
+      } catch (e) {
+        return false;
+      }
+    };
+    const volume = await probe(VOLUME_COLS);
+    const mentor = await probe(MENTOR_COLS);
+    if (!volume || !mentor) {
+      console.warn('[ACCESS] sema eksik: volume=' + volume + ' mentor=' + mentor + ' (005_mentorship.sql)');
+    }
+    return { volume, mentor };
+  })();
+  return capsPromise;
+}
+
+function allowedFields(caps) {
+  const set = new Set(['user_id', 'exchange', 'exchange_uid', 'status', 'verified_by', 'verified_at', 'note', 'attempts']);
+  if (caps && caps.volume) VOLUME_COLS.forEach((c) => set.add(c));
+  if (caps && caps.mentor) MENTOR_COLS.forEach((c) => set.add(c));
+  return set;
+}
+
+function pickAllowed(obj, caps) {
+  const allowed = allowedFields(caps);
+  const out = {};
+  Object.keys(obj || {}).forEach((k) => { if (allowed.has(k)) out[k] = obj[k]; });
+  return out;
+}
+
 // Kullanicinin JWT'si ile okuma: RLS yalniz kendi satirini dondurur.
-async function readOwn(jwt, userId) {
+async function readOwn(jwt, userId, caps) {
+  const cols = BASE_COLS.slice();
+  if (caps && caps.volume) cols.push(...VOLUME_COLS);
+  if (caps && caps.mentor) cols.push(...MENTOR_COLS);
   const r = await fetch(
     SUPABASE_URL + '/rest/v1/site_access?user_id=eq.' + encodeURIComponent(userId) +
-      '&select=exchange,exchange_uid,status,verified_at,verified_by,attempts,updated_at',
+      '&select=' + cols.join(','),
     { headers: { apikey: PUB, Authorization: 'Bearer ' + jwt } }
   );
   if (r.status === 404) return { missing: true };
@@ -98,13 +169,13 @@ async function readOwn(jwt, userId) {
   return { row: rows && rows[0] ? rows[0] : null };
 }
 
-async function writeRow(row) {
+async function writeRow(row, caps) {
   const key = process.env.SUPABASE_SERVICE_ROLE || '';
   if (!key) throw new Error('service role missing');
   const r = await fetch(SUPABASE_URL + '/rest/v1/site_access?on_conflict=user_id', {
     method: 'POST',
     headers: { ...svcHeaders(), Prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify([row])
+    body: JSON.stringify([pickAllowed(row, caps)])
   });
   if (!r.ok) {
     const body = await r.text().catch(() => '');
@@ -122,6 +193,78 @@ function tierOf(user, status) {
   return 'free';
 }
 
+// ---- Mentorship ----
+
+function mentorView(caps, row) {
+  const enabled = !!(caps && caps.mentor) && mentorshipConfigured();
+  const status = (row && row.mentor_status) || 'none';
+  const live = !!(row && row.status === 'verified' &&
+    inviteIsLive(row.mentor_invite, row.mentor_invite_expires_at));
+  return {
+    enabled,
+    chat: enabled || (caps && caps.mentor) ? 'telegram' : null,
+    status,
+    invite: live ? row.mentor_invite : null,
+    invite_expires_at: live ? row.mentor_invite_expires_at : null,
+    invited_at: (row && row.mentor_invited_at) || null,
+    joined_at: (row && row.mentor_joined_at) || null
+  };
+}
+
+// Dogrulanmis uye icin gecerli bir davet linki oldugundan emin olur.
+// Var olan link gecerlıyse yeniden uretmez; Telegram hatasi akisi durdurmaz.
+async function ensureMentorInvite(userId, row, caps, opts) {
+  const force = !!(opts && opts.force);
+  if (!caps || !caps.mentor || !mentorshipConfigured()) return { row, created: false };
+  if (!row || row.status !== 'verified') return { row, created: false };
+  if (row.mentor_status === 'joined' || row.mentor_status === 'revoked') return { row, created: false };
+
+  const live = inviteIsLive(row.mentor_invite, row.mentor_invite_expires_at);
+  if (live && !force) return { row, created: false };
+  if (live && force) {
+    const last = row.mentor_invited_at ? Date.parse(row.mentor_invited_at) : 0;
+    if (Number.isFinite(last) && Date.now() - last < MENTOR_REFRESH_MS) {
+      return { row, created: false };
+    }
+  }
+
+  if (row.mentor_invite) {
+    try { await revokeMentorshipInvite(row.mentor_invite); } catch (e) { /* best-effort */ }
+  }
+
+  const label = ((row.exchange || 'alfa') + '-' + (row.exchange_uid || '')).toLowerCase();
+  const inv = await createMentorshipInvite({ name: label });
+  if (!inv.ok) {
+    console.error('[ACCESS] mentorship davet', inv.reason, inv.detail || '');
+    return { row, created: false };
+  }
+
+  const patch = {
+    mentor_status: 'invited',
+    mentor_invite: inv.link,
+    mentor_invite_expires_at: inv.expires_at,
+    mentor_invited_at: new Date().toISOString()
+  };
+  let next = { ...row, ...patch };
+  try {
+    const saved = await svcPatch(userId, patch, caps);
+    if (saved) next = { ...row, ...saved };
+  } catch (e) {
+    console.error('[ACCESS] mentorship kayit', e && e.message);
+  }
+  return { row: next, created: true };
+}
+
+async function notifyAdmin(text) {
+  const chatId = (process.env.TG_CHAT_ID || '').trim();
+  if (!chatId || !process.env.TG_BOT_TOKEN) return;
+  try {
+    await sendTelegram(text, chatId, null, {
+      inline_keyboard: [[{ text: 'Üyeleri gör →', url: 'https://alfa-trader.com/?page=erisim' }]]
+    });
+  } catch (e) { /* bildirim sessiz kalir */ }
+}
+
 // ---- Yonetici islemleri (service role gerekir) ----
 
 async function svcRead(path) {
@@ -132,7 +275,7 @@ async function svcRead(path) {
   return r.json();
 }
 
-async function svcPatch(userId, patch) {
+async function svcPatch(userId, patch, caps) {
   const key = process.env.SUPABASE_SERVICE_ROLE || '';
   if (!key) throw new Error('service role missing');
   const r = await fetch(
@@ -140,7 +283,7 @@ async function svcPatch(userId, patch) {
     {
       method: 'PATCH',
       headers: { ...svcHeaders(), Prefer: 'return=representation' },
-      body: JSON.stringify(patch)
+      body: JSON.stringify(pickAllowed(patch, caps))
     }
   );
   if (!r.ok) throw new Error('patch ' + r.status);
@@ -163,11 +306,16 @@ async function emailMap() {
 
 async function listHandler(res, user) {
   if (!isAdminUser(user)) return fail(res, 403, 'admin_only');
+  const caps = await accessCaps();
+  const cols = BASE_COLS.concat(['user_id', 'note', 'created_at']);
+  if (caps.volume) cols.push(...VOLUME_COLS);
+  if (caps.mentor) cols.push(...MENTOR_COLS);
+
   let rows;
   try {
     rows = await svcRead(
-      '/rest/v1/site_access?select=user_id,exchange,exchange_uid,status,note,attempts,' +
-      'verified_at,verified_by,created_at,updated_at,volume&order=created_at.desc&limit=200'
+      '/rest/v1/site_access?select=' + cols.join(',') +
+      '&order=created_at.desc&limit=200'
     );
   } catch (e) {
     console.error('[ACCESS] list', e && e.message);
@@ -185,9 +333,19 @@ async function listHandler(res, user) {
     verified_at: r.verified_at,
     verified_by: r.verified_by,
     created_at: r.created_at,
-    updated_at: r.updated_at
+    updated_at: r.updated_at,
+    volume: r.volume === undefined ? null : r.volume,
+    volume_updated_at: r.volume_updated_at || null,
+    exchange_joined_at: r.exchange_joined_at || null,
+    mentor_status: r.mentor_status || 'none',
+    mentor_invite: r.mentor_invite || null,
+    mentor_invite_expires_at: r.mentor_invite_expires_at || null,
+    mentor_invited_at: r.mentor_invited_at || null,
+    mentor_joined_at: r.mentor_joined_at || null,
+    last_checked_at: r.last_checked_at || null,
+    check_reason: r.check_reason || null
   }));
-  // Aylık sistem: dogrulanan referans sayilarini ay bazinda ozetle.
+  // Aylik sistem: dogrulanan referans sayilarini ay bazinda ozetle.
   const byMonth = {};
   (Array.isArray(rows) ? rows : []).forEach((r) => {
     if (r.status !== 'verified') return;
@@ -198,7 +356,14 @@ async function listHandler(res, user) {
     byMonth[d].v = (byMonth[d].v || 0) + (Number(r.volume) || 0);
   });
   const monthList = Object.keys(byMonth).sort().map((k) => ({ month: k, verified: byMonth[k].n, volume: byMonth[k].v }));
-  return send(res, 200, { ok: true, rows: out, open: process.env.SITE_ACCESS_OPEN === '1', byMonth: monthList });
+  return send(res, 200, {
+    ok: true,
+    rows: out,
+    open: process.env.SITE_ACCESS_OPEN === '1',
+    byMonth: monthList,
+    mentor_configured: mentorshipConfigured() && caps.mentor,
+    schema: { volume: caps.volume, mentor: caps.mentor }
+  });
 }
 
 async function adminOpHandler(res, user, body) {
@@ -209,6 +374,8 @@ async function adminOpHandler(res, user, body) {
     return fail(res, 400, 'bad_user');
   }
   if (userId === user.id) return fail(res, 400, 'self');
+
+  const caps = await accessCaps();
 
   let patch;
   if (op === 'approve') {
@@ -221,50 +388,75 @@ async function adminOpHandler(res, user, body) {
   } else if (op === 'setvolume') {
     const vol = Number(body.volume);
     if (!isFinite(vol) || vol < 0) return fail(res, 400, 'bad_volume');
-    patch = { volume: vol };
+    if (!caps.volume) return fail(res, 503, 'schema_missing');
+    patch = { volume: vol, volume_updated_at: new Date().toISOString() };
   } else if (op === 'delvolume') {
-    patch = { volume: null };
+    if (!caps.volume) return fail(res, 503, 'schema_missing');
+    patch = { volume: null, volume_updated_at: null };
   } else if (op === 'revoke') {
     patch = { status: 'rejected', verified_by: 'manual', verified_at: null, note: 'revoked' };
+    if (caps.mentor) patch.mentor_status = 'revoked';
   } else {
     return fail(res, 400, 'bad_op');
   }
 
   let row;
   try {
-    row = await svcPatch(userId, patch);
+    row = await svcPatch(userId, patch, caps);
   } catch (e) {
     console.error('[ACCESS] admin op', e && e.message);
     return fail(res, 500, 'store_error');
   }
   if (!row) return fail(res, 404, 'not_found');
-  // Onay sonrasi yoneticiye bilgilendirme (best-effort).
+
   if (op === 'approve') {
-    try {
-      const tgb = process.env.TG_BOT_TOKEN;
-      const tgc = process.env.TG_CHAT_ID;
-      if (tgb && tgc) {
-        await fetch('https://api.telegram.org/bot' + tgb + '/sendMessage', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: tgc,
-            text: '🎉 Yeni bir üye premium\'a katıldı.\n\nDetaylar → https://alfa-trader.com/?page=erisim',
-            reply_markup: { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] }
-          })
-        });
-      }
-    } catch (e) { /* bildirim sessiz kalir */ }
+    const got = await ensureMentorInvite(userId, row, caps);
+    row = got.row;
+    await notifyAdmin(
+      '🎉 Yeni bir üye premium\'a katıldı.\n\n' +
+      (row.exchange ? String(row.exchange).toUpperCase() + ' · UID ' + (row.exchange_uid || '—') + '\n' : '') +
+      'Mentorship daveti: ' + (got.created ? 'hazır' : (mentorView(caps, row).invite ? 'hazır' : 'bekliyor')) +
+      '\n\nhttps://alfa-trader.com/?page=erisim'
+    );
   }
-  return send(res, 200, { ok: true, status: row.status, user_id: row.user_id });
+  if (op === 'revoke' && row.mentor_invite) {
+    try { await revokeMentorshipInvite(row.mentor_invite); } catch (e) { /* best-effort */ }
+  }
+  return send(res, 200, {
+    ok: true,
+    status: row.status,
+    user_id: row.user_id,
+    mentor: mentorView(caps, row)
+  });
+}
+
+async function mentorOpHandler(res, user, jwt) {
+  const caps = await accessCaps();
+  if (!caps.mentor) return fail(res, 503, 'schema_missing');
+  if (!mentorshipConfigured()) return fail(res, 503, 'mentor_not_configured');
+
+  let row = null;
+  try {
+    const got = await readOwn(jwt, user.id, caps);
+    if (got.missing) return fail(res, 500, 'access_store');
+    row = got.row;
+  } catch (e) {
+    console.error('[ACCESS] mentor read', e && e.message);
+    return fail(res, 500, 'store_error');
+  }
+  if (!row || row.status !== 'verified') return fail(res, 403, 'not_verified');
+
+  const got = await ensureMentorInvite(user.id, row, caps, { force: true });
+  return send(res, 200, { ok: true, mentor: mentorView(caps, got.row) });
 }
 
 async function statusHandler(res, user, jwt) {
   const admin = isAdminUser(user);
+  const caps = await accessCaps();
   let row = null;
   let missing = false;
   try {
-    const got = await readOwn(jwt, user.id);
+    const got = await readOwn(jwt, user.id, caps);
     missing = !!got.missing;
     row = got.row || null;
   } catch (e) {
@@ -273,6 +465,20 @@ async function statusHandler(res, user, jwt) {
   }
 
   const status = admin ? 'verified' : (row ? row.status : 'none');
+
+  // Dogrulanmis ama daveti olmayan uyeler (eski kayitlar) icin bir kez
+  // davet uret. Telegram hatasi GET'i asla bozmaz.
+  if (!admin && row && row.status === 'verified' && caps.mentor && mentorshipConfigured() &&
+      row.mentor_status !== 'joined' && row.mentor_status !== 'revoked' &&
+      !inviteIsLive(row.mentor_invite, row.mentor_invite_expires_at)) {
+    try {
+      const got = await ensureMentorInvite(user.id, row, caps);
+      row = got.row;
+    } catch (e) {
+      console.error('[ACCESS] mentor ensure', e && e.message);
+    }
+  }
+
   const open = process.env.SITE_ACCESS_OPEN === '1';
 
   // Tablo kurulmamis ise kapi devre disidir: kimseyi yanlislikla kilitlemeyiz.
@@ -289,8 +495,11 @@ async function statusHandler(res, user, jwt) {
     exchange_uid: row ? row.exchange_uid : null,
     verified_at: row ? row.verified_at : null,
     verified_by: row ? row.verified_by : null,
+    volume: row && row.volume !== undefined ? row.volume : null,
     store_missing: missing,
     configured: { okx: isConfigured('okx'), bybit: isConfigured('bybit') },
+    mentor: mentorView(caps, row),
+    schema: { volume: caps.volume, mentor: caps.mentor },
     links: links()
   });
 }
@@ -304,12 +513,16 @@ async function submitHandler(res, user, jwt, body) {
 
   // Admin zaten tam erisimli; bosuna borsa sorgusu yapmayalim.
   if (isAdminUser(user)) {
-    return send(res, 200, { ok: true, tier: 'admin', status: 'verified', verified: true });
+    return send(res, 200, {
+      ok: true, tier: 'admin', status: 'verified', verified: true,
+      mentor: { enabled: false, status: 'none', invite: null }
+    });
   }
 
+  const caps = await accessCaps();
   let existing = null;
   try {
-    const got = await readOwn(jwt, user.id);
+    const got = await readOwn(jwt, user.id, caps);
     if (got.missing) return fail(res, 500, 'access_store');
     existing = got.row;
   } catch (e) {
@@ -319,7 +532,11 @@ async function submitHandler(res, user, jwt, body) {
 
   // Dogrulanmis kullanici yeniden basvurarak durumunu dusuremez.
   if (existing && existing.status === 'verified') {
-    return send(res, 200, { ok: true, tier: 'ref', status: 'verified', verified: true });
+    const got = await ensureMentorInvite(user.id, existing, caps);
+    return send(res, 200, {
+      ok: true, tier: 'ref', status: 'verified', verified: true,
+      mentor: mentorView(caps, got.row)
+    });
   }
 
   if (existing && existing.updated_at) {
@@ -332,8 +549,9 @@ async function submitHandler(res, user, jwt, body) {
 
   const v = await verifyExchange(exchange, uid);
 
-  // Anahtar yoksa dogrulama yapilamaz: 'pending' birak, yanlis sonuc yazma.
-  const status = v.verified ? 'verified' : (v.reason === 'not_configured' ? 'pending' : 'rejected');
+  // Anahtar yoksa veya borsa hata verdiyse dogrulama yapilamaz: 'pending'
+  // birak, yanlis sonuc yazma. Yalnizca kesin 'yok' cevabi reddedilir.
+  const status = submitStatusFor(v);
 
   const row = {
     user_id: user.id,
@@ -345,13 +563,37 @@ async function submitHandler(res, user, jwt, body) {
     note: v.verified ? null : v.reason,
     attempts: ((existing && existing.attempts) || 0) + 1
   };
+  if (caps.volume) {
+    if (v.volume !== null && v.volume !== undefined) {
+      row.volume = v.volume;
+      row.volume_updated_at = new Date().toISOString();
+    }
+    if (v.joinedAt) row.exchange_joined_at = v.joinedAt;
+  }
+  if (caps.mentor) {
+    row.last_checked_at = new Date().toISOString();
+    row.check_reason = v.reason;
+  }
 
   try {
-    await writeRow(row);
+    await writeRow(row, caps);
   } catch (e) {
     if (e && e.conflict) return fail(res, 409, 'uid_taken');
     console.error('[ACCESS] submit write', e && e.message);
     return fail(res, 500, 'access_store');
+  }
+
+  let saved = row;
+  if (status === 'verified') {
+    const got = await ensureMentorInvite(user.id, row, caps);
+    saved = got.row;
+    await notifyAdmin(
+      '✅ UID otomatik doğrulandı.\n\n' +
+      String(exchange).toUpperCase() + ' · UID ' + uid +
+      (v.volume !== null && v.volume !== undefined ? '\nHacim: $' + Number(v.volume).toLocaleString('tr-TR') : '') +
+      '\nMentorship daveti: ' + (mentorView(caps, saved).invite ? 'hazır' : 'bekliyor') +
+      '\n\nhttps://alfa-trader.com/?page=erisim'
+    );
   }
 
   return send(res, 200, {
@@ -360,7 +602,8 @@ async function submitHandler(res, user, jwt, body) {
     status,
     verified: v.verified,
     manual: v.reason === 'not_configured',
-    reason: v.reason
+    reason: v.reason,
+    mentor: mentorView(caps, saved)
   });
 }
 
@@ -388,6 +631,7 @@ export default async function handler(req, res) {
     const op = body.op || 'status';
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);
+    if (op === 'mentor') return mentorOpHandler(res, user, jwt);
     if (op === 'approve' || op === 'reject' || op === 'revoke' || op === 'setvolume' || op === 'delvolume') return adminOpHandler(res, user, body);
     return fail(res, 400, 'bad_request');
   }

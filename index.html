@@ -8601,6 +8601,16 @@
       </div>
     </div>
 
+    <div class="panel" id="acc-mentor-panel" style="display:none;">
+      <h2><span>🤝 Mentorship</span><span class="n" id="acc-mentor-badge">—</span></h2>
+      <p class="hint" id="acc-mentor-text" style="margin:0 0 6px;"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <a class="btn solid" id="acc-mentor-join" target="_blank" rel="noopener noreferrer" style="display:none;">Telegram grubuna katıl ↗</a>
+        <button class="btn" id="acc-mentor-refresh" type="button" style="display:none;">Davet linkini yenile</button>
+      </div>
+      <p class="hint" id="acc-mentor-note" style="margin:10px 0 0;"></p>
+    </div>
+
     <div class="panel" id="acc-admin-panel" style="display:none;">
       <h2><span>Üyelik onayları</span><span class="n" id="acc-admin-count">—</span></h2>
       <p class="hint" style="margin:0 0 10px;">UID gönderen üyeler burada listelenir. Onayladığında üye anında premium erişim alır.</p>
@@ -13038,6 +13048,7 @@ const SITE = {
   verified_by: null,
   store_missing: false,
   configured: { okx: false, bybit: false },
+  mentor: { enabled: false, status: 'none', invite: null, invite_expires_at: null },
   links: { okx: SITE_REF_LINKS.okx, bybit: SITE_REF_LINKS.bybit }
 };
 
@@ -13123,6 +13134,7 @@ function siteApplyAccess(j) {
   SITE.verified_by = j.verified_by || null;
   SITE.store_missing = !!j.store_missing;
   SITE.configured = j.configured || { okx: false, bybit: false };
+  SITE.mentor = j.mentor || { enabled: false, status: 'none', invite: null, invite_expires_at: null };
   const L = j.links || {};
   SITE.links = {
     okx: L.okx || SITE_REF_LINKS.okx,
@@ -13239,14 +13251,101 @@ function accessErrText(code) {
   const map = {
     bad_uid: 'UID 3-32 karakter olmalı, harf ve rakam içerebilir.',
     bad_exchange: 'Borsa seçilemedi.',
+    bad_user: 'Üye bulunamadı.',
     too_soon: 'Çok sık denedin. 20 saniye sonra tekrar dene.',
     too_many_attempts: 'Deneme sınırı doldu. Yöneticiye başvur.',
     uid_taken: 'Bu UID başka bir hesaba bağlı. Kendi hesabını kullan.',
     access_store: 'Kayıt yazılamadı. Yöneticiye başvur.',
     store_error: 'Erişim kaydı okunamadı. Yöneticiye başvur.',
+    schema_missing: 'Mentorship kurulumu henüz tamamlanmadı.',
+    mentor_not_configured: 'Mentorship grubu henüz bağlanmadı.',
+    not_verified: 'Önce UID doğrulaması gerekiyor.',
     unauthorized: 'Oturum süresi doldu, tekrar giriş yap.'
   };
   return map[code] || 'Bir hata oldu, tekrar dene.';
+}
+
+function mentorDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString('tr-TR', {
+      day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
+    });
+  } catch (e) { return '—'; }
+}
+
+function renderMentorPanel() {
+  const panel = document.getElementById('acc-mentor-panel');
+  if (!panel) return;
+  const verified = SITE.tier === 'ref' && !siteIsAdmin();
+  panel.style.display = verified ? '' : 'none';
+  if (!verified) return;
+
+  const badge = document.getElementById('acc-mentor-badge');
+  const text = document.getElementById('acc-mentor-text');
+  const join = document.getElementById('acc-mentor-join');
+  const refresh = document.getElementById('acc-mentor-refresh');
+  const note = document.getElementById('acc-mentor-note');
+  const M = SITE.mentor || {};
+
+  const setJoin = function (link) {
+    if (!join) return;
+    if (link) { join.href = link; join.style.display = ''; }
+    else { join.removeAttribute('href'); join.style.display = 'none'; }
+  };
+  const setRefresh = function (show) {
+    if (refresh) refresh.style.display = show ? '' : 'none';
+  };
+
+  if (!M.enabled) {
+    if (badge) badge.textContent = 'Kurulum bekliyor';
+    if (text) text.textContent = 'Premium erişimin açık. Telegram mentorship grubu henüz bağlanmadı; grup bağlandığında davetin burada görünecek.';
+    setJoin(null); setRefresh(false);
+    if (note) note.textContent = '';
+    return;
+  }
+
+  if (M.status === 'joined') {
+    if (badge) badge.textContent = 'Grupta';
+    if (text) text.textContent = 'Mentorship grubundasın. Canlı oturumlar, trade değerlendirmeleri ve soru-cevap grupta yapılır.';
+    setJoin(null); setRefresh(false);
+    if (note) note.textContent = M.joined_at ? 'Katılım: ' + mentorDate(M.joined_at) : '';
+    return;
+  }
+
+  if (M.invite) {
+    if (badge) badge.textContent = 'Davet hazır';
+    if (text) text.textContent = 'Mentorship grubuna katılmak için tek kullanımlık davet linkin hazır. Link yalnızca bir kez kullanılabilir, bu yüzden kimseyle paylaşma.';
+    setJoin(M.invite); setRefresh(true);
+    if (note) note.textContent = M.invite_expires_at ? 'Link geçerlilik sonu: ' + mentorDate(M.invite_expires_at) : '';
+    return;
+  }
+
+  if (badge) badge.textContent = 'Hazırlanıyor';
+  if (text) text.textContent = 'Premium erişimin açık. Davet linki hazırlanıyor; birkaç saniye içinde görünmezse aşağıdan yenile.';
+  setJoin(null); setRefresh(true);
+  if (note) note.textContent = '';
+}
+
+async function refreshMentorInvite() {
+  const btn = document.getElementById('acc-mentor-refresh');
+  const note = document.getElementById('acc-mentor-note');
+  if (btn) btn.disabled = true;
+  if (note) note.textContent = 'Yeni davet linki hazırlanıyor…';
+  try {
+    const r = await siteFetch('/api/access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ op: 'mentor' })
+    });
+    const j = await r.json().catch(function () { return null; });
+    if (!r.ok || !j || !j.ok) throw new Error(accessErrText(j && j.error));
+    SITE.mentor = j.mentor || SITE.mentor;
+    renderMentorPanel();
+  } catch (e) {
+    if (note) note.textContent = e.message || 'Davet yenilenemedi.';
+  }
+  if (btn) btn.disabled = false;
 }
 
 function renderAccessPage() {
@@ -13264,7 +13363,7 @@ function renderAccessPage() {
     badge.textContent = 'Kurulum eksik';
     text.textContent = 'Erişim tablosu kurulmamış; kapı devre dışı. Yönetici supabase/site/001_access.sql dosyasını çalıştırmalı.';
   } else if (isAdmin) { badge.textContent = 'Yönetici'; text.textContent = 'Yönetici hesabı: tüm sayfalar açık.'; }
-  else if (verified) { badge.textContent = 'Doğrulandı'; text.textContent = 'Referansın doğrulandı. Tüm ürün erişimine sahipsin.'; }
+  else if (verified) { badge.textContent = 'Doğrulandı'; text.textContent = 'Referansın doğrulandı. Tüm ürün erişimine ve mentorship davetine sahipsin.'; }
   else if (SITE.status === 'pending') { badge.textContent = 'Onay bekliyor'; text.textContent = 'Başvurun alındı. Yönetici onayladığında erişim açılır.'; }
   else if (SITE.status === 'rejected') { badge.textContent = 'Doğrulanamadı'; text.textContent = 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup tekrar dene.'; }
   else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı borsanı bağlayınca açılır.'; }
@@ -13312,6 +13411,7 @@ function renderAccessPage() {
     if (isAdmin) loadAdminAccess(true);
   }
 
+  renderMentorPanel();
   bindAccessForm();
 }
 
@@ -13405,10 +13505,13 @@ function renderAdminAccess() {
       ? ('<button class="btn"' + attrs.replace('%OP%', 'revoke') + '>Geri al</button>')
       : ('<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
         '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>');
+    const mentorLbl = r.mentor_status === 'joined' ? 'grupta'
+      : (r.mentor_status === 'invited' ? 'davetli'
+        : (r.mentor_status === 'revoked' ? 'iptal' : '—'));
     return '<div style="border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--card);display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;">' +
       '<div style="min-width:190px;">' +
         '<div style="font-size:13px;font-weight:600;word-break:break-all;">' + accEsc(mail) + '</div>' +
-        '<div class="hint" style="margin:2px 0 0;">' + accEsc(ex) + ' · UID ' + accEsc(uidTxt) + ' · ' + st + ' · hacim $' + (r.volume || 0) + ' · ' + adminAccessFmt(r.created_at) + '</div>' +
+        '<div class="hint" style="margin:2px 0 0;">' + accEsc(ex) + ' · UID ' + accEsc(uidTxt) + ' · ' + st + ' · hacim $' + (r.volume || 0) + ' · mentor: ' + mentorLbl + ' · ' + adminAccessFmt(r.created_at) + '</div>' +
       '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' + act + '<input type="number" data-acc-vol-input="' + accEsc(r.user_id) + '" value="' + (r.volume || 0) + '" placeholder="Hacim (USD)" style="width:96px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">' + '<button class="btn solid" data-acc-op="setvolume" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-vol="INPUT">Kaydet</button>' + '<button class="btn" data-acc-op="delvolume" data-acc-uid="' + accEsc(r.user_id) + '">Sil</button>' + '</div>' +
     '</div>';
@@ -13527,6 +13630,8 @@ function bindAccessForm() {
   if (goBtn) goBtn.addEventListener('click', function () { showPage(accessNextPage || 'home'); accessNextPage = ''; });
   const uid = document.getElementById('acc-uid');
   if (uid) uid.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitAccess(); } });
+  const mRefresh = document.getElementById('acc-mentor-refresh');
+  if (mRefresh) mRefresh.addEventListener('click', refreshMentorInvite);
   const accRefresh = document.getElementById('acc-admin-refresh');
   if (accRefresh) accRefresh.addEventListener('click', function () { loadAdminAccess(true); });
   const accAll = document.getElementById('acc-admin-all');
@@ -13586,12 +13691,22 @@ async function submitAccess() {
   try { renderHomeChannel(); } catch (e) {}
 
   if (outcome.status === 'verified') {
+    const M = SITE.mentor || {};
+    if (M.enabled && M.invite) {
+      if (msg) msg.textContent = 'Doğrulandı. Mentorship davetin hazır.';
+      renderAccessPage();
+      const panel = document.getElementById('acc-mentor-panel');
+      if (panel && panel.scrollIntoView) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     if (msg) msg.textContent = 'Doğrulandı, açılıyor…';
     setTimeout(function () { showPage(accessNextPage || 'home'); accessNextPage = ''; }, 450);
     return;
   }
   if (outcome.status === 'pending') {
-    if (msg) msg.textContent = 'Başvurun alındı, onay bekliyor. Onaylandığında erişim açılır.';
+    if (msg) msg.textContent = outcome.manual
+      ? 'Başvurun alındı. Otomatik doğrulama henüz aktif değil; yönetici onayından sonra erişim ve mentorship daveti açılır.'
+      : 'Başvurun alındı, kontrol sürüyor. Onaylandığında erişim ve mentorship daveti açılır.';
   } else {
     if (msg) msg.textContent = 'Bu UID referans listemizde görünmüyor. Linkten üye olduğundan emin olup tekrar dene.';
   }
