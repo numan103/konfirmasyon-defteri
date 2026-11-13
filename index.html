@@ -14187,24 +14187,78 @@ window.addEventListener('popstate', function (e) {
   _popStateNavigating = false;
 });
 
+// Ana sayfa "İşlem Kanalı" önizlemesi yalnızca son 7 günün paylaşımlarını gösterir.
+// Eski (ör. Ağustos) pozlar yeni kayıtlı kullanıcılara sızmasın.
+const HOME_CHANNEL_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const HOME_CHANNEL_CACHE_MS = 30 * 1000;
+let homeChannelCache = { at: 0, posts: [] };
+function homeChannelRecent(posts, opts) {
+  const now = (opts && Number(opts.now)) || Date.now();
+  const ref = !!(opts && opts.ref);
+  const cutoff = now - HOME_CHANNEL_WINDOW_MS;
+  const recent = (Array.isArray(posts) ? posts : [])
+    .filter(function (p) { return p && Number(p.ts) >= cutoff; })
+    .sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); });
+  if (ref) return recent.slice(0, 3);
+  const trades = recent.filter(function (p) { return p.type === 'islem'; });
+  return (trades.length ? trades : recent).slice(0, 3);
+}
+// /api/edu-shared?kind=landing yalnızca yöneticinin son 7 gündeki paylaşımlarını
+// döner; giriş/TP/SL alanları hiç yer almaz. Ana sayfa da aynı kaynağı kullanır.
+function homeChannelFromLanding(data) {
+  const channel = data && data.channel;
+  if (!channel) return [];
+  function mapPost(p, type) {
+    const ts = Date.parse(p && p.date);
+    if (!Number.isFinite(ts)) return null;
+    return {
+      id: p.id,
+      type: type,
+      title: p.title || p.excerpt || 'Paylaşım',
+      coin: p.coin || '',
+      img: p.image || '',
+      ts: ts
+    };
+  }
+  const trades = (channel.trades && Array.isArray(channel.trades.latest) ? channel.trades.latest : [])
+    .map(function (p) { return mapPost(p, 'islem'); });
+  const biases = (channel.biases && Array.isArray(channel.biases.latest) ? channel.biases.latest : [])
+    .map(function (p) { return mapPost(p, 'analiz'); });
+  return trades.concat(biases).filter(Boolean);
+}
+async function loadHomeChannelPosts() {
+  const now = Date.now();
+  if (homeChannelCache.posts.length && now - homeChannelCache.at < HOME_CHANNEL_CACHE_MS) return homeChannelCache.posts;
+  try {
+    const res = await fetch('/api/edu-shared?kind=landing', { cache: 'no-store' });
+    if (!res.ok) throw new Error('http ' + res.status);
+    const data = await res.json();
+    const posts = homeChannelFromLanding(data);
+    homeChannelCache = { at: now, posts: posts };
+    return posts;
+  } catch (e) {
+    // API alınamazsa eski kayıt gösterme; mevcut akışı yine 7 günle sınırla.
+    if (!alfaLoaded) { try { await loadAlfaTrading(); } catch (e2) {} }
+    return (alfaPosts || []).map(function (p) {
+      return {
+        id: p.id, type: p.type, title: p.title || p.text || 'Paylaşım',
+        coin: p.coin || '', ts: Number(p.ts) || 0,
+        img: /^https:\/\//i.test(p.img || '') ? p.img : ''
+      };
+    });
+  }
+}
+
 async function renderHomeChannel() {
   const box = document.getElementById('hc2-list');
   if (!box) return;
   const ref = refUnlocked();
-  if (!alfaLoaded) { try { await loadAlfaTrading(); } catch (e) {} }
-  let posts = (alfaPosts || []).slice().sort(function (a, b) { return (Number(b.ts) || 0) - (Number(a.ts) || 0); });
-  if (!ref) {
-    const ok = posts.filter(function (p) { return p.type === 'islem' && p.status === 'tp'; });
-    posts = (ok.length ? ok : posts.filter(function (p) { return p.type === 'islem'; })).slice(0, 3);
-    if (!posts.length) {
-      box.innerHTML = '<div class="hd-empty">İşlem kanalı premium üyelere açık. Son güncellemeleri ve analizleri görmek için premium\'a gec.</div>';
-      return;
-    }
-  } else {
-    posts = posts.slice(0, 3);
-  }
+  const all = await loadHomeChannelPosts();
+  const posts = homeChannelRecent(all, { ref: ref });
   if (!posts.length) {
-    box.innerHTML = '<div class="hd-empty">Henüz paylaşım yok.</div>';
+    box.innerHTML = ref
+      ? '<div class="hd-empty">Son 7 günde yeni paylaşım yok.</div>'
+      : '<div class="hd-empty">İşlem kanalı premium üyelere açık. Son 7 günde yeni paylaşım yok.</div>';
     return;
   }
   box.innerHTML = posts.map(function (p) {
