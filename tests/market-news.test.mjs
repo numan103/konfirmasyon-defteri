@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
-  scoreNews, isTargetRelevant, isHighImpact, newsEventKey,
+  scoreNews, isTargetRelevant, isHighImpact, isHardEvent, newsEventKey,
   pickNewsToSend, istanbulDateKey, formatNewsMessage,
 } from '../lib/market-news.mjs';
 
@@ -64,6 +64,31 @@ test('Istanbul day boundary is used for the daily cap', () => {
   assert.equal(istanbulDateKey(new Date('2026-11-12T21:30:00Z')), '2026-11-13');
 });
 
+test('hard macro releases are recognised and outrank price commentary', () => {
+  const ppi = item('US PPI Slows Sharply to 0.3%, but Underlying Price Pressures Stay Firm');
+  const wholesale = item('Wholesale inflation rose in October to highest annual rate in nearly four years');
+  const cpi = item('CPI rises 0.4% in October as core inflation stays hot');
+  const nfp = item('Nonfarm payrolls fall by 12,000; unemployment rate holds at 4.1%');
+  const fomc = item('Fed holds rates steady, signals one more hike');
+  const preview = item('S&P 500 Futures Gain With Focus on U.S. PPI Data and Fed Speak');
+  const goldComment = item('Gold Price Today: $3,888 Friday on PPI Day After a 13-Month Low');
+
+  for (const hard of [ppi, wholesale, cpi, nfp, fomc]) {
+    assert.equal(isHardEvent(hard), true, hard.title);
+    assert.ok(isTargetRelevant(hard), hard.title);
+  }
+  assert.equal(isHardEvent(preview), false, preview.title);
+  assert.equal(isHardEvent(goldComment), false, goldComment.title);
+});
+
+test('cooldown defaults to 10 minutes and hard events sort first', () => {
+  const src = fs.readFileSync(new URL('../lib/market-news.mjs', import.meta.url), 'utf8');
+  assert.match(src, /NEWS_COOLDOWN_MIN \|\| 10/);
+  assert.match(src, /const hard = Number\(isHardEvent\(b\)\) - Number\(isHardEvent\(a\)\);/);
+  assert.match(src, /HARD_EVENT_RES/);
+  assert.match(src, /wholesale \(inflation\|prices\?\)/);
+});
+
 test('news message shows at most two headlines and names BTC/gold', () => {
   const items = [
     item('Bitcoin drops 6% to $68,700'),
@@ -85,4 +110,7 @@ test('handler enforces the daily cap and sends one event per alert', () => {
   assert.match(src, /analyzeNews\(\[picked\]\)/);
   assert.match(src, /formatNewsMessage\(\[picked\], analysis\)/);
   assert.match(src, /saveState\(seen, now, today, events\)/);
+  assert.match(src, /x-github-oidc-token/);
+  assert.match(src, /verifyGithubOidc/);
+  assert.match(src, /market-news poll/);
 });

@@ -1,0 +1,53 @@
+name: news-poll
+
+# Vercel Hobby'de 15 dakikalik cron yok. Bu is akisi 15 dakikada bir haber
+# watcher'i tetikler. Sunucuda saklanan bir sir yok: GitHub Actions OIDC
+# token'i ile kimlik dogrulanir.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: news-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger news watcher
+        env:
+          NEWS_URL: https://alfa-trader.com/api/ai?news=1
+          OIDC_AUDIENCE: alfa-trader-news
+        run: |
+          set -euo pipefail
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "OIDC request URL yok; id-token: write iznini kontrol et." >&2
+            exit 1
+          fi
+          TOKEN=$(curl -sS \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -r '.value // empty')
+          if [ -z "$TOKEN" ]; then
+            echo "OIDC token alinamadi." >&2
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          BODY=$(curl -sS --max-time 60 -w '\n%{http_code}' \
+            -H "x-github-oidc-token: ${TOKEN}" \
+            -H "Accept: application/json" \
+            "${NEWS_URL}")
+          CODE=$(printf '%s' "$BODY" | tail -n1)
+          JSON=$(printf '%s' "$BODY" | sed '$d')
+          echo "HTTP $CODE"
+          echo "$JSON" | jq -c '{ok,skipped,day,sentToday,dailyMax,eventKey,messageId,pending,error}' 2>/dev/null || echo "$JSON"
+          if [ "$CODE" != "200" ]; then
+            echo "Haber watcher $CODE dondurdu." >&2
+            exit 1
+          fi
