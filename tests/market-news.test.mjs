@@ -152,6 +152,11 @@ test('cooler PPI pozitif, 5.17% tahvil getirisi negatif okunur', () => {
   assert.equal(yields.btc, 'negative');
   assert.equal(yields.gold, 'negative');
   assert.equal(combinedEffect(yields), 'NEGATIF');
+
+  const hot = extractMacroFacts(item('US PPI Inflation Hits 6.5% as Bitcoin Struggles Below $70K'));
+  assert.equal(hot.driver, 'ppi');
+  assert.equal(hot.driverDirection, 'negative');
+  assert.equal(combinedEffect(hot), 'NEGATIF');
 });
 
 test('yon belirtmeyen veri raporu bildirim olarak secilmez', () => {
