@@ -7,7 +7,7 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 test('auth gate offers password visibility toggle and clear access note', () => {
   assert.ok(html.includes('id="au-pass-toggle"'));
   assert.ok(html.includes('class="auth-note"'));
-  assert.ok(html.includes('İkisi de para istemez.'));
+  assert.ok(html.includes('İkisi de ücretsiz.'));
 });
 
 test('home subtitle is role-aware', () => {
