@@ -18849,22 +18849,51 @@ function ap2CommitPosition(pos, total, qty, histRec) {
     const cash = Number(ap2Data.cash) || 0;
     if (total > cash) { document.getElementById('ap2-f-err').textContent = 'Harcama (' + ap2Fmt(total) + ') bakiyenin üstünde — kalan: ' + ap2Fmt(cash); return; }
     ap2Data.cash = cash - total;
-    ap2Data.positions.push(pos);
+    ap2Data.cash = cash - total;
+    var existingMerge = ap2Data.positions.find(function (x) { return !ap2IsPending(x) && x.symbol === pos.symbol && (x.side || 'LONG') === (pos.side || 'LONG') && x.id !== pos.id; });
     var newCash = cash - total;
     var totalAfter = newCash + total;
-    var tgMsg = (ap2FormSide === 'SHORT' ? '📉 KISA (hedge) — ' : '📈 UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' ✅' : (histRec ? ' ⚠' : ''));
-    tgMsg += '\n\n🔹 ' + ap2FmtNum(qty) + ' adet · ' + ap2Fmt(total) + ' harcandı';
-    tgMsg += '\n💵 Birim maliyet: ' + ap2Fmt(pos.cost);
-    tgMsg += '\n💰 Kalan nakit: ' + ap2Fmt(newCash);
-    tgMsg += '\n📊 Portföy toplam: ' + ap2Fmt(totalAfter);
-    if (totalAfter > 0) {
-      var pctPos = (total / totalAfter * 100).toFixed(1);
-      var pctCash = (newCash / totalAfter * 100).toFixed(1);
-      tgMsg += '\n📈 ' + pos.symbol + ': %' + pctPos + ' · 💵 Nakit: %' + pctCash;
+    var tgMsg;
+    if (existingMerge) {
+      var oldQty = Number(existingMerge.qty) || 0;
+      var oldCost = Number(existingMerge.cost) || 0;
+      var mergedQty = oldQty + qty;
+      var mergedCost = mergedQty > 0 ? (oldQty * oldCost + total) / mergedQty : pos.cost;
+      existingMerge.qty = Math.round(mergedQty * 1e8) / 1e8;
+      existingMerge.cost = Math.round(mergedCost * 100) / 100;
+      if (pos.price != null) existingMerge.price = pos.price;
+      if (pos.date && (!existingMerge.date || pos.date < existingMerge.date)) existingMerge.date = pos.date;
+      existingMerge.note = [existingMerge.note, pos.note].filter(Boolean).join(' | ');
+      if (pos.hist) existingMerge.hist = pos.hist;
+      tgMsg = (ap2FormSide === 'SHORT' ? 'KISA (hedge) — ' : 'UZUN — ') + 'Pozisyon birleştirildi: ' + pos.symbol + (histRec && histRec.ok ? ' OK' : (histRec ? ' !' : ''));
+      tgMsg += '\n\nToplam adet: ' + ap2FmtNum(existingMerge.qty) + ' · ortalama maliyet: ' + ap2Fmt(existingMerge.cost);
+      tgMsg += '\nBu giriş: ' + ap2FmtNum(qty) + ' adet · ' + ap2Fmt(total);
+      tgMsg += '\nKalan nakit: ' + ap2Fmt(newCash);
+      tgMsg += '\nPortföy toplam: ' + ap2Fmt(totalAfter);
+      if (totalAfter > 0) {
+        var pctPos = (total / totalAfter * 100).toFixed(1);
+        var pctCash = (newCash / totalAfter * 100).toFixed(1);
+        tgMsg += '\n' + pos.symbol + ': %' + pctPos + ' · Nakit: %' + pctCash;
+      }
+      if (pos.note) tgMsg += '\nNot: ' + pos.note;
+      tgMsg += '\n\nalfa-trader.com';
+      ap2TgNotify(tgMsg, ap2TgTeaser('pozisyon birleştirildi', pos.symbol));
+    } else {
+      ap2Data.positions.push(pos);
+      tgMsg = (ap2FormSide === 'SHORT' ? 'KISA (hedge) — ' : 'UZUN — ') + 'Yeni pozisyon: ' + pos.symbol + (histRec && histRec.ok ? ' OK' : (histRec ? ' !' : ''));
+      tgMsg += '\n\n' + ap2FmtNum(qty) + ' adet · ' + ap2Fmt(total) + ' harcandı';
+      tgMsg += '\nBirim maliyet: ' + ap2Fmt(pos.cost);
+      tgMsg += '\nKalan nakit: ' + ap2Fmt(newCash);
+      tgMsg += '\nPortföy toplam: ' + ap2Fmt(totalAfter);
+      if (totalAfter > 0) {
+        var pctPos2 = (total / totalAfter * 100).toFixed(1);
+        var pctCash2 = (newCash / totalAfter * 100).toFixed(1);
+        tgMsg += '\n' + pos.symbol + ': %' + pctPos2 + ' · Nakit: %' + pctCash2;
+      }
+      if (pos.note) tgMsg += '\nNot: ' + pos.note;
+      tgMsg += '\n\nalfa-trader.com';
+      ap2TgNotify(tgMsg, ap2TgTeaser('yeni bir hamle yapıldı', pos.symbol));
     }
-    if (pos.note) tgMsg += '\n📝 Not: ' + pos.note;
-    tgMsg += '\n\nalfa-trader.com';
-    ap2TgNotify(tgMsg, ap2TgTeaser('yeni bir hamle yapıldı', pos.symbol));
   }
   ap2Save();
   document.getElementById('ap2-form').classList.add('hidden');
