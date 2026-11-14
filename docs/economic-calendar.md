@@ -160,7 +160,14 @@ Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&force=1" -Headers @
 
 # Haftalik on bakisi bugun olmasa bile zorla gonder (mesaj atar).
 Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&weekly=1" -Headers @{ Authorization = "Bearer $token" }
+
+# Ornek mesajlari YALNIZCA yonetici DM'ine gonder (haftalik + gunluk + hatirlatma).
+Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&adminPreview=1" -Headers @{ Authorization = "Bearer $token" }
+
+# Ayni ornekleri gondermeden sadece metin olarak al.
+Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&adminPreview=1&dryRun=1" -Headers @{ Authorization = "Bearer $token" }
 ```
+`adminPreview=1` bu haftanin gercek takvim verileriyle haftalik, gunluk ve hatirlatma orneklerini `🧪 ÖRNEK — gruba gönderilmedi` etiketiyle admin DM'ine yollar; gruba gitmez ve durum yazmaz.
 `dryRun` cevabi: `agenda`, `agendaEmpty`, `weekly`, `weeklyEmpty`, `weeklyDue`, `weekKey`, `weekSentAt`, `reminders`, `events`, `agendaWindow`, `windows`, `source`, `stale`.
 `force` ajanda icin yalnizca o gun henuz gonderilmediyse calisir; tekrar denemek icin durum satirindaki `day` alanini temizle.
 `weekly=1` haftalik on bakisi gun/hafta kontrolu olmadan gonderir; test disinda kullanilmamalidir.

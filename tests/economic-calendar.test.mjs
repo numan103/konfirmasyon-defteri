@@ -7,6 +7,7 @@ import {
   fetchCalendarRows, parseCache, cacheUsable, cacheWriteDue,
   weekStartKey, eventsForWeek, formatWeeklyOutlook, weeklyEnabled, isWeeklyDay,
   formatWeeklyEmpty, formatAgendaEmpty, emptyNotesEnabled, isIstanbulWeekday,
+  buildCalendarPreviews,
 } from '../lib/economic-calendar.mjs';
 
 const row = (title, country, date, impact = 'High', forecast = '', previous = '') => ({
@@ -145,6 +146,27 @@ test('haftalik on bakis gunu ve acma/kapama env ile ayarlanir', () => {
   }
 });
 
+
+test('yonetici onizlemesi haftalik, gunluk ve hatirlatma ornegi uretir', () => {
+  const now = new Date('2026-11-14T05:30:00Z'); // Cumartesi
+  const events = [
+    event('cpi', '2026-11-10T13:30:00Z', { title: 'CPI m/m', forecast: '0.3%', previous: '0.6%' }),
+    event('ppi', '2026-11-10T13:30:00Z', { title: 'PPI m/m', forecast: '0.4%', previous: '1.3%' }),
+    event('nfp', '2026-11-13T13:30:00Z', { title: 'Non-Farm Employment Change' }),
+  ];
+  const previews = buildCalendarPreviews(events, now);
+  assert.deepEqual(previews.map((p) => p.kind), ['weekly', 'agenda', 'reminder']);
+  assert.match(previews[0].text, /Bu Haftanın Ekonomik Takvimi/);
+  assert.equal(previews[1].day, '2026-11-10');
+  assert.match(previews[1].text, /10\.11\.2026/);
+  assert.match(previews[1].text, /ABD TÜFE \(aylık\)/);
+  assert.match(previews[2].text, /15 dk sonra/);
+
+  const empty = buildCalendarPreviews([], now);
+  assert.equal(empty.length, 1);
+  assert.equal(empty[0].kind, 'weekly');
+  assert.match(empty[0].text, /verisi yok/);
+});
 
 // --- Mesaj formatlari ---
 
@@ -383,6 +405,10 @@ test('takvim durumu ayri satirda tutulur ve actual sonucu iddia etmez', () => {
   assert.match(src, /formatAgendaEmpty\(now\)/);
   assert.match(src, /formatWeeklyEmpty\(now\)/);
   assert.match(src, /emptyNotesEnabled\(\)/);
+  // Yonetici onizlemesi yalnizca admin DM'ine gonderir.
+  assert.match(src, /buildCalendarPreviews\(events, now\)/);
+  assert.match(src, /TG_ADMIN_CHAT_ID/);
+  assert.match(src, /gruba gönderilmedi/);
   // Hatirlatma, gunluk ajanda kapisini ilerletmemeli.
   assert.match(src, /day: state\.day \|\| null/);
   assert.doesNotMatch(src, /day: state\.day \|\| day/);
