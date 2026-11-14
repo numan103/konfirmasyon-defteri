@@ -37,14 +37,14 @@ Tetikleme: `.github/workflows/news-poll.yml` icindeki ikinci adim, `*/15 * * * *
    - Haftada **en fazla 1 kez** gonderilir (`state.weekKey`).
    - `ECON_WEEKLY_DAY` (ISO 1 = Pazartesi ... 7 = Pazar) ve `ECON_WEEKLY_ENABLED=0` ile ayarlanir.
    - Haftalik mesaj o gunun verilerini de icerdigi icin ayni gun ayrica gunluk ajanda gitmez.
-   - Haftada veri yoksa mesaj gitmez.
+   - Haftada yuksek etkili veri yoksa kisa bir "veri yok" notu gonderilir (`ECON_EMPTY_NOTES=0` ile kapatilir).
 2. **Gunluk ajanda**
    - Varsayilan **08:30 TSİ**, 45 dakikalik pencere (08:30-09:14).
    - `ECON_AGENDA_START` (or. `08:30`) ve `ECON_AGENDA_WINDOW_MIN` (5-180) ile ayarlanir.
    - Gunde **en fazla 1 kez** gonderilir (`state.day`).
    - O gun kalan tum yuksek etkili veriler saat, ulke, Turkce baslik, beklenti ve onceki degerle listelenir.
    - Ajanda, olaya **25 dakikadan az** kalan verileri "gonderildi" olarak isaretler; ayni veri icin ayrica hatirlatma gitmez.
-   - O gun veri yoksa mesaj gitmez (`skipped: "no_events_today"`).
+   - O gun veri yoksa hafta ici gunlerde kisa bir "bugün veri yok" notu gonderilir; hafta sonu bos gunlerde mesaj gitmez. Notlar `ECON_EMPTY_NOTES=0` ile kapatilir.
 3. **Veri hatirlatmasi**
    - Veriden **5-25 dakika once**, gunde her olay icin **en fazla 1 kez**.
    - 15 dakikalik tetikleme + 20 dakikalik pencere, her olayi yakalar.
@@ -136,6 +136,7 @@ Aksi halde `401 unauthorized`.
 | `ECON_AGENDA_WINDOW_MIN` | `45` | Ajanda penceresi (dk) |
 | `ECON_WEEKLY_DAY` | `1` | Haftalik on bakis gunu (ISO: 1=Pazartesi, 7=Pazar) |
 | `ECON_WEEKLY_ENABLED` | `1` | `0` ise haftalik on bakis gonderilmez |
+| `ECON_EMPTY_NOTES` | `1` | `0` ise "veri yok" bilgi notlari gonderilmez |
 | `ECON_REMINDER_START_HOUR` | `8` | Hatirlatma sessiz saat baslangici |
 | `ECON_REMINDER_END_HOUR` | `23` | Hatirlatma sessiz saat bitisi (haric) |
 | `ECON_CALENDAR_PROXY_URL` | `https://alfa-trader.com/api/eco-cal` | 429/5xx yedek kaynagi |
@@ -160,7 +161,7 @@ Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&force=1" -Headers @
 # Haftalik on bakisi bugun olmasa bile zorla gonder (mesaj atar).
 Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&weekly=1" -Headers @{ Authorization = "Bearer $token" }
 ```
-`dryRun` cevabi: `agenda`, `weekly`, `weeklyDue`, `weekKey`, `weekSentAt`, `reminders`, `events`, `agendaWindow`, `windows`, `source`, `stale`.
+`dryRun` cevabi: `agenda`, `agendaEmpty`, `weekly`, `weeklyEmpty`, `weeklyDue`, `weekKey`, `weekSentAt`, `reminders`, `events`, `agendaWindow`, `windows`, `source`, `stale`.
 `force` ajanda icin yalnizca o gun henuz gonderilmediyse calisir; tekrar denemek icin durum satirindaki `day` alanini temizle.
 `weekly=1` haftalik on bakisi gun/hafta kontrolu olmadan gonderir; test disinda kullanilmamalidir.
 
@@ -169,7 +170,7 @@ Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&weekly=1" -Headers 
 - `source`: `feed` (dogrudan), `proxy` (edge-cache yedegi) veya `cache` (son basarili kopya).
 - `stale: true`: kaynak kesintisi nedeniyle son kopya kullanildi.
 - `skipped: "source_unavailable"`: kaynak alinamadi ve kullanilabilir kopya yok; mesaj yok.
-- `skipped: "no_events_today"`: ajanda penceresinde o gun veri yok.
+- `skipped: "no_events_today"`: ajanda penceresinde o gun veri yok ve bos gun notu kapali/hafta sonu.
 - `skipped: "nothing_due"`: 5-25 dk penceresinde gonderilecek veri yok.
 - `events`: gonderilen/uygun olay sayisi veya olay anahtarlari.
 - `stateSaved`: durum satiri yazildi mi.

@@ -6,6 +6,7 @@ import {
   formatAgenda, formatEventReminder, dueReminders, agendaWindow,
   fetchCalendarRows, parseCache, cacheUsable, cacheWriteDue,
   weekStartKey, eventsForWeek, formatWeeklyOutlook, weeklyEnabled, isWeeklyDay,
+  formatWeeklyEmpty, formatAgendaEmpty, emptyNotesEnabled, isIstanbulWeekday,
 } from '../lib/economic-calendar.mjs';
 
 const row = (title, country, date, impact = 'High', forecast = '', previous = '') => ({
@@ -106,6 +107,27 @@ test('haftalik on bakis gun adi, saat, Turkce baslik ve degerleri yazar', () => 
   assert.match(text, /Cuma 16:30 — ABD Tarım Dışı İstihdam/);
   assert.match(text, /Kaynak: Forex Factory/);
   assert.equal(formatWeeklyOutlook([], now), null);
+});
+
+test('veri olmayan gun ve hafta icin kisa bilgi notu uretilir', () => {
+  const mon = new Date('2026-11-09T05:30:00Z');
+  assert.match(formatWeeklyEmpty(mon), /9 Kasım 2026 – 15 Kasım 2026/);
+  assert.match(formatWeeklyEmpty(mon), /Bu hafta öne çıkan yüksek etkili ABD verisi yok/);
+
+  const sat = new Date('2026-11-14T05:30:00Z');
+  assert.match(formatAgendaEmpty(sat), /14\.11\.2026/);
+  assert.match(formatAgendaEmpty(sat), /Bugün öne çıkan yüksek etkili ABD verisi yok/);
+
+  assert.equal(emptyNotesEnabled(), true);
+  assert.equal(isIstanbulWeekday(new Date('2026-11-13T05:30:00Z')), true); // Cuma
+  assert.equal(isIstanbulWeekday(new Date('2026-11-14T05:30:00Z')), false); // Cumartesi
+  assert.equal(isIstanbulWeekday(new Date('2026-11-15T21:30:00Z')), true); // Pazartesi 00:30
+  process.env.ECON_EMPTY_NOTES = '0';
+  try {
+    assert.equal(emptyNotesEnabled(), false);
+  } finally {
+    delete process.env.ECON_EMPTY_NOTES;
+  }
 });
 
 test('haftalik on bakis gunu ve acma/kapama env ile ayarlanir', () => {
@@ -357,6 +379,10 @@ test('takvim durumu ayri satirda tutulur ve actual sonucu iddia etmez', () => {
   assert.match(src, /isWeeklyDay\(now\)/);
   assert.match(src, /state\.weekKey !== weekKey/);
   assert.match(src, /weekSentAt: state\.weekSentAt \|\| null/);
+  // Bos gun/hafta notlari kapatilabilir.
+  assert.match(src, /formatAgendaEmpty\(now\)/);
+  assert.match(src, /formatWeeklyEmpty\(now\)/);
+  assert.match(src, /emptyNotesEnabled\(\)/);
   // Hatirlatma, gunluk ajanda kapisini ilerletmemeli.
   assert.match(src, /day: state\.day \|\| null/);
   assert.doesNotMatch(src, /day: state\.day \|\| day/);
