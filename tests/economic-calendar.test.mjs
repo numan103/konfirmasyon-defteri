@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import {
   parseCalendarRows, filterCalendarEvents, eventsForDay,
   formatAgenda, formatEventReminder, dueReminders, agendaWindow,
+  fetchCalendarRows, parseCache, cacheUsable, cacheWriteDue,
 } from '../lib/economic-calendar.mjs';
 
 const row = (title, country, date, impact = 'High', forecast = '', previous = '') => ({
@@ -189,6 +190,101 @@ test('gunluk ajanda penceresi 08:30 TSİ ve env ile ayarlanabilir', () => {
 
 // --- Rota / zamanlayici / durum ---
 
+test('kaynak 429 verirse tekrar edilir, sonra edge-cache proxy denenir', async () => {
+  process.env.ECON_CALENDAR_PROXY_URL = 'https://proxy.test/eco-cal';
+  process.env.ECON_FETCH_RETRY_MS = '0';
+  const real = globalThis.fetch;
+  let directCalls = 0;
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('faireconomy')) {
+      directCalls++;
+      return new Response('rate limited', { status: 429 });
+    }
+    return new Response(JSON.stringify({
+      ok: true,
+      items: [row('CPI m/m', 'USD', '2026-11-10T08:30:00-05:00', 'High', '0.3%', '0.6%')],
+    }), { status: 200 });
+  };
+
+  try {
+    const out = await fetchCalendarRows();
+    assert.equal(out.ok, true);
+    assert.equal(out.via, 'proxy');
+    assert.equal(out.rows.length, 1);
+    assert.equal(directCalls, 2); // ilk istek + 429 tekrari
+  } finally {
+    globalThis.fetch = real;
+    delete process.env.ECON_CALENDAR_PROXY_URL;
+    delete process.env.ECON_FETCH_RETRY_MS;
+  }
+});
+
+test('dogrudan kaynak calisirsa proxy cagrilmaz', async () => {
+  process.env.ECON_CALENDAR_PROXY_URL = 'https://proxy.test/eco-cal';
+  const real = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(JSON.stringify([
+      row('CPI m/m', 'USD', '2026-11-10T08:30:00-05:00', 'High', '0.3%', '0.6%'),
+    ]), { status: 200 });
+  };
+
+  try {
+    const out = await fetchCalendarRows();
+    assert.equal(out.ok, true);
+    assert.equal(out.via, 'feed');
+    assert.equal(calls.some((u) => u.includes('proxy.test')), false);
+  } finally {
+    globalThis.fetch = real;
+    delete process.env.ECON_CALENDAR_PROXY_URL;
+  }
+});
+
+test('kaynak ve proxy birlikte cokerse hata doner', async () => {
+  process.env.ECON_CALENDAR_PROXY_URL = 'https://proxy.test/eco-cal';
+  process.env.ECON_FETCH_RETRY_MS = '0';
+  const real = globalThis.fetch;
+
+  globalThis.fetch = async (url) => new Response('down', {
+    status: String(url).includes('faireconomy') ? 429 : 500,
+  });
+
+  try {
+    const out = await fetchCalendarRows();
+    assert.equal(out.ok, false);
+    assert.match(out.error, /http_/);
+  } finally {
+    globalThis.fetch = real;
+    delete process.env.ECON_CALENDAR_PROXY_URL;
+    delete process.env.ECON_FETCH_RETRY_MS;
+  }
+});
+
+test('son basarili takvim kopyasi dogrulanir ve 48 saat kullanilir', () => {
+  const now = new Date('2026-11-14T05:30:00Z');
+  const cache = parseCache({
+    fetchedAt: '2026-11-14T04:00:00Z',
+    via: 'feed',
+    events: [
+      { key: 'USD|cpi|1', title: 'CPI m/m', country: 'USD', impact: 'High', at: at('2026-11-14T13:30:00Z'), forecast: '0.3%', previous: '0.6%' },
+      { key: 'gecersiz', title: 'Eksik alan' }, // country/impact/at yok
+    ],
+  });
+
+  assert.equal(cache.events.length, 1);
+  assert.equal(cache.via, 'feed');
+  assert.equal(cacheUsable(cache, now), true);
+  assert.equal(cacheUsable(cache, new Date('2026-11-20T05:30:00Z')), false); // > 48 saat
+  assert.equal(cacheUsable(parseCache({ fetchedAt: '2026-11-14T04:00:00Z', events: [] }), now), false);
+  assert.equal(parseCache(null), null);
+  assert.equal(cacheWriteDue(cache, new Date('2026-11-14T04:10:00Z'), 30), false);
+  assert.equal(cacheWriteDue(cache, new Date('2026-11-14T04:40:00Z'), 30), true);
+  assert.equal(cacheWriteDue(null, now, 30), true);
+});
+
 test('api/ai rotasi ve GitHub Actions adimi takvimi tetikler', () => {
   const api = fs.readFileSync(new URL('../api/ai.mjs', import.meta.url), 'utf8');
   assert.match(api, /import economicCalendarHandler from '\.\.\/lib\/economic-calendar\.mjs'/);
@@ -208,6 +304,9 @@ test('takvim durumu ayri satirda tutulur ve actual sonucu iddia etmez', () => {
   // Hatirlatma, gunluk ajanda kapisini ilerletmemeli.
   assert.match(src, /day: state\.day \|\| null/);
   assert.doesNotMatch(src, /day: state\.day \|\| day/);
+  // Kaynak kesintisinde son basarili kopya kullanilir.
+  assert.match(src, /cacheUsable\(state\.cache, now\)/);
+  assert.match(src, /filterCalendarEvents\(state\.cache\.events\)/);
   assert.match(src, /actual.*yoktur|yoktur.*actual/is);
   // Gerçekleşen veri sonrası yorum bu hatta yok.
   assert.doesNotMatch(src, /Gerçekleşen veri/);

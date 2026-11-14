@@ -13,6 +13,14 @@
 - Tarihler kaynakta ABD Dogu saati ofsetiyle gelir; hat bunlari **Europe/Istanbul** saatine cevirir.
 - Basliklar `TITLE_TR` tablosuyla Turkceye cevrilir; tabloda olmayan baslik Ingilizce kalir (uydurma ceviri yapilmaz).
 
+### Kaynak kesintisi (429 / 5xx)
+ForexFactory ucretsiz feed'i yogunlukta `429` donebilir. Hat sirayla dener:
+1. Dogrudan feed; `429`/`5xx` ise kisa bir bekleme sonrasi **tek tekrar**.
+2. Site ici edge-cache'li proxy: `https://alfa-trader.com/api/eco-cal` (`ECON_CALENDAR_PROXY_URL`).
+3. Ikisi de olmezse Supabase'deki **son basarili kopya** (en fazla 48 saat).
+
+Basarili her okuma `econ_calendar_state.data.cache` alanina yazilir (en fazla 30 dakikada bir). Kaynak kesintisinde ajanda/hatirlatma bu kopyadan uretilir; cevapta `source: "cache"`, `stale: true` doner. 48 saatten eski kopya kullanilmaz ve `source_unavailable` doner. `api/eco-cal` hata cevaplarini artik cache'lemez (`Cache-Control: no-store`), boylece kisa bir 429 bes dakika boyunca "takvim yok" olarak kalmaz.
+
 ## Filtre
 - Varsayilan: yalnizca `country = USD` ve `impact = High`.
 - `ECON_COUNTRIES` (or. `USD,EUR`) ve `ECON_IMPACTS` (or. `High,Medium`) ile degistirilebilir. Ajanda basligi da secilen ulkelere gore yazilir.
@@ -70,10 +78,16 @@ Yüksek etkili veri; BTC ve altında oynaklık artabilir.
     "day": "2026-11-14",
     "agendaSentAt": "2026-11-14T05:30:12.000Z",
     "sent": { "USD|cpi m/m|29649270": "2026-11-14T12:45:00.000Z" },
+    "cache": {
+      "fetchedAt": "2026-11-14T05:20:00.000Z",
+      "via": "feed",
+      "events": []
+    },
     "updatedAt": "2026-11-14T12:45:00.000Z"
   }
   ```
 - `sent` anahtari olay bazlidir; son 3 gun tutulur, en fazla 200 kayit.
+- `cache`, kaynak kesintisinde kullanilan son basarili filtreli kopyadir (en fazla 500 olay).
 - Ajanda gonderilemezse `day` yazilmaz; pencere icinde tekrar denenir. Telegram/DB hatasinda cevap `502`/`503` doner ve workflow kirmizi olur.
 - `SUPABASE_SERVICE_ROLE` yoksa normal gonderim `503 state_not_configured` ile durur; `dryRun` calismaya devam eder.
 
@@ -99,6 +113,10 @@ Aksi halde `401 unauthorized`.
 | `ECON_AGENDA_WINDOW_MIN` | `45` | Ajanda penceresi (dk) |
 | `ECON_REMINDER_START_HOUR` | `8` | Hatirlatma sessiz saat baslangici |
 | `ECON_REMINDER_END_HOUR` | `23` | Hatirlatma sessiz saat bitisi (haric) |
+| `ECON_CALENDAR_PROXY_URL` | `https://alfa-trader.com/api/eco-cal` | 429/5xx yedek kaynagi |
+| `ECON_FETCH_RETRY_MS` | `1200` | 429/5xx tekrar beklemesi (0-5000) |
+| `ECON_CACHE_MAX_AGE_HOURS` | `48` | Son basarili kopyanin azami yasi |
+| `ECON_CACHE_WRITE_MIN` | `30` | Kopyayi en sik yazma araligi (dk) |
 | `SUPABASE_URL` | proje URL'i | Varsayilan proje URL'i gomulu |
 | `SUPABASE_SERVICE_ROLE` | — | Durum yazimi icin zorunlu |
 | `TG_BOT_TOKEN` | — | Telegram bot token'i |
@@ -114,12 +132,14 @@ Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&dryRun=1" -Headers 
 # Pencere disinda bile ajandayi/hatirlatmayi zorla dene (mesaj atar).
 Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&force=1" -Headers @{ Authorization = "Bearer $token" }
 ```
-`dryRun` cevabi: `agenda`, `reminders`, `events`, `agendaWindow`, `windows`.
+`dryRun` cevabi: `agenda`, `reminders`, `events`, `agendaWindow`, `windows`, `source`, `stale`.
 `force` ajanda icin yalnizca o gun henuz gonderilmediyse calisir; tekrar denemek icin durum satirindaki `day` alanini temizle.
 
 ## Cevap alanlari
 - `kind: "agenda"` / `kind: "reminder"`: mesaj gonderildi.
-- `skipped: "source_unavailable"`: kaynak alinamadi, mesaj yok.
+- `source`: `feed` (dogrudan), `proxy` (edge-cache yedegi) veya `cache` (son basarili kopya).
+- `stale: true`: kaynak kesintisi nedeniyle son kopya kullanildi.
+- `skipped: "source_unavailable"`: kaynak alinamadi ve kullanilabilir kopya yok; mesaj yok.
 - `skipped: "no_events_today"`: ajanda penceresinde o gun veri yok.
 - `skipped: "nothing_due"`: 5-25 dk penceresinde gonderilecek veri yok.
 - `events`: gonderilen/uygun olay sayisi veya olay anahtarlari.
