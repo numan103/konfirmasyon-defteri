@@ -6,7 +6,7 @@ import {
   pickNewsToSend, istanbulDateKey, formatNewsMessage,
   dataReportKey, extractMacroFacts, hasClearMarketImpact, combinedEffect,
   buildFactAnalysis, normalizeEffectLine, validateAnalysis,
-  newsSlotAt, nextNewsWindow, istanbulClock, newsSendHours,
+  newsSlotAt, nextNewsWindow, istanbulClock, newsSendHours, istanbulWeekend,
 } from '../lib/market-news.mjs';
 
 const item = (title, description = '') => ({ source: 'Test', title, description, pubDate: new Date().toUTCString() });
@@ -284,4 +284,15 @@ test('pencere disi ve ayni pencere ikinci mesaji engellenir', () => {
   assert.match(src, /skipped: 'slot_already_sent'/);
   assert.match(src, /newsSlotAt\(new Date\(collected\.lastSentAt\)\)/);
   assert.match(src, /lastSlot\.key === slot\.key/);
+});
+
+test('hafta sonu makro haber gonderilmez', () => {
+  assert.equal(istanbulWeekend(new Date('2026-11-14T06:00:00Z')), true); // Cumartesi 09:00 TSİ
+  assert.equal(istanbulWeekend(new Date('2026-11-15T12:00:00Z')), true); // Pazar 15:00 TSİ
+  assert.equal(istanbulWeekend(new Date('2026-11-15T21:30:00Z')), false); // Pazartesi 00:30 TSİ
+  assert.equal(istanbulWeekend(new Date('2026-11-16T06:00:00Z')), false); // Pazartesi 09:00 TSİ
+
+  const src = fs.readFileSync(new URL('../lib/market-news.mjs', import.meta.url), 'utf8');
+  assert.match(src, /istanbulWeekend\(slotNow\)/);
+  assert.match(src, /skipped: 'weekend'/);
 });

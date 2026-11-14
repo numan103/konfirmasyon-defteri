@@ -9,7 +9,8 @@
 
 ## Zamanlama
 - `api/ai?news=1` endpoint'i, `lib/market-news.mjs` modulunu calistirir.
-- **Gonderim saatleri:** yalnizca **09:00** ve **15:00 TSİ** (piyasa hacmi girmeden once). Gece 00:00 gibi hacimsiz saatlerde bildirim gitmez; pencere disindaki tetiklemeler `skipped: "outside_window"` doner ve RSS bile cekilmez.
+- **Gonderim saatleri:** yalnizca **09:00** ve **15:00 TSİ** (piyasa hacmi girmeden once) ve yalnizca **Pazartesi-Cuma**. Gece 00:00 gibi hacimsiz saatlerde bildirim gitmez; pencere disindaki tetiklemeler `skipped: "outside_window"` doner ve RSS bile cekilmez.
+- **Hafta sonu (Cumartesi/Pazar) makro haber gonderilmez:** `skipped: "weekend"`. Pazar aksami 20:00 TSİ'de yalnizca haftalik ekonomik takvim ozeti gonderilir.
 - Her pencerede **en fazla 1 bildirim**. Sabah 09:00'da mesaj gittiyse ayni pencerede (09:00-09:59) ikinci mesaj gitmez: `skipped: "slot_already_sent"`.
 - Pencere icinde yeni ve net etkili haber gelirse gonderilir; yeni haber yoksa sessiz kalir (`skipped: "no_new_news"`).
 - Varsayilan pencere suresi 60 dk. `NEWS_SEND_HOURS` (or. `9,15`) ve `NEWS_WINDOW_MIN` (5-240) ile degistirilebilir.
@@ -111,6 +112,7 @@ Invoke-WebRequest -Uri "https://alfa-trader.com/api/ai?news=1&force=1" -Headers 
 
 ## Cevap alanlari
 - `skipped: "outside_window"`: gonderim penceresi disinda; `nextWindow`, `nextInMinutes` doner.
+- `skipped: "weekend"`: hafta sonu; makro haber gonderilmedi.
 - `skipped: "slot_already_sent"`: ayni pencerede zaten bir bildirim gonderildi.
 - `skipped: "no_new_news"`: yeni uygun baslik yok.
 - `skipped: "daily_cap"`: gunluk 2 haber limiti doldu; `sentToday` / `dailyMax` doner.

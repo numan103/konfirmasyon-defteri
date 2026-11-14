@@ -7,7 +7,7 @@ import {
   fetchCalendarRows, parseCache, cacheUsable, cacheWriteDue,
   weekStartKey, eventsForWeek, formatWeeklyOutlook, weeklyEnabled, isWeeklyDay,
   formatWeeklyEmpty, formatAgendaEmpty, emptyNotesEnabled, isIstanbulWeekday,
-  buildCalendarPreviews,
+  buildCalendarPreviews, upcomingWeekKey, weeklyWindow,
 } from '../lib/economic-calendar.mjs';
 
 const row = (title, country, date, impact = 'High', forecast = '', previous = '') => ({
@@ -83,6 +83,10 @@ test('hafta pazartesi baslar ve Istanbul gun siniri kullanilir', () => {
   assert.equal(weekStartKey(new Date('2026-11-15T20:00:00Z')), '2026-11-09'); // Pazar 23:00 TSİ
   assert.equal(weekStartKey(new Date('2026-11-15T21:30:00Z')), '2026-11-16'); // Pazartesi 00:30 TSİ
   assert.equal(weekStartKey(new Date('2026-11-16T09:00:00Z')), '2026-11-16'); // Pazartesi
+  // Pazar aksami gonderimde ertesi gun baslayan hafta hedeflenir.
+  assert.equal(upcomingWeekKey(new Date('2026-11-15T17:00:00Z')), '2026-11-16'); // Pazar 20:00 TSİ
+  assert.equal(upcomingWeekKey(new Date('2026-11-14T05:30:00Z')), '2026-11-09'); // Cumartesi
+  assert.equal(upcomingWeekKey(new Date('2026-11-16T05:30:00Z')), '2026-11-16'); // Pazartesi 08:30
 });
 
 test('haftalik liste yalnizca o haftanin verilerini alir', () => {
@@ -133,8 +137,12 @@ test('veri olmayan gun ve hafta icin kisa bilgi notu uretilir', () => {
 
 test('haftalik on bakis gunu ve acma/kapama env ile ayarlanir', () => {
   assert.equal(weeklyEnabled(), true);
-  assert.equal(isWeeklyDay(new Date('2026-11-09T05:30:00Z')), true); // Pazartesi
-  assert.equal(isWeeklyDay(new Date('2026-11-10T05:30:00Z')), false); // Salı
+  assert.equal(isWeeklyDay(new Date('2026-11-15T17:00:00Z')), true); // Pazar 20:00 TSİ
+  assert.equal(isWeeklyDay(new Date('2026-11-09T05:30:00Z')), false); // Pazartesi
+  assert.equal(weeklyWindow(new Date('2026-11-15T17:00:00Z')), true); // 20:00
+  assert.equal(weeklyWindow(new Date('2026-11-15T17:44:00Z')), true); // 20:44
+  assert.equal(weeklyWindow(new Date('2026-11-15T17:45:00Z')), false); // 20:45
+  assert.equal(weeklyWindow(new Date('2026-11-15T16:59:00Z')), false); // 19:59
   process.env.ECON_WEEKLY_DAY = '3';
   process.env.ECON_WEEKLY_ENABLED = '0';
   try {
@@ -400,6 +408,9 @@ test('takvim durumu ayri satirda tutulur ve actual sonucu iddia etmez', () => {
   assert.match(src, /kind: 'weekly'/);
   assert.match(src, /isWeeklyDay\(now\)/);
   assert.match(src, /state\.weekKey !== weekKey/);
+  assert.match(src, /weeklyWindow\(now\)/);
+  assert.match(src, /skipped: 'weekend'/);
+  assert.match(src, /!weekend && \(force \|\| agendaWindow\(now\)\)/);
   assert.match(src, /weekSentAt: state\.weekSentAt \|\| null/);
   // Bos gun/hafta notlari kapatilabilir.
   assert.match(src, /formatAgendaEmpty\(now\)/);
