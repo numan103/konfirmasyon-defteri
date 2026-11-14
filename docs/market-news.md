@@ -17,6 +17,7 @@
 - Vercel Hobby planinda 15 dakikalik cron yok; tetikleme **GitHub Actions** ile yapilir: `.github/workflows/news-poll.yml`, `*/15 * * * *`. Actions her 15 dk calissa da gonderim yalnizca yukaridaki pencerelerde olur.
 - Vercel cron eklenmedi; mevcut 3 gunluk cron degismedi. cron-job.org artik gerekli degil (yedek olarak kalabilir).
 - Actions is akisi sunucuda saklanan sir kullanmaz: `id-token: write` ile alinan GitHub OIDC token'i `x-github-oidc-token` basligiyla gonderilir. Sunucu token'i GitHub JWKS ile dogrular.
+- Ayni is akisi ikinci adimda **ekonomik takvim** hattini tetikler (`?calendar=1`, 08:30 TSİ ajanda + veri oncesi hatirlatma). Ayrinti: `docs/economic-calendar.md`.
 
 ## Kaynaklar
 - RSS: CNBC, BBC Business, NYT Business, MarketWatch.
