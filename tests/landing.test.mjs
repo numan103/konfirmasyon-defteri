@@ -76,7 +76,7 @@ test('hero uses real public projections instead of sample financial figures', ()
 
 test('hero preview explains access and supports keyboard navigation and actions', () => {
   const panels = new Map();
-  const tabs = ['trade', 'bias', 'portfolio', 'community'].map(name => {
+  const tabs = ['trade', 'bias', 'portfolio', 'community', 'results'].map(name => {
     const attrs = { 'aria-controls': `lp-sig-panel-${name}` };
     panels.set(attrs['aria-controls'], { hidden: name !== 'trade' });
     return {
@@ -104,13 +104,13 @@ test('hero preview explains access and supports keyboard navigation and actions'
   assert.equal(panels.get('lp-sig-panel-bias').hidden, false);
   assert.equal(panels.get('lp-sig-panel-trade').hidden, true);
   tabs[1].handlers.keydown({ key: 'End', preventDefault() {} });
-  assert.equal(tabs[3].attrs['aria-selected'], 'true');
-  assert.equal(tabs[3].focused, true);
+  assert.equal(tabs[4].attrs['aria-selected'], 'true');
+  assert.equal(tabs[4].focused, true);
   link.handlers.click();
   button.handlers.click();
   assert.equal(jumped, true);
   assert.equal(opened, true);
-  assert.equal((landing.match(/class="lp-preview-summary"/g) || []).length, 4);
+  assert.equal((landing.match(/class="lp-preview-summary"/g) || []).length, 5);
   assert.ok(landing.includes('ÖZET ÜCRETSİZ · DETAYLAR PREMIUM'));
 });
 

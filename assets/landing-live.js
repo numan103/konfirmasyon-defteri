@@ -3,6 +3,7 @@
   const portfolio = document.getElementById('lp-live-portfolio');
   const trades = document.getElementById('lp-live-trades');
   const bias = document.getElementById('lp-live-bias');
+  const results = document.getElementById('lp-live-results');
   if (!portfolio || !trades || !bias) return;
   const finite = n => typeof n === 'number' && Number.isFinite(n);
   const date = value => {
@@ -190,6 +191,23 @@
       host.append(list);
     }
   }
+  function renderResults(host, group, status) {
+    if (!host) return;
+    const posts = Array.isArray(group?.latest) ? group.latest : [];
+    if (!posts.length) return state(host, status === 'unavailable' ? 'Sonuçlar şu an alınamıyor.' : 'Son 30 günde tamamlanan işlem yok.');
+    const list = el('div', null, 'lp-week-posts');
+    list.setAttribute('aria-label', 'Son 30 günde tamamlanan işlemler');
+    posts.forEach(item => {
+      const button = el('button', null, 'lp-week-post');
+      button.type = 'button';
+      const title = item.title || 'İşlem paylaşımı';
+      const meta = [date(item.date), item.coin, item.direction ? ({ long: 'LONG', short: 'SHORT', notr: 'NÖTR' }[item.direction] || '') : ''].filter(Boolean).join(' · ');
+      button.append(el('span', title), el('small', meta + (item.excerpt ? ' — ' + item.excerpt.slice(0, 80) : '')));
+      button.addEventListener('click', () => showPreview(item, button));
+      list.append(button);
+    });
+    host.replaceChildren(el('span', 'Son 30 gün · ' + number(group.count || posts.length) + ' tamamlanan işlem', 'lp-live-label'), list);
+  }
   async function load() {
     try {
       const response = await fetch('/api/edu-shared?kind=landing', { signal: AbortSignal.timeout(25000) });
@@ -198,6 +216,7 @@
       renderPortfolio(data.portfolio, data.status?.portfolio);
       renderPost(trades, data.channel?.trades, data.status?.channel, 'trade');
       renderPost(bias, data.channel?.biases, data.status?.channel, 'bias');
+      renderResults(results, data.channel?.results, data.status?.channel);
     } catch (_) {
       state(portfolio, 'Portföy verisi şu an alınamıyor.');
       state(trades, 'İşlem paylaşımı şu an alınamıyor.');
