@@ -120,6 +120,15 @@ test('handler enforces the daily cap and sends one event per alert', () => {
   assert.match(src, /market-news poll/);
 });
 
+test('admin onizleme yalnizca yonetici DM ine gonderir', () => {
+  const src = fs.readFileSync(new URL('../lib/market-news.mjs', import.meta.url), 'utf8');
+  assert.match(src, /adminPreview/);
+  assert.match(src, /TG_ADMIN_CHAT_ID/);
+  assert.match(src, /gruba gönderilmedi/);
+  assert.match(src, /!force && !dryRun && !adminPreview && !slot/);
+  assert.match(src, /!force && !adminPreview && sentToday >= DAILY_MAX/);
+});
+
 // --- Makro tutarlilik: ayni veri raporu, gercek yon, uydurma engeli ---
 
 const nightCooler = item('Crypto market sees brief relief after cooler US PPI data');
