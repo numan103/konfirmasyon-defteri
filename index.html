@@ -26482,7 +26482,7 @@ function bootAuth() {
       } else if (mode === 'register') {
         if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
         if (!name) { msg('Lütfen isminizi yazın.', 'err'); return; }
-        const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name } } });
+        const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: window.location.origin + window.location.pathname } });
         if (error) throw error;
         if (data && data.session && data.user) { saveRemember(email, true); await onAuthed(data.user); return; }
         msg('Kayıt alındı. E-posta onayı gerekiyorsa gelen kutunu kontrol et, sonra giriş yap.', 'ok');
