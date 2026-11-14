@@ -4696,7 +4696,13 @@
   #landing .lp-hero p { font-size: 16px; margin-left: 0; }
   #landing .lp-cta { justify-content: flex-start; }
   #landing .lp-assurance { max-width: 420px; }
-  #landing .lp-explore { display: inline-flex; gap: 14px; align-items: center; color: var(--text-2); font-size: 12px; margin-top: 30px; text-decoration: none; }
+  #landing .lp-hero-video { margin-top: 18px; max-width: 520px; }
+#landing .lp-video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; border: 1px solid var(--border); background: var(--card); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+#landing .lp-video-play { position: absolute; z-index: 2; width: 64px; height: 64px; border-radius: 50%; border: none; background: var(--pc); color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(79,69,216,.35); }
+#landing .lp-video-play:hover { transform: scale(1.05); }
+#landing .lp-video-placeholder { font-size: 13px; color: var(--text-3); }
+#landing .lp-video-caption { margin: 8px 0 0; font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+@media (max-width: 720px) { #landing .lp-hero-video { max-width: 100%; } }
   #landing .lp-explore span { transition: transform .2s; }
   #landing .lp-explore:hover span { transform: translateY(4px); }
   #landing .lp-art { position: relative; min-width: 0; isolation: isolate; padding-bottom: 10px; }
@@ -5140,6 +5146,13 @@
         <div><b>Topluluk</b><span>Soru sor, fikir paylaş</span></div>
       </div>
     </div>
+    <div class="lp-hero-video">
+      <div class="lp-video-frame" id="lp-hero-video-frame" data-video-src="">
+        <button type="button" class="lp-video-play" id="lp-hero-video-play" aria-label="Tanıtım videosunu oynat">▶</button>
+        <span class="lp-video-placeholder">Tanıtım videosu buraya eklenecek</span>
+      </div>
+      <p class="lp-video-caption">Alfa Traders nasıl kullanılır? 2 dakikada platform turu.</p>
+    </div>
     <a class="lp-explore" href="#lp-showcase">Platformu keşfet <span aria-hidden="true">↓</span></a>
     </div>
     <div class="lp-art">
@@ -5344,6 +5357,26 @@
       <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Bota /start yaz: @alfaportfoy_bot, veya siteden üye ol: https://alfa-trader.com. Onay sonrası premium özellikler açılır.</p>
     </details>
   </div>
+  <script>
+  (function () {
+    var frame = document.getElementById('lp-hero-video-frame');
+    var btn = document.getElementById('lp-hero-video-play');
+    if (!frame || !btn) return;
+    btn.addEventListener('click', function () {
+      var src = frame.getAttribute('data-video-src') || '';
+      if (!src) { frame.querySelector('.lp-video-placeholder').textContent = 'Video linki henüz eklenmedi.'; return; }
+      var iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.title = 'Alfa Traders tanıtım videosu';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;';
+      frame.innerHTML = '';
+      frame.appendChild(iframe);
+      frame.style.background = '#000';
+    });
+  })();
+  </script>
   <footer class="lp-foot"><strong>Alfa Traders</strong><p>İşlem, bias, portföy ve topluluk için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p><p style="font-size:12px;margin-top:8px;"><a href="/gizlilik.html">Gizlilik</a> · <a href="/kvkk.html">KVKK</a> · <a href="/kullanim.html">Kullanım Şartları</a></p></footer>
 </div>
 <script>
