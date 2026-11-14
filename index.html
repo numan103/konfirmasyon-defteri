@@ -20311,12 +20311,13 @@ function ap2ShareCanvas() {
     ctx.beginPath(); ctx.arc(pad + 3, y, 3, 0, Math.PI * 2); ctx.fill();
     var name = r.name;
     var nameW = posRight - (pad + 16) - 70;
+    if (nameW < 24) nameW = 24;
     if (nameW > 0) {
       ctx.font = '600 12px Inter, sans-serif';
       while (ctx.measureText(name).width > nameW && name.length > 1) name = name.slice(0, -1);
       if (name !== r.name) name += '…';
     }
-    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif';
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.textAlign = 'left';
     ctx.fillText(name, pad + 16, y + 4);
     if (r.pnl !== null) {
       ctx.fillStyle = r.pnlPos >= 0 ? '#34d399' : '#f87171';
