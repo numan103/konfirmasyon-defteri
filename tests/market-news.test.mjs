@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import {
   scoreNews, isTargetRelevant, isHighImpact, isHardEvent, newsEventKey,
   pickNewsToSend, istanbulDateKey, formatNewsMessage,
+  dataReportKey, extractMacroFacts, hasClearMarketImpact, combinedEffect,
+  buildFactAnalysis, normalizeEffectLine, validateAnalysis,
 } from '../lib/market-news.mjs';
 
 const item = (title, description = '') => ({ source: 'Test', title, description, pubDate: new Date().toUTCString() });
@@ -115,4 +117,85 @@ test('handler enforces the daily cap and sends one event per alert', () => {
   assert.match(src, /x-github-oidc-token/);
   assert.match(src, /verifyGithubOidc/);
   assert.match(src, /market-news poll/);
+});
+
+// --- Makro tutarlilik: ayni veri raporu, gercek yon, uydurma engeli ---
+
+const nightCooler = item('Crypto market sees brief relief after cooler US PPI data');
+const nightYields = item('10-year Treasury yield moves to 5.17% as traders weigh producer price report');
+
+test('iki farkli PPI basligi ayni gun tek olay sayilir (data:ppi)', () => {
+  assert.equal(dataReportKey(nightCooler.title), 'ppi');
+  assert.equal(dataReportKey(nightYields.title), 'ppi');
+  assert.equal(newsEventKey(nightCooler), 'data:ppi');
+  assert.equal(newsEventKey(nightYields), 'data:ppi');
+  const today = istanbulDateKey();
+  // Ilk PPI gonderildiyse ayni gun ikinci PPI basligi secilmez.
+  assert.equal(
+    pickNewsToSend([nightCooler, nightYields], { day: today, events: ['data:ppi'] }, 2, today),
+    null
+  );
+});
+
+test('cooler PPI pozitif, 5.17% tahvil getirisi negatif okunur', () => {
+  const cool = extractMacroFacts(nightCooler);
+  assert.equal(cool.driver, 'ppi');
+  assert.equal(cool.driverDirection, 'positive');
+  assert.equal(cool.btc, 'positive');
+  assert.equal(cool.gold, 'positive');
+  assert.equal(combinedEffect(cool), 'POZITIF');
+
+  const yields = extractMacroFacts(nightYields);
+  assert.equal(yields.driver, 'yields');
+  assert.equal(yields.driverDirection, 'negative');
+  assert.equal(yields.metric, 5.17);
+  assert.equal(yields.btc, 'negative');
+  assert.equal(yields.gold, 'negative');
+  assert.equal(combinedEffect(yields), 'NEGATIF');
+});
+
+test('yon belirtmeyen veri raporu bildirim olarak secilmez', () => {
+  const undecided = item('Producer price report watched as traders await Fed signals');
+  assert.equal(hasClearMarketImpact(undecided), false);
+  const today = istanbulDateKey();
+  assert.equal(
+    pickNewsToSend([undecided, nightCooler], { day: today, events: [] }, 2, today),
+    nightCooler
+  );
+});
+
+test('AI baslikta olmayan "PPI yukselisi" yazarsa analiz reddedilir', () => {
+  const facts = extractMacroFacts(nightCooler);
+  const invented =
+    'Etki: POZITIF\n' +
+    'BTC: PPI yükselişi faiz beklentilerini artırsa da kripto rahatladı.\n' +
+    'Altın: Düşük veri altını destekler.\n' +
+    'Neden: PPI yükselişi doları güçlendirdi.';
+  const bad = validateAnalysis(invented, facts);
+  assert.equal(bad.ok, false);
+  assert.equal(bad.reason, 'contradiction');
+
+  const wrongEffect = invented.replace('Etki: POZITIF', 'Etki: NEGATIF');
+  assert.equal(validateAnalysis(wrongEffect, facts).reason, 'effect_mismatch');
+});
+
+test('kural tabanli yedek analiz dogru yonde ve tek Etki satiri uretir', () => {
+  const facts = extractMacroFacts(nightCooler);
+  const fallback = buildFactAnalysis(nightCooler, facts);
+  assert.match(fallback, /^Etki: POZITIF$/m);
+  assert.match(fallback, /^BTC: /m);
+  assert.match(fallback, /^Altın: /m);
+  assert.match(fallback, /^Neden: /m);
+  assert.doesNotMatch(fallback, /yüksel/i);
+
+  const text = formatNewsMessage([nightCooler], 'Etki: POZITIF / POZITIF\nBTC: x\nAltın: y\nNeden: z');
+  assert.match(text, /Etki: POZITIF\nBTC: x/);
+  assert.doesNotMatch(text, /POZITIF \/ POZITIF/);
+  assert.equal(normalizeEffectLine('Etki: NEGATIF / NEGATIF\nBTC: x'), 'Etki: NEGATIF\nBTC: x');
+});
+
+test('eksik satirli AI cevabi kabul edilmez', () => {
+  const facts = extractMacroFacts(nightCooler);
+  assert.equal(validateAnalysis('Etki: POZITIF\nBTC: x', facts).reason, 'missing_sections');
+  assert.equal(validateAnalysis('', facts).reason, 'empty');
 });
