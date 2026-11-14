@@ -5498,22 +5498,25 @@
           <button type="button" class="auth-link" id="forgot-link" data-i18n="auth.forgot">Şifreni mi unuttun?</button>
           <button type="button" class="auth-link hidden" id="back-login" data-i18n="auth.back">← Girişe dön</button>
         </div>
+        <button type="button" class="auth-link hidden" id="resend-verify" style="margin-top:6px;">Doğrulama e-postasını tekrar gönder</button>
         <div class="auth-msg" id="au-msg"></div>
       </form>
       <div class="auth-pricing">
         <div class="auth-price">
           <div class="auth-price-name">Ücretsiz Üye</div>
-          <div class="auth-price-val"><span class="auth-price-free">$0</span></div>
+          <div class="auth-price-val"><span class="auth-price-free">$0</span><span class="auth-price-period"> / her zaman</span></div>
           <div class="auth-price-desc">Calculator, takvim, portföy özeti ve topluluk</div>
+          <div class="auth-price-how">Para ödemezsin; kayıt yeterli.</div>
         </div>
         <div class="auth-price featured">
-          <div class="auth-price-badge">Tam erişim</div>
+          <div class="auth-price-badge">Borsanı bağla · ücretsiz</div>
           <div class="auth-price-name">Premium</div>
-          <div class="auth-price-val">$0<span>/ aidat yok</span></div>
+          <div class="auth-price-val"><span class="auth-price-free">$0</span><span class="auth-price-period"> / aidat yok</span></div>
           <div class="auth-price-desc">Borsanı bağla, ücretsiz aç</div>
+          <div class="auth-price-how">Para değil, referans hesabı gerekir.</div>
         </div>
       </div>
-      <p class="auth-note">Abonelik ücreti alınmaz. Borsanı bağla, premium'u ücretsiz kullan; portföy özeti ve topluluk herkese açıktır.</p>
+      <p class="auth-note">İkisi de para istemez. Fark erişim seviyesi: ücretsiz üyelik temel araçları açar; premium, borsanı bağlayınca işlem kanalı, eğitim, portföy detayı ve yeni özellikleri açar.</p>
     </div>
   </div>
 </div>
@@ -26501,6 +26504,20 @@ function bootAuth() {
       }
     } catch (err) {
       msg(authError(err), 'err');
+      const em = String(err && (err.message || err) || '').toLowerCase();
+      const rv = $('resend-verify');
+      if (rv && mode === 'login' && (em.indexOf('confirm') !== -1 || em.indexOf('doğrula') !== -1)) {
+        rv.classList.remove('hidden');
+        rv.onclick = async () => {
+          try {
+            const { error } = await AUTH.client.auth.resend({ type: 'signup', email: $('au-email').value.trim() });
+            if (error) throw error;
+            msg('Doğrulama e-postası tekrar gönderildi. Gelen kutunu (ve spam) kontrol et.', 'ok');
+          } catch (e2) { msg(authError(e2), 'err'); }
+        };
+      } else if (rv) {
+        rv.classList.add('hidden');
+      }
       if (mode === 'login' && $('au-pass')) {
         $('au-pass').value = '';
         try { $('au-pass').focus({ preventScroll: true }); } catch (e2) {}
