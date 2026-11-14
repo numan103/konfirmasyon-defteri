@@ -227,6 +227,24 @@
   .navbar { display: flex; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .nav-brand { display: flex; align-items: center; gap: 11px; cursor: pointer; text-decoration: none; color: inherit; }
   .nav-brand:hover { opacity: .8; }
+  /* Yeni ozellik rozeti: sitenin sol ustunde, marka adinin yaninda. */
+  .new-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 7px; padding: 3px 8px; border-radius: 999px;
+    font-family: 'Inter', sans-serif; font-style: normal;
+    font-size: 10px; font-weight: 800; letter-spacing: .09em; line-height: 1;
+    color: #fff; text-transform: uppercase; white-space: nowrap;
+    background: linear-gradient(120deg, #7b78f5, #22d3ee 85%);
+    box-shadow: 0 2px 8px rgba(34,211,238,.30);
+    -webkit-text-fill-color: #fff;
+    transform: translateY(-1px);
+    animation: newBadgePulse 2.6s ease-in-out infinite;
+  }
+  @keyframes newBadgePulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(34,211,238,.26); }
+    50% { box-shadow: 0 2px 15px rgba(123,120,245,.55); }
+  }
+  @media (prefers-reduced-motion: reduce) { .new-badge { animation: none; } }
   a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
@@ -5071,7 +5089,7 @@
       <div class="lp-brand">
         <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
         <div>
-          <h1>Alfa Traders</h1>
+          <h1>Alfa Traders <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></h1>
           <div class="sub">İşlem, veri ve fikir paylaşımı</div>
         </div>
       </div>
@@ -5513,6 +5531,7 @@
     <a href="?page=home" class="nav-brand" id="nav-home" data-nav>
       <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
       <span>Alfa Traders</span>
+      <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>
     </a>
     <div class="nav-links">
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
@@ -5573,7 +5592,7 @@
   <div class="nav-mobile-backdrop" id="nav-mobile-backdrop"></div>
   <div class="nav-mobile" id="nav-mobile" role="dialog" aria-label="Menü">
     <div class="nav-mobile-head">
-      <div class="nav-brand"><div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div><span>Alfa Traders</span></div>
+      <div class="nav-brand"><div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div><span>Alfa Traders</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></div>
       <div class="nav-mobile-actions">
         <button class="theme-toggle-d" id="themeToggleM" type="button" role="switch" aria-label="Gündüz / Gece modu"><span class="tt-thumb"></span></button>
         <button class="nav-mobile-close" id="nav-mobile-close" type="button" aria-label="Kapat">✕</button>
@@ -29000,6 +29019,8 @@ loadSfx();
     'app.analiz': { tr: '🧭 Analiz Köşesi', en: '🧭 Analysis Corner' },
     'app.butce': { tr: '💰 Gelir/Gider', en: '💰 Income/Expense' },
     'app.pano': { tr: '🛠️ Çalışma Panosu', en: '🛠️ Work Board' },
+    'ui.new': { tr: 'YENİ', en: 'NEW' },
+    'ui.newTitle': { tr: 'Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı', en: 'New: personal work board and weekly review are now open to premium members' },
     'app.mentoring': { tr: '🤝 Mentoring', en: '🤝 Mentoring' },
     'app.indicators': { tr: '📐 İndikatörler', en: '📐 Indicators' },
     'app.designer': { tr: '🧬 Alfa Designer', en: '🧬 Alfa Designer' },
