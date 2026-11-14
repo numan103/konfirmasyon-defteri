@@ -5,6 +5,7 @@ import {
   parseCalendarRows, filterCalendarEvents, eventsForDay,
   formatAgenda, formatEventReminder, dueReminders, agendaWindow,
   fetchCalendarRows, parseCache, cacheUsable, cacheWriteDue,
+  weekStartKey, eventsForWeek, formatWeeklyOutlook, weeklyEnabled, isWeeklyDay,
 } from '../lib/economic-calendar.mjs';
 
 const row = (title, country, date, impact = 'High', forecast = '', previous = '') => ({
@@ -72,6 +73,56 @@ test('gun siniri Istanbul saatine gore cizilir', () => {
   assert.deepEqual(eventsForDay(events, '2026-11-14').map((e) => e.key), ['late']);
   assert.deepEqual(eventsForDay(events, '2026-11-15').map((e) => e.key), ['midnight']);
 });
+
+// --- Haftalik on bakis ---
+
+test('hafta pazartesi baslar ve Istanbul gun siniri kullanilir', () => {
+  assert.equal(weekStartKey(new Date('2026-11-14T05:30:00Z')), '2026-11-09'); // Cumartesi
+  assert.equal(weekStartKey(new Date('2026-11-15T20:00:00Z')), '2026-11-09'); // Pazar 23:00 TSİ
+  assert.equal(weekStartKey(new Date('2026-11-15T21:30:00Z')), '2026-11-16'); // Pazartesi 00:30 TSİ
+  assert.equal(weekStartKey(new Date('2026-11-16T09:00:00Z')), '2026-11-16'); // Pazartesi
+});
+
+test('haftalik liste yalnizca o haftanin verilerini alir', () => {
+  const events = [
+    event('before', '2026-11-08T13:30:00Z'), // onceki hafta
+    event('mon', '2026-11-09T13:30:00Z'),
+    event('sun', '2026-11-15T13:30:00Z'),
+    event('next', '2026-11-16T13:30:00Z'), // sonraki hafta
+  ];
+  assert.deepEqual(eventsForWeek(events, '2026-11-09').map((e) => e.key), ['mon', 'sun']);
+});
+
+test('haftalik on bakis gun adi, saat, Turkce baslik ve degerleri yazar', () => {
+  const now = new Date('2026-11-09T05:30:00Z'); // Pazartesi 08:30 TSİ
+  const text = formatWeeklyOutlook([
+    event('cpi', '2026-11-10T13:30:00Z', { title: 'CPI m/m', forecast: '0.3%', previous: '0.6%' }),
+    event('nfp', '2026-11-13T13:30:00Z', { title: 'Non-Farm Employment Change' }),
+  ], now);
+  assert.match(text, /Bu Haftanın Ekonomik Takvimi/);
+  assert.match(text, /9 Kasım 2026 – 15 Kasım 2026/);
+  assert.match(text, /Salı 16:30 — ABD TÜFE \(aylık\)/);
+  assert.match(text, /Beklenti: 0,3% · Önceki: 0,6%/);
+  assert.match(text, /Cuma 16:30 — ABD Tarım Dışı İstihdam/);
+  assert.match(text, /Kaynak: Forex Factory/);
+  assert.equal(formatWeeklyOutlook([], now), null);
+});
+
+test('haftalik on bakis gunu ve acma/kapama env ile ayarlanir', () => {
+  assert.equal(weeklyEnabled(), true);
+  assert.equal(isWeeklyDay(new Date('2026-11-09T05:30:00Z')), true); // Pazartesi
+  assert.equal(isWeeklyDay(new Date('2026-11-10T05:30:00Z')), false); // Salı
+  process.env.ECON_WEEKLY_DAY = '3';
+  process.env.ECON_WEEKLY_ENABLED = '0';
+  try {
+    assert.equal(isWeeklyDay(new Date('2026-11-11T05:30:00Z')), true); // Çarşamba
+    assert.equal(weeklyEnabled(), false);
+  } finally {
+    delete process.env.ECON_WEEKLY_DAY;
+    delete process.env.ECON_WEEKLY_ENABLED;
+  }
+});
+
 
 // --- Mesaj formatlari ---
 
@@ -301,6 +352,11 @@ test('takvim durumu ayri satirda tutulur ve actual sonucu iddia etmez', () => {
   assert.match(src, /skipped: 'source_unavailable'/);
   assert.match(src, /skipped: 'nothing_due'/);
   assert.match(src, /skipped: 'no_events_today'/);
+  // Haftalik on bakis ayri bir tur olarak gonderilir ve haftada bir kez.
+  assert.match(src, /kind: 'weekly'/);
+  assert.match(src, /isWeeklyDay\(now\)/);
+  assert.match(src, /state\.weekKey !== weekKey/);
+  assert.match(src, /weekSentAt: state\.weekSentAt \|\| null/);
   // Hatirlatma, gunluk ajanda kapisini ilerletmemeli.
   assert.match(src, /day: state\.day \|\| null/);
   assert.doesNotMatch(src, /day: state\.day \|\| day/);

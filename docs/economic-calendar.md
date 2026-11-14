@@ -31,14 +31,21 @@ Basarili her okuma `econ_calendar_state.data.cache` alanina yazilir (en fazla 30
 Tetikleme: `.github/workflows/news-poll.yml` icindeki ikinci adim, `*/15 * * * *` (15 dakikada bir).
 `https://alfa-trader.com/api/ai?calendar=1`
 
-1. **Gunluk ajanda**
+1. **Haftalik on bakis**
+   - Varsayilan **Pazartesi 08:30 TSİ**, ayni 45 dakikalik pencerede.
+   - O haftanin henuz gerceklesmemis yuksek etkili verileri gun adi + saat + Turkce baslik + beklenti/onceki ile listelenir.
+   - Haftada **en fazla 1 kez** gonderilir (`state.weekKey`).
+   - `ECON_WEEKLY_DAY` (ISO 1 = Pazartesi ... 7 = Pazar) ve `ECON_WEEKLY_ENABLED=0` ile ayarlanir.
+   - Haftalik mesaj o gunun verilerini de icerdigi icin ayni gun ayrica gunluk ajanda gitmez.
+   - Haftada veri yoksa mesaj gitmez.
+2. **Gunluk ajanda**
    - Varsayilan **08:30 TSİ**, 45 dakikalik pencere (08:30-09:14).
    - `ECON_AGENDA_START` (or. `08:30`) ve `ECON_AGENDA_WINDOW_MIN` (5-180) ile ayarlanir.
    - Gunde **en fazla 1 kez** gonderilir (`state.day`).
    - O gun kalan tum yuksek etkili veriler saat, ulke, Turkce baslik, beklenti ve onceki degerle listelenir.
    - Ajanda, olaya **25 dakikadan az** kalan verileri "gonderildi" olarak isaretler; ayni veri icin ayrica hatirlatma gitmez.
    - O gun veri yoksa mesaj gitmez (`skipped: "no_events_today"`).
-2. **Veri hatirlatmasi**
+3. **Veri hatirlatmasi**
    - Veriden **5-25 dakika once**, gunde her olay icin **en fazla 1 kez**.
    - 15 dakikalik tetikleme + 20 dakikalik pencere, her olayi yakalar.
    - Ayni calistirmada birden fazla olay varsa tek mesajda toplanir.
@@ -46,6 +53,19 @@ Tetikleme: `.github/workflows/news-poll.yml` icindeki ikinci adim, `*/15 * * * *
    - Gece 00:00 civarinda ajanda/hatirlatma yoktur.
 
 ## Mesaj bicimleri
+
+Haftalik on bakis (Pazartesi):
+```
+🗓️ Bu Haftanın Ekonomik Takvimi
+9 Kasım 2026 – 15 Kasım 2026 · TSİ
+
+Bu hafta öne çıkan ABD verileri:
+• Salı 16:30 — ABD TÜFE (aylık)
+  Beklenti: 0,3% · Önceki: 0,6%
+• Cuma 16:30 — ABD Tarım Dışı İstihdam
+
+Saatler TSİ. Kaynak: Forex Factory; resmî kurum tahmini değildir.
+```
 
 Gunluk ajanda:
 ```
@@ -77,6 +97,8 @@ Yüksek etkili veri; BTC ve altında oynaklık artabilir.
   {
     "day": "2026-11-14",
     "agendaSentAt": "2026-11-14T05:30:12.000Z",
+    "weekKey": "2026-11-09",
+    "weekSentAt": "2026-11-09T05:30:10.000Z",
     "sent": { "USD|cpi m/m|29649270": "2026-11-14T12:45:00.000Z" },
     "cache": {
       "fetchedAt": "2026-11-14T05:20:00.000Z",
@@ -87,6 +109,7 @@ Yüksek etkili veri; BTC ve altında oynaklık artabilir.
   }
   ```
 - `sent` anahtari olay bazlidir; son 3 gun tutulur, en fazla 200 kayit.
+- `weekKey` haftalik on bakisin gonderildigi haftanin Pazartesi tarihidir; ayni hafta ikinci kez gonderilmez.
 - `cache`, kaynak kesintisinde kullanilan son basarili filtreli kopyadir (en fazla 500 olay).
 - Ajanda gonderilemezse `day` yazilmaz; pencere icinde tekrar denenir. Telegram/DB hatasinda cevap `502`/`503` doner ve workflow kirmizi olur.
 - `SUPABASE_SERVICE_ROLE` yoksa normal gonderim `503 state_not_configured` ile durur; `dryRun` calismaya devam eder.
@@ -111,6 +134,8 @@ Aksi halde `401 unauthorized`.
 | `ECON_IMPACTS` | `High` | Etki seviyeleri |
 | `ECON_AGENDA_START` | `08:30` | Ajanda baslangici (TSİ) |
 | `ECON_AGENDA_WINDOW_MIN` | `45` | Ajanda penceresi (dk) |
+| `ECON_WEEKLY_DAY` | `1` | Haftalik on bakis gunu (ISO: 1=Pazartesi, 7=Pazar) |
+| `ECON_WEEKLY_ENABLED` | `1` | `0` ise haftalik on bakis gonderilmez |
 | `ECON_REMINDER_START_HOUR` | `8` | Hatirlatma sessiz saat baslangici |
 | `ECON_REMINDER_END_HOUR` | `23` | Hatirlatma sessiz saat bitisi (haric) |
 | `ECON_CALENDAR_PROXY_URL` | `https://alfa-trader.com/api/eco-cal` | 429/5xx yedek kaynagi |
@@ -131,12 +156,16 @@ Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&dryRun=1" -Headers 
 
 # Pencere disinda bile ajandayi/hatirlatmayi zorla dene (mesaj atar).
 Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&force=1" -Headers @{ Authorization = "Bearer $token" }
+
+# Haftalik on bakisi bugun olmasa bile zorla gonder (mesaj atar).
+Invoke-RestMethod "https://alfa-trader.com/api/ai?calendar=1&weekly=1" -Headers @{ Authorization = "Bearer $token" }
 ```
-`dryRun` cevabi: `agenda`, `reminders`, `events`, `agendaWindow`, `windows`, `source`, `stale`.
+`dryRun` cevabi: `agenda`, `weekly`, `weeklyDue`, `weekKey`, `weekSentAt`, `reminders`, `events`, `agendaWindow`, `windows`, `source`, `stale`.
 `force` ajanda icin yalnizca o gun henuz gonderilmediyse calisir; tekrar denemek icin durum satirindaki `day` alanini temizle.
+`weekly=1` haftalik on bakisi gun/hafta kontrolu olmadan gonderir; test disinda kullanilmamalidir.
 
 ## Cevap alanlari
-- `kind: "agenda"` / `kind: "reminder"`: mesaj gonderildi.
+- `kind: "weekly"` / `kind: "agenda"` / `kind: "reminder"`: mesaj gonderildi.
 - `source`: `feed` (dogrudan), `proxy` (edge-cache yedegi) veya `cache` (son basarili kopya).
 - `stale: true`: kaynak kesintisi nedeniyle son kopya kullanildi.
 - `skipped: "source_unavailable"`: kaynak alinamadi ve kullanilabilir kopya yok; mesaj yok.
