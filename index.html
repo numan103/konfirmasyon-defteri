@@ -4960,6 +4960,71 @@
     #landing .lp-explore { display: inline-flex; align-items: center; min-height: 40px; }
     #landing .lp-photo-copy a { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 0; }
   }
+  /* Ziyaretçi analitiği (admin) */
+  .ana-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:22px 0 6px; }
+  .ana-head h1 { font-family:var(--font-display); font-size:22px; margin:0; letter-spacing:-.02em; }
+  .ana-head p { font-size:12.5px; color:var(--dim); margin:5px 0 0; }
+  .ana-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-left:auto; }
+  .ana-controls select, .ana-controls button { font:inherit; font-size:12.5px; font-weight:600; color:var(--text); background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 12px; cursor:pointer; }
+  .ana-controls button:hover { border-color:var(--pc); color:var(--pc); }
+  .ana-check { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-3); font-weight:600; cursor:pointer; }
+  .ana-note { margin:8px 0 16px; padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); font-size:11.5px; line-height:1.55; color:var(--text-3); }
+  .ana-loading, .ana-empty { padding:22px 4px; font-size:13px; color:var(--text-3); }
+  .ana-error { padding:14px 16px; border:1px solid rgba(248,113,113,.35); border-radius:12px; background:rgba(248,113,113,.08); color:var(--red); font-size:12.5px; line-height:1.5; }
+  .ana-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(138px,1fr)); gap:10px; margin:0 0 16px; }
+  .ana-card { border:1px solid var(--border); border-radius:13px; background:linear-gradient(180deg,rgba(56,189,248,.07),transparent 70%),var(--card); padding:12px 14px; min-width:0; }
+  .ana-card span { display:block; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+  .ana-card b { display:block; font-family:var(--font-display); font-size:26px; line-height:1.15; letter-spacing:-.03em; margin:5px 0 2px; color:var(--text); }
+  .ana-card small { display:block; font-size:10.5px; color:var(--text-3); line-height:1.4; }
+  .ana-section { border:1px solid var(--border); border-radius:14px; background:var(--card); padding:14px 16px; margin-bottom:14px; }
+  .ana-section > h2 { font-family:var(--font-display); font-size:14px; margin:0 0 10px; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
+  .ana-section > h2 em { font-style:normal; font-size:10.5px; font-weight:600; color:var(--text-3); }
+  .ana-tablewrap { overflow-x:auto; }
+  .ana-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .ana-table th { text-align:left; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); font-weight:700; padding:7px 9px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .ana-table td { padding:8px 9px; border-bottom:1px solid rgba(255,255,255,.045); color:var(--text-2); vertical-align:middle; }
+  .ana-table tr:last-child td { border-bottom:none; }
+  .ana-table td b { color:var(--text); font-weight:700; }
+  .ana-bar { display:inline-block; height:5px; border-radius:99px; background:linear-gradient(90deg,#38bdf8,#7b78f5); vertical-align:middle; min-width:2px; max-width:110px; }
+  .ana-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .ana-grid2 .ana-section { margin-bottom:0; }
+  @media (max-width:760px) { .ana-grid2 { grid-template-columns:1fr; } .ana-controls { margin-left:0; } }
+  .ana-srow { display:flex; align-items:center; gap:10px; padding:10px 9px; border-radius:10px; cursor:pointer; border:1px solid transparent; }
+  .ana-srow:hover { background:rgba(56,189,248,.07); border-color:rgba(56,189,248,.22); }
+  .ana-srow.on { background:rgba(56,189,248,.1); border-color:rgba(56,189,248,.4); }
+  .ana-avatar { width:34px; height:34px; flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; background:linear-gradient(135deg,#38bdf8,#7b78f5); }
+  .ana-avatar.anon { background:linear-gradient(135deg,#4b5563,#374151); }
+  .ana-avatar.admin { background:linear-gradient(135deg,#f59e0b,#ef4444); }
+  .ana-smain { min-width:0; flex:1; }
+  .ana-smain b { display:block; font-size:12.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ana-smain small { display:block; font-size:10.5px; color:var(--text-3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ana-smeta { text-align:right; flex:none; font-size:10.5px; color:var(--text-3); line-height:1.5; }
+  .ana-smeta b { display:block; font-size:12px; color:var(--text-2); }
+  .ana-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:99px; font-size:9.5px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; border:1px solid var(--border); color:var(--text-3); }
+  .ana-badge.live { color:#34d399; border-color:rgba(52,211,153,.4); background:rgba(52,211,153,.1); }
+  .ana-badge.admin { color:#fbbf24; border-color:rgba(251,191,36,.4); background:rgba(251,191,36,.1); }
+  .ana-detail { border:1px solid rgba(56,189,248,.3); border-radius:14px; background:linear-gradient(180deg,rgba(56,189,248,.08),transparent 55%),var(--card); padding:15px 17px; margin-bottom:14px; }
+  .ana-detail h3 { font-family:var(--font-display); font-size:15px; margin:0 0 4px; }
+  .ana-detail .ana-sub { font-size:11px; color:var(--text-3); margin-bottom:12px; }
+  .ana-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:14px; }
+  .ana-chip { border:1px solid var(--border); border-radius:9px; padding:7px 9px; background:rgba(0,0,0,.10); min-width:0; }
+  .ana-chip span { display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-3); font-weight:700; }
+  .ana-chip b { display:block; font-size:11.5px; color:var(--text); margin-top:3px; overflow-wrap:anywhere; }
+  .ana-timeline { display:flex; flex-direction:column; gap:7px; }
+  .ana-tlrow { display:grid; grid-template-columns:96px 1fr 74px; gap:9px; align-items:center; font-size:11.5px; }
+  .ana-tlrow span:first-child { color:var(--text-2); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ana-tlrow span:last-child { text-align:right; color:var(--text-3); font-size:10.5px; white-space:nowrap; }
+  .ana-tltrack { height:7px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden; }
+  .ana-tltrack i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#38bdf8,#7b78f5); }
+  .ana-days { display:flex; align-items:flex-end; gap:4px; height:82px; padding:6px 2px 0; }
+  .ana-day { flex:1; min-width:4px; height:100%; display:flex; align-items:flex-end; }
+  .ana-day i { display:block; width:100%; border-radius:5px 5px 2px 2px; background:linear-gradient(180deg,#38bdf8,rgba(123,120,245,.45)); min-height:2px; }
+  .ana-day-lbls { display:flex; gap:4px; margin-top:5px; font-size:8.5px; color:var(--text-3); }
+  .ana-day-lbls span { flex:1; min-width:4px; text-align:center; overflow:hidden; }
+  .ana-clicks { display:flex; flex-direction:column; gap:6px; }
+  .ana-click { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text-2); }
+  .ana-click em { font-style:normal; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:#38bdf8; }
+  .ana-click small { color:var(--text-3); font-size:10.5px; margin-left:auto; white-space:nowrap; }
   </style>
   <script>
   // Portfolio data is loaded from the shared server record, never seeded here.
@@ -5483,6 +5548,7 @@
       </div>
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
+      <a href="?page=analitik" class="nav-link" id="tab-analitik" data-nav style="display:none">📊 Analitik</a>
     </div>
     <div class="nav-contact" id="nav-contact">
       <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
@@ -5533,6 +5599,7 @@
       <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
+      <a href="?page=analitik" class="mnav-link" data-nav data-mnav="analitik" id="mnav-analitik" style="display:none">📊 Ziyaretçi Analitiği</a>
       <div class="mnav-contact">
         <span class="nc-lbl" data-i18n="app.contact">İletişim</span>
         <a class="soc-link tg" id="nc-tg-m" href="#" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.6l-.33 3.9c.47 0 .68-.2.93-.45l2.24-2.15 4.64 3.4c.85.47 1.46.22 1.7-.79l3.07-14.4c.28-1.26-.46-1.75-1.28-1.45L1.2 9.53c-1.23.48-1.21 1.17-.21 1.48l4.9 1.53L17.28 6.1c.54-.35 1.03-.16.63.2z"/></svg></a>
@@ -5837,6 +5904,10 @@
   <div class="home-section-head">Yönetim</div>
   <div class="home-grid">
         <button type="button" class="home-card" data-macro-open style="text-align:left;font:inherit"><div class="hc-body"><h2>🌐 Alfa Makro Analist</h2><p>09.00 raporu, hedef kontrolü, önizleme ve onaylı test gönderimi.</p></div></button>
+        <a href="?page=analitik" class="home-card" data-nav>
+          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvAn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity=".16"/><stop offset="1" stop-color="#38bdf8" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvAn)"/><g stroke="#38bdf8" stroke-width="3" stroke-linecap="round" opacity=".85"><path d="M40 88V64"/><path d="M72 88V44"/><path d="M104 88V56"/><path d="M136 88V32"/><path d="M168 88V48"/><path d="M200 88V38"/><path d="M232 88V58"/><path d="M264 88V28"/></g><path d="M40 70 72 52 104 60 136 40 168 54 200 44 232 62 264 36" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="264" cy="28" r="5" fill="#38bdf8"/></svg></div>
+          <div class="hc-body"><h2>📊 Ziyaretçi Analitiği</h2><p>Kim geldi, ne kadar kaldı, hangi sayfalarla ilgilendi.</p></div>
+        </a>
         <a href="?page=basvuru" class="home-card" data-nav id="home-basvuru-card" style="display:none">
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv9)"/><circle cx="114" cy="50" r="19" fill="var(--pc)" stroke="var(--card)" stroke-width="4"/><circle cx="150" cy="50" r="19" fill="#7c3aed" stroke="var(--card)" stroke-width="4"/><circle cx="186" cy="50" r="19" fill="var(--green)" stroke="var(--card)" stroke-width="4"/><rect x="122" y="78" width="56" height="22" rx="11" fill="var(--green)"/><text x="150" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">+52R</text></svg></div>
           <div class="hc-body"><h2>🤝 Alfa Ol</h2><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
@@ -8394,6 +8465,32 @@
       <button class="path-btn" onclick="renderApps()" style="margin-left:auto;padding:9px 18px;font-size:13px;">🔄 Yenile</button>
     </div>
     <div id="apps-list" style="font-size:12.5px;color:var(--text-3);">Yükleniyor...</div>
+  </div>
+</div>
+
+<div id="page-analitik" class="hidden">
+  <div class="wrap">
+    <div class="ana-head">
+      <div>
+        <h1>📊 Ziyaretçi Analitiği</h1>
+        <p>Kim geldi, ne kadar kaldı, hangi sayfalarla ilgilendi.</p>
+      </div>
+      <div class="ana-controls">
+        <select id="ana-days" aria-label="Zaman aralığı">
+          <option value="1">Bugün</option>
+          <option value="7" selected>Son 7 gün</option>
+          <option value="30">Son 30 gün</option>
+          <option value="90">Son 90 gün</option>
+        </select>
+        <label class="ana-check"><input type="checkbox" id="ana-include-admin"> Yönetici ziyaretleri</label>
+        <button type="button" id="ana-refresh">🔄 Yenile</button>
+        <button type="button" id="ana-prune" title="90 günden eski analitik kayıtlarını sil">🧹 Eski kayıtları temizle</button>
+      </div>
+    </div>
+    <div class="ana-note">Ziyaretler anonim ölçülür; ham IP adresi saklanmaz. İsim/e-posta yalnızca kullanıcı giriş yaptıysa görünür. Yönetici ziyaretleri varsayılan olarak sayılmaz.</div>
+    <div id="ana-body">
+      <div class="ana-loading">Analitik yükleniyor…</div>
+    </div>
   </div>
 </div>
 
@@ -12257,7 +12354,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna'];
+  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna','analitik'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -13067,7 +13164,7 @@ const PAGE_TIER = {
   news: 'admin', ek: 'admin', defter: 'admin', data: 'admin', review: 'admin', karne: 'admin',
   alfa: 'admin', apps: 'admin', basvuru: 'admin', 'chat-admin': 'admin',
   sosyalmetre: 'admin', uyap: 'admin', zaman: 'admin', strateji: 'admin',
-  ayna: 'admin', mentoring: 'admin'
+  ayna: 'admin', mentoring: 'admin', analitik: 'admin'
 };
 
 // Referans linkleri: sunucu (SITE_OKX_REF_LINK / SITE_BYBIT_REF_LINK) bos
@@ -14116,7 +14213,7 @@ function showPage(name, skipAnim) {
   // AYNA:BASLA
   if (name === 'ayna') Ayna.render();
   // AYNA:BITIR
-  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim'];
+  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -14159,6 +14256,9 @@ function showPage(name, skipAnim) {
   if (name === 'alfa') { renderAlfaMan(); }
   if (name === 'apps') { renderApps(); }
   if (name === 'erisim') { renderAccessPage(); }
+  if (name === 'analitik') { try { anaOpenPage(); } catch (e) { /* analitik yüklenemedi */ } }
+  // Sayfa görüntüleme analitiği (anonim; üye kimliği yalnızca giriş varsa).
+  try { anaPageView(name); } catch (e) {}
 }
 
 async function renderHomeTeaser() {
@@ -26047,8 +26147,17 @@ async function refreshAppData() {
 
 function showGate() { document.getElementById('auth-gate').classList.add('open'); }
 function hideGate() { document.getElementById('auth-gate').classList.remove('open'); }
-function showLanding() { document.body.classList.add('landed'); document.getElementById('landing').classList.add('open'); try { renderSiteReviews(); } catch (e) {} }
-function hideLanding() { document.body.classList.remove('landed'); document.getElementById('landing').classList.remove('open'); }
+function showLanding() {
+  document.body.classList.add('landed');
+  document.getElementById('landing').classList.add('open');
+  try { renderSiteReviews(); } catch (e) {}
+  try { anaPageView('landing'); } catch (e) {}
+}
+function hideLanding() {
+  document.body.classList.remove('landed');
+  document.getElementById('landing').classList.remove('open');
+  try { anaPageView(currentPage || 'home'); } catch (e) {}
+}
 
 function migrateLegacyLocal() {
   // Bu tarayıcıda hesapsız kullanılmış eski verileri (varsa) yeni hesaba taşı.
@@ -26450,6 +26559,590 @@ function statsInit() {
   setInterval(statsRefresh, 15000);
   setInterval(statsFetchTotal, 30000);
 }
+
+// ============ Ziyaretçi analitiği (anonim ölçüm + admin paneli) ============
+var ANA_API = '/api/analytics';
+var ANA_ONLINE_MS = 90000;
+var ANA_STATE_KEY = 'at_analytics_state_v1';
+var ANA_SESSION_KEY = 'at_analytics_sid_v1';
+var ANA_START_KEY = 'at_analytics_start_v1';
+var ANA_VISITOR_KEY = 'at_visitor_v1';
+var ANA_FLUSH_MS = 25000;
+var ANA_MAX_ACTIVE_MS = 12 * 60 * 60 * 1000;
+var anaStarted = false;
+var anaPendingLanding = false;
+var anaFlushTimer = null;
+var anaAutoTimer = null;
+var anaTrack = {
+  activeMs: 0,
+  lastTick: Date.now(),
+  pages: {},
+  days: {},
+  clicks: [],
+  curPage: null,
+  lastPageView: null,
+  scroll: 0,
+  entry: '',
+  ref: '',
+  utm: {},
+  lang: '',
+  tz: '',
+  screen: '',
+  mobile: false
+};
+var anaState = { days: 7, includeAdmin: false, data: null, error: '', loading: false, loadedAt: 0, open: null };
+
+function anaSid() {
+  try {
+    var s = sessionStorage.getItem(ANA_SESSION_KEY);
+    if (!s) {
+      s = 's' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem(ANA_SESSION_KEY, s);
+    }
+    return s;
+  } catch (e) { return 's' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
+}
+
+function anaVid() {
+  try {
+    var v = localStorage.getItem(ANA_VISITOR_KEY);
+    if (!v) {
+      v = 'v' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(ANA_VISITOR_KEY, v);
+    }
+    return v;
+  } catch (e) { return 'v' + Date.now().toString(36); }
+}
+
+function anaStart() {
+  try {
+    var s = sessionStorage.getItem(ANA_START_KEY);
+    if (!s) { s = new Date().toISOString(); sessionStorage.setItem(ANA_START_KEY, s); }
+    return s;
+  } catch (e) { return new Date().toISOString(); }
+}
+
+// Istanbul günü (UTC+3) — sunucudaki gün anahtarıyla aynı.
+function anaDayKey() {
+  return new Date(Date.now() + 3 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+function anaUtm() {
+  var out = {};
+  try {
+    var sp = new URLSearchParams(location.search);
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) {
+      var v = sp.get(k);
+      if (v) out[k.replace('utm_', '')] = String(v).slice(0, 100);
+    });
+  } catch (e) {}
+  return out;
+}
+
+function anaPageEntry(name) {
+  if (!anaTrack.pages[name]) anaTrack.pages[name] = { v: 0, ms: 0, s: 0 };
+  return anaTrack.pages[name];
+}
+
+function anaSaveState() {
+  try {
+    sessionStorage.setItem(ANA_STATE_KEY, JSON.stringify({
+      activeMs: Math.round(anaTrack.activeMs),
+      pages: anaTrack.pages,
+      days: anaTrack.days
+    }));
+  } catch (e) {}
+}
+
+function anaRestoreState() {
+  try {
+    var raw = sessionStorage.getItem(ANA_STATE_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (s && typeof s === 'object') {
+      anaTrack.activeMs = Math.max(0, Math.min(ANA_MAX_ACTIVE_MS, Number(s.activeMs) || 0));
+      if (s.pages && typeof s.pages === 'object') anaTrack.pages = s.pages;
+      if (s.days && typeof s.days === 'object') anaTrack.days = s.days;
+    }
+  } catch (e) {}
+}
+
+function anaTick() {
+  var now = Date.now();
+  var dt = now - anaTrack.lastTick;
+  anaTrack.lastTick = now;
+  if (dt <= 0 || dt > 5000 || document.visibilityState !== 'visible') return;
+  anaTrack.activeMs = Math.min(ANA_MAX_ACTIVE_MS, anaTrack.activeMs + dt);
+  if (anaTrack.curPage) {
+    var p = anaPageEntry(anaTrack.curPage);
+    p.ms = Math.min(ANA_MAX_ACTIVE_MS, p.ms + dt);
+  }
+  var dk = anaDayKey();
+  var day = anaTrack.days[dk] || { ms: 0, pv: 0 };
+  day.ms = Math.min(ANA_MAX_ACTIVE_MS, day.ms + dt);
+  anaTrack.days[dk] = day;
+  if (now - (anaTrack.lastSaved || 0) > 5000) {
+    anaTrack.lastSaved = now;
+    anaSaveState();
+  }
+}
+
+function anaScroll() {
+  if (!anaTrack.curPage) return;
+  var doc = document.documentElement;
+  var body = document.body;
+  var h = Math.max(doc.scrollHeight || 0, body ? body.scrollHeight || 0 : 0);
+  var vh = window.innerHeight || doc.clientHeight || 0;
+  var y = window.scrollY || doc.scrollTop || (body ? body.scrollTop : 0) || 0;
+  var pct = h > vh ? Math.round(((y + vh) / h) * 100) : 100;
+  pct = Math.max(0, Math.min(100, pct));
+  var p = anaPageEntry(anaTrack.curPage);
+  p.s = Math.max(p.s, pct);
+  anaTrack.scroll = Math.max(anaTrack.scroll || 0, pct);
+}
+
+function anaPageView(name) {
+  if (!anaTrack) return;
+  if (!name || !/^[A-Za-z0-9_-]{1,40}$/.test(name)) return;
+  anaPendingLanding = false;
+  if (anaTrack.lastPageView === name) return;
+  anaTrack.lastPageView = name;
+  anaTrack.curPage = name;
+  var p = anaPageEntry(name);
+  p.v += 1;
+  var dk = anaDayKey();
+  var day = anaTrack.days[dk] || { ms: 0, pv: 0 };
+  day.pv += 1;
+  anaTrack.days[dk] = day;
+  anaSaveState();
+  anaFlushSoon();
+}
+
+function anaFlushSoon() {
+  clearTimeout(anaFlushTimer);
+  anaFlushTimer = setTimeout(function () { anaFlush(false); }, 1200);
+}
+
+async function anaToken() {
+  try {
+    if (!AUTH || !AUTH.client || !AUTH.user) return '';
+    var r = await AUTH.client.auth.getSession();
+    var s = r && r.data && r.data.session;
+    return s && s.access_token || '';
+  } catch (e) { return ''; }
+}
+
+async function anaFlush(beacon) {
+  if (!anaStarted) return;
+  if (anaPendingLanding) {
+    var stillLanded = false;
+    try { stillLanded = document.body.classList.contains('landed'); } catch (e) {}
+    if (stillLanded) {
+      anaPendingLanding = false;
+      anaPageView('landing');
+    }
+  }
+  var maxScroll = anaTrack.scroll || 0;
+  Object.keys(anaTrack.pages).forEach(function (k) {
+    if (anaTrack.pages[k] && anaTrack.pages[k].s > maxScroll) maxScroll = anaTrack.pages[k].s;
+  });
+  var payload = {
+    sid: anaSid(),
+    vid: anaVid(),
+    first: anaStart(),
+    page: anaTrack.curPage || currentPage || 'home',
+    entry: anaTrack.entry,
+    ref: anaTrack.ref,
+    utm: anaTrack.utm,
+    lang: anaTrack.lang,
+    tz: anaTrack.tz,
+    screen: anaTrack.screen,
+    mobile: anaTrack.mobile,
+    activeMs: Math.round(anaTrack.activeMs),
+    pages: anaTrack.pages,
+    days: anaTrack.days,
+    clicks: anaTrack.clicks.slice(-60),
+    scroll: maxScroll
+  };
+  anaSaveState();
+  var body = JSON.stringify(payload);
+  if (beacon && navigator.sendBeacon) {
+    try { navigator.sendBeacon(ANA_API, new Blob([body], { type: 'text/plain;charset=UTF-8' })); return; } catch (e) {}
+  }
+  var headers = { 'Content-Type': 'application/json' };
+  try {
+    var token = await anaToken();
+    if (token) headers.Authorization = 'Bearer ' + token;
+    await fetch(ANA_API, { method: 'POST', headers: headers, body: body, keepalive: true });
+  } catch (e) { /* analitik sessizce atlanır */ }
+}
+
+function anaBind() {
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') { anaTick(); anaFlush(true); }
+    else { anaTrack.lastTick = Date.now(); }
+  });
+  window.addEventListener('pagehide', function () { anaTick(); anaFlush(true); });
+  window.addEventListener('scroll', anaScroll, { passive: true });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var link = t.closest('a[href]');
+    var cta = t.closest('[data-an-cta],[data-macro-open]');
+    if (!link && !cta) return;
+
+    var kind = '';
+    var label = '';
+    var url = '';
+    if (link) {
+      var href = link.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#') return;
+      var abs = null;
+      try { abs = new URL(href, location.href); } catch (err) { return; }
+      var host = abs.hostname.toLowerCase();
+      if (/okx\.com$|(^|\.)okx\.com$/.test(host) || /bybit\.com$|(^|\.)bybit\.com$/.test(host)) kind = 'affiliate';
+      else if (/(^|\.)t\.me$|(^|\.)telegram\.(me|org)$/.test(host)) kind = 'telegram';
+      else if (abs.origin !== location.origin) kind = link.hasAttribute('download') ? 'download' : 'external';
+      if (!kind) return;
+      url = (host + abs.pathname).slice(0, 180);
+    } else {
+      kind = 'cta';
+    }
+    var txt = (link ? link.textContent : cta.textContent) || '';
+    label = String(txt).replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (!label) {
+      var aria = (link && (link.getAttribute('aria-label') || link.getAttribute('title'))) || '';
+      label = String(aria || url || (kind === 'cta' ? 'CTA' : 'Bağlantı')).slice(0, 80);
+    }
+    if (kind === 'cta' && !url) {
+      var ctaId = cta.getAttribute('data-an-cta') || (cta.hasAttribute('data-macro-open') ? 'macro' : '');
+      url = ctaId ? ('cta:' + ctaId) : '';
+    }
+    anaTrack.clicks.push({
+      t: new Date().toISOString(),
+      kind: kind,
+      label: label,
+      url: url,
+      page: anaTrack.curPage || ''
+    });
+    if (anaTrack.clicks.length > 60) anaTrack.clicks = anaTrack.clicks.slice(-60);
+    anaFlushSoon();
+  }, true);
+
+  document.addEventListener('change', function (e) {
+    if (!e.target || !e.target.id) return;
+    if (e.target.id === 'ana-days') {
+      anaState.days = Math.max(1, Math.min(90, Number(e.target.value) || 7));
+      anaLoad();
+    } else if (e.target.id === 'ana-include-admin') {
+      anaState.includeAdmin = !!e.target.checked;
+      anaLoad();
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest('#ana-refresh')) { anaLoad(); return; }
+    if (t.closest('#ana-prune')) { anaPrune(); return; }
+    var row = t.closest('[data-ana-sid]');
+    if (row && row.closest('#page-analitik')) {
+      var sid = row.getAttribute('data-ana-sid');
+      anaState.open = anaState.open === sid ? null : sid;
+      anaRender();
+    }
+  });
+}
+
+function anaInit() {
+  if (anaStarted) return;
+  anaStarted = true;
+  anaRestoreState();
+  anaTrack.lastTick = Date.now();
+  anaTrack.ref = document.referrer || '';
+  anaTrack.utm = anaUtm();
+  anaTrack.lang = navigator.language || '';
+  try {
+    anaTrack.tz = (Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || '';
+  } catch (e) { anaTrack.tz = ''; }
+  anaTrack.screen = (window.screen ? (screen.width || 0) + 'x' + (screen.height || 0) : '');
+  anaTrack.mobile = /mobi|iphone|ipod|android.*mobile/i.test(navigator.userAgent || '');
+  try {
+    var sp = new URLSearchParams(location.search);
+    var pg = sp.get('page') || '';
+    var post = sp.get('post') || '';
+    anaTrack.entry = location.pathname + (pg ? '?page=' + encodeURIComponent(pg) : '') + (post ? '&post=' + encodeURIComponent(post) : '');
+  } catch (e) { anaTrack.entry = location.pathname; }
+
+  anaBind();
+  setInterval(anaTick, 1000);
+  setInterval(function () { anaFlush(false); }, ANA_FLUSH_MS);
+  setTimeout(function () { anaFlush(false); }, 2500);
+  anaAutoTimer = setInterval(function () {
+    if (currentPage === 'analitik' && siteIsAdmin() && !document.hidden) anaLoad();
+  }, 30000);
+  if (!anaTrack.lastPageView) {
+    var landed = false;
+    try { landed = document.body.classList.contains('landed'); } catch (e) {}
+    if (landed) {
+      // Girişli üyeler landing'i görmeden uygulamaya geçer; landing görüntülemesi
+      // yalnızca ziyaretçi tanıtım ekranında kalırsa ilk gönderimde sayılır
+      // (anaFlush içinde).
+      anaTrack.curPage = 'landing';
+      anaPendingLanding = true;
+    } else {
+      anaPageView(currentPage || 'home');
+    }
+  }
+}
+
+function anaDur(ms) {
+  ms = Math.max(0, Number(ms) || 0);
+  var s = Math.round(ms / 1000);
+  if (s < 60) return s + ' sn';
+  var m = Math.floor(s / 60);
+  var rs = s % 60;
+  if (m < 60) return m + ' dk' + (rs ? ' ' + rs + ' sn' : '');
+  var h = Math.floor(m / 60);
+  var rm = m % 60;
+  return h + ' sa' + (rm ? ' ' + rm + ' dk' : '');
+}
+
+function anaWhen(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString('tr-TR', {
+      timeZone: 'Europe/Istanbul', day: '2-digit', month: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
+  } catch (e) { return '—'; }
+}
+
+function anaPageLabel(page) {
+  var map = {
+    home: 'Ana Menü', butce: 'Gelir/Gider', sosyalmetre: 'Sosyalmetre', uyap: 'Real Estate',
+    zaman: 'Zaman', strateji: 'Strateji', trading: 'Trading', alfatrading: 'İşlem Kanalı',
+    portfoy: 'Portföy Yönetimi', defter: 'Check List', data: 'Trade Günlüğü',
+    review: 'Haftalık Değerlendirme', karne: 'Günün Karnesi', news: 'AlfaNews', ek: 'Ek',
+    egitim: 'Alfa Edu', strategies: 'Stratejiler', analiz: 'Analiz Köşesi', mentoring: 'Mentoring',
+    pano: 'Çalışma Panosu', indicators: 'İndikatörler', designer: 'Alfa Designer',
+    onchain: 'Onchain', calendar: 'Ekonomik Takvim', basvuru: 'Alfa Ol', 'chat-admin': 'Alfa Chat',
+    calc: 'Alfa Calculator', alfa: 'Alfa Man', apps: 'Başvurular', ayna: 'Kişisel Günlük',
+    erisim: 'Erişim', analitik: 'Ziyaretçi Analitiği', landing: 'Giriş / Tanıtım'
+  };
+  return map[page] || page || '—';
+}
+
+function anaCard(label, value, note) {
+  return '<div class="ana-card"><span>' + esc(label) + '</span><b>' + esc(value) + '</b><small>' + esc(note || '') + '</small></div>';
+}
+
+function anaSessionRow(s) {
+  var initial = s.member ? String(s.member.name || s.member.email || '?').charAt(0).toUpperCase() : '👤';
+  var cls = s.admin ? 'admin' : (s.member ? '' : 'anon');
+  var badges = (s.live ? ' <span class="ana-badge live">canlı</span>' : '') +
+    (s.admin ? ' <span class="ana-badge admin">yönetici</span>' : '') +
+    (s.member ? ' <span class="ana-badge">üye</span>' : '');
+  return '<div class="ana-srow' + (anaState.open === s.sid ? ' on' : '') + '" data-ana-sid="' + esc(s.sid) + '">' +
+    '<div class="ana-avatar ' + cls + '">' + esc(initial) + '</div>' +
+    '<div class="ana-smain"><b>' + esc(s.label) + badges + '</b>' +
+    '<small>' + esc(anaWhen(s.last)) + ' · ' + esc(s.country || '—') + ' · ' + esc(s.device) + ' · ' + esc(s.browser) + ' · ' + esc(s.currentPageLabel || '—') + '</small></div>' +
+    '<div class="ana-smeta"><b>' + esc(anaDur(s.activeMs)) + '</b>' + Number(s.pageviews || 0) + ' görüntüleme · ' + (s.pages || []).length + ' sayfa</div></div>';
+}
+
+function anaBars(items, labelKey, valueKey, unit) {
+  if (!items || !items.length) return '<div class="ana-empty">Henüz veri yok.</div>';
+  var max = 1;
+  items.forEach(function (x) { max = Math.max(max, Number(x[valueKey]) || 0); });
+  return items.map(function (x) {
+    var n = Number(x[valueKey]) || 0;
+    var pct = Math.max(3, Math.round((n / max) * 100));
+    return '<div class="ana-tlrow"><span>' + esc(x[labelKey] || '—') + '</span>' +
+      '<span class="ana-tltrack"><i style="width:' + pct + '%"></i></span>' +
+      '<span>' + n + (unit ? ' ' + esc(unit) : '') + '</span></div>';
+  }).join('');
+}
+
+function anaDetailMarkup(s) {
+  var pages = (s.pages || []).slice().sort(function (a, b) { return (b.ms || 0) - (a.ms || 0) || (b.views || 0) - (a.views || 0); });
+  var max = 1;
+  pages.forEach(function (p) { max = Math.max(max, Number(p.ms) || 0); });
+  var utm = s.utm && Object.keys(s.utm).length
+    ? Object.keys(s.utm).map(function (k) { return k + ': ' + s.utm[k]; }).join(' · ')
+    : '—';
+  var member = s.member
+    ? (s.member.name || 'Üye') + (s.member.email ? ' · ' + s.member.email : '')
+    : 'Anonim ziyaretçi';
+  var chips = [
+    ['Kim', member],
+    ['Giriş', anaPageLabel(s.entry && s.entry.indexOf('page=') >= 0 ? s.entry.split('page=')[1].split('&')[0] : '')],
+    ['Kaynak', s.source || 'Doğrudan'],
+    ['UTM', utm],
+    ['Aktif süre', anaDur(s.activeMs)],
+    ['Sayfa görüntüleme', String(s.pageviews || 0)],
+    ['Kaydırma', '%' + (s.scroll || 0)],
+    ['Dil / saat dilimi', [s.lang, s.tz].filter(Boolean).join(' · ') || '—'],
+    ['Ekran', s.screen || '—'],
+    ['Ülke / cihaz', [s.country || '—', s.device, s.browser, s.os].filter(Boolean).join(' · ')],
+  ];
+  var timeline = pages.length ? pages.map(function (p) {
+    var pct = Math.max(3, Math.round(((Number(p.ms) || 0) / max) * 100));
+    return '<div class="ana-tlrow"><span>' + esc(p.label || anaPageLabel(p.page)) + '</span>' +
+      '<span class="ana-tltrack"><i style="width:' + pct + '%"></i></span>' +
+      '<span>' + esc(anaDur(p.ms)) + ' · %' + (p.scroll || 0) + '</span></div>';
+  }).join('') : '<div class="ana-empty">Sayfa kaydı yok.</div>';
+
+  var clickRows = (s.clicks || []).slice().reverse().map(function (c) {
+    var kind = c.kind === 'affiliate' ? 'borsa' : (c.kind === 'telegram' ? 'telegram' : (c.kind === 'cta' ? 'buton' : c.kind));
+    return '<div class="ana-click"><em>' + esc(kind) + '</em><span>' + esc(c.label || c.url || '—') + '</span>' +
+      '<small>' + esc(anaWhen(c.t)) + (c.page ? ' · ' + esc(anaPageLabel(c.page)) : '') + '</small></div>';
+  }).join('');
+
+  return '<div class="ana-detail"><h3>' + esc(s.label) + '</h3>' +
+    '<div class="ana-sub">' + esc(anaWhen(s.first)) + ' → ' + esc(anaWhen(s.last)) + ' · oturum ' + esc(s.sid) + '</div>' +
+    '<div class="ana-detail-grid">' + chips.map(function (x) {
+      return '<div class="ana-chip"><span>' + esc(x[0]) + '</span><b>' + esc(x[1]) + '</b></div>';
+    }).join('') + '</div>' +
+    '<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:0 0 8px;">Sayfa zaman çizelgesi</div>' +
+    '<div class="ana-timeline">' + timeline + '</div>' +
+    (clickRows ? '<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:14px 0 8px;">Tıklamalar</div><div class="ana-clicks">' + clickRows + '</div>' : '') +
+    '</div>';
+}
+
+function anaRender() {
+  var box = document.getElementById('ana-body');
+  if (!box) return;
+  if (!siteIsAdmin()) {
+    box.innerHTML = '<div class="ana-error">Bu sayfa yalnızca yönetici içindir.</div>';
+    return;
+  }
+  if (anaState.loading && !anaState.data) {
+    box.innerHTML = '<div class="ana-loading">Analitik yükleniyor…</div>';
+    return;
+  }
+  if (anaState.error) {
+    box.innerHTML = '<div class="ana-error">Analitik yüklenemedi: ' + esc(anaState.error) + '<br><small>Sayfayı yenilemeyi veya tekrar giriş yapmayı dene.</small></div>';
+    return;
+  }
+  var d = anaState.data;
+  if (!d) { box.innerHTML = '<div class="ana-empty">Henüz veri yok.</div>'; return; }
+
+  var t = d.totals || {};
+  var rangeDays = (d.range && d.range.days) || anaState.days;
+  var scope = rangeDays === 1 ? 'bugün' : 'son ' + rangeDays + ' gün';
+  var html = [];
+
+  html.push('<div class="ana-cards">' +
+    anaCard('Çevrimiçi', t.onlineNow || 0, 'son 90 saniye') +
+    anaCard('Tekil ziyaretçi', t.uniqueVisitors || 0, scope) +
+    anaCard('Oturum', t.sessions || 0, scope) +
+    anaCard('Sayfa görüntüleme', t.pageviews || 0, scope) +
+    anaCard('Ortalama süre', anaDur(t.avgActiveMs), 'aktif süre') +
+    anaCard('Üye / Anonim', (t.memberSessions || 0) + ' / ' + (t.anonymousSessions || 0), 'giriş yapan / yapmayan') +
+    '</div>');
+
+  if (d.daily && d.daily.length > 1) {
+    var maxPv = 1;
+    d.daily.forEach(function (x) { maxPv = Math.max(maxPv, Number(x.pageviews) || 0); });
+    var bars = d.daily.map(function (x) {
+      var h = Math.max(2, Math.round(((Number(x.pageviews) || 0) / maxPv) * 100));
+      return '<div class="ana-day" title="' + esc(x.date + ' · ' + (x.pageviews || 0) + ' görüntüleme · ' + (x.visitors || 0) + ' ziyaretçi') + '"><i style="height:' + h + '%"></i></div>';
+    }).join('');
+    var step = Math.ceil(d.daily.length / 10);
+    var labels = d.daily.map(function (x, i) {
+      return '<span>' + (i % step === 0 || i === d.daily.length - 1 ? esc(x.date.slice(5)) : '') + '</span>';
+    }).join('');
+    html.push('<div class="ana-section"><h2>📈 Günlük görüntüleme <em>' + esc(scope) + '</em></h2><div class="ana-days">' + bars + '</div><div class="ana-day-lbls">' + labels + '</div></div>');
+  }
+
+  html.push('<div class="ana-section"><h2>🟢 Şu an çevrimiçi <em>son 90 saniye</em></h2>');
+  if (!d.online || !d.online.length) html.push('<div class="ana-empty">Şu an çevrimiçi kimse yok.</div>');
+  else html.push(d.online.map(anaSessionRow).join(''));
+  html.push('</div>');
+
+  var openSession = null;
+  (d.sessions || []).forEach(function (s) { if (s.sid === anaState.open) openSession = s; });
+  if (openSession) html.push(anaDetailMarkup(openSession));
+
+  html.push('<div class="ana-grid2">');
+  html.push('<div class="ana-section"><h2>🔥 İlgi alanları <em>sayfa</em></h2>' +
+    (d.topPages && d.topPages.length
+      ? '<div class="ana-tablewrap"><table class="ana-table"><thead><tr><th>Sayfa</th><th>Görüntüleme</th><th>Ziyaretçi</th><th>Ort. süre</th><th>Kaydırma</th></tr></thead><tbody>' +
+        d.topPages.slice(0, 18).map(function (p) {
+          return '<tr><td><b>' + esc(p.label || anaPageLabel(p.page)) + '</b></td><td>' + (p.views || 0) + '</td><td>' + (p.visitors || 0) + '</td><td>' + esc(anaDur(p.avgMs)) + '</td><td>%' + (p.scroll || 0) + '</td></tr>';
+        }).join('') + '</tbody></table></div>'
+      : '<div class="ana-empty">Henüz sayfa verisi yok.</div>') + '</div>');
+
+  html.push('<div class="ana-section"><h2>🔗 Nereden geldiler <em>kaynak</em></h2>' +
+    anaBars(d.referrers || [], 'source', 'sessions', 'oturum') + '</div>');
+  html.push('</div>');
+
+  html.push('<div class="ana-grid2">');
+  html.push('<div class="ana-section"><h2>📱 Cihazlar <em>oturum</em></h2>' + anaBars(d.devices || [], 'key', 'sessions', '') + '</div>');
+  html.push('<div class="ana-section"><h2>🌍 Ülkeler <em>oturum</em></h2>' + anaBars(d.countries || [], 'key', 'sessions', '') + '</div>');
+  html.push('</div>');
+
+  html.push('<div class="ana-section"><h2>🧭 Tarayıcı & işletim sistemi</h2><div class="ana-grid2" style="margin:0;">' +
+    '<div>' + anaBars(d.browsers || [], 'key', 'sessions', '') + '</div>' +
+    '<div>' + anaBars(d.os || [], 'key', 'sessions', '') + '</div>' +
+    '</div></div>');
+
+  html.push('<div class="ana-section"><h2>👥 Oturumlar <em>' + (d.sessions || []).length + ' kayıt</em></h2>');
+  if (!d.sessions || !d.sessions.length) html.push('<div class="ana-empty">Bu aralıkta oturum yok.</div>');
+  else {
+    html.push(d.sessions.slice(0, 80).map(anaSessionRow).join(''));
+    if (d.sessions.length > 80) html.push('<div class="ana-empty">İlk 80 oturum gösteriliyor. Daha eski kayıtlar için aralığı daralt.</div>');
+  }
+  html.push('</div>');
+
+  box.innerHTML = html.join('');
+}
+
+async function anaLoad() {
+  if (!siteIsAdmin() || anaState.loading) return;
+  anaState.loading = true;
+  anaState.error = '';
+  anaRender();
+  try {
+    var url = ANA_API + '?days=' + encodeURIComponent(anaState.days) + (anaState.includeAdmin ? '&includeAdmin=1' : '');
+    var r = await siteFetch(url, { headers: { Accept: 'application/json' } });
+    var j = await r.json().catch(function () { return {}; });
+    if (!r.ok || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+    anaState.data = j;
+    anaState.loadedAt = Date.now();
+  } catch (e) {
+    anaState.error = (e && e.message) || 'bilinmeyen hata';
+  }
+  anaState.loading = false;
+  anaRender();
+}
+
+function anaOpenPage() {
+  if (!siteIsAdmin()) return;
+  if (!anaState.data || Date.now() - anaState.loadedAt > 30000) anaLoad();
+  else anaRender();
+}
+
+async function anaPrune() {
+  if (!siteIsAdmin()) return;
+  if (!window.confirm('90 günden eski analitik kayıtları silinsin mi? Bu işlem geri alınamaz.')) return;
+  anaState.loading = true;
+  anaState.error = '';
+  anaRender();
+  try {
+    var r = await siteFetch(ANA_API + '?days=' + encodeURIComponent(anaState.days) + '&prune=1', { headers: { Accept: 'application/json' } });
+    var j = await r.json().catch(function () { return {}; });
+    if (!r.ok || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+  } catch (e) {
+    anaState.error = (e && e.message) || 'temizlik başarısız';
+  }
+  anaState.loading = false;
+  if (!anaState.error) await anaLoad();
+  else anaRender();
+}
+
+anaInit();
 
 // ============ Mentoring (ortak eğitim — Ahmet + Çağatay) ============
 var MT_KEY = 'alfa-mentoring-v1';

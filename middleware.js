@@ -38,6 +38,7 @@ const PAGES = {
   basvuru: { title: 'Alfa Traders — Alfa Ol', desc: 'Alfa Ol — topluluğa katılma başvurusu.' },
   apps: { title: 'Alfa Traders — Başvurular', desc: 'Başvurular — admin başvuru yönetimi.' },
   'chat-admin': { title: 'Alfa Traders — Alfa Chat', desc: 'Alfa Chat — topluluk sohbeti.' },
+  analitik: { title: 'Alfa Traders — Ziyaretçi Analitiği', desc: 'Ziyaretçi analitiği — yönetici paneli.' },
 };
 
 const DEFAULT = {
