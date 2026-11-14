@@ -245,6 +245,11 @@
     50% { box-shadow: 0 2px 15px rgba(123,120,245,.55); }
   }
   @media (prefers-reduced-motion: reduce) { .new-badge { animation: none; } }
+  /* Rozet marka adinda degil, yeni ozellik girislerinde durur. */
+  .nav-drop .drop-menu .nav-link.has-new { display: flex; align-items: center; gap: 6px; }
+  .nav-link.has-new .new-badge, .mnav-link .new-badge { margin-left: 0; }
+  .eg-brand .new-badge { margin-left: -6px; }
+  .home-quick .new-badge { margin-left: 0; }
   a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
@@ -5089,7 +5094,7 @@
       <div class="lp-brand">
         <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
         <div>
-          <h1>Alfa Traders <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></h1>
+          <h1>Alfa Traders</h1>
           <div class="sub">İşlem, veri ve fikir paylaşımı</div>
         </div>
       </div>
@@ -5531,7 +5536,6 @@
     <a href="?page=home" class="nav-brand" id="nav-home" data-nav>
       <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
       <span>Alfa Traders</span>
-      <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>
     </a>
     <div class="nav-links">
       <a href="?page=home" class="nav-link on" id="tab-home" data-nav data-i18n="app.home">🏠 Ana Menü</a>
@@ -5541,9 +5545,9 @@
       <div class="nav-drop">
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
         <div class="drop-menu">
-          <a href="?page=defter" class="nav-link" id="tab-defter" data-nav data-i18n="app.check">✅ Check List</a>
-          <a href="?page=review" class="nav-link" id="tab-review" data-nav data-i18n="pg.review.t">📊 Haftalık Değerlendirme</a>
-          <a href="?page=pano" class="nav-link" id="tab-pano" data-nav data-i18n="app.pano">🛠️ Çalışma Panosu</a>
+          <a href="?page=defter" class="nav-link has-new" id="tab-defter" data-nav><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+          <a href="?page=review" class="nav-link has-new" id="tab-review" data-nav><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+          <a href="?page=pano" class="nav-link has-new" id="tab-pano" data-nav><span data-i18n="app.pano">🛠️ Çalışma Panosu</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav data-i18n="app.calc">🧮 Alfa Calculator</a>
           <a href="?page=zaman" class="nav-link" id="tab-zaman" data-nav>⏱️ Zaman</a>
           <a href="?page=strateji" class="nav-link" id="tab-strateji" data-nav>🧭 Strateji</a>
@@ -5592,7 +5596,7 @@
   <div class="nav-mobile-backdrop" id="nav-mobile-backdrop"></div>
   <div class="nav-mobile" id="nav-mobile" role="dialog" aria-label="Menü">
     <div class="nav-mobile-head">
-      <div class="nav-brand"><div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div><span>Alfa Traders</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></div>
+      <div class="nav-brand"><div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div><span>Alfa Traders</span></div>
       <div class="nav-mobile-actions">
         <button class="theme-toggle-d" id="themeToggleM" type="button" role="switch" aria-label="Gündüz / Gece modu"><span class="tt-thumb"></span></button>
         <button class="nav-mobile-close" id="nav-mobile-close" type="button" aria-label="Kapat">✕</button>
@@ -5604,9 +5608,9 @@
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" id="mnav-butce" data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
-      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" id="mnav-defter" data-i18n="app.check">✅ Check List</a>
-      <a href="?page=review" class="mnav-link" data-nav data-mnav="review" id="mnav-review" data-i18n="pg.review.t">📊 Haftalık Değerlendirme</a>
-      <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" id="mnav-pano" data-i18n="app.pano">🛠️ Çalışma Panosu</a>
+      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" id="mnav-defter"><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+      <a href="?page=review" class="mnav-link" data-nav data-mnav="review" id="mnav-review"><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+      <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" id="mnav-pano"><span data-i18n="app.pano">🛠️ Çalışma Panosu</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
@@ -5864,9 +5868,9 @@
       <div class="home-quick" id="home-quick">
         <a href="?page=calc" data-nav>🧮 Calculator</a>
         <a href="?page=calendar" data-nav>📅 Takvim</a>
-        <a href="?page=defter" data-nav data-ref-only>✅ Check List</a>
-        <a href="?page=review" data-nav data-ref-only>📊 Haftalık Değerlendirme</a>
-        <a href="?page=pano" data-nav data-ref-only>🛠️ Çalışma Panosu</a>
+        <a href="?page=defter" data-nav data-ref-only>✅ Check List <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+        <a href="?page=review" data-nav data-ref-only>📊 Haftalık Değerlendirme <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+        <a href="?page=pano" data-nav data-ref-only>🛠️ Çalışma Panosu <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
         <a href="?page=butce" data-nav data-ref-only>💰 Gelir/Gider</a>
         <a href="?page=trading" data-nav data-ref-only>📉 Terminal</a>
         <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
@@ -6049,7 +6053,7 @@
     </script>
   </div>
   <div id="page-defter" class="hidden">
-    <div class="eg-brand"><span class="eg-brand-ico">✅</span><span class="eg-brand-name" data-i18n="pg.defter.t">Alfa-Check List</span><span class="eg-brand-sub" data-i18n="pg.defter.s">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
+    <div class="eg-brand"><span class="eg-brand-ico">✅</span><span class="eg-brand-name" data-i18n="pg.defter.t">Alfa-Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i><span class="eg-brand-sub" data-i18n="pg.defter.s">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
   <div class="ai-wrap panel" id="ai-wrap">
     <div class="ai-head" id="ai-head" role="button" tabindex="0" aria-expanded="false">
       <span class="ai-title" data-i18n="pg.defter.aiT">🧠 Yapay Zeka ile Kişisel Checklist</span>
@@ -6498,7 +6502,7 @@
   </div>
 
   <div id="page-review" class="hidden">
-    <div class="eg-brand"><span class="eg-brand-ico">📊</span><span class="eg-brand-name" data-i18n="pg.review.t">Haftalık Değerlendirme</span><span class="eg-brand-sub" data-i18n="pg.review.s">Haftalık RR gir, kümülatif eğrini ve retrospektini izle.</span></div>
+    <div class="eg-brand"><span class="eg-brand-ico">📊</span><span class="eg-brand-name" data-i18n="pg.review.t">Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i><span class="eg-brand-sub" data-i18n="pg.review.s">Haftalık RR gir, kümülatif eğrini ve retrospektini izle.</span></div>
     <div class="rv-head">
       <button class="rv-nav" id="rv-prev" type="button">◀</button>
       <div class="rv-week" id="rv-week">—</div>
@@ -7858,6 +7862,7 @@
           </span>
           <span class="pano-room-grp" title="Bu pano yalnızca size özeldir; başka üyeler göremez ve değiştiremez.">
             <span class="pano-t">🔒 Kişisel Panon</span>
+            <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>
             <span class="pano-tip">sadece siz görürsünüz</span>
           </span>
           <span class="pano-tools" id="pano-tools">
@@ -12074,9 +12079,10 @@ function renderEk() {
     const canOpen = (typeof siteCanOpen === 'function') ? siteCanOpen(c.page) : true;
     const need = (typeof sitePageTier === 'function') ? sitePageTier(c.page) : 'free';
     const lockText = need === 'admin' ? '🔒 Yönetici erişimi' : '🔒 Referansla açılır';
+    const isNew = c.page === 'review' || c.page === 'pano';
     return '<a href="?page=' + c.page + '" data-nav onclick="event.preventDefault();showPage(\'' + c.page + '\')" style="display:block;padding:18px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);transition:box-shadow .15s,border-color .15s;">' +
       '<div style="font-size:26px;margin-bottom:8px;">' + c.icon + '</div>' +
-      '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + c.title + '</div>' +
+      '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + c.title + (isNew ? ' <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>' : '') + '</div>' +
       '<div style="font-size:11.5px;color:var(--dim);line-height:1.45;">' + c.desc + '</div>' +
       (canOpen ? '' : '<div style="margin-top:8px;font-size:10px;color:var(--amber);">' + lockText + '</div>') +
       '</a>';
