@@ -6,6 +6,7 @@ import {
   pickNewsToSend, istanbulDateKey, formatNewsMessage,
   dataReportKey, extractMacroFacts, hasClearMarketImpact, combinedEffect,
   buildFactAnalysis, normalizeEffectLine, validateAnalysis,
+  newsSlotAt, nextNewsWindow, istanbulClock, newsSendHours,
 } from '../lib/market-news.mjs';
 
 const item = (title, description = '') => ({ source: 'Test', title, description, pubDate: new Date().toUTCString() });
@@ -203,4 +204,75 @@ test('eksik satirli AI cevabi kabul edilmez', () => {
   const facts = extractMacroFacts(nightCooler);
   assert.equal(validateAnalysis('Etki: POZITIF\nBTC: x', facts).reason, 'missing_sections');
   assert.equal(validateAnalysis('', facts).reason, 'empty');
+});
+
+// --- Gonderim saatleri: 09:00 ve 15:00 oncesi, gece yok ---
+
+test('gonderim penceresi 09:00 ve 15:00, gece kapali', () => {
+  delete process.env.NEWS_SEND_HOURS;
+  delete process.env.NEWS_WINDOW_MIN;
+  try {
+    assert.deepEqual(newsSendHours(), [9, 15]);
+
+    const morning = newsSlotAt(new Date('2026-11-14T06:00:00Z')); // 09:00 TSİ
+    assert.equal(morning.hour, 9);
+    assert.equal(morning.key, '2026-11-14:09');
+
+    // 09:59 hala sabah penceresi, 10:00 disarida.
+    assert.equal(newsSlotAt(new Date('2026-11-14T06:59:00Z')).hour, 9);
+    assert.equal(newsSlotAt(new Date('2026-11-14T07:00:00Z')), null);
+
+    const afternoon = newsSlotAt(new Date('2026-11-14T12:00:00Z')); // 15:00 TSİ
+    assert.equal(afternoon.hour, 15);
+    assert.equal(afternoon.key, '2026-11-14:15');
+    assert.equal(newsSlotAt(new Date('2026-11-14T13:00:00Z')), null); // 16:00
+
+    // 00:00 TSİ (gece) ve 03:00 TSİ kapali.
+    assert.equal(newsSlotAt(new Date('2026-11-14T21:00:00Z')), null);
+    assert.equal(istanbulClock(new Date('2026-11-14T21:00:00Z')).hour, 0);
+  } finally {
+    delete process.env.NEWS_SEND_HOURS;
+    delete process.env.NEWS_WINDOW_MIN;
+  }
+});
+
+test('sonraki pencere dogru bildirilir', () => {
+  delete process.env.NEWS_SEND_HOURS;
+  try {
+    const later = nextNewsWindow(new Date('2026-11-14T07:00:00Z')); // 10:00 TSİ
+    assert.equal(later.label, '15:00');
+    assert.equal(later.inMinutes, 300);
+    assert.equal(later.tomorrow, false);
+
+    const nextDay = nextNewsWindow(new Date('2026-11-14T21:00:00Z')); // 00:00 TSİ
+    assert.equal(nextDay.label, '09:00');
+    assert.equal(nextDay.inMinutes, 540);
+    assert.equal(nextDay.tomorrow, false); // gece yarisini gecti, 09:00 ayni gun
+
+    const tomorrow = nextNewsWindow(new Date('2026-11-14T20:00:00Z')); // 23:00 TSİ
+    assert.equal(tomorrow.label, '09:00');
+    assert.equal(tomorrow.inMinutes, 600);
+    assert.equal(tomorrow.tomorrow, true);
+  } finally {
+    delete process.env.NEWS_SEND_HOURS;
+  }
+});
+
+test('saatler env ile degistirilebilir', () => {
+  process.env.NEWS_SEND_HOURS = '10,16';
+  try {
+    assert.deepEqual(newsSendHours(), [10, 16]);
+    assert.equal(newsSlotAt(new Date('2026-11-14T07:00:00Z')).hour, 10); // 10:00 TSİ
+    assert.equal(newsSlotAt(new Date('2026-11-14T06:00:00Z')), null); // 09:00 artik kapali
+  } finally {
+    delete process.env.NEWS_SEND_HOURS;
+  }
+});
+
+test('pencere disi ve ayni pencere ikinci mesaji engellenir', () => {
+  const src = fs.readFileSync(new URL('../lib/market-news.mjs', import.meta.url), 'utf8');
+  assert.match(src, /skipped: 'outside_window'/);
+  assert.match(src, /skipped: 'slot_already_sent'/);
+  assert.match(src, /newsSlotAt\(new Date\(collected\.lastSentAt\)\)/);
+  assert.match(src, /lastSlot\.key === slot\.key/);
 });

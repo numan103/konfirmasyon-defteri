@@ -9,7 +9,12 @@
 
 ## Zamanlama
 - `api/ai?news=1` endpoint'i, `lib/market-news.mjs` modulunu calistirir.
-- Vercel Hobby planinda 15 dakikalik cron yok; tetikleme **GitHub Actions** ile yapilir: `.github/workflows/news-poll.yml`, `*/15 * * * *`.
+- **Gonderim saatleri:** yalnizca **09:00** ve **15:00 TSİ** (piyasa hacmi girmeden once). Gece 00:00 gibi hacimsiz saatlerde bildirim gitmez; pencere disindaki tetiklemeler `skipped: "outside_window"` doner ve RSS bile cekilmez.
+- Her pencerede **en fazla 1 bildirim**. Sabah 09:00'da mesaj gittiyse ayni pencerede (09:00-09:59) ikinci mesaj gitmez: `skipped: "slot_already_sent"`.
+- Pencere icinde yeni ve net etkili haber gelirse gonderilir; yeni haber yoksa sessiz kalir (`skipped: "no_new_news"`).
+- Varsayilan pencere suresi 60 dk. `NEWS_SEND_HOURS` (or. `9,15`) ve `NEWS_WINDOW_MIN` (5-240) ile degistirilebilir.
+- `&force=1` ve `&dryRun=1` saat/pencere kontrolunu atlar (elle test icin).
+- Vercel Hobby planinda 15 dakikalik cron yok; tetikleme **GitHub Actions** ile yapilir: `.github/workflows/news-poll.yml`, `*/15 * * * *`. Actions her 15 dk calissa da gonderim yalnizca yukaridaki pencerelerde olur.
 - Vercel cron eklenmedi; mevcut 3 gunluk cron degismedi. cron-job.org artik gerekli degil (yedek olarak kalabilir).
 - Actions is akisi sunucuda saklanan sir kullanmaz: `id-token: write` ile alinan GitHub OIDC token'i `x-github-oidc-token` basligiyla gonderilir. Sunucu token'i GitHub JWKS ile dogrular.
 
@@ -80,6 +85,7 @@ AI yorumu bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.
 - Ayni baslik ikinci kez gonderilmez (gorulenler listesi).
 - Cooldown: son gonderimden sonra `NEWS_COOLDOWN_MIN` (varsayilan **10**) dakika boyunca otomatik gonderim yapilmaz; cevap `skipped: "cooldown"`. Onemli veri haberi 60 dk beklemesin diye dusuruldu.
 - Gunluk limit: `NEWS_DAILY_MAX` (varsayilan 2). Limit dolunca cevap `skipped: "daily_cap"`; Istanbul gece yarisinda sifirlanir.
+- Her gonderim penceresi icin en fazla 1 mesaj: `skipped: "slot_already_sent"`.
 - Ayni olay gun icinde tekrar gonderilmez (`skipped: "duplicate_event"`).
 - Elle/test gonderimi icin `&force=1` cooldown ve gunluk limiti atlar.
 - Cooldown, gorulenler ve gunluk sayac ayni Supabase satirinda (`data.lastSentAt`, `data.seen`, `data.day`, `data.events`) tutulur; yazma icin `SUPABASE_SERVICE_ROLE` gerekir.
@@ -103,6 +109,8 @@ Invoke-WebRequest -Uri "https://alfa-trader.com/api/ai?news=1&force=1" -Headers 
 ```
 
 ## Cevap alanlari
+- `skipped: "outside_window"`: gonderim penceresi disinda; `nextWindow`, `nextInMinutes` doner.
+- `skipped: "slot_already_sent"`: ayni pencerede zaten bir bildirim gonderildi.
 - `skipped: "no_new_news"`: yeni uygun baslik yok.
 - `skipped: "daily_cap"`: gunluk 2 haber limiti doldu; `sentToday` / `dailyMax` doner.
 - `skipped: "duplicate_event"`: ayni olay bugun zaten gonderildi.
