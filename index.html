@@ -5178,7 +5178,7 @@
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-results" role="tabpanel" aria-labelledby="lp-sig-tab-results" data-lp-hero-panel="results" hidden>
           <article class="lp-signal-card lp-live-card" id="lp-live-results" aria-live="polite"><p class="lp-live-state">Tamamlanan işlemler yükleniyor…</p></article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">SON 30 GÜN · TAMAMLANAN İŞLEMLER</span><h4>Başarılı sonuçlar.</h4><p>Son 30 günde TP gelen işlemler. Giriş/hedef/stop detayları premium'a özel.</p></div>
+          <div class="lp-preview-summary"><span class="lp-preview-access">SON 30 GÜN · TAMAMLANAN İŞLEMLER VE BİAS</span><h4>Başarılı sonuçlar.</h4><p>Son 30 günde TP gelen işlemler ve bias güncellemeleri. Giriş/hedef/stop detayları premium'a özel.</p></div>
           <a class="lp-sig-link" href="?page=alfatrading">İşlem kanalını aç <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-portfolio" role="tabpanel" aria-labelledby="lp-sig-tab-portfolio" data-lp-hero-panel="portfolio">
@@ -5935,7 +5935,7 @@
         fetch('/api/edu-shared?kind=landing').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
           var posts = (d && d.channel && d.channel.results && Array.isArray(d.channel.results.latest)) ? d.channel.results.latest : [];
           if (count) count.textContent = posts.length ? (posts.length + ' sonuç') : '—';
-          if (!posts.length) { list.textContent = 'Son 30 günde tamamlanan işlem yok.'; return; }
+          if (!posts.length) { list.textContent = 'Son 30 günde paylaşım yok.'; return; }
           list.textContent = '';
           posts.slice(0, 6).forEach(function (p) {
             var row = document.createElement('div');

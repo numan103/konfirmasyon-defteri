@@ -194,7 +194,7 @@
   function renderResults(host, group, status) {
     if (!host) return;
     const posts = Array.isArray(group?.latest) ? group.latest : [];
-    if (!posts.length) return state(host, status === 'unavailable' ? 'Sonuçlar şu an alınamıyor.' : 'Son 30 günde tamamlanan işlem yok.');
+    if (!posts.length) return state(host, status === 'unavailable' ? 'Sonuçlar şu an alınamıyor.' : 'Son 30 günde paylaşım yok.');
     const list = el('div', null, 'lp-week-posts');
     list.setAttribute('aria-label', 'Son 30 günde tamamlanan işlemler');
     posts.forEach(item => {
@@ -206,7 +206,7 @@
       button.addEventListener('click', () => showPreview(item, button));
       list.append(button);
     });
-    host.replaceChildren(el('span', 'Son 30 gün · ' + number(group.count || posts.length) + ' tamamlanan işlem', 'lp-live-label'), list);
+    host.replaceChildren(el('span', 'Son 30 gün · ' + number(group.count || posts.length) + ' işlem ve bias güncellemesi', 'lp-live-label'), list);
   }
   async function load() {
     try {
