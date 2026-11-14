@@ -26210,6 +26210,11 @@ async function onAuthed(user) {
   const apMob = document.getElementById('mnav-apps');
   if (apTab) apTab.style.display = isAdmin ? '' : 'none';
   if (apMob) apMob.style.display = isAdmin ? '' : 'none';
+  // Ziyaretçi analitiği: sadece admin hesabında
+  const anTab = document.getElementById('tab-analitik');
+  const anMob = document.getElementById('mnav-analitik');
+  if (anTab) anTab.style.display = isAdmin ? '' : 'none';
+  if (anMob) anMob.style.display = isAdmin ? '' : 'none';
   // Alfa Ol: sadece admin görebilir
   const bsTab = document.getElementById('tab-basvuru');
   const bsMob = document.getElementById('mnav-basvuru');

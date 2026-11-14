@@ -241,5 +241,6 @@ test('site wires the admin analytics page and anonymous tracker', () => {
   assert.ok(html.includes("anaPageView(currentPage || 'home')"), 'entering the app counts the real page');
   assert.ok(html.includes("anaTrack.curPage = 'landing'"), 'landing view is deferred for logged-in members');
   assert.ok(html.includes('anaPendingLanding'), 'pending landing flag wires deferred view');
+  assert.ok(html.includes("document.getElementById('tab-analitik')"), 'admin-only nav tab is toggled');
 });
 
