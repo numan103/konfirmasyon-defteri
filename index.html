@@ -20379,27 +20379,16 @@ function ap2ShareCanvas() {
     var y = splitTop + 13 + i * (rowH + 6);
     ctx.fillStyle = r.color;
     ctx.beginPath(); ctx.arc(pad + 3, y, 3, 0, Math.PI * 2); ctx.fill();
-    var name = r.name;
-    if (name.length > 14) name = name.slice(0, 14);
-    var nameW = posRight - (pad + 16) - 90;
-    if (nameW < 24) nameW = 24;
-    if (nameW > 0) {
-      ctx.font = '600 12px Inter, sans-serif';
-      while (ctx.measureText(name).width > nameW && name.length > 1) name = name.slice(0, -1);
-      if (name !== r.name && name.length > 0) name += '…';
-    }
+    // Sol: isim
     ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText(name, pad + 16, y + 4);
-    if (r.pnl !== null) {
-      ctx.fillStyle = r.pnlPos >= 0 ? '#34d399' : '#f87171';
-      ctx.font = '700 11px Inter, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(r.pnl, posRight, y + 4);
-      ctx.textAlign = 'left';
-    }
-    ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(r.val, r.pnl !== null ? posRight - 75 : posRight, y + 4);
+    var name = (r.name || '').length > 12 ? String(r.name).slice(0, 11) + '\u2026' : (r.name || '');
+    ctx.fillText(name, pad + 10, y + 4);
+    // Sağ: para + pnl tek satırda (çakışma yok)
+    var rightTxt = r.val;
+    if (r.pnl !== null) rightTxt = r.val + '  ' + r.pnl;
+    ctx.fillStyle = r.pnlPos >= 0 ? '#f8fafc' : '#f8fafc';
+    ctx.font = '700 12px Inter, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(rightTxt, posRight, y + 4);
     ctx.textAlign = 'left';
   });
 
