@@ -2377,7 +2377,7 @@
   .ap2-share-mn-cell.zero b { color: #94a3b8; }
   .ap2-share-pos { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); }
   .ap2-share-pos-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .ap2-share-pos-name { flex: 1; font-size: 12px; font-weight: 600; color: #cbd5e1; }
+  .ap2-share-pos-name { flex: 1; font-size: 12px; font-weight: 600; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
   .ap2-share-pos-val { font-size: 12px; font-weight: 700; color: #f8fafc; font-variant-numeric: tabular-nums; }
   .ap2-share-pos-pnl { font-size: 11px; font-weight: 700; min-width: 50px; text-align: right; }
   .ap2-share-pos-pnl.pos { color: #34d399; }
@@ -20380,12 +20380,13 @@ function ap2ShareCanvas() {
     ctx.fillStyle = r.color;
     ctx.beginPath(); ctx.arc(pad + 3, y, 3, 0, Math.PI * 2); ctx.fill();
     var name = r.name;
-    var nameW = posRight - (pad + 16) - 70;
+    if (name.length > 14) name = name.slice(0, 14);
+    var nameW = posRight - (pad + 16) - 90;
     if (nameW < 24) nameW = 24;
     if (nameW > 0) {
       ctx.font = '600 12px Inter, sans-serif';
       while (ctx.measureText(name).width > nameW && name.length > 1) name = name.slice(0, -1);
-      if (name !== r.name) name += '…';
+      if (name !== r.name && name.length > 0) name += '…';
     }
     ctx.fillStyle = '#cbd5e1'; ctx.font = '600 12px Inter, sans-serif'; ctx.textAlign = 'left';
     ctx.fillText(name, pad + 16, y + 4);
@@ -20398,7 +20399,7 @@ function ap2ShareCanvas() {
     }
     ctx.fillStyle = '#f8fafc'; ctx.font = '700 12px Inter, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(r.val, r.pnl !== null ? posRight - 58 : posRight, y + 4);
+    ctx.fillText(r.val, r.pnl !== null ? posRight - 75 : posRight, y + 4);
     ctx.textAlign = 'left';
   });
 
