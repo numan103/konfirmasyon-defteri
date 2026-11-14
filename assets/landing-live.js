@@ -140,7 +140,20 @@
     }
     const statusLabel = { aktif: 'Aktif', tp: 'TP geldi', sl: 'SL', iptal: 'İptal' }[post.status];
     if (statusLabel) tags.append(el('span', statusLabel));
-    host.replaceChildren(el('span', 'Son 7 gün · ' + number(group.count) + (kind === 'trade' ? ' işlem paylaşımı' : ' bias / analiz paylaşımı'), 'lp-live-label'), tags, el('h5', post.title || (kind === 'trade' ? 'İşlem paylaşımı' : 'Bias & analiz paylaşımı'), 'lp-post-title'), el('p', stamp(post.date), 'lp-live-caption'));
+    let resultSummary = '';
+    if (kind === 'trade' && Array.isArray(posts) && posts.length) {
+      const counts = { tp: 0, sl: 0, aktif: 0, iptal: 0 };
+      posts.forEach(function (p) { if (p && p.status && Object.prototype.hasOwnProperty.call(counts, p.status)) counts[p.status]++; });
+      const parts = [];
+      if (counts.tp) parts.push(counts.tp + ' TP');
+      if (counts.sl) parts.push(counts.sl + ' SL');
+      if (counts.aktif) parts.push(counts.aktif + ' aktif');
+      if (counts.iptal) parts.push(counts.iptal + ' iptal');
+      if (parts.length) resultSummary = 'Sonuç: ' + parts.join(' · ');
+    }
+    const children = [el('span', 'Son 7 gün · ' + number(group.count) + (kind === 'trade' ? ' işlem paylaşımı' : ' bias / analiz paylaşımı'), 'lp-live-label'), tags, el('h5', post.title || (kind === 'trade' ? 'İşlem paylaşımı' : 'Bias & analiz paylaşımı'), 'lp-post-title'), el('p', stamp(post.date), 'lp-live-caption')];
+    if (resultSummary) children.splice(2, 0, el('p', resultSummary, 'lp-live-result'));
+    host.replaceChildren(...children);
     if (safeImage(post.image)) {
       const link = el('button', null, 'lp-post-image-link');
       link.type = 'button';
