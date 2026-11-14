@@ -20,6 +20,9 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://zvnjslmptwmnuhftgqsr.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <!-- AYNA:BASLA -->
 <link rel="stylesheet" href="/ayna/ayna-core.css?v=10">
@@ -5318,7 +5321,30 @@
       <button id="cta-register" type="button" data-i18n="cta.btn">Ücretsiz kayıt ol</button>
     </div>
   </div>
-  <footer class="lp-foot"><strong>Alfa Traders</strong><p>İşlem, bias, portföy ve topluluk için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p></footer>
+  <div class="lp-faq" style="max-width:980px;margin:24px auto 10px;padding:0 14px;">
+    <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;">Sık sorulan sorular</h3>
+    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
+      <summary style="cursor:pointer;font-weight:600;">Premium gerçekten ücretsiz mi?</summary>
+      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Evet. Bybit veya OKX hesabını bizim referans linkimizden açarsan veya taşırsan premium ücretsiz açılır. Aidat yok, abonelik yok.</p>
+    </details>
+    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
+      <summary style="cursor:pointer;font-weight:600;">UID'mi nereden bulurum?</summary>
+      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Borsa hesabının profil sayfasında yazar. Bot yalnızca UID ister; şifre, SMS kodu veya API anahtarı istemez.</p>
+    </details>
+    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
+      <summary style="cursor:pointer;font-weight:600;">Mevcut OKX hesabım referansa taşınamıyor, ne yapmalıyım?</summary>
+      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Not: Eğer OKX hesabınız varsa aile bireylerinden birinin üzerine yeni hesap açabilirsiniz; sürekli tekrar login istememektedir. 6 ayda bir giriş yeterlidir.</p>
+    </details>
+    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
+      <summary style="cursor:pointer;font-weight:600;">Verilerim nasıl korunuyor?</summary>
+      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Çalışma panosu ve ziyaretçi verisi şifreli tutulur; ham IP adresi kaydedilmez. Üye kimliği yalnızca doğrulanmış girişten sonra eşlenir.</p>
+    </details>
+    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
+      <summary style="cursor:pointer;font-weight:600;">Premium'a nasıl katılırım?</summary>
+      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Bota /start yaz: @alfaportfoy_bot, veya siteden üye ol: https://alfa-trader.com. Onay sonrası premium özellikler açılır.</p>
+    </details>
+  </div>
+  <footer class="lp-foot"><strong>Alfa Traders</strong><p>İşlem, bias, portföy ve topluluk için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p><p style="font-size:12px;margin-top:8px;"><a href="/gizlilik.html">Gizlilik</a> · <a href="/kvkk.html">KVKK</a> · <a href="/kullanim.html">Kullanım Şartları</a></p></footer>
 </div>
 <script>
 (function () {
@@ -5543,7 +5569,7 @@
       <a href="?page=butce" class="nav-link" id="tab-butce" data-nav data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="nav-link" id="tab-uyap" data-nav>🏠 Real Estate</a>
       <div class="nav-drop">
-        <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
+        <button type="button" class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</button>
         <div class="drop-menu">
           <a href="?page=defter" class="nav-link has-new" id="tab-defter" data-nav><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
           <a href="?page=review" class="nav-link has-new" id="tab-review" data-nav><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
@@ -5556,7 +5582,7 @@
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
       <div class="nav-drop">
-        <a class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</a>
+        <button type="button" class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</button>
         <div class="drop-menu">
           <a href="?page=egitim" class="nav-link" id="tab-egitim" data-nav data-i18n="app.eduPage">🎓 Alfa Edu</a>
           <a href="?page=strategies" class="nav-link" id="tab-strategies" data-nav data-i18n="app.strategies">🧪 Stratejiler</a>
@@ -5566,7 +5592,7 @@
         </div>
       </div>
       <div class="nav-drop">
-        <a class="nav-link drop-btn" data-i18n="app.news">📰 AlfaNews ▾</a>
+        <button type="button" class="nav-link drop-btn" data-i18n="app.news">📰 AlfaNews ▾</button>
         <div class="drop-menu">
           <a href="?page=calendar" class="nav-link" id="tab-calendar" data-nav data-i18n="app.calendar">📅 Ekonomik Takvim</a>
         </div>
@@ -6631,7 +6657,7 @@
     <div class="mc-inner">
       <img id="mag-cardview-img" alt="Alfa Dergi kart görseli" draggable="true">
       <div class="mc-actions">
-        <a id="mag-cardview-dl" download="alfanews-kart.png" rel="noopener">⬇ <span data-i18n="pg.news.cardDownload">İndir</span></a>
+        <a id="mag-cardview-dl" href="#" download="alfanews-kart.png" rel="noopener">⬇ <span data-i18n="pg.news.cardDownload">İndir</span></a>
         <button id="mag-cardview-close" type="button">✕ <span data-i18n="pg.news.cardClose">Kapat</span></button>
       </div>
       <div class="mc-hint" data-i18n="pg.news.cardHint">Görseli sürükleyin ya da sağ tıklayıp kopyalayın</div>
@@ -8715,13 +8741,21 @@
       <span class="eg-brand-sub">OKX veya Bybit üzerinden referansla üye ol, sonra UID'ni doğrula. Doğrulama borsadan yapılır.</span>
     </div>
 
+    <div class="panel" style="margin-bottom:12px;">
+      <h2><span>3 adımda premium</span><span class="n">Ücretsiz</span></h2>
+      <div style="display:grid;gap:8px;font-size:13px;color:var(--text-2);">
+        <div><b style="color:var(--text);">1.</b> Referans linkinden Bybit veya OKX hesabı aç / taşı.</div>
+        <div><b style="color:var(--text);">2.</b> Bota UID'ni gönder ve doğrulamayı bekle.</div>
+        <div><b style="color:var(--text);">3.</b> Onay sonrası premium özellikler açılır.</div>
+      </div>
+    </div>
     <div class="panel">
       <h2><span>Durum</span><span class="n" id="acc-status-badge">—</span></h2>
       <p class="hint" id="acc-status-text" style="margin:0 0 4px;"></p>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px;">
-        <a class="btn solid" id="acc-link-okx" target="_blank" rel="noopener noreferrer" style="display:none;">OKX'te üye ol ↗</a>
-        <a class="btn solid" id="acc-link-bybit" target="_blank" rel="noopener noreferrer" style="display:none;">Bybit'te üye ol ↗</a>
+        <a class="btn solid" id="acc-link-okx" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">OKX'te üye ol ↗</a>
+        <a class="btn solid" id="acc-link-bybit" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">Bybit'te üye ol ↗</a>
       </div>
       <p class="hint" id="acc-links-missing" style="display:none;margin:0;">Referans bağlantısı henüz ayarlanmadı. Yöneticiye başvur.</p>
       <div id="acc-go-wrap" style="display:none;margin-top:14px;">
@@ -8769,7 +8803,7 @@
       <h2><span>🤝 Mentorship</span><span class="n" id="acc-mentor-badge">—</span></h2>
       <p class="hint" id="acc-mentor-text" style="margin:0 0 6px;"></p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-        <a class="btn solid" id="acc-mentor-join" target="_blank" rel="noopener noreferrer" style="display:none;">Telegram grubuna katıl ↗</a>
+        <a class="btn solid" id="acc-mentor-join" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">Telegram grubuna katıl ↗</a>
         <button class="btn" id="acc-mentor-refresh" type="button" style="display:none;">Davet linkini yenile</button>
       </div>
       <p class="hint" id="acc-mentor-note" style="margin:10px 0 0;"></p>
