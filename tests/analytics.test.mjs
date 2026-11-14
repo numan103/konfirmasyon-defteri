@@ -4,6 +4,8 @@ import fs from 'node:fs';
 
 import {
   dayKey,
+  decryptVisit,
+  encryptVisit,
   mergeVisit,
   parseDevice,
   sanitizePayload,
@@ -226,6 +228,28 @@ test('summarizeSessions ignores sessions older than the requested range', () => 
   const out = summarizeSessions([old], { now: NOW, days: 7, includeAdmin: true });
   assert.equal(out.totals.sessions, 0);
   assert.equal(out.sessions.length, 0);
+});
+
+test('visit rows are encrypted at rest and legacy plaintext still reads', () => {
+  const data = {
+    sid: 'session_123456',
+    vid: 'visitor_123456',
+    pages: { home: { v: 1, ms: 1000, s: 10 } },
+    member: { id: 'member-uuid-1' },
+    clicks: [{ t: '2026-11-14T08:00:00.000Z', kind: 'affiliate', label: 'Bybit', url: 'bybit.com' }],
+  };
+  const enc = encryptVisit(data);
+  assert.equal(enc.enc, 'a1');
+  assert.ok(enc.iv && enc.tag && enc.ct);
+  assert.equal(JSON.stringify(enc).includes('session_123456'), false);
+  assert.equal(JSON.stringify(enc).includes('member-uuid-1'), false);
+  assert.deepEqual(decryptVisit(enc), data);
+
+  // Bozuk/yanlış anahtarlı satır özete girmez.
+  assert.equal(decryptVisit({ enc: 'a1', iv: 'x', tag: 'y', ct: 'z' }), null);
+
+  // Eski düz satırlar okunabilir kalır (migrasyon öncesi uyumluluk).
+  assert.deepEqual(decryptVisit(data), data);
 });
 
 test('site wires the admin analytics page and anonymous tracker', () => {

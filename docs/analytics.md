@@ -43,6 +43,10 @@ data = { sid, vid, first, last, activeMs, pages, days, clicks, ... }
 ```
 
 - Yazma/okuma: `SUPABASE_SERVICE_ROLE` (yoksa publishable anahtarla sınırlı deneme).
+- **Satır içeriği AES-256-GCM ile şifrelenir.** `edu_shared` anon (publishable)
+  anahtarıyla okunabildiği için düz JSON saklanmaz. Anahtar yalnızca sunucudaki
+  `SUPABASE_SERVICE_ROLE` (veya tanımlıysa `ANALYTICS_SECRET`) değerinden türetilir.
+  Genel okuyucu yalnızca `visit_<sid>` kimliğini ve güncelleme zamanını görür.
 - Satırlar 90 gün sonra **Panel → 🧹 Eski kayıtları temizle** ile silinebilir.
 - Okuma üst sınırı tek istekte 5.000 satırdır (1.000'lik sayfalar hâlinde).
 

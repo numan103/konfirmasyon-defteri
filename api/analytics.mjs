@@ -6,6 +6,8 @@
 //
 // Depolama: mevcut edu_shared tablosu (id = "visit_<sid>"). Böylece yeni tablo
 // açmadan (DDL gerekmeden) oturum başına tek JSON satırı tutulur.
+// edu_shared anon anahtarıyla okunabildiği için satır içeriği AES-256-GCM ile
+// şifrelenir; anahtar yalnızca sunucudaki servis anahtarından türetilir.
 //
 // Gizlilik:
 //  - Ham IP adresi okunmaz/saklanmaz.
@@ -15,6 +17,7 @@
 //  - E-posta adresi satıra yazılmaz; yönetici özetinde auth kullanıcılarından
 //    eşlenir ve yalnızca yönetici yanıtında görünür.
 
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { requestUser } from '../lib/auth.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
@@ -96,6 +99,39 @@ function sbHeaders(key, json) {
 
 function storageKey() {
   return serviceKey() || PUB;
+}
+
+// edu_shared anon anahtarıyla okunabildiği için ziyaretçi verisi şifreli tutulur.
+// Anahtar yalnızca sunucuda bulunan servis anahtarından türetilir; istemciye
+// veya genel okuma anahtarına asla sızmaz.
+function visitKey() {
+  const secret = process.env.ANALYTICS_SECRET || serviceKey() || 'alfa-analytics-local';
+  return createHash('sha256').update('visit:' + secret).digest();
+}
+
+export function encryptVisit(obj) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', visitKey(), iv);
+  const ct = Buffer.concat([cipher.update(JSON.stringify(obj), 'utf8'), cipher.final()]);
+  return {
+    enc: 'a1',
+    iv: iv.toString('base64'),
+    tag: cipher.getAuthTag().toString('base64'),
+    ct: ct.toString('base64'),
+  };
+}
+
+export function decryptVisit(data) {
+  if (!data || typeof data !== 'object') return null;
+  if (data.enc !== 'a1') return data; // eski düz satırlar (okuma uyumluluğu)
+  try {
+    const decipher = createDecipheriv('aes-256-gcm', visitKey(), Buffer.from(data.iv, 'base64'));
+    decipher.setAuthTag(Buffer.from(data.tag, 'base64'));
+    const out = Buffer.concat([decipher.update(Buffer.from(data.ct, 'base64')), decipher.final()]);
+    return JSON.parse(out.toString('utf8'));
+  } catch (e) {
+    return null;
+  }
 }
 
 function str(value, max) {
@@ -620,7 +656,7 @@ async function readVisit(sid) {
   const r = await fetch(url, { headers: sbHeaders(storageKey()), signal: AbortSignal.timeout(8000) });
   if (!r.ok) return null;
   const rows = await r.json().catch(function () { return []; });
-  return rows && rows[0] && rows[0].data ? rows[0].data : null;
+  return rows && rows[0] && rows[0].data ? decryptVisit(rows[0].data) : null;
 }
 
 async function writeVisit(sid, data) {
@@ -630,7 +666,7 @@ async function writeVisit(sid, data) {
   const r = await fetch(SUPABASE_URL + '/rest/v1/edu_shared?on_conflict=id', {
     method: 'POST',
     headers: Object.assign(sbHeaders(key, true), { Prefer: 'resolution=merge-duplicates,return=minimal' }),
-    body: JSON.stringify([{ id: id, data: data, updated_at: new Date().toISOString() }]),
+    body: JSON.stringify([{ id: id, data: encryptVisit(data), updated_at: new Date().toISOString() }]),
     signal: AbortSignal.timeout(8000),
   });
   return r.ok;
@@ -648,7 +684,9 @@ async function readVisitRows(sinceIso) {
     if (!r.ok) return { error: 'read_' + r.status, rows: out };
     const rows = await r.json().catch(function () { return []; });
     if (!Array.isArray(rows) || !rows.length) break;
-    rows.forEach(function (x) { out.push(x); });
+    rows.forEach(function (x) {
+      out.push({ id: x.id, updated_at: x.updated_at, data: decryptVisit(x.data) });
+    });
     if (rows.length < PAGE_SIZE) break;
   }
   return { rows: out };
