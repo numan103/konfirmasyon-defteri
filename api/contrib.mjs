@@ -1,4 +1,5 @@
 // Topluluk Katkıları + Çalışma Panosu — Supabase üzerinden paylaşım (edu_shared tablosunun ayrı satırları).
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { requestUser, requestTier } from '../lib/auth.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 
@@ -6,6 +7,9 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.s
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROW_CONTRIB = 'contribs';
 const ROW_PANO = 'panos';
+// Calisma panosu uye basina ayri satirda tutulur: pano_member_<uuid>.
+// Boylece bir uyenin kaydi diger uyelerin panosunu ezemez.
+const PANO_PREFIX = 'pano_member_';
 const JOURNAL_UID = '00000000-0000-0000-0000-00000000e001';
 
 const sbHeaders = (key) => ({
@@ -58,8 +62,71 @@ async function writeJournal(data, extra) {
   return { ok: true };
 }
 
-function cleanRoom(r) {
-  return String(r || 'alfa').replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'alfa';
+function panoMemberRow(user) {
+  const id = String((user && user.id) || '').replace(/[^a-zA-Z0-9_-]/g, '');
+  return id ? PANO_PREFIX + id : '';
+}
+
+// edu_shared publishable anahtarla okunabildigi icin kisisel pano satiri
+// sifreli tutulur. Anahtar yalnizca sunucudaki servis anahtarindan turetilir.
+function panoKey() {
+  const secret = process.env.PANO_SECRET || process.env.SUPABASE_SERVICE_ROLE || 'alfa-pano-local';
+  return createHash('sha256').update('pano:' + secret).digest();
+}
+
+function sealPano(board) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', panoKey(), iv);
+  const ct = Buffer.concat([cipher.update(JSON.stringify(board), 'utf8'), cipher.final()]);
+  return { enc: 'p1', iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64'), ct: ct.toString('base64') };
+}
+
+function openPano(data) {
+  if (!data || typeof data !== 'object' || data.enc !== 'p1') return data;
+  try {
+    const decipher = createDecipheriv('aes-256-gcm', panoKey(), Buffer.from(data.iv, 'base64'));
+    decipher.setAuthTag(Buffer.from(data.tag, 'base64'));
+    const out = Buffer.concat([decipher.update(Buffer.from(data.ct, 'base64')), decipher.final()]);
+    return JSON.parse(out.toString('utf8'));
+  } catch (e) {
+    return null;
+  }
+}
+
+// Pano: yalnizca oturumdaki uyenin kendi satiri okunur/yazilir. Istemcinin
+// gonderdigi "room" degeri yok sayilir; baska uyenin panosuna erisilemez.
+async function panoStore(req, res, user) {
+  const row = panoMemberRow(user);
+  if (!row) return res.status(400).json({ error: 'member_required' });
+
+  if (req.method === 'GET') {
+    const r = await readShared(row);
+    if (r.error && !r.missing) return res.status(500).json({ error: r.error });
+    const board = openPano(r.data);
+    if (Array.isArray(board)) return res.status(200).json({ ok: true, scope: 'member', data: board });
+    // Eski tek-odalı pano yalnızca yöneticiye, ilk açılışta taşıma kolaylığı
+    // için gösterilir; üyelerin panolarına karışmaz.
+    if (user.admin) {
+      const legacy = await readShared(ROW_PANO);
+      const map = legacy.data && typeof legacy.data === 'object' && !Array.isArray(legacy.data) ? legacy.data : {};
+      if (Array.isArray(map.alfa)) return res.status(200).json({ ok: true, scope: 'member', legacy: true, data: map.alfa });
+    }
+    return res.status(200).json({ ok: true, scope: 'member', data: null });
+  }
+
+  if (req.method === 'POST') {
+    let body;
+    try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
+    const board = body.data;
+    if (board === undefined || board === null) return res.status(400).json({ error: 'data required' });
+    if (!Array.isArray(board)) return res.status(400).json({ error: 'data must be an array' });
+    const w = await writeShared(row, sealPano(board));
+    if (w.ok) return res.status(200).json({ ok: true, via: 'edu_shared', scope: 'member' });
+    if (!w.missing) return res.status(500).json({ error: w.error });
+    return res.status(500).json({ error: 'Pano depolaması hazır değil.' });
+  }
+
+  return res.status(405).json({ error: 'method_not_allowed' });
 }
 
 // ---- Alfa Trading (topluluk işlem/analiz akışı) — aynı edu_shared altyapısı ----
@@ -366,29 +433,20 @@ export default async function handler(req, res) {
   if (req.query.store === 'alfatrading') return alfaTrading(req, res, await requestUser(req));
 
   const store = req.query.store === 'pano' ? 'pano' : 'contrib';
-  const rowId = store === 'pano' ? ROW_PANO : ROW_CONTRIB;
-  const room = cleanRoom(req.query.room);
+  const rowId = ROW_CONTRIB;
 
   // Calisma Panosu (pano) referans uyelerine ait: yazma ve okuma icin
-  // dogrulanmis uyelik istiyoruz. Tablo kurulu degilse kapi kapali (fail-open).
+  // dogrulanmis uyelik istiyoruz. Her uye yalnizca kendi panosunu gorur.
   if (store === 'pano') {
     const u = await requestUser(req);
     if (!u) return res.status(401).json({ error: 'unauthorized' });
     const tier = await requestTier(u);
     if (tier !== 'ref' && tier !== 'admin') return res.status(403).json({ error: 'referral_required' });
+    return panoStore(req, res, u);
   }
 
   if (req.method === 'GET') {
     const r = await readShared(rowId);
-    if (store === 'pano') {
-      const map = r.data && typeof r.data === 'object' && !Array.isArray(r.data) ? r.data : {};
-      if (map[room]) return res.status(200).json({ ok: true, room, data: map[room] });
-      if (r.error && !r.missing) return res.status(500).json({ error: r.error });
-      const j = await readJournal();
-      const jmap = j.data && typeof j.data === 'object' && !Array.isArray(j.data) ? j.data : {};
-      if (jmap[room]) return res.status(200).json({ ok: true, room, data: jmap[room] });
-      return res.status(200).json({ ok: true, room, data: null });
-    }
     if (r.data) return res.status(200).json(r.data);
     if (!r.error && !r.missing) return res.status(200).json([]);
     const j = await readJournal();
@@ -399,25 +457,6 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     let body;
     try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
-
-    if (store === 'pano') {
-      const board = body.data;
-      if (board === undefined || board === null) return res.status(400).json({ error: 'data required' });
-      const cur = await readShared(rowId);
-      if (cur.error && !cur.missing) return res.status(500).json({ error: cur.error });
-      const map = cur.data && typeof cur.data === 'object' && !Array.isArray(cur.data) ? cur.data : {};
-      map[room] = board;
-      const w = await writeShared(rowId, map);
-      if (w.ok) return res.status(200).json({ ok: true, via: 'edu_shared', room });
-      if (!w.missing) return res.status(500).json({ error: w.error });
-      const jr = await readJournal();
-      const jmap = jr.data && typeof jr.data === 'object' && !Array.isArray(jr.data) ? jr.data : {};
-      jmap[room] = board;
-      const jw = await writeJournal(jmap);
-      if (jw.ok) return res.status(200).json({ ok: true, via: 'journals', room });
-      if (!jw.missing) return res.status(500).json({ error: jw.error });
-      return res.status(500).json({ error: 'Pano depolaması hazır değil.' });
-    }
 
     const { title, url, author } = body || {};
     if (!url) return res.status(400).json({ error: 'url required' });

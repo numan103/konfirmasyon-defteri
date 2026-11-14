@@ -5523,6 +5523,8 @@
         <a class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</a>
         <div class="drop-menu">
           <a href="?page=defter" class="nav-link" id="tab-defter" data-nav data-i18n="app.check">✅ Check List</a>
+          <a href="?page=review" class="nav-link" id="tab-review" data-nav data-i18n="pg.review.t">📊 Haftalık Değerlendirme</a>
+          <a href="?page=pano" class="nav-link" id="tab-pano" data-nav data-i18n="app.pano">🛠️ Çalışma Panosu</a>
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav data-i18n="app.calc">🧮 Alfa Calculator</a>
           <a href="?page=zaman" class="nav-link" id="tab-zaman" data-nav>⏱️ Zaman</a>
           <a href="?page=strateji" class="nav-link" id="tab-strateji" data-nav>🧭 Strateji</a>
@@ -5583,7 +5585,9 @@
       <a href="?page=butce" class="mnav-link" data-nav data-mnav="butce" id="mnav-butce" data-i18n="app.butce">💰 Gelir/Gider</a>
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
-      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" data-i18n="app.check">✅ Check List</a>
+      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" id="mnav-defter" data-i18n="app.check">✅ Check List</a>
+      <a href="?page=review" class="mnav-link" data-nav data-mnav="review" id="mnav-review" data-i18n="pg.review.t">📊 Haftalık Değerlendirme</a>
+      <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" id="mnav-pano" data-i18n="app.pano">🛠️ Çalışma Panosu</a>
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
@@ -5841,6 +5845,9 @@
       <div class="home-quick" id="home-quick">
         <a href="?page=calc" data-nav>🧮 Calculator</a>
         <a href="?page=calendar" data-nav>📅 Takvim</a>
+        <a href="?page=defter" data-nav data-ref-only>✅ Check List</a>
+        <a href="?page=review" data-nav data-ref-only>📊 Haftalık Değerlendirme</a>
+        <a href="?page=pano" data-nav data-ref-only>🛠️ Çalışma Panosu</a>
         <a href="?page=butce" data-nav data-ref-only>💰 Gelir/Gider</a>
         <a href="?page=trading" data-nav data-ref-only>📉 Terminal</a>
         <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
@@ -7830,9 +7837,9 @@
           <span class="pano-drag" id="pano-drag" data-i18n-title="pg.pano.drag" title="Sürükle ve taşı">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="none"><circle cx="9" cy="5.5" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="9" cy="18.5" r="1.4"/><circle cx="15" cy="5.5" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="15" cy="18.5" r="1.4"/></svg>
           </span>
-          <span class="pano-room-grp">
-            <input type="text" id="pano-room" class="pano-room" value="alfa" data-i18n-title="pg.pano.room" title="Oda adı" maxlength="40">
-            <button type="button" class="pano-apply" id="pano-apply" data-i18n="pg.pano.openRoom">Odayı Aç</button>
+          <span class="pano-room-grp" title="Bu pano yalnızca size özeldir; başka üyeler göremez ve değiştiremez.">
+            <span class="pano-t">🔒 Kişisel Panon</span>
+            <span class="pano-tip">sadece siz görürsünüz</span>
           </span>
           <span class="pano-tools" id="pano-tools">
             <button type="button" class="pt active" data-tool="select" data-i18n-title="pg.pano.tSelect" title="Seç / Taşı (V)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg></button>
@@ -13160,8 +13167,9 @@ const PAGE_TIER = {
   trading: 'ref',
   egitim: 'ref', strategies: 'admin', analiz: 'admin', indicators: 'admin', designer: 'admin',
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
+  defter: 'ref', review: 'ref',
   // Asagidakiler sadece yonetici (admin) gorur:
-  news: 'admin', ek: 'admin', defter: 'admin', data: 'admin', review: 'admin', karne: 'admin',
+  news: 'admin', ek: 'admin', data: 'admin', karne: 'admin',
   alfa: 'admin', apps: 'admin', basvuru: 'admin', 'chat-admin': 'admin',
   sosyalmetre: 'admin', uyap: 'admin', zaman: 'admin', strateji: 'admin',
   ayna: 'admin', mentoring: 'admin', analitik: 'admin'
@@ -13216,6 +13224,19 @@ function siteCanOpen(page) {
   if (need === 'free') return true;
   if (need === 'admin') return siteIsAdmin();
   return refUnlocked();
+}
+
+// Uyelik seviyesi sayfa acilmadan once bilinmedigi icin ?page=pano gibi derin
+// baglantilar once erisim sayfasina duser. Seviye yuklendikten sonra uyeyi
+// hedefledigi sayfaya geri tasi.
+function restorePendingPage() {
+  try {
+    if (currentPage !== 'erisim' || !accessNextPage) return;
+    if (!siteCanOpen(accessNextPage)) return;
+    const target = accessNextPage;
+    accessNextPage = '';
+    showPage(target);
+  } catch (e) {}
 }
 
 let siteRefreshPromise = null;
@@ -13349,10 +13370,10 @@ function applyTierUi() {
     links.forEach(function (a) { if (a.style.display !== 'none') any = true; });
     const label = d.querySelector('.drop-btn');
     const privateMenu = label && ['app.trader', 'app.news'].includes(label.getAttribute('data-i18n'));
-    if (links.length) d.style.display = (!isAdmin && privateMenu) ? 'none' : (any ? '' : 'none');
+    if (links.length) d.style.display = (!ref && privateMenu) ? 'none' : (any ? '' : 'none');
   });
   // Admin-only sayfalarin ana sayfa kartlarini non-admin'de gizle
-  ['defter', 'data', 'review', 'karne', 'news', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
+  ['data', 'karne', 'news', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
     const card = document.querySelector('.home-card[href="?page=' + p + '"]');
     if (card) card.style.display = isAdmin ? '' : 'none';
   });
@@ -23726,9 +23747,14 @@ function bindChannelsPage() {
 }
 
 function panoRoomId() {
-  const el = document.getElementById('pano-room');
-  const r = (el ? el.value : 'alfa').trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  return r || 'alfa';
+  // Pano her uyeye ozeldir. Sunucu da oturumdaki uye kimliginden ayni anahtari
+  // turetir; istemciden gelen oda adi kullanilmaz.
+  try {
+    if (typeof AUTH !== 'undefined' && AUTH && AUTH.user && AUTH.user.id) {
+      return 'm-' + String(AUTH.user.id).toLowerCase().replace(/[^a-z0-9-]/g, '');
+    }
+  } catch (e) {}
+  return 'local';
 }
 
 const PANO_KEY = 'alfa-pano-canvas-v1';
@@ -23983,7 +24009,7 @@ async function panoSave() {
   try { localStorage.setItem(PANO_KEY + ':' + r, JSON.stringify(panoObjs)); } catch (e) {}
   const st = document.getElementById('pano-save-status');
   try {
-    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), {
+    const res = await fetch('/api/contrib?store=pano', {
       method: 'POST',
       headers: await siteAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ data: panoObjs }),
@@ -24002,7 +24028,7 @@ async function panoPoll() {
   if (!document.body || document.body.dataset.page !== 'pano') return;
   const r = panoRoomId();
   try {
-    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), { cache: 'no-store', headers: await siteAuthHeaders() });
+    const res = await fetch('/api/contrib?store=pano', { cache: 'no-store', headers: await siteAuthHeaders() });
     const d = await res.json();
     if (panoPendingSave || panoInteracting) return;
     if (!d || !d.ok || !Array.isArray(d.data)) return;
@@ -24017,13 +24043,12 @@ async function panoPoll() {
 
 async function panoLoadBoard() {
   const r = panoRoomId();
-  try { localStorage.setItem('alfa-pano-room', r); } catch (e) {}
   try {
     const local = JSON.parse(localStorage.getItem(PANO_KEY + ':' + r) || 'null');
     if (Array.isArray(local)) { panoObjs = local; panoDraw(); }
   } catch (e) {}
   try {
-    const res = await fetch('/api/contrib?store=pano&room=' + encodeURIComponent(r), { cache: 'no-store', headers: await siteAuthHeaders() });
+    const res = await fetch('/api/contrib?store=pano', { cache: 'no-store', headers: await siteAuthHeaders() });
     const d = await res.json();
     if (d && d.ok && Array.isArray(d.data) && d.data.length) {
       panoObjs = d.data;
@@ -24519,24 +24544,7 @@ function panoLoad() {
   if (panoLoadedRoom === r) return;
   panoLoadBoard();
 }
-function panoApply() {
-  const r = panoRoomId();
-  try { localStorage.setItem('alfa-pano-room', r); } catch (e) {}
-  const el = document.getElementById('pano-room');
-  if (el) el.value = r;
-  panoLoadedRoom = null;
-  panoLoad();
-}
 function bindPanoPage() {
-  const g = id => document.getElementById(id);
-  const el = g('pano-room');
-  if (el) {
-    const saved = localStorage.getItem('alfa-pano-room');
-    if (saved) el.value = saved;
-    el.addEventListener('keydown', e => { if (e.key === 'Enter') panoApply(); });
-  }
-  const a = g('pano-apply');
-  if (a) a.addEventListener('click', panoApply);
   panoInit();
 }
 
@@ -26260,6 +26268,7 @@ async function onAuthed(user) {
   // Uyelik seviyesi (free / ref / admin): navigasyon ve sayfa erisimi buna gore.
   await loadSiteAccess();
   applyTierUi();
+  restorePendingPage();
   try { renderHomeDash(); } catch (e) {}
   try { renderHomeTeaser(); } catch (e) {}
   try { renderHomeChannel(); } catch (e) {}
