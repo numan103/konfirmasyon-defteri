@@ -18398,6 +18398,7 @@ async function ap2Hydrate() {
     ap2Ideas = Array.isArray(d.ideas) ? d.ideas : [];
     try { localStorage.setItem(AP2_HIST_KEY, JSON.stringify(Array.isArray(d.history) ? d.history : [])); } catch(e) {}
     if (siteIsAdmin()) localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data));
+    if (siteIsAdmin() && typeof ap2MergeDuplicates === 'function' && ap2MergeDuplicates()) { try { await ap2SyncCloud(); } catch (e) {} }
     ap2CloudReady = true;
     ap2LocalPreview = false;
     ap2ReadOnlyLoaded = true;
@@ -18421,7 +18422,47 @@ async function ap2Hydrate() {
 let ap2Filter = 'all';
 let ap2EditId = null;
 let ap2SellId = null;
-function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; (ap2Data.positions || []).forEach(p => { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; }); if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; ap2RecalcCash(); ap2RebuildHistory(); } } catch(e) {} }
+function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; (ap2Data.positions || []).forEach(p => { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; }); if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; ap2RecalcCash(); ap2RebuildHistory(); if (typeof ap2MergeDuplicates === 'function' && ap2MergeDuplicates()) { try { ap2Save(); } catch (e) {} } } } catch(e) {} }
+function ap2MergeDuplicates() {
+  if (!ap2Data || !Array.isArray(ap2Data.positions)) return false;
+  const toRemove = new Set();
+  const groups = {};
+  ap2Data.positions.forEach(function (p) {
+    if (ap2IsPending(p)) return;
+    const key = (p.symbol || '') + '|' + (p.side === 'SHORT' ? 'SHORT' : 'LONG');
+    (groups[key] = groups[key] || []).push(p);
+  });
+  let changed = false;
+  Object.keys(groups).forEach(function (key) {
+    const arr = groups[key];
+    if (arr.length < 2) return;
+    arr.sort(function (a, b) { return String(a.date || '').localeCompare(String(b.date || '')); });
+    const base = arr[0];
+    let totalQty = Number(base.qty) || 0;
+    let totalCost = totalQty * (Number(base.cost) || 0);
+    const notes = [base.note].filter(Boolean);
+    for (let i = 1; i < arr.length; i++) {
+      const p = arr[i];
+      const q = Number(p.qty) || 0;
+      const c = Number(p.cost) || 0;
+      totalQty += q;
+      totalCost += q * c;
+      if (p.note) notes.push(p.note);
+      if (p.price != null && base.price == null) base.price = p.price;
+      if (p.hist) base.hist = p.hist;
+      if (p.date && (!base.date || p.date < base.date)) base.date = p.date;
+      toRemove.add(p.id);
+    }
+    base.qty = Math.round(totalQty * 1e8) / 1e8;
+    base.cost = totalQty > 0 ? Math.round((totalCost / totalQty) * 100) / 100 : base.cost;
+    base.note = notes.join(' | ');
+    changed = true;
+  });
+  if (changed) {
+    ap2Data.positions = ap2Data.positions.filter(function (p) { return !toRemove.has(p.id); });
+  }
+  return changed;
+}
 function ap2RebuildHistory() {
   if (!siteIsAdmin()) return;
   try {
