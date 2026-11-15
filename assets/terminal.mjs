@@ -197,7 +197,7 @@ function openChart() {
   canvas.oncontextmenu = event => { event.preventDefault(); const r = canvas.getBoundingClientRect(); showContext(event.clientX, event.clientY, null); };
 }
 function syncVisibility() {
-  const visible = !page.classList.contains('hidden') && typeof siteCanOpen === 'function' && siteCanOpen('trading');
+  const visible = !page.classList.contains('hidden');
   document.body.classList.toggle('terminal-active', visible);
   if (!visible) { if (active) dispose(); active = false; return; }
   const id = (AUTH && AUTH.user) ? AUTH.user.id : 'anonymous';
