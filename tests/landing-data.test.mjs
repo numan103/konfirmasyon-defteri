@@ -56,6 +56,10 @@ test('anonymous landing endpoint is GET-only, reads approved sources, isolates f
   const calls = [];
   global.fetch = async (url, options) => {
     calls.push({ url, options });
+    if (url.includes('/alfa_landing_images?')) {
+      const id = new URL(url).searchParams.get('post_id').slice(3);
+      return { ok: true, json: async () => id === 'trade' ? [{ img: 'data:image/png;base64,aGVsbG8=' }] : id === 'bias' ? [{ img: 'https://example.com/chart.png' }] : [] };
+    }
     if (url.includes('id=eq.alfa_portfoy_public')) return { ok: true, json: async () => [{ data: { startBalance: 1000, cash: 1050, positions: [], history: [{ d: '2026-10-01', v: 1000 }] }, updated_at: '2026-10-02' }] };
     if (url.includes('id=eq.alfa_trading')) return { ok: true, json: async () => [{ data: { posts: [post('trade', 'islem', 1000, { img: 'data:image/png;base64,aGVsbG8=' }), post('bias', 'analiz', 2000), post('old', 'analiz', -8 * 86400000)] } }] };
     throw new Error('unexpected URL');
@@ -88,7 +92,7 @@ test('anonymous landing endpoint is GET-only, reads approved sources, isolates f
     }
     const invalid = response(); await handler({ method: 'GET', query: { image: '../secret' } }, invalid);
     assert.equal(invalid.code, 400);
-    assert.equal(calls.length, count);
+    assert.equal(calls.length, count + 4, 'each picture reads only its own projected source');
     global.fetch = async url => {
       if (url.includes('id=eq.alfa_portfoy_public')) return { ok: true, json: async () => [{ data: { startBalance: 1000, cash: 900, positions: [] }, updated_at: '2026-10-02' }] };
       throw new Error('secret upstream error');

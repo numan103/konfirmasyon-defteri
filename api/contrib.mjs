@@ -2,6 +2,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { requestUser, requestTier } from '../lib/auth.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
+import { createRevisionCache } from '../lib/revision-cache.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -11,6 +12,7 @@ const ROW_PANO = 'panos';
 // Boylece bir uyenin kaydi diger uyelerin panosunu ezemez.
 const PANO_PREFIX = 'pano_member_';
 const JOURNAL_UID = '00000000-0000-0000-0000-00000000e001';
+const publicReads = createRevisionCache();
 
 const sbHeaders = (key) => ({
   apikey: key,
@@ -19,12 +21,27 @@ const sbHeaders = (key) => ({
 });
 
 async function readShared(rowId) {
-  const url = `${SUPABASE_URL}/rest/v1/edu_shared?id=eq.${rowId}&select=data`;
+  const url = `${SUPABASE_URL}/rest/v1/edu_shared?id=eq.${rowId}&select=data,updated_at`;
   const res = await fetch(url, { headers: sbHeaders(SUPABASE_KEY) });
   if (res.status === 404) return { missing: true };
   if (!res.ok) return { error: `Supabase read ${res.status}: ${(await res.text()).slice(0, 160)}` };
   const rows = await res.json();
-  return { data: (rows && rows[0] && rows[0].data) || null };
+  return { data: (rows && rows[0] && rows[0].data) || null, revision: rows?.[0]?.updated_at || null };
+}
+// Only shared/public feeds use this cache. Personal boards always use fresh,
+// authorized reads. Mutations never consume cached documents.
+async function readPublicShared(rowId) {
+  try {
+    return await publicReads.get(rowId, async () => {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/edu_shared?id=eq.${rowId}&select=updated_at`, { headers: sbHeaders(SUPABASE_KEY) });
+      if (!r.ok) throw new Error('revision_unavailable');
+      return (await r.json())?.[0]?.updated_at || null;
+    }, async () => {
+      const r = await readShared(rowId);
+      if (r.error || r.missing) throw Object.assign(new Error('read_failed'), { result: r });
+      return { value: r, revision: r.revision };
+    });
+  } catch (error) { return error.result || { error: 'Shared data unavailable' }; }
 }
 
 async function writeShared(rowId, data) {
@@ -32,10 +49,11 @@ async function writeShared(rowId, data) {
   const res = await fetch(url, {
     method: 'POST',
     headers: { ...sbHeaders(SUPABASE_KEY), Prefer: 'resolution=merge-duplicates' },
-    body: JSON.stringify({ id: rowId, data }),
+    body: JSON.stringify({ id: rowId, data, updated_at: new Date().toISOString() }),
   });
   if (res.status === 404) return { missing: true };
   if (!res.ok) return { error: `Supabase write ${res.status}: ${(await res.text()).slice(0, 160)}` };
+  publicReads.invalidate(rowId);
   return { ok: true };
 }
 
@@ -263,10 +281,18 @@ async function atNotifyPost(post, save, dryRun, kind = atNotifyKind(post)) {
   return post.tradeNotify;
 }
 async function alfaTradingImage(req, res, pid) {
-  const r = await readShared(AT_ROW);
-  const posts = (r.data && Array.isArray(r.data.posts)) ? r.data.posts : [];
-  const post = posts.find(p => p.id === String(pid));
-  const m = post && /^data:(image\/(?:jpeg|jpg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/i.exec(String(post.imgBlur || ''));
+  if (!/^[a-zA-Z0-9_-]{1,60}$/.test(String(pid))) return res.status(400).json({ error: 'invalid_image' });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/alfa_social_images?post_id=eq.${encodeURIComponent(pid)}&select=img&limit=1`, { headers: sbHeaders(SUPABASE_KEY) });
+  let image;
+  if (r.status === 404) {
+    const legacy = await readPublicShared(AT_ROW);
+    if (legacy.error || legacy.missing) return res.status(503).json({ error: 'image_unavailable' });
+    image = legacy.data?.posts?.find(p => p.id === String(pid))?.imgBlur;
+  } else {
+    if (!r.ok) return res.status(503).json({ error: 'image_unavailable' });
+    image = (await r.json())?.[0]?.img;
+  }
+  const m = /^data:(image\/(?:jpeg|jpg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/i.exec(String(image || ''));
   if (!m) {
     res.status(302);
     res.setHeader('Location', '/og.png');
@@ -289,24 +315,25 @@ async function alfaTradingImage(req, res, pid) {
   return res.end(buf);
 }
 async function alfaTrading(req, res, user) {
-  const r = await readShared(AT_ROW);
+  // Reject unauthorized mutations BEFORE downloading the image-heavy source row.
+  let body, action;
+  if (req.method === 'POST') {
+    try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'bad json' }); }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return res.status(400).json({ error: 'bad json' });
+    action = body.action;
+    const adminActions = ['add', 'edit', 'delPost', 'delComment', 'delTg', 'notify', 'status', 'profileUpdate'];
+    if (adminActions.includes(action)) {
+      if (!user || !user.admin) return res.status(403).json({ error: 'forbidden' });
+    } else if (action === 'like' || action === 'comment') {
+      if (!user) return res.status(401).json({ error: 'unauthorized' });
+    } else return res.status(400).json({ error: 'bilinmeyen action' });
+  } else if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const r = await (req.method === 'GET' ? readPublicShared(AT_ROW) : readShared(AT_ROW));
+  if (r.error || r.missing) return res.status(503).json({ error: 'feed_unavailable' });
   const posts = (r.data && Array.isArray(r.data.posts)) ? r.data.posts : [];
   const save = () => writeShared(AT_ROW, { posts });
   const find = id => posts.find(p => p.id === id);
-  if (req.method === 'GET') return res.status(200).json({ posts });
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  let body;
-  try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'bad json' }); }
-  const action = body.action;
-
-  // Yazma yetkisi: yonetici post yonetir; begeni/yorum icin giris yeterli.
-  const adminActions = ['add', 'edit', 'delPost', 'delComment', 'delTg', 'notify', 'status', 'profileUpdate'];
-  if (adminActions.indexOf(action) >= 0) {
-    if (!user || !user.admin) return res.status(403).json({ error: 'forbidden' });
-  } else if (action === 'like' || action === 'comment') {
-    if (!user) return res.status(401).json({ error: 'unauthorized' });
-  }
-
+  if (req.method === 'GET') { res.setHeader('Cache-Control', 'no-store'); return res.status(200).json({ posts }); }
   if (action === 'add') {
     const p = body.post || {};
     const clientId = atClip(body.clientId || p.clientId, 80);
@@ -430,7 +457,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'GET' && req.query.store === 'alfatrading' && req.query.image) return alfaTradingImage(req, res, req.query.image);
-  if (req.query.store === 'alfatrading') return alfaTrading(req, res, await requestUser(req));
+  if (req.query.store === 'alfatrading') return alfaTrading(req, res, req.method === 'GET' ? null : await requestUser(req));
 
   const store = req.query.store === 'pano' ? 'pano' : 'contrib';
   const rowId = ROW_CONTRIB;
@@ -446,7 +473,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const r = await readShared(rowId);
+    const r = await readPublicShared(rowId);
     if (r.data) return res.status(200).json(r.data);
     if (!r.error && !r.missing) return res.status(200).json([]);
     const j = await readJournal();

@@ -31,6 +31,7 @@
 <!-- AYNA:BITIR -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/shared-documents.js?v=1"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -12503,14 +12504,20 @@ function magIsAdmin() {
   catch (e) { return true; }
 }
 async function loadNews() {
+  if (currentPage !== 'news') return false;
+  const owner = AUTH && AUTH.user && AUTH.user.id;
   let d = null;
   try {
     if (typeof AUTH !== 'undefined' && AUTH.client) {
-      const res = await AUTH.client.from('alfanews').select('data').eq('id', 1).maybeSingle();
+      const res = window.AlfaSharedDocuments
+        ? await window.AlfaSharedDocuments.read(AUTH.client, owner, 1)
+        : await AUTH.client.from('alfanews').select('data').eq('id', 1).maybeSingle();
+      if (owner !== (AUTH && AUTH.user && AUTH.user.id)) return false;
       if (res && res.data && res.data.data) d = res.data.data;
     }
   } catch (e) { /* tablo yok / çevrimdışı */ }
   if (!d) { try { const raw = await store.get(NEWS_KEY); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; } }
+  const available = !!d;
   if (!d || typeof d !== 'object') d = {};
   magData = d;
   if (typeof magData.issueNo !== 'number') magData.issueNo = 1;
@@ -12548,13 +12555,17 @@ async function loadNews() {
     }
     delete e.authorName; delete e.authorPhoto;
   });
+  return available;
 }
 function magAuthor(id) { return magData.authors.find(a => a.id === id) || null; }
 async function saveNews() {
   const json = JSON.stringify(magData);
   try { await store.set(NEWS_KEY, json); } catch (e) { /* yerel */ }
   if (magIsAdmin()) {
-    try { if (typeof AUTH !== 'undefined' && AUTH.client && AUTH.user) await AUTH.client.from('alfanews').upsert({ id: 1, data: magData, updated_at: new Date().toISOString() }); } catch (e) { /* tablo yok */ }
+    try { if (typeof AUTH !== 'undefined' && AUTH.client && AUTH.user) {
+      await AUTH.client.from('alfanews').upsert({ id: 1, data: magData, updated_at: new Date().toISOString() });
+      if (window.AlfaSharedDocuments) window.AlfaSharedDocuments.invalidate(AUTH.user.id, 1);
+    } } catch (e) { /* tablo yok */ }
   }
 }
 function magSaveT() { clearTimeout(magSaveTimer); magSaveTimer = setTimeout(() => saveNews(), 600); }
@@ -14417,14 +14428,14 @@ function showPage(name, skipAnim) {
   if (name === 'data') renderData();
   if (name === 'review') renderReview();
   if (name === 'karne') { if (window.renderKarne) renderKarne(); }
-  if (name === 'news') renderNews();
+  if (name === 'news') openSharedPage('news', loadNews, renderNews);
   if (name === 'egitim') renderEgitim();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
   if (name === 'sosyalmetre') renderSosyal();
   if (name === 'uyap') renderUyap();
   if (name === 'butce') { renderButce(); ap2RenderPublicTeaser(); }
-  if (name === 'mentoring') { try { renderMentor(); } catch (e) { /* devam */ } }
+  if (name === 'mentoring') openSharedPage('mentoring', loadMentor, renderMentor);
   if (name === 'pano') { panoLoad(); }
   if (name === 'indicators') renderIndicators();
   if (name === 'designer') renderDesigner();
@@ -14472,6 +14483,7 @@ window.addEventListener('popstate', function (e) {
 const HOME_CHANNEL_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 const HOME_CHANNEL_CACHE_MS = 30 * 1000;
 let homeChannelCache = { at: 0, posts: [] };
+let homeChannelPending = null;
 function homeChannelRecent(posts, opts) {
   const now = (opts && Number(opts.now)) || Date.now();
   const ref = !!(opts && opts.ref);
@@ -14508,32 +14520,39 @@ function homeChannelFromLanding(data) {
 }
 async function loadHomeChannelPosts() {
   const now = Date.now();
-  if (homeChannelCache.posts.length && now - homeChannelCache.at < HOME_CHANNEL_CACHE_MS) return homeChannelCache.posts;
-  try {
-    const res = await fetch('/api/edu-shared?kind=landing', { cache: 'no-store' });
-    if (!res.ok) throw new Error('http ' + res.status);
-    const data = await res.json();
-    const posts = homeChannelFromLanding(data);
-    homeChannelCache = { at: now, posts: posts };
-    return posts;
-  } catch (e) {
-    // API alınamazsa eski kayıt gösterme; mevcut akışı yine 7 günle sınırla.
-    if (!alfaLoaded) { try { await loadAlfaTrading(); } catch (e2) {} }
-    return (alfaPosts || []).map(function (p) {
-      return {
-        id: p.id, type: p.type, title: p.title || p.text || 'Paylaşım',
-        coin: p.coin || '', ts: Number(p.ts) || 0,
-        img: /^https:\/\//i.test(p.img || '') ? p.img : ''
-      };
-    });
-  }
+  if (homeChannelCache.at && now - homeChannelCache.at < HOME_CHANNEL_CACHE_MS) return homeChannelCache.posts;
+  if (homeChannelPending) return homeChannelPending;
+  homeChannelPending = (async function () {
+    try {
+      const res = await fetch('/api/edu-shared?kind=landing');
+      if (!res.ok) throw new Error('http ' + res.status);
+      const data = await res.json();
+      if (!data.channel || (data.status && data.status.channel === 'unavailable')) throw new Error('channel_unavailable');
+      const posts = homeChannelFromLanding(data);
+      homeChannelCache = { at: now, posts: posts };
+      return posts;
+    } catch (e) {
+      // A teaser failure must never trigger a multi-megabyte full-feed download.
+      if (!alfaLoaded) throw e;
+      return (alfaPosts || []).map(function (p) {
+        return {
+          id: p.id, type: p.type, title: p.title || p.text || 'Paylaşım',
+          coin: p.coin || '', ts: Number(p.ts) || 0,
+          img: /^https:\/\//i.test(p.img || '') ? p.img : ''
+        };
+      });
+    }
+  })().finally(function () { homeChannelPending = null; });
+  return homeChannelPending;
 }
 
 async function renderHomeChannel() {
   const box = document.getElementById('hc2-list');
   if (!box) return;
   const ref = refUnlocked();
-  const all = await loadHomeChannelPosts();
+  let all;
+  try { all = await loadHomeChannelPosts(); }
+  catch (e) { box.textContent = 'Paylaşımlar şu an yüklenemiyor. Lütfen daha sonra tekrar deneyin.'; return; }
   const posts = homeChannelRecent(all, { ref: ref });
   if (!posts.length) {
     box.innerHTML = ref
@@ -26375,6 +26394,28 @@ async function refreshAppData() {
 }
 
 function showGate() { document.getElementById('auth-gate').classList.add('open'); }
+const sharedPageGeneration = {};
+async function openSharedPage(name, load, render) {
+  const page = document.getElementById('page-' + name);
+  if (!page) return;
+  const generation = sharedPageGeneration[name] = (sharedPageGeneration[name] || 0) + 1;
+  let status = page.querySelector('[data-shared-status]');
+  if (!status) {
+    status = document.createElement('div'); status.dataset.sharedStatus = '';
+    status.className = 'hd-empty'; status.setAttribute('role', 'status'); page.prepend(status);
+  }
+  status.hidden = false; status.textContent = 'İçerik yükleniyor…';
+  page.setAttribute('aria-busy', 'true'); page.inert = true;
+  try {
+    const available = await load();
+    if (generation !== sharedPageGeneration[name] || currentPage !== name) return;
+    if (available) { status.hidden = true; render(); }
+    else status.textContent = 'İçerik yüklenemedi. Bağlantınızı kontrol edip sayfayı yeniden açın.';
+  } catch (e) { status.textContent = 'İçerik yüklenemedi. Lütfen yeniden deneyin.'; }
+  finally {
+    if (generation === sharedPageGeneration[name]) { page.inert = false; page.setAttribute('aria-busy', 'false'); }
+  }
+}
 function hideGate() { document.getElementById('auth-gate').classList.remove('open'); }
 function showLanding() {
   document.body.classList.add('landed');
@@ -26721,7 +26762,7 @@ function statsRender(online) {
 }
 
 function statsRefresh() {
-  if (!AUTH || !AUTH.client) return;
+  if (document.hidden || !AUTH || !AUTH.client) return;
   AUTH.client.from('presence')
     .select('id', { count: 'exact', head: true })
     .gt('last_seen', new Date(Date.now() - STATS_WINDOW).toISOString())
@@ -26732,7 +26773,7 @@ function statsRefresh() {
 }
 
 function statsHeartbeat() {
-  if (!AUTH || !AUTH.client) return;
+  if (document.hidden || !AUTH || !AUTH.client) return;
   statsLiveOnly(amAllowed());
   if (amAllowed()) { statsRefresh(); return; }
   var vid = statsVid();
@@ -26755,7 +26796,7 @@ function statsLiveOnly(isAdmin) {
 }
 
 function statsFetchTotal() {
-  if (!AUTH || !AUTH.client) return;
+  if (document.hidden || !AUTH || !AUTH.client) return;
   AUTH.client.from('site_stats')
     .select('total_visits')
     .eq('id', 1)
@@ -26816,7 +26857,7 @@ var ANA_STATE_KEY = 'at_analytics_state_v1';
 var ANA_SESSION_KEY = 'at_analytics_sid_v1';
 var ANA_START_KEY = 'at_analytics_start_v1';
 var ANA_VISITOR_KEY = 'at_visitor_v1';
-var ANA_FLUSH_MS = 25000;
+var ANA_FLUSH_MS = 60000;
 var ANA_MAX_ACTIVE_MS = 12 * 60 * 60 * 1000;
 var anaStarted = false;
 var anaPendingLanding = false;
@@ -26983,6 +27024,7 @@ async function anaToken() {
 
 async function anaFlush(beacon) {
   if (!anaStarted) return;
+  if (!beacon && document.hidden) return;
   if (anaPendingLanding) {
     var stillLanded = false;
     try { stillLanded = document.body.classList.contains('landed'); } catch (e) {}
@@ -27130,7 +27172,7 @@ function anaInit() {
   setTimeout(function () { anaFlush(false); }, 2500);
   anaAutoTimer = setInterval(function () {
     if (currentPage === 'analitik' && siteIsAdmin() && !document.hidden) anaLoad();
-  }, 30000);
+  }, 60000);
   if (!anaTrack.lastPageView) {
     var landed = false;
     try { landed = document.body.classList.contains('landed'); } catch (e) {}
@@ -27411,14 +27453,20 @@ function mtAllowed() {
 function mtTopic(id) { return mtData.topics.find(t => t.id === id) || null; }
 
 async function loadMentor() {
+  if (currentPage !== 'mentoring') return false;
+  const owner = AUTH && AUTH.user && AUTH.user.id;
   let d = null;
   try {
     if (typeof AUTH !== 'undefined' && AUTH.client) {
-      const res = await AUTH.client.from('alfanews').select('data').eq('id', 2).maybeSingle();
+      const res = window.AlfaSharedDocuments
+        ? await window.AlfaSharedDocuments.read(AUTH.client, owner, 2)
+        : await AUTH.client.from('alfanews').select('data').eq('id', 2).maybeSingle();
+      if (owner !== (AUTH && AUTH.user && AUTH.user.id)) return false;
       if (res && res.data && res.data.data) d = res.data.data;
     }
   } catch (e) { /* tablo yok / çevrimdışı */ }
   if (!d) { try { const raw = await store.get(MT_KEY); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; } }
+  const available = !!d;
   if (!d || typeof d !== 'object') d = {};
   if (!Array.isArray(d.topics)) d.topics = [];
   d.topics.forEach(t => {
@@ -27431,13 +27479,17 @@ async function loadMentor() {
   });
   mtData = d;
   if (mtSel && !mtTopic(mtSel)) mtSel = null;
+  return available;
 }
 
 async function saveMentor() {
   const json = JSON.stringify(mtData);
   try { await store.set(MT_KEY, json); } catch (e) { /* yerel */ }
   if (mtAllowed()) {
-    try { if (typeof AUTH !== 'undefined' && AUTH.client && AUTH.user) await AUTH.client.from('alfanews').upsert({ id: 2, data: mtData, updated_at: new Date().toISOString() }); } catch (e) { /* tablo yok */ }
+    try { if (typeof AUTH !== 'undefined' && AUTH.client && AUTH.user) {
+      await AUTH.client.from('alfanews').upsert({ id: 2, data: mtData, updated_at: new Date().toISOString() });
+      if (window.AlfaSharedDocuments) window.AlfaSharedDocuments.invalidate(AUTH.user.id, 2);
+    } } catch (e) { /* tablo yok */ }
   }
 }
 function mtSaveT() { clearTimeout(mtSaveTimer); mtSaveTimer = setTimeout(() => saveMentor(), 500); }
@@ -28278,7 +28330,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b186';
+const APP_BUILD = 'b187';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
@@ -28944,6 +28996,7 @@ let chatPoll = null;
 function startChatPoll() {
   clearInterval(chatPoll);
   chatPoll = setInterval(() => {
+    if (document.hidden) return;
     const p = document.getElementById('chat-popup');
     if (!p || !p.classList.contains('open')) return;
     const sid = chatSid();
@@ -29067,19 +29120,21 @@ function caSelect(sid) {
 function startAdminChatPoll() {
   clearInterval(caPollTimer);
   caPollTimer = setInterval(() => {
+    if (document.hidden) return;
     const p = document.getElementById('page-chat-admin');
     if (!p || p.classList.contains('hidden')) return;
     renderAdminChat();
   }, 5000);
 }
-// Nav'da bildirim rozetini güncelle (her 8 sn'de bir) — yalnızca yönetici.
+// Kapalı sohbet ekranında rozet için 30 sn; açık panel kendi 5 sn döngüsünü kullanır.
 setInterval(() => {
-  if (!siteIsAdmin()) return;
+  if (document.hidden || !siteIsAdmin()) return;
+  if (currentPage === 'chat-admin') return;
   chatFetch(CHAT_API + '?t=' + Date.now()).then(r => r.json()).then(msgs => {
     caAllMsgs = msgs || [];
     updateChatBadge();
   }).catch(() => {});
-}, 8000);
+}, 30000);
 // ============ Günün Sözü Ticker (Ders Defteri'nden) ============
 function showDailyQuote() {
   const el = document.getElementById('ticker-text');

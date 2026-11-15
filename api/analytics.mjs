@@ -19,6 +19,7 @@
 
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { requestUser } from '../lib/auth.mjs';
+import { createWindowRowsCache } from '../lib/window-rows-cache.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -32,6 +33,7 @@ const MAX_PAGES = 80;
 const MAX_CLICKS = 60;
 const MAX_ROWS = 5000;
 const PAGE_SIZE = 1000;
+const visitReads = createWindowRowsCache({ maxRows: MAX_ROWS });
 
 const SID_RE = /^[A-Za-z0-9_-]{6,64}$/;
 const PAGE_RE = /^[A-Za-z0-9_-]{1,40}$/;
@@ -672,7 +674,7 @@ async function writeVisit(sid, data) {
   return r.ok;
 }
 
-async function readVisitRows(sinceIso) {
+async function fetchVisitRows(sinceIso) {
   const key = serviceKey();
   if (!key) return { error: 'service_role_missing', rows: [] };
   const out = [];
@@ -689,7 +691,10 @@ async function readVisitRows(sinceIso) {
     });
     if (rows.length < PAGE_SIZE) break;
   }
-  return { rows: out };
+  return { rows: out, truncated: out.length >= MAX_ROWS };
+}
+async function readVisitRows(sinceIso, days) {
+  return visitReads.read(String(days), sinceIso, fetchVisitRows);
 }
 
 async function pruneRows(cutoffIso) {
@@ -705,7 +710,15 @@ async function pruneRows(cutoffIso) {
   return r.ok;
 }
 
+let memberMapCache = null;
+let memberMapPending = null;
 async function memberEmailMap() {
+  if (memberMapCache && memberMapCache.expires > Date.now()) return memberMapCache.map;
+  if (memberMapPending) return memberMapPending;
+  memberMapPending = fetchMemberEmailMap().finally(() => { memberMapPending = null; });
+  return memberMapPending;
+}
+async function fetchMemberEmailMap() {
   const key = serviceKey();
   if (!key) return {};
   const map = {};
@@ -723,6 +736,7 @@ async function memberEmailMap() {
         name: str((u.user_metadata && (u.user_metadata.name || u.user_metadata.full_name)) || '', 80),
       };
     });
+    memberMapCache = { map, expires: Date.now() + 300000 };
   } catch (e) { /* eşleme opsiyonel */ }
   return map;
 }
@@ -786,9 +800,11 @@ export default async function handler(req, res) {
     let pruned = false;
     if (String(q.prune || '') === '1') {
       pruned = await pruneRows(new Date(now - MAX_DAYS * 864e5).toISOString()).catch(function () { return false; });
+      if (pruned) visitReads.clear();
     }
 
-    const out = await readVisitRows(new Date(now - days * 864e5).toISOString());
+    // Never share a cached report across requests without the fresh admin check above.
+    const out = await readVisitRows(new Date(now - days * 864e5).toISOString(), days);
     if (out.error) return send(res, 503, { ok: false, error: out.error });
 
     const emailMap = await memberEmailMap();
