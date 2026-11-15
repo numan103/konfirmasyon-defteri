@@ -24,6 +24,7 @@
 <link rel="preconnect" href="https://zvnjslmptwmnuhftgqsr.supabase.co" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
+<link rel="stylesheet" href="/assets/terminal.css?v=1">
 <!-- AYNA:BASLA -->
 <link rel="stylesheet" href="/ayna/ayna-core.css?v=10">
 <!-- AYNA:BITIR -->
@@ -6026,6 +6027,7 @@
     </div>
   </div>
   <div id="page-trading" class="hidden">
+    <script type="module" src="/assets/terminal.mjs?v=1"></script>
     <div class="eg-brand" style="padding:2px 0 0;margin-bottom:0;"><span class="eg-brand-ico">📉</span><span class="eg-brand-name" style="font-size:17px;" data-i18n="pg.trading.t">Trading Terminali</span><span class="eg-brand-sub" data-i18n="pg.trading.s">Canlı grafik burada çalışır (giriş gerekmez). Hesabını/watchlist'ini bağlamak için aşağıdaki butonla TradingView'da giriş yap — aynı tarayıcıda girince widget otomatik tanır.</span><span class="tv-acc-link" style="margin-left:auto;"><a href="https://www.tradingview.com/accounts/signin/" target="_blank" rel="noopener" data-i18n="pg.trading.loginTv">🔑 TradingView'a giriş</a><a href="https://www.tradingview.com/" target="_blank" rel="noopener" class="ghost" data-i18n="pg.trading.openTv">TradingView'da aç</a></span></div>
     <div class="tv-wl">
       <span class="wl-head" lang="en">⭐ Watchlist</span>
@@ -6036,6 +6038,7 @@
     <div class="tv-chart-box" id="tv-chart-box"></div>
     <script>
     (function () {
+      return; // Replaced by the full-screen terminal module above.
       window._tvSym = null;
       function loadTVChart(sym) {
         var box = document.getElementById('tv-chart-box');
