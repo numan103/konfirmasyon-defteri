@@ -139,7 +139,7 @@ document.addEventListener('pointerdown', e => { if (!contextMenu.contains(e.targ
 const drawKey = 'alfa-terminal-drawings-v1';
 let drawingBook = {};
 async function loadDrawings() {
-  if (!AUTH.user || AUTH.user.id !== userId) return;
+  if (!userId) return;
   try {
     const raw = await store.get(drawKey);
     const saved = JSON.parse(raw || '{}');
@@ -150,16 +150,16 @@ async function loadDrawings() {
     });
   } catch { drawingBook = {}; }
 }
-async function saveDrawings() { if (!userId || !AUTH.user || AUTH.user.id !== userId) return; await store.set(drawKey, JSON.stringify(drawingBook)); }
+async function saveDrawings() { if (!userId) return; await store.set(DRAW_KEY, JSON.stringify(drawingBook)); }
 function currentDrawings() { return drawingBook[selected + '|' + interval] ||= []; }
 function undoDrawing() { const d = currentDrawings(); if (!d.length) return; redoStack.push(d.pop()); saveDrawings(); status.textContent = 'Son çizim geri alındı.'; }
 function redoDrawing() { if (!redoStack.length) return; currentDrawings().push(redoStack.pop()); saveDrawings(); status.textContent = 'Çizim ileri alındı.'; }
 const redoStack = [];
 
 async function persist() {
-  if (!userId || !AUTH.user || AUTH.user.id !== userId) return;
+  if (!userId) return;
   await store.set(KEY, JSON.stringify(list));
-  status.textContent = 'Liste hesabına kaydedildi; bulut eşitlemesi mevcut hesap sistemi üzerinden yapılır.';
+  status.textContent = AUTH.user ? 'Liste hesabına kaydedildi; bulut eşitlemesi mevcut hesap sistemi üzerinden yapılır.' : 'Liste bu cihaza kaydedildi.';
 }
 function render() {
   entries.replaceChildren();
@@ -197,10 +197,10 @@ function openChart() {
   canvas.oncontextmenu = event => { event.preventDefault(); const r = canvas.getBoundingClientRect(); showContext(event.clientX, event.clientY, null); };
 }
 function syncVisibility() {
-  const visible = !page.classList.contains('hidden') && typeof siteCanOpen === 'function' && siteCanOpen('trading') && !!AUTH.user;
+  const visible = !page.classList.contains('hidden') && typeof siteCanOpen === 'function' && siteCanOpen('trading');
   document.body.classList.toggle('terminal-active', visible);
   if (!visible) { if (active) dispose(); active = false; return; }
-  const id = AUTH.user.id;
+  const id = AUTH.user ? AUTH.user.id : 'anonymous';
   if (active && id === userId) return;
   active = true; userId = id;
   sharedListButton.hidden = !siteIsAdmin();
