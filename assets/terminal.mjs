@@ -4,12 +4,17 @@ const page = document.getElementById('page-trading');
 const KEY = 'alfa-watchlist';
 const SEED_KEY = 'alfa-watchlist-tv-seed-v1';
 const DRAW_KEY = 'alfa-terminal-drawings-v1';
+const FAV_KEY = 'alfa-watchlist-favs';
+const SIDE_KEY = 'alfa-terminal-side';
+const SAFE_DEFAULT = 'BINANCE:BTCUSDT';
+// TV'ye özel (gömülü widget'ta açılmayan) semboller.
+const tvOnly = symbol => symbol.endsWith('!') || symbol.startsWith('FX_IDC:');
 // Kullanıcının TradingView izleme listesi (assets/watchlist-84359879.txt).
 const TV_LIST = 'CME:BTC1!,OKX:USDTTRY,CBOE:VIX,FX_IDC:XAUTRYG,OKX:XAUTUSDT,BIST:XU100,CRYPTOCAP:TOTAL,CRYPTOCAP:TOTAL2,CRYPTOCAP:TOTAL3,CRYPTOCAP:BTC.D,BINANCE:ETHBTC,CRYPTOCAP:USDT.D,BINANCE:BTCUSDT.P,BINANCE:ETHUSDT,BINANCE:BTCUSDT,OKX:ETHUSDT.P,TVC:GOLD,BYBIT:BTCUSDT.P,BYBIT:ETHUSDT.P,FX:XAUUSD,FPMARKETS:US100,OKX:SOLUSDT,OKX:PEPEUSDT.P,OKX:BNBUSDT.P,OKX:DOGEUSDT,OKX:HBARUSDT.P,OKX:AVAXUSDT.P,OKX:LTCUSDT.P,OKX:XRPUSDT.P,OKX:XLMUSDT.P,OKX:SUIUSDT.P,OKX:ADAUSDT.P,OKX:UNIUSDT.P,OKX:BCHUSDT.P,OKX:DOTUSDT.P,OKX:LINKUSDT.P,OKX:TRXUSDT.P,OKX:NEARUSDT.P,OKX:WIFUSDT,OKX:INJUSDT,OKX:BONKUSDT,OKX:POPCATUSDT.P,OKX:AAVEUSDT.P,OKX:RENDERUSDT'.split(',');
 const DEFAULT = [...TV_LIST];
-let list = [], selected = DEFAULT[0], interval = '60', poll, aborter;
+let list = [], selected = SAFE_DEFAULT, interval = '60', poll, aborter;
 let version = 0, active = false, userId = '', loadedUser = '';
-let alerts = [];
+let alerts = [], favs = [], sideOpen = true;
 const node = (tag, text, cls) => {
   const n = document.createElement(tag);
   if (text != null) n.textContent = text;
@@ -27,6 +32,9 @@ const heading = button(selected + ' ⌕', () => { searchDialog.showModal(); sear
 heading.title = 'Parite ara';
 const listButton = button('★ İzleme listesi', () => { renderList(); dialog.showModal(); }, top);
 listButton.title = 'İzleme listesini aç, içe/dışa aktar';
+const sideToggle = button('☰ Liste', () => setSide(!sideOpen), top, 'term-side-toggle');
+sideToggle.title = 'Sağ izleme panelini aç/kapat';
+sideToggle.setAttribute('aria-pressed', 'true');
 const timeframe = node('select'); timeframe.setAttribute('aria-label', 'Zaman dilimi');
 [['1', '1dk'], ['5', '5dk'], ['15', '15dk'], ['60', '1sa'], ['240', '4sa'], ['1440', '1G']].forEach(([value, text]) => {
   const o = node('option', text); o.value = value; timeframe.append(o);
@@ -35,9 +43,27 @@ timeframe.value = interval; top.append(timeframe);
 timeframe.addEventListener('change', () => { interval = timeframe.value; openChart(); });
 const body = node('div', null, 'term-body');
 const canvas = node('div', null, 'term-chart');
-body.append(canvas);
+const side = node('aside', null, 'term-side'); side.setAttribute('aria-label', 'İzleme listesi');
+const sideHead = node('div', null, 'term-side-head');
+sideHead.append(node('strong', 'İzleme listesi'));
+button('＋ İçe aktar', () => { renderList(); dialog.showModal(); }, sideHead);
+const sideClose = button('›', () => setSide(false), sideHead, 'term-side-close');
+sideClose.setAttribute('aria-label', 'İzleme panelini kapat');
+const sideSearch = node('input', null, 'term-side-search');
+sideSearch.type = 'search'; sideSearch.placeholder = 'Sembol filtrele'; sideSearch.setAttribute('aria-label', 'İzleme listesinde filtrele');
+const entries = node('div', null, 'term-entries');
+side.append(sideHead, sideSearch, entries);
+body.append(canvas, side);
+sideSearch.addEventListener('input', () => renderList());
 const status = node('footer', '', 'term-foot'); status.setAttribute('role', 'status');
-page.append(top, body, status);
+const quick = node('div', null, 'term-quick');
+const favQuick = button('☆', () => toggleFav(selected), quick, 'term-quick-btn');
+favQuick.title = 'Favorilere ekle / çıkar'; favQuick.setAttribute('aria-label', 'Favorilere ekle veya çıkar');
+const addQuick = button('＋', () => addCurrent(), quick, 'term-quick-btn');
+addQuick.title = 'Grafikteki sembolü izleme listesine ekle'; addQuick.setAttribute('aria-label', 'İzleme listesine ekle');
+const alarmQuick = button('⏰', () => alarmDialog.showModal(), quick, 'term-quick-btn');
+alarmQuick.title = 'Fiyat uyarısı ekle'; alarmQuick.setAttribute('aria-label', 'Fiyat uyarısı ekle');
+page.append(top, body, status, quick);
 
 const dialog = node('dialog', null, 'term-dialog term-watchlist-dialog');
 dialog.append(node('h2', 'İzleme listesi'));
@@ -184,21 +210,57 @@ async function persist() {
   await store.set(KEY, JSON.stringify(list));
   status.textContent = AUTH.user ? 'Liste hesabına kaydedildi; bulut eşitlemesi mevcut hesap sistemi üzerinden yapılır.' : 'Liste bu cihaza kaydedildi.';
 }
+function wlRow(symbol, inDialog) {
+  const row = node('div', null, 'term-row' + (symbol === selected ? ' on' : ''));
+  const star = button(favs.includes(symbol) ? '★' : '☆', () => toggleFav(symbol), row, 'term-action term-star');
+  star.setAttribute('aria-label', symbol + ' favorilere ekle veya çıkar');
+  star.setAttribute('aria-pressed', favs.includes(symbol) ? 'true' : 'false');
+  const open = button('', () => { selected = symbol; renderList(); openChart(); if (inDialog) dialog.close(); }, row, 'term-pair');
+  open.title = 'Grafiği aç';
+  open.append(node('b', symbol.split(':')[1]), node('small',
+    symbol.split(':')[0] + (marketSource(symbol).native ? ' · borsa' : '') + (tvOnly(symbol) ? ' · TV özel' : '')));
+  const remove = button('×', async () => {
+    list = list.filter(s => s !== symbol); await persist(); renderList();
+  }, row, 'term-action');
+  remove.setAttribute('aria-label', symbol + ' kaldır');
+  return row;
+}
 function renderList() {
+  const q = (sideSearch.value || '').trim().toUpperCase();
+  const ordered = [...favs.filter(s => list.includes(s)), ...list.filter(s => !favs.includes(s))];
+  const shown = ordered.filter(s => !q || s.toUpperCase().includes(q));
+  entries.replaceChildren();
+  if (!shown.length) entries.append(node('p', q ? 'Eşleşme yok.' : 'Liste boş.', 'term-empty'));
+  shown.forEach(symbol => entries.append(wlRow(symbol, false)));
   wlList.replaceChildren();
   if (!list.length) wlList.append(node('p', 'Liste boş. Aşağıdan sembol ekle.'));
-  list.forEach(symbol => {
-    const row = node('div', null, 'term-wl-row' + (symbol === selected ? ' on' : ''));
-    const open = button(symbol, () => { selected = symbol; renderList(); openChart(); dialog.close(); }, row, 'term-wl-open');
-    open.title = 'Grafiği aç';
-    if (marketSource(symbol).native) open.append(node('small', ' · borsa'));
-    const remove = button('×', async () => {
-      list = list.filter(s => s !== symbol); await persist(); renderList();
-    }, row, 'term-action');
-    remove.setAttribute('aria-label', symbol + ' kaldır');
-    wlList.append(row);
-  });
-  listButton.textContent = '★ İzleme listesi (' + list.length + ')';
+  list.forEach(symbol => wlList.append(wlRow(symbol, true)));
+  listButton.textContent = '★ İzleme (' + list.length + ')';
+  updateQuick();
+}
+function updateQuick() {
+  const on = favs.includes(selected);
+  favQuick.textContent = on ? '★' : '☆';
+  favQuick.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+async function toggleFav(symbol) {
+  if (!symbol) return;
+  favs = favs.includes(symbol) ? favs.filter(s => s !== symbol) : [...favs, symbol].slice(0, 500);
+  try { await store.set(FAV_KEY, JSON.stringify(favs)); } catch { /* yerel kalır */ }
+  renderList();
+  status.textContent = favs.includes(symbol) ? symbol + ' favorilerde (listede üstte).' : symbol + ' favorilerden çıkarıldı.';
+}
+async function addCurrent() {
+  if (list.includes(selected)) { status.textContent = selected + ' zaten listende.'; return; }
+  if (list.length >= 200) { status.textContent = 'En fazla 200 sembol tutulur.'; return; }
+  list = [...list, selected]; await persist(); renderList();
+  status.textContent = selected + ' izleme listesine eklendi.';
+}
+function setSide(open, save) {
+  sideOpen = !!open;
+  body.classList.toggle('no-side', !sideOpen);
+  sideToggle.setAttribute('aria-pressed', sideOpen ? 'true' : 'false');
+  if (save !== false) { try { store.set(SIDE_KEY, sideOpen ? '1' : '0'); } catch { /* yerel kalır */ } }
 }
 function dispose() { version++; clearTimeout(poll); aborter?.abort(); canvas.replaceChildren(); }
 function openChart() {
@@ -214,7 +276,10 @@ function openChart() {
     studies: ['RSI@tv-basicstudies', 'MASimple@tv-basicstudies'], allow_symbol_change: true, hide_side_toolbar: false
   });
   container.append(widget, script); canvas.append(container);
-  status.textContent = `${selected} · TradingView grafiği · Çizimler, indikatörler ve alarm bu terminalde saklanır; TV hesabına bağlanmaz.`;
+  status.textContent = tvOnly(selected)
+    ? `${selected} · Bu sembol için canlı veri gelmeyebilir; listeden başka bir sembol seçebilirsin.`
+    : `${selected} · Canlı grafik · Çizimler, indikatörler ve alarm bu terminalde saklanır.`;
+  updateQuick();
   canvas.oncontextmenu = event => { event.preventDefault(); const r = canvas.getBoundingClientRect(); showContext(event.clientX, event.clientY, null); };
 }
 function syncVisibility() {
@@ -239,11 +304,21 @@ function syncVisibility() {
         await store.set(KEY, JSON.stringify(list));
         await store.set(SEED_KEY, '1');
       } else {
-        list = Array.isArray(saved) && saved.length ? saved : [...TV_LIST];
+        list = Array.isArray(saved) ? saved : [...TV_LIST];
       }
+      const favRaw = await store.get(FAV_KEY);
+      const sideRaw = await store.get(SIDE_KEY);
+      if (!active) return;
+      try {
+        const f = JSON.parse(favRaw || '[]');
+        favs = Array.isArray(f) ? f.filter(x => typeof x === 'string' && list.includes(x)).slice(0, 500) : [];
+      } catch { favs = []; }
+      setSide(sideRaw !== '0', false);
       await loadDrawings();
       if (!active) return;
-      loadedUser = id; selected = list[0] || DEFAULT[0]; renderList(); openChart();
+      loadedUser = id;
+      selected = list.includes(SAFE_DEFAULT) ? SAFE_DEFAULT : (list[0] || SAFE_DEFAULT);
+      renderList(); openChart();
     })();
   } else { renderList(); openChart(); }
 }

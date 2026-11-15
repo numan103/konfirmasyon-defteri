@@ -19,7 +19,7 @@ Alfa Traders; işlem planlama, bias ve onchain okuması, portföy takibi, eğiti
 Site üç erişim seviyesi kullanır:
 
 - **Free (herkese açık):** Ana menü, hesap makinesi (calculator), ekonomik takvim, erişim sayfası.
-- **Ref (premium):** İşlem kanalı, trading terminali, Alfa Edu, stratejiler, analiz köşesi, indikatörler, Alfa Designer, onchain, portföy, gelir/gider, Check List, haftalık değerlendirme, çalışma panosu, Alfa Man.
+- **Ref (premium):** İşlem kanalı, Alfa Edu, stratejiler, analiz köşesi, indikatörler, Alfa Designer, onchain, portföy, gelir/gider, Check List, haftalık değerlendirme, çalışma panosu, Alfa Man.
 - **Admin (yönetici):** Haberler (AlfaNews), Ek, veri/Notion işlemleri, günün karnesi, başvurular, canlı destek, sosyalmetre, gayrimenkul, zaman, strateji, kişisel günlük, mentoring, ziyaretçi analitiği.
 
 Premium (ref) erişim ücretsizdir: Bybit veya OKX hesabı referans linkinden açılır/taşınır, UID doğrulanır.
@@ -53,7 +53,7 @@ Bu üç özellik giriş sayfası, menü ve hızlı erişimde "YENİ" rozeti ile 
 
 - **İşlem Kanalı (alfatrading):** Gerekçeli işlem paylaşımları, bias ve onchain.
 - **Portföy (portfoy):** Paylaşılan portföy, salt okunur; özet herkese açık, detay premium.
-- **Trading Terminali (trading):** Grafik ve terminal.
+- **Trading Terminali (trading):** Ücretsiz, tam ekran grafik; kripto + forex/altın sembolleri. Sağda açılır/kapanır izleme paneli (favori yıldızı, filtre, sembol seçme/silme), sol altta hızlı araçlar (favori, grafikteki sembolü listeye ekle, fiyat uyarısı). TradingView izleme listesi (.txt veya yapıştırma) içe aktarılabilir; spot/vadeli/borsa ayrımı korunur. Grafik TradingView gömülü widget'ıdır; TV hesabına bağlı bulut liste/şablon/alarm özellikleri bu terminalde yoktur, izleme listesi ve favoriler siteye aittir. TV'ye özel semboller (ör. `CME:BTC1!`) gömülü grafikte canlı veri göstermeyebilir.
 - **Alfa Edu (egitim):** Eğitim içerikleri.
 - **Stratejiler (strategies):** Strateji yönetimi.
 - **Analiz Köşesi (analiz):** Analist içerikleri.
