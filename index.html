@@ -18664,10 +18664,7 @@ function ap2RecalcCash() {
   var startBalance = Number(ap2Data.startBalance) || 1000;
   var totalProfit = 0;
   (ap2Data.sells || []).forEach(function(sl) {
-    var v = Number(sl.pnl);
-    if (isNaN(v)) v = Number(sl.profit);
-    if (isNaN(v)) v = 0;
-    totalProfit += v;
+    totalProfit += ap2SaleProfit(sl);
   });
   var activeBuyCost = 0;
   (ap2Data.positions || []).forEach(function(p) {
@@ -19146,6 +19143,15 @@ function ap2FillPos(id) {
   ap2Save();
   renderAlfaPortfoy2();
 }
+function ap2SaleProfit(sale) {
+  for (const key of ['pnl', 'profit']) {
+    const raw = sale && sale[key];
+    if (raw == null || raw === '') continue;
+    const value = Number(raw);
+    if (Number.isFinite(value)) return value;
+  }
+  return 0;
+}
 function ap2Summary() {
   const positions = ap2Active();
   const sells = ap2Data.sells || [];
@@ -19157,7 +19163,8 @@ function ap2Summary() {
   const pnl = portfolioValue - startBalance;
   const pnlPct = startBalance > 0 ? pnl / startBalance * 100 : null;
   const totalSellAmount = sells.reduce((s, sl) => s + (Number(sl.amount) || 0), 0);
-  return { totalValue, totalCost, cash, portfolioValue, pnl, pnlPct, startBalance, totalSellAmount, totalInvested: totalCost, count: positions.length, priced, sellCount: sells.length };
+  const realizedPnl = sells.reduce((sum, sale) => sum + ap2SaleProfit(sale), 0);
+  return { totalValue, totalCost, cash, portfolioValue, pnl, pnlPct, realizedPnl, startBalance, totalSellAmount, totalInvested: totalCost, count: positions.length, priced, sellCount: sells.length };
 }
 function ap2Fmt(n) { return pfAmt(n); }
 // Satislarda "yatirilan" tutar: satis hasilati eksi kâr. Eski kayitlarda cost
@@ -20012,11 +20019,11 @@ function renderAlfaPortfoy2() {
     var tradesTotal = document.getElementById('ap2-trades-total');
     if (tradesEl) tradesEl.style.display = sells.length ? '' : 'none';
     if (tradesBody && sells.length) {
-      var totalPnl = sells.reduce(function(s, sl) { var v = Number(sl.pnl); if (isNaN(v)) v = Number(sl.profit); return s + (isNaN(v) ? 0 : v); }, 0);
+      var totalPnl = sells.reduce(function(s, sl) { return s + ap2SaleProfit(sl); }, 0);
       if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
       var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
       tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
-        var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
+        var pf = ap2SaleProfit(sl);
         var invested = ap2SellInvested(sl, pf);
         var pfPct = invested > 0 ? (pf / invested * 100) : 0;
         var pfCls = pf >= 0 ? 'pos' : 'neg';
@@ -20046,7 +20053,7 @@ function renderAlfaPortfoy2() {
   sumEl.innerHTML =
     '<div class="ap2-sum-row">' +
       '<div class="ap2-sum-sm" data-accent="pc"><div class="ap2-sum-sm-lbl">Toplam Değer</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.portfolioValue) + '</div><div class="ap2-sum-sm-sub">' + ap2Fmt(sum.startBalance) + ' başlangıç</div></div>' +
-      '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '</div></div>' +
+      '<div class="ap2-sum-sm" data-accent="' + (sum.pnl >= 0 ? 'green' : 'red') + '"><div class="ap2-sum-sm-lbl">Kar / Zarar</div><div class="ap2-sum-sm-val" style="color:' + (sum.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (sum.pnl >= 0 ? '+' : '') + ap2Fmt(sum.pnl) + '</div><div class="ap2-sum-sm-sub">' + pfPct(sum.pnlPct) + '<br>Geçmiş satış K/Z: <span id="ap2-realized-pnl">' + (sum.realizedPnl >= 0 ? '+' : '') + ap2Fmt(sum.realizedPnl) + ' USDT</span></div></div>' +
       '<div class="ap2-sum-sm" data-accent="green"><div class="ap2-sum-sm-lbl">Bakiye (USDT)</div><div class="ap2-sum-sm-val">' + ap2Fmt(sum.cash) + '</div><div class="ap2-sum-sm-sub">Serbest USDT bakiyesi</div></div>' +
     '</div>';
   ap2TrackHistory(sum.portfolioValue);
@@ -20140,11 +20147,11 @@ function renderAlfaPortfoy2() {
   var tradesTotal = document.getElementById('ap2-trades-total');
   if (tradesEl) tradesEl.style.display = sells.length ? '' : 'none';
   if (tradesBody && sells.length) {
-    var totalPnl = sells.reduce(function(s, sl) { var v = Number(sl.pnl); if (isNaN(v)) v = Number(sl.profit); return s + (isNaN(v) ? 0 : v); }, 0);
+    var totalPnl = sells.reduce(function(s, sl) { return s + ap2SaleProfit(sl); }, 0);
     if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
     var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
     tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
-      var pf = Number(sl.pnl); if (isNaN(pf)) pf = Number(sl.profit); if (isNaN(pf)) pf = 0;
+      var pf = ap2SaleProfit(sl);
       var invested = ap2SellInvested(sl, pf);
       var pfPct = invested > 0 ? (pf / invested * 100) : 0;
       var pfCls = pf >= 0 ? 'pos' : 'neg';
@@ -28408,7 +28415,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b188';
+const APP_BUILD = 'b189';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

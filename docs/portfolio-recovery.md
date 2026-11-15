@@ -2,6 +2,23 @@
 
 ## Kurtarma tamamlandı (16 Kas 2026)
 
+- Takip düzeltmesi: `portfolio-before.json`, önceki altın kurtarmasından **önce**
+  alınmıştı. `restore-gold.cjs` dosyasındaki tarihli iki XAUUSD lotu da kullanıcının
+  altınların eksik olduğunu bildirmesi üzerine, 12 Kasım alış/gerçekleşme tarihleri
+  korunarak eklendi. Eski betik çalıştırılmadı (bugünün tarihini yazabilir ve
+  yedeği ezebilirdi); kontrollü, revizyon korumalı yeni işlem kullanıldı.
+- Altın sonrası sunucu verisi beklenen belgeyle `assert.deepEqual` eşleşti:
+  5 pozisyon (3 kripto + 2 altın), mevcut 6 satış, fikir/notlar ve geçmiş
+  korundu. Nakit değişmedi ve sunucunun `reconcileCash` hesabıyla kuruş
+  toleransında eşleşti. Satış kârları ikinci kez bakiyeye eklenmedi.
+- b189: geçmiş satış K/Z üst portföy özetinde ayrı gösteriliyor. Ortak
+  `ap2SaleProfit` yardımcı fonksiyonu eski `pnl` ve yeni `profit` alanlarını,
+  null/boş alanları ve gerçek sıfırı tutarlı işler. Toplam K/Z hesabına
+  gerçekleşmiş kâr tekrar eklenmez.
+- 430 Node testi geçti. Yerelde ve üretim kaynağıyla izole Chrome arayüz
+  testinde iki altın kartı, altı satış satırı ve gerçekleşmiş kâr etiketi
+  doğrulandı; test portföyü sunucuya yazmadı. Üretim anonim egress smoke testi
+  de geçti. Bu UI testi gerçek oturum açma kontrolü yerine geçmez.
 - Kullanıcı, 12 Kasım tarihli `portfolio-before.json` yedeğindeki ETH/DOGE/PEPE
   kayıtlarının kaybolan portföyü olduğunu doğruladı ve geri yüklemeyi onayladı.
 - Bu dosya `C:\Users\Pc\AppData\Local\Temp\opencode` içinde bulundu. JSON'un tamamı,
