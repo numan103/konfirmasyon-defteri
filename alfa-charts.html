@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10141c">
+  <title>ALFA CHARTS — Grafik Analizi</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=3">
+</head>
+<body>
+  <main class="workspace">
+    <header class="toolbar">
+      <a class="back" href="/?page=home" aria-label="Alfa Traders ana sayfasına dön">← Site</a>
+      <h1>ALFA <span>CHARTS</span></h1>
+      <label class="symbol-label">Binance Spot
+        <select id="symbol" aria-label="Sembol">
+          <option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option>
+        </select>
+      </label>
+      <nav id="timeframes" aria-label="Zaman dilimi"></nav>
+      <select id="chart-type" aria-label="Grafik türü">
+        <option value="candles">Mum</option><option value="line">Line / Çizgi</option>
+      </select>
+      <div class="actions">
+        <button id="fit" type="button" title="Yüklü tüm mumları göster">Sığdır</button>
+        <button id="live" type="button" title="En son muma dön">Son mum</button>
+        <button id="list-toggle" type="button" aria-pressed="true" aria-controls="watchlist">Liste</button>
+        <button id="fullscreen" type="button">Tam ekran</button>
+      </div>
+    </header>
+    <div class="workarea">
+      <aside class="drawing-space" aria-label="Çizim araçları alanı">
+        <span class="cross-icon" aria-hidden="true">⌖</span>
+        <span class="drawing-note">Çizim araçları sonraki fazda</span>
+      </aside>
+      <section class="chart-panel" aria-label="Fiyat grafiği">
+        <div class="legend">
+          <strong id="market-title">BTCUSDT · 1H</strong>
+          <span id="ohlc">Gerçek piyasa verisi bekleniyor</span>
+        </div>
+        <div id="chart" tabindex="0" aria-label="Binance canlı fiyat grafiği. Sürükle veya tekerlekle gezin; artı/eksi ile yakınlaştır, ok tuşlarıyla kaydır."></div>
+        <div id="message" role="status">Binance mum verileri yükleniyor…</div>
+      </section>
+      <aside id="watchlist" aria-label="İzleme listesi">
+        <div class="watch-head"><h2>İzleme listesi</h2><span>BINANCE · SPOT</span></div>
+        <p class="watch-caption">Sembol seçerek grafiği aç</p>
+        <div id="watch-rows"></div>
+        <div class="quote"><span>Seçili sembol · son mum fiyatı</span><strong id="last-price">—</strong><small id="price-time">Henüz veri yok</small></div>
+        <p class="scope">FAZ 1<br>Yalnızca Binance Spot. Forex, vadeli işlemler ve emir iletimi yoktur.</p>
+      </aside>
+    </div>
+    <footer>
+      <span id="connection" role="status">Bağlantı hazırlanıyor</span>
+      <span id="data-info">Kaynak: Binance · Zaman: UTC · En fazla 1000 mum</span>
+      <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Lightweight Charts™ by TradingView</a>
+    </footer>
+  </main>
+  <script type="module" src="/assets/alfa-charts.mjs?v=3"></script>
+</body>
+</html>
