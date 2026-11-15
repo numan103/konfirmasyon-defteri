@@ -10,9 +10,9 @@ function hydration(local, remote) {
   const storage = new Map();
   let writes = 0, renders = 0;
   const ctx = vm.createContext({
-    ap2Data: local, ap2Ideas: [], AP2_KEY: 'fund', AP2_HIST_KEY: 'fund-history',
+    ap2Data: local, ap2Ideas: [], ap2CloudData: remote, AP2_KEY: 'fund', AP2_HIST_KEY: 'fund-history',
     siteIsAdmin: () => true,
-    localStorage: { setItem: (k, v) => storage.set(k, v) },
+    localStorage: { setItem: (k, v) => storage.set(k, v), getItem: k => storage.get(k) || null },
     ap2FetchCloud: async () => remote,
     ap2SyncCloud: async () => { writes++; },
     renderAlfaPortfoy2: () => { renders++; }, ap2LoadPrices: () => {},
@@ -22,6 +22,8 @@ function hydration(local, remote) {
       createElement: () => ({}), createTextNode: () => ({})
     }
   });
+  ctx.window = ctx;
+  vm.runInContext(fs.readFileSync(new URL('../assets/portfolio-recovery.js', import.meta.url), 'utf8'), ctx);
   vm.runInContext(html.slice(html.indexOf('let ap2ReadOnlyLoaded ='), html.indexOf("let ap2Filter =")), ctx);
   return { ctx, storage, writes: () => writes, renders: () => renders };
 }
@@ -42,6 +44,56 @@ test('empty shared portfolio loads once, not an infinite hydration loop', async 
   assert.equal(vm.runInContext('ap2CloudReady', h.ctx), true);
   assert.equal(h.renders(), 1);
   assert.equal(h.writes(), 0);
+});
+test('empty cloud cannot replace a nonempty local portfolio or publish it without confirmation', async () => {
+  const local = { positions: [{ id: 'real', symbol: 'BTC', qty: .01, cost: 50000 }], sells: [], startBalance: 1000, cash: 500 };
+  const h = hydration(local, { v: 2, positions: [], sells: [], cash: 1000 });
+  await vm.runInContext('ap2Hydrate()', h.ctx);
+  assert.equal(h.ctx.ap2Data.positions[0].id, 'real');
+  assert.equal(vm.runInContext('ap2LocalPreview', h.ctx), true);
+  assert.equal(vm.runInContext('ap2CloudReady', h.ctx), false);
+  assert.equal(h.writes(), 0);
+  assert.equal(JSON.parse(h.storage.get('alfa-fund-recovery-v1')).positions[0].id, 'real');
+});
+test('existing recovery survives an empty local hydration and appears read-only', async () => {
+  const h = hydration({ positions: [], sells: [] }, { v: 2, positions: [], sells: [], cash: 1000 });
+  const backup = { positions: [{ id: 'recovered', symbol: 'XAUUSD' }], sells: [], startBalance: 1000, cash: 100 };
+  h.storage.set('alfa-fund-recovery-v1', JSON.stringify(backup));
+  await vm.runInContext('ap2Hydrate()', h.ctx);
+  assert.equal(h.ctx.ap2Data.positions[0].id, 'recovered');
+  assert.equal(h.writes(), 0);
+  assert.deepEqual(JSON.parse(h.storage.get('alfa-fund-recovery-v1')), backup);
+});
+test('newer local copy is previewed, not automatically pushed over the server', async () => {
+  const local = { positions: [{ id: 'local' }], lastUpdate: '2026-11-15T15:00:00Z' };
+  const remote = { v: 2, positions: [{ id: 'remote' }], lastUpdate: '2026-11-15T14:00:00Z' };
+  const h = hydration(local, remote); await vm.runInContext('ap2Hydrate()', h.ctx);
+  assert.equal(h.ctx.ap2Data.positions[0].id, 'local'); assert.equal(h.writes(), 0);
+  assert.equal(vm.runInContext('ap2LocalPreview', h.ctx), true);
+});
+test('recovery publication requires explicit confirmation and a loaded revision', async () => {
+  const local = { positions: [{ id: 'real', symbol: 'BTC' }], sells: [], startBalance: 1000, cash: 500 };
+  const h = hydration(local, { v: 2, positions: [], sells: [] });
+  await vm.runInContext('ap2Hydrate()', h.ctx);
+  h.ctx.confirm = () => true;
+  await vm.runInContext('ap2RestoreRecovery()', h.ctx); assert.equal(h.writes(), 0, 'no revision, no write');
+  vm.runInContext('ap2Revision = "loaded-revision"', h.ctx);
+  h.ctx.confirm = () => false;
+  await vm.runInContext('ap2RestoreRecovery()', h.ctx); assert.equal(h.writes(), 0, 'cancel must never write');
+  h.ctx.confirm = () => true;
+  await vm.runInContext('ap2RestoreRecovery()', h.ctx);
+  assert.equal(h.writes(), 1); assert.equal(vm.runInContext('ap2LocalPreview', h.ctx), false);
+});
+test('failed explicit restore leaves the recovery and preview intact', async () => {
+  const local = { positions: [{ id: 'real', symbol: 'BTC' }], sells: [], startBalance: 1000, cash: 500 };
+  const h = hydration(local, { v: 2, positions: [], sells: [] }); await vm.runInContext('ap2Hydrate()', h.ctx);
+  h.ctx.confirm = () => true; h.ctx.ap2SyncCloud = async () => { throw new Error('409'); };
+  vm.runInContext('ap2Revision = "loaded-revision"', h.ctx);
+  await vm.runInContext('ap2RestoreRecovery()', h.ctx);
+  assert.equal(h.ctx.ap2Data.positions[0].id, 'real');
+  assert.equal(vm.runInContext('ap2LocalPreview', h.ctx), true);
+  assert.equal(vm.runInContext('ap2CloudReady', h.ctx), false);
+  assert.equal(JSON.parse(h.storage.get('alfa-fund-recovery-v1')).positions[0].id, 'real');
 });
 test('legacy injected ETH seed is never displayed as a current portfolio', async () => {
   const seed = { positions: [{ id: 'eth-sep5' }], lastUpdate: '2026-09-05' };

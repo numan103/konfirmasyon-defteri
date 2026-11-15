@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Portföy Kurtarma — Alfa Traders</title>
+  <style>
+    :root{color-scheme:dark;font:15px system-ui;background:#10141c;color:#d6dce7}
+    body{max-width:850px;margin:30px auto;padding:20px;line-height:1.6}
+    a{color:#a9baff}article{padding:18px;border:1px solid #3b4760;border-radius:10px;margin:15px 0}
+    button{background:#263354;color:#fff;border:1px solid #536ba9;padding:10px 16px;border-radius:6px;cursor:pointer}
+    button:disabled{opacity:.4;cursor:not-allowed}.note{color:#f1c174}h1{font-size:24px}small{color:#95a3ba}
+  </style>
+</head>
+<body>
+  <h1>Portföy kurtarma kopyaları</h1>
+  <p>Bu sayfa yalnızca <strong>bu tarayıcıdaki</strong> bilinen portföy kopyalarını okur. Sunucuya veri göndermez, kayıtları silmez veya değiştirmez.</p>
+  <p class="note">Verileri en son gördüğün aynı tarayıcı/profilde aç. Önce varsa JSON yedeğini indir; tarayıcı verilerini temizleme. Yedek finansal bilgiler içerebilir, herkese açık paylaşma.</p>
+  <div id="copies" role="status">Kopyalar kontrol ediliyor…</div>
+  <p><a href="/?page=portfoy">Portföy Yönetimi’ne dön</a></p>
+  <script src="/assets/portfolio-recovery.js?v=1"></script>
+  <script>
+    (function () {
+      var target = document.getElementById('copies'), api = window.AlfaPortfolioRecovery;
+      var copies = api.scan(localStorage); target.replaceChildren();
+      var usable = copies.filter(function (copy) { return copy.active && !copy.legacy; });
+      var summary = document.createElement('p');
+      summary.textContent = usable.length ? usable.length + ' dolu kurtarma kopyası bulundu.' : 'Bu tarayıcıda bilinen anahtarlarda dolu bir kurtarma kopyası bulunamadı. Bu sonuç diğer tarayıcı/profillerde de kopya olmadığı anlamına gelmez.';
+      target.append(summary);
+      copies.forEach(function (copy) {
+        var card = document.createElement('article'), title = document.createElement('strong'), detail = document.createElement('p');
+        title.textContent = copy.key;
+        detail.textContent = copy.data.positions.length + ' pozisyon · ' + (copy.data.sells || []).length + ' satış' +
+          (copy.legacy ? ' · eski örnek başlangıç kaydı (geri yüklenmez)' : '');
+        var button = document.createElement('button'); button.type = 'button'; button.textContent = 'JSON yedeğini indir';
+        button.disabled = !copy.active || copy.legacy;
+        button.onclick = function () { api.download(copy.data, copy.key); };
+        card.append(title, detail, button); target.append(card);
+      });
+    })();
+  </script>
+</body>
+</html>

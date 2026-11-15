@@ -32,6 +32,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
+<script src="/assets/portfolio-recovery.js?v=1"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -18414,9 +18415,92 @@ let ap2Hydrating = false;
 let ap2Revision = null;
 let ap2WriteQueue = Promise.resolve();
 let ap2SaveSeq = 0;
+let ap2RecoveryCandidate = null;
+let ap2Restoring = false;
+function ap2HasActivity(data) {
+  return !!data && Array.isArray(data.positions) && (data.positions.length > 0 || (Array.isArray(data.sells) && data.sells.length > 0));
+}
+function ap2PreserveRecovery(data) {
+  if (!siteIsAdmin() || !ap2HasActivity(data) || ap2LegacySeed(data)) return false;
+  try { return !!window.AlfaPortfolioRecovery && window.AlfaPortfolioRecovery.preserve(localStorage, data); }
+  catch (e) { return false; }
+}
+function ap2FindRecovery(local) {
+  if (!siteIsAdmin()) return null;
+  if (ap2HasActivity(local) && !ap2LegacySeed(local)) return { key: 'bu cihazdaki kopya', data: JSON.parse(JSON.stringify(local)) };
+  try {
+    return window.AlfaPortfolioRecovery.scan(localStorage).find(function (copy) { return copy.active && !copy.legacy; }) || null;
+  } catch (e) { return null; }
+}
+function ap2OfferRecovery(candidate, message) {
+  ap2RecoveryCandidate = candidate;
+  ap2Data = JSON.parse(JSON.stringify(candidate.data));
+  ap2CloudReady = false; ap2LocalPreview = true; ap2ReadOnly = true; ap2ReadOnlyLoaded = true;
+  renderAlfaPortfoy2();
+  ap2Status(message + ' · Salt okunur kurtarma kopyası; sunucuya otomatik yazılmadı.');
+}
+function ap2RenderRecoveryNotice() {
+  var existing = document.getElementById('ap2-recovery-notice');
+  if (!siteIsAdmin() || !ap2LocalPreview || !ap2RecoveryCandidate) { if (existing) existing.remove(); return; }
+  var header = document.querySelector('#page-portfoy .ap2-hd');
+  if (!header) return;
+  var panel = existing || document.createElement('div');
+  panel.id = 'ap2-recovery-notice'; panel.className = 'hd-empty';
+  panel.style.cssText = 'padding:14px;border:1px solid #b88b35;border-radius:10px;margin:10px 0;line-height:1.7';
+  panel.replaceChildren();
+  var note = document.createElement('p');
+  note.textContent = 'Yerel kopya bulundu: ' + ap2Data.positions.length + ' pozisyon, ' + (ap2Data.sells || []).length +
+    ' satış. Bu görünüm güncel sunucu kaydı değildir. Önce JSON yedeğini indir; geri yükleme yalnızca onayınla yapılır.';
+  var link = document.createElement('a'); link.href = '/portfoy-kurtarma.html'; link.textContent = 'Kurtarma kopyaları / JSON yedeği';
+  var restore = document.createElement('button'); restore.type = 'button'; restore.id = 'ap2-restore-recovery';
+  restore.textContent = 'Bu kopyayı buluta geri yükle'; restore.style.margin = '8px';
+  restore.disabled = ap2Restoring || !ap2Revision || !Number.isFinite(Number(ap2Data.startBalance));
+  restore.onclick = ap2RestoreRecovery;
+  var cloud = document.createElement('button'); cloud.type = 'button'; cloud.textContent = 'Sunucudaki sürümü göster';
+  cloud.disabled = ap2Restoring; cloud.onclick = ap2UseCloudSnapshot;
+  panel.append(note, link, document.createElement('br'), restore, cloud);
+  if (!existing) header.insertAdjacentElement('afterend', panel);
+}
+async function ap2UseCloudSnapshot() {
+  if (!siteIsAdmin() || ap2Restoring) return;
+  if (!ap2PreserveRecovery(ap2Data)) { ap2Status('Önce kurtarma sayfasından JSON yedeğini indir; tarayıcı yedeği alınamadı.'); return; }
+  try {
+    var d = await ap2FetchCloud(true);
+    if (!d || !Array.isArray(d.positions) || ap2LegacySeed(d)) throw new Error('Geçerli sunucu kaydı bulunamadı.');
+    ap2Data = JSON.parse(JSON.stringify(d)); ap2Ideas = Array.isArray(d.ideas) ? d.ideas : [];
+    ap2RecoveryCandidate = null; ap2LocalPreview = false; ap2CloudReady = true; ap2ReadOnly = false;
+    try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch (e) {}
+    renderAlfaPortfoy2(); ap2Status('Sunucudaki sürüm · Yerel kurtarma yedeği korundu.');
+  } catch (e) { ap2Status(e.message + ' Yerel kopya korundu.'); }
+}
+async function ap2RestoreRecovery() {
+  if (!siteIsAdmin() || !ap2RecoveryCandidate || !ap2Revision || ap2Restoring) return;
+  if (!ap2HasActivity(ap2RecoveryCandidate.data) || ap2LegacySeed(ap2RecoveryCandidate.data) ||
+      !Number.isFinite(Number(ap2RecoveryCandidate.data.startBalance)) || ap2RecoveryCandidate.data.startBalance == null) {
+    ap2Status('Bu kopya doğrudan geri yüklemeye uygun değil. JSON yedeğini indirip kontrol et.'); return;
+  }
+  if (!confirm('Bu yerel kopya paylaşılan portföye kaydedilecek. Mevcut sunucu sürümü değişmişse işlem reddedilir. Önce JSON yedeğini indirdiğinden emin ol. Geri yüklemek istiyor musun?')) return;
+  ap2Restoring = true; renderAlfaPortfoy2();
+  try {
+    if (ap2CloudData) {
+      var old = JSON.parse(localStorage.getItem('alfa-fund-before-restore-v1') || 'null');
+      if (!ap2HasActivity(old)) localStorage.setItem('alfa-fund-before-restore-v1', JSON.stringify(ap2CloudData));
+    }
+    ap2Data = JSON.parse(JSON.stringify(ap2RecoveryCandidate.data));
+    if (!Array.isArray(ap2Data.sells)) ap2Data.sells = [];
+    ap2CloudReady = true;
+    await ap2SyncCloud(); // Uses the exact loaded revision; never force-overwrites another device.
+    ap2RecoveryCandidate = null; ap2LocalPreview = false; ap2ReadOnly = false;
+    try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch (e) {}
+    ap2Status('Kurtarma kopyası sunucuya kaydedildi.');
+  } catch (e) {
+    ap2CloudReady = false; ap2LocalPreview = true; ap2ReadOnly = true;
+    ap2Status('Geri yükleme tamamlanamadı. Yerel kopya korundu; sunucu kaydını yeniden kontrol et.');
+  } finally { ap2Restoring = false; renderAlfaPortfoy2(); }
+}
 function ap2LegacySeed(data) {
-  return !!data && (data.positions || []).some(function(p) { return p.id === 'eth-sep5'; })
-    && !((data.positions || []).some(function(p) { return p.id !== 'eth-sep5'; }))
+  return !!data && (data.positions || []).some(function(p) { return p && p.id === 'eth-sep5'; })
+    && !((data.positions || []).some(function(p) { return p && p.id !== 'eth-sep5'; }))
     && String(data.lastUpdate || '2026-09-05').slice(0, 10) <= '2026-09-05';
 }
 function ap2Status(text) {
@@ -18431,42 +18515,37 @@ async function ap2Hydrate() {
   ap2Status('Güncel portföy sunucudan yükleniyor…');
   var local = JSON.parse(JSON.stringify(ap2Data));
   var saveSeqAtStart = ap2SaveSeq;
+  ap2PreserveRecovery(local);
   try {
     var d = await ap2FetchCloud(true);
     if (!d || !Array.isArray((d.data || d).positions)) throw new Error('Portföy kaydı bulunamadı.');
     // Yükleme sürerken yeni kayıt yapıldıysa ya da yerel kopya sunucudakinden
     // yeniyse, eski sunucu görünümü yerel portföyün üstüne yazılmaz.
     var cloudData = d.data || d;
+    if (ap2SaveSeq !== saveSeqAtStart) local = JSON.parse(JSON.stringify(ap2Data));
+    var recovery = ap2FindRecovery(local);
+    var localPreserved = !ap2HasActivity(local) || ap2PreserveRecovery(local);
     var cloudStamp = Date.parse(cloudData.lastUpdate || d.updated_at || '');
     var localStamp = Date.parse((local && local.lastUpdate) || '');
     if (siteIsAdmin() && (ap2SaveSeq !== saveSeqAtStart || (localStamp && (!cloudStamp || localStamp > cloudStamp)))) {
-      ap2Data = local;
-      ap2CloudReady = true;
-      ap2LocalPreview = false;
-      ap2ReadOnly = false;
-      ap2ReadOnlyLoaded = true;
-      ap2Status('Bu cihazdaki daha yeni kayıt korundu; sunucuya eşitleniyor.');
-      renderAlfaPortfoy2();
-      await ap2SyncCloud();
-      ap2LoadPrices();
+      if (recovery) { ap2OfferRecovery(recovery, 'Bu cihazda sunucudan daha yeni bir kopya var'); return; }
+    }
+    if (recovery && (!ap2HasActivity(cloudData) || ap2LegacySeed(cloudData) || !localPreserved)) {
+      ap2OfferRecovery(recovery, 'Sunucu kaydı boş/eski veya yerel yedek alınamadı; cihazdaki veriler korundu');
       return;
     }
-    // Save a recovery copy, never erase a desktop-only portfolio silently.
-    if (siteIsAdmin()) localStorage.setItem('alfa-fund-recovery-v1', JSON.stringify(local));
     if (ap2LegacySeed(d)) {
       if (!siteIsAdmin() || ap2LegacySeed(local) || !(local.positions || []).length) {
         throw new Error('Sunucuda eski başlangıç kaydı var. Güncel portföyün bulunduğu bilgisayarda siteyi bir kez açmak gerekiyor; eski pozisyonlar gösterilmiyor.');
       }
-      // One-time migration from the real desktop portfolio, not the injected seed.
-      ap2CloudReady = true;
-      await ap2SyncCloud();
-      d = ap2CloudData;
+      throw new Error('Eski başlangıç kaydı geri yüklenmedi; kurtarma sayfasını kontrol et.');
     }
     ap2Data = JSON.parse(JSON.stringify(d.data || d));
     ap2Ideas = Array.isArray(d.ideas) ? d.ideas : [];
     try { localStorage.setItem(AP2_HIST_KEY, JSON.stringify(Array.isArray(d.history) ? d.history : [])); } catch(e) {}
     if (siteIsAdmin()) localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data));
-    if (siteIsAdmin() && typeof ap2MergeDuplicates === 'function' && ap2MergeDuplicates()) { try { await ap2SyncCloud(); } catch (e) {} }
+    // Hydration is read-only: merging/publishing must never happen on page load.
+    ap2RecoveryCandidate = null;
     ap2CloudReady = true;
     ap2LocalPreview = false;
     ap2ReadOnlyLoaded = true;
@@ -18476,12 +18555,10 @@ async function ap2Hydrate() {
     ap2LoadPrices();
   } catch(e) {
     ap2CloudReady = false;
-    ap2LocalPreview = siteIsAdmin() && !ap2LegacySeed(local) && Array.isArray(local.positions) && local.positions.length > 0;
-    if (ap2LocalPreview) {
-      ap2Data = local;
-      ap2ReadOnly = true;
-      renderAlfaPortfoy2();
-      ap2Status('Bu cihazdaki kopya · Sunucuyla eşitleme bekleniyor.');
+    var fallback = ap2FindRecovery(local);
+    if (fallback) {
+      ap2PreserveRecovery(fallback.data);
+      ap2OfferRecovery(fallback, 'Sunucu yüklenemedi; bu cihazdaki kopya korunuyor');
     } else {
       ap2Status('Portföy yüklenemedi: ' + e.message);
     }
@@ -19810,6 +19887,7 @@ function ap2ResetAll() {
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
+  ap2RenderRecoveryNotice();
   document.querySelector('#page-portfoy .ap2-hd-actions').style.display = '';
   if (!ap2CloudReady && !ap2LocalPreview) {
     var layout = document.querySelector('#page-portfoy .ap2-layout');
@@ -28330,7 +28408,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b187';
+const APP_BUILD = 'b188';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
