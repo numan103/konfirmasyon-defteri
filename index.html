@@ -18582,6 +18582,9 @@ function ap2MergeDuplicates() {
     const arr = groups[key];
     if (arr.length < 2) return;
     arr.sort(function (a, b) { return String(a.date || '').localeCompare(String(b.date || '')); });
+    const sourceLots = arr.flatMap(function(p) {
+      return JSON.parse(JSON.stringify(Array.isArray(p.sourceLots) ? p.sourceLots : [p]));
+    });
     const base = arr[0];
     let totalQty = Number(base.qty) || 0;
     let totalCost = totalQty * (Number(base.cost) || 0);
@@ -18599,7 +18602,9 @@ function ap2MergeDuplicates() {
       toRemove.add(p.id);
     }
     base.qty = Math.round(totalQty * 1e8) / 1e8;
-    base.cost = totalQty > 0 ? Math.round((totalCost / totalQty) * 100) / 100 : base.cost;
+    // Round only the displayed price, not the stored weighted average.
+    base.cost = base.qty > 0 ? totalCost / base.qty : base.cost;
+    base.sourceLots = sourceLots;
     base.note = notes.join(' | ');
     changed = true;
   });
@@ -18614,8 +18619,8 @@ function ap2RebuildHistory() {
     if (!ap2Data) return;
     var sb = Number(ap2Data.startBalance) || 1000;
     var sells = (ap2Data.sells || []).slice().sort(function(a, b) {
-      var ta = a.ts || (a.date ? new Date(a.date).getTime() : 0) || (a.posDate ? new Date(a.posDate).getTime() : 0);
-      var tb = b.ts || (b.date ? new Date(b.date).getTime() : 0) || (b.posDate ? new Date(b.posDate).getTime() : 0);
+      var ta = ap2SaleTimestamp(a);
+      var tb = ap2SaleTimestamp(b);
       return ta - tb;
     });
     var positions = ap2Data.positions || [];
@@ -18638,10 +18643,9 @@ function ap2RebuildHistory() {
     var cumProfit = 0;
     var lastDate = hist[0].d;
     sells.forEach(function(s) {
-      var sellDate = s.date || s.posDate || null;
-      var dd = sellDate || (s.ts ? new Date(s.ts).toISOString().slice(0, 10) : null);
+      var dd = ap2SaleDate(s);
       if (!dd) return;
-      cumProfit += (function() { var v = Number(s.pnl); if (isNaN(v)) v = Number(s.profit); return isNaN(v) ? 0 : v; })();
+      cumProfit += ap2SaleProfit(s);
       if (dd === lastDate) {
         hist[hist.length - 1].v = sb + cumProfit;
       } else {
@@ -19142,6 +19146,20 @@ function ap2FillPos(id) {
   ap2TgNotify('⚡ Limit emri el ile dolduruldu — ' + p.symbol + ' 🔒 ' + ap2Fmt(p.cost) + '\n\nAdet: ' + ap2FmtNum(p.qty) + ' · Harcama: ' + ap2Fmt(total) + '\n\nalfa-trader.com', ap2TgTeaser('yeni bir hamle yapıldı', p.symbol));
   ap2Save();
   renderAlfaPortfoy2();
+}
+function ap2SaleTimestamp(sale) {
+  // Some legacy rows have an incorrect timestamp year but an explicit sale date.
+  const date = sale && sale.date;
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date.slice(0, 10))) {
+    const explicit = Date.parse(date.slice(0, 10) + 'T12:00:00Z');
+    if (Number.isFinite(explicit)) return explicit;
+  }
+  const ts = sale && sale.ts;
+  return ts != null && ts !== '' && Number.isFinite(Number(ts)) && Number(ts) > 0 ? Number(ts) : 0;
+}
+function ap2SaleDate(sale) {
+  const ts = ap2SaleTimestamp(sale);
+  return ts ? new Date(ts).toISOString().slice(0, 10) : null;
 }
 function ap2SaleProfit(sale) {
   for (const key of ['pnl', 'profit']) {
@@ -20022,14 +20040,14 @@ function renderAlfaPortfoy2() {
       var totalPnl = sells.reduce(function(s, sl) { return s + ap2SaleProfit(sl); }, 0);
       if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
       var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
-      tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
+      tradesBody.innerHTML = sells.slice().sort(function(a, b) { return ap2SaleTimestamp(b) - ap2SaleTimestamp(a); }).map(function(sl) {
         var pf = ap2SaleProfit(sl);
         var invested = ap2SellInvested(sl, pf);
         var pfPct = invested > 0 ? (pf / invested * 100) : 0;
         var pfCls = pf >= 0 ? 'pos' : 'neg';
         var bgCol = symColors[sl.symbol] || '#3b82f6';
-        var buyDate = sl.buyDate || '';
-        var sellDate = sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
+        var buyDate = sl.buyDate || sl.posDate || '';
+        var sellDate = ap2SaleDate(sl) || '';
         return '<div class="ap2-trade-row">' +
           '<div class="ap2-trade-icon" style="background:' + bgCol + '">' + sl.symbol.charAt(0) + '</div>' +
           '<div class="ap2-trade-info">' +
@@ -20150,14 +20168,14 @@ function renderAlfaPortfoy2() {
     var totalPnl = sells.reduce(function(s, sl) { return s + ap2SaleProfit(sl); }, 0);
     if (tradesTotal) tradesTotal.textContent = 'Toplam K/Z: ' + (totalPnl >= 0 ? '+' : '') + ap2Fmt(totalPnl);
     var symColors = { ETH: '#627eea', BTC: '#f7931a', LTC: '#bfbbbb', SOL: '#9945ff', XRP: '#00aae4', BNB: '#f3ba2f', ADA: '#0033ad', DOGE: '#c2a633' };
-    tradesBody.innerHTML = sells.slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); }).map(function(sl) {
+    tradesBody.innerHTML = sells.slice().sort(function(a, b) { return ap2SaleTimestamp(b) - ap2SaleTimestamp(a); }).map(function(sl) {
       var pf = ap2SaleProfit(sl);
       var invested = ap2SellInvested(sl, pf);
       var pfPct = invested > 0 ? (pf / invested * 100) : 0;
       var pfCls = pf >= 0 ? 'pos' : 'neg';
       var bgCol = symColors[sl.symbol] || '#3b82f6';
-      var buyDate = sl.buyDate || '';
-      var sellDate = sl.date || (sl.ts ? new Date(sl.ts).toLocaleDateString('tr-TR') : '');
+      var buyDate = sl.buyDate || sl.posDate || '';
+      var sellDate = ap2SaleDate(sl) || '';
       return '<div class="ap2-trade-row">' +
         '<div class="ap2-trade-icon" style="background:' + bgCol + '">' + sl.symbol.charAt(0) + '</div>' +
         '<div class="ap2-trade-info">' +
@@ -28415,7 +28433,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b189';
+const APP_BUILD = 'b190';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

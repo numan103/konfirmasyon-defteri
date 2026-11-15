@@ -2,6 +2,21 @@
 
 ## Kurtarma tamamlandı (16 Kas 2026)
 
+- Kullanıcının altının birleşik olduğunu belirtmesi üzerine iki altın lotu
+  tek pozisyonda birleştirildi. Miktar ve toplam maliyet korundu; ağırlıklı
+  ortalama depolamada iki ondalığa yuvarlanmadı. İki orijinal lot `sourceLots`
+  içinde saklandı. Kripto pozisyonları, satışlar, notlar, geçmiş ve nakit
+  değiştirilmedi. Revizyon korumalı yazımdan sonra tam belge tekrar doğrulandı.
+- Son denetimde onaylanan 12 Kasım yedeğindeki 3 kripto pozisyonunun kimlik,
+  miktar, maliyet, tarih, gerçekleşme ve not alanları eşleşti; 6 satış ve
+  fikir/not kayıtları da eşleşti. Bu bilinen kaynaklarda başka eksik bulunmadı;
+  bu sonuç mevcut olmayan daha yeni bir kaynağın eksiksizliğini kanıtlamaz.
+- b190: lot birleştirmede tam hassasiyet ve kaynak lotları korunuyor. Eski
+  satışlarda açık tarih, yanlış yıl içerebilen `ts` alanından önce kullanılıyor;
+  `posDate` alış tarihi olarak gösteriliyor, satış tarihi yerine kullanılmıyor.
+  Eksik satış tarihi bilinmiyorsa alış tarihinden uydurulmuyor.
+- 432 Node testi geçti. Gerçek Chrome izole arayüz kontrolü tek altın kartı,
+  6 satış, geçmiş kâr etiketi ve tüm kaynak alış tarihlerini doğruladı.
 - Takip düzeltmesi: `portfolio-before.json`, önceki altın kurtarmasından **önce**
   alınmıştı. `restore-gold.cjs` dosyasındaki tarihli iki XAUUSD lotu da kullanıcının
   altınların eksik olduğunu bildirmesi üzerine, 12 Kasım alış/gerçekleşme tarihleri

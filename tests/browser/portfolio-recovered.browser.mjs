@@ -31,6 +31,7 @@ try {
     saleRows: document.querySelectorAll('#ap2-trades-body .ap2-trade-row').length,
     realized: document.getElementById('ap2-realized-pnl')?.textContent,
     saleTotal: document.getElementById('ap2-trades-total')?.textContent,
+    saleDates: [...document.querySelectorAll('#ap2-trades-body .ap2-trade-dates')].map(el => el.textContent),
     summary: ap2Summary(), summaryShown: getComputedStyle(document.querySelector('#page-portfoy .ap2-layout')).display !== 'none'
   }));
   assert.equal(observed.goldCards, data.positions.filter(p => p.type === 'altin').length);
@@ -38,6 +39,7 @@ try {
   assert.ok(observed.realized, 'realized profit must be visible in the top summary');
   assert.match(observed.realized, /268[,.]58/);
   assert.match(observed.saleTotal, /268[,.]58/);
+  assert.ok(observed.saleDates.every(text => text.includes('→')), 'all supplied sales must show their recorded purchase dates');
   assert.equal(observed.summaryShown, true);
   assert.ok(Math.abs(observed.summary.realizedPnl - 268.576777025) < 1e-8);
   assert.deepEqual(writes, []);
