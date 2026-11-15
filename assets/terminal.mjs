@@ -220,6 +220,7 @@ window.renderWatchlist = () => { render(); syncVisibility(); };
 new MutationObserver(syncVisibility).observe(page, { attributes: true, attributeFilter: ['class'] });
 const waitForGlobals = () => { if (typeof store === 'undefined' || typeof AUTH === 'undefined') setTimeout(waitForGlobals, 50); else syncVisibility(); };
 waitForGlobals();
+setInterval(() => { if (!page.classList.contains('hidden') && !active) syncVisibility(); }, 1000);
 setTimeout(syncVisibility, 500);
 setTimeout(syncVisibility, 2000);
 setTimeout(syncVisibility, 500);
