@@ -12457,7 +12457,7 @@ function init() {
   });
   // Sayfa yüklendiğinde ?page= parametresini oku
   const pm = window.location.search.match(/[?&]page=(\w+)/);
-  if (pm) showPage(pm[1]);
+  if (pm) setTimeout(function () { showPage(pm[1]); }, 0);
   // Eğitim kanalı derin bağlantısı: ?page=egitim&ch=<id>&sec=<id>&t=<id>&v=<id> ya da kısa ?go=<code>
   const qs = new URLSearchParams(window.location.search);
   const go = qs.get('go');
