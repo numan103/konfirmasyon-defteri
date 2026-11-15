@@ -2,8 +2,11 @@ import { parseWatchlist, marketSource } from './terminal-model.mjs?v=4';
 
 const page = document.getElementById('page-trading');
 const KEY = 'alfa-watchlist';
+const SEED_KEY = 'alfa-watchlist-tv-seed-v1';
 const DRAW_KEY = 'alfa-terminal-drawings-v1';
-const DEFAULT = ['BINANCE:BTCUSDT', 'BINANCE:ETHUSDT', 'FX:EURUSD', 'FX:GBPUSD', 'TVC:GOLD'];
+// Kullanıcının TradingView izleme listesi (assets/watchlist-84359879.txt).
+const TV_LIST = 'CME:BTC1!,OKX:USDTTRY,CBOE:VIX,FX_IDC:XAUTRYG,OKX:XAUTUSDT,BIST:XU100,CRYPTOCAP:TOTAL,CRYPTOCAP:TOTAL2,CRYPTOCAP:TOTAL3,CRYPTOCAP:BTC.D,BINANCE:ETHBTC,CRYPTOCAP:USDT.D,BINANCE:BTCUSDT.P,BINANCE:ETHUSDT,BINANCE:BTCUSDT,OKX:ETHUSDT.P,TVC:GOLD,BYBIT:BTCUSDT.P,BYBIT:ETHUSDT.P,FX:XAUUSD,FPMARKETS:US100,OKX:SOLUSDT,OKX:PEPEUSDT.P,OKX:BNBUSDT.P,OKX:DOGEUSDT,OKX:HBARUSDT.P,OKX:AVAXUSDT.P,OKX:LTCUSDT.P,OKX:XRPUSDT.P,OKX:XLMUSDT.P,OKX:SUIUSDT.P,OKX:ADAUSDT.P,OKX:UNIUSDT.P,OKX:BCHUSDT.P,OKX:DOTUSDT.P,OKX:LINKUSDT.P,OKX:TRXUSDT.P,OKX:NEARUSDT.P,OKX:WIFUSDT,OKX:INJUSDT,OKX:BONKUSDT,OKX:POPCATUSDT.P,OKX:AAVEUSDT.P,OKX:RENDERUSDT'.split(',');
+const DEFAULT = [...TV_LIST];
 let list = [], selected = DEFAULT[0], interval = '60', poll, aborter;
 let version = 0, active = false, userId = '', loadedUser = '';
 let alerts = [];
@@ -22,6 +25,8 @@ const top = node('header', null, 'term-top');
 button('← Site', () => showPage('home'), top);
 const heading = button(selected + ' ⌕', () => { searchDialog.showModal(); searchInput.focus(); }, top, 'term-symbol');
 heading.title = 'Parite ara';
+const listButton = button('★ İzleme listesi', () => { renderList(); dialog.showModal(); }, top);
+listButton.title = 'İzleme listesini aç, içe/dışa aktar';
 const timeframe = node('select'); timeframe.setAttribute('aria-label', 'Zaman dilimi');
 [['1', '1dk'], ['5', '5dk'], ['15', '15dk'], ['60', '1sa'], ['240', '4sa'], ['1440', '1G']].forEach(([value, text]) => {
   const o = node('option', text); o.value = value; timeframe.append(o);
@@ -30,42 +35,60 @@ timeframe.value = interval; top.append(timeframe);
 timeframe.addEventListener('change', () => { interval = timeframe.value; openChart(); });
 const body = node('div', null, 'term-body');
 const canvas = node('div', null, 'term-chart');
-const side = node('aside', null, 'term-side'); side.setAttribute('aria-label', 'İzleme listesi');
-const sideHead = node('div', null, 'term-side-head');
-sideHead.append(node('strong', 'İzleme listesi'));
-button('＋ / İçe aktar', () => { dialog.showModal(); }, sideHead);
-button('Dışa aktar', () => {
-  const url = URL.createObjectURL(new Blob([list.join(',')], { type: 'text/plain' }));
-  const a = node('a'); a.href = url; a.download = 'alfa-watchlist.txt'; a.click(); URL.revokeObjectURL(url);
-}, sideHead);
-const entries = node('div'); side.append(sideHead, entries);
-body.append(canvas, side);
+body.append(canvas);
 const status = node('footer', '', 'term-foot'); status.setAttribute('role', 'status');
 page.append(top, body, status);
 
-const dialog = node('dialog', null, 'term-dialog');
-dialog.append(node('h2', 'Watchlist aktar'));
-dialog.append(node('p', 'TradingView .txt dosyanı seç veya BORSA:SEMBOL listesini yapıştır. Mevcut listen silinmez; yeni semboller eklenir. Spot ve vadeli ürünler ayrı tutulur.'));
+const dialog = node('dialog', null, 'term-dialog term-watchlist-dialog');
+dialog.append(node('h2', 'İzleme listesi'));
+const wlList = node('div', null, 'term-watchlist-list');
+dialog.append(wlList);
+const wlTools = node('div', null, 'term-wl-tools');
+button('Dışa aktar', () => {
+  const url = URL.createObjectURL(new Blob([list.join(',')], { type: 'text/plain' }));
+  const a = node('a'); a.href = url; a.download = 'alfa-watchlist.txt'; a.click(); URL.revokeObjectURL(url);
+}, wlTools);
+button('Tümünü temizle', async () => {
+  list = []; await persist(); renderList(); importMessage.textContent = 'Liste temizlendi.';
+}, wlTools);
+dialog.append(wlTools);
+dialog.append(node('p', 'TradingView .txt dosyanı seç veya BORSA:SEMBOL listesini yapıştır. Spot ve vadeli ürünler ayrı tutulur.'));
 const file = node('input'); file.type = 'file'; file.accept = '.txt,text/plain';
 file.setAttribute('aria-label', 'TradingView watchlist dosyası');
 const text = node('textarea'); text.placeholder = 'BINANCE:BTCUSDT,FX:EURUSD,TVC:GOLD'; text.setAttribute('aria-label', 'Sembol listesi');
 const importMessage = node('p'); importMessage.setAttribute('role', 'status');
-const sharedListButton = button('Paylaştığın Kripto listesini getir', async () => {
+file.addEventListener('change', async () => {
+  const f = file.files && file.files[0];
+  if (!f) return;
+  try { text.value = await f.text(); importMessage.textContent = `${f.name} okundu; aşağıdaki butonla aktar.`; }
+  catch { importMessage.textContent = 'Dosya okunamadı.'; }
+});
+const sharedListButton = button('TradingView listemi getir (44)', async () => {
   try {
-    const r = await fetch('/assets/watchlist-84359879.txt?v=1');
+    const r = await fetch('/assets/watchlist-84359879.txt?v=2');
     if (!r.ok) throw new Error();
     text.value = await r.text();
-    importMessage.textContent = 'Paylaştığın sayfadan okunabilen 44 sembol hazır. “Listeye ekle” ile kaydet. Otomatik TradingView senkronizasyonu değildir.';
-  } catch { importMessage.textContent = 'Paylaşılan liste alınamadı.'; }
+    importMessage.textContent = 'Hazır TradingView listen yüklendi. “Listeyi değiştir” ile aynen aktar.';
+  } catch { importMessage.textContent = 'Hazır liste alınamadı.'; }
 }, dialog);
-sharedListButton.hidden = true;
-dialog.append(file, text, importMessage);
+dialog.append(file, text, sharedListButton, importMessage);
+function addParsed(parsed) {
+  if (!parsed.symbols.length) { importMessage.textContent = 'Geçerli BORSA:SEMBOL bulunamadı. Dosya veya sembol listesi kullan.'; return false; }
+  return true;
+}
 button('Listeye ekle', async () => {
   const parsed = parseWatchlist(text.value);
-  if (!parsed.symbols.length) { importMessage.textContent = 'Geçerli BORSA:SEMBOL bulunamadı. Watchlist bağlantısı yerine dosya veya sembol listesi kullan.'; return; }
+  if (!addParsed(parsed)) return;
   list = [...new Set([...list, ...parsed.symbols])].slice(0, 200);
-  await persist(); render();
-  importMessage.textContent = `${parsed.symbols.length} geçerli sembol işlendi. ${parsed.rejected.length} satır/ifade aktarılmadı.${parsed.rejected.length ? ' Geçersiz: ' + parsed.rejected.slice(0, 5).join(', ') : ''}${parsed.overflow ? ' En fazla 200 sembol tutulur.' : ''}`;
+  await persist(); renderList();
+  importMessage.textContent = `${parsed.symbols.length} sembol eklendi.${parsed.rejected.length ? ' ' + parsed.rejected.length + ' satır aktarılmadı: ' + parsed.rejected.slice(0, 5).join(', ') : ''}${parsed.overflow ? ' En fazla 200 sembol tutulur.' : ''}`;
+}, dialog);
+button('Listeyi değiştir', async () => {
+  const parsed = parseWatchlist(text.value);
+  if (!addParsed(parsed)) return;
+  list = [...new Set(parsed.symbols)].slice(0, 200);
+  await persist(); renderList();
+  importMessage.textContent = `Liste ${list.length} sembolle değiştirildi.`;
 }, dialog);
 button('Kapat', () => dialog.close(), dialog);
 page.append(dialog);
@@ -80,7 +103,7 @@ searchDialog.append(searchInput, searchResults, searchStatus);
 button('Kapat', () => searchDialog.close(), searchDialog);
 page.append(searchDialog);
 const catalog = [...DEFAULT, 'FX:USDJPY', 'FX:AUDUSD', 'FX:USDCAD', 'FX:USDCHF', 'FX:NZDUSD', 'FX:XAUUSD', 'TVC:SILVER', 'TVC:DXY', 'CBOE:VIX', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:TOTAL'];
-function chooseSymbol(symbol) { selected = symbol; render(); openChart(); searchDialog.close(); }
+function chooseSymbol(symbol) { selected = symbol; renderList(); openChart(); searchDialog.close(); }
 function paintSearch() {
   const q = searchInput.value.trim().toUpperCase(); searchResults.replaceChildren();
   const matches = [...new Set([...parseWatchlist(q).symbols, ...list, ...catalog])].filter(s => !q || s.includes(q)).slice(0, 60);
@@ -89,7 +112,7 @@ function paintSearch() {
     button(symbol, () => chooseSymbol(symbol), row);
     const add = button(list.includes(symbol) ? '✓' : '＋', async () => {
       if (list.length >= 200 && !list.includes(symbol)) { searchStatus.textContent = 'En fazla 200 sembol kaydedebilirsin.'; return; }
-      list = [...new Set([...list, symbol])]; await persist(); render(); paintSearch();
+      list = [...new Set([...list, symbol])]; await persist(); renderList(); paintSearch();
     }, row);
     add.setAttribute('aria-label', symbol + ' listeye ekle'); searchResults.append(row);
   });
@@ -161,29 +184,27 @@ async function persist() {
   await store.set(KEY, JSON.stringify(list));
   status.textContent = AUTH.user ? 'Liste hesabına kaydedildi; bulut eşitlemesi mevcut hesap sistemi üzerinden yapılır.' : 'Liste bu cihaza kaydedildi.';
 }
-function render() {
-  entries.replaceChildren();
-  list.forEach((symbol, index) => {
-    const row = node('div', null, 'term-row' + (symbol === selected ? ' on' : ''));
-    const select = button('', () => { selected = symbol; render(); openChart(); }, row, 'term-pair');
-    select.append(node('b', symbol.split(':')[1]), node('small', symbol.split(':')[0] + (marketSource(symbol).native ? ' · Borsa verisi' : ' · TV gömülü')));
-    const up = button('↑', async () => {
-      if (!index) return; [list[index - 1], list[index]] = [list[index], list[index - 1]]; await persist(); render();
-    }, row, 'term-action');
-    up.setAttribute('aria-label', symbol + ' yukarı taşı'); up.disabled = index === 0;
+function renderList() {
+  wlList.replaceChildren();
+  if (!list.length) wlList.append(node('p', 'Liste boş. Aşağıdan sembol ekle.'));
+  list.forEach(symbol => {
+    const row = node('div', null, 'term-wl-row' + (symbol === selected ? ' on' : ''));
+    const open = button(symbol, () => { selected = symbol; renderList(); openChart(); dialog.close(); }, row, 'term-wl-open');
+    open.title = 'Grafiği aç';
+    if (marketSource(symbol).native) open.append(node('small', ' · borsa'));
     const remove = button('×', async () => {
-      list = list.filter(s => s !== symbol); await persist(); render();
+      list = list.filter(s => s !== symbol); await persist(); renderList();
     }, row, 'term-action');
     remove.setAttribute('aria-label', symbol + ' kaldır');
-    entries.append(row);
+    wlList.append(row);
   });
+  listButton.textContent = '★ İzleme listesi (' + list.length + ')';
 }
 function dispose() { version++; clearTimeout(poll); aborter?.abort(); canvas.replaceChildren(); }
 function openChart() {
   if (!active) return;
   dispose(); heading.textContent = selected + ' ⌕';
   window._tvSym = selected;
-  const m = marketSource(selected);
   const widget = node('div', null, 'tradingview-widget-container__widget'); widget.style.height = '100%';
   const container = node('div', null, 'tradingview-widget-container'); container.style.height = '100%';
   const script = node('script'); script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'; script.async = true;
@@ -208,15 +229,26 @@ function syncVisibility() {
     (async () => {
       const raw = await store.get(KEY);
       if (!active) return;
-      try { const saved = JSON.parse(raw || 'null'); list = Array.isArray(saved) ? saved : [...DEFAULT]; } catch { list = [...DEFAULT]; }
+      let saved = null;
+      try { saved = JSON.parse(raw || 'null'); } catch { /* bozuk kayıt yok sayılır */ }
+      // TradingView listesi bir kez otomatik aktarılır; sonraki düzenlemeler korunur.
+      const seeded = await store.get(SEED_KEY);
+      if (!active) return;
+      if (!seeded) {
+        list = [...TV_LIST];
+        await store.set(KEY, JSON.stringify(list));
+        await store.set(SEED_KEY, '1');
+      } else {
+        list = Array.isArray(saved) && saved.length ? saved : [...TV_LIST];
+      }
       await loadDrawings();
       if (!active) return;
-      loadedUser = id; selected = list[0] || DEFAULT[0]; render(); openChart();
+      loadedUser = id; selected = list[0] || DEFAULT[0]; renderList(); openChart();
     })();
-  } else { render(); openChart(); }
+  } else { renderList(); openChart(); }
 }
 window.loadTVChart = symbol => { if (typeof symbol === 'string' && symbol.includes(':')) { selected = symbol; if (active) openChart(); } };
-window.renderWatchlist = () => { render(); syncVisibility(); };
+window.renderWatchlist = () => { renderList(); syncVisibility(); };
 new MutationObserver(syncVisibility).observe(page, { attributes: true, attributeFilter: ['class'] });
 const waitForGlobals = () => { if (typeof store === 'undefined' || typeof AUTH === 'undefined') setTimeout(waitForGlobals, 50); else syncVisibility(); };
 waitForGlobals();
