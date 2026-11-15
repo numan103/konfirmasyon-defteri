@@ -45,3 +45,48 @@ export function ema(candles, period = 20) {
   let value = candles[0].close;
   return candles.map(c => { value += (c.close - value) * (2 / (period + 1)); return { time: c.time, value }; });
 }
+export function sma(data, period = 20) {
+  let sum = 0;
+  return data.flatMap((c, i) => {
+    sum += c.close;
+    if (i >= period) sum -= data[i - period].close;
+    return i >= period - 1 ? [{ time: c.time, value: sum / period }] : [];
+  });
+}
+export function rsi(data, period = 14) {
+  if (data.length <= period) return [];
+  let gain = 0, loss = 0;
+  const result = [];
+  for (let i = 1; i < data.length; i++) {
+    const delta = data[i].close - data[i - 1].close;
+    if (i <= period) { gain += Math.max(delta, 0) / period; loss += Math.max(-delta, 0) / period; }
+    else { gain = (gain * (period - 1) + Math.max(delta, 0)) / period; loss = (loss * (period - 1) + Math.max(-delta, 0)) / period; }
+    if (i >= period) result.push({ time: data[i].time, value: gain === 0 && loss === 0 ? 50 : loss === 0 ? 100 : 100 - 100 / (1 + gain / loss) });
+  }
+  return result;
+}
+// Long-only crossover. Signal from a CLOSED bar executes at the NEXT bar open.
+// Open positions are reported separately, never counted as realized profit.
+export function backtestEMA(data, { fast = 9, slow = 21, feePct = 0.1, slippagePct = 0.02 } = {}) {
+  if (![fast, slow].every(Number.isInteger) || fast < 2 || slow <= fast || slow > 200 ||
+      ![feePct, slippagePct].every(n => Number.isFinite(n) && n >= 0 && n <= 5))
+    throw new Error('EMA: 2 ≤ hızlı < yavaş ≤ 200; komisyon/kayma: %0–5 olmalı.');
+  if (data.length < slow + 3) throw new Error('Seçilen EMA dönemleri için yeterli kapalı mum yok.');
+  const f = ema(data, fast), s = ema(data, slow), fee = feePct / 100, slip = slippagePct / 100;
+  let position = null, equity = 1, peak = 1, maxDrawdownPct = 0;
+  const trades = [];
+  for (let i = slow + 1; i < data.length; i++) {
+    const up = f[i - 2].value <= s[i - 2].value && f[i - 1].value > s[i - 1].value;
+    const down = f[i - 2].value >= s[i - 2].value && f[i - 1].value < s[i - 1].value;
+    if (!position && up) position = { time: data[i].time, price: data[i].open * (1 + slip) };
+    else if (position && down) {
+      const exit = data[i].open * (1 - slip);
+      const multiplier = exit * (1 - fee) / (position.price * (1 + fee));
+      trades.push({ entryTime: position.time, exitTime: data[i].time, entry: position.price, exit, returnPct: (multiplier - 1) * 100 });
+      equity *= multiplier; peak = Math.max(peak, equity);
+      maxDrawdownPct = Math.max(maxDrawdownPct, (peak - equity) / peak * 100);
+      position = null;
+    }
+  }
+  return { trades, netReturnPct: (equity - 1) * 100, winRate: trades.length ? trades.filter(t => t.returnPct > 0).length / trades.length * 100 : null, maxDrawdownPct, openPosition: position };
+}
