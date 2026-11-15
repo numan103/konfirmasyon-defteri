@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { parseWatchlist, marketSource, candleRequest, normalizeCandles, ema } from '../assets/terminal-model.mjs';
+test('terminal can be reached from desktop Trader and mobile menus', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const trader = html.slice(html.indexOf('data-i18n="app.trader">⚡ Trader ▾'), html.indexOf('id="tab-alfatrading"'));
+  assert.match(trader, /href="\?page=trading"[^>]*id="tab-trading"[^>]*data-nav/);
+  assert.match(html, /href="\?page=trading"[^>]*id="mnav-trading"[^>]*data-mnav="trading"/);
+});
 test('watchlist preserves exchange and spot/perpetual and rejects markup/URLs', () => {
   const parsed = parseWatchlist('BINANCE:BTCUSDT,BYBIT:BTCUSDT.P\nFX:EURUSD TVC:GOLD BINANCE:BTCUSDT <img> https://tr.tradingview.com/watchlists/84359879/');
   assert.deepEqual(parsed.symbols, ['BINANCE:BTCUSDT','BYBIT:BTCUSDT.P','FX:EURUSD','TVC:GOLD']);
