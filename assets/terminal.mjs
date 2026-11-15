@@ -272,7 +272,7 @@ function openChart() {
   const script = node('script'); script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'; script.async = true;
   script.textContent = JSON.stringify({
     autosize: true, symbol: selected, interval: interval === '1440' ? 'D' : interval, timezone: 'Europe/Istanbul',
-    theme: 'dark', style: '1', locale: 'tr', withdateranges: true, details: true, hotlist: true, calendar: false,
+    theme: 'dark', style: '1', locale: 'tr', withdateranges: true, details: true, hotlist: false, calendar: false,
     studies: ['RSI@tv-basicstudies', 'MASimple@tv-basicstudies'], allow_symbol_change: true, hide_side_toolbar: false
   });
   container.append(widget, script); canvas.append(container);
