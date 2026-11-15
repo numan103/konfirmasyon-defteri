@@ -12458,6 +12458,11 @@ function init() {
   // Sayfa yüklendiğinde ?page= parametresini oku
   const pm = window.location.search.match(/[?&]page=(\w+)/);
   if (pm) setTimeout(function () { showPage(pm[1]); }, 0);
+  // Güvenlik: sayfa yüklendikten sonra da deep link kontrolü yap
+  window.addEventListener('load', function () {
+    const pm2 = window.location.search.match(/[?&]page=(\w+)/);
+    if (pm2 && typeof showPage === 'function') showPage(pm2[1]);
+  });
   // Eğitim kanalı derin bağlantısı: ?page=egitim&ch=<id>&sec=<id>&t=<id>&v=<id> ya da kısa ?go=<code>
   const qs = new URLSearchParams(window.location.search);
   const go = qs.get('go');
