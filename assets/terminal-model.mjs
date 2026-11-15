@@ -36,7 +36,7 @@ export function normalizeCandles(data, exchange) {
   rows.forEach(r => {
     const [time, open, high, low, close] = r.slice(0, 5).map(Number);
     if ([time, open, high, low, close].every(Number.isFinite) && time > 0 && low > 0 && high >= low && high >= Math.max(open, close) && low <= Math.min(open, close))
-      unique.set(time, { time: Math.floor(time / 1000), open, high, low, close });
+      unique.set(time, { time: Math.floor(time / 1000), open, high, low, close, volume: Math.max(0, Number(r[5]) || 0) });
   });
   return [...unique.values()].sort((a, b) => a.time - b.time);
 }
@@ -89,4 +89,22 @@ export function backtestEMA(data, { fast = 9, slow = 21, feePct = 0.1, slippageP
     }
   }
   return { trades, netReturnPct: (equity - 1) * 100, winRate: trades.length ? trades.filter(t => t.returnPct > 0).length / trades.length * 100 : null, maxDrawdownPct, openPosition: position };
+}
+export function parseCandleCSV(text) {
+  const lines=String(text).trim().split(/\r?\n/).filter(Boolean);
+  if(!lines.length)return [];
+  const delimiter=lines[0].includes(';')?';':lines[0].includes('\t')?'\t':',';
+  const cells=line=>line.split(delimiter).map(v=>v.trim().replace(/^"|"$/g,''));
+  const header=cells(lines[0]).map(v=>v.toLowerCase());
+  const hasHeader=header.some(v=>['timestamp','time','date'].includes(v));
+  const indexes=hasHeader?[header.findIndex(v=>['timestamp','time','date'].includes(v)),...['open','high','low','close','volume'].map(k=>header.indexOf(k))]:[0,1,2,3,4,5];
+  if(indexes.slice(0,5).some(i=>i<0))throw new Error('CSV başlığı timestamp,open,high,low,close,volume olmalı.');
+  const rows=lines.slice(hasHeader?1:0).slice(-10000).map(line=>{
+    const c=cells(line), raw=c[indexes[0]], n=Number(raw);
+    const time=raw && Number.isFinite(n)?(n<1e12?n*1000:n):Date.parse(raw);
+    return [time,...indexes.slice(1).map(i=>i>=0?Number(String(c[i]).replace(',','.')):0)];
+  });
+  const result=normalizeCandles(rows,'BINANCE');
+  if(result.length!==rows.length)throw new Error('CSV geçersiz veya tekrarlanan mumlar içeriyor. Tarih ve OHLC değerlerini kontrol et.');
+  return result;
 }

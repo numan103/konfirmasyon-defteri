@@ -1,4 +1,5 @@
 body.terminal-active { overflow: hidden; }
+body.terminal-active .chat-bubble,body.terminal-active .chat-popup,body.terminal-active .theme-toggle,body.terminal-active .rv-fab { display: none !important; }
 #page-trading.terminal-screen:not(.hidden) { position: fixed; inset: 0; z-index: 900; width: 100%; height: 100dvh; margin: 0; padding: 0; background: #0d1117; color: #d6deeb; display: grid; grid-template-rows: 44px minmax(0,1fr) 25px; font: 13px Inter, sans-serif; }
 .term-top { display: flex; align-items: center; gap: 8px; padding: 0 10px; border-bottom: 1px solid #263041; min-width: 0; overflow-x: auto; white-space: nowrap; }
 .term-top button,.term-top select,.term-side button,.term-dialog button { background: #171e29; color: #d6deeb; border: 1px solid #303c50; border-radius: 5px; padding: 6px 9px; cursor: pointer; font: inherit; }
@@ -19,6 +20,16 @@ body.terminal-active { overflow: hidden; }
 .term-search-row button:first-child { flex: 1; text-align: left; }
 .term-indicator-option { display: flex; gap: 12px; padding: 12px 0; align-items: center; }
 .term-indicator-option input { margin: 0 !important; }
+.term-indicator-option[hidden] { display: none; }
+.term-indicator-options { max-height: 45dvh; overflow-y: auto; }
+.term-tools select { width: 32px; color: #becce3; background: #172033; border: 1px solid #35445c; min-height: 32px; }
+.term-tools { overflow-y: auto; }
+.term-context { position: fixed; z-index: 1100; min-width: 210px; padding: 6px; border: 1px solid #44536c; border-radius: 8px; background: #162030; box-shadow: 0 8px 30px #0009; }
+.term-context[hidden],.term-alert[hidden] { display: none; }
+.term-context button { display: block; width: 100%; background: transparent; border: 0; padding: 10px; text-align: left; color: #d6deeb; cursor: pointer; }
+.term-context button:hover { background: #2a3b5b; }
+.term-alert { position: absolute; top: 52px; right: 16px; z-index: 1101; padding: 15px; max-width: min(440px,80vw); background: #294b42; border: 1px solid #50d4a3; border-radius: 8px; }
+.term-alert button { margin-left: 12px; cursor: pointer; }
 .term-test-dialog { max-height: 85dvh; overflow-y: auto; }
 .term-test-field { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0; }
 .term-test-field input { width: 90px; padding: 8px; margin: 0 !important; background: #0d1117; color: #d6deeb; border: 1px solid #35445c; }
