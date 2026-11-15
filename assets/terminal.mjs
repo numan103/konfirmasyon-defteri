@@ -324,7 +324,7 @@ function paintCandles() {
 }
 function currentDrawings() { return drawingBook[selected + '|' + interval] ||= []; }
 async function saveDrawings() {
-  if (!AUTH.user || AUTH.user.id !== userId) return;
+  if (!userId) return;
   await store.set(DRAW_KEY, JSON.stringify(drawingBook));
 }
 function setTool(tool) {
@@ -398,9 +398,9 @@ async function drawingClick(param) {
 }
 
 async function persist() {
-  if (!userId || !AUTH.user || AUTH.user.id !== userId) return;
+  if (!userId) return;
   await store.set(KEY, JSON.stringify(list));
-  status.textContent = 'Liste hesabına kaydedildi; bulut eşitlemesi mevcut hesap sistemi üzerinden yapılır.';
+  status.textContent = AUTH.user ? 'Liste hesabına kaydedildi; bulut eşitlemesi mevcut hesap sistemi üzerinden yapılır.' : 'Liste bu cihaza kaydedildi.';
 }
 function render() {
   entries.replaceChildren();
@@ -498,19 +498,19 @@ async function openChart() {
   }
 }
 async function syncVisibility() {
-  const visible = !page.classList.contains('hidden') && typeof siteCanOpen === 'function' && siteCanOpen('trading') && !!AUTH.user;
+  const visible = !page.classList.contains('hidden');
   document.body.classList.toggle('terminal-active', visible);
   if (!visible) { if (active) dispose(); active = false; return; }
-  const id = AUTH.user.id;
+  const id = (AUTH && AUTH.user) ? AUTH.user.id : 'anonymous';
   if (active && id === userId) return;
   active = true; userId = id;
   sharedListButton.hidden = !siteIsAdmin();
   if (loadedUser !== id) {
     const raw = await store.get(KEY);
-    if (!active || AUTH.user?.id !== id) return;
+    if (!active) return;
     try { const saved = JSON.parse(raw || 'null'); list = Array.isArray(saved) ? parseWatchlist(saved.join(',')).symbols : [...DEFAULT]; } catch { list = [...DEFAULT]; }
     const drawingsRaw = await store.get(DRAW_KEY);
-    if (!active || AUTH.user?.id !== id) return;
+    if (!active) return;
     drawingBook = {};
     try {
       const saved = JSON.parse(drawingsRaw || '{}');
