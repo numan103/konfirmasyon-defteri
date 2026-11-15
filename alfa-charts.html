@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=3">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=5">
 </head>
 <body>
   <main class="workspace">
@@ -23,6 +23,9 @@
         <option value="candles">Mum</option><option value="line">Line / Çizgi</option>
       </select>
       <div class="actions">
+        <button id="drawing-undo" type="button" title="Undo (Ctrl+Z)" disabled>↶</button>
+        <button id="drawing-redo" type="button" title="Redo (Ctrl+Shift+Z)" disabled>↷</button>
+        <button id="drawing-manage" type="button">Çizimler / Ayarlar</button>
         <button id="fit" type="button" title="Yüklü tüm mumları göster">Sığdır</button>
         <button id="live" type="button" title="En son muma dön">Son mum</button>
         <button id="list-toggle" type="button" aria-pressed="true" aria-controls="watchlist">Liste</button>
@@ -30,14 +33,14 @@
       </div>
     </header>
     <div class="workarea">
-      <aside class="drawing-space" aria-label="Çizim araçları alanı">
-        <span class="cross-icon" aria-hidden="true">⌖</span>
-        <span class="drawing-note">Çizim araçları sonraki fazda</span>
+      <aside class="drawing-space" aria-label="Çizim araçları">
+        <nav id="drawing-tools" aria-label="Çizim aracı seç"></nav>
       </aside>
       <section class="chart-panel" aria-label="Fiyat grafiği">
         <div class="legend">
           <strong id="market-title">BTCUSDT · 1H</strong>
           <span id="ohlc">Gerçek piyasa verisi bekleniyor</span>
+          <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
         </div>
         <div id="chart" tabindex="0" aria-label="Binance canlı fiyat grafiği. Sürükle veya tekerlekle gezin; artı/eksi ile yakınlaştır, ok tuşlarıyla kaydır."></div>
         <div id="message" role="status">Binance mum verileri yükleniyor…</div>
@@ -47,15 +50,59 @@
         <p class="watch-caption">Sembol seçerek grafiği aç</p>
         <div id="watch-rows"></div>
         <div class="quote"><span>Seçili sembol · son mum fiyatı</span><strong id="last-price">—</strong><small id="price-time">Henüz veri yok</small></div>
-        <p class="scope">FAZ 1<br>Yalnızca Binance Spot. Forex, vadeli işlemler ve emir iletimi yoktur.</p>
+        <p class="scope">FAZ 2 · ÇİZİM ANALİZİ<br>Yalnızca Binance Spot. Pozisyon çizimleri emir açmaz. Forex, vadeli işlemler ve emir iletimi yoktur.</p>
       </aside>
     </div>
+    <aside id="drawing-manager" aria-label="Çizim yönetimi" hidden>
+      <div class="drawing-manager-head"><strong>Çizimler · <span id="drawing-selected-name"></span></strong><button id="drawing-close" type="button" aria-label="Çizim ayarlarını kapat">✕</button></div>
+      <p id="drawing-empty">Bu sembolde çizim yok. Soldan bir araç seçin.</p>
+      <div id="drawing-objects" aria-label="Çizim listesi"></div>
+      <form id="drawing-settings" hidden>
+        <label>Renk <input id="drawing-color" type="color" data-edit></label>
+        <label>Çizgi kalınlığı <input id="drawing-width" type="number" min="1" max="6" step="1" data-edit></label>
+        <label id="drawing-text-row" hidden>Metin <textarea id="drawing-text" maxlength="500" data-edit></textarea></label>
+        <label id="drawing-font-row" hidden>Metin boyutu <input id="drawing-font-size" type="number" min="8" max="48" step="1" data-edit></label>
+        <fieldset id="drawing-fib-fields" hidden>
+          <legend>Fibonacci</legend>
+          <label>Seviyeler (virgülle ayırın; ondalık: nokta)
+            <textarea id="fib-levels" rows="3" data-edit></textarea>
+          </label>
+          <small>0 = ikinci uç, 1 = ilk uç. Örnek: 0, 0.382, 0.618, 1. Ekleme/silme için listeyi düzenleyin.</small>
+          <label><input id="fib-reverse" type="checkbox" data-edit> Ters çevir</label>
+          <label><input id="fib-prices" type="checkbox" data-edit> Fiyatları göster</label>
+          <label>Şablon adı <input id="fib-template-name" maxlength="60" data-edit></label>
+          <button id="fib-template-save" type="button" data-edit>Mevcut stili şablon kaydet</button>
+          <small>Önce ayarları uygula. Şablonlar bu hesap/sembolde saklanır.</small>
+          <label>Kayıtlı şablon <select id="fib-templates" data-edit></select></label>
+          <button id="fib-template-load" type="button">Şablonu uygula</button>
+        </fieldset>
+        <fieldset id="drawing-position-fields" hidden>
+          <legend>Pozisyon · yalnızca analiz</legend>
+          <label>Entry <input id="position-entry" type="number" min="0" step="any" data-edit></label>
+          <label>Stop Loss <input id="position-stop" type="number" min="0" step="any" data-edit></label>
+          <label>Take Profit <input id="position-target" type="number" min="0" step="any" data-edit></label>
+          <output id="position-stats"></output>
+          <small>Risk yüzdesi fiyat mesafesidir; hesap bakiyesi riski değildir. Varsayılan hedef 2.5R. Stop/TP değişince RR serbest hesaplanır.</small>
+        </fieldset>
+        <button type="submit" data-edit>Ayarları uygula</button>
+        <div class="drawing-buttons">
+          <button id="drawing-hide" type="button">Gizle</button>
+          <button id="drawing-lock" type="button">Kilitle</button>
+          <button id="drawing-copy" type="button">Kopyala</button>
+          <button id="drawing-remove" type="button">Sil</button>
+        </div>
+      </form>
+      <button id="drawing-export" type="button">JSON dışa aktar (yedek)</button>
+      <button id="drawing-cloud-retry" type="button" disabled>Bulut kaydını yeniden dene</button>
+      <a href="/?page=home">Hesap girişi için siteye dön</a>
+    </aside>
     <footer>
       <span id="connection" role="status">Bağlantı hazırlanıyor</span>
+      <span id="drawing-status" role="status">Çizim oturumu hazırlanıyor</span>
       <span id="data-info">Kaynak: Binance · Zaman: UTC · En fazla 1000 mum</span>
       <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Lightweight Charts™ by TradingView</a>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=3"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=5"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
+import { DrawingEngine } from './alfa-drawings.mjs?v=2';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -20,7 +21,7 @@ const candles = chart.addSeries(CandlestickSeries, {
 });
 const line = chart.addSeries(LineSeries, { color: '#8ea7ff', lineWidth: 2, visible: false });
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
-let history = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
+let history = [], seriesBars = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false;
 const observer = new ResizeObserver(([entry]) => {
   chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
@@ -44,6 +45,7 @@ function quote() {
 }
 function setData(data, resetView) {
   history = data;
+  seriesBars = data;
   candles.setData(history);
   line.setData(history.map(c => ({ time: c.time, value: c.close })));
   if (resetView) {
@@ -86,11 +88,12 @@ function updateUI() {
 }
 async function loadMarket() {
   const id = ++generation;
-  closeTransport(); attempts = 0; history = [];
+  closeTransport(); attempts = 0; history = []; seriesBars = [];
   candles.setData([]); line.setData([]);
   $('last-price').textContent = '—'; $('price-time').textContent = 'Henüz veri yok';
   $('ohlc').textContent = 'Gerçek piyasa verisi bekleniyor';
   updateUI();
+  drawings.openMarket(symbol);
   showMessage('Binance mum verileri yükleniyor…');
   connection('Geçmiş mumlar yükleniyor');
   connect(id, true);
@@ -139,6 +142,7 @@ function connect(id, resetView = false) {
       if (!ready) { buffered.push(c); if (buffered.length > 2000) buffered.shift(); return; }
       if (c.time < history.at(-1).time) return;
       candles.update(c); line.update({ time: c.time, value: c.close });
+      if (c.time > seriesBars.at(-1).time) seriesBars = [...seriesBars, c];
       history = mergeCandles(history, [c]);
       quote(); attempts = 0;
       connection(`Canlı · ${new Date(lastReceipt).toLocaleTimeString('tr-TR')} · WebSocket`, 'live');
@@ -183,13 +187,14 @@ $('fullscreen').addEventListener('click', async () => {
   } catch { connection('Tarayıcı tam ekran isteğini reddetti', 'error'); }
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? 'Küçült' : 'Tam ekran'; });
-function dispose() { disposed = true; ++generation; closeTransport(); observer.disconnect(); chart.remove(); }
+const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 window.addEventListener('online', () => { if (!disposed) loadMarket(); });
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
 loadMarket();
