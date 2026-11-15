@@ -220,3 +220,4 @@ window.renderWatchlist = () => { render(); syncVisibility(); };
 new MutationObserver(syncVisibility).observe(page, { attributes: true, attributeFilter: ['class'] });
 syncVisibility();
 setTimeout(syncVisibility, 500);
+setTimeout(syncVisibility, 500);
