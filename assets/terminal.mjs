@@ -219,3 +219,4 @@ window.loadTVChart = symbol => { if (typeof symbol === 'string' && symbol.includ
 window.renderWatchlist = () => { render(); syncVisibility(); };
 new MutationObserver(syncVisibility).observe(page, { attributes: true, attributeFilter: ['class'] });
 syncVisibility();
+setTimeout(syncVisibility, 500);
