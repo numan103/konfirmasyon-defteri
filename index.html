@@ -8868,7 +8868,7 @@
 
     <div class="panel" id="acc-admin-panel" style="display:none;">
       <h2><span>Üyelik onayları</span><span class="n" id="acc-admin-count">—</span></h2>
-      <p class="hint" style="margin:0 0 10px;">UID gönderen üyeler burada listelenir. Onayladığında üye anında premium erişim alır.</p>
+      <p class="hint" style="margin:0 0 10px;">UID gönderen üyeler burada listelenir. Onayladığında üye anında premium erişim alır. Reddederken yazdığın ret sebebi üyenin erişim sayfasında görünür.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
         <button class="btn" id="acc-admin-refresh" type="button">Yenile</button>
         <select id="acc-admin-status" style="padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;min-width:150px;">
@@ -13303,6 +13303,7 @@ const SITE = {
   tier: 'free',           // free | ref | admin
   admin: false,           // sunucunun onayladigi yonetici
   status: 'none',         // none | pending | verified | rejected
+  note: null,             // reddetme sebebi (üyeye gösterilir)
   exchange: null,
   exchange_uid: null,
   verified_at: null,
@@ -13402,6 +13403,7 @@ function siteApplyAccess(j) {
   SITE.admin = !!j.admin || siteIsAdminEmail();
   SITE.tier = SITE.admin ? 'admin' : (j.tier || 'free');
   SITE.status = j.status || 'none';
+  SITE.note = j.note || null;
   SITE.exchange = j.exchange || null;
   SITE.exchange_uid = j.exchange_uid || null;
   SITE.verified_at = j.verified_at || null;
@@ -13421,6 +13423,7 @@ async function loadSiteAccess() {
   if (!token) {
     SITE.admin = false;
     SITE.tier = siteIsAdmin() ? 'admin' : 'free';
+    SITE.note = null;
     SITE.loaded = true;
     return SITE;
   }
@@ -13428,11 +13431,12 @@ async function loadSiteAccess() {
     const r = await fetch('/api/access', { headers: { Authorization: 'Bearer ' + token } });
     const j = await r.json().catch(function () { return null; });
     if (r.ok && j && j.ok) siteApplyAccess(j);
-    else { SITE.admin = false; SITE.tier = siteIsAdmin() ? 'admin' : 'free'; }
+    else { SITE.admin = false; SITE.tier = siteIsAdmin() ? 'admin' : 'free'; SITE.note = null; }
   } catch (e) {
     // Uc erisilemezse kimse "yanlislikla" dogrulanmis sayilmaz.
     SITE.admin = false;
     SITE.tier = siteIsAdmin() ? 'admin' : 'free';
+    SITE.note = null;
   }
   SITE.loaded = true;
   return SITE;
@@ -13639,7 +13643,22 @@ function renderAccessPage() {
   } else if (isAdmin) { badge.textContent = 'Yönetici'; text.textContent = 'Yönetici hesabı: tüm sayfalar açık.'; }
   else if (verified) { badge.textContent = 'Doğrulandı'; text.textContent = 'Referansın doğrulandı. Tüm ürün erişimine ve mentorship davetine sahipsin.'; }
   else if (SITE.status === 'pending') { badge.textContent = 'Onay bekliyor'; text.textContent = 'Başvurun alındı. Yönetici onayladığında erişim açılır.'; }
-  else if (SITE.status === 'rejected') { badge.textContent = 'Doğrulanamadı'; text.textContent = 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup tekrar dene.'; }
+  else if (SITE.status === 'rejected') {
+    // note alanı otomatik UID kontrolünde iç kodlar da taşır; yalnızca
+    // yöneticinin yazdığı gerçek ret sebebini üyeye göster.
+    const internalNotes = { 'revoked': 1, 'manual reject': 1, 'not_found': 1, 'not_configured': 1, 'ok': 1, 'error': 1, 'auth_error': 1, 'rate_limited': 1 };
+    const noteVal = String(SITE.note || '').trim();
+    if (noteVal.toLowerCase() === 'revoked') {
+      badge.textContent = 'Erişim kapalı';
+      text.textContent = 'Erişimin yönetici tarafından geri alındı. Detay için bizimle iletişime geçebilirsin.';
+    } else {
+      const reason = (noteVal && !internalNotes[noteVal.toLowerCase()]) ? noteVal : '';
+      badge.textContent = 'Reddedildi';
+      text.textContent = reason
+        ? 'Başvurun reddedildi. Sebep: ' + reason
+        : 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup tekrar dene.';
+    }
+  }
   else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı borsanı bağlayınca açılır.'; }
 
   const okx = document.getElementById('acc-link-okx');
@@ -13778,24 +13797,33 @@ function renderAdminAccess() {
     const invite = (r.mentor_invite && r.status === 'verified')
       ? '<a class="btn" href="' + accEsc(r.mentor_invite) + '" target="_blank" rel="noopener noreferrer">Davet</a>'
       : '';
+    const noteCodes = { 'revoked': 1, 'manual reject': 1, 'not_found': 1, 'not_configured': 1, 'ok': 1, 'error': 1, 'auth_error': 1, 'rate_limited': 1 };
+    const noteVal = (r.note && !noteCodes[String(r.note).trim().toLowerCase()]) ? r.note : '';
+    const noteInput = r.status === 'verified' ? ''
+      : '<input type="text" data-acc-note-input="' + accEsc(r.user_id) + '" value="' + accEsc(noteVal) + '" maxlength="500" placeholder="Ret sebebi (üyeye gösterilir)" title="Ret sebebi (üyeye gösterilir)" style="width:210px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">';
     const act = invite + (r.status === 'verified'
       ? ('<button class="btn"' + attrs.replace('%OP%', 'revoke') + '>Geri al</button>')
-      : ('<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
+      : (noteInput +
+        '<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
         '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>'));
     const mentorLbl = r.mentor_status === 'joined' ? 'grupta'
       : (r.mentor_status === 'invited' ? 'davetli'
         : (r.mentor_status === 'revoked' ? 'iptal' : '—'));
+    const noteLine = (r.status === 'rejected' && noteVal)
+      ? '<div class="hint" style="margin:2px 0 0;color:var(--amber);">Ret sebebi: ' + accEsc(noteVal) + '</div>'
+      : '';
     return '<div style="border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:var(--card);display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;">' +
       '<div style="min-width:190px;">' +
         '<div style="font-size:13px;font-weight:600;word-break:break-all;">' + accEsc(mail) + '</div>' +
         '<div class="hint" style="margin:2px 0 0;">' + accEsc(ex) + ' · UID ' + accEsc(uidTxt) + ' · ' + st + ' · hacim $' + (r.volume || 0) + ' · mentor: ' + mentorLbl + ' · ' + adminAccessFmt(r.created_at) + '</div>' +
+        noteLine +
       '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' + act + '<input type="number" data-acc-vol-input="' + accEsc(r.user_id) + '" value="' + (r.volume || 0) + '" placeholder="Hacim (USD)" style="width:96px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">' + '<button class="btn solid" data-acc-op="setvolume" data-acc-uid="' + accEsc(r.user_id) + '" data-acc-vol="INPUT">Kaydet</button>' + '<button class="btn" data-acc-op="delvolume" data-acc-uid="' + accEsc(r.user_id) + '">Sil</button>' + '</div>' +
     '</div>';
   }).join('');
 }
 
-async function adminAccessOp(op, userId, email, volume) {
+async function adminAccessOp(op, userId, email, volume, note) {
   if (!userId) return;
   if (op === "setvolume") {
     let vol = (volume === null || volume === undefined || volume === '' || volume === 'INPUT') ? NaN : Number(volume);
@@ -13867,10 +13895,18 @@ async function adminAccessOp(op, userId, email, volume) {
     return;
   }
   if (adminAccessBusy) return;
+  note = String(note || '').trim();
+  if (op === 'reject' && !note) {
+    const msg = document.getElementById('acc-admin-msg');
+    if (msg) msg.textContent = 'Reddetmek için ret sebebi yaz (üye bu sebebi görecek).';
+    const inp = document.querySelector('input[data-acc-note-input="' + userId + '"]');
+    if (inp) inp.focus();
+    return;
+  }
   if (op !== 'approve') {
     const who = email || 'bu üye';
     const q = op === 'reject'
-      ? '"' + who + '" başvurusunu reddetmek istiyor musun?'
+      ? '"' + who + '" başvurusunu reddetmek istiyor musun?\n\nRet sebebi: ' + note
       : '"' + who + '" premium erişimini geri almak istiyor musun?';
     if (!window.confirm(q)) return;
   }
@@ -13878,10 +13914,12 @@ async function adminAccessOp(op, userId, email, volume) {
   const msg = document.getElementById('acc-admin-msg');
   if (msg) msg.textContent = op === 'approve' ? 'Onaylanıyor…' : 'İşleniyor…';
   try {
+    const payload = { op: op, user_id: userId };
+    if (op === 'reject') payload.note = note;
     const r = await siteFetch('/api/access', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ op: op, user_id: userId })
+      body: JSON.stringify(payload)
     });
     const j = await r.json().catch(function () { return null; });
     if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
@@ -13924,9 +13962,11 @@ function bindAccessForm() {
     const mail2 = b.getAttribute("data-acc-mail");
     const volInput = b.parentElement ? b.parentElement.querySelector('input[data-acc-vol-input]') : null;
     const vol2 = (volInput && volInput.value !== '') ? volInput.value : null;
+    const noteInput = b.parentElement ? b.parentElement.querySelector('input[data-acc-note-input]') : null;
+    const note2 = noteInput ? noteInput.value : '';
     if (op2 === "setvolume") { adminAccessOp("setvolume", uid2, mail2, vol2); return; }
     if (op2 === "delvolume") { adminAccessOp("delvolume", uid2, mail2, null); return; }
-    adminAccessOp(op2, uid2, mail2);
+    adminAccessOp(op2, uid2, mail2, null, note2);
   });
 }
 
@@ -28234,7 +28274,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b185';
+const APP_BUILD = 'b186';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
