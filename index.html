@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://zvnjslmptwmnuhftgqsr.supabase.co" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
-<link rel="stylesheet" href="/assets/terminal.css?v=4">
+<link rel="stylesheet" href="/assets/terminal.css?v=6">
 
 <!-- AYNA:BASLA -->
 <link rel="stylesheet" href="/ayna/ayna-core.css?v=10">
@@ -6030,7 +6030,7 @@
     </div>
   </div>
   <div id="page-trading" class="hidden">
-    <script type="module" src="/assets/terminal.mjs?v=4"></script>
+    <script type="module" src="/assets/terminal.mjs?v=6"></script>
     <div class="eg-brand" style="padding:2px 0 0;margin-bottom:0;"><span class="eg-brand-ico">📉</span><span class="eg-brand-name" style="font-size:17px;" data-i18n="pg.trading.t">Trading Terminali</span><span class="eg-brand-sub" data-i18n="pg.trading.s">Canlı grafik burada çalışır (giriş gerekmez). Hesabını/watchlist'ini bağlamak için aşağıdaki butonla TradingView'da giriş yap — aynı tarayıcıda girince widget otomatik tanır.</span><span class="tv-acc-link" style="margin-left:auto;"><a href="https://www.tradingview.com/accounts/signin/" target="_blank" rel="noopener" data-i18n="pg.trading.loginTv">🔑 TradingView'a giriş</a><a href="https://www.tradingview.com/" target="_blank" rel="noopener" class="ghost" data-i18n="pg.trading.openTv">TradingView'da aç</a></span></div>
     <div class="tv-wl">
       <span class="wl-head" lang="en">⭐ Watchlist</span>
@@ -18222,7 +18222,8 @@ function renderPortfoy() {
     { icon: '📈', label: 'Kâr / Zarar', val: (sum.pnlPct !== null ? pfPct(sum.pnlPct) : '—') + ' · ' + pfAmt(sum.pnl), cls: sum.pnl >= 0 ? 'bd-up' : 'bd-down', sub: 'gerçekleşmemiş' + (sum.pnl ? ' · ' + pfAmtTl(sum.pnl) : '') },
     ...(hasTarget ? [{ icon: '🎯', label: '1 Yıl Hedef Kazanç', val: tSign + pfAmt(targetEarnings), cls: tCls, sub: 'hedeflere göre potansiyel · ' + pfAmtTl(targetEarnings) }] : [])
   ];
-  document.getElementById('bd-pf-summary').innerHTML = cards.map(c =>
+  const summaryEl = document.getElementById('bd-pf-summary');
+  if (summaryEl) summaryEl.innerHTML = cards.map(c =>
     '<div class="bd-card ' + c.cls + '">' +
       '<div class="bd-card-top"><span class="bd-chip">' + c.icon + '</span></div>' +
       '<div class="bd-k">' + c.label + '</div>' +
