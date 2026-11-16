@@ -2,6 +2,7 @@ import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } 
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 import { IndicatorManager } from './alfa-indicators.mjs?v=1';
+import { SessionLevelsManager } from './alfa-session-levels.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -55,6 +56,7 @@ function setData(data, resetView) {
   quote();
   if (pendingIndicators) { try { indicators.fromJSON(pendingIndicators); } catch {} pendingIndicators = null; }
   else { try { indicators.updateAll(history); } catch {} }
+  try { sessionLevels.render(); } catch {}
 }
 chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(type === 'candles' ? candles : line);
@@ -151,6 +153,7 @@ function connect(id, resetView = false) {
       history = mergeCandles(history, [c]);
       quote(); attempts = 0;
       try { indicators.updateAll(seriesBars); } catch {}
+      try { sessionLevels.render(); } catch {}
       connection(`Canlı · ${new Date(lastReceipt).toLocaleTimeString('tr-TR')} · WebSocket`, 'live');
     } catch { reconnect('Veri doğrulanamadı'); }
   };
@@ -195,6 +198,7 @@ $('fullscreen').addEventListener('click', async () => {
 document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? 'Küçült' : 'Tam ekran'; });
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
 const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
+const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
 function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -209,5 +213,11 @@ $('indicator-add').addEventListener('change', e => {
   if (!type) return;
   try { indicators.add(type); localStorage.setItem('alfa-ind:v1:' + symbol, JSON.stringify(indicators.toJSON())); } catch {}
   e.target.value = '';
+});
+$('session-levels-toggle').addEventListener('click', () => {
+  const on = $('session-levels-toggle').dataset.on !== '1';
+  $('session-levels-toggle').dataset.on = on ? '1' : '0';
+  $('session-levels-toggle').style.background = on ? '#2962ff' : '#151b26';
+  sessionLevels.setEnabled(on);
 });
 loadMarket();
