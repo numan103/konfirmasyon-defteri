@@ -12,6 +12,10 @@ create table if not exists public.chart_settings (
 alter table public.chart_settings enable row level security;
 revoke all on public.chart_settings from anon;
 grant select, insert, update, delete on public.chart_settings to authenticated;
+drop policy if exists chart_settings_select on public.chart_settings;
+drop policy if exists chart_settings_insert on public.chart_settings;
+drop policy if exists chart_settings_update on public.chart_settings;
+drop policy if exists chart_settings_delete on public.chart_settings;
 create policy chart_settings_select on public.chart_settings for select to authenticated using (auth.uid() = user_id);
 create policy chart_settings_insert on public.chart_settings for insert to authenticated with check (auth.uid() = user_id);
 create policy chart_settings_update on public.chart_settings for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
