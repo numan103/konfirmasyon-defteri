@@ -33,6 +33,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
+<script src="/assets/portfolio-versions.js?v=1"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -14441,7 +14442,7 @@ function showPage(name, skipAnim) {
   if (name === 'indicators') renderIndicators();
   if (name === 'designer') renderDesigner();
   if (name === 'alfatrading') renderAlfaTrading();
-  if (name === 'portfoy') { ap2CloudReady = false; ap2LocalPreview = false; ap2ReadOnlyLoaded = false; ap2ReadOnly = false; renderAlfaPortfoy2(); }
+  if (name === 'portfoy') { if (!ap2Dirty && !ap2PendingWrites && !ap2SyncBlocked) { ap2CloudReady = false; ap2LocalPreview = false; ap2ReadOnlyLoaded = false; ap2ReadOnly = false; } renderAlfaPortfoy2(); }
   if (name === 'calendar') { if (window.loadCal) loadCal(); }
   if (name === 'basvuru') { renderSfx(); }
   if (name === 'chat-admin') { renderAdminChat(); startAdminChatPoll(); }
@@ -18417,6 +18418,63 @@ let ap2WriteQueue = Promise.resolve();
 let ap2SaveSeq = 0;
 let ap2RecoveryCandidate = null;
 let ap2Restoring = false;
+let ap2SyncBlocked = false;
+let ap2PendingWrites = 0;
+let ap2Dirty = false;
+if (typeof window.addEventListener === 'function') window.addEventListener('beforeunload', function(event) {
+  if (!ap2Dirty && !ap2PendingWrites) return;
+  event.preventDefault(); event.returnValue = '';
+});
+function ap2CanEdit() {
+  if (!siteIsAdmin() || !ap2CloudReady || ap2LocalPreview || ap2SyncBlocked || ap2Hydrating || ap2PendingWrites || ap2Restoring) {
+    if (typeof stratToast === 'function') stratToast('Portföy yükleniyor/kaydediliyor veya eşitleme durdu. İşlem yapılmadı.');
+    return false;
+  }
+  return true;
+}
+function ap2BlockSync(message) {
+  ap2SyncBlocked = true; ap2CloudReady = false; ap2LocalPreview = true; ap2ReadOnly = true;
+  ap2PreserveRecovery(ap2Data);
+  ap2Status(message + ' Yerel kopya korundu; yeni düzenlemeler durduruldu.');
+  ap2SafetyControls();
+}
+async function ap2ReloadServerSafely() {
+  if (ap2PendingWrites || ap2Restoring) return;
+  if (ap2Dirty && !confirm('Kaydedilmemiş yerel değişiklikler var. Önce JSON yedeğini indirmen önerilir. Yerel kurtarma kopyasını koruyup sunucudaki sürümü yüklemek istiyor musun?')) return;
+  if (ap2HasActivity(ap2Data) && !ap2PreserveRecovery(ap2Data)) {
+    ap2Status('Yerel yedek alınamadı. Önce JSON indir; otomatik üzerine yazılmadı.'); return;
+  }
+  ap2SyncBlocked = false; ap2Dirty = false; ap2LocalPreview = false; ap2CloudReady = false;
+  ap2RecoveryCandidate = null; ap2CloudData = null;
+  await ap2Hydrate(); renderAlfaPortfoy2();
+}
+function ap2SafetyControls() {
+  const page = document.getElementById('page-portfoy');
+  if (!page || !siteIsAdmin()) return;
+  let panel = document.getElementById('ap2-safety-controls');
+  if (!panel) {
+    panel = document.createElement('div'); panel.id = 'ap2-safety-controls';
+    panel.style.cssText = 'padding:12px;border:1px solid #52647d;border-radius:10px;margin:10px 0;line-height:1.7';
+    const status = document.createElement('p'); status.id = 'ap2-durable-status'; status.setAttribute('role','status');
+    const exportButton = document.createElement('button'); exportButton.textContent = 'JSON yedeğini indir';
+    exportButton.onclick = () => window.AlfaPortfolioRecovery.download(Object.assign({}, ap2Data, { ideas: ap2Ideas }), 'bu-cihaz');
+    const history = document.createElement('button'); history.textContent = 'Sunucu sürüm geçmişi'; history.style.margin = '8px';
+    history.onclick = () => window.AlfaPortfolioVersions.open({
+      fetch: siteFetch, revision: () => ap2Revision,
+      canRestore: () => ap2CanEdit() && !ap2Dirty,
+      onWriteFailure: ap2BlockSync, onRestored: async () => { ap2Dirty = false; await ap2ReloadServerSafely(); }
+    });
+    const reload = document.createElement('button'); reload.id = 'ap2-safe-reload'; reload.textContent = 'Sunucudaki sürümü yükle';
+    reload.onclick = ap2ReloadServerSafely;
+    panel.append(status,exportButton,history,reload);
+    const header = page.querySelector('.ap2-hd'); if (header) header.insertAdjacentElement('afterend',panel);
+  }
+  const status = document.getElementById('ap2-durable-status');
+  status.textContent = ap2SyncBlocked ? 'Kayıt doğrulanamadı. Bu cihazdaki kopya korunuyor; düzenleme kilitli. JSON indir veya sunucu sürümünü kontrol et.' :
+    ap2PendingWrites ? 'Sunucuya kaydediliyor… Başarı onayı bekleniyor.' :
+    ap2CloudReady ? 'Sunucu sürümü yüklü. Her değişiklik atomik olarak yedeklenir; son 100 sürüm saklanır.' : 'Sunucu kaydı yükleniyor; düzenleme kilitli.';
+  document.getElementById('ap2-safe-reload').disabled = !!ap2PendingWrites || ap2Restoring;
+}
 function ap2HasActivity(data) {
   return !!data && Array.isArray(data.positions) && (data.positions.length > 0 || (Array.isArray(data.sells) && data.sells.length > 0));
 }
@@ -18489,7 +18547,8 @@ async function ap2RestoreRecovery() {
     ap2Data = JSON.parse(JSON.stringify(ap2RecoveryCandidate.data));
     if (!Array.isArray(ap2Data.sells)) ap2Data.sells = [];
     ap2CloudReady = true;
-    await ap2SyncCloud(); // Uses the exact loaded revision; never force-overwrites another device.
+    ap2SyncBlocked = false;
+    await ap2SyncCloud(); // Guarded normal save; cannot silently drop server records.
     ap2RecoveryCandidate = null; ap2LocalPreview = false; ap2ReadOnly = false;
     try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch (e) {}
     ap2Status('Kurtarma kopyası sunucuya kaydedildi.');
@@ -18510,6 +18569,7 @@ function ap2Status(text) {
   if (title) title.textContent = siteIsAdmin() ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
 }
 async function ap2Hydrate() {
+  if (ap2SyncBlocked || ap2PendingWrites || ap2Dirty) return;
   if (ap2Hydrating) return;
   ap2Hydrating = true;
   ap2Status('Güncel portföy sunucudan yükleniyor…');
@@ -18550,6 +18610,7 @@ async function ap2Hydrate() {
     ap2LocalPreview = false;
     ap2ReadOnlyLoaded = true;
     ap2ReadOnly = !siteIsAdmin();
+    ap2Dirty = false;
     ap2Status(siteIsAdmin() ? 'Pozisyonların, emirlerin ve satış geçmişin.' : 'Yöneticinin paylaştığı portföy · Salt okunur');
     renderAlfaPortfoy2();
     ap2LoadPrices();
@@ -18567,7 +18628,19 @@ async function ap2Hydrate() {
 let ap2Filter = 'all';
 let ap2EditId = null;
 let ap2SellId = null;
-function ap2Load() { try { const raw = localStorage.getItem(AP2_KEY); if (raw) { ap2Data = JSON.parse(raw); if (ap2Data.startBalance == null) ap2Data.startBalance = 1000; (ap2Data.positions || []).forEach(p => { p.side = p.side === 'SHORT' ? 'SHORT' : 'LONG'; }); if (ap2Data.cash == null) { ap2Data.cash = ap2Data.startBalance; (ap2Data.positions || []).forEach(p => { const c = ap2Calc(p); ap2Data.cash -= c.totalCost; }); } if (!Array.isArray(ap2Data.sells)) ap2Data.sells = []; ap2RecalcCash(); ap2RebuildHistory(); if (typeof ap2MergeDuplicates === 'function' && ap2MergeDuplicates()) { try { ap2Save(); } catch (e) {} } } } catch(e) {} }
+function ap2Load() {
+  try {
+    const raw = localStorage.getItem(AP2_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || !Array.isArray(data.positions)) return;
+    ap2PreserveRecovery(data);
+    // Loading a browser cache must never publish, merge, or rebuild financial history.
+    ap2Data = data;
+    if (ap2Data.startBalance == null) ap2Data.startBalance = 1000;
+    if (!Array.isArray(ap2Data.sells)) ap2Data.sells = [];
+  } catch(e) {}
+}
 function ap2MergeDuplicates() {
   if (!ap2Data || !Array.isArray(ap2Data.positions)) return false;
   const toRemove = new Set();
@@ -18677,11 +18750,11 @@ function ap2RecalcCash() {
   ap2Data.cash = startBalance - activeBuyCost + totalProfit;
   ap2Save();
 }
-function ap2Save() { if (!siteIsAdmin()) return; ap2SaveSeq++; if (!ap2CloudReady) return; ap2Data.lastUpdate = new Date().toISOString(); try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} ap2SyncCloud().catch(function() {}); }
+function ap2Save(options) { if (!siteIsAdmin() || !ap2CloudReady || ap2SyncBlocked) return; ap2SaveSeq++; ap2Dirty = true; ap2Data.lastUpdate = new Date().toISOString(); try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {} ap2SyncCloud(options).catch(function() {}); }
 const AP2_IDEAS_KEY = 'alfa-fund-ideas-v1';
 let ap2Ideas = [];
 function ap2IdeasLoad() { if (!siteIsAdmin() || ap2CloudReady) return; try { const raw = localStorage.getItem(AP2_IDEAS_KEY); if (raw) ap2Ideas = JSON.parse(raw); } catch(e) {} if (!Array.isArray(ap2Ideas)) ap2Ideas = []; }
-function ap2IdeasSave() { if (!siteIsAdmin() || !ap2CloudReady) return; try { localStorage.setItem(AP2_IDEAS_KEY, JSON.stringify(ap2Ideas)); } catch(e) {} ap2SyncCloud().catch(function() {}); }
+function ap2IdeasSave() { if (!siteIsAdmin() || !ap2CloudReady || ap2SyncBlocked) return; ap2SaveSeq++; ap2Dirty = true; try { localStorage.setItem(AP2_IDEAS_KEY, JSON.stringify(ap2Ideas)); } catch(e) {} ap2SyncCloud().catch(function() {}); }
 function ap2IdeaDate(d) { if (!d) return '—'; const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1].slice(2) : String(d); }
 function ap2RenderIdeas() {
   ap2IdeasLoad();
@@ -18715,7 +18788,8 @@ function ap2IdeaForm(show) {
     '<div class="ap2-idea-form-actions"><button type="button" class="btn solid" id="ap2-idea-save">Kaydet</button><button type="button" class="btn" id="ap2-idea-cancel">Vazgeç</button></div>';
   const listEl = document.getElementById('ap2-idea-list');
   if (listEl) listEl.before(form);
-  document.getElementById('ap2-idea-save').addEventListener('click', function() {
+  document.getElementById('ap2-idea-save').onclick = function() {
+    if (!ap2CanEdit()) return;
     const sym = (document.getElementById('ap2-idea-sym').value || '').trim();
     const note = (document.getElementById('ap2-idea-note').value || '').trim();
     if (!note) { document.getElementById('ap2-idea-note').focus(); return; }
@@ -18724,10 +18798,11 @@ function ap2IdeaForm(show) {
     ap2Ideas.push(idea);
     ap2IdeasSave(); ap2RenderIdeas(); ap2IdeaForm(false);
     ap2IdeaNotify(idea);
-  });
+  };
   document.getElementById('ap2-idea-cancel').addEventListener('click', function() { ap2IdeaForm(false); });
 }
 function ap2IdeaDelete(id) {
+  if (!ap2CanEdit()) return;
   ap2Ideas = ap2Ideas.filter(function(i) { return i.id !== id; });
   ap2IdeasSave(); ap2RenderIdeas();
 }
@@ -18741,6 +18816,7 @@ function ap2IdeaEdit(id) {
     const ti = document.getElementById('ap2-idea-tags'); if (ti) ti.value = (idea.tags || []).join(', ');
     const sv = document.getElementById('ap2-idea-save');
     if (sv) sv.onclick = function() {
+      if (!ap2CanEdit()) return;
       idea.symbol = (document.getElementById('ap2-idea-sym').value || '').trim();
       idea.note = (document.getElementById('ap2-idea-note').value || '').trim();
       idea.tags = (document.getElementById('ap2-idea-tags').value || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
@@ -18776,25 +18852,30 @@ function ap2CloudSummary() {
     history: hist.slice(-90)
   };
 }
-function ap2SyncCloud() {
-  if (!siteIsAdmin() || !ap2CloudReady) return Promise.resolve();
+function ap2SyncCloud(options) {
+  if (!siteIsAdmin() || !ap2CloudReady || ap2SyncBlocked) return Promise.reject(new Error('Portföy eşitlemesi hazır değil.'));
+  options = options || {};
+  var saveSeq = ap2SaveSeq;
   var data = JSON.parse(JSON.stringify(Object.assign(ap2CloudSummary(), {
     v: 2, positions: ap2Data.positions || [], sells: ap2Data.sells || [],
     startBalance: ap2Data.startBalance, cash: ap2Data.cash, ideas: ap2Ideas,
     lastUpdate: ap2Data.lastUpdate || new Date().toISOString()
   })));
+  ap2PendingWrites++;
+  ap2SafetyControls();
   var job = ap2WriteQueue.then(async function() {
     if (!ap2CloudReady) throw new Error('Portföy önce yeniden yüklenmeli.');
     var r = await siteFetch('/api/edu-shared?kind=portfolio', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ revision: ap2Revision, data: data })
+      body: JSON.stringify({ revision: ap2Revision, data: data, action: options.action || 'save' })
     });
     if (!r.ok) {
-      ap2CloudReady = false;
-      ap2Status(r.status === 409 ? 'Başka cihazda portföy değişti. Yerel kopya korundu; yeniden yükle.' : 'Kayıt sunucuya ulaşmadı. Yerel kopya korundu; yeniden yükle.');
+      ap2BlockSync(r.status === 409 ? 'Başka cihazda portföy değişti.' :
+        r.status === 422 ? 'Veri kaybı riski nedeniyle sunucu kaydı reddetti.' : 'Sunucu kaydı doğrulanamadı.');
       throw new Error('Portföy kaydedilemedi (' + r.status + ').');
     }
     var result = await r.json();
+    if (!result.revision || !result.backedUp || !result.versionId) throw new Error('Yedekli sunucu kaydı doğrulanamadı.');
     ap2Revision = result.revision; ap2CloudData = data;
     // Sunucu nakdi pozisyonlardan yeniden hesaplar; fark varsa yerel görünümü düzelt.
     if (typeof result.cash === 'number' && Math.abs(result.cash - (Number(ap2Data.cash) || 0)) > 0.005) {
@@ -18803,8 +18884,12 @@ function ap2SyncCloud() {
       try { localStorage.setItem(AP2_KEY, JSON.stringify(ap2Data)); } catch(e) {}
       renderAlfaPortfoy2();
     }
-    ap2Status('Pozisyonların, emirlerin ve satış geçmişin.');
-  });
+    if (saveSeq === ap2SaveSeq) ap2Dirty = false;
+    ap2Status('Sunucuya kaydedildi · sürüm #' + result.versionId + ' · geri alınabilir.');
+  }).catch(function(error) {
+    if (!ap2SyncBlocked) ap2BlockSync('Bağlantı veya kayıt hatası: işlem sonucu doğrulanamadı.');
+    throw error;
+  }).finally(function() { ap2PendingWrites--; ap2SafetyControls(); });
   ap2WriteQueue = job.catch(function() {});
   return job;
 }
@@ -18974,6 +19059,7 @@ function ap2ShowHistConfirm() {
   dlg.classList.remove('hidden');
 }
 function ap2CommitPosition(pos, total, qty, histRec) {
+  if (!ap2CanEdit()) return;
   if (histRec) pos.hist = histRec;
   ap2HistPend = null;
   ap2HistOverride = false;
@@ -19136,6 +19222,7 @@ function ap2FillsCheck() {
   return filled;
 }
 function ap2FillPos(id) {
+  if (!ap2CanEdit()) return;
   const p = (ap2Data.positions || []).find(x => x.id === id);
   if (!p || !ap2IsPending(p)) return;
   const total = (Number(p.qty) || 0) * (Number(p.cost) || 0);
@@ -19361,6 +19448,7 @@ function ap2GetFormType() {
   return on ? on.getAttribute('data-ap2t') : 'kripto';
 }
 function ap2SaveForm() {
+  if (!ap2CanEdit()) return;
   const sym = document.getElementById('ap2-f-sym').value.trim();
   if (!sym) { document.getElementById('ap2-f-err').textContent = 'Sembol gerekli'; return; }
   const cost = parseFloat(document.getElementById('ap2-f-cost').value) || 0;
@@ -19407,6 +19495,7 @@ function ap2SaveForm() {
   ap2CommitPosition(pos, total, qty, overridden ? { d: pos.date, p: pos.cost, ok: true } : null);
 }
 function ap2Delete(id) {
+  if (!ap2CanEdit()) return;
   if (!confirm('Bu enstrümanı silmek istediğine emin misin?')) return;
   const pos = ap2Data.positions.find(x => x.id === id);
   if (pos) {
@@ -19417,7 +19506,7 @@ function ap2Delete(id) {
     }
   }
   ap2Data.positions = ap2Data.positions.filter(x => x.id !== id);
-  ap2Save();
+  ap2Save({ action: 'delete_position' });
   renderAlfaPortfoy2();
 }
 function ap2OpenSell(id) {
@@ -19438,6 +19527,7 @@ function ap2OpenSell(id) {
   document.getElementById('ap2-sell-qty').focus();
 }
 function ap2SellConfirm() {
+  if (!ap2CanEdit()) return;
   const pos = ap2Data.positions.find(x => x.id === ap2SellId);
   if (!pos) return;
   const sellQty = parseFloat(document.getElementById('ap2-sell-qty').value);
@@ -19894,25 +19984,25 @@ function ap2RenderMonthly() {
 
   body.innerHTML = barChart + netHeader + grid;
 }
-function ap2ResetAll() {
-  if (!siteIsAdmin()) return;
-  if (!confirm('Tüm portföy verisi (pozisyonlar, satışlar, geçmiş) silinecek. Emin misin?')) return;
+async function ap2ResetAll() {
+  if (!ap2CanEdit()) return;
+  if (prompt('Portföy sıfırlanmadan önce mevcut sürüm sunucuda korunacak. Onaylamak için PORTFOYU SIFIRLA yaz:') !== 'PORTFOYU SIFIRLA') return;
+  if (ap2HasActivity(ap2Data) && !ap2PreserveRecovery(ap2Data)) { ap2Status('Önce JSON yedeğini indir. Yerel yedek alınamadı.'); return; }
+  ap2Restoring = true;
   try {
-    ap2Data = { positions: [], startBalance: 1000, cash: 1000, sells: [] };
-    ap2Ideas = [];
-    try { localStorage.removeItem('defter-portfoy-v1'); } catch(e) {}
-    try { localStorage.removeItem('defter-portfoy-sim-v3'); } catch(e) {}
-    try { localStorage.removeItem('alfa-fund-ideas-v1'); } catch(e) {}
-    try { localStorage.removeItem('defter-portfoy-sim-v2'); } catch(e) {}
-    ap2Save();
-    ap2SyncCloud();
-    renderAlfaPortfoy2();
-    alert('Portföy verisi sıfırlandı.');
-  } catch (e) { alert('Hata: ' + (e && e.message ? e.message : 'bilinmeyen')); }
+    const r = await siteFetch('/api/edu-shared?kind=portfolio', { method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ action:'reset', confirmation:'PORTFOYU SIFIRLA', revision:ap2Revision }) });
+    const result = await r.json();
+    if (!r.ok || !result.backedUp || !result.versionId) throw new Error('Sıfırlama onaylanmadı; mevcut kopya korundu.');
+    ap2Restoring = false; ap2Dirty = false; await ap2ReloadServerSafely();
+    alert('Portföy sıfırlandı. Önceki kayıt Sunucu sürüm geçmişi bölümünden geri alınabilir.');
+  } catch (e) { ap2BlockSync(e.message); }
+  finally { ap2Restoring = false; ap2SafetyControls(); }
 }
 function renderAlfaPortfoy2() {
   if (!ap2IsMember()) { ap2ShowGate(); return; }
   ap2RenderRecoveryNotice();
+  ap2SafetyControls();
   document.querySelector('#page-portfoy .ap2-hd-actions').style.display = '';
   if (!ap2CloudReady && !ap2LocalPreview) {
     var layout = document.querySelector('#page-portfoy .ap2-layout');
@@ -28433,7 +28523,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b190';
+const APP_BUILD = 'b192-portfolio-safe1';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {

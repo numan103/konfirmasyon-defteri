@@ -197,14 +197,15 @@ test('portfolio writes authenticate admin and compare the exact loaded revision'
   global.fetch = async (url, options) => {
     calls.push({ url, options });
     if (url.endsWith('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin', email: 'ahmetnuman20@gmail.com' }) };
-    return { ok: true, json: async () => [] }; // CAS didn't match: stale device
+    return { ok: false, json: async () => ({ code: 'P0001', message: 'portfolio_conflict' }) };
   };
   try {
     const res = response();
-    await portfolio({ method: 'POST', headers: { authorization: 'Bearer session' }, body: { revision: '2026-11-02T00:00:00Z', data: { v: 2, positions: [], sells: [] } } }, res);
+    await portfolio({ method: 'POST', headers: { authorization: 'Bearer session' }, body: { revision: '2026-11-02T00:00:00Z', data: { v: 2, positions: [], sells: [], ideas: [], history: [], cash: 1000, startBalance: 1000 } } }, res);
     assert.equal(res.code, 409);
-    assert.match(calls[1].url, /updated_at=eq\.2026-11-02T00%3A00%3A00Z/);
-    assert.equal(calls[1].options.method, 'PATCH');
+    assert.match(calls[1].url, /rpc\/portfolio_commit/);
+    assert.equal(calls[1].options.method, 'POST');
+    assert.equal(JSON.parse(calls[1].options.body).p_revision, '2026-11-02T00:00:00Z');
   } finally {
     global.fetch = original;
     if (oldKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE; else process.env.SUPABASE_SERVICE_ROLE = oldKey;
@@ -262,17 +263,21 @@ test('stored cash drift is corrected on write', async () => {
   global.fetch = async (url, options) => {
     if (url.endsWith('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin', email: process.env.ADMIN_EMAIL || 'ahmetnuman20@gmail.com' }) };
     if (url.includes('/site_access?')) return { ok: true, json: async () => [{ status: 'verified' }] };
-    if (url.includes('updated_at=eq.')) return { ok: true, json: async () => [{ updated_at: 'new-revision' }] };
+    if (url.includes('/rpc/portfolio_commit')) {
+      stored = JSON.parse(options.body).p_data;
+      return { ok: true, json: async () => ({ revision: 'new-revision', versionId: 2, backedUp: true, cash: stored.cash }) };
+    }
     if (url.includes('/rest/v1/edu_shared')) return { ok: true, json: async () => [{ data: null, updated_at: 'rev' }] };
     return { ok: true, json: async () => ({}) };
   };
   try {
-    const data = { v: 2, startBalance: 1000, positions: [{ qty: 1, cost: 400 }], sells: [], cash: 1000, lastUpdate: '2026-11-12T00:00:00.000Z' };
+    const data = { v: 2, startBalance: 1000, positions: [{ id: 'position-1', symbol: 'ETH', qty: 1, cost: 400 }], sells: [], ideas: [], history: [], cash: 1000, lastUpdate: '2026-11-12T00:00:00.000Z' };
     const write = response();
-    await portfolio({ method: 'POST', headers: { authorization: 'Bearer session' }, body: JSON.stringify({ revision: 'rev', data }), query: {} }, write);
+    await portfolio({ method: 'POST', headers: { authorization: 'Bearer session' }, body: JSON.stringify({ revision: '2026-11-12T00:00:00Z', data }), query: {} }, write);
     assert.equal(write.code, 200);
     assert.equal(write.body.cash, 600);
     assert.equal(write.body.cashAdjusted, true);
+    assert.equal(stored.cash, 600);
   } finally {
     global.fetch = original;
     if (oldKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE; else process.env.SUPABASE_SERVICE_ROLE = oldKey;
