@@ -3,6 +3,7 @@ import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKlin
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 import { IndicatorManager } from './alfa-indicators.mjs?v=1';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=1';
+import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -57,6 +58,7 @@ function setData(data, resetView) {
   if (pendingIndicators) { try { indicators.fromJSON(pendingIndicators); } catch {} pendingIndicators = null; }
   else { try { indicators.updateAll(history); } catch {} }
   try { sessionLevels.render(); } catch {}
+  try { marketStructure.render(); } catch {}
 }
 chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(type === 'candles' ? candles : line);
@@ -154,6 +156,7 @@ function connect(id, resetView = false) {
       quote(); attempts = 0;
       try { indicators.updateAll(seriesBars); } catch {}
       try { sessionLevels.render(); } catch {}
+      try { marketStructure.render(); } catch {}
       connection(`Canlı · ${new Date(lastReceipt).toLocaleTimeString('tr-TR')} · WebSocket`, 'live');
     } catch { reconnect('Veri doğrulanamadı'); }
   };
@@ -199,6 +202,7 @@ document.addEventListener('fullscreenchange', () => { $('fullscreen').textConten
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
 const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
+const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -219,5 +223,11 @@ $('session-levels-toggle').addEventListener('click', () => {
   $('session-levels-toggle').dataset.on = on ? '1' : '0';
   $('session-levels-toggle').style.background = on ? '#2962ff' : '#151b26';
   sessionLevels.setEnabled(on);
+});
+$('market-structure-toggle').addEventListener('click', () => {
+  const on = $('market-structure-toggle').dataset.on !== '1';
+  $('market-structure-toggle').dataset.on = on ? '1' : '0';
+  $('market-structure-toggle').style.background = on ? '#2962ff' : '#151b26';
+  marketStructure.setEnabled(on);
 });
 loadMarket();
