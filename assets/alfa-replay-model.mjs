@@ -59,6 +59,38 @@ export class ReplayEngine {
     const b = this.#full[this.index - 1];
     return b ? candleCloseTime(b.time, this.timeframe) : null;
   }
+  get lastTime() { return this.#full.at(-1)?.time ?? null; }
+  get exhausted() { return this.index >= this.#full.length; }
+  append(bars) {
+    const incoming = new Map();
+    for(const b of bars) {
+      if(![b.time,b.open,b.high,b.low,b.close].every(Number.isFinite) ||
+        b.low>Math.min(b.open,b.close) || b.high<Math.max(b.open,b.close)) throw new Error('Invalid replay candle');
+      if(b.time>this.lastTime && candleCloseTime(b.time,this.timeframe)<=this.now) incoming.set(b.time,{...b});
+    }
+    const next=[...incoming.values()].sort((a,b)=>a.time-b.time);
+    let previous=this.lastTime;
+    for(const b of next) {
+      if(b.time!==candleCloseTime(previous,this.timeframe))throw new Error('Missing replay candle');
+      previous=b.time;
+    }
+    if(this.#full.length+next.length>50000)throw new Error('Replay session limit: 50000 candles');
+    this.#full.push(...next);
+    return next.length;
+  }
+  restore(bars, session) {
+    if(session.version!==1 || session.symbol!==this.symbol || session.timeframe!==this.timeframe ||
+      session.exchange!=='Binance' || session.marketType!=='spot')throw new Error('Invalid replay session');
+    this.load(bars,session.startTime);
+    if(this.#full[this.startIndex-1]?.time!==session.startTime ||
+      this.#full[0]?.time!==session.dataStart)throw new Error('Saved replay history unavailable');
+    const index=this.#full.findIndex(b=>b.time===session.currentTime);
+    if(index<0)throw new Error('Saved replay candle unavailable');
+    // Validate every candle in the saved prefix; never restore across holes.
+    this.index=1;
+    this.step(index);
+    return this.snapshot();
+  }
   step(delta = 1) {
     if (!Number.isInteger(delta)) throw new Error('Integer step required');
     const target = clampIndex(this.index + delta, this.#full.length);
@@ -78,7 +110,7 @@ export class ReplayEngine {
   }
   serialize() {
     return { version:1, symbol:this.symbol, exchange:'Binance', marketType:'spot',
-      timeframe:this.timeframe, startTime:this.#full[this.startIndex-1]?.time,
+      timeframe:this.timeframe, dataStart:this.#full[0]?.time, startTime:this.#full[this.startIndex-1]?.time,
       currentTime:this.#full[this.index-1]?.time };
   }
 }
