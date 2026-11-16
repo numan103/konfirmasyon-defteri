@@ -44,18 +44,25 @@ export function mergeCandles(history, updates, limit = 1000) {
   for (const c of updates) merged.set(c.time, c);
   return [...merged.values()].sort((a, b) => a.time - b.time).slice(-limit);
 }
-export async function fetchHistory(symbol, interval, signal, fetcher = fetch) {
+export async function fetchHistory(symbol, interval, signal, fetcher = fetch, endTime = null, startTime = null) {
+  validateMarket(symbol, interval);
   let lastError;
   for (const origin of REST_ORIGINS) {
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     try {
-      const response = await fetcher(restURL(origin, symbol, interval), { signal, cache: 'no-store' });
-      if (!response.ok) throw new Error(`Binance HTTP ${response.status}`);
-      return parseHistory(await response.json());
+      let url = restURL(origin, symbol, interval);
+      if (startTime) url += '&startTime=' + startTime;
+      if (endTime) url += '&endTime=' + endTime;
+      const response = await fetcher(url, { signal, cache: 'no-store' });
+      if (!response.ok) throw new Error('Binance HTTP ' + response.status);
+      const rows = await response.json();
+      if (!Array.isArray(rows)) throw new Error('invalid kline response');
+      if (!rows.length) return [];
+      return parseHistory(rows);
     } catch (error) {
       if (signal?.aborted) throw error;
       lastError = error;
     }
   }
-  throw lastError;
+  throw lastError || new Error('history unavailable');
 }

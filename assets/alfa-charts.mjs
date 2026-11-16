@@ -28,11 +28,14 @@ const candles = chart.addSeries(CandlestickSeries, {
 const line = chart.addSeries(LineSeries, { color: '#8ea7ff', lineWidth: 2, visible: false });
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
 let history = [], seriesBars = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
-let lastReceipt = 0, disposed = false, pendingIndicators = null;
+let lastReceipt = 0, disposed = false, pendingIndicators = null, loadingOlder = false;
 const observer = new ResizeObserver(([entry]) => {
   chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
 });
 observer.observe(host);
+chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+  if (range && range.from < 40 && !loadingOlder && history.length >= 900) loadOlderHistory();
+});
 
 function connection(text, state = 'waiting') {
   $('connection').textContent = text; $('connection').dataset.state = state;
@@ -41,6 +44,42 @@ function showMessage(text) { $('message').textContent = text; $('message').hidde
 function showCandle(c) {
   if (!c) return;
   $('ohlc').textContent = `O ${priceFormat.format(c.open)}  H ${priceFormat.format(c.high)}  L ${priceFormat.format(c.low)}  C ${priceFormat.format(c.close)}`;
+}
+async function loadOlderHistory() {
+  if (loadingOlder || disposed || history.length === 0) return;
+  loadingOlder = true;
+  const firstTime = history[0].time;
+  const controller = new AbortController();
+  try {
+    const older = await fetchHistory(symbol, interval, controller.signal, fetch, firstTime * 1000 - 1);
+    if (!older.length) { loadingOlder = false; return; }
+    const seen = new Set(history.map(c => c.time));
+    const newBars = older.filter(c => !seen.has(c.time));
+    if (!newBars.length) { loadingOlder = false; return; }
+    const before = history.length;
+    const merged = [...newBars, ...history];
+    const deduped = [];
+    const seen2 = new Set();
+    for (const c of merged) { if (seen2.has(c.time)) continue; seen2.add(c.time); deduped.push(c); }
+    deduped.sort((a, b) => a.time - b.time);
+    const added = deduped.length - before;
+    const range = chart.timeScale().getVisibleLogicalRange();
+    history = deduped;
+    seriesBars = deduped;
+    candles.setData(history);
+    line.setData(history.map(c => ({ time: c.time, value: c.close })));
+    if (range) chart.timeScale().setVisibleLogicalRange({ from: range.from + added, to: range.to + added });
+    try { indicators.updateAll(history); } catch {}
+    try { sessionLevels.render(); } catch {}
+    try { marketStructure.render(); } catch {}
+    try { fvg.render(); } catch {}
+    try { mtf.render(); } catch {}
+    quote();
+  } catch (e) {
+    if (e && e.name !== 'AbortError') console.error('older history failed', e);
+  } finally {
+    loadingOlder = false;
+  }
 }
 function quote() {
   const c = history.at(-1);
@@ -234,6 +273,22 @@ $('indicator-add').addEventListener('change', e => {
   if (!type) return;
   try { indicators.add(type); localStorage.setItem('alfa-ind:v1:' + symbol, JSON.stringify(indicators.toJSON())); } catch {}
   e.target.value = '';
+});
+$('goto-date-btn').addEventListener('click', async () => {
+  const v = $('goto-date').value;
+  if (!v) return;
+  const ts = Math.floor(new Date(v).getTime() / 1000);
+  if (!Number.isFinite(ts)) return;
+  const ctrl = new AbortController();
+  try {
+    const data = await fetchHistory(symbol, interval, ctrl.signal, fetch, null, ts * 1000);
+    if (!data.length) { connection('Seçilen tarihte veri bulunamadı', 'error'); return; }
+    setData(data, true);
+    chart.timeScale().setVisibleLogicalRange({ from: 0, to: Math.min(data.length, 130) });
+    connection('Tarihe gidildi');
+  } catch (e) {
+    if (e.name !== 'AbortError') connection('Tarihe gidilemedi', 'error');
+  }
 });
 $('session-levels-toggle').addEventListener('click', () => {
   const on = $('session-levels-toggle').dataset.on !== '1';
