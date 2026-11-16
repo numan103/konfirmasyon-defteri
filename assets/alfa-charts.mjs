@@ -1,7 +1,7 @@
 import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
-import { IndicatorManager } from './alfa-indicators.mjs?v=1';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=1';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=1';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
@@ -249,4 +249,203 @@ $('mtf-toggle').addEventListener('click', () => {
   $('mtf-toggle').style.background = on ? '#2962ff' : '#151b26';
   mtf.setEnabled(on);
 });
+
+// ---------- UI: indicator manager, settings, MTF settings, persistence ----------
+function currentUserKey() {
+  try {
+    const raw = localStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token') || sessionStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token');
+    const j = raw ? JSON.parse(raw) : null;
+    return (j && j.user && j.user.id) || 'guest';
+  } catch { return 'guest'; }
+}
+function layoutKey() { return 'alfa-chart-layout:v1:' + currentUserKey() + ':' + symbol + ':' + interval; }
+function saveLayout() {
+  try {
+    localStorage.setItem(layoutKey(), JSON.stringify({
+      indicators: indicators.toJSON(),
+      mtf: mtf.config,
+      sessionLevels: sessionLevels.config,
+      marketStructure: marketStructure.config,
+      fvg: fvg.config,
+    }));
+  } catch {}
+}
+function loadLayout() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
+    if (!raw) return;
+    if (Array.isArray(raw.indicators)) { indicators.clear(); for (const e of raw.indicators) indicators.add(e.type, e.params); }
+    if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
+    if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
+    if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
+    if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
+  } catch {}
+}
+
+function openModal(html) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#151b26;border:1px solid #30394b;border-radius:12px;padding:16px;max-width:720px;width:100%;max-height:80vh;overflow:auto;color:#d7e0ee;';
+  box.innerHTML = html;
+  overlay.append(box);
+  document.body.append(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  return { overlay, box, close };
+}
+
+function openIndicatorManager() {
+  const favs = JSON.parse(localStorage.getItem('alfa-ind-fav:v1') || '[]');
+  const recent = JSON.parse(localStorage.getItem('alfa-ind-recent:v1') || '[]');
+  const cats = ['Trend', 'Momentum', 'Volatility', 'Volume'];
+  const list = INDICATOR_CATALOG;
+  const modal = openModal(`
+    <h3 style="margin:0 0 10px;">İndikatörler</h3>
+    <input id="ind-search" placeholder="Ara (ema, rsi, macd...)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;margin-bottom:10px;">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      <button data-cat="all" class="ind-cat">Tümü</button>
+      ${cats.map(c => `<button data-cat="${c}" class="ind-cat">${c}</button>`).join('')}
+      <button data-cat="fav" class="ind-cat">Favoriler</button>
+      <button data-cat="recent" class="ind-cat">Son kullanılan</button>
+    </div>
+    <div id="ind-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;"></div>
+    <h4 style="margin:12px 0 6px;">Aktif indikatörler</h4>
+    <div id="ind-active"></div>
+    <div style="margin-top:12px;text-align:right;"><button id="ind-close">Kapat</button></div>
+  `);
+  const search = modal.box.querySelector('#ind-search');
+  const listEl = modal.box.querySelector('#ind-list');
+  const activeEl = modal.box.querySelector('#ind-active');
+  let cat = 'all';
+  function renderList() {
+    const q = search.value.trim().toLowerCase();
+    let items = list;
+    if (cat === 'fav') items = list.filter(i => favs.includes(i.id));
+    else if (cat === 'recent') items = list.filter(i => recent.includes(i.id));
+    else if (cat !== 'all') items = list.filter(i => i.category === cat);
+    if (q) items = items.filter(i => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
+    listEl.innerHTML = items.map(i => `<button data-add="${i.id}" style="padding:8px;border-radius:8px;border:1px solid #30394b;background:#1a2230;color:#d7e0ee;text-align:left;">${i.name}<br><small style="color:#8e9eb6;">${i.category}</small></button>`).join('');
+    listEl.querySelectorAll('[data-add]').forEach(b => {
+      b.onclick = () => {
+        indicators.add(b.dataset.add);
+        if (!recent.includes(b.dataset.add)) { recent.unshift(b.dataset.add); recent.splice(10); localStorage.setItem('alfa-ind-recent:v1', JSON.stringify(recent)); }
+        saveLayout();
+        renderActive();
+      };
+    });
+  }
+  function renderActive() {
+    activeEl.innerHTML = indicators.list().map(i => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #2a3444;">
+        <span>${i.type.toUpperCase()} ${JSON.stringify(i.params).slice(0,40)}</span>
+        <span>
+          <button data-edit="${i.id}">⚙</button>
+          <button data-dup="${i.id}">⧉</button>
+          <button data-del="${i.id}">✕</button>
+        </span>
+      </div>`).join('') || '<small style="color:#8e9eb6;">Aktif indikatör yok.</small>';
+    activeEl.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { indicators.remove(b.dataset.del); saveLayout(); renderActive(); });
+    activeEl.querySelectorAll('[data-dup]').forEach(b => b.onclick = () => {
+      const it = indicators.items.find(x => x.id === b.dataset.dup);
+      if (it) { indicators.add(it.type, { ...it.params }); saveLayout(); renderActive(); }
+    });
+    activeEl.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => { const it = indicators.items.find(x => x.id === b.dataset.edit); if (it) openIndicatorSettings(it); });
+  }
+  search.addEventListener('input', renderList);
+  modal.box.querySelectorAll('.ind-cat').forEach(b => b.onclick = () => { cat = b.dataset.cat; renderList(); });
+  modal.box.querySelector('#ind-close').onclick = modal.close;
+  renderList(); renderActive();
+}
+
+function openIndicatorSettings(item) {
+  const params = item.params;
+  const inputs = Object.keys(params).map(k => {
+    const v = params[k];
+    if (typeof v === 'boolean') return `<label style="display:block;margin:6px 0;"><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> ${k}</label>`;
+    if (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) return `<label style="display:block;margin:6px 0;">${k} <input type="color" data-k="${k}" value="${v}"></label>`;
+    return `<label style="display:block;margin:6px 0;">${k} <input type="number" step="any" data-k="${k}" value="${v}" style="padding:4px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>`;
+  }).join('');
+  const modal = openModal(`
+    <h3 style="margin:0 0 10px;">${item.type.toUpperCase()} Ayarları</h3>
+    ${inputs}
+    <div style="margin-top:12px;text-align:right;">
+      <button id="is-cancel">İptal</button>
+      <button id="is-apply">Uygula</button>
+    </div>
+  `);
+  modal.box.querySelector('#is-cancel').onclick = modal.close;
+  modal.box.querySelector('#is-apply').onclick = () => {
+    modal.box.querySelectorAll('[data-k]').forEach(inp => {
+      const k = inp.dataset.k;
+      if (inp.type === 'checkbox') params[k] = inp.checked;
+      else if (inp.type === 'color') params[k] = inp.value;
+      else params[k] = Number(inp.value);
+    });
+    indicators.remove(item.id);
+    indicators.add(item.type, { ...params });
+    saveLayout();
+    modal.close();
+  };
+}
+
+function openMtfSettings() {
+  const cfg = mtf.config;
+  const htfOpts = ['15m','30m','1h','4h','1d','1w'];
+  const modal = openModal(`
+    <h3 style="margin:0 0 10px;">Multi-Timeframe Ayarları</h3>
+    <label>HTF seçimi (çoklu):</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px;">
+      ${htfOpts.map(t => `<label style="padding:4px 8px;border:1px solid #30394b;border-radius:6px;"><input type="checkbox" data-htf="${t}" ${cfg.htf.includes(t)?'checked':''}> ${t.toUpperCase()}</label>`).join('')}
+    </div>
+    <label><input type="checkbox" id="mtf-swings" ${cfg.showSwings?'checked':''}> Swing göster</label><br>
+    <label><input type="checkbox" id="mtf-fvg" ${cfg.showFvg?'checked':''}> FVG göster</label><br>
+    <label><input type="checkbox" id="mtf-confirmed" ${cfg.confirmedOnly?'checked':''}> Yalnızca onaylanmış (confirmed)</label><br>
+    <label><input type="checkbox" id="mtf-extend" ${cfg.extend?'checked':''}> Bölgeyi sağa uzat</label>
+    <div style="margin-top:12px;text-align:right;">
+      <button id="mtf-cancel">İptal</button>
+      <button id="mtf-apply">Uygula</button>
+    </div>
+  `);
+  modal.box.querySelector('#mtf-cancel').onclick = modal.close;
+  modal.box.querySelector('#mtf-apply').onclick = () => {
+    const htf = [...modal.box.querySelectorAll('[data-htf]')].filter(x => x.checked).map(x => x.dataset.htf);
+    mtf.updateConfig({
+      htf: htf.length ? htf : ['1h'],
+      showSwings: modal.box.querySelector('#mtf-swings').checked,
+      showFvg: modal.box.querySelector('#mtf-fvg').checked,
+      confirmedOnly: modal.box.querySelector('#mtf-confirmed').checked,
+      extend: modal.box.querySelector('#mtf-extend').checked,
+    });
+    saveLayout();
+    modal.close();
+  };
+}
+
+// wire buttons
+$('indicators-manage').addEventListener('click', () => { console.log('INDICATORS BUTTON CLICKED'); openIndicatorManager(); });
+// replace MTF toggle behavior: open settings instead of just toggle
+const mtfBtn = $('mtf-toggle');
+mtfBtn.onclick = () => openMtfSettings();
+
+// load layout after first data load: hook into setData by wrapping? We'll load in loadMarket before fetch.
+const _origLoadMarket = loadMarket;
+// patch: load layout when symbol changes
+const _origOpenMarket = drawings.openMarket.bind(drawings);
+drawings.openMarket = async (symbol, force) => {
+  await _origOpenMarket(symbol, force);
+  loadLayout();
+  try { indicators.updateAll(seriesBars); } catch {}
+  try { sessionLevels.render(); } catch {}
+  try { marketStructure.render(); } catch {}
+  try { fvg.render(); } catch {}
+  try { mtf.render(); } catch {}
+};
+
+// persist on changes
+window.addEventListener('beforeunload', saveLayout);
+window.openIndicatorManager = openIndicatorManager;
+window.openIndicatorSettings = openIndicatorSettings;
+window.openMtfSettings = openMtfSettings;
+
 loadMarket();
