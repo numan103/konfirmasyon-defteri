@@ -1,6 +1,7 @@
 # Bar Replay — validation checkpoint
 
-Status: completion implementation; local acceptance passed. See completion results below.
+Status: implemented and deployed; automated/local and production guest-browser
+acceptance passed. Authenticated/device checks remain explicitly manual below.
 
 `phase4-mod1-pre` is the pre-development Git checkpoint.
 
@@ -98,6 +99,17 @@ touch, zoom/pan, timeframe/symbol changes, Fibonacci, Long/Short).
 
 Full working-tree Node suite: 495 tests, 494 PASS / 1 FAIL. The outstanding
 Access-screen assertion above remains unchanged and is reported separately.
+
+The isolated release archive (without the unrelated uncommitted Access changes)
+passed **495 / 495 Node tests**. Source commits: `adfdc4e` (core, data, strict
+session validation), `85aa00a` (UI and integration).
+
+Vercel production build: READY,
+`dpl_AqV7dBKo38oyeWiMziMaUQTLSjKZ`, aliased to `https://alfa-trader.com`.
+The complete replay browser acceptance flow was repeated against that production
+domain successfully with real Binance data and no uncaught page errors. The
+14 existing drawing scenarios also passed on production, in a disposable guest
+browser profile; no authenticated production drawing rows were written.
 
 ## Limits / not claimed verified
 
