@@ -131,8 +131,8 @@ function start() {
       <label>Yayın türü<select name="cadence"><option value="weekly">Haftalık</option><option value="daily">Günlük</option></select></label>
       <label>Bölüm tarihi<input type="date" name="date" required></label>
       <label>Ses dosyası (en fazla 30 MB)<input type="file" name="file" accept=".mp3,.m4a,.aac,.ogg,.opus,.wav,audio/*"></label>
-      <button type="button" class="ap-upload">Seçilen dosyayı yükle</button><small class="ap-upload-note">MP3 önerilir; konuşma için 64–96 kbps mono yeterlidir. Dosya doğrudan ses deposuna yüklenir; ücretsiz kota 1 GB depolama ve 10 GB/ay trafiktir.</small>
-      <label>veya doğrudan HTTPS ses adresi<input type="url" name="audioUrl" required placeholder="https://…/bolum.mp3"></label>
+      <button type="button" class="ap-upload">Seçilen dosyayı yükle</button><small class="ap-upload-note">MP3 önerilir; konuşma için 64–96 kbps mono yeterlidir. Dosya seçtikten sonra bu düğmeye bas; yükleme bitince Yayınla aktif olur. Ya da doğrudan ses adresi gir.</small>
+      <label>veya doğrudan HTTPS ses adresi<input type="url" name="audioUrl" placeholder="https://…/bolum.mp3"></label>
       <p class="ap-editor-status" role="status">Yönetici kaydı yükleniyor…</p>
       <div class="ap-editor-actions"><button class="ap-publish" type="submit" disabled>Yayınla</button><button class="ap-unpublish" type="button" hidden>Yayından kaldır</button><button class="ap-cancel" type="button">Kapat</button></div></form>`;
     document.body.append(dialog); dialog.showModal();
@@ -158,7 +158,7 @@ function start() {
       if(!data.uploadAvailable)dialog.querySelector('.ap-upload-note').textContent='Dosya yükleme yapılandırılmamış; doğrudan MP3/M4A ses adresiyle yayınlayabilirsin.';
       message('Hazır. Bölüm ancak Yayınla düğmesine basınca görünür.');
     } catch(error){message(error.message);upload.disabled=true;}
-    upload.onclick=async()=>{
+    async function uploadSelected(){
       const file=field('file').files?.[0];
       if(!file){message('Önce ses dosyası seç.');return;}
       if(!file.size||file.size>MAX_AUDIO_BYTES||!/\.(mp3|m4a|aac|ogg|opus|wav)$/i.test(file.name)||
@@ -175,12 +175,18 @@ function start() {
         message('Ses yüklendi. Başlığı kontrol edip Yayınla’ya bas.');
       } catch {message('Ses yüklenemedi. Bağlantıyı kontrol et veya doğrudan ses adresi kullan.');}
       finally{uploading=false;lock(false);}
-    };
+    }
+    upload.onclick=uploadSelected;
     form.onsubmit=async event=>{
       event.preventDefault();if(busy||!revision)return;
+      if(!field('audioUrl').value.trim() && field('file').files?.[0]){
+        const ok=await uploadSelected();
+        if(!ok)return;
+      }
+      if(!field('audioUrl').value.trim()){message('Önce ses dosyası yükle veya doğrudan HTTPS ses adresi gir.');return;}
       const next=cleanEpisode({title:field('title').value,description:field('description').value,cadence:field('cadence').value,
         publishedAt:new Date(field('date').value+'T00:00:00+03:00').toISOString(),audioUrl:field('audioUrl').value,durationSeconds:duration});
-      if(!next){message('Başlık, tarih ve doğrudan ses adresini kontrol et. YouTube/Spotify sayfa bağlantısı değil, ses dosyası gerekir.');return;}
+      if(!next){message('Başlık, tarih ve ses adresini kontrol et. YouTube/Spotify sayfa bağlantısı değil, ses dosyası gerekir.');return;}
       if(current?.audioUrl===next.audioUrl)next.id=current.id;
       lock(true);message('Yayınlanıyor…');
       try {
