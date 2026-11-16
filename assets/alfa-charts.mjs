@@ -10,6 +10,7 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=1';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=2';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
+import { PaperTradingPanel } from './alfa-paper.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -106,6 +107,7 @@ function applyReplaySlice() {
   try { mtf.setReplayClock(replayEngine.clock); } catch {}
   quote();
   const info = $('replay-info');
+  paper.update();
   if (info) info.textContent = new Date(replayEngine.clock * 1000).toISOString() + ' · Confirmed';
   connection('REPLAY · yalnızca kapanmış mumlar', 'replay');
 }
@@ -153,6 +155,13 @@ async function enterReplay({target,session=null}={}) {
   liveDrawingState={context:drawings.context,history:drawings.history,histories:drawings.histories};
   drawings.histories=new Map();
   replaySessionId=session?.id||'replay-'+crypto.randomUUID();
+  try{
+    paper.start({sessionId:replaySessionId,symbol,exchange:'Binance',marketType:'spot',timeframe:interval},session?.paper);
+  }catch(error){
+    Object.assign(drawings,liveDrawingState);liveDrawingState=null;
+    replayEngine=null;replayFull=[];paper.stop();
+    connection('Paper oturumu açılamadı: '+error.message,'error');connect(generation,false);return;
+  }
   drawings.context={owner:replaySessionId,symbol,remote:false,revision:0,doc:session?.drawings||emptyDocument()};
   drawings.history=new DrawingHistory(session?.drawings||emptyDocument()); drawings.selected=null;
   $('replay-speed').value=String([.5,1,2,5,10].includes(session?.speed)?session.speed:1);
@@ -173,9 +182,11 @@ async function enterReplay({target,session=null}={}) {
 }
 function exitReplay() {
   if (!replayMode) return;
+  if(!paper.canLeave())return;
   replayRequest?.abort(); replayBusy=false;
   if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
   replayMode = false;
+  paper.stop();
   sessionLevels.replayBoundary=null;
   document.body.classList.remove('replay-mode');
   const bar = $('replay-bar');
@@ -296,8 +307,12 @@ function updateUI() {
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
 }
 async function loadMarket() {
+  if(replayMode&&!paper.canLeave()){
+    symbol=paper.context.symbol;interval=paper.context.timeframe;updateUI();return;
+  }
   if (replayMode) {
     pauseReplay(); replayMode=false; replayEngine=null;
+    paper.stop();
     sessionLevels.replayBoundary=null;
     mtf.replayClock=null; mtf.loadController?.abort(); mtf.htfData.clear(); mtf.clear();
     $('replay-bar').hidden=true;
@@ -421,6 +436,11 @@ const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () =>
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+const paper = new PaperTradingPanel({
+  series:candles,owner:currentUserKey,pause:pauseReplay,
+  getReplay:()=>replayMode&&replayEngine?{bars:history,clock:replayEngine.clock}:null,
+  onPersist:()=>{if(replayMode)$('replay-save').click();}
+});
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
   try { loadLayout(); } catch {}
@@ -431,14 +451,14 @@ const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').
   try { mtf.render(); } catch {}
 });
 cloudSettings.start();
-function dispose() { pauseReplay(); disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
+function dispose() { pauseReplay(); paper.stop(); disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 window.addEventListener('online', () => { if (!disposed) loadMarket(); });
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, paper, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }
@@ -480,11 +500,12 @@ $('replay-prev').addEventListener('click', () => stepReplay(-1));
 $('replay-next').addEventListener('click', () => stepReplay(1));
 $('replay-restart').addEventListener('click', restartReplay);
 $('replay-stop').addEventListener('click', exitReplay);
+$('paper-toggle').addEventListener('click',()=>paper.toggle());
 $('replay-speed').addEventListener('change',()=>{ const playing=!!replayTimer;pauseReplay();if(playing)playReplay(); });
 $('replay-save').addEventListener('click',()=>{
   if(!replayMode)return;
   try{
-    const session={...replayEngine.serialize(),id:drawings.context.owner,speed:Number($('replay-speed').value),drawings:drawings.history.doc,indicators:indicators.toJSON(),mtfConfig:mtf.config,mtfEnabled:!!mtf.enabled};
+    const session={...replayEngine.serialize(),id:drawings.context.owner,speed:Number($('replay-speed').value),drawings:drawings.history.doc,indicators:indicators.toJSON(),mtfConfig:mtf.config,mtfEnabled:!!mtf.enabled,paper:paper.serialize()};
     localStorage.setItem('alfa-replay-session:v1:'+currentUserKey()+':'+symbol+':'+interval,JSON.stringify(session));
     connection('Replay oturumu yerelde kaydedildi','replay');
   }catch{connection('Replay oturumu kaydedilemedi','error');}
@@ -777,6 +798,7 @@ const _origLoadMarket = loadMarket;
 const _origOpenMarket = drawings.openMarket.bind(drawings);
 drawings.openMarket = async (symbol, force) => {
   if(replayMode)exitReplay();
+  if(replayMode)return;
   await _origOpenMarket(symbol, force);
   await loadLayout();
   cloudRevision = 0;
