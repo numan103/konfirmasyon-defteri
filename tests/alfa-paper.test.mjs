@@ -115,3 +115,24 @@ test('rewind removes future exits and then fills; saved journal restores determi
   assert.equal(e.evaluate(bars,900).trades[0].status,'Pending');
   assert.equal(e.evaluate(bars,0).trades.length,0);
 });
+test('JSON persistence normalizes optional fields and preserves exact evaluation',()=>{
+  const e=make({expiresAt:undefined});
+  const saved=JSON.parse(JSON.stringify(e.serialize()));
+  const restored=new PaperTradingEngine(saved.context,saved.events);
+  const bars=[b(0),b(900)];
+  assert.deepEqual(restored.evaluate(bars,1800),e.evaluate(bars,1800));
+});
+test('short SL-first and adverse short gap honor short-side risk',()=>{
+  for(const [bars,r] of [
+    [[b(0),b(900,100,115,70,100)],-1],
+    [[b(0),b(900),b(1800,120,124,118,122)],-2]
+  ]){
+    const t=evaluate(make({direction:'short',stopLoss:110,takeProfit:75}),bars);
+    assert.equal(t.status,'Closed SL');assert.equal(t.realizedR,r);
+  }
+});
+test('intrabar limit fill cannot escape an adverse stop and never exceeds its limit',()=>{
+  const t=evaluate(make({orderType:'limit',entry:95,stopLoss:85,takeProfit:120,spread:2,slippageBps:5}),
+    [b(0),b(900,100,110,84,90)]);
+  assert.equal(t.entryPrice,95);assert.equal(t.status,'Closed SL');assert.ok(t.netR<-1);
+});

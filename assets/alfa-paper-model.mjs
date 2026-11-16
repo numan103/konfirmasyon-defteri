@@ -21,6 +21,8 @@ export function createPaperOrder(input) {
   const order={direction:'long',orderType:'market',riskPercentage:1,feeBps:0,slippageBps:0,spread:0,policy:'conservative',notes:'',...input};
   if(order.takeProfit==null)order.takeProfit=order.entry+(order.direction==='long'?1:-1)*2.5*Math.abs(order.entry-order.stopLoss);
   if(order.positionSize==null && positive(order.riskAmount))order.positionSize=order.riskAmount/Math.abs(order.entry-order.stopLoss);
+  order.expiresAt=order.expiresAt??null;
+  for(const key of Object.keys(order))if(order[key]===undefined)delete order[key];
   return validateOrder(order);
 }
 function execution(reference, side, order, limit=null) {
@@ -51,7 +53,7 @@ export class PaperTradingEngine {
   }
   command(type,payload,at,id) {
     if(!Number.isFinite(at)||!id || this.events.some(e=>e.id===id))throw new Error('Invalid/duplicate paper event');
-    const event={id,at,type,...copy(payload),version:1};
+    const event={...copy(payload),id,at,type,version:1};
     if(type==='create')event.order=createPaperOrder(event.order);
     this.events.push(event);
     try{this.validateJournal();}catch(error){this.events.pop();throw error;}
@@ -156,7 +158,9 @@ export class PaperTradingEngine {
     }
     while(ei<events.length)apply(events[ei++]); // new orders/edits visible, but no retroactive fill
     for(const t of trades.values()){
-      if(t.status==='Pending' && t.expiresAt!=null && clock>=t.expiresAt)t.status='Expired';
+      if(t.status==='Pending' && t.expiresAt!=null && clock>=t.expiresAt){
+        t.status='Expired';history.push({tradeId:t.id,type:'Expired',at:Math.max(t.orderCreatedAt,t.expiresAt)});
+      }
       t.currentR=t.status==='Open'&&known.length?t.side*(known.at(-1).close-t.entryPrice)/t.initialRiskPerUnit:null;
     }
     return {trades:copy([...trades.values()]),history:copy(history)};
