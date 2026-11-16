@@ -35,6 +35,8 @@ await page.route('**/api/edu-shared?kind=podcast**', async route => {
 });
 try {
   await page.goto((arg('url') || 'http://127.0.0.1:4173') + '/?page=home');
+  await page.waitForFunction(() => window.AlfaPodcast);
+  await page.evaluate(() => { SITE.tier = 'ref'; window.refUnlocked = () => true; window.AlfaPodcast.refreshContext(); });
   const landingCard = page.locator('#landing-podcast-slot .ap-podcast');
   await landingCard.waitFor({ state:'visible' });
   assert.match(await landingCard.locator('.ap-title').textContent(), /Haftanın piyasa notları/);

@@ -22,6 +22,8 @@ function start() {
   audio.playbackRate=[.75,1,1.25,1.5,2].includes(Number(prefs.rate))?Number(prefs.rate):1;
   $('.ap-speed').value=String(audio.playbackRate);
   function admin() { try { return typeof window.siteIsAdmin==='function'&&window.siteIsAdmin(); } catch { return false; } }
+  function premium() { try { return typeof window.refUnlocked==='function'&&window.refUnlocked(); } catch { return false; } }
+  function canListen() { return admin() || premium(); }
   function status(text='') { $('.ap-status').textContent=text; }
   function persist() {
     if (!episode) return;
@@ -40,7 +42,7 @@ function start() {
     if (card.parentNode!==host) host.append(card);
     dock.hidden=!mini;
     document.body.classList.toggle('ap-has-dock',mini);
-    card.hidden=(!isHome&&!mini)||(!episode&&!admin());
+    card.hidden=(!isHome&&!mini)||(!episode&&!admin())||!canListen();
     home.hidden=card.hidden||card.parentNode!==home;
     landing.hidden=card.hidden||card.parentNode!==landing;
     $('.ap-manage').hidden=!admin();
