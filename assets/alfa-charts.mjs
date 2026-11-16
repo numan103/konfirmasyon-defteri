@@ -6,6 +6,7 @@ import { SessionLevelsManager } from './alfa-session-levels.mjs?v=3';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=1';
+import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -210,6 +211,15 @@ const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () =>
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+  try { loadLayout(); } catch {}
+  try { indicators.updateAll(seriesBars); } catch {}
+  try { sessionLevels.render(); } catch {}
+  try { marketStructure.render(); } catch {}
+  try { fvg.render(); } catch {}
+  try { mtf.render(); } catch {}
+});
+cloudSettings.start();
 function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -259,6 +269,8 @@ function currentUserKey() {
   } catch { return 'guest'; }
 }
 function layoutKey() { return 'alfa-chart-layout:v1:' + currentUserKey() + ':' + symbol + ':' + interval; }
+let cloudRevision = 0;
+let cloudSaveTimer = null;
 function saveLayout() {
   try {
     localStorage.setItem(layoutKey(), JSON.stringify({
@@ -269,17 +281,63 @@ function saveLayout() {
       fvg: fvg.config,
     }));
   } catch {}
+  scheduleCloudSave();
 }
-function loadLayout() {
+async function loadLayout() {
   try {
     const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
-    if (!raw) return;
-    if (Array.isArray(raw.indicators)) { indicators.clear(); for (const e of raw.indicators) indicators.add(e.type, e.params); }
-    if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
-    if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
-    if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
-    if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
+    if (raw) {
+      if (Array.isArray(raw.indicators)) { indicators.clear(); for (const e of raw.indicators) indicators.add(e.type, e.params); }
+      if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
+      if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
+      if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
+      if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
+    }
   } catch {}
+  if (cloudSettings.isAuthed()) {
+    const cloud = await cloudSettings.load(symbol, interval);
+    if (cloud && cloud.settings) {
+      const s = cloud.settings;
+      if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
+      if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
+      if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
+      if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
+      if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
+      cloudRevision = cloud.revision || 0;
+      try { $('drawing-status').textContent = 'Bulut: yüklendi'; } catch {}
+    }
+  }
+}
+function scheduleCloudSave() {
+  if (!cloudSettings.isAuthed()) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(async () => {
+    const settings = {
+      indicators: indicators.toJSON(),
+      mtf: mtf.config,
+      sessionLevels: sessionLevels.config,
+      marketStructure: marketStructure.config,
+      fvg: fvg.config,
+    };
+    const res = await cloudSettings.save(symbol, interval, settings, cloudRevision);
+    if (res.ok) { cloudRevision = res.revision || cloudRevision; try { $('drawing-status').textContent = 'Bulut: kaydedildi'; } catch {} }
+    else if (res.error && /conflict|unique/i.test(res.error)) {
+      // reload cloud and apply
+      const cloud = await cloudSettings.load(symbol, interval);
+      if (cloud && cloud.settings) {
+        const s = cloud.settings;
+        if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
+        if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
+        if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
+        if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
+        if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
+        cloudRevision = cloud.revision || cloudRevision;
+        try { $('drawing-status').textContent = 'Çakışma çözüldü · bulut sürümü uygulandı'; } catch {}
+      }
+    } else {
+      try { $('drawing-status').textContent = res.offline ? 'Çevrimdışı · yerel kayıt' : 'Bulut hatası · yerel kayıt'; } catch {}
+    }
+  }, 800);
 }
 
 function openModal(html) {
@@ -449,7 +507,8 @@ const _origLoadMarket = loadMarket;
 const _origOpenMarket = drawings.openMarket.bind(drawings);
 drawings.openMarket = async (symbol, force) => {
   await _origOpenMarket(symbol, force);
-  loadLayout();
+  await loadLayout();
+  cloudRevision = 0;
   try { indicators.updateAll(seriesBars); } catch {}
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
