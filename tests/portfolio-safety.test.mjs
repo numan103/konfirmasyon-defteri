@@ -115,7 +115,16 @@ test('loading cache is read-only and DB migration owns atomic versioning/securit
   const sql=fs.readFileSync(new URL('../supabase/site/009_portfolio_versions.sql',import.meta.url),'utf8');
   assert.match(sql,/for update;/i);assert.match(sql,/portfolio_server_only/);
   assert.match(sql,/portfolio_sales_removal_blocked/);assert.match(sql,/portfolio_position_removal_blocked/);
-  assert.match(sql,/offset 100/);assert.match(sql,/enable row level security/);
+  assert.match(sql,/offset 5/);assert.match(sql,/enable row level security/);
   assert.match(sql,/grant execute[\s\S]*to service_role/);
   assert.match(sql,/before insert or update or delete on public\.edu_shared/);
+});
+test('normal portfolio UI has no permanent backup/history panel; only failures show recovery controls', () => {
+  const controls=html.slice(html.indexOf('function ap2SafetyControls('),html.indexOf('function ap2HasActivity('));
+  assert.match(controls,/if \(!ap2SyncBlocked\) \{ if \(panel\) panel\.remove\(\); return; \}/);
+  assert.doesNotMatch(controls,/Sunucu sürüm geçmişi|son 100|Sürümler yükleniyor/);
+  assert.doesNotMatch(html,/<script src="\/assets\/portfolio-versions/);
+  const migration=fs.readFileSync(new URL('../supabase/site/010_portfolio_quiet_retention.sql',import.meta.url),'utf8');
+  assert.match(migration,/offset 5/);
+  assert.doesNotMatch(migration,/update public\.edu_shared set/i);
 });

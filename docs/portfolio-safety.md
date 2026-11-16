@@ -26,7 +26,7 @@ yükleme yolları vardı. Bunlar sunucu kapanmasından farklı veri güvenliği 
   korunur. Sunucu başarı/versiyon onayı gelmeden ekran temizlenmez.
 - Sürüm geri yüklemede DB'deki sürüm seçilir; tarayıcıdan gönderilen keyfi
   snapshot kullanılmaz. Geri yükleme de yeni sürümdür ve revizyon kontrolü yapar.
-- Son **100 sürüm** tutulur; belge başına **256 KiB** sınırı vardır. Sürüm listesi
+- Son **5 güvenlik kopyası** tutulur; belge başına **256 KiB** sınırı vardır. Teknik sürüm listesi
   yalnızca 20 metaveri satırı döndürür; tam belge sadece seçildiğinde indirilir.
   Arka plan sürüm anketi/polling eklenmedi. Yeni ücretli hizmet yok.
 - Kayıt hatası veya belirsiz ağ sonucunda düzenleme kilitlenir, yerel JSON ve
@@ -38,19 +38,24 @@ yükleme yolları vardı. Bunlar sunucu kapanmasından farklı veri güvenliği 
 
 ## Kullanım
 
-Portföy Yönetimi üst kısmında:
+Normal Portföy Yönetimi ekranında güvenlik paneli, sürüm listesi veya yedek
+düğmeleri gösterilmez. Başarılı kayıt da sürüm numarasıyla ekranı doldurmaz.
+Koruma sunucuda çalışır; önceki kopyalar teknik/admin müdahalesi için tutulur.
+`010_portfolio_quiet_retention.sql`, mevcut kurulumun saklama sayısını 5'e indirir;
+canlı portföy belgesini değiştirmez.
 
-- **JSON yedeğini indir:** cihazdaki kopya.
-- **Sunucu sürüm geçmişi:** tarih, pozisyon/satış sayısı; sürümü JSON indirme ve
-  açık onayla önceki sürüme dönme.
-- **Sunucudaki sürümü yükle:** hata/çakışma sonrasında yerel kopyayı koruyarak
-  kontrollü yeniden yükleme.
+Yalnızca gerçekten kayıt hatası/çakışma olduğunda kısa bir uyarı, yerel
+**JSON yedeğini indir** ve **Sunucudaki sürümü yükle** kurtarma seçenekleri açılır.
 
 Kırmızı/hata durumunda yeni işlem yapmak yerine önce JSON indirin ve sunucu
 sürümünü kontrol edin. Sonucu belirsiz bir yazma otomatik tekrar edilmez.
 
 ## Doğrulama
 
+- Sade ekran güncellemesinde 442 Node testi geçti. Üretim kaynağıyla mock API
+  tarayıcı testi normal kullanımda ve başarılı kayıtta panel olmadığını,
+  yalnızca hatada kurtarma uyarısı çıktığını doğruladı. Migration 010 uygulandı;
+  canlı portföy verisi/revizyonu öncesiyle birebir aynı kaldı.
 - Migration 009 Supabase SQL Editor'de uygulandı; kurtarılan mevcut portföy
   ilk sürüm olarak alındı.
 - `tests/sql/portfolio-safety.verify.sql`: gerçek DB'de 13 kontrol geçti.
@@ -58,8 +63,8 @@ sürümünü kontrol edin. Sonucu belirsiz bir yazma otomatik tekrar edilmez.
   bozuk miktar, onaysız sıfırlama, onaylı sıfırlama sonrası geri dönüş, satır
   silme ve anonim doğrudan yazma testleri içerir. Tamamı ROLLBACK ile sonlanır.
 - API/istemci birim testleri: `tests/portfolio-safety.test.mjs`.
-- Gerçek Chrome, **mock portfolio API** ile history JSON indirme, onaylı
-  geri yükleme, ağ kesilmesi, düzenleme kilidi ve gezinmede kaydedilmemiş
+- Gerçek Chrome, **mock portfolio API** ile normal/başarılı kayıtta temiz ekran,
+  ağ kesilmesi, yalnızca hatada kurtarma seçenekleri, düzenleme kilidi ve gezinmede kaydedilmemiş
   değişikliğin korunması: `tests/browser/portfolio-safety.browser.mjs`.
   Bu test gerçek kullanıcının portföyüne veri yazmaz.
 - Portföye özel izole yayın kopyasında 441 Node testi geçti; üretim kaynağıyla
@@ -75,7 +80,7 @@ sürümünü kontrol edin. Sonucu belirsiz bir yazma otomatik tekrar edilmez.
 
 Bu bir “asla arıza olmaz” garantisi değildir. Aynı DB'deki sürümler tüm projenin
 silinmesine veya tüm veritabanının kaybedilmesine karşı bağımsız yedek değildir.
-Önemli dönemlerde JSON'u başka bir güvenli yerde de saklayın. 100 kayıt dışına
+Önemli dönemlerde JSON'u başka bir güvenli yerde de saklayın. 5 kayıt dışına
 çıkan eski sürümler silinir; aynı belgeyi tekrar kaydetmek sürüm üretmez.
 Supabase/Vercel kesintisinde yeni kayıt onayı alınamaz, işlem durur; mevcut
 veri/kurtarma kopyaları korunur. Bağımsız, zamanlanmış harici yedekleme bu

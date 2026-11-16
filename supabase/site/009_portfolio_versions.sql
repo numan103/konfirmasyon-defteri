@@ -93,9 +93,9 @@ begin
   end if;
   insert into public.portfolio_versions(revision, data, actor_id, action, position_count, sale_count)
   values(new.updated_at, new.data, actor, action_name, jsonb_array_length(new.data->'positions'), jsonb_array_length(new.data->'sells'));
-  -- 100 bounded versions; current small documents use roughly 1 MB, not new egress polling.
+  -- Five bounded safety copies; no background egress polling.
   delete from public.portfolio_versions where id in
-    (select id from public.portfolio_versions order by id desc offset 100);
+    (select id from public.portfolio_versions order by id desc offset 5);
   return new;
 end;
 $$;

@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v131-portfolio-safe1';
-const BUILD_ID = 'b192-portfolio-safe1';
+﻿const CACHE = 'alfa-v131-portfolio-quiet2';
+const BUILD_ID = 'b192-portfolio-quiet2';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

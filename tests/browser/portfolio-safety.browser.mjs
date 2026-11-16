@@ -1,4 +1,4 @@
-// Isolated UI failure/history checks. Every portfolio API request is mocked.
+// Quiet normal UI and isolated failure checks. All portfolio API requests are mocked.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,7 +29,7 @@ await page.route('**/api/edu-shared?kind=portfolio**',async route=>{
 });
 try{
   await page.goto((arg('url')||'http://localhost:4173')+'/?page=home');
-  await page.waitForFunction(()=>typeof ap2SafetyControls==='function'&&!!window.AlfaPortfolioVersions&&typeof AUTH!=='undefined'&&AUTH.client);
+  await page.waitForFunction(()=>typeof ap2SafetyControls==='function'&&typeof AUTH!=='undefined'&&AUTH.client);
   await page.evaluate(({data,revision})=>{
     siteIsAdmin=()=>true;ap2IsMember=()=>true;refUnlocked=()=>true;ap2LoadPrices=()=>{};
     // Mock API uses no real credentials; do not change server authorization.
@@ -42,21 +42,11 @@ try{
     renderAlfaPortfoy2();
   },{data,revision});
   await page.waitForFunction(()=>ap2CloudReady&&!ap2Hydrating);
-  assert.equal(await page.locator('#ap2-safety-controls').count(),1,
-    JSON.stringify(await page.evaluate(()=>({admin:siteIsAdmin(),member:ap2IsMember(),panel:!!document.getElementById('ap2-safety-controls'),
-      heading:!!document.querySelector('#page-portfoy .ap2-hd'),pageClass:document.getElementById('page-portfoy').className,
-      callsSafety:renderAlfaPortfoy2.toString().includes('ap2SafetyControls')}))));
-  await page.getByRole('button',{name:'Sunucu sürüm geçmişi',exact:true}).click();
-  await page.getByRole('dialog').waitFor();
-  const download=page.waitForEvent('download');
-  await page.getByRole('button',{name:'JSON indir',exact:true}).click();
-  const file=await download;
-  const exported=JSON.parse(fs.readFileSync(await file.path(),'utf8'));
-  assert.equal(exported.positions[0].id,'safety-test');
-  page.once('dialog',dialog=>dialog.accept());
-  await page.getByRole('button',{name:'Bu sürüme dön',exact:true}).click();
-  await page.waitForFunction(()=>!document.getElementById('ap2-versions-dialog')&&ap2CloudReady&&!ap2Hydrating);
-  assert.ok(calls.some(c=>c.body?.action==='restore'&&c.body.confirmation==='RESTORE'&&c.body.versionId===1));
+  assert.equal(await page.locator('#ap2-safety-controls').count(),0);
+  assert.equal(await page.getByRole('button',{name:'Sunucu sürüm geçmişi',exact:true}).count(),0);
+  await page.evaluate(()=>{ap2Data.positions[0].note='saved safety test';ap2Save();});
+  await page.waitForFunction(()=>ap2PendingWrites===0&&!ap2Dirty);
+  assert.equal(await page.locator('#ap2-safety-controls').count(),0,'successful saves must stay visually quiet');
   mode='offline';
   await page.evaluate(()=>{ap2Data.positions[0].note='unsaved safety test';ap2Save();});
   await page.waitForFunction(()=>ap2SyncBlocked&&ap2PendingWrites===0);
@@ -69,7 +59,12 @@ try{
   assert.equal(state.note,'unsaved safety test');assert.equal(state.ready,false);
   assert.equal(calls.filter(c=>c.method==='GET'&&!/version/.test(c.url)).length,reads,'navigation must not erase unsaved edits with a cloud reload');
   assert.match(await page.locator('#ap2-durable-status').textContent(),/düzenleme kilitli/);
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'JSON yedeğini indir',exact:true}).click();
+  const file=await download;
+  const exported=JSON.parse(fs.readFileSync(await file.path(),'utf8'));
+  assert.equal(exported.positions[0].note,'unsaved safety test');
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({passed:true,mockedPortfolioAPI:true,historyDownload:true,confirmedRestore:true,
-    offlineEditsPreserved:true,editingBlockedAfterFailure:true,noAutomaticReload:true,pageErrors:errors}));
+  console.log(JSON.stringify({passed:true,mockedPortfolioAPI:true,quietNormalUI:true,quietSuccessfulSave:true,
+    recoveryOnlyOnFailure:true,offlineEditsPreserved:true,editingBlockedAfterFailure:true,noAutomaticReload:true,pageErrors:errors}));
 }finally{await browser.close();}

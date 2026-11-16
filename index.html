@@ -33,7 +33,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
-<script src="/assets/portfolio-versions.js?v=1"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -18452,27 +18451,22 @@ function ap2SafetyControls() {
   const page = document.getElementById('page-portfoy');
   if (!page || !siteIsAdmin()) return;
   let panel = document.getElementById('ap2-safety-controls');
+  // Quiet by default: safeguards are server-side, not a permanent dashboard.
+  if (!ap2SyncBlocked) { if (panel) panel.remove(); return; }
   if (!panel) {
     panel = document.createElement('div'); panel.id = 'ap2-safety-controls';
     panel.style.cssText = 'padding:12px;border:1px solid #52647d;border-radius:10px;margin:10px 0;line-height:1.7';
     const status = document.createElement('p'); status.id = 'ap2-durable-status'; status.setAttribute('role','status');
     const exportButton = document.createElement('button'); exportButton.textContent = 'JSON yedeğini indir';
     exportButton.onclick = () => window.AlfaPortfolioRecovery.download(Object.assign({}, ap2Data, { ideas: ap2Ideas }), 'bu-cihaz');
-    const history = document.createElement('button'); history.textContent = 'Sunucu sürüm geçmişi'; history.style.margin = '8px';
-    history.onclick = () => window.AlfaPortfolioVersions.open({
-      fetch: siteFetch, revision: () => ap2Revision,
-      canRestore: () => ap2CanEdit() && !ap2Dirty,
-      onWriteFailure: ap2BlockSync, onRestored: async () => { ap2Dirty = false; await ap2ReloadServerSafely(); }
-    });
     const reload = document.createElement('button'); reload.id = 'ap2-safe-reload'; reload.textContent = 'Sunucudaki sürümü yükle';
+    reload.style.marginLeft = '8px';
     reload.onclick = ap2ReloadServerSafely;
-    panel.append(status,exportButton,history,reload);
+    panel.append(status,exportButton,reload);
     const header = page.querySelector('.ap2-hd'); if (header) header.insertAdjacentElement('afterend',panel);
   }
   const status = document.getElementById('ap2-durable-status');
-  status.textContent = ap2SyncBlocked ? 'Kayıt doğrulanamadı. Bu cihazdaki kopya korunuyor; düzenleme kilitli. JSON indir veya sunucu sürümünü kontrol et.' :
-    ap2PendingWrites ? 'Sunucuya kaydediliyor… Başarı onayı bekleniyor.' :
-    ap2CloudReady ? 'Sunucu sürümü yüklü. Her değişiklik atomik olarak yedeklenir; son 100 sürüm saklanır.' : 'Sunucu kaydı yükleniyor; düzenleme kilitli.';
+  status.textContent = 'Kayıt doğrulanamadı; değişikliklerin bu cihazda korundu. Sorun çözülene kadar düzenleme kilitli.';
   document.getElementById('ap2-safe-reload').disabled = !!ap2PendingWrites || ap2Restoring;
 }
 function ap2HasActivity(data) {
@@ -18885,7 +18879,7 @@ function ap2SyncCloud(options) {
       renderAlfaPortfoy2();
     }
     if (saveSeq === ap2SaveSeq) ap2Dirty = false;
-    ap2Status('Sunucuya kaydedildi · sürüm #' + result.versionId + ' · geri alınabilir.');
+    ap2Status('Pozisyonların, emirlerin ve satış geçmişin.');
   }).catch(function(error) {
     if (!ap2SyncBlocked) ap2BlockSync('Bağlantı veya kayıt hatası: işlem sonucu doğrulanamadı.');
     throw error;
@@ -19995,7 +19989,7 @@ async function ap2ResetAll() {
     const result = await r.json();
     if (!r.ok || !result.backedUp || !result.versionId) throw new Error('Sıfırlama onaylanmadı; mevcut kopya korundu.');
     ap2Restoring = false; ap2Dirty = false; await ap2ReloadServerSafely();
-    alert('Portföy sıfırlandı. Önceki kayıt Sunucu sürüm geçmişi bölümünden geri alınabilir.');
+    alert('Portföy sıfırlandı. Önceki kayıt güvenlik kopyasında korundu.');
   } catch (e) { ap2BlockSync(e.message); }
   finally { ap2Restoring = false; ap2SafetyControls(); }
 }
@@ -28523,7 +28517,7 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b192-portfolio-safe1';
+const APP_BUILD = 'b192-portfolio-quiet2';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
