@@ -20,7 +20,6 @@ function dayKey(ts, tz, startHour = 0, startMinute = 0) {
 }
 
 function weekKey(ts, tz, startDay = 1, startHour = 0, startMinute = 0) {
-  // startDay: 0=Sun..6=Sat
   const c = tzParts(ts, tz);
   const barMin = c.hour * 60 + c.minute;
   const startMin = startHour * 60 + startMinute;
@@ -50,18 +49,13 @@ function inSession(ts, tz, start, end) {
   const s = start.h * 60 + start.m;
   const e = end.h * 60 + end.m;
   if (s < e) return barMin >= s && barMin < e;
-  // overnight
   return barMin >= s || barMin < e;
 }
 
 export function sessionWindowTs(ts, tz, start, end) {
-  // returns {startTs, endTs} UTC seconds for the session window containing ts
   const c = tzParts(ts, tz);
   const sMin = start.h * 60 + start.m;
   const eMin = end.h * 60 + end.m;
-  const dayStart = Date.UTC(c.year, c.month - 1, c.day) / 1000;
-  // convert dayStart (UTC midnight) to tz midnight offset
-  // We'll compute by searching: find tz midnight for this date
   const tzMidnight = tzMidnightTs(c.year, c.month, c.day, tz);
   const startTs = tzMidnight + sMin * 60;
   let endTs = tzMidnight + eMin * 60;
@@ -70,16 +64,12 @@ export function sessionWindowTs(ts, tz, start, end) {
 }
 
 function tzMidnightTs(year, month, day, tz) {
-  // Find UTC timestamp whose tz date is year-month-day 00:00
-  // Binary-ish: start from UTC midnight of that date and adjust
   let ts = Date.UTC(year, month - 1, day) / 1000;
-  // shift until tzParts match
   for (let i = 0; i < 48; i++) {
     const p = tzParts(ts, tz);
     if (p.year === year && p.month === month && p.day === day && p.hour === 0 && p.minute === 0) break;
-    // adjust
-    if (p.day < day || (p.day === day && (p.hour < 0))) ts -= 3600;
-    else if (p.day > day) ts -= 3600;
+    if (p.day > day) ts -= 3600;
+    else if (p.day < day) ts += 3600;
     else if (p.hour > 0 || p.minute > 0) ts -= (p.hour * 3600 + p.minute * 60);
     else ts += 3600;
   }
@@ -93,7 +83,6 @@ export function computeSessionLevels(bars, config) {
   const last = bars[bars.length - 1];
   const lastTs = last.time;
 
-  // helper to find first bar of a period
   function firstBarOfPeriod(keyFn, targetKey) {
     return bars.find((b) => keyFn(b.time) === targetKey);
   }
@@ -110,16 +99,15 @@ export function computeSessionLevels(bars, config) {
     const sm = cfg.daily?.startMinute ?? 0;
     const curKey = dayKey(lastTs, tz, sh, sm);
     const prevDate = new Date(lastTs * 1000 - 86400000);
-    // previous day key
     const prevKey = dayKey(prevDate.getTime() / 1000, tz, sh, sm);
     const curBar = firstBarOfPeriod((t) => dayKey(t, tz, sh, sm), curKey);
-    const prevBar = firstBarOfPeriod((t) => dayKey(t, tz, sh, sm), prevKey);
-    if (curBar) levels.push({ id: 'DO', label: 'Daily Open', price: curBar.open, kind: 'open' });
+    const prevBars = bars.filter((b) => dayKey(b.time, tz, sh, sm) === prevKey);
+    if (curBar) levels.push({ id: 'DO', label: 'Daily Open', price: curBar.open, kind: 'open', approximate: curBar === bars[0] });
     if (cfg.show?.PDH !== false) {
-      const prevBars = bars.filter((b) => dayKey(b.time, tz, sh, sm) === prevKey);
       const mm = maxMin(prevBars);
-      if (mm.high != null) levels.push({ id: 'PDH', label: 'Prev Day High', price: mm.high, kind: 'level' });
-      if (mm.low != null) levels.push({ id: 'PDL', label: 'Prev Day Low', price: mm.low, kind: 'level' });
+      const approx = prevBars.length > 0 && prevBars[0] === bars[0];
+      if (mm.high != null) levels.push({ id: 'PDH', label: 'Prev Day High', price: mm.high, kind: 'level', approximate: approx });
+      if (mm.low != null) levels.push({ id: 'PDL', label: 'Prev Day Low', price: mm.low, kind: 'level', approximate: approx });
     }
   }
 
@@ -131,15 +119,15 @@ export function computeSessionLevels(bars, config) {
     const sd = cfg.weekly?.startDay ?? 1;
     const curKey = weekKey(lastTs, tz, sd, sh, sm);
     const curBar = firstBarOfPeriod((t) => weekKey(t, tz, sd, sh, sm), curKey);
-    if (curBar) levels.push({ id: 'WO', label: 'Weekly Open', price: curBar.open, kind: 'open' });
+    if (curBar) levels.push({ id: 'WO', label: 'Weekly Open', price: curBar.open, kind: 'open', approximate: curBar === bars[0] });
     if (cfg.show?.PWH !== false) {
-      // previous week key
       const prevWeekTs = lastTs - 7 * 86400;
       const prevKey = weekKey(prevWeekTs, tz, sd, sh, sm);
       const prevBars = bars.filter((b) => weekKey(b.time, tz, sd, sh, sm) === prevKey);
       const mm = maxMin(prevBars);
-      if (mm.high != null) levels.push({ id: 'PWH', label: 'Prev Week High', price: mm.high, kind: 'level' });
-      if (mm.low != null) levels.push({ id: 'PWL', label: 'Prev Week Low', price: mm.low, kind: 'level' });
+      const approx = prevBars.length > 0 && prevBars[0] === bars[0];
+      if (mm.high != null) levels.push({ id: 'PWH', label: 'Prev Week High', price: mm.high, kind: 'level', approximate: approx });
+      if (mm.low != null) levels.push({ id: 'PWL', label: 'Prev Week Low', price: mm.low, kind: 'level', approximate: approx });
     }
   }
 
@@ -151,17 +139,17 @@ export function computeSessionLevels(bars, config) {
     const sd = cfg.monthly?.startDay ?? 1;
     const curKey = monthKey(lastTs, tz, sd, sh, sm);
     const curBar = firstBarOfPeriod((t) => monthKey(t, tz, sd, sh, sm), curKey);
-    if (curBar) levels.push({ id: 'MO', label: 'Monthly Open', price: curBar.open, kind: 'open' });
+    if (curBar) levels.push({ id: 'MO', label: 'Monthly Open', price: curBar.open, kind: 'open', approximate: curBar === bars[0] });
     if (cfg.show?.PMH !== false) {
-      // previous month
       const c = tzParts(lastTs, tz);
       let pm = c.month - 1, py = c.year;
       if (pm < 1) { pm = 12; py -= 1; }
       const prevKey = `${py}-${String(pm).padStart(2, '0')}`;
       const prevBars = bars.filter((b) => monthKey(b.time, tz, sd, sh, sm) === prevKey);
       const mm = maxMin(prevBars);
-      if (mm.high != null) levels.push({ id: 'PMH', label: 'Prev Month High', price: mm.high, kind: 'level' });
-      if (mm.low != null) levels.push({ id: 'PML', label: 'Prev Month Low', price: mm.low, kind: 'level' });
+      const approx = prevBars.length > 0 && prevBars[0] === bars[0];
+      if (mm.high != null) levels.push({ id: 'PMH', label: 'Prev Month High', price: mm.high, kind: 'level', approximate: approx });
+      if (mm.low != null) levels.push({ id: 'PML', label: 'Prev Month Low', price: mm.low, kind: 'level', approximate: approx });
     }
   }
 
@@ -172,7 +160,7 @@ export function computeSessionLevels(bars, config) {
     const curBar = firstBarOfPeriod((t) => dayKey(t, tz, 0, 0), curKey);
     if (curBar) {
       const tfMinutes = bars.length > 1 ? (bars[1].time - bars[0].time) / 60 : 0;
-      levels.push({ id: 'NYMO', label: 'NY Midnight Open', price: curBar.open, kind: 'open', approximate: tfMinutes > 60 });
+      levels.push({ id: 'NYMO', label: 'NY Midnight Open', price: curBar.open, kind: 'open', approximate: tfMinutes > 60 || curBar === bars[0] });
     }
   }
 
@@ -187,11 +175,11 @@ export function computeSessionLevels(bars, config) {
     const { startTs, endTs } = sessionWindowTs(lastTs, s.tz, s.start, s.end);
     const inWindow = bars.filter((b) => b.time >= startTs && b.time < endTs);
     const mm = maxMin(inWindow);
-    if (mm.high != null) levels.push({ id: s.id + '_H', label: s.name + ' High', price: mm.high, kind: 'session' });
-    if (mm.low != null) levels.push({ id: s.id + '_L', label: s.name + ' Low', price: mm.low, kind: 'session' });
-    // open of session
+    const approx = inWindow.length > 0 && inWindow[0] === bars[0];
+    if (mm.high != null) levels.push({ id: s.id + '_H', label: s.name + ' High', price: mm.high, kind: 'session', approximate: approx });
+    if (mm.low != null) levels.push({ id: s.id + '_L', label: s.name + ' Low', price: mm.low, kind: 'session', approximate: approx });
     const first = inWindow[0];
-    if (first) levels.push({ id: s.id + '_O', label: s.name + ' Open', price: first.open, kind: 'session-open' });
+    if (first) levels.push({ id: s.id + '_O', label: s.name + ' Open', price: first.open, kind: 'session-open', approximate: approx });
   }
 
   return levels;

@@ -1,8 +1,8 @@
 import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=1';
-import { SessionLevelsManager } from './alfa-session-levels.mjs?v=1';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
+import { SessionLevelsManager } from './alfa-session-levels.mjs?v=3';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=1';
@@ -362,6 +362,10 @@ function openIndicatorSettings(item) {
   const params = item.params;
   const inputs = Object.keys(params).map(k => {
     const v = params[k];
+    if (k === 'source') {
+      const opts = ['open','high','low','close','hl2','hlc3','ohlc4'].map(x => `<option value="${x}" ${v===x?'selected':''}>${x.toUpperCase()}</option>`).join('');
+      return `<label style="display:block;margin:6px 0;">${k} <select data-k="${k}" style="padding:4px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;">${opts}</select></label>`;
+    }
     if (typeof v === 'boolean') return `<label style="display:block;margin:6px 0;"><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> ${k}</label>`;
     if (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) return `<label style="display:block;margin:6px 0;">${k} <input type="color" data-k="${k}" value="${v}"></label>`;
     return `<label style="display:block;margin:6px 0;">${k} <input type="number" step="any" data-k="${k}" value="${v}" style="padding:4px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>`;
@@ -380,6 +384,7 @@ function openIndicatorSettings(item) {
       const k = inp.dataset.k;
       if (inp.type === 'checkbox') params[k] = inp.checked;
       else if (inp.type === 'color') params[k] = inp.value;
+      else if (inp.tagName === 'SELECT') params[k] = inp.value;
       else params[k] = Number(inp.value);
     });
     indicators.remove(item.id);
@@ -400,6 +405,11 @@ function openMtfSettings() {
     </div>
     <label><input type="checkbox" id="mtf-swings" ${cfg.showSwings?'checked':''}> Swing göster</label><br>
     <label><input type="checkbox" id="mtf-fvg" ${cfg.showFvg?'checked':''}> FVG göster</label><br>
+    <label><input type="checkbox" id="mtf-ms" ${cfg.showMS?'checked':''}> Market Structure göster</label><br>
+    <label><input type="checkbox" id="mtf-protected" ${cfg.showProtected?'checked':''}> Protected Levels</label><br>
+    <label><input type="checkbox" id="mtf-bos" ${cfg.showBOS?'checked':''}> BOS</label><br>
+    <label><input type="checkbox" id="mtf-choch" ${cfg.showCHoCH?'checked':''}> CHoCH</label><br>
+    <label><input type="checkbox" id="mtf-ifvg" ${cfg.showIFVG?'checked':''}> IFVG</label><br>
     <label><input type="checkbox" id="mtf-confirmed" ${cfg.confirmedOnly?'checked':''}> Yalnızca onaylanmış (confirmed)</label><br>
     <label><input type="checkbox" id="mtf-extend" ${cfg.extend?'checked':''}> Bölgeyi sağa uzat</label>
     <div style="margin-top:12px;text-align:right;">
@@ -414,6 +424,11 @@ function openMtfSettings() {
       htf: htf.length ? htf : ['1h'],
       showSwings: modal.box.querySelector('#mtf-swings').checked,
       showFvg: modal.box.querySelector('#mtf-fvg').checked,
+      showMS: modal.box.querySelector('#mtf-ms').checked,
+      showProtected: modal.box.querySelector('#mtf-protected').checked,
+      showBOS: modal.box.querySelector('#mtf-bos').checked,
+      showCHoCH: modal.box.querySelector('#mtf-choch').checked,
+      showIFVG: modal.box.querySelector('#mtf-ifvg').checked,
       confirmedOnly: modal.box.querySelector('#mtf-confirmed').checked,
       extend: modal.box.querySelector('#mtf-extend').checked,
     });

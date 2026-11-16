@@ -1,4 +1,4 @@
-import { computeSessionLevels } from './alfa-session-levels-model.mjs?v=1';
+import { computeSessionLevels } from './alfa-session-levels-model.mjs?v=3';
 
 export class SessionLevelsManager {
   constructor({ series, getBars }) {

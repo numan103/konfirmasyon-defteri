@@ -1,5 +1,5 @@
 import { createChart } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { sma, ema, wma, vwma, rsi, macd, atr, bollinger, vwap, stochastic, stochRsi, adx, supertrend, obv } from './alfa-indicators-model.mjs?v=1';
+import { sma, ema, wma, vwma, rsi, macd, atr, bollinger, vwap, stochastic, stochRsi, adx, supertrend, obv } from './alfa-indicators-model.mjs?v=2';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 
@@ -21,17 +21,17 @@ export const INDICATOR_CATALOG = [
 ];
 
 const DEFAULTS = {
-  sma: { period: 20, color: '#f5a623' },
-  ema: { period: 20, color: '#2962ff' },
-  wma: { period: 20, color: '#9c27b0' },
-  vwma: { period: 20, color: '#00bcd4' },
-  vwap: { color: '#ff9800' },
-  bollinger: { period: 20, mult: 2, color: '#4caf50' },
+  sma: { period: 20, source: 'close', color: '#f5a623' },
+  ema: { period: 20, source: 'close', color: '#2962ff' },
+  wma: { period: 20, source: 'close', color: '#9c27b0' },
+  vwma: { period: 20, source: 'close', color: '#00bcd4' },
+  vwap: { source: 'hlc3', color: '#ff9800' },
+  bollinger: { period: 20, mult: 2, source: 'close', color: '#4caf50' },
   supertrend: { period: 10, mult: 3, color: '#26a69a' },
-  rsi: { period: 14, color: '#7e57c2' },
-  macd: { fast: 12, slow: 26, signal: 9, color: '#2962ff' },
-  stochastic: { k: 14, d: 3, smooth: 3, color: '#2962ff' },
-  stochrsi: { rsiPeriod: 14, stochPeriod: 14, kSmooth: 3, dSmooth: 3, color: '#2962ff' },
+  rsi: { period: 14, source: 'close', color: '#7e57c2' },
+  macd: { fast: 12, slow: 26, signal: 9, source: 'close', color: '#2962ff' },
+  stochastic: { k: 14, d: 3, smooth: 3, source: 'close', color: '#2962ff' },
+  stochrsi: { rsiPeriod: 14, stochPeriod: 14, kSmooth: 3, dSmooth: 3, source: 'close', color: '#2962ff' },
   atr: { period: 14, color: '#ff5722' },
   adx: { period: 14, color: '#e91e63' },
   obv: { color: '#607d8b' },
@@ -68,13 +68,13 @@ export class IndicatorManager {
   compute(item, bars) {
     const p = item.params;
     switch (item.type) {
-      case 'sma': return [{ key: 'value', data: sma(bars, p.period).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
-      case 'ema': return [{ key: 'value', data: ema(bars, p.period).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
-      case 'wma': return [{ key: 'value', data: wma(bars, p.period).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
-      case 'vwma': return [{ key: 'value', data: vwma(bars, p.period).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
-      case 'vwap': return [{ key: 'value', data: vwap(bars).map((v, i) => ({ time: bars[i].time, value: v })) }];
+      case 'sma': return [{ key: 'value', data: sma(bars, p.period, p.source).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
+      case 'ema': return [{ key: 'value', data: ema(bars, p.period, p.source).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
+      case 'wma': return [{ key: 'value', data: wma(bars, p.period, p.source).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
+      case 'vwma': return [{ key: 'value', data: vwma(bars, p.period, p.source).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
+      case 'vwap': return [{ key: 'value', data: vwap(bars, p.source).map((v, i) => ({ time: bars[i].time, value: v })) }];
       case 'bollinger': {
-        const b = bollinger(bars, p.period, p.mult);
+        const b = bollinger(bars, p.period, p.mult, p.source);
         return [
           { key: 'upper', data: b.upper.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
           { key: 'middle', data: b.middle.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
@@ -85,9 +85,9 @@ export class IndicatorManager {
         const s = supertrend(bars, p.period, p.mult);
         return [{ key: 'value', data: s.value.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
       }
-      case 'rsi': return [{ key: 'value', data: rsi(bars, p.period).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
+      case 'rsi': return [{ key: 'value', data: rsi(bars, p.period, p.source).map((v, i) => v == null ? null : { time: bars[i].time, value: v }) }];
       case 'macd': {
-        const m = macd(bars, p.fast, p.slow, p.signal);
+        const m = macd(bars, p.fast, p.slow, p.signal, p.source);
         return [
           { key: 'macd', data: m.macd.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
           { key: 'signal', data: m.signal.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
@@ -95,14 +95,14 @@ export class IndicatorManager {
         ];
       }
       case 'stochastic': {
-        const s = stochastic(bars, p.k, p.d, p.smooth);
+        const s = stochastic(bars, p.k, p.d, p.smooth, p.source);
         return [
           { key: 'k', data: s.k.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
           { key: 'd', data: s.d.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
         ];
       }
       case 'stochrsi': {
-        const s = stochRsi(bars, p.rsiPeriod, p.stochPeriod, p.kSmooth, p.dSmooth);
+        const s = stochRsi(bars, p.rsiPeriod, p.stochPeriod, p.kSmooth, p.dSmooth, p.source);
         return [
           { key: 'k', data: s.k.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },
           { key: 'd', data: s.d.map((v, i) => v == null ? null : { time: bars[i].time, value: v }) },

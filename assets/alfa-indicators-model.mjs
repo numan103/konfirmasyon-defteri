@@ -1,73 +1,83 @@
 // Pure, dependency-free indicator calculations for ALFA CHARTS.
-// Every function takes candles sorted by time ascending and returns an array aligned
-// to the input (same length). Warm-up positions are null.
-export const INDICATORS = {};
+export function priceOf(c, source = 'close') {
+  switch (source) {
+    case 'open': return c.open;
+    case 'high': return c.high;
+    case 'low': return c.low;
+    case 'hl2': return (c.high + c.low) / 2;
+    case 'hlc3': return (c.high + c.low + c.close) / 3;
+    case 'ohlc4': return (c.open + c.high + c.low + c.close) / 4;
+    default: return c.close;
+  }
+}
 
-function closes(candles) { return candles.map(c => c.close); }
-function highs(candles) { return candles.map(c => c.high); }
-function lows(candles) { return candles.map(c => c.low); }
-function volumes(candles) { return candles.map(c => c.volume ?? 0); }
+function closes(candles, source) { return candles.map(c => priceOf(c, source)); }
 
-export function sma(candles, period = 20) {
+export function sma(candles, period = 20, source = 'close') {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
+  const vals = closes(candles, source);
   let sum = 0;
   for (let i = 0; i < candles.length; i++) {
-    sum += candles[i].close;
-    if (i >= p) sum -= candles[i - p].close;
+    sum += vals[i];
+    if (i >= p) sum -= vals[i - p];
     if (i >= p - 1) out[i] = sum / p;
   }
   return out;
 }
 
-export function ema(candles, period = 20) {
+export function ema(candles, period = 20, source = 'close') {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
+  const vals = closes(candles, source);
   const k = 2 / (p + 1);
   let seed = null, sum = 0, count = 0;
   for (let i = 0; i < candles.length; i++) {
-    if (count < p) { sum += candles[i].close; count++; if (count === p) { seed = sum / p; out[i] = seed; } }
-    else { seed = candles[i].close * k + seed * (1 - k); out[i] = seed; }
+    if (count < p) { sum += vals[i]; count++; if (count === p) { seed = sum / p; out[i] = seed; } }
+    else { seed = vals[i] * k + seed * (1 - k); out[i] = seed; }
   }
   return out;
 }
 
-export function wma(candles, period = 20) {
+export function wma(candles, period = 20, source = 'close') {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
+  const vals = closes(candles, source);
   const denom = p * (p + 1) / 2;
   for (let i = p - 1; i < candles.length; i++) {
     let s = 0;
-    for (let j = 0; j < p; j++) s += candles[i - p + 1 + j].close * (j + 1);
+    for (let j = 0; j < p; j++) s += vals[i - p + 1 + j] * (j + 1);
     out[i] = s / denom;
   }
   return out;
 }
 
-export function vwma(candles, period = 20) {
+export function vwma(candles, period = 20, source = 'close') {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
+  const vals = closes(candles, source);
   for (let i = p - 1; i < candles.length; i++) {
     let pv = 0, v = 0;
-    for (let j = 0; j < p; j++) { pv += candles[i - p + 1 + j].close * (candles[i - p + 1 + j].volume ?? 0); v += candles[i - p + 1 + j].volume ?? 0; }
-    out[i] = v ? pv / v : candles[i].close;
+    for (let j = 0; j < p; j++) { pv += vals[i - p + 1 + j] * (candles[i - p + 1 + j].volume ?? 0); v += candles[i - p + 1 + j].volume ?? 0; }
+    out[i] = v ? pv / v : vals[i];
   }
   return out;
 }
 
-export function rsi(candles, period = 14) {
+export function rsi(candles, period = 14, source = 'close') {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
+  const vals = closes(candles, source);
   if (candles.length <= p) return out;
   let gain = 0, loss = 0;
   for (let i = 1; i <= p; i++) {
-    const d = candles[i].close - candles[i - 1].close;
+    const d = vals[i] - vals[i - 1];
     if (d >= 0) gain += d; else loss -= d;
   }
   let avgGain = gain / p, avgLoss = loss / p;
   out[p] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss);
   for (let i = p + 1; i < candles.length; i++) {
-    const d = candles[i].close - candles[i - 1].close;
+    const d = vals[i] - vals[i - 1];
     const g = d > 0 ? d : 0, l = d < 0 ? -d : 0;
     avgGain = (avgGain * (p - 1) + g) / p;
     avgLoss = (avgLoss * (p - 1) + l) / p;
@@ -92,16 +102,14 @@ export function atr(candles, period = 14) {
   return out;
 }
 
-export function macd(candles, fast = 12, slow = 26, signal = 9) {
-  const eFast = ema(candles, fast);
-  const eSlow = ema(candles, slow);
+export function macd(candles, fast = 12, slow = 26, signal = 9, source = 'close') {
+  const eFast = ema(candles, fast, source);
+  const eSlow = ema(candles, slow, source);
   const line = candles.map((_, i) => (eFast[i] == null || eSlow[i] == null) ? null : eFast[i] - eSlow[i]);
-  // signal EMA over macd line (treat nulls as 0 for warm-up, then standard EMA from first valid)
   const sig = new Array(candles.length).fill(null);
   const k = 2 / (signal + 1);
-  let seed = null, sum = 0, count = 0, validStart = line.findIndex(v => v != null);
-  // seed with SMA of first `signal` valid macd values
   const validVals = line.filter(v => v != null);
+  let seed = null;
   if (validVals.length >= signal) {
     let acc = 0;
     for (let j = 0; j < signal; j++) acc += validVals[j];
@@ -120,13 +128,14 @@ export function macd(candles, fast = 12, slow = 26, signal = 9) {
   return { macd: line, signal: sig, hist };
 }
 
-export function bollinger(candles, period = 20, mult = 2) {
-  const mid = sma(candles, period);
+export function bollinger(candles, period = 20, mult = 2, source = 'close') {
+  const mid = sma(candles, period, source);
+  const vals = closes(candles, source);
   const upper = new Array(candles.length).fill(null);
   const lower = new Array(candles.length).fill(null);
   for (let i = period - 1; i < candles.length; i++) {
     let sq = 0;
-    for (let j = 0; j < period; j++) sq += (candles[i - period + 1 + j].close - mid[i]) ** 2;
+    for (let j = 0; j < period; j++) sq += (vals[i - period + 1 + j] - mid[i]) ** 2;
     const sd = Math.sqrt(sq / period);
     upper[i] = mid[i] + mult * sd;
     lower[i] = mid[i] - mult * sd;
@@ -134,29 +143,29 @@ export function bollinger(candles, period = 20, mult = 2) {
   return { upper, middle: mid, lower };
 }
 
-export function vwap(candles) {
+export function vwap(candles, source = 'hlc3') {
   const out = new Array(candles.length).fill(null);
   let cumPV = 0, cumV = 0, day = null;
   for (let i = 0; i < candles.length; i++) {
     const d = new Date(candles[i].time * 1000).toISOString().slice(0, 10);
     if (day !== d) { day = d; cumPV = 0; cumV = 0; }
-    const price = (candles[i].high + candles[i].low + candles[i].close) / 3;
+    const price = priceOf(candles[i], source === 'close' ? 'hlc3' : source);
     const v = candles[i].volume ?? 0;
     cumPV += price * v; cumV += v;
-    out[i] = cumV ? cumPV / cumV : candles[i].close;
+    out[i] = cumV ? cumPV / cumV : priceOf(candles[i], source);
   }
   return out;
 }
 
-export function stochastic(candles, kPeriod = 14, dPeriod = 3, smooth = 3) {
+export function stochastic(candles, kPeriod = 14, dPeriod = 3, smooth = 3, source = 'close') {
+  const vals = closes(candles, source);
   const rawK = new Array(candles.length).fill(null);
   for (let i = kPeriod - 1; i < candles.length; i++) {
     let hh = -Infinity, ll = Infinity;
     for (let j = 0; j < kPeriod; j++) { hh = Math.max(hh, candles[i - kPeriod + 1 + j].high); ll = Math.min(ll, candles[i - kPeriod + 1 + j].low); }
     const range = hh - ll;
-    rawK[i] = range ? ((candles[i].close - ll) / range) * 100 : 50;
+    rawK[i] = range ? ((vals[i] - ll) / range) * 100 : 50;
   }
-  // smooth %K
   const k = new Array(candles.length).fill(null);
   for (let i = kPeriod - 1 + smooth - 1; i < candles.length; i++) {
     let s = 0;
@@ -168,35 +177,23 @@ export function stochastic(candles, kPeriod = 14, dPeriod = 3, smooth = 3) {
 }
 
 function smaLike(values, period) {
-  const out = new Array(values.length).fill(null);
-  let sum = 0, count = 0;
-  for (let i = 0; i < values.length; i++) {
-    if (values[i] == null) { out[i] = null; continue; }
-    sum += values[i]; count++;
-    if (count > period) { /* find previous valid to subtract - approximate by sliding over raw positions */ }
-  }
-  // simpler: standard SMA over the array treating nulls as gaps
   const res = new Array(values.length).fill(null);
   for (let i = period - 1; i < values.length; i++) {
-    let s = 0, n = 0, ok = true;
+    let s = 0, ok = true;
     for (let j = 0; j < period; j++) {
       if (values[i - j] == null) { ok = false; break; }
-      s += values[i - j]; n++;
+      s += values[i - j];
     }
-    if (ok && n === period) res[i] = s / period;
+    if (ok) res[i] = s / period;
   }
   return res;
 }
 
-export function stochRsi(candles, rsiPeriod = 14, stochPeriod = 14, kSmooth = 3, dSmooth = 3) {
-  const r = rsi(candles, rsiPeriod);
-  // build pseudo-candles from rsi values
-  const pseudo = r.map((v, i) => ({ time: candles[i].time, open: v ?? 0, high: v ?? 0, low: v ?? 0, close: v ?? 0, volume: 0 }));
-  // stochastic on rsi, but only where rsi valid
+export function stochRsi(candles, rsiPeriod = 14, stochPeriod = 14, kSmooth = 3, dSmooth = 3, source = 'close') {
+  const r = rsi(candles, rsiPeriod, source);
   const rawK = new Array(candles.length).fill(null);
   for (let i = 0; i < candles.length; i++) {
     if (r[i] == null) continue;
-    // need stochPeriod valid rsi ending at i
     let start = i - stochPeriod + 1;
     if (start < 0) continue;
     let allValid = true;
@@ -210,7 +207,6 @@ export function stochRsi(candles, rsiPeriod = 14, stochPeriod = 14, kSmooth = 3,
   const k = new Array(candles.length).fill(null);
   for (let i = 0; i < candles.length; i++) {
     if (rawK[i] == null) continue;
-    // smooth
     let s = 0, n = 0, ok = true;
     for (let j = 0; j < kSmooth; j++) {
       if (rawK[i - j] == null) { ok = false; break; }
@@ -226,7 +222,6 @@ export function adx(candles, period = 14) {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
   if (candles.length < p + 1) return out;
-  // +DM, -DM, TR
   const plusDM = new Array(candles.length).fill(0);
   const minusDM = new Array(candles.length).fill(0);
   const trs = new Array(candles.length).fill(0);
@@ -238,20 +233,8 @@ export function adx(candles, period = 14) {
     const pc = candles[i - 1].close;
     trs[i] = Math.max(candles[i].high - candles[i].low, Math.abs(candles[i].high - pc), Math.abs(candles[i].low - pc));
   }
-  // Wilder smoothing
-  let smTR = 0, smPlus = 0, smMinus = 0;
-  for (let i = 1; i <= p; i++) { smTR += trs[i]; smPlus += plusDM[i]; smMinus += minusDM[i]; }
-  const dx = new Array(candles.length).fill(null);
-  let pdi = (smTR ? (smPlus / smTR) * 100 : 0);
-  let mdi = (smTR ? (smMinus / smTR) * 100 : 0);
-  let adxVal = Math.abs(pdi - mdi) / (pdi + mdi || 1) * 100;
-  const adxArr = new Array(candles.length).fill(null);
-  // seed adx with first dx
-  let adxSum = 0, adxCount = 0;
-  // We'll compute DX series first
-  const dxSeries = new Array(candles.length).fill(null);
-  // recompute smoothed per step
-  let sTR = smTR, sP = smPlus, sM = smMinus;
+  let sTR = 0, sP = 0, sM = 0;
+  for (let i = 1; i <= p; i++) { sTR += trs[i]; sP += plusDM[i]; sM += minusDM[i]; }
   let adxSmooth = null;
   for (let i = p; i < candles.length; i++) {
     if (i > p) {
@@ -262,21 +245,19 @@ export function adx(candles, period = 14) {
     const pd = sTR ? (sP / sTR) * 100 : 0;
     const md = sTR ? (sM / sTR) * 100 : 0;
     const d = (pd + md) ? (Math.abs(pd - md) / (pd + md)) * 100 : 0;
-    dxSeries[i] = d;
     if (i === p) { adxSmooth = d; }
     else { adxSmooth = (adxSmooth * (p - 1) + d) / p; }
-    adxArr[i] = adxSmooth;
+    out[i] = adxSmooth;
   }
-  // shift: ADX valid from 2p-1? TradingView from p. Keep p.
-  for (let i = 0; i < p; i++) adxArr[i] = null;
-  return adxArr;
+  for (let i = 0; i < p; i++) out[i] = null;
+  return out;
 }
 
 export function supertrend(candles, period = 10, mult = 3) {
   const a = atr(candles, period);
   const upper = new Array(candles.length).fill(null);
   const lower = new Array(candles.length).fill(null);
-  const trend = new Array(candles.length).fill(1); // 1 up, -1 down
+  const trend = new Array(candles.length).fill(1);
   const st = new Array(candles.length).fill(null);
   for (let i = 0; i < candles.length; i++) {
     if (a[i] == null) continue;
