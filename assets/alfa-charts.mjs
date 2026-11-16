@@ -1,6 +1,7 @@
 import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
+import { IndicatorManager } from './alfa-indicators.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -22,7 +23,7 @@ const candles = chart.addSeries(CandlestickSeries, {
 const line = chart.addSeries(LineSeries, { color: '#8ea7ff', lineWidth: 2, visible: false });
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
 let history = [], seriesBars = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
-let lastReceipt = 0, disposed = false;
+let lastReceipt = 0, disposed = false, pendingIndicators = null;
 const observer = new ResizeObserver(([entry]) => {
   chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
 });
@@ -52,6 +53,8 @@ function setData(data, resetView) {
     chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, history.length - 130), to: history.length + 8 });
   }
   quote();
+  if (pendingIndicators) { try { indicators.fromJSON(pendingIndicators); } catch {} pendingIndicators = null; }
+  else { try { indicators.updateAll(history); } catch {} }
 }
 chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(type === 'candles' ? candles : line);
@@ -94,6 +97,8 @@ async function loadMarket() {
   $('ohlc').textContent = 'Gerçek piyasa verisi bekleniyor';
   updateUI();
   drawings.openMarket(symbol);
+  try { indicators.clear(); } catch {}
+  try { pendingIndicators = JSON.parse(localStorage.getItem('alfa-ind:v1:' + symbol) || 'null'); } catch { pendingIndicators = null; }
   showMessage('Binance mum verileri yükleniyor…');
   connection('Geçmiş mumlar yükleniyor');
   connect(id, true);
@@ -145,6 +150,7 @@ function connect(id, resetView = false) {
       if (c.time > seriesBars.at(-1).time) seriesBars = [...seriesBars, c];
       history = mergeCandles(history, [c]);
       quote(); attempts = 0;
+      try { indicators.updateAll(seriesBars); } catch {}
       connection(`Canlı · ${new Date(lastReceipt).toLocaleTimeString('tr-TR')} · WebSocket`, 'live');
     } catch { reconnect('Veri doğrulanamadı'); }
   };
@@ -188,6 +194,7 @@ $('fullscreen').addEventListener('click', async () => {
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? 'Küçült' : 'Tam ekran'; });
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -197,4 +204,10 @@ window.addEventListener('offline', () => { connection('İnternet bağlantısı y
 if (new URLSearchParams(location.search).has('debug')) {
   window.__alfaDebug = { chart, candles, line, drawings, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
+$('indicator-add').addEventListener('change', e => {
+  const type = e.target.value;
+  if (!type) return;
+  try { indicators.add(type); localStorage.setItem('alfa-ind:v1:' + symbol, JSON.stringify(indicators.toJSON())); } catch {}
+  e.target.value = '';
+});
 loadMarket();

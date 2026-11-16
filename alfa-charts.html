@@ -23,6 +23,14 @@
         <option value="candles">Mum</option><option value="line">Line / Çizgi</option>
       </select>
       <div class="actions">
+        <select id="indicator-add" aria-label="İndikatör ekle" title="İndikatör ekle" style="padding:6px 8px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">
+          <option value="">+ İndikatör</option>
+          <option value="sma">SMA</option><option value="ema">EMA</option><option value="wma">WMA</option>
+          <option value="vwma">VWMA</option><option value="vwap">VWAP</option><option value="bollinger">Bollinger Bands</option>
+          <option value="supertrend">Supertrend</option><option value="rsi">RSI</option><option value="macd">MACD</option>
+          <option value="stochastic">Stochastic</option><option value="stochrsi">Stochastic RSI</option>
+          <option value="atr">ATR</option><option value="adx">ADX</option><option value="obv">OBV</option>
+        </select>
         <button id="drawing-undo" type="button" title="Undo (Ctrl+Z)" disabled>↶</button>
         <button id="drawing-redo" type="button" title="Redo (Ctrl+Shift+Z)" disabled>↷</button>
         <button id="drawing-manage" type="button">Çizimler / Ayarlar</button>
@@ -103,6 +111,6 @@
       <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Lightweight Charts™ by TradingView</a>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=6"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=7"></script>
 </body>
 </html>
