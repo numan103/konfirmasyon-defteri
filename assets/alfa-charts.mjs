@@ -5,6 +5,7 @@ import { IndicatorManager } from './alfa-indicators.mjs?v=1';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=1';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
+import { MtfManager } from './alfa-mtf.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -103,6 +104,7 @@ async function loadMarket() {
   $('ohlc').textContent = 'Gerçek piyasa verisi bekleniyor';
   updateUI();
   drawings.openMarket(symbol);
+  try { mtf.setSymbol(symbol); } catch {}
   try { indicators.clear(); } catch {}
   try { pendingIndicators = JSON.parse(localStorage.getItem('alfa-ind:v1:' + symbol) || 'null'); } catch { pendingIndicators = null; }
   showMessage('Binance mum verileri yükleniyor…');
@@ -207,6 +209,7 @@ const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
+const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
 function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -239,5 +242,11 @@ $('fvg-toggle').addEventListener('click', () => {
   $('fvg-toggle').dataset.on = on ? '1' : '0';
   $('fvg-toggle').style.background = on ? '#2962ff' : '#151b26';
   fvg.setEnabled(on);
+});
+$('mtf-toggle').addEventListener('click', () => {
+  const on = $('mtf-toggle').dataset.on !== '1';
+  $('mtf-toggle').dataset.on = on ? '1' : '0';
+  $('mtf-toggle').style.background = on ? '#2962ff' : '#151b26';
+  mtf.setEnabled(on);
 });
 loadMarket();
