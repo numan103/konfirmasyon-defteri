@@ -1,6 +1,10 @@
 :root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;color:#d6dce7;background:#10141c;font-size:12px}
 *{box-sizing:border-box}
 body{margin:0}
+#replay-bar:not([hidden]){display:flex;flex-wrap:wrap;flex-shrink:0}
+.replay-mode #market-title::before{content:"REPLAY · ";color:#ffb74d}
+#replay-saved{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+#replay-date{color:inherit;background:#10141c;border:1px solid #536ba9;padding:8px;margin:8px}
 button,select,a{touch-action:manipulation}
 button,select{font:inherit;color:inherit;background:#191f2b;border:1px solid #30394b;border-radius:5px;padding:7px 9px}
 button,select{cursor:pointer}

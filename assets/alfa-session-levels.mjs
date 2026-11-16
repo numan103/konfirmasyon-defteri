@@ -1,4 +1,4 @@
-import { computeSessionLevels } from './alfa-session-levels-model.mjs?v=3';
+import { computeSessionLevels, strictSessionLevels } from './alfa-session-levels-model.mjs?v=4';
 
 export class SessionLevelsManager {
   constructor({ series, getBars }) {
@@ -37,7 +37,8 @@ export class SessionLevelsManager {
     this.clear();
     if (!this.enabled) return;
     const bars = this.getBars();
-    const levels = computeSessionLevels(bars, this.config);
+    const levels = this.replayBoundary ? strictSessionLevels(bars,this.config,this.replayBoundary) :
+      computeSessionLevels(bars, this.config);
     for (const lv of levels) {
       if (this.config.show?.[lv.id.replace(/_H|_L|_O$/, '')] === false) continue;
       // session toggles checked by id prefix

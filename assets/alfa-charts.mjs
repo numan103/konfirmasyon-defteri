@@ -1,11 +1,14 @@
 import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
+import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=2';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
-import { SessionLevelsManager } from './alfa-session-levels.mjs?v=3';
+import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
-import { MtfManager } from './alfa-mtf.mjs?v=1';
+import { MtfManager } from './alfa-mtf.mjs?v=2';
+import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
+import { replayRange } from './alfa-replay-data.mjs?v=1';
+import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=2';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 
 const $ = id => document.getElementById(id);
@@ -29,6 +32,10 @@ const line = chart.addSeries(LineSeries, { color: '#8ea7ff', lineWidth: 2, visib
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
 let history = [], seriesBars = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false, pendingIndicators = null, loadingOlder = false;
+let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, replaySpeed = 1;
+let olderController = null;
+let replayEngine = null, replayStartIndex = 0, liveDrawingState = null, replayMtfEnabled = false;
+let replayRequest=null, replayBusy=false, replayPicking=false, replaySessionId=null;
 const observer = new ResizeObserver(([entry]) => {
   chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
 });
@@ -46,12 +53,15 @@ function showCandle(c) {
   $('ohlc').textContent = `O ${priceFormat.format(c.open)}  H ${priceFormat.format(c.high)}  L ${priceFormat.format(c.low)}  C ${priceFormat.format(c.close)}`;
 }
 async function loadOlderHistory() {
+  if (replayMode) return;
   if (loadingOlder || disposed || history.length === 0) return;
   loadingOlder = true;
+  const requestGeneration = generation, requestSymbol = symbol, requestInterval = interval;
   const firstTime = history[0].time;
-  const controller = new AbortController();
+  const controller = new AbortController(); olderController = controller;
   try {
-    const older = await fetchHistory(symbol, interval, controller.signal, fetch, firstTime * 1000 - 1);
+    const older = await fetchHistory(requestSymbol, requestInterval, controller.signal, fetch, firstTime * 1000 - 1);
+    if (requestGeneration !== generation || replayMode || disposed) return;
     if (!older.length) { loadingOlder = false; return; }
     const seen = new Set(history.map(c => c.time));
     const newBars = older.filter(c => !seen.has(c.time));
@@ -78,8 +88,156 @@ async function loadOlderHistory() {
   } catch (e) {
     if (e && e.name !== 'AbortError') console.error('older history failed', e);
   } finally {
-    loadingOlder = false;
+    if (olderController === controller) { loadingOlder = false; olderController = null; }
   }
+}
+function applyReplaySlice() {
+  const sliced = replayEngine.snapshot();
+  replayIndex = sliced.length;
+  history = sliced;
+  seriesBars = sliced;
+  sessionLevels.replayBoundary={clock:replayEngine.clock,step:candleCloseTime(0,interval)};
+  candles.setData(history);
+  line.setData(history.map(c => ({ time: c.time, value: c.close })));
+  try { indicators.updateAll(history); } catch {}
+  try { sessionLevels.render(); } catch {}
+  try { marketStructure.render(); } catch {}
+  try { fvg.render(); } catch {}
+  try { mtf.setReplayClock(replayEngine.clock); } catch {}
+  quote();
+  const info = $('replay-info');
+  if (info) info.textContent = new Date(replayEngine.clock * 1000).toISOString() + ' · Confirmed';
+  connection('REPLAY · yalnızca kapanmış mumlar', 'replay');
+}
+async function enterReplay({target,session=null}={}) {
+  if (replayMode) return;
+  if(replayBusy || !drawings.ready)return;
+  if(session) {
+    if(!SYMBOLS.includes(session.symbol) || !Object.values(TIMEFRAMES).includes(session.timeframe)){
+      connection('Geçersiz kayıtlı replay','error');return;
+    }
+    symbol=session.symbol;interval=session.timeframe; target=session.startTime;
+  }
+  if(!Number.isFinite(target)){connection('Geçersiz replay tarihi','error');return;}
+  replayBusy=true; replayRequest?.abort(); replayRequest=new AbortController();
+  const capturedGeneration=++generation; closeTransport();
+  const seconds=candleCloseTime(0,interval);
+  const offset=interval==='1w'?345600:0;
+  const aligned=Math.floor((target-offset)/seconds)*seconds+offset;
+  const warmup=Math.min(5000,Math.max(300,...indicators.items.flatMap(i=>Object.entries(i.params).filter(([k,v])=>typeof v==='number'&&/period|slow|fast|length/i.test(k)).map(([,v])=>v*3))));
+  let data;
+  try {
+    const start=session?.dataStart ?? aligned-warmup*seconds;
+    if(!Number.isFinite(start))throw new Error('Bu eski kayıt başlangıç verisi içermiyor');
+    const end=session ? Math.max(session.currentTime,session.startTime) : aligned;
+    connection('Replay geçmişi ve warm-up yükleniyor…');
+    data=await replayRange({symbol,timeframe:interval,start,end,signal:replayRequest.signal});
+    if(capturedGeneration!==generation)return;
+    await drawings.openMarket(symbol,true);
+    if(capturedGeneration!==generation)return;
+    if(session?.indicators) {
+      if(!Array.isArray(session.indicators)||session.indicators.length>30)throw new Error('Geçersiz replay indikatör ayarları');
+      indicators.fromJSON(session.indicators);
+    }
+    const engine=new ReplayEngine({symbol,timeframe:interval});
+    if(session)engine.restore(data,session);else engine.load(data,aligned);
+    replayEngine=engine;
+    if(session?.drawings) new DrawingHistory(session.drawings); // validate before swapping live layer
+  } catch(error) {
+    if(capturedGeneration===generation){connection('Replay başlatılamadı: '+error.message,'error');connect(generation,false);}
+    return;
+  } finally {replayBusy=false;}
+  replayFull = data;
+  replayStartIndex=replayEngine.index;
+  ++generation; closeTransport();
+  liveDrawingState={context:drawings.context,history:drawings.history,histories:drawings.histories};
+  drawings.histories=new Map();
+  replaySessionId=session?.id||'replay-'+crypto.randomUUID();
+  drawings.context={owner:replaySessionId,symbol,remote:false,revision:0,doc:session?.drawings||emptyDocument()};
+  drawings.history=new DrawingHistory(session?.drawings||emptyDocument()); drawings.selected=null;
+  $('replay-speed').value=String([.5,1,2,5,10].includes(session?.speed)?session.speed:1);
+  replayMtfEnabled=!!mtf.enabled;
+  mtf.loadController?.abort(); mtf.htfData.clear(); mtf.clear();
+  if(session?.mtfConfig)mtf.config={...mtf.defaultConfig(),...session.mtfConfig};
+  if(session && typeof session.mtfEnabled==='boolean')mtf.enabled=session.mtfEnabled;
+  replayMode = true;
+  updateUI();
+  document.body.classList.add('replay-mode');
+  const bar = $('replay-bar');
+  if (bar) bar.hidden = false;
+  try { $('live').disabled = true; } catch {}
+  applyReplaySlice();
+  chart.timeScale().setVisibleLogicalRange({from:Math.max(0,replayIndex-100),to:replayIndex+8});
+  drawings.refresh();
+  if(aligned!==target)connection('REPLAY · en yakın mum açılışı '+new Date(aligned*1000).toISOString(),'replay');
+}
+function exitReplay() {
+  if (!replayMode) return;
+  replayRequest?.abort(); replayBusy=false;
+  if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+  replayMode = false;
+  sessionLevels.replayBoundary=null;
+  document.body.classList.remove('replay-mode');
+  const bar = $('replay-bar');
+  if (bar) bar.hidden = true;
+  try { $('live').disabled = false; } catch {}
+  history = replayFull;
+  seriesBars = replayFull;
+  candles.setData(history);
+  line.setData(history.map(c => ({ time: c.time, value: c.close })));
+  try { indicators.updateAll(history); } catch {}
+  try { sessionLevels.render(); } catch {}
+  try { marketStructure.render(); } catch {}
+  try { fvg.render(); } catch {}
+  try { mtf.render(); } catch {}
+  quote();
+  replayFull = [];
+  if (liveDrawingState) {
+    Object.assign(drawings,liveDrawingState); liveDrawingState=null;
+    drawings.selected=null; drawings.refresh();
+  }
+  mtf.setReplayClock(null); mtf.setEnabled(replayMtfEnabled);
+  replayEngine=null;
+  loadMarket();
+}
+async function stepReplay(delta) {
+  if (!replayMode) return;
+  pauseReplay();
+  if(replayBusy)return;
+  if(delta>0 && replayEngine.exhausted) {
+    replayBusy=true;
+    const engine=replayEngine, request=new AbortController(); replayRequest=request;
+    try {
+      connection('Replay veri bloğu yükleniyor · duraklatıldı','replay');
+      const next=candleCloseTime(engine.lastTime,interval);
+      const bars=await fetchHistory(symbol,interval,request.signal,fetch,Date.now()-1,next*1000);
+      if(engine!==replayEngine || !replayMode)return;
+      engine.now=Date.now()/1000;
+      const count=engine.append(bars);
+      if(!count){connection('Son kapanmış muma ulaşıldı · Durdur ile canlıya dönün','replay');return;}
+    }catch(error){if(replayMode)connection('Replay duraklatıldı: '+error.message,'error');return;}
+    finally{replayBusy=false;}
+  }
+  try { replayEngine.step(delta); applyReplaySlice(); }
+  catch(error) { connection(error.message,'error'); }
+}
+function playReplay() {
+  if (!replayMode || replayTimer || replayBusy) return;
+  const speed = Number($('replay-speed').value) || 1;
+  const intervalMs = Math.max(50, 1000 / speed);
+  replayTimer = setInterval(() => {
+    if (replayEngine.exhausted) { pauseReplay(); stepReplay(1); return; }
+    try { replayEngine.step(1); applyReplaySlice(); }
+    catch(error) { pauseReplay(); connection(error.message,'error'); }
+  }, intervalMs);
+}
+function pauseReplay() {
+  if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+}
+function restartReplay() {
+  if (!replayMode || replayBusy) return;
+  pauseReplay(); replayEngine.restart();
+  applyReplaySlice();
 }
 function quote() {
   const c = history.at(-1);
@@ -125,6 +283,7 @@ host.addEventListener('keydown', event => {
   }
 });
 function closeTransport() {
+  olderController?.abort(); olderController = null; loadingOlder = false;
   clearTimeout(retryTimer); clearInterval(watchdog);
   aborter?.abort();
   if (socket) { socket.onclose = socket.onmessage = socket.onopen = socket.onerror = null; socket.close(); socket = null; }
@@ -137,6 +296,14 @@ function updateUI() {
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
 }
 async function loadMarket() {
+  if (replayMode) {
+    pauseReplay(); replayMode=false; replayEngine=null;
+    sessionLevels.replayBoundary=null;
+    mtf.replayClock=null; mtf.loadController?.abort(); mtf.htfData.clear(); mtf.clear();
+    $('replay-bar').hidden=true;
+    document.body.classList.remove('replay-mode'); $('live').disabled=false;
+    if(liveDrawingState){Object.assign(drawings,liveDrawingState);liveDrawingState=null;}
+  }
   const id = ++generation;
   closeTransport(); attempts = 0; history = []; seriesBars = [];
   candles.setData([]); line.setData([]);
@@ -146,7 +313,10 @@ async function loadMarket() {
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
   try { indicators.clear(); } catch {}
-  try { pendingIndicators = JSON.parse(localStorage.getItem('alfa-ind:v1:' + symbol) || 'null'); } catch { pendingIndicators = null; }
+  try {
+    const layout=JSON.parse(localStorage.getItem(layoutKey())||'null');
+    pendingIndicators=layout?.indicators ?? JSON.parse(localStorage.getItem('alfa-ind:v1:'+symbol)||'null');
+  } catch { pendingIndicators = null; }
   showMessage('Binance mum verileri yükleniyor…');
   connection('Geçmiş mumlar yükleniyor');
   connect(id, true);
@@ -178,7 +348,7 @@ function connect(id, resetView = false) {
       const data = await fetchHistory(symbol, interval, controller.signal);
       if (id !== generation || ended) return;
       clearTimeout(timeout);
-      setData(mergeCandles(data, buffered), resetView);
+      setData(mergeCandles(history, [...data, ...buffered], Infinity), resetView);
       buffered = []; ready = true;
       showMessage('');
       connection('Geçmiş yüklendi · ilk canlı mum bekleniyor');
@@ -187,6 +357,7 @@ function connect(id, resetView = false) {
     }
   };
   ws.onmessage = event => {
+    if (replayMode) return;
     if (id !== generation || ended) return;
     try {
       const c = parseKline(event.data, symbol, interval);
@@ -195,8 +366,8 @@ function connect(id, resetView = false) {
       if (!ready) { buffered.push(c); if (buffered.length > 2000) buffered.shift(); return; }
       if (c.time < history.at(-1).time) return;
       candles.update(c); line.update({ time: c.time, value: c.close });
-      if (c.time > seriesBars.at(-1).time) seriesBars = [...seriesBars, c];
-      history = mergeCandles(history, [c]);
+      history = mergeCandles(history, [c], Infinity);
+      seriesBars = history;
       quote(); attempts = 0;
       try { indicators.updateAll(seriesBars); } catch {}
       try { sessionLevels.render(); } catch {}
@@ -250,6 +421,7 @@ const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () =>
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
   try { loadLayout(); } catch {}
   try { indicators.updateAll(seriesBars); } catch {}
@@ -259,15 +431,64 @@ const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').
   try { mtf.render(); } catch {}
 });
 cloudSettings.start();
-function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
+function dispose() { pauseReplay(); disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 window.addEventListener('online', () => { if (!disposed) loadMarket(); });
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
+$('replay-toggle').addEventListener('click', () => {
+  if (replayMode) { exitReplay(); return; }
+  const modal=openModal(`<h3>Bar Replay</h3>
+    <p>Seçilen mumun <strong>kapanışından</strong> başlanır. Tarih/saat UTC’dir.</p>
+    <button id="replay-pick">Grafikten mum seç</button>
+    <label>Tarih/saat gir (UTC) <input id="replay-date" type="datetime-local"></label>
+    <button id="replay-date-start">Tarihten başlat</button>
+    <h4>Kayıtlı oturumlar (bu kullanıcı)</h4><div id="replay-saved"></div>
+    <button id="replay-cancel">Kapat</button>`);
+  modal.box.querySelector('#replay-cancel').onclick=modal.close;
+  modal.box.querySelector('#replay-pick').onclick=()=>{
+    modal.close();replayPicking=true;drawings.cancel();
+    connection('Replay: başlangıç mumuna tıklayın · Escape iptal','replay');
+  };
+  modal.box.querySelector('#replay-date-start').onclick=()=>{
+    const value=modal.box.querySelector('#replay-date').value;
+    if(!value)return;
+    const target=Date.parse(value+'Z')/1000;
+    modal.close();enterReplay({target});
+  };
+  const prefix='alfa-replay-session:v1:'+currentUserKey()+':';
+  try {for(const key of Object.keys(localStorage).filter(k=>k.startsWith(prefix))){
+    const session=JSON.parse(localStorage.getItem(key));
+    const button=document.createElement('button');
+    button.textContent=session.symbol+' '+session.timeframe+' · '+new Date(session.currentTime*1000).toISOString();
+    button.onclick=()=>{modal.close();enterReplay({session});};
+    modal.box.querySelector('#replay-saved').append(button);
+  }}catch{connection('Kayıtlı replay okunamadı','error');}
+});
+chart.subscribeClick(param=>{
+  if(!replayPicking || !Number.isFinite(param.time))return;
+  replayPicking=false;enterReplay({target:param.time});
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')replayPicking=false;});
+$('replay-play').addEventListener('click', playReplay);
+$('replay-pause').addEventListener('click', pauseReplay);
+$('replay-prev').addEventListener('click', () => stepReplay(-1));
+$('replay-next').addEventListener('click', () => stepReplay(1));
+$('replay-restart').addEventListener('click', restartReplay);
+$('replay-stop').addEventListener('click', exitReplay);
+$('replay-speed').addEventListener('change',()=>{ const playing=!!replayTimer;pauseReplay();if(playing)playReplay(); });
+$('replay-save').addEventListener('click',()=>{
+  if(!replayMode)return;
+  try{
+    const session={...replayEngine.serialize(),id:drawings.context.owner,speed:Number($('replay-speed').value),drawings:drawings.history.doc,indicators:indicators.toJSON(),mtfConfig:mtf.config,mtfEnabled:!!mtf.enabled};
+    localStorage.setItem('alfa-replay-session:v1:'+currentUserKey()+':'+symbol+':'+interval,JSON.stringify(session));
+    connection('Replay oturumu yerelde kaydedildi','replay');
+  }catch{connection('Replay oturumu kaydedilemedi','error');}
+});
 $('indicator-add').addEventListener('change', e => {
   const type = e.target.value;
   if (!type) return;
@@ -277,18 +498,8 @@ $('indicator-add').addEventListener('change', e => {
 $('goto-date-btn').addEventListener('click', async () => {
   const v = $('goto-date').value;
   if (!v) return;
-  const ts = Math.floor(new Date(v).getTime() / 1000);
-  if (!Number.isFinite(ts)) return;
-  const ctrl = new AbortController();
-  try {
-    const data = await fetchHistory(symbol, interval, ctrl.signal, fetch, null, ts * 1000);
-    if (!data.length) { connection('Seçilen tarihte veri bulunamadı', 'error'); return; }
-    setData(data, true);
-    chart.timeScale().setVisibleLogicalRange({ from: 0, to: Math.min(data.length, 130) });
-    connection('Tarihe gidildi');
-  } catch (e) {
-    if (e.name !== 'AbortError') connection('Tarihe gidilemedi', 'error');
-  }
+  if(replayMode){connection('Önce mevcut replay oturumunu durdurun','error');return;}
+  await enterReplay({target:Date.parse(v+'Z')/1000});
 });
 $('session-levels-toggle').addEventListener('click', () => {
   const on = $('session-levels-toggle').dataset.on !== '1';
@@ -339,6 +550,7 @@ function saveLayout() {
   scheduleCloudSave();
 }
 async function loadLayout() {
+  if(replayMode)return;
   try {
     const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
     if (raw) {
@@ -351,6 +563,7 @@ async function loadLayout() {
   } catch {}
   if (cloudSettings.isAuthed()) {
     const cloud = await cloudSettings.load(symbol, interval);
+    if(replayMode)return;
     if (cloud && cloud.settings) {
       const s = cloud.settings;
       if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
@@ -364,9 +577,11 @@ async function loadLayout() {
   }
 }
 function scheduleCloudSave() {
+  if(replayMode)return;
   if (!cloudSettings.isAuthed()) return;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(async () => {
+    if(replayMode)return;
     const settings = {
       indicators: indicators.toJSON(),
       mtf: mtf.config,
@@ -561,6 +776,7 @@ const _origLoadMarket = loadMarket;
 // patch: load layout when symbol changes
 const _origOpenMarket = drawings.openMarket.bind(drawings);
 drawings.openMarket = async (symbol, force) => {
+  if(replayMode)exitReplay();
   await _origOpenMarket(symbol, force);
   await loadLayout();
   cloudRevision = 0;
