@@ -161,8 +161,7 @@ function start() {
     async function uploadSelected(){
       const file=field('file').files?.[0];
       if(!file){message('Önce ses dosyası seç.');return;}
-      if(!file.size||file.size>MAX_AUDIO_BYTES||!/\.(mp3|m4a|aac|ogg|opus|wav)$/i.test(file.name)||
-        file.type&&!AUDIO_TYPES.includes(file.type)){message('MP3/M4A/AAC/OGG/OPUS/WAV, en fazla 30 MB yükleyebilirsin.');return;}
+      if(!file.size||file.size>MAX_AUDIO_BYTES||!/\.(mp3|m4a|aac|ogg|opus|wav)$/i.test(file.name)){message('MP3/M4A/AAC/OGG/OPUS/WAV, en fazla 30 MB yükleyebilirsin.');return;}
       lock(true);uploading=true;controller=new AbortController();
       try {
         const {upload:send}=await import('./vendor/vercel-blob-upload.mjs?v=1');
@@ -173,7 +172,7 @@ function start() {
           onUploadProgress:p=>message('Ses yükleniyor: %'+Math.round(p.percentage))});
         field('audioUrl').value=result.url;dirty=true;duration=0;
         message('Ses yüklendi. Başlığı kontrol edip Yayınla’ya bas.');
-      } catch {message('Ses yüklenemedi. Bağlantıyı kontrol et veya doğrudan ses adresi kullan.');}
+      } catch (error){console.error('podcast upload failed',error);message('Ses yüklenemedi: '+(error?.message||error)+'. Doğrudan ses adresi kullanabilirsin.');}
       finally{uploading=false;lock(false);}
     }
     upload.onclick=uploadSelected;

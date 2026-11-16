@@ -1,5 +1,5 @@
 export const MAX_AUDIO_BYTES = 30 * 1024 * 1024;
-export const AUDIO_TYPES = ['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/opus', 'audio/wav', 'audio/x-wav'];
+export const AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a', 'audio/aac', 'audio/x-aac', 'audio/ogg', 'audio/opus', 'audio/wav', 'audio/x-wav'];
 export function audioURL(value) {
   try {
     if (typeof value !== 'string' || value.length > 2048) return null;
