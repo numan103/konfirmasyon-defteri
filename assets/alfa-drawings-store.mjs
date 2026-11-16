@@ -28,6 +28,11 @@ export class DrawingStore {
   account(user) {
     if (this.disposed) return;
     if (this.initialized && this.user?.id === user?.id) return;
+    if (this.user?.id !== user?.id) {
+      for (const ctx of this.contexts) clearTimeout(ctx.timer);
+      this.contexts.clear();
+      this.loads.clear();
+    }
     this.initialized = true; this.user = user;
     this.onAccount(user);
   }

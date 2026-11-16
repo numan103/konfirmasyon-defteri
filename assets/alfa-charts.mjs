@@ -1,6 +1,6 @@
 import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=1';
-import { DrawingEngine } from './alfa-drawings.mjs?v=2';
+import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');

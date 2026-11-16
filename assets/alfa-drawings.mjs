@@ -1,6 +1,6 @@
-import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=2';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=2';
-import { DrawingStore } from './alfa-drawings-store.mjs?v=2';
+import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=3';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=3';
+import { DrawingStore } from './alfa-drawings-store.mjs?v=3';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text'].includes(type);
 const isPosition = d => ['long', 'short'].includes(d.type);
