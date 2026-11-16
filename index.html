@@ -25,6 +25,8 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
+<link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
+<script type="module" src="/assets/alfa-podcast.mjs?v=1"></script>
 
 <!-- AYNA:BASLA -->
 <link rel="stylesheet" href="/ayna/ayna-core.css?v=10">
@@ -5138,6 +5140,7 @@
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
     <div class="lp-assurance">Kredi kartı yok · Aidat yok · Borsanı bağla, premium ücretsiz</div>
+    <div id="landing-podcast-slot" hidden></div>
     <div class="lp-hero-values" aria-label="Platformun dört odağı">
       <div class="lp-hero-value">
         <span class="lp-hv-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16.5 9 11l3.4 3.4L20 6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6.8H20v4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -5847,6 +5850,7 @@
         <p class="home-sub">Trader'lar için disiplin, analiz ve öğrenme platformu</p>
         <div class="home-status" id="home-status"></div>
        </div>
+       <div id="home-podcast-slot" hidden></div>
        <a id="home-diary-link" href="?page=ayna" data-nav hidden style="margin:12px 0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;">
          <strong>📓 Kişisel Günlük Asistan →</strong><br><span class="hint">Sana özel alanın: gününü planla, düşüncelerini kaydet, akşam küçük bir sonraki adım belirle.</span>
        </a>
@@ -28517,11 +28521,12 @@ function sfxStart() {
   initSfxDrag();
   sfxLoop();
 }
-const APP_BUILD = 'b192-portfolio-quiet2';
+const APP_BUILD = 'b192-podcast1';
 function initAutoReload() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
   setInterval(async () => {
     if (document.visibilityState === 'hidden') return;
+    if (window.AlfaPodcast && window.AlfaPodcast.isBusy()) return;
     const el = document.activeElement;
     if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) return;
     try {
