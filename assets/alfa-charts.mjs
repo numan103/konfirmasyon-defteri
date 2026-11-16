@@ -4,6 +4,7 @@ import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 import { IndicatorManager } from './alfa-indicators.mjs?v=1';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=1';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
+import { FvgManager } from './alfa-fvg.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -59,6 +60,7 @@ function setData(data, resetView) {
   else { try { indicators.updateAll(history); } catch {} }
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
+  try { fvg.render(); } catch {}
 }
 chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(type === 'candles' ? candles : line);
@@ -157,6 +159,7 @@ function connect(id, resetView = false) {
       try { indicators.updateAll(seriesBars); } catch {}
       try { sessionLevels.render(); } catch {}
       try { marketStructure.render(); } catch {}
+      try { fvg.render(); } catch {}
       connection(`Canlı · ${new Date(lastReceipt).toLocaleTimeString('tr-TR')} · WebSocket`, 'live');
     } catch { reconnect('Veri doğrulanamadı'); }
   };
@@ -203,6 +206,7 @@ const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () =
 const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
+const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 function dispose() { disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -229,5 +233,11 @@ $('market-structure-toggle').addEventListener('click', () => {
   $('market-structure-toggle').dataset.on = on ? '1' : '0';
   $('market-structure-toggle').style.background = on ? '#2962ff' : '#151b26';
   marketStructure.setEnabled(on);
+});
+$('fvg-toggle').addEventListener('click', () => {
+  const on = $('fvg-toggle').dataset.on !== '1';
+  $('fvg-toggle').dataset.on = on ? '1' : '0';
+  $('fvg-toggle').style.background = on ? '#2962ff' : '#151b26';
+  fvg.setEnabled(on);
 });
 loadMarket();
