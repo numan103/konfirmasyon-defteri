@@ -19,7 +19,9 @@ const documentState = () => debug(() => structuredClone(window.__alfaDebug.drawi
 const lastDrawing = async () => (await documentState()).drawings.at(-1);
 const count = async () => (await documentState()).drawings.length;
 async function assertNativeProjection(type = 'trend') {
-  const result = await page.evaluate(type => {
+  // Chart autoscale and the SVG overlay update on animation frames. Wait for the
+  // actual projection to converge; don't compare different rendering frames.
+  const handle = await page.waitForFunction(type => {
     const api = window.__alfaDebug, d = api.drawings.history.doc.drawings.find(d => d.type === type);
     if (!d) return { skipped: true };
     const p = d.points[0], bars = api.candles.data(), ts = api.chart.timeScale();
@@ -30,11 +32,14 @@ async function assertNativeProjection(type = 'trend') {
     const nativeY = active.priceToCoordinate(p.price);
     const line = document.querySelector(`[data-id="${d.id}"] line[pointer-events=none]`);
     if (!line) return { error: 'rendered line missing' };
-    return { dx: Math.abs(Number(line.getAttribute('x1')) - nativeX), dy: Math.abs(Number(line.getAttribute('y1')) - nativeY),
+    const result = { dx: Math.abs(Number(line.getAttribute('x1')) - nativeX), dy: Math.abs(Number(line.getAttribute('y1')) - nativeY),
       nativeX, renderedX: Number(line.getAttribute('x1')), engineX: api.drawings.project(p).x,
       anchor: p.time, lo: a.time, hi: b.time, index: i, engineStep: api.drawings.step(), engineCount: api.drawings.getBars().length,
       nativeFirst: bars[0].time, engineFirst: api.drawings.getBars()[0]?.time };
-  }, type);
+    return result.dx < .1 && result.dy < .1 ? result : false;
+  }, type, { timeout: 5000 });
+  const result = await handle.jsonValue();
+  await handle.dispose();
   if (!result.skipped) { assert.ok(result.dx < .1 && result.dy < .1, JSON.stringify(result)); }
 }
 const plot = () => debug(() => {

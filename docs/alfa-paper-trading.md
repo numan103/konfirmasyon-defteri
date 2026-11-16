@@ -71,6 +71,14 @@ balance, margin/leverage, liquidation or an equity curve.
 - Local real-Binance Paper UI acceptance passed with no page errors and
   zero real order requests. Existing replay acceptance passed; the standalone
   drawing regression run passed all 14 scenarios.
+- Isolated release archive: **517/517 Node tests PASS**. Production build READY,
+  deployment `dpl_6kGtEZkgSGjjDjaixLWEqQn7oEcn`, aliased to
+  `https://alfa-trader.com`. Source commits: `681064e`, `879d349`, `5bf77d0`.
+- Production Chrome tests repeated successfully: full Paper UI acceptance
+  (including quota injection), 4,000-candle replay acceptance, and all 14 drawing
+  scenarios. Disposable guest browser profiles; no authenticated user drawing
+  rows modified. Exact SL/TP collision and fill prices remain unit-fixture tests,
+  not a claim of triggering every price condition in the real market.
 - `tests/alfa-paper.test.mjs`: market/limit long/short, favorable limits, both
   SL/TP policies, adverse gaps, fees/spread/slippage, manual close, profit-lock
   SL, frozen R, cancellation/expiration, invalid input, partial/missing candles,
@@ -95,6 +103,9 @@ balance, margin/leverage, liquidation or an equity curve.
 - Real two-account sign-in/token-renewal and physical-device interactions have
   not been verified for this new panel. This is local persistence, not cloud sync.
 - Very large trade logs / 50,000-candle sustained playback are not benchmarked.
-- One concurrent-browser drawing run hit a projection timing assertion after
-  resize; a standalone rerun passed all 14. No test was disabled or weakened.
+- Immediate drawing projection assertions failed in an initial parallel run and
+  once on production during chart-type transition. The regression test now waits
+  up to 5 seconds for actual chart/SVG projection convergence, retaining the
+  original 0.1-pixel tolerance and assertions. All 14 production cases then
+  passed. No persistent coordinate discrepancy was observed; no test disabled.
 - Browser storage quotas and user-cleared site data require external JSON backup.
