@@ -6,7 +6,8 @@ const closed=t=>t&&!t.ambiguous&&['Closed TP','Closed SL','Closed Manual'].inclu
 export function rrScenario({context,events,bars,clock,trade,target}){
   const fail=(status,reason)=>({tradeId:trade?.id,target,status,reason,result:null});
   if(!RR_TARGETS.includes(target))return fail('unsupported','Only 2R / 2.5R / 3R');
-  if(!closed(trade)||trade.sessionId!==context.sessionId||(trade.branchId||'main')!==(context.branchId||'main'))
+  if(!closed(trade)||trade.sessionId!==context.sessionId||trade.symbol!==context.symbol||trade.timeframe!==context.timeframe||
+    (trade.branchId||'main')!==(context.branchId||'main'))
     return fail('ineligible','Only active-scope resolved closed trades');
   const create=events.find(e=>e.type==='create'&&e.id===trade.id);
   if(!create)return fail('missing-data','Original create command unavailable');

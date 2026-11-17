@@ -123,6 +123,7 @@ test('invalid provenance, prototype keys, oversized metadata and reversed dates 
   assert.throws(()=>validateLab(bad),/Lookahead/);
   assert.throws(()=>validateLab({...doc,annotations:JSON.parse('{"__proto__":[]}')}));
   assert.throws(()=>tag(emptyLab(),trade('a',1),{session:'a'.repeat(301)}));
+  assert.throws(()=>tag(emptyLab(),trade('__proto__',1),{}),/trade ID/);
   assert.throws(()=>validateLab({...doc,filters:{from:3000,to:900}}));
 });
 test('RR targets use real OHLC: 2/2.5/3R reach at different candles',()=>{
@@ -193,6 +194,27 @@ test('RR rejects unresolved ambiguous, mismatched executions and wrong replay sc
   const normal=engine(),path=[bar(0),bar(900,100,126,96,120)],actual=evaluated(normal,path);
   assert.equal(rrScenario({context:ctx,events:normal.events,bars:path,clock:1800,trade:{...actual,netR:99},target:2}).status,'missing-data');
   assert.equal(rrScenario({context:{...ctx,sessionId:'other'},events:normal.events,bars:path,clock:1800,trade:actual,target:2}).status,'ineligible');
+});
+test('RR preserves pre-fill stop edits and rejects non-positive short target prices',()=>{
+  const e=engine();e.command('edit',{tradeId:'t1',stopLoss:80,takeProfit:125},900,'edit');
+  const bars=[bar(0),bar(900,100,126,95,120),bar(1800,120,161,115,155)],t=evaluated(e,bars);
+  const r=rrScenario({context:ctx,events:e.events,bars,clock:2700,trade:t,target:3});
+  assert.equal(r.status,'complete');assert.equal(r.result.initialRisk,20);assert.equal(r.result.netR,3);
+  const short=engine({direction:'short',stopLoss:200,takeProfit:50});short.command('close',{tradeId:'t1'},1800,'close');
+  const path=[bar(0),bar(900),bar(1800)],actual=evaluated(short,path);
+  const unsupported=rrScenario({context:ctx,events:short.events,bars:path,clock:2700,trade:actual,target:3});
+  assert.equal(unsupported.status,'unsupported');assert.equal(unsupported.result,null);
+});
+test('duplicate saved clocks count once; divergent equal-save snapshots are excluded',()=>{
+  const e=engine(),bars=[bar(0),bar(900,100,126,96,120)],p=payload(e,bars,1800,10);
+  const active=source([],{context:{...ctx,sessionId:'active'}});
+  const entries=[[paperKey('owner'),JSON.stringify(p)],
+    ['alfa-replay-session:v1:owner:BTCUSDT:15m',JSON.stringify({paper:p})]];
+  assert.equal(analyzeLab(savedLabSources(memory(entries),'owner',active).sources).summary.totalTrades,1);
+  const conflict=structuredClone(p);conflict.labSnapshot.trades[0].netR=99;
+  entries[1][1]=JSON.stringify({paper:conflict});
+  const collection=savedLabSources(memory(entries),'owner',active);
+  assert.equal(collection.sources.length,1);assert.match(collection.warnings.join(' '),/Conflicting/);
 });
 test('rewind updates Lab statistics from current Paper state, with no accumulated snapshots',()=>{
   const e=engine(),bars=[bar(0),bar(900,100,126,96,120)];

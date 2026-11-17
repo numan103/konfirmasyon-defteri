@@ -21,7 +21,8 @@ export function savedLabSources(storage,owner,active){
       if(!journal?.labSnapshot){warnings.push('Legacy session without research snapshot; reopen and save it to include');continue;}
       const c=journal.context,s=journal.labSnapshot;
       if(!c?.sessionId||!c.symbol||!c.timeframe||journal.version!==1||s.version!==1||
-        !Number.isFinite(s.clock)||!Number.isFinite(s.capturedAt)||!Array.isArray(s.trades)||s.trades.length>10000||
+        !Number.isFinite(s.clock)||s.clock<0||s.clock>8640000000000||!Number.isFinite(s.capturedAt)||s.capturedAt<0||
+        !Array.isArray(s.trades)||s.trades.length>10000||
         !Array.isArray(s.ambiguityIds)||!Array.isArray(journal.events))throw new Error('Invalid research snapshot');
       // Check key/context isolation and the presence of every original create command.
       const expected=key.startsWith(paperPrefix)?paperPrefix+c.symbol+':'+c.timeframe+':'+c.sessionId:replayPrefix+c.symbol+':'+c.timeframe;

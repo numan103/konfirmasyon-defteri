@@ -92,9 +92,10 @@ export function observationFor(trade,doc,clock,knowledge=''){
     .sort((a,b)=>b.revision-a.revision)[0]||null;
 }
 export function recordObservation(doc,trade,values,custom,{clock,observedThrough,reliable=true,strategyId}){
+  if(!safeKey(trade.id))throw new Error('Invalid Lab trade ID');
   const next=structuredClone(doc),history=next.annotations[trade.id]||[];
   const preEntry=reliable&&trade.status==='Pending'&&trade.labOrigin?.reliable===true&&trade.labOrigin.clock===trade.orderCreatedAt&&
-    trade.labOrigin.observedThrough<=trade.orderCreatedAt&&observedThrough<=clock;
+    trade.labOrigin.observedThrough<=trade.orderCreatedAt&&clock>=trade.orderCreatedAt&&observedThrough<=clock;
   const record={revision:Math.max(0,...history.map(a=>a.revision))+1,recordedAt:Date.now(),
     recordedReplayTime:clock,observedThrough:Math.max(clock,observedThrough),provenance:preEntry?'pre-entry':'retrospective',
     strategyId,values:structuredClone(values),custom:structuredClone(custom)};
