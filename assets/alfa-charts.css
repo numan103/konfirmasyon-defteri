@@ -14,6 +14,11 @@ body{margin:0}
 .paper-error{color:#ffb74d}
 #paper-panel.tester-active{width:min(1180px,calc(100vw - 32px));max-height:76vh}
 .strategy-tester[hidden],#paper-list[hidden]{display:none}
+.strategy-lab[hidden]{display:none}
+.lab-warning{border-left:3px solid #e9ad50;background:#382e1c;padding:10px}
+.lab-template-form{display:grid;gap:8px;margin:16px 0;max-width:600px}
+.lab-template-form textarea{min-height:80px;padding:8px;background:#10141c;color:inherit;border:1px solid #30394b;border-radius:5px}
+.strategy-lab fieldset{border:1px solid #30394b}
 .tester-metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .tester-metrics>div{background:#101722;border:1px solid #30394b;border-radius:7px;padding:12px}
 .tester-metrics small,.tester-metrics strong{display:block}

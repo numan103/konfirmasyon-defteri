@@ -1,5 +1,7 @@
 import { PaperTradingEngine, createPaperOrder } from './alfa-paper-model.mjs?v=1';
-import { StrategyTester } from './alfa-strategy.mjs?v=1';
+import { StrategyTester } from './alfa-strategy.mjs?v=2';
+import { StrategyLab } from './alfa-lab.mjs?v=1';
+import { labSnapshot } from './alfa-lab-store.mjs?v=1';
 const fmt=v=>Number.isFinite(v)?Number(v.toFixed(8)).toLocaleString('en-US',{maximumFractionDigits:8}):'—';
 const sameContext=(a,b)=>['sessionId','symbol','timeframe','exchange','marketType'].every(k=>a?.[k]===b?.[k]);
 export class PaperTradingPanel {
@@ -17,7 +19,8 @@ export class PaperTradingPanel {
       Limit: daha iyi açılış fiyatı, en kötü limit fiyatı. SL/TP aynı mumda: varsayılan SL-first.
       Intrabar limit fill sonrası aynı mumdaki belirsiz TP kâr sayılmaz.</p>
       <nav aria-label="Paper Trading sekmeleri"><button data-filter="paper">Paper Trading</button>
-      <button data-filter="history">Trade History</button><button data-filter="tester">Strategy Tester</button></nav>
+      <button data-filter="history">Trade History</button><button data-filter="tester">Strategy Tester</button>
+      <button data-filter="lab">Strategy Lab</button></nav>
       <nav><button data-action="new">Yeni emir</button><button data-filter="all">Tümü</button>
       <button data-filter="Pending">Pending Orders</button><button data-filter="Open">Open Positions</button>
       <button data-filter="closed">Closed Trades</button>
@@ -25,6 +28,7 @@ export class PaperTradingPanel {
       <p id="paper-status" role="status"></p><div id="paper-list"></div>`;
     document.querySelector('.workspace').append(this.root);
     this.tester=new StrategyTester(this);
+    this.lab=new StrategyLab(this);
     this.root.addEventListener('click',event=>{
       const b=event.target.closest('button');if(!b)return;
       if(b.dataset.filter){this.filter=b.dataset.filter==='paper'?'all':b.dataset.filter;this.update();return;}
@@ -34,6 +38,7 @@ export class PaperTradingPanel {
       const t=this.state?.trades.find(t=>t.id===b.dataset.id);if(!t)return;
       if(b.dataset.action==='select'){this.selected=t.id;this.update();return;}
       if(b.dataset.action==='journal'){this.tester.journalDialog(t);return;}
+      if(b.dataset.action==='lab-tag'){this.lab.tagDialog(t);return;}
       if(b.dataset.action==='edit'){this.editDialog(t);return;}
       if(b.dataset.action==='resolve')this.command('resolve',{tradeId:t.id,outcome:b.dataset.outcome});
       else if(['cancel','close'].includes(b.dataset.action))this.command(b.dataset.action,{tradeId:t.id});
@@ -57,11 +62,16 @@ export class PaperTradingPanel {
     }
     this.engine=new PaperTradingEngine(context,[...merged.values()]);
     this.tester.start(context,journals.map(j=>j?.analytics));
+    this.lab.start(context,journals.map(j=>j?.lab),this.getReplay()?.clock??0);
     this.selected=null;this.message('Replay hesabı hazır. Gelecekteki komutlar geri sararken silinmez; o saate gelince yeniden uygulanır.');
   }
   serialize(){
     if(this.owner()!==this.ownerId||!this.engine)return null;
-    return {...this.engine.serialize(),analytics:this.tester.serialize()};
+    const replay=this.getReplay();
+    this.lab.observe(replay?.clock);
+    this.snapshotCounter=Math.max(Date.now(),(this.snapshotCounter||0)+1);
+    return {...this.engine.serialize(),analytics:this.tester.serialize(),lab:this.lab.serialize(),
+      ...(replay?{labSnapshot:labSnapshot(this.engine,replay,this.snapshotCounter)}:{})};
   }
   message(text){this.root.querySelector('#paper-status').textContent=text;}
   persist(){
@@ -77,6 +87,11 @@ export class PaperTradingPanel {
     this.pause();
     const replay=this.getReplay();if(!replay||!this.engine||this.owner()!==this.ownerId){this.stop();this.message('Yalnızca kendi Replay oturumunuzda kullanılabilir');return;}
     try{
+      if(type==='create'){
+        this.lab.observe(replay.clock);
+        payload={...payload,order:{...payload.order,labOrigin:{clock:replay.clock,
+          observedThrough:this.lab.doc.maxObservedClock,reliable:this.lab.reliable}}};
+      }
       const candidate=new PaperTradingEngine(this.context,this.engine.events);
       candidate.command(type,payload,replay.clock,crypto.randomUUID());
       candidate.evaluate(replay.bars,replay.clock);
@@ -95,6 +110,7 @@ export class PaperTradingPanel {
   }
   stop(){
     this.tester?.stop();
+    this.lab?.stop();
     document.querySelectorAll('#trade-journal-dialog').forEach(d=>d.close());
     for(const line of this.lines)try{this.series.removePriceLine(line);}catch{}
     this.lines=[];this.root.hidden=true;this.engine=null;this.state=null;
@@ -105,11 +121,13 @@ export class PaperTradingPanel {
     try{this.state=this.engine.evaluate(replay.bars,replay.clock);}
     catch(error){this.pause();this.message('Simülasyon durduruldu: '+error.message);return;}
     this.tester.root.hidden=this.filter!=='tester';
-    this.root.classList.toggle('tester-active',this.filter==='tester');
-    this.root.querySelector('#paper-list').hidden=this.filter==='tester';
+    this.lab.root.hidden=this.filter!=='lab';
+    this.root.classList.toggle('tester-active',['tester','lab'].includes(this.filter));
+    this.root.querySelector('#paper-list').hidden=['tester','lab'].includes(this.filter);
     for(const b of this.root.querySelectorAll('[data-filter]'))b.setAttribute('aria-pressed',String(b.dataset.filter===this.filter||
-      b.dataset.filter==='paper'&&!['history','tester'].includes(this.filter)));
+      b.dataset.filter==='paper'&&!['history','tester','lab'].includes(this.filter)));
     this.tester.update(this.state);
+    this.lab.update(this.state);
     for(const line of this.lines)this.series.removePriceLine(line);
     this.lines=[];
     for(const t of this.state.trades.filter(t=>t.status==='Open'||t.status==='Pending')){
@@ -119,7 +137,7 @@ export class PaperTradingPanel {
       }
     }
     const list=this.root.querySelector('#paper-list');list.replaceChildren();
-    if(this.filter==='tester')return;
+    if(['tester','lab'].includes(this.filter))return;
     if(this.filter==='history'){
       for(const event of this.state.history){
         const row=document.createElement('div');
@@ -144,6 +162,7 @@ ${t.notes?'Not: '+t.notes:''}`;
       };
       button('Seç','select');
       button('Günlük / Strateji','journal');
+      button('Lab etiketleri','lab-tag');
       if(t.status==='Pending')button('Emri iptal et','cancel');
       if(t.status==='Open'&&!t.ambiguous)button(t.closeRequested?'Kapanış bekliyor':'Manuel kapat','close');
       if(['Open','Pending'].includes(t.status)&&!t.ambiguous)button('SL / TP','edit');

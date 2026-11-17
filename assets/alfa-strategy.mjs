@@ -1,5 +1,6 @@
 import { analyzeTrades, emptyAnalytics, mergeAnalytics, validateAnalytics } from './alfa-strategy-model.mjs?v=1';
 import { sanitizeScreenshot } from './alfa-strategy-images.mjs?v=1';
+export { fmt,el,option,svgNode,lineChart,barChart };
 const fmt=n=>Number.isFinite(n)?n.toFixed(3):'N/A';
 const el=(tag,text,cls)=>{const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;};
 const option=(value,name)=>{const o=el('option',name);o.value=value;return o;};
@@ -56,9 +57,10 @@ export class StrategyTester {
   start(context,documents){this.context=context;this.doc=mergeAnalytics(documents);this.state=null;this.report=null;}
   stop(){this.doc=emptyAnalytics();this.state=null;this.report=null;this.context=null;this.root.replaceChildren();this.root.hidden=true;}
   serialize(){return structuredClone(this.doc);}
-  changed(next){
+  changed(next,labNext=null){
     if(!this.context||this.paper.owner()!==this.paper.ownerId)throw new Error('Oturum değişti');
-    next.revision=this.doc.revision+1;this.doc=validateAnalytics(next);
+    next.revision=this.doc.revision+1;const validated=validateAnalytics(next);
+    this.doc=validated;if(labNext)this.paper.lab.doc=labNext;
     if(this.paper.persist())this.paper.message('Analiz tercihleri ve işlem günlüğü yerel replay oturumuna kaydedildi.');
     this.render();
   }
@@ -189,7 +191,9 @@ export class StrategyTester {
         const a={strategyId:form.elements.strategyId.value,screenshot,revision:(original?.revision||0)+1,
           updatedAt:Date.now(),recordedReplayTime:this.paper.getReplay()?.clock??null};
         for(const field of ['setup','rationale','mistakes','notes'])a[field]=form.elements[field].value;
-        doc.annotations[trade.id]=a;this.changed(doc);dialog.close();this.paper.update();
+        doc.annotations[trade.id]=a;
+        const labNext=this.paper.lab?.prepareStrategyEdit(trade,a.strategyId);
+        this.changed(doc,labNext);dialog.close();this.paper.update();
       }catch(error){dialog.querySelector('.paper-error').textContent=error.message;button.disabled=false;}
     };
   }
