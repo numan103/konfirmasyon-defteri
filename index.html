@@ -5105,9 +5105,16 @@
   .inf-plan-buy { display: block; text-align: center; text-decoration: none; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 700; background: var(--pc); color: #fff; }
   .inf-plan-buy:hover { filter: brightness(1.1); }
   .inf-plan-note { font-size: 10.5px; color: var(--text-3); margin-top: 8px; }
-  .inf-code { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-  .inf-code input { flex: 1; min-width: 180px; padding: 9px 11px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text); font: inherit; font-size: 12.5px; }
-  .inf-code-msg { font-size: 11.5px; margin-top: 8px; color: var(--amber); }
+  .inf-payment { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .inf-payment input, .inf-payment select { flex: 1; min-width: 180px; padding: 9px 11px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text); font: inherit; font-size: 12.5px; }
+  .inf-payment-msg { font-size: 11.5px; margin-top: 8px; color: var(--amber); }
+  .inf-wallet { display: block; overflow-wrap: anywhere; padding: 12px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; margin: 12px 0; user-select: all; }
+  .inf-payment { flex-direction: column; }
+  .inf-payment label { font-size: 12px; color: var(--text-2); }
+  .inf-faq details { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .inf-faq summary { cursor: pointer; font-size: 13px; font-weight: 600; }
+  .inf-faq p { margin: 10px 0 0; }
+  .inf-admin-order { padding: 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow-wrap: anywhere; }
   .inf-locked-note { font-size: 11.5px; color: var(--text-3); margin: 0 0 12px; }
   @media (max-width: 900px) {
     .inf-grid { grid-template-columns: 1fr; }
@@ -7580,13 +7587,11 @@
     <div id="inf-teaser" class="inf-card inf-teaser">
       <h2 data-i18n="pg.influencer.promo.h">Kripto Influencer programı</h2>
       <p data-i18n="pg.influencer.promo.s">X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.</p>
-      <div class="inf-video">
-        <iframe src="https://www.youtube.com/embed/MOKNqsj6WfU" title="Kripto Influencer tanıtım videosu" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
+      <div class="inf-card" data-i18n="pg.influencer.videoSoon">Tanıtım videosu yakında burada.</div>
       <h3 class="inf-sub" data-i18n="pg.influencer.plans.h">Paketleri gör</h3>
       <div class="inf-plans">
         <div class="inf-plan">
-          <div class="inf-plan-name" data-i18n="pg.influencer.p1.name">Kütüphane</div>
+          <div class="inf-plan-name" data-i18n="pg.influencer.p1.name">Video eğitim</div>
           <div class="inf-plan-price">1.990₺</div>
           <div class="inf-plan-period" data-i18n="pg.influencer.p1.period">tek ödeme · ömür boyu erişim</div>
           <ul class="inf-plan-feats">
@@ -7594,40 +7599,70 @@
             <li data-i18n="pg.influencer.p1.f2">Başlangıç kontrol listesi</li>
             <li data-i18n="pg.influencer.p1.f3">İçerik fikirleri listesi</li>
           </ul>
-          <a class="inf-plan-buy" href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.buy">Satın al ↗</a>
+          <a class="inf-plan-buy" href="#inf-payment" data-inf-package="video" data-i18n="pg.influencer.buy">Satın al ↗</a>
         </div>
         <div class="inf-plan featured">
-          <div class="inf-plan-name" data-i18n="pg.influencer.p2.name">Uygulama</div>
+          <div class="inf-plan-name" data-i18n="pg.influencer.p2.name">Eğitim + soru-cevap</div>
           <div class="inf-plan-price">3.490₺</div>
           <div class="inf-plan-period" data-i18n="pg.influencer.p2.period">tek ödeme · 30 gün</div>
           <ul class="inf-plan-feats">
-            <li data-i18n="pg.influencer.p2.f1">Kütüphane'deki her şey</li>
+            <li data-i18n="pg.influencer.p2.f1">Video eğitim paketindeki her şey</li>
             <li data-i18n="pg.influencer.p2.f2">Eğitsel içerikler ve şablonlar</li>
             <li data-i18n="pg.influencer.p2.f3">4× bireysel soru-cevap</li>
             <li data-i18n="pg.influencer.p2.f4">1 profil incelemesi</li>
           </ul>
-          <a class="inf-plan-buy" href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.buy">Satın al ↗</a>
+          <a class="inf-plan-buy" href="#inf-payment" data-inf-package="guided" data-i18n="pg.influencer.buy">Satın al ↗</a>
         </div>
         <div class="inf-plan">
-          <div class="inf-plan-name" data-i18n="pg.influencer.p3.name">Büyüme 1-1</div>
+          <div class="inf-plan-name" data-i18n="pg.influencer.p3.name">1-1 büyüme desteği</div>
           <div class="inf-plan-price">6.990₺</div>
           <div class="inf-plan-period" data-i18n="pg.influencer.p3.period">ilk 1000 takipçiye veya 90 güne kadar</div>
           <ul class="inf-plan-feats">
-            <li data-i18n="pg.influencer.p3.f1">Uygulama'daki her şey</li>
+            <li data-i18n="pg.influencer.p3.f1">Eğitim + soru-cevap paketindeki her şey</li>
             <li data-i18n="pg.influencer.p3.f2">Haftalık 1-1 görüşme</li>
             <li data-i18n="pg.influencer.p3.f3">İçerik onayı ve kişisel tavsiyeler</li>
             <li data-i18n="pg.influencer.p3.f4">İçerik fikirleri ve hesap denetimi</li>
           </ul>
           <p class="inf-plan-note" data-i18n="pg.influencer.p3.note">Hangisi önce gelirse: 1000 takipçi veya 90 gün.</p>
-          <a class="inf-plan-buy" href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.buy">Satın al ↗</a>
+          <a class="inf-plan-buy" href="#inf-payment" data-inf-package="growth" data-i18n="pg.influencer.buy">Satın al ↗</a>
         </div>
       </div>
-      <div class="inf-code">
-        <input type="text" id="inf-code-input" data-i18n-ph="pg.influencer.code.ph" placeholder="Erişim kodun" autocomplete="off">
-        <button type="button" class="btn solid" id="inf-code-btn" data-i18n="pg.influencer.code.btn">Kilidi aç</button>
-      </div>
-      <div class="inf-code-msg" id="inf-code-msg"></div>
+      <p data-i18n="pg.influencer.noGuarantee">Takipçi veya gelir garantisi verilmez. Destek ilk 1000 takipçiye veya 90 güne kadar sürer; hangisi önce gelirse.</p>
+      <section id="inf-payment" class="inf-payment">
+        <h3 class="inf-sub" data-i18n="pg.influencer.pay.h">USDT (TRC20) ile ödeme</h3>
+        <p data-i18n="pg.influencer.pay.note">Fiyatlar TL cinsindedir. Göndermeden önce Telegram'dan güncel USDT tutarını teyit et. Yalnızca TRON (TRC20) ağından USDT gönder; başka ağ veya varlık gönderme.</p>
+        <code class="inf-wallet">TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6</code>
+        <button type="button" class="btn" id="inf-copy-wallet" data-i18n="pg.influencer.copy">Adresi kopyala</button>
+        <a class="btn" href="https://t.me/traderahmetd" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.contact">Ahmet'e Telegram'dan ulaş ↗</a>
+        <p data-i18n="pg.influencer.pay.flow">Site hesabına giriş yap, ödemeni tamamla ve işlem kimliğini gönder. Ahmet'e bildirim gider; zincir üzerindeki ödeme kontrol edilip onaylandıktan sonra erişimin açılır. Premium üyelik bu eğitimleri kapsamaz.</p>
+        <label for="inf-package" data-i18n="pg.influencer.package">Seçtiğin paket</label>
+        <select id="inf-package">
+          <option value="video" data-i18n="pg.influencer.pay.p1">Video eğitim — 1.990₺</option>
+          <option value="guided" data-i18n="pg.influencer.pay.p2">Eğitim + soru-cevap — 3.490₺</option>
+          <option value="growth" data-i18n="pg.influencer.pay.p3">1-1 büyüme desteği — 6.990₺</option>
+        </select>
+        <label for="inf-txid" data-i18n="pg.influencer.txid">İşlem kimliği (TXID / 64 karakter)</label>
+        <input id="inf-txid" type="text" maxlength="64" autocomplete="off" spellcheck="false">
+        <button type="button" class="btn solid" id="inf-payment-submit" data-i18n="pg.influencer.submit">Ödememi onaya gönder</button>
+        <div class="inf-payment-msg" id="inf-payment-msg" role="status" aria-live="polite"></div>
+      </section>
     </div>
+    <section class="inf-card inf-faq">
+      <h2 data-i18n="pg.influencer.faq.h">Sıkça sorulan sorular</h2>
+      <details><summary data-i18n="pg.influencer.faq.q1">Premium üyeyim, eğitim dahil mi?</summary><p data-i18n="pg.influencer.faq.a1">Hayır. Influencer eğitimleri ayrı bir üründür; premium üyelik otomatik erişim sağlamaz.</p></details>
+      <details><summary data-i18n="pg.influencer.faq.q2">Ödeme ve onay nasıl çalışıyor?</summary><p data-i18n="pg.influencer.faq.a2">USDT tutarını Telegram'dan teyit et, TRC20 adresine gönder ve TXID'yi site hesabınla bildir. Ödemen elle kontrol edilir; onaylanmadan erişim açılmaz.</p></details>
+      <details><summary data-i18n="pg.influencer.faq.q3">1000 takipçi garanti mi?</summary><p data-i18n="pg.influencer.faq.a3">Hayır. Bu bir destek hedefidir, sonuç garantisi değildir. Destek 1000 takipçiye ulaşıldığında veya 90 gün sonunda biter.</p></details>
+      <details><summary data-i18n="pg.influencer.faq.q4">Bireysel soru-cevap nasıl yapılıyor?</summary><p data-i18n="pg.influencer.faq.a4">4 görüşmenin tarih ve saatini Telegram'dan birlikte planlıyoruz. Görüşmeler 30 günlük destek döneminde kullanılır.</p></details>
+      <details><summary data-i18n="pg.influencer.faq.q5">Bir sorun yaşarsam kime ulaşacağım?</summary><p><a href="https://t.me/traderahmetd" target="_blank" rel="noopener noreferrer">@traderahmetd</a> <span data-i18n="pg.influencer.faq.a5">üzerinden bana doğrudan yazabilirsin.</span></p></details>
+      <details><summary data-i18n="pg.influencer.faq.q6">Başlamadan önce neyi netleştirmeliyim?</summary><p data-i18n="pg.influencer.faq.a6">Paket kapsamı, başlangıç tarihi, görüşme süresi ve iptal/iade koşullarını ödeme yapmadan önce Telegram'dan teyit et.</p></details>
+    </section>
+    <section id="inf-admin" class="inf-card hidden">
+      <h2 data-i18n="pg.influencer.admin.h">Yalnızca sen: eğitim konu taslağı ve ödeme onayları</h2>
+      <div id="inf-outline"></div>
+      <h3 class="inf-sub" data-i18n="pg.influencer.admin.orders">Ödeme bildirimleri</h3>
+      <button type="button" class="btn" id="inf-refresh-orders" data-i18n="pg.influencer.refresh">Yenile</button>
+      <div id="inf-orders" role="status"></div>
+    </section>
 
     <div id="inf-full" class="hidden">
     <p class="inf-locked-note" data-i18n="pg.influencer.unlockedNote">Tam erişim açık — aşağıdaki çalışma alanı paketine özel.</p>
@@ -12348,41 +12383,109 @@ function renderEk() {
 }
 
 const INF_CHECK_KEY = 'alfa-influencer-check-v1';
-const INF_UNLOCK_KEY = 'alfa-influencer-pro-v1';
-// Demo erisim kodu: geri odeme altyapisi gelene kadar manuel acilis icin.
-const INF_UNLOCK_CODE = 'ALFA-INF-2026';
 const INF_ITEMS = [
   'pg.influencer.c1', 'pg.influencer.c2', 'pg.influencer.c3', 'pg.influencer.c4',
   'pg.influencer.c5', 'pg.influencer.c6', 'pg.influencer.c7', 'pg.influencer.c8',
 ];
 
-function infUnlocked() {
-  if (typeof siteIsAdmin === 'function' && siteIsAdmin()) return true;
-  try { return localStorage.getItem(INF_UNLOCK_KEY) === '1'; } catch (e) { return false; }
+let infAccess = false;
+let infRequest = 0;
+function infUnlocked() { return siteIsAdmin() || infAccess; }
+function infText(key) { return typeof t === 'function' ? t('pg.influencer.' + key) : key; }
+async function infApi(path = '', body) {
+  const res = await siteFetch('/api/influencer' + path, body ? {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  } : {});
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error || 'request_failed');
+  return data;
 }
-
-function renderInfluencer() {
-  const teaser = document.getElementById('inf-teaser');
-  const full = document.getElementById('inf-full');
+function infMessage(error) {
+  const key = { login_required: 'login', invalid_payment: 'invalid', duplicate_txid: 'duplicate',
+    too_many_requests: 'rate', storage_unavailable: 'unavailable' }[error.message] || 'unavailable';
+  return infText('pay.' + key);
+}
+async function loadInfluencerAdmin() {
+  const panel = document.getElementById('inf-admin');
+  panel.classList.toggle('hidden', !siteIsAdmin());
+  if (!siteIsAdmin()) { document.getElementById('inf-outline').replaceChildren(); document.getElementById('inf-orders').replaceChildren(); return; }
+  try {
+    const data = await infApi('?op=outline');
+    if (!siteIsAdmin()) return;
+    const box = document.getElementById('inf-outline');
+    box.replaceChildren();
+    data.outline.forEach(([title, description]) => {
+      const item = document.createElement('details'), head = document.createElement('summary'), p = document.createElement('p');
+      head.textContent = title; p.textContent = description;
+      item.append(head, p); box.append(item);
+    });
+  } catch { document.getElementById('inf-outline').textContent = infText('pay.unavailable'); }
+  await loadInfluencerOrders();
+}
+async function loadInfluencerOrders() {
+  if (!siteIsAdmin()) return;
+  const box = document.getElementById('inf-orders');
+  try {
+    const data = await infApi('?op=list');
+    if (!siteIsAdmin()) return;
+    box.replaceChildren();
+    if (!data.orders.length) box.textContent = infText('admin.empty');
+    data.orders.forEach(order => {
+      const row = document.createElement('div'); row.className = 'inf-admin-order';
+      const text = document.createElement('p');
+      text.textContent = order.email + ' · ' + order.package + ' · ' + order.status;
+      const link = document.createElement('a');
+      link.href = 'https://tronscan.org/#/transaction/' + encodeURIComponent(order.txid);
+      link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = order.txid;
+      row.append(text, link);
+      if (order.status === 'pending') ['approve', 'reject'].forEach(op => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'btn'; button.textContent = infText('admin.' + op);
+        button.onclick = async () => {
+          if (op === 'approve' && !confirm(infText('admin.confirm'))) return;
+          button.disabled = true;
+          try { await infApi('', { op, id: order.id }); await loadInfluencerOrders(); }
+          catch (e) { button.disabled = false; alert(infMessage(e)); }
+        };
+        row.append(button);
+      });
+      box.append(row);
+    });
+  } catch { box.textContent = infText('pay.unavailable'); }
+}
+function renderInfluencer(skipLoad = false) {
+  const teaser = document.getElementById('inf-teaser'), full = document.getElementById('inf-full');
   const unlocked = infUnlocked();
   if (teaser) teaser.classList.toggle('hidden', unlocked);
   if (full) full.classList.toggle('hidden', !unlocked);
-  const msg = document.getElementById('inf-code-msg');
-  if (msg) msg.textContent = '';
-  if (!unlocked) {
-    const input = document.getElementById('inf-code-input');
-    const btn = document.getElementById('inf-code-btn');
-    if (btn) btn.onclick = function () {
-      const val = ((input && input.value) || '').trim().toUpperCase();
-      if (val === INF_UNLOCK_CODE) {
-        try { localStorage.setItem(INF_UNLOCK_KEY, '1'); } catch (e) {}
-        renderInfluencer();
-      } else if (msg) {
-        msg.textContent = (typeof t === 'function') ? t('pg.influencer.code.bad') : 'Kod geçersiz.';
-      }
-    };
-    return;
+  const msg = document.getElementById('inf-payment-msg');
+  document.querySelectorAll('[data-inf-package]').forEach(link => {
+    link.onclick = () => { document.getElementById('inf-package').value = link.dataset.infPackage; };
+  });
+  document.getElementById('inf-copy-wallet').onclick = async () => {
+    try { await navigator.clipboard.writeText('TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6'); msg.textContent = infText('copied'); }
+    catch { msg.textContent = infText('copyManual'); }
+  };
+  document.getElementById('inf-payment-submit').onclick = async function () {
+    const txid = document.getElementById('inf-txid').value.trim();
+    if (!/^[a-f0-9]{64}$/i.test(txid)) { msg.textContent = infText('pay.invalid'); return; }
+    this.disabled = true;
+    try {
+      const data = await infApi('', { op: 'submit', package: document.getElementById('inf-package').value, txid });
+      msg.textContent = infText(data.notified ? 'pay.pending' : 'pay.saved');
+    } catch (e) { msg.textContent = infMessage(e); }
+    finally { this.disabled = false; }
+  };
+  document.getElementById('inf-refresh-orders').onclick = loadInfluencerOrders;
+  if (!skipLoad) {
+    loadInfluencerAdmin();
+    const seq = ++infRequest;
+    infApi().then(data => {
+      if (seq !== infRequest) return;
+      infAccess = !!data.unlocked;
+      renderInfluencer(true);
+    }).catch(() => { if (seq === infRequest) { infAccess = false; renderInfluencer(true); } });
   }
+  if (!unlocked) { document.getElementById('inf-checks').replaceChildren(); return; }
   const box = document.getElementById('inf-checks');
   if (!box) return;
   let done = [];
@@ -13702,6 +13805,9 @@ async function loadSiteAccess() {
 }
 
 function applyTierUi() {
+  infAccess = false;
+  if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
+
   const isAdmin = siteIsAdmin();
   const ref = refUnlocked();
   Object.keys(PAGE_TIER).forEach(function (p) {
@@ -29759,29 +29865,68 @@ loadSfx();
     'pg.influencer.promo.h': { tr: 'Kripto Influencer programı', en: 'Crypto Influencer programme' },
     'pg.influencer.promo.s': { tr: 'X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.', en: 'Three packages take you from a blank X profile to your first 1,000 followers. Watch the intro and pick your package.' },
     'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
-    'pg.influencer.buy': { tr: 'Satın al ↗', en: 'Buy ↗' },
+    'pg.influencer.buy': { tr: 'Paketi seç', en: 'Select package' },
     'pg.influencer.unlockedNote': { tr: 'Tam erişim açık — aşağıdaki çalışma alanı paketine özel.', en: 'Full access is open — the workspace below is for package members.' },
-    'pg.influencer.p1.name': { tr: 'Kütüphane', en: 'Library' },
+    'pg.influencer.p1.name': { tr: 'Video eğitim', en: 'Video training' },
     'pg.influencer.p1.period': { tr: 'tek ödeme · ömür boyu erişim', en: 'one-time · lifetime access' },
     'pg.influencer.p1.f1': { tr: 'Eğitim videoları', en: 'Training videos' },
     'pg.influencer.p1.f2': { tr: 'Başlangıç kontrol listesi', en: 'Getting-started checklist' },
     'pg.influencer.p1.f3': { tr: 'İçerik fikirleri listesi', en: 'Content idea list' },
-    'pg.influencer.p2.name': { tr: 'Uygulama', en: 'Apply' },
+    'pg.influencer.p2.name': { tr: 'Eğitim + soru-cevap', en: 'Training + Q&A' },
     'pg.influencer.p2.period': { tr: 'tek ödeme · 30 gün', en: 'one-time · 30 days' },
-    'pg.influencer.p2.f1': { tr: 'Kütüphanedeki her şey', en: 'Everything in Library' },
+    'pg.influencer.p2.f1': { tr: 'Video eğitim paketindeki her şey', en: 'Everything in Video training' },
     'pg.influencer.p2.f2': { tr: 'Eğitsel içerikler ve şablonlar', en: 'Learning materials and templates' },
     'pg.influencer.p2.f3': { tr: '4× bireysel soru-cevap', en: '4× one-to-one Q&A' },
     'pg.influencer.p2.f4': { tr: '1 profil incelemesi', en: '1 profile review' },
-    'pg.influencer.p3.name': { tr: 'Büyüme 1-1', en: 'Growth 1-1' },
+    'pg.influencer.p3.name': { tr: '1-1 büyüme desteği', en: '1-1 growth support' },
     'pg.influencer.p3.period': { tr: 'ilk 1000 takipçiye veya 90 güne kadar', en: 'until 1,000 followers or 90 days' },
-    'pg.influencer.p3.f1': { tr: 'Uygulamadaki her şey', en: 'Everything in Apply' },
+    'pg.influencer.p3.f1': { tr: 'Eğitim + soru-cevap paketindeki her şey', en: 'Everything in Training + Q&A' },
     'pg.influencer.p3.f2': { tr: 'Haftalık 1-1 görüşme', en: 'Weekly 1-1 call' },
     'pg.influencer.p3.f3': { tr: 'İçerik onayı ve kişisel tavsiyeler', en: 'Content sign-off and personal advice' },
     'pg.influencer.p3.f4': { tr: 'İçerik fikirleri ve hesap denetimi', en: 'Content ideas and account audit' },
     'pg.influencer.p3.note': { tr: 'Hangisi önce gelirse: 1000 takipçi veya 90 gün.', en: 'Whichever comes first: 1,000 followers or 90 days.' },
-    'pg.influencer.code.ph': { tr: 'Erişim kodun', en: 'Your access code' },
-    'pg.influencer.code.btn': { tr: 'Kilidi aç', en: 'Unlock' },
-    'pg.influencer.code.bad': { tr: 'Kod geçersiz.', en: 'Invalid code.' },
+    "pg.influencer.videoSoon": { tr: "Tanıtım videosu yakında burada.", en: "The introduction video will appear here soon." },
+    "pg.influencer.noGuarantee": { tr: "Takipçi veya gelir garantisi verilmez. Destek ilk 1000 takipçiye veya 90 güne kadar sürer; hangisi önce gelirse.", en: "No follower or income guarantee. Support ends at 1,000 followers or 90 days, whichever comes first." },
+    "pg.influencer.pay.h": { tr: "USDT (TRC20) ile ödeme", en: "Pay with USDT (TRC20)" },
+    "pg.influencer.pay.note": { tr: "Fiyatlar TL cinsindedir. Göndermeden önce Telegram'dan güncel USDT tutarını teyit et. Yalnızca TRON (TRC20) ağından USDT gönder; başka ağ veya varlık gönderme.", en: "Prices are in TRY. Confirm the current USDT amount on Telegram before sending. Send USDT only on the TRON (TRC20) network; do not use another network or asset." },
+    "pg.influencer.copy": { tr: "Adresi kopyala", en: "Copy address" },
+    "pg.influencer.contact": { tr: "Ahmet'e Telegram'dan ulaş ↗", en: "Contact Ahmet on Telegram ↗" },
+    "pg.influencer.pay.flow": { tr: "Site hesabına giriş yap, ödemeni tamamla ve işlem kimliğini gönder. Ahmet'e bildirim gider; zincir üzerindeki ödeme kontrol edilip onaylandıktan sonra erişimin açılır. Premium üyelik bu eğitimleri kapsamaz.", en: "Sign in, complete payment, then submit the transaction ID. Ahmet is notified; access opens only after manual on-chain verification and approval. Premium membership does not include these courses." },
+    "pg.influencer.package": { tr: "Seçtiğin paket", en: "Selected package" },
+    "pg.influencer.pay.p1": { tr: "Video eğitim — 1.990₺", en: "Video training — 1,990 TRY" },
+    "pg.influencer.pay.p2": { tr: "Eğitim + soru-cevap — 3.490₺", en: "Training + Q&A — 3,490 TRY" },
+    "pg.influencer.pay.p3": { tr: "1-1 büyüme desteği — 6.990₺", en: "1-1 growth support — 6,990 TRY" },
+    "pg.influencer.txid": { tr: "İşlem kimliği (TXID / 64 karakter)", en: "Transaction ID (TXID / 64 characters)" },
+    "pg.influencer.submit": { tr: "Ödememi onaya gönder", en: "Submit payment for approval" },
+    "pg.influencer.faq.h": { tr: "Sıkça sorulan sorular", en: "Frequently asked questions" },
+    "pg.influencer.faq.q1": { tr: "Premium üyeyim, eğitim dahil mi?", en: "Is this included in premium?" },
+    "pg.influencer.faq.a1": { tr: "Hayır. Influencer eğitimleri ayrı bir üründür; premium üyelik otomatik erişim sağlamaz.", en: "No. Influencer training is a separate product. Premium does not automatically grant access." },
+    "pg.influencer.faq.q2": { tr: "Ödeme ve onay nasıl çalışıyor?", en: "How do payment and approval work?" },
+    "pg.influencer.faq.a2": { tr: "USDT tutarını Telegram'dan teyit et, TRC20 adresine gönder ve TXID'yi site hesabınla bildir. Ödemen elle kontrol edilir; onaylanmadan erişim açılmaz.", en: "Confirm the USDT amount on Telegram, pay to the TRC20 address and submit the TXID using your site account. Payment is reviewed manually; access opens only after approval." },
+    "pg.influencer.faq.q3": { tr: "1000 takipçi garanti mi?", en: "Are 1,000 followers guaranteed?" },
+    "pg.influencer.faq.a3": { tr: "Hayır. Bu bir destek hedefidir, sonuç garantisi değildir. Destek 1000 takipçiye ulaşıldığında veya 90 gün sonunda biter.", en: "No. It is a support goal, not a guaranteed result. Support ends at 1,000 followers or after 90 days." },
+    "pg.influencer.faq.q4": { tr: "Bireysel soru-cevap nasıl yapılıyor?", en: "How do the individual Q&A sessions work?" },
+    "pg.influencer.faq.a4": { tr: "4 görüşmenin tarih ve saatini Telegram'dan birlikte planlıyoruz. Görüşmeler 30 günlük destek döneminde kullanılır.", en: "We schedule the four sessions together on Telegram. Use them within the 30-day support period." },
+    "pg.influencer.faq.q5": { tr: "Bir sorun yaşarsam kime ulaşacağım?", en: "Who can I contact for help?" },
+    "pg.influencer.faq.a5": { tr: "üzerinden bana doğrudan yazabilirsin.", en: "is where you can message me directly." },
+    "pg.influencer.faq.q6": { tr: "Başlamadan önce neyi netleştirmeliyim?", en: "What should I confirm before starting?" },
+    "pg.influencer.faq.a6": { tr: "Paket kapsamı, başlangıç tarihi, görüşme süresi ve iptal/iade koşullarını ödeme yapmadan önce Telegram'dan teyit et.", en: "Confirm package scope, start date, session duration and cancellation/refund terms on Telegram before paying." },
+    "pg.influencer.admin.h": { tr: "Yalnızca sen: eğitim konu taslağı ve ödeme onayları", en: "Only you: private course outline and payment approvals" },
+    "pg.influencer.admin.orders": { tr: "Ödeme bildirimleri", en: "Payment requests" },
+    "pg.influencer.refresh": { tr: "Yenile", en: "Refresh" },
+    "pg.influencer.copied": { tr: "Adres kopyalandı.", en: "Address copied." },
+    "pg.influencer.copyManual": { tr: "Adresi seçerek elle kopyalayabilirsin.", en: "Select the address to copy it manually." },
+    "pg.influencer.pay.login": { tr: "Ödeme bildirmek için site hesabına giriş yap.", en: "Sign in to submit a payment." },
+    "pg.influencer.pay.invalid": { tr: "Geçerli, 64 karakterlik işlem kimliğini gir.", en: "Enter a valid 64-character transaction ID." },
+    "pg.influencer.pay.duplicate": { tr: "Bu işlem kimliği zaten bildirilmiş.", en: "This transaction has already been submitted." },
+    "pg.influencer.pay.rate": { tr: "Çok fazla bildirim gönderdin. Daha sonra tekrar dene.", en: "Too many requests. Try again later." },
+    "pg.influencer.pay.unavailable": { tr: "İşlem şu an tamamlanamadı. Telegram’dan Ahmet’e ulaş.", en: "Could not complete the request. Contact Ahmet on Telegram." },
+    "pg.influencer.pay.pending": { tr: "Ödeme bildirimin kaydedildi ve Ahmet’e iletildi. Onay bekleniyor.", en: "Your payment request was saved and Ahmet was notified. Awaiting approval." },
+    "pg.influencer.pay.saved": { tr: "Bildirimin kaydedildi, ancak Telegram bildirimi iletilemedi. @traderahmetd üzerinden haber ver.", en: "Request saved, but the Telegram alert failed. Please contact @traderahmetd." },
+    "pg.influencer.admin.empty": { tr: "Henüz ödeme bildirimi yok.", en: "No payment requests yet." },
+    "pg.influencer.admin.approve": { tr: "Ödemeyi onayla", en: "Approve payment" },
+    "pg.influencer.admin.reject": { tr: "Reddet", en: "Reject" },
+    "pg.influencer.admin.confirm": { tr: "TRC20 ağını, USDT varlığını, alıcı adresini ve tutarı zincir üzerinde kontrol ettin mi? Onay erişimi açar.", en: "Have you verified the TRC20 network, USDT asset, recipient and amount on-chain? Approval grants access." },
     'app.influencer': { tr: '🚀 Influencer', en: '🚀 Influencer' },
     'pg.influencer.hc': { tr: 'X (Twitter) profilini kur, içerik üret, takipçini büyüt.', en: 'Build your X (Twitter) profile, publish content, grow your audience.' },
     'pg.influencer.t': { tr: 'Kripto Influencer', en: 'Crypto Influencer' },
