@@ -115,4 +115,24 @@ Large sustained logs/playback have not been benchmarked; the panel rerenders
 current results while visible. Browser storage deletion requires external
 backup. No branch-management UI, automated strategies or Strategy Lab.
 
-Production verification is recorded below only after deployment succeeds.
+## Release / production verification
+
+- Calculation/image tests commit: `16c41ae`.
+- UI/integration/browser acceptance commit: `b5f34bd`.
+- Isolated `git archive HEAD` release, excluding unrelated Access edits:
+  **537/537 Node tests PASS**, no skipped tests.
+- Production deployment: `dpl_hNdRRwMSN78zDS7no835NkBo5D85`, **READY**,
+  aliased to `https://alfa-trader.com`. Published application source: `b5f34bd`.
+  Entrypoint `alfa-charts.mjs?v=21`, Paper module `?v=2`, CSS `?v=8`.
+- Production real Chrome acceptance repeated: Strategy Tester **PASS**,
+  Paper Trading **PASS**, real Binance 4,000-candle replay **PASS**,
+  drawing scenarios **14/14 PASS**. Zero page errors / real order requests.
+  Strategy screenshot test also confirmed zero image upload requests.
+- All browser tests used disposable guest profiles. Production user records
+  and authenticated Supabase drawing rows were not modified by these tests.
+- Production screenshot captured outside the repository:
+  `%LOCALAPPDATA%/Temp/opencode/alfa-strategy-production.png`.
+
+The known working-tree Access assertion remains failing; it was neither hidden
+nor fixed as part of this module. Release and working-tree results differ
+because the unrelated Access changes were deliberately excluded.
