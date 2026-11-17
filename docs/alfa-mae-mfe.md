@@ -151,4 +151,30 @@ Paper OHLC execution limitations remain. Authenticated two-account/token-renewal
 and physical-device testing remain unverified; simulated owner checks are not
 claimed as authenticated acceptance.
 
-Production results are recorded after the clean release verification.
+## Release / production verification
+
+- Pure model/tests: `fe16c9e`; lower-boundary contradiction safeguard: `5b3bf34`.
+- Published UI/integration/browser source: **`a1c34fa`**.
+- Clean `git archive` release, excluding unrelated Access edits:
+  **591/591 Node tests PASS**, no skips.
+- Deployment **`dpl_Hb9rZdBADNm99EAFqAPiJ9fombuq`**, **READY**,
+  aliased to **https://alfa-trader.com**.
+- Cache versions: entrypoint `alfa-charts.mjs?v=23`, Paper `?v=4`,
+  Lab `?v=2`, new excursion modules `?v=1`. No modified cached asset was
+  published under its old import URL.
+- Production real Chrome acceptance repeated successfully:
+  **MAE/MFE PASS** (including actual 1m HTTP 200 data, bounded scatter,
+  independent long/short calculations, unchanged trading state, rewind,
+  save/restore, missing archive path and simulated owner isolation);
+  **Strategy Lab PASS**, **Strategy Tester PASS**, **Paper PASS**,
+  **4,000-candle Replay PASS**, **14/14 drawing scenarios PASS**.
+- No page errors or real order requests. Browser profiles were disposable
+  guests; no authenticated drawing database records were modified.
+- The boundary test is explicitly post-hoc and does not imply successful
+  strategy prediction. Unit fixtures, not invented market prices, cover exact
+  collision, gap and missing-data edge cases.
+- Screenshot saved outside the repository:
+  `%LOCALAPPDATA%/Temp/opencode/alfa-excursions-production.png`.
+
+The separate working-tree Access assertion still fails (590/591); it was not
+suppressed or included in this release.
