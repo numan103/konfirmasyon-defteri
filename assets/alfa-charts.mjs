@@ -10,7 +10,7 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=1';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=2';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
-import { PaperTradingPanel } from './alfa-paper.mjs?v=3';
+import { PaperTradingPanel } from './alfa-paper.mjs?v=4';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');

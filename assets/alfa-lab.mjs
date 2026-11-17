@@ -3,6 +3,7 @@ import { savedLabSources } from './alfa-lab-store.mjs?v=1';
 import { rrScenario,RR_TARGETS } from './alfa-lab-scenarios.mjs?v=1';
 import { analyzeTrades,validateAnalytics } from './alfa-strategy-model.mjs?v=1';
 import { fmt,el,option,svgNode,lineChart,barChart } from './alfa-strategy.mjs?v=2';
+import { ExcursionAnalysis } from './alfa-excursions.mjs?v=1';
 const pf=m=>m.profitFactorStatus==='no-losses'?'∞ (kayıp yok)':fmt(m.profitFactor);
 const labels={strategyId:'Strategy',symbol:'Symbol',timeframe:'Timeframe',direction:'Direction',
   ...Object.fromEntries(LAB_FIELDS),replaySessionId:'Replay Session',knowledge:'Etiket zamanı'};
@@ -30,6 +31,7 @@ export class StrategyLab{
   constructor(paper){
     this.paper=paper;this.doc=emptyLab();this.epoch=0;
     this.root=el('section',null,'strategy-lab');this.root.id='strategy-lab';this.root.hidden=true;paper.root.append(this.root);
+    this.excursions=new ExcursionAnalysis(this);
   }
   start(context,documents,clock){
     this.context=context;this.doc=mergeLab(documents);this.reliable=true;
@@ -49,6 +51,7 @@ export class StrategyLab{
     }
   }
   stop(){
+    this.excursions.stop();
     this.epoch++;this.context=null;this.state=null;this.report=null;this.scenarios=null;this.doc=emptyLab();
     this.root.replaceChildren();this.root.hidden=true;
     document.querySelectorAll('#lab-tag-dialog').forEach(d=>d.close());
@@ -69,6 +72,7 @@ export class StrategyLab{
     this.paper.update();
   }
   update(state){
+    this.excursions.invalidate();
     this.epoch++;this.scenarios=null;this.state=state;this.observe(this.paper.getReplay()?.clock);
     if(!this.root.hidden)this.render();
   }
@@ -150,6 +154,7 @@ export class StrategyLab{
       report.cohorts[this.doc.groupBy].map(r=>{const s=r.summary;return [names.get(r.value)||r.value,s.totalTrades,fmt(s.winRate)+'%',fmt(s.averageWinR),
         fmt(s.averageLossR),fmt(s.expectancy),pf(s),fmt(s.totalNetR),fmt(s.maximumDrawdown),s.longestLossStreak,r.sampleWarning];}));
     comparison.id='lab-comparison';this.root.append(comparison);
+    this.excursions.render(names);
     this.root.append(el('h4','Paper Trade etiketleri · aktif replay'));
     const table=this.paper.tester.table(['Trade','Strategy / Setup','Session / HTF','Displacement','Yön / Symbol / TF','Net R','Etiket zamanı','Etiketle'],
       this.state.trades.map(t=>{
