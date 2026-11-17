@@ -1,4 +1,5 @@
 import { PaperTradingEngine, createPaperOrder } from './alfa-paper-model.mjs?v=1';
+import { StrategyTester } from './alfa-strategy.mjs?v=1';
 const fmt=v=>Number.isFinite(v)?Number(v.toFixed(8)).toLocaleString('en-US',{maximumFractionDigits:8}):'—';
 const sameContext=(a,b)=>['sessionId','symbol','timeframe','exchange','marketType'].every(k=>a?.[k]===b?.[k]);
 export class PaperTradingPanel {
@@ -15,20 +16,24 @@ export class PaperTradingPanel {
       <p>Gerçek emir gönderilmez. Market / manuel kapanış: sonraki mum açılışı.
       Limit: daha iyi açılış fiyatı, en kötü limit fiyatı. SL/TP aynı mumda: varsayılan SL-first.
       Intrabar limit fill sonrası aynı mumdaki belirsiz TP kâr sayılmaz.</p>
+      <nav aria-label="Paper Trading sekmeleri"><button data-filter="paper">Paper Trading</button>
+      <button data-filter="history">Trade History</button><button data-filter="tester">Strategy Tester</button></nav>
       <nav><button data-action="new">Yeni emir</button><button data-filter="all">Tümü</button>
       <button data-filter="Pending">Pending Orders</button><button data-filter="Open">Open Positions</button>
-      <button data-filter="closed">Closed Trades</button><button data-filter="history">Trade History</button>
+      <button data-filter="closed">Closed Trades</button>
       <button data-action="export">JSON yedek</button></nav>
       <p id="paper-status" role="status"></p><div id="paper-list"></div>`;
     document.querySelector('.workspace').append(this.root);
+    this.tester=new StrategyTester(this);
     this.root.addEventListener('click',event=>{
       const b=event.target.closest('button');if(!b)return;
-      if(b.dataset.filter){this.filter=b.dataset.filter;this.update();return;}
+      if(b.dataset.filter){this.filter=b.dataset.filter==='paper'?'all':b.dataset.filter;this.update();return;}
       if(b.dataset.action==='hide'){this.root.hidden=true;return;}
       if(b.dataset.action==='export'){this.export();return;}
       if(b.dataset.action==='new'){this.orderDialog();return;}
       const t=this.state?.trades.find(t=>t.id===b.dataset.id);if(!t)return;
       if(b.dataset.action==='select'){this.selected=t.id;this.update();return;}
+      if(b.dataset.action==='journal'){this.tester.journalDialog(t);return;}
       if(b.dataset.action==='edit'){this.editDialog(t);return;}
       if(b.dataset.action==='resolve')this.command('resolve',{tradeId:t.id,outcome:b.dataset.outcome});
       else if(['cancel','close'].includes(b.dataset.action))this.command(b.dataset.action,{tradeId:t.id});
@@ -41,7 +46,8 @@ export class PaperTradingPanel {
     try {local=JSON.parse(localStorage.getItem(this.key)||'null');}
     catch{throw new Error('Yerel Paper günlüğü okunamadı; kayıt silinmedi');}
     const merged=new Map();
-    for(const journal of [saved,local,this.unsaved.get(this.key)]) {
+    const journals=[saved,local,this.unsaved.get(this.key)];
+    for(const journal of journals) {
       if(!journal)continue;
       if(journal.version!==1||!sameContext(journal.context,context))throw new Error('Paper oturumu bağlamı uyuşmuyor');
       for(const e of journal.events) {
@@ -50,9 +56,13 @@ export class PaperTradingPanel {
       }
     }
     this.engine=new PaperTradingEngine(context,[...merged.values()]);
+    this.tester.start(context,journals.map(j=>j?.analytics));
     this.selected=null;this.message('Replay hesabı hazır. Gelecekteki komutlar geri sararken silinmez; o saate gelince yeniden uygulanır.');
   }
-  serialize(){return this.owner()===this.ownerId?this.engine?.serialize()??null:null;}
+  serialize(){
+    if(this.owner()!==this.ownerId||!this.engine)return null;
+    return {...this.engine.serialize(),analytics:this.tester.serialize()};
+  }
   message(text){this.root.querySelector('#paper-status').textContent=text;}
   persist(){
     if(!this.engine)return;
@@ -84,6 +94,8 @@ export class PaperTradingPanel {
       confirm('Paper günlüğü kaydedilemedi. JSON yedek almadan çıkarsanız değişiklikler kaybolabilir. Yine de çıkılsın mı?');
   }
   stop(){
+    this.tester?.stop();
+    document.querySelectorAll('#trade-journal-dialog').forEach(d=>d.close());
     for(const line of this.lines)try{this.series.removePriceLine(line);}catch{}
     this.lines=[];this.root.hidden=true;this.engine=null;this.state=null;
   }
@@ -92,6 +104,12 @@ export class PaperTradingPanel {
     if(this.owner()!==this.ownerId){this.stop();return;}
     try{this.state=this.engine.evaluate(replay.bars,replay.clock);}
     catch(error){this.pause();this.message('Simülasyon durduruldu: '+error.message);return;}
+    this.tester.root.hidden=this.filter!=='tester';
+    this.root.classList.toggle('tester-active',this.filter==='tester');
+    this.root.querySelector('#paper-list').hidden=this.filter==='tester';
+    for(const b of this.root.querySelectorAll('[data-filter]'))b.setAttribute('aria-pressed',String(b.dataset.filter===this.filter||
+      b.dataset.filter==='paper'&&!['history','tester'].includes(this.filter)));
+    this.tester.update(this.state);
     for(const line of this.lines)this.series.removePriceLine(line);
     this.lines=[];
     for(const t of this.state.trades.filter(t=>t.status==='Open'||t.status==='Pending')){
@@ -101,6 +119,7 @@ export class PaperTradingPanel {
       }
     }
     const list=this.root.querySelector('#paper-list');list.replaceChildren();
+    if(this.filter==='tester')return;
     if(this.filter==='history'){
       for(const event of this.state.history){
         const row=document.createElement('div');
@@ -124,6 +143,7 @@ ${t.notes?'Not: '+t.notes:''}`;
         if(action==='select')b.setAttribute('aria-pressed',String(this.selected===t.id));
       };
       button('Seç','select');
+      button('Günlük / Strateji','journal');
       if(t.status==='Pending')button('Emri iptal et','cancel');
       if(t.status==='Open'&&!t.ambiguous)button(t.closeRequested?'Kapanış bekliyor':'Manuel kapat','close');
       if(['Open','Pending'].includes(t.status)&&!t.ambiguous)button('SL / TP','edit');
@@ -159,6 +179,7 @@ ${t.notes?'Not: '+t.notes:''}`;
       return createPaperOrder(input);
     };
     const dialog=this.dialog('Yeni sanal emir',`
+      <label>Strategy tag<select name="strategyId"></select></label>
       <label>Yön<select name="direction"><option value="long">Long</option><option value="short">Short</option></select></label>
       <label>Emir<select name="orderType"><option value="market">Market (sonraki açılış)</option><option value="limit">Limit</option></select></label>
       <label>Planlanan entry / limit fiyatı<input name="entry" type="number" min="0" step="any" required value="${close}"></label>
@@ -177,6 +198,7 @@ ${t.notes?'Not: '+t.notes:''}`;
         const order=parse(form);
         if(!this.command('create',{order}))throw new Error('Emir kabul edilmedi; paneldeki hata mesajını kontrol edin.');
       });
+    this.tester.populate(dialog.querySelector('[name="strategyId"]'));
     dialog.querySelector('form').addEventListener('input',()=>{
       try {
         const o=parse(new FormData(dialog.querySelector('form')));

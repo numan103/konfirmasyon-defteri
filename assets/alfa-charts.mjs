@@ -10,7 +10,7 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=1';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=2';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
-import { PaperTradingPanel } from './alfa-paper.mjs?v=1';
+import { PaperTradingPanel } from './alfa-paper.mjs?v=2';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -443,6 +443,7 @@ const paper = new PaperTradingPanel({
 });
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+  if(paper.engine&&paper.owner()!==paper.ownerId){pauseReplay();paper.stop();}
   try { loadLayout(); } catch {}
   try { indicators.updateAll(seriesBars); } catch {}
   try { sessionLevels.render(); } catch {}
