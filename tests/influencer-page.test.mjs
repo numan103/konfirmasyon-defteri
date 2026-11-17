@@ -33,7 +33,7 @@ test('sayfa metinleri Türkçe ve İngilizce sözlükte tanımlı', () => {
     'pg.influencer.c1', 'pg.influencer.c8', 'pg.influencer.road',
     'pg.influencer.w4d', 'pg.influencer.metrics', 'pg.influencer.warnp',
   ]) {
-    assert.match(html, new RegExp("'" + key.replace(/\./g, '\\.') + "':\\s*\\{\\s*tr:"));
+    assert.match(html, new RegExp("[\"']" + key.replace(/\./g, '\\.') + "[\"']:\\s*\\{\\s*tr:"));
   }
   for (const id of ['inf-checks', 'inf-bar', 'inf-count', 'inf-reset']) {
     assert.ok(html.includes('id="' + id + '"'), 'missing element: ' + id);
@@ -134,5 +134,21 @@ test('konu taslağı HTML içinde yok, sadece admin API üzerinden yüklenir', (
 });
 
 test('sosyal önizleme için middleware sayfa başlığı var', () => {
-  assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — Kripto Influencer'/);
+  assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — Kitle Atölyesi'/);
+});
+
+test('Kitle Atölyesi kripto dışındaki içerik üreticilerine de hitap eder', () => {
+  assert.match(html, /data-i18n="app\.influencer">🚀 Kitle Atölyesi/);
+  assert.match(html, /data-i18n="pg\.influencer\.t">Kitle Atölyesi/);
+  assert.match(html, /Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı/);
+  assert.match(html, /Audience Studio/);
+  assert.ok(!html.includes('>Kripto Influencer<'));
+});
+
+test('gerçek gönderiler eşit boyutlu, kaydırılabilir ve devam bağlantılıdır', () => {
+  assert.match(html, /\.inf-real-post \{[^}]*height: 440px/);
+  assert.match(html, /\.inf-real-post-preview \{[^}]*overflow: auto/);
+  assert.equal((html.match(/class="inf-real-post-preview" tabindex="0"/g) || []).length, 3);
+  assert.equal((html.match(/data-i18n="pg\.influencer\.openPost">Devamını gör ↗/g) || []).length, 3);
+  assert.match(html, /data-i18n-aria="pg\.influencer\.postPreview"/);
 });

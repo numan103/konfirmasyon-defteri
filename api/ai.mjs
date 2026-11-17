@@ -166,9 +166,9 @@ async function influencerPrices() {
 }
 // Kept inside the server function, never embedded in the public page.
 const INF_OUTLINE = [
-  ['1. Başlangıç ve konumlandırma', 'Hedef kitle; kriptoda uzmanlık alanı seçimi; kişisel hikâye; 30 günlük hedefler.'],
+  ['1. Başlangıç ve konumlandırma', 'Hedef kitle; kripto, FX veya başka bir alanda uzmanlık seçimi; kişisel hikâye; 30 günlük hedefler.'],
   ['2. X profilini kurma', 'Kullanıcı adı, fotoğraf, kapak, biyografi; tanışma gönderisi ve sabitlenen içerik. X tek sabit gönderiye izin verir.'],
-  ['3. Kripto içerik okuryazarlığı', 'Kaynak doğrulama; veri/haber ayrımı; grafik anlatımı; telif ve kaynak gösterme; sponsorlu içerik açıklamaları.'],
+  ['3. Kaynak ve içerik okuryazarlığı', 'Kaynak doğrulama; veri/haber ayrımı; grafik anlatımı; telif ve kaynak gösterme; sponsorlu içerik açıklamaları.'],
   ['4. İçerik üretimi', 'Kısa gönderi, seri ve thread; güçlü giriş; görsel şablon; taslak geliştirme; AI çıktısını doğrulama.'],
   ['5. İçerik planı ve fikir sistemi', 'Üç içerik sütunu; haftalık takvim; haberden içerik çıkarma; fikir havuzu; tekrar kullanılabilir formatlar.'],
   ['6. İlk topluluğunu oluşturma', 'Nitelikli yanıtlar; sohbet başlatma; iş birlikleri; Spaces; spam ve botlardan kaçınma.'],
@@ -248,7 +248,7 @@ export async function influencerHandler(req, res) {
       // Never fall back to a group or mentorship topic.
       if (process.env.TG_BOT_TOKEN && /^\d+$/.test(chat)) {
         const sent = await sendTelegram([
-          'Influencer eğitim ödeme bildirimi', INF_PACKAGES[order.package], 'Üye: ' + user.email,
+          'Kitle Atölyesi ödeme bildirimi', INF_PACKAGES[order.package], 'Üye: ' + user.email,
           'TXID: ' + order.txid, 'Ödeme kullanıcı beyanıdır; henüz doğrulanmadı.',
           'USDT/TRC20, alıcı adresi ve tutarı zincirden kontrol et.',
           'Onay/red: https://alfa-trader.com/?page=influencer'

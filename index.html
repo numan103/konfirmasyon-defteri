@@ -5131,12 +5131,14 @@
   .inf-like-range { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
   .inf-like-range strong { color: var(--pc); font-size: 34px; font-weight: 800; letter-spacing: -.04em; }
   .inf-like-range span { color: var(--text-2); font-size: 13px; }
-  .inf-real-posts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 12px; margin-top: 16px; }
-  .inf-real-post { min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); overflow-x: auto; }
+  .inf-real-posts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 12px; margin-top: 16px; }
+  .inf-real-post { display: flex; flex-direction: column; min-width: 0; height: 440px; box-sizing: border-box; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); overflow: hidden; }
+  .inf-real-post-preview { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; border-radius: 8px; }
+  .inf-real-post-preview:focus-visible { outline: 2px solid var(--pc); outline-offset: -2px; }
   .inf-real-post blockquote { margin: 0 0 12px; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
   .inf-real-post blockquote p { margin: 0 0 10px; }
   .inf-real-post .twitter-tweet { margin: 0 auto 12px !important; }
-  .inf-real-post-link { display: inline-block; padding: 8px 0; font-size: 12px; color: var(--pc); }
+  .inf-real-post-link { display: flex; justify-content: center; align-items: center; flex: none; min-height: 44px; margin-top: 10px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--pc); text-decoration: none; }
   @media (max-width: 900px) { .inf-real-posts { grid-template-columns: 1fr; } }
   .inf-compare { display: grid; grid-template-columns: 60px minmax(0,1fr) 40px; align-items: center; gap: 8px; margin: 8px 0; font-size: 10px; color: var(--text-2); }
   .inf-compare > div { height: 9px; border-radius: 6px; overflow: hidden; background: var(--border); }
@@ -7618,13 +7620,13 @@
   <div id="page-influencer" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🚀</span>
-      <span class="eg-brand-name" data-i18n="pg.influencer.t">Kripto Influencer</span>
-      <span class="eg-brand-sub" data-i18n="pg.influencer.s">X (Twitter)'da profilini kur, güvenilir içerik üret, takipçini büyüt.</span>
+      <span class="eg-brand-name" data-i18n="pg.influencer.t">Kitle Atölyesi</span>
+      <span class="eg-brand-sub" data-i18n="pg.influencer.s">Bilgini içeriğe, içeriğini topluluğa dönüştür.</span>
     </div>
 
     <div id="inf-teaser" class="inf-card inf-teaser">
-      <h2 data-i18n="pg.influencer.promo.h">Kripto Influencer programı</h2>
-      <p data-i18n="pg.influencer.promo.s">X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.</p>
+      <h2 data-i18n="pg.influencer.promo.h">Bir profil değil, kendi kitleni oluştur.</h2>
+      <p data-i18n="pg.influencer.promo.s">Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı ya da bağımsız bir içerik üreticisi olabilirsin. Kitle Atölyesi; X’te konumlanma, anlaşılır içerik üretme ve güvenilir bir topluluk kurma sürecine odaklanır.</p>
       <div class="inf-card" data-i18n="pg.influencer.videoSoon">Tanıtım videosu yakında burada.</div>
       <p class="inf-update" data-i18n="pg.influencer.updates">Eğitim alanı hazırlanıyor. Videolar, eğitsel içerikler ve örnekler ben ekledikçe güncellenecek; içeriklerin tamamı henüz yayında değil.</p>
       <h3 class="inf-sub" data-i18n="pg.influencer.plans.h">Paketleri gör</h3>
@@ -7713,28 +7715,34 @@
         <p data-i18n="pg.influencer.engagement.quote">Bazı gönderilerim 30–50 arası beğeni alıyor.</p>
         <div class="inf-like-range"><strong>30–50</strong><span data-i18n="pg.influencer.engagement.likes">bazı gönderilerde beğeni</span></div>
         <p class="inf-method" data-i18n="pg.influencer.engagement.note">Ahmet’in aktardığı aralık; tüm gönderilerin ortalaması veya sonuç garantisi değildir. Beğeni sayısı, toplam etkileşim ya da gösterim sayısı anlamına gelmez.</p>
-        <p class="inf-method" data-i18n="pg.influencer.engagement.sources">Kendi hesabımdan üç gerçek gönderi. Gönderiler X üzerinden yüklenir; beğeni ve diğer etkileşim sayıları zamanla değişebilir. Yüklenmezse “X’te aç” bağlantısını kullan.</p>
+        <p class="inf-method" data-i18n="pg.influencer.engagement.sources">Kendi hesabımdan üç gerçek gönderi. Beğeni ve diğer etkileşim sayıları zamanla değişebilir. Kart içinde kaydırabilir veya tamamını X’te okumak için “Devamını gör” bağlantısını kullanabilirsin.</p>
         <div class="inf-real-posts" id="inf-real-posts">
           <article class="inf-real-post">
+            <div class="inf-real-post-preview" tabindex="0" role="region" aria-label="Gönderi önizlemesi" data-i18n-aria="pg.influencer.postPreview">
             <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
               <p lang="tr" dir="ltr">Eskiden akıllı bir traderdım<br><br>-Marketi yenebileceğimi<br>- İşlemlerden 3-5RR kazanabileceğimi<br>- Fiyatı döndürebileceğimi<br>- Kayıplarımı telafi etmeye çalışırsam başaracağımı<br>- Başkalarından üstün olduğumu<br>- Her zaman yeni bir şey öğrenmem gerektiğini<br>- Çok azimli olursam çok…</p>
               — Trader Ahmet (@traderahmet_) <a href="https://x.com/traderahmet_/status/2122697067059388880" target="_blank" rel="noopener noreferrer">2026-11-17</a>
             </blockquote>
-            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2122697067059388880" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">X’te aç ↗</a>
+            </div>
+            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2122697067059388880" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">Devamını gör ↗</a>
           </article>
           <article class="inf-real-post">
+            <div class="inf-real-post-preview" tabindex="0" role="region" aria-label="Gönderi önizlemesi" data-i18n-aria="pg.influencer.postPreview">
             <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
               <p lang="tr" dir="ltr">Biz de zamanında her lower lowu longlardık, her dibi yakalamaya fiyatı döndürmeye çalışırdık sonra piyasalar kafamıza vura vura öğretti. Sanmayın ki kolay öğrendik, yıllarca öğren(e)medik. Öğrenmek istemedik. Market maker'dık ya fiyatı yönetiyorduk :D<br><br>O yüzden bunu çok…</p>
               — Trader Ahmet (@traderahmet_) <a href="https://x.com/traderahmet_/status/2120899179778113906" target="_blank" rel="noopener noreferrer">2026-11-12</a>
             </blockquote>
-            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2120899179778113906" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">X’te aç ↗</a>
+            </div>
+            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2120899179778113906" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">Devamını gör ↗</a>
           </article>
           <article class="inf-real-post">
+            <div class="inf-real-post-preview" tabindex="0" role="region" aria-label="Gönderi önizlemesi" data-i18n-aria="pg.influencer.postPreview">
             <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
               <p lang="tr" dir="ltr">“11 yıl okul, 2 yıl kolej, 3 yıl üniversite… Meğer tek öğrenmem gereken yatay çizgi çizmekmiş.”<br><br>-Tom Dante</p>
               — Trader Ahmet (@traderahmet_) <a href="https://x.com/traderahmet_/status/2114068323839172986" target="_blank" rel="noopener noreferrer">2026-10-24</a>
             </blockquote>
-            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2114068323839172986" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">X’te aç ↗</a>
+            </div>
+            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2114068323839172986" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">Devamını gör ↗</a>
           </article>
         </div>
       </div>
@@ -7779,8 +7787,8 @@
           <h2 data-i18n="pg.influencer.ideas">İçerik fikirleri</h2>
           <ul class="inf-list">
             <li data-i18n="pg.influencer.idea1">Günlük 3 satır: ne oldu, neden önemli, neyi izleyeceksin.</li>
-            <li data-i18n="pg.influencer.idea2">Bir grafiği 3 renkle anlat: destek, direnç, senin senaryon.</li>
-            <li data-i18n="pg.influencer.idea3">Haber öncesi risk notu: saat, beklenti, hesabındaki kısıt.</li>
+            <li data-i18n="pg.influencer.idea2">Bir grafik, süreç veya kavramı üç net başlıkla anlat: gözlem, yorum, çıkarım.</li>
+            <li data-i18n="pg.influencer.idea3">Alanındaki güncel bir gelişmeyi açıkla: ne değişti, kimi etkiliyor, kaynak ne?</li>
             <li data-i18n="pg.influencer.idea4">Yaptığın bir hatayı ders olarak paylaş, sonucu gizleme.</li>
             <li data-i18n="pg.influencer.idea5">Her gönderide kaynak, veri ve saat dilimini belirt.</li>
           </ul>
@@ -7790,7 +7798,7 @@
         <div class="inf-card">
           <h2 data-i18n="pg.influencer.road">30 günlük yol haritası</h2>
           <div class="inf-road">
-            <div class="inf-step"><b data-i18n="pg.influencer.w1t">1. Hafta — Profil</b><span data-i18n="pg.influencer.w1d">Fotoğraf, biyografi, 3 sabitlenen gönderi; 10 kişiden geri bildirim al.</span></div>
+            <div class="inf-step"><b data-i18n="pg.influencer.w1t">1. Hafta — Profil</b><span data-i18n="pg.influencer.w1d">Fotoğraf, biyografi ve sabit tanışma gönderisi; 10 kişiden geri bildirim al.</span></div>
             <div class="inf-step"><b data-i18n="pg.influencer.w2t">2. Hafta — Ritim</b><span data-i18n="pg.influencer.w2d">Günde 1 kısa gönderi, haftada 1 derin analiz; saatleri sabitle.</span></div>
             <div class="inf-step"><b data-i18n="pg.influencer.w3t">3. Hafta — Etkileşim</b><span data-i18n="pg.influencer.w3d">5 kişiyle anlamlı sohbet, 1 thread; gelen sorulara cevap ver.</span></div>
             <div class="inf-step"><b data-i18n="pg.influencer.w4t">4. Hafta — Ölçüm</b><span data-i18n="pg.influencer.w4d">En çok kaydedilen gönderiyi bul, aynı formatı tekrarla.</span></div>
@@ -30011,8 +30019,8 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
-    'pg.influencer.promo.h': { tr: 'Kripto Influencer programı', en: 'Crypto Influencer programme' },
-    'pg.influencer.promo.s': { tr: 'X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.', en: 'Three packages take you from a blank X profile to your first 1,000 followers. Watch the intro and pick your package.' },
+    "pg.influencer.promo.h": { tr: "Bir profil değil, kendi kitleni oluştur.", en: "Build more than a profile. Build your own audience." },
+    "pg.influencer.promo.s": { tr: "Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı ya da bağımsız bir içerik üreticisi olabilirsin. Kitle Atölyesi; X’te konumlanma, anlaşılır içerik üretme ve güvenilir bir topluluk kurma sürecine odaklanır.", en: "Whether you trade crypto or FX, teach, explore technology or create independently, Audience Studio focuses on positioning yourself on X, communicating clearly and building a trusted community." },
     'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
     'pg.influencer.buy': { tr: 'Paketi seç', en: 'Select package' },
     'pg.influencer.unlockedNote': { tr: 'Tam erişim açık — aşağıdaki çalışma alanı paketine özel.', en: 'Full access is open — the workspace below is for package members.' },
@@ -30090,8 +30098,9 @@ loadSfx();
     "pg.influencer.engagement.quote": { tr: "Bazı gönderilerim 30–50 arası beğeni alıyor.", en: "Some of my posts receive 30–50 likes." },
     "pg.influencer.engagement.likes": { tr: "bazı gönderilerde beğeni", en: "likes on some posts" },
     "pg.influencer.engagement.note": { tr: "Ahmet’in aktardığı aralık; tüm gönderilerin ortalaması veya sonuç garantisi değildir. Beğeni sayısı, toplam etkileşim ya da gösterim sayısı anlamına gelmez.", en: "A range reported by Ahmet, not an average across all posts or a guarantee of results. Likes are not the same as total engagements or impressions." },
-    "pg.influencer.engagement.sources": { tr: "Kendi hesabımdan üç gerçek gönderi. Gönderiler X üzerinden yüklenir; beğeni ve diğer etkileşim sayıları zamanla değişebilir. Yüklenmezse “X’te aç” bağlantısını kullan.", en: "Three real posts from my account. Posts load from X; likes and other engagement counts may change over time. If an embed does not load, use “Open on X”." },
-    "pg.influencer.openPost": { tr: "X’te aç ↗", en: "Open on X ↗" },
+    "pg.influencer.postPreview": { tr: "Gönderi önizlemesi", en: "Post preview" },
+    "pg.influencer.engagement.sources": { tr: "Kendi hesabımdan üç gerçek gönderi. Beğeni ve diğer etkileşim sayıları zamanla değişebilir. Kart içinde kaydırabilir veya tamamını X’te okumak için “Devamını gör” bağlantısını kullanabilirsin.", en: "Three real posts from my account. Likes and other engagement counts may change over time. Scroll inside a card or use “Read full post” to read it on X." },
+    "pg.influencer.openPost": { tr: "Devamını gör ↗", en: "Read full post ↗" },
     "pg.influencer.case.period.3": { tr: "Süre belirtilmedi", en: "Duration not provided" },
     "pg.influencer.followers": { tr: "takipçi", en: "followers" },
     "pg.influencer.start": { tr: "Başlangıç", en: "Start" },
@@ -30109,30 +30118,30 @@ loadSfx();
     "pg.influencer.tweet.3.title": { tr: "Süreç ve güven", en: "Process and trust" },
     "pg.influencer.tweet.3.body": { tr: "Bu hafta en çok ne öğrendim? İyi görünen her fikri paylaşmak yerine nedenini açıklayabildiğim fikirlere odaklanmak. Bir sonraki paylaşımda sonucu değil, karar sürecini de göstereceğim.", en: "My biggest lesson this week: focus on ideas I can explain rather than sharing every idea that looks good. In my next post, I will show the decision process, not just the outcome." },
     "pg.influencer.sample": { tr: "Temsili örnek · gerçek gönderi değil", en: "Illustrative sample · not a real post" },
-    'app.influencer': { tr: '🚀 Influencer', en: '🚀 Influencer' },
-    'pg.influencer.hc': { tr: 'X (Twitter) profilini kur, içerik üret, takipçini büyüt.', en: 'Build your X (Twitter) profile, publish content, grow your audience.' },
-    'pg.influencer.t': { tr: 'Kripto Influencer', en: 'Crypto Influencer' },
-    'pg.influencer.s': { tr: "X (Twitter)'da profilini kur, güvenilir içerik üret, takipçini büyüt.", en: 'Set up your X (Twitter) profile, publish trustworthy content, grow your audience.' },
+    "app.influencer": { tr: "🚀 Kitle Atölyesi", en: "🚀 Audience Studio" },
+    "pg.influencer.hc": { tr: "Alanını bul, içerik üret, kendi kitleni oluştur.", en: "Find your niche, publish content and build your audience." },
+    "pg.influencer.t": { tr: "Kitle Atölyesi", en: "Audience Studio" },
+    "pg.influencer.s": { tr: "Bilgini içeriğe, içeriğini topluluğa dönüştür.", en: "Turn your knowledge into content and your content into community." },
     'pg.influencer.check': { tr: 'Başlangıç kontrol listesi', en: 'Getting-started checklist' },
     'pg.influencer.checkS': { tr: 'Sırayla tamamla. İşaretler bu tarayıcıda saklanır.', en: 'Work through them in order. Your ticks are saved in this browser.' },
     'pg.influencer.reset': { tr: 'Sıfırla', en: 'Reset' },
     'pg.influencer.c1': { tr: 'Net profil fotoğrafı ve kapak görseli kullan.', en: 'Use a clear profile photo and cover image.' },
-    'pg.influencer.c2': { tr: 'Biyografi: neyi takip ettiğini ve neden güvenilir olduğunu 1 cümlede yaz.', en: 'Bio: in one sentence, say what you follow and why you are credible.' },
-    'pg.influencer.c3': { tr: '3 gönderiyi sabitle: tanışma, en iyi analizin, yol haritan.', en: 'Pin 3 posts: intro, your best analysis, your roadmap.' },
+    "pg.influencer.c2": { tr: "Biyografi: kime, hangi konuda ve nasıl yardımcı olduğunu bir cümlede yaz.", en: "Bio: explain who you help, with what, and how in one sentence." },
+    "pg.influencer.c3": { tr: "Bir tanışma gönderisi sabitle; en iyi içeriklerini ve yol haritanı bu gönderide topla.", en: "Pin an introductory post and use it to bring together your best content and roadmap." },
     'pg.influencer.c4': { tr: 'Haftada en az 5 gönderi planla; aynı saatlerde paylaş.', en: 'Plan at least 5 posts a week and publish at consistent times.' },
     'pg.influencer.c5': { tr: 'Her analizde kaynak, veri ve saat dilimini belirt.', en: 'Always include the source, data and time zone in your analysis.' },
     'pg.influencer.c6': { tr: 'Günde 15 dakika yorumlara cevap ver.', en: 'Spend 15 minutes a day replying to comments.' },
-    'pg.influencer.c7': { tr: 'Günlük piyasa notu tut; neyi neden yazdığını kaydet.', en: 'Keep a daily market note; record what you wrote and why.' },
+    "pg.influencer.c7": { tr: "Günlük içerik notu tut; neyi, kime ve neden yazdığını kaydet.", en: "Keep a daily content note: record what you wrote, for whom and why." },
     'pg.influencer.c8': { tr: 'Takipçi değil, güven ve tutarlılık hedefle.', en: 'Aim for trust and consistency, not follower counts.' },
     'pg.influencer.ideas': { tr: 'İçerik fikirleri', en: 'Content ideas' },
     'pg.influencer.idea1': { tr: 'Günlük 3 satır: ne oldu, neden önemli, neyi izleyeceksin.', en: 'Daily 3 lines: what happened, why it matters, what you will watch.' },
-    'pg.influencer.idea2': { tr: 'Bir grafiği 3 renkle anlat: destek, direnç, senin senaryon.', en: 'Explain one chart in 3 colours: support, resistance, your scenario.' },
-    'pg.influencer.idea3': { tr: 'Haber öncesi risk notu: saat, beklenti, hesabındaki kısıt.', en: 'Pre-news risk note: time, expectation, your account restrictions.' },
+    "pg.influencer.idea2": { tr: "Bir grafik, süreç veya kavramı üç net başlıkla anlat: gözlem, yorum, çıkarım.", en: "Explain a chart, process or concept in three clear parts: observation, interpretation and takeaway." },
+    "pg.influencer.idea3": { tr: "Alanındaki güncel bir gelişmeyi açıkla: ne değişti, kimi etkiliyor, kaynak ne?", en: "Explain a current development in your niche: what changed, who it affects and what the source is." },
     'pg.influencer.idea4': { tr: 'Yaptığın bir hatayı ders olarak paylaş, sonucu gizleme.', en: 'Share a mistake as a lesson; do not hide the outcome.' },
     'pg.influencer.idea5': { tr: 'Her gönderide kaynak, veri ve saat dilimini belirt.', en: 'Include source, data and time zone in every post.' },
     'pg.influencer.road': { tr: '30 günlük yol haritası', en: '30-day roadmap' },
     'pg.influencer.w1t': { tr: '1. Hafta — Profil', en: 'Week 1 — Profile' },
-    'pg.influencer.w1d': { tr: 'Fotoğraf, biyografi, 3 sabitlenen gönderi; 10 kişiden geri bildirim al.', en: 'Photo, bio, 3 pinned posts; get feedback from 10 people.' },
+    "pg.influencer.w1d": { tr: "Fotoğraf, biyografi ve sabit tanışma gönderisi; 10 kişiden geri bildirim al.", en: "Photo, bio and a pinned introduction; get feedback from 10 people." },
     'pg.influencer.w2t': { tr: '2. Hafta — Ritim', en: 'Week 2 — Rhythm' },
     'pg.influencer.w2d': { tr: 'Günde 1 kısa gönderi, haftada 1 derin analiz; saatleri sabitle.', en: 'One short post a day, one deep analysis a week; fix your posting times.' },
     'pg.influencer.w3t': { tr: '3. Hafta — Etkileşim', en: 'Week 3 — Engagement' },

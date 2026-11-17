@@ -1,4 +1,9 @@
-# Influencer eğitimi: ödeme onayı kurulumu
+# Kitle Atölyesi: ödeme onayı kurulumu
+
+Kapsam: kripto/FX trader'ları, eğitmenler ve farklı alanlarda içerik üretenler.
+Mevcut `?page=influencer` bağlantısı ve erişim anahtarları geriye uyumluluk için korunur.
+Gerçek gönderi kartları eşit 440px yüksekliğindedir; önizleme içinde kaydırılabilir,
+“Devamını gör” bağlantısıyla X üzerindeki tam gönderi açılır.
 
 ## Veritabanı
 
