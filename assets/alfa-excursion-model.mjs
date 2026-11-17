@@ -53,7 +53,7 @@ function subBars(parent,lower,step,clock,context){
   return bars;
 }
 function refineSegments(trade,base,lower,step,clock,context){
-  let used=0;const warnings=[],segments=[];
+  let used=0,incompatible=false;const warnings=[],segments=[];
   for(const s of base){
     if(!s.partialStart&&!s.partialEnd){segments.push(s);continue;}
     const bars=subBars(s.bar,lower,step,clock,context);
@@ -81,14 +81,14 @@ function refineSegments(trade,base,lower,step,clock,context){
       if(end<0)conflict=true;
     }
     if(conflict){
-      segments.push(s);warnings.push('Lower path conflicts with original conservative execution; original bounds retained');continue;
+      incompatible=true;segments.push(s);warnings.push('Lower path conflicts with original conservative execution');continue;
     }
     for(let i=start;i<=end;i++)segments.push({bar:bars[i],partialStart:i===start&&partialStart,
       partialEnd:i===end&&s.partialEnd&&endMode!=='open',end:i===end?endMode:'',
       exitReference:s.exitReference,deferTarget:s.deferTarget});
     used++;
   }
-  return {segments,used,warnings:[...new Set(warnings)]};
+  return {segments,used,incompatible,warnings:[...new Set(warnings)]};
 }
 export function measureExcursion({context,events,bars,clock,trade,lowerData=null}){
   const fail=(status,reason)=>({tradeId:trade?.id,tradeKey:trade?excursionKey(trade):'',status,reason,mae:null,mfe:null});
@@ -130,6 +130,8 @@ export function measureExcursion({context,events,bars,clock,trade,lowerData=null
     if(lowerData){
       try{
         const refined=refineSegments(actual,base,lowerData,step,clock,context),candidate=envelope(actual,refined.segments);
+        if(refined.incompatible)return {...fail('boundary-conflict','Lower OHLC contradicts the original simulated exit sequence; no excursion produced'),
+          refinement:{used:0,timeframe:lowerData.timeframe,warnings:refined.warnings}};
         if(['mae','mfe'].some(k=>candidate[k].lower<prices[k].lower&&!near(candidate[k].lower,prices[k].lower)||
           candidate[k].upper>prices[k].upper&&!near(candidate[k].upper,prices[k].upper)))throw new Error('Lower path is not a compatible refinement');
         prices=candidate;refinement={used:refined.used,timeframe:lowerData.timeframe,warnings:refined.warnings};

@@ -137,13 +137,13 @@ test('lower-timeframe exit refinement excludes subcandles after TP, not just lat
   assert.equal(r.refinement.used,1);assert.deepEqual(r.mae.price,{lower:2,upper:5});
   assert.deepEqual(r.mfe.price,{lower:25,upper:25});
 });
-test('lower path contradicting original conservative SL-first retains original bounds with warning',()=>{
-  const e=make({takeProfit:125}),bars=[b(0),b(900,100,130,80,100)],base=run(e,bars);
+test('lower path contradicting original conservative SL-first produces no contradictory excursion',()=>{
+  const e=make({takeProfit:125}),bars=[b(0),b(900,100,130,80,100)];
   const lowerData={symbol:'BTCUSDT',timeframe:'5m',bars:[
     b(900,100,130,95,120),b(1200,120,122,80,90),b(1500,90,105,85,100)]};
   const r=run(e,bars,{lowerData});
   assert.equal(r.refinement.used,0);assert.match(r.refinement.warnings.join(' '),/conflicts/);
-  assert.deepEqual(r.mae,base.mae);assert.deepEqual(r.mfe,base.mfe);
+  assert.equal(r.status,'boundary-conflict');assert.equal(r.mae,null);assert.equal(r.mfe,null);
 });
 test('missing/mismatched/wrong-symbol/future lower candles never invent precision',()=>{
   const e=make({takeProfit:125}),bars=[b(0),b(900,100,150,95,140)],base=run(e,bars);
@@ -176,4 +176,9 @@ test('Strategy Lab strategy filters and metadata cohorts feed excursions unchang
   const result=run(e,bars),report=excursionReport(lab.rows,[result]);
   assert.equal(report.rows.length,1);assert.equal(report.groups.strategyId[0].value,'fib-0382');
   assert.equal(report.groups.outcome[0].value,'Winning');assert.equal(report.summary.mfeR.lower,1.5);
+});
+test('empty results have no synthetic measurements or averages',()=>{
+  const r=excursionReport([],[]);
+  assert.deepEqual(r.rows,[]);assert.equal(r.summary.measured,0);assert.equal(r.summary.total,0);
+  assert.equal(r.summary.maeR.lower,null);assert.equal(r.summary.mfeR.upper,null);
 });
