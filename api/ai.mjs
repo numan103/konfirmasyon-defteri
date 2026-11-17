@@ -145,7 +145,25 @@ async function cronHandler(req, res) {
 // Influencer purchases share this function to stay within the Hobby function limit.
 const INF_SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const INF_PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
-const INF_PACKAGES = { video: 'Video eğitim — 1.990₺', guided: 'Eğitim + bireysel soru-cevap — 3.490₺', growth: '1-1 büyüme desteği — 6.990₺' };
+const INF_PACKAGES = { video: 'Video eğitim — 50 USDT', guided: 'Eğitim + bireysel soru-cevap — 90 USDT', growth: '1-1 büyüme desteği — 175 USDT' };
+export const INF_PACKAGE_PRICES = { video: 50, guided: 90, growth: 175 };
+let infFxCache = null;
+async function influencerPrices() {
+  let fx = infFxCache && Date.now() - infFxCache.at < 3600000 ? infFxCache.value : null;
+  if (!fx) {
+    try {
+      const r = await fetch('https://api.frankfurter.dev/v1/latest?base=USD&symbols=TRY', { signal: AbortSignal.timeout(5000) });
+      if (!r.ok) throw new Error('fx_unavailable');
+      const body = await r.json();
+      const age = Date.now() - Date.parse(body.date);
+      if (body.base !== 'USD' || body.amount !== 1 || !Number.isFinite(body.rates?.TRY) ||
+          body.rates.TRY <= 0 || !Number.isFinite(age) || age > 7 * 86400000 || age < -86400000) throw new Error('invalid_fx');
+      fx = { usdTry: body.rates.TRY, date: body.date, source: 'Frankfurter / ECB' };
+      infFxCache = { at: Date.now(), value: fx };
+    } catch { /* Fixed USDT prices remain payable without an FX estimate. */ }
+  }
+  return { ok: true, prices: INF_PACKAGE_PRICES, currency: 'USDT', network: 'TRC20', fx };
+}
 // Kept inside the server function, never embedded in the public page.
 const INF_OUTLINE = [
   ['1. Başlangıç ve konumlandırma', 'Hedef kitle; kriptoda uzmanlık alanı seçimi; kişisel hikâye; 30 günlük hedefler.'],
@@ -182,6 +200,7 @@ async function influencerDb(path, method = 'GET', body) {
 }
 export async function influencerHandler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return influencerReply(res, 405, { ok: false, error: 'method' });
+  if (req.method === 'GET' && req.query?.op === 'prices') return influencerReply(res, 200, await influencerPrices());
   try {
     const token = /^Bearer (.+)$/i.exec(req.headers.authorization || '')?.[1];
     if (!token) return influencerReply(res, 401, { ok: false, error: 'login_required' });

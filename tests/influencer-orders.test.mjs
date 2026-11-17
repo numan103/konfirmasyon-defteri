@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { influencerHandler as handler } from '../api/ai.mjs';
+import { influencerHandler as handler, INF_PACKAGE_PRICES } from '../api/ai.mjs';
 
 const txid = 'a'.repeat(64);
 async function call(req = {}) {
@@ -35,6 +35,27 @@ function fake(t, { admin = false, orders = [], storage = true } = {}) {
 }
 test('anonymous requests are denied before database access', async () => {
   assert.equal((await call({ headers: {} })).status, 401);
+});
+test('public prices work without login even when FX is unavailable', async t => {
+  t.mock.method(globalThis, 'fetch', async () => Response.json({}, { status: 503 }));
+  const r = await call({ headers: {}, query: { op: 'prices' } });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.body.prices, { video: 50, guided: 90, growth: 175 });
+  assert.equal(r.body.currency, 'USDT');
+  assert.equal(r.body.fx, null);
+  assert.deepEqual(r.body.prices, INF_PACKAGE_PRICES);
+});
+test('public FX rejects malformed rates without inventing a TRY equivalent', async t => {
+  t.mock.method(globalThis, 'fetch', async () => Response.json({ base: 'USD', amount: 1, date: new Date().toISOString().slice(0, 10), rates: { TRY: -1 } }));
+  const r = await call({ headers: {}, query: { op: 'prices' } });
+  assert.equal(r.body.fx, null);
+});
+test('public prices include a dated source for valid FX estimates', async t => {
+  const date = new Date().toISOString().slice(0, 10);
+  t.mock.method(globalThis, 'fetch', async () => Response.json({ base: 'USD', amount: 1, date, rates: { TRY: 50 } }));
+  const r = await call({ headers: {}, query: { op: 'prices' } });
+  assert.deepEqual(r.body.fx, { usdTry: 50, date, source: 'Frankfurter / ECB' });
+  assert.equal(r.body.prices.video, 50);
 });
 test('premium member cannot read outline, list orders or approve payments', async t => {
   const calls = fake(t);
@@ -75,6 +96,7 @@ test('valid request is persisted pending, notifies admin privately without topic
   assert.equal(message.chat_id, '12345');
   assert.ok(!message.message_thread_id);
   assert.match(message.text, /henüz doğrulanmadı/);
+  assert.match(message.text, /90 USDT/);
 });
 test('storage failures do not falsely report payment success or notify admin', async t => {
   const calls = fake(t, { storage: false });

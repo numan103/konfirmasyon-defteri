@@ -5115,6 +5115,32 @@
   .inf-faq summary { cursor: pointer; font-size: 13px; font-weight: 600; }
   .inf-faq p { margin: 10px 0 0; }
   .inf-admin-order { padding: 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow-wrap: anywhere; }
+  .inf-plan-price small { display: block; font-size: 12px; font-weight: 600; margin-top: 4px; }
+  .inf-price-try { font-size: 12px; color: var(--text-2); margin: 6px 0 10px; }
+  .inf-update { border-left: 3px solid var(--pc); padding: 12px; background: var(--pc-soft); border-radius: 8px; }
+  .inf-pay-total { display: flex; justify-content: space-between; gap: 10px; padding: 14px; border-radius: 10px; background: var(--pc-soft); margin: 6px 0; }
+  .inf-pay-total strong { color: var(--pc); }
+  .inf-results, .inf-tweets { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 14px 0; }
+  .inf-result, .inf-tweet { min-width: 0; border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: var(--input-bg); }
+  .inf-result-head { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--text-2); flex-wrap: wrap; }
+  .inf-result-number { margin: 18px 0 6px; font-size: 25px; font-weight: 800; color: var(--text); }
+  .inf-result-number span { color: var(--pc); }
+  .inf-result-gain { font-size: 12px; color: var(--green); margin-bottom: 16px; }
+  .inf-compare { display: grid; grid-template-columns: 60px minmax(0,1fr) 40px; align-items: center; gap: 8px; margin: 8px 0; font-size: 10px; color: var(--text-2); }
+  .inf-compare > div { height: 9px; border-radius: 6px; overflow: hidden; background: var(--border); }
+  .inf-compare i { display: block; height: 100%; border-radius: 6px; background: var(--text-3); }
+  .inf-compare.end i { background: var(--pc); }
+  .inf-compare b { text-align: right; font-weight: 500; }
+  .inf-card .inf-method, .inf-card .inf-fx-note { font-size: 11px; color: var(--text-3); }
+  .inf-bot-note { padding: 16px; border-radius: 12px; background: var(--pc-soft); margin-top: 16px; }
+  .inf-bot-note h3 { font-size: 14px; margin: 0 0 8px; }
+  .inf-bot-note p { margin: 0; }
+  .inf-tweet-top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .inf-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--pc); background: var(--pc-soft); flex: none; font-weight: 700; }
+  .inf-tweet b { display: block; font-size: 12px; }
+  .inf-tweet small { display: block; margin-top: 4px; font-size: 10px; color: var(--text-3); }
+  .inf-tweet p { white-space: pre-wrap; margin: 0; }
+  @media (max-width: 900px) { .inf-results, .inf-tweets { grid-template-columns: 1fr; } }
   .inf-locked-note { font-size: 11.5px; color: var(--text-3); margin: 0 0 12px; }
   @media (max-width: 900px) {
     .inf-grid { grid-template-columns: 1fr; }
@@ -7588,11 +7614,12 @@
       <h2 data-i18n="pg.influencer.promo.h">Kripto Influencer programı</h2>
       <p data-i18n="pg.influencer.promo.s">X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.</p>
       <div class="inf-card" data-i18n="pg.influencer.videoSoon">Tanıtım videosu yakında burada.</div>
+      <p class="inf-update" data-i18n="pg.influencer.updates">Eğitim alanı hazırlanıyor. Videolar, eğitsel içerikler ve örnekler ben ekledikçe güncellenecek; içeriklerin tamamı henüz yayında değil.</p>
       <h3 class="inf-sub" data-i18n="pg.influencer.plans.h">Paketleri gör</h3>
       <div class="inf-plans">
         <div class="inf-plan">
           <div class="inf-plan-name" data-i18n="pg.influencer.p1.name">Video eğitim</div>
-          <div class="inf-plan-price">1.990₺</div>
+          <div class="inf-plan-price">$50 <small>50 USDT</small></div><div class="inf-price-try" data-inf-try="video" aria-live="polite">≈ TL…</div>
           <div class="inf-plan-period" data-i18n="pg.influencer.p1.period">tek ödeme · ömür boyu erişim</div>
           <ul class="inf-plan-feats">
             <li data-i18n="pg.influencer.p1.f1">Eğitim videoları</li>
@@ -7603,7 +7630,7 @@
         </div>
         <div class="inf-plan featured">
           <div class="inf-plan-name" data-i18n="pg.influencer.p2.name">Eğitim + soru-cevap</div>
-          <div class="inf-plan-price">3.490₺</div>
+          <div class="inf-plan-price">$90 <small>90 USDT</small></div><div class="inf-price-try" data-inf-try="guided" aria-live="polite">≈ TL…</div>
           <div class="inf-plan-period" data-i18n="pg.influencer.p2.period">tek ödeme · 30 gün</div>
           <ul class="inf-plan-feats">
             <li data-i18n="pg.influencer.p2.f1">Video eğitim paketindeki her şey</li>
@@ -7615,7 +7642,7 @@
         </div>
         <div class="inf-plan">
           <div class="inf-plan-name" data-i18n="pg.influencer.p3.name">1-1 büyüme desteği</div>
-          <div class="inf-plan-price">6.990₺</div>
+          <div class="inf-plan-price">$175 <small>175 USDT</small></div><div class="inf-price-try" data-inf-try="growth" aria-live="polite">≈ TL…</div>
           <div class="inf-plan-period" data-i18n="pg.influencer.p3.period">ilk 1000 takipçiye veya 90 güne kadar</div>
           <ul class="inf-plan-feats">
             <li data-i18n="pg.influencer.p3.f1">Eğitim + soru-cevap paketindeki her şey</li>
@@ -7627,34 +7654,62 @@
           <a class="inf-plan-buy" href="#inf-payment" data-inf-package="growth" data-i18n="pg.influencer.buy">Satın al ↗</a>
         </div>
       </div>
+      <p class="inf-fx-note" id="inf-fx-note" aria-live="polite"></p>
       <p data-i18n="pg.influencer.noGuarantee">Takipçi veya gelir garantisi verilmez. Destek ilk 1000 takipçiye veya 90 güne kadar sürer; hangisi önce gelirse.</p>
       <section id="inf-payment" class="inf-payment">
         <h3 class="inf-sub" data-i18n="pg.influencer.pay.h">USDT (TRC20) ile ödeme</h3>
-        <p data-i18n="pg.influencer.pay.note">Fiyatlar TL cinsindedir. Göndermeden önce Telegram'dan güncel USDT tutarını teyit et. Yalnızca TRON (TRC20) ağından USDT gönder; başka ağ veya varlık gönderme.</p>
+        <p data-i18n="pg.influencer.pay.note">Ödeme tutarları sabittir: 50 / 90 / 175 USDT. Telegram’dan fiyat teyidi gerekmez. Dolar etiketleri fiyat referansıdır; TL karşılıkları güncel referans kurla yaklaşık gösterilir. Yalnızca TRON (TRC20) ağından USDT gönder; ağ ücretini ayrıca karşıla.</p>
         <code class="inf-wallet">TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6</code>
         <button type="button" class="btn" id="inf-copy-wallet" data-i18n="pg.influencer.copy">Adresi kopyala</button>
         <a class="btn" href="https://t.me/traderahmetd" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.contact">Ahmet'e Telegram'dan ulaş ↗</a>
         <p data-i18n="pg.influencer.pay.flow">Site hesabına giriş yap, ödemeni tamamla ve işlem kimliğini gönder. Ahmet'e bildirim gider; zincir üzerindeki ödeme kontrol edilip onaylandıktan sonra erişimin açılır. Premium üyelik bu eğitimleri kapsamaz.</p>
         <label for="inf-package" data-i18n="pg.influencer.package">Seçtiğin paket</label>
         <select id="inf-package">
-          <option value="video" data-i18n="pg.influencer.pay.p1">Video eğitim — 1.990₺</option>
-          <option value="guided" data-i18n="pg.influencer.pay.p2">Eğitim + soru-cevap — 3.490₺</option>
-          <option value="growth" data-i18n="pg.influencer.pay.p3">1-1 büyüme desteği — 6.990₺</option>
+          <option value="video" data-i18n="pg.influencer.pay.p1">Video eğitim — $50 / 50 USDT</option>
+          <option value="guided" data-i18n="pg.influencer.pay.p2">Eğitim + soru-cevap — $90 / 90 USDT</option>
+          <option value="growth" data-i18n="pg.influencer.pay.p3">1-1 büyüme desteği — $175 / 175 USDT</option>
         </select>
+        <div class="inf-pay-total"><span data-i18n="pg.influencer.pay.amount">Ödenecek tutar</span><strong id="inf-pay-amount">50 USDT</strong></div>
         <label for="inf-txid" data-i18n="pg.influencer.txid">İşlem kimliği (TXID / 64 karakter)</label>
         <input id="inf-txid" type="text" maxlength="64" autocomplete="off" spellcheck="false">
         <button type="button" class="btn solid" id="inf-payment-submit" data-i18n="pg.influencer.submit">Ödememi onaya gönder</button>
         <div class="inf-payment-msg" id="inf-payment-msg" role="status" aria-live="polite"></div>
       </section>
     </div>
+    <section class="inf-card inf-showcase">
+      <h2 data-i18n="pg.influencer.cases.h">Küçük hesaptan gerçek bir kitleye</h2>
+      <div class="inf-results"><article class="inf-result"><div class="inf-result-head"><b data-i18n="pg.influencer.case.1">Anonim hesap 1</b><span data-i18n="pg.influencer.case.period.1">2 hafta</span></div>
+    <div class="inf-result-number">60 <span>→</span> 140</div>
+    <div class="inf-result-gain">+80 <span data-i18n="pg.influencer.followers">takipçi</span> · +133%</div>
+    <div class="inf-compare"><span data-i18n="pg.influencer.start">Başlangıç</span><div><i style="width:43%"></i></div><b>60</b></div>
+    <div class="inf-compare end"><span data-i18n="pg.influencer.end">Sonuç</span><div><i style="width:100%"></i></div><b>140</b></div>
+  </article><article class="inf-result"><div class="inf-result-head"><b data-i18n="pg.influencer.case.2">Anonim hesap 2</b><span data-i18n="pg.influencer.case.period.2">2 ay</span></div>
+    <div class="inf-result-number">200 <span>→</span> 1.200</div>
+    <div class="inf-result-gain">+1.000 <span data-i18n="pg.influencer.followers">takipçi</span> · +500%</div>
+    <div class="inf-compare"><span data-i18n="pg.influencer.start">Başlangıç</span><div><i style="width:17%"></i></div><b>200</b></div>
+    <div class="inf-compare end"><span data-i18n="pg.influencer.end">Sonuç</span><div><i style="width:100%"></i></div><b>1.200</b></div>
+  </article><article class="inf-result"><div class="inf-result-head"><b data-i18n="pg.influencer.case.3">Anonim hesap 3</b><span data-i18n="pg.influencer.case.period.3">Süre belirtilmedi</span></div>
+    <div class="inf-result-number">2.000 <span>→</span> 4.000</div>
+    <div class="inf-result-gain">+2.000 <span data-i18n="pg.influencer.followers">takipçi</span> · +100%</div>
+    <div class="inf-compare"><span data-i18n="pg.influencer.start">Başlangıç</span><div><i style="width:50%"></i></div><b>2.000</b></div>
+    <div class="inf-compare end"><span data-i18n="pg.influencer.end">Sonuç</span><div><i style="width:100%"></i></div><b>4.000</b></div>
+  </article></div>
+      <p class="inf-method" data-i18n="pg.influencer.cases.note">Ahmet’in aktardığı anonim hesap örnekleri. Grafikler yalnızca paylaşılan başlangıç ve sonuç sayılarını karşılaştırır; doğrulanmış X analitik raporu veya günlük büyüme/etkileşim eğrisi değildir. Sonuçlar kişiye göre değişir.</p>
+      <aside class="inf-bot-note"><h3 data-i18n="pg.influencer.bot.h">20 bin takipçi tek başına kalite göstergesi değil</h3><p data-i18n="pg.influencer.bot.body">Takipçi satın almak ve bot etkileşim mümkün; ancak bir hesabın büyük olması bot kullandığını kanıtlamaz. Sayıya aldanma: yorumların niteliğine, aynı kişilerin tekrar katılmasına ve gösterimden profil ziyareti/takibe dönüşüme bak. Küçük ama ilgili bir topluluk daha değerli olabilir.</p></aside>
+    </section>
+    <section class="inf-card inf-showcase">
+      <h2 data-i18n="pg.influencer.tweets.h">X’te paylaşabileceğin içerik örnekleri</h2>
+      <p data-i18n="pg.influencer.tweets.note">Eğitim amaçlı temsili taslaklar; gerçek X gönderileri veya canlı piyasa verisi değildir. Fiyat, saat ve kaynak eklemeden önce güncel veriyi doğrula. Gerçek gönderi bağlantılarını ve analitik ekranlarını daha sonra ekleyeceğiz.</p>
+      <div class="inf-tweets"><article class="inf-tweet"><div class="inf-tweet-top"><span class="inf-avatar" aria-hidden="true">X</span><div><b data-i18n="pg.influencer.tweet.1.title">Piyasa notu</b><small data-i18n="pg.influencer.sample">Temsili örnek · gerçek gönderi değil</small></div></div><p data-i18n="pg.influencer.tweet.1.body">BTC için bugün tek bir tahmine bağlanmıyorum. Önce günün veri saatlerini ve önemli seviyeleri not ediyorum. Senaryom bozulursa ne yapacağım, işlemden önce belli. Sen bugün hangi veriyi izliyorsun?</p></article><article class="inf-tweet"><div class="inf-tweet-top"><span class="inf-avatar" aria-hidden="true">X</span><div><b data-i18n="pg.influencer.tweet.2.title">Öğretici paylaşım</b><small data-i18n="pg.influencer.sample">Temsili örnek · gerçek gönderi değil</small></div></div><p data-i18n="pg.influencer.tweet.2.body">Funding tek başına yön söylemez. Fiyat + açık pozisyon + funding birlikte ne anlatıyor? Bugünkü çalışma notumda bu üç veriyi aynı zaman aralığında karşılaştırıyorum. Kaynak ve saat ekleyip senaryoyu güncelleyeceğim.</p></article><article class="inf-tweet"><div class="inf-tweet-top"><span class="inf-avatar" aria-hidden="true">X</span><div><b data-i18n="pg.influencer.tweet.3.title">Süreç ve güven</b><small data-i18n="pg.influencer.sample">Temsili örnek · gerçek gönderi değil</small></div></div><p data-i18n="pg.influencer.tweet.3.body">Bu hafta en çok ne öğrendim? İyi görünen her fikri paylaşmak yerine nedenini açıklayabildiğim fikirlere odaklanmak. Bir sonraki paylaşımda sonucu değil, karar sürecini de göstereceğim.</p></article></div>
+    </section>
     <section class="inf-card inf-faq">
       <h2 data-i18n="pg.influencer.faq.h">Sıkça sorulan sorular</h2>
       <details><summary data-i18n="pg.influencer.faq.q1">Premium üyeyim, eğitim dahil mi?</summary><p data-i18n="pg.influencer.faq.a1">Hayır. Influencer eğitimleri ayrı bir üründür; premium üyelik otomatik erişim sağlamaz.</p></details>
-      <details><summary data-i18n="pg.influencer.faq.q2">Ödeme ve onay nasıl çalışıyor?</summary><p data-i18n="pg.influencer.faq.a2">USDT tutarını Telegram'dan teyit et, TRC20 adresine gönder ve TXID'yi site hesabınla bildir. Ödemen elle kontrol edilir; onaylanmadan erişim açılmaz.</p></details>
+      <details><summary data-i18n="pg.influencer.faq.q2">Ödeme ve onay nasıl çalışıyor?</summary><p data-i18n="pg.influencer.faq.a2">Paketini seç, ekrandaki sabit USDT tutarını TRC20 adresine gönder ve TXID’yi site hesabınla bildir. Telegram’dan fiyat teyidi gerekmez. Ödemen elle kontrol edilir; onaylanmadan erişim açılmaz.</p></details>
       <details><summary data-i18n="pg.influencer.faq.q3">1000 takipçi garanti mi?</summary><p data-i18n="pg.influencer.faq.a3">Hayır. Bu bir destek hedefidir, sonuç garantisi değildir. Destek 1000 takipçiye ulaşıldığında veya 90 gün sonunda biter.</p></details>
       <details><summary data-i18n="pg.influencer.faq.q4">Bireysel soru-cevap nasıl yapılıyor?</summary><p data-i18n="pg.influencer.faq.a4">4 görüşmenin tarih ve saatini Telegram'dan birlikte planlıyoruz. Görüşmeler 30 günlük destek döneminde kullanılır.</p></details>
       <details><summary data-i18n="pg.influencer.faq.q5">Bir sorun yaşarsam kime ulaşacağım?</summary><p><a href="https://t.me/traderahmetd" target="_blank" rel="noopener noreferrer">@traderahmetd</a> <span data-i18n="pg.influencer.faq.a5">üzerinden bana doğrudan yazabilirsin.</span></p></details>
-      <details><summary data-i18n="pg.influencer.faq.q6">Başlamadan önce neyi netleştirmeliyim?</summary><p data-i18n="pg.influencer.faq.a6">Paket kapsamı, başlangıç tarihi, görüşme süresi ve iptal/iade koşullarını ödeme yapmadan önce Telegram'dan teyit et.</p></details>
+      <details><summary data-i18n="pg.influencer.faq.q6">Başlamadan önce neyi netleştirmeliyim?</summary><p data-i18n="pg.influencer.faq.a6">Sayfadaki sabit USDT tutarı ödenecek tutardır; TL karşılığı bilgilendirme amaçlıdır. Görüşme tarihleri ve iptal/iade koşulları için @traderahmetd üzerinden bana ulaşabilirsin.</p></details>
     </section>
     <section id="inf-admin" class="inf-card hidden">
       <h2 data-i18n="pg.influencer.admin.h">Yalnızca sen: eğitim konu taslağı ve ödeme onayları</h2>
@@ -12388,6 +12443,28 @@ const INF_ITEMS = [
   'pg.influencer.c5', 'pg.influencer.c6', 'pg.influencer.c7', 'pg.influencer.c8',
 ];
 
+const INF_PAYMENT_PRICES = { video: 50, guided: 90, growth: 175 };
+let infPriceData = null, infPriceRequest = null;
+function infPaintPrices() {
+  const selected = document.getElementById('inf-package');
+  const amount = document.getElementById('inf-pay-amount');
+  if (selected && amount) amount.textContent = INF_PAYMENT_PRICES[selected.value] + ' USDT';
+  const fx = infPriceData && infPriceData.fx;
+  document.querySelectorAll('[data-inf-try]').forEach(el => {
+    const price = INF_PAYMENT_PRICES[el.dataset.infTry];
+    el.textContent = fx ? '≈ ' + (price * fx.usdTry).toLocaleString(window.LANG === 'en' ? 'en-US' : 'tr-TR', { maximumFractionDigits: 0 }) + ' ₺' : infText('fx.missing');
+  });
+  const note = document.getElementById('inf-fx-note');
+  if (note) note.textContent = fx ? infText('fx.date') + ': ' + fx.date + ' · ' + fx.source : infText('fx.unavailable');
+}
+function infLoadPrices() {
+  infPaintPrices();
+  if (!infPriceRequest) infPriceRequest = fetch('/api/ai?influencer=1&op=prices')
+    .then(async res => { if (!res.ok) throw new Error('prices_unavailable'); return res.json(); })
+    .then(data => { if (data.ok) infPriceData = data; })
+    .catch(() => { infPriceRequest = null; })
+    .finally(infPaintPrices);
+}
 let infAccess = false;
 let infRequest = 0;
 function infUnlocked() { return siteIsAdmin() || infAccess; }
@@ -12458,8 +12535,10 @@ function renderInfluencer(skipLoad = false) {
   if (teaser) teaser.classList.toggle('hidden', unlocked);
   if (full) full.classList.toggle('hidden', !unlocked);
   const msg = document.getElementById('inf-payment-msg');
+  infLoadPrices();
+  document.getElementById('inf-package').onchange = infPaintPrices;
   document.querySelectorAll('[data-inf-package]').forEach(link => {
-    link.onclick = () => { document.getElementById('inf-package').value = link.dataset.infPackage; };
+    link.onclick = () => { document.getElementById('inf-package').value = link.dataset.infPackage; infPaintPrices(); };
   });
   document.getElementById('inf-copy-wallet').onclick = async () => {
     try { await navigator.clipboard.writeText('TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6'); msg.textContent = infText('copied'); }
@@ -29888,21 +29967,21 @@ loadSfx();
     "pg.influencer.videoSoon": { tr: "Tanıtım videosu yakında burada.", en: "The introduction video will appear here soon." },
     "pg.influencer.noGuarantee": { tr: "Takipçi veya gelir garantisi verilmez. Destek ilk 1000 takipçiye veya 90 güne kadar sürer; hangisi önce gelirse.", en: "No follower or income guarantee. Support ends at 1,000 followers or 90 days, whichever comes first." },
     "pg.influencer.pay.h": { tr: "USDT (TRC20) ile ödeme", en: "Pay with USDT (TRC20)" },
-    "pg.influencer.pay.note": { tr: "Fiyatlar TL cinsindedir. Göndermeden önce Telegram'dan güncel USDT tutarını teyit et. Yalnızca TRON (TRC20) ağından USDT gönder; başka ağ veya varlık gönderme.", en: "Prices are in TRY. Confirm the current USDT amount on Telegram before sending. Send USDT only on the TRON (TRC20) network; do not use another network or asset." },
+    "pg.influencer.pay.note": { tr: "Ödeme tutarları sabittir: 50 / 90 / 175 USDT. Telegram’dan fiyat teyidi gerekmez. Dolar etiketleri fiyat referansıdır; TL karşılıkları güncel referans kurla yaklaşık gösterilir. Yalnızca TRON (TRC20) ağından USDT gönder; ağ ücretini ayrıca karşıla.", en: "Fixed payment amounts: 50 / 90 / 175 USDT. No Telegram price confirmation is needed. Dollar labels are the price reference; TRY estimates use the latest reference rate. Send USDT only on TRON (TRC20); cover the network fee separately." },
     "pg.influencer.copy": { tr: "Adresi kopyala", en: "Copy address" },
     "pg.influencer.contact": { tr: "Ahmet'e Telegram'dan ulaş ↗", en: "Contact Ahmet on Telegram ↗" },
     "pg.influencer.pay.flow": { tr: "Site hesabına giriş yap, ödemeni tamamla ve işlem kimliğini gönder. Ahmet'e bildirim gider; zincir üzerindeki ödeme kontrol edilip onaylandıktan sonra erişimin açılır. Premium üyelik bu eğitimleri kapsamaz.", en: "Sign in, complete payment, then submit the transaction ID. Ahmet is notified; access opens only after manual on-chain verification and approval. Premium membership does not include these courses." },
     "pg.influencer.package": { tr: "Seçtiğin paket", en: "Selected package" },
-    "pg.influencer.pay.p1": { tr: "Video eğitim — 1.990₺", en: "Video training — 1,990 TRY" },
-    "pg.influencer.pay.p2": { tr: "Eğitim + soru-cevap — 3.490₺", en: "Training + Q&A — 3,490 TRY" },
-    "pg.influencer.pay.p3": { tr: "1-1 büyüme desteği — 6.990₺", en: "1-1 growth support — 6,990 TRY" },
+    "pg.influencer.pay.p1": { tr: "Video eğitim — $50 / 50 USDT", en: "Video training — $50 / 50 USDT" },
+    "pg.influencer.pay.p2": { tr: "Eğitim + soru-cevap — $90 / 90 USDT", en: "Training + Q&A — $90 / 90 USDT" },
+    "pg.influencer.pay.p3": { tr: "1-1 büyüme desteği — $175 / 175 USDT", en: "1-1 growth support — $175 / 175 USDT" },
     "pg.influencer.txid": { tr: "İşlem kimliği (TXID / 64 karakter)", en: "Transaction ID (TXID / 64 characters)" },
     "pg.influencer.submit": { tr: "Ödememi onaya gönder", en: "Submit payment for approval" },
     "pg.influencer.faq.h": { tr: "Sıkça sorulan sorular", en: "Frequently asked questions" },
     "pg.influencer.faq.q1": { tr: "Premium üyeyim, eğitim dahil mi?", en: "Is this included in premium?" },
     "pg.influencer.faq.a1": { tr: "Hayır. Influencer eğitimleri ayrı bir üründür; premium üyelik otomatik erişim sağlamaz.", en: "No. Influencer training is a separate product. Premium does not automatically grant access." },
     "pg.influencer.faq.q2": { tr: "Ödeme ve onay nasıl çalışıyor?", en: "How do payment and approval work?" },
-    "pg.influencer.faq.a2": { tr: "USDT tutarını Telegram'dan teyit et, TRC20 adresine gönder ve TXID'yi site hesabınla bildir. Ödemen elle kontrol edilir; onaylanmadan erişim açılmaz.", en: "Confirm the USDT amount on Telegram, pay to the TRC20 address and submit the TXID using your site account. Payment is reviewed manually; access opens only after approval." },
+    "pg.influencer.faq.a2": { tr: "Paketini seç, ekrandaki sabit USDT tutarını TRC20 adresine gönder ve TXID’yi site hesabınla bildir. Telegram’dan fiyat teyidi gerekmez. Ödemen elle kontrol edilir; onaylanmadan erişim açılmaz.", en: "Choose a package, send the displayed fixed USDT amount to the TRC20 address, then submit the TXID using your site account. No Telegram price confirmation is needed. Payment is checked manually; access opens after approval." },
     "pg.influencer.faq.q3": { tr: "1000 takipçi garanti mi?", en: "Are 1,000 followers guaranteed?" },
     "pg.influencer.faq.a3": { tr: "Hayır. Bu bir destek hedefidir, sonuç garantisi değildir. Destek 1000 takipçiye ulaşıldığında veya 90 gün sonunda biter.", en: "No. It is a support goal, not a guaranteed result. Support ends at 1,000 followers or after 90 days." },
     "pg.influencer.faq.q4": { tr: "Bireysel soru-cevap nasıl yapılıyor?", en: "How do the individual Q&A sessions work?" },
@@ -29910,7 +29989,7 @@ loadSfx();
     "pg.influencer.faq.q5": { tr: "Bir sorun yaşarsam kime ulaşacağım?", en: "Who can I contact for help?" },
     "pg.influencer.faq.a5": { tr: "üzerinden bana doğrudan yazabilirsin.", en: "is where you can message me directly." },
     "pg.influencer.faq.q6": { tr: "Başlamadan önce neyi netleştirmeliyim?", en: "What should I confirm before starting?" },
-    "pg.influencer.faq.a6": { tr: "Paket kapsamı, başlangıç tarihi, görüşme süresi ve iptal/iade koşullarını ödeme yapmadan önce Telegram'dan teyit et.", en: "Confirm package scope, start date, session duration and cancellation/refund terms on Telegram before paying." },
+    "pg.influencer.faq.a6": { tr: "Sayfadaki sabit USDT tutarı ödenecek tutardır; TL karşılığı bilgilendirme amaçlıdır. Görüşme tarihleri ve iptal/iade koşulları için @traderahmetd üzerinden bana ulaşabilirsin.", en: "The fixed USDT amount shown here is the payment amount; TRY figures are indicative. Contact @traderahmetd for session scheduling and cancellation/refund terms." },
     "pg.influencer.admin.h": { tr: "Yalnızca sen: eğitim konu taslağı ve ödeme onayları", en: "Only you: private course outline and payment approvals" },
     "pg.influencer.admin.orders": { tr: "Ödeme bildirimleri", en: "Payment requests" },
     "pg.influencer.refresh": { tr: "Yenile", en: "Refresh" },
@@ -29927,6 +30006,33 @@ loadSfx();
     "pg.influencer.admin.approve": { tr: "Ödemeyi onayla", en: "Approve payment" },
     "pg.influencer.admin.reject": { tr: "Reddet", en: "Reject" },
     "pg.influencer.admin.confirm": { tr: "TRC20 ağını, USDT varlığını, alıcı adresini ve tutarı zincir üzerinde kontrol ettin mi? Onay erişimi açar.", en: "Have you verified the TRC20 network, USDT asset, recipient and amount on-chain? Approval grants access." },
+    "pg.influencer.updates": { tr: "Eğitim alanı hazırlanıyor. Videolar, eğitsel içerikler ve örnekler ben ekledikçe güncellenecek; içeriklerin tamamı henüz yayında değil.", en: "The training area is being prepared. Videos, learning materials and examples will be updated as I add them; the full content is not live yet." },
+    "pg.influencer.pay.amount": { tr: "Ödenecek tutar", en: "Payment amount" },
+    "pg.influencer.fx.date": { tr: "TL referans kuru tarihi", en: "TRY reference rate date" },
+    "pg.influencer.fx.unavailable": { tr: "TL karşılığı şu an hesaplanamıyor. Ödenecek sabit USDT tutarı değişmez.", en: "TRY estimates are currently unavailable. The fixed USDT payment amount is unchanged." },
+    "pg.influencer.fx.missing": { tr: "TL karşılığı kullanılamıyor", en: "TRY estimate unavailable" },
+    "pg.influencer.case.1": { tr: "Anonim hesap 1", en: "Anonymous account 1" },
+    "pg.influencer.case.period.1": { tr: "2 hafta", en: "2 weeks" },
+    "pg.influencer.case.2": { tr: "Anonim hesap 2", en: "Anonymous account 2" },
+    "pg.influencer.case.period.2": { tr: "2 ay", en: "2 months" },
+    "pg.influencer.case.3": { tr: "Anonim hesap 3", en: "Anonymous account 3" },
+    "pg.influencer.case.period.3": { tr: "Süre belirtilmedi", en: "Duration not provided" },
+    "pg.influencer.followers": { tr: "takipçi", en: "followers" },
+    "pg.influencer.start": { tr: "Başlangıç", en: "Start" },
+    "pg.influencer.end": { tr: "Sonuç", en: "End" },
+    "pg.influencer.cases.h": { tr: "Küçük hesaptan gerçek bir kitleye", en: "From a small account to a real audience" },
+    "pg.influencer.cases.note": { tr: "Ahmet’in aktardığı anonim hesap örnekleri. Grafikler yalnızca paylaşılan başlangıç ve sonuç sayılarını karşılaştırır; doğrulanmış X analitik raporu veya günlük büyüme/etkileşim eğrisi değildir. Sonuçlar kişiye göre değişir.", en: "Anonymous account examples reported by Ahmet. Charts compare only the supplied start and end counts; they are not verified X analytics reports or daily growth/engagement curves. Results vary." },
+    "pg.influencer.bot.h": { tr: "20 bin takipçi tek başına kalite göstergesi değil", en: "20,000 followers alone is not proof of quality" },
+    "pg.influencer.bot.body": { tr: "Takipçi satın almak ve bot etkileşim mümkün; ancak bir hesabın büyük olması bot kullandığını kanıtlamaz. Sayıya aldanma: yorumların niteliğine, aynı kişilerin tekrar katılmasına ve gösterimden profil ziyareti/takibe dönüşüme bak. Küçük ama ilgili bir topluluk daha değerli olabilir.", en: "Followers and bot engagement can be purchased, but a large account is not proof of bot use. Look beyond the count: comment quality, returning participants, and impressions converting into profile visits and follows. A small, engaged community may be more valuable." },
+    "pg.influencer.tweets.h": { tr: "X’te paylaşabileceğin içerik örnekleri", en: "Example posts for X" },
+    "pg.influencer.tweets.note": { tr: "Eğitim amaçlı temsili taslaklar; gerçek X gönderileri veya canlı piyasa verisi değildir. Fiyat, saat ve kaynak eklemeden önce güncel veriyi doğrula. Gerçek gönderi bağlantılarını ve analitik ekranlarını daha sonra ekleyeceğiz.", en: "Illustrative training drafts, not real X posts or live market data. Verify current data before adding prices, timestamps and sources. Real post links and analytics screenshots will be added later." },
+    "pg.influencer.tweet.1.title": { tr: "Piyasa notu", en: "Market note" },
+    "pg.influencer.tweet.1.body": { tr: "BTC için bugün tek bir tahmine bağlanmıyorum. Önce günün veri saatlerini ve önemli seviyeleri not ediyorum. Senaryom bozulursa ne yapacağım, işlemden önce belli. Sen bugün hangi veriyi izliyorsun?", en: "For BTC today, I am not committing to one prediction. First I note the data-release times and key levels. Before any trade, I know what I will do if my scenario fails. What data are you watching today?" },
+    "pg.influencer.tweet.2.title": { tr: "Öğretici paylaşım", en: "Educational post" },
+    "pg.influencer.tweet.2.body": { tr: "Funding tek başına yön söylemez. Fiyat + açık pozisyon + funding birlikte ne anlatıyor? Bugünkü çalışma notumda bu üç veriyi aynı zaman aralığında karşılaştırıyorum. Kaynak ve saat ekleyip senaryoyu güncelleyeceğim.", en: "Funding alone does not tell you direction. What do price, open interest and funding say together? In today’s study note I compare all three over the same interval. I will add the source and timestamp before updating my scenario." },
+    "pg.influencer.tweet.3.title": { tr: "Süreç ve güven", en: "Process and trust" },
+    "pg.influencer.tweet.3.body": { tr: "Bu hafta en çok ne öğrendim? İyi görünen her fikri paylaşmak yerine nedenini açıklayabildiğim fikirlere odaklanmak. Bir sonraki paylaşımda sonucu değil, karar sürecini de göstereceğim.", en: "My biggest lesson this week: focus on ideas I can explain rather than sharing every idea that looks good. In my next post, I will show the decision process, not just the outcome." },
+    "pg.influencer.sample": { tr: "Temsili örnek · gerçek gönderi değil", en: "Illustrative sample · not a real post" },
     'app.influencer': { tr: '🚀 Influencer', en: '🚀 Influencer' },
     'pg.influencer.hc': { tr: 'X (Twitter) profilini kur, içerik üret, takipçini büyüt.', en: 'Build your X (Twitter) profile, publish content, grow your audience.' },
     'pg.influencer.t': { tr: 'Kripto Influencer', en: 'Crypto Influencer' },
@@ -30423,6 +30529,7 @@ loadSfx();
     q('[data-i18n-title]').forEach(function (el) { el.setAttribute('title', t(el.getAttribute('data-i18n-title'))); });
     q('#lang-btn,#lang-btn-app').forEach(function (el) { el.textContent = t('nav.lang'); });
     document.documentElement.setAttribute('lang', window.LANG === 'tr' ? 'tr' : 'en');
+    if (typeof infPaintPrices === 'function') infPaintPrices();
     if (typeof refreshRvStatic === 'function') refreshRvStatic();
   };
   window.setLang = function (l) {

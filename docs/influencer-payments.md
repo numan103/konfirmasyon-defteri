@@ -11,14 +11,18 @@ Migration yokken API `503` döner; sahte bir ödeme/onay başarısı göstermez.
 
 ## Akış
 
-1. Kullanıcı `@traderahmetd` ile TL fiyatın güncel USDT karşılığını teyit eder.
+1. Kullanıcı paketini seçer. Sabit ödeme tutarları sırasıyla **50 / 90 / 175 USDT**.
+   Telegram'dan fiyat teyidi gerekmez. Dolar etiketi referanstır; yaklaşık TL
+   karşılığı Frankfurter/ECB USD/TRY kuruyla, kur tarihiyle birlikte gösterilir.
+   Kur servisi erişilemezse TL tahmini gizlenir; USDT tutarı değişmez.
 2. Site hesabına giriş yapar, USDT'yi TRON/TRC20 üzerinden
    `TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6` adresine gönderir.
 3. Paketini ve 64 karakterlik TXID'yi bildirir. Sipariş `pending` kaydedilir.
 4. Mevcut bot, `TG_ADMIN_CHAT_ID` / mevcut admin kimliğine **özel mesaj**
    gönderir. Grup/topic hedeflerine geri dönüş yoktur.
 5. Yönetici influencer sayfasındaki özel panelden TXID'yi TronScan'de açar.
-   Ağ, doğru USDT sözleşmesi, başarılı işlem, alıcı ve anlaşılan tutarı kontrol eder.
+   Ağ, doğru USDT sözleşmesi, başarılı işlem, alıcı ve seçilen paketin sabit USDT
+   tutarını kontrol eder. Ağ ücreti kullanıcı tarafından ayrıca karşılanır.
 6. Yönetici onayladığında erişim sunucuda açılır. TXID bildirimi tek başına ödeme
    kanıtı değildir. Aynı TXID ikinci kez kullanılamaz.
 
@@ -32,7 +36,12 @@ Telegram gönderimi başarısız olsa da kayıt özel admin panelinde kalır.
 - Gerçek eğitim videolarını public dosyalara koyma; özel depolama ve sunucudan
   paket kontrolü yapılan süreli video bağlantıları gerekir. Mevcut çalışma alanı
   henüz eğitim-video dağıtım sistemi değildir.
-- İptal/iade koşulları ve görüşme süreleri henüz belirtilmedi; ödeme öncesi
-  Telegram'dan teyit edilmesi gerektiği yazılıdır.
+- Eğitim alanı henüz tamamlanmadı; videolar ve kaynaklar eklendikçe güncelleneceği
+  sayfada açıkça belirtilir.
+- Büyüme karşılaştırmaları Ahmet'in verdiği anonim başlangıç/sonuç rakamlarıdır.
+  Ara zaman serisi, doğrulanmış analitik veya etkileşim ölçümleri uydurulmaz.
+  Gerçek tweet bağlantıları verilene kadar paylaşım örnekleri temsili etiketlenir.
+- İptal/iade koşulları ve görüşme süreleri henüz belirtilmedi; destek iletişimi
+  Telegram'dır. Fiyat için teyit şartı yoktur.
 - Özel konu taslağı `/api/ai?influencer=1&op=outline` içinde tutulur; anonim ve premium
   kullanıcıya `401/403` döner, public HTML'ye gömülmez.

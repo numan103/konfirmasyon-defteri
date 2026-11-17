@@ -44,7 +44,7 @@ test('tanıtım videosu ve 3 paket herkese açık, tam içerik kilitli', () => {
   assert.ok(html.includes('id="inf-teaser"'));
   assert.ok(html.includes('id="inf-full" class="hidden"'));
   assert.match(html, /pg\.influencer\.videoSoon/);
-  for (const price of ['1.990₺', '3.490₺', '6.990₺']) assert.ok(html.includes(price), 'missing price: ' + price);
+  for (const price of ['$50', '$90', '$175']) assert.ok(html.includes(price), 'missing price: ' + price);
   assert.match(html, /pg\.influencer\.p3\.note/);
   assert.match(html, /1000 takipçi/);
   assert.match(html, /90 gün/);
@@ -53,6 +53,28 @@ test('tanıtım videosu ve 3 paket herkese açık, tam içerik kilitli', () => {
   assert.match(html, /TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6/);
   assert.match(html, /https:\/\/t\.me\/traderahmetd/);
   assert.match(html, /class="inf-card inf-faq"/);
+});
+
+test('ödeme tutarları sabit USDT; Telegram fiyat teyidi istenmez', () => {
+  assert.match(html, /INF_PAYMENT_PRICES = \{ video: 50, guided: 90, growth: 175 \}/);
+  assert.match(html, /id="inf-pay-amount">50 USDT/);
+  assert.match(html, /inf-package'\)\.onchange = infPaintPrices/);
+  assert.match(html, /infPaintPrices\(\); \};/);
+  assert.match(html, /op=prices/);
+  assert.ok(!html.includes("Göndermeden önce Telegram'dan güncel USDT tutarını teyit et"));
+  assert.match(html, /data-inf-try="video"/);
+  assert.match(html, /TL referans kuru tarihi/);
+});
+
+test('büyüme örnekleri verilen ölçümlerle sınırlı ve temsili tweetler etiketli', () => {
+  const section = html.slice(html.indexOf('<div id="page-influencer"'), html.indexOf('<div id="page-mentoring"'));
+  assert.equal((section.match(/class="inf-result"/g) || []).length, 3);
+  assert.equal((section.match(/class="inf-tweet"/g) || []).length, 3);
+  for (const value of ['60', '140', '200', '1.200', '2.000', '4.000', '2 hafta', '2 ay', 'Süre belirtilmedi']) assert.ok(section.includes(value));
+  assert.match(section, /Temsili örnek · gerçek gönderi değil/);
+  assert.match(section, /doğrulanmış X analitik raporu/);
+  assert.match(section, /büyük olması bot kullandığını kanıtlamaz/);
+  assert.match(section, /içeriklerin tamamı henüz yayında değil/);
 });
 
 test('erişim kodu yok; kilit sunucu onayı veya admin ile açılır', () => {
