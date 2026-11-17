@@ -1,8 +1,10 @@
 # ALFALUENCE: ödeme onayı kurulumu
 
-Kapsam: kripto/FX trader'ları, eğitmenler ve farklı alanlarda içerik üretenler.
-Sayfa akışı: kişisel marka faydaları → çalışma hedefleri → Türkiye odaklı
-prop firm/borsa/marka/freelance senaryoları → alana göre uygulama → paketler.
+Kapsam: kripto/FX trader'ları ve trading araçları üzerine içerik üretenler.
+Günlük yaşam/lifestyle ve genel freelance senaryoları kaldırıldı.
+Sayfa akışı: özgün SVG illüstrasyon → üç kısa fayda kartı → dört çalışma hedefi →
+prop firm/borsa/trading aracı senaryoları → paketler.
+Metinler kısa maddelerdir; koşullar ve temsili tweet taslakları açılır bölümlerdedir.
 Bu senaryolar gerçek anlaşmalar, mezun sonuçları veya sağlanan ayrıcalıklar
 gibi sunulmaz. Yeni gelir, müşteri veya sponsorluk garantisi verilmez.
 Mevcut `?page=influencer` bağlantısı ve erişim anahtarları geriye uyumluluk için korunur.

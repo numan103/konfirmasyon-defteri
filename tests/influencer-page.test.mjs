@@ -72,9 +72,9 @@ test('büyüme örnekleri verilen ölçümlerle sınırlı ve temsili tweetler e
   assert.equal((section.match(/class="inf-tweet"/g) || []).length, 3);
   for (const value of ['60', '140', '200', '1.200', '250', '450', '2 hafta', '2 ay', 'Süre belirtilmedi']) assert.ok(section.includes(value));
   assert.match(section, /Temsili örnek · gerçek gönderi değil/);
-  assert.match(section, /doğrulanmış X analitik raporu/);
-  assert.match(section, /büyük olması bot kullandığını kanıtlamaz/);
-  assert.match(section, /içeriklerin tamamı henüz yayında değil/);
+  assert.match(section, /Doğrulanmış analitik rapor veya sonuç garantisi değildir/);
+  assert.match(section, /Takipçi sayısı tek başına kaliteyi veya bot kullanımını göstermez/);
+  assert.match(section, /Eğitimler hazırlanıyor/);
 });
 
 test('üçüncü hesap 250→450, +200 ve yüzde 80 büyüme olarak gösterilir', () => {
@@ -93,8 +93,8 @@ test('beğeni aralığı beyan olarak gösterilir; sahte gönderi analitiği ür
   const block = html.slice(a, html.indexOf('</section>', a));
   assert.match(block, /30–50/);
   assert.match(block, /bazı gönderilerde beğeni/);
-  assert.match(block, /tüm gönderilerin ortalaması veya sonuç garantisi değildir/);
-  assert.match(block, /toplam etkileşim ya da gösterim sayısı anlamına gelmez/);
+  assert.match(block, /ortalama veya garanti değil/);
+  assert.match(block, /Beğeni, toplam etkileşim demek değildir/);
   assert.match(html, /"pg\.influencer\.engagement\.h": \{ tr: .+, en: /);
 });
 
@@ -137,30 +137,46 @@ test('sosyal önizleme için middleware sayfa başlığı var', () => {
   assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — ALFALUENCE'/);
 });
 
-test('ALFALUENCE kripto dışındaki içerik üreticilerine de hitap eder', () => {
+test('ALFALUENCE odağı kripto, FX ve trading araçlarıdır', () => {
   assert.match(html, /data-i18n="app\.influencer">🚀 ALFALUENCE/);
   assert.match(html, /data-i18n="pg\.influencer\.t">ALFALUENCE/);
-  assert.match(html, /Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı/);
+  assert.match(html, /Kripto ve FX odaklı kişisel marka, içerik ve iş birliği eğitimi/);
   assert.match(html, /Find your voice\. Build your audience/);
   assert.ok(!html.includes('>Kripto Influencer<'));
 });
 
 test('fayda, hedef ve Türkiye odaklı senaryolar paketlerden önce anlatılır', () => {
   const section = html.slice(html.indexOf('<div id="page-influencer"'), html.indexOf('<div id="page-mentoring"'));
-  const stages = ['inf-opportunities', 'inf-outcomes', 'inf-real-world', 'inf-your-path', 'inf-packages'];
+  const stages = ['inf-opportunities', 'inf-outcomes', 'inf-real-world', 'inf-packages'];
   let previous = -1;
   for (const id of stages) {
     const position = section.indexOf('id="' + id + '"');
     assert.ok(position > previous, 'out of order or missing: ' + id);
     previous = position;
   }
-  assert.equal((section.match(/class="inf-benefit"/g) || []).length, 6);
-  assert.equal((section.match(/class="inf-story"/g) || []).length, 4);
-  for (const topic of ['Prop firm ile kampanya', 'Borsa ile içerik iş birliği', 'Marka sponsorluğu', 'müşteri ve proje talebi']) assert.ok(section.includes(topic));
-  assert.match(section, /örnek senaryolardır; gerçekleşmiş anlaşma/);
-  assert.match(section, /bir prop firm hesabı, borsa anlaşması, sponsorluk veya müşteri sağlamaz/);
-  assert.match(section, /reklam\/komisyon ilişkisini açıkça belirt/);
+  assert.equal((section.match(/class="inf-benefit"/g) || []).length, 3);
+  assert.equal((section.match(/class="inf-story"/g) || []).length, 3);
+  for (const topic of ['Prop firm ile kampanya', 'Borsa ile içerik iş birliği', 'Araç ve platform iş birlikleri']) assert.ok(section.includes(topic));
+  assert.match(section, /Örnek fırsatlardır; paketlere dahil değildir/);
+  assert.match(section, /Değerlendirme erişimi, fonlanma veya ödeme garantisi değildir/);
+  assert.match(section, /Reklam ve komisyon ilişkisini açıkça belirt/);
   for (const foreign of ['Justin Welsh', 'Ali Abdaal', 'Ben Felix']) assert.ok(!section.includes(foreign));
+});
+
+test('pazarlama alanı resimli kısa maddeler kullanır; yaşam ve uzun taslaklar kaldırılır', () => {
+  const section = html.slice(html.indexOf('<div id="page-influencer"'), html.indexOf('<div id="page-mentoring"'));
+  for (const image of ['hero', 'prop', 'exchange', 'tools']) {
+    assert.ok(section.includes('/assets/alfaluence-' + image + '.svg'));
+    assert.ok(fs.existsSync(new URL('../assets/alfaluence-' + image + '.svg', import.meta.url)));
+  }
+  const marketing = section.slice(0, section.indexOf('id="inf-packages"'));
+  assert.equal((marketing.match(/class="inf-mini-list"/g) || []).length, 7);
+  assert.ok(marketing.length > 0);
+  assert.ok(!section.includes('günlük yaşam'));
+  assert.ok(!section.includes('yaşam tarzı'));
+  assert.ok(!section.includes('inf-your-path'));
+  assert.match(section, /<details class="inf-sample-drawer"><summary/);
+  assert.ok(!section.includes('<details class="inf-sample-drawer" open'));
 });
 
 test('gerçek gönderiler eşit boyutlu, kaydırılabilir ve devam bağlantılıdır', () => {
