@@ -1,4 +1,4 @@
-// Trading terminal and Alfa Charts links are visible only to the site admin.
+// Alfa Charts is admin-only; Trading Terminal is reachable only from the Ek page.
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -9,50 +9,33 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } }),
 page.on('pageerror', e => errors.push(e.message));
 await page.route('**/api/access**', route => route.fulfill({ json: { ok: true, admin: false, tier: 'free', status: 'none' } }));
 await page.route('**/api/edu-shared?kind=landing**', route => route.fulfill({ json: { status: { channel: 'ok' }, channel: { results: { latest: [] } } } }));
-const visibility = () => page.evaluate(() => {
-  const ids = ['tab-trading', 'mnav-trading', 'tab-alfacharts', 'mnav-alfacharts'];
-  const out = {};
-  for (const id of ids) out[id] = document.getElementById(id)?.style.display !== 'none';
-  const term = document.querySelector('.tv-term');
-  out['tv-term'] = !!term && term.style.display !== 'none';
-  const quick = document.querySelector('#home-quick [data-admin-only]');
-  out['home-quick-terminal'] = !!quick && quick.style.display !== 'none';
-  const card = document.querySelector('#page-home .home-card[data-admin-only]');
-  out['home-card-terminal'] = !!card && card.style.display !== 'none';
-  return out;
-});
+const state = () => page.evaluate(() => ({
+  alfaDesktop: document.getElementById('tab-alfacharts')?.style.display !== 'none',
+  alfaMobile: document.getElementById('mnav-alfacharts')?.style.display !== 'none',
+  tradingNav: !!document.querySelector('[id="tab-trading"], [id="mnav-trading"], .tv-term'),
+  tradingShortcut: !!document.querySelector('#home-quick a[href="?page=trading"], #page-home .home-card[href="?page=trading"]'),
+  ekTrading: !!document.querySelector('#ek-grid a[href="?page=trading"]')
+}));
 try {
   await page.goto((arg('url') || 'http://127.0.0.1:4173') + '/?page=home');
-  await page.waitForFunction(() => typeof applyTierUi === 'function' && document.getElementById('tab-trading'));
-  // Markup must already hide everything, even if init has not resolved access yet.
-  const initial = await visibility();
-  assert.deepEqual(initial, {
-    'tab-trading': false, 'mnav-trading': false,
-    'tab-alfacharts': false, 'mnav-alfacharts': false,
-    'tv-term': false, 'home-quick-terminal': false, 'home-card-terminal': false
-  });
-  // Init awaits Supabase session/access; invoke the tier gate directly for a deterministic check.
+  await page.waitForFunction(() => typeof applyTierUi === 'function' && document.getElementById('tab-alfacharts'));
+  const initial = await state();
+  assert.deepEqual(initial, { alfaDesktop: false, alfaMobile: false, tradingNav: false, tradingShortcut: false, ekTrading: false });
+
   await page.evaluate(() => applyTierUi());
-  const anon = await visibility();
-  assert.deepEqual(anon, {
-    'tab-trading': false, 'mnav-trading': false,
-    'tab-alfacharts': false, 'mnav-alfacharts': false,
-    'tv-term': false, 'home-quick-terminal': false, 'home-card-terminal': false
-  });
+  const anon = await state();
+  assert.deepEqual(anon, initial);
   await page.evaluate(() => showPage('trading'));
   assert.equal(await page.evaluate(() => document.body.dataset.page), 'erisim');
 
-  await page.evaluate(() => { siteIsAdmin = () => true; applyTierUi(); showPage('home'); });
-  const admin = await visibility();
-  assert.deepEqual(admin, {
-    'tab-trading': true, 'mnav-trading': true,
-    'tab-alfacharts': true, 'mnav-alfacharts': true,
-    'tv-term': true, 'home-quick-terminal': true, 'home-card-terminal': true
-  });
+  await page.evaluate(() => { siteIsAdmin = () => true; applyTierUi(); showPage('ek'); });
+  const admin = await state();
+  assert.deepEqual(admin, { alfaDesktop: true, alfaMobile: true, tradingNav: false, tradingShortcut: false, ekTrading: true });
+  assert.equal(await page.evaluate(() => document.body.dataset.page), 'ek');
   await page.evaluate(() => showPage('trading'));
   assert.equal(await page.evaluate(() => document.body.dataset.page), 'trading');
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, markupHidden: initial, anonymousHidden: anon, adminVisible: admin, pageErrors: errors }));
+  console.log(JSON.stringify({ passed: true, markup: initial, anonymous: anon, admin, pageErrors: errors }));
 } catch (error) {
   console.log(JSON.stringify({ passed: false, error: error.message, pageErrors: errors }));
   process.exitCode = 1;
