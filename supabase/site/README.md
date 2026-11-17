@@ -25,6 +25,20 @@ Oluşan tablolar: `public.site_access` (site), `public.telegram_access` (bot).
 - Yazma sadece `/api/access` üzerinden, `SUPABASE_SERVICE_ROLE` ile.
 - Aynı borsa UID'si iki hesaba bağlanamaz (`site_access_uid_key`).
 
+## 1b. Cloud Research Database (Faz 5 / Modül 2)
+
+ALFA CHARTS araştırma kayıtları için `014_cloud_research.sql` dosyasını SQL Editor'da
+**ayrıca** çalıştır. Migration eklemelerden oluşur; mevcut `chart_settings`,
+`site_access`,drawing veya portföy tablolarını değiştirmez veya silmez. Tablolar:
+`research_sessions`, `research_session_versions`, `research_candles`,
+`research_legacy_records`. Dört tabloda da RLS açık ve `FORCE` modundadır;
+anonim hiçbir okuma/yazma hakkına sahip değildir, `authenticated` yalnızca
+`auth.uid()` ile eşleşen kendi satırlarını görebilir/ekleyebilir.
+
+Migration uygulanmadan tarayıcı yerel IndexedDB kuyruğuna kaydetmeye devam eder;
+panel hata durumunu gösterir ve hiçbir yerel kayıt silinmez. Service-role anahtarı
+frontend'e gönderilmez; bu akış tamamen publishable key + kullanıcı JWT'si ile çalışır.
+
 ## 2. Ortam değişkenleri (Vercel → Settings → Environment Variables)
 
 Zaten mevcut olması gerekenler:

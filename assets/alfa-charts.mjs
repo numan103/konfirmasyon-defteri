@@ -11,6 +11,8 @@ import { replayRange } from './alfa-replay-data.mjs?v=1';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=2';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=4';
+import { ResearchPanel } from './alfa-research.mjs?v=3';
+import { packetBars,validatePacket } from './alfa-research-model.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
@@ -111,7 +113,7 @@ function applyReplaySlice() {
   if (info) info.textContent = new Date(replayEngine.clock * 1000).toISOString() + ' · Confirmed';
   connection('REPLAY · yalnızca kapanmış mumlar', 'replay');
 }
-async function enterReplay({target,session=null}={}) {
+async function enterReplay({target,session=null,researchPacket=null}={}) {
   if (replayMode) return;
   if(replayBusy || !drawings.ready)return;
   if(session) {
@@ -121,6 +123,7 @@ async function enterReplay({target,session=null}={}) {
     symbol=session.symbol;interval=session.timeframe; target=session.startTime;
   }
   if(!Number.isFinite(target)){connection('Geçersiz replay tarihi','error');return;}
+  const capturedOwner=currentUserKey();
   replayBusy=true; replayRequest?.abort(); replayRequest=new AbortController();
   const capturedGeneration=++generation; closeTransport();
   const seconds=candleCloseTime(0,interval);
@@ -133,10 +136,16 @@ async function enterReplay({target,session=null}={}) {
     if(!Number.isFinite(start))throw new Error('Bu eski kayıt başlangıç verisi içermiyor');
     const end=session ? Math.max(session.currentTime,session.startTime) : aligned;
     connection('Replay geçmişi ve warm-up yükleniyor…');
-    data=await replayRange({symbol,timeframe:interval,start,end,signal:replayRequest.signal});
+    if(researchPacket?.coverage==='complete'){
+      const packet=validatePacket(researchPacket);
+      if(packet.replay.id!==session?.id)throw new Error('Research/replay ID mismatch');
+      data=packetBars(packet).filter(b=>b.time>=start);
+    }else data=await replayRange({symbol,timeframe:interval,start,end,signal:replayRequest.signal});
     if(capturedGeneration!==generation)return;
+    if(currentUserKey()!==capturedOwner)throw new Error('Replay yüklenirken hesap değişti');
     await drawings.openMarket(symbol,true);
     if(capturedGeneration!==generation)return;
+    if(currentUserKey()!==capturedOwner)throw new Error('Replay yüklenirken hesap değişti');
     if(session?.indicators) {
       if(!Array.isArray(session.indicators)||session.indicators.length>30)throw new Error('Geçersiz replay indikatör ayarları');
       indicators.fromJSON(session.indicators);
@@ -157,6 +166,25 @@ async function enterReplay({target,session=null}={}) {
   replaySessionId=session?.id||'replay-'+crypto.randomUUID();
   try{
     paper.start({sessionId:replaySessionId,symbol,exchange:'Binance',marketType:'spot',timeframe:interval},session?.paper);
+    if(researchPacket){
+      const parentStep=candleCloseTime(0,interval);
+      const parentTimes=new Set(data.map(b=>b.time)),origin=data[0].time;
+      for(const tf of Object.keys(researchPacket.priceData).filter(tf=>tf!==interval)){
+        const subStep=candleCloseTime(0,tf),sub=packetBars(researchPacket,tf);
+        if(subStep>=parentStep)continue;
+        const groups=new Map();
+        for(const b of sub){
+          const start=origin+Math.floor((b.time-origin)/parentStep)*parentStep;
+          if(parentTimes.has(start)){if(!groups.has(start))groups.set(start,[]);groups.get(start).push(b);}
+        }
+        for(const [time,window] of groups){
+          if(window.length===parentStep/subStep){
+            if(paper.lab.excursions.cache.size>=64)paper.lab.excursions.cache.delete(paper.lab.excursions.cache.keys().next().value);
+            paper.lab.excursions.cache.set(symbol+':'+tf+':'+time,window);
+          }
+        }
+      }
+    }
   }catch(error){
     Object.assign(drawings,liveDrawingState);liveDrawingState=null;
     replayEngine=null;replayFull=[];paper.stop();
@@ -441,8 +469,11 @@ const paper = new PaperTradingPanel({
   getReplay:()=>replayMode&&replayEngine?{bars:history,clock:replayEngine.clock}:null,
   onPersist:()=>{if(replayMode)$('replay-save').click();}
 });
+const research = new ResearchPanel({getOwner:currentUserKey,isReplayActive:()=>replayMode,
+  onOpen:packet=>enterReplay({session:packet.replay,researchPacket:packet})});
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+  research.account(user,cloudSettings.client);
   if(paper.engine&&paper.owner()!==paper.ownerId){pauseReplay();paper.stop();}
   try { loadLayout(); } catch {}
   try { indicators.updateAll(seriesBars); } catch {}
@@ -452,14 +483,14 @@ const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').
   try { mtf.render(); } catch {}
 });
 cloudSettings.start();
-function dispose() { pauseReplay(); paper.stop(); disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
+function dispose() { pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
-window.addEventListener('online', () => { if (!disposed) loadMarket(); });
+window.addEventListener('online', () => { if (!disposed&&!replayMode) loadMarket(); });
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, paper, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }
@@ -502,12 +533,16 @@ $('replay-next').addEventListener('click', () => stepReplay(1));
 $('replay-restart').addEventListener('click', restartReplay);
 $('replay-stop').addEventListener('click', exitReplay);
 $('paper-toggle').addEventListener('click',()=>paper.toggle());
+$('research-toggle').addEventListener('click',()=>research.toggle());
 $('replay-speed').addEventListener('change',()=>{ const playing=!!replayTimer;pauseReplay();if(playing)playReplay(); });
 $('replay-save').addEventListener('click',()=>{
   if(!replayMode)return;
+  if(paper.ownerId!==currentUserKey()){connection('Hesap değişti; önce Replay oturumunu durdurun','error');return;}
   try{
     const session={...replayEngine.serialize(),id:drawings.context.owner,speed:Number($('replay-speed').value),drawings:drawings.history.doc,indicators:indicators.toJSON(),mtfConfig:mtf.config,mtfEnabled:!!mtf.enabled,paper:paper.serialize()};
     localStorage.setItem('alfa-replay-session:v1:'+currentUserKey()+':'+symbol+':'+interval,JSON.stringify(session));
+    const lowerWindows=[...paper.lab.excursions.cache].map(([key,bars])=>({timeframe:key.split(':')[1],bars}));
+    research.capture(currentUserKey(),session,{bars:history,lowerWindows,watermark:paper.lab.doc.maxObservedClock});
     connection('Replay oturumu yerelde kaydedildi','replay');
   }catch{connection('Replay oturumu kaydedilemedi','error');}
 });
@@ -551,7 +586,7 @@ $('mtf-toggle').addEventListener('click', () => {
 // ---------- UI: indicator manager, settings, MTF settings, persistence ----------
 function currentUserKey() {
   try {
-    const raw = localStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token') || sessionStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token');
+    const raw = sessionStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token') || localStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token');
     const j = raw ? JSON.parse(raw) : null;
     return (j && j.user && j.user.id) || 'guest';
   } catch { return 'guest'; }
