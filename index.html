@@ -5126,6 +5126,11 @@
   .inf-result-number { margin: 18px 0 6px; font-size: 25px; font-weight: 800; color: var(--text); }
   .inf-result-number span { color: var(--pc); }
   .inf-result-gain { font-size: 12px; color: var(--green); margin-bottom: 16px; }
+  .inf-engagement { margin-top: 20px; padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--pc-soft); }
+  .inf-engagement h3 { margin: 0 0 12px; font-size: 15px; }
+  .inf-like-range { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+  .inf-like-range strong { color: var(--pc); font-size: 34px; font-weight: 800; letter-spacing: -.04em; }
+  .inf-like-range span { color: var(--text-2); font-size: 13px; }
   .inf-compare { display: grid; grid-template-columns: 60px minmax(0,1fr) 40px; align-items: center; gap: 8px; margin: 8px 0; font-size: 10px; color: var(--text-2); }
   .inf-compare > div { height: 9px; border-radius: 6px; overflow: hidden; background: var(--border); }
   .inf-compare i { display: block; height: 100%; border-radius: 6px; background: var(--text-3); }
@@ -7689,13 +7694,20 @@
     <div class="inf-compare"><span data-i18n="pg.influencer.start">Başlangıç</span><div><i style="width:17%"></i></div><b>200</b></div>
     <div class="inf-compare end"><span data-i18n="pg.influencer.end">Sonuç</span><div><i style="width:100%"></i></div><b>1.200</b></div>
   </article><article class="inf-result"><div class="inf-result-head"><b data-i18n="pg.influencer.case.3">Anonim hesap 3</b><span data-i18n="pg.influencer.case.period.3">Süre belirtilmedi</span></div>
-    <div class="inf-result-number">2.000 <span>→</span> 4.000</div>
-    <div class="inf-result-gain">+2.000 <span data-i18n="pg.influencer.followers">takipçi</span> · +100%</div>
-    <div class="inf-compare"><span data-i18n="pg.influencer.start">Başlangıç</span><div><i style="width:50%"></i></div><b>2.000</b></div>
-    <div class="inf-compare end"><span data-i18n="pg.influencer.end">Sonuç</span><div><i style="width:100%"></i></div><b>4.000</b></div>
+    <div class="inf-result-number">250 <span>→</span> 450</div>
+    <div class="inf-result-gain">+200 <span data-i18n="pg.influencer.followers">takipçi</span> · +80%</div>
+    <div class="inf-compare"><span data-i18n="pg.influencer.start">Başlangıç</span><div><i style="width:55.56%"></i></div><b>250</b></div>
+    <div class="inf-compare end"><span data-i18n="pg.influencer.end">Sonuç</span><div><i style="width:100%"></i></div><b>450</b></div>
   </article></div>
       <p class="inf-method" data-i18n="pg.influencer.cases.note">Ahmet’in aktardığı anonim hesap örnekleri. Grafikler yalnızca paylaşılan başlangıç ve sonuç sayılarını karşılaştırır; doğrulanmış X analitik raporu veya günlük büyüme/etkileşim eğrisi değildir. Sonuçlar kişiye göre değişir.</p>
       <aside class="inf-bot-note"><h3 data-i18n="pg.influencer.bot.h">20 bin takipçi tek başına kalite göstergesi değil</h3><p data-i18n="pg.influencer.bot.body">Takipçi satın almak ve bot etkileşim mümkün; ancak bir hesabın büyük olması bot kullandığını kanıtlamaz. Sayıya aldanma: yorumların niteliğine, aynı kişilerin tekrar katılmasına ve gösterimden profil ziyareti/takibe dönüşüme bak. Küçük ama ilgili bir topluluk daha değerli olabilir.</p></aside>
+      <div class="inf-engagement" id="inf-engagement">
+        <h3 data-i18n="pg.influencer.engagement.h">Kendi gönderilerimden: beğeni etkileşimi</h3>
+        <p data-i18n="pg.influencer.engagement.quote">Bazı gönderilerim 30–50 arası beğeni alıyor.</p>
+        <div class="inf-like-range"><strong>30–50</strong><span data-i18n="pg.influencer.engagement.likes">bazı gönderilerde beğeni</span></div>
+        <p class="inf-method" data-i18n="pg.influencer.engagement.note">Ahmet’in aktardığı aralık; tüm gönderilerin ortalaması veya sonuç garantisi değildir. Beğeni sayısı, toplam etkileşim ya da gösterim sayısı anlamına gelmez.</p>
+        <p class="inf-method" data-i18n="pg.influencer.engagement.pending">Gerçek gönderi bağlantıları ve ekran görüntüleri eklendiğinde örnekleri burada görebileceksin.</p>
+      </div>
     </section>
     <section class="inf-card inf-showcase">
       <h2 data-i18n="pg.influencer.tweets.h">X’te paylaşabileceğin içerik örnekleri</h2>
@@ -30016,6 +30028,11 @@ loadSfx();
     "pg.influencer.case.2": { tr: "Anonim hesap 2", en: "Anonymous account 2" },
     "pg.influencer.case.period.2": { tr: "2 ay", en: "2 months" },
     "pg.influencer.case.3": { tr: "Anonim hesap 3", en: "Anonymous account 3" },
+    "pg.influencer.engagement.h": { tr: "Kendi gönderilerimden: beğeni etkileşimi", en: "From my own posts: likes" },
+    "pg.influencer.engagement.quote": { tr: "Bazı gönderilerim 30–50 arası beğeni alıyor.", en: "Some of my posts receive 30–50 likes." },
+    "pg.influencer.engagement.likes": { tr: "bazı gönderilerde beğeni", en: "likes on some posts" },
+    "pg.influencer.engagement.note": { tr: "Ahmet’in aktardığı aralık; tüm gönderilerin ortalaması veya sonuç garantisi değildir. Beğeni sayısı, toplam etkileşim ya da gösterim sayısı anlamına gelmez.", en: "A range reported by Ahmet, not an average across all posts or a guarantee of results. Likes are not the same as total engagements or impressions." },
+    "pg.influencer.engagement.pending": { tr: "Gerçek gönderi bağlantıları ve ekran görüntüleri eklendiğinde örnekleri burada görebileceksin.", en: "Real examples will appear here when post links and screenshots are added." },
     "pg.influencer.case.period.3": { tr: "Süre belirtilmedi", en: "Duration not provided" },
     "pg.influencer.followers": { tr: "takipçi", en: "followers" },
     "pg.influencer.start": { tr: "Başlangıç", en: "Start" },

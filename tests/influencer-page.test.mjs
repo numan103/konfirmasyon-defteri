@@ -70,11 +70,32 @@ test('büyüme örnekleri verilen ölçümlerle sınırlı ve temsili tweetler e
   const section = html.slice(html.indexOf('<div id="page-influencer"'), html.indexOf('<div id="page-mentoring"'));
   assert.equal((section.match(/class="inf-result"/g) || []).length, 3);
   assert.equal((section.match(/class="inf-tweet"/g) || []).length, 3);
-  for (const value of ['60', '140', '200', '1.200', '2.000', '4.000', '2 hafta', '2 ay', 'Süre belirtilmedi']) assert.ok(section.includes(value));
+  for (const value of ['60', '140', '200', '1.200', '250', '450', '2 hafta', '2 ay', 'Süre belirtilmedi']) assert.ok(section.includes(value));
   assert.match(section, /Temsili örnek · gerçek gönderi değil/);
   assert.match(section, /doğrulanmış X analitik raporu/);
   assert.match(section, /büyük olması bot kullandığını kanıtlamaz/);
   assert.match(section, /içeriklerin tamamı henüz yayında değil/);
+});
+
+test('üçüncü hesap 250→450, +200 ve yüzde 80 büyüme olarak gösterilir', () => {
+  const a = html.indexOf('data-i18n="pg.influencer.case.3"');
+  const card = html.slice(a, html.indexOf('</article>', a));
+  assert.match(card, /250 <span>→<\/span> 450/);
+  assert.match(card, /\+200/);
+  assert.match(card, /\+80%/);
+  assert.match(card, /width:55\.56%/);
+  assert.ok(!card.includes('2.000'));
+  assert.ok(!card.includes('4.000'));
+});
+
+test('beğeni aralığı beyan olarak gösterilir; sahte gönderi analitiği üretilmez', () => {
+  const a = html.indexOf('id="inf-engagement"');
+  const block = html.slice(a, html.indexOf('</section>', a));
+  assert.match(block, /30–50/);
+  assert.match(block, /bazı gönderilerde beğeni/);
+  assert.match(block, /tüm gönderilerin ortalaması veya sonuç garantisi değildir/);
+  assert.match(block, /toplam etkileşim ya da gösterim sayısı anlamına gelmez/);
+  assert.match(html, /"pg\.influencer\.engagement\.h": \{ tr: .+, en: /);
 });
 
 test('erişim kodu yok; kilit sunucu onayı veya admin ile açılır', () => {
