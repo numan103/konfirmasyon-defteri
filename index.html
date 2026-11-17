@@ -5131,6 +5131,13 @@
   .inf-like-range { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
   .inf-like-range strong { color: var(--pc); font-size: 34px; font-weight: 800; letter-spacing: -.04em; }
   .inf-like-range span { color: var(--text-2); font-size: 13px; }
+  .inf-real-posts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 12px; margin-top: 16px; }
+  .inf-real-post { min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); overflow-x: auto; }
+  .inf-real-post blockquote { margin: 0 0 12px; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+  .inf-real-post blockquote p { margin: 0 0 10px; }
+  .inf-real-post .twitter-tweet { margin: 0 auto 12px !important; }
+  .inf-real-post-link { display: inline-block; padding: 8px 0; font-size: 12px; color: var(--pc); }
+  @media (max-width: 900px) { .inf-real-posts { grid-template-columns: 1fr; } }
   .inf-compare { display: grid; grid-template-columns: 60px minmax(0,1fr) 40px; align-items: center; gap: 8px; margin: 8px 0; font-size: 10px; color: var(--text-2); }
   .inf-compare > div { height: 9px; border-radius: 6px; overflow: hidden; background: var(--border); }
   .inf-compare i { display: block; height: 100%; border-radius: 6px; background: var(--text-3); }
@@ -7706,12 +7713,35 @@
         <p data-i18n="pg.influencer.engagement.quote">Bazı gönderilerim 30–50 arası beğeni alıyor.</p>
         <div class="inf-like-range"><strong>30–50</strong><span data-i18n="pg.influencer.engagement.likes">bazı gönderilerde beğeni</span></div>
         <p class="inf-method" data-i18n="pg.influencer.engagement.note">Ahmet’in aktardığı aralık; tüm gönderilerin ortalaması veya sonuç garantisi değildir. Beğeni sayısı, toplam etkileşim ya da gösterim sayısı anlamına gelmez.</p>
-        <p class="inf-method" data-i18n="pg.influencer.engagement.pending">Gerçek gönderi bağlantıları ve ekran görüntüleri eklendiğinde örnekleri burada görebileceksin.</p>
+        <p class="inf-method" data-i18n="pg.influencer.engagement.sources">Kendi hesabımdan üç gerçek gönderi. Gönderiler X üzerinden yüklenir; beğeni ve diğer etkileşim sayıları zamanla değişebilir. Yüklenmezse “X’te aç” bağlantısını kullan.</p>
+        <div class="inf-real-posts" id="inf-real-posts">
+          <article class="inf-real-post">
+            <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
+              <p lang="tr" dir="ltr">Eskiden akıllı bir traderdım<br><br>-Marketi yenebileceğimi<br>- İşlemlerden 3-5RR kazanabileceğimi<br>- Fiyatı döndürebileceğimi<br>- Kayıplarımı telafi etmeye çalışırsam başaracağımı<br>- Başkalarından üstün olduğumu<br>- Her zaman yeni bir şey öğrenmem gerektiğini<br>- Çok azimli olursam çok…</p>
+              — Trader Ahmet (@traderahmet_) <a href="https://x.com/traderahmet_/status/2122697067059388880" target="_blank" rel="noopener noreferrer">2026-11-17</a>
+            </blockquote>
+            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2122697067059388880" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">X’te aç ↗</a>
+          </article>
+          <article class="inf-real-post">
+            <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
+              <p lang="tr" dir="ltr">Biz de zamanında her lower lowu longlardık, her dibi yakalamaya fiyatı döndürmeye çalışırdık sonra piyasalar kafamıza vura vura öğretti. Sanmayın ki kolay öğrendik, yıllarca öğren(e)medik. Öğrenmek istemedik. Market maker'dık ya fiyatı yönetiyorduk :D<br><br>O yüzden bunu çok…</p>
+              — Trader Ahmet (@traderahmet_) <a href="https://x.com/traderahmet_/status/2120899179778113906" target="_blank" rel="noopener noreferrer">2026-11-12</a>
+            </blockquote>
+            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2120899179778113906" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">X’te aç ↗</a>
+          </article>
+          <article class="inf-real-post">
+            <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none">
+              <p lang="tr" dir="ltr">“11 yıl okul, 2 yıl kolej, 3 yıl üniversite… Meğer tek öğrenmem gereken yatay çizgi çizmekmiş.”<br><br>-Tom Dante</p>
+              — Trader Ahmet (@traderahmet_) <a href="https://x.com/traderahmet_/status/2114068323839172986" target="_blank" rel="noopener noreferrer">2026-10-24</a>
+            </blockquote>
+            <a class="inf-real-post-link" href="https://x.com/traderahmet_/status/2114068323839172986" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.openPost">X’te aç ↗</a>
+          </article>
+        </div>
       </div>
     </section>
     <section class="inf-card inf-showcase">
       <h2 data-i18n="pg.influencer.tweets.h">X’te paylaşabileceğin içerik örnekleri</h2>
-      <p data-i18n="pg.influencer.tweets.note">Eğitim amaçlı temsili taslaklar; gerçek X gönderileri veya canlı piyasa verisi değildir. Fiyat, saat ve kaynak eklemeden önce güncel veriyi doğrula. Gerçek gönderi bağlantılarını ve analitik ekranlarını daha sonra ekleyeceğiz.</p>
+      <p data-i18n="pg.influencer.tweets.note">Bunlar eğitim amaçlı temsili taslaklardır; gerçek gönderiler yukarıdaki bölümde yer alır. Taslaklar canlı piyasa verisi değildir. Fiyat, saat ve kaynak eklemeden önce güncel veriyi doğrula.</p>
       <div class="inf-tweets"><article class="inf-tweet"><div class="inf-tweet-top"><span class="inf-avatar" aria-hidden="true">X</span><div><b data-i18n="pg.influencer.tweet.1.title">Piyasa notu</b><small data-i18n="pg.influencer.sample">Temsili örnek · gerçek gönderi değil</small></div></div><p data-i18n="pg.influencer.tweet.1.body">BTC için bugün tek bir tahmine bağlanmıyorum. Önce günün veri saatlerini ve önemli seviyeleri not ediyorum. Senaryom bozulursa ne yapacağım, işlemden önce belli. Sen bugün hangi veriyi izliyorsun?</p></article><article class="inf-tweet"><div class="inf-tweet-top"><span class="inf-avatar" aria-hidden="true">X</span><div><b data-i18n="pg.influencer.tweet.2.title">Öğretici paylaşım</b><small data-i18n="pg.influencer.sample">Temsili örnek · gerçek gönderi değil</small></div></div><p data-i18n="pg.influencer.tweet.2.body">Funding tek başına yön söylemez. Fiyat + açık pozisyon + funding birlikte ne anlatıyor? Bugünkü çalışma notumda bu üç veriyi aynı zaman aralığında karşılaştırıyorum. Kaynak ve saat ekleyip senaryoyu güncelleyeceğim.</p></article><article class="inf-tweet"><div class="inf-tweet-top"><span class="inf-avatar" aria-hidden="true">X</span><div><b data-i18n="pg.influencer.tweet.3.title">Süreç ve güven</b><small data-i18n="pg.influencer.sample">Temsili örnek · gerçek gönderi değil</small></div></div><p data-i18n="pg.influencer.tweet.3.body">Bu hafta en çok ne öğrendim? İyi görünen her fikri paylaşmak yerine nedenini açıklayabildiğim fikirlere odaklanmak. Bir sonraki paylaşımda sonucu değil, karar sürecini de göstereceğim.</p></article></div>
     </section>
     <section class="inf-card inf-faq">
@@ -12541,7 +12571,35 @@ async function loadInfluencerOrders() {
     });
   } catch { box.textContent = infText('pay.unavailable'); }
 }
+function infLoadRealPosts() {
+  const box = document.getElementById('inf-real-posts');
+  if (!box) return;
+  const mount = () => {
+    if (!window.twttr || !window.twttr.widgets || box.dataset.embedState === 'ready') return;
+    box.querySelectorAll('blockquote.twitter-tweet').forEach(post => {
+      post.dataset.theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      post.dataset.lang = window.LANG === 'en' ? 'en' : 'tr';
+    });
+    box.dataset.embedState = 'ready';
+    Promise.resolve(window.twttr.widgets.load(box)).catch(() => { box.dataset.embedState = 'unavailable'; });
+  };
+  if (window.twttr && window.twttr.widgets) { mount(); return; }
+  if (document.getElementById('inf-x-widgets')) return;
+  const script = document.createElement('script');
+  script.id = 'inf-x-widgets';
+  script.src = 'https://platform.twitter.com/widgets.js';
+  script.async = true;
+  script.charset = 'utf-8';
+  script.onload = () => {
+    if (window.twttr && typeof window.twttr.ready === 'function') window.twttr.ready(mount);
+    else mount();
+  };
+  script.onerror = () => { box.dataset.embedState = 'unavailable'; };
+  document.head.appendChild(script);
+}
+
 function renderInfluencer(skipLoad = false) {
+  infLoadRealPosts();
   const teaser = document.getElementById('inf-teaser'), full = document.getElementById('inf-full');
   const unlocked = infUnlocked();
   if (teaser) teaser.classList.toggle('hidden', unlocked);
@@ -30032,7 +30090,8 @@ loadSfx();
     "pg.influencer.engagement.quote": { tr: "Bazı gönderilerim 30–50 arası beğeni alıyor.", en: "Some of my posts receive 30–50 likes." },
     "pg.influencer.engagement.likes": { tr: "bazı gönderilerde beğeni", en: "likes on some posts" },
     "pg.influencer.engagement.note": { tr: "Ahmet’in aktardığı aralık; tüm gönderilerin ortalaması veya sonuç garantisi değildir. Beğeni sayısı, toplam etkileşim ya da gösterim sayısı anlamına gelmez.", en: "A range reported by Ahmet, not an average across all posts or a guarantee of results. Likes are not the same as total engagements or impressions." },
-    "pg.influencer.engagement.pending": { tr: "Gerçek gönderi bağlantıları ve ekran görüntüleri eklendiğinde örnekleri burada görebileceksin.", en: "Real examples will appear here when post links and screenshots are added." },
+    "pg.influencer.engagement.sources": { tr: "Kendi hesabımdan üç gerçek gönderi. Gönderiler X üzerinden yüklenir; beğeni ve diğer etkileşim sayıları zamanla değişebilir. Yüklenmezse “X’te aç” bağlantısını kullan.", en: "Three real posts from my account. Posts load from X; likes and other engagement counts may change over time. If an embed does not load, use “Open on X”." },
+    "pg.influencer.openPost": { tr: "X’te aç ↗", en: "Open on X ↗" },
     "pg.influencer.case.period.3": { tr: "Süre belirtilmedi", en: "Duration not provided" },
     "pg.influencer.followers": { tr: "takipçi", en: "followers" },
     "pg.influencer.start": { tr: "Başlangıç", en: "Start" },
@@ -30042,7 +30101,7 @@ loadSfx();
     "pg.influencer.bot.h": { tr: "20 bin takipçi tek başına kalite göstergesi değil", en: "20,000 followers alone is not proof of quality" },
     "pg.influencer.bot.body": { tr: "Takipçi satın almak ve bot etkileşim mümkün; ancak bir hesabın büyük olması bot kullandığını kanıtlamaz. Sayıya aldanma: yorumların niteliğine, aynı kişilerin tekrar katılmasına ve gösterimden profil ziyareti/takibe dönüşüme bak. Küçük ama ilgili bir topluluk daha değerli olabilir.", en: "Followers and bot engagement can be purchased, but a large account is not proof of bot use. Look beyond the count: comment quality, returning participants, and impressions converting into profile visits and follows. A small, engaged community may be more valuable." },
     "pg.influencer.tweets.h": { tr: "X’te paylaşabileceğin içerik örnekleri", en: "Example posts for X" },
-    "pg.influencer.tweets.note": { tr: "Eğitim amaçlı temsili taslaklar; gerçek X gönderileri veya canlı piyasa verisi değildir. Fiyat, saat ve kaynak eklemeden önce güncel veriyi doğrula. Gerçek gönderi bağlantılarını ve analitik ekranlarını daha sonra ekleyeceğiz.", en: "Illustrative training drafts, not real X posts or live market data. Verify current data before adding prices, timestamps and sources. Real post links and analytics screenshots will be added later." },
+    "pg.influencer.tweets.note": { tr: "Bunlar eğitim amaçlı temsili taslaklardır; gerçek gönderiler yukarıdaki bölümde yer alır. Taslaklar canlı piyasa verisi değildir. Fiyat, saat ve kaynak eklemeden önce güncel veriyi doğrula.", en: "These are illustrative training drafts; the real posts are in the section above. Drafts are not live market data. Verify current data before adding prices, timestamps and sources." },
     "pg.influencer.tweet.1.title": { tr: "Piyasa notu", en: "Market note" },
     "pg.influencer.tweet.1.body": { tr: "BTC için bugün tek bir tahmine bağlanmıyorum. Önce günün veri saatlerini ve önemli seviyeleri not ediyorum. Senaryom bozulursa ne yapacağım, işlemden önce belli. Sen bugün hangi veriyi izliyorsun?", en: "For BTC today, I am not committing to one prediction. First I note the data-release times and key levels. Before any trade, I know what I will do if my scenario fails. What data are you watching today?" },
     "pg.influencer.tweet.2.title": { tr: "Öğretici paylaşım", en: "Educational post" },

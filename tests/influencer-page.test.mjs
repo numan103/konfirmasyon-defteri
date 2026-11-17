@@ -98,6 +98,22 @@ test('beğeni aralığı beyan olarak gösterilir; sahte gönderi analitiği ür
   assert.match(html, /"pg\.influencer\.engagement\.h": \{ tr: .+, en: /);
 });
 
+test('verilen üç gerçek X gönderisi izleme parametresiz gömülür ve yedek bağlantıları vardır', () => {
+  const a = html.indexOf('id="inf-real-posts"');
+  const block = html.slice(a, html.indexOf('</section>', a));
+  for (const id of ['2122697067059388880', '2120899179778113906', '2114068323839172986']) {
+    const url = 'https://x.com/traderahmet_/status/' + id;
+    assert.equal(block.split('href="' + url + '"').length - 1, 2);
+    assert.ok(!block.includes(url + '?'));
+  }
+  assert.equal((block.match(/class="twitter-tweet"/g) || []).length, 3);
+  assert.match(html, /https:\/\/platform\.twitter\.com\/widgets\.js/);
+  assert.match(html, /script\.onerror/);
+  assert.match(html, /function infLoadRealPosts\(\)/);
+  assert.match(html, /data-dnt="true"/);
+  assert.ok(!html.includes('Gerçek gönderi bağlantıları ve ekran görüntüleri eklendiğinde'));
+});
+
 test('erişim kodu yok; kilit sunucu onayı veya admin ile açılır', () => {
   assert.match(html, /function infUnlocked\(\)/);
   assert.match(html, /siteIsAdmin\(\)/);

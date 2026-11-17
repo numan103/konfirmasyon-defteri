@@ -40,7 +40,10 @@ Telegram gönderimi başarısız olsa da kayıt özel admin panelinde kalır.
   sayfada açıkça belirtilir.
 - Büyüme karşılaştırmaları Ahmet'in verdiği anonim başlangıç/sonuç rakamlarıdır.
   Ara zaman serisi, doğrulanmış analitik veya etkileşim ölçümleri uydurulmaz.
-  Gerçek tweet bağlantıları verilene kadar paylaşım örnekleri temsili etiketlenir.
+  Eğitim taslakları temsili etiketlenir. Ahmet'in verdiği üç gerçek gönderi ayrı
+  bölümde resmi X widget'ıyla gösterilir; X engellenirse alıntı ve doğrudan kaynak
+  bağlantısı kalır. Gömme kodu yalnızca influencer sayfası açılınca yüklenir.
+  Beğeni sayıları sabitlenmez ve doğrulanmamış gösterim/etkileşim verisi üretilmez.
 - İptal/iade koşulları ve görüşme süreleri henüz belirtilmedi; destek iletişimi
   Telegram'dır. Fiyat için teyit şartı yoktur.
 - Özel konu taslağı `/api/ai?influencer=1&op=outline` içinde tutulur; anonim ve premium
