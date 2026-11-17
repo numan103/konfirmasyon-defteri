@@ -86,16 +86,36 @@ test('3 yıldız brifi tüm ülkelerin sadece o günün yüksek etkili verilerin
   assert.deepEqual(mentorHighImpact([], day), []);
 });
 
-test('mentörlük brifi TSİ saatleri, beklenti/önceki ve haber kısıtı uyarısı içerir', () => {
+test('mentörlük brifi sadece haber, saat ve beklenti yazar', () => {
   const text = formatMentorDailyBrief([
     { country: 'USD', title: 'CPI m/m', impact: 'High', at: Date.parse(at(day)), forecast: '0.3%', previous: '0.6%' },
   ], new Date(), day);
   assert.match(text, /📅 3 Yıldız Haberler/);
   assert.match(text, /TSİ/);
-  assert.match(text, /TÜFE/);
-  assert.match(text, /Beklenti/);
-  assert.match(text, /haber kısıtını kontrol et/);
-  assert.doesNotMatch(text, /gerçekleşti|actual/i);
+  assert.match(text, /TÜFE \(aylık\)/);
+  assert.match(text, /Beklenti: 0,3%/);
+  assert.doesNotMatch(text, /Önceki|Forex Factory|haber kısıtı|gerçekleşti|actual/i);
+});
+
+test('yüksek etkili takvim başlıkları ve ülkeler Türkçe yazılır', () => {
+  const titles = [
+    'BOE Gov Bailey Speaks', 'Core Retail Sales m/m', 'Employment Change',
+    'Fed Chairman Warsh Speaks', 'FOMC Meeting Minutes', 'Inflation Expectations q/q',
+    'Median CPI y/y', 'RBA Gov Bullock Speaks', 'Trimmed CPI y/y',
+  ];
+  const text = formatMentorDailyBrief(titles.map((title, i) => ({
+    country: ['GBP', 'USD', 'USD', 'USD', 'USD', 'NZD', 'USD', 'AUD', 'USD'][i],
+    title, impact: 'High', at: Date.parse(at(day)) + i * 60000, forecast: '0,3%',
+  })), new Date(), day);
+  for (const expected of [
+    'İngiltere Merkez Bankası Başkanı Bailey Konuşuyor',
+    'Çekirdek Perakende Satışlar (aylık)', 'İstihdam Değişimi',
+    'Fed Başkanı Warsh Konuşuyor', 'FOMC Toplantı Tutanakları',
+    'Enflasyon Beklentileri (çeyreklik)', 'Medyan TÜFE (yıllık)',
+    'Avustralya Merkez Bankası Başkanı Bullock Konuşuyor', 'Kırpılmış TÜFE (yıllık)',
+    'Yeni Zelanda', 'Avustralya', 'İngiltere',
+  ]) assert.ok(text.includes(expected), 'missing: ' + expected);
+  assert.doesNotMatch(text, /\b(Speaks|Retail Sales|Employment Change|Expectations|Median|Trimmed|Minutes)\b/);
 });
 
 test('route ve cron 07:00 TSİ için mentorNews yolunu kullanır', () => {
