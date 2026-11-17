@@ -5155,6 +5155,32 @@
   .inf-tweet small { display: block; margin-top: 4px; font-size: 10px; color: var(--text-3); }
   .inf-tweet p { white-space: pre-wrap; margin: 0; }
   @media (max-width: 900px) { .inf-results, .inf-tweets { grid-template-columns: 1fr; } }
+  .inf-section-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0; }
+  .inf-section-nav a { color: var(--pc); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 9px 13px; font-size: 12px; }
+  .inf-section-nav a:hover { border-color: var(--pc); background: var(--pc-soft); }
+  .inf-value-section { padding: 24px 0; border-top: 1px solid var(--border); }
+  .inf-value-section h3 { font-size: 20px; line-height: 1.35; margin: 0 0 12px; color: var(--text); }
+  .inf-benefits, .inf-stories { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 18px 0; }
+  .inf-stories { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .inf-opportunity-label { display: block; margin: 14px 0 6px; font-size: 12px; color: var(--pc); }
+  .inf-benefit, .inf-story { min-width: 0; padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--input-bg); }
+  .inf-benefit-num { color: var(--pc); font-family: var(--font-display); font-size: 12px; }
+  .inf-benefit h4, .inf-story h4 { color: var(--text); font-size: 14px; line-height: 1.4; margin: 12px 0 8px; }
+  .inf-card .inf-benefit p, .inf-card .inf-story p { font-size: 12px; line-height: 1.65; }
+  .inf-outcomes { background: var(--pc-soft); border-radius: 14px; padding: 20px; border: 1px solid var(--border); margin: 8px 0; }
+  .inf-outcome-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; list-style-position: inside; margin: 16px 0 0; padding: 0; }
+  .inf-outcome-list li { color: var(--pc); font-size: 12px; }
+  .inf-outcome-list b { color: var(--text); font-size: 13px; }
+  .inf-outcome-list span { display: block; color: var(--text-2); line-height: 1.6; margin-top: 6px; }
+  .inf-story-name { display: block; font-size: 18px; color: var(--pc); font-weight: 700; }
+  .inf-card .inf-story-lesson { border-left: 2px solid var(--pc); padding-left: 10px; }
+  .inf-story a, .inf-why-now a { color: var(--pc); font-size: 12px; display: inline-block; padding: 8px 0; }
+  .inf-niche, .inf-why-now { border: 1px solid var(--border); border-radius: 12px; margin: 10px 0; padding: 15px; }
+  .inf-niche summary, .inf-why-now summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); }
+  .inf-niche p, .inf-why-now p { margin-top: 12px; }
+  #inf-opportunities, #inf-real-world, #inf-packages, #inf-outcomes { scroll-margin-top: 90px; }
+  @media (max-width: 900px) { .inf-benefits, .inf-stories { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .inf-outcome-list { grid-template-columns: 1fr; } .inf-value-section h3 { font-size: 18px; } }
   .inf-locked-note { font-size: 11.5px; color: var(--text-3); margin: 0 0 12px; }
   @media (max-width: 900px) {
     .inf-grid { grid-template-columns: 1fr; }
@@ -5704,7 +5730,7 @@
         </div>
       </div>
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
-      <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Kitle Atölyesi</a>
+      <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 ALFALUENCE</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
       <div class="nav-drop">
         <button type="button" class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</button>
@@ -5767,7 +5793,7 @@
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
-      <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Kitle Atölyesi</a>
+      <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 ALFALUENCE</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
@@ -6111,7 +6137,7 @@
         </a>
         <a href="?page=influencer" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvInf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvInf)"/><circle cx="150" cy="54" r="26" fill="var(--card)" stroke="var(--pc)" stroke-width="2"/><path d="M139 58l11-11 11 11-11 11z" fill="none" stroke="var(--pc)" stroke-width="2.4" stroke-linejoin="round"/><circle cx="150" cy="58" r="3.4" fill="var(--pc)"/><path d="M82 92h136" stroke="var(--pc)" stroke-width="2" stroke-linecap="round" opacity=".55"/><circle cx="104" cy="47" r="3" fill="var(--pc)" opacity=".7"/><circle cx="196" cy="47" r="3" fill="var(--pc)" opacity=".7"/></svg></div>
-          <div class="hc-body"><h2 data-i18n="app.influencer">🚀 Kitle Atölyesi</h2><p data-i18n="pg.influencer.hc">Alanını bul, içerik üret, kendi kitleni oluştur.</p></div>
+          <div class="hc-body"><h2 data-i18n="app.influencer">🚀 ALFALUENCE</h2><p data-i18n="pg.influencer.hc">Bilgini görünür kıl; güven, topluluk ve yeni fırsatlar oluştur.</p></div>
         </a>
   </div>
 </div>
@@ -7620,16 +7646,48 @@
   <div id="page-influencer" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🚀</span>
-      <span class="eg-brand-name" data-i18n="pg.influencer.t">Kitle Atölyesi</span>
-      <span class="eg-brand-sub" data-i18n="pg.influencer.s">Bilgini içeriğe, içeriğini topluluğa dönüştür.</span>
+      <span class="eg-brand-name" data-i18n="pg.influencer.t">ALFALUENCE</span>
+      <span class="eg-brand-sub" data-i18n="pg.influencer.s">Sesini bul. Kitleni oluştur.</span>
     </div>
 
     <div id="inf-teaser" class="inf-card inf-teaser">
-      <h2 data-i18n="pg.influencer.promo.h">Bir profil değil, kendi kitleni oluştur.</h2>
-      <p data-i18n="pg.influencer.promo.s">Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı ya da bağımsız bir içerik üreticisi olabilirsin. Kitle Atölyesi; X’te konumlanma, anlaşılır içerik üretme ve güvenilir bir topluluk kurma sürecine odaklanır.</p>
+      <h2 data-i18n="pg.influencer.promo.h">Sadece tanınmak değil. Alanında aranan kişi olmak.</h2>
+      <p data-i18n="pg.influencer.promo.s">Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı ya da bağımsız bir içerik üreticisi olabilirsin. ALFALUENCE’ta hedef; ne bildiğini anlaşılır biçimde göstermek, güven kazanmak ve bu güvenin açabileceği fırsatlara hazırlanmaktır.</p>
       <div class="inf-card" data-i18n="pg.influencer.videoSoon">Tanıtım videosu yakında burada.</div>
       <p class="inf-update" data-i18n="pg.influencer.updates">Eğitim alanı hazırlanıyor. Videolar, eğitsel içerikler ve örnekler ben ekledikçe güncellenecek; içeriklerin tamamı henüz yayında değil.</p>
-      <h3 class="inf-sub" data-i18n="pg.influencer.plans.h">Paketleri gör</h3>
+
+      <nav class="inf-section-nav" aria-label="ALFALUENCE">
+        <a data-i18n="pg.influencer.jump.why" href="#inf-opportunities">Ne kazandırabilir?</a>
+        <a data-i18n="pg.influencer.jump.stories" href="#inf-real-world">Fırsat senaryoları</a>
+        <a data-i18n="pg.influencer.jump.packages" href="#inf-packages">Paketleri karşılaştır</a>
+      </nav>
+      <section class="inf-value-section" id="inf-opportunities" aria-labelledby="inf-benefits-title">
+        <h3 data-i18n="pg.influencer.value.h" id="inf-benefits-title">Neden içerik üretmelisin?</h3>
+        <p data-i18n="pg.influencer.value.intro">Herkes fenomen olmak zorunda değil. Ama bildiğin şeyler yalnızca sende kalırsa, o bilgiden yararlanabilecek insanlar seni bulamayabilir. Hedef büyük görünmek değil; doğru insanlar için faydalı ve güvenilir olmaktır.</p>
+        <div class="inf-benefits"><article class="inf-benefit"><span class="inf-benefit-num" aria-hidden="true">01</span><h4 data-i18n="pg.influencer.benefit.0.h">Görünür bir uzmanlık</h4><p data-i18n="pg.influencer.benefit.0.p">Bir özgeçmiş “biliyorum” der; iyi içerik nasıl düşündüğünü gösterir. Profilin, işverenlerin ve potansiyel müşterilerin inceleyebileceği canlı bir portföye dönüşebilir.</p></article><article class="inf-benefit"><span class="inf-benefit-num" aria-hidden="true">02</span><h4 data-i18n="pg.influencer.benefit.1.h">İş ve müşteri fırsatları</h4><p data-i18n="pg.influencer.benefit.1.p">Doğru problemi çözebildiğini göstermek; freelance işler, proje teklifleri ve uzmanlığına uygun hizmet talepleri için keşfedilmeni kolaylaştırabilir.</p></article><article class="inf-benefit"><span class="inf-benefit-num" aria-hidden="true">03</span><h4 data-i18n="pg.influencer.benefit.2.h">Kendi ürününü sunabilmek</h4><p data-i18n="pg.influencer.benefit.2.p">Bir şablon, rehber, araç veya eğitim: kitlenin tekrar eden sorununu öğrenir, gerçekten faydalı bir ürünü test edebilirsin. Takipçi sayısı tek başına satış yaratmaz.</p></article><article class="inf-benefit"><span class="inf-benefit-num" aria-hidden="true">04</span><h4 data-i18n="pg.influencer.benefit.3.h">Marka ve içerik iş birlikleri</h4><p data-i18n="pg.influencer.benefit.3.p">Alanına uygun markalarla içerik üretimi, sponsorluk veya satış ortaklığı mümkün olabilir. Reklam ve komisyon ilişkileri açıkça belirtilmeli; güven bir anlaşmadan daha değerlidir.</p></article><article class="inf-benefit"><span class="inf-benefit-num" aria-hidden="true">05</span><h4 data-i18n="pg.influencer.benefit.4.h">Çevre ve topluluk</h4><p data-i18n="pg.influencer.benefit.4.p">Benzer ilgi alanındaki insanlarla tanışabilir, ortak yayınlar yapabilir ve fikirlerine geri bildirim alabilirsin. İzinli e-posta listesi gibi kanallar tek platforma bağımlılığı azaltmaya yardımcı olabilir.</p></article><article class="inf-benefit"><span class="inf-benefit-num" aria-hidden="true">06</span><h4 data-i18n="pg.influencer.benefit.5.h">Biriken bilgi ve üretim becerisi</h4><p data-i18n="pg.influencer.benefit.5.p">Yazdıkça anlatımın, araştırman ve düşünce netliğin gelişebilir. Bugün hazırladığın iyi bir açıklama yarın portföyün, rehberin veya eğitim içeriğinin parçası olabilir.</p></article></div>
+        <details class="inf-why-now">
+          <summary data-i18n="pg.influencer.now.h">Yeni dünyada neden önemli?</summary>
+          <p data-i18n="pg.influencer.now.p">İçerik üretmek kolaylaştıkça yalnızca çok paylaşmak ayrıştırıcı olmayabilir. Kendi deneyimin, kaynaklarını göstermen ve bir konuda tutarlı biçimde fayda üretmen daha sağlam bir zemin sunar. Algoritmaya bağımlılığı azaltmak için izinli iletişim kanalları da düşün.</p>
+          <p data-i18n="pg.influencer.now.practical">Marka açısından soru sadece “kaç takipçisi var?” değil: “Benim ulaşmak istediğim insanlara, güvenilir bir şekilde ulaşabiliyor mu?” Bu yüzden kendi alanında ilgili bir topluluk kurmak, rastgele büyümekten daha anlamlı bir hedef olabilir.</p>
+        </details>
+      </section>
+      <section class="inf-value-section inf-outcomes" id="inf-outcomes" aria-labelledby="inf-outcomes-title">
+        <h3 data-i18n="pg.influencer.outcomes.h" id="inf-outcomes-title">ALFALUENCE’ta neyi hedefliyoruz?</h3>
+        <p data-i18n="pg.influencer.outcomes.note">Üzerinde çalışacağımız hedefler bunlar; hazır müşteri, sponsor, belirli bir gelir veya takipçi sözü değil. Bireysel görüşme ve destek kapsamı seçtiğin pakete bağlı.</p>
+        <ol class="inf-outcome-list"><li><b data-i18n="pg.influencer.outcome.0.h">Net bir profil</b><span data-i18n="pg.influencer.outcome.0.p">Kime, hangi konuda ve nasıl yardımcı olduğunu anlatan bir konumlandırma.</span></li><li><b data-i18n="pg.influencer.outcome.1.h">Tekrarlanabilir içerik sistemi</b><span data-i18n="pg.influencer.outcome.1.p">İçerik sütunları, fikir havuzu ve sürdürülebilir bir yayın ritmi.</span></li><li><b data-i18n="pg.influencer.outcome.2.h">Gerçek geri bildirim</b><span data-i18n="pg.influencer.outcome.2.p">Beğeninin yanında kaydetme, anlamlı yanıt ve profil ziyaretini değerlendirme.</span></li><li><b data-i18n="pg.influencer.outcome.3.h">Fırsata giden bir sonraki adım</b><span data-i18n="pg.influencer.outcome.3.p">Portföy, iletişim yolu veya küçük bir ürün fikri; alanına uygun olanı seçme.</span></li></ol>
+      </section>
+      <section class="inf-value-section" id="inf-real-world" aria-labelledby="inf-real-world-title">
+        <h3 data-i18n="pg.influencer.stories.h" id="inf-real-world-title">Türkiye’de bu iş nasıl fırsata dönüşebilir?</h3>
+        <p data-i18n="pg.influencer.stories.intro">Aşağıdakiler örnek senaryolardır; gerçekleşmiş anlaşma veya ALFALUENCE’ın sağladığı ayrıcalıklar değildir. İş birlikleri; markanın koşullarına, kitlenin uygunluğuna, mevzuata ve sözleşmeye bağlıdır.</p>
+        <div class="inf-stories"><article class="inf-story"><span data-i18n="pg.influencer.story.0.name" class="inf-story-name">FX içerik üreticisi</span><h4 data-i18n="pg.influencer.story.0.tag">Prop firm ile kampanya</h4><p data-i18n="pg.influencer.story.0.body">Türkçe işlem günlüğü paylaşıyorsun; riskini ve değerlendirme kurallarını anlaşılır anlatıyorsun. Kitlen de bu süreci öğrenmek isteyen trader’lardan oluşuyor.</p><b data-i18n="pg.influencer.opportunity" class="inf-opportunity-label">Nasıl bir kapı açılabilir?</b><p data-i18n="pg.influencer.story.0.opportunity">Bir prop firm ile içerik anlaşması, indirim kodu veya satış ortaklığı görüşebilirsin. Koşullarına göre değerlendirme erişimi de anlaşmanın parçası olabilir.</p><p data-i18n="pg.influencer.story.0.lesson" class="inf-story-lesson">Değerlendirme erişimi, fonlanma veya ödeme alma garantisi değildir. Kampanya koşullarını ve reklam/komisyon ilişkisini açıkça belirt.</p></article><article class="inf-story"><span data-i18n="pg.influencer.story.1.name" class="inf-story-name">Kripto içerik üreticisi</span><h4 data-i18n="pg.influencer.story.1.tag">Borsa ile içerik iş birliği</h4><p data-i18n="pg.influencer.story.1.body">Yeni başlayanlara emir türlerini, hesap güvenliğini veya platform kullanımını öğretiyorsun. Anlaşılır anlatımın, ilgili bir Türkçe kitlenin seni takip etmesini sağlıyor.</p><b data-i18n="pg.influencer.opportunity" class="inf-opportunity-label">Nasıl bir kapı açılabilir?</b><p data-i18n="pg.influencer.story.1.opportunity">Bir borsa ile eğitim yayını, kampanya içeriği veya uygunluk koşullarına bağlı referans anlaşması gündeme gelebilir.</p><p data-i18n="pg.influencer.story.1.lesson" class="inf-story-lesson">Hacim ya da kazanç vaat etme. Ücret veya komisyon aldığını, platform risklerini ve geçerli koşulları açıkça paylaş.</p></article><article class="inf-story"><span data-i18n="pg.influencer.story.2.name" class="inf-story-name">Teknoloji / günlük yaşam üreticisi</span><h4 data-i18n="pg.influencer.story.2.tag">Marka sponsorluğu ve ürün deneyimi</h4><p data-i18n="pg.influencer.story.2.body">Kullandığın araçları, ekipmanı veya günlük rutinini gerçekten deneyerek anlatıyorsun. Takipçilerin yalnızca fotoğrafı değil, senin yorumunu önemsiyor.</p><b data-i18n="pg.influencer.opportunity" class="inf-opportunity-label">Nasıl bir kapı açılabilir?</b><p data-i18n="pg.influencer.story.2.opportunity">Bir yazılım, ekipman veya yaşam tarzı markasıyla ücretli içerik, ürün denemesi ya da satış ortaklığı konuşabilirsin.</p><p data-i18n="pg.influencer.story.2.lesson" class="inf-story-lesson">Ürün gönderilmesi nakit ödeme demek değildir. İçerik kullanım haklarını ve teslimleri netleştir; reklamı gizleme.</p></article><article class="inf-story"><span data-i18n="pg.influencer.story.3.name" class="inf-story-name">Uzman / bağımsız çalışan</span><h4 data-i18n="pg.influencer.story.3.tag">İçerikten müşteri ve proje talebi</h4><p data-i18n="pg.influencer.story.3.body">Bir tasarımın, kodun veya anlatımın nasıl iyileştiğini örnekle gösteriyorsun. Bir işletme, benzer bir ihtiyacını çözebileceğini profilinden görebiliyor.</p><b data-i18n="pg.influencer.opportunity" class="inf-opportunity-label">Nasıl bir kapı açılabilir?</b><p data-i18n="pg.influencer.story.3.opportunity">Marka tanıtımı beklemeden freelance proje, içerik üretimi hizmeti veya uzmanlık alanındaki bir iş için talep alabilirsin.</p><p data-i18n="pg.influencer.story.3.lesson" class="inf-story-lesson">Net bir portföy ve iletişim yolu hazırla. Talep almak, otomatik olarak anlaşma veya gelir elde etmek değildir.</p></article></div>
+        <p data-i18n="pg.influencer.stories.note" class="inf-method">Bu eğitim bir prop firm hesabı, borsa anlaşması, sponsorluk veya müşteri sağlamaz. Amaç; böyle fırsatlar için anlatımını, profilini ve içerik üretimini geliştirmektir. Ücretli ilişkiler açıklanmalı; finans alanında ilgili kurallara uyulmalıdır.</p>
+      </section>
+      <section class="inf-value-section" id="inf-your-path">
+        <h3 data-i18n="pg.influencer.path.h">Senin alanında nasıl görünebilir?</h3>
+        <details class="inf-niche"><summary data-i18n="pg.influencer.niche.0.h">Kripto / FX / finans</summary><p data-i18n="pg.influencer.niche.0.p">Kazanç ekranı yerine bir kararın gerekçesini, riskini ve ne zaman geçersiz olacağını anlat. Bir süreç günlüğü veya kaynaklı veri okuması içerik başlangıcın olabilir. Eğitim içeriği, kişiye özel yatırım danışmanlığı yetkisi vermez.</p></details><details class="inf-niche"><summary data-i18n="pg.influencer.niche.1.h">Eğitmen / teknoloji / uzmanlık</summary><p data-i18n="pg.influencer.niche.1.p">Küçük bir problemi adım adım çöz: bir araç kullanımı, kod örneği veya anlaşılır bir konu anlatımı. Bu içerikler portföy, eğitim veya uzmanlığına uygun bir hizmet için referans olabilir.</p></details><details class="inf-niche"><summary data-i18n="pg.influencer.niche.2.h">Bağımsız içerik üreticisi</summary><p data-i18n="pg.influencer.niche.2.p">İlgi alanını tekrar edilebilir bir formata dönüştür: inceleme, deney, yorum veya hikâye. Okurun neden geri geleceğini netleştir; ardından uygun ürün, iş birliği veya topluluk fikrini test et.</p></details>
+      </section>
+
+      <h3 class="inf-sub" id="inf-packages" data-i18n="pg.influencer.plans.h">Paketleri gör</h3>
       <div class="inf-plans">
         <div class="inf-plan">
           <div class="inf-plan-name" data-i18n="pg.influencer.p1.name">Video eğitim</div>
@@ -30019,8 +30077,8 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
-    "pg.influencer.promo.h": { tr: "Bir profil değil, kendi kitleni oluştur.", en: "Build more than a profile. Build your own audience." },
-    "pg.influencer.promo.s": { tr: "Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı ya da bağımsız bir içerik üreticisi olabilirsin. Kitle Atölyesi; X’te konumlanma, anlaşılır içerik üretme ve güvenilir bir topluluk kurma sürecine odaklanır.", en: "Whether you trade crypto or FX, teach, explore technology or create independently, Audience Studio focuses on positioning yourself on X, communicating clearly and building a trusted community." },
+    "pg.influencer.promo.h": { tr: "Sadece tanınmak değil. Alanında aranan kişi olmak.", en: "Go beyond being known. Become known for something." },
+    "pg.influencer.promo.s": { tr: "Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı ya da bağımsız bir içerik üreticisi olabilirsin. ALFALUENCE’ta hedef; ne bildiğini anlaşılır biçimde göstermek, güven kazanmak ve bu güvenin açabileceği fırsatlara hazırlanmaktır.", en: "Whether you trade crypto or FX, teach, explore technology or create independently, ALFALUENCE helps you communicate what you know, build trust and prepare for the opportunities that trust may open." },
     'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
     'pg.influencer.buy': { tr: 'Paketi seç', en: 'Select package' },
     'pg.influencer.unlockedNote': { tr: 'Tam erişim açık — aşağıdaki çalışma alanı paketine özel.', en: 'Full access is open — the workspace below is for package members.' },
@@ -30118,10 +30176,71 @@ loadSfx();
     "pg.influencer.tweet.3.title": { tr: "Süreç ve güven", en: "Process and trust" },
     "pg.influencer.tweet.3.body": { tr: "Bu hafta en çok ne öğrendim? İyi görünen her fikri paylaşmak yerine nedenini açıklayabildiğim fikirlere odaklanmak. Bir sonraki paylaşımda sonucu değil, karar sürecini de göstereceğim.", en: "My biggest lesson this week: focus on ideas I can explain rather than sharing every idea that looks good. In my next post, I will show the decision process, not just the outcome." },
     "pg.influencer.sample": { tr: "Temsili örnek · gerçek gönderi değil", en: "Illustrative sample · not a real post" },
-    "app.influencer": { tr: "🚀 Kitle Atölyesi", en: "🚀 Audience Studio" },
-    "pg.influencer.hc": { tr: "Alanını bul, içerik üret, kendi kitleni oluştur.", en: "Find your niche, publish content and build your audience." },
-    "pg.influencer.t": { tr: "Kitle Atölyesi", en: "Audience Studio" },
-    "pg.influencer.s": { tr: "Bilgini içeriğe, içeriğini topluluğa dönüştür.", en: "Turn your knowledge into content and your content into community." },
+    "pg.influencer.benefit.0.h": { tr: "Görünür bir uzmanlık", en: "Visible expertise" },
+    "pg.influencer.benefit.0.p": { tr: "Bir özgeçmiş “biliyorum” der; iyi içerik nasıl düşündüğünü gösterir. Profilin, işverenlerin ve potansiyel müşterilerin inceleyebileceği canlı bir portföye dönüşebilir.", en: "A résumé says you know something; useful content shows how you think. Your profile can become a living portfolio for employers and prospective clients." },
+    "pg.influencer.benefit.1.h": { tr: "İş ve müşteri fırsatları", en: "Work and client opportunities" },
+    "pg.influencer.benefit.1.p": { tr: "Doğru problemi çözebildiğini göstermek; freelance işler, proje teklifleri ve uzmanlığına uygun hizmet talepleri için keşfedilmeni kolaylaştırabilir.", en: "Showing that you can solve a specific problem can help people discover you for freelance work, projects and services aligned with your expertise." },
+    "pg.influencer.benefit.2.h": { tr: "Kendi ürününü sunabilmek", en: "A route to your own products" },
+    "pg.influencer.benefit.2.p": { tr: "Bir şablon, rehber, araç veya eğitim: kitlenin tekrar eden sorununu öğrenir, gerçekten faydalı bir ürünü test edebilirsin. Takipçi sayısı tek başına satış yaratmaz.", en: "A template, guide, tool or course: learn which problems recur in your audience and test a genuinely useful product. Followers alone do not create sales." },
+    "pg.influencer.benefit.3.h": { tr: "Marka ve içerik iş birlikleri", en: "Brand and content collaborations" },
+    "pg.influencer.benefit.3.p": { tr: "Alanına uygun markalarla içerik üretimi, sponsorluk veya satış ortaklığı mümkün olabilir. Reklam ve komisyon ilişkileri açıkça belirtilmeli; güven bir anlaşmadan daha değerlidir.", en: "Relevant brands may offer content collaborations, sponsorships or affiliate arrangements. Disclose advertising and commissions clearly; trust matters more than any single deal." },
+    "pg.influencer.benefit.4.h": { tr: "Çevre ve topluluk", en: "Network and community" },
+    "pg.influencer.benefit.4.p": { tr: "Benzer ilgi alanındaki insanlarla tanışabilir, ortak yayınlar yapabilir ve fikirlerine geri bildirim alabilirsin. İzinli e-posta listesi gibi kanallar tek platforma bağımlılığı azaltmaya yardımcı olabilir.", en: "Meet people in your niche, collaborate on live sessions and get feedback. Opt-in channels such as an email list can help reduce reliance on a single platform." },
+    "pg.influencer.benefit.5.h": { tr: "Biriken bilgi ve üretim becerisi", en: "Compounding knowledge and skills" },
+    "pg.influencer.benefit.5.p": { tr: "Yazdıkça anlatımın, araştırman ve düşünce netliğin gelişebilir. Bugün hazırladığın iyi bir açıklama yarın portföyün, rehberin veya eğitim içeriğinin parçası olabilir.", en: "Writing can improve your communication, research and clarity. A useful explanation today may later become part of a portfolio, guide or educational resource." },
+    "pg.influencer.outcome.0.h": { tr: "Net bir profil", en: "A clear profile" },
+    "pg.influencer.outcome.0.p": { tr: "Kime, hangi konuda ve nasıl yardımcı olduğunu anlatan bir konumlandırma.", en: "Position yourself around who you help, with what and how." },
+    "pg.influencer.outcome.1.h": { tr: "Tekrarlanabilir içerik sistemi", en: "A repeatable content system" },
+    "pg.influencer.outcome.1.p": { tr: "İçerik sütunları, fikir havuzu ve sürdürülebilir bir yayın ritmi.", en: "Content pillars, an idea bank and a sustainable publishing rhythm." },
+    "pg.influencer.outcome.2.h": { tr: "Gerçek geri bildirim", en: "Useful feedback" },
+    "pg.influencer.outcome.2.p": { tr: "Beğeninin yanında kaydetme, anlamlı yanıt ve profil ziyaretini değerlendirme.", en: "Look beyond likes at saves, meaningful replies and profile visits." },
+    "pg.influencer.outcome.3.h": { tr: "Fırsata giden bir sonraki adım", en: "A next step towards opportunity" },
+    "pg.influencer.outcome.3.p": { tr: "Portföy, iletişim yolu veya küçük bir ürün fikri; alanına uygun olanı seçme.", en: "Choose a portfolio, a contact path or a small product idea that suits your niche." },
+    "pg.influencer.story.0.name": { tr: "FX içerik üreticisi", en: "FX creator" },
+    "pg.influencer.story.0.tag": { tr: "Prop firm ile kampanya", en: "A prop firm campaign" },
+    "pg.influencer.story.0.body": { tr: "Türkçe işlem günlüğü paylaşıyorsun; riskini ve değerlendirme kurallarını anlaşılır anlatıyorsun. Kitlen de bu süreci öğrenmek isteyen trader’lardan oluşuyor.", en: "You share a trading journal in Turkish and explain risk and evaluation rules clearly. Your audience includes traders who want to understand that process." },
+    "pg.influencer.opportunity": { tr: "Nasıl bir kapı açılabilir?", en: "What opportunity could open?" },
+    "pg.influencer.story.0.opportunity": { tr: "Bir prop firm ile içerik anlaşması, indirim kodu veya satış ortaklığı görüşebilirsin. Koşullarına göre değerlendirme erişimi de anlaşmanın parçası olabilir.", en: "You could discuss a content agreement, discount code or affiliate arrangement with a prop firm. Evaluation access may form part of an agreement, subject to its terms." },
+    "pg.influencer.story.0.lesson": { tr: "Değerlendirme erişimi, fonlanma veya ödeme alma garantisi değildir. Kampanya koşullarını ve reklam/komisyon ilişkisini açıkça belirt.", en: "Evaluation access does not guarantee funding or payouts. Disclose campaign terms and advertising or commission relationships." },
+    "pg.influencer.story.1.name": { tr: "Kripto içerik üreticisi", en: "Crypto creator" },
+    "pg.influencer.story.1.tag": { tr: "Borsa ile içerik iş birliği", en: "Content collaboration with an exchange" },
+    "pg.influencer.story.1.body": { tr: "Yeni başlayanlara emir türlerini, hesap güvenliğini veya platform kullanımını öğretiyorsun. Anlaşılır anlatımın, ilgili bir Türkçe kitlenin seni takip etmesini sağlıyor.", en: "You explain order types, account security or platform use to beginners. Clear explanations can help a relevant Turkish-speaking audience find you." },
+    "pg.influencer.story.1.opportunity": { tr: "Bir borsa ile eğitim yayını, kampanya içeriği veya uygunluk koşullarına bağlı referans anlaşması gündeme gelebilir.", en: "An exchange may consider an educational session, campaign content or a referral arrangement subject to eligibility." },
+    "pg.influencer.story.1.lesson": { tr: "Hacim ya da kazanç vaat etme. Ücret veya komisyon aldığını, platform risklerini ve geçerli koşulları açıkça paylaş.", en: "Do not promise trading volume or profits. Disclose compensation, platform risks and applicable terms." },
+    "pg.influencer.story.2.name": { tr: "Teknoloji / günlük yaşam üreticisi", en: "Technology / lifestyle creator" },
+    "pg.influencer.story.2.tag": { tr: "Marka sponsorluğu ve ürün deneyimi", en: "Brand sponsorship and product experience" },
+    "pg.influencer.story.2.body": { tr: "Kullandığın araçları, ekipmanı veya günlük rutinini gerçekten deneyerek anlatıyorsun. Takipçilerin yalnızca fotoğrafı değil, senin yorumunu önemsiyor.", en: "You share first-hand experience with tools, equipment or daily routines. Your audience values your perspective, not just the pictures." },
+    "pg.influencer.story.2.opportunity": { tr: "Bir yazılım, ekipman veya yaşam tarzı markasıyla ücretli içerik, ürün denemesi ya da satış ortaklığı konuşabilirsin.", en: "You could discuss paid content, a product trial or an affiliate arrangement with a software, equipment or lifestyle brand." },
+    "pg.influencer.story.2.lesson": { tr: "Ürün gönderilmesi nakit ödeme demek değildir. İçerik kullanım haklarını ve teslimleri netleştir; reklamı gizleme.", en: "Receiving a product is not the same as being paid. Agree on usage rights and deliverables; do not hide advertising." },
+    "pg.influencer.story.3.name": { tr: "Uzman / bağımsız çalışan", en: "Specialist / freelancer" },
+    "pg.influencer.story.3.tag": { tr: "İçerikten müşteri ve proje talebi", en: "Content leading to client enquiries" },
+    "pg.influencer.story.3.body": { tr: "Bir tasarımın, kodun veya anlatımın nasıl iyileştiğini örnekle gösteriyorsun. Bir işletme, benzer bir ihtiyacını çözebileceğini profilinden görebiliyor.", en: "You show how you improve a design, code sample or explanation. A business can see from your profile how you might address a similar need." },
+    "pg.influencer.story.3.opportunity": { tr: "Marka tanıtımı beklemeden freelance proje, içerik üretimi hizmeti veya uzmanlık alanındaki bir iş için talep alabilirsin.", en: "Instead of waiting for a sponsorship, you may receive enquiries for freelance projects, content services or work within your expertise." },
+    "pg.influencer.story.3.lesson": { tr: "Net bir portföy ve iletişim yolu hazırla. Talep almak, otomatik olarak anlaşma veya gelir elde etmek değildir.", en: "Prepare a clear portfolio and contact path. An enquiry is not automatically a contract or income." },
+    "pg.influencer.niche.0.h": { tr: "Kripto / FX / finans", en: "Crypto / FX / finance" },
+    "pg.influencer.niche.0.p": { tr: "Kazanç ekranı yerine bir kararın gerekçesini, riskini ve ne zaman geçersiz olacağını anlat. Bir süreç günlüğü veya kaynaklı veri okuması içerik başlangıcın olabilir. Eğitim içeriği, kişiye özel yatırım danışmanlığı yetkisi vermez.", en: "Explain the reasoning, risk and invalidation behind a decision rather than just showing profits. A process journal or sourced data analysis can be a starting point. Educational content does not grant authority to offer personalised investment advice." },
+    "pg.influencer.niche.1.h": { tr: "Eğitmen / teknoloji / uzmanlık", en: "Education / technology / expertise" },
+    "pg.influencer.niche.1.p": { tr: "Küçük bir problemi adım adım çöz: bir araç kullanımı, kod örneği veya anlaşılır bir konu anlatımı. Bu içerikler portföy, eğitim veya uzmanlığına uygun bir hizmet için referans olabilir.", en: "Solve a small problem step by step: a tool walkthrough, code example or clear explanation. These posts can serve as references for a portfolio, education or services within your expertise." },
+    "pg.influencer.niche.2.h": { tr: "Bağımsız içerik üreticisi", en: "Independent creator" },
+    "pg.influencer.niche.2.p": { tr: "İlgi alanını tekrar edilebilir bir formata dönüştür: inceleme, deney, yorum veya hikâye. Okurun neden geri geleceğini netleştir; ardından uygun ürün, iş birliği veya topluluk fikrini test et.", en: "Turn an interest into a repeatable format: reviews, experiments, commentary or stories. Clarify why readers should return, then test a suitable product, collaboration or community idea." },
+    "pg.influencer.jump.why": { tr: "Ne kazandırabilir?", en: "What could you gain?" },
+    "pg.influencer.jump.stories": { tr: "Fırsat senaryoları", en: "Opportunity scenarios" },
+    "pg.influencer.jump.packages": { tr: "Paketleri karşılaştır", en: "Compare packages" },
+    "pg.influencer.value.h": { tr: "Neden içerik üretmelisin?", en: "Why create content?" },
+    "pg.influencer.value.intro": { tr: "Herkes fenomen olmak zorunda değil. Ama bildiğin şeyler yalnızca sende kalırsa, o bilgiden yararlanabilecek insanlar seni bulamayabilir. Hedef büyük görünmek değil; doğru insanlar için faydalı ve güvenilir olmaktır.", en: "Not everyone needs to become an influencer. But if your knowledge stays private, people who could benefit from it may never find you. The aim is not to look big, but to be useful and trustworthy to the right people." },
+    "pg.influencer.now.h": { tr: "Yeni dünyada neden önemli?", en: "Why does it matter now?" },
+    "pg.influencer.now.p": { tr: "İçerik üretmek kolaylaştıkça yalnızca çok paylaşmak ayrıştırıcı olmayabilir. Kendi deneyimin, kaynaklarını göstermen ve bir konuda tutarlı biçimde fayda üretmen daha sağlam bir zemin sunar. Algoritmaya bağımlılığı azaltmak için izinli iletişim kanalları da düşün.", en: "As publishing becomes easier, posting more may not be enough to stand out. First-hand experience, transparent sources and consistent usefulness offer a stronger foundation. Consider opt-in contact channels to reduce reliance on algorithms." },
+    "pg.influencer.now.practical": { tr: "Marka açısından soru sadece “kaç takipçisi var?” değil: “Benim ulaşmak istediğim insanlara, güvenilir bir şekilde ulaşabiliyor mu?” Bu yüzden kendi alanında ilgili bir topluluk kurmak, rastgele büyümekten daha anlamlı bir hedef olabilir.", en: "A brand’s question is not only how many followers you have, but whether you can reach relevant people credibly. A focused community can therefore be a more meaningful goal than growth without direction." },
+    "pg.influencer.outcomes.h": { tr: "ALFALUENCE’ta neyi hedefliyoruz?", en: "What are we working towards in ALFALUENCE?" },
+    "pg.influencer.outcomes.note": { tr: "Üzerinde çalışacağımız hedefler bunlar; hazır müşteri, sponsor, belirli bir gelir veya takipçi sözü değil. Bireysel görüşme ve destek kapsamı seçtiğin pakete bağlı.", en: "These are working goals, not promises of clients, sponsors, a particular income or follower count. Individual sessions and support depend on your chosen package." },
+    "pg.influencer.stories.h": { tr: "Türkiye’de bu iş nasıl fırsata dönüşebilir?", en: "How could this create opportunities in Turkey?" },
+    "pg.influencer.stories.intro": { tr: "Aşağıdakiler örnek senaryolardır; gerçekleşmiş anlaşma veya ALFALUENCE’ın sağladığı ayrıcalıklar değildir. İş birlikleri; markanın koşullarına, kitlenin uygunluğuna, mevzuata ve sözleşmeye bağlıdır.", en: "The following are illustrative scenarios, not completed deals or privileges provided by ALFALUENCE. Collaborations depend on brand terms, audience fit, applicable rules and contracts." },
+    "pg.influencer.stories.note": { tr: "Bu eğitim bir prop firm hesabı, borsa anlaşması, sponsorluk veya müşteri sağlamaz. Amaç; böyle fırsatlar için anlatımını, profilini ve içerik üretimini geliştirmektir. Ücretli ilişkiler açıklanmalı; finans alanında ilgili kurallara uyulmalıdır.", en: "This programme does not provide a prop firm account, exchange deal, sponsorship or clients. The aim is to improve your communication, profile and content in preparation for such opportunities. Disclose paid relationships and follow applicable financial rules." },
+    "pg.influencer.path.h": { tr: "Senin alanında nasıl görünebilir?", en: "What could this look like in your niche?" },
+    "app.influencer": { tr: "🚀 ALFALUENCE", en: "🚀 ALFALUENCE" },
+    "pg.influencer.hc": { tr: "Bilgini görünür kıl; güven, topluluk ve yeni fırsatlar oluştur.", en: "Make your expertise visible; build trust, community and new opportunities." },
+    "pg.influencer.t": { tr: "ALFALUENCE", en: "ALFALUENCE" },
+    "pg.influencer.s": { tr: "Sesini bul. Kitleni oluştur.", en: "Find your voice. Build your audience." },
     'pg.influencer.check': { tr: 'Başlangıç kontrol listesi', en: 'Getting-started checklist' },
     'pg.influencer.checkS': { tr: 'Sırayla tamamla. İşaretler bu tarayıcıda saklanır.', en: 'Work through them in order. Your ticks are saved in this browser.' },
     'pg.influencer.reset': { tr: 'Sıfırla', en: 'Reset' },

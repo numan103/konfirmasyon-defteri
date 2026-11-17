@@ -134,15 +134,33 @@ test('konu taslağı HTML içinde yok, sadece admin API üzerinden yüklenir', (
 });
 
 test('sosyal önizleme için middleware sayfa başlığı var', () => {
-  assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — Kitle Atölyesi'/);
+  assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — ALFALUENCE'/);
 });
 
-test('Kitle Atölyesi kripto dışındaki içerik üreticilerine de hitap eder', () => {
-  assert.match(html, /data-i18n="app\.influencer">🚀 Kitle Atölyesi/);
-  assert.match(html, /data-i18n="pg\.influencer\.t">Kitle Atölyesi/);
+test('ALFALUENCE kripto dışındaki içerik üreticilerine de hitap eder', () => {
+  assert.match(html, /data-i18n="app\.influencer">🚀 ALFALUENCE/);
+  assert.match(html, /data-i18n="pg\.influencer\.t">ALFALUENCE/);
   assert.match(html, /Kripto veya FX trader’ı, eğitmen, teknoloji meraklısı/);
-  assert.match(html, /Audience Studio/);
+  assert.match(html, /Find your voice\. Build your audience/);
   assert.ok(!html.includes('>Kripto Influencer<'));
+});
+
+test('fayda, hedef ve Türkiye odaklı senaryolar paketlerden önce anlatılır', () => {
+  const section = html.slice(html.indexOf('<div id="page-influencer"'), html.indexOf('<div id="page-mentoring"'));
+  const stages = ['inf-opportunities', 'inf-outcomes', 'inf-real-world', 'inf-your-path', 'inf-packages'];
+  let previous = -1;
+  for (const id of stages) {
+    const position = section.indexOf('id="' + id + '"');
+    assert.ok(position > previous, 'out of order or missing: ' + id);
+    previous = position;
+  }
+  assert.equal((section.match(/class="inf-benefit"/g) || []).length, 6);
+  assert.equal((section.match(/class="inf-story"/g) || []).length, 4);
+  for (const topic of ['Prop firm ile kampanya', 'Borsa ile içerik iş birliği', 'Marka sponsorluğu', 'müşteri ve proje talebi']) assert.ok(section.includes(topic));
+  assert.match(section, /örnek senaryolardır; gerçekleşmiş anlaşma/);
+  assert.match(section, /bir prop firm hesabı, borsa anlaşması, sponsorluk veya müşteri sağlamaz/);
+  assert.match(section, /reklam\/komisyon ilişkisini açıkça belirt/);
+  for (const foreign of ['Justin Welsh', 'Ali Abdaal', 'Ben Felix']) assert.ok(!section.includes(foreign));
 });
 
 test('gerçek gönderiler eşit boyutlu, kaydırılabilir ve devam bağlantılıdır', () => {

@@ -1,6 +1,10 @@
-# Kitle Atölyesi: ödeme onayı kurulumu
+# ALFALUENCE: ödeme onayı kurulumu
 
 Kapsam: kripto/FX trader'ları, eğitmenler ve farklı alanlarda içerik üretenler.
+Sayfa akışı: kişisel marka faydaları → çalışma hedefleri → Türkiye odaklı
+prop firm/borsa/marka/freelance senaryoları → alana göre uygulama → paketler.
+Bu senaryolar gerçek anlaşmalar, mezun sonuçları veya sağlanan ayrıcalıklar
+gibi sunulmaz. Yeni gelir, müşteri veya sponsorluk garantisi verilmez.
 Mevcut `?page=influencer` bağlantısı ve erişim anahtarları geriye uyumluluk için korunur.
 Gerçek gönderi kartları eşit 440px yüksekliğindedir; önizleme içinde kaydırılabilir,
 “Devamını gör” bağlantısıyla X üzerindeki tam gönderi açılır.
