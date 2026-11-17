@@ -5089,8 +5089,29 @@
   .inf-warn { border-color: rgba(251,113,133,.45); background: var(--pc-soft); }
   .inf-warn h2 { color: #fb7185; }
   .inf-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .inf-teaser { border-color: var(--pc); }
+  .inf-video { position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #000; margin: 12px 0 18px; }
+  .inf-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .inf-sub { margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--text); }
+  .inf-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .inf-plan { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: var(--input-bg); }
+  .inf-plan.featured { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc), 0 8px 28px var(--pc-soft); }
+  .inf-plan-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .inf-plan-price { font-size: 26px; font-weight: 800; color: var(--pc); margin: 8px 0 2px; }
+  .inf-plan-period { font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
+  .inf-plan-feats { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .inf-plan-feats li { position: relative; padding-left: 16px; font-size: 11.5px; line-height: 1.45; color: var(--text-2); }
+  .inf-plan-feats li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 800; }
+  .inf-plan-buy { display: block; text-align: center; text-decoration: none; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 700; background: var(--pc); color: #fff; }
+  .inf-plan-buy:hover { filter: brightness(1.1); }
+  .inf-plan-note { font-size: 10.5px; color: var(--text-3); margin-top: 8px; }
+  .inf-code { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .inf-code input { flex: 1; min-width: 180px; padding: 9px 11px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text); font: inherit; font-size: 12.5px; }
+  .inf-code-msg { font-size: 11.5px; margin-top: 8px; color: var(--amber); }
+  .inf-locked-note { font-size: 11.5px; color: var(--text-3); margin: 0 0 12px; }
   @media (max-width: 900px) {
     .inf-grid { grid-template-columns: 1fr; }
+    .inf-plans { grid-template-columns: 1fr; }
   }
   </style>
   <script>
@@ -7555,6 +7576,61 @@
       <span class="eg-brand-name" data-i18n="pg.influencer.t">Kripto Influencer</span>
       <span class="eg-brand-sub" data-i18n="pg.influencer.s">X (Twitter)'da profilini kur, güvenilir içerik üret, takipçini büyüt.</span>
     </div>
+
+    <div id="inf-teaser" class="inf-card inf-teaser">
+      <h2 data-i18n="pg.influencer.promo.h">Kripto Influencer programı</h2>
+      <p data-i18n="pg.influencer.promo.s">X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.</p>
+      <div class="inf-video">
+        <iframe src="https://www.youtube.com/embed/MOKNqsj6WfU" title="Kripto Influencer tanıtım videosu" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <h3 class="inf-sub" data-i18n="pg.influencer.plans.h">Paketleri gör</h3>
+      <div class="inf-plans">
+        <div class="inf-plan">
+          <div class="inf-plan-name" data-i18n="pg.influencer.p1.name">Kütüphane</div>
+          <div class="inf-plan-price">1.990₺</div>
+          <div class="inf-plan-period" data-i18n="pg.influencer.p1.period">tek ödeme · ömür boyu erişim</div>
+          <ul class="inf-plan-feats">
+            <li data-i18n="pg.influencer.p1.f1">Eğitim videoları</li>
+            <li data-i18n="pg.influencer.p1.f2">Başlangıç kontrol listesi</li>
+            <li data-i18n="pg.influencer.p1.f3">İçerik fikirleri listesi</li>
+          </ul>
+          <a class="inf-plan-buy" href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.buy">Satın al ↗</a>
+        </div>
+        <div class="inf-plan featured">
+          <div class="inf-plan-name" data-i18n="pg.influencer.p2.name">Uygulama</div>
+          <div class="inf-plan-price">3.490₺</div>
+          <div class="inf-plan-period" data-i18n="pg.influencer.p2.period">tek ödeme · 30 gün</div>
+          <ul class="inf-plan-feats">
+            <li data-i18n="pg.influencer.p2.f1">Kütüphane'deki her şey</li>
+            <li data-i18n="pg.influencer.p2.f2">Eğitsel içerikler ve şablonlar</li>
+            <li data-i18n="pg.influencer.p2.f3">4× bireysel soru-cevap</li>
+            <li data-i18n="pg.influencer.p2.f4">1 profil incelemesi</li>
+          </ul>
+          <a class="inf-plan-buy" href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.buy">Satın al ↗</a>
+        </div>
+        <div class="inf-plan">
+          <div class="inf-plan-name" data-i18n="pg.influencer.p3.name">Büyüme 1-1</div>
+          <div class="inf-plan-price">6.990₺</div>
+          <div class="inf-plan-period" data-i18n="pg.influencer.p3.period">ilk 1000 takipçiye veya 90 güne kadar</div>
+          <ul class="inf-plan-feats">
+            <li data-i18n="pg.influencer.p3.f1">Uygulama'daki her şey</li>
+            <li data-i18n="pg.influencer.p3.f2">Haftalık 1-1 görüşme</li>
+            <li data-i18n="pg.influencer.p3.f3">İçerik onayı ve kişisel tavsiyeler</li>
+            <li data-i18n="pg.influencer.p3.f4">İçerik fikirleri ve hesap denetimi</li>
+          </ul>
+          <p class="inf-plan-note" data-i18n="pg.influencer.p3.note">Hangisi önce gelirse: 1000 takipçi veya 90 gün.</p>
+          <a class="inf-plan-buy" href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" data-i18n="pg.influencer.buy">Satın al ↗</a>
+        </div>
+      </div>
+      <div class="inf-code">
+        <input type="text" id="inf-code-input" data-i18n-ph="pg.influencer.code.ph" placeholder="Erişim kodun" autocomplete="off">
+        <button type="button" class="btn solid" id="inf-code-btn" data-i18n="pg.influencer.code.btn">Kilidi aç</button>
+      </div>
+      <div class="inf-code-msg" id="inf-code-msg"></div>
+    </div>
+
+    <div id="inf-full" class="hidden">
+    <p class="inf-locked-note" data-i18n="pg.influencer.unlockedNote">Tam erişim açık — aşağıdaki çalışma alanı paketine özel.</p>
     <div class="inf-grid">
       <div>
         <div class="inf-card">
@@ -7601,6 +7677,7 @@
           <p data-i18n="pg.influencer.warnp">Satın alınan takipçi, bot etkileşim ve garantili getiri vaadi hesabını uzun vadede bitirir. Bu sayfa yatırım tavsiyesi değildir.</p>
         </div>
       </div>
+    </div>
     </div>
   </div>
   <div id="page-mentoring" class="hidden">
@@ -12271,12 +12348,41 @@ function renderEk() {
 }
 
 const INF_CHECK_KEY = 'alfa-influencer-check-v1';
+const INF_UNLOCK_KEY = 'alfa-influencer-pro-v1';
+// Demo erisim kodu: geri odeme altyapisi gelene kadar manuel acilis icin.
+const INF_UNLOCK_CODE = 'ALFA-INF-2026';
 const INF_ITEMS = [
   'pg.influencer.c1', 'pg.influencer.c2', 'pg.influencer.c3', 'pg.influencer.c4',
   'pg.influencer.c5', 'pg.influencer.c6', 'pg.influencer.c7', 'pg.influencer.c8',
 ];
 
+function infUnlocked() {
+  if (typeof siteIsAdmin === 'function' && siteIsAdmin()) return true;
+  try { return localStorage.getItem(INF_UNLOCK_KEY) === '1'; } catch (e) { return false; }
+}
+
 function renderInfluencer() {
+  const teaser = document.getElementById('inf-teaser');
+  const full = document.getElementById('inf-full');
+  const unlocked = infUnlocked();
+  if (teaser) teaser.classList.toggle('hidden', unlocked);
+  if (full) full.classList.toggle('hidden', !unlocked);
+  const msg = document.getElementById('inf-code-msg');
+  if (msg) msg.textContent = '';
+  if (!unlocked) {
+    const input = document.getElementById('inf-code-input');
+    const btn = document.getElementById('inf-code-btn');
+    if (btn) btn.onclick = function () {
+      const val = ((input && input.value) || '').trim().toUpperCase();
+      if (val === INF_UNLOCK_CODE) {
+        try { localStorage.setItem(INF_UNLOCK_KEY, '1'); } catch (e) {}
+        renderInfluencer();
+      } else if (msg) {
+        msg.textContent = (typeof t === 'function') ? t('pg.influencer.code.bad') : 'Kod geçersiz.';
+      }
+    };
+    return;
+  }
   const box = document.getElementById('inf-checks');
   if (!box) return;
   let done = [];
@@ -29650,6 +29756,32 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
+    'pg.influencer.promo.h': { tr: 'Kripto Influencer programı', en: 'Crypto Influencer programme' },
+    'pg.influencer.promo.s': { tr: 'X profilini sıfırdan kurup ilk 1000 takipçiye giden yolu 3 pakette anlatıyoruz. Tanıtımı izle, sana uygun paketi seç.', en: 'Three packages take you from a blank X profile to your first 1,000 followers. Watch the intro and pick your package.' },
+    'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
+    'pg.influencer.buy': { tr: 'Satın al ↗', en: 'Buy ↗' },
+    'pg.influencer.unlockedNote': { tr: 'Tam erişim açık — aşağıdaki çalışma alanı paketine özel.', en: 'Full access is open — the workspace below is for package members.' },
+    'pg.influencer.p1.name': { tr: 'Kütüphane', en: 'Library' },
+    'pg.influencer.p1.period': { tr: 'tek ödeme · ömür boyu erişim', en: 'one-time · lifetime access' },
+    'pg.influencer.p1.f1': { tr: 'Eğitim videoları', en: 'Training videos' },
+    'pg.influencer.p1.f2': { tr: 'Başlangıç kontrol listesi', en: 'Getting-started checklist' },
+    'pg.influencer.p1.f3': { tr: 'İçerik fikirleri listesi', en: 'Content idea list' },
+    'pg.influencer.p2.name': { tr: 'Uygulama', en: 'Apply' },
+    'pg.influencer.p2.period': { tr: 'tek ödeme · 30 gün', en: 'one-time · 30 days' },
+    'pg.influencer.p2.f1': { tr: 'Kütüphanedeki her şey', en: 'Everything in Library' },
+    'pg.influencer.p2.f2': { tr: 'Eğitsel içerikler ve şablonlar', en: 'Learning materials and templates' },
+    'pg.influencer.p2.f3': { tr: '4× bireysel soru-cevap', en: '4× one-to-one Q&A' },
+    'pg.influencer.p2.f4': { tr: '1 profil incelemesi', en: '1 profile review' },
+    'pg.influencer.p3.name': { tr: 'Büyüme 1-1', en: 'Growth 1-1' },
+    'pg.influencer.p3.period': { tr: 'ilk 1000 takipçiye veya 90 güne kadar', en: 'until 1,000 followers or 90 days' },
+    'pg.influencer.p3.f1': { tr: 'Uygulamadaki her şey', en: 'Everything in Apply' },
+    'pg.influencer.p3.f2': { tr: 'Haftalık 1-1 görüşme', en: 'Weekly 1-1 call' },
+    'pg.influencer.p3.f3': { tr: 'İçerik onayı ve kişisel tavsiyeler', en: 'Content sign-off and personal advice' },
+    'pg.influencer.p3.f4': { tr: 'İçerik fikirleri ve hesap denetimi', en: 'Content ideas and account audit' },
+    'pg.influencer.p3.note': { tr: 'Hangisi önce gelirse: 1000 takipçi veya 90 gün.', en: 'Whichever comes first: 1,000 followers or 90 days.' },
+    'pg.influencer.code.ph': { tr: 'Erişim kodun', en: 'Your access code' },
+    'pg.influencer.code.btn': { tr: 'Kilidi aç', en: 'Unlock' },
+    'pg.influencer.code.bad': { tr: 'Kod geçersiz.', en: 'Invalid code.' },
     'app.influencer': { tr: '🚀 Influencer', en: '🚀 Influencer' },
     'pg.influencer.hc': { tr: 'X (Twitter) profilini kur, içerik üret, takipçini büyüt.', en: 'Build your X (Twitter) profile, publish content, grow your audience.' },
     'pg.influencer.t': { tr: 'Kripto Influencer', en: 'Crypto Influencer' },

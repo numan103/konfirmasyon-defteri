@@ -40,6 +40,27 @@ test('sayfa metinleri Türkçe ve İngilizce sözlükte tanımlı', () => {
   }
 });
 
+test('tanıtım videosu ve 3 paket herkese açık, tam içerik kilitli', () => {
+  assert.ok(html.includes('id="inf-teaser"'));
+  assert.ok(html.includes('id="inf-full" class="hidden"'));
+  assert.match(html, /<iframe[^>]+youtube\.com\/embed\//);
+  for (const price of ['1.990₺', '3.490₺', '6.990₺']) assert.ok(html.includes(price), 'missing price: ' + price);
+  assert.match(html, /pg\.influencer\.p3\.note/);
+  assert.match(html, /1000 takipçi/);
+  assert.match(html, /90 gün/);
+  assert.match(html, /id="inf-code-input"/);
+  assert.match(html, /id="inf-code-btn"/);
+});
+
+test('kilit admin veya erişim koduyla açılır', () => {
+  assert.match(html, /function infUnlocked\(\)/);
+  assert.match(html, /siteIsAdmin\(\)/);
+  assert.match(html, /localStorage\.getItem\(INF_UNLOCK_KEY\)/);
+  assert.match(html, /localStorage\.setItem\(INF_UNLOCK_KEY, '1'\)/);
+  assert.match(html, /teaser\.classList\.toggle\('hidden', unlocked\)/);
+  assert.match(html, /full\.classList\.toggle\('hidden', !unlocked\)/);
+});
+
 test('sosyal önizleme için middleware sayfa başlığı var', () => {
   assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — Kripto Influencer'/);
 });
