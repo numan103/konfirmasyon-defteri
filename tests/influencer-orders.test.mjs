@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from '../api/influencer.mjs';
+import { influencerHandler as handler } from '../api/ai.mjs';
 
 const txid = 'a'.repeat(64);
 async function call(req = {}) {

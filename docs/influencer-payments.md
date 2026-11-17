@@ -34,5 +34,5 @@ Telegram gönderimi başarısız olsa da kayıt özel admin panelinde kalır.
   henüz eğitim-video dağıtım sistemi değildir.
 - İptal/iade koşulları ve görüşme süreleri henüz belirtilmedi; ödeme öncesi
   Telegram'dan teyit edilmesi gerektiği yazılıdır.
-- Özel konu taslağı `/api/influencer?op=outline` içinde tutulur; anonim ve premium
+- Özel konu taslağı `/api/ai?influencer=1&op=outline` içinde tutulur; anonim ve premium
   kullanıcıya `401/403` döner, public HTML'ye gömülmez.

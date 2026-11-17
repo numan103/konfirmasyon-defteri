@@ -12393,7 +12393,7 @@ let infRequest = 0;
 function infUnlocked() { return siteIsAdmin() || infAccess; }
 function infText(key) { return typeof t === 'function' ? t('pg.influencer.' + key) : key; }
 async function infApi(path = '', body) {
-  const res = await siteFetch('/api/influencer' + path, body ? {
+  const res = await siteFetch('/api/ai?influencer=1' + path.replace(/^\?/, '&'), body ? {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   } : {});
   const data = await res.json();

@@ -62,7 +62,7 @@ test('erişim kodu yok; kilit sunucu onayı veya admin ile açılır', () => {
   assert.ok(!html.includes('ALFA-INF-2026'));
   assert.ok(!html.includes('inf-code-input'));
   assert.match(html, /infAccess = !!data.unlocked/);
-  assert.match(html, /siteFetch\('\/api\/influencer'/);
+  assert.match(html, /siteFetch\('\/api\/ai\?influencer=1'/);
   assert.match(html, /teaser\.classList\.toggle\('hidden', unlocked\)/);
   assert.match(html, /full\.classList\.toggle\('hidden', !unlocked\)/);
 });
