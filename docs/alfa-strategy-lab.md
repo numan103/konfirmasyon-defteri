@@ -174,4 +174,31 @@ to 100 revisions; no destructive truncation. Bootstrap confidence intervals and
 out-of-sample split tooling are optional and **not implemented** in this release.
 No automatic trading or optimization algorithms.
 
-Production status is recorded after release verification below.
+## Release / production
+
+- Model/scenario commit: `7a06809`.
+- Data-safety follow-up: `0906489`.
+- Published application integration: **`0d9fc97`**.
+- Clean `git archive` release excluded the unrelated Access working-tree edits.
+  **566/566 Node tests PASS**, no skips.
+- Deployment **`dpl_4b9b9mXWJ6Lkuy3Cbq3Ju9qhW1e4`**, **READY**,
+  production alias **https://alfa-trader.com**.
+- Cache versions: entrypoint `alfa-charts.mjs?v=22`, Paper `?v=3`,
+  shared Tester UI `?v=2`, CSS `?v=9`; new Lab modules `?v=1`.
+- Production real Chrome acceptance repeated successfully:
+  **Lab PASS**, **Strategy Tester PASS**, **Paper PASS**, **4,000-candle Replay
+  PASS**, **14/14 drawing scenarios PASS**. No page errors / real order requests;
+  Lab and Tester also recorded zero image uploads.
+- Lab production acceptance included real BTC/15m and ETH/1h trades, archived
+  cross-market cohorts, pre-entry/retrospective revision selection and rewind,
+  scoped save/reload, original manual-close RR scenarios, storage failure/retry,
+  responsive layout and simulated owner isolation.
+- Price-path hit/collision/gap and missing-data edge cases are exact fixed unit
+  fixtures; they are not falsely claimed to have all occurred in the historical
+  browser trades. Authenticated account switching is still unverified.
+- All browser profiles were disposable guests; no authenticated user drawing
+  database rows were modified. Screenshot:
+  `%LOCALAPPDATA%/Temp/opencode/alfa-lab-production.png` (outside the repository).
+
+The Access working-tree assertion remains a separate known failure; it was not
+hidden, suppressed or “fixed” by changing an assertion for this release.
