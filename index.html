@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -129,6 +129,7 @@
   body[data-page="alfatrading"] { --pc: #2aabee; --pc-soft: rgba(42,171,238,.16); --glow-a: rgba(42,171,238,.18); --glow-b: rgba(14,165,233,.10); }
   body[data-page="karne"] { --pc: #a3e635; --pc-soft: rgba(163,230,53,.16); --glow-a: rgba(163,230,53,.20); --glow-b: rgba(132,204,22,.10); }
   body[data-page="uyap"] { --pc: #f59e0b; --pc-soft: rgba(245,158,11,.16); --glow-a: rgba(245,158,11,.18); --glow-b: rgba(217,119,6,.10); }
+  body[data-page="influencer"] { --pc: #e879f9; --pc-soft: rgba(232,121,249,.16); --glow-a: rgba(232,121,249,.18); --glow-b: rgba(168,85,247,.10); }
   .wrap { max-width: 1060px; margin: 0 auto; padding: 0 14px; }
 
   .tophead { padding: 18px 0 4px; }
@@ -5063,6 +5064,34 @@
   .ana-click { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text-2); }
   .ana-click em { font-style:normal; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:#38bdf8; }
   .ana-click small { color:var(--text-3); font-size:10.5px; margin-left:auto; white-space:nowrap; }
+  /* Influencer / X (Twitter) buyutme sayfasi */
+  .inf-head { margin-bottom: 16px; }
+  .inf-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; }
+  .inf-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .inf-card h2 { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--text); }
+  .inf-card p { margin: 0 0 10px; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
+  .inf-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .inf-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; }
+  .inf-bar > i { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--pc); transition: width .2s ease; }
+  .inf-count { font-size: 12px; font-weight: 700; color: var(--pc); min-width: 34px; text-align: right; }
+  .inf-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); cursor: pointer; min-height: 40px; margin-bottom: 8px; }
+  .inf-check:hover { border-color: var(--pc); }
+  .inf-check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--pc); flex: 0 0 auto; }
+  .inf-check span { font-size: 12.5px; line-height: 1.45; color: var(--text-2); }
+  .inf-check.done span { text-decoration: line-through; opacity: .55; }
+  .inf-road { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .inf-step { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--input-bg); }
+  .inf-step b { display: block; font-size: 12.5px; color: var(--pc); margin-bottom: 5px; }
+  .inf-step span { font-size: 11.5px; line-height: 1.5; color: var(--text-2); }
+  .inf-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .inf-list li { position: relative; padding-left: 20px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
+  .inf-list li::before { content: '→'; position: absolute; left: 0; top: 0; color: var(--pc); font-weight: 800; }
+  .inf-warn { border-color: rgba(251,113,133,.45); background: var(--pc-soft); }
+  .inf-warn h2 { color: #fb7185; }
+  .inf-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  @media (max-width: 900px) {
+    .inf-grid { grid-template-columns: 1fr; }
+  }
   </style>
   <script>
   // Portfolio data is loaded from the shared server record, never seeded here.
@@ -5607,6 +5636,7 @@
         </div>
       </div>
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
+      <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Influencer</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
       <div class="nav-drop">
         <button type="button" class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</button>
@@ -5669,6 +5699,7 @@
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
+      <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Influencer</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
@@ -6009,6 +6040,10 @@
         <a href="?page=calendar" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv8)"/><rect x="96" y="24" width="108" height="72" rx="9" fill="var(--card)" stroke="var(--border)"/><rect x="96" y="24" width="108" height="18" rx="9" fill="var(--pc)" opacity=".8"/><g fill="var(--border)"><rect x="106" y="50" width="14" height="10" rx="2"/><rect x="126" y="50" width="14" height="10" rx="2"/><rect x="146" y="50" width="14" height="10" rx="2"/><rect x="166" y="50" width="14" height="10" rx="2"/><rect x="106" y="66" width="14" height="10" rx="2"/><rect x="146" y="66" width="14" height="10" rx="2"/><rect x="166" y="66" width="14" height="10" rx="2"/></g><rect x="126" y="66" width="14" height="10" rx="2" fill="#f5a623"/><path d="M150 80 l2 4 5 .6 -3.5 3.4 .8 5 -4.3 -2.3 -4.3 2.3 .8 -5 -3.5 -3.4 5 -.6 z" fill="#f5a623"/></svg></div>
           <div class="hc-body"><h2>📅 Ekonomik Takvim</h2><p>3 yıldızlı yüksek etkili makro haberleri kaçırma.</p></div>
+        </a>
+        <a href="?page=influencer" class="home-card" data-nav>
+          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvInf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvInf)"/><circle cx="150" cy="54" r="26" fill="var(--card)" stroke="var(--pc)" stroke-width="2"/><path d="M139 58l11-11 11 11-11 11z" fill="none" stroke="var(--pc)" stroke-width="2.4" stroke-linejoin="round"/><circle cx="150" cy="58" r="3.4" fill="var(--pc)"/><path d="M82 92h136" stroke="var(--pc)" stroke-width="2" stroke-linecap="round" opacity=".55"/><circle cx="104" cy="47" r="3" fill="var(--pc)" opacity=".7"/><circle cx="196" cy="47" r="3" fill="var(--pc)" opacity=".7"/></svg></div>
+          <div class="hc-body"><h2 data-i18n="app.influencer">🚀 Influencer</h2><p data-i18n="pg.influencer.hc">X (Twitter) profilini kur, içerik üret, takipçini büyüt.</p></div>
         </a>
   </div>
 </div>
@@ -7514,6 +7549,60 @@
   </div>
 </div>
 
+  <div id="page-influencer" class="hidden">
+    <div class="eg-brand">
+      <span class="eg-brand-ico">🚀</span>
+      <span class="eg-brand-name" data-i18n="pg.influencer.t">Kripto Influencer</span>
+      <span class="eg-brand-sub" data-i18n="pg.influencer.s">X (Twitter)'da profilini kur, güvenilir içerik üret, takipçini büyüt.</span>
+    </div>
+    <div class="inf-grid">
+      <div>
+        <div class="inf-card">
+          <h2 data-i18n="pg.influencer.check">Başlangıç kontrol listesi</h2>
+          <p data-i18n="pg.influencer.checkS">Sırayla tamamla. İşaretler bu tarayıcıda saklanır.</p>
+          <div class="inf-progress">
+            <div class="inf-bar"><i id="inf-bar"></i></div>
+            <div class="inf-count" id="inf-count">0/8</div>
+          </div>
+          <div id="inf-checks"></div>
+          <div class="inf-actions"><button type="button" class="btn" id="inf-reset" data-i18n="pg.influencer.reset">Sıfırla</button></div>
+        </div>
+        <div class="inf-card">
+          <h2 data-i18n="pg.influencer.ideas">İçerik fikirleri</h2>
+          <ul class="inf-list">
+            <li data-i18n="pg.influencer.idea1">Günlük 3 satır: ne oldu, neden önemli, neyi izleyeceksin.</li>
+            <li data-i18n="pg.influencer.idea2">Bir grafiği 3 renkle anlat: destek, direnç, senin senaryon.</li>
+            <li data-i18n="pg.influencer.idea3">Haber öncesi risk notu: saat, beklenti, hesabındaki kısıt.</li>
+            <li data-i18n="pg.influencer.idea4">Yaptığın bir hatayı ders olarak paylaş, sonucu gizleme.</li>
+            <li data-i18n="pg.influencer.idea5">Her gönderide kaynak, veri ve saat dilimini belirt.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="inf-card">
+          <h2 data-i18n="pg.influencer.road">30 günlük yol haritası</h2>
+          <div class="inf-road">
+            <div class="inf-step"><b data-i18n="pg.influencer.w1t">1. Hafta — Profil</b><span data-i18n="pg.influencer.w1d">Fotoğraf, biyografi, 3 sabitlenen gönderi; 10 kişiden geri bildirim al.</span></div>
+            <div class="inf-step"><b data-i18n="pg.influencer.w2t">2. Hafta — Ritim</b><span data-i18n="pg.influencer.w2d">Günde 1 kısa gönderi, haftada 1 derin analiz; saatleri sabitle.</span></div>
+            <div class="inf-step"><b data-i18n="pg.influencer.w3t">3. Hafta — Etkileşim</b><span data-i18n="pg.influencer.w3d">5 kişiyle anlamlı sohbet, 1 thread; gelen sorulara cevap ver.</span></div>
+            <div class="inf-step"><b data-i18n="pg.influencer.w4t">4. Hafta — Ölçüm</b><span data-i18n="pg.influencer.w4d">En çok kaydedilen gönderiyi bul, aynı formatı tekrarla.</span></div>
+          </div>
+        </div>
+        <div class="inf-card">
+          <h2 data-i18n="pg.influencer.metrics">Takip etmen gereken 3 şey</h2>
+          <ul class="inf-list">
+            <li data-i18n="pg.influencer.metric1">Beğeni değil, kaydetme ve paylaşma oranı.</li>
+            <li data-i18n="pg.influencer.metric2">Profil ziyareti → takip dönüşümü.</li>
+            <li data-i18n="pg.influencer.metric3">Aynı kişilerden gelen tekrar yorumlar: gerçek topluluk işareti.</li>
+          </ul>
+        </div>
+        <div class="inf-card inf-warn">
+          <h2 data-i18n="pg.influencer.warn">Dikkat</h2>
+          <p data-i18n="pg.influencer.warnp">Satın alınan takipçi, bot etkileşim ve garantili getiri vaadi hesabını uzun vadede bitirir. Bu sayfa yatırım tavsiyesi değildir.</p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="page-mentoring" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🤝</span>
@@ -12181,6 +12270,58 @@ function renderEk() {
   }).join('');
 }
 
+const INF_CHECK_KEY = 'alfa-influencer-check-v1';
+const INF_ITEMS = [
+  'pg.influencer.c1', 'pg.influencer.c2', 'pg.influencer.c3', 'pg.influencer.c4',
+  'pg.influencer.c5', 'pg.influencer.c6', 'pg.influencer.c7', 'pg.influencer.c8',
+];
+
+function renderInfluencer() {
+  const box = document.getElementById('inf-checks');
+  if (!box) return;
+  let done = [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(INF_CHECK_KEY) || '[]');
+    if (Array.isArray(raw)) done = raw.filter(n => Number.isInteger(n) && n >= 0 && n < INF_ITEMS.length);
+  } catch (e) {}
+  box.innerHTML = INF_ITEMS.map((key, i) => {
+    const checked = done.includes(i);
+    return '<label class="inf-check' + (checked ? ' done' : '') + '">' +
+      '<input type="checkbox" data-inf-i="' + i + '"' + (checked ? ' checked' : '') + '>' +
+      '<span data-i18n="' + key + '">' + (typeof t === 'function' ? t(key) : '') + '</span></label>';
+  }).join('');
+  const bar = document.getElementById('inf-bar');
+  const count = document.getElementById('inf-count');
+  const paint = () => {
+    const pct = Math.round(done.length / INF_ITEMS.length * 100);
+    if (bar) bar.style.width = pct + '%';
+    if (count) count.textContent = done.length + '/' + INF_ITEMS.length;
+    try { localStorage.setItem(INF_CHECK_KEY, JSON.stringify(done)); } catch (e) {}
+  };
+  box.onchange = function (e) {
+    const input = e.target && e.target.closest ? e.target.closest('input[data-inf-i]') : null;
+    if (!input) return;
+    const i = Number(input.getAttribute('data-inf-i'));
+    done = done.filter(n => n !== i);
+    if (input.checked) done.push(i);
+    done.sort((a, b) => a - b);
+    const row = input.closest('.inf-check');
+    if (row) row.classList.toggle('done', input.checked);
+    paint();
+  };
+  const reset = document.getElementById('inf-reset');
+  if (reset) reset.onclick = function () {
+    done = [];
+    box.querySelectorAll('input[data-inf-i]').forEach(input => {
+      input.checked = false;
+      const row = input.closest('.inf-check');
+      if (row) row.classList.remove('done');
+    });
+    paint();
+  };
+  paint();
+}
+
 function init() {
   ensureConfigShape();
   session = autoSession();
@@ -13289,7 +13430,7 @@ const AM_PLAN = [
 // yalnizca arayuzu ve yonlendirmeyi belirler; veri erisimi Supabase RLS + API
 // tarafinda korunur.
 const PAGE_TIER = {
-  home: 'free', calc: 'free', calendar: 'free', erisim: 'free',
+  home: 'free', calc: 'free', calendar: 'free', erisim: 'free', influencer: 'free',
   alfatrading: 'ref',
   trading: 'admin',          // Trading terminali yalnızca yöneticiye görünür
   alfacharts: 'admin',       // Alfa Charts bağlantısı yalnızca yöneticiye görünür
@@ -14398,12 +14539,13 @@ function showPage(name, skipAnim) {
   dtRowFocus = null;
   document.body.dataset.page = name;
   if (name === 'ek') renderEk();
+  if (name === 'influencer') renderInfluencer();
   if (name === 'zaman') zmRender();
   if (name === 'strateji') st2Render();
   // AYNA:BASLA
   if (name === 'ayna') Ayna.render();
   // AYNA:BITIR
-  const pages = ['home', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
+  const pages = ['home', 'influencer', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -29508,6 +29650,42 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
+    'app.influencer': { tr: '🚀 Influencer', en: '🚀 Influencer' },
+    'pg.influencer.hc': { tr: 'X (Twitter) profilini kur, içerik üret, takipçini büyüt.', en: 'Build your X (Twitter) profile, publish content, grow your audience.' },
+    'pg.influencer.t': { tr: 'Kripto Influencer', en: 'Crypto Influencer' },
+    'pg.influencer.s': { tr: "X (Twitter)'da profilini kur, güvenilir içerik üret, takipçini büyüt.", en: 'Set up your X (Twitter) profile, publish trustworthy content, grow your audience.' },
+    'pg.influencer.check': { tr: 'Başlangıç kontrol listesi', en: 'Getting-started checklist' },
+    'pg.influencer.checkS': { tr: 'Sırayla tamamla. İşaretler bu tarayıcıda saklanır.', en: 'Work through them in order. Your ticks are saved in this browser.' },
+    'pg.influencer.reset': { tr: 'Sıfırla', en: 'Reset' },
+    'pg.influencer.c1': { tr: 'Net profil fotoğrafı ve kapak görseli kullan.', en: 'Use a clear profile photo and cover image.' },
+    'pg.influencer.c2': { tr: 'Biyografi: neyi takip ettiğini ve neden güvenilir olduğunu 1 cümlede yaz.', en: 'Bio: in one sentence, say what you follow and why you are credible.' },
+    'pg.influencer.c3': { tr: '3 gönderiyi sabitle: tanışma, en iyi analizin, yol haritan.', en: 'Pin 3 posts: intro, your best analysis, your roadmap.' },
+    'pg.influencer.c4': { tr: 'Haftada en az 5 gönderi planla; aynı saatlerde paylaş.', en: 'Plan at least 5 posts a week and publish at consistent times.' },
+    'pg.influencer.c5': { tr: 'Her analizde kaynak, veri ve saat dilimini belirt.', en: 'Always include the source, data and time zone in your analysis.' },
+    'pg.influencer.c6': { tr: 'Günde 15 dakika yorumlara cevap ver.', en: 'Spend 15 minutes a day replying to comments.' },
+    'pg.influencer.c7': { tr: 'Günlük piyasa notu tut; neyi neden yazdığını kaydet.', en: 'Keep a daily market note; record what you wrote and why.' },
+    'pg.influencer.c8': { tr: 'Takipçi değil, güven ve tutarlılık hedefle.', en: 'Aim for trust and consistency, not follower counts.' },
+    'pg.influencer.ideas': { tr: 'İçerik fikirleri', en: 'Content ideas' },
+    'pg.influencer.idea1': { tr: 'Günlük 3 satır: ne oldu, neden önemli, neyi izleyeceksin.', en: 'Daily 3 lines: what happened, why it matters, what you will watch.' },
+    'pg.influencer.idea2': { tr: 'Bir grafiği 3 renkle anlat: destek, direnç, senin senaryon.', en: 'Explain one chart in 3 colours: support, resistance, your scenario.' },
+    'pg.influencer.idea3': { tr: 'Haber öncesi risk notu: saat, beklenti, hesabındaki kısıt.', en: 'Pre-news risk note: time, expectation, your account restrictions.' },
+    'pg.influencer.idea4': { tr: 'Yaptığın bir hatayı ders olarak paylaş, sonucu gizleme.', en: 'Share a mistake as a lesson; do not hide the outcome.' },
+    'pg.influencer.idea5': { tr: 'Her gönderide kaynak, veri ve saat dilimini belirt.', en: 'Include source, data and time zone in every post.' },
+    'pg.influencer.road': { tr: '30 günlük yol haritası', en: '30-day roadmap' },
+    'pg.influencer.w1t': { tr: '1. Hafta — Profil', en: 'Week 1 — Profile' },
+    'pg.influencer.w1d': { tr: 'Fotoğraf, biyografi, 3 sabitlenen gönderi; 10 kişiden geri bildirim al.', en: 'Photo, bio, 3 pinned posts; get feedback from 10 people.' },
+    'pg.influencer.w2t': { tr: '2. Hafta — Ritim', en: 'Week 2 — Rhythm' },
+    'pg.influencer.w2d': { tr: 'Günde 1 kısa gönderi, haftada 1 derin analiz; saatleri sabitle.', en: 'One short post a day, one deep analysis a week; fix your posting times.' },
+    'pg.influencer.w3t': { tr: '3. Hafta — Etkileşim', en: 'Week 3 — Engagement' },
+    'pg.influencer.w3d': { tr: '5 kişiyle anlamlı sohbet, 1 thread; gelen sorulara cevap ver.', en: 'Five real conversations, one thread; answer the questions you get.' },
+    'pg.influencer.w4t': { tr: '4. Hafta — Ölçüm', en: 'Week 4 — Review' },
+    'pg.influencer.w4d': { tr: 'En çok kaydedilen gönderiyi bul, aynı formatı tekrarla.', en: 'Find your most-saved post and repeat that format.' },
+    'pg.influencer.metrics': { tr: 'Takip etmen gereken 3 şey', en: 'Three things to track' },
+    'pg.influencer.metric1': { tr: 'Beğeni değil, kaydetme ve paylaşma oranı.', en: 'Saves and shares, not likes.' },
+    'pg.influencer.metric2': { tr: 'Profil ziyareti → takip dönüşümü.', en: 'Profile visit → follower conversion.' },
+    'pg.influencer.metric3': { tr: 'Aynı kişilerden gelen tekrar yorumlar: gerçek topluluk işareti.', en: 'Repeat comments from the same people: a real community signal.' },
+    'pg.influencer.warn': { tr: 'Dikkat', en: 'Caution' },
+    'pg.influencer.warnp': { tr: 'Satın alınan takipçi, bot etkileşim ve garantili getiri vaadi hesabını uzun vadede bitirir. Bu sayfa yatırım tavsiyesi değildir.', en: 'Bought followers, bot engagement and guaranteed-return promises will kill your account long term. This page is not investment advice.' },
     'pg.trading.t': { tr: 'Trading Terminali', en: 'Trading Terminal' },
     'pg.trading.s': { tr: 'Canlı grafik burada çalışır (giriş gerekmez). Hesabını/watchlist\'ini bağlamak için aşağıdaki butonla TradingView\'da giriş yap — aynı tarayıcıda girince widget otomatik tanır.', en: 'Live charts work here (no login required). To connect your account/watchlist, sign in to TradingView with the button below — once signed in on the same browser, the widget picks it up automatically.' },
     'pg.trading.loginTv': { tr: '🔑 TradingView\'a giriş', en: '🔑 Sign in to TradingView' },
