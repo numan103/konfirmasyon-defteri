@@ -390,7 +390,7 @@ test('son basarili takvim kopyasi dogrulanir ve 48 saat kullanilir', () => {
 
 test('api/ai rotasi ve GitHub Actions adimi takvimi tetikler', () => {
   const api = fs.readFileSync(new URL('../api/ai.mjs', import.meta.url), 'utf8');
-  assert.match(api, /import economicCalendarHandler from '\.\.\/lib\/economic-calendar\.mjs'/);
+  assert.match(api, /import economicCalendarHandler, \{ mentorshipDailyNewsHandler \} from '\.\.\/lib\/economic-calendar\.mjs'/);
   assert.match(api, /req\.query\?\.calendar === '1'/);
 
   const workflow = fs.readFileSync(new URL('../.github/workflows/news-poll.yml', import.meta.url), 'utf8');
