@@ -24,6 +24,13 @@ const visibility = () => page.evaluate(() => {
 try {
   await page.goto((arg('url') || 'http://127.0.0.1:4173') + '/?page=home');
   await page.waitForFunction(() => typeof applyTierUi === 'function' && document.getElementById('tab-trading'));
+  // Markup must already hide everything, even if init has not resolved access yet.
+  const initial = await visibility();
+  assert.deepEqual(initial, {
+    'tab-trading': false, 'mnav-trading': false,
+    'tab-alfacharts': false, 'mnav-alfacharts': false,
+    'tv-term': false, 'home-quick-terminal': false, 'home-card-terminal': false
+  });
   // Init awaits Supabase session/access; invoke the tier gate directly for a deterministic check.
   await page.evaluate(() => applyTierUi());
   const anon = await visibility();
@@ -45,7 +52,7 @@ try {
   await page.evaluate(() => showPage('trading'));
   assert.equal(await page.evaluate(() => document.body.dataset.page), 'trading');
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, anonymousHidden: anon, adminVisible: admin, pageErrors: errors }));
+  console.log(JSON.stringify({ passed: true, markupHidden: initial, anonymousHidden: anon, adminVisible: admin, pageErrors: errors }));
 } catch (error) {
   console.log(JSON.stringify({ passed: false, error: error.message, pageErrors: errors }));
   process.exitCode = 1;
