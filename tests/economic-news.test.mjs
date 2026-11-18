@@ -61,8 +61,11 @@ test('top news panel is global and sources remain independent with an official l
   assert.ok(html.indexOf('id="economic-news"') < html.indexOf('id="page-home"'));
   assert.match(html, /data-econ-high checked/);
   assert.match(client, /widgets\.tradingview-widget\.com\/w\/tr\/tv-economic-calendar\.js/);
-  assert.match(client, /panel\.open && !document\.hidden/);
-  assert.match(client, /localStorage\.setItem\('alfa-economic-news-open'/);
+  assert.match(client, /!popup\.hidden && !document\.hidden/);
+  assert.match(client, /trigger\.setAttribute\('aria-expanded', 'false'\)/);
+  assert.ok(!client.includes("localStorage.setItem('alfa-economic-news-open'"));
+  assert.match(html, /id="economic-news-popover"[^>]*hidden/);
+  assert.match(client, /event\.key === 'Escape'/);
   assert.ok(!client.includes('innerHTML'));
   assert.ok(!client.includes('contentWindow'));
   assert.ok(!client.includes('Telegram'));

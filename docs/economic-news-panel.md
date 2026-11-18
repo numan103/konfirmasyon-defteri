@@ -1,7 +1,10 @@
 # Üst ekonomik haber paneli
 
-- Fiyat bandının altında, sayfalardan bağımsız açılır panel. İlk kullanımda açık;
-  açık/kapalı tercihi tarayıcıda saklanır.
+- Sağ üstte tema anahtarının yanında takvim ikonu; üzerine gelince sola açılan
+  sayfadan bağımsız popover. Her sayfa yüklenmesinde kapalı başlar; eski açık
+  tercihler dikkate alınmaz. Mobilde dokunarak, klavyede Enter ile açılır.
+  Kapat, Escape, dışarı tıklama veya fareyi uzaklaştırma ile kapanır.
+  Kapalıyken veri isteği yapılmaz ve sağlayıcı iframe'i kaldırılır.
 - Sol: `/api/eco-cal` üzerinden mevcut Forex Factory / Fair Economy haftalık akışı.
   Sadece bugünün TSİ kayıtları; varsayılan yüksek etki, tüm etkiler seçilebilir.
   Türkçe başlık ve orijinali birlikte gösterilir. Sözlükte olmayan başlıkta

@@ -27,8 +27,8 @@
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
-<link rel="stylesheet" href="/assets/economic-news.css?v=1">
-<script type="module" src="/assets/economic-news.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/economic-news.css?v=2">
+<script type="module" src="/assets/economic-news.mjs?v=2"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=4"></script>
 
@@ -5891,8 +5891,13 @@
     <span class="ta" id="ticker-author"></span>
   </div>
   <!-- ECONOMIC_NEWS_PANEL_BEGIN -->
-  <details class="econ-news" id="economic-news">
-    <summary><strong data-i18n="econ.title">📅 Bugünün Haberleri</strong><span class="econ-news-summary" data-econ-summary>Ajanda · Beklenti · Gerçekleşen</span></summary>
+  <div class="econ-news" id="economic-news">
+    <button type="button" class="econ-news-trigger" id="economic-news-trigger" aria-controls="economic-news-popover" aria-expanded="false" data-i18n-title="econ.title" data-i18n-aria="econ.title" title="Bugünün Haberleri" aria-label="Bugünün Haberleri">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2m-8 3h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+    <div id="economic-news-popover" class="econ-news-popover" role="region" aria-labelledby="economic-news-heading" hidden>
+      <div class="econ-news-head"><strong id="economic-news-heading" data-i18n="econ.title">📅 Bugünün Haberleri</strong><button type="button" class="econ-news-close" data-econ-close data-i18n-aria="econ.close" aria-label="Takvimi kapat">✕</button></div>
+      <p class="econ-news-summary" data-econ-summary>Ajanda · Beklenti · Gerçekleşen</p>
     <div class="econ-news-body">
       <div class="econ-news-controls">
         <label><input type="checkbox" data-econ-high checked><span data-i18n="econ.high">Sadece 3 yıldız</span></label>
@@ -5913,7 +5918,8 @@
         </section>
       </div>
     </div>
-  </details>
+    </div>
+  </div>
   <!-- ECONOMIC_NEWS_PANEL_END -->
   <div id="page-home" class="hidden">
     <script>
@@ -30438,6 +30444,7 @@ loadSfx();
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
     // ECONOMIC_NEWS_I18N_BEGIN
     'econ.title': { tr: '📅 Bugünün Haberleri', en: '📅 Today’s Economic News' },
+    'econ.close': { tr: 'Takvimi kapat', en: 'Close calendar' },
     'econ.high': { tr: 'Sadece 3 yıldız', en: 'High impact only' },
     'econ.refresh': { tr: 'Yenile', en: 'Refresh' },
     'econ.agenda': { tr: 'Günün ajandası · EN / TR · TSİ', en: 'Today’s agenda · EN / TR · Istanbul time' },

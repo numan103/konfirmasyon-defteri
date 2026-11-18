@@ -2,13 +2,16 @@ import { todayEvents, istanbulTime } from './economic-news-model.mjs?v=1';
 
 const panel = document.getElementById('economic-news');
 if (panel) {
+  const trigger = panel.querySelector('#economic-news-trigger');
+  const popup = panel.querySelector('#economic-news-popover');
   const list = panel.querySelector('[data-econ-list]');
   const status = panel.querySelector('[data-econ-status]');
   const summary = panel.querySelector('[data-econ-summary]');
   const filter = panel.querySelector('[data-econ-high]');
   const host = panel.querySelector('[data-econ-widget]');
   const widgetStatus = panel.querySelector('[data-econ-widget-status]');
-  let items = [], loadedAt = 0, pending = null, widgetPromise = null;
+  let items = [], loadedAt = 0, pending = null, widgetPromise = null, widgetGeneration = 0;
+  let closeTimer, pinned = false;
   const en = () => window.LANG === 'en';
   const tr = (a, b) => en() ? b : a;
   function element(tag, text, cls) {
@@ -60,6 +63,7 @@ if (panel) {
   }
   async function mountWidget() {
     if (widgetPromise) return widgetPromise;
+    const generation = ++widgetGeneration;
     host.hidden = false;
     widgetPromise = (async () => {
       try {
@@ -73,6 +77,7 @@ if (panel) {
             ]);
           } finally { clearTimeout(timer); }
         }
+        if (generation !== widgetGeneration || popup.hidden) return;
         const widget = element('tv-economic-calendar');
         widget.setAttribute('countries', 'us,eu,gb,ca,au,nz,jp,ch,cn,tr');
         if (filter.checked) widget.setAttribute('high-importance-only', '');
@@ -81,6 +86,7 @@ if (panel) {
         host.replaceChildren(widget);
         widgetStatus.textContent = tr('Kaynak: TradingView. Gerçekleşen / beklenti / önceki değerler sağlayıcıdan gelir; gecikme olabilir. Saat dilimi sonuç takviminin kendi ayarındadır.', 'Source: TradingView. Actual / forecast / previous values come from the provider and may be delayed. The results calendar has its own timezone setting.');
       } catch {
+        if (generation !== widgetGeneration) return;
         widgetPromise = null;
         host.hidden = true;
         widgetStatus.textContent = tr('Sonuç takvimi yüklenemedi veya engellendi. Yenile ile tekrar dene; ajandadaki beklenti sonuç değildir.', 'Results calendar unavailable or blocked. Try Refresh; agenda forecasts are not actual results.');
@@ -89,9 +95,39 @@ if (panel) {
     })();
     return widgetPromise;
   }
-  panel.addEventListener('toggle', () => {
-    try { localStorage.setItem('alfa-economic-news-open', panel.open ? '1' : '0'); } catch {}
-    if (panel.open && panel.getClientRects().length && !document.hidden) { load(); mountWidget(); }
+  function setOpen(open, returnFocus = false) {
+    clearTimeout(closeTimer);
+    popup.hidden = !open;
+    trigger.setAttribute('aria-expanded', String(open));
+    if (open) { load(); mountWidget(); }
+    else {
+      pinned = false;
+      widgetGeneration++; widgetPromise = null;
+      host.replaceChildren(); // Do not leave a provider iframe running while closed.
+      if (returnFocus) trigger.focus();
+    }
+  }
+  trigger.addEventListener('click', () => {
+    if (popup.hidden) { pinned = true; setOpen(true); }
+    else setOpen(false);
+  });
+  panel.addEventListener('pointerenter', event => {
+    if (event.pointerType !== 'mouse' || !matchMedia('(hover: hover)').matches) return;
+    clearTimeout(closeTimer);
+    if (popup.hidden) setOpen(true);
+  });
+  panel.addEventListener('pointerleave', event => {
+    if (event.pointerType !== 'mouse') return;
+    closeTimer = setTimeout(() => {
+      if (!pinned && !popup.contains(document.activeElement)) setOpen(false);
+    }, 220);
+  });
+  panel.querySelector('[data-econ-close]').addEventListener('click', () => setOpen(false, true));
+  document.addEventListener('pointerdown', event => {
+    if (!popup.hidden && !panel.contains(event.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !popup.hidden) { event.preventDefault(); setOpen(false, true); }
   });
   filter.addEventListener('change', () => {
     paint();
@@ -99,20 +135,17 @@ if (panel) {
     if (widget) widget.toggleAttribute('high-importance-only', filter.checked);
   });
   panel.querySelector('[data-econ-refresh]').addEventListener('click', () => {
-    load(true); widgetPromise = null; mountWidget();
+    load(true); widgetGeneration++; widgetPromise = null; mountWidget();
   });
   // No polling while collapsed, hidden, in another tab, or on the landing page.
   setInterval(() => {
-    if (panel.open && !document.hidden && panel.getClientRects().length) load();
+    if (!popup.hidden && !document.hidden && panel.getClientRects().length) load();
   }, 60000);
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && panel.open && panel.getClientRects().length) load();
+    if (!document.hidden && !popup.hidden && panel.getClientRects().length) load();
   });
-  let wasVisible = false;
   const observer = new MutationObserver(() => {
-    const visible = !!panel.getClientRects().length;
-    if (visible && !wasVisible && panel.open) { load(); mountWidget(); }
-    wasVisible = visible;
+    if (!panel.getClientRects().length && !popup.hidden) setOpen(false);
   });
   observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'data-page'] });
   const preferences = new MutationObserver(() => {
@@ -121,6 +154,18 @@ if (panel) {
     if (widget) widget.setAttribute('theme', document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
   });
   preferences.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'lang'] });
+  // On small screens use a real navbar slot, not a fixed button over Login.
+  const mobileLayout = matchMedia('(max-width: 680px)');
+  const originalParent = panel.parentNode, originalNext = panel.nextSibling;
+  function placeTrigger() {
+    const menu = document.getElementById('nav-mobile-btn');
+    if (mobileLayout.matches && menu) menu.before(panel);
+    else originalParent.insertBefore(panel, originalNext);
+  }
+  mobileLayout.addEventListener('change', placeTrigger);
+  placeTrigger();
   paint();
-  try { panel.open = localStorage.getItem('alfa-economic-news-open') !== '0'; } catch { panel.open = true; }
+  // Always start closed, including when an older version saved an open preference.
+  popup.hidden = true;
+  trigger.setAttribute('aria-expanded', 'false');
 }
