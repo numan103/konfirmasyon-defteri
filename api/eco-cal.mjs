@@ -1,3 +1,4 @@
+import { calendarTitleTr } from '../lib/calendar-titles.mjs';
 const FEED = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
 
 function sleep(ms) {
@@ -52,16 +53,18 @@ export default async function handler(req, res) {
   }
 
   const items = out.data
+    .filter((x) => x && typeof x === 'object')
     .map((x) => ({
       title: String(x.title || '').trim(),
+      titleTr: calendarTitleTr(x.title),
       country: String(x.country || '').trim(),
       date: String(x.date || '').trim(),
       impact: String(x.impact || 'Low').trim(),
-      forecast: String(x.forecast || '').trim(),
-      previous: String(x.previous || '').trim(),
+      forecast: String(x.forecast ?? '').trim(),
+      previous: String(x.previous ?? '').trim(),
     }))
     .filter((x) => x.title);
 
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60');
-  return res.json({ ok: true, items });
+  return res.json({ ok: true, items, fetchedAt: new Date().toISOString(), source: 'Forex Factory / Fair Economy', actualAvailable: false });
 }

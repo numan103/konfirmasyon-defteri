@@ -1,0 +1,33 @@
+.econ-news { margin: 12px 0 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); }
+.econ-news > summary { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 12px 16px; cursor: pointer; list-style: none; }
+.econ-news > summary::-webkit-details-marker { display: none; }
+.econ-news > summary::after { content: '⌄'; margin-left: auto; }
+.econ-news[open] > summary::after { content: '⌃'; }
+.econ-news summary strong { font-size: 13px; white-space: nowrap; }
+.econ-news-summary { font-size: 11px; color: var(--text-3); }
+.econ-news-body { border-top: 1px solid var(--border); padding: 14px; }
+.econ-news-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; }
+.econ-news-controls label { display: flex; align-items: center; gap: 6px; }
+.econ-news-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 18px; }
+.econ-news-columns section { min-width: 0; }
+.econ-news h2 { font-size: 13px; margin: 0 0 8px; }
+.econ-news-note, .econ-news-status { font-size: 11px; line-height: 1.6; color: var(--text-3); }
+.econ-news-status { margin-left: auto; }
+.econ-news-list { max-height: 490px; overflow-y: auto; }
+.econ-news-row { display: grid; grid-template-columns: 45px minmax(0, 1fr); gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.econ-news-row time { font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.econ-news-row strong { display: block; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.econ-news-original { display: block; font-size: 11px; color: var(--text-3); margin-top: 2px; overflow-wrap: anywhere; }
+.econ-news-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; font-size: 10.5px; color: var(--text-3); }
+.econ-news-impact { font-weight: 700; color: var(--amber, #cf913c); }
+.econ-news-widget { min-height: 540px; }
+.econ-news-widget tv-economic-calendar { display: block; height: 540px; width: 100%; }
+.econ-news-error { color: var(--red, #e76f6f); }
+.econ-news button:focus-visible, .econ-news summary:focus-visible { outline: 2px solid var(--pc); outline-offset: 3px; }
+@media (max-width: 760px) {
+  .econ-news-columns { grid-template-columns: 1fr; }
+  .econ-news > summary { flex-wrap: wrap; gap: 6px 10px; padding: 12px; }
+  .econ-news-summary { width: calc(100% - 26px); order: 3; }
+  .econ-news-status { margin-left: 0; width: 100%; }
+  .econ-news-list { max-height: 330px; }
+}

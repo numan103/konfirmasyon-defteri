@@ -27,6 +27,8 @@
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
+<link rel="stylesheet" href="/assets/economic-news.css?v=1">
+<script type="module" src="/assets/economic-news.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=4"></script>
 
@@ -5888,6 +5890,31 @@
     <span class="tq" id="ticker-text">Yükleniyor...</span>
     <span class="ta" id="ticker-author"></span>
   </div>
+  <!-- ECONOMIC_NEWS_PANEL_BEGIN -->
+  <details class="econ-news" id="economic-news">
+    <summary><strong data-i18n="econ.title">📅 Bugünün Haberleri</strong><span class="econ-news-summary" data-econ-summary>Ajanda · Beklenti · Gerçekleşen</span></summary>
+    <div class="econ-news-body">
+      <div class="econ-news-controls">
+        <label><input type="checkbox" data-econ-high checked><span data-i18n="econ.high">Sadece 3 yıldız</span></label>
+        <button type="button" class="btn" data-econ-refresh data-i18n="econ.refresh">Yenile</button>
+        <span class="econ-news-status" role="status" data-econ-status></span>
+      </div>
+      <div class="econ-news-columns">
+        <section aria-labelledby="econ-agenda-title">
+          <h2 id="econ-agenda-title" data-i18n="econ.agenda">Günün ajandası · EN / TR · TSİ</h2>
+          <div class="econ-news-list" data-econ-list></div>
+          <p class="econ-news-note" data-i18n="econ.agendaNote">Kaynak: Forex Factory / Fair Economy. Bu akış yalnızca beklenti ve önceki değeri içerir; gerçekleşen sonuç değildir.</p>
+        </section>
+        <section aria-labelledby="econ-results-title">
+          <h2 id="econ-results-title" data-i18n="econ.results">Açıklanan sonuçlar · Türkçe takvim</h2>
+          <p class="econ-news-note" data-i18n="econ.resultsHelp">G: Gerçekleşen · T: Tahmin · Ö: Önceki. Açıklanan veriler için takvim içinde yukarı kaydır. Görünmüyorsa Yenile'yi dene.</p>
+          <div class="econ-news-widget" data-econ-widget></div>
+          <p class="econ-news-note" data-econ-widget-status data-i18n="econ.resultsNote">Gerçekleşen değerler TradingView takviminde gösterilir. Sağlayıcı gecikmesi olabilir; sonuç takviminin saat dilimini kontrol et.</p>
+        </section>
+      </div>
+    </div>
+  </details>
+  <!-- ECONOMIC_NEWS_PANEL_END -->
   <div id="page-home" class="hidden">
     <script>
     (function () {
@@ -30409,6 +30436,16 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
+    // ECONOMIC_NEWS_I18N_BEGIN
+    'econ.title': { tr: '📅 Bugünün Haberleri', en: '📅 Today’s Economic News' },
+    'econ.high': { tr: 'Sadece 3 yıldız', en: 'High impact only' },
+    'econ.refresh': { tr: 'Yenile', en: 'Refresh' },
+    'econ.agenda': { tr: 'Günün ajandası · EN / TR · TSİ', en: 'Today’s agenda · EN / TR · Istanbul time' },
+    'econ.results': { tr: 'Açıklanan sonuçlar · Türkçe takvim', en: 'Released results · Turkish calendar' },
+    'econ.resultsHelp': { tr: "G: Gerçekleşen · T: Tahmin · Ö: Önceki. Açıklanan veriler için takvim içinde yukarı kaydır. Görünmüyorsa Yenile'yi dene.", en: 'G: Actual · T: Forecast · Ö: Previous. Scroll up inside the calendar for released data. If it is not visible, try Refresh.' },
+    'econ.agendaNote': { tr: 'Kaynak: Forex Factory / Fair Economy. Bu akış yalnızca beklenti ve önceki değeri içerir; gerçekleşen sonuç değildir.', en: 'Source: Forex Factory / Fair Economy. This feed contains forecast and previous values only, not actual results.' },
+    'econ.resultsNote': { tr: 'Gerçekleşen değerler TradingView takviminde gösterilir. Sağlayıcı gecikmesi olabilir; sonuç takviminin saat dilimini kontrol et.', en: 'Actual values appear in the TradingView calendar. Provider delays are possible; check the results calendar’s timezone.' },
+    // ECONOMIC_NEWS_I18N_END
     'edu.kicker': { tr: 'ALFA EDU · KURS KÜTÜPHANESİ', en: 'ALFA EDU · COURSE LIBRARY' },
     'edu.heroTitle': { tr: 'İzle. Öğren. Uygula.', en: 'Watch. Learn. Apply.' },
     'edu.heroSub': { tr: 'Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.', en: 'From technical analysis to psychology, onchain data to macro reading — all training in one place. Pick a course and start the first lesson instantly.' },
