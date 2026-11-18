@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+const arg = key => process.argv.find(s => s.startsWith(`--${key}=`))?.slice(key.length + 3);
+const { chromium } = await import(pathToFileURL(path.resolve(arg('playwright'))));
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  await page.route('**/api/**', route => route.fulfill({ json: { ok: true, admin: false, tier: 'free', episode: null } }));
+  await page.goto((arg('url') || 'http://127.0.0.1:4186') + '/?page=eduplans');
+  await page.locator('#page-eduplans').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.eduplan').count(), 4);
+  assert.equal(await page.locator('[data-plan="video"] .eduplan-price').textContent(), '$50');
+  assert.equal(await page.locator('[data-plan="live"] .eduplan-price').textContent(), '$99');
+  assert.equal(await page.locator('[data-plan="personal"] .eduplan-price').textContent(), '$250');
+  assert.match(await page.locator('[data-plan="personal"]').innerText(), /2 adet birebir/);
+  assert.match(await page.locator('[data-plan="plus"]').innerText(), /4 adet birebir/);
+  assert.equal(await page.locator('[data-plan="plus"] .eduplan-buttons a').count(), 1, 'no invented cash option for 100K');
+  assert.equal(await page.locator('.eduplan-buttons a').count(), 7);
+  const link = new URL(await page.locator('[data-plan="personal"] .eduplan-buttons a').last().getAttribute('href'));
+  assert.equal(link.hostname, 't.me');
+  assert.match(link.searchParams.get('text'), /Pro muadili/);
+  await page.evaluate(() => setLang('en'));
+  await page.waitForFunction(() => document.querySelector('[data-plan="video"] h3').textContent === 'Video Training');
+  assert.match(await page.locator('.eduplans-terms').innerText(), /1\.5–3 hours/);
+  await page.setViewportSize({ width: 320, height: 900 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.evaluate(() => showPage('home', true));
+  assert.equal(await page.locator('#page-eduplans').isVisible(), false, 'SPA navigation must hide the offer');
+  await page.evaluate(() => showPage('eduplans', true));
+  assert.equal(await page.locator('#page-eduplans').isVisible(), true);
+  await page.evaluate(() => showPage('egitim', true));
+  assert.equal(await page.evaluate(() => document.body.dataset.page), 'erisim', 'public offers must not unlock courses');
+  assert.deepEqual(errors, []);
+  console.log(JSON.stringify({ passed: true, publicOffer: true, packages: 4, privateLessons: [2, 4], bilingual: true, mobile: true, existingCourseGatePreserved: true, pageErrors: errors }));
+} finally { await browser.close(); }

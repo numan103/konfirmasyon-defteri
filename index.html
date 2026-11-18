@@ -28,6 +28,8 @@
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
 <link rel="stylesheet" href="/assets/member-video.css?v=1">
 <script type="module" src="/assets/member-video.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/edu-plans.css?v=1">
+<script type="module" src="/assets/edu-plans.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
@@ -5333,6 +5335,7 @@
     </div>
     <div class="lp-assurance">Kredi kartı yok · Aidat yok · Borsanı bağla, premium ücretsiz</div>
     <div id="landing-podcast-slot" hidden></div>
+    <a href="?page=eduplans" class="eduplans-entry" data-i18n="edu.plansEntry">🎓 Alfa Edu · Video, canlı grup ve birebir eğitim paketleri →</a>
     <div class="lp-hero-values" aria-label="Platformun dört odağı">
       <div class="lp-hero-value">
         <span class="lp-hv-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16.5 9 11l3.4 3.4L20 6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6.8H20v4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -5804,6 +5807,7 @@
       <div class="nav-drop">
         <button type="button" class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</button>
         <div class="drop-menu">
+          <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
           <a href="?page=egitim" class="nav-link" id="tab-egitim" data-nav data-i18n="app.eduPage">🎓 Alfa Edu</a>
           <a href="?page=strategies" class="nav-link" id="tab-strategies" data-nav data-i18n="app.strategies">🧪 Stratejiler</a>
           <a href="?page=analiz" class="nav-link" id="tab-analiz" data-nav data-i18n="app.analiz">🧭 Analiz Köşesi</a>
@@ -5865,6 +5869,7 @@
       <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
+      <a href="?page=eduplans" class="mnav-link" data-nav data-mnav="eduplans" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
       <a href="?page=strategies" class="mnav-link" data-nav data-mnav="strategies" data-i18n="app.strategies">🧪 Stratejiler</a>
       <a href="?page=analiz" class="mnav-link" data-nav data-mnav="analiz" data-i18n="app.analiz">🧭 Analiz Köşesi</a>
@@ -6951,6 +6956,9 @@
       <div class="mc-hint" data-i18n="pg.news.cardHint">Görseli sürükleyin ya da sağ tıklayıp kopyalayın</div>
     </div>
   </div>
+  <div id="page-eduplans" class="hidden">
+    <div class="eduplans" id="eduplans-root"></div>
+  </div>
   <div id="page-egitim" class="hidden">
     <section class="edu-hero" id="edu-hero">
       <div class="edu-kicker" data-i18n="edu.kicker">ALFA EDU · KURS KÜTÜPHANESİ</div>
@@ -6958,6 +6966,7 @@
       <p data-i18n="edu.heroSub">Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.</p>
       <div class="edu-hero-actions">
         <button type="button" class="btn solid" id="edu-browse" data-i18n="edu.browse">Kursları keşfet →</button>
+        <a href="?page=eduplans" data-nav class="btn" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
         <button type="button" class="btn hidden" id="edu-continue" data-i18n="edu.continue">Kaldığın yerden devam et</button>
       </div>
       <div class="edu-progress-summary" id="edu-overall"></div>
@@ -13171,7 +13180,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna','analitik'];
+  const VALID_PAGES = ['eduplans', 'home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna','analitik'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -13910,7 +13919,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps', 'erisim'];
+  const pages = ['eduplans', 'home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps', 'erisim'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -13982,6 +13991,7 @@ const AM_PLAN = [
 // yalnizca arayuzu ve yonlendirmeyi belirler; veri erisimi Supabase RLS + API
 // tarafinda korunur.
 const PAGE_TIER = {
+  eduplans: 'free',
   home: 'free', calc: 'free', calendar: 'free', erisim: 'free', influencer: 'free',
   alfatrading: 'ref',
   trading: 'admin',          // Trading terminali yalnızca yöneticiye görünür
@@ -15105,7 +15115,7 @@ function showPage(name, skipAnim) {
   // AYNA:BASLA
   if (name === 'ayna') Ayna.render();
   // AYNA:BITIR
-  const pages = ['home', 'influencer', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
+  const pages = ['eduplans', 'home', 'influencer', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -24086,28 +24096,28 @@ function eduLast() {
   try { return JSON.parse(localStorage.getItem('alfa-edu-last') || 'null'); } catch (e) { return null; }
 }
 function eduAdvancedCard() {
+  // Package comparison only. Course content and current course permissions are unchanged.
   const card = document.createElement('button');
   card.type = 'button';
-  card.className = 'edu-card locked';
-  card.disabled = true;
-  card.setAttribute('aria-disabled', 'true');
-  card.setAttribute('aria-label', eduT('edu.advancedTitle', 'İleri Seviye Paket'));
+  card.className = 'edu-card edu-plan-link';
+  card.setAttribute('aria-label', eduT('edu.plansNav', 'Eğitim Paketleri'));
+  card.addEventListener('click', () => showPage('eduplans'));
   const thumb = document.createElement('div'); thumb.className = 'edu-thumb';
   const img = document.createElement('img');
-  img.src = 'assets/edu-advanced.jpg'; img.alt = eduT('edu.advancedTitle', 'İleri Seviye Paket'); img.loading = 'lazy';
+  img.src = 'assets/edu-advanced.jpg'; img.alt = eduT('edu.plansNav', 'Eğitim Paketleri'); img.loading = 'lazy';
   const lock = document.createElement('span'); lock.className = 'edu-lock';
-  lock.textContent = '🔒 ' + eduT('edu.locked', 'KİLİTLİ');
+  lock.textContent = eduT('edu.plansNav', 'Eğitim Paketleri');
   const tag = document.createElement('span'); tag.className = 'edu-thumb-tag';
-  tag.textContent = eduT('edu.advancedTag', 'EXTRA · VIDEO');
+  tag.textContent = 'ALFA EDU';
   thumb.append(img, lock, tag);
   const body = document.createElement('div'); body.className = 'edu-card-body';
   const title = document.createElement('div'); title.className = 'edu-card-title';
-  title.textContent = eduT('edu.advancedTitle', 'İleri Seviye Paket');
+  title.textContent = eduT('edu.plansNav', 'Eğitim Paketleri');
   const sub = document.createElement('div'); sub.className = 'edu-card-sub';
-  sub.textContent = eduT('edu.advancedSub', 'Detaylı video eğitimi · Kilitli');
+  sub.textContent = eduT('edu.plansEntry', 'Video, canlı grup ve birebir eğitim');
   const foot = document.createElement('div'); foot.className = 'edu-card-foot';
   const note = document.createElement('span'); note.className = 'edu-card-foot-note';
-  note.textContent = eduT('edu.advancedTeaser', 'Derinlemesine senaryolar ve uygulamalı çalışmalar.');
+  note.textContent = eduT('edu.plansCompare', 'Paketleri karşılaştır →');
   foot.appendChild(note);
   body.append(title, sub, foot);
   card.append(thumb, body);
@@ -27540,6 +27550,7 @@ async function openSharedPage(name, load, render) {
 }
 function hideGate() { document.getElementById('auth-gate').classList.remove('open'); }
 function showLanding() {
+  if (new URLSearchParams(location.search).get('page') === 'eduplans') { hideLanding(); showPage('eduplans', true); return; }
   document.body.classList.add('landed');
   document.getElementById('landing').classList.add('open');
   try { renderSiteReviews(); } catch (e) {}
@@ -30456,6 +30467,9 @@ loadSfx();
     'econ.agendaNote': { tr: 'Kaynak: Forex Factory / Fair Economy. Bu akış yalnızca beklenti ve önceki değeri içerir; gerçekleşen sonuç değildir.', en: 'Source: Forex Factory / Fair Economy. This feed contains forecast and previous values only, not actual results.' },
     'econ.resultsNote': { tr: 'Gerçekleşen değerler TradingView takviminde gösterilir. Sağlayıcı gecikmesi olabilir; sonuç takviminin saat dilimini kontrol et.', en: 'Actual values appear in the TradingView calendar. Provider delays are possible; check the results calendar’s timezone.' },
     // ECONOMIC_NEWS_I18N_END
+    'edu.plansNav': { tr: '🎓 Eğitim Paketleri', en: '🎓 Training Packages' },
+    'edu.plansCompare': { tr: 'Paketleri karşılaştır →', en: 'Compare packages →' },
+    'edu.plansEntry': { tr: '🎓 Alfa Edu · Video, canlı grup ve birebir eğitim paketleri →', en: '🎓 Alfa Edu · Video, live group and private training packages →' },
     'edu.kicker': { tr: 'ALFA EDU · KURS KÜTÜPHANESİ', en: 'ALFA EDU · COURSE LIBRARY' },
     'edu.heroTitle': { tr: 'İzle. Öğren. Uygula.', en: 'Watch. Learn. Apply.' },
     'edu.heroSub': { tr: 'Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.', en: 'From technical analysis to psychology, onchain data to macro reading — all training in one place. Pick a course and start the first lesson instantly.' },

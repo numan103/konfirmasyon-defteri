@@ -1,0 +1,34 @@
+.eduplans { max-width: 1160px; margin: 0 auto 36px; }
+.eduplans-hero { display: grid; grid-template-columns: 1.4fr .8fr; gap: 28px; align-items: center; padding: 32px; border: 1px solid var(--border); border-radius: 22px; background: linear-gradient(120deg,var(--pc-soft),var(--card) 70%); }
+.eduplans-kicker { font-size: 10px; font-weight: 800; letter-spacing: .16em; color: var(--pc); }
+.eduplans h1 { margin: 12px 0; font-family: var(--font-display); font-size: clamp(26px,4vw,42px); line-height: 1.13; letter-spacing: -.035em; }
+.eduplans-lead { color: var(--text-3); line-height: 1.75; font-size: 13px; max-width: 620px; }
+.eduplans-art { margin: 0; }
+.eduplans-art img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 15px; }
+.eduplans-art figcaption { font-size: 10px; color: var(--text-3); margin-top: 7px; }
+.eduplans-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.eduplans a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: normal; text-align: center; line-height: 1.45; }
+.eduplans-intro { margin: 26px 0 18px; }
+.eduplans-intro h2 { font-size: 20px; margin: 0 0 8px; }
+.eduplans-intro p { font-size: 12px; color: var(--text-3); line-height: 1.7; }
+.eduplans-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+.eduplan { display: flex; flex-direction: column; min-width: 0; padding: 22px 18px; border-radius: 17px; border: 1px solid var(--border); background: var(--card); }
+.eduplan.featured { border-color: var(--pc); background: linear-gradient(160deg,var(--pc-soft),var(--card) 70%); }
+.eduplan-level { font-size: 10px; letter-spacing: .09em; color: var(--text-3); font-weight: 800; }
+.eduplan h3 { margin: 12px 0 8px; font-size: 18px; }
+.eduplan-price { font-size: 31px; font-weight: 800; font-family: var(--font-display); letter-spacing: -.03em; }
+.eduplan-period { font-size: 10px; color: var(--text-3); margin: 5px 0 10px; }
+.eduplan-account { font-size: 12px; line-height: 1.6; padding: 10px; border-radius: 10px; background: var(--panel-alt); color: var(--text-2); }
+.eduplan ul { padding: 0; margin: 18px 0; list-style: none; }
+.eduplan li { font-size: 12px; line-height: 1.6; margin: 9px 0; padding-left: 16px; position: relative; }
+.eduplan li::before { content: '✓'; position: absolute; left: 0; color: var(--green); }
+.eduplan small { font-size: 10px; color: var(--text-3); line-height: 1.6; }
+.eduplan-buttons { display: grid; gap: 7px; margin-top: auto; padding-top: 16px; }
+.eduplans-terms { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+.eduplans-term { border: 1px solid var(--border); border-radius: 15px; padding: 20px; background: var(--panel-alt); }
+.eduplans-term h2 { font-size: 15px; margin: 0 0 9px; }
+.eduplans-term p { font-size: 12px; line-height: 1.8; color: var(--text-3); margin: 0; }
+.eduplans-disclosure { font-size: 11px; line-height: 1.8; color: var(--text-3); margin: 20px 0; }
+.eduplans-entry { display: block; width: fit-content; max-width: calc(100% - 32px); margin: 16px auto; padding: 10px 18px; border: 1px solid var(--border); border-radius: 12px; color: var(--pc); text-decoration: none; background: var(--pc-soft); font-size: 13px; }
+@media(max-width:1000px) { .eduplans-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .eduplans-hero { grid-template-columns: 1fr; padding: 22px 18px; gap: 18px; } .eduplans-grid,.eduplans-terms { grid-template-columns: 1fr; } }

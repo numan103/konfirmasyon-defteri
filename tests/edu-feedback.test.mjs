@@ -251,19 +251,20 @@ test('Edu konu etiketleri ve fotoğraf notu TR/EN tanımlı', () => {
   assert.ok(html.includes('data-i18n="edu.photoNote"'));
 });
 
-test('İleri paket görünür ama kilitli; URL, kod veya içerik sızdırmaz', () => {
+test('Edu paket kartı herkese açık karşılaştırmaya gider; ders veya erişim kodu içermez', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const css = fs.readFileSync(new URL('../assets/edu-feedback.css', import.meta.url), 'utf8');
   const start = html.indexOf('function eduAdvancedCard()');
   const end = html.indexOf('function eduCard(c, i)', start);
   assert.ok(start > -1 && end > start);
   const block = html.slice(start, end);
-  assert.ok(block.includes("card.className = 'edu-card locked'"));
+  assert.ok(block.includes("card.className = 'edu-card edu-plan-link'"));
   assert.ok(block.includes("img.src = 'assets/edu-advanced.jpg'"));
-  assert.ok(block.includes("lock.textContent = '🔒 ' + eduT('edu.locked', 'KİLİTLİ')"));
+  assert.ok(block.includes("showPage('eduplans')"));
+  assert.ok(!block.includes('card.disabled = true'));
   assert.ok(html.includes('grid.appendChild(eduAdvancedCard())'));
   assert.ok(html.indexOf('grid.appendChild(eduAdvancedCard())') < html.indexOf('list.forEach((c, i) => grid.appendChild(eduCard(c, i)))'));
-  for (const leak of ['href', 'location', 'fetch(', 'access', 'code', 't.me', 'http', '?page=']) {
+  for (const leak of ['href', 'location', 'fetch(', 'accessCode', 't.me', 'http', '?page=']) {
     assert.ok(!block.toLowerCase().includes(leak.toLowerCase()), leak + ' kilitli kartta sızdı');
   }
   for (const rule of ['.edu-card.locked', '.edu-thumb-topic', '.edu-lock', '.edu-photo-note']) {
