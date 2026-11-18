@@ -1,4 +1,4 @@
-import { EDU_PLANS, eduApplicationURL } from './edu-plans-model.mjs?v=1';
+import { EDU_PLANS, eduApplicationURL } from './edu-plans-model.mjs?v=2';
 const root = document.getElementById('eduplans-root');
 if (root) {
   const text = (tr, en) => window.LANG === 'en' ? en : tr;
@@ -32,26 +32,38 @@ if (root) {
     art.append(img, el('figcaption', text('Fotoğraf temsilidir.', 'Illustrative photo.')));
     hero.append(copy, art); root.appendChild(hero);
     const intro = el('div', undefined, 'eduplans-intro');
-    intro.append(el('h2', text('Dört paket. Net haklar.', 'Four packages. Clear benefits.')),
-      el('p', text('Her üst paket önceki paketlerin tamamını içerir. Ders ve grup hakları ilk aylık döneme aittir; videolar ömür boyu açık kalır.', 'Each higher package includes all previous package benefits. Lesson and group allowances apply to the first monthly period; video access lasts for life.')));
+    intro.append(el('h2', text('Üç paket. İhtiyacına göre eğitim.', 'Three packages. Training for your needs.')),
+      el('p', text('Her üst paket önceki paketlerin tamamını içerir. Ders ve grup hakları ilk aylık döneme aittir; videolar ömür boyu açık kalır.', 'Each higher package includes all previous package benefits. Lesson and group allowances apply to the first monthly period; video access lasts for life.')),
+      el('p', text('Breakout fırsatları yalnızca bizim referansımızdan ilk kayıt ve uygun ilk hesap alımına özeldir. Mevcut hesaplara veya sonraki alımlara otomatik uygulanmaz.', 'Breakout offers apply only to first-time signup through our referral and a qualifying first account purchase. They do not automatically apply to existing accounts or subsequent purchases.'), 'eduplans-offer-note'));
     root.appendChild(intro);
     const grid = el('div', undefined, 'eduplans-grid');
     EDU_PLANS.forEach((plan, index) => {
       const card = el('article', undefined, 'eduplan' + (plan.id === 'personal' ? ' featured' : '')); card.dataset.plan = plan.id;
       card.append(el('span', '0' + (index + 1), 'eduplan-level'), el('h3', text(plan.name.tr, plan.name.en)),
-        el('div', plan.usd === null ? text('100K Classic', '100K Classic') : '$' + plan.usd, 'eduplan-price'),
+        el('div', '$' + plan.usd, 'eduplan-price'),
         el('div', plan.id === 'video' ? text('Tek ödeme · kalıcı video hakkı', 'One-time · lifetime videos') : text('İlk aylık eğitim paketi', 'Initial monthly training package'), 'eduplan-period'),
-        el('div', (plan.usd === null ? text('Breakout seçeneği: ', 'Breakout option: ') : text('veya Breakout: ', 'or Breakout: ')) + text(plan.account.tr, plan.account.en), 'eduplan-account'));
+        el('div', text('veya Breakout ilk alım: ', 'or Breakout first purchase: ') + text(plan.account.tr, plan.account.en), 'eduplan-account'));
       const list = el('ul');
       const benefits = [text('Ömür boyu eğitim videoları', 'Lifetime training videos'), text('İlk ay grup erişimi', 'First month of group access')];
-      if (plan.groupLessons) benefits.push(text('4 ortak canlı ders · haftada 1', '4 shared live lessons · one per week'), text('Market analizi, işlem değerlendirme, soru-cevap', 'Market analysis, trade reviews and Q&A'));
+      if (plan.groupLessons) benefits.push(text('Haftalık canlı grup eğitimi · ilk ay 4 ders', 'Weekly live group training · 4 lessons in the first month'), text('Canlı konu anlatımı, market analizi, işlem değerlendirme ve soru-cevap', 'Live teaching, market analysis, trade reviews and Q&A'));
       if (plan.privateLessons) benefits.push(text(plan.privateLessons + ' adet birebir özel ders — toplam', plan.privateLessons + ' private one-to-one lessons — total'), text('Her özel ders 1,5–3 saat', 'Each private lesson lasts 1.5–3 hours'), text('Seviyene ve yaşadığın sorunlara özel plan', 'A plan tailored to your level and difficulties'));
       benefits.forEach(benefit => list.appendChild(el('li', benefit)));
       card.appendChild(list);
       if (index) card.appendChild(el('small', text('Önceki paketlerin tüm hakları dahil.', 'Includes all previous package benefits.')));
+      if (plan.upgrade) {
+        const upgrade = el('div', undefined, 'eduplan-upgrade');
+        upgrade.append(el('strong', text('100K Classic ilk alımında: 4 özel ders', '100K Classic first purchase: 4 private lessons')),
+          el('p', text('Aynı Personal Coaching paketi. Özel ders hakkın 2 yerine toplam 4 olur; videolar, grup erişimi ve haftalık canlı eğitim de dahildir. Dersler senin ihtiyacına ve çalışmak istediğin konulara göre planlanır.', 'The same Personal Coaching package. Your private allowance increases from 2 to 4 total; videos, group access and weekly live training remain included. Lessons are tailored to your needs and the topics you want to work on.')));
+        card.appendChild(upgrade);
+      }
       const buttons = el('div', undefined, 'eduplan-buttons');
-      if (plan.usd !== null) buttons.appendChild(link(text('$' + plan.usd + ' ile başvur ↗', 'Apply for $' + plan.usd + ' ↗'), eduApplicationURL(plan.id, 'cash', window.LANG), 'btn solid'));
-      buttons.appendChild(link(text('Breakout referans linkini iste ↗', 'Request Breakout referral link ↗'), eduApplicationURL(plan.id, 'breakout', window.LANG)));
+      buttons.appendChild(link(text('$' + plan.usd + ' ile başvur ↗', 'Apply for $' + plan.usd + ' ↗'), eduApplicationURL(plan.id, 'cash', window.LANG), 'btn solid'));
+      const breakout = link(text('İlk alım için Breakout linkini iste ↗', 'Request a first-purchase Breakout link ↗'), eduApplicationURL(plan.id, 'breakout', window.LANG));
+      breakout.dataset.route = 'breakout'; buttons.appendChild(breakout);
+      if (plan.upgrade) {
+        const upgrade = link(text('100K ile 4 özel ders için başvur ↗', 'Apply for 4 private lessons with 100K ↗'), eduApplicationURL(plan.id, 'breakout100k', window.LANG));
+        upgrade.dataset.route = 'breakout100k'; buttons.appendChild(upgrade);
+      }
       card.appendChild(buttons); grid.appendChild(card);
     });
     root.appendChild(grid);

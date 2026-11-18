@@ -11,7 +11,11 @@
 .eduplans-intro { margin: 26px 0 18px; }
 .eduplans-intro h2 { font-size: 20px; margin: 0 0 8px; }
 .eduplans-intro p { font-size: 12px; color: var(--text-3); line-height: 1.7; }
-.eduplans-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+.eduplans-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.eduplans-intro .eduplans-offer-note { padding: 12px 14px; border-left: 3px solid var(--pc); border-radius: 9px; background: var(--pc-soft); color: var(--text-2); }
+.eduplan-upgrade { padding: 13px; margin-top: 14px; border: 1px solid var(--pc); border-radius: 11px; background: var(--pc-soft); }
+.eduplan-upgrade strong { font-size: 12px; line-height: 1.6; }
+.eduplan-upgrade p { font-size: 11px; line-height: 1.75; color: var(--text-3); margin: 6px 0 0; }
 .eduplan { display: flex; flex-direction: column; min-width: 0; padding: 22px 18px; border-radius: 17px; border: 1px solid var(--border); background: var(--card); }
 .eduplan.featured { border-color: var(--pc); background: linear-gradient(160deg,var(--pc-soft),var(--card) 70%); }
 .eduplan-level { font-size: 10px; letter-spacing: .09em; color: var(--text-3); font-weight: 800; }

@@ -10,20 +10,26 @@ try {
   await page.route('**/api/**', route => route.fulfill({ json: { ok: true, admin: false, tier: 'free', episode: null } }));
   await page.goto((arg('url') || 'http://127.0.0.1:4186') + '/?page=eduplans');
   await page.locator('#page-eduplans').waitFor({ state: 'visible' });
-  assert.equal(await page.locator('.eduplan').count(), 4);
+  assert.equal(await page.locator('.eduplan').count(), 3);
+  assert.match(await page.locator('.eduplans-offer-note').innerText(), /ilk hesap alımına özeldir/);
   assert.equal(await page.locator('[data-plan="video"] .eduplan-price').textContent(), '$50');
   assert.equal(await page.locator('[data-plan="live"] .eduplan-price').textContent(), '$99');
   assert.equal(await page.locator('[data-plan="personal"] .eduplan-price').textContent(), '$250');
   assert.match(await page.locator('[data-plan="personal"]').innerText(), /2 adet birebir/);
-  assert.match(await page.locator('[data-plan="plus"]').innerText(), /4 adet birebir/);
-  assert.equal(await page.locator('[data-plan="plus"] .eduplan-buttons a').count(), 1, 'no invented cash option for 100K');
+  assert.match(await page.locator('[data-plan="live"]').innerText(), /Haftalık canlı grup eğitimi · ilk ay 4 ders/);
+  assert.match(await page.locator('[data-plan="personal"] .eduplan-upgrade').innerText(), /100K Classic ilk alımında: 4 özel ders/);
+  assert.equal(await page.locator('[data-plan="plus"]').count(), 0, '100K must not be a separate package');
   assert.equal(await page.locator('.eduplan-buttons a').count(), 7);
-  const link = new URL(await page.locator('[data-plan="personal"] .eduplan-buttons a').last().getAttribute('href'));
+  const link = new URL(await page.locator('[data-plan="personal"] [data-route="breakout"]').getAttribute('href'));
   assert.equal(link.hostname, 't.me');
   assert.match(link.searchParams.get('text'), /Pro muadili/);
+  const upgrade = new URL(await page.locator('[data-plan="personal"] [data-route="breakout100k"]').getAttribute('href'));
+  assert.match(upgrade.searchParams.get('text'), /100K Classic/);
+  assert.match(upgrade.searchParams.get('text'), /toplam 4 birebir ders/);
   await page.evaluate(() => setLang('en'));
   await page.waitForFunction(() => document.querySelector('[data-plan="video"] h3').textContent === 'Video Training');
   assert.match(await page.locator('.eduplans-terms').innerText(), /1\.5–3 hours/);
+  assert.match(await page.locator('[data-plan="personal"] .eduplan-upgrade').innerText(), /increases from 2 to 4 total/);
   await page.setViewportSize({ width: 320, height: 900 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.evaluate(() => showPage('home', true));
@@ -33,5 +39,5 @@ try {
   await page.evaluate(() => showPage('egitim', true));
   assert.equal(await page.evaluate(() => document.body.dataset.page), 'erisim', 'public offers must not unlock courses');
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, publicOffer: true, packages: 4, privateLessons: [2, 4], bilingual: true, mobile: true, existingCourseGatePreserved: true, pageErrors: errors }));
+  console.log(JSON.stringify({ passed: true, publicOffer: true, packages: 3, firstPurchaseOnly: true, integrated100KUpgrade: true, privateLessons: [2, 4], bilingual: true, mobile: true, existingCourseGatePreserved: true, pageErrors: errors }));
 } finally { await browser.close(); }

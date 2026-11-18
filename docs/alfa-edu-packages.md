@@ -6,9 +6,13 @@ ve eski üyelerin hakları değiştirilmedi. Paket tanıtımı satın alma/eriş
 | Paket | Eğitim ücreti | Breakout alternatifi | İlk dönem hakları |
 |---|---|---|---|
 | Video Eğitim | $50 | 10K Classic | Ömür boyu videolar + ilk ay grup |
-| Canlı Grup | $99 | 25K Classic | Öncekiler + 4 ortak ders, haftada 1 |
-| Personal Coaching | $250 | 50K Classic / onaylı Pro muadili | Öncekiler + toplam 2 birebir |
-| Coaching Plus | Belirlenmedi, gösterilmez | 100K Classic | Öncekiler; birebir sayısı toplam 4, 6 değil |
+| Canlı Grup Eğitimi | $99 | 25K Classic | Öncekiler + 4 canlı eğitim dersi, haftada 1 |
+| Personal Coaching | $250 | 50K Classic / onaylı Pro muadili | Öncekiler + toplam 2 ihtiyaca özel birebir |
+
+Toplam 3 paket vardır. Personal Coaching içindeki **100K Classic ilk alım
+seçeneği**, özel ders sayısını 2'den toplam 4'e yükseltir. Ayrı bir üst paket
+değildir; diğer tüm haklar aynı şekilde dahildir. 100K için ayrı nakit fiyatı
+uydurulmaz. Hem 50K hem 100K başvurusu Personal Coaching olarak iletilir.
 
 Her özel ders öğrencinin ihtiyacına göre 90–180 dakika. Kişisel plan; strateji,
 risk, psikoloji, uygulama ve funded değerlendirmesine hazırlık. Kazanç veya geçiş
@@ -18,7 +22,10 @@ Grup ilk ay dahil. İkinci aydan sonra bizim referansımızla OKX/Bybit'te işle
 yapma/doğrulama koşulu vardır. Bu, ömür boyu video hakkını geri almaz.
 Devam için minimum hacim ya da işlem sayısı uydurulmadı.
 
-Breakout alternatifi bizim linkimizden ilk kayıt + uygun ilk satın alım gerektirir.
+Breakout alternatifi yalnızca bizim linkimizden ilk kayıt + uygun ilk satın alım gerektirir.
+Bu koşul kartların üstünde de görünür; sonraki alımlara veya mevcut hesaplara
+otomatik hak verilmez. İkinci pakette konu anlatımı, piyasa analizi, işlem
+değerlendirme ve soru-cevap içeren haftalık canlı eğitim başlar.
 Referans linki ve kesin Pro muadilliği henüz yapılandırılmadığından kullanıcı
 satın almadan önce `@traderahmetd` üzerinden teyit ister. Başvuru düğmeleri
 yalnızca planı içeren Telegram mesaj taslağı açar; kendiliğinden mesaj göndermez.
