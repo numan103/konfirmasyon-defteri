@@ -34,7 +34,7 @@ const PAGES = {
   indicators: { title: 'Alfa Traders — İndikatörler', desc: 'İndikatörler — özel indikatör setleri.' },
   designer: { title: 'Alfa Traders — Alfa Designer', desc: 'Alfa Designer — tasarım ve gösterge yapılandırma.' },
   calendar: { title: 'Alfa Traders — Ekonomik Takvim', desc: 'Ekonomik Takvim — önemli ekonomik veriler ve takvim.' },
-  influencer: { title: 'Alfa Traders — ALFALUENCE', desc: 'ALFALUENCE: kripto ve FX odaklı kişisel marka, içerik ve iş birliği eğitimi.' },
+  influencer: { title: 'Alfa Traders — Alfa Influencer', desc: 'Alfa Influencer: hesap büyümesi, etkileşim, tweet yazımı, networking ve topluluk desteği. Kripto ve FX içerik üreticileri için.' },
   news: { title: 'Alfa Traders — AlfaNews', desc: 'AlfaNews — paylaşımlı analiz dergisi.' },
   basvuru: { title: 'Alfa Traders — Alfa Ol', desc: 'Alfa Ol — topluluğa katılma başvurusu.' },
   apps: { title: 'Alfa Traders — Başvurular', desc: 'Başvurular — admin başvuru yönetimi.' },

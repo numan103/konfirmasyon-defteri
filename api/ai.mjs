@@ -248,7 +248,7 @@ export async function influencerHandler(req, res) {
       // Never fall back to a group or mentorship topic.
       if (process.env.TG_BOT_TOKEN && /^\d+$/.test(chat)) {
         const sent = await sendTelegram([
-          'ALFALUENCE ödeme bildirimi', INF_PACKAGES[order.package], 'Üye: ' + user.email,
+          'Alfa Influencer ödeme bildirimi', INF_PACKAGES[order.package], 'Üye: ' + user.email,
           'TXID: ' + order.txid, 'Ödeme kullanıcı beyanıdır; henüz doğrulanmadı.',
           'USDT/TRC20, alıcı adresi ve tutarı zincirden kontrol et.',
           'Onay/red: https://alfa-trader.com/?page=influencer'

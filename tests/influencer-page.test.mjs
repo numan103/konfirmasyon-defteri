@@ -134,14 +134,14 @@ test('konu taslağı HTML içinde yok, sadece admin API üzerinden yüklenir', (
 });
 
 test('sosyal önizleme için middleware sayfa başlığı var', () => {
-  assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — ALFALUENCE'/);
+  assert.match(middleware, /influencer:\s*\{\s*title: 'Alfa Traders — Alfa Influencer'/);
 });
 
-test('ALFALUENCE odağı kripto, FX ve trading araçlarıdır', () => {
-  assert.match(html, /data-i18n="app\.influencer">🚀 ALFALUENCE/);
-  assert.match(html, /data-i18n="pg\.influencer\.t">ALFALUENCE/);
-  assert.match(html, /Kripto ve FX odaklı kişisel marka, içerik ve iş birliği eğitimi/);
-  assert.match(html, /Find your voice\. Build your audience/);
+test('Alfa Influencer hesap, içerik ve topluluk desteği sunar', () => {
+  assert.match(html, /data-i18n="app\.influencer">🚀 Alfa Influencer/);
+  assert.match(html, /data-i18n="pg\.influencer\.t">Alfa Influencer/);
+  assert.match(html, /Kripto ve FX içeriklerinde hesabını, etkileşimini ve kişisel markanı/);
+  assert.match(html, /Sadece izleyen değil, üreten tarafta ol/);
   assert.ok(!html.includes('>Kripto Influencer<'));
 });
 
@@ -154,7 +154,7 @@ test('fayda, hedef ve Türkiye odaklı senaryolar paketlerden önce anlatılır'
     assert.ok(position > previous, 'out of order or missing: ' + id);
     previous = position;
   }
-  assert.equal((section.match(/class="inf-benefit"/g) || []).length, 3);
+  assert.equal((section.match(/class="inf-benefit"/g) || []).length, 6);
   assert.equal((section.match(/class="inf-story"/g) || []).length, 3);
   for (const topic of ['Prop firm ile kampanya', 'Borsa ile içerik iş birliği', 'Araç ve platform iş birlikleri']) assert.ok(section.includes(topic));
   assert.match(section, /Örnek fırsatlardır; paketlere dahil değildir/);
@@ -163,20 +163,36 @@ test('fayda, hedef ve Türkiye odaklı senaryolar paketlerden önce anlatılır'
   for (const foreign of ['Justin Welsh', 'Ali Abdaal', 'Ben Felix']) assert.ok(!section.includes(foreign));
 });
 
-test('pazarlama alanı resimli kısa maddeler kullanır; yaşam ve uzun taslaklar kaldırılır', () => {
+test('pazarlama alanı gerçek fotoğraf ve kısa maddeler kullanır', () => {
   const section = html.slice(html.indexOf('<div id="page-influencer"'), html.indexOf('<div id="page-mentoring"'));
-  for (const image of ['hero', 'prop', 'exchange', 'tools']) {
-    assert.ok(section.includes('/assets/alfaluence-' + image + '.svg'));
-    assert.ok(fs.existsSync(new URL('../assets/alfaluence-' + image + '.svg', import.meta.url)));
+  for (const image of ['creator', 'trading', 'writing', 'network']) {
+    assert.ok(section.includes('/assets/alfa-influencer-' + image + '.jpg'));
+    const file = new URL('../assets/alfa-influencer-' + image + '.jpg', import.meta.url);
+    assert.ok(fs.existsSync(file));
+    const bytes = fs.readFileSync(file);
+    assert.equal(bytes[0], 0xff);
+    assert.equal(bytes[1], 0xd8);
   }
   const marketing = section.slice(0, section.indexOf('id="inf-packages"'));
-  assert.equal((marketing.match(/class="inf-mini-list"/g) || []).length, 7);
+  assert.equal((marketing.match(/class="inf-mini-list"/g) || []).length, 10);
+  assert.ok(!section.includes('/assets/alfaluence-hero.svg'));
+  assert.match(section, /Fotoğraflar temsilidir/);
   assert.ok(marketing.length > 0);
   assert.ok(!section.includes('günlük yaşam'));
   assert.ok(!section.includes('yaşam tarzı'));
   assert.ok(!section.includes('inf-your-path'));
   assert.match(section, /<details class="inf-sample-drawer"><summary/);
   assert.ok(!section.includes('<details class="inf-sample-drawer" open'));
+});
+
+test('destekler büyüme, etkileşim, viral potansiyel, networking, topluluk ve kariyer içerir', () => {
+  const a = html.indexOf('id="inf-opportunities"');
+  const block = html.slice(a, html.indexOf('</section>', a));
+  for (const phrase of ['Küçük hesabını geliştir', 'Etkileşimini güçlendir', 'Viral potansiyelini geliştir', 'Doğru networking', 'Toplulukla büyü', 'Kariyer ve ek gelir fırsatları']) {
+    assert.ok(block.includes(phrase), phrase);
+  }
+  assert.match(block, /Viral olma, belirli bir takipçi sayısı veya gelir garantisi verilmez/);
+  assert.match(block, /Kendi topluluğunun temelini kur/);
 });
 
 test('gerçek gönderiler eşit boyutlu, kaydırılabilir ve devam bağlantılıdır', () => {

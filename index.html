@@ -5156,7 +5156,8 @@
   .inf-tweet p { white-space: pre-wrap; margin: 0; }
   @media (max-width: 900px) { .inf-results, .inf-tweets { grid-template-columns: 1fr; } }
   .inf-hero-visual { margin: 18px 0; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #151728; }
-  .inf-hero-visual img { width: 100%; height: auto; display: block; }
+  .inf-hero-visual img { width: 100%; height: clamp(240px, 30vw, 360px); object-fit: cover; object-position: center 50%; display: block; }
+  .inf-hero-visual figcaption { padding: 7px 12px; font-size: 10px; color: var(--text-3); background: var(--card); }
   .inf-section-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
   .inf-section-nav a { color: var(--pc); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 9px 13px; font-size: 12px; }
   .inf-section-nav a:hover { border-color: var(--pc); background: var(--pc-soft); }
@@ -5164,9 +5165,9 @@
   .inf-value-section h3 { margin: 0 0 14px; font-size: 19px; line-height: 1.35; color: var(--text); }
   .inf-benefits, .inf-stories { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 14px 0; }
   .inf-benefit, .inf-story { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--input-bg); }
-  .inf-benefit-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--pc-soft); color: var(--pc); font-size: 23px; }
+  .inf-benefit-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: var(--pc-soft); color: var(--pc); font-size: 13px; font-weight: 700; }
   .inf-benefit h4, .inf-story h4 { margin: 12px 0 10px; font-size: 14px; color: var(--text); line-height: 1.4; }
-  .inf-story-art { width: 100%; height: auto; display: block; border-radius: 10px; margin-bottom: 14px; background: #151728; }
+  .inf-story-art { width: 100%; aspect-ratio: 16/10; height: auto; object-fit: cover; object-position: center; display: block; border-radius: 10px; margin-bottom: 14px; background: var(--card); }
   .inf-story-name { font-size: 11px; color: var(--pc); font-weight: 600; }
   .inf-mini-list { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; }
   .inf-mini-list li { position: relative; padding-left: 16px; color: var(--text-2); font-size: 12px; line-height: 1.5; }
@@ -5731,7 +5732,7 @@
         </div>
       </div>
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
-      <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 ALFALUENCE</a>
+      <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
       <div class="nav-drop">
         <button type="button" class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</button>
@@ -5794,7 +5795,7 @@
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
-      <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 ALFALUENCE</a>
+      <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
       <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
@@ -6138,7 +6139,7 @@
         </a>
         <a href="?page=influencer" class="home-card" data-nav>
           <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvInf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvInf)"/><circle cx="150" cy="54" r="26" fill="var(--card)" stroke="var(--pc)" stroke-width="2"/><path d="M139 58l11-11 11 11-11 11z" fill="none" stroke="var(--pc)" stroke-width="2.4" stroke-linejoin="round"/><circle cx="150" cy="58" r="3.4" fill="var(--pc)"/><path d="M82 92h136" stroke="var(--pc)" stroke-width="2" stroke-linecap="round" opacity=".55"/><circle cx="104" cy="47" r="3" fill="var(--pc)" opacity=".7"/><circle cx="196" cy="47" r="3" fill="var(--pc)" opacity=".7"/></svg></div>
-          <div class="hc-body"><h2 data-i18n="app.influencer">🚀 ALFALUENCE</h2><p data-i18n="pg.influencer.hc">Kripto ve FX içerikleriyle görünür ol, kendi kitleni kur.</p></div>
+          <div class="hc-body"><h2 data-i18n="app.influencer">🚀 Alfa Influencer</h2><p data-i18n="pg.influencer.hc">Hesap büyümesi, güçlü tweetler, networking ve topluluk.</p></div>
         </a>
   </div>
 </div>
@@ -7647,34 +7648,35 @@
   <div id="page-influencer" class="hidden">
     <div class="eg-brand">
       <span class="eg-brand-ico">🚀</span>
-      <span class="eg-brand-name" data-i18n="pg.influencer.t">ALFALUENCE</span>
-      <span class="eg-brand-sub" data-i18n="pg.influencer.s">Sesini bul. Kitleni oluştur.</span>
+      <span class="eg-brand-name" data-i18n="pg.influencer.t">Alfa Influencer</span>
+      <span class="eg-brand-sub" data-i18n="pg.influencer.s">Hesabını geliştir. İçeriğinle katkı ver.</span>
     </div>
 
     <div id="inf-teaser" class="inf-card inf-teaser">
-      <h2 data-i18n="pg.influencer.promo.h">Trade bilgini paylaş. Kendi kitleni kur.</h2>
-      <p data-i18n="pg.influencer.promo.s">Kripto ve FX odaklı kişisel marka, içerik ve iş birliği eğitimi.</p>
-      <figure class="inf-hero-visual"><img src="/assets/alfaluence-hero.svg" width="1200" height="420" alt="" decoding="async"></figure>
+      <h2 data-i18n="pg.influencer.promo.h">Sadece izleyen değil, üreten tarafta ol.</h2>
+      <p data-i18n="pg.influencer.promo.s">Kripto ve FX içeriklerinde hesabını, etkileşimini ve kişisel markanı geliştirmek için birlikte çalışıyoruz.</p>
+      <figure class="inf-hero-visual"><img src="/assets/alfa-influencer-creator.jpg" width="1440" height="960" alt="" decoding="async"><figcaption data-i18n="pg.influencer.photoNote">Fotoğraflar temsilidir.</figcaption></figure>
       <div class="inf-card" data-i18n="pg.influencer.videoSoon">Tanıtım videosu yakında burada.</div>
       <p class="inf-update" data-i18n="pg.influencer.updates">Eğitimler hazırlanıyor; içerikler eklendikçe güncellenir.</p>
 
-<nav class="inf-section-nav" aria-label="ALFALUENCE">
+<nav class="inf-section-nav" aria-label="Alfa Influencer">
   <a data-i18n="pg.influencer.jump.why" href="#inf-opportunities">Ne kazandırır?</a>
   <a data-i18n="pg.influencer.jump.stories" href="#inf-real-world">Fırsatlar</a>
   <a data-i18n="pg.influencer.jump.packages" href="#inf-packages">Paketler</a>
 </nav>
 <section class="inf-value-section" id="inf-opportunities" aria-labelledby="inf-benefits-title">
-  <h3 data-i18n="pg.influencer.value.h" id="inf-benefits-title">Neden içerik üretmelisin?</h3>
-  <div class="inf-benefits"><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">◎</span><h4 data-i18n="pg.influencer.benefit.0.h">Görünür ol</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.0.p0">Alanını netleştir.</li><li data-i18n="pg.influencer.benefit.0.p1">Trade sürecini anlat.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">◇</span><h4 data-i18n="pg.influencer.benefit.1.h">Güven kazan</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.1.p0">Kaynak ve risk paylaş.</li><li data-i18n="pg.influencer.benefit.1.p1">Gerçek etkileşime odaklan.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">↗</span><h4 data-i18n="pg.influencer.benefit.2.h">Fırsatlara hazırlan</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.2.p0">Prop firm ve borsa kampanyaları.</li><li data-i18n="pg.influencer.benefit.2.p1">Trading aracı iş birlikleri.</li></ul></article></div>
+  <h3 data-i18n="pg.influencer.value.h" id="inf-benefits-title">Alfa Influencer’da nasıl destek oluyoruz?</h3>
+<div class="inf-benefits"><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">01</span><h4 data-i18n="pg.influencer.benefit.0.h">Küçük hesabını geliştir</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.0.p0">Profilini ve nişini netleştir.</li><li data-i18n="pg.influencer.benefit.0.p1">Organik büyüme için yayın ritmi kur.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">02</span><h4 data-i18n="pg.influencer.benefit.1.h">Etkileşimini güçlendir</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.1.p0">Sohbet başlatan içerikler üret.</li><li data-i18n="pg.influencer.benefit.1.p1">Analitikten neyin işe yaradığını öğren.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">03</span><h4 data-i18n="pg.influencer.benefit.2.h">Viral potansiyelini geliştir</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.2.p0">Güçlü giriş, net fikir ve akış.</li><li data-i18n="pg.influencer.benefit.2.p1">Tweet örneklerinden birlikte öğren.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">04</span><h4 data-i18n="pg.influencer.benefit.3.h">Doğru networking</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.3.p0">Alanındaki doğru kişilere ulaş.</li><li data-i18n="pg.influencer.benefit.3.p1">İlk mesaj ve ortak yayın yaklaşımını geliştir.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">05</span><h4 data-i18n="pg.influencer.benefit.4.h">Toplulukla büyü</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.4.p0">Üreticilerle tanış, katkı ver.</li><li data-i18n="pg.influencer.benefit.4.p1">Kendi topluluğunun temelini kur.</li></ul></article><article class="inf-benefit"><span class="inf-benefit-icon" aria-hidden="true">06</span><h4 data-i18n="pg.influencer.benefit.5.h">Kariyer ve ek gelir fırsatları</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.benefit.5.p0">Kendi influencer kimliğini geliştir.</li><li data-i18n="pg.influencer.benefit.5.p1">Prop firm, borsa ve marka fırsatlarına hazırlan.</li></ul></article></div>
+<p data-i18n="pg.influencer.support.note">Hedefimiz organik gelişim. Viral olma, belirli bir takipçi sayısı veya gelir garantisi verilmez.</p>
 </section>
 <section class="inf-value-section inf-outcomes" id="inf-outcomes" aria-labelledby="inf-outcomes-title">
-  <h3 data-i18n="pg.influencer.outcomes.h" id="inf-outcomes-title">Birlikte neye çalışacağız?</h3>
-  <ul class="inf-outcome-list"><li data-i18n="pg.influencer.outcome.0.h">Net profil ve biyografi</li><li data-i18n="pg.influencer.outcome.1.h">İçerik fikirleri ve yayın planı</li><li data-i18n="pg.influencer.outcome.2.h">Etkileşim ölçüm düzeni</li><li data-i18n="pg.influencer.outcome.3.h">İş birliğine uygun sunum</li></ul>
+  <h3 data-i18n="pg.influencer.outcomes.h" id="inf-outcomes-title">İzleyiciden üreticiye, adım adım.</h3>
+  <ul class="inf-outcome-list"><li data-i18n="pg.influencer.outcome.0.h">Profil ve organik büyüme planı</li><li data-i18n="pg.influencer.outcome.1.h">Tweet yazımı ve içerik rutini</li><li data-i18n="pg.influencer.outcome.2.h">Networking ve topluluk yaklaşımı</li><li data-i18n="pg.influencer.outcome.3.h">Kariyer ve iş birliği sunumu</li></ul>
   <p data-i18n="pg.influencer.outcomes.note" class="inf-method">Bireysel destek seçtiğin pakete göre değişir.</p>
 </section>
 <section class="inf-value-section" id="inf-real-world" aria-labelledby="inf-real-world-title">
   <h3 data-i18n="pg.influencer.stories.h" id="inf-real-world-title">Hangi kapılar açılabilir?</h3>
-  <div class="inf-stories"><article class="inf-story"><img class="inf-story-art" src="/assets/alfaluence-prop.svg" width="600" height="240" alt="" loading="lazy" decoding="async"><span data-i18n="pg.influencer.story.0.name" class="inf-story-name">FX / prop firm</span><h4 data-i18n="pg.influencer.story.0.tag">Prop firm ile kampanya</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.story.0.p0">İndirim kodu</li><li data-i18n="pg.influencer.story.0.p1">İçerik anlaşması</li><li data-i18n="pg.influencer.story.0.p2">Koşullu değerlendirme erişimi</li></ul></article><article class="inf-story"><img class="inf-story-art" src="/assets/alfaluence-exchange.svg" width="600" height="240" alt="" loading="lazy" decoding="async"><span data-i18n="pg.influencer.story.1.name" class="inf-story-name">Kripto / borsa</span><h4 data-i18n="pg.influencer.story.1.tag">Borsa ile içerik iş birliği</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.story.1.p0">Türkçe eğitim yayını</li><li data-i18n="pg.influencer.story.1.p1">Kampanya içeriği</li><li data-i18n="pg.influencer.story.1.p2">Koşullara bağlı referans anlaşması</li></ul></article><article class="inf-story"><img class="inf-story-art" src="/assets/alfaluence-tools.svg" width="600" height="240" alt="" loading="lazy" decoding="async"><span data-i18n="pg.influencer.story.2.name" class="inf-story-name">Trading araçları</span><h4 data-i18n="pg.influencer.story.2.tag">Araç ve platform iş birlikleri</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.story.2.p0">Grafik / veri aracı tanıtımı</li><li data-i18n="pg.influencer.story.2.p1">Platform deneyimi paylaşımı</li><li data-i18n="pg.influencer.story.2.p2">Ücretli içerik veya satış ortaklığı</li></ul></article></div>
+  <div class="inf-stories"><article class="inf-story"><img class="inf-story-art" src="/assets/alfa-influencer-trading.jpg" width="800" height="534" alt="" loading="lazy" decoding="async"><span data-i18n="pg.influencer.story.0.name" class="inf-story-name">FX / prop firm</span><h4 data-i18n="pg.influencer.story.0.tag">Prop firm ile kampanya</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.story.0.p0">İndirim kodu</li><li data-i18n="pg.influencer.story.0.p1">İçerik anlaşması</li><li data-i18n="pg.influencer.story.0.p2">Koşullu değerlendirme erişimi</li></ul></article><article class="inf-story"><img class="inf-story-art" src="/assets/alfa-influencer-writing.jpg" width="800" height="534" alt="" loading="lazy" decoding="async"><span data-i18n="pg.influencer.story.1.name" class="inf-story-name">Kripto / borsa</span><h4 data-i18n="pg.influencer.story.1.tag">Borsa ile içerik iş birliği</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.story.1.p0">Türkçe eğitim yayını</li><li data-i18n="pg.influencer.story.1.p1">Kampanya içeriği</li><li data-i18n="pg.influencer.story.1.p2">Koşullara bağlı referans anlaşması</li></ul></article><article class="inf-story"><img class="inf-story-art" src="/assets/alfa-influencer-network.jpg" width="800" height="534" alt="" loading="lazy" decoding="async"><span data-i18n="pg.influencer.story.2.name" class="inf-story-name">Trading araçları</span><h4 data-i18n="pg.influencer.story.2.tag">Araç ve platform iş birlikleri</h4><ul class="inf-mini-list"><li data-i18n="pg.influencer.story.2.p0">Grafik / veri aracı tanıtımı</li><li data-i18n="pg.influencer.story.2.p1">Platform deneyimi paylaşımı</li><li data-i18n="pg.influencer.story.2.p2">Ücretli içerik veya satış ortaklığı</li></ul></article></div>
   <p data-i18n="pg.influencer.stories.note" class="inf-method">Örnek fırsatlardır; paketlere dahil değildir. Anlaşmalar markaların koşullarına bağlıdır.</p>
   <details class="inf-terms">
     <summary data-i18n="pg.influencer.stories.terms">İş birliklerinde dikkat</summary>
@@ -30080,8 +30082,8 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
-    "pg.influencer.promo.h": { tr: "Trade bilgini paylaş. Kendi kitleni kur.", en: "Share your trading knowledge. Build your audience." },
-    "pg.influencer.promo.s": { tr: "Kripto ve FX odaklı kişisel marka, içerik ve iş birliği eğitimi.", en: "Personal branding, content and collaboration training focused on crypto and FX." },
+    "pg.influencer.promo.h": { tr: "Sadece izleyen değil, üreten tarafta ol.", en: "Move from watching to creating." },
+    "pg.influencer.promo.s": { tr: "Kripto ve FX içeriklerinde hesabını, etkileşimini ve kişisel markanı geliştirmek için birlikte çalışıyoruz.", en: "We work together to develop your account, engagement and personal brand in crypto and FX content." },
     'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
     'pg.influencer.buy': { tr: 'Paketi seç', en: 'Select package' },
     'pg.influencer.unlockedNote': { tr: 'Tam erişim açık — aşağıdaki çalışma alanı paketine özel.', en: 'Full access is open — the workspace below is for package members.' },
@@ -30179,15 +30181,6 @@ loadSfx();
     "pg.influencer.tweet.3.title": { tr: "Süreç ve güven", en: "Process and trust" },
     "pg.influencer.tweet.3.body": { tr: "Bu hafta en çok ne öğrendim? İyi görünen her fikri paylaşmak yerine nedenini açıklayabildiğim fikirlere odaklanmak. Bir sonraki paylaşımda sonucu değil, karar sürecini de göstereceğim.", en: "My biggest lesson this week: focus on ideas I can explain rather than sharing every idea that looks good. In my next post, I will show the decision process, not just the outcome." },
     "pg.influencer.sample": { tr: "Temsili örnek · gerçek gönderi değil", en: "Illustrative sample · not a real post" },
-    "pg.influencer.benefit.0.h": { tr: "Görünür ol", en: "Get noticed" },
-    "pg.influencer.benefit.0.p0": { tr: "Alanını netleştir.", en: "Define your niche." },
-    "pg.influencer.benefit.0.p1": { tr: "Trade sürecini anlat.", en: "Explain your trading process." },
-    "pg.influencer.benefit.1.h": { tr: "Güven kazan", en: "Earn trust" },
-    "pg.influencer.benefit.1.p0": { tr: "Kaynak ve risk paylaş.", en: "Share sources and risks." },
-    "pg.influencer.benefit.1.p1": { tr: "Gerçek etkileşime odaklan.", en: "Focus on meaningful engagement." },
-    "pg.influencer.benefit.2.h": { tr: "Fırsatlara hazırlan", en: "Prepare for opportunities" },
-    "pg.influencer.benefit.2.p0": { tr: "Prop firm ve borsa kampanyaları.", en: "Prop firm and exchange campaigns." },
-    "pg.influencer.benefit.2.p1": { tr: "Trading aracı iş birlikleri.", en: "Trading-tool collaborations." },
     "pg.influencer.story.0.name": { tr: "FX / prop firm", en: "FX / prop firms" },
     "pg.influencer.story.0.tag": { tr: "Prop firm ile kampanya", en: "Prop firm campaigns" },
     "pg.influencer.story.0.p0": { tr: "İndirim kodu", en: "Discount code" },
@@ -30206,12 +30199,12 @@ loadSfx();
     "pg.influencer.jump.why": { tr: "Ne kazandırır?", en: "What can you gain?" },
     "pg.influencer.jump.stories": { tr: "Fırsatlar", en: "Opportunities" },
     "pg.influencer.jump.packages": { tr: "Paketler", en: "Packages" },
-    "pg.influencer.value.h": { tr: "Neden içerik üretmelisin?", en: "Why create content?" },
-    "pg.influencer.outcomes.h": { tr: "Birlikte neye çalışacağız?", en: "What will we work on?" },
-    "pg.influencer.outcome.0.h": { tr: "Net profil ve biyografi", en: "A clear profile and bio" },
-    "pg.influencer.outcome.1.h": { tr: "İçerik fikirleri ve yayın planı", en: "Content ideas and publishing plan" },
-    "pg.influencer.outcome.2.h": { tr: "Etkileşim ölçüm düzeni", en: "An engagement tracking routine" },
-    "pg.influencer.outcome.3.h": { tr: "İş birliğine uygun sunum", en: "A collaboration-ready introduction" },
+    "pg.influencer.value.h": { tr: "Alfa Influencer’da nasıl destek oluyoruz?", en: "How do we support you at Alfa Influencer?" },
+    "pg.influencer.outcomes.h": { tr: "İzleyiciden üreticiye, adım adım.", en: "From audience member to creator, step by step." },
+    "pg.influencer.outcome.0.h": { tr: "Profil ve organik büyüme planı", en: "Profile and organic growth plan" },
+    "pg.influencer.outcome.1.h": { tr: "Tweet yazımı ve içerik rutini", en: "Post writing and content routine" },
+    "pg.influencer.outcome.2.h": { tr: "Networking ve topluluk yaklaşımı", en: "Networking and community approach" },
+    "pg.influencer.outcome.3.h": { tr: "Kariyer ve iş birliği sunumu", en: "Career and collaboration introduction" },
     "pg.influencer.outcomes.note": { tr: "Bireysel destek seçtiğin pakete göre değişir.", en: "Individual support depends on your package." },
     "pg.influencer.stories.h": { tr: "Hangi kapılar açılabilir?", en: "What opportunities could open?" },
     "pg.influencer.stories.note": { tr: "Örnek fırsatlardır; paketlere dahil değildir. Anlaşmalar markaların koşullarına bağlıdır.", en: "Illustrative opportunities, not package inclusions. Agreements depend on each brand’s terms." },
@@ -30221,10 +30214,30 @@ loadSfx();
     "pg.influencer.stories.rule3": { tr: "Kazanç, sponsorluk veya müşteri garantisi verilmez; ilgili finans kurallarına uy.", en: "No guarantee of profits, sponsorships or clients. Follow applicable financial rules." },
     "pg.influencer.bot.point1": { tr: "Yorum kalitesine bak.", en: "Look at comment quality." },
     "pg.influencer.bot.point2": { tr: "Tekrar gelen etkileşimi izle.", en: "Look for returning engagement." },
-    "app.influencer": { tr: "🚀 ALFALUENCE", en: "🚀 ALFALUENCE" },
-    "pg.influencer.hc": { tr: "Kripto ve FX içerikleriyle görünür ol, kendi kitleni kur.", en: "Get noticed through crypto and FX content. Build your audience." },
-    "pg.influencer.t": { tr: "ALFALUENCE", en: "ALFALUENCE" },
-    "pg.influencer.s": { tr: "Sesini bul. Kitleni oluştur.", en: "Find your voice. Build your audience." },
+    "pg.influencer.benefit.0.h": { tr: "Küçük hesabını geliştir", en: "Develop a small account" },
+    "pg.influencer.benefit.0.p0": { tr: "Profilini ve nişini netleştir.", en: "Clarify your profile and niche." },
+    "pg.influencer.benefit.0.p1": { tr: "Organik büyüme için yayın ritmi kur.", en: "Build a publishing routine for organic growth." },
+    "pg.influencer.benefit.1.h": { tr: "Etkileşimini güçlendir", en: "Improve engagement" },
+    "pg.influencer.benefit.1.p0": { tr: "Sohbet başlatan içerikler üret.", en: "Create posts that start conversations." },
+    "pg.influencer.benefit.1.p1": { tr: "Analitikten neyin işe yaradığını öğren.", en: "Use analytics to learn what works." },
+    "pg.influencer.benefit.2.h": { tr: "Viral potansiyelini geliştir", en: "Develop viral potential" },
+    "pg.influencer.benefit.2.p0": { tr: "Güçlü giriş, net fikir ve akış.", en: "Stronger hooks, clear ideas and structure." },
+    "pg.influencer.benefit.2.p1": { tr: "Tweet örneklerinden birlikte öğren.", en: "Learn together from example posts." },
+    "pg.influencer.benefit.3.h": { tr: "Doğru networking", en: "Relevant networking" },
+    "pg.influencer.benefit.3.p0": { tr: "Alanındaki doğru kişilere ulaş.", en: "Reach relevant people in your niche." },
+    "pg.influencer.benefit.3.p1": { tr: "İlk mesaj ve ortak yayın yaklaşımını geliştir.", en: "Improve introductions and collaboration approaches." },
+    "pg.influencer.benefit.4.h": { tr: "Toplulukla büyü", en: "Grow with a community" },
+    "pg.influencer.benefit.4.p0": { tr: "Üreticilerle tanış, katkı ver.", en: "Meet fellow creators and contribute." },
+    "pg.influencer.benefit.4.p1": { tr: "Kendi topluluğunun temelini kur.", en: "Lay the foundations for your own community." },
+    "pg.influencer.benefit.5.h": { tr: "Kariyer ve ek gelir fırsatları", en: "Career and extra-income opportunities" },
+    "pg.influencer.benefit.5.p0": { tr: "Kendi influencer kimliğini geliştir.", en: "Develop your own creator identity." },
+    "pg.influencer.benefit.5.p1": { tr: "Prop firm, borsa ve marka fırsatlarına hazırlan.", en: "Prepare for prop firm, exchange and brand opportunities." },
+    "pg.influencer.support.note": { tr: "Hedefimiz organik gelişim. Viral olma, belirli bir takipçi sayısı veya gelir garantisi verilmez.", en: "Our goal is organic development. Virality, a specific follower count and income are not guaranteed." },
+    "pg.influencer.photoNote": { tr: "Fotoğraflar temsilidir.", en: "Photos are illustrative." },
+    "app.influencer": { tr: "🚀 Alfa Influencer", en: "🚀 Alfa Influencer" },
+    "pg.influencer.hc": { tr: "Hesap büyümesi, güçlü tweetler, networking ve topluluk.", en: "Account growth, stronger posts, networking and community." },
+    "pg.influencer.t": { tr: "Alfa Influencer", en: "Alfa Influencer" },
+    "pg.influencer.s": { tr: "Hesabını geliştir. İçeriğinle katkı ver.", en: "Grow your profile. Contribute through your content." },
     'pg.influencer.check': { tr: 'Başlangıç kontrol listesi', en: 'Getting-started checklist' },
     'pg.influencer.checkS': { tr: 'Sırayla tamamla. İşaretler bu tarayıcıda saklanır.', en: 'Work through them in order. Your ticks are saved in this browser.' },
     'pg.influencer.reset': { tr: 'Sıfırla', en: 'Reset' },

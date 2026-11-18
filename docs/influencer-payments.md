@@ -1,10 +1,14 @@
-# ALFALUENCE: ödeme onayı kurulumu
+# Alfa Influencer: ödeme onayı kurulumu
 
 Kapsam: kripto/FX trader'ları ve trading araçları üzerine içerik üretenler.
 Günlük yaşam/lifestyle ve genel freelance senaryoları kaldırıldı.
-Sayfa akışı: özgün SVG illüstrasyon → üç kısa fayda kartı → dört çalışma hedefi →
+Sayfa akışı: doğal üretim fotoğrafı → altı kısa destek kartı → dört çalışma hedefi →
 prop firm/borsa/trading aracı senaryoları → paketler.
 Metinler kısa maddelerdir; koşullar ve temsili tweet taslakları açılır bölümlerdedir.
+Destek başlıkları: organik hesap gelişimi, etkileşim, viral potansiyelli tweetler,
+networking, topluluk ve influencer kariyeri/ek gelir fırsatları. Sonuç garantisi yoktur.
+Eski SVG görseller sayfada kullanılmaz; gerçek fotoğraf kaynakları ve lisans notları
+`docs/alfa-influencer-photos.md` içindedir.
 Bu senaryolar gerçek anlaşmalar, mezun sonuçları veya sağlanan ayrıcalıklar
 gibi sunulmaz. Yeni gelir, müşteri veya sponsorluk garantisi verilmez.
 Mevcut `?page=influencer` bağlantısı ve erişim anahtarları geriye uyumluluk için korunur.
