@@ -86,9 +86,9 @@ test('öğrenci için eksik erişim tablosu premium erişim sayılmaz', async t 
   assert.equal(result.body.error, 'setup_required');
   assert.ok(!f.calls.some(call => call.url.includes('/edu_feedback')));
 });
-test('sahte konu veya ders için paylaşım kaydedilmez', async t => {
+test('var olmayan eğitim kanalı için paylaşım kaydedilmez', async t => {
   const f = fixture(t);
-  assert.equal((await f.request({ op: 'question', lesson: 'missing', text: 'Bir sorum var', anonymous: true }, 'POST')).status, 404);
+  assert.equal((await f.request({ channel: 'missing', op: 'question', text: 'Bir sorum var', anonymous: true }, 'POST')).status, 404);
   assert.equal(f.rows.length, 0);
 });
 test('anonim kayıt hesapla bağlıdır fakat okuma yanıtında kimlik/e-posta bulunmaz', async t => {
@@ -96,6 +96,8 @@ test('anonim kayıt hesapla bağlıdır fakat okuma yanıtında kimlik/e-posta b
   const r = await f.request({ op: 'question', lesson: 'lesson-1', text: 'Bu konuyu açıklar mısınız?', anonymous: true, name: 'Özel ad', user_id: 'forged', instructor: true }, 'POST');
   assert.equal(r.status, 200); assert.equal(f.rows[0].user_id, f.userId);
   assert.equal(f.rows[0].display_name, 'Anonim'); assert.equal(f.rows[0].instructor, false);
+  assert.equal(f.rows[0].lesson_id, null);
+  assert.equal(f.rows[0].section_id, 'general'); assert.equal(f.rows[0].topic_id, 'general');
   const read = await f.request({ view: 'questions' });
   assert.equal(read.body.posts[0].name, 'Anonim'); assert.equal(read.body.posts[0].mine, true);
   assert.ok(!JSON.stringify(read.body).includes(f.userId));
@@ -124,13 +126,44 @@ test('öğrenci eğitmen yanıtı üretemez veya başka öğrencinin kaydını s
   assert.equal((await f.request({ op: 'remove', id: other.id }, 'POST')).status, 403);
   assert.equal(f.rows.length, 1);
 });
-test('yönetici yanıtı doğru soruya ve derse bağlanır, öğrencilere görünür', async t => {
+test('yönetici yanıtı doğru soruya bağlanır, video bağlantısı yayımlanmaz', async t => {
   const question = { id: '20000000-0000-0000-0000-000000000099', user_id: 'another-student', channel_id: scope.channel,
     section_id: scope.section, topic_id: scope.topic, lesson_id: 'lesson-2', kind: 'question', body: 'Bir soru var', anonymous: true };
   const f = fixture(t, { admin: true, posts: [question] });
   assert.equal((await f.request({ op: 'answer', parent: question.id, text: 'Açıklayıcı eğitmen yanıtı', name: 'Eğitmen', anonymous: false, lesson: 'lesson-1' }, 'POST')).status, 200);
-  assert.equal(f.rows[1].lesson_id, 'lesson-2'); assert.equal(f.rows[1].instructor, true);
-  assert.equal((await f.request({ view: 'questions' })).body.answers.length, 1);
+  assert.equal(f.rows[1].lesson_id, null); assert.equal(f.rows[1].instructor, true);
+  const result = await f.request({ view: 'questions' });
+  assert.equal(result.body.answers.length, 1);
+  assert.ok(!Object.hasOwn(result.body.posts[0], 'lesson_id'));
+  assert.equal(f.rows[0].lesson_id, 'lesson-2'); // Old metadata stays stored.
+});
+test('video veya konu değişince aynı genel yorum güncellenir; eski kayıtlar korunur', async t => {
+  const f = fixture(t);
+  await f.request({ op: 'review', rating: 3, text: 'Eğitimin ilk kısmı açıklayıcı.', anonymous: true, topic: 'course-1' }, 'POST');
+  await f.request({ op: 'review', rating: 4, text: 'Eğitimin genelinden memnunum.', anonymous: true, section: 'other', topic: 'course-2' }, 'POST');
+  assert.equal(f.rows.length, 1);
+  assert.equal(f.rows[0].rating, 4);
+  const read = await f.request({ topic: 'unrelated', section: 'unrelated' });
+  assert.equal(read.status, 200); assert.equal(read.body.posts.length, 1);
+  assert.equal(read.body.myReview.id, f.rows[0].id);
+});
+test('kalemle düzenleme başka öğrencinin yorumunu değiştiremez', async t => {
+  const row = { id: '20000000-0000-0000-0000-000000000099', channel_id: scope.channel,
+    section_id: 'old-section', topic_id: 'old-topic', kind: 'review', user_id: 'another-student',
+    rating: 2, body: 'Eski öğrencinin yorumu', anonymous: true };
+  const f = fixture(t, { posts: [row] });
+  assert.equal((await f.request({ op: 'review', id: row.id, rating: 5, text: 'Yorumu değiştirmeye çalışıyorum', anonymous: true }, 'POST')).status, 403);
+  assert.equal(f.rows[0].rating, 2);
+});
+test('eski konu yorumları ve soruları genel akışta görünür, silinmez', async t => {
+  const rows = ['review', 'question'].map((kind, i) => ({ id: '20000000-0000-0000-0000-' + String(i + 1).padStart(12, '0'),
+    user_id: 'another-student', channel_id: scope.channel, section_id: 'old-section', topic_id: 'old-topic',
+    lesson_id: 'old-lesson', kind, body: 'Eski kayıt burada kalmalı', anonymous: true, rating: kind === 'review' ? 4 : null }));
+  const f = fixture(t, { posts: rows });
+  assert.equal((await f.request()).body.posts.length, 1);
+  assert.equal((await f.request({ view: 'questions' })).body.posts.length, 1);
+  assert.equal(f.rows.length, 2);
+  assert.equal(f.rows[1].topic_id, 'old-topic');
 });
 test('migration RLS ve tek öğrenci/konu yorumu kısıtını içerir', () => {
   const sql = fs.readFileSync(new URL('../supabase/site/016_edu_feedback.sql', import.meta.url), 'utf8');

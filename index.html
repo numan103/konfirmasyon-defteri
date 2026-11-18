@@ -26,8 +26,8 @@
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
-<link rel="stylesheet" href="/assets/edu-feedback.css?v=1">
-<script defer src="/assets/edu-feedback.js?v=1"></script>
+<link rel="stylesheet" href="/assets/edu-feedback.css?v=2">
+<script defer src="/assets/edu-feedback.js?v=2"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=4"></script>
 
 <!-- AYNA:BASLA -->
@@ -24042,10 +24042,9 @@ function chMoveTopic(t, topic, dir) {
 function mountEduFeedback(trader, topic, lesson) {
   if (!window.EduFeedback) return;
   if (!trader || !topic) { window.EduFeedback.clear(); return; }
-  const lessons = topic.videos || [];
+  const lessons = Object.values(trader.sections || {}).flatMap(topics => (topics || []).flatMap(item => item.videos || []));
   window.EduFeedback.mount({
-    channel: trader.id, section: chSec, topic: topic.id, title: topic.title || '',
-    lesson: lesson ? lesson.id : '', lessons: lessons.map(v => ({ id: v.id, title: v.title || '' })),
+    channel: trader.id, title: trader.name || 'Alfa Edu',
     done: lessons.filter(v => chIsDone(trader, v)).length, total: lessons.length,
     account: AUTH.user ? AUTH.user.id : '', admin: siteIsAdmin()
   });
