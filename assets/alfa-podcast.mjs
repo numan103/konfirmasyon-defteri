@@ -22,8 +22,7 @@ function start() {
   audio.playbackRate=[.75,1,1.25,1.5,2].includes(Number(prefs.rate))?Number(prefs.rate):1;
   $('.ap-speed').value=String(audio.playbackRate);
   function admin() { try { return typeof window.siteIsAdmin==='function'&&window.siteIsAdmin(); } catch { return false; } }
-  function premium() { try { return typeof window.refUnlocked==='function'&&window.refUnlocked(); } catch { return false; } }
-  function canListen() { return admin() || premium(); }
+  function canListen() { return admin() || (typeof AUTH !== 'undefined' && !!AUTH.user?.id); }
   function status(text='') { $('.ap-status').textContent=text; }
   function persist() {
     if (!episode) return;
@@ -35,6 +34,12 @@ function start() {
     lastSaved=Date.now();
   }
   function context() {
+    if (!canListen()) {
+      persist();
+      if (!audio.paused) audio.pause();
+      if (audio.hasAttribute('src')) { audio.removeAttribute('src'); audio.load(); }
+      hasPlayed=false;
+    }
     const isLanding=document.body.classList.contains('landed');
     const isHome=isLanding || document.body.dataset.page==='home' || !document.body.dataset.page;
     const mini=!isHome&&hasPlayed&&!dismissed&&!!episode;
@@ -80,7 +85,7 @@ function start() {
     status(); update(); context();
   }
   async function play() {
-    if (!episode) return;
+    if (!episode || !canListen()) return;
     if (!audio.paused) { audio.pause(); return; }
     status();
     if (!audio.getAttribute('src')) audio.src=episode.audioUrl;

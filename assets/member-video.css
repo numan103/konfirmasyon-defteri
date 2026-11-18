@@ -1,0 +1,12 @@
+.member-video { margin: 18px auto; padding: 18px; max-width: 860px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
+.member-video[hidden] { display: none !important; }
+.member-video-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.member-video-kicker { font-size: 10px; font-weight: 800; letter-spacing: .08em; color: var(--pc); }
+.member-video-perk { font-size: 10px; color: var(--text-3); }
+.member-video h2 { font-size: 17px; line-height: 1.4; margin: 0 0 6px; overflow-wrap: anywhere; }
+.member-video-meta { margin-bottom: 12px; font-size: 11px; color: var(--text-3); }
+.member-video-frame { aspect-ratio: 16/9; overflow: hidden; border-radius: 10px; background: #080a10; }
+.member-video iframe { display: block; width: 100%; height: 100%; border: 0; }
+.member-video-note { margin: 10px 0 0; font-size: 11px; line-height: 1.6; color: var(--text-3); }
+.member-video-note a { color: var(--pc); }
+@media (max-width: 480px) { .member-video { padding: 12px; } .member-video h2 { font-size: 15px; } }

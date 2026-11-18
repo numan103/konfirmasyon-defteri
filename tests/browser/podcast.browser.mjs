@@ -36,13 +36,13 @@ await page.route('**/api/edu-shared?kind=podcast**', async route => {
 try {
   await page.goto((arg('url') || 'http://127.0.0.1:4173') + '/?page=home');
   await page.waitForFunction(() => window.AlfaPodcast);
-  await page.evaluate(() => { SITE.tier = 'ref'; window.refUnlocked = () => true; window.AlfaPodcast.refreshContext(); });
+  await page.evaluate(() => { AUTH.user={id:'free-member',email:'member@example.com'}; SITE.tier = 'free'; window.refUnlocked = () => false; window.AlfaPodcast.refreshContext(); });
   const landingCard = page.locator('#landing-podcast-slot .ap-podcast');
   await landingCard.waitFor({ state:'visible' });
   assert.match(await landingCard.locator('.ap-title').textContent(), /Haftanın piyasa notları/);
   assert.match(await landingCard.locator('.ap-badge').textContent(), /Haftanın Podcast/);
   assert.equal(await page.evaluate(() => document.getElementById('alfa-podcast-audio').paused), true, 'must not autoplay');
-  assert.equal(await landingCard.locator('.ap-manage').isVisible(), false, 'anonymous visitors never see publishing controls');
+  assert.equal(await landingCard.locator('.ap-manage').isVisible(), false, 'free members never see publishing controls');
   assert.equal(await landingCard.locator('.ap-description').textContent(), '16.11.2026 · Faiz, dolares ve kripto görünümü');
 
   await landingCard.locator('.ap-play').click();
