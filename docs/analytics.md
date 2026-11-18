@@ -1,5 +1,8 @@
 # Ziyaretçi Analitiği
 
+Eğitim/ürün takibi de eklendi: [Eğitim CRM](education-crm.md). Ziyaret/CTA ilgisi,
+açık talep ve yönetici onaylı alım ayrı tutulur; mevcut ziyaret raporu korunur.
+
 Site ziyaretçilerini **kim geldi, ne kadar kaldı, hangi sayfalarla ilgilendi** ekseninde
 gösteren yönetici paneli. Panel yalnızca `ahmetnuman20@gmail.com` (veya
 `SITE_ADMIN_EMAILS`) hesabıyla açılır: `?page=analitik`.

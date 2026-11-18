@@ -64,6 +64,14 @@ if (root) {
         const upgrade = link(text('100K ile 4 özel ders için başvur ↗', 'Apply for 4 private lessons with 100K ↗'), eduApplicationURL(plan.id, 'breakout100k', window.LANG));
         upgrade.dataset.route = 'breakout100k'; buttons.appendChild(upgrade);
       }
+      buttons.querySelectorAll('a').forEach(anchor => {
+        anchor.dataset.product = 'education'; anchor.dataset.plan = plan.id;
+        if (!anchor.dataset.route) anchor.dataset.route = 'cash';
+      });
+      const apply = el('button', text('Talep bırak · Size ulaşalım', 'Leave an application · Contact me'), 'btn');
+      apply.type = 'button'; apply.dataset.eduApply = plan.id; apply.dataset.anCta = 'education-application';
+      apply.dataset.product = 'education'; apply.dataset.plan = plan.id; apply.dataset.route = 'undecided';
+      buttons.appendChild(apply);
       card.appendChild(buttons); grid.appendChild(card);
     });
     root.appendChild(grid);

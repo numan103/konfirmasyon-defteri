@@ -27,8 +27,9 @@ Bu koşul kartların üstünde de görünür; sonraki alımlara veya mevcut hesa
 otomatik hak verilmez. İkinci pakette konu anlatımı, piyasa analizi, işlem
 değerlendirme ve soru-cevap içeren haftalık canlı eğitim başlar.
 Referans linki ve kesin Pro muadilliği henüz yapılandırılmadığından kullanıcı
-satın almadan önce `@traderahmetd` üzerinden teyit ister. Başvuru düğmeleri
-yalnızca planı içeren Telegram mesaj taslağı açar; kendiliğinden mesaj göndermez.
+satın almadan önce `@traderahmetd` üzerinden teyit ister. Telegram düğmeleri
+planı içeren mesaj taslağı açar; kendiliğinden mesaj göndermez.
+Ek olarak açık rızalı talep formu [eğitim CRM](education-crm.md) kaydı oluşturur.
 İlk ay ders/grup haklarının başlangıcı onay sırasında planlanır.
 
 Bu sürüm paket sunumu ve manuel başvuru içindir. Ödeme tahsilatı, Breakout

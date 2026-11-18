@@ -29,7 +29,10 @@
 <link rel="stylesheet" href="/assets/member-video.css?v=1">
 <script type="module" src="/assets/member-video.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-plans.css?v=2">
-<script type="module" src="/assets/edu-plans.mjs?v=2"></script>
+<script type="module" src="/assets/edu-plans.mjs?v=4"></script>
+<link rel="stylesheet" href="/assets/education-crm.css?v=1">
+<script type="module" src="/assets/education-crm.mjs?v=1"></script>
+<script type="module" src="/assets/edu-application.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
@@ -9088,8 +9091,8 @@
   <div class="wrap">
     <div class="ana-head">
       <div>
-        <h1>📊 Ziyaretçi Analitiği</h1>
-        <p>Kim geldi, ne kadar kaldı, hangi sayfalarla ilgilendi.</p>
+        <h1>📊 Ziyaretçi & Ürün Analitiği</h1>
+        <p>Ziyaretler, borsa üyelikleri, eğitim talepleri ve onaylı alımlar.</p>
       </div>
       <div class="ana-controls">
         <select id="ana-days" aria-label="Zaman aralığı">
@@ -9104,6 +9107,7 @@
       </div>
     </div>
     <div class="ana-note">Ziyaretler anonim ölçülür; ham IP adresi saklanmaz. İsim/e-posta yalnızca kullanıcı giriş yaptıysa görünür. Yönetici ziyaretleri varsayılan olarak sayılmaz.</div>
+    <div id="education-crm-slot"></div>
     <div id="ana-body">
       <div class="ana-loading">Analitik yükleniyor…</div>
     </div>
@@ -14164,6 +14168,7 @@ function applyTierUi() {
   }
   infAccess = false;
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
+  if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
 
   const isAdmin = siteIsAdmin();
   const ref = refUnlocked();
@@ -28248,7 +28253,10 @@ function anaBind() {
       kind: kind,
       label: label,
       url: url,
-      page: anaTrack.curPage || ''
+      page: anaTrack.curPage || '',
+      product: (link || cta).getAttribute('data-product') || '',
+      plan: (link || cta).getAttribute('data-plan') || '',
+      route: (link || cta).getAttribute('data-route') || ''
     });
     if (anaTrack.clicks.length > 60) anaTrack.clicks = anaTrack.clicks.slice(-60);
     anaFlushSoon();
@@ -28534,6 +28542,7 @@ async function anaLoad() {
     var j = await r.json().catch(function () { return {}; });
     if (!r.ok || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
     anaState.data = j;
+    window.dispatchEvent(new CustomEvent('alfa-analytics-loaded', { detail: j.educationInterest || null }));
     anaState.loadedAt = Date.now();
   } catch (e) {
     anaState.error = (e && e.message) || 'bilinmeyen hata';

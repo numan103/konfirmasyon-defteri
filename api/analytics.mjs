@@ -20,6 +20,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { requestUser } from '../lib/auth.mjs';
 import { createWindowRowsCache } from '../lib/window-rows-cache.mjs';
+import educationCRM, { educationInterest } from '../lib/education-crm.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -56,6 +57,8 @@ const PAGE_LABELS = {
   news: 'AlfaNews',
   ek: 'Ek',
   egitim: 'Alfa Edu',
+  eduplans: 'Alfa Edu Paketleri',
+  influencer: 'Alfa Influencer',
   strategies: 'Stratejiler',
   analiz: 'Analiz Köşesi',
   mentoring: 'Mentoring',
@@ -264,6 +267,9 @@ export function sanitizePayload(body, now) {
       url: str(c.url, 180),
       page: PAGE_RE.test(str(c.page, 40)) ? str(c.page, 40) : '',
     };
+    if (c.product === 'education' && ['video', 'live', 'personal'].includes(c.plan) && ['cash', 'breakout', 'breakout100k', 'undecided'].includes(c.route) && (c.route !== 'breakout100k' || c.plan === 'personal')) {
+      item.product = 'education'; item.plan = c.plan; item.route = c.route;
+    }
     if (!item.t || (!item.label && !item.url)) return;
     const key = [item.t, kind, item.label, item.url].join('|');
     if (seen.has(key)) return;
@@ -744,6 +750,7 @@ async function fetchMemberEmailMap() {
 export default async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (String(req.query?.education || '') === '1') return educationCRM(req, res);
 
   if (req.method === 'POST') {
     let body = req.body;
@@ -821,6 +828,7 @@ export default async function handler(req, res) {
       includeAdmin: includeAdmin,
       pruned: pruned,
       store: serviceKey() ? 'service' : 'publishable',
+      educationInterest: { ...educationInterest(out.rows, { now, days, includeAdmin }), truncated: !!out.truncated },
     }, summary));
   }
 
