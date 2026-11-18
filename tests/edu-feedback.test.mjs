@@ -206,6 +206,67 @@ test('Alfa Edu katalogdan kurs oynatıcıya direkt geçer', () => {
   assert.match(html, /openCourse\(c\.t\.id, c\.sec\.id\)/);
   assert.match(html, /refreshEduDynamic\(\)/);
   assert.ok(!html.includes('eg-no-channel'), 'ara kanal seçim metni kalmamalı');
-  assert.match(html, /\/assets\/edu-feedback\.js\?v=3/);
-  assert.match(html, /\/assets\/edu-feedback\.css\?v=3/);
+  assert.match(html, /\/assets\/edu-feedback\.js\?v=4/);
+  assert.match(html, /\/assets\/edu-feedback\.css\?v=4/);
+});
+
+test('Alfa Edu kurs kartları sabit yerel görseller kullanır', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const map = {
+    teknik: 'assets/edu-technical.jpg',
+    temel: 'assets/edu-fundamental.jpg',
+    psikoloji: 'assets/edu-psychology.jpg',
+    islem: 'assets/edu-execution.jpg',
+    onchain: 'assets/edu-onchain.jpg'
+  };
+  for (const [id, src] of Object.entries(map)) {
+    assert.ok(html.includes(id + ": '" + src + "'"), id + ' görsel eşlemesi eksik');
+  }
+  assert.match(html, /function eduThumb\(secId\)/);
+  assert.match(html, /img\.src = eduThumb\(c\.sec\.id\)/);
+  const helperEnd = html.indexOf('function eduLast()');
+  const helperBlock = html.slice(html.indexOf('const EDU_THUMBS'), helperEnd);
+  assert.ok(!/alfa-influencer-(trading|writing|network|creator)\.jpg/.test(helperBlock), 'influencer rotation kalmamalı');
+  for (const file of [...Object.values(map), 'assets/edu-advanced.jpg']) {
+    const path = new URL('../' + file, import.meta.url);
+    assert.ok(fs.existsSync(path), file + ' eksik');
+    const buf = fs.readFileSync(path);
+    assert.equal(buf.subarray(0, 3).toString('hex'), 'ffd8ff', file + ' JPEG değil');
+    assert.ok(buf.length > 10000, file + ' çok küçük');
+  }
+});
+
+test('Edu konu etiketleri ve fotoğraf notu TR/EN tanımlı', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const keys = [
+    ["'edu.topic.teknik': { tr: 'PRICE ACTION · HACİM', en: 'PRICE ACTION · VOLUME' }"],
+    ["'edu.topic.temel': { tr: 'MAKRO · HABER · WASH', en: 'MACRO · NEWS · WASH' }"],
+    ["'edu.topic.psikoloji': { tr: 'SABIR · ÇİPALAMA · AÇGÖZLÜK', en: 'PATIENCE · FOMO · GREED' }"],
+    ["'edu.topic.islem': { tr: 'BACKTEST · UYGULAMA', en: 'BACKTEST · EXECUTION' }"],
+    ["'edu.topic.onchain': { tr: 'L/S · OI · SPOT CVD', en: 'L/S · OI · SPOT CVD' }"],
+    ["'edu.photoNote': { tr: 'Fotoğraflar temsilidir.', en: 'Photos are illustrative.' }"]
+  ];
+  keys.forEach(([entry]) => assert.ok(html.includes(entry), entry + ' eksik'));
+  assert.ok(html.includes("topic.className = 'edu-thumb-topic'"));
+  assert.ok(html.includes('data-i18n="edu.photoNote"'));
+});
+
+test('İleri paket görünür ama kilitli; URL, kod veya içerik sızdırmaz', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../assets/edu-feedback.css', import.meta.url), 'utf8');
+  const start = html.indexOf('function eduAdvancedCard()');
+  const end = html.indexOf('function eduCard(c, i)', start);
+  assert.ok(start > -1 && end > start);
+  const block = html.slice(start, end);
+  assert.ok(block.includes("card.className = 'edu-card locked'"));
+  assert.ok(block.includes("img.src = 'assets/edu-advanced.jpg'"));
+  assert.ok(block.includes("lock.textContent = '🔒 ' + eduT('edu.locked', 'KİLİTLİ')"));
+  assert.ok(html.includes('grid.appendChild(eduAdvancedCard())'));
+  assert.ok(html.indexOf('grid.appendChild(eduAdvancedCard())') < html.indexOf('list.forEach((c, i) => grid.appendChild(eduCard(c, i)))'));
+  for (const leak of ['href', 'location', 'fetch(', 'access', 'code', 't.me', 'http', '?page=']) {
+    assert.ok(!block.toLowerCase().includes(leak.toLowerCase()), leak + ' kilitli kartta sızdı');
+  }
+  for (const rule of ['.edu-card.locked', '.edu-thumb-topic', '.edu-lock', '.edu-photo-note']) {
+    assert.ok(css.includes(rule), rule + ' stili eksik');
+  }
 });

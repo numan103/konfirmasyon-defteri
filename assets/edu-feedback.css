@@ -220,3 +220,58 @@
   .ef-prompt { align-items: flex-start; flex-wrap: wrap; }
   .ef-prompt .ef-actions { width: 100%; }
 }
+
+/* Alfa Edu — course art, topic overlays and the locked advanced package. */
+.edu-thumb-topic {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 2;
+  max-width: calc(100% - 20px);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(123, 120, 245, .92);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: .07em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.edu-card.locked {
+  cursor: default;
+  border-style: dashed;
+  border-color: rgba(123, 120, 245, .5);
+  background: linear-gradient(180deg, var(--pc-soft), var(--card) 62%);
+}
+.edu-card.locked:disabled { opacity: 1; }
+.edu-card.locked:hover { transform: none; border-color: rgba(123, 120, 245, .7); }
+.edu-card.locked .edu-thumb img { opacity: .5; filter: saturate(.65); }
+.edu-card.locked .edu-play { display: none; }
+.edu-lock {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(12, 13, 24, .84);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  pointer-events: none;
+}
+.edu-card-foot-note { font-size: 10.5px; line-height: 1.45; color: var(--text-3); }
+.edu-photo-note { margin: 10px 0 0; font-size: 10.5px; color: var(--text-3); text-align: right; }
+
+@media (max-width: 620px) {
+  .edu-thumb-topic { font-size: 8px; letter-spacing: .04em; }
+  .edu-card-foot-note { font-size: 10px; }
+}

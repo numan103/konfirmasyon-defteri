@@ -26,8 +26,8 @@
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
-<link rel="stylesheet" href="/assets/edu-feedback.css?v=3">
-<script defer src="/assets/edu-feedback.js?v=3"></script>
+<link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
+<script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=4"></script>
 
 <!-- AYNA:BASLA -->
@@ -6932,6 +6932,7 @@
         <div id="edu-chips" class="edu-chips"></div>
       </div>
       <div id="edu-grid" class="edu-grid"></div>
+      <div class="edu-photo-note" data-i18n="edu.photoNote">Fotoğraflar temsilidir.</div>
       <div id="edu-empty" class="edu-empty hidden" data-i18n="edu.empty">Eşleşen kurs bulunamadı.</div>
       <div id="edu-manage" class="edu-manage hidden">
         <div class="ch-panel ch-main" id="ch-main">
@@ -24032,17 +24033,49 @@ function eduCourses() {
   out.sort((a, b) => (Number(b.total > 0) - Number(a.total > 0)) || (a.order - b.order));
   return out;
 }
-function eduThumb(i) {
-  const imgs = [
-    'assets/alfa-influencer-trading.jpg',
-    'assets/alfa-influencer-writing.jpg',
-    'assets/alfa-influencer-network.jpg',
-    'assets/alfa-influencer-creator.jpg'
-  ];
-  return imgs[i % imgs.length];
+const EDU_THUMBS = {
+  teknik: 'assets/edu-technical.jpg',
+  temel: 'assets/edu-fundamental.jpg',
+  psikoloji: 'assets/edu-psychology.jpg',
+  islem: 'assets/edu-execution.jpg',
+  onchain: 'assets/edu-onchain.jpg'
+};
+function eduThumb(secId) { return EDU_THUMBS[secId] || EDU_THUMBS.teknik; }
+function eduTopicTag(secId) {
+  const key = 'edu.topic.' + secId;
+  const text = eduT(key, '');
+  return text === key ? '' : text;
 }
 function eduLast() {
   try { return JSON.parse(localStorage.getItem('alfa-edu-last') || 'null'); } catch (e) { return null; }
+}
+function eduAdvancedCard() {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'edu-card locked';
+  card.disabled = true;
+  card.setAttribute('aria-disabled', 'true');
+  card.setAttribute('aria-label', eduT('edu.advancedTitle', 'İleri Seviye Paket'));
+  const thumb = document.createElement('div'); thumb.className = 'edu-thumb';
+  const img = document.createElement('img');
+  img.src = 'assets/edu-advanced.jpg'; img.alt = eduT('edu.advancedTitle', 'İleri Seviye Paket'); img.loading = 'lazy';
+  const lock = document.createElement('span'); lock.className = 'edu-lock';
+  lock.textContent = '🔒 ' + eduT('edu.locked', 'KİLİTLİ');
+  const tag = document.createElement('span'); tag.className = 'edu-thumb-tag';
+  tag.textContent = eduT('edu.advancedTag', 'EXTRA · VIDEO');
+  thumb.append(img, lock, tag);
+  const body = document.createElement('div'); body.className = 'edu-card-body';
+  const title = document.createElement('div'); title.className = 'edu-card-title';
+  title.textContent = eduT('edu.advancedTitle', 'İleri Seviye Paket');
+  const sub = document.createElement('div'); sub.className = 'edu-card-sub';
+  sub.textContent = eduT('edu.advancedSub', 'Detaylı video eğitimi · Kilitli');
+  const foot = document.createElement('div'); foot.className = 'edu-card-foot';
+  const note = document.createElement('span'); note.className = 'edu-card-foot-note';
+  note.textContent = eduT('edu.advancedTeaser', 'Derinlemesine senaryolar ve uygulamalı çalışmalar.');
+  foot.appendChild(note);
+  body.append(title, sub, foot);
+  card.append(thumb, body);
+  return card;
 }
 function eduCard(c, i) {
   const card = document.createElement('button');
@@ -24052,11 +24085,12 @@ function eduCard(c, i) {
   card.dataset.course = c.sec.id;
   const thumb = document.createElement('div'); thumb.className = 'edu-thumb';
   const img = document.createElement('img');
-  img.src = eduThumb(i); img.alt = c.sec.title || 'Alfa Edu'; img.loading = 'lazy';
+  img.src = eduThumb(c.sec.id); img.alt = c.sec.title || 'Alfa Edu'; img.loading = 'lazy';
+  const topic = document.createElement('span'); topic.className = 'edu-thumb-topic'; topic.textContent = eduTopicTag(c.sec.id);
   const play = document.createElement('span'); play.className = 'edu-play'; play.textContent = '▶';
   const tag = document.createElement('span'); tag.className = 'edu-thumb-tag';
   tag.textContent = c.total ? ('KURS · ' + c.lessons.length + ' ' + eduT('edu.lessonsCount', 'ders')) : eduT('edu.soon', 'Yakında');
-  thumb.append(img, play, tag);
+  thumb.append(img, topic, play, tag);
   const body = document.createElement('div'); body.className = 'edu-card-body';
   const title = document.createElement('div'); title.className = 'edu-card-title'; title.textContent = c.sec.title || 'Alfa Edu';
   const sub = document.createElement('div'); sub.className = 'edu-card-sub'; sub.textContent = 'Alfa Edu · ' + (c.t.name || eduT('edu.instructor', 'Eğitmen'));
@@ -24098,6 +24132,7 @@ function renderEduCatalog() {
     return hay.indexOf(q) !== -1;
   });
   grid.replaceChildren();
+  grid.appendChild(eduAdvancedCard());
   list.forEach((c, i) => grid.appendChild(eduCard(c, i)));
   const empty = document.getElementById('edu-empty');
   if (empty) empty.classList.toggle('hidden', list.length > 0);
@@ -30399,6 +30434,17 @@ loadSfx();
     'edu.start': { tr: 'Başla', en: 'Start' },
     'edu.resume': { tr: 'Devam et', en: 'Resume' },
     'edu.overall': { tr: 'Genel ilerleme', en: 'Overall progress' },
+    'edu.topic.teknik': { tr: 'PRICE ACTION · HACİM', en: 'PRICE ACTION · VOLUME' },
+    'edu.topic.temel': { tr: 'MAKRO · HABER · WASH', en: 'MACRO · NEWS · WASH' },
+    'edu.topic.psikoloji': { tr: 'SABIR · ÇİPALAMA · AÇGÖZLÜK', en: 'PATIENCE · FOMO · GREED' },
+    'edu.topic.islem': { tr: 'BACKTEST · UYGULAMA', en: 'BACKTEST · EXECUTION' },
+    'edu.topic.onchain': { tr: 'L/S · OI · SPOT CVD', en: 'L/S · OI · SPOT CVD' },
+    'edu.locked': { tr: 'KİLİTLİ', en: 'LOCKED' },
+    'edu.advancedTag': { tr: 'EXTRA · VIDEO', en: 'EXTRA · VIDEO' },
+    'edu.advancedTitle': { tr: 'İleri Seviye Paket', en: 'Advanced Package' },
+    'edu.advancedSub': { tr: 'Detaylı video eğitimi · Kilitli', en: 'In-depth video training · Locked' },
+    'edu.advancedTeaser': { tr: 'Derinlemesine senaryolar ve uygulamalı çalışmalar.', en: 'Deep-dive scenarios and hands-on work.' },
+    'edu.photoNote': { tr: 'Fotoğraflar temsilidir.', en: 'Photos are illustrative.' },
     "pg.influencer.promo.h": { tr: "Sadece izleyen değil, üreten tarafta ol.", en: "Move from watching to creating." },
     "pg.influencer.promo.s": { tr: "Kripto ve FX içeriklerinde hesabını, etkileşimini ve kişisel markanı geliştirmek için birlikte çalışıyoruz.", en: "We work together to develop your account, engagement and personal brand in crypto and FX content." },
     'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
