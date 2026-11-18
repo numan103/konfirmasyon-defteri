@@ -190,6 +190,22 @@ test('Alfa Edu mevcut kanal görünümüne ve mevcut API fonksiyonuna bağlanır
   assert.match(html, /mountEduFeedback\(t, cur, curVid\)/);
   assert.match(api, /kind === 'feedback'/);
   assert.match(client, /alfa-edu-feedback-prompts-v1/);
-  for (const word of ['promptStart', 'promptMiddle', 'promptEnd', 'Şimdi değil']) assert.ok(client.includes(word));
+  for (const word of ['promptStart', 'promptMiddle', 'promptEnd', 'Sonra']) assert.ok(client.includes(word));
   assert.ok(!client.includes('innerHTML'));
+});
+
+test('Alfa Edu katalogdan kurs oynatıcıya direkt geçer', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  for (const id of [
+    'edu-hero', 'edu-search', 'edu-chips', 'edu-grid', 'edu-empty', 'edu-overall',
+    'edu-continue', 'edu-manage-toggle', 'edu-crumb-course', 'edu-meta-pills',
+    'ch-now-kicker', 'ch-admin-controls'
+  ]) assert.ok(html.includes('id="' + id + '"'), id + ' eksik');
+  assert.match(html, /function renderEduCatalog\(\)/);
+  assert.match(html, /function openCourse\(traderId, secId\)/);
+  assert.match(html, /openCourse\(c\.t\.id, c\.sec\.id\)/);
+  assert.match(html, /refreshEduDynamic\(\)/);
+  assert.ok(!html.includes('eg-no-channel'), 'ara kanal seçim metni kalmamalı');
+  assert.match(html, /\/assets\/edu-feedback\.js\?v=3/);
+  assert.match(html, /\/assets\/edu-feedback\.css\?v=3/);
 });

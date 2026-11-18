@@ -8,6 +8,8 @@ Migration uygulanmadan API `setup_required` döner; sahte bir başarı gösterme
 
 ## Kullanım
 
+- Alfa Edu ana sayfası kurs kataloğudur. Kurs kartına tıklanınca doğrudan oynatıcı
+  açılır; ayrı bir “trader kanalı” adımı yoktur.
 - Mevcut kanalın eğitimine ait tek genel yorum/soru alanıdır. Bölüm, konu veya
   video değişince alan sıfırlanmaz; soru formunda video seçimi yoktur.
   Eski, gizli kurs panelini yeniden açmaz.
@@ -23,7 +25,7 @@ Migration uygulanmadan API `setup_required` döner; sahte bir başarı gösterme
   Bu aşamalar kanaldaki bütün içeriklerin **İzledim / Okudum işaretlerine** dayanır;
   video oynatma süresi veya doğrulanmış izleme olarak sunulmaz. Tek içerikli
   eğitimde orta aşama olmayabilir. Daha önce yorum yapan öğrenciye hiçbiri çıkmaz.
-- “Şimdi değil” ile kapatılabilir; video veya ders erişimi yoruma bağlı değildir.
+- “Sonra” ile kapatılabilir; video veya ders erişimi yoruma bağlı değildir. Yorum ve sorular, oynatıcının altında tek ve sade bir kartta sekmelerle gösterilir.
   Hatırlatma tercihleri tarayıcıda hesap + kanal bazında tutulur.
 - Anonim varsayılandır. Öğrenci isterse görünen adını/takma adını yazar.
   Anonimlik diğer öğrencilere yöneliktir, kayıt auth hesabıyla bağlı kalır.

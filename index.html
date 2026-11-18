@@ -26,8 +26,8 @@
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
-<link rel="stylesheet" href="/assets/edu-feedback.css?v=2">
-<script defer src="/assets/edu-feedback.js?v=2"></script>
+<link rel="stylesheet" href="/assets/edu-feedback.css?v=3">
+<script defer src="/assets/edu-feedback.js?v=3"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=4"></script>
 
 <!-- AYNA:BASLA -->
@@ -1711,6 +1711,67 @@
   .emo-head-right .bias-seg button.on-bull { color: #fff; background: var(--green); }
   .emo-head-right .bias-seg button.on-bear { color: #fff; background: var(--red); }
 
+  /* ===== Alfa Edu — catalog & course player ===== */
+  .edu-hero { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 20px; padding: 30px 32px; margin-bottom: 16px; background: radial-gradient(90% 140% at 100% 0%, var(--pc-soft), transparent 62%), linear-gradient(115deg, var(--card), var(--panel-alt)); box-shadow: var(--shadow); }
+  .edu-hero::after { content: ''; position: absolute; width: 280px; height: 280px; right: -90px; bottom: -170px; border: 1px solid var(--border); border-radius: 50%; opacity: .5; pointer-events: none; }
+  .edu-kicker { font-size: 10.5px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--pc); }
+  .edu-hero h1 { font-family: var(--font-display); font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -.035em; line-height: 1.08; margin: 9px 0 8px; color: var(--text); text-wrap: balance; }
+  .edu-hero p { max-width: 640px; font-size: 13.5px; line-height: 1.6; color: var(--text-2); margin: 0; }
+  .edu-hero-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 18px; }
+  .edu-hero-actions .btn { min-height: 40px; }
+  .edu-progress-summary { margin-top: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-3); }
+  .edu-progress-summary .edu-bar { width: 130px; }
+  .edu-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .edu-search { flex: 1 1 240px; max-width: 360px; background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 10px 13px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); outline: none; }
+  .edu-search:focus { border-color: var(--pc); }
+  .edu-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .edu-chip { border: 1px solid var(--border); background: var(--card); color: var(--text-3); border-radius: 999px; padding: 7px 13px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .edu-chip:hover { border-color: var(--pc); color: var(--pc); }
+  .edu-chip.on { background: var(--pc); border-color: var(--pc); color: #fff; }
+  .edu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 16px; }
+  .edu-card { display: flex; flex-direction: column; overflow: hidden; text-align: left; padding: 0; border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--text); font-family: 'Inter', sans-serif; cursor: pointer; box-shadow: var(--shadow); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+  .edu-card:hover { transform: translateY(-3px); border-color: var(--pc); box-shadow: 0 14px 34px rgba(15,18,40,.16); }
+  .edu-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: radial-gradient(circle at 30% 20%, var(--pc-soft), #0d0f16 70%); }
+  .edu-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: .88; transition: transform .35s ease; }
+  .edu-card:hover .edu-thumb img { transform: scale(1.035); }
+  .edu-thumb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(8,9,18,.55)); pointer-events: none; }
+  .edu-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.92); color: #15172a; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+  .edu-thumb-tag { position: absolute; left: 10px; bottom: 10px; z-index: 1; padding: 3px 8px; border-radius: 6px; background: rgba(12,13,24,.72); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; }
+  .edu-card-body { display: flex; flex-direction: column; flex: 1; gap: 6px; padding: 14px 15px 15px; }
+  .edu-card-title { font-family: var(--font-display); font-size: 15px; font-weight: 800; letter-spacing: -.015em; line-height: 1.3; color: var(--text); }
+  .edu-card-sub { font-size: 11px; color: var(--text-3); }
+  .edu-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 10px; font-size: 10.5px; color: var(--text-3); }
+  .edu-bar { height: 5px; border-radius: 999px; background: var(--bar-bg, var(--bg-2)); overflow: hidden; flex: 1; }
+  .edu-bar span { display: block; height: 100%; border-radius: inherit; background: var(--pc); }
+  .edu-badge { padding: 3px 8px; border-radius: 999px; background: var(--pc-soft); color: var(--pc); font-size: 9.5px; font-weight: 800; }
+  .edu-empty { padding: 46px 20px; text-align: center; border: 1px dashed var(--border); border-radius: 16px; background: var(--panel-alt); color: var(--text-3); font-size: 13px; }
+  .edu-manage { margin-top: 22px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel-alt); }
+  .edu-manage .ch-main { border: 0; padding: 0; margin: 0; background: transparent; }
+  .edu-manage-toggle { position: fixed; right: 14px; bottom: 18px; z-index: 60; width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--card); color: var(--text-3); font-size: 15px; cursor: pointer; box-shadow: var(--shadow); }
+  .edu-card.soon { cursor: default; }
+  .edu-card.soon:hover { transform: none; border-color: var(--border); }
+  .edu-card.soon .edu-play { background: rgba(255,255,255,.72); color: var(--text-3); }
+  #ch-view .eg-course { grid-template-columns: minmax(0, 1fr) 320px; }
+  #ch-view .eg-player-panel { order: 1; }
+  #ch-view .eg-list-panel { order: 2; position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow-y: auto; }
+  .edu-course-head { align-items: flex-end; padding: 20px 22px; }
+  .edu-course-head .ch-view-ava { width: 44px; height: 44px; font-size: 18px; }
+  .edu-crumb { width: 100%; display: flex; gap: 8px; align-items: center; font-size: 10.5px; font-weight: 700; color: var(--text-3); margin-bottom: 2px; }
+  .edu-crumb span:first-child { color: var(--pc); }
+  .edu-meta-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .edu-meta-pills span { padding: 3px 8px; border-radius: 999px; background: var(--pc-soft); color: var(--pc); font-size: 9.5px; font-weight: 800; }
+  .edu-now-kicker { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 5px; }
+  #ch-view .eg-now { padding: 4px 2px 0; }
+  #ch-view .eg-now-title { font-size: 19px; }
+  #ch-view .ch-note-box { margin-top: 16px; }
+  #ch-view .ch-embed-foot { justify-content: flex-start; }
+  #ch-view .eg-list-panel .eg-vids { border-top: 1px solid var(--border); padding-top: 14px; }
+  #ch-view .eg-list-panel .eg-vid-row { padding: 10px; }
+  @media (max-width: 900px) {
+    #ch-view .eg-course { grid-template-columns: 1fr; }
+    #ch-view .eg-list-panel { position: static; max-height: none; }
+    .edu-hero { padding: 24px 20px; }
+  }
   /* ===== Eğitim (Alfa Edu) ===== */
   .eg-brand { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 18px; margin-bottom: 14px; border-radius: 16px; border: 1px solid var(--border); border-left: 3px solid var(--pc); background: linear-gradient(115deg, var(--pc-soft), rgba(123,120,245,.02) 60%, transparent); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.04); }
   .eg-brand-ico { width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 19px; border-radius: 12px; background: var(--pc-soft); border: 1px solid var(--border); box-shadow: 0 6px 16px rgba(0,0,0,.35); }
@@ -6855,18 +6916,33 @@
     </div>
   </div>
   <div id="page-egitim" class="hidden">
-    <div class="eg-brand">
-      <span class="eg-brand-ico">🎓</span>
-      <span class="eg-brand-name" data-i18n="pg.egitim.t">Alfa Edu</span>
-      <span class="eg-brand-sub" data-i18n="pg.egitim.s">Eğitsel trader kanalları — videolar, notlar ve fotoğraflar. Kanalına tıkla, içeriği izle.</span>
-    </div>
-    <div class="ch-panel ch-main" id="ch-main">
-      <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
-      <div id="eg-ch-list" class="ch-list"></div>
-      <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok.</div>
-      <button type="button" class="btn ch-mine-btn hidden" id="eg-ch-add" data-i18n="pg.egitim.chAdd">＋ Yeni kanal ekle</button>
-      <div id="eg-no-channel" class="data-empty" data-i18n="pg.egitim.chPick">Bir trader kanalına tıkla — videoları ve notları burada izle.</div>
-    </div>
+    <section class="edu-hero" id="edu-hero">
+      <div class="edu-kicker" data-i18n="edu.kicker">ALFA EDU · KURS KÜTÜPHANESİ</div>
+      <h1 data-i18n="edu.heroTitle">İzle. Öğren. Uygula.</h1>
+      <p data-i18n="edu.heroSub">Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.</p>
+      <div class="edu-hero-actions">
+        <button type="button" class="btn solid" id="edu-browse" data-i18n="edu.browse">Kursları keşfet →</button>
+        <button type="button" class="btn hidden" id="edu-continue" data-i18n="edu.continue">Kaldığın yerden devam et</button>
+      </div>
+      <div class="edu-progress-summary" id="edu-overall"></div>
+    </section>
+    <section id="edu-catalog">
+      <div class="edu-toolbar">
+        <input type="search" id="edu-search" class="edu-search" data-i18n-ph="edu.searchPh" placeholder="Kurs veya konu ara…" autocomplete="off">
+        <div id="edu-chips" class="edu-chips"></div>
+      </div>
+      <div id="edu-grid" class="edu-grid"></div>
+      <div id="edu-empty" class="edu-empty hidden" data-i18n="edu.empty">Eşleşen kurs bulunamadı.</div>
+      <div id="edu-manage" class="edu-manage hidden">
+        <div class="ch-panel ch-main" id="ch-main">
+          <div class="ch-panel-h"><span class="ch-panel-title" data-i18n="pg.egitim.channels">🎬 Eğitsel Kanal — Traderlar</span></div>
+          <div id="eg-ch-list" class="ch-list"></div>
+          <div id="eg-ch-empty" class="ch-empty" data-i18n="pg.egitim.chEmpty">Henüz trader kanalı yok.</div>
+          <button type="button" class="btn ch-mine-btn hidden" id="eg-ch-add" data-i18n="pg.egitim.chAdd">＋ Yeni kanal ekle</button>
+        </div>
+      </div>
+    </section>
+    <button type="button" class="edu-manage-toggle hidden" id="edu-manage-toggle" data-i18n-title="edu.manage" title="İçerik yönetimi">⚙</button>
     <div class="eg-course hidden" id="eg-old-course">
       <aside class="panel eg-list-panel">
             <h2 class="cat-h2"><span data-i18n="pg.topics">Konular</span><span class="eg-progress" id="eg-progress"></span><button type="button" class="cat-edit" id="eg-add-topic" data-i18n="pg.addTopic">+ Konu</button></h2>
@@ -6918,27 +6994,33 @@
       <div class="eg-form-err" id="eg-in-err"></div>
     </div>
 
-    <!-- Kanal görünümü: traderın kendi sayfası -->
+    <!-- Kurs oynatıcı: katalogdan direkt ders açılır -->
     <div id="ch-view" class="hidden">
-      <div class="ch-view-header">
+      <div class="ch-view-header edu-course-head">
         <div class="ch-view-ava" id="ch-view-ava"></div>
         <div class="ch-view-meta">
+          <div class="edu-crumb">
+            <span data-i18n="app.eduPage">Alfa Edu</span><span>/</span>
+            <span data-i18n="edu.courses">Kurslar</span><span>/</span>
+            <span id="edu-crumb-course">—</span>
+          </div>
           <div class="ch-view-name" id="ch-view-name"></div>
+          <div class="edu-meta-pills" id="edu-meta-pills"></div>
           <div class="ch-view-bio" id="ch-view-bio"></div>
         </div>
         <div class="ch-view-actions">
           <button type="button" class="btn solid hidden" id="ch-edit-prof" data-i18n="pg.egitim.chEditProf">✎ Profili düzenle</button>
-          <button type="button" class="btn" id="ch-back" data-i18n="pg.egitim.chBack">← Alfa Edu</button>
+          <button type="button" class="btn" id="ch-back" data-i18n="edu.back">← Kurslara dön</button>
         </div>
       </div>
-      <div class="controls">
+      <div class="controls hidden" id="ch-admin-controls">
         <div class="seg" id="ch-sec-seg"></div>
       </div>
       <div class="eg-course">
         <aside class="panel eg-list-panel">
-          <h2 class="cat-h2"><span data-i18n="pg.topics">Konular</span><button type="button" class="cat-edit hidden" id="ch-add-topic" data-i18n="pg.addTopic">+ Konu</button></h2>
+          <h2 class="cat-h2"><span data-i18n="edu.lessons">Dersler</span><span class="edu-progress" id="ch-progress"></span><button type="button" class="cat-edit hidden" id="ch-add-topic" data-i18n="edu.addLesson">+ Ders</button></h2>
           <div id="ch-topic-list" class="eg-list"></div>
-          <div id="ch-topic-empty" class="eg-empty-list" data-i18n="pg.egitim.chNoTopics">Bu kanalda henüz konu yok.</div>
+          <div id="ch-topic-empty" class="eg-empty-list" data-i18n="edu.noLessons">Bu kursda henüz ders yok.</div>
         </aside>
         <section class="panel eg-player-panel">
           <div id="ch-player-wrap">
@@ -6946,6 +7028,7 @@
             <div class="ch-note-box hidden" id="ch-note-box"></div>
             <div class="ch-embed-foot hidden" id="ch-foot"></div>
             <div class="eg-now">
+              <div class="edu-now-kicker" id="ch-now-kicker">DERS</div>
               <div class="eg-now-title-row">
                 <div class="eg-now-title" id="ch-now-title">—</div>
               </div>
@@ -6954,15 +7037,15 @@
                 <button type="button" class="btn eg-share-btn" id="ch-share-topic">🔗 Paylaş</button>
               </div>
               <div class="eg-vids">
-                <div class="eg-vids-h"><span data-i18n="pg.egitim.videos">İçerik</span><button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addContent">+ İçerik ekle</button></div>
+                <div class="eg-vids-h"><span data-i18n="edu.playlist">Ders içeriği</span><button type="button" class="eg-vid-add hidden" id="ch-add-vid" data-i18n="pg.egitim.addContent">+ İçerik ekle</button></div>
                 <div id="ch-vid-list" class="eg-vid-list"></div>
               </div>
             </div>
             <div id="edu-feedback" class="edu-feedback hidden"></div>
           </div>
-          <div id="ch-player-empty" class="data-empty" data-i18n="pg.egitim.playerEmpty">Soldan bir konu seç — videoları burada büyük ekranda açılsın.</div>
-      </section>
-    </div>
+          <div id="ch-player-empty" class="data-empty" data-i18n="edu.playerEmpty">Bu kursda henüz izlenecek ders yok.</div>
+        </section>
+      </div>
     </div>
 
     <!-- Kanal formu: bölüm / konu / içerik ekle-düzenle -->
@@ -23474,36 +23557,45 @@ function egCurVid(topic) {
 }
 
 function renderEgitim() {
-  const canEdit = magIsAdmin();
-  // ---- Eğitsel Kanal: trader listesi (sol alttaki panel) ----
+  const canEdit = magIsAdmin(); // eski gizli panelin artık erişilmeyen kodunda kullanılıyor
+  // ---- Alfa Edu: katalog -> kurs oynatıcı, ara kanal adımı yok ----
   if (!channelsLoaded) {
     channelsLoaded = true;
-    loadChannels().then(async () => { await chEnsureMine(); chSeedFromEdu(chMineTrader()); renderEduChannels(); applyChDeep(); });
+    loadChannels().then(async () => {
+      await chEnsureMine(); chSeedFromEdu(chMineTrader());
+      renderEduChannels(); renderEduCatalog(); applyChDeep();
+    });
   } else {
     applyChDeep();
     chSeedFromEdu(chMineTrader());
   }
   renderEduChannels();
-  // ---- Kanal görünümü: Alfa Edu artık sadece trader kanalları; eski kurs arayüzü kapalı ----
   const chView = document.getElementById('ch-view');
+  const hero = document.getElementById('edu-hero');
+  const catalog = document.getElementById('edu-catalog');
   const oldCourse = document.getElementById('eg-old-course');
-  const mainControls = document.querySelector('#page-egitim > .controls');
+  const adminControls = document.getElementById('ch-admin-controls');
+  const manageBtn = document.getElementById('edu-manage-toggle');
   const egAddForm = document.getElementById('eg-add-form');
   const chFormEl = document.getElementById('ch-form');
   const chProfEl = document.getElementById('ch-prof-form');
   if (oldCourse) oldCourse.classList.add('hidden');
-  if (mainControls) mainControls.style.display = 'none';
   if (egAddForm) egAddForm.classList.add('hidden');
-  const noCh = document.getElementById('eg-no-channel');
-  if (noCh) noCh.style.display = channelOpen ? 'none' : 'block';
+  if (adminControls) adminControls.classList.toggle('hidden', !channelOpen || !chCanEditCur());
+  if (manageBtn) manageBtn.classList.toggle('hidden', !chIsAdmin() || !!channelOpen);
   if (channelOpen) {
+    if (hero) hero.classList.add('hidden');
+    if (catalog) catalog.classList.add('hidden');
     if (chView) chView.classList.remove('hidden');
     if (chFormEl) chFormEl.classList.add('hidden');
     if (chProfEl) chProfEl.classList.add('hidden');
     renderChannelView();
     return;
   }
+  if (hero) hero.classList.remove('hidden');
+  if (catalog) catalog.classList.remove('hidden');
   if (chView) chView.classList.add('hidden');
+  renderEduCatalog();
   if (window.EduFeedback) window.EduFeedback.clear();
   return;
   // ---- Bölüm sekmeleri (dinamik; ekle/sil sadece admin) ----
@@ -23762,6 +23854,7 @@ let chProfMode = null;    // 'new' | 'edit'
 let chProfTarget = null;  // edit edilen kanal id
 let chDeep = null;        // derin bağlantı (?ch=&sec=&t=&v=) bekliyorsa burada
 let chProg = null;        // kullanıcıya özel "okudum/izledim" tik haritası (yerel)
+let eduFilter = 'all';    // katalog bölüm filtresi
 
 function chUid() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function chUserEmail() { return (AUTH && AUTH.user && AUTH.user.email) ? String(AUTH.user.email).toLowerCase() : ''; }
@@ -23919,6 +24012,120 @@ async function deleteChannel(traderId) {
     });
   } catch (e) { /* */ }
 }
+function eduT(key, fallback) {
+  try { return (typeof window.t === 'function') ? window.t(key) : fallback; } catch (e) { return fallback; }
+}
+function eduCourses() {
+  const ids = (channelsData.order || []).filter(id => channelsData.traders[id]);
+  Object.keys(channelsData.traders || {}).forEach(id => { if (ids.indexOf(id) === -1) ids.push(id); });
+  const out = [];
+  ids.forEach((id, oi) => {
+    const t = channelsData.traders[id];
+    if (!t) return;
+    chSecMeta(t).forEach((sec, si) => {
+      const lessons = (t.sections && Array.isArray(t.sections[sec.id])) ? t.sections[sec.id] : [];
+      const items = lessons.reduce((all, lesson) => all.concat((lesson.videos || []).map(v => ({ lesson, video: v }))), []);
+      const done = items.filter(x => chIsDone(t, x.video)).length;
+      out.push({ t, sec, lessons, items, done, total: items.length, order: oi * 100 + si });
+    });
+  });
+  out.sort((a, b) => (Number(b.total > 0) - Number(a.total > 0)) || (a.order - b.order));
+  return out;
+}
+function eduThumb(i) {
+  const imgs = [
+    'assets/alfa-influencer-trading.jpg',
+    'assets/alfa-influencer-writing.jpg',
+    'assets/alfa-influencer-network.jpg',
+    'assets/alfa-influencer-creator.jpg'
+  ];
+  return imgs[i % imgs.length];
+}
+function eduLast() {
+  try { return JSON.parse(localStorage.getItem('alfa-edu-last') || 'null'); } catch (e) { return null; }
+}
+function eduCard(c, i) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'edu-card' + (c.total ? '' : ' soon');
+  card.dataset.trader = c.t.id;
+  card.dataset.course = c.sec.id;
+  const thumb = document.createElement('div'); thumb.className = 'edu-thumb';
+  const img = document.createElement('img');
+  img.src = eduThumb(i); img.alt = c.sec.title || 'Alfa Edu'; img.loading = 'lazy';
+  const play = document.createElement('span'); play.className = 'edu-play'; play.textContent = '▶';
+  const tag = document.createElement('span'); tag.className = 'edu-thumb-tag';
+  tag.textContent = c.total ? ('KURS · ' + c.lessons.length + ' ' + eduT('edu.lessonsCount', 'ders')) : eduT('edu.soon', 'Yakında');
+  thumb.append(img, play, tag);
+  const body = document.createElement('div'); body.className = 'edu-card-body';
+  const title = document.createElement('div'); title.className = 'edu-card-title'; title.textContent = c.sec.title || 'Alfa Edu';
+  const sub = document.createElement('div'); sub.className = 'edu-card-sub'; sub.textContent = 'Alfa Edu · ' + (c.t.name || eduT('edu.instructor', 'Eğitmen'));
+  const foot = document.createElement('div'); foot.className = 'edu-card-foot';
+  const bar = document.createElement('span'); bar.className = 'edu-bar';
+  const fill = document.createElement('span'); fill.style.width = (c.total ? Math.round(c.done / c.total * 100) : 0) + '%'; bar.appendChild(fill);
+  const count = document.createElement('span'); count.textContent = c.done + '/' + c.total;
+  foot.append(bar, count);
+  if (c.done && c.total) { const badge = document.createElement('span'); badge.className = 'edu-badge'; badge.textContent = eduT('edu.resume', 'Devam et'); foot.appendChild(badge); }
+  body.append(title, sub, foot);
+  card.append(thumb, body);
+  if (c.total) card.addEventListener('click', () => openCourse(c.t.id, c.sec.id));
+  return card;
+}
+function renderEduCatalog() {
+  const grid = document.getElementById('edu-grid');
+  if (!grid) return;
+  const courses = eduCourses();
+  const searchEl = document.getElementById('edu-search');
+  const q = ((searchEl && searchEl.value) || '').trim().toLocaleLowerCase();
+  const chips = document.getElementById('edu-chips');
+  if (chips) {
+    const defs = [{ id: 'all', title: eduT('edu.all', 'Tümü') }];
+    const seen = Object.create(null);
+    courses.forEach(c => { if (!seen[c.sec.id]) { seen[c.sec.id] = 1; defs.push({ id: c.sec.id, title: c.sec.title }); } });
+    chips.replaceChildren();
+    defs.forEach(d => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'edu-chip' + (eduFilter === d.id ? ' on' : '');
+      b.textContent = d.title;
+      b.addEventListener('click', () => { eduFilter = d.id; renderEduCatalog(); });
+      chips.appendChild(b);
+    });
+  }
+  const list = courses.filter(c => {
+    if (eduFilter !== 'all' && c.sec.id !== eduFilter) return false;
+    if (!q) return true;
+    const hay = [c.sec.title, c.t.name, c.t.bio].concat(c.lessons.map(l => l.title)).join(' ').toLocaleLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+  grid.replaceChildren();
+  list.forEach((c, i) => grid.appendChild(eduCard(c, i)));
+  const empty = document.getElementById('edu-empty');
+  if (empty) empty.classList.toggle('hidden', list.length > 0);
+  let total = 0, done = 0;
+  courses.forEach(c => { total += c.total; done += c.done; });
+  const overall = document.getElementById('edu-overall');
+  if (overall) {
+    overall.replaceChildren();
+    const label = document.createElement('span');
+    label.textContent = eduT('edu.overall', 'Genel ilerleme') + ': ' + done + '/' + total;
+    const bar = document.createElement('span'); bar.className = 'edu-bar';
+    const fill = document.createElement('span'); fill.style.width = (total ? Math.round(done / total * 100) : 0) + '%'; bar.appendChild(fill);
+    overall.append(label, bar);
+  }
+  const cont = document.getElementById('edu-continue');
+  const last = eduLast();
+  const target = last && courses.find(c => c.t.id === last.ch && c.sec.id === last.sec && c.total);
+  if (cont) {
+    cont.classList.toggle('hidden', !target);
+    if (target) cont.textContent = (target.done ? eduT('edu.continue', 'Kaldığın yerden devam et') : eduT('edu.start', 'Başla'));
+  }
+}
+function refreshEduDynamic() {
+  if (typeof currentPage === 'undefined' || currentPage !== 'egitim') return;
+  const view = document.getElementById('ch-view');
+  if (channelOpen && view && !view.classList.contains('hidden')) renderChannelView();
+  else renderEduCatalog();
+}
 function renderEduChannels() {
   const listEl = document.getElementById('eg-ch-list');
   const emptyEl = document.getElementById('eg-ch-empty');
@@ -23930,25 +24137,35 @@ function renderEduChannels() {
     row.type = 'button';
     row.className = 'ch-trader' + (channelOpen === t.id ? ' on' : '');
     row.innerHTML = '<span class="ch-ava">' + chAvatarHtml(t) + '</span><span class="ch-t-name">' + esc(t.name || 'Trader') + '</span><span class="ch-t-cnt">' + chCount(t) + ' içerik</span>';
-    row.addEventListener('click', () => openChannel(t.id));
+    const first = chSecMeta(t)[0];
+    row.addEventListener('click', () => openCourse(t.id, first && first.id));
     listEl.appendChild(row);
   });
   if (emptyEl) emptyEl.style.display = channelsData.order.length ? 'none' : '';
   // Yeni kanal ekleme sadece admin'e özel; diğer herkes sadece izler
   if (addBtn) addBtn.classList.toggle('hidden', !chIsAdmin());
+  renderEduCatalog();
 }
 
 function chCurTrader() { return channelOpen ? channelsData.traders[channelOpen] || null : null; }
 function chCanEditCur() { return chCanEdit(chCurTrader()); }
+function openCourse(traderId, secId) {
+  const t = channelsData.traders[traderId];
+  if (!t) return;
+  if (chIsMine(t)) chSeedFromEdu(t);
+  const meta = chSecMeta(t);
+  channelOpen = traderId;
+  chSec = (meta.some(m => m.id === secId) ? secId : (meta[0] && meta[0].id));
+  chTopic = null; chVid = null; chDelArmed = null;
+  chCloseForm(); chCloseProf();
+  try { localStorage.setItem('alfa-edu-last', JSON.stringify({ ch: traderId, sec: chSec })); } catch (e) {}
+  renderEgitim();
+}
 function openChannel(userId) {
   const t = channelsData.traders[userId];
   if (!t) return;
-  if (chIsMine(t)) chSeedFromEdu(t);
-  channelOpen = userId;
-  chSec = chSecMeta(t)[0].id;
-  chTopic = null; chVid = null;
-  chCloseForm(); chCloseProf();
-  renderEgitim();
+  const first = chSecMeta(t)[0];
+  openCourse(userId, first && first.id);
 }
 function closeChannel() {
   channelOpen = null; chDelArmed = null;
@@ -24059,14 +24276,41 @@ function renderChannelView() {
   const t = chCurTrader();
   const canEdit = chCanEditCur();
   if (!t) { if (window.EduFeedback) window.EduFeedback.clear(); return; }
-  // header
-  document.getElementById('ch-view-ava').innerHTML = chAvatarHtml(t);
+  const sec = chSecMeta(t).find(m => m.id === chSec) || chSecMeta(t)[0] || { id: '', title: 'Alfa Edu' };
+  const secTitle = sec.title || 'Alfa Edu';
+  const lessons = (t.sections && Array.isArray(t.sections[sec.id])) ? t.sections[sec.id] : [];
+  const items = lessons.reduce((all, lesson) => all.concat(lesson.videos || []), []);
+  const doneCount = items.filter(v => chIsDone(t, v)).length;
+  // kurs başlığı
+  const ava = document.getElementById('ch-view-ava');
+  if (ava) {
+    ava.replaceChildren();
+    const initial = document.createElement('span'); initial.textContent = (secTitle.trim().charAt(0) || 'A').toUpperCase();
+    ava.appendChild(initial);
+  }
   const nm = document.getElementById('ch-view-name');
-  nm.innerHTML = esc(t.name || 'Trader') + ' <small>' + chSecMeta(t).length + ' bölüm · ' + chCount(t) + ' içerik</small>';
-  if (chCanEdit(t)) nm.innerHTML += ' <span class="ch-badge-owner">' + (chIsAdmin() ? 'ADMIN' : 'KANALIN') + '</span>';
-  document.getElementById('ch-view-bio').textContent = t.bio || 'Bu trader henüz bir tanıtım yazmadı.';
+  if (nm) {
+    nm.replaceChildren(document.createTextNode(secTitle));
+    const small = document.createElement('small');
+    small.textContent = lessons.length + ' ' + eduT('edu.lessonsCount', 'ders') + ' · ' + items.length + ' ' + eduT('edu.videosCount', 'içerik');
+    nm.appendChild(small);
+    if (chCanEdit(t)) { const badge = document.createElement('span'); badge.className = 'ch-badge-owner'; badge.textContent = chIsAdmin() ? 'ADMIN' : 'KANALIN'; nm.appendChild(badge); }
+  }
+  const crumb = document.getElementById('edu-crumb-course');
+  if (crumb) crumb.textContent = secTitle;
+  const bio = document.getElementById('ch-view-bio');
+  if (bio) bio.textContent = t.bio || (eduT('edu.instructor', 'Eğitmen') + ': ' + (t.name || 'Alfa Edu'));
+  const pills = document.getElementById('edu-meta-pills');
+  if (pills) {
+    pills.replaceChildren();
+    [lessons.length + ' ' + eduT('edu.lessonsCount', 'ders'), items.length + ' ' + eduT('edu.videosCount', 'içerik'), doneCount + '/' + items.length + ' ' + eduT('edu.progress', 'ilerleme')].forEach(text => {
+      const p = document.createElement('span'); p.textContent = text; pills.appendChild(p);
+    });
+  }
   const editProf = document.getElementById('ch-edit-prof');
   if (editProf) editProf.classList.toggle('hidden', !canEdit);
+  const progress = document.getElementById('ch-progress');
+  if (progress) progress.textContent = doneCount + '/' + items.length;
   // bölüm sekmeleri
   const seg = document.getElementById('ch-sec-seg');
   seg.innerHTML = '';
@@ -24228,6 +24472,8 @@ function renderChannelView() {
     foot.classList.add('hidden');
   }
   document.getElementById('ch-now-title').textContent = cur.title || '(başlıksız)';
+  const kicker = document.getElementById('ch-now-kicker');
+  if (kicker) kicker.textContent = eduT('edu.lesson', 'DERS') + ' ' + (topics.indexOf(cur) + 1);
   const link = document.getElementById('ch-now-link');
   if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
   else if (curVid && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
@@ -24678,6 +24924,25 @@ async function chDelProf() {
 
 function bindChannelsPage() {
   const g = id => document.getElementById(id);
+  const search = g('edu-search');
+  if (search) search.addEventListener('input', renderEduCatalog);
+  const browse = g('edu-browse');
+  if (browse) browse.addEventListener('click', () => {
+    const target = g('edu-catalog');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  const cont = g('edu-continue');
+  if (cont) cont.addEventListener('click', () => {
+    const last = eduLast();
+    if (!last) return;
+    const course = eduCourses().find(c => c.t.id === last.ch && c.sec.id === last.sec && c.total);
+    if (course) openCourse(course.t.id, course.sec.id);
+  });
+  const manageToggle = g('edu-manage-toggle');
+  if (manageToggle) manageToggle.addEventListener('click', () => {
+    const panel = g('edu-manage');
+    if (panel) panel.classList.toggle('hidden');
+  });
   const addBtn = g('eg-ch-add');
   if (addBtn) addBtn.addEventListener('click', chOpenNew);
   const back = g('ch-back');
@@ -30109,6 +30374,31 @@ loadSfx();
     'flt.month': { tr: 'Bu ay', en: 'This month' },
     'pg.topics': { tr: 'Konular', en: 'Topics' },
     'pg.addTopic': { tr: '+ Konu', en: '+ Topic' },
+    'edu.kicker': { tr: 'ALFA EDU · KURS KÜTÜPHANESİ', en: 'ALFA EDU · COURSE LIBRARY' },
+    'edu.heroTitle': { tr: 'İzle. Öğren. Uygula.', en: 'Watch. Learn. Apply.' },
+    'edu.heroSub': { tr: 'Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.', en: 'From technical analysis to psychology, onchain data to macro reading — all training in one place. Pick a course and start the first lesson instantly.' },
+    'edu.browse': { tr: 'Kursları keşfet →', en: 'Explore courses →' },
+    'edu.continue': { tr: 'Kaldığın yerden devam et', en: 'Continue where you left off' },
+    'edu.searchPh': { tr: 'Kurs veya konu ara…', en: 'Search a course or topic…' },
+    'edu.empty': { tr: 'Eşleşen kurs bulunamadı.', en: 'No matching course found.' },
+    'edu.manage': { tr: 'İçerik yönetimi', en: 'Manage content' },
+    'edu.courses': { tr: 'Kurslar', en: 'Courses' },
+    'edu.lessons': { tr: 'Dersler', en: 'Lessons' },
+    'edu.addLesson': { tr: '+ Ders', en: '+ Lesson' },
+    'edu.noLessons': { tr: 'Bu kursda henüz ders yok.', en: 'No lessons in this course yet.' },
+    'edu.back': { tr: '← Kurslara dön', en: '← Back to courses' },
+    'edu.playlist': { tr: 'Ders içeriği', en: 'Lesson content' },
+    'edu.playerEmpty': { tr: 'Bu kursda henüz izlenecek ders yok.', en: 'No lessons to watch in this course yet.' },
+    'edu.all': { tr: 'Tümü', en: 'All' },
+    'edu.lesson': { tr: 'DERS', en: 'LESSON' },
+    'edu.lessonsCount': { tr: 'ders', en: 'lessons' },
+    'edu.videosCount': { tr: 'içerik', en: 'items' },
+    'edu.progress': { tr: 'ilerleme', en: 'progress' },
+    'edu.instructor': { tr: 'Eğitmen', en: 'Instructor' },
+    'edu.soon': { tr: 'Yakında', en: 'Soon' },
+    'edu.start': { tr: 'Başla', en: 'Start' },
+    'edu.resume': { tr: 'Devam et', en: 'Resume' },
+    'edu.overall': { tr: 'Genel ilerleme', en: 'Overall progress' },
     "pg.influencer.promo.h": { tr: "Sadece izleyen değil, üreten tarafta ol.", en: "Move from watching to creating." },
     "pg.influencer.promo.s": { tr: "Kripto ve FX içeriklerinde hesabını, etkileşimini ve kişisel markanı geliştirmek için birlikte çalışıyoruz.", en: "We work together to develop your account, engagement and personal brand in crypto and FX content." },
     'pg.influencer.plans.h': { tr: 'Paketleri gör', en: 'See the packages' },
@@ -30759,6 +31049,7 @@ loadSfx();
     document.documentElement.setAttribute('lang', window.LANG === 'tr' ? 'tr' : 'en');
     if (typeof infPaintPrices === 'function') infPaintPrices();
     if (typeof refreshRvStatic === 'function') refreshRvStatic();
+    if (typeof refreshEduDynamic === 'function') refreshEduDynamic();
   };
   window.setLang = function (l) {
     window.LANG = (l === 'en') ? 'en' : 'tr';
