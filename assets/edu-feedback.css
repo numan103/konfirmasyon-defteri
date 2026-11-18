@@ -1,0 +1,26 @@
+.edu-feedback { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 20px; }
+.ef-heading { font-size: 17px; margin: 0 0 6px; }
+.ef-muted { font-size: 11px; line-height: 1.5; color: var(--text-3); margin: 8px 0; }
+.ef-tabs, .ef-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.ef-tabs button { min-height: 40px; }
+.ef-tabs button[aria-selected="true"] { border-color: var(--pc); background: var(--pc-soft); color: var(--pc); }
+.ef-form { padding: 16px; border: 1px solid var(--border); background: var(--input-bg); border-radius: 12px; margin: 12px 0; }
+.ef-form label { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin: 10px 0 6px; }
+.ef-form input, .ef-form select, .ef-form textarea { box-sizing: border-box; width: 100%; max-width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 10px; font: inherit; font-size: 13px; color: var(--text); background: var(--card); }
+.ef-form textarea { min-height: 100px; resize: vertical; }
+.ef-form [hidden], .edu-feedback [hidden] { display: none !important; }
+.ef-form :focus-visible, .edu-feedback button:focus-visible { outline: 2px solid var(--pc); outline-offset: 3px; }
+.ef-name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ef-prompt { padding: 14px; border: 1px solid var(--pc); background: var(--pc-soft); border-radius: 12px; margin: 12px 0; }
+.ef-prompt p { font-size: 13px; line-height: 1.5; }
+.ef-status { font-size: 12px; color: var(--amber); white-space: pre-wrap; margin: 10px 0; }
+.ef-post { padding: 15px 0; border-bottom: 1px solid var(--border); }
+.ef-post-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
+.ef-stars { color: var(--amber); letter-spacing: 2px; }
+.ef-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.65; }
+.ef-stage, .ef-badge { padding: 3px 7px; background: var(--pc-soft); border-radius: 6px; color: var(--pc); font-size: 10px; }
+.ef-answer { border-left: 2px solid var(--pc); padding-left: 14px; margin: 14px 0 0 10px; }
+.ef-reply-form { margin: 12px 0; }
+.ef-post .btn { min-height: 36px; font-size: 11px; padding: 6px 10px; }
+.ef-more { margin-top: 14px; }
+@media (max-width: 600px) { .ef-name-row { grid-template-columns: 1fr; } .ef-form { padding: 12px; } }

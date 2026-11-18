@@ -26,6 +26,8 @@
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
+<link rel="stylesheet" href="/assets/edu-feedback.css?v=1">
+<script defer src="/assets/edu-feedback.js?v=1"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=4"></script>
 
 <!-- AYNA:BASLA -->
@@ -6956,6 +6958,7 @@
                 <div id="ch-vid-list" class="eg-vid-list"></div>
               </div>
             </div>
+            <div id="edu-feedback" class="edu-feedback hidden"></div>
           </div>
           <div id="ch-player-empty" class="data-empty" data-i18n="pg.egitim.playerEmpty">Soldan bir konu seç — videoları burada büyük ekranda açılsın.</div>
       </section>
@@ -14025,6 +14028,10 @@ async function loadSiteAccess() {
 }
 
 function applyTierUi() {
+  if (window.EduFeedback) {
+    window.EduFeedback.clear();
+    if (currentPage === 'egitim') refreshEduFeedback();
+  }
   infAccess = false;
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
 
@@ -14962,6 +14969,7 @@ function showPage(name, skipAnim) {
     name = 'erisim';
   }
   currentPage = name;
+  if (name !== 'egitim' && window.EduFeedback) window.EduFeedback.clear();
   if (!_popStateNavigating) {
     try {
       const _cur = new URLSearchParams(location.search).get('page');
@@ -23496,6 +23504,7 @@ function renderEgitim() {
     return;
   }
   if (chView) chView.classList.add('hidden');
+  if (window.EduFeedback) window.EduFeedback.clear();
   return;
   // ---- Bölüm sekmeleri (dinamik; ekle/sil sadece admin) ----
   const seg = document.getElementById('eg-sec-seg');
@@ -24029,10 +24038,28 @@ function chMoveTopic(t, topic, dir) {
   return true;
 }
 
+// EDU_FEEDBACK_CONTEXT_BEGIN
+function mountEduFeedback(trader, topic, lesson) {
+  if (!window.EduFeedback) return;
+  if (!trader || !topic) { window.EduFeedback.clear(); return; }
+  const lessons = topic.videos || [];
+  window.EduFeedback.mount({
+    channel: trader.id, section: chSec, topic: topic.id, title: topic.title || '',
+    lesson: lesson ? lesson.id : '', lessons: lessons.map(v => ({ id: v.id, title: v.title || '' })),
+    done: lessons.filter(v => chIsDone(trader, v)).length, total: lessons.length,
+    account: AUTH.user ? AUTH.user.id : '', admin: siteIsAdmin()
+  });
+}
+function refreshEduFeedback() {
+  if (currentPage !== 'egitim' || !channelOpen) { if (window.EduFeedback) window.EduFeedback.clear(); return; }
+  const trader = chCurTrader(), topic = trader && chCurTopic(trader);
+  mountEduFeedback(trader, topic, topic && chCurVid(topic));
+}
+// EDU_FEEDBACK_CONTEXT_END
 function renderChannelView() {
   const t = chCurTrader();
   const canEdit = chCanEditCur();
-  if (!t) return;
+  if (!t) { if (window.EduFeedback) window.EduFeedback.clear(); return; }
   // header
   document.getElementById('ch-view-ava').innerHTML = chAvatarHtml(t);
   const nm = document.getElementById('ch-view-name');
@@ -24135,7 +24162,7 @@ function renderChannelView() {
   // sağ: oynatıcı
   const wrap = document.getElementById('ch-player-wrap');
   const empty = document.getElementById('ch-player-empty');
-  if (!cur) { wrap.style.display = 'none'; empty.style.display = 'block'; return; }
+  if (!cur) { wrap.style.display = 'none'; empty.style.display = 'block'; if (window.EduFeedback) window.EduFeedback.clear(); return; }
   wrap.style.display = 'block'; empty.style.display = 'none';
   const vids = cur.videos || [];
   const curVid = chCurVid(cur);
@@ -24251,6 +24278,7 @@ function renderChannelView() {
     row.addEventListener('click', () => { if (chVid === v.id) return; chVid = v.id; renderChannelView(); });
     vlist.appendChild(row);
   });
+  mountEduFeedback(t, cur, curVid);
 }
 
 function chBuildNoteBox(vid, fallbackTitle) {
