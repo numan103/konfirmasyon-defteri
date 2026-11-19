@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="Alfa Traders — Eğitim, Analiz ve Topluluk">
 <meta name="twitter:description" content="Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.">
 <meta name="twitter:image" content="https://alfa-trader.com/alfa-traders-share-v2.png">
-<link rel="stylesheet" href="/assets/influencer-content.css?v=4">
+<link rel="stylesheet" href="/assets/influencer-content.css?v=5">
 <link rel="stylesheet" href="/assets/nav-autohide.css">
 <script type="module" src="/assets/nav-autohide.mjs"></script>
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -12840,7 +12840,7 @@ function infLoadRealPosts() {
 
 function renderInfluencer(skipLoad = false) {
   document.getElementById('page-influencer')?.classList.toggle('inf-admin-editor', siteIsAdmin());
-  import('/assets/influencer-content.mjs?v=3').then(module => {
+  import('/assets/influencer-content.mjs?v=4').then(module => {
     const node = document.getElementById('inf-content-library');
     if (!node) return;
     module.mount(node, {
@@ -14383,7 +14383,7 @@ function applyTierUi() {
     if (currentPage === 'egitim') refreshEduFeedback();
   }
   infAccess = false;
-  import('/assets/influencer-content.mjs?v=3').then(module => module.clear()).catch(() => {});
+  import('/assets/influencer-content.mjs?v=4').then(module => module.clear()).catch(() => {});
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();

@@ -110,7 +110,7 @@ try {
   await page.getByRole('heading', { name: 'Viral Gönderi Atölyesi', exact: true }).waitFor();
   assert.equal(await page.locator('img').count(), 0, 'reader starts on topic map');
   await page.locator('.ic-section-open').filter({ hasText:'Görsel ve video örnekleri' }).click();
-  assert.equal(await page.locator('textarea,input').count(), 0);
+  assert.equal(await page.locator('textarea, input:not(.ic-search input)').count(), 0);
   assert.equal(await page.getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 0);
   assert.equal(await page.locator('img').count(), 5);
   assert.equal(await page.getByRole('link', { name: 'Kaynak gönderiyi aç ↗' }).getAttribute('href'), 'https://x.com/example/status/123');
@@ -136,6 +136,11 @@ try {
     hideLanding(); showPage('influencer'); renderInfluencer(true);
   });
   await app.locator('#inf-content-library').getByRole('heading', { name: 'İçerik Yönetim Paneli' }).waitFor();
+  await app.locator('.ic-map-branch > .ic-drag-handle').first().waitFor();
+  const beforeSort = await app.locator('.ic-map-branch').evaluateAll(nodes => nodes.map(n => n.dataset.sortId));
+  await app.locator('.ic-map-branch > .ic-drag-handle').first().press('ArrowDown');
+  const afterSort = await app.locator('.ic-map-branch').evaluateAll(nodes => nodes.map(n => n.dataset.sortId));
+  assert.deepEqual(afterSort, [beforeSort[1], beforeSort[0], ...beforeSort.slice(2)], 'app integration uses the sortable map');
   assert.equal(await app.locator('#inf-content-library').getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 1);
   assert.equal(await app.locator('#inf-teaser').isVisible(), false, 'admin does not see marketing');
   assert.equal(await app.locator('#page-influencer > .inf-showcase:visible').count(), 0, 'admin does not see growth cases, engagement or sample tweets');

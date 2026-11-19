@@ -6,6 +6,14 @@
 - Konu haritasında bağlı kartlarla ilerlenir: konu → alt başlık → o alt başlığın
   içerik editörü/okuyucusu. Tüm alt başlık formları aynı anda açılmaz.
 - Konu kartının yanında onay isteyen silme tuşu vardır; silme kaydedilince uygulanır.
+- Konu ve alt başlık kartlarındaki ⠿ tutamacıyla fare/dokunmatik/kalem üzerinden
+  sıralama yapılır. Mor çizgi önce/sonra bırakma yerini gösterir. Escape iptal eder.
+  Tutamaç odaktayken ok tuşları komşu kartla sıralamayı değiştirir.
+  Yeni sıra “Kaydet” ile kalıcı olur; haritada sürükleme tek başına sunucuya yazmaz.
+- Konu adı, açıklaması veya alt başlıkta arama yapılabilir. Eşleşen alt başlıklar
+  vurgulanır. Filtre açıkken gizli kartların sırasını yanlışlıkla değiştirmemek için
+  sürükleme durdurulur; arama temizlenince yeniden açılır. Arama içerik kaydı sayılmaz.
+- Alt başlık kartları metin, görsel, video ve gönderi adetlerini gösterir.
 - “Viral Gönderi örneğini ekle” örneği yalnızca editörde içerik oluşturur.
   Kaydetmeden sunucuya yazılmaz. **Kaydet = yayınla**: başarılı kayıtta tüm
   mevcut konular `published=true` olarak kaydedilir. Ayrı yayınlama kutusu yoktur.

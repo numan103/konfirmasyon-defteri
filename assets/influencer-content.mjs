@@ -1,7 +1,27 @@
 import { mediaUrl } from './influencer-content-model.mjs';
+import { bindSortable } from './content-sortable.mjs';
 
 let root, context, data = { topics: [] }, revision = null, selected = '', editing = false, dirty = false, loading = false, saving = false, uploading = false, epoch = 0, owner = '';
 let activeSection = '';
+let searchQuery = '';
+const lower = s => String(s || '').toLocaleLowerCase('tr');
+const matchingTopics = () => data.topics.filter(t => lower([t.title, t.description, ...t.sections.map(s => s.title)].join(' ')).includes(lower(searchQuery)));
+function sortHandle(node, list, item, kind) {
+  node.dataset.sortId = item.id;
+  const handle = button(node, '⠿', () => {}, 'ic-drag-handle');
+  handle.disabled ||= !!searchQuery;
+  handle.setAttribute('aria-label', (kind === 'topic' ? 'Konuyu taşı: ' : 'Alt başlığı taşı: ') + item.title);
+  handle.setAttribute('aria-pressed', 'false');
+  bindSortable(handle, {
+    list, item, node, selector: kind === 'topic' ? '.ic-topic-node' : '.ic-map-branch',
+    axis: kind === 'topic' ? 'grid' : 'vertical', announce:message,
+    onChange: id => {
+      change(); draw();
+      root.querySelector('[data-sort-id="' + id + '"] > .ic-drag-handle')?.focus({ preventScroll:true });
+      message('Sıralama değiştirildi. Kalıcı olması için kaydet.');
+    },
+  });
+}
 const el = (tag, text, cls) => { const n = document.createElement(tag); if (text) n.textContent = text; if (cls) n.className = cls; return n; };
 const uid = () => crypto.randomUUID();
 function message(text) { const n = root?.querySelector('[role="status"]'); if (n) n.textContent = text; }
@@ -33,7 +53,7 @@ async function api(body) {
     : 'İçerik yüklenemedi veya kaydedilemedi. Tekrar dene.');
   return j;
 }
-export function clear() { epoch++; data = { topics: [] }; owner = ''; dirty = false; editing = false; loading = false; saving = false; uploading = false; activeSection = ''; if (root) root.replaceChildren(); }
+export function clear() { epoch++; data = { topics: [] }; owner = ''; dirty = false; editing = false; loading = false; saving = false; uploading = false; activeSection = ''; searchQuery = ''; if (root) root.replaceChildren(); }
 export function mount(node, ctx) {
   root = node; context = ctx;
   if (!ctx.unlocked || !ctx.userId) { clear(); return; }
@@ -86,7 +106,7 @@ function sample() {
     { id: uid(), title: '2. Kendi yorumunu kat', blocks: [{ id: uid(), type: 'text', body: 'Metni birebir kopyalamak yerine fikri kendi kitlene uyarla. Yeni bir örnek, farklı bir bakış açısı veya güncel veri ekle. Kaynak kullanıyorsan belirt; başkasının görselini izin olmadan yeniden yayımlama.' }] },
     { id: uid(), title: '3. Örnekler ve uygulama', blocks: [{ id: uid(), type: 'text', body: 'Buraya kaynak gönderiyi, kendi uyarlamanı ve aralarındaki farkları ekle. Örnek ekran görüntülerini ve anlatım videosunu bu başlığın altında paylaşabilirsin. Benzer bir formatın tutması, yeni gönderinin de viral olacağını garanti etmez.' }] },
   ] };
-  data.topics.push(t); selected = t.id; activeSection = ''; editing = true; change(); draw();
+  data.topics.push(t); selected = t.id; activeSection = ''; searchQuery = ''; editing = true; change(); draw();
 }
 async function imageFile(file) {
   if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 12000000) throw new Error('En fazla 12 MB JPG, PNG veya WebP seç.');
@@ -188,26 +208,47 @@ function draw() {
   const toolbar = el('div', '', 'ic-toolbar'); root.append(toolbar);
   if (context.admin) {
     button(toolbar, editing ? 'Okuyucu önizlemesi' : 'İçerikleri düzenle', () => { editing = !editing; draw(); });
-    button(toolbar, '+ Konu ekle', () => { const t = { id: uid(), title: 'Yeni konu', description: '', published: false, sections: [{ id: uid(), title: 'İlk alt başlık', blocks: [] }] }; data.topics.push(t); selected = t.id; activeSection = ''; editing = true; change(); draw(); });
+    button(toolbar, '+ Konu ekle', () => { const t = { id: uid(), title: 'Yeni konu', description: '', published: false, sections: [{ id: uid(), title: 'İlk alt başlık', blocks: [] }] }; data.topics.push(t); selected = t.id; activeSection = ''; searchQuery = ''; editing = true; change(); draw(); });
     button(toolbar, 'Viral Gönderi örneğini ekle', sample);
     button(toolbar, dirty ? 'Değişiklikleri kaydet' : 'Kaydet', save, 'ic-primary');
     button(toolbar, 'Yeniden yükle', () => { if (!dirty || confirm('Kaydedilmemiş değişiklikler kaybolacak. Devam edilsin mi?')) void load(); });
   }
   const status = el('p', dirty ? 'Kaydedilmemiş değişiklikler var.' : context.admin && data.topics.length ? data.topics.every(t => t.published) ? 'Kaydedilen konular yayında. Değişikliklerden sonra tekrar kaydet.' : 'Kaydettiğinde tüm konular yayınlanır.' : ''); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); root.append(status);
   if (!data.topics.length) { root.append(el('p', context.admin ? 'İlk konunu ekle veya Viral Gönderi örneğiyle başla.' : 'İçerikler hazırlanıyor.', 'ic-empty')); return; }
+  const search = el('div', '', 'ic-search');
+  const searchLabel = el('label', 'Haritada ara'), searchInput = el('input');
+  searchInput.value = searchQuery; searchInput.disabled = saving || uploading;
+  searchLabel.append(searchInput); search.append(searchLabel);
+  searchInput.addEventListener('keydown', e => e.stopPropagation());
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value;
+    const matches = matchingTopics();
+    if (!matches.some(t => t.id === selected)) { selected = matches[0]?.id || ''; activeSection = ''; }
+    const caret = searchInput.selectionStart; draw();
+    const next = root.querySelector('.ic-search input'); next?.focus({ preventScroll:true }); next?.setSelectionRange(caret, caret);
+  });
+  searchInput.placeholder = 'Konu veya alt başlık bul…';
+  root.append(search);
+  if (searchQuery) button(search, 'Aramayı temizle', () => { searchQuery = ''; draw(); });
+  const visibleTopics = matchingTopics();
+  if (!visibleTopics.length) { root.append(el('p', 'Bu aramayla eşleşen konu veya alt başlık bulunamadı.', 'ic-empty')); return; }
+  if (!visibleTopics.some(t => t.id === selected)) selected = visibleTopics[0].id;
+  if (context.admin && editing) root.append(el('p', searchQuery ? 'Sıralamak için aramayı temizle.' : '⠿ tutamaçlarından sürükleyerek konu ve alt başlık sırasını değiştir. Ok tuşlarıyla da taşıyabilirsin.', 'ic-muted'));
   const layout = el('div', '', 'ic-layout ic-map-layout'), nav = el('nav', '', 'ic-nav ic-topic-map'), article = el('article', '', 'ic-topic ic-map-detail');
   nav.setAttribute('aria-label', 'İçerik konuları'); layout.append(nav, article); root.append(layout);
-  data.topics.forEach((t, i) => {
+  visibleTopics.forEach(t => {
+    const i = data.topics.indexOf(t);
     const node = el('div', '', 'ic-topic-node'); nav.append(node);
     const b = button(node, String(i + 1).padStart(2, '0') + ' · ' + t.title, () => { selected = t.id; activeSection = ''; draw(); }, 'ic-topic-open');
     b.setAttribute('aria-current', String(t.id === selected));
     node.append(el('small', t.sections.length + ' alt başlık' + (context.admin ? t.published ? ' · Yayında' : ' · Kaydedilmedi' : ''), 'ic-muted'));
     if (context.admin && editing) {
+      sortHandle(node, data.topics, t, 'topic');
       const del = button(node, '🗑', () => remove(data.topics, t), 'ic-topic-delete');
       del.setAttribute('aria-label', 'Konuyu sil: ' + t.title); del.title = 'Konuyu sil';
     }
   });
-  const t = data.topics.find(t => t.id === selected) || data.topics[0];
+  const t = visibleTopics.find(t => t.id === selected) || visibleTopics[0];
   if (!t.sections.some(s => s.id === activeSection)) activeSection = '';
   const path = el('div', '', 'ic-toolbar ic-breadcrumb');
   button(path, '⌘ ' + t.title, () => { activeSection = ''; draw(); });
@@ -226,12 +267,16 @@ function draw() {
     const branches = el('div', '', 'ic-map-branches'); map.append(branches);
     t.sections.forEach((s, i) => {
       const branch = el('div', '', 'ic-map-branch');
+      if (searchQuery && lower(s.title).includes(lower(searchQuery))) branch.classList.add('ic-search-match');
       const b = button(branch, String(i + 1).padStart(2, '0') + ' · ' + s.title, () => {
         activeSection = s.id; draw();
         root.querySelector('.ic-section')?.scrollIntoView({ block:'nearest', behavior:'instant' });
         root.querySelector('.ic-section')?.focus({ preventScroll:true });
       }, 'ic-section-open');
-      b.append(el('small', s.blocks.length + ' içerik · Aç →'));
+      const types = [['text', 'metin'], ['image', 'görsel'], ['video', 'video'], ['post', 'gönderi']]
+        .map(([type, name]) => { const n = s.blocks.filter(b => b.type === type).length; return n ? n + ' ' + name : ''; }).filter(Boolean);
+      b.append(el('small', (types.join(' · ') || 'Henüz içerik yok') + ' · Aç →'));
+      if (context.admin && editing) sortHandle(branch, t.sections, s, 'section');
       branches.append(branch);
     });
     if (!t.sections.length) branches.append(el('p', 'Bu konuya ilk alt başlığını ekle.', 'ic-muted'));
