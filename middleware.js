@@ -11,12 +11,12 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.s
 // anahtar 401 dönerse tek seferlik bu anahtarla tekrar denenir.
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const SUPABASE_FALLBACK_KEY = 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
-const IMG = '/og.png';
+const IMG = '/alfa-traders-share-v2.png';
 
 const BOT_RE = /(telegrambot|twitterbot|facebookexternalhit|facebookcatalog|linkedinbot|slackbot|discordbot|whatsapp|viber|line-preview|linespider|tumblr|redditbot|snapchat|skypeuripreview|microblog|embedly|ia_archiver|bingbot|googlebot|google-inspectiontool|duckduckbot|petalbot|yandex|baiduspider|curl|wget|python-requests|urllib)/i;
 
 const PAGES = {
-  home: { title: 'Alfa Traders — Konfirmasyon Defteri', desc: 'Konfluens analizi, işlem karnesi, plan ve disiplin — tüm araçlar tek panelde.' },
+  home: { title: 'Alfa Traders — Eğitim, Analiz ve Topluluk', desc: 'Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.' },
   butce: { title: 'Alfa Traders — Alfa Defter (Bütçe)', desc: 'Alfa Defter — bütçe ve sermaye yönetimiyle işlemlerini takip et.' },
   defter: { title: 'Alfa Traders — Check List', desc: 'Check List — kriter analizi, konfluens skoru ve planla setup kalitesini ölç.' },
   data: { title: 'Alfa Traders — Trade Günlüğü', desc: 'Trade Günlüğü — işlemlerini kaydet, günlük veriyi analiz et.' },
@@ -36,7 +36,7 @@ const PAGES = {
   calendar: { title: 'Alfa Traders — Ekonomik Takvim', desc: 'Ekonomik Takvim — önemli ekonomik veriler ve takvim.' },
   eduplans: { title: 'Alfa Edu — Eğitim Paketleri', desc: 'Video eğitim, canlı grup dersleri ve kişiye özel birebir eğitim. Eğitim ücretleri veya uygun Breakout hesaplarıyla katılım seçenekleri.' },
   influencer: { title: 'Alfa Traders — Alfa Influencer', desc: 'Alfa Influencer: hesap büyümesi, etkileşim, tweet yazımı, networking ve topluluk desteği. Kripto ve FX içerik üreticileri için.' },
-  news: { title: 'Alfa Traders — AlfaNews', desc: 'AlfaNews — paylaşımlı analiz dergisi.' },
+  news: { title: 'Alfa Traders — Alfa Dergi', desc: 'Haftalık piyasa analizleri, makro haberler ve teknik görünüm. Alfa Dergi ile piyasayı takip et.' },
   basvuru: { title: 'Alfa Traders — Alfa Ol', desc: 'Alfa Ol — topluluğa katılma başvurusu.' },
   apps: { title: 'Alfa Traders — Başvurular', desc: 'Başvurular — admin başvuru yönetimi.' },
   'chat-admin': { title: 'Alfa Traders — Alfa Chat', desc: 'Alfa Chat — topluluk sohbeti.' },
@@ -44,8 +44,8 @@ const PAGES = {
 };
 
 const DEFAULT = {
-  title: 'Alfa Traders — Konfirmasyon Defteri',
-  desc: 'Konfluens analizi, işlem karnesi, plan ve disiplin. Alfa Trading analiz & işlem akışı, haftalık değerlendirme ve topluluk.',
+  title: 'Alfa Traders — Eğitim, Analiz ve Topluluk',
+  desc: 'Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.',
 };
 
 export const config = { matcher: ['/', '/index.html'] };

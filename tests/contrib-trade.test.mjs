@@ -413,7 +413,7 @@ test('middleware onchain onizlemesinde bias etiketini kullanir ve seviye sizdirm
   assert.doesNotMatch(html, /Entry|TP 90|SL 105|Kaldıraç/);
 });
 
-test('middleware bulanik gorsel yoksa genel /og.png gorseline duser', async () => {
+test('middleware bulanik gorsel yoksa yeni marka gorseline duser', async () => {
   const state = makeStore();
   state.data.posts = [{ id: 'p2', type: 'islem', coin: 'ETH', title: 'Eski kayit', author: 'Admin', ts: 1700000000000 }];
   globalThis.fetch = fetchStub(state);
@@ -423,7 +423,7 @@ test('middleware bulanik gorsel yoksa genel /og.png gorseline duser', async () =
   });
   const response = await middleware(request);
   const html = await response.text();
-  assert.match(html, /og:image" content="https:\/\/alfa-trader\.com\/og\.png"/);
+  assert.match(html, /og:image" content="https:\/\/alfa-trader\.com\/alfa-traders-share-v2\.png"/);
   assert.match(html, /og:image:width" content="1200"/);
   assert.match(html, /og:image:height" content="630"/);
 });
