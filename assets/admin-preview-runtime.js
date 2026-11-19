@@ -4,6 +4,8 @@
   const config = window.ALFA_PREVIEW_CONFIG;
   if (!config || !['landing','free','premium'].includes(config.role) || window.parent === window) return;
   const send = message => parent.postMessage({ ...message, channel:config.channel }, config.origin);
+  document.documentElement.setAttribute('data-theme', config.theme || 'dark');
+  document.documentElement.classList.add('admin-preview-role-' + config.role);
   function memoryStorage() {
     const data = Object.create(null);
     return new Proxy(data, { get(target, key) {
@@ -17,6 +19,8 @@
     }, set(target,key,value) { target[key] = String(value); return true; } });
   }
   for (const name of ['localStorage','sessionStorage']) Object.defineProperty(window,name,{ value:memoryStorage() });
+  // Landing and new-member previews open in light mode, like a clean browser tab.
+  if (config.theme === 'light') localStorage.setItem('alfa-theme', 'light');
   // Legacy cache-cleanup code may inspect CacheStorage even though this frame
   // has no persistent cache. Supply only an empty, in-memory no-op facade.
   Object.defineProperty(window,'caches',{ value:{
@@ -128,7 +132,23 @@
   // Forms handled by app JavaScript still open, validate and show errors;
   // their server-side writes are rejected by fetch. Native submissions cannot
   // navigate thanks to sandbox + CSP form-action.
-  window.AlfaPreviewRuntime = { async start() {
+  window.AlfaPreviewRuntime = {
+    videoPoster(video) {
+      if (!/^[\w-]{11}$/.test(String(video?.id || ''))) return null;
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'preview-video-poster';
+      button.setAttribute('aria-label', 'Videoyu önizleme oynatıcısında aç');
+      const image = document.createElement('img');
+      image.src = 'https://i.ytimg.com/vi/' + video.id + '/hqdefault.jpg';
+      image.alt = ''; image.loading = 'lazy';
+      const play = document.createElement('span'); play.className = 'preview-video-play'; play.textContent = '▶';
+      const label = document.createElement('span'); label.className = 'preview-video-label';
+      label.textContent = String(video.title || 'YouTube videosu').slice(0, 160);
+      button.append(image, play, label);
+      button.onclick = () => send({ type:'preview:video', id:video.id, title:label.textContent });
+      return button;
+    },
+    async start() {
     AUTH.client = client; AUTH.user = user; AUTH.cloud = {}; AUTH.ns = 'preview:';
     scheduleCloudSync = function () {}; // Ephemeral local exercises, never cloud sync.
     await loadSiteAccess();

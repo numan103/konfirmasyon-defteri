@@ -45,6 +45,21 @@
 .mentor-result-row { display: grid; grid-template-columns: 1fr auto auto; gap: 7px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--card); font-size: 12px; }
 .mentor-result-row small { grid-column: 1/-1; font-size: 10px; color: var(--text-3); }
 .mentor-result-row > span { font-size: 10px; color: var(--text-3); }
+.mentor-evaluation { border: 1px solid var(--border); border-radius: 13px; background: var(--panel-alt,var(--card)); padding: 15px; }
+.mentor-eval-title { margin: 8px 0 2px; font-size: 15px; }
+.mentor-eval-curve { margin: 0 -4px 12px; }
+.mentor-eval-curve .mentor-curve { border: 0; background: none; padding: 0; margin: 0; }
+.mentor-eval-list { display: grid; gap: 8px; }
+.mentor-eval-row { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
+.mentor-eval-when { display: grid; gap: 2px; }
+.mentor-eval-when strong { font-size: 12px; }
+.mentor-eval-when small { font-size: 9px; color: var(--text-3); }
+.mentor-eval-moves { display: flex; flex-wrap: wrap; gap: 5px; }
+.mentor-eval-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 6px; background: var(--bg2,var(--panel-alt)); border: 1px solid var(--border); font-size: 11px; }
+.mentor-eval-chip em { font-style: normal; font-weight: 800; }
+.mentor-eval-totals { display: grid; gap: 2px; text-align: right; }
+.mentor-eval-totals strong { font-size: 14px; font-variant-numeric: tabular-nums; }
+.mentor-eval-totals small { font-size: 9px; color: var(--text-3); }
 body[data-mentor-access="results"] #page-alfatrading :is(#at-filters,#at-feed,.at-head-btns) { display: none; }
 #landing .lp-hero .mentor-curve .mentor-trades-note { font-size: 11px; line-height: 1.6; margin: 12px 0 0; max-width: none; }
 #landing .lp-hero :is(#lp-live-bias,#lp-live-results) > p { font-size: 12px; line-height: 1.7; margin: 8px 0; }

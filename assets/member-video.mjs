@@ -26,13 +26,22 @@ if (slot) {
     const title = element('h2', video.title);
     const date = element('div', new Date(video.publishedAt).toLocaleDateString(window.LANG === 'en' ? 'en-GB' : 'tr-TR') + ' · Crypto Ahmet', 'member-video-meta');
     const frame = element('div', undefined, 'member-video-frame');
-    const iframe = element('iframe');
-    iframe.title = video.title; iframe.loading = 'lazy'; iframe.allowFullscreen = true;
-    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-    iframe.allow = 'encrypted-media; picture-in-picture; fullscreen';
-    iframe.src = 'https://www.youtube-nocookie.com/embed/' + video.id + '?rel=0&playsinline=1';
-    frame.appendChild(iframe);
-    const note = element('p', tr('Video açılmıyorsa: ', 'If the video does not load: '), 'member-video-note');
+    const preview = window.AlfaPreviewRuntime?.videoPoster?.(video);
+    if (preview) {
+      // The opaque preview frame cannot run third-party players; the parent
+      // opens the same video in a small, isolated player on demand.
+      frame.appendChild(preview);
+    } else {
+      const iframe = element('iframe');
+      iframe.title = video.title; iframe.loading = 'lazy'; iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allow = 'encrypted-media; picture-in-picture; fullscreen';
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + video.id + '?rel=0&playsinline=1';
+      frame.appendChild(iframe);
+    }
+    const note = element('p', preview
+      ? tr('Önizlemede güvenli oynatıcı açılır. ', 'The secure player opens inside the preview. ')
+      : tr('Video açılmıyorsa: ', 'If the video does not load: '), 'member-video-note');
     const link = element('a', tr('YouTube’da izle ↗', 'Watch on YouTube ↗'));
     link.href = 'https://www.youtube.com/watch?v=' + video.id; link.target = '_blank'; link.rel = 'noopener noreferrer';
     note.appendChild(link); slot.append(head, title, date, frame, note);

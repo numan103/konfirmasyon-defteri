@@ -26,18 +26,18 @@
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
 <link rel="stylesheet" href="/assets/alfa-podcast.css?v=1">
-<link rel="stylesheet" href="/assets/member-video.css?v=1">
-<script type="module" src="/assets/member-video.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/member-video.css?v=2">
+<script type="module" src="/assets/member-video.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/edu-plans.css?v=4">
-<link rel="stylesheet" href="/assets/admin-preview.css?v=2">
-<script type="module" src="/assets/admin-preview.mjs?v=2"></script>
+<link rel="stylesheet" href="/assets/admin-preview.css?v=3">
+<script type="module" src="/assets/admin-preview.mjs?v=3"></script>
 <script type="module" src="/assets/edu-plans.mjs?v=7"></script>
 <link rel="stylesheet" href="/assets/education-crm.css?v=3">
 <script type="module" src="/assets/education-crm.mjs?v=3"></script>
 <script type="module" src="/assets/edu-application.mjs?v=3"></script>
-<link rel="stylesheet" href="/assets/mentorship-trades.css?v=3">
-<script type="module" src="/assets/mentorship-trades.mjs?v=2"></script>
-<script type="module" src="/assets/mentor-results-preview.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/mentorship-trades.css?v=4">
+<script type="module" src="/assets/mentorship-trades.mjs?v=3"></script>
+<script type="module" src="/assets/mentor-results-preview.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
@@ -554,13 +554,17 @@
   .hc2-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
   .hc2-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
   .hc2-list { padding: 4px 0; }
-  .hc2-row { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-bottom: 1px dashed var(--border); }
+  .hc2-row { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px dashed var(--border); }
   .hc2-row:last-child { border-bottom: none; }
-  .hc2-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: var(--bg2); border: 1px solid var(--border); flex: none; }
-  .hc2-body { flex: 1; min-width: 0; }
-  .hc2-title { font-size: 13px; font-weight: 700; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hc2-meta { font-size: 11px; color: var(--text-3); }
-  .hc2-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--bg2); border: 1px solid var(--border); color: var(--text-3); white-space: nowrap; }
+  .hc2-thumb { width: 42px; height: 42px; border-radius: 9px; object-fit: cover; background: var(--bg2); border: 1px solid var(--border); }
+  .hc2-body { min-width: 0; }
+  .hc2-title { font-size: 12px; font-weight: 700; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hc2-meta { font-size: 10px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .hc2-side { display: grid; gap: 3px; justify-items: end; }
+  .hc2-r { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .hc2-r.pos { color: var(--green); }
+  .hc2-r.neg { color: var(--red); }
+  .hc2-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 5px; background: var(--bg2); border: 1px solid var(--border); color: var(--text-3); white-space: nowrap; }
   .hc2-badge.islem { color: var(--green); border-color: rgba(34,197,94,.35); }
   .hc2-badge.analiz { color: var(--pc); border-color: rgba(123,120,245,.35); }
   .hc2-badge.onchain { color: #06b6d4; border-color: rgba(6,182,212,.35); }
@@ -6169,10 +6173,12 @@
         <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
         <a href="?page=portfoy" data-nav>💼 Portföy</a>
       </div>
-      <div class="panel" id="home-results-panel" style="margin:0 0 12px;">
-        <h2><span>Sonuçlar</span><span class="n" id="home-results-count">—</span></h2>
-        <p class="hint" style="margin:0 0 8px;">Aktarılan teyitli sonuçlar · kümülatif R. Grafikler ve aktif işlemler premium'a özel.</p>
-        <div id="home-results-list" style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-2);"></div>
+      <div id="home-results-slot">
+        <div class="panel" id="home-results-panel" style="margin:0 0 12px;">
+          <h2><span>Sonuçlar</span><span class="n" id="home-results-count">—</span></h2>
+          <p class="hint" style="margin:0 0 8px;">1 Kasım’dan bugüne aktarılan teyitli sonuçlar · günlük ve kümülatif R. Grafikler ve aktif işlemler premium’a özel.</p>
+          <div id="home-results-list"></div>
+        </div>
       </div>
       <div class="home-edu" id="home-edu">
         <div class="he-ico">🎓</div>
@@ -6241,6 +6247,7 @@
         </a>
       </div>
   </div>
+  <div id="home-results-bottom"></div>
     
     </div>
   </div>
@@ -15261,7 +15268,12 @@ async function renderHomeChannel() {
     const label = p.type === 'islem' ? 'İşlem' : (p.type === 'onchain' ? 'Onchain' : 'Kanal');
     const thumb = p.img ? '<img class="hc2-thumb" src="' + esc(p.img) + '" alt="">' : '<div class="hc2-thumb"></div>';
     const title = p.title || p.text || 'Paylasim';
-    return '<div class="hc2-row">' + thumb + '<div class="hc2-body"><div class="hc2-title">' + esc(title) + '</div><div class="hc2-meta">' + (p.coin ? esc(p.coin) + ' · ' : '') + (typeof atTimeAgo === 'function' ? atTimeAgo(p.ts) : '') + '</div></div><span class="hc2-badge ' + badge + '">' + label + '</span></div>';
+    const rMatch = String(title).match(/([+\-−]\s*\d{1,3}(?:[.,]\d{1,3})?)\s*r\b/i);
+    const rText = rMatch ? rMatch[1].replace(/\s/g,'').replace('−','-').replace(',','.') : '';
+    const rClass = rText && Number(rText) >= 0 ? 'pos' : 'neg';
+    const date = new Date(p.ts).toLocaleDateString('tr-TR', { day:'2-digit', month:'short', timeZone:'Europe/Istanbul' });
+    const r = rText ? '<span class="hc2-r ' + rClass + '">' + (Number(rText) > 0 ? '+' : '') + esc(rText) + 'R</span>' : '';
+    return '<div class="hc2-row">' + thumb + '<div class="hc2-body"><div class="hc2-title">' + esc(title) + '</div><div class="hc2-meta">' + (p.coin ? esc(p.coin) + ' · ' : '') + esc(date) + '</div></div><div class="hc2-side">' + r + '<span class="hc2-badge ' + badge + '">' + label + '</span></div></div>';
   }).join('');
 }
 

@@ -43,8 +43,9 @@ test('free results cannot carry premium fields even under a broad admin API resp
 test('opaque live runtime keeps tokens and parent storage out; native network remains blocked', () => {
   const parent = fs.readFileSync(new URL('../assets/admin-preview.mjs',import.meta.url),'utf8');
   const runtime = fs.readFileSync(new URL('../assets/admin-preview-runtime.js',import.meta.url),'utf8');
-  assert.match(parent,/setAttribute\('sandbox', 'allow-scripts'\)/);
-  assert.doesNotMatch(parent,/allow-same-origin|allow-forms|allow-top-navigation/);
+  assert.match(parent,/frame\.setAttribute\('sandbox', 'allow-scripts'\)/);
+  assert.doesNotMatch(parent,/frame\.setAttribute\([^)]*allow-same-origin|frame\.setAttribute\([^)]*allow-forms|frame\.setAttribute\([^)]*allow-top-navigation/);
+  assert.match(parent,/player\.setAttribute\('sandbox', 'allow-scripts allow-same-origin allow-presentation'\)/);
   assert.match(parent,/connect-src 'none'/);
   assert.match(parent,/event\.source !== frame\.contentWindow/);
   assert.match(parent,/message\.channel !== channel/);
@@ -52,4 +53,25 @@ test('opaque live runtime keeps tokens and parent storage out; native network re
   assert.match(runtime,/Object\.defineProperty\(window,name,\{ value:memoryStorage\(\) \}\)/);
   assert.match(runtime,/access_token:'preview-no-authority'/);
   assert.doesNotMatch(parent,/postMessage\([^;]*(?:access_token|Authorization)/);
+});
+test('minimal switcher, light member previews and November evaluation are wired in', () => {
+  const parent = fs.readFileSync(new URL('../assets/admin-preview.mjs',import.meta.url),'utf8');
+  const css = fs.readFileSync(new URL('../assets/admin-preview.css',import.meta.url),'utf8');
+  const runtime = fs.readFileSync(new URL('../assets/admin-preview-runtime.js',import.meta.url),'utf8');
+  const curve = fs.readFileSync(new URL('../assets/mentor-curve.mjs',import.meta.url),'utf8');
+  const panel = fs.readFileSync(new URL('../assets/mentor-results-preview.mjs',import.meta.url),'utf8');
+  const html = fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(parent,/icons = \{ landing:'⌂', free:'＋', premium:'★', admin:'⚙' \}/);
+  assert.match(parent,/b\.setAttribute\('aria-label', label\)/);
+  assert.match(parent,/theme:role === 'premium' \? 'dark' : 'light'/);
+  assert.match(css,/#admin-view-switch \{ position:fixed[^}]*height:34px/);
+  assert.match(css,/html\.admin-preview-role-premium #page-alfatrading \.mentor-trades-head/);
+  assert.match(css,/html\.admin-preview-role-premium #page-alfatrading \.mentor-trades-filters/);
+  assert.match(runtime,/if \(config\.theme === 'light'\) localStorage\.setItem\('alfa-theme', 'light'\)/);
+  assert.match(runtime,/videoPoster\(video\)/);
+  assert.match(runtime,/type:'preview:video'/);
+  assert.match(curve,/2026-11-01T00:00:00\+03:00/);
+  assert.match(curve,/renderMentorEvaluation/);
+  assert.match(panel,/home-results-bottom/);
+  assert.match(html,/id="home-results-bottom"/);
 });
