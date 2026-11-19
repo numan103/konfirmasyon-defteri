@@ -32,6 +32,8 @@ try {
       return route.fulfill({json:{ok:true,video:{id:'MOKNqsj6WfU',title:'Güvenli video önizlemesi',publishedAt:'2026-11-10T10:00:00Z'}}});
     if (url.pathname === '/api/edu-shared' && q.get('kind') === 'landing')
       return route.fulfill({json:{ok:true,channel:{trades:{latest:[{id:'channel-1',date:new Date().toISOString(),title:'GOLD +2.3R sonuç',coin:'GOLD'}]},biases:{latest:[]}},status:{channel:'ok'}}});
+    if (url.pathname === '/api/edu-shared' && q.get('kind') === 'news')
+      return route.fulfill({json:{ok:true,data:{issueNo:1,weekLabel:'1 Kasım',rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[{id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',images:[]}]}}});
     if (url.pathname === '/api/edu-shared') return route.fulfill({json:{ok:true,data:null,episode:null,channels:{},status:{channel:'ok'},channel:{trades:{latest:[]},biases:{latest:[]}}}});
     return route.fulfill({json:{ok:true,rows:[],entries:[],applications:[]}});
   });
@@ -73,6 +75,13 @@ try {
   assert.equal(await preview.locator('.mentor-trade img').count(),0);
   assert.equal(await preview.evaluate(() => siteCanOpen('egitim')),false);
   assert.equal(await preview.evaluate(() => siteCanOpen('alfacharts')),false);
+  assert.equal(await preview.evaluate(() => siteCanOpen('news')),true);
+  await preview.evaluate(() => showPage('home'));
+  await preview.locator('#home-magazine-link').click();
+  await preview.waitForFunction(() => document.body.dataset.page === 'news');
+  await preview.locator('#news-weekly-list .nw-card').first().waitFor();
+  assert.equal(await preview.locator('#mag-tools:visible').count(),0,'preview roles read the weekly magazine without editor tools');
+  await preview.evaluate(() => showPage('home'));
   const start = requests.length;
   assert.equal(await preview.evaluate(async () => (await fetch('/api/analytics?education=1',{method:'POST',body:'{}'})).status),403);
   assert.equal(await preview.evaluate(async () => (await fetch('/api/access?op=list')).status),403);
@@ -93,7 +102,6 @@ try {
   assert.equal(await preview.evaluate(() => siteCanOpen('egitim')),true);
   assert.equal(await preview.evaluate(() => siteCanOpen('trading')),false);
   // A non-home page stays navigable across role changes, and catalog JS renders.
-  await preview.locator('.drop-btn[data-i18n="app.edu"]').hover();
   await preview.locator('#tab-eduplans').click();
   await preview.locator('article[data-plan="video"]').waitFor();
   await preview.locator('.eduplan-cover').first().scrollIntoViewIfNeeded();

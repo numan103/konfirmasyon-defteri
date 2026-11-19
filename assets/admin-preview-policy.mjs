@@ -38,7 +38,7 @@ export function previewRequest(raw, method, role, origin) {
   if (u.pathname === '/api/eco-cal' && !u.search) return { url:'/api/eco-cal', authenticated:false };
   if (u.pathname === '/api/edu-shared') {
     const kind = q.get('kind') || '';
-    if (['landing','podcast','youtube'].includes(kind))
+    if (['landing','podcast','youtube','news'].includes(kind))
       return { url:'/api/edu-shared?kind=' + kind, authenticated:false };
     if (kind === 'portfolio' && member(role)) {
       const summary = role !== 'premium' || q.get('view') === 'summary';

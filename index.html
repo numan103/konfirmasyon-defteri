@@ -415,6 +415,18 @@
   .analyst-foot { color:var(--text-3); font-size:11px; font-weight:600; margin-top:11px; }
   /* AlfaNews dergi düzeni */
   #page-news > .news-grid, #page-news > .news-lower, #page-news > .news-crew { display:none; }
+  .news-weekly { max-width:980px; margin:0 auto 18px; padding:16px 18px; border:1px solid var(--border); border-radius:16px; background:var(--card); }
+  .nw-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .nw-head h2 { margin:0; font-size:16px; font-weight:800; }
+  .nw-head p { margin:0; font-size:11.5px; color:var(--text-3); }
+  .nw-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
+  .nw-card { display:grid; gap:6px; padding:13px 14px; border:1px solid var(--border); border-radius:12px; background:var(--bg2); min-width:0; }
+  .nw-meta { display:flex; gap:8px; flex-wrap:wrap; font-size:10px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:.04em; }
+  .nw-title { margin:0; font-size:13px; font-weight:800; color:var(--text); line-height:1.35; }
+  .nw-excerpt { margin:0; font-size:11.5px; color:var(--text-2); line-height:1.5; }
+  .nw-open { justify-self:start; margin-top:3px; padding:6px 10px; border:1px solid var(--pc); border-radius:8px; background:transparent; color:var(--pc); font-size:11px; font-weight:800; cursor:pointer; }
+  .nw-open:hover { background:var(--pc); color:#fff; }
+  .nw-empty { grid-column:1/-1; margin:0; font-size:12px; color:var(--text-3); }
   .mag-cover { position:relative; display:grid; grid-template-columns:1.06fr .94fr; gap:22px; overflow:hidden; min-height:315px; padding:24px; border-radius:20px; color:#fff; background:linear-gradient(135deg,#10111f 0%,#282453 100%); }
   .mag-cover:after { content:'ALFA'; position:absolute; left:20px; bottom:-36px; font-family:var(--font-display); font-size:150px; font-weight:800; line-height:1; letter-spacing:-.09em; color:rgba(255,255,255,.045); }
   .mag-cover > * { position:relative; z-index:1; }
@@ -568,6 +580,14 @@
   .hc2-badge.islem { color: var(--green); border-color: rgba(34,197,94,.35); }
   .hc2-badge.analiz { color: var(--pc); border-color: rgba(123,120,245,.35); }
   .hc2-badge.onchain { color: #06b6d4; border-color: rgba(6,182,212,.35); }
+  .home-magazine { display:flex; align-items:center; gap:12px; max-width:980px; margin:12px auto 18px; padding:14px 16px; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); text-decoration:none; box-shadow:var(--shadow); transition:border-color .12s,transform .12s; }
+  .home-magazine:hover { border-color:var(--pc); transform:translateY(-1px); }
+  .hm-ico { display:grid; place-items:center; width:40px; height:40px; flex:none; border-radius:11px; background:var(--bg2); border:1px solid var(--border); font-size:21px; }
+  .hm-body { display:grid; gap:3px; min-width:0; }
+  .hm-body strong { font-size:13.5px; font-weight:800; }
+  .hm-body .hint { font-size:11.5px; color:var(--text-3); line-height:1.4; }
+  .hm-arrow { margin-left:auto; color:var(--pc); font-size:18px; font-weight:800; }
+  @media (max-width:600px) { .home-magazine { padding:12px 13px; gap:10px; } .hm-ico { width:36px; height:36px; font-size:19px; } .hm-body .hint { font-size:10.5px; } }
   .home-teaser { max-width: 980px; margin: 0 auto 18px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
   .ht-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
   .ht-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
@@ -5816,23 +5836,7 @@
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
-      <div class="nav-drop">
-        <button type="button" class="nav-link drop-btn" data-i18n="app.edu">🎓 Edu ▾</button>
-        <div class="drop-menu">
-          <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
-          <a href="?page=egitim" class="nav-link" id="tab-egitim" data-nav data-i18n="app.eduPage">🎓 Alfa Edu</a>
-          <a href="?page=strategies" class="nav-link" id="tab-strategies" data-nav data-i18n="app.strategies">🧪 Stratejiler</a>
-          <a href="?page=analiz" class="nav-link" id="tab-analiz" data-nav data-i18n="app.analiz">🧭 Analiz Köşesi</a>
-          <a href="?page=indicators" class="nav-link" id="tab-indicators" data-nav data-i18n="app.indicators">📐 İndikatörler</a>
-          <a href="?page=designer" class="nav-link" id="tab-designer" data-nav data-i18n="app.designer">🧬 Alfa Designer</a>
-        </div>
-      </div>
-      <div class="nav-drop">
-        <button type="button" class="nav-link drop-btn" data-i18n="app.news">📰 AlfaNews ▾</button>
-        <div class="drop-menu">
-          <a href="?page=calendar" class="nav-link" id="tab-calendar" data-nav data-i18n="app.calendar">📅 Ekonomik Takvim</a>
-        </div>
-      </div>
+      <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
       <a href="?page=analitik" class="nav-link" id="tab-analitik" data-nav style="display:none">📊 Analitik</a>
@@ -5880,15 +5884,7 @@
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
-      <div class="mnav-group" data-i18n="app.edu">🎓 Edu</div>
       <a href="?page=eduplans" class="mnav-link" data-nav data-mnav="eduplans" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
-      <a href="?page=egitim" class="mnav-link" data-nav data-mnav="egitim" data-i18n="app.eduPage">🎓 Alfa Edu</a>
-      <a href="?page=strategies" class="mnav-link" data-nav data-mnav="strategies" data-i18n="app.strategies">🧪 Stratejiler</a>
-      <a href="?page=analiz" class="mnav-link" data-nav data-mnav="analiz" data-i18n="app.analiz">🧭 Analiz Köşesi</a>
-      <a href="?page=indicators" class="mnav-link" data-nav data-mnav="indicators" data-i18n="app.indicators">📐 İndikatörler</a>
-      <a href="?page=designer" class="mnav-link" data-nav data-mnav="designer" data-i18n="app.designer">🧬 Alfa Designer</a>
-      <div class="mnav-group" data-i18n="app.news">📰 AlfaNews</div>
-      <a href="?page=calendar" class="mnav-link" data-nav data-mnav="calendar" data-i18n="app.calendar">📅 Ekonomik Takvim</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
       <a href="?page=analitik" class="mnav-link" data-nav data-mnav="analitik" id="mnav-analitik" style="display:none">📊 Ziyaretçi Analitiği</a>
@@ -6091,6 +6087,11 @@
        </div>
        <div id="home-podcast-slot" hidden></div>
        <section id="home-member-video" class="member-video" aria-label="Son YouTube videosu" hidden></section>
+        <a id="home-magazine-link" href="?page=news" data-nav class="home-magazine" aria-label="Alfa Dergi: haftalık HTF bias ve piyasa analizleri">
+          <span class="hm-ico" aria-hidden="true">🗞️</span>
+          <span class="hm-body"><strong>🗞️ Alfa Dergi</strong><span class="hint">Haftalık HTF bias, makro analiz ve seviyeler — herkes okuyabilir.</span></span>
+          <span class="hm-arrow" aria-hidden="true">→</span>
+        </a>
        <a id="home-diary-link" href="?page=ayna" data-nav hidden style="margin:12px 0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;">
          <strong>📓 Kişisel Günlük Asistan →</strong><br><span class="hint">Sana özel alanın: gününü planla, düşüncelerini kaydet, akşam küçük bir sonraki adım belirle.</span>
        </a>
@@ -6908,6 +6909,10 @@
     </div>
   </div>
   <div id="page-news" class="hidden">
+    <section class="news-weekly" id="news-weekly" aria-labelledby="news-weekly-title">
+      <div class="nw-head"><h2 id="news-weekly-title">🗞️ Haftalık Dergi</h2><p>HTF bias, makro analiz ve seviye yazıları · yeni kayıt, premium ve yönetici okuyabilir</p></div>
+      <div class="nw-list" id="news-weekly-list"><p class="nw-empty">Haftalık yazılar yükleniyor…</p></div>
+    </section>
     <div class="eg-brand"><span class="eg-brand-ico">🗞️</span><span class="eg-brand-name" data-i18n="pg.news.t">AlfaNews</span><span class="eg-brand-sub" data-i18n="pg.news.s">Dergi formatında analist içerikleri ve piyasa içgörüleri.</span></div>
     <div class="mag-wrap">
       <div class="mag-toolbar">
@@ -13187,22 +13192,32 @@ let magSaveTimer = null;
 let magPreview = false; // admin okuyucu önizlemesi
 
 function magIsAdmin() {
-  try { return (typeof AUTH !== 'undefined' && AUTH.user) ? ((AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL) : true; }
-  catch (e) { return true; }
+  // Düzenleme araçları yalnızca gerçek site yöneticisinde; giriş yoksa fail-open değil.
+  try { return typeof siteIsAdmin === 'function' && siteIsAdmin(); }
+  catch (e) { return false; }
 }
 async function loadNews() {
   if (currentPage !== 'news') return false;
-  const owner = AUTH && AUTH.user && AUTH.user.id;
   let d = null;
-  try {
-    if (typeof AUTH !== 'undefined' && AUTH.client) {
-      const res = window.AlfaSharedDocuments
-        ? await window.AlfaSharedDocuments.read(AUTH.client, owner, 1)
-        : await AUTH.client.from('alfanews').select('data').eq('id', 1).maybeSingle();
-      if (owner !== (AUTH && AUTH.user && AUTH.user.id)) return false;
-      if (res && res.data && res.data.data) d = res.data.data;
-    }
-  } catch (e) { /* tablo yok / çevrimdışı */ }
+  if (magIsAdmin()) {
+    // Yönetici tam veriyi kendi oturumuyla okur (düzenleme alanları için).
+    const owner = AUTH && AUTH.user && AUTH.user.id;
+    try {
+      if (typeof AUTH !== 'undefined' && AUTH.client && owner) {
+        const res = window.AlfaSharedDocuments
+          ? await window.AlfaSharedDocuments.read(AUTH.client, owner, 1)
+          : await AUTH.client.from('alfanews').select('data').eq('id', 1).maybeSingle();
+        if (owner === (AUTH && AUTH.user && AUTH.user.id) && res && res.data && res.data.data) d = res.data.data;
+      }
+    } catch (e) { /* tablo yok / çevrimdışı */ }
+  }
+  // Yeni kayıt, premium, misafir ve preview rolleri için ortak okuma ucu.
+  if (!d) {
+    try {
+      const res = await fetch('/api/edu-shared?kind=news', { cache: 'no-store' });
+      if (res.ok) { const j = await res.json(); if (j && j.ok && j.data && typeof j.data === 'object') d = j.data; }
+    } catch (e) { /* ortak dergi okunamadı */ }
+  }
   if (!d) { try { const raw = await store.get(NEWS_KEY); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; } }
   const available = !!d;
   if (!d || typeof d !== 'object') d = {};
@@ -13788,6 +13803,41 @@ function renderRoster() {
   box.appendChild(add);
 }
 
+function renderNewsWeekly() {
+  const box = document.getElementById('news-weekly-list'); if (!box) return;
+  box.innerHTML = '';
+  const all = Array.isArray(magData.entries) ? magData.entries : [];
+  const entries = magMainList().length ? magMainList() : all;
+  if (!entries.length) {
+    const empty = document.createElement('p'); empty.className = 'nw-empty'; empty.textContent = 'Bu hafta için dergi yazısı bekleniyor.';
+    box.appendChild(empty); return;
+  }
+  const week = magData.weekLabel || magWeek();
+  entries.slice(0, 12).forEach(function (e) {
+    const card = document.createElement('article'); card.className = 'nw-card';
+    const meta = document.createElement('div'); meta.className = 'nw-meta';
+    const wk = document.createElement('span'); wk.textContent = 'Haftalık · ' + week;
+    const kind = document.createElement('span'); kind.textContent = magIsUpd(e) ? 'Güncelleme' : 'Analiz';
+    const author = magAuthor(e.authorId);
+    const au = document.createElement('span'); au.textContent = (author && author.name) ? author.name : 'Analist belirtilmemiş';
+    meta.append(wk, kind, au);
+    const title = document.createElement('h3'); title.className = 'nw-title'; title.textContent = e.title || 'Başlıksız analiz';
+    const excerpt = document.createElement('p'); excerpt.className = 'nw-excerpt';
+    const raw = String(e.body || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    excerpt.textContent = raw ? (raw.slice(0, 180) + (raw.length > 180 ? '…' : '')) : 'Özet bekleniyor.';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'nw-open'; btn.textContent = 'Dergide oku →';
+    btn.addEventListener('click', function () {
+      let page;
+      if (magIsUpd(e)) { const pi = magUpdParentIdx(e); page = pi >= 0 ? magMainIdx(pi) : 0; }
+      else { const idx = magData.entries.indexOf(e); page = idx >= 0 ? magMainIdx(idx) : 2; }
+      magGoTo(page);
+      const book = document.getElementById('mag-book');
+      if (book && book.scrollIntoView) book.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    card.append(meta, title, excerpt, btn);
+    box.appendChild(card);
+  });
+}
 function renderNews() {
   const stage = document.getElementById('mag-stage'); if (!stage) return;
   if (!magData || !Array.isArray(magData.entries)) magData = { issueNo: 1, entries: [], authors: [] };
@@ -13797,6 +13847,7 @@ function renderNews() {
   const tools = document.getElementById('mag-tools'); if (tools) tools.style.display = (isAdmin && !magPreview) ? '' : 'none';
   const exitBtn = document.getElementById('mag-preview-exit'); if (exitBtn) exitBtn.style.display = (isAdmin && magPreview) ? '' : 'none';
   renderRoster();
+  renderNewsWeekly();
   const badge = document.getElementById('mag-adminbadge'); if (badge) badge.style.display = admin ? '' : 'none';
   const n = magCount();
   stage.innerHTML = '';
@@ -13988,7 +14039,7 @@ const PAGE_TIER = {
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
   defter: 'ref', review: 'ref',
   // Asagidakiler sadece yonetici (admin) gorur:
-  news: 'admin', ek: 'admin', data: 'admin', karne: 'admin',
+  news: 'free', ek: 'admin', data: 'admin', karne: 'admin',
   alfa: 'admin', apps: 'admin', basvuru: 'admin', 'chat-admin': 'admin',
   sosyalmetre: 'admin', uyap: 'admin', zaman: 'admin', strateji: 'admin',
   ayna: 'admin', mentoring: 'admin', analitik: 'admin'
@@ -14204,11 +14255,11 @@ function applyTierUi() {
     let any = false;
     links.forEach(function (a) { if (a.style.display !== 'none') any = true; });
     const label = d.querySelector('.drop-btn');
-    const privateMenu = label && ['app.trader', 'app.news'].includes(label.getAttribute('data-i18n'));
+    const privateMenu = label && label.getAttribute('data-i18n') === 'app.trader';
     if (links.length) d.style.display = (!ref && privateMenu) ? 'none' : (any ? '' : 'none');
   });
   // Admin-only sayfalarin ana sayfa kartlarini non-admin'de gizle
-  ['data', 'karne', 'news', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
+  ['data', 'karne', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
     const card = document.querySelector('.home-card[href="?page=' + p + '"]');
     if (card) card.style.display = isAdmin ? '' : 'none';
   });

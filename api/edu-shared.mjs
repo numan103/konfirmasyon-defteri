@@ -33,6 +33,52 @@ async function readEduShared(rowId) {
   return { data: (rows && rows[0] && rows[0].data) || null };
 }
 
+// AlfaNews — haftalık dergi. Salt okunur, herkese açık, kişisel veri taşımaz.
+async function alfaNews(req, res) {
+  if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'read_only' });
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/alfanews?id=eq.1&select=data,updated_at`;
+    const response = await fetch(url, { headers: sbHeaders(SUPABASE_KEY), cache: 'no-store' });
+    if (!response.ok) return res.status(200).json({ ok: false, data: null, _warn: `Supabase read ${response.status}` });
+    const rows = await response.json();
+    const raw = rows && rows[0] && rows[0].data;
+    if (!raw || typeof raw !== 'object') return res.status(200).json({ ok: true, data: null });
+    const text = (value, max) => String(value == null ? '' : value).slice(0, max);
+    const entries = Array.isArray(raw.entries) ? raw.entries.slice(0, 60).map(e => ({
+      id: text(e && e.id, 80),
+      title: text(e && e.title, 200),
+      body: text(e && e.body, 40000),
+      type: e && e.type === 'update' ? 'update' : '',
+      relId: text(e && e.relId, 80),
+      result: text(e && e.result, 200),
+      authorId: text(e && e.authorId, 80),
+      images: Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => text(u, 600)).filter(Boolean) : [],
+      beforeImg: text(e && e.beforeImg, 600),
+      afterImg: text(e && e.afterImg, 600),
+      ctaUrl: text(e && e.ctaUrl, 600),
+    })) : [];
+    const authors = Array.isArray(raw.authors) ? raw.authors.slice(0, 20).map(a => ({
+      id: text(a && a.id, 80),
+      name: text(a && a.name, 120),
+      specialty: text(a && a.specialty, 120),
+      photo: text(a && a.photo, 600),
+    })) : [];
+    return res.status(200).json({ ok: true, updatedAt: rows[0].updated_at || null, data: {
+      issueNo: Number.isFinite(raw.issueNo) ? raw.issueNo : 1,
+      weekLabel: text(raw.weekLabel, 120),
+      coverBg: text(raw.coverBg, 600),
+      ctaLabel: text(raw.ctaLabel, 120),
+      ctaUrl: text(raw.ctaUrl, 600),
+      rosterVer: 2,
+      authorsSeeded: true,
+      authors,
+      entries,
+    } });
+  } catch (error) {
+    return res.status(200).json({ ok: false, data: null, _warn: 'alfanews okunamadı' });
+  }
+}
+
 async function writeEduShared(rowId, data) {
   const url = `${SUPABASE_URL}/rest/v1/edu_shared`;
   const res = await fetch(url, {
@@ -147,6 +193,7 @@ export default async function handler(req, res) {
   if (req.query?.kind === 'landing') return landing(req, res);
   if (req.query?.kind === 'podcast') return podcast(req, res);
   if (req.query?.kind === 'youtube') return youtubeLatest(req, res);
+  if (req.query?.kind === 'news') return alfaNews(req, res);
 
   const isChannel = String(req.query && req.query.kind) === 'channel';
   const isShort = String(req.query && req.query.kind) === 'short';

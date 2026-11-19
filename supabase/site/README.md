@@ -101,7 +101,7 @@ select user_id, exchange, exchange_uid, status, note, created_at
 
 `index.html` içindeki `PAGE_TIER` haritası:
 
-- **free** — kayıtlı herkes: `home`, `news`, `calc`, `calendar`, `ek`
+- **free** — herkes: `home`, `news` (Alfa Dergi / haftalık dergi), `calc`, `calendar` (artık menüde değil, direkt URL ile açılır), `ek`
 - **ref** — referansı doğrulanmış: `alfatrading` (işlem kanalı), `defter`, `data`, `review`, `karne`, `trading`, `egitim`, `strategies`, `analiz`, `indicators`, `designer`, `pano`, `onchain`, `portfoy`, `butce`
 - **admin** — `alfa`, `apps`, `basvuru`, `chat-admin`, `sosyalmetre`, `uyap`, `zaman`, `strateji`, `ayna`, `mentoring`
 
