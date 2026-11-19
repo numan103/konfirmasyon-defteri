@@ -4,8 +4,8 @@ Ana paket düğmeleri artık Telegram mesajı açmaz:
 
 1. **50 / 99 / 250 USDT · TRC20 ile katıl**: site hesabıyla giriş, paket tutarı,
    USDT/TRON(TRC20) adresi, ödeme sonrası 64 haneli TXID ve onay bildirimi.
-2. **Breakout hesabıyla katıl**: resmi Breakout bağlantısı, ALFA kodu, paket için
-   10K/25K/50K Classic alımı, sonra kayıt e-postası + hesap ID + sipariş ID.
+2. **Breakout hesabıyla katıl**: resmi Breakout bağlantısı, ALFA kodu, alınan hesabın
+   serbest yazılan tam adı (ör. 25K 1 Step Pro / Turbo), kayıt e-postası + hesap ID + sipariş ID.
    Personal 100K seçeneği aynı paket içinde 4 özel ders olarak kalır.
 3. **Sorum var**: isteğe bağlı Telegram soru mesajı; ödeme/katılımın şartı değil.
 
@@ -60,3 +60,21 @@ Yönetici zincir/Breakout kontrolü ve açık onayla alımı onaylar. Bu değiş
 eğitim/Telegram yetkilerini otomatik değiştirmez; hak tanımlama mevcut yönetici
 sürecinde kalır. Influencer ödeme/erişim akışı, üç eğitim paketinin hakları ve
 mevcut Access taslakları değiştirilmez. Yeni SQL/DDL yoktur.
+
+## Görsel katılım ekranı / farklı hesaplar
+
+- Global `* { margin:0 }` yüzünden sola kayan native dialog, açık `position:fixed`,
+  `inset:0`, `margin:auto` ile yatay/dikey ortalanır. Uzun içerik pencere içinde
+  kayar; başlık/kapat ve soru bağlantısı görünür kalır. Mobilde tek sütun.
+- Sayfada üç kısa adım, görselli paket kartları, temsili yerel eğitim fotoğrafları
+  ve açılır detaylar bulunur. Orijinal Breakout partner afişi kullanılır.
+- Hesap adı 3–160 karakter serbest metindir. Pro/Turbo örnek butonları sadece
+  alanı doldurur; seçenek listesiyle sınırlamaz. Yeni istemci `accountType:custom`
+  ve `accountDescription` gönderir. Eski Classic/Pro istemcileri geriye uyumludur.
+- Serbest isimden otomatik hesap büyüklüğü, eşdeğerlik veya ders hakkı çıkarılmaz.
+  `accountSize:null`, `requestedAccountSize:<paketin referansı>` tutulur.
+  Yönetici gerçek hesap adı ile seçilen paketin / 100K yükseltmesinin uygunluğunu
+  ayrıca `accountEligibilityConfirmed:true` ile onaylamadan alım onaylanamaz.
+  Başvuranın gönderdiği bu bayrak dikkate alınmaz.
+- Aynı paket için diğer yolda bekleyen/onaylı başvuru varsa yeni ödeme talimatı
+  yerine mevcut kayda yönlendirilir. İlk kayıt/uygun ilk alım şartı değişmez.

@@ -264,3 +264,26 @@ test('purchase retries are idempotent and a reserved proof remains retryable aft
   assert.equal(repeat.body.duplicate, true); assert.equal(f.rows.get(id).updated_at, stamp);
   assert.equal([...f.rows.keys()].filter(id => id.startsWith('educrm_')).length, 1);
 });
+test('custom Pro/Turbo/other account names are accepted as unverified claims, not invented account sizes or rights', () => {
+  const buyer = { id: 'buyer', email: 'buyer@example.com' };
+  const body = purchase({ plan: 'live', route: 'breakout', accountType: 'custom', accountDescription: '25K · 1 Step Turbo',
+    breakoutEmail: 'buyer@example.com', accountId: 'ACC123', orderId: 'ORDER123', firstPurchaseClaim: true,
+    accountEligibilityConfirmed: true, privateAllowance: 999 });
+  const row = sanitizePurchase(body, buyer);
+  assert.equal(row.evidence.accountDescription, '25K · 1 Step Turbo');
+  assert.equal(row.evidence.accountSize, null); assert.equal(row.evidence.requestedAccountSize, '25K');
+  assert.equal(row.evidence.eligibilityReviewRequired, true);
+  assert.equal(row.stage, 'applied'); assert.equal(row.privateAllowance, null);
+  for (const name of ['', 'ab', 'x'.repeat(161), '<img src=x>', '25K\nPro']) {
+    assert.throws(() => sanitizePurchase({ ...body, accountDescription: name }, buyer), /invalid_account_description/);
+  }
+});
+test('a custom account requires a separate admin eligibility confirmation, including the 100K lesson upgrade', () => {
+  const previous = sanitizePurchase(purchase({ plan: 'personal', route: 'breakout100k', accountType: 'custom', accountDescription: '25K 1 Step Pro',
+    breakoutEmail: 'buyer@example.com', accountId: 'ACC123', orderId: 'ORDER123', firstPurchaseClaim: true }), { id: 'buyer', email: 'buyer@example.com' });
+  const body = verified({ contact: previous.contact, plan: previous.plan, route: previous.route });
+  assert.throws(() => sanitizeAdminRecord(body, previous, actor), /account_eligibility_required/);
+  const reviewed = sanitizeAdminRecord({ ...body, accountEligibilityConfirmed: true }, previous, actor);
+  assert.equal(reviewed.accountEligibilityConfirmed, true);
+  assert.equal(reviewed.privateAllowance, 4, 'only an explicit admin decision can approve this selected upgrade');
+});

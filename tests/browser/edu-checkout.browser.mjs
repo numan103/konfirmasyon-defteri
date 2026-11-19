@@ -23,6 +23,11 @@ try {
   await page.waitForFunction(() => !!window.AlfaEduCheckout);
   await page.locator('[data-edu-apply="video"][data-edu-route="cash"]').click();
   let dialog = page.locator('dialog.edu-checkout');
+  const centered = async () => dialog.evaluate(node => {
+    const r = node.getBoundingClientRect();
+    return Math.abs(r.left + r.width / 2 - innerWidth / 2) < 4 && Math.abs(r.top + r.height / 2 - innerHeight / 2) < 4 && r.top >= 0 && r.bottom <= innerHeight;
+  });
+  assert.equal(await centered(), true, 'login dialog must be centered, not left-aligned');
   assert.equal(await dialog.locator('code').count(), 0, 'ask for login before exposing payment instructions');
   await dialog.getByRole('button', { name: 'Giriş yap / Ücretsiz kaydol' }).click();
   await page.evaluate(() => {
@@ -33,6 +38,7 @@ try {
   });
   dialog = page.locator('dialog.edu-checkout');
   await dialog.locator('[name="txid"]').waitFor();
+  assert.equal(await centered(), true, 'payment dialog must be centered');
   assert.equal(await dialog.locator('.edu-checkout-payment strong').innerText(), '50 USDT');
   assert.equal(await dialog.locator('code').innerText(), 'TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6');
   await dialog.locator('[name="txid"]').fill('a'.repeat(64));
@@ -53,19 +59,31 @@ try {
   await page.locator('[data-edu-apply="live"][data-edu-route="breakout"]').click();
   dialog = page.locator('dialog.edu-checkout');
   await dialog.locator('[name="accountId"]').waitFor();
+  assert.equal(await centered(), true, 'Breakout dialog must be centered');
   assert.equal(await dialog.getByRole('link', { name: 'Breakout’tan hesap al ↗' }).getAttribute('href'), 'https://www.breakoutprop.com/');
   assert.match(await dialog.innerText(), /25K Classic/);
+  await dialog.getByRole('button', { name: '25K · 1 Step Turbo', exact: true }).click();
+  assert.equal(await dialog.locator('[name="accountDescription"]').inputValue(), '25K · 1 Step Turbo');
+  await dialog.locator('[name="accountDescription"]').fill('25K 1 Step Pro — kendi hesabım');
   await dialog.locator('[name="breakoutEmail"]').fill('breakout@example.com');
   await dialog.locator('[name="accountId"]').fill('ACC123'); await dialog.locator('[name="orderId"]').fill('ORDER123');
   await dialog.locator('[name="firstPurchaseClaim"]').check(); await dialog.locator('[name="consent"]').check(); await dialog.locator('[name="acknowledgePending"]').check();
   await page.setViewportSize({ width: 360, height: 900 });
+  assert.equal(await centered(), true, 'mobile dialog must stay centered and inside viewport');
   assert.equal(await dialog.evaluate(node => node.getBoundingClientRect().width <= innerWidth), true);
+  assert.equal(await dialog.locator('.edu-checkout-scroll').evaluate(node => node.scrollHeight > node.clientHeight), true, 'long form scrolls internally');
+  if (arg('screenshot')) {
+    await page.setViewportSize({ width: 1440, height: 1100 });
+    await dialog.screenshot({ path: path.resolve(arg('screenshot')) });
+  }
   await dialog.locator('button[type="submit"]').click();
   await dialog.getByRole('status').filter({ hasText: 'Eğitim onayı bekliyor' }).waitFor();
   assert.equal(submitted[1].route, 'breakout'); assert.equal(submitted[1].accountId, 'ACC123');
+  assert.equal(submitted[1].accountDescription, '25K 1 Step Pro — kendi hesabım');
+  assert.equal(submitted[1].accountType, 'custom');
   assert.equal(page.url().includes('t.me'), false, 'enrollment does not redirect to a Telegram DM');
   await page.evaluate(() => { AUTH.user = null; AlfaEduCheckout.refreshContext(); });
   assert.equal(await page.locator('dialog.edu-checkout').count(), 0);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, loginBeforePayment: true, trc20Instructions: true, txidSubmission: true, breakoutSelfService: true, pendingStatus: true, noForcedTelegram: true, noAutomaticApproval: true, mobile: true, productionPayments: false }));
+  console.log(JSON.stringify({ passed: true, centeredDialogs: true, customAccountName: true, presetAndFreeTyping: true, loginBeforePayment: true, trc20Instructions: true, txidSubmission: true, breakoutSelfService: true, pendingStatus: true, noForcedTelegram: true, noAutomaticApproval: true, mobile: true, productionPayments: false }));
 } finally { await browser.close(); }

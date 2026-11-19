@@ -23,6 +23,7 @@ const errors = {
   identity_locked: 'Paket, iletişim ve alım yolu bu kayıtta sabittir. Farklı seçenek için ayrı kayıt aç.',
   invalid_package: '100K seçeneği yalnızca Personal Coaching için kullanılabilir.',
   invalid_date: 'Geçerli grup tarihleri gir.',
+  account_eligibility_required: 'Beyan edilen hesabın seçilen eğitim paketine ve varsa 100K yükseltmesine uygunluğunu ayrıca doğrula.',
 };
 async function api(body) {
   if (!admin() || typeof window.siteFetch !== 'function') throw new Error('admin_required');
@@ -146,7 +147,8 @@ function edit(record) {
         const link = el('a', 'Tronscan’da kontrol et ↗'); link.href = 'https://tronscan.org/#/transaction/' + proof.txid; link.target = '_blank'; link.rel = 'noopener noreferrer'; evidence.appendChild(link);
       }
     } else {
-      evidence.append(el('p', 'Breakout: ' + proof.accountSize + ' · ' + proof.accountType + ' · Kod ' + proof.partnerCode),
+      evidence.append(el('p', 'Alınan hesap (üye beyanı): ' + (proof.accountDescription || proof.accountSize + ' · ' + proof.accountType)),
+        el('p', 'Seçilen paket referansı: ' + (proof.requestedAccountSize || proof.accountSize || '—') + ' · Kod ' + proof.partnerCode),
         el('p', 'Kayıt e-postası: ' + proof.email), el('p', 'Hesap ID: ' + proof.accountId), el('p', 'Sipariş: ' + proof.orderId),
         el('p', 'Hesap/sipariş eşleşmesini, ALFA referansını, ilk kayıt/uygun ilk alımı ve varsa Pro muadilliğini manuel kontrol et. Şifre veya API anahtarı isteme.'));
     }
@@ -180,6 +182,7 @@ function edit(record) {
   }
   checkbox('confirmPurchase', 'Alımı manuel olarak kontrol ettim; ziyaret veya başvuruyu satış saymıyorum.', record?.stage === 'verified');
   checkbox('firstPurchaseConfirmed', 'Breakout referans/ilk kayıt/uygun ilk hesap alımı şartını ve varsa Pro muadilini kontrol ettim.', !!record?.firstPurchaseConfirmed);
+  if (record?.evidence?.eligibilityReviewRequired) checkbox('accountEligibilityConfirmed', 'Yazılan gerçek hesap türü/büyüklüğü bu eğitim paketine ve varsa 100K yükseltmesine uygundur; ayrıca kontrol ettim.', !!record.accountEligibilityConfirmed);
   const limits = el('p'); form.appendChild(limits);
   function updateLimits() {
     if (!fields.privateUsed) return;
@@ -192,6 +195,7 @@ function edit(record) {
     fields.verification.required = fields.stage.value === 'verified';
     fields.confirmPurchase.required = fields.stage.value === 'verified';
     fields.firstPurchaseConfirmed.required = fields.stage.value === 'verified' && fields.route.value !== 'cash';
+    if (fields.accountEligibilityConfirmed) fields.accountEligibilityConfirmed.required = fields.stage.value === 'verified';
   }
   if (record) for (const name of ['contact', 'plan', 'route']) fields[name].disabled = true;
   updateLimits();

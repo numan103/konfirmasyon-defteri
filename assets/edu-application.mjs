@@ -1,5 +1,5 @@
 import { EDU_PLANS } from './edu-plans-model.mjs?v=4';
-import './edu-checkout.mjs?v=1';
+import './edu-checkout.mjs?v=2';
 const en = () => window.LANG === 'en';
 const t = (a, b) => en() ? b : a;
 const el = (tag, text) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; return node; };

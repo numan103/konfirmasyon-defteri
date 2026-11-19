@@ -36,3 +36,60 @@
 .education-crm-editor .crm-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .education-crm-editor h2 { font-size: 18px; margin: 0; }
 @media(max-width:600px) { .education-crm { padding: 12px; } .education-crm-toolbar select { flex: 1 1 120px; } .education-crm-editor .crm-editor-grid { grid-template-columns: 1fr; } }
+
+/* Explicit margins restore native dialog centering after the site's * margin reset. */
+.edu-application, .education-crm-editor { position: fixed; inset: 0; margin: auto; height: fit-content; box-sizing: border-box; }
+.edu-checkout { width: min(900px,calc(100vw - 32px)); max-width: calc(100vw - 32px); max-height: calc(100dvh - 40px); padding: 0; overflow: hidden; box-shadow: 0 30px 100px #0008; border-radius: 20px; }
+.edu-checkout[open] { display: flex; flex-direction: column; }
+.edu-checkout::backdrop { background: #030814bf; backdrop-filter: blur(4px); }
+body:has(.edu-checkout[open]) { overflow: hidden; }
+.edu-checkout-header { flex: none; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; gap: 16px; padding: 22px 24px 16px; border-bottom: 1px solid var(--border); background: var(--card); }
+.edu-checkout-header h2 { font-size: clamp(19px,3vw,25px); line-height: 1.25; margin: 6px 0 0; }
+.edu-checkout-close { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 50%; background: var(--panel-alt); color: var(--text); font-size: 24px; cursor: pointer; }
+.edu-checkout-tabs { grid-column: 1/-1; display: flex; flex-wrap: wrap; gap: 8px; }
+.edu-checkout-tabs button { padding: 8px 14px; border: 1px solid var(--border); border-radius: 99px; background: var(--panel-alt); color: var(--text-3); font-size: 12px; cursor: pointer; }
+.edu-checkout-tabs button[aria-pressed="true"] { background: var(--pc-soft); color: var(--pc); border-color: var(--pc); font-weight: 700; }
+.edu-checkout-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px; }
+.edu-checkout-status { border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--pc-soft); overflow-wrap: anywhere; }
+.edu-checkout-status:empty { display: none; }
+.edu-checkout-footer { flex: none; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border); background: var(--card); }
+.edu-checkout-footer span { font-size: 10px; color: var(--text-3); }
+.edu-checkout-footer a { margin: 0; font-size: 12px; }
+.edu-checkout-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding: 0; margin: 0 0 20px; list-style: none; }
+.edu-checkout-steps li { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-2); }
+.edu-checkout-steps b { display: grid; place-items: center; flex: none; width: 25px; height: 25px; border-radius: 50%; background: var(--pc-soft); color: var(--pc); }
+.edu-checkout-layout { display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr); align-items: start; gap: 24px; }
+.edu-checkout .edu-checkout-payment { min-width: 0; margin: 0; padding: 18px; background: linear-gradient(145deg,var(--pc-soft),var(--panel-alt)); }
+.edu-checkout .edu-checkout-payment > strong { font-size: 30px; margin: 9px 0; }
+.edu-checkout .edu-checkout-payment .btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; white-space: normal; font-size: 12px; min-height: 42px; }
+.edu-checkout .edu-checkout-payment a.btn { padding: 11px 14px; border: 1px solid var(--pc); border-radius: 10px; background: var(--pc); color: #fff; text-decoration: none; font-weight: 700; }
+.edu-checkout .edu-checkout-payment a.btn:hover { filter: brightness(1.12); }
+.edu-checkout-payment small { display: block; font-size: 10px; color: var(--text-3); line-height: 1.7; margin-top: 10px; }
+.edu-checkout-partner-art { display: block; width: 100%; aspect-ratio: 16/9; object-fit: contain; border-radius: 9px; background: #090e20; }
+.edu-checkout .edu-checkout-form { margin: 0; gap: 12px; min-width: 0; }
+.edu-checkout-form label { font-weight: 600; }
+.edu-checkout-form input { font-weight: 400; min-height: 40px; }
+.edu-checkout .edu-consent { font-weight: 400; font-size: 11px; line-height: 1.6; }
+.edu-checkout .edu-consent input { min-height: 0; margin-top: 3px; accent-color: var(--pc); }
+.edu-checkout-refs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.edu-account-presets { display: flex; flex-wrap: wrap; gap: 5px; }
+.edu-account-name { display: grid; gap: 6px; }
+.edu-account-presets .btn { font-size: 10px; min-height: 30px; padding: 5px 8px; border-radius: 7px; white-space: normal; font-weight: 500; }
+.edu-account-presets [aria-pressed="true"] { border-color: var(--pc); color: var(--pc); }
+.edu-checkout-extra summary { font-size: 11px; color: var(--text-3); cursor: pointer; }
+.edu-checkout-extra label { margin-top: 8px; }
+.edu-checkout .edu-checkout-warning { font-size: 11px; line-height: 1.6; margin: 10px 0 0; color: var(--text-2); }
+.edu-checkout .edu-checkout-safety { font-size: 10px; line-height: 1.6; text-align: center; margin: 16px 0 0; }
+.edu-checkout-login-art { display: block; width: 100%; max-height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 18px; }
+.edu-checkout-state-icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--pc-soft); color: var(--pc); font-size: 38px; margin: 22px auto; }
+.edu-checkout-scroll h3 { font-size: 18px; margin: 12px 0; }
+@media(max-width:650px) {
+  .edu-checkout { width: calc(100vw - 20px); max-width: calc(100vw - 20px); max-height: calc(100dvh - 24px); border-radius: 16px; }
+  .edu-checkout-header { padding: 16px; gap: 12px; }
+  .edu-checkout-scroll { padding: 16px; }
+  .edu-checkout-footer { padding: 12px 16px; }
+  .edu-checkout-layout { grid-template-columns: minmax(0,1fr); gap: 18px; }
+  .edu-checkout-partner-art { max-height: 150px; }
+  .edu-checkout-steps li { flex-direction: column; align-items: flex-start; font-size: 10px; gap: 5px; }
+  .edu-checkout-refs { grid-template-columns: minmax(0,1fr); }
+}

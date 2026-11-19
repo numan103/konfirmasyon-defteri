@@ -50,6 +50,7 @@ try {
   assert.match(question.searchParams.get('text'), /bir sorum var/);
   await page.evaluate(() => setLang('en'));
   await page.waitForFunction(() => document.querySelector('[data-plan="video"] h3').textContent === 'Video Training');
+  await page.locator('.eduplans-term summary').nth(2).click();
   assert.match(await page.locator('.eduplans-terms').innerText(), /1\.5–3 hours/);
   assert.equal(await page.getByRole('button', { name: 'Copy code', exact: true }).count(), 1);
   assert.match(await page.locator('.eduplan[data-plan="personal"] .eduplan-upgrade').innerText(), /increases from 2 to 4 total/);

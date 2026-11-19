@@ -20,7 +20,7 @@ try {
       if (body.op === 'submitPurchase') {
         records.push({ id: 'educrm_' + 'a'.repeat(64), revision: '2026-11-18T10:00:00Z', ...body,
           contact: 'student@example.com', evidenceReviewPending: true,
-          evidence: { kind: 'breakout', accountSize: '100K', accountType: 'classic', email: body.breakoutEmail, accountId: body.accountId, orderId: body.orderId, partnerCode: 'ALFA' },
+          evidence: { kind: 'breakout', accountSize: null, requestedAccountSize: '100K', accountType: 'custom', accountDescription: body.accountDescription, eligibilityReviewRequired: true, email: body.breakoutEmail, accountId: body.accountId, orderId: body.orderId, partnerCode: 'ALFA' },
           stage: 'applied', source: 'purchase_submission', createdAt: '2026-11-18T10:00:00Z',
           memberId: 'member-id', verification: '', privateUsed: 0, groupUsed: 0, privateAllowance: null, groupAllowance: null,
           cashReceivedUsd: null, commissionReceivedUsd: null, groupStart: null, groupEnd: null, adminNote: '' });
@@ -54,6 +54,8 @@ try {
   await application.locator('[name="breakoutEmail"]').fill('student@example.com');
   await application.locator('[name="accountId"]').fill('ACC123');
   await application.locator('[name="orderId"]').fill('ORDER123');
+  await application.locator('[name="accountDescription"]').fill('100K Classic');
+  await application.locator('.edu-checkout-extra summary').click();
   await application.locator('[name="note"]').fill('Risk yönetimi desteği');
   await application.locator('[name="firstPurchaseClaim"]').check();
   await application.locator('[name="consent"]').check();
@@ -89,6 +91,7 @@ try {
   assert.equal(writes, before, 'approval requires explicit confirmation');
   await editor.locator('[name="confirmPurchase"]').check();
   await editor.locator('[name="firstPurchaseConfirmed"]').check();
+  await editor.locator('[name="accountEligibilityConfirmed"]').check();
   await editor.locator('button[type="submit"]').click();
   await editor.waitFor({ state: 'hidden' });
   await page.waitForFunction(() => document.querySelector('[data-education-record]')?.textContent.includes('Alımı onaylandı'));
