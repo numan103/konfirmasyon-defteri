@@ -19,4 +19,33 @@
 .mentor-trades-admin { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 16px; display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
 .mentor-trades-admin input { min-width: 0; flex: 1 1 250px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--bg); }
 .mentor-trades-admin p { flex-basis: 100%; font-size: 11px; }
+.mentor-trades-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0; }
+.mentor-trades-filters button[aria-pressed="true"] { border-color: var(--pc); background: var(--pc-soft); }
+.mentor-trades-filters input { min-width: 0; max-width: 150px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; padding: 8px; }
+.mentor-category { display: inline-block; color: var(--text-3); font-size: 10px; margin-top: 5px; }
+.mentor-trades-grid { align-items: start; }
+.mentor-trade-media img { max-height: 350px; }
+.mentor-trade-media details { margin: 10px 0; font-size: 11px; color: var(--text-3); }
+.mentor-trade-media summary { cursor: pointer; padding: 8px 0; }
+.mentor-image-open { display: block; padding: 0; background: none; border: 0; cursor: zoom-in; width: 100%; }
+.mentor-image-dialog { max-width: min(1200px,95vw); max-height: 94dvh; border: 1px solid var(--border); border-radius: 13px; background: var(--card); color: var(--text); padding: 14px; }
+.mentor-image-dialog::backdrop { background: #000b; }
+.mentor-image-dialog > img { display: block; max-width: 100%; max-height: 80dvh; object-fit: contain; margin-top: 12px; }
+.mentor-curve { border: 1px solid var(--border); border-radius: 13px; background: var(--panel-alt,var(--card)); padding: 15px; margin: 12px 0; }
+.mentor-curve-headline { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+.mentor-curve-headline strong { font-size: 27px; font-variant-numeric: tabular-nums; }
+.mentor-curve-headline > span { color: var(--text-3); font-size: 10px; }
+.mentor-curve-svg { display: block; width: 100%; max-height: 205px; color: var(--text-3); }
+.mentor-curve-dates { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-3); margin-top: 4px; }
+.mentor-curve .positive, .mentor-results-list .positive { color: var(--green,#59d6ad); }
+.mentor-curve .negative, .mentor-results-list .negative { color: var(--red,#f28a91); }
+.mentor-curve .mentor-trades-note { margin: 12px 0 0; font-size: 10px; line-height: 1.6; color: var(--text-3); }
+.mentor-preview-cta { display: block; padding: 10px 0; font-size: 11px; line-height: 1.7; color: var(--pc); }
+.mentor-results-list { display: grid; gap: 8px; margin-top: 12px; }
+.mentor-result-row { display: grid; grid-template-columns: 1fr auto auto; gap: 7px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--card); font-size: 12px; }
+.mentor-result-row small { grid-column: 1/-1; font-size: 10px; color: var(--text-3); }
+.mentor-result-row > span { font-size: 10px; color: var(--text-3); }
+body[data-mentor-access="results"] #page-alfatrading :is(#at-filters,#at-feed,.at-head-btns) { display: none; }
+#landing .lp-hero .mentor-curve .mentor-trades-note { font-size: 11px; line-height: 1.6; margin: 12px 0 0; max-width: none; }
+#landing .lp-hero :is(#lp-live-bias,#lp-live-results) > p { font-size: 12px; line-height: 1.7; margin: 8px 0; }
 @media(max-width:650px) { .mentor-trades { padding: 14px; margin-inline: 8px; } .mentor-trades-grid { grid-template-columns: 1fr; } }

@@ -31,8 +31,9 @@ Düzenleme taraması 1000 kayıt sınırını aşarsa sessiz yanlışlık yerine
 
 `?page=alfatrading` içinde **Trader Ahmet · İşlem Sonuçları** alanı.
 `/api/ai?mentorTrades=1`: GET liste / `&image=<id>&index=0|1` fotoğraf.
-Hem liste hem orijinal fotoğraf, her istekte doğrulanmış site_access üyeliği
-veya admin gerektirir. Eksik tablo/erişim hatası kapalı sonuçlanır.
+Özel tam liste ve orijinal fotoğraf, her istekte doğrulanmış site_access üyeliği
+veya admin gerektirir. Free üyeye yalnızca aşağıdaki güvenli sonuç projeksiyonu
+verilir. Eksik tablo/erişim hatası özel içerik için kapalı sonuçlanır.
 SITE_ACCESS_OPEN ve eski "tablo yoksa ref" varsayımı bu özel akışı açmaz.
 
 `edu_shared` satırları `mentortrade_<sha256>` ve AES-256-GCM + ID AAD.
@@ -66,3 +67,38 @@ mesajlar kullanılır.
 
 Kurulumda kullanılan geçici, 30 dakika sınırlı içe aktarım yetkisi kaldırıldı.
 Kalıcı sürümde ayrı kurulum anahtarı yolu yoktur; yönetim yalnızca admin JWT.
+
+## Kategoriler, erişim ve sonuç eğrisi
+
+- Yeni, bu başlıktaki yazar mesajları da aktarılır: açık `bias` / `#bias` yön
+  görüşü; `long`, `short`, `entry`, `girdik` veya `#islem` işlem; aksi gönderi.
+  Belirsiz fotoğraflardan yön/sonuç çıkarılmaz. Komut ve forward aktarılmaz.
+- Tam R satırı Sonuç kategorisindedir. Sonuçlanan kaydın ilk paylaşımı, aktif
+  işlem/gönderi listesinde tekrar gösterilmez. Sembol/R satırları açıklamadan
+  temizlenir, gerçek açıklamalar korunur. Tek sonuçta R tek yerde görünür.
+- Premium: işlem, bias, gönderi, açıklama, kaynak ve kimlik doğrulamalı fotoğraf.
+- Kayıtlı ücretsiz: yalnızca teyitli, sonuçlanmış kayıtların opak ID/sembol/R/tarih
+  allowlist'i. Açık işlemler, notlar, Telegram linkleri ve medya verilmez.
+- Giriş sayfasının sağındaki İşlemler sekmesi ve üye ana sayfasında günlük
+  kümülatif R: başlangıç 0R, tüm aktarılan teyitli sonuçlar, negatif/0R dahil.
+  Günlük kapanış eğrisidir, gün içi drawdown iddiası değildir. Kayıt sayısı ve
+  veri dönemi görünür; tam geçmiş/bağımsız doğrulanmış getiri iddia edilmez.
+- Anonim ziyaretçi yalnızca toplu günlük eğriyi görür; sembol bazlı sonuçlar
+  kayıt gerektirir. Bias ve aktif işlem ayrıntıları girişte gösterilmez.
+
+`?summary=1` anonim toplu eğri; `?results=1` kayıtlı üyeye güvenli sonuç listesi.
+Normal liste API'si premium üyeye özel akış, free üyeye güvenli sonuçlar döner.
+`PAGE_TIER.alfatrading=free` sadece sonuç sayfasını açar; medya sunucuda premium
+doğrulanmaya devam eder. Eski manuel tam akış free istemcide yüklenmez.
+
+Metadata `mentormeta_<hash>` satırlarında AES-GCM şifrelidir; fotoğraf byte'ı ve
+dosya ID'si içermez. Liste/filtreler bu küçük metadata'yı okur. Eski kayıtlar ilk
+özet/listede bir kez metadata'ya geçirilir; yeni yazılar her iki kaydı günceller.
+Sonuç projeksiyonu da şifreli `mentor_results_public` satırında tutulur; API
+allowlist'i dışında alan yayımlamaz. CAS ve webhook retry projeksiyon hatalarını
+sessiz başarı saymaz. 1000 kayıt sınırında eksik veri yerine hata verir.
+
+Fotoğraflar görünür olunca, en fazla iki paralel istekte yüklenir. İlk işlem
+fotoğrafı açılır bölümde bekler; tıklanan grafik büyütülür. Çıkış, seviye
+düşürme ve navigasyonda özel DOM ve Blob URL'leri temizlenir. Eğri/landing
+istekleri birleştirilir, 60 saniye içi tekrar istek yapılmaz; arka plan poll yok.

@@ -11,6 +11,7 @@ try {
   await page.route('**/api/**', async route => {
     const req = route.request(), url = new URL(req.url());
     if (url.searchParams.get('mentorTrades') === '1') {
+      if (url.searchParams.get('summary')) return route.fulfill({ json: { ok: true, summary: { count: 1, netR: 2.3, wins: 1, losses: 0, flat: 0, series: [{ day: '2026-11-18', cumulativeR: 2.3 }], from: '2026-11-18', to: '2026-11-18' } } });
       reads++;
       if (url.searchParams.get('image')) return route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aU1sAAAAASUVORK5CYII=', 'base64') });
       return route.fulfill({ json: { ok: true, more: false, records: [{ id, coin: 'BTC', r: 2.3, date: 1795019005, text: 'BTC +2.3R', rootText: '<img src=x onerror=alert(1)>', hasImage: true, imageCount: 1, needsReview: false, link: 'https://t.me/alfakasim/6/946' }] } });
@@ -28,7 +29,7 @@ try {
     AlfaMentorTrades.refreshContext();
   });
   await page.locator('[data-mentor-trade]').waitFor();
-  assert.match(await page.locator('.mentor-trade-title').innerText(), /BTC\s+\+2.3R/);
+  assert.match(await page.locator('.mentor-trade-title').innerText(), /BTC[\s\S]*Sonuç[\s\S]*\+2.3R/);
   assert.equal(await page.locator('.mentor-trade-text img').count(), 0, 'source text is never HTML');
   await page.waitForFunction(() => document.querySelector('.mentor-trade-media img')?.complete);
   assert.ok((await page.locator('.mentor-trade-media img').getAttribute('src')).startsWith('blob:'));

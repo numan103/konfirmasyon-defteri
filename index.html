@@ -33,8 +33,9 @@
 <link rel="stylesheet" href="/assets/education-crm.css?v=1">
 <script type="module" src="/assets/education-crm.mjs?v=1"></script>
 <script type="module" src="/assets/edu-application.mjs?v=1"></script>
-<link rel="stylesheet" href="/assets/mentorship-trades.css?v=1">
-<script type="module" src="/assets/mentorship-trades.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/mentorship-trades.css?v=3">
+<script type="module" src="/assets/mentorship-trades.mjs?v=2"></script>
+<script type="module" src="/assets/mentor-results-preview.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
@@ -5365,7 +5366,7 @@
       <div class="lp-art-halo" aria-hidden="true"></div>
             <div class="lp-signal-board" role="group" aria-label="Platform önizlemesi: işlem, bias, portföy ve topluluk sekmeleri">
         <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>ALFA'NIN İÇİNDEN</b><em>gerçek kayıtlar</em></div>
-        <div class="lp-preview-intro"><h3>Alfa'nın içinden.</h3><span>Gerçek portföy · son 7 günün işlem ve bias paylaşımları.</span></div>
+        <div class="lp-preview-intro"><h3>Alfa'nın içinden.</h3><span>Portföy özeti · sonuçlanan işlemlerin R eğrisi.</span></div>
         <div class="lp-signal-tabs" role="tablist" aria-label="Önizleme sekmeleri">
           <button type="button" role="tab" id="lp-sig-tab-portfolio" aria-controls="lp-sig-panel-portfolio" aria-selected="true" data-lp-hero-tab="portfolio"><span class="lp-tab-dot teal" aria-hidden="true"></span>Portföy</button>
           <button type="button" role="tab" id="lp-sig-tab-trade" aria-controls="lp-sig-panel-trade" aria-selected="false" tabindex="-1" data-lp-hero-tab="trade"><span class="lp-tab-dot green" aria-hidden="true"></span>İşlemler</button>
@@ -5374,18 +5375,18 @@
           <button type="button" role="tab" id="lp-sig-tab-community" aria-controls="lp-sig-panel-community" aria-selected="false" tabindex="-1" data-lp-hero-tab="community"><span class="lp-tab-dot amber" aria-hidden="true"></span>Topluluk</button>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-trade" role="tabpanel" aria-labelledby="lp-sig-tab-trade" data-lp-hero-panel="trade" hidden>
-          <article class="lp-signal-card lp-live-card" id="lp-live-trades" aria-live="polite"><p class="lp-live-state">İşlem kanalı paylaşımları yükleniyor…</p></article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">SON 7 GÜN · İŞLEM KANALI</span><h4>Bu hafta neler paylaştık?</h4><p>Haftanın işlem paylaşımlarını seç; grafiğe dokun, büyüt ve yakından incele.</p></div>
+          <article class="lp-signal-card lp-live-card" id="lp-live-trades" aria-live="polite"><p class="lp-live-state">Kümülatif R eğrisi yükleniyor…</p></article>
+          <div class="lp-preview-summary"><span class="lp-preview-access">MENTORSHIP · KÜMÜLATİF R</span><h4>Sonuçların kayıtlı seyri.</h4><p>Yalnızca sonuçlanmış, aktarılan işlemler. Aktif işlemler ve grafikler premium'a özel.</p></div>
           <a class="lp-sig-link" href="?page=alfatrading">İşlem kanalını aç <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-bias" role="tabpanel" aria-labelledby="lp-sig-tab-bias" data-lp-hero-panel="bias" hidden>
           <article class="lp-signal-card lp-live-card" id="lp-live-bias" aria-live="polite"><p class="lp-live-state">Bias ve analiz paylaşımları yükleniyor…</p></article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">SON 7 GÜN · BİAS &amp; ANALİZ</span><h4>Görüşümüzü yakından incele.</h4><p>Haftanın bias ve analizlerini seç. Grafiğe dokunarak aç; yakınlaştırıp detayları gör.</p></div>
+          <div class="lp-preview-summary"><span class="lp-preview-access">PREMIUM · BİAS &amp; ANALİZ</span><h4>Yönü ve gerekçesini birlikte oku.</h4><p>Canlı bias, analiz ve grafikler yalnızca premium üyelere açıktır.</p></div>
           <a class="lp-sig-link" href="?page=alfatrading">Bias paylaşımlarını aç <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-results" role="tabpanel" aria-labelledby="lp-sig-tab-results" data-lp-hero-panel="results" hidden>
           <article class="lp-signal-card lp-live-card" id="lp-live-results" aria-live="polite"><p class="lp-live-state">Tamamlanan işlemler yükleniyor…</p></article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">SON 30 GÜN · TAMAMLANAN İŞLEMLER VE BİAS</span><h4>Başarılı sonuçlar.</h4><p>Son 30 günde TP gelen işlemler ve bias güncellemeleri. Giriş/hedef/stop detayları premium'a özel.</p></div>
+          <div class="lp-preview-summary"><span class="lp-preview-access">KAYITLI ÜYELERE · SONUÇLAR</span><h4>Artı ve eksi sonuçlar birlikte.</h4><p>Ücretsiz üyeler sonuçlanan işlemlerin sembol/R özetini görür. İşlem planı, bias, açıklama ve fotoğraflar premium'a özel.</p></div>
           <a class="lp-sig-link" href="?page=alfatrading">İşlem kanalını aç <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-portfolio" role="tabpanel" aria-labelledby="lp-sig-tab-portfolio" data-lp-hero-panel="portfolio">
@@ -5658,7 +5659,7 @@
   });
 })();
 </script>
-<script src="/assets/landing-live.js?v=183" defer></script>
+<script src="/assets/landing-live.js?v=184" defer></script>
 <script src="/assets/macro-admin.js?v=187" defer></script>
 <div id="auth-gate">
   <div class="auth-box">
@@ -6168,37 +6169,9 @@
       </div>
       <div class="panel" id="home-results-panel" style="margin:0 0 12px;">
         <h2><span>Sonuçlar</span><span class="n" id="home-results-count">—</span></h2>
-        <p class="hint" style="margin:0 0 8px;">Son 30 günde tamamlanan işlemler. Giriş/hedef/stop detayları premium'a özel.</p>
+        <p class="hint" style="margin:0 0 8px;">Aktarılan teyitli sonuçlar · kümülatif R. Grafikler ve aktif işlemler premium'a özel.</p>
         <div id="home-results-list" style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-2);"></div>
       </div>
-      <script>
-      (function () {
-        var list = document.getElementById('home-results-list');
-        var count = document.getElementById('home-results-count');
-        if (!list) return;
-        fetch('/api/edu-shared?kind=landing').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-          var posts = (d && d.channel && d.channel.results && Array.isArray(d.channel.results.latest)) ? d.channel.results.latest : [];
-          if (count) count.textContent = posts.length ? (posts.length + ' sonuç') : '—';
-          if (!posts.length) { list.textContent = 'Son 30 günde paylaşım yok.'; return; }
-          list.textContent = '';
-          posts.slice(0, 6).forEach(function (p) {
-            var row = document.createElement('div');
-            row.style.cssText = 'padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card);';
-            var title = document.createElement('div');
-            title.style.fontWeight = '600';
-            title.textContent = p.title || 'İşlem paylaşımı';
-            var meta = document.createElement('div');
-            meta.style.cssText = 'font-size:11.5px;color:var(--text-3);margin-top:2px;';
-            meta.textContent = [p.date ? new Date(p.date).toLocaleDateString('tr-TR') : '', p.coin, p.direction ? ({ long:'LONG', short:'SHORT', notr:'NÖTR' }[p.direction] || '') : ''].filter(Boolean).join(' · ');
-            var excerpt = document.createElement('div');
-            excerpt.style.cssText = 'font-size:12px;color:var(--text-2);margin-top:4px;';
-            excerpt.textContent = (p.excerpt || '').slice(0, 140);
-            row.append(title, meta, excerpt);
-            list.append(row);
-          });
-        }).catch(function () { list.textContent = 'Sonuçlar şu an alınamıyor.'; });
-      })();
-      </script>
       <div class="home-edu" id="home-edu">
         <div class="he-ico">🎓</div>
         <div class="he-body">
@@ -13999,7 +13972,7 @@ const AM_PLAN = [
 const PAGE_TIER = {
   eduplans: 'free',
   home: 'free', calc: 'free', calendar: 'free', erisim: 'free', influencer: 'free',
-  alfatrading: 'ref',
+  alfatrading: 'free',
   trading: 'admin',          // Trading terminali yalnızca yöneticiye görünür
   alfacharts: 'admin',       // Alfa Charts bağlantısı yalnızca yöneticiye görünür
   egitim: 'ref', strategies: 'admin', analiz: 'admin', indicators: 'admin', designer: 'admin',
@@ -14172,6 +14145,7 @@ function applyTierUi() {
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();
+  if (window.AlfaMentorPreview) window.AlfaMentorPreview.refresh();
 
   const isAdmin = siteIsAdmin();
   const ref = refUnlocked();
@@ -26842,6 +26816,8 @@ async function atApi(action, payload) {
   return res.json();
 }
 async function loadAlfaTrading() {
+  // Free members use the whitelisted result projection, not the full manual feed.
+  if (!refUnlocked()) { alfaPosts = []; alfaLoaded = false; document.getElementById('at-feed')?.replaceChildren(); return; }
   try {
     const res = await fetch('/api/contrib?store=alfatrading', { cache: 'no-store', headers: await siteAuthHeaders() });
     const data = await res.json();

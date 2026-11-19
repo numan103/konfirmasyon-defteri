@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler, { parseMentorResults, resultRecords, isMentorMessage, sealTrade, openTrade, ingestMentorUpdate, parseMentorWidget } from '../lib/mentorship-trades.mjs';
+import handler, { parseMentorResults, resultRecords, postRecords, isMentorMessage, sealTrade, openTrade, ingestMentorUpdate, parseMentorWidget } from '../lib/mentorship-trades.mjs';
+import { classifyMentorPost, cleanMentorText, mentorDescription, completedMentorResults, mentorResultSummary } from '../assets/mentor-feed-model.mjs';
 import webhook from '../lib/telegram-webhook.mjs';
 const msg = overrides => ({
   message_id: 946, date: 1795019005, message_thread_id: 6,
@@ -29,10 +30,10 @@ function fixture(t) {
       assert.equal(options.headers.apikey, 'unit-test-service-key');
       if (outage) return Response.json({}, { status: 503 });
       const query = u.searchParams.get('id'), id = query?.replace(/^eq\./, '');
-      if (method === 'GET') return Response.json(query?.startsWith('like.') ? [...rows.values()] : rows.has(id) ? [rows.get(id)] : []);
+      if (method === 'GET') return Response.json(query?.startsWith('like.') ? [...rows.values()].filter(row => row.id.startsWith(query.slice(5).replace('*', ''))) : rows.has(id) ? [rows.get(id)] : []);
       const body = JSON.parse(options.body);
       if (method === 'POST') {
-        if (rows.has(body.id)) return Response.json({}, { status: 409 });
+        if (rows.has(body.id) && u.searchParams.get('on_conflict') !== 'id') return Response.json({}, { status: 409 });
         rows.set(body.id, body); return Response.json([body]);
       }
       const old = rows.get(id), rev = u.searchParams.get('updated_at')?.replace(/^eq\./, '');
@@ -89,13 +90,14 @@ test('duplicate Telegram deliveries produce one result; corrections replace rath
   assert.equal((await ingestMentorUpdate({ message: msg() })).results[0], 'saved');
   assert.equal((await ingestMentorUpdate({ message: msg() })).results[0], 'duplicate');
   await ingestMentorUpdate({ edited_message: msg({ text: 'BTC +2.5R', edit_date: 1795019100 }) });
-  assert.equal(f.rows.size, 1);
-  const row = [...f.rows.values()][0]; assert.equal(openTrade(row.id, row.data).r, 2.5);
+  assert.equal([...f.rows.keys()].filter(id => id.startsWith('mentortrade_')).length, 1);
+  const row = [...f.rows.values()].find(row => row.id.startsWith('mentortrade_')); assert.equal(openTrade(row.id, row.data).r, 2.5);
   assert.equal((await ingestMentorUpdate({ message: msg() })).results[0], 'stale');
 });
 test('removing a result in an edit retracts it rather than showing the old R', async t => {
   const f = fixture(t); await ingestMentorUpdate({ message: msg() });
   await ingestMentorUpdate({ edited_message: msg({ text: 'Sonuç teyit ediliyor', edit_date: 1795019200 }) });
+  f.verified(false);
   const out = await f.request('member'); assert.deepEqual(out.data.records, []);
 });
 test('database failure and CAS conflict are retryable; they never acknowledge a fake success', async t => {
@@ -104,16 +106,16 @@ test('database failure and CAS conflict are retryable; they never acknowledge a 
   f.outage(false); await ingestMentorUpdate({ message: msg() }); f.conflict(true);
   await assert.rejects(ingestMentorUpdate({ edited_message: msg({ text: 'BTC -1R', edit_date: 1795019300 }) }), /conflict/);
 });
-test('anonymous/free requests cannot read lists, originals, or import results', async t => {
+test('anonymous requests cannot read results; free members cannot read originals or import', async t => {
   const f = fixture(t);
   assert.equal((await f.request()).status, 401);
   f.verified(false);
-  assert.equal((await f.request('member')).status, 403);
+  const safe = await f.request('member');
+  assert.equal(safe.status, 200); assert.equal(safe.data.access, 'results');
   assert.equal((await f.request('member', { image: resultRecords(msg())[0].id })).status, 403);
   assert.equal((await f.request('member', {}, { op: 'import', ids: [946] })).status, 403);
   f.outage(true);
-  assert.equal((await f.request('member')).status, 403, 'missing table must fail closed');
-  assert.equal(f.calls.filter(call => call.url.includes('/edu_shared')).length, 0);
+  assert.equal((await f.request('member', { image: resultRecords(msg())[0].id })).status, 403, 'missing table must never grant original photo access');
 });
 test('authorized feed is private/no-store and never leaks Telegram file identifiers', async t => {
   const f = fixture(t); await ingestMentorUpdate({ message: msg() });
@@ -140,4 +142,73 @@ test('forged webhook requests cannot ingest even a matching source message', asy
   await webhook({ method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'forged' }, body: { message: msg() } }, res);
   assert.equal(status, 403); assert.equal(data.error, 'forbidden');
   assert.equal(f.rows.size, 0); assert.equal(f.calls.length, 0);
+});
+test('Telegram posts are categorized conservatively; trade targets never become outcomes', () => {
+  assert.equal(classifyMentorPost('BTC bias yukarı'), 'bias');
+  assert.equal(classifyMentorPost('BTC long entry 90000 stop 89000 hedef +2R'), 'trade');
+  assert.equal(classifyMentorPost('Piyasa üzerine bir not'), 'post');
+  assert.equal(postRecords(msg({ text: '/help' })).length, 0);
+  const [post] = postRecords(msg({ text: 'GOLD short girdim' }));
+  assert.equal(post.category, 'trade'); assert.equal(post.r, null);
+  const [target] = postRecords(msg({ text: 'BTC +2R hedef' }));
+  assert.equal(target.category, 'post'); assert.equal(target.r, null, 'unclear target remains a private post, never a realized result');
+  assert.equal(postRecords(msg({ text: 'BTC +2R\nBTC -1R' })).length, 0);
+});
+test('redundant symbols and R lines are removed while meaningful notes stay intact', () => {
+  assert.equal(cleanMentorText('gold\ngold +2.2r', 'GOLD'), '');
+  assert.equal(mentorDescription({ coin: 'GOLD', rootText: 'GOLD', text: 'GOLD +2.2R\nHızlı bir TP oldu.' }), 'Hızlı bir TP oldu.');
+  assert.equal(mentorDescription({ coin: 'BTC', rootText: 'Riskimi düşürdüm', text: 'BTC +2R\nRiskimi düşürdüm' }), 'Riskimi düşürdüm');
+});
+test('public projections whitelist completed results and include negative and flat outcomes in the curve', () => {
+  const [base] = resultRecords(msg());
+  const data = completedMentorResults([
+    { ...base, text: 'SECRET_PLAN', images: ['secret'], photoId: 'secret', r: 2.3 },
+    { ...base, id: 'loss', r: -1, date: base.date + 86400 },
+    { ...base, id: 'flat', r: 0, date: base.date + 172800 },
+    { ...base, id: 'active', r: 8, category: 'trade' },
+    { ...base, id: 'pending', needsReview: true },
+    { ...base, id: 'removed', retracted: true },
+  ]);
+  assert.equal(data.length, 3); assert.deepEqual(Object.keys(data[0]).sort(), ['coin','date','id','r']);
+  assert.ok(!JSON.stringify(data).includes('secret'));
+  const summary = mentorResultSummary(data);
+  assert.equal(summary.netR, 1.3); assert.equal(summary.wins, 1); assert.equal(summary.losses, 1); assert.equal(summary.flat, 1);
+  assert.deepEqual(summary.series.map(point => point.cumulativeR), [2.3,1.3,1.3]);
+});
+test('free member API responses contain no text, links, images, active trades or bias', async t => {
+  const f = fixture(t);
+  await ingestMentorUpdate({ message: msg() });
+  await ingestMentorUpdate({ message: msg({ message_id: 1000, text: 'BTC bias yukarı SECRET', reply_to_message: undefined }) });
+  f.verified(false);
+  const out = await f.request('member');
+  assert.equal(out.status, 200); assert.equal(out.data.records.length, 1);
+  assert.deepEqual(Object.keys(out.data.records[0]).sort(), ['coin','date','id','r']);
+  assert.ok(!JSON.stringify(out.data).includes('SECRET'));
+  const aggregate = await f.request('', { summary: '1' });
+  assert.equal(aggregate.status, 200); assert.equal(aggregate.data.summary.count, 1);
+  assert.equal(Object.hasOwn(aggregate.data, 'records'), false);
+  assert.ok(!JSON.stringify(aggregate.data).includes('BTC'));
+  const stored = f.rows.get('mentor_results_public');
+  assert.equal(stored.data.enc, 'mt1', 'projection is encrypted at rest too');
+});
+test('premium lists use small encrypted metadata, not image-heavy source rows', async t => {
+  const f = fixture(t);
+  await ingestMentorUpdate({ message: msg() });
+  const start = f.calls.length;
+  const out = await f.request('member');
+  assert.equal(out.status, 200); assert.equal(out.data.access, 'premium');
+  assert.ok(!f.calls.slice(start).some(call => call.url.includes('id=like.mentortrade_')));
+});
+test('a closing result removes its original trade from active lists and a loss updates the public curve', async t => {
+  const f = fixture(t);
+  await ingestMentorUpdate({ message: msg({ message_id: 889, text: 'BTC short girdim', date: 1794933244, reply_to_message: undefined }) });
+  await ingestMentorUpdate({ message: msg() });
+  const closed = await f.request('member', { category: 'trade' });
+  assert.equal(closed.data.records.length, 0); assert.equal(closed.data.counts.trade, 0);
+  const loss = msg({ message_id: 1001, text: 'ETH -1R', date: 1795105405,
+    reply_to_message: { message_id: 900, text: 'ETH long entry', from: { id: 12345, username: 'traderahmetd' } } });
+  await ingestMentorUpdate({ message: loss });
+  const summary = await f.request('', { summary: '1' });
+  assert.equal(summary.data.summary.netR, 1.3);
+  assert.equal(summary.data.summary.count, 2); assert.equal(summary.data.summary.losses, 1);
 });

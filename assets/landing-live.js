@@ -214,13 +214,13 @@
       if (!response.ok) throw new Error('unavailable');
       const data = await response.json();
       renderPortfolio(data.portfolio, data.status?.portfolio);
-      renderPost(trades, data.channel?.trades, data.status?.channel, 'trade');
-      renderPost(bias, data.channel?.biases, data.status?.channel, 'bias');
-      renderResults(results, data.channel?.results, data.status?.channel);
+      if (!trades.dataset?.mentorOwned) renderPost(trades, data.channel?.trades, data.status?.channel, 'trade');
+      if (!bias.dataset?.mentorOwned) renderPost(bias, data.channel?.biases, data.status?.channel, 'bias');
+      if (!results?.dataset?.mentorOwned) renderResults(results, data.channel?.results, data.status?.channel);
     } catch (_) {
       state(portfolio, 'Portföy verisi şu an alınamıyor.');
-      state(trades, 'İşlem paylaşımı şu an alınamıyor.');
-      state(bias, 'Bias paylaşımı şu an alınamıyor.');
+      if (!trades.dataset?.mentorOwned) state(trades, 'İşlem paylaşımı şu an alınamıyor.');
+      if (!bias.dataset?.mentorOwned) state(bias, 'Bias paylaşımı şu an alınamıyor.');
     }
   }
   // No polling or browser portfolio state: only the server's public projections.
