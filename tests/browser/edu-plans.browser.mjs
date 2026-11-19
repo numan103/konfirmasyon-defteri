@@ -11,6 +11,29 @@ try {
   await page.goto((arg('url') || 'http://127.0.0.1:4186') + '/?page=eduplans');
   await page.locator('#page-eduplans').waitFor({ state: 'visible' });
   assert.equal(await page.locator('.eduplan').count(), 3);
+  assert.equal(await page.locator('.eduplans-code code').innerText(), 'ALFA');
+  await page.locator('.eduplans-partnership > img').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    const img = document.querySelector('.eduplans-partnership > img');
+    return img.complete && img.naturalWidth === 1280;
+  });
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async value => { window.copiedPartnerCode = value; } } }));
+  await page.getByRole('button', { name: 'Kodu kopyala', exact: true }).click();
+  assert.equal(await page.evaluate(() => window.copiedPartnerCode), 'ALFA');
+  assert.equal(await page.locator('.eduplans-copy-status').innerText(), 'Kopyalandı');
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('denied'); } } }));
+  await page.getByRole('button', { name: 'Kodu kopyala', exact: true }).click();
+  assert.match(await page.locator('.eduplans-copy-status').innerText(), /Kopyalanamadı/);
+  assert.equal(await page.locator('.edu-partners a').count(), 3);
+  await page.locator('.edu-partners').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => [...document.querySelectorAll('.edu-partners img')].every(img => img.complete && img.naturalWidth > 0));
+  assert.equal(await page.locator('.edu-partners a').first().getAttribute('href'), 'https://www.okx.com/join/CRYPTOAHMET');
+  await page.getByRole('button', { name: 'Akışı duraklat', exact: true }).click();
+  assert.equal(await page.locator('.edu-partners').evaluate(node => getComputedStyle(node.querySelector('.edu-partners-track')).animationPlayState), 'paused');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  assert.equal(await page.locator('.edu-partners-track').evaluate(node => getComputedStyle(node).animationName), 'none');
+  assert.equal(await page.locator('.edu-partners a:visible').count(), 3);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   assert.match(await page.locator('.eduplans-offer-note').innerText(), /ilk hesap alımına özeldir/);
   assert.equal(await page.locator('.eduplan[data-plan="video"] .eduplan-price').textContent(), '$50');
   assert.equal(await page.locator('.eduplan[data-plan="live"] .eduplan-price').textContent(), '$99');
@@ -29,6 +52,7 @@ try {
   await page.evaluate(() => setLang('en'));
   await page.waitForFunction(() => document.querySelector('[data-plan="video"] h3').textContent === 'Video Training');
   assert.match(await page.locator('.eduplans-terms').innerText(), /1\.5–3 hours/);
+  assert.equal(await page.getByRole('button', { name: 'Copy code', exact: true }).count(), 1);
   assert.match(await page.locator('.eduplan[data-plan="personal"] .eduplan-upgrade').innerText(), /increases from 2 to 4 total/);
   await page.setViewportSize({ width: 320, height: 900 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);

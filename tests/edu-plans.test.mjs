@@ -18,6 +18,7 @@ test('applications specify first purchase and keep the 100K upgrade inside Perso
     const url = new URL(eduApplicationURL(plan.id, 'breakout'));
     assert.equal(url.origin + url.pathname, 'https://t.me/traderahmetd');
     assert.match(url.searchParams.get('text'), /ilk hesap alımı fırsatı/);
+    assert.match(url.searchParams.get('text'), /Partner kodu: ALFA/);
     assert.match(url.searchParams.get('text'), /Satın almadan önce referans bağlantısını ve ilk alım uygunluğumu teyit/);
     assert.ok(url.searchParams.get('text').includes(plan.account.tr));
   }
@@ -31,6 +32,24 @@ test('applications specify first purchase and keep the 100K upgrade inside Perso
   assert.equal(eduApplicationURL('unknown'), null);
   assert.equal(eduApplicationURL('video', 'invalid'), null);
   assert.match(new URL(eduApplicationURL('personal', 'cash', 'en')).searchParams.get('text'), /\$250/);
+});
+test('partner assets are local, inert and the marquee supports accessible motion controls', () => {
+  const client = fs.readFileSync(new URL('../assets/edu-plans.mjs', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../assets/edu-plans.css', import.meta.url), 'utf8');
+  for (const name of ['okx', 'bybit', 'breakout']) {
+    const svg = fs.readFileSync(new URL('../assets/partners/' + name + '.svg', import.meta.url), 'utf8');
+    assert.match(svg, /<svg/);
+    assert.doesNotMatch(svg, /<script|<foreignObject|onload=|href=/i);
+  }
+  assert.ok(fs.statSync(new URL('../assets/partners/breakout-trader-ahmet.jpg', import.meta.url)).size > 10000);
+  assert.match(client, /await navigator.clipboard.writeText\('ALFA'\)/);
+  assert.match(client, /aria-hidden/);
+  assert.match(client, /aria-pressed/);
+  assert.match(client, /https:\/\/www.okx.com\/join\/CRYPTOAHMET/);
+  assert.match(client, /https:\/\/partner.bybit.com\/b\/cryptoahmet/);
+  assert.match(css, /translateX\(-50%\)/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /focus-within/);
 });
 test('public package offer is separate from existing course access and has clear continuation conditions', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');

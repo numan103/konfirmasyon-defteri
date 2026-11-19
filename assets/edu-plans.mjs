@@ -1,4 +1,4 @@
-import { EDU_PLANS, eduApplicationURL } from './edu-plans-model.mjs?v=2';
+import { EDU_PLANS, eduApplicationURL } from './edu-plans-model.mjs?v=3';
 const root = document.getElementById('eduplans-root');
 if (root) {
   const text = (tr, en) => window.LANG === 'en' ? en : tr;
@@ -31,6 +31,33 @@ if (root) {
     img.src = '/assets/edu-technical.jpg'; img.alt = text('Fiyat ve hacim grafikleri', 'Price and volume charts'); img.loading = 'lazy';
     art.append(img, el('figcaption', text('Fotoğraf temsilidir.', 'Illustrative photo.')));
     hero.append(copy, art); root.appendChild(hero);
+    const partner = el('section', undefined, 'eduplans-partnership');
+    partner.setAttribute('aria-label', text('Breakout partnerliği', 'Breakout partnership'));
+    const poster = el('img');
+    poster.src = '/assets/partners/breakout-trader-ahmet.jpg';
+    poster.alt = text('Breakout × Trader Ahmet partnerlik duyurusu. Kod: ALFA. breakoutprop.com', 'Breakout × Trader Ahmet partnership announcement. Code: ALFA. breakoutprop.com');
+    poster.width = 1280; poster.height = 720; poster.loading = 'lazy';
+    const partnerCopy = el('div', undefined, 'eduplans-partnership-copy');
+    partnerCopy.append(el('span', text('PARTNERLİK DUYURUSU', 'PARTNERSHIP ANNOUNCEMENT'), 'eduplans-kicker'),
+      el('h2', 'Breakout × Trader Ahmet'),
+      el('p', text('Breakout partner kodumuz hazır. Uygun ilk hesap alımında eğitim paketini birlikte planlayalım.', 'Our Breakout partner code is here. Let’s plan your training package with a qualifying first account purchase.')));
+    const codeRow = el('div', undefined, 'eduplans-code');
+    const code = el('code', 'ALFA'), copyCode = el('button', text('Kodu kopyala', 'Copy code'), 'btn');
+    copyCode.type = 'button';
+    const copyStatus = el('span', '', 'eduplans-copy-status'); copyStatus.setAttribute('role', 'status');
+    copyCode.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText('ALFA');
+        copyStatus.textContent = text('Kopyalandı', 'Copied');
+      } catch {
+        copyStatus.textContent = text('Kopyalanamadı; ALFA kodunu elle kopyala.', 'Could not copy; copy ALFA manually.');
+      }
+    };
+    codeRow.append(el('span', text('Partner kodu', 'Partner code')), code, copyCode);
+    partnerCopy.append(codeRow, copyStatus,
+      link(text('Breakout’u ziyaret et ↗', 'Visit Breakout ↗'), 'https://www.breakoutprop.com/', 'btn solid'),
+      el('small', text('Eğitim avantajı ilk kayıt ve uygun ilk alıma özeldir. Satın almadan önce referans ve paket uygunluğunu bizimle teyit et. Kod otomatik erişim açmaz.', 'Training benefits apply to first-time signup and a qualifying first purchase. Confirm referral and package eligibility with us before buying. The code does not automatically unlock access.')));
+    partner.append(poster, partnerCopy); root.appendChild(partner);
     const intro = el('div', undefined, 'eduplans-intro');
     intro.append(el('h2', text('Üç paket. İhtiyacına göre eğitim.', 'Three packages. Training for your needs.')),
       el('p', text('Her üst paket önceki paketlerin tamamını içerir. Ders ve grup hakları ilk aylık döneme aittir; videolar ömür boyu açık kalır.', 'Each higher package includes all previous package benefits. Lesson and group allowances apply to the first monthly period; video access lasts for life.')),
@@ -58,7 +85,7 @@ if (root) {
       }
       const buttons = el('div', undefined, 'eduplan-buttons');
       buttons.appendChild(link(text('$' + plan.usd + ' ile başvur ↗', 'Apply for $' + plan.usd + ' ↗'), eduApplicationURL(plan.id, 'cash', window.LANG), 'btn solid'));
-      const breakout = link(text('İlk alım için Breakout linkini iste ↗', 'Request a first-purchase Breakout link ↗'), eduApplicationURL(plan.id, 'breakout', window.LANG));
+      const breakout = link(text('ALFA ile ilk alım uygunluğunu teyit et ↗', 'Confirm first-purchase eligibility with ALFA ↗'), eduApplicationURL(plan.id, 'breakout', window.LANG));
       breakout.dataset.route = 'breakout'; buttons.appendChild(breakout);
       if (plan.upgrade) {
         const upgrade = link(text('100K ile 4 özel ders için başvur ↗', 'Apply for 4 private lessons with 100K ↗'), eduApplicationURL(plan.id, 'breakout100k', window.LANG));
@@ -84,6 +111,39 @@ if (root) {
     ];
     notes.forEach(([title, body]) => { const note = el('section', undefined, 'eduplans-term'); note.append(el('h2', title), el('p', body)); terms.appendChild(note); });
     root.append(terms, el('p', text('10K / 25K / 50K / 100K hesap büyüklüğüdür, hesap satın alma ücreti değildir. Eğitim ücretleri ile Breakout hesap ücretleri ayrı seçeneklerdir. Referanslı satın alımlardan komisyon kazanabiliriz. Prop değerlendirme ve ödeme kuralları ilgili firmaya aittir. Başvuru düğmeleri ödeme almaz veya otomatik erişim açmaz.', '10K / 25K / 50K / 100K describe account sizes, not purchase prices. Education fees and Breakout account fees are alternative routes. We may earn referral commissions. Prop evaluation and payout rules belong to the provider. Application buttons do not collect payment or automatically unlock access.'), 'eduplans-disclosure'));
+    const partners = el('section', undefined, 'edu-partners');
+    partners.setAttribute('aria-label', text('Partnerler', 'Partners'));
+    const partnerHead = el('div', undefined, 'edu-partners-head');
+    const pause = el('button', text('Akışı duraklat', 'Pause animation'), 'btn');
+    pause.type = 'button'; pause.setAttribute('aria-pressed', 'false');
+    pause.onclick = () => {
+      const paused = partners.classList.toggle('is-paused');
+      pause.setAttribute('aria-pressed', String(paused));
+      pause.textContent = paused ? text('Akışı sürdür', 'Resume animation') : text('Akışı duraklat', 'Pause animation');
+    };
+    partnerHead.append(el('h2', text('Partnerler', 'Partners')), pause);
+    const viewport = el('div', undefined, 'edu-partners-viewport'), track = el('div', undefined, 'edu-partners-track');
+    const brands = [
+      ['OKX', 'okx.svg', 'https://www.okx.com/join/CRYPTOAHMET', 'okx'],
+      ['Bybit', 'bybit.svg', 'https://partner.bybit.com/b/cryptoahmet', 'bybit'],
+      ['Breakout', 'breakout.svg', 'https://www.breakoutprop.com/', 'breakout'],
+    ];
+    for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
+      const group = el('div', undefined, 'edu-partners-group');
+      if (groupIndex) group.setAttribute('aria-hidden', 'true');
+      for (let repeat = 0; repeat < 2; repeat++) brands.forEach(([name, asset, url, brand]) => {
+        const accessible = groupIndex === 0 && repeat === 0;
+        const item = accessible ? link('', url, 'edu-partner-logo ' + brand) : el('span', undefined, 'edu-partner-logo ' + brand);
+        if (!accessible) item.setAttribute('aria-hidden', 'true');
+        const logo = el('img'); logo.src = '/assets/partners/' + asset; logo.alt = accessible ? name : '';
+        logo.width = 150; logo.height = 48; logo.loading = 'lazy';
+        item.appendChild(logo); group.appendChild(item);
+      });
+      track.appendChild(group);
+    }
+    viewport.appendChild(track); partners.append(partnerHead, viewport,
+      el('p', text('Partner bağlantıları referans içerir; uygun işlemlerden komisyon kazanabiliriz.', 'Partner links include referrals; we may earn commissions from qualifying activity.')));
+    root.appendChild(partners);
   }
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   render();

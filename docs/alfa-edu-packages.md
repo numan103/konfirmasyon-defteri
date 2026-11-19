@@ -26,7 +26,9 @@ Breakout alternatifi yalnızca bizim linkimizden ilk kayıt + uygun ilk satın a
 Bu koşul kartların üstünde de görünür; sonraki alımlara veya mevcut hesaplara
 otomatik hak verilmez. İkinci pakette konu anlatımı, piyasa analizi, işlem
 değerlendirme ve soru-cevap içeren haftalık canlı eğitim başlar.
-Referans linki ve kesin Pro muadilliği henüz yapılandırılmadığından kullanıcı
+Partner kodu **ALFA**; Breakout bağlantısı resmi `https://www.breakoutprop.com/`.
+Kodun otomatik uygulandığı bir affiliate URL veya indirim yüzdesi varsayılmaz.
+Referans bağlantısı ve kesin Pro muadilliği ayrıca teyit gerektirdiğinden kullanıcı
 satın almadan önce `@traderahmetd` üzerinden teyit ister. Telegram düğmeleri
 planı içeren mesaj taslağı açar; kendiliğinden mesaj göndermez.
 Ek olarak açık rızalı talep formu [eğitim CRM](education-crm.md) kaydı oluşturur.

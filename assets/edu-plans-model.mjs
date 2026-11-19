@@ -15,7 +15,7 @@ export function eduApplicationURL(id, route = 'cash', lang = 'tr') {
   const account = route === 'breakout100k' ? plan.upgrade.account : plan.account;
   const lessonNote = route === 'breakout100k' ? (en ? ' Private lessons: 4 total instead of 2.' : ' Özel ders hakkı: 2 yerine toplam 4 birebir ders.') : '';
   const message = en
-    ? 'Hello, I would like to apply for Alfa Edu — ' + plan.name.en + '. ' + (route === 'cash' ? 'Education price: $' + plan.usd + '.' : 'Breakout first-purchase offer: ' + account.en + '.' + lessonNote + ' Please send the referral link and confirm first-purchase eligibility before I buy.')
-    : 'Merhaba, Alfa Edu — ' + plan.name.tr + ' paketine başvurmak istiyorum. ' + (route === 'cash' ? 'Eğitim ücreti: ' + plan.usd + ' dolar.' : 'Breakout ilk hesap alımı fırsatı: ' + account.tr + '.' + lessonNote + ' Satın almadan önce referans bağlantısını ve ilk alım uygunluğumu teyit etmek istiyorum.');
+    ? 'Hello, I would like to apply for Alfa Edu — ' + plan.name.en + '. ' + (route === 'cash' ? 'Education price: $' + plan.usd + '.' : 'Breakout first-purchase offer: ' + account.en + '.' + lessonNote + ' Partner code: ALFA. Please confirm the referral link and first-purchase eligibility before I buy.')
+    : 'Merhaba, Alfa Edu — ' + plan.name.tr + ' paketine başvurmak istiyorum. ' + (route === 'cash' ? 'Eğitim ücreti: ' + plan.usd + ' dolar.' : 'Breakout ilk hesap alımı fırsatı: ' + account.tr + '.' + lessonNote + ' Partner kodu: ALFA. Satın almadan önce referans bağlantısını ve ilk alım uygunluğumu teyit etmek istiyorum.');
   return 'https://t.me/traderahmetd?text=' + encodeURIComponent(message);
 }
