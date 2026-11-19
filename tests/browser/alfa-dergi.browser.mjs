@@ -44,34 +44,43 @@ async function session(label, access) {
     assert.ok(cardTop >= videoTop, label + ' card is below the video');
 
     const reader = page.locator('#home-mag-reader');
-    assert.equal(await reader.isVisible(), true, label + ' embedded reader visible');
-    const rail = page.locator('#hmr-rail');
-    await rail.locator('.hmr-card').first().waitFor();
+    assert.equal(await reader.isVisible(), true, label + ' embedded flipbook visible');
+    await page.locator('#hmr-stage .mag-page').first().waitFor();
     const embedded = await page.evaluate(() => {
-      const r = document.getElementById('hmr-rail');
+      const s = document.getElementById('hmr-stage');
       return {
-        cards: r.querySelectorAll('.hmr-card').length,
-        titles: [...r.querySelectorAll('.hmr-title')].map(n => n.textContent),
-        copy: r.querySelector('.hmr-copy')?.textContent || '',
+        pages: s.querySelectorAll('.mag-page').length,
+        cover: s.querySelectorAll('.mag-cover3').length,
+        toc: s.querySelectorAll('.mag-toc3').length,
+        entries: s.querySelectorAll('.mag-entry').length,
+        titles: [...s.querySelectorAll('.e-title')].map(n => n.textContent),
+        body: s.querySelector('.e-body')?.textContent || '',
         week: document.getElementById('hmr-week')?.textContent || '',
-        dots: document.querySelectorAll('#hmr-dots .hmr-dot').length,
-        scrollable: r.scrollWidth > r.clientWidth,
+        dots: document.querySelectorAll('#hmr-dots .mag-dot2').length,
+        counter: document.getElementById('hmr-counter')?.textContent || '',
         tools: !!document.querySelector('#home-mag-reader #mag-tools'),
+        editors: document.querySelectorAll('#hmr-stage input, #hmr-stage textarea').length,
+        cards: document.querySelectorAll('#hmr-stage .hmr-card').length,
         readerLabel: document.getElementById('home-mag-reader')?.getAttribute('aria-label') || '',
       };
     });
-    assert.ok(embedded.cards >= 1, label + ' embedded cards');
-    assert.ok(embedded.titles.every(t => t && t.trim()), label + ' embedded titles');
-    assert.ok(embedded.copy.trim(), label + ' embedded copy');
+    assert.ok(embedded.pages >= 3, label + ' embedded real flipbook pages');
+    assert.equal(embedded.cover, 1, label + ' embedded cover page');
+    assert.equal(embedded.toc, 1, label + ' embedded table of contents');
+    assert.equal(embedded.entries, embedded.pages - 2, label + ' embedded entry pages');
+    assert.ok(embedded.titles.every(t => t && t.trim()), label + ' embedded entry titles');
+    assert.ok(embedded.body.trim(), label + ' embedded article body');
     assert.match(embedded.week, /^Haftalık · /, label + ' embedded week label');
-    assert.equal(embedded.dots, embedded.cards, label + ' reader dots');
-    assert.ok(embedded.scrollable, label + ' rail scrolls horizontally');
-    assert.equal(embedded.tools, false, label + ' embedded reader is read-only');
-    assert.match(embedded.readerLabel, /okuyucu/i, label + ' reader mode label');
-    const beforeScroll = await rail.evaluate(n => n.scrollLeft);
+    assert.equal(embedded.dots, embedded.pages, label + ' one dot per flipbook page');
+    assert.match(embedded.counter, new RegExp('^1 / ' + embedded.pages + '$'), label + ' embedded page counter');
+    assert.equal(embedded.tools, false, label + ' embedded flipbook has no editor toolbar');
+    assert.equal(embedded.editors, 0, label + ' embedded flipbook has no editor fields even for admin');
+    assert.equal(embedded.cards, 0, label + ' no preview-like card strip');
+    assert.match(embedded.readerLabel, /dergi/i, label + ' magazine label');
     await page.locator('#hmr-next').click();
-    await page.waitForFunction(prev => document.getElementById('hmr-rail').scrollLeft > prev, beforeScroll);
-    assert.equal(await page.locator('#hmr-dots .hmr-dot.on').count(), 1, label + ' one active dot');
+    await page.waitForFunction(() => document.getElementById('hmr-counter').textContent.startsWith('2 /'), null, { timeout: 4000 });
+    assert.equal(await page.locator('#hmr-stage .mag-page.turned').count(), 1, label + ' page turn applied');
+    assert.equal(await page.locator('#hmr-dots .mag-dot2.on').count(), 1, label + ' one active dot');
 
     await card.click();
     await page.waitForFunction(() => document.body.dataset.page === 'news');

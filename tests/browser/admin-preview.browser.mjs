@@ -77,9 +77,10 @@ try {
   assert.equal(await preview.evaluate(() => siteCanOpen('alfacharts')),false);
   assert.equal(await preview.evaluate(() => siteCanOpen('news')),true);
   await preview.evaluate(() => showPage('home'));
-  await preview.locator('#home-mag-reader .hmr-card').first().waitFor();
-  assert.equal(await preview.locator('#mag-tools:visible').count(),0,'embedded home reader stays read-only in preview');
-  assert.equal(await preview.evaluate(() => { const r = document.getElementById('hmr-rail'); return r.scrollWidth > r.clientWidth; }),true,'preview weekly reader scrolls sideways');
+  await preview.locator('#hmr-stage .mag-page').first().waitFor();
+  assert.equal(await preview.locator('#mag-tools:visible').count(),0,'embedded home flipbook stays read-only in preview');
+  assert.equal(await preview.evaluate(() => document.querySelectorAll('#hmr-stage .mag-cover3').length),1,'preview embedded flipbook has a real cover');
+  assert.equal(await preview.evaluate(() => document.querySelectorAll('#hmr-stage input, #hmr-stage textarea').length),0,'preview embedded flipbook has no editor fields');
   await preview.locator('#home-magazine-link').click();
   await preview.waitForFunction(() => document.body.dataset.page === 'news');
   await preview.locator('#news-weekly-list .nw-card').first().waitFor();

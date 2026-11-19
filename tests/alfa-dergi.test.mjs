@@ -45,21 +45,28 @@ test('Alfa Dergi sits directly under the home video and has a weekly reading sec
   assert.ok(!/\['data', 'karne', 'news'/.test(tierUi), 'magazine card must not be hidden for non-admin');
 });
 
-test('home embeds a horizontal, read-only weekly reader reachable by every member', () => {
+test('home embeds the real weekly flipbook in read-only mode for everyone', () => {
   const home = html.slice(html.indexOf('id="home-member-video"'), html.indexOf('id="home-diary-link"'));
   assert.match(home, /id="home-mag-reader"/);
-  assert.match(home, /Okuyucu Modu/);
-  assert.match(home, /id="hmr-rail"/);
+  assert.match(home, /class="mag-book hmr-book" id="hmr-book"/);
+  assert.match(home, /id="hmr-viewport"/);
+  assert.match(home, /id="hmr-stage"/);
   assert.match(home, /id="hmr-prev"/);
   assert.match(home, /id="hmr-next"/);
   assert.match(home, /id="hmr-dots"/);
-  assert.ok(!home.includes('mag-tools'), 'embedded reader never shows editor tools');
-  assert.match(html, /\.hmr-rail \{[^}]*overflow-x:auto[^}]*scroll-snap-type:x mandatory/s);
+  assert.match(home, /id="hmr-counter"/);
+  assert.ok(!home.includes('mag-tools'), 'embedded flipbook never shows editor tools');
+  assert.ok(!home.includes('hmr-card'), 'no preview-like card strip remains');
+  assert.ok(!home.includes('Okuyucu Modu'), 'no preview-style label');
   assert.match(html, /async function loadHomeMagazine\(\)/);
   assert.match(html, /function renderHomeMagazine\(\)/);
-  assert.match(html, /function bindHomeMagazine\(\)/);
+  assert.match(html, /pages = \[magBuildCover\(\), magBuildToc\(hmrGoTo\)\]/);
+  assert.match(html, /magBuildEntry\(e, magData\.entries\.indexOf\(e\), false\)/);
+  assert.match(html, /window\.__magForceReader = true/);
+  assert.match(html, /function invalidateHomeMagazine\(\)/);
+  assert.match(html, /magInvalidateHome\(\)/);
   assert.match(html, /if \(name === 'home'\).*loadHomeMagazine\(\)/);
-  assert.match(html, /Tam dergiyi aç/);
+  assert.match(html, /Tam ekranda aç/);
 });
 
 test('news read endpoint is a public, read-only projection without personal data', () => {
