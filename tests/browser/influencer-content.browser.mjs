@@ -113,15 +113,40 @@ try {
   await app.locator('#inf-content-library').getByRole('heading', { name: 'İçerik Yönetim Paneli' }).waitFor();
   assert.equal(await app.locator('#inf-content-library').getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 1);
   assert.equal(await app.locator('#inf-teaser').isVisible(), false, 'admin does not see marketing');
+  assert.equal(await app.locator('#page-influencer > .inf-showcase:visible').count(), 0, 'admin does not see growth cases, engagement or sample tweets');
+  assert.equal(await app.locator('#page-influencer > .inf-faq:visible').count(), 0, 'admin does not see customer FAQ');
+  const visibleChildren = await app.locator('#page-influencer').evaluate(node =>
+    [...node.children].filter(child => child.getBoundingClientRect().height > 0)
+      .map(child => child.id || child.className));
+  assert.ok(visibleChildren.every(value => ['eg-brand', 'inf-full', 'inf-admin'].includes(value)), 'admin page only contains brand, editor and access management');
   assert.equal(await app.locator('#inf-checks').isVisible(), false, 'admin does not see student checklist');
   assert.equal(await app.locator('#inf-outline').isVisible(), false, 'legacy notes collapsed by default');
   assert.equal(await app.getByRole('heading', { name: 'İçerik Yönetim Paneli', exact: true }).isVisible(), true);
+  await app.mouse.move(700, 700);
+  await app.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 1000); });
+  await app.waitForFunction(() => document.body.classList.contains('nav-scrolled') && document.querySelector('.navbar').getBoundingClientRect().bottom <= 0);
+  await app.mouse.move(400, 4);
+  await app.waitForFunction(() => document.querySelector('.navbar').getBoundingClientRect().top >= -1);
+  await app.mouse.move(700, 700);
+  await app.waitForFunction(() => document.querySelector('.navbar').getBoundingClientRect().bottom <= 0);
+  await app.locator('.navbar a').first().focus();
+  await app.waitForFunction(() => document.querySelector('.navbar').getBoundingClientRect().top >= -1);
+  await app.evaluate(() => document.activeElement?.blur());
+  await app.setViewportSize({ width:390, height:844 });
+  await app.getByRole('button', { name:'☰ Menü', exact:true }).click();
+  await app.waitForFunction(() => document.querySelector('.navbar').getBoundingClientRect().top >= -1);
+  await app.locator('#nav-mobile-btn').click();
+  await app.waitForFunction(() => document.getElementById('nav-mobile').classList.contains('open'));
+  await app.locator('#nav-mobile-close').click();
+  await app.evaluate(() => window.scrollTo(0, 0));
   await app.evaluate(() => {
     siteIsAdmin = () => false; SITE.admin = false; infAccess = false;
     AUTH.user = { id: 'new-member-fixture' }; renderInfluencer(true);
   });
   assert.equal(await app.locator('#inf-teaser').isVisible(), true, 'new member still sees introduction');
+  assert.equal(await app.locator('#page-influencer > .inf-showcase:visible').count(), 2, 'new member still sees showcase sections');
+  assert.equal(await app.locator('#page-influencer > .inf-faq').isVisible(), true, 'new member still sees customer FAQ');
   assert.equal(await app.locator('#inf-content-library').isVisible(), false);
   await app.close();
-  console.log(JSON.stringify({ passed: true, adminEditor: true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
+  console.log(JSON.stringify({ passed: true, adminEditor: true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, navAutoHide:true, navHoverReveal:true, navKeyboardReveal:true, navMobileReveal:true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

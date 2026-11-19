@@ -41,6 +41,7 @@
 #page-influencer.inf-admin-editor #inf-full { order:1; }
 #page-influencer.inf-admin-editor #inf-admin { order:2; }
 #page-influencer.inf-admin-editor #inf-teaser,
+#page-influencer.inf-admin-editor > :not(.eg-brand):not(#inf-full):not(#inf-admin),
 #page-influencer.inf-admin-editor #inf-full > :not(#inf-content-library),
 #page-influencer.inf-admin-editor > .eg-brand .eg-brand-sub { display:none!important; }
 #page-influencer.inf-admin-editor .ic-library { margin-top:0; }
