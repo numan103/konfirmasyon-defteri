@@ -1,10 +1,12 @@
-import { EDU_PLANS } from './edu-plans-model.mjs?v=2';
+import { EDU_PLANS } from './edu-plans-model.mjs?v=4';
+import './edu-checkout.mjs?v=1';
 const en = () => window.LANG === 'en';
 const t = (a, b) => en() ? b : a;
 const el = (tag, text) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; return node; };
 document.addEventListener('click', event => {
   const button = event.target.closest?.('[data-edu-apply]');
   if (!button) return;
+  if (button.dataset.eduRoute) return; // Direct purchase/verification flow, not a contact lead.
   const plan = EDU_PLANS.find(plan => plan.id === button.dataset.eduApply);
   if (!plan || document.querySelector('dialog.edu-application')) return;
   const dialog = el('dialog'); dialog.className = 'edu-application'; dialog.setAttribute('aria-label', t('Eğitim talebi', 'Training application'));

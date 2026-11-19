@@ -11,17 +11,20 @@ try {
   await page.route('**/api/**', async route => {
     const request = route.request(), url = new URL(request.url()), admin = request.headers().authorization === 'Bearer crm-admin';
     if (url.pathname === '/api/analytics' && url.searchParams.get('education') === '1') {
+      if (request.method() === 'GET' && url.searchParams.get('mine') === '1') return route.fulfill({ json: { ok: true, applications: [] } });
       if (request.method() === 'GET') {
         adminReads++;
         return route.fulfill({ status: admin ? 200 : 403, json: admin ? { ok: true, records, truncated: false } : { ok: false, error: 'admin_required' } });
       }
       const body = request.postDataJSON(); writes++;
-      if (body.op === 'apply') {
+      if (body.op === 'submitPurchase') {
         records.push({ id: 'educrm_' + 'a'.repeat(64), revision: '2026-11-18T10:00:00Z', ...body,
-          stage: 'applied', source: 'application_form', createdAt: '2026-11-18T10:00:00Z',
-          memberId: null, verification: '', privateUsed: 0, groupUsed: 0, privateAllowance: null, groupAllowance: null,
+          contact: 'student@example.com', evidenceReviewPending: true,
+          evidence: { kind: 'breakout', accountSize: '100K', accountType: 'classic', email: body.breakoutEmail, accountId: body.accountId, orderId: body.orderId, partnerCode: 'ALFA' },
+          stage: 'applied', source: 'purchase_submission', createdAt: '2026-11-18T10:00:00Z',
+          memberId: 'member-id', verification: '', privateUsed: 0, groupUsed: 0, privateAllowance: null, groupAllowance: null,
           cashReceivedUsd: null, commissionReceivedUsd: null, groupStart: null, groupEnd: null, adminNote: '' });
-        return route.fulfill({ json: { ok: true, status: 'received', reference: records[0].id } });
+        return route.fulfill({ json: { ok: true, status: 'pending_review', reference: 'EDU-' + 'a'.repeat(16) } });
       }
       if (!admin) return route.fulfill({ status: 403, json: { ok: false, error: 'admin_required' } });
       const row = records.find(r => r.id === body.id);
@@ -39,17 +42,24 @@ try {
     return route.fulfill({ json: { ok: true, admin, tier: admin ? 'admin' : 'free', episode: null } });
   });
   await page.goto((arg('url') || 'http://127.0.0.1:4186') + '/?page=eduplans');
-  await page.locator('[data-edu-apply="personal"]').waitFor({ state: 'visible' });
+  await page.locator('[data-edu-apply="personal"][data-edu-route="breakout100k"]').waitFor({ state: 'visible' });
+  await page.waitForFunction(() => !!window.AlfaEduCheckout);
   assert.equal(adminReads, 0, 'anonymous page never loads CRM records');
-  await page.locator('[data-edu-apply="personal"]').click();
-  const application = page.locator('dialog.edu-application');
-  await application.locator('[name="contact"]').fill('student@example.com');
-  await application.locator('[name="name"]').fill('Student <img src=x>');
-  await application.locator('[name="route"]').selectOption('breakout100k');
+  await page.evaluate(() => {
+    AUTH.user = { id: 'member-id', email: 'student@example.com', user_metadata: { name: 'Student <img src=x>' } };
+    window.siteFetch = (url, init = {}) => fetch(url, init);
+  });
+  await page.locator('[data-edu-apply="personal"][data-edu-route="breakout100k"]').click();
+  const application = page.locator('dialog.edu-checkout');
+  await application.locator('[name="breakoutEmail"]').fill('student@example.com');
+  await application.locator('[name="accountId"]').fill('ACC123');
+  await application.locator('[name="orderId"]').fill('ORDER123');
   await application.locator('[name="note"]').fill('Risk yönetimi desteği');
-  await application.locator('input[type="checkbox"]').check();
+  await application.locator('[name="firstPurchaseClaim"]').check();
+  await application.locator('[name="consent"]').check();
+  await application.locator('[name="acknowledgePending"]').check();
   await application.locator('button[type="submit"]').click();
-  await application.getByRole('status').filter({ hasText: 'Talebin kaydedildi' }).waitFor();
+  await application.getByRole('status').filter({ hasText: 'Bildirimin kaydedildi' }).waitFor();
   assert.equal(records[0].stage, 'applied');
   assert.equal(records[0].cashReceivedUsd, null);
   await application.getByRole('button', { name: 'Kapat', exact: true }).click();

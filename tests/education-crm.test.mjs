@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  recordId, sealRecord, openRecord, sanitizeApplication, sanitizeAdminRecord, lessonAllowance, educationInterest,
+  recordId, sealRecord, openRecord, sanitizeApplication, sanitizeAdminRecord, lessonAllowance, educationInterest, sanitizePurchase, memberPurchaseId,
 } from '../lib/education-crm.mjs';
 import handler, { sanitizePayload } from '../api/analytics.mjs';
 import { educationTotals, educationCSV, filterEducationRecords, groupState, allowance } from '../assets/education-crm-model.mjs';
 const NOW = Date.parse('2026-11-18T12:00:00Z'), actor = { id: 'admin-id' };
 let serial = 0;
+let buyerSerial = 0;
 function config(t) {
   const before = process.env.SUPABASE_SERVICE_ROLE;
   process.env.SUPABASE_SERVICE_ROLE = 'test-service-role';
@@ -16,16 +17,19 @@ const application = overrides => ({ op: 'apply', plan: 'personal', route: 'break
 const verified = overrides => ({ ...application(), op: 'save', stage: 'verified', confirmPurchase: true, firstPurchaseConfirmed: true, verification: 'Admin checked purchase #1', privateUsed: 1, groupUsed: 0, ...overrides });
 function fixture(t) {
   config(t);
+  const buyerId = 'buyer-' + (++buyerSerial);
   let clock = NOW;
   t.mock.method(Date, 'now', () => clock);
   const rows = new Map(), calls = [];
-  let outage = false, conflict = false;
+  let outage = false, conflict = false, failPurchaseWrite = false;
   t.mock.method(globalThis, 'fetch', async (url, opts = {}) => {
     const u = new URL(url), method = opts.method || 'GET'; calls.push({ u, method, opts });
     if (u.pathname === '/auth/v1/user') {
       const token = opts.headers.Authorization;
       if (token === 'Bearer admin') return Response.json({ id: 'admin-id', email: 'ahmetnuman20@gmail.com' });
       if (token === 'Bearer member') return Response.json({ id: 'member-id', email: 'member@example.com' });
+      if (token === 'Bearer buyer') return Response.json({ id: buyerId, email: buyerId + '@example.com' });
+      if (token === 'Bearer buyer-other') return Response.json({ id: buyerId + '-other', email: buyerId + '-other@example.com' });
       return Response.json({}, { status: 401 });
     }
     if (u.pathname !== '/rest/v1/edu_shared') throw new Error('Unexpected URL');
@@ -38,6 +42,7 @@ function fixture(t) {
     }
     if (method === 'POST') {
       const body = JSON.parse(opts.body);
+      if (failPurchaseWrite && body.id?.startsWith('educrm_')) { failPurchaseWrite = false; return Response.json({}, { status: 503 }); }
       if (rows.has(body.id)) return Response.json({}, { status: 409 });
       rows.set(body.id, body); return Response.json([body], { status: 201 });
     }
@@ -53,7 +58,7 @@ function fixture(t) {
     await handler({ method, query: { education: '1' }, headers: token ? { authorization: 'Bearer ' + token } : {}, body }, res);
     return { status: res.statusCode, body: data };
   }
-  return { rows, calls, request, contact: 'student' + (++serial) + '@example.com', setOutage: value => { outage = value; }, setConflict: value => { conflict = value; } };
+  return { rows, calls, request, buyerId, contact: 'student' + (++serial) + '@example.com', failPurchaseWrite: () => { failPurchaseWrite = true; }, setOutage: value => { outage = value; }, setConflict: value => { conflict = value; } };
 }
 test('private CRM records are authenticated encrypted and bound to the exact row ID', t => {
   config(t);
@@ -183,4 +188,79 @@ test('CRM totals count only explicitly entered amounts in confirmed records and 
   assert.equal(filterEducationRecords(records, { stage: 'applied' }).length, 1);
   assert.ok(educationCSV(records).includes("'=HYPERLINK"));
   assert.deepEqual(allowance(confirmed), { private: 4, group: 4 });
+});
+const purchase = overrides => ({ op: 'submitPurchase', plan: 'video', route: 'cash', txid: 'a'.repeat(64), consent: true, acknowledgePending: true, ...overrides });
+test('purchase evidence requires a logged-in member and never accepts client payment/approval claims', async t => {
+  const f = fixture(t);
+  assert.equal((await f.request(purchase())).status, 401);
+  const result = await f.request(purchase({ plan: 'personal', amount: 1, recipient: 'attacker', stage: 'verified', cashReceivedUsd: 250, memberId: 'forged' }), 'buyer');
+  assert.equal(result.status, 200); assert.equal(result.body.status, 'pending_review');
+  const id = memberPurchaseId(f.buyerId, 'personal', 'cash'), data = openRecord(id, f.rows.get(id).data);
+  assert.equal(data.memberId, f.buyerId); assert.equal(data.stage, 'applied'); assert.equal(data.cashReceivedUsd, null);
+  assert.equal(data.privateAllowance, null); assert.equal(data.evidence.verified, false);
+  assert.equal(data.evidence.expectedAmount, 250);
+  assert.equal(data.evidence.recipient, 'TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6');
+  assert.equal(data.evidence.currency, 'USDT'); assert.equal(data.evidence.network, 'TRC20');
+  assert.ok(!JSON.stringify(result.body).includes('a'.repeat(64)));
+});
+test('TRC20 and Breakout evidence have strict required fields without granting payment approval', () => {
+  const buyer = { id: 'buyer', email: 'buyer@example.com' };
+  assert.throws(() => sanitizePurchase(purchase({ txid: 'short' }), buyer), /invalid_txid/);
+  assert.throws(() => sanitizePurchase(purchase({ acknowledgePending: false }), buyer), /pending_ack_required/);
+  assert.throws(() => sanitizePurchase(purchase({ consent: false }), buyer), /consent_required/);
+  const claim = purchase({ plan: 'personal', route: 'breakout100k', breakoutEmail: 'buyer@example.com', accountId: 'ACC123', orderId: 'ORDER123', accountType: 'classic', firstPurchaseClaim: true, firstPurchaseConfirmed: true });
+  const record = sanitizePurchase(claim, buyer);
+  assert.equal(record.evidence.accountSize, '100K'); assert.equal(record.evidence.partnerCode, 'ALFA');
+  assert.equal(record.firstPurchaseConfirmed, false); assert.equal(record.stage, 'applied');
+  assert.throws(() => sanitizePurchase({ ...claim, accountType: 'pro' }, buyer), /invalid_account_type/);
+  assert.throws(() => sanitizePurchase({ ...claim, firstPurchaseClaim: false }, buyer), /first_purchase_claim_required/);
+});
+test('member status is identity-bound and excludes admin notes, audits and other applicants', async t => {
+  const f = fixture(t);
+  await f.request(purchase(), 'buyer');
+  const id = memberPurchaseId(f.buyerId, 'video', 'cash');
+  const row = f.rows.get(id), stored = openRecord(id, row.data);
+  stored.adminNote = 'PRIVATE ADMIN NOTE'; stored.audit = [{ actor: 'admin-id', to: 'applied' }];
+  row.data = sealRecord(id, stored);
+  async function mine(token) {
+    let out, status;
+    const res = { setHeader() {}, end(value) { out = JSON.parse(value); }, set statusCode(n) { status = n; }, get statusCode() { return status; } };
+    await handler({ method: 'GET', query: { education: '1', mine: '1' }, headers: { authorization: 'Bearer ' + token } }, res);
+    return { status, out };
+  }
+  const own = await mine('buyer'), other = await mine('buyer-other');
+  assert.equal(own.status, 200); assert.equal(own.out.applications.length, 1);
+  assert.equal(other.out.applications.length, 0);
+  assert.ok(!JSON.stringify(own.out).includes('PRIVATE ADMIN NOTE'));
+  assert.ok(!JSON.stringify(own.out).includes('admin-id'));
+});
+test('the same TXID cannot back two education claims and duplicate errors reveal no other member', async t => {
+  const f = fixture(t);
+  assert.equal((await f.request(purchase(), 'buyer')).status, 200);
+  const collision = await f.request(purchase({ plan: 'live' }), 'buyer-other');
+  assert.equal(collision.status, 409); assert.equal(collision.body.error, 'evidence_already_submitted');
+  assert.ok(!JSON.stringify(collision.body).includes(f.buyerId));
+  assert.equal([...f.rows.keys()].filter(id => id.startsWith('educrm_')).length, 1);
+});
+test('resubmitting evidence cannot overwrite an approved purchase or its rights', async t => {
+  const f = fixture(t);
+  await f.request(purchase(), 'buyer');
+  const id = memberPurchaseId(f.buyerId, 'video', 'cash'), row = f.rows.get(id), data = openRecord(id, row.data);
+  data.stage = 'verified'; data.cashReceivedUsd = 50; data.privateAllowance = 0; data.adminNote = 'Checked on-chain';
+  row.data = sealRecord(id, data);
+  const repeat = await f.request(purchase({ txid: 'b'.repeat(64) }), 'buyer');
+  assert.equal(repeat.body.status, 'already_verified');
+  const after = openRecord(id, f.rows.get(id).data);
+  assert.equal(after.stage, 'verified'); assert.equal(after.cashReceivedUsd, 50);
+  assert.equal(after.evidence.txid, 'a'.repeat(64)); assert.equal(after.adminNote, 'Checked on-chain');
+});
+test('purchase retries are idempotent and a reserved proof remains retryable after a failed record write', async t => {
+  const f = fixture(t); f.failPurchaseWrite();
+  assert.equal((await f.request(purchase(), 'buyer')).status, 503);
+  assert.equal([...f.rows.keys()].filter(id => id.startsWith('educrm_')).length, 0);
+  assert.equal((await f.request(purchase(), 'buyer')).status, 200);
+  const id = memberPurchaseId(f.buyerId, 'video', 'cash'), stamp = f.rows.get(id).updated_at;
+  const repeat = await f.request(purchase(), 'buyer');
+  assert.equal(repeat.body.duplicate, true); assert.equal(f.rows.get(id).updated_at, stamp);
+  assert.equal([...f.rows.keys()].filter(id => id.startsWith('educrm_')).length, 1);
 });

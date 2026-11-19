@@ -29,10 +29,10 @@
 <link rel="stylesheet" href="/assets/member-video.css?v=1">
 <script type="module" src="/assets/member-video.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-plans.css?v=3">
-<script type="module" src="/assets/edu-plans.mjs?v=5"></script>
-<link rel="stylesheet" href="/assets/education-crm.css?v=1">
-<script type="module" src="/assets/education-crm.mjs?v=1"></script>
-<script type="module" src="/assets/edu-application.mjs?v=1"></script>
+<script type="module" src="/assets/edu-plans.mjs?v=6"></script>
+<link rel="stylesheet" href="/assets/education-crm.css?v=2">
+<script type="module" src="/assets/education-crm.mjs?v=2"></script>
+<script type="module" src="/assets/edu-application.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/mentorship-trades.css?v=3">
 <script type="module" src="/assets/mentorship-trades.mjs?v=2"></script>
 <script type="module" src="/assets/mentor-results-preview.mjs?v=1"></script>
@@ -14146,6 +14146,7 @@ function applyTierUi() {
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();
   if (window.AlfaMentorPreview) window.AlfaMentorPreview.refresh();
+  if (window.AlfaEduCheckout) window.AlfaEduCheckout.refreshContext();
 
   const isAdmin = siteIsAdmin();
   const ref = refUnlocked();

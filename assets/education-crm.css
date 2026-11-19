@@ -24,6 +24,15 @@
 .edu-application input, .edu-application select, .edu-application textarea, .education-crm-editor input, .education-crm-editor select, .education-crm-editor textarea { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--input-bg,var(--bg)); font: inherit; }
 .edu-application .edu-consent, .education-crm-editor .edu-consent { display: flex; gap: 9px; align-items: flex-start; line-height: 1.6; }
 .edu-consent input { width: auto; flex: none; }
+.edu-checkout { box-sizing: border-box; width: min(620px,calc(100vw - 28px)); }
+.edu-checkout-payment { border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin: 14px 0; background: var(--panel-alt); }
+.edu-checkout-payment strong { display: block; font-size: 25px; }
+.edu-checkout-payment code { display: block; padding: 12px 0; overflow-wrap: anywhere; font-size: 14px; user-select: all; }
+.edu-checkout a { display: inline-block; color: var(--pc); font-size: 12px; line-height: 1.7; margin: 8px 0; }
+.edu-checkout > a { margin-inline-start: 12px; }
+.edu-checkout .edu-consent input { width: auto; }
+.edu-checkout input:invalid:not(:placeholder-shown) { border-color: var(--border); }
+.education-crm-editor .education-crm-summary { overflow-wrap: anywhere; }
 .education-crm-editor .crm-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .education-crm-editor h2 { font-size: 18px; margin: 0; }
 @media(max-width:600px) { .education-crm { padding: 12px; } .education-crm-toolbar select { flex: 1 1 120px; } .education-crm-editor .crm-editor-grid { grid-template-columns: 1fr; } }

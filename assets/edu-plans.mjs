@@ -1,4 +1,4 @@
-import { EDU_PLANS, eduApplicationURL } from './edu-plans-model.mjs?v=3';
+import { EDU_PLANS, eduQuestionURL } from './edu-plans-model.mjs?v=4';
 const root = document.getElementById('eduplans-root');
 if (root) {
   const text = (tr, en) => window.LANG === 'en' ? en : tr;
@@ -24,7 +24,9 @@ if (root) {
       el('h1', text('İzlemekten uygulamaya. Sana uygun eğitim.', 'From watching to practice. Training that fits you.')),
       el('p', text('Kendi hızında video eğitim, birlikte canlı piyasa değerlendirmeleri veya tamamen sana özel birebir çalışma. Nerede olduğunu birlikte belirleyip bir sonraki adıma odaklanıyoruz.', 'Self-paced videos, shared live market reviews or fully personal one-to-one work. We assess where you are and focus on your next step.'), 'eduplans-lead'));
     const actions = el('div', undefined, 'eduplans-actions');
-    actions.append(link(text('Paket seçimi için konuşalım ↗', 'Discuss your package ↗'), 'https://t.me/traderahmetd', 'btn solid'),
+    const choose = el('button', text('Paketini seç · Katıl ↓', 'Choose your package · Join ↓'), 'btn solid');
+    choose.type = 'button'; choose.onclick = () => root.querySelector('.eduplans-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    actions.append(choose, link(text('Sorum var ↗', 'I have a question ↗'), 'https://t.me/traderahmetd'),
       link(text('Mevcut derslerime git →', 'Go to my existing courses →'), '?page=egitim'));
     copy.appendChild(actions);
     const art = el('figure', undefined, 'eduplans-art'), img = el('img');
@@ -56,7 +58,7 @@ if (root) {
     codeRow.append(el('span', text('Partner kodu', 'Partner code')), code, copyCode);
     partnerCopy.append(codeRow, copyStatus,
       link(text('Breakout’u ziyaret et ↗', 'Visit Breakout ↗'), 'https://www.breakoutprop.com/', 'btn solid'),
-      el('small', text('Eğitim avantajı ilk kayıt ve uygun ilk alıma özeldir. Satın almadan önce referans ve paket uygunluğunu bizimle teyit et. Kod otomatik erişim açmaz.', 'Training benefits apply to first-time signup and a qualifying first purchase. Confirm referral and package eligibility with us before buying. The code does not automatically unlock access.')));
+      el('small', text('ALFA koduyla ilk kaydını ve uygun Classic hesap alımını yap; ardından hesap/sipariş bilgilerini siteden doğrulamaya gönder. Pro muadili ayrıca onay gerektirir. Kod otomatik erişim açmaz.', 'Use ALFA for first-time signup and a qualifying Classic account purchase, then submit account/order details here. Pro equivalents require separate approval. The code does not automatically unlock access.')));
     partner.append(poster, partnerCopy); root.appendChild(partner);
     const intro = el('div', undefined, 'eduplans-intro');
     intro.append(el('h2', text('Üç paket. İhtiyacına göre eğitim.', 'Three packages. Training for your needs.')),
@@ -84,21 +86,19 @@ if (root) {
         card.appendChild(upgrade);
       }
       const buttons = el('div', undefined, 'eduplan-buttons');
-      buttons.appendChild(link(text('$' + plan.usd + ' ile başvur ↗', 'Apply for $' + plan.usd + ' ↗'), eduApplicationURL(plan.id, 'cash', window.LANG), 'btn solid'));
-      const breakout = link(text('ALFA ile ilk alım uygunluğunu teyit et ↗', 'Confirm first-purchase eligibility with ALFA ↗'), eduApplicationURL(plan.id, 'breakout', window.LANG));
-      breakout.dataset.route = 'breakout'; buttons.appendChild(breakout);
-      if (plan.upgrade) {
-        const upgrade = link(text('100K ile 4 özel ders için başvur ↗', 'Apply for 4 private lessons with 100K ↗'), eduApplicationURL(plan.id, 'breakout100k', window.LANG));
-        upgrade.dataset.route = 'breakout100k'; buttons.appendChild(upgrade);
+      function checkout(label, route, solid = false) {
+        const button = el('button', label, 'btn' + (solid ? ' solid' : '')); button.type = 'button';
+        button.dataset.eduApply = plan.id; button.dataset.eduRoute = route; button.dataset.anCta = 'education-checkout';
+        button.dataset.product = 'education'; button.dataset.plan = plan.id; button.dataset.route = route;
+        return button;
       }
-      buttons.querySelectorAll('a').forEach(anchor => {
-        anchor.dataset.product = 'education'; anchor.dataset.plan = plan.id;
-        if (!anchor.dataset.route) anchor.dataset.route = 'cash';
-      });
-      const apply = el('button', text('Talep bırak · Size ulaşalım', 'Leave an application · Contact me'), 'btn');
-      apply.type = 'button'; apply.dataset.eduApply = plan.id; apply.dataset.anCta = 'education-application';
-      apply.dataset.product = 'education'; apply.dataset.plan = plan.id; apply.dataset.route = 'undecided';
-      buttons.appendChild(apply);
+      buttons.append(checkout(text(plan.usd + ' USDT · TRC20 ile katıl', plan.usd + ' USDT · Join via TRC20'), 'cash', true),
+        checkout(text('Breakout hesabıyla katıl', 'Join with a Breakout account'), 'breakout'));
+      if (plan.upgrade) {
+        buttons.appendChild(checkout(text('100K alımını bildir · 4 özel ders', 'Submit 100K purchase · 4 private lessons'), 'breakout100k'));
+      }
+      const question = link(text('Sorum var ↗', 'I have a question ↗'), eduQuestionURL(plan.id, window.LANG));
+      question.dataset.product = 'education'; question.dataset.plan = plan.id; question.dataset.route = 'undecided'; buttons.appendChild(question);
       card.appendChild(buttons); grid.appendChild(card);
     });
     root.appendChild(grid);
@@ -107,7 +107,7 @@ if (root) {
       [text('01 · Video hakkın kalıcı', '01 · Your videos stay accessible'), text('Uygun eğitim ödemesi veya Breakout satın alımı doğrulandıktan sonra video hakkın ömür boyu sürer. Sonradan gruptan ayrılman bu hakkı kaldırmaz.', 'After a qualifying education payment or Breakout purchase is verified, your video access lasts for life. Leaving the group later does not remove that right.')],
       [text('02 · İkinci aydan itibaren grup', '02 · Group access from month two'), text('Grupta kalmak için bizim referansımızla OKX veya Bybit’e katılıp işlemlerini orada yapman gerekir. Devam uygunluğu doğrulanır. Bu şart kalıcı video hakkını etkilemez.', 'To stay in the group, join OKX or Bybit through our referral and carry out your trading there. Continuing eligibility is verified. This condition does not affect lifetime video access.')],
       [text('03 · Özel ders, gerçekten kişiye özel', '03 · Truly personal lessons'), text('İster sıfırdan başla ister deneyimli ol: strateji, risk yönetimi, psikoloji ve uygulamadaki ihtiyaçlarına göre plan hazırlanır. Her birebir görüşme öğrencinin durumuna göre 1,5–3 saattir. Funded değerlendirmesine hazırlıkta destek sağlanır; başarı veya kazanç garantisi verilmez.', 'Whether you are starting out or experienced, we tailor strategy, risk management, psychology and execution work to your needs. Each private session lasts 1.5–3 hours depending on the student. We support funded evaluation preparation, without guaranteeing success or profit.')],
-      [text('04 · Başvuru ve doğrulama', '04 · Application and verification'), text('Breakout hakkı bizim linkimizden ilk kayıt ve uygun ilk hesap alımına bağlıdır. Hesap almadan önce referans linkini ve paket uygunluğunu teyit et; Pro muadili ayrıca onaylanır. Ödeme ve satın alım manuel doğrulandıktan sonra hakların tanımlanır. Birebir dersler ve ilk paket ders adetleri otomatik yenilenmez.', 'Breakout benefits require first-time signup through our link and a qualifying first account purchase. Confirm the referral link and eligibility before buying; Pro equivalents need separate approval. Benefits are assigned after payment or purchase is manually verified. Private lessons and initial package lesson allowances do not renew automatically.')],
+      [text('04 · Öde / hesabını al → Bildir → Onay bekle', '04 · Pay / buy an account → Submit → Await review'), text('TRC20 yolunda ekrandaki sabit USDT tutarını gönderip TXID’ni bildir. Breakout yolunda ALFA koduyla ilk kayıt ve uygun ilk Classic hesap alımını tamamlayıp hesap/sipariş bilgilerini gönder. Pro muadili ayrıca onaylanır. Bildirimler manuel incelenir; form göndermek ödeme veya erişim onayı değildir. Soru sormak isteğe bağlıdır. Birebir dersler ve ilk paket ders adetleri otomatik yenilenmez.', 'For TRC20, send the displayed fixed USDT amount and submit your TXID. For Breakout, use ALFA for first-time signup and a qualifying first Classic account purchase, then submit account/order details. Pro equivalents need separate approval. Submissions are manually reviewed, not payment or access approval. Questions are optional. Private lessons and initial package lesson allowances do not renew automatically.')],
     ];
     notes.forEach(([title, body]) => { const note = el('section', undefined, 'eduplans-term'); note.append(el('h2', title), el('p', body)); terms.appendChild(note); });
     root.append(terms, el('p', text('10K / 25K / 50K / 100K hesap büyüklüğüdür, hesap satın alma ücreti değildir. Eğitim ücretleri ile Breakout hesap ücretleri ayrı seçeneklerdir. Referanslı satın alımlardan komisyon kazanabiliriz. Prop değerlendirme ve ödeme kuralları ilgili firmaya aittir. Başvuru düğmeleri ödeme almaz veya otomatik erişim açmaz.', '10K / 25K / 50K / 100K describe account sizes, not purchase prices. Education fees and Breakout account fees are alternative routes. We may earn referral commissions. Prop evaluation and payout rules belong to the provider. Application buttons do not collect payment or automatically unlock access.'), 'eduplans-disclosure'));

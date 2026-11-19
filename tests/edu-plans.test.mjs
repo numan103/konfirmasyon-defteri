@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { EDU_PLANS, PRIVATE_LESSON_MINUTES, eduApplicationURL } from '../assets/edu-plans-model.mjs';
+import { EDU_PLANS, PRIVATE_LESSON_MINUTES, EDU_PAYMENT, eduApplicationURL, eduQuestionURL } from '../assets/edu-plans-model.mjs';
 test('Alfa Edu packages keep the agreed prices and total lesson allowances', () => {
   assert.deepEqual(EDU_PLANS.map(p => [p.id, p.usd, p.groupMonths, p.groupLessons, p.privateLessons]), [
     ['video', 50, 1, 0, 0], ['live', 99, 1, 4, 0], ['personal', 250, 1, 4, 2],
@@ -67,4 +67,13 @@ test('public package offer is separate from existing course access and has clear
   assert.ok(!client.includes('innerHTML'));
   assert.ok(!client.includes('localStorage'));
   assert.ok(!client.includes('fetch('), 'offer page must not collect payment or alter access');
+});
+test('education enrollment is direct; the confirmed TRC20 destination is unchanged and Telegram is optional', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const client = fs.readFileSync(new URL('../assets/edu-plans.mjs', import.meta.url), 'utf8');
+  assert.ok(html.includes('<code class="inf-wallet">' + EDU_PAYMENT.address + '</code>'));
+  assert.deepEqual([EDU_PAYMENT.currency, EDU_PAYMENT.network], ['USDT','TRC20']);
+  assert.ok(!client.includes('eduApplicationURL'));
+  assert.ok(client.includes("button.dataset.eduRoute = route"));
+  assert.match(new URL(eduQuestionURL('personal')).searchParams.get('text'), /bir sorum var/);
 });

@@ -1,0 +1,71 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+const arg = key => process.argv.find(s => s.startsWith(`--${key}=`))?.slice(key.length + 3);
+const { chromium } = await import(pathToFileURL(path.resolve(arg('playwright'))));
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  const submitted = [], applications = [];
+  await page.route('**/api/**', async route => {
+    const request = route.request(), url = new URL(request.url());
+    if (url.pathname === '/api/analytics' && url.searchParams.get('education') === '1') {
+      if (url.searchParams.get('mine')) return route.fulfill({ json: { ok: true, applications } });
+      const body = request.postDataJSON(); assert.equal(body.op, 'submitPurchase'); submitted.push(body);
+      applications.push({ plan: body.plan, route: body.route, stage: 'applied', reviewPending: true, reference: 'EDU-' + 'a'.repeat(16), evidence: { txid: body.txid } });
+      return route.fulfill({ json: { ok: true, status: 'pending_review', reference: 'EDU-' + 'a'.repeat(16) } });
+    }
+    if (url.searchParams.get('mentorTrades')) return route.fulfill({ json: { ok: true, summary: { count: 0, netR: 0, wins: 0, losses: 0, flat: 0, series: [] } } });
+    return route.fulfill({ json: { ok: true, admin: false, tier: 'free', episode: null } });
+  });
+  await page.goto((arg('url') || 'http://127.0.0.1:4186') + '/?page=eduplans');
+  await page.waitForFunction(() => !!window.AlfaEduCheckout);
+  await page.locator('[data-edu-apply="video"][data-edu-route="cash"]').click();
+  let dialog = page.locator('dialog.edu-checkout');
+  assert.equal(await dialog.locator('code').count(), 0, 'ask for login before exposing payment instructions');
+  await dialog.getByRole('button', { name: 'Giriş yap / Ücretsiz kaydol' }).click();
+  await page.evaluate(() => {
+    document.getElementById('auth-gate').classList.remove('open');
+    AUTH.user = { id: 'buyer', email: 'buyer@example.com' }; SITE.tier = 'free';
+    window.siteFetch = (url, init = {}) => fetch(url, { ...init, headers: { ...(init.headers || {}), Authorization: 'Bearer buyer' } });
+    AlfaEduCheckout.refreshContext();
+  });
+  dialog = page.locator('dialog.edu-checkout');
+  await dialog.locator('[name="txid"]').waitFor();
+  assert.equal(await dialog.locator('.edu-checkout-payment strong').innerText(), '50 USDT');
+  assert.equal(await dialog.locator('code').innerText(), 'TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6');
+  await dialog.locator('[name="txid"]').fill('a'.repeat(64));
+  await dialog.locator('[name="consent"]').check();
+  await dialog.locator('button[type="submit"]').click();
+  assert.equal(submitted.length, 0, 'manual review acknowledgement is required');
+  await dialog.locator('[name="acknowledgePending"]').check();
+  await dialog.locator('button[type="submit"]').click();
+  await dialog.getByRole('status').filter({ hasText: 'Eğitim onayı bekliyor' }).waitFor();
+  assert.equal(submitted[0].route, 'cash'); assert.equal(submitted[0].plan, 'video');
+  assert.equal(Object.hasOwn(submitted[0], 'cashReceivedUsd'), false);
+  assert.equal(await dialog.locator('code').count(), 0, 'payment instruction is removed after successful notification');
+  await dialog.getByRole('button', { name: 'Kapat', exact: true }).click();
+  await page.locator('[data-edu-apply="video"][data-edu-route="cash"]').click();
+  await page.waitForFunction(() => document.querySelector('dialog.edu-checkout')?.textContent.includes('Onay bekliyor'));
+  assert.equal(await page.locator('dialog.edu-checkout [name="txid"]').count(), 0, 'pending applicants are not asked to pay again');
+  await page.locator('dialog.edu-checkout').getByRole('button', { name: 'Kapat', exact: true }).click();
+  await page.locator('[data-edu-apply="live"][data-edu-route="breakout"]').click();
+  dialog = page.locator('dialog.edu-checkout');
+  await dialog.locator('[name="accountId"]').waitFor();
+  assert.equal(await dialog.getByRole('link', { name: 'Breakout’tan hesap al ↗' }).getAttribute('href'), 'https://www.breakoutprop.com/');
+  assert.match(await dialog.innerText(), /25K Classic/);
+  await dialog.locator('[name="breakoutEmail"]').fill('breakout@example.com');
+  await dialog.locator('[name="accountId"]').fill('ACC123'); await dialog.locator('[name="orderId"]').fill('ORDER123');
+  await dialog.locator('[name="firstPurchaseClaim"]').check(); await dialog.locator('[name="consent"]').check(); await dialog.locator('[name="acknowledgePending"]').check();
+  await page.setViewportSize({ width: 360, height: 900 });
+  assert.equal(await dialog.evaluate(node => node.getBoundingClientRect().width <= innerWidth), true);
+  await dialog.locator('button[type="submit"]').click();
+  await dialog.getByRole('status').filter({ hasText: 'Eğitim onayı bekliyor' }).waitFor();
+  assert.equal(submitted[1].route, 'breakout'); assert.equal(submitted[1].accountId, 'ACC123');
+  assert.equal(page.url().includes('t.me'), false, 'enrollment does not redirect to a Telegram DM');
+  await page.evaluate(() => { AUTH.user = null; AlfaEduCheckout.refreshContext(); });
+  assert.equal(await page.locator('dialog.edu-checkout').count(), 0);
+  assert.deepEqual(errors, []);
+  console.log(JSON.stringify({ passed: true, loginBeforePayment: true, trc20Instructions: true, txidSubmission: true, breakoutSelfService: true, pendingStatus: true, noForcedTelegram: true, noAutomaticApproval: true, mobile: true, productionPayments: false }));
+} finally { await browser.close(); }

@@ -28,10 +28,11 @@ otomatik hak verilmez. İkinci pakette konu anlatımı, piyasa analizi, işlem
 değerlendirme ve soru-cevap içeren haftalık canlı eğitim başlar.
 Partner kodu **ALFA**; Breakout bağlantısı resmi `https://www.breakoutprop.com/`.
 Kodun otomatik uygulandığı bir affiliate URL veya indirim yüzdesi varsayılmaz.
-Referans bağlantısı ve kesin Pro muadilliği ayrıca teyit gerektirdiğinden kullanıcı
-satın almadan önce `@traderahmetd` üzerinden teyit ister. Telegram düğmeleri
-planı içeren mesaj taslağı açar; kendiliğinden mesaj göndermez.
-Ek olarak açık rızalı talep formu [eğitim CRM](education-crm.md) kaydı oluşturur.
+Katılım [site içi ödeme/alım bildirimi](edu-checkout.md) üzerinden yapılır:
+USDT/TRC20 gönder + TXID bildir veya ALFA ile uygun Classic hesap al + hesap/sipariş
+bilgilerini bildir. Kullanıcı manuel eğitim onayını bekler. Pro muadilliği ayrıca
+teyit gerektirir. Telegram yalnızca isteğe bağlı soru bağlantısıdır.
+Genel ilgi formu API'si geriye uyumlu kalır; ana düğmeler doğrudan katılım içindir.
 İlk ay ders/grup haklarının başlangıcı onay sırasında planlanır.
 
 Bu sürüm paket sunumu ve manuel başvuru içindir. Ödeme tahsilatı, Breakout

@@ -90,6 +90,7 @@ function render() {
       if (record.publicReference) who.appendChild(el('small', record.publicReference));
       const packageCell = el('td'); packageCell.append(el('strong', planName(record.plan)), el('span', EDU_ROUTES[record.route]));
       const stage = el('td'); stage.append(el('strong', EDU_STAGES[record.stage]), el('small', record.verification || 'Doğrulama referansı yok'));
+      if (record.evidenceReviewPending) stage.appendChild(el('small', 'Yeni alım/ödeme bildirimi · Onay bekliyor'));
       const amounts = el('td'); amounts.append(el('span', 'Tahsilat: ' + money(record.cashReceivedUsd)), el('span', 'Komisyon: ' + money(record.commissionReceivedUsd)));
       const lessons = el('td'), allowed = allowance(record);
       const groupLabels = { unverified: 'Alım onaylı değil', undated: 'Grup tarihi girilmedi', scheduled: 'Grup dönemi başlamadı', active: 'Tarihe göre ilk grup dönemi aktif', expired: 'Grup dönemi doldu' };
@@ -134,6 +135,24 @@ function edit(record) {
   dialog.append(el('h2', record ? 'Eğitim kaydını incele' : 'Manuel eğitim kaydı'), el('p', 'Alım onayı erişim açmaz. Ödeme, Breakout ilk alımı ve Pro muadilliği manuel doğrulanmalıdır. İletişim/paket/alım yolu kayıt oluşturulduktan sonra değişmez.'));
   if (record?.note) dialog.appendChild(el('p', 'Öğrenci talebi: ' + record.note));
   if (record?.lastApplication) dialog.appendChild(el('p', 'Son form talebi (kimlik/alım teyidi değildir): ' + (record.lastApplication.name || '') + ' · ' + (record.lastApplication.note || '') + ' · ' + record.lastApplication.at));
+  if (record?.evidence) {
+    const proof = record.evidence, evidence = el('section', undefined, 'education-crm-summary');
+    evidence.append(el('strong', 'Üyenin alım/ödeme beyanı — otomatik doğrulanmış değildir'));
+    if (proof.kind === 'trc20') {
+      evidence.append(el('p', proof.expectedAmount + ' ' + proof.currency + ' · ' + proof.network),
+        el('p', 'Beklenen alıcı: ' + proof.recipient), el('p', 'TXID: ' + proof.txid),
+        el('p', 'USDT varlığını, TRC20 ağını, alıcı adresini, tutarı, işlemin başarısını ve başka alımda kullanılmadığını kontrol et. Tutar alanını yalnızca gerçekten alınan ödeme ile doldur.'));
+      if (/^[a-f0-9]{64}$/i.test(proof.txid || '')) {
+        const link = el('a', 'Tronscan’da kontrol et ↗'); link.href = 'https://tronscan.org/#/transaction/' + proof.txid; link.target = '_blank'; link.rel = 'noopener noreferrer'; evidence.appendChild(link);
+      }
+    } else {
+      evidence.append(el('p', 'Breakout: ' + proof.accountSize + ' · ' + proof.accountType + ' · Kod ' + proof.partnerCode),
+        el('p', 'Kayıt e-postası: ' + proof.email), el('p', 'Hesap ID: ' + proof.accountId), el('p', 'Sipariş: ' + proof.orderId),
+        el('p', 'Hesap/sipariş eşleşmesini, ALFA referansını, ilk kayıt/uygun ilk alımı ve varsa Pro muadilliğini manuel kontrol et. Şifre veya API anahtarı isteme.'));
+    }
+    if (record.evidenceHistory?.length) evidence.appendChild(el('small', record.evidenceHistory.length + ' önceki belge bildirimi kayıt içinde korunuyor.'));
+    dialog.appendChild(evidence);
+  }
   const form = el('form'), grid = el('div', undefined, 'crm-editor-grid'); form.appendChild(grid);
   const fields = {};
   function field(name, label, type = 'text', value = '') {

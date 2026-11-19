@@ -1,5 +1,9 @@
 # Eğitim / ürün CRM ve analitik
 
+Paket katılımı artık [site içi TRC20 / Breakout bildirim akışı](edu-checkout.md)
+üzerinden yapılır. Mesaj gönderme zorunluluğu yoktur; alım/ödeme beyanları
+CRM'de onay bekler. Genel ilgi formu API'si geriye uyumlu kalır.
+
 ## Ekranlar
 
 `?page=analitik` ziyaret raporunun üstünde **Eğitim · Talepler & Alımlar**.

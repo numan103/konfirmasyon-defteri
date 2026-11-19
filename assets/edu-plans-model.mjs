@@ -8,6 +8,15 @@ export const EDU_PLANS = Object.freeze([
     upgrade: { account: { tr: '100K Classic', en: '100K Classic' }, privateLessons: 4 } },
 ]);
 export const PRIVATE_LESSON_MINUTES = Object.freeze({ min: 90, max: 180 });
+// Confirmed by the owner: the existing site TRC20 receiving address also serves Alfa Edu.
+export const EDU_PAYMENT = Object.freeze({ currency: 'USDT', network: 'TRC20', address: 'TPipnkFzdUF8Vb5cPpuwNLyRR6wcePxqG6' });
+export function eduQuestionURL(id, lang = 'tr') {
+  const plan = EDU_PLANS.find(p => p.id === id);
+  if (!plan) return null;
+  return 'https://t.me/traderahmetd?text=' + encodeURIComponent(lang === 'en'
+    ? 'Hello, I have a question about Alfa Edu — ' + plan.name.en + '.'
+    : 'Merhaba, Alfa Edu — ' + plan.name.tr + ' hakkında bir sorum var.');
+}
 export function eduApplicationURL(id, route = 'cash', lang = 'tr') {
   const plan = EDU_PLANS.find(p => p.id === id);
   if (!plan || !['cash', 'breakout', 'breakout100k'].includes(route) || (route === 'breakout100k' && !plan.upgrade)) return null;
