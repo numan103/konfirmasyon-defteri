@@ -42,7 +42,7 @@ function fixture(t) {
     await handler({ method, headers: token ? { authorization: 'Bearer ' + token } : {}, body }, res);
     return { status, body: result, headers };
   }
-  return { request, writes, row: () => row, outage: () => { outage = true; } };
+  return { request, writes, row: () => row, seed: value => { row = value; }, outage: () => { outage = true; } };
 }
 test('nested topics, subtitles, descriptions and mixed media are normalized', () => {
   const clean = cleanLibrary(content());
@@ -87,17 +87,26 @@ test('only actual admins write; premium/free/anonymous cannot self-authorize', a
   assert.equal((await f.request('admin', body)).status, 200);
   assert.equal(JSON.stringify(f.row()).includes('SECRET_DRAFT'), false);
 });
-test('only approved Influencer users read; drafts are admin-only and no-store', async t => {
+test('only approved Influencer users read saved topics; saving publishes every topic', async t => {
   const f = fixture(t);
   await f.request('admin', { data: content(), revision: null });
   assert.equal((await f.request('')).status, 401);
   assert.equal((await f.request('free')).status, 403);
   const paid = await f.request('paid');
   assert.equal(paid.status, 200);
-  assert.equal(paid.body.data.topics.length, 1);
-  assert.equal(JSON.stringify(paid.body).includes('SECRET_DRAFT'), false);
+  assert.equal(paid.body.data.topics.length, 2);
+  assert.ok(paid.body.data.topics.every(topic => topic.published));
+  assert.ok(openLibrary(f.row().data).topics.every(topic => topic.published));
   assert.equal(paid.headers['Cache-Control'], 'private, no-store');
   assert.equal((await f.request('admin')).body.data.topics.length, 2);
+});
+test('older saved records no longer remain stuck behind the former draft flag', async t => {
+  const f = fixture(t);
+  f.seed({ data: sealLibrary(content()), updated_at: '2026-11-01T00:00:00Z' });
+  const admin = await f.request('admin'), member = await f.request('paid');
+  assert.ok(admin.body.data.topics.every(topic => topic.published));
+  assert.equal(member.body.data.topics.length, 2);
+  assert.equal(f.writes.length, 0, 'reading legacy content does not mutate storage');
 });
 test('conflicting saves never overwrite changes and storage outages fail closed', async t => {
   const f = fixture(t);

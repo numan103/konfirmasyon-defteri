@@ -22,11 +22,12 @@ const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const errors = []; page.on('pageerror', e => errors.push(e.message));
-  let stored = { topics: [] }, writes = 0;
+  let stored = { topics: [] }, writes = 0, failSave = false;
   await page.route('**/api/edu-shared?kind=influencer-content', async route => {
     const req = route.request(), token = req.headers().authorization;
     if (req.method() === 'POST') {
       assert.equal(token, 'Bearer admin');
+      if (failSave) return route.fulfill({ status:503, json:{ ok:false, error:'storage_unavailable' } });
       stored = req.postDataJSON().data; writes++;
       return route.fulfill({ json: { ok: true, data: stored, revision: '2026-11-19T12:00:00Z' } });
     }
@@ -41,8 +42,10 @@ try {
   await mount('admin');
   await page.getByRole('heading', { name: 'İçerik Yönetim Paneli', exact: true }).waitFor();
   assert.equal(await page.getByRole('button', { name: 'Okuyucu önizlemesi', exact: true }).count(), 1, 'admin starts directly in editor mode');
-  await page.getByRole('button', { name: 'Viral Gönderi taslağı ekle', exact: true }).click();
-  assert.equal(await page.getByLabel('Alt başlık', { exact: true }).count(), 3);
+  await page.getByRole('button', { name: 'Viral Gönderi örneğini ekle', exact: true }).click();
+  assert.equal(await page.locator('.ic-section-open').count(), 3);
+  assert.equal(await page.locator('.ic-section').count(), 0, 'map does not show every editor at once');
+  await page.getByText('Konu adını / açıklamasını düzenle', { exact:true }).click();
   await page.getByLabel('Konu başlığı', { exact: true }).fill('Viral Gönderi Atölyesi');
   await page.getByLabel('Konu açıklaması', { exact: true }).fill('Örnekler ve uygulamalar');
   await page.getByRole('button', { name: '+ Alt başlık ekle', exact: true }).click();
@@ -78,19 +81,41 @@ try {
   page.once('dialog', d => d.accept('https://youtu.be/abcdefghijk'));
   await section.getByRole('button', { name: '+ Video', exact: true }).click();
   assert.equal(await page.locator('iframe').count(), 1);
-  await page.getByRole('checkbox').check();
+  assert.equal(await page.getByRole('checkbox').count(), 0, 'saving is publishing, no separate publish toggle');
+  failSave = true;
+  await page.getByRole('button', { name:'Değişiklikleri kaydet', exact:true }).click();
+  await page.getByRole('status').filter({ hasText:'İçerik yüklenemedi veya kaydedilemedi.' }).waitFor();
+  assert.equal(await page.locator('.ic-topic-node small').textContent(), '4 alt başlık · Kaydedilmedi', 'failed save does not pretend to publish');
+  failSave = false;
   await page.getByRole('button', { name: 'Değişiklikleri kaydet', exact: true }).click();
-  await page.getByRole('status').filter({ hasText: 'Kaydedildi.' }).waitFor();
+  await page.getByRole('status').filter({ hasText: 'Kaydedildi ve yayınlandı.' }).waitFor();
   assert.equal(writes, 1); assert.equal(stored.topics[0].published, true);
+  assert.equal(await page.locator('.ic-topic-node small').textContent(), '4 alt başlık · Yayında');
   assert.ok(stored.topics[0].sections.at(-1).blocks.some(b => b.type === 'image' && b.url.startsWith('data:image/webp')));
+  await page.getByRole('button', { name: '+ Konu ekle', exact:true }).click();
+  assert.equal(await page.getByRole('button', { name:'Konuyu sil: Yeni konu', exact:true }).count(), 1);
+  page.once('dialog', d => d.dismiss());
+  await page.getByRole('button', { name:'Konuyu sil: Yeni konu', exact:true }).click();
+  assert.equal(await page.locator('.ic-topic-node').count(), 2, 'cancel preserves the topic');
+  page.once('dialog', d => d.accept());
+  await page.getByRole('button', { name:'Konuyu sil: Yeni konu', exact:true }).click();
+  assert.equal(await page.locator('.ic-topic-node').count(), 1, 'topic deleted directly from its map node');
+  await page.getByRole('button', { name:'Değişiklikleri kaydet', exact:true }).click();
+  await page.getByRole('status').filter({ hasText:'Kaydedildi ve yayınlandı.' }).waitFor();
+  assert.equal(stored.topics.length, 1);
+  await page.locator('.ic-section-open').filter({ hasText:'Görsel ve video örnekleri' }).click();
   await page.getByRole('button', { name: 'Okuyucu önizlemesi', exact: true }).click();
   assert.equal(await page.locator('textarea').count(), 0);
   await mount('paid');
   await page.getByRole('heading', { name: 'Viral Gönderi Atölyesi', exact: true }).waitFor();
+  assert.equal(await page.locator('img').count(), 0, 'reader starts on topic map');
+  await page.locator('.ic-section-open').filter({ hasText:'Görsel ve video örnekleri' }).click();
   assert.equal(await page.locator('textarea,input').count(), 0);
   assert.equal(await page.getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 0);
   assert.equal(await page.locator('img').count(), 5);
   assert.equal(await page.getByRole('link', { name: 'Kaynak gönderiyi aç ↗' }).getAttribute('href'), 'https://x.com/example/status/123');
+  await page.getByRole('button', { name:'← Alt başlık haritasına dön', exact:true }).click();
+  assert.equal(await page.locator('.ic-section-open').count(), 4);
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   await mount('free');
@@ -148,5 +173,5 @@ try {
   assert.equal(await app.locator('#page-influencer > .inf-faq').isVisible(), true, 'new member still sees customer FAQ');
   assert.equal(await app.locator('#inf-content-library').isVisible(), false);
   await app.close();
-  console.log(JSON.stringify({ passed: true, adminEditor: true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, navAutoHide:true, navHoverReveal:true, navKeyboardReveal:true, navMobileReveal:true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
+  console.log(JSON.stringify({ passed: true, adminEditor: true, topicMap:true, sectionDrilldown:true, topicDelete:true, savePublishes:true, failedSavePreservesState:true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, navAutoHide:true, navHoverReveal:true, navKeyboardReveal:true, navMobileReveal:true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

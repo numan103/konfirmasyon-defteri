@@ -1,6 +1,7 @@
 import { mediaUrl } from './influencer-content-model.mjs';
 
 let root, context, data = { topics: [] }, revision = null, selected = '', editing = false, dirty = false, loading = false, saving = false, uploading = false, epoch = 0, owner = '';
+let activeSection = '';
 const el = (tag, text, cls) => { const n = document.createElement(tag); if (text) n.textContent = text; if (cls) n.className = cls; return n; };
 const uid = () => crypto.randomUUID();
 function message(text) { const n = root?.querySelector('[role="status"]'); if (n) n.textContent = text; }
@@ -32,7 +33,7 @@ async function api(body) {
     : 'İçerik yüklenemedi veya kaydedilemedi. Tekrar dene.');
   return j;
 }
-export function clear() { epoch++; data = { topics: [] }; owner = ''; dirty = false; editing = false; loading = false; saving = false; uploading = false; if (root) root.replaceChildren(); }
+export function clear() { epoch++; data = { topics: [] }; owner = ''; dirty = false; editing = false; loading = false; saving = false; uploading = false; activeSection = ''; if (root) root.replaceChildren(); }
 export function mount(node, ctx) {
   root = node; context = ctx;
   if (!ctx.unlocked || !ctx.userId) { clear(); return; }
@@ -58,12 +59,19 @@ async function save() {
   if (saving || uploading) return;
   saving = true; const seq = epoch; draw(); message('Kaydediliyor…');
   try {
-    const j = await api({ data, revision });
+    const published = { topics: data.topics.map(topic => ({ ...topic, published: true })) };
+    const j = await api({ data: published, revision });
     if (seq !== epoch) return;
-    data = j.data; revision = j.revision; dirty = false; saving = false; draw(); message('Kaydedildi.');
+    data = j.data; revision = j.revision; dirty = false; saving = false; draw(); message('Kaydedildi ve yayınlandı.');
   } catch (e) { if (seq === epoch) { saving = false; draw(); message(e.message); } }
 }
-function remove(list, value) { if (!confirm('Bu öğe kaldırılsın mı? Kaydettiğinde uygulanır.')) return; list.splice(list.indexOf(value), 1); change(); draw(); }
+function remove(list, value) {
+  if (!confirm('“' + (value.title || 'Bu öğe') + '” silinsin mi? Kaydettiğinde uygulanır.')) return;
+  list.splice(list.indexOf(value), 1);
+  if (selected === value.id) { selected = data.topics[0]?.id || ''; activeSection = ''; }
+  if (activeSection === value.id) activeSection = '';
+  change(); draw();
+}
 function order(parent, list, item) {
   const i = list.indexOf(item);
   for (const [label, delta] of [['↑', -1], ['↓', 1]]) {
@@ -78,7 +86,7 @@ function sample() {
     { id: uid(), title: '2. Kendi yorumunu kat', blocks: [{ id: uid(), type: 'text', body: 'Metni birebir kopyalamak yerine fikri kendi kitlene uyarla. Yeni bir örnek, farklı bir bakış açısı veya güncel veri ekle. Kaynak kullanıyorsan belirt; başkasının görselini izin olmadan yeniden yayımlama.' }] },
     { id: uid(), title: '3. Örnekler ve uygulama', blocks: [{ id: uid(), type: 'text', body: 'Buraya kaynak gönderiyi, kendi uyarlamanı ve aralarındaki farkları ekle. Örnek ekran görüntülerini ve anlatım videosunu bu başlığın altında paylaşabilirsin. Benzer bir formatın tutması, yeni gönderinin de viral olacağını garanti etmez.' }] },
   ] };
-  data.topics.push(t); selected = t.id; editing = true; change(); draw();
+  data.topics.push(t); selected = t.id; activeSection = ''; editing = true; change(); draw();
 }
 async function imageFile(file) {
   if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 12000000) throw new Error('En fazla 12 MB JPG, PNG veya WebP seç.');
@@ -165,44 +173,73 @@ function media(parent, b) {
 function draw() {
   if (!root || !owner) return;
   root.className = 'ic-library' + (editing ? ' ic-edit' : ''); root.replaceChildren();
-  root.append(el('h2', context.admin ? 'İçerik Yönetim Paneli' : 'İçerik Kütüphanesi'), el('p', context.admin ? 'Konuları oluştur, alt başlıkları düzenle; açıklama, fotoğraf, video ve gönderi örneklerini buradan yükle.' : 'Fikirden uygulamaya: konu anlatımları, örnekler ve videolar.', 'ic-muted'));
+  root.append(el('h2', context.admin ? 'İçerik Yönetim Paneli' : 'İçerik Kütüphanesi'), el('p', 'Konu kartını seç → alt başlığa gir → içeriği aç.' + (context.admin ? ' Kaydettiğin içerik otomatik yayınlanır.' : ''), 'ic-muted'));
   if (context.admin) {
     const guide = el('div', '', 'ic-guide');
     for (const [title, text] of [
-      ['01 · Konu oluştur', '“+ Konu ekle” ile başla. Örneğin: Viral Gönderi, İçerik Fikirleri veya Profil Düzeni.'],
-      ['02 · Alt başlıkları doldur', 'Açıklama ve gönderi örnekleri yaz. Fotoğraf alanına tıkla, Ctrl+V yap; videoyu YouTube / MP4 bağlantısıyla ekle.'],
-      ['03 · Kontrol et ve yayınla', 'Okuyucu önizlemesinden kontrol et. “Yayında” seçimini aç ve değişiklikleri kaydet. Taslakları yalnızca sen görürsün.'],
+      ['01 · Konuyu seç', 'Haritadaki konu kartından ilerle. Konuların yanındaki çöp kutusuyla sil.'],
+      ['02 · Alt başlığı aç', 'Bir alt başlık kartına tıkla. Yalnızca o başlığın metinleri, fotoğrafları, videoları ve gönderileri açılır.'],
+      ['03 · Kaydet ve bitir', 'Ayrı yayınlama adımı yok. Kaydettiğinde içerikler onaylı Influencer üyelerine açılır.'],
     ]) { const card = el('div'); card.append(el('strong', title), el('p', text)); guide.append(card); }
-    root.append(guide);
+    const help = el('details', '', 'ic-help'); help.append(el('summary', 'Nasıl kullanılır?'), guide); root.append(help);
     const count = data.topics.reduce((n, t) => n + t.sections.length, 0);
     root.append(el('p', data.topics.length + ' konu · ' + count + ' alt başlık · ' + data.topics.filter(t => t.published).length + ' yayında', 'ic-muted'));
   }
   const toolbar = el('div', '', 'ic-toolbar'); root.append(toolbar);
   if (context.admin) {
     button(toolbar, editing ? 'Okuyucu önizlemesi' : 'İçerikleri düzenle', () => { editing = !editing; draw(); });
-    button(toolbar, '+ Konu ekle', () => { const t = { id: uid(), title: 'Yeni konu', description: '', published: false, sections: [{ id: uid(), title: 'İlk alt başlık', blocks: [] }] }; data.topics.push(t); selected = t.id; editing = true; change(); draw(); });
-    button(toolbar, 'Viral Gönderi taslağı ekle', sample);
+    button(toolbar, '+ Konu ekle', () => { const t = { id: uid(), title: 'Yeni konu', description: '', published: false, sections: [{ id: uid(), title: 'İlk alt başlık', blocks: [] }] }; data.topics.push(t); selected = t.id; activeSection = ''; editing = true; change(); draw(); });
+    button(toolbar, 'Viral Gönderi örneğini ekle', sample);
     button(toolbar, dirty ? 'Değişiklikleri kaydet' : 'Kaydet', save, 'ic-primary');
     button(toolbar, 'Yeniden yükle', () => { if (!dirty || confirm('Kaydedilmemiş değişiklikler kaybolacak. Devam edilsin mi?')) void load(); });
   }
-  const status = el('p', dirty ? 'Kaydedilmemiş değişiklikler var.' : ''); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); root.append(status);
-  if (!data.topics.length) { root.append(el('p', context.admin ? 'İlk konunu ekle veya Viral Gönderi taslağıyla başla.' : 'İçerikler hazırlanıyor.', 'ic-empty')); return; }
-  const layout = el('div', '', 'ic-layout'), nav = el('nav', '', 'ic-nav'), article = el('article', '', 'ic-topic');
+  const status = el('p', dirty ? 'Kaydedilmemiş değişiklikler var.' : context.admin && data.topics.length ? data.topics.every(t => t.published) ? 'Kaydedilen konular yayında. Değişikliklerden sonra tekrar kaydet.' : 'Kaydettiğinde tüm konular yayınlanır.' : ''); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); root.append(status);
+  if (!data.topics.length) { root.append(el('p', context.admin ? 'İlk konunu ekle veya Viral Gönderi örneğiyle başla.' : 'İçerikler hazırlanıyor.', 'ic-empty')); return; }
+  const layout = el('div', '', 'ic-layout ic-map-layout'), nav = el('nav', '', 'ic-nav ic-topic-map'), article = el('article', '', 'ic-topic ic-map-detail');
   nav.setAttribute('aria-label', 'İçerik konuları'); layout.append(nav, article); root.append(layout);
   data.topics.forEach((t, i) => {
-    const b = button(nav, String(i + 1).padStart(2, '0') + ' · ' + t.title + (context.admin && !t.published ? ' · Taslak' : ''), () => { selected = t.id; draw(); });
+    const node = el('div', '', 'ic-topic-node'); nav.append(node);
+    const b = button(node, String(i + 1).padStart(2, '0') + ' · ' + t.title, () => { selected = t.id; activeSection = ''; draw(); }, 'ic-topic-open');
     b.setAttribute('aria-current', String(t.id === selected));
+    node.append(el('small', t.sections.length + ' alt başlık' + (context.admin ? t.published ? ' · Yayında' : ' · Kaydedilmedi' : ''), 'ic-muted'));
+    if (context.admin && editing) {
+      const del = button(node, '🗑', () => remove(data.topics, t), 'ic-topic-delete');
+      del.setAttribute('aria-label', 'Konuyu sil: ' + t.title); del.title = 'Konuyu sil';
+    }
   });
   const t = data.topics.find(t => t.id === selected) || data.topics[0];
-  if (editing && context.admin) {
-    field(article, 'Konu başlığı', t.title, v => t.title = v);
-    field(article, 'Konu açıklaması', t.description, v => t.description = v, true);
-    const label = el('label', '', 'ic-check'), check = el('input'); check.type = 'checkbox'; check.checked = t.published; check.disabled = saving || uploading;
-    check.onchange = () => { t.published = check.checked; change(); }; label.append(check, document.createTextNode('Yayında · onaylı Influencer üyeleri okuyabilir')); article.append(label);
-    const tools = el('div', '', 'ic-toolbar'); order(tools, data.topics, t); article.append(tools);
-  } else article.append(el('h3', t.title), el('p', t.description));
+  if (!t.sections.some(s => s.id === activeSection)) activeSection = '';
+  const path = el('div', '', 'ic-toolbar ic-breadcrumb');
+  button(path, '⌘ ' + t.title, () => { activeSection = ''; draw(); });
+  if (activeSection) path.append(el('span', '→ ' + t.sections.find(s => s.id === activeSection).title));
+  article.append(path);
+  if (!activeSection) {
+    article.append(el('h3', t.title), el('p', t.description));
+    if (editing && context.admin) {
+      const settings = el('details', '', 'ic-topic-settings'); settings.append(el('summary', 'Konu adını / açıklamasını düzenle'));
+      field(settings, 'Konu başlığı', t.title, v => t.title = v);
+      field(settings, 'Konu açıklaması', t.description, v => t.description = v, true);
+      const tools = el('div', '', 'ic-toolbar'); order(tools, data.topics, t); settings.append(tools); article.append(settings);
+    }
+    const map = el('div', '', 'ic-branch-map'); map.setAttribute('aria-label', t.title + ' alt başlık haritası');
+    map.append(el('div', t.title, 'ic-map-root'));
+    const branches = el('div', '', 'ic-map-branches'); map.append(branches);
+    t.sections.forEach((s, i) => {
+      const branch = el('div', '', 'ic-map-branch');
+      const b = button(branch, String(i + 1).padStart(2, '0') + ' · ' + s.title, () => {
+        activeSection = s.id; draw();
+        root.querySelector('.ic-section')?.scrollIntoView({ block:'nearest', behavior:'instant' });
+        root.querySelector('.ic-section')?.focus({ preventScroll:true });
+      }, 'ic-section-open');
+      b.append(el('small', s.blocks.length + ' içerik · Aç →'));
+      branches.append(branch);
+    });
+    if (!t.sections.length) branches.append(el('p', 'Bu konuya ilk alt başlığını ekle.', 'ic-muted'));
+    article.append(map);
+  } else button(article, '← Alt başlık haritasına dön', () => { activeSection = ''; draw(); });
   for (const s of t.sections) {
-    const section = el('section', '', 'ic-section'); article.append(section);
+    if (s.id !== activeSection) continue;
+    const section = el('section', '', 'ic-section'); section.tabIndex = -1; section.setAttribute('aria-label', s.title); article.append(section);
     if (editing && context.admin) { field(section, 'Alt başlık', s.title, v => s.title = v); const tools = el('div', '', 'ic-toolbar'); order(tools, t.sections, s); section.append(tools); }
     else section.append(el('h3', s.title));
     for (const b of s.blocks) {
@@ -235,6 +272,6 @@ function draw() {
       imageZone(section, s);
     }
   }
-  if (editing && context.admin) button(article, '+ Alt başlık ekle', () => { t.sections.push({ id: uid(), title: 'Yeni alt başlık', blocks: [] }); change(); draw(); });
+  if (editing && context.admin) button(article, '+ Alt başlık ekle', () => { const s = { id: uid(), title: 'Yeni alt başlık', blocks: [] }; t.sections.push(s); activeSection = s.id; change(); draw(); });
 }
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });

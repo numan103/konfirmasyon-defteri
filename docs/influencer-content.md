@@ -3,8 +3,15 @@
 - Mevcut Influencer tam erişim alanında gösterilir.
 - Admin konu, açıklama ve alt başlık ekler. Her alt başlıkta sıralanabilir metin,
   görsel ve video blokları bulunur. Konular ve alt başlıklar da sıralanabilir.
-- “Viral Gönderi taslağı ekle” örneği yalnızca editörde bir taslak oluşturur;
-  kaydetmeden sunucuya yazılmaz, “Yayında” seçilmeden üyelere açılmaz.
+- Konu haritasında bağlı kartlarla ilerlenir: konu → alt başlık → o alt başlığın
+  içerik editörü/okuyucusu. Tüm alt başlık formları aynı anda açılmaz.
+- Konu kartının yanında onay isteyen silme tuşu vardır; silme kaydedilince uygulanır.
+- “Viral Gönderi örneğini ekle” örneği yalnızca editörde içerik oluşturur.
+  Kaydetmeden sunucuya yazılmaz. **Kaydet = yayınla**: başarılı kayıtta tüm
+  mevcut konular `published=true` olarak kaydedilir. Ayrı yayınlama kutusu yoktur.
+  Sunucu da kayıtları yayınlanmış olarak saklar. Önceki sürümde kaydedilip eski
+  taslak bayrağı taşıyan konular da okuma sırasında yayınlanmış kabul edilir;
+  bunun için arka planda veri tabanı değişikliği yapılmaz.
 - Görseller JPG/PNG/WebP olarak cihazdan yüklenir ve tarayıcıda küçültülür
   (1400 px, tek görsel en fazla 500 KB data URL). Alternatif: HTTPS görsel adresi.
   Tüm kaydetme isteği en fazla 3 MB. Çok sayıda görsel için URL kullanın.
@@ -20,7 +27,8 @@
 - Gönderi örneği bloğunda metin ve isteğe bağlı HTTPS kaynak bağlantısı eklenir;
   üçüncü taraf gönderi iframe'i veya script'i çalıştırılmaz.
 - Okuma: admin veya `influencer_orders.status=approved` olan kullanıcı.
-  Site premium üyeliği tek başına yetmez. Taslaklar yalnızca admin'e döner.
+  Site premium üyeliği tek başına yetmez. Henüz kaydedilmeyen değişiklikler
+  yalnızca admin'in o tarayıcı oturumunda bulunur; üyeye gönderilmez.
 - Yazma: gerçek admin JWT'si zorunludur; tarayıcıdaki admin bayrağı yetki sağlamaz.
 - Depolama: mevcut `edu_shared` tablosunda `influencer_content_v1`.
   AES-256-GCM ile şifreli saklanır; genel tablo okuması içerik metnini açığa çıkarmaz.
