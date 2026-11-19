@@ -19,6 +19,7 @@
 <meta name="twitter:title" content="Alfa Traders — Eğitim, Analiz ve Topluluk">
 <meta name="twitter:description" content="Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.">
 <meta name="twitter:image" content="https://alfa-trader.com/alfa-traders-share-v2.png">
+<link rel="stylesheet" href="/assets/influencer-content.css">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7993,6 +7994,7 @@
     </section>
 
     <div id="inf-full" class="hidden">
+      <section id="inf-content-library" aria-label="Alfa Influencer içerik kütüphanesi"></section>
     <p class="inf-locked-note" data-i18n="pg.influencer.unlockedNote">Tam erişim açık — aşağıdaki çalışma alanı paketine özel.</p>
     <div class="inf-grid">
       <div>
@@ -12831,6 +12833,22 @@ function infLoadRealPosts() {
 }
 
 function renderInfluencer(skipLoad = false) {
+  import('/assets/influencer-content.mjs').then(module => {
+    const node = document.getElementById('inf-content-library');
+    if (!node) return;
+    module.mount(node, {
+      unlocked: infUnlocked(), admin: siteIsAdmin(),
+      userId: typeof AUTH !== 'undefined' && AUTH.user ? AUTH.user.id : '',
+      getToken: async () => {
+        if (typeof AUTH === 'undefined' || !AUTH.user || !AUTH.client) return '';
+        const session = await AUTH.client.auth.getSession();
+        return session.data?.session?.access_token || '';
+      }
+    });
+  }).catch(() => {
+    const node = document.getElementById('inf-content-library');
+    if (node) node.textContent = 'İçerik kütüphanesi yüklenemedi. Sayfayı yenileyebilirsin.';
+  });
   infLoadRealPosts();
   const teaser = document.getElementById('inf-teaser'), full = document.getElementById('inf-full');
   const unlocked = infUnlocked();
@@ -14358,6 +14376,7 @@ function applyTierUi() {
     if (currentPage === 'egitim') refreshEduFeedback();
   }
   infAccess = false;
+  import('/assets/influencer-content.mjs').then(module => module.clear()).catch(() => {});
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();

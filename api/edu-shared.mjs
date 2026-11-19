@@ -10,6 +10,7 @@ import landing from '../lib/landing.mjs';
 import podcast from '../lib/podcast.mjs';
 import youtubeLatest from '../lib/youtube-latest.mjs';
 import eduFeedback from '../lib/edu-feedback.mjs';
+import influencerContent from '../lib/influencer-content.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -199,6 +200,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.query?.kind === 'feedback') return eduFeedback(req, res);
+  if (req.query?.kind === 'influencer-content') return influencerContent(req, res);
   if (req.query?.kind === 'portfolio') return portfolio(req, res);
   if (req.query?.kind === 'landing') return landing(req, res);
   if (req.query?.kind === 'podcast') return podcast(req, res);
