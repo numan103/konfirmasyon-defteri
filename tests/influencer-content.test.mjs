@@ -62,6 +62,15 @@ test('media rejects scripts, unsafe embeds, credentials and SVG data', () => {
     assert.equal(fn('https://youtu.be/abcdefghijk', 'video'), 'https://youtu.be/abcdefghijk');
   }
 });
+test('post examples preserve text and optional safe source links', () => {
+  const library = content();
+  library.topics[0].sections[0].blocks.push({ id: 'post', type: 'post', body: 'Kendi gönderim', url: 'https://x.com/example/status/123' });
+  const post = cleanLibrary(library).topics[0].sections[0].blocks.at(-1);
+  assert.equal(post.body, 'Kendi gönderim');
+  assert.equal(post.url, 'https://x.com/example/status/123');
+  library.topics[0].sections[0].blocks.at(-1).url = 'javascript:alert(1)';
+  assert.throws(() => cleanLibrary(library), /invalid_media/);
+});
 test('content is encrypted at rest with integrity protection', t => {
   fixture(t); const sealed = sealLibrary(content());
   assert.equal(JSON.stringify(sealed).includes('PRIVATE_CONTENT'), false);

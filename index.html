@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="Alfa Traders — Eğitim, Analiz ve Topluluk">
 <meta name="twitter:description" content="Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.">
 <meta name="twitter:image" content="https://alfa-trader.com/alfa-traders-share-v2.png">
-<link rel="stylesheet" href="/assets/influencer-content.css">
+<link rel="stylesheet" href="/assets/influencer-content.css?v=2">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7986,11 +7986,15 @@
       <details><summary data-i18n="pg.influencer.faq.q6">Başlamadan önce neyi netleştirmeliyim?</summary><p data-i18n="pg.influencer.faq.a6">Sayfadaki sabit USDT tutarı ödenecek tutardır; TL karşılığı bilgilendirme amaçlıdır. Görüşme tarihleri ve iptal/iade koşulları için @traderahmetd üzerinden bana ulaşabilirsin.</p></details>
     </section>
     <section id="inf-admin" class="inf-card hidden">
-      <h2 data-i18n="pg.influencer.admin.h">Yalnızca sen: eğitim konu taslağı ve ödeme onayları</h2>
+      <details>
+      <summary>Üye erişimleri ve ödeme yönetimi</summary>
+      <details><summary>Eski eğitim konu notları</summary>
       <div id="inf-outline"></div>
+      </details>
       <h3 class="inf-sub" data-i18n="pg.influencer.admin.orders">Ödeme bildirimleri</h3>
       <button type="button" class="btn" id="inf-refresh-orders" data-i18n="pg.influencer.refresh">Yenile</button>
       <div id="inf-orders" role="status"></div>
+      </details>
     </section>
 
     <div id="inf-full" class="hidden">
@@ -12833,7 +12837,8 @@ function infLoadRealPosts() {
 }
 
 function renderInfluencer(skipLoad = false) {
-  import('/assets/influencer-content.mjs').then(module => {
+  document.getElementById('page-influencer')?.classList.toggle('inf-admin-editor', siteIsAdmin());
+  import('/assets/influencer-content.mjs?v=2').then(module => {
     const node = document.getElementById('inf-content-library');
     if (!node) return;
     module.mount(node, {
@@ -14376,7 +14381,7 @@ function applyTierUi() {
     if (currentPage === 'egitim') refreshEduFeedback();
   }
   infAccess = false;
-  import('/assets/influencer-content.mjs').then(module => module.clear()).catch(() => {});
+  import('/assets/influencer-content.mjs?v=2').then(module => module.clear()).catch(() => {});
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();

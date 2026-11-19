@@ -39,6 +39,8 @@ try {
     }, role);
   }
   await mount('admin');
+  await page.getByRole('heading', { name: 'İçerik Yönetim Paneli', exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Okuyucu önizlemesi', exact: true }).count(), 1, 'admin starts directly in editor mode');
   await page.getByRole('button', { name: 'Viral Gönderi taslağı ekle', exact: true }).click();
   assert.equal(await page.getByLabel('Alt başlık', { exact: true }).count(), 3);
   await page.getByLabel('Konu başlığı', { exact: true }).fill('Viral Gönderi Atölyesi');
@@ -46,8 +48,33 @@ try {
   await page.getByRole('button', { name: '+ Alt başlık ekle', exact: true }).click();
   await page.getByLabel('Alt başlık', { exact: true }).last().fill('Görsel ve video örnekleri');
   const section = page.locator('.ic-section').last();
-  await section.locator('input[type=file]').setInputFiles(path.join(root, 'assets/alfa-influencer-writing.jpg'));
-  await page.waitForSelector('.ic-block img');
+  await section.locator('input[type=file]').setInputFiles([
+    path.join(root, 'assets/alfa-influencer-writing.jpg'), path.join(root, 'assets/alfa-influencer-network.jpg'),
+  ]);
+  await page.waitForFunction(() => document.querySelectorAll('.ic-block img').length === 2);
+  await browser.contexts()[0].grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.evaluate(async () => {
+    const image = await createImageBitmap(await (await fetch('/assets/alfa-influencer-writing.jpg')).blob());
+    const canvas = document.createElement('canvas'); canvas.width = 120; canvas.height = 80;
+    canvas.getContext('2d').drawImage(image, 0, 0, 120, 80); image.close();
+    const png = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+  });
+  await section.locator('.ic-image-zone').click({ position: { x: 12, y: 12 } });
+  await page.keyboard.press('Control+v');
+  await page.waitForFunction(() => document.querySelectorAll('.ic-block img').length === 3);
+  assert.equal(await section.locator('.ic-image-zone').evaluate(n => n === document.activeElement), true, 'paste area stays focused for repeated pastes');
+  await section.locator('.ic-image-zone').evaluate(async zone => {
+    const bytes = await (await fetch('/assets/alfa-influencer-network.jpg')).arrayBuffer();
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([bytes], 'one.jpg', { type: 'image/jpeg' }));
+    transfer.items.add(new File([bytes], 'two.jpg', { type: 'image/jpeg' }));
+    zone.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: transfer }));
+  });
+  await page.waitForFunction(() => document.querySelectorAll('.ic-block img').length === 5);
+  await section.getByRole('button', { name: '+ Gönderi örneği', exact: true }).click();
+  await page.getByLabel('Gönderi metni / örneği', { exact: true }).fill('Kendi yorumumla yeniden yazdığım gönderi.');
+  await page.getByLabel('Kaynak gönderi bağlantısı (isteğe bağlı)', { exact: true }).fill('https://x.com/example/status/123');
   page.once('dialog', d => d.accept('https://youtu.be/abcdefghijk'));
   await section.getByRole('button', { name: '+ Video', exact: true }).click();
   assert.equal(await page.locator('iframe').count(), 1);
@@ -62,7 +89,8 @@ try {
   await page.getByRole('heading', { name: 'Viral Gönderi Atölyesi', exact: true }).waitFor();
   assert.equal(await page.locator('textarea,input').count(), 0);
   assert.equal(await page.getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 0);
-  assert.equal(await page.locator('img').count(), 1);
+  assert.equal(await page.locator('img').count(), 5);
+  assert.equal(await page.getByRole('link', { name: 'Kaynak gönderiyi aç ↗' }).getAttribute('href'), 'https://x.com/example/status/123');
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   await mount('free');
@@ -82,8 +110,18 @@ try {
     siteIsAdmin = () => true; SITE.admin = true;
     hideLanding(); showPage('influencer'); renderInfluencer(true);
   });
-  await app.locator('#inf-content-library').getByRole('heading', { name: 'İçerik Kütüphanesi' }).waitFor();
+  await app.locator('#inf-content-library').getByRole('heading', { name: 'İçerik Yönetim Paneli' }).waitFor();
   assert.equal(await app.locator('#inf-content-library').getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 1);
+  assert.equal(await app.locator('#inf-teaser').isVisible(), false, 'admin does not see marketing');
+  assert.equal(await app.locator('#inf-checks').isVisible(), false, 'admin does not see student checklist');
+  assert.equal(await app.locator('#inf-outline').isVisible(), false, 'legacy notes collapsed by default');
+  assert.equal(await app.getByRole('heading', { name: 'İçerik Yönetim Paneli', exact: true }).isVisible(), true);
+  await app.evaluate(() => {
+    siteIsAdmin = () => false; SITE.admin = false; infAccess = false;
+    AUTH.user = { id: 'new-member-fixture' }; renderInfluencer(true);
+  });
+  assert.equal(await app.locator('#inf-teaser').isVisible(), true, 'new member still sees introduction');
+  assert.equal(await app.locator('#inf-content-library').isVisible(), false);
   await app.close();
-  console.log(JSON.stringify({ passed: true, adminEditor: true, topicsAndSubheadings: true, imageUpload: true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
+  console.log(JSON.stringify({ passed: true, adminEditor: true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

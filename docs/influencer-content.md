@@ -9,6 +9,16 @@
   (1400 px, tek görsel en fazla 500 KB data URL). Alternatif: HTTPS görsel adresi.
   Tüm kaydetme isteği en fazla 3 MB. Çok sayıda görsel için URL kullanın.
 - Videolar YouTube veya HTTPS MP4 bağlantısıyla eklenir; video dosyası yükleme yoktur.
+- Admin sayfası doğrudan editörle açılır; tanıtım yalnızca erişimi olmayan yeni
+  kullanıcılara gösterilir. Üye/ödeme yönetimi editörün altında kapalı bir bölümdür.
+- Her alt başlıkta odaklanabilir fotoğraf alanı vardır: tıkla + Ctrl+V,
+  çoklu dosya seçimi ve sürükle-bırak aynı yükleme hattını kullanır.
+  Metin alanına yapıştırma normal metin işlemi olarak kalır.
+- Çoklu fotoğraflar küçültülürken kaydetme ve düzenleme geçici durdurulur.
+  Desteklenmeyen dosyalar bildirilir; kabul edilen fotoğraflar korunur.
+  Toplam içerik boyutu önceden kontrol edilir, kayıt sınırına ulaşınca uyarılır.
+- Gönderi örneği bloğunda metin ve isteğe bağlı HTTPS kaynak bağlantısı eklenir;
+  üçüncü taraf gönderi iframe'i veya script'i çalıştırılmaz.
 - Okuma: admin veya `influencer_orders.status=approved` olan kullanıcı.
   Site premium üyeliği tek başına yetmez. Taslaklar yalnızca admin'e döner.
 - Yazma: gerçek admin JWT'si zorunludur; tarayıcıdaki admin bayrağı yetki sağlamaz.
