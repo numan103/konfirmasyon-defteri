@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow"><stop stop-color="#6251d7" stop-opacity=".38"/><stop offset="1" stop-color="#0b0e19" stop-opacity="0"/></radialGradient>
+    <linearGradient id="accent"><stop stop-color="#a9a0ff"/><stop offset="1" stop-color="#6f86ff"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0b0e19"/>
+  <ellipse cx="1090" cy="60" rx="600" ry="550" fill="url(#glow)"/>
+  <rect x="32" y="32" width="1136" height="566" rx="24" fill="none" stroke="#ffffff" stroke-opacity=".1"/>
+  <rect x="76" y="78" width="12" height="30" rx="6" fill="#a69aff"/>
+  <text x="104" y="103" font-family="Segoe UI, Arial" font-size="24" font-weight="700" letter-spacing="5" fill="#e9e6ff">ALFA TRADERS</text>
+  <text x="76" y="242" font-family="Segoe UI, Arial" font-size="68" font-weight="700" fill="#f6f6fc">Piyasayı birlikte</text>
+  <text x="76" y="327" font-family="Segoe UI, Arial" font-size="76" font-weight="700" fill="url(#accent)">daha iyi oku.</text>
+  <text x="80" y="396" font-family="Segoe UI, Arial" font-size="26" fill="#aeb5ca">Eğitim, piyasa analizleri ve trader topluluğu.</text>
+  <g font-family="Segoe UI, Arial" font-size="18" font-weight="600" fill="#dedaf9">
+    <rect x="80" y="442" width="132" height="42" rx="21" fill="#9b8dff" fill-opacity=".12" stroke="#9b8dff" stroke-opacity=".25"/>
+    <text x="106" y="470">Alfa Edu</text>
+    <rect x="224" y="442" width="150" height="42" rx="21" fill="#9b8dff" fill-opacity=".12" stroke="#9b8dff" stroke-opacity=".25"/>
+    <text x="250" y="470">Alfa Dergi</text>
+    <rect x="386" y="442" width="172" height="42" rx="21" fill="#9b8dff" fill-opacity=".12" stroke="#9b8dff" stroke-opacity=".25"/>
+    <text x="412" y="470">Mentorluk</text>
+  </g>
+  <path d="M80 529H1120" stroke="#ffffff" stroke-opacity=".12"/>
+  <text x="80" y="565" font-family="Segoe UI, Arial" font-size="18" fill="#9da5bd">EĞİTİM · ANALİZ · TOPLULUK</text>
+  <text x="1120" y="565" text-anchor="end" font-family="Segoe UI, Arial" font-size="20" font-weight="600" fill="#c5bfff">alfa-trader.com</text>
+</svg>
