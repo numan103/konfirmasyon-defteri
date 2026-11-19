@@ -45,6 +45,23 @@ test('Alfa Dergi sits directly under the home video and has a weekly reading sec
   assert.ok(!/\['data', 'karne', 'news'/.test(tierUi), 'magazine card must not be hidden for non-admin');
 });
 
+test('home embeds a horizontal, read-only weekly reader reachable by every member', () => {
+  const home = html.slice(html.indexOf('id="home-member-video"'), html.indexOf('id="home-diary-link"'));
+  assert.match(home, /id="home-mag-reader"/);
+  assert.match(home, /Okuyucu Modu/);
+  assert.match(home, /id="hmr-rail"/);
+  assert.match(home, /id="hmr-prev"/);
+  assert.match(home, /id="hmr-next"/);
+  assert.match(home, /id="hmr-dots"/);
+  assert.ok(!home.includes('mag-tools'), 'embedded reader never shows editor tools');
+  assert.match(html, /\.hmr-rail \{[^}]*overflow-x:auto[^}]*scroll-snap-type:x mandatory/s);
+  assert.match(html, /async function loadHomeMagazine\(\)/);
+  assert.match(html, /function renderHomeMagazine\(\)/);
+  assert.match(html, /function bindHomeMagazine\(\)/);
+  assert.match(html, /if \(name === 'home'\).*loadHomeMagazine\(\)/);
+  assert.match(html, /Tam dergiyi aç/);
+});
+
 test('news read endpoint is a public, read-only projection without personal data', () => {
   assert.match(api, /kind === 'news'.*res\.status\(200\)/s);
   assert.match(api, /function alfaNews\(req, res\)/);

@@ -42,6 +42,37 @@ async function session(label, access) {
     const videoTop = await page.locator('#home-member-video').evaluate(n => n.getBoundingClientRect().top).catch(() => -1);
     const cardTop = await card.evaluate(n => n.getBoundingClientRect().top);
     assert.ok(cardTop >= videoTop, label + ' card is below the video');
+
+    const reader = page.locator('#home-mag-reader');
+    assert.equal(await reader.isVisible(), true, label + ' embedded reader visible');
+    const rail = page.locator('#hmr-rail');
+    await rail.locator('.hmr-card').first().waitFor();
+    const embedded = await page.evaluate(() => {
+      const r = document.getElementById('hmr-rail');
+      return {
+        cards: r.querySelectorAll('.hmr-card').length,
+        titles: [...r.querySelectorAll('.hmr-title')].map(n => n.textContent),
+        copy: r.querySelector('.hmr-copy')?.textContent || '',
+        week: document.getElementById('hmr-week')?.textContent || '',
+        dots: document.querySelectorAll('#hmr-dots .hmr-dot').length,
+        scrollable: r.scrollWidth > r.clientWidth,
+        tools: !!document.querySelector('#home-mag-reader #mag-tools'),
+        readerLabel: document.getElementById('home-mag-reader')?.getAttribute('aria-label') || '',
+      };
+    });
+    assert.ok(embedded.cards >= 1, label + ' embedded cards');
+    assert.ok(embedded.titles.every(t => t && t.trim()), label + ' embedded titles');
+    assert.ok(embedded.copy.trim(), label + ' embedded copy');
+    assert.match(embedded.week, /^Haftalık · /, label + ' embedded week label');
+    assert.equal(embedded.dots, embedded.cards, label + ' reader dots');
+    assert.ok(embedded.scrollable, label + ' rail scrolls horizontally');
+    assert.equal(embedded.tools, false, label + ' embedded reader is read-only');
+    assert.match(embedded.readerLabel, /okuyucu/i, label + ' reader mode label');
+    const beforeScroll = await rail.evaluate(n => n.scrollLeft);
+    await page.locator('#hmr-next').click();
+    await page.waitForFunction(prev => document.getElementById('hmr-rail').scrollLeft > prev, beforeScroll);
+    assert.equal(await page.locator('#hmr-dots .hmr-dot.on').count(), 1, label + ' one active dot');
+
     await card.click();
     await page.waitForFunction(() => document.body.dataset.page === 'news');
 

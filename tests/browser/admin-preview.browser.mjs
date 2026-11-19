@@ -33,7 +33,7 @@ try {
     if (url.pathname === '/api/edu-shared' && q.get('kind') === 'landing')
       return route.fulfill({json:{ok:true,channel:{trades:{latest:[{id:'channel-1',date:new Date().toISOString(),title:'GOLD +2.3R sonuç',coin:'GOLD'}]},biases:{latest:[]}},status:{channel:'ok'}}});
     if (url.pathname === '/api/edu-shared' && q.get('kind') === 'news')
-      return route.fulfill({json:{ok:true,data:{issueNo:1,weekLabel:'1 Kasım',rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[{id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',images:[]}]}}});
+      return route.fulfill({json:{ok:true,data:{issueNo:1,weekLabel:'1 Kasım',rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[{id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',images:[]},{id:'n2',title:'Makro Analiz',body:'DXY ve altın tarafında risk iştahı zayıf.',type:'',relId:'',result:'',authorId:'a1',images:[]}]}}});
     if (url.pathname === '/api/edu-shared') return route.fulfill({json:{ok:true,data:null,episode:null,channels:{},status:{channel:'ok'},channel:{trades:{latest:[]},biases:{latest:[]}}}});
     return route.fulfill({json:{ok:true,rows:[],entries:[],applications:[]}});
   });
@@ -77,6 +77,9 @@ try {
   assert.equal(await preview.evaluate(() => siteCanOpen('alfacharts')),false);
   assert.equal(await preview.evaluate(() => siteCanOpen('news')),true);
   await preview.evaluate(() => showPage('home'));
+  await preview.locator('#home-mag-reader .hmr-card').first().waitFor();
+  assert.equal(await preview.locator('#mag-tools:visible').count(),0,'embedded home reader stays read-only in preview');
+  assert.equal(await preview.evaluate(() => { const r = document.getElementById('hmr-rail'); return r.scrollWidth > r.clientWidth; }),true,'preview weekly reader scrolls sideways');
   await preview.locator('#home-magazine-link').click();
   await preview.waitForFunction(() => document.body.dataset.page === 'news');
   await preview.locator('#news-weekly-list .nw-card').first().waitFor();
