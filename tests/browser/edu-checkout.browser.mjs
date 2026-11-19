@@ -30,6 +30,7 @@ try {
   assert.equal(await centered(), true, 'login dialog must be centered, not left-aligned');
   assert.equal(await dialog.locator('code').count(), 0, 'ask for login before exposing payment instructions');
   await dialog.getByRole('button', { name: 'Giriş yap / Ücretsiz kaydol' }).click();
+  assert.equal(await page.locator('dialog.edu-checkout').count(), 0, 'closed checkout is removed before the auth handoff');
   await page.evaluate(() => {
     document.getElementById('auth-gate').classList.remove('open');
     AUTH.user = { id: 'buyer', email: 'buyer@example.com' }; SITE.tier = 'free';

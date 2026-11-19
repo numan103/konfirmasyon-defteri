@@ -22,7 +22,9 @@ const errors = () => ({
   unauthorized: t('Oturumunu yenileyip tekrar dene.', 'Refresh your session and retry.'),
 });
 function open(plan, route) {
-  dialog?.close();
+  const previous = dialog;
+  previous?.close();
+  previous?.remove();
   const current = user();
   const node = el('dialog', undefined, 'edu-application edu-checkout'); dialog = node; owner = current?.id || '';
   node.setAttribute('aria-label', t('Eğitim katılımı', 'Training enrollment'));
@@ -48,7 +50,9 @@ function open(plan, route) {
     const art = el('img'); art.src = '/assets/edu-execution.jpg'; art.alt = t('Temsili eğitim ve grafik çalışması', 'Illustrative training and chart study'); art.className = 'edu-checkout-login-art';
     scroll.append(art, el('h3', t('Önce hesabına giriş yap', 'Sign in first')), el('p', t('Katılmak ve başvurunu takip etmek için. Henüz ödeme yapma.', 'To enroll and track your application. Do not pay yet.')),
       button(t('Giriş yap / Ücretsiz kaydol', 'Sign in / Register free'), () => {
-        node.close(); document.getElementById('auth-gate')?.classList.add('open');
+        node.close(); node.remove();
+        if (dialog === node) dialog = null;
+        document.getElementById('auth-gate')?.classList.add('open');
       }, 'btn solid'));
     document.body.appendChild(node); node.showModal(); return;
   }

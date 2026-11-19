@@ -27,6 +27,9 @@ göremiyordu. Artık doğrulama için ayrı bir ekran açılır, adres gösteril
 - Gerçek hesap/kayıt e-postası oluşturulmadı. SMTP teslimatı, spam klasörüne
   düşme veya redirect allowlist'in tamamı bu testlerle doğrulanmış sayılmaz.
 - AUTH/SITE, Supabase ayarları, RLS ve ödeme/onay kuralları değiştirilmedi.
+- Eğitim katılımından girişe geçerken kapanmış dialog eşzamanlı kaldırılır.
+  Yeniden açılan ödeme penceresiyle eski düğümün kısa süre birlikte kalması
+  önlenir. Tutarlar, cüzdan ve manuel onay mantığı değişmez.
 
 ## Kişisel “Yaptım” ve hatırlatma
 
