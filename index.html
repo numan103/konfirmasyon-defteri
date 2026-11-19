@@ -33,6 +33,8 @@
 <link rel="stylesheet" href="/assets/education-crm.css?v=1">
 <script type="module" src="/assets/education-crm.mjs?v=1"></script>
 <script type="module" src="/assets/edu-application.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/mentorship-trades.css?v=1">
+<script type="module" src="/assets/mentorship-trades.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
@@ -14169,6 +14171,7 @@ function applyTierUi() {
   infAccess = false;
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
+  if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();
 
   const isAdmin = siteIsAdmin();
   const ref = refUnlocked();

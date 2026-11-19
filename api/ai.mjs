@@ -23,6 +23,7 @@ import telegramWebhookHandler from '../lib/telegram-webhook.mjs';
 import coinalyzeHandler from '../lib/coinalyze.mjs';
 import marketNewsHandler from '../lib/market-news.mjs';
 import economicCalendarHandler, { mentorshipDailyNewsHandler } from '../lib/economic-calendar.mjs';
+import mentorTradesHandler from '../lib/mentorship-trades.mjs';
 
 const AYNA_ACTIONS = { ping, scribe, reflect, coach, 'journal-followup': journalFollowup, 'notion-sync': notionSyncAction, 'onboarding-summary': onboardingSummary, sync, 'dedupe-chat': dedupeChat, 'ring-suggest': ringSuggest, 'chat-extract': chatExtract };
 
@@ -45,6 +46,7 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export default async function handler(req, res) {
   if (req.query?.influencer === '1') return influencerHandler(req, res);
+  if (req.query?.mentorTrades === '1') return mentorTradesHandler(req, res);
   if (req.query?.ping === '1') return res.status(200).json({ ok: true, time: new Date().toISOString() });
   if (req.query?.authdebug === '1') {
     const { requestUser, bearer } = await import('../lib/auth.mjs');

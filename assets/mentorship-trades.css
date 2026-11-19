@@ -1,0 +1,22 @@
+.mentor-trades { max-width: 1160px; margin: 22px auto 30px; padding: 22px; border: 1px solid var(--border); border-radius: 18px; background: var(--card); }
+.mentor-trades[hidden] { display: none !important; }
+.mentor-trades-head, .mentor-trade-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.mentor-trades-kicker { font-size: 10px; letter-spacing: .14em; font-weight: 800; color: var(--pc); }
+.mentor-trades h2 { margin: 7px 0; font-size: clamp(18px,3vw,25px); }
+.mentor-trades-note, .mentor-trades small { color: var(--text-3); font-size: 11px; line-height: 1.7; }
+.mentor-trades-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin: 18px 0; }
+.mentor-trade { min-width: 0; padding: 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel-alt); }
+.mentor-trade h3 { margin: 0; font-size: 20px; }
+.mentor-trade-title strong { font-size: 28px; font-variant-numeric: tabular-nums; }
+.mentor-trade .positive { color: var(--green); }
+.mentor-trade .negative { color: var(--red); }
+.mentor-trade-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.8; }
+.mentor-trade-review { padding: 10px; border: 1px solid var(--amber); border-radius: 8px; color: var(--amber); font-size: 11px; line-height: 1.7; }
+.mentor-trade-media figure { margin: 14px 0; }
+.mentor-trade-media img { display: block; width: 100%; height: auto; max-height: 560px; object-fit: contain; border-radius: 9px; background: #0c1020; }
+.mentor-trade-media figcaption { font-size: 10px; color: var(--text-3); margin: 6px 0; }
+.mentor-trade > a { font-size: 11px; color: var(--pc); }
+.mentor-trades-admin { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 16px; display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+.mentor-trades-admin input { min-width: 0; flex: 1 1 250px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: var(--bg); }
+.mentor-trades-admin p { flex-basis: 100%; font-size: 11px; }
+@media(max-width:650px) { .mentor-trades { padding: 14px; margin-inline: 8px; } .mentor-trades-grid { grid-template-columns: 1fr; } }
