@@ -200,7 +200,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.query?.kind === 'feedback') return eduFeedback(req, res);
-  if (req.query?.kind === 'influencer-content') return influencerContent(req, res);
+  if (['influencer-content', 'influencer-progress'].includes(req.query?.kind)) return influencerContent(req, res);
   if (req.query?.kind === 'portfolio') return portfolio(req, res);
   if (req.query?.kind === 'landing') return landing(req, res);
   if (req.query?.kind === 'podcast') return podcast(req, res);

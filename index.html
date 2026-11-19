@@ -19,8 +19,10 @@
 <meta name="twitter:title" content="Alfa Traders — Eğitim, Analiz ve Topluluk">
 <meta name="twitter:description" content="Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.">
 <meta name="twitter:image" content="https://alfa-trader.com/alfa-traders-share-v2.png">
-<link rel="stylesheet" href="/assets/influencer-content.css?v=5">
+<link rel="stylesheet" href="/assets/influencer-content.css?v=6">
 <link rel="stylesheet" href="/assets/nav-autohide.css">
+<link rel="stylesheet" href="/assets/growth.css">
+<script type="module" src="/assets/growth.mjs"></script>
 <script type="module" src="/assets/nav-autohide.mjs"></script>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
@@ -5375,26 +5377,29 @@
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="nav-lang" id="lang-btn" type="button" title="Dil / Language">EN</button>
+      <button class="growth-nav-register" type="button" data-growth-register>Ücretsiz kayıt ol</button>
       <button class="nav-login" id="nav-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
   </nav>
   <section class="lp-hero">
     <div class="lp-hero-copy">
-    <span class="lp-badge">İŞLEM · BİAS · PORTFÖY · TOPLULUK</span>
-    <h2>İşlemini planla.<br><span class="grad">Sürecini yönet.</span></h2>
-    <p>Check list, haftalık değerlendirme ve kişisel çalışma panosuyla disiplinli trading. Premium, borsanı bağlayınca ücretsiz.</p>
-    <div class="lp-hero-video">
-      <div class="lp-video-frame" id="lp-hero-video-frame">
-        <iframe src="https://www.youtube.com/embed/MOKNqsj6WfU" title="Alfa Traders tanıtım videosu" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
-      </div>
-      <p class="lp-video-caption">Alfa Traders nasıl kullanılır? 2 dakikada platform turu.</p>
-    </div>
+    <span class="lp-badge">ÖĞREN · PİYASAYI TAKİP ET · UYGULA</span>
+    <h2>Piyasayı birlikte oku.<br><span class="grad">Kendi yolunu geliştir.</span></h2>
+    <p>Haftalık Alfa Dergi, piyasa analizleri, eğitimler ve içerik üreticileri için Alfa Influencer. Önce ücretsiz hesabını oluştur, sana uygun çalışma alanını keşfet.</p>
     <div class="lp-cta">
-      <button class="primary" id="hero-register" type="button" data-i18n="hero.register">Ücretsiz başla →</button>
+      <button class="primary" id="hero-register" type="button" data-i18n="hero.register">Ücretsiz kayıt ol →</button>
       <button class="ghost" id="hero-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
-    <div class="lp-assurance">Kredi kartı yok · Aidat yok · Borsanı bağla, premium ücretsiz</div>
-    <div id="landing-podcast-slot" hidden></div>
+    <div class="lp-assurance">Kayıt ücretsiz · Kredi kartı gerekmez · E-postanla başla</div>
+    <details class="growth-video-details"><summary>Ek erişim koşulları nasıl çalışır?</summary>
+    <div class="lp-hero-video">
+      <div class="lp-video-frame" id="lp-hero-video-frame">
+        <iframe loading="lazy" src="https://www.youtube.com/embed/MOKNqsj6WfU" title="Alfa Traders tanıtım videosu" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+      </div>
+      <p class="lp-video-caption">Referans erişimiyle ilgili video. Ücretsiz hesap oluşturmak için borsa bağlaman gerekmez.</p>
+    </div>
+    </details>
+<div id="landing-podcast-slot" hidden></div>
     <a href="?page=eduplans" class="eduplans-entry" data-i18n="edu.plansEntry">🎓 Alfa Edu · Video, canlı grup ve birebir eğitim paketleri →</a>
     <div class="lp-hero-values" aria-label="Platformun dört odağı">
       <div class="lp-hero-value">
@@ -5416,6 +5421,13 @@
     </div>
     <a class="lp-explore" href="#lp-showcase">Platformu keşfet <span aria-hidden="true">↓</span></a>
     </div>
+    <div class="growth-hero-preview">
+      <div class="growth-board-head"><span class="lp-eyebrow">SENİN ÇALIŞMA ALANIN</span><span>Öğren → Uygula → Takip et</span></div>
+      <a class="growth-product" href="?page=news" data-growth-page="news"><span class="growth-product-icon">01</span><div><h3>Haftanın dergisini aç.</h3><p>Makro haberler ve teknik analizler, gerçek flipbook düzeninde.</p><span class="growth-tags">ALFA DERGİ · HABER · TEKNİK ANALİZ</span></div><b aria-hidden="true">↗</b></a>
+      <a class="growth-product" href="?page=influencer" data-growth-page="influencer"><span class="growth-product-icon">02</span><div><h3>İçerik fikrini uygulamaya geçir.</h3><p>Konu haritası, örnek gönderiler, görseller ve anlatım videoları.</p><div class="growth-mini-map" aria-hidden="true"><span>Viral Gönderi</span><i>→</i><span>Örnekler</span><i>→</i><span>Uygula</span></div></div><b aria-hidden="true">↗</b></a>
+      <a class="growth-product" href="?page=eduplans" data-growth-page="eduplans"><span class="growth-product-icon">03</span><div><h3>Öğrenme yolunu seç.</h3><p>Video, canlı grup ve birebir eğitim seçeneklerini incele.</p><span class="growth-tags">ALFA EDU · EĞİTİM SEÇENEKLERİ</span></div><b aria-hidden="true">↗</b></a>
+      <div class="growth-board-note">Kayıt ücretsizdir. Eğitim programları ve özel alanların erişim koşulları ayrıca belirtilir.</div>
+      <details class="growth-live-disclosure"><summary>Portföy ve kayıtlı sonuç önizlemeleri</summary>
     <div class="lp-art">
       <div class="lp-art-halo" aria-hidden="true"></div>
             <div class="lp-signal-board" role="group" aria-label="Platform önizlemesi: işlem, bias, portföy ve topluluk sekmeleri">
@@ -5461,6 +5473,8 @@
       </div>
       
       <div class="lp-art-note">Geçmiş sonuçlar gelecekteki getiriyi garanti etmez.</div>
+    </div>
+      </details>
     </div>
   </section>
   </div>
@@ -5513,117 +5527,45 @@
     <h3 id="lp-features-title">Daha fazla sekme değil,<br>daha net bir akış.</h3>
     <p>Analizi, öğrenmeyi ve takibi birbirine bağlayan araçlar.</p>
   </div>
-    <section class="lp-features">
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">01 / İŞLEM</span><h3>İşlem Kanalı</h3><p>Giriş, hedef, stop ve gerekçe aynı akışta. Yalnızca sonucu değil, kararın arkasındaki senaryoyu da incele.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">02 / TAKİP</span><h3>Paylaşılan Portföy</h3><p>Yöneticinin pozisyonlarını, satışlarını, notlarını ve portföy grafiğini salt okunur olarak takip et. İşlem kanalından ayrı bir görünüm.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">03 / VERİ</span><h3>Bias &amp; Onchain</h3><p>Yön görüşünü funding, CVD ve açık pozisyon verileriyle birlikte oku. Fiyat hareketine farklı açılardan bak.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">04 / ÖĞRENME</span><h3>Alfa Edu</h3><p>Konulara ayrılmış video eğitimler ve kaynaklarla bilgini adım adım geliştir. İhtiyacın olan derse kolayca dön.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">05 / ÇALIŞMA</span><h3>Trading Terminali</h3><p>Canlı grafik ve watchlist ile takip ettiğin piyasaları aynı çalışma alanında incele.</p><span class="lp-feature-access">Premium</span></div></article>
-    <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">06 / TOPLULUK</span><h3>Topluluk &amp; Telegram</h3><p>Platformda fikir paylaş; premium Telegram grubunda sohbet et. Telegram'a katılım yönetici tarafından sağlanır.</p><span class="lp-feature-access">Akış ücretsiz · Telegram premium</span></div></article>
+    <section class="lp-features growth-features">
+      <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">01 / HAFTALIK OKUMA</span><h3>Alfa Dergi</h3><p>Gerçek sayfa çevirme düzeninde makro haberler ve teknik analizler. Haber / Teknik Analiz rozetleriyle haftanın akışını oku.</p><a href="?page=news" data-growth-page="news">Dergiyi incele →</a></div></article>
+      <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">02 / İÇERİK ÜRETİMİ</span><h3>Alfa Influencer</h3><p>Konu haritasından ilerle; gönderi örneklerini, görselleri ve videoları aynı başlıkta bul. Yaptım takibi ve kişisel tekrar hatırlatmalarıyla uygula.</p><a href="?page=influencer" data-growth-page="influencer">Programı tanı →</a></div></article>
+      <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">03 / EĞİTİM</span><h3>Alfa Edu</h3><p>Video, canlı grup ve birebir eğitim seçenekleri. Paketleri ve katılım koşullarını açıkça incele, ihtiyacına göre seç.</p><a href="?page=eduplans" data-growth-page="eduplans">Eğitim seçenekleri →</a></div></article>
+      <article class="lp-card"><div class="lp-card-body"><span class="lp-feature-label">04 / GÜNLÜK TAKİP</span><h3>İşlem ve portföy</h3><p>Kayıtlı işlem sonuçlarını ve paylaşılan portföyün özetini takip et. Ayrıntılı analizlerin erişim koşulları hesap içinde belirtilir.</p><button type="button" data-growth-register>Ücretsiz hesabını oluştur →</button></div></article>
     </section>
 
 
-  <div class="lp-section-head">
-    <div class="lp-eyebrow">ERİŞİM SEÇENEKLERİ</div>
-    <h3 id="lp-access-title">Ücretsiz başla.<br>Borsanı bağla, premium'u ücretsiz aç.</h3>
-    <p>Aidat yok, kredi kartı yok. Referans bağlantımızla açtığın borsa hesabını bağla; premium erişim ücretsiz açılsın.</p>
-  </div>
-  <div class="lp-pricing">
-    <div class="lp-price-card">
-      <div class="lp-price-tag">Başlangıç</div>
-      <div class="lp-price-name">Ücretsiz Üye</div>
-      <div class="lp-price-desc">Platformu tanı, piyasayı takip et, topluluğa katıl.</div>
-      <div class="lp-price-val"><b class="lp-free">$0</b><span> / her zaman</span></div>
-      <div class="lp-price-period">Kayıt yeterli · kart gerekmez</div>
-      <div class="lp-price-list-title">Neler açık?</div>
-      <ul class="lp-price-feats">
-        <li><b>Topluluk akışı</b> — Soru sor, fikir paylaş, tartış.</li>
-        <li><b>Portföy özeti</b> — Paylaşılan portföyün büyük resmini gör.</li>
-        <li><b>İşlem önizlemeleri</b> — Son paylaşımlardan haberdar ol.</li>
-        <li><b>Alfa Calculator</b> — Pozisyon boyutunu ve riskini planla.</li>
-        <li><b>Ekonomik takvim</b> — Veri saatlerini kaçırma.</li>
-      </ul>
-      <div class="lp-price-how lp-price-how-free">
-        <div class="lp-price-how-t">Neden ücretsiz?</div>
-        <ul class="lp-price-points">
-          <li>Abonelik ücreti yok; kart bilgisi istenmez.</li>
-          <li>Gelir, referans borsa hesabındaki komisyondan gelir.</li>
-          <li>Fonlar senin hesabında kalır; ek ücret yansımaz.</li>
-        </ul>
-      </div>
-      <p class="lp-price-note"><b>Hazır olduğunda:</b> borsanı bağla, premium ücretsiz açılsın.</p>
-      <button class="lp-price-btn ghost" onclick="document.getElementById('auth-gate').classList.add('open')">Ücretsiz başla</button>
-    </div>
-    <div class="lp-price-card featured" id="lp-premium-card">
-      <div class="lp-price-badge">Borsanı bağla · ücretsiz</div>
-      <div class="lp-price-tag">Tam erişim</div>
-      <div class="lp-price-name">Premium</div>
-      <div class="lp-price-desc">İşlemden veriye, portföyden eğitime kadar tam çalışma alanı.</div>
-      <div class="lp-price-val"><b class="lp-free">$0</b><span> / aidat yok</span></div>
-      <div class="lp-price-period">Borsanı bağla · kart gerekmez</div>
-      <div class="lp-price-list-title">Tam erişimde neler var?</div>
-      <ul class="lp-price-feats">
-        <li><b>Ücretsiz üyelikteki her şey</b> — Başlangıç özellikleri dahil.</li>
-        <li><b>İşlem Kanalı</b> — Giriş, hedef, stop ve gerekçe aynı akışta.</li>
-        <li><b>Bias &amp; Onchain</b> — Funding, CVD ve açık pozisyon okuması.</li>
-        <li><b>Paylaşılan portföy</b> — Pozisyonlar, satışlar ve notlar; salt okunur.</li>
-        <li><b>Trading Terminali</b> — Canlı grafik ve watchlist.</li>
-        <li><b>Alfa Edu</b> — Video eğitimler ve kaynaklar.</li>
-        <li><b>Telegram topluluğu</b> — Premium sonrası yönetici davetiyle katıl.</li>
-        <li><b>Bütçe &amp; plan</b> — Gelir / Gider ve Çalışma Panosu.</li>
-      </ul>
-      <div class="lp-price-how">
-        <div class="lp-price-how-t">Nasıl açılır?</div>
-        <ol>
-          <li><span>1</span> Borsa hesabını referans bağlantımızla aç.</li>
-          <li><span>2</span> Hesabını bağla, UID'ni bir kez doğrula.</li>
-          <li><span>3</span> Premium ücretsiz açılır; aidat ödemezsin.</li>
-        </ol>
-      </div>
-      <button class="lp-price-btn primary" onclick="document.getElementById('auth-gate').classList.add('open')">Borsanı bağla, ücretsiz aç →</button>
-    </div>
-  </div>
-  <p class="lp-price-foot">Taahhüt yok · İstediğin an ayrıl · Fonlar senin borsa hesabında kalır.</p>
 
+  <section class="growth-access" aria-labelledby="lp-access-title">
+    <span class="lp-eyebrow">ÖNCE BİR ADIM AT</span>
+    <h3 id="lp-access-title">Ücretsiz hesabınla başla.</h3>
+    <p>İlk adımda paket seçmek veya borsa bağlamak zorunda değilsin. Hesabını aç, e-postanı doğrula ve platformu tanı.</p>
+    <button type="button" class="growth-primary" data-growth-register>Ücretsiz kayıt ol →</button>
+    <details id="lp-premium-card"><summary>Eğitim ve ek erişim koşulları</summary><p>Kayıt ücretsizdir; tüm eğitim paketlerini veya özel kanalları otomatik olarak açmaz. Alfa Edu ve Alfa Influencer ayrı programlardır. Borsanı bağla seçeneğiyle açılan alanlar, referans doğrulaması ve ilgili koşullara tabidir. Referans bağlantılarından komisyon kazanabiliriz. Fonların kendi hesabında kalır.</p></details>
+  </section>
   <section class="lp-start" aria-labelledby="lp-start-title">
     <div class="lp-section-head"><div class="lp-eyebrow">NASIL BAŞLARSIN?</div><h3 id="lp-start-title">Üç adımda çalışma alanın hazır.</h3></div>
     <div class="lp-steps">
       <div><span>01</span><h4>Hesabını oluştur</h4><p>Ücretsiz kayıt ol; topluluğu, işlem önizlemelerini ve portföy özetini gör.</p></div>
-      <div><span>02</span><h4>Borsanı bağla</h4><p>Referans bağlantımızla açtığın OKX veya Bybit hesabını bağla, UID'ni bir kez doğrula.</p></div>
-      <div><span>03</span><h4>Premium'u kullan</h4><p>İşlem kanalı, bias verileri, paylaşılan portföy ve Alfa Edu ücretsiz açılır.</p></div>
+      <div><span>02</span><h4>E-postanı doğrula</h4><p>Gelen kutundaki onay bağlantısını aç. Bulamazsan spam klasörünü kontrol et veya yeniden gönder.</p></div>
+      <div><span>03</span><h4>İlgini çeken alanı keşfet</h4><p>Dergiyi oku, eğitim seçeneklerine bak veya Alfa Influencer ile içerik üretimini geliştir.</p></div>
     </div>
     <p class="lp-disclosure">Platform için abonelik ücreti alınmaz. Referans bağlantıları üzerinden borsalardan komisyon kazanabiliriz. Borsanın işlem ücretleri ve koşulları geçerlidir.</p>
   </section>
   <div class="lp-cta-band">
     <div class="lp-cta-inner">
       <h3>Fırsatları birlikte okuyalım.</h3>
-      <p>Önce platformu keşfet; işlemleri, biasları ve topluluk akışını gör. Daha fazlası için borsanı bağla, premium'u ücretsiz aç.</p>
+      <p>Güncel içerikleri keşfet, öğren ve kendi düzenini kur. İlk adım ücretsiz hesabını oluşturmak.</p>
       <button id="cta-register" type="button" data-i18n="cta.btn">Ücretsiz kayıt ol</button>
     </div>
   </div>
-  <div class="lp-faq" style="max-width:980px;margin:24px auto 10px;padding:0 14px;">
-    <h3 style="font-size:16px;font-weight:700;margin:0 0 10px;">Sık sorulan sorular</h3>
-    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
-      <summary style="cursor:pointer;font-weight:600;">Premium gerçekten ücretsiz mi?</summary>
-      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Evet. Bybit veya OKX hesabını bizim referans linkimizden açarsan veya taşırsan premium ücretsiz açılır. Aidat yok, abonelik yok.</p>
-    </details>
-    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
-      <summary style="cursor:pointer;font-weight:600;">UID'mi nereden bulurum?</summary>
-      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Borsa hesabının profil sayfasında yazar. Bot yalnızca UID ister; şifre, SMS kodu veya API anahtarı istemez.</p>
-    </details>
-    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
-      <summary style="cursor:pointer;font-weight:600;">Mevcut OKX hesabım referansa taşınamıyor, ne yapmalıyım?</summary>
-      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Not: Eğer OKX hesabınız varsa aile bireylerinden birinin üzerine yeni hesap açabilirsiniz; sürekli tekrar login istememektedir. 6 ayda bir giriş yeterlidir.</p>
-    </details>
-    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
-      <summary style="cursor:pointer;font-weight:600;">Verilerim nasıl korunuyor?</summary>
-      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Çalışma panosu ve ziyaretçi verisi şifreli tutulur; ham IP adresi kaydedilmez. Üye kimliği yalnızca doğrulanmış girişten sonra eşlenir.</p>
-    </details>
-    <details style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card);">
-      <summary style="cursor:pointer;font-weight:600;">Premium'a nasıl katılırım?</summary>
-      <p style="margin:8px 0 0;font-size:13px;color:var(--text-2);line-height:1.5;">Bota /start yaz: @alfaportfoy_bot, veya siteden üye ol: https://alfa-trader.com. Onay sonrası premium özellikler açılır.</p>
-    </details>
-  </div>
+  <section class="lp-faq growth-faq">
+    <h3>Başlamadan önce</h3>
+    <details><summary>Ücretsiz kayıt için ne gerekiyor?</summary><p>İsmin, e-posta adresin ve şifren yeterli. Kredi kartı veya borsa bilgisi kayıt sırasında istenmez.</p></details>
+    <details><summary>Onay e-postası gelmezse ne yapmalıyım?</summary><p>Spam ve diğer klasörleri kontrol et; adresinin doğru yazıldığından emin ol. Onay ekranındaki yeniden gönder düğmesini kullanabilirsin. Çok sık denemek geçici gönderim sınırına yol açabilir.</p></details>
+    <details><summary>Kayıt olmak bütün eğitimleri açar mı?</summary><p>Hayır. Kayıt ücretsizdir; Alfa Edu ve Alfa Influencer eğitimlerinin paket ve erişim koşulları kendi sayfalarında belirtilir.</p></details>
+    <details><summary>Yatırım getirisi veya takipçi garantisi var mı?</summary><p>Hayır. İçerikler eğitim ve bilgilendirme amaçlıdır. Sonuçlar kişiye ve piyasa koşullarına göre değişir.</p></details>
+  </section>
   <footer class="lp-foot"><strong>Alfa Traders</strong><p>İşlem, bias, portföy ve topluluk için tek çalışma alanı.</p><p>İçerikler yatırım tavsiyesi değildir. Geçmiş sonuçlar gelecekteki getiriyi garanti etmez. Finansal piyasalarda sermayenizi kaybedebilirsiniz.</p><p style="font-size:12px;margin-top:8px;"><a href="/gizlilik.html">Gizlilik</a> · <a href="/kvkk.html">KVKK</a> · <a href="/kullanim.html">Kullanım Şartları</a></p></footer>
 </div>
 <script>
@@ -5715,34 +5657,20 @@
 </script>
 <script src="/assets/landing-live.js?v=184" defer></script>
 <script src="/assets/macro-admin.js?v=187" defer></script>
-<div id="auth-gate">
+<div id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
   <div class="auth-box">
     <button class="auth-x" id="auth-close" type="button" aria-label="Kapat" data-i18n-aria="auth.close">&times;</button>
-    <div class="auth-pitch">
-      <div class="auth-brand">
-        <div class="logo-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#4ade80" stroke-width="2.3" stroke-linecap="round"/></svg></div>
-        <div>
-          <h1>Alfa Traders</h1>
-          <div class="sub">İşlem · bias · portföy · topluluk</div>
-        </div>
-      </div>
-      <span class="auth-kicker">FIRSATLARI BİRLİKTE OKUYORUZ</span>
-      <h2>İşlemleri gör.<br>Gerekçeyi oku.<br><em>Topluluğa katıl.</em></h2>
-      <p>Paylaştığımız işlemleri, biasları ve portföy yaklaşımını takip et; toplulukta fikir alışverişi yap. Kararlarını kendi hesabında, kendi riskinle uygularsın.</p>
-      <ul class="auth-perks">
-        <li><span class="ap-ico" aria-hidden="true">📈</span><div><b>İşlem paylaşımı</b><span>Giriş, hedef, stop ve gerekçe aynı akışta.</span></div></li>
-        <li><span class="ap-ico" aria-hidden="true">🧭</span><div><b>Bias &amp; onchain</b><span>Yön görüşü ve veri okuması bir arada.</span></div></li>
-        <li><span class="ap-ico" aria-hidden="true">💼</span><div><b>Portföy yaklaşımı</b><span>Paylaşılan portföyü salt okunur izle.</span></div></li>
-        <li><span class="ap-ico" aria-hidden="true">💬</span><div><b>Topluluk</b><span>Sor, tartış, fikrini paylaş.</span></div></li>
-      </ul>
-      <div class="auth-trust">Ücretsiz üyelik · Aidat yok · Borsanı bağla, premium ücretsiz. Fonların senin hesabında kalır.</div>
-    </div>
+
     <div class="auth-form-col">
+      <div class="growth-auth-brand">ALFA TRADERS</div>
+      <h2 id="auth-title">Tekrar hoş geldin.</h2>
+      <p id="auth-description">Hesabına giriş yap, kaldığın yerden devam et.</p>
       <div class="auth-tabs">
         <button id="tab-login" class="on" type="button" data-i18n="nav.login">Giriş yap</button>
         <button id="tab-register" type="button" data-i18n="nav.register">Kayıt ol</button>
       </div>
       <form id="auth-form" autocomplete="on">
+        <div id="auth-verify" class="hidden"><span class="growth-mail-icon" aria-hidden="true">✉</span><h3>E-postanı kontrol et</h3><p id="auth-verify-email"></p><p>Onay bağlantısını açtıktan sonra giriş yapabilirsin. Gelen kutusu, spam ve diğer klasörleri kontrol et.</p></div>
         <div class="auth-field hidden" id="f-name">
           <label for="au-name" data-i18n="auth.name">İsim</label>
           <input type="text" id="au-name" placeholder="Adın" data-i18n-ph="auth.namePh" autocomplete="name" maxlength="40">
@@ -5755,7 +5683,7 @@
           <label for="au-pass" data-i18n="auth.pass">Şifre</label>
           <div class="auth-pass-wrap">
             <input type="password" id="au-pass" placeholder="En az 6 karakter" data-i18n-ph="auth.passPh" autocomplete="current-password" minlength="6">
-            <button type="button" class="auth-pass-toggle" id="au-pass-toggle" aria-label="Şifreyi göster" tabindex="-1">Göster</button>
+            <button type="button" class="auth-pass-toggle" id="au-pass-toggle" aria-label="Şifreyi göster">Göster</button>
           </div>
         </div>
         <label class="auth-remember" id="f-remember" title="Bu cihazda seni hatırlayalım" data-i18n-title="auth.remember">
@@ -5768,22 +5696,9 @@
           <button type="button" class="auth-link hidden" id="back-login" data-i18n="auth.back">← Girişe dön</button>
         </div>
         <button type="button" class="auth-link hidden" id="resend-verify" style="margin-top:6px;">Doğrulama e-postasını tekrar gönder</button>
-        <div class="auth-msg" id="au-msg"></div>
+        <div class="auth-msg" id="au-msg" role="status" aria-live="polite"></div>
       </form>
-      <div class="auth-pricing">
-        <div class="auth-price">
-          <div class="auth-price-name">Ücretsiz Üye</div>
-          <div class="auth-price-desc">Calculator, takvim, portföy özeti ve topluluk</div>
-          <div class="auth-price-how">Kayıt yeterli, kart gerekmez.</div>
-        </div>
-        <div class="auth-price featured">
-          <div class="auth-price-badge">Borsanı bağla · ücretsiz</div>
-          <div class="auth-price-name">Premium</div>
-          <div class="auth-price-desc">İşlem kanalı, eğitim, portföy detayı ve yeni özellikler</div>
-          <div class="auth-price-how">Borsanı bağla, ücretsiz açılır.</div>
-        </div>
-      </div>
-      <p class="auth-note">İkisi de ücretsiz. Farkı erişim seviyesi: temel araçlar herkese açık; premium, borsanı bağlayınca tam çalışma alanını açar.</p>
+      <p class="auth-note">Hesap oluşturmak ücretsizdir. Eğitim paketleri ve ek erişimler ayrıca belirtilir. <a href="/gizlilik.html">Gizlilik</a> · <a href="/kullanim.html">Kullanım şartları</a></p>
     </div>
   </div>
 </div>
@@ -12840,7 +12755,7 @@ function infLoadRealPosts() {
 
 function renderInfluencer(skipLoad = false) {
   document.getElementById('page-influencer')?.classList.toggle('inf-admin-editor', siteIsAdmin());
-  import('/assets/influencer-content.mjs?v=4').then(module => {
+  import('/assets/influencer-content.mjs?v=5').then(module => {
     const node = document.getElementById('inf-content-library');
     if (!node) return;
     module.mount(node, {
@@ -14383,7 +14298,7 @@ function applyTierUi() {
     if (currentPage === 'egitim') refreshEduFeedback();
   }
   infAccess = false;
-  import('/assets/influencer-content.mjs?v=4').then(module => module.clear()).catch(() => {});
+  import('/assets/influencer-content.mjs?v=5').then(module => module.clear()).catch(() => {});
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();
@@ -27925,13 +27840,17 @@ function authError(err) {
   if (/Email not confirmed/i.test(m)) return 'E-postan henüz onaylanmamış. Gelen kutunu kontrol et.';
   if (/least 6/i.test(m)) return 'Şifre en az 6 karakter olmalı.';
   if (/rate limit|too many/i.test(m)) return 'Çok fazla deneme oldu, biraz bekle.';
+  if (/Failed to fetch|NetworkError|fetch failed|Load failed/i.test(m)) return 'Bağlantı kurulamadı. İnternet bağlantını kontrol edip tekrar dene.';
   return m || 'Bir hata oldu, tekrar dene.';
 }
 
 function bootAuth() {
+  const callbackError = new URLSearchParams(window.location.hash.replace(/^#/, '')).has('error') || new URLSearchParams(window.location.search).has('error');
   AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const $ = id => document.getElementById(id);
   let mode = 'login';
+  let submitting = false;
+  const verificationRedirect = window.location.origin + window.location.pathname;
   // Şifre sıfırlama bağlantısıyla mı gelindi? (URL'de recovery işareti)
   let recovering = /type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search);
   const msg = (t, cls) => { const el = $('au-msg'); el.textContent = t; el.className = 'auth-msg' + (cls ? ' ' + cls : ''); };
@@ -27959,17 +27878,27 @@ function bootAuth() {
   // Modlar: login | register | reset (sıfırlama isteği) | newpass (yeni şifre belirle)
   const setMode = m => {
     mode = m;
-    const isLogin = m === 'login', isReg = m === 'register', isReset = m === 'reset', isNew = m === 'newpass';
+    const isLogin = m === 'login', isReg = m === 'register', isReset = m === 'reset', isNew = m === 'newpass', isVerify = m === 'verify';
+    $('auth-title').textContent = isReg ? 'Ücretsiz hesabını oluştur.' : isVerify ? 'Bir adım kaldı.' : isReset ? 'Şifreni yenile.' : isNew ? 'Yeni şifreni belirle.' : 'Tekrar hoş geldin.';
+    $('auth-description').textContent = isReg ? 'İsmin, e-postan ve şifren yeterli. Kart veya borsa bilgisi gerekmez.' : isVerify ? 'Doğrulama bağlantısı için e-postanı kontrol et.' : isReset ? 'Şifre yenileme bağlantısını e-postana gönderelim.' : isNew ? 'Hesabın için yeni ve güçlü bir şifre seç.' : 'Hesabına giriş yap, kaldığın yerden devam et.';
+    $('auth-verify').classList.toggle('hidden', !isVerify);
+    $('resend-verify').classList.toggle('hidden', !isVerify);
+    $('au-submit').classList.toggle('hidden', isVerify);
     $('tab-login').classList.toggle('on', isLogin);
     $('tab-register').classList.toggle('on', isReg);
-    document.querySelector('.auth-tabs').classList.toggle('hidden', isReset || isNew);
+    document.querySelector('.auth-tabs').classList.toggle('hidden', isReset || isNew || isVerify);
     $('f-name').classList.toggle('hidden', !isReg);
-    $('f-email').classList.toggle('hidden', isNew);   // yeni şifre modunda e-posta yok
-    $('f-pass').classList.toggle('hidden', isReset);  // sıfırlama isteğinde şifre yok
+    $('f-email').classList.toggle('hidden', isNew || isVerify);
+    $('f-pass').classList.toggle('hidden', isReset || isVerify);
+    $('au-name').required = isReg;
+    $('au-email').required = !isNew && !isVerify;
+    $('au-pass').required = !isReset && !isVerify;
     $('forgot-link').classList.toggle('hidden', !isLogin);
-    $('back-login').classList.toggle('hidden', !isReset);
+    $('back-login').classList.toggle('hidden', !isReset && !isVerify);
     if ($('f-remember')) $('f-remember').classList.toggle('hidden', !isLogin);
     $('au-submit').textContent = isReg ? 'Kayıt ol' : isReset ? 'Sıfırlama bağlantısı gönder' : isNew ? 'Şifreyi güncelle' : 'Giriş yap';
+    if (isReg || isLogin) $('au-submit').setAttribute('data-i18n', isReg ? 'nav.register' : 'nav.login');
+    else $('au-submit').removeAttribute('data-i18n');
     $('au-pass').setAttribute('autocomplete', (isReg || isNew) ? 'new-password' : 'current-password');
     $('au-pass').setAttribute('placeholder', isNew ? 'Yeni şifre (en az 6 karakter)' : 'En az 6 karakter');
     if (isLogin) rememberPrefill();
@@ -27979,6 +27908,20 @@ function bootAuth() {
   $('tab-register').addEventListener('click', () => setMode('register'));
   $('forgot-link').addEventListener('click', () => setMode('reset'));
   $('back-login').addEventListener('click', () => setMode('login'));
+  let resendAfter = 0;
+  $('resend-verify').addEventListener('click', async () => {
+    const email = $('au-email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg('Önce doğru e-posta adresini yaz.', 'err'); return; }
+    if (Date.now() < resendAfter) { msg('Yeni bir bağlantı istemeden önce bir dakika bekle.', 'err'); return; }
+    const button = $('resend-verify'); button.disabled = true;
+    try {
+      const { error } = await AUTH.client.auth.resend({ type:'signup', email, options:{ emailRedirectTo:verificationRedirect } });
+      if (error) throw error;
+      resendAfter = Date.now() + 60000;
+      msg('Yeni doğrulama bağlantısı istendi. Gelen kutunu ve spam klasörünü kontrol et.', 'ok');
+    } catch (err) { msg(authError(err), 'err'); }
+    finally { button.disabled = false; }
+  });
   // Tanıtım sayfası -> giriş penceresi
   const openAuth = m => { showGate(); setMode(m); };
   $('nav-login').addEventListener('click', () => openAuth('login'));
@@ -28012,6 +27955,8 @@ function bootAuth() {
   });
   $('auth-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (submitting || mode === 'verify') return;
+    submitting = true;
     const email = $('au-email').value.trim();
     const pass = $('au-pass').value;
     const name = $('au-name').value.trim();
@@ -28036,11 +27981,13 @@ function bootAuth() {
       } else if (mode === 'register') {
         if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
         if (!name) { msg('Lütfen isminizi yazın.', 'err'); return; }
-        const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: window.location.origin + window.location.pathname } });
+        const { data, error } = await AUTH.client.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: verificationRedirect } });
         if (error) throw error;
         if (data && data.session && data.user) { saveRemember(email, true); await onAuthed(data.user); return; }
-        msg('Kayıt alındı. E-posta onayı gerekiyorsa gelen kutunu kontrol et, sonra giriş yap.', 'ok');
-        setMode('login');
+        setMode('verify');
+        $('auth-verify-email').textContent = email;
+        $('au-pass').value = '';
+        msg('Kayıt isteğin alındı. Onay gerekiyorsa e-postandaki bağlantıyla devam et. E-postayı bulamazsan yeniden göndermeyi deneyebilirsin.', 'ok');
       } else {
         if (!email || pass.length < 6) { msg('E-posta ve en az 6 karakterli şifre gerekli.', 'err'); return; }
         const rem = document.getElementById('au-remember');
@@ -28062,13 +28009,6 @@ function bootAuth() {
       const rv = $('resend-verify');
       if (rv && mode === 'login' && (em.indexOf('confirm') !== -1 || em.indexOf('doğrula') !== -1)) {
         rv.classList.remove('hidden');
-        rv.onclick = async () => {
-          try {
-            const { error } = await AUTH.client.auth.resend({ type: 'signup', email: $('au-email').value.trim() });
-            if (error) throw error;
-            msg('Doğrulama e-postası tekrar gönderildi. Gelen kutunu (ve spam) kontrol et.', 'ok');
-          } catch (e2) { msg(authError(e2), 'err'); }
-        };
       } else if (rv) {
         rv.classList.add('hidden');
       }
@@ -28078,6 +28018,7 @@ function bootAuth() {
       }
     } finally {
       clearTimeout(safety);
+      submitting = false;
       $('au-submit').disabled = false;
     }
   });
@@ -28087,6 +28028,11 @@ function bootAuth() {
       if (recovering) { showGate(); setMode('newpass'); return; }
       if (data && data.session && data.session.user) onAuthed(data.session.user);
       else showLanding();
+      if (callbackError) {
+        showGate(); setMode('login');
+        msg('Doğrulama bağlantısı geçersiz veya süresi dolmuş olabilir. E-postanı yazıp yeni bir bağlantı iste.', 'err');
+        $('resend-verify').classList.remove('hidden');
+      }
     })
     .catch(() => { if (recovering) { showGate(); setMode('newpass'); } else showLanding(); });
 }
@@ -30542,7 +30488,7 @@ loadSfx();
     'hero.badge': { tr: '✦ Trader\'lar için hepsi bir arada platform', en: '✦ The all-in-one platform for traders' },
     'hero.h2': { tr: 'Öğren, uygula,<br><span class="grad">disiplinini koru.</span>', en: 'Learn, practice,<br><span class="grad">stay disciplined.</span>' },
     'hero.p': { tr: 'Video eğitim, trade defteri, portföy & birikim planı, onchain veriler ve trader topluluğu — bir trader\'ın ihtiyacı olan her şey tek çatı altında.', en: 'Video courses, trade journal, portfolio & savings plan, on-chain data and a trader community — everything a trader needs under one roof.' },
-    'hero.register': { tr: 'Ücretsiz başla →', en: 'Start free →' },
+    'hero.register': { tr: 'Ücretsiz kayıt ol →', en: 'Create a free account →' },
     'hero.proof.txt': { tr: 'kayıtlı trader disiplinle işlem yapıyor', en: 'registered traders trading with discipline' },
     'hero.proof.rating': { tr: 'topluluk puanı', en: 'community rating' },
     'hero.live.online': { tr: 'kişi şu an çevrimiçi', en: 'people online now' },
@@ -33737,4 +33683,3 @@ document.addEventListener('input', function (e) {
 </script>
 </body>
 </html>
-

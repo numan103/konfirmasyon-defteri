@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const landing = html.slice(html.indexOf('<div id="landing">'), html.indexOf('<div id="auth-gate">'));
+const landing = html.slice(html.indexOf('<div id="landing">'), html.indexOf('<div id="auth-gate"'));
 const appNav = html.slice(html.indexOf('<nav class="navbar">'), html.indexOf('<div class="nav-mobile-backdrop"'));
 const mobileHead = html.slice(html.indexOf('<div class="nav-mobile-head">'), html.indexOf('<div class="nav-mobile-body">'));
 const pano = html.slice(html.indexOf('<div id="page-pano"'), html.indexOf('<div id="page-', html.indexOf('<div id="page-pano"') + 20));

@@ -1,9 +1,61 @@
 import { mediaUrl } from './influencer-content-model.mjs';
 import { bindSortable } from './content-sortable.mjs';
+import { REMINDER_DAYS, progressState } from './topic-progress.mjs';
 
 let root, context, data = { topics: [] }, revision = null, selected = '', editing = false, dirty = false, loading = false, saving = false, uploading = false, epoch = 0, owner = '';
 let activeSection = '';
 let searchQuery = '';
+let progress = null, progressBusy = false, progressError = '';
+async function loadProgress() {
+  const seq = epoch;
+  try { const result = await api(undefined, 'influencer-progress'); if (seq === epoch) { progress = result.data; progressError = ''; } }
+  catch { if (seq === epoch) { progress = null; progressError = 'Kişisel takip yüklenemedi.'; } }
+}
+async function updateProgress(topicId, op, intervalDays) {
+  if (progressBusy || !progress) return;
+  const seq = epoch; progressBusy = true; draw();
+  try {
+    const result = await api({ topicId, op, ...(op === 'schedule' ? { intervalDays } : {}) }, 'influencer-progress');
+    if (seq !== epoch) return;
+    progress = result.data; progressError = '';
+  } catch { if (seq === epoch) progressError = 'Takip kaydedilemedi. Tekrar dene.'; }
+  finally { if (seq === epoch) { progressBusy = false; draw(); } }
+}
+function topicRoutine(node, topic) {
+  const value = progress?.topics?.[topic.id], state = progressState(value);
+  const box = el('div', '', 'ic-routine'); box.dataset.routineId = topic.id;
+  const label = el('label', '', 'ic-done-label'), check = el('input'); check.type = 'checkbox';
+  check.checked = state.done && !state.due; check.disabled = !progress || progressBusy;
+  check.setAttribute('aria-label', 'Yaptım: ' + topic.title);
+  check.onchange = () => void updateProgress(topic.id, check.checked ? 'complete' : 'uncheck');
+  label.append(check, document.createTextNode('Yaptım')); box.append(label);
+  const schedule = el('label', 'Tekrar kontrol'), select = el('select');
+  const names = ['Hatırlatma kapalı', 'Her gün', '3 günde bir', 'Her hafta', '2 haftada bir', 'Her ay'];
+  REMINDER_DAYS.forEach((days, i) => { const option = el('option', names[i]); option.value = days; select.append(option); });
+  select.value = value?.intervalDays || 0; select.disabled = !progress || progressBusy;
+  select.setAttribute('aria-label', 'Hatırlatma: ' + topic.title);
+  select.onchange = () => void updateProgress(topic.id, 'schedule', Number(select.value));
+  schedule.append(select); box.append(schedule);
+  const note = el('small', '', 'ic-routine-state'); box.append(note);
+  node.append(box);
+}
+function refreshRoutines() {
+  if (!root || !owner || !progress) return;
+  let due = 0;
+  data.topics.forEach(topic => {
+    const state = progressState(progress.topics?.[topic.id]);
+    if (state.due) due++;
+    const box = root.querySelector('[data-routine-id="' + topic.id + '"]');
+    if (!box) return;
+    box.classList.toggle('ic-is-due', state.due);
+    box.querySelector('input').checked = state.done && !state.due;
+    box.querySelector('.ic-routine-state').textContent = state.due ? 'Kontrol zamanı: Bu konuyu uyguluyor musun?'
+      : state.nextAt ? 'Sonraki kontrol: ' + new Date(state.nextAt).toLocaleDateString('tr-TR')
+      : state.done ? 'Tamamlandı · ' + new Date(progress.topics[topic.id].doneAt).toLocaleDateString('tr-TR') : 'Henüz işaretlenmedi';
+  });
+  const summary = root.querySelector('.ic-routine-summary');
+  if (summary) summary.textContent = due ? due + ' konu tekrar kontrol bekliyor. Uyguladıysan “Yaptım” kutusunu işaretle.' : 'Kişisel takibin güncel. Hatırlatmalar yalnızca site içinde gösterilir; e-posta veya bildirim gönderilmez.';
+}
 const lower = s => String(s || '').toLocaleLowerCase('tr');
 const matchingTopics = () => data.topics.filter(t => lower([t.title, t.description, ...t.sections.map(s => s.title)].join(' ')).includes(lower(searchQuery)));
 function sortHandle(node, list, item, kind) {
@@ -37,10 +89,10 @@ function field(parent, title, value, update, area = false) {
   input.addEventListener('keydown', e => e.stopPropagation());
   label.append(input); parent.append(label); return input;
 }
-async function api(body) {
+async function api(body, kind = 'influencer-content') {
   const token = await context.getToken();
   if (!token) throw new Error('Oturumunu yenileyip tekrar dene.');
-  const r = await fetch('/api/edu-shared?kind=influencer-content', {
+  const r = await fetch('/api/edu-shared?kind=' + kind, {
     method: body ? 'POST' : 'GET', cache: 'no-store',
     headers: { Authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}),
@@ -53,7 +105,7 @@ async function api(body) {
     : 'İçerik yüklenemedi veya kaydedilemedi. Tekrar dene.');
   return j;
 }
-export function clear() { epoch++; data = { topics: [] }; owner = ''; dirty = false; editing = false; loading = false; saving = false; uploading = false; activeSection = ''; searchQuery = ''; if (root) root.replaceChildren(); }
+export function clear() { epoch++; data = { topics: [] }; owner = ''; dirty = false; editing = false; loading = false; saving = false; uploading = false; activeSection = ''; searchQuery = ''; progress = null; progressBusy = false; progressError = ''; if (root) root.replaceChildren(); }
 export function mount(node, ctx) {
   root = node; context = ctx;
   if (!ctx.unlocked || !ctx.userId) { clear(); return; }
@@ -68,6 +120,8 @@ async function load() {
     const j = await api();
     if (seq !== epoch) return;
     data = j.data; revision = j.revision || null; dirty = false;
+    await loadProgress();
+    if (seq !== epoch) return;
     if (!data.topics.some(t => t.id === selected)) selected = data.topics[0]?.id || '';
     draw();
   } catch (e) {
@@ -214,6 +268,8 @@ function draw() {
     button(toolbar, 'Yeniden yükle', () => { if (!dirty || confirm('Kaydedilmemiş değişiklikler kaybolacak. Devam edilsin mi?')) void load(); });
   }
   const status = el('p', dirty ? 'Kaydedilmemiş değişiklikler var.' : context.admin && data.topics.length ? data.topics.every(t => t.published) ? 'Kaydedilen konular yayında. Değişikliklerden sonra tekrar kaydet.' : 'Kaydettiğinde tüm konular yayınlanır.' : ''); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); root.append(status);
+  root.append(el('p', progressError, 'ic-progress-error'), el('p', '', 'ic-routine-summary'));
+  if (!progress) button(root, 'Kişisel takibi yeniden yükle', async () => { const seq = epoch; await loadProgress(); if (seq === epoch) draw(); });
   if (!data.topics.length) { root.append(el('p', context.admin ? 'İlk konunu ekle veya Viral Gönderi örneğiyle başla.' : 'İçerikler hazırlanıyor.', 'ic-empty')); return; }
   const search = el('div', '', 'ic-search');
   const searchLabel = el('label', 'Haritada ara'), searchInput = el('input');
@@ -242,6 +298,7 @@ function draw() {
     const b = button(node, String(i + 1).padStart(2, '0') + ' · ' + t.title, () => { selected = t.id; activeSection = ''; draw(); }, 'ic-topic-open');
     b.setAttribute('aria-current', String(t.id === selected));
     node.append(el('small', t.sections.length + ' alt başlık' + (context.admin ? t.published ? ' · Yayında' : ' · Kaydedilmedi' : ''), 'ic-muted'));
+    topicRoutine(node, t);
     if (context.admin && editing) {
       sortHandle(node, data.topics, t, 'topic');
       const del = button(node, '🗑', () => remove(data.topics, t), 'ic-topic-delete');
@@ -318,5 +375,9 @@ function draw() {
     }
   }
   if (editing && context.admin) button(article, '+ Alt başlık ekle', () => { const s = { id: uid(), title: 'Yeni alt başlık', blocks: [] }; t.sections.push(s); activeSection = s.id; change(); draw(); });
+  refreshRoutines();
 }
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshRoutines(); });
+window.addEventListener('focus', refreshRoutines);
+setInterval(() => { if (!document.hidden) refreshRoutines(); }, 60000);

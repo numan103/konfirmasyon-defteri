@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const landing = html.slice(html.indexOf('<div id="landing">'), html.indexOf('<div id="auth-gate">'));
+const landing = html.slice(html.indexOf('<div id="landing">'), html.indexOf('<div id="auth-gate"'));
 
 test('landing excludes sample performance, social invitations and admin-only benefits', () => {
   for (const text of ['lp-hero-shot', 'hseq-svg', '+52.4R', 'lp-comm-tg', 'Bir fikrin mi var', 'Kişisel Günlük Asistan', 'AlfaNews', 'Check List']) {
@@ -16,10 +16,11 @@ test('landing keeps registration hooks and accurate premium descriptions', () =>
   for (const id of ['nav-login', 'hero-register', 'hero-login', 'cta-register']) {
     assert.ok(landing.includes(`id="${id}"`), id);
   }
-  assert.equal((landing.match(/<article class="lp-card">/g) || []).length, 6);
+  assert.equal((landing.match(/<article class="lp-card">/g) || []).length, 4);
   assert.ok(landing.includes('salt okunur'));
   assert.ok(landing.includes('Borsanı bağla'));
-  assert.ok(landing.includes('aidat yok'));
+  assert.ok(landing.includes('Kayıt ücretsizdir; tüm eğitim paketlerini veya özel kanalları otomatik olarak açmaz.'));
+  assert.ok(!landing.includes('class="lp-pricing"'));
   assert.ok(!landing.includes('Referansla aç'));
   assert.ok(!landing.includes('onaylandığında'));
   assert.ok(landing.includes('komisyon kazanabiliriz'));

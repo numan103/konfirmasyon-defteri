@@ -23,8 +23,18 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   let stored = { topics: [] }, writes = 0, failSave = false;
-  await page.route('**/api/edu-shared?kind=influencer-content', async route => {
+  const progressByToken = {};
+  await page.route('**/api/edu-shared?kind=influencer-*', async route => {
     const req = route.request(), token = req.headers().authorization;
+    if (new URL(req.url()).searchParams.get('kind') === 'influencer-progress') {
+      const progress = progressByToken[token] ||= { topics:{} };
+      if (req.method() === 'POST') {
+        const body = req.postDataJSON(), old = progress.topics[body.topicId] || {doneAt:0,intervalDays:0};
+        progress.topics[body.topicId] = body.op === 'schedule' ? {...old,intervalDays:body.intervalDays}
+          : {...old,doneAt:body.op === 'complete'?Date.now():0};
+      }
+      return route.fulfill({json:{ok:true,data:progress}});
+    }
     if (req.method() === 'POST') {
       assert.equal(token, 'Bearer admin');
       if (failSave) return route.fulfill({ status:503, json:{ ok:false, error:'storage_unavailable' } });
@@ -81,16 +91,27 @@ try {
   page.once('dialog', d => d.accept('https://youtu.be/abcdefghijk'));
   await section.getByRole('button', { name: '+ Video', exact: true }).click();
   assert.equal(await page.locator('iframe').count(), 1);
-  assert.equal(await page.getByRole('checkbox').count(), 0, 'saving is publishing, no separate publish toggle');
+  assert.equal(await page.locator('.ic-check').count(), 0, 'saving is publishing, no separate publish toggle');
   failSave = true;
   await page.getByRole('button', { name:'Değişiklikleri kaydet', exact:true }).click();
   await page.getByRole('status').filter({ hasText:'İçerik yüklenemedi veya kaydedilemedi.' }).waitFor();
-  assert.equal(await page.locator('.ic-topic-node small').textContent(), '4 alt başlık · Kaydedilmedi', 'failed save does not pretend to publish');
+  assert.equal(await page.locator('.ic-topic-node > small').textContent(), '4 alt başlık · Kaydedilmedi', 'failed save does not pretend to publish');
   failSave = false;
   await page.getByRole('button', { name: 'Değişiklikleri kaydet', exact: true }).click();
   await page.getByRole('status').filter({ hasText: 'Kaydedildi ve yayınlandı.' }).waitFor();
   assert.equal(writes, 1); assert.equal(stored.topics[0].published, true);
-  assert.equal(await page.locator('.ic-topic-node small').textContent(), '4 alt başlık · Yayında');
+  assert.equal(await page.locator('.ic-topic-node > small').textContent(), '4 alt başlık · Yayında');
+  await page.getByRole('checkbox',{name:'Yaptım: Viral Gönderi Atölyesi',exact:true}).check();
+  await page.waitForFunction(() => document.querySelector('.ic-routine input').checked && !document.querySelector('.ic-routine input').disabled);
+  await page.getByLabel('Hatırlatma: Viral Gönderi Atölyesi',{exact:true}).selectOption('1');
+  await page.waitForFunction(() => document.querySelector('.ic-routine select').value === '1' && !document.querySelector('.ic-routine select').disabled);
+  const topicId = stored.topics[0].id;
+  assert.equal(progressByToken['Bearer admin'].topics[topicId].intervalDays,1);
+  progressByToken['Bearer admin'].topics[topicId].doneAt = Date.now()-2*86400000;
+  await page.getByRole('button',{name:'Yeniden yükle',exact:true}).click();
+  await page.getByText('Kontrol zamanı: Bu konuyu uyguluyor musun?',{exact:true}).waitFor();
+  await page.getByRole('checkbox',{name:'Yaptım: Viral Gönderi Atölyesi',exact:true}).check();
+  await page.waitForFunction(() => !document.querySelector('.ic-routine').classList.contains('ic-is-due'));
   assert.ok(stored.topics[0].sections.at(-1).blocks.some(b => b.type === 'image' && b.url.startsWith('data:image/webp')));
   await page.getByRole('button', { name: '+ Konu ekle', exact:true }).click();
   assert.equal(await page.getByRole('button', { name:'Konuyu sil: Yeni konu', exact:true }).count(), 1);
@@ -108,9 +129,10 @@ try {
   assert.equal(await page.locator('textarea').count(), 0);
   await mount('paid');
   await page.getByRole('heading', { name: 'Viral Gönderi Atölyesi', exact: true }).waitFor();
+  assert.equal(await page.getByRole('checkbox',{name:'Yaptım: Viral Gönderi Atölyesi',exact:true}).isChecked(),false,'another user has independent progress');
   assert.equal(await page.locator('img').count(), 0, 'reader starts on topic map');
   await page.locator('.ic-section-open').filter({ hasText:'Görsel ve video örnekleri' }).click();
-  assert.equal(await page.locator('textarea, input:not(.ic-search input)').count(), 0);
+  assert.equal(await page.locator('textarea, input:not(.ic-search input):not([type=checkbox])').count(), 0);
   assert.equal(await page.getByRole('button', { name: '+ Konu ekle', exact: true }).count(), 0);
   assert.equal(await page.locator('img').count(), 5);
   assert.equal(await page.getByRole('link', { name: 'Kaynak gönderiyi aç ↗' }).getAttribute('href'), 'https://x.com/example/status/123');
@@ -178,5 +200,5 @@ try {
   assert.equal(await app.locator('#page-influencer > .inf-faq').isVisible(), true, 'new member still sees customer FAQ');
   assert.equal(await app.locator('#inf-content-library').isVisible(), false);
   await app.close();
-  console.log(JSON.stringify({ passed: true, adminEditor: true, topicMap:true, sectionDrilldown:true, topicDelete:true, savePublishes:true, failedSavePreservesState:true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, navAutoHide:true, navHoverReveal:true, navKeyboardReveal:true, navMobileReveal:true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
+  console.log(JSON.stringify({ passed: true, personalProgress:true, recurringReminders:true, privateProgress:true, adminEditor: true, topicMap:true, sectionDrilldown:true, topicDelete:true, savePublishes:true, failedSavePreservesState:true, topicsAndSubheadings: true, multiImageUpload: true, nativeCtrlVPaste: true, multiImageDrop: true, postExamples: true, adminMarketingHidden: true, newMemberMarketingVisible: true, navAutoHide:true, navHoverReveal:true, navKeyboardReveal:true, navMobileReveal:true, videoEmbed: true, save: true, reader: true, mobile: true, logoutClears: true, productionWrites: false }));
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
