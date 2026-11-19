@@ -1,25 +1,40 @@
-# Yönetici görünüm önizlemesi
+# Canlı yönetici görünüm geçişi
 
-Üye yönetimi başlığındaki **Görünüm önizleme** düğmesi yalnızca sunucudan
-`SITE.admin === true` almış, oturum açmış yöneticiye görünür.
-Giriş / Yeni üye / Premium üye ve sayfa listesi; Yöneticiye dön veya Escape.
+Oturum açmış, sunucudan `SITE.admin === true` almış yönetici için ekranın en
+üstünde sabit dört buton: **Giriş sayfası / Yeni kayıt / Premium üye / Yönetici**.
+Menüler sitenin kendi menüleridir; sayfa listesi veya statik tasarım kopyası yoktur.
+Katalog, katılım penceresi, filtreler ve yerel araçlar gerçek uygulama koduyla
+çalışır. Yönetici butonu izole görünümü kaldırır, gerçek oturuma döner.
 
-Bu sürüm **salt okunur tasarım önizlemesidir**, gerçek bir başka kullanıcı
-oturumu veya uçtan uca üyelik testi değildir. Kaynak, canlı admin DOM'u değil,
-`/` adresinden oturumsuz okunan HTML'dir. Sitenin kendi stilleri ve statik
-yerleşimi kullanılır; dinamik uygulama modülleri çalıştırılmaz.
-Kişisel günlükler, eğitim hakları, başvuru/ödeme durumları ve araçların
-etkileşimleri gösterilmez. Dinamik modül alanları boş kalabilir.
-Sayfalar üstteki listeden seçilir; iframe içindeki kontroller devre dışıdır.
+## İzolasyon ve veri sınırı
 
-Iframe `sandbox=""` ile opak kökendedir: script, oturum/storage erişimi,
-form, popup, üst pencere gezinmesi yoktur. Ek CSP script/connect/frame/form
-erişimini kapatır. Kaynak script/event handler'ları ve admin alanları silinir.
-Gerçek AUTH/SITE, URL, yerel günlükler ve Supabase oturumu değiştirilmez.
+- Kaynak `/` HTML'i oturumsuz alınır; gerçek admin DOM'u veya kişisel storage'ı
+  kopyalanmaz. App boot sözleşmesi doğrulanır; gerçek bootAuth yerine yalnız
+  bu belge içinde preview runtime çalıştırılır. Sözleşme değişirse açılmaz.
+- `sandbox="allow-scripts"`; **allow-same-origin, allow-forms, top-navigation,
+  popups yok**. Opak origin nedeniyle ebeveyn session/storage erişimi yoktur.
+- Bellek içi local/sessionStorage ve sahte, boş Supabase client kullanılır.
+  Token `preview-no-authority` gerçek JWT değildir. Gerçek JWT frame'e verilmez.
+  Yerel araçlarda yapılan denemeler rol değiştirince/kapatınca silinir.
+- CSP `connect-src 'none'`, `form-action 'none'`, `worker-src 'none'`;
+  native fetch/XHR/socket/beacon, DB/oturum/OAuth yazma yolları kapalıdır.
+- fetch adapter ebeveyne yalnız URL+GET gönderir. Ebeveyn frame source,
+  origin, rastgele kanal ve gerçek admin durumunu kontrol eder. Rol ebeveynden
+  seçilir; mesaj içeriğinden veya URL'den yetki alınmaz. Header/body aktarılmaz.
+- Ebeveyn sadece açık allowlist GET çağrılarını yapar; URL'leri yeniden kurar.
+  Sunucu yazıları, analytics, AI maliyetli POST'lar, bildirim ve gerçek kişisel
+  başvuru/kayıt okumaları engellenir. `/mine` başvuruları boş test cevabıdır.
+- Free Mentorship her zaman results uç noktasına gider ve coin/r/date alanlarına
+  tekrar daraltılır. Premium ortak metin/grafikleri normal feed modülüyle açar.
+  Portföy free'de yalnız summary'dir; versions/admin bayrakları aktarılmaz.
+- Eğitim kursları premium görünümde ortak katalogdan okunur. Premium, başka
+  bir kişinin ders alımı veya Influencer aboneliği varmış gibi davranmaz.
+- Ortak landing/podcast/YouTube, ekonomik takvim, piyasa fiyatları canlı okunur.
+  Harici linkler ve hesap işlemleri uyarıyla engellenir; video embed'leri ve
+  yayınlanmış medya sağlayıcının iframe koşulları elverdiği ölçüde çalışır.
+- Static asset CORS `*` yalnız public `/assets/` modülleri için eklenmiştir.
+  API auth/CORS veya gerçek kullanıcı yetkileri değiştirilmemiştir.
 
-Mentorship ortak içerik istisnası: ebeveyn yalnızca sabit GET uçlarını okur.
-Yeni üye sadece `results=1` çağırır; cevap yeniden coin/r/date allowlist'ine
-daraltılır. Premium ortak metni ve ilk 8 grafiği okur; token iframe'e verilmez.
-Grafikler veri URL'leri olarak geçirilir. Rol değiştirme/kapatma eski asenkron
-yanıtları geçersiz kılar ve frame'i boşaltır. Ödeme veya kayıt yazma yolu yoktur.
-Premium, eğitim satın alınmış olduğu veya Influencer erişimi olduğu anlamına gelmez.
+Bu bir **etkileşimli test görünümü**, gerçek bir kullanıcıya ait oturum değildir.
+Kişisel alanlar boş başlar; server-side işlemler bilerek tamamlanmaz.
+Yetki testlerinin yerine geçmez. Yönetici görünümü gerçek ve normal işlevlidir.
