@@ -74,7 +74,7 @@ try {
     if (u.searchParams.get('kind') === 'influencer-content') return route.fulfill({ json: { ok: true, data: stored, revision: null } });
     return route.fulfill({ json: { ok: true, admin: false, tier: 'free', unlocked: true, orders: [], outline: [], posts: [], data: null } });
   });
-  await app.goto(base + '/index.html?page=influencer', { waitUntil: 'domcontentloaded' });
+  await app.goto((arg('url') || base) + '/index.html?page=influencer', { waitUntil: 'domcontentloaded' });
   await app.waitForFunction(() => typeof renderInfluencer === 'function');
   await app.evaluate(() => {
     AUTH.user = { id: 'admin-fixture', email: ADMIN_EMAIL };
