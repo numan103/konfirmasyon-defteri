@@ -33,7 +33,10 @@ try {
     if (url.pathname === '/api/edu-shared' && q.get('kind') === 'landing')
       return route.fulfill({json:{ok:true,channel:{trades:{latest:[{id:'channel-1',date:new Date().toISOString(),title:'GOLD +2.3R sonuç',coin:'GOLD'}]},biases:{latest:[]}},status:{channel:'ok'}}});
     if (url.pathname === '/api/edu-shared' && q.get('kind') === 'news')
-      return route.fulfill({json:{ok:true,data:{issueNo:1,weekLabel:'1 Kasım',rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[{id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',images:[]},{id:'n2',title:'Makro Analiz',body:'DXY ve altın tarafında risk iştahı zayıf.',type:'',relId:'',result:'',authorId:'a1',images:[]}]}}});
+      return route.fulfill({json:{ok:true,data:{issueNo:1,weekLabel:'1 Kasım',rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[
+        {id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',category:'Teknik Analiz',sourceLink:'https://t.me/alfakasim/6/946',publishedAt:'2026-11-19T09:00:00.000Z',images:['/api/tg?magPhoto=tech_chart_file_id_456'],photoIds:['tech_chart_file_id_456']},
+        {id:'n2',title:'Makro Analiz',body:'DXY ve altın tarafında risk iştahı zayıf.',type:'',relId:'',result:'',authorId:'a1',category:'Haber',sourceLink:'https://t.me/haberler/501',publishedAt:'2026-11-19T08:00:00.000Z',images:['/api/tg?magPhoto=news_photo_file_id_123'],photoIds:['news_photo_file_id_123']}
+      ]}}});
     if (url.pathname === '/api/edu-shared') return route.fulfill({json:{ok:true,data:null,episode:null,channels:{},status:{channel:'ok'},channel:{trades:{latest:[]},biases:{latest:[]}}}});
     return route.fulfill({json:{ok:true,rows:[],entries:[],applications:[]}});
   });
@@ -85,6 +88,9 @@ try {
   await preview.waitForFunction(() => document.body.dataset.page === 'news');
   await preview.locator('#news-weekly-list .nw-card').first().waitFor();
   assert.equal(await preview.locator('#mag-tools:visible').count(),0,'preview roles read the weekly magazine without editor tools');
+  assert.equal(requests.some(r => /telesco|telegram\.org|telegram\.me/.test(r.url)),false,'magazine never hotlinks Telegram CDN');
+  const photoSrcs = await preview.evaluate(() => [...document.querySelectorAll('#hmr-stage .e-img')].map(img => img.getAttribute('src')));
+  assert.ok(photoSrcs.length >= 1 && photoSrcs.every(src => src.startsWith('/api/tg?magPhoto=')),'magazine photos use only the same-origin allowlisted proxy');
   await preview.evaluate(() => showPage('home'));
   const start = requests.length;
   assert.equal(await preview.evaluate(async () => (await fetch('/api/analytics?education=1',{method:'POST',body:'{}'})).status),403);
@@ -145,7 +151,8 @@ try {
   assert.equal(await page.evaluate(() => AUTH.user.id),'real-admin-fixture');
   const apiReads = requests.slice(start);
   assert.equal(apiReads.every(r => r.method === 'GET'),true);
-  assert.equal(requests.every(r => r.frame === 'parent'),true,'preview cannot send native API requests');
+  assert.equal(apiReads.filter(r => !r.url.includes('/api/tg?magPhoto=')).every(r => r.frame === 'parent'),true,'preview cannot send native API requests');
+  assert.equal(apiReads.filter(r => r.url.includes('/api/tg?magPhoto=')).every(r => r.frame === 'preview'),true,'magazine proxy images are same-origin GETs');
   await bar.getByRole('button',{name:'Yeni kayıt',exact:true}).click();
   await page.evaluate(() => { AUTH.user = null; SITE.admin = false; document.body.classList.add('landed'); });
   await page.waitForFunction(() => !document.getElementById('admin-preview-frame'));

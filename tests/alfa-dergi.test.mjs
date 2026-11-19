@@ -82,3 +82,23 @@ test('news read endpoint is a public, read-only projection without personal data
   }
   assert.match(policy, /'landing','podcast','youtube','news'/);
 });
+
+test('Telegram entries share one stream with a category badge and safe same-origin photos', () => {
+  const load = html.slice(html.indexOf('async function loadNews()'), html.indexOf('function magAuthor('));
+  assert.match(load, /e\.category !== 'Haber' && e\.category !== 'Teknik Analiz'/);
+  assert.match(load, /Array\.isArray\(e\.photoIds\)/);
+  assert.match(html, /\.e-cat\.news/);
+  assert.match(html, /\.e-cat\.tech/);
+  assert.match(html, /\.toc-cat\.news/);
+  const toc = html.slice(html.indexOf('function magBuildToc('), html.indexOf('function magBuildEntry('));
+  assert.match(toc, /toc-cat/);
+  assert.match(toc, /cat === 'Haber' \? 'news' : 'tech'/);
+  const entry = html.slice(html.indexOf('function magBuildEntry('), html.indexOf('function magBuildUpdates('));
+  assert.match(entry, /label = cat === 'Haber' \? 'HABER' : \(cat === 'Teknik Analiz' \? 'TEKNİK ANALİZ' : 'ANALİZ'\)/);
+  assert.match(entry, /\[\['', 'Analiz'\], \['Haber', 'Haber'\], \['Teknik Analiz', 'Teknik Analiz'\]\]/);
+  assert.match(api, /category: \(e && e\.category === 'Haber'\)/);
+  assert.match(api, /sourceLink: text\(e && e\.sourceLink, 300\)/);
+  assert.match(api, /publishedAt: text\(e && e\.publishedAt, 40\)/);
+  assert.match(api, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(id\)/);
+  assert.ok(!/\/api\/edu-shared[\s\S]{0,400}t\.me\//.test(api), 'no Telegram CDN hotlink in the public projection');
+});

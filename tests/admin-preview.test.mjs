@@ -75,3 +75,12 @@ test('minimal switcher, light member previews and November evaluation are wired 
   assert.match(panel,/home-results-bottom/);
   assert.match(html,/id="home-results-bottom"/);
 });
+test('magazine Telegram photos stay same-origin and allowlisted in previews', () => {
+  const id = 'aBc123_-xyz456789';
+  for (const role of ['landing','free','premium']) {
+    assert.equal(policy('/api/tg?magPhoto=' + id,role).url,'/api/tg?magPhoto=' + id);
+    assert.equal(policy('/api/tg?magPhoto=' + id,role,'POST').status,403);
+  }
+  for (const bad of ['/api/tg?magPhoto=short','/api/tg?magPhoto=../../etc/passwd','/api/tg?magPhoto=' + 'a'.repeat(251),
+    '/api/tg?notify=1','/api/tg?magPhoto=' + id + '&notify=1']) assert.equal(policy(bad,'premium').status,403,bad);
+});

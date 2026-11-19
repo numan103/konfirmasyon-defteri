@@ -62,6 +62,9 @@ async function session(label, access) {
         editors: document.querySelectorAll('#hmr-stage input, #hmr-stage textarea').length,
         cards: document.querySelectorAll('#hmr-stage .hmr-card').length,
         readerLabel: document.getElementById('home-mag-reader')?.getAttribute('aria-label') || '',
+        cats: [...s.querySelectorAll('.e-cat')].map(n => n.textContent),
+        tocCats: [...s.querySelectorAll('.toc-cat')].map(n => n.textContent),
+        kickers: [...s.querySelectorAll('.e-kicker')].map(n => n.textContent),
       };
     });
     assert.ok(embedded.pages >= 3, label + ' embedded real flipbook pages');
@@ -77,6 +80,13 @@ async function session(label, access) {
     assert.equal(embedded.editors, 0, label + ' embedded flipbook has no editor fields even for admin');
     assert.equal(embedded.cards, 0, label + ' no preview-like card strip');
     assert.match(embedded.readerLabel, /dergi/i, label + ' magazine label');
+    if (!live) {
+      assert.ok(embedded.cats.includes('Haber'), label + ' news badge on the article page');
+      assert.ok(embedded.cats.includes('Teknik Analiz'), label + ' technical badge on the article page');
+      assert.ok(embedded.tocCats.includes('Haber') && embedded.tocCats.includes('Teknik Analiz'), label + ' badges in the table of contents');
+      assert.ok(embedded.kickers.some(k => k.startsWith('HABER · ')), label + ' news kicker');
+      assert.ok(embedded.kickers.some(k => k.startsWith('TEKNİK ANALİZ · ')), label + ' technical kicker');
+    }
     await page.locator('#hmr-next').click();
     await page.waitForFunction(() => document.getElementById('hmr-counter').textContent.startsWith('2 /'), null, { timeout: 4000 });
     assert.equal(await page.locator('#hmr-stage .mag-page.turned').count(), 1, label + ' page turn applied');
@@ -93,6 +103,9 @@ async function session(label, access) {
       meta: document.querySelector('#news-weekly-list .nw-meta')?.textContent || '',
       toolsVisible: getComputedStyle(document.getElementById('mag-tools')).display !== 'none',
       stagePages: document.querySelectorAll('#mag-stage .mag-page').length,
+      cats: [...document.querySelectorAll('#mag-stage .e-cat')].map(n => n.textContent),
+      adminCatSelects: document.querySelectorAll('#mag-stage select.e-cat-in').length,
+      previewSelects: document.querySelectorAll('#home-mag-reader select.e-cat-in').length,
     }));
     assert.ok(weekly.count >= 1, label + ' weekly cards');
     assert.ok(weekly.titles.length === weekly.count && weekly.titles.every(t => t && t.trim()), label + ' weekly titles');
@@ -106,6 +119,11 @@ async function session(label, access) {
       assert.match(weekly.meta, /Haftalık · 1 Kasım/, label + ' fixture weekly label');
     }
     assert.equal(weekly.toolsVisible, access.admin === true, label + ' editor tools');
+    assert.equal(weekly.adminCatSelects, access.admin ? weekly.count : 0, label + ' category picker only for admin');
+    assert.equal(weekly.previewSelects, 0, label + ' embedded reader never exposes category picker');
+    if (!live) {
+      assert.ok(weekly.cats.includes('Haber') && weekly.cats.includes('Teknik Analiz'), label + ' full magazine badges');
+    }
     assert.ok(weekly.stagePages >= 3, label + ' flipbook pages');
 
     await page.locator('#news-weekly-list .nw-open').first().click();

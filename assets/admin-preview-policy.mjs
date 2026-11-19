@@ -36,6 +36,8 @@ export function previewRequest(raw, method, role, origin) {
   if (u.pathname === '/api/analytics' && q.get('education') === '1' && q.get('mine') === '1')
     return { status:200, json:{ ok:true, applications:[], preview:true } };
   if (u.pathname === '/api/eco-cal' && !u.search) return { url:'/api/eco-cal', authenticated:false };
+  if (u.pathname === '/api/tg' && q.size === 1 && /^[A-Za-z0-9_-]{10,250}$/.test(q.get('magPhoto') || ''))
+    return { url:'/api/tg?magPhoto=' + q.get('magPhoto'), authenticated:false };
   if (u.pathname === '/api/edu-shared') {
     const kind = q.get('kind') || '';
     if (['landing','podcast','youtube','news'].includes(kind))

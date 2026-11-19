@@ -52,10 +52,20 @@ async function alfaNews(req, res) {
       relId: text(e && e.relId, 80),
       result: text(e && e.result, 200),
       authorId: text(e && e.authorId, 80),
-      images: Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => text(u, 600)).filter(Boolean) : [],
+      images: (function () {
+        const own = Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => text(u, 600)).filter(Boolean) : [];
+        const tg = Array.isArray(e && e.photoIds)
+          ? e.photoIds.slice(0, 3).map(id => text(id, 250)).filter(Boolean)
+            .map(id => '/api/tg?magPhoto=' + encodeURIComponent(id))
+          : [];
+        return own.concat(tg).slice(0, 12);
+      })(),
       beforeImg: text(e && e.beforeImg, 600),
       afterImg: text(e && e.afterImg, 600),
       ctaUrl: text(e && e.ctaUrl, 600),
+      category: (e && e.category === 'Haber') ? 'Haber' : ((e && e.category === 'Teknik Analiz') ? 'Teknik Analiz' : ''),
+      sourceLink: text(e && e.sourceLink, 300),
+      publishedAt: text(e && e.publishedAt, 40),
     })) : [];
     const authors = Array.isArray(raw.authors) ? raw.authors.slice(0, 20).map(a => ({
       id: text(a && a.id, 80),

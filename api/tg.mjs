@@ -22,6 +22,55 @@ const TG_PREMIUM_THREAD = process.env.TG_PREMIUM_THREAD ? Number(String(process.
 const PUBLIC_FALLBACK = '🔔 Portföyde yeni bir hamle yapıldı.\n\nAyrıntılar ve canlı portföy premium üyeler için açık.\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
 const PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] };
 
+// Dergi görselleri Telegram CDN'ine hotlink edilmez: file_id same-origin proxy ile
+// sunucuda çözülür. Yalnızca alfanews satırında kayıtlı file_id'ler kabul edilir.
+const magPhotoAllow = new Map();
+async function magPhotoAllowed(fileId) {
+  const hit = magPhotoAllow.get(fileId);
+  if (hit && hit > Date.now()) return true;
+  const base = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+  const key = (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_PUBLISHABLE || '').trim();
+  if (!key) return false;
+  const res = await fetch(`${base}/rest/v1/alfanews?id=eq.1&select=data`, {
+    headers: { apikey: key, ...(key.startsWith('sb_secret_') ? {} : { Authorization: 'Bearer ' + key }) },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) return false;
+  const rows = await res.json();
+  const data = rows && rows[0] && rows[0].data;
+  const entries = data && Array.isArray(data.entries) ? data.entries : [];
+  const ok = entries.some(e => Array.isArray(e && e.photoIds) && e.photoIds.includes(fileId));
+  if (ok) magPhotoAllow.set(fileId, Date.now() + 5 * 60 * 1000);
+  return ok;
+}
+async function handleMagPhoto(req, res) {
+  const fileId = String(req.query?.magPhoto || '');
+  if (!/^[A-Za-z0-9_-]{10,250}$/.test(fileId)) return res.status(400).json({ error: 'invalid_photo' });
+  if (!TG_TOKEN) return res.status(503).json({ error: 'telegram_not_configured' });
+  try {
+    if (!await magPhotoAllowed(fileId)) return res.status(404).json({ error: 'photo_not_found' });
+    const info = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getFile`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: fileId }), signal: AbortSignal.timeout(8000),
+    });
+    const meta = await info.json();
+    const path = meta && meta.ok && meta.result && meta.result.file_path;
+    if (!path || !/^[\w./-]+$/.test(path)) return res.status(404).json({ error: 'photo_unavailable' });
+    const file = await fetch(`https://api.telegram.org/file/bot${TG_TOKEN}/${path}`, { signal: AbortSignal.timeout(12000) });
+    if (!file.ok) return res.status(502).json({ error: 'photo_fetch_failed' });
+    const type = String(file.headers.get('content-type') || '').split(';')[0].toLowerCase();
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(type)) return res.status(415).json({ error: 'unsupported_media' });
+    const buf = Buffer.from(await file.arrayBuffer());
+    if (buf.length > 2_000_000) return res.status(413).json({ error: 'photo_too_large' });
+    res.setHeader('Content-Type', type);
+    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    return res.status(200).send(buf);
+  } catch (e) {
+    return res.status(502).json({ error: 'photo_error' });
+  }
+}
+
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
@@ -201,6 +250,7 @@ function extractPosts(html) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'GET' && req.query && req.query.magPhoto) return handleMagPhoto(req, res);
   const notify = (req.method === 'POST') || (req.query && String(req.query.notify) === '1');
   if (notify) return handleNotify(req, res);
   res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
