@@ -1,0 +1,11 @@
+.admin-preview { position:fixed; inset:0; margin:auto; padding:0; width:calc(100vw - 24px); max-width:1600px; height:calc(100dvh - 24px); max-height:none; border:1px solid var(--border); border-radius:16px; background:var(--card); color:var(--text); overflow:hidden; }
+.admin-preview[open] { display:flex; flex-direction:column; }
+.admin-preview::backdrop { background:#020616cc; }
+.admin-preview header { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px; }
+.admin-preview header strong { margin-right:auto; }
+.admin-preview select,.admin-preview button { border:1px solid var(--border); border-radius:8px; padding:9px; background:var(--panel-alt); color:var(--text); font:inherit; font-size:12px; }
+.admin-preview button { cursor:pointer; }
+.admin-preview > p { margin:0; padding:0 14px 12px; font-size:11px; color:var(--text-3); }
+.admin-preview iframe { width:100%; flex:1; min-height:0; border:0; background:var(--bg,#0c1020); }
+#admin-preview-open[hidden] { display:none!important; }
+@media(max-width:600px) { .admin-preview header strong { width:100%; } .admin-preview select { flex:1; min-width:0; } }
