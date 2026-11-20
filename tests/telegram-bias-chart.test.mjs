@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { wantsBiasChart, buildBiasChartModel, biasChartSvg, biasChartContext, biasChartViewport, biasScenarioGeometry } from '../lib/telegram-bias-chart.mjs';
 import { renderBiasChart, createBiasChartRenderer } from '../lib/telegram-bias-image.mjs';
 import { deliverQaReply } from '../lib/telegram-qa-delivery.mjs';
-import { handleTelegramUpdate, briefMarketFallback, needsBriefRewrite } from '../lib/telegram-qa.mjs';
+import { handleTelegramUpdate, briefMarketFallback, needsBriefRewrite, hasPriceScaleError } from '../lib/telegram-qa.mjs';
 import { closedBars, TF_MS } from '../lib/alpha-strategy-v16.mjs';
 
 const history=JSON.parse(fs.readFileSync(new URL('./fixtures/alpha-v16/btc-2025-01.json',import.meta.url)));
@@ -50,6 +50,35 @@ test('live quote is distinct from the last closed bar and rejects future or diff
   assert.doesNotMatch(biasChartSvg(m),/mum teyidi ayrı|canlı tick/);
   for(const q of [{...quote,at:asOf+1},{...quote,source:'different venue'},{...quote,at:asOf-600000}])
     assert.equal(buildBiasChartModel({detail,asOf,quote:q}).liveQuote,null);
+});
+test('fresh all-time-in-window low/high quote still renders, without inventing support or resistance beyond it',()=>{
+  const base=buildBiasChartModel({detail,asOf}),actual=new Set(detail['15m'].candles.flatMap(b=>[b.h,b.l]));
+  for(const [price,side,state] of [[base.below-500,'below','new_low'],[base.above+500,'above','new_high']]){
+    const m=buildBiasChartModel({detail,asOf,quote:{price,at:asOf,source:detail['15m'].source}});
+    assert.equal(m.boundaryState,state);assert.equal(m.unmappedSide,side);
+    assert.ok(actual.has(m.lower)&&actual.has(m.upper));
+    assert.equal(side==='below'?m.scenarios.short.continuationReference:m.scenarios.long.continuationReference,null);
+    assert.ok(renderBiasChart(m).length>10000);
+    const text=briefMarketFallback({symbol:'BTC',price},m);
+    assert.equal(needsBriefRewrite(text),false);
+    assert.match(text,/teyitli yeni pivot yok/);
+    assert.match(biasChartContext(m),/VARMIŞ GİBİ SUNMA/);
+  }
+});
+test('price exactly at a historical low/high does not fail the reference bracket check',()=>{
+  const base=buildBiasChartModel({detail,asOf});
+  for(const [price,state] of [[base.below,'at_low'],[base.above,'at_high']]){
+    const m=buildBiasChartModel({detail,asOf,quote:{price,at:asOf,source:detail['15m'].source}});
+    assert.equal(m.boundaryState,state);
+    assert.ok(m.lower<m.upper);
+  }
+});
+test('currency range scale sanity catches 60–61 dollars, without silently multiplying units or rejecting explicit thousands/risk amounts',()=>{
+  const ref={symbol:'BTC',price:60461};
+  for(const text of ['Fiyat 60-61 $ aralığında.','Fiyat 60‑61 $ aralığında.','BTC $60–$61 arasında.'])
+    assert.equal(hasPriceScaleError(text,ref),true,text);
+  for(const text of ['60.000–61.000 $ aralığı.','60–61 bin $ aralığı.','$60–$61 bin aralığı.','İşlem başına risk 20–30 $.'])
+    assert.equal(hasPriceScaleError(text,ref),false,text);
 });
 test('local event labels only use observable completed candles and never assert a canonical M2 signal',()=>{
   const m=buildBiasChartModel({detail,asOf});
@@ -225,5 +254,52 @@ test('Telegram normal /ask stays text-only; graph /ask and /grafik produce PNG w
   } finally {
     globalThis.fetch=original;
     for(const [k,v] of Object.entries(saved)) if(v===undefined)delete process.env[k];else process.env[k]=v;
+  }
+});
+test('Telegram fresh-low request delivers PNG and repairs wrong dollar range; genuine missing OHLC gets a distinct error',async()=>{
+  const original=globalThis.fetch;
+  const keys=['GROQ_API_KEY','SUPABASE_SERVICE_ROLE','COINALYZE_API_KEY','OPENMARKET_API_KEY','TG_QA_CHAT_ID','TG_QA_THREAD'];
+  const saved=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
+  process.env.GROQ_API_KEY='unit';for(const k of keys.slice(1))delete process.env[k];
+  const prompts=[],calls=[];let missing=false;
+  globalThis.fetch=async(url,opts={})=>{
+    const u=String(url);calls.push({url:u,method:opts.method||'GET'});
+    if(u.includes('api.groq.com')){
+      prompts.push(JSON.parse(opts.body));
+      return Response.json({choices:[{message:{content:'BTC fiyatı 60-61 $ aralığında sıkışabilir.'}}]});
+    }
+    if(u.includes('/rest/v1/edu_shared'))return Response.json([]);
+    if(u.includes('/api/v3/ticker/24hr'))return Response.json({lastPrice:'60000'});
+    if(u.includes('/api/v3/klines')&&!missing){
+      const tf=new URL(u).searchParams.get('interval'),d=TF_MS[tf],at=Math.floor(Date.now()/d)*d;
+      return Response.json(Array.from({length:80},(_,i)=>{
+        const p=62000+Math.sin(i)*150;
+        return [at-(79-i)*d,String(p),String(p+200),String(p-200),String(p+15),'10'];
+      }));
+    }
+    if(u.includes('gold-api.com'))return Response.json({price:2500});
+    return new Response('{}',{status:503});
+  };
+  const update={message:{text:'/grafik BTC',chat:{id:123,type:'private'},from:{id:7}}};
+  try {
+    const qa=await import('../lib/telegram-qa.mjs?fresh-low='+Math.random());
+    const result=await qa.handleTelegramUpdate(update);
+    assert.ok(Buffer.isBuffer(result.photo),'fresh low must not suppress graph');
+    assert.equal(prompts.length,2,'wrong range gets one correction attempt');
+    assert.match(prompts[0].messages[0].content,/DİP SINIRI/);
+    assert.match(prompts[1].messages.at(-1).content,/dolar\/bin dolar ölçeği yanlış/);
+    assert.doesNotMatch(result.reply,/60-61 \$|Grafik üretilemedi/);
+    assert.match(result.reply,/eski dip olarak üstümüzde/);
+    assert.match(result.reply,/teyitli yeni pivot yok/);
+    missing=true;
+    const noData=await import('../lib/telegram-qa.mjs?missing-ohlc='+Math.random());
+    const unavailable=await noData.handleTelegramUpdate(update);
+    assert.equal(unavailable.photo,undefined);
+    assert.match(unavailable.reply,/Grafik için yeterli mum verisi alınamadı/);
+    assert.doesNotMatch(unavailable.reply,/Mum verisi güncel değil/);
+    assert.equal(calls.filter(c=>c.method!=='GET'&&!c.url.includes('api.groq.com')).length,0);
+  } finally {
+    globalThis.fetch=original;
+    for(const [k,v] of Object.entries(saved))if(v===undefined)delete process.env[k];else process.env[k]=v;
   }
 });

@@ -48,6 +48,8 @@ Saf motorun `analyzeV16(detail, asOf, { evidence, mode })` arayüzü incelenmiş
 
 Varsayılan yorum 3–4 cümle ve en fazla 90 kelimedir; tablo, model kataloğu ve iç durum kodları gösterilmez. Uzun yanıt bir kez kısalttırılır ve işlem planı güvenliği tekrar denetlenir; hâlâ uygunsuzsa canlı fiyat/1H betimsel görünümden kısa güvenli cevap döner. Detay/işlem planı açıkça istendiğinde ayrıntıya izin verilir. Saat birimleri “24 saat / 1 saat” diye açık yazılır; defter duvarları HTF supply/demand gibi sunulmaz.
 
+“60–61 $” gibi güncel fiyat ölçeğiyle bariz uyuşmayan dolar aralıkları yeniden yazdırılır; kendiliğinden 1000 ile çarpılarak düzeltilmez. “60–61 bin dolar” gibi açık birimler ve risk/bütçe tutarları bu kontrolle karıştırılmaz. Bu bir yanıt-birim denetimidir, strateji giriş/stop uzaklığı filtresi değildir.
+
 ### İsteğe bağlı iki senaryolu Telegram görseli
 
 - “BTC’yi grafikle yorumla”, `/ask BTC grafikle yorumla` veya `/grafik BTC`: aynı veri snapshot'ından 15M PNG ve kısa yorum. `/chart BTC` de desteklenir. Normal sorularda görsel oluşturulmaz.
@@ -63,6 +65,8 @@ Varsayılan yorum 3–4 cümle ve en fazla 90 kelimedir; tablo, model kataloğu 
 - Canlı quote ile son kapalı mum modelde ayrı tutulur; sade görselde yalnız seçilen fiyat etiketi gösterilir. Gelecek zamanlı, eski veya farklı borsadan quote çizim başlangıcına karıştırılmaz. Son yerel kırılım/geri kazanım gözlemi kapalı mumlardan çıkarılır ve yorumda kullanılabilir; görselde ek açıklama olarak basılmaz.
 - Yeşil/kırmızı beklenen teyit çemberleri fiyatlar yakın olsa da yatayda ayrılır. Metin yedeği grafiğin gerçek iki referansını ve varsa yerel olayı kullanır; genel şablon cevaba düşmez. Normal sohbet istemine işlem-plan formu eklenmez.
 - Sade görsel: üstte yalnız isim/zaman dilimi ve küçük kaynak/tarih; sağda fiyat ekseni ve güncel fiyat etiketi. Anlık/mum teyidi paragrafları, görünen tepe/dip yazıları, ana/karşı senaryo başlıkları ve uzun açıklamalar kaldırıldı. Tek kısa alt not çizimlerin şematik ve çemberlerin beklenen teyit olduğunu belirtir. Ayrıntılar yorum/analiz verisinde korunur.
+- Yeni dip/tepe hatası düzeltildi: canlı fiyat kapanmış mumların aralığını aştığında grafik iptal edilmez. Eski dip/tepe retest referansı olarak korunur; bilinmeyen yönde `continuationReference: null` döner, yeni destek/direnç uydurulmaz. Tam sınır eşitlikleri de desteklenir; mum kapanışı gelmeden yeni uç teyit sayılmaz.
+- Gerçek veri eksikliği, eski mum ve render hataları ayrı mesaj/kodlarla ayrılır. Teşhis logları yalnız aşama ve sabit hata kodu içerir; kullanıcı mesajı/kimliği veya gizli anahtar kaydetmez.
 
 ## 3. Ek veri bağlantıları
 
@@ -123,7 +127,7 @@ node --test tests/*.test.mjs
 
 ## 6. Regresyon ve güvenlik
 
-Tam test paketi: **847 test / 847 geçti / 0 başarısız**. `git diff --check` temiz. Ek regresyon testi sistem fontları kapalıyken başlık ve sağ fiyat eksenindeki gerçek yazı piksellerini kontrol eder; yalnız PNG dosyasının oluşması yeterli sayılmaz. İki yolun da sürekli/eğrisel olduğu, kırmızı uzantının dip altına indiği ve bunun strateji seviyelerini değiştirmediği ayrıca test edilir.
+Tam test paketi: **851 test / 851 geçti / 0 başarısız**. `git diff --check` temiz. Ek regresyon testi sistem fontları kapalıyken başlık ve sağ fiyat eksenindeki gerçek yazı piksellerini kontrol eder; yalnız PNG dosyasının oluşması yeterli sayılmaz. İki yolun da sürekli/eğrisel olduğu, kırmızı uzantının dip altına indiği ve bunun strateji seviyelerini değiştirmediği ayrıca test edilir. Yeni dip/tepe, sınır eşitliği, hatalı dolar aralığı ve gerçek veri eksikliği ayrımı PNG/Telegram akışında test edilir.
 
 Yeni testler iki yönlü MSB/Fibonacci, HTF fitil/kapanış ayrımı, gelecek/eksik kanıt, limitten önce TP, intrabar belirsizliği, fill sonrası hedef, otomatik re-anchor olmaması, LLM plan reddi ve Telegram parçalamayı kapsar. Q&A entegrasyonu ağ/LLM taklitleriyle test edilir; gerçek servis yazımı yapılmaz.
 
