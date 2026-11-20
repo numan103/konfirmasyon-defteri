@@ -143,7 +143,7 @@
   body[data-page="data"] { --pc: #38bdf8; --pc-soft: rgba(56,189,248,.16); --glow-a: rgba(56,189,248,.18); --glow-b: rgba(59,130,246,.10); }
   body[data-page="review"] { --pc: #fbbf24; --pc-soft: rgba(251,191,36,.16); --glow-a: rgba(251,191,36,.18); --glow-b: rgba(245,158,11,.10); }
   body[data-page="news"] { --pc: #fb7185; --pc-soft: rgba(251,113,133,.16); --glow-a: rgba(251,113,133,.20); --glow-b: rgba(225,29,72,.10); }
-  body[data-page="egitim"] { --pc: #f472b6; --pc-soft: rgba(244,114,182,.16); --glow-a: rgba(244,114,182,.20); --glow-b: rgba(236,72,153,.10); }
+  body[data-page="egitim"], body[data-page="edustudio"] { --pc: #f472b6; --pc-soft: rgba(244,114,182,.16); --glow-a: rgba(244,114,182,.20); --glow-b: rgba(236,72,153,.10); }
   body[data-page="pano"] { --pc: #a78bfa; --pc-soft: rgba(167,139,250,.16); --glow-a: rgba(167,139,250,.20); --glow-b: rgba(139,92,246,.10); }
   body[data-page="indicators"] { --pc: #2dd4bf; --pc-soft: rgba(45,212,191,.16); --glow-a: rgba(45,212,191,.18); --glow-b: rgba(20,184,166,.10); }
   body[data-page="onchain"] { --pc: #fb923c; --pc-soft: rgba(251,146,60,.16); --glow-a: rgba(251,146,60,.18); --glow-b: rgba(234,88,12,.10); }
@@ -2995,6 +2995,28 @@
   .ch-note-view { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; box-sizing: border-box; }
   .ch-note-box { margin-top: 14px; }
   .ch-study { min-width:0; }
+  .edu-author-head { display:flex; justify-content:space-between; align-items:start; gap:16px; margin:18px 0; }
+  .edu-author-head h1 { margin:6px 0; font-size:28px; }
+  .edu-author-head p { color:var(--text-3); max-width:760px; line-height:1.7; }
+  .edu-author-grid { display:grid; grid-template-columns:minmax(250px,340px) minmax(0,1fr); gap:18px; margin-top:16px; align-items:start; }
+  .edu-author-editor, #edu-author-tree { min-width:0; }
+  #edu-author-tree { max-height:82vh; overflow:auto; }
+  #edu-author-tree select { width:100%; margin:6px 0 12px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:10px; }
+  .edu-author-actions { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+  .edu-author-topic { border-top:1px solid var(--border); margin-top:14px; padding-top:12px; }
+  .edu-author-topic h3 { font-size:15px; margin:0 0 8px; overflow-wrap:anywhere; }
+  .edu-author-item { display:flex; align-items:center; gap:6px; margin:8px 0; }
+  .edu-author-item > button:first-child { flex:1; min-width:0; text-align:left; white-space:normal; overflow-wrap:anywhere; }
+  #edu-author-status, #ch-draft-status { font-size:12px; color:var(--text-2); line-height:1.7; }
+  #edu-author-drafts { padding:12px; border:1px solid var(--border); border-radius:10px; }
+  #edu-author-draft-list > div { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:8px 0; }
+  #page-edustudio .eg-form { margin-top:0; max-width:none; }
+  #page-edustudio .eg-form-btns { position:sticky; bottom:8px; z-index:4; padding:10px; background:var(--card); border:1px solid var(--border); border-radius:10px; flex-wrap:wrap; }
+  @media(max-width:820px) {
+    .edu-author-grid { grid-template-columns:minmax(0,1fr); }
+    .edu-author-head { flex-direction:column; }
+    #edu-author-tree { max-height:45vh; }
+  }
   #ch-view .eg-course > .panel { min-width:0; }
   #ch-view .eg-item-t { min-width:0; overflow-wrap:anywhere; }
   .ch-study-tools { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
@@ -3006,7 +3028,7 @@
   .ch-tricks { margin-top:18px; padding:16px; border:1px solid var(--border); border-left:3px solid var(--pc); border-radius:12px; background:var(--bg); }
   .ch-tricks h3 { font-size:14px; margin:0 0 10px; }
   .ch-paste-help { font-size:12px; color:var(--text-3); line-height:1.6; }
-  #ch-form[data-mode="topic"] > :not(#ch-form-title):not(#ch-in-title):not(.eg-form-btns):not(#ch-in-err) { display:none; }
+  #ch-form[data-mode="topic"] > :not(#ch-form-title):not(#ch-editor-context):not(#ch-in-title):not(.eg-form-btns):not(#ch-in-err):not(#ch-draft-status) { display:none; }
   #ch-form[data-mode="section"] > .ch-content-field,
   #ch-form[data-mode="section"] > #ch-body-tool,
   #ch-form[data-mode="section"] > #ch-photo-ed,
@@ -4092,7 +4114,7 @@
   .tv-sug-item .s-ex { margin-left: auto; font-size: 10.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; }
   .tv-sug-note { padding: 9px 12px; font-size: 11.5px; color: var(--text-3); }
   body[data-page="trading"] .wrap { max-width: 1560px; }
-  body[data-page="egitim"] .wrap { max-width: 1400px; }
+  body[data-page="egitim"] .wrap, body[data-page="edustudio"] .wrap { max-width: 1400px; }
   /* Alfa Man */
   .alfa-page { max-width: 980px; margin: 0 auto; padding: 22px 14px 70px; }
   .am-tabs { display: flex; gap: 8px; margin: 16px 0; }
@@ -5909,6 +5931,7 @@
       <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
       <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
+      <a href="?page=edustudio" class="nav-link" id="tab-edustudio" data-nav style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=ek" class="nav-link" id="tab-ek" data-nav>📎 Ek</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
       <a href="?page=analitik" class="nav-link" id="tab-analitik" data-nav style="display:none">📊 Analitik</a>
@@ -5959,6 +5982,7 @@
       <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
       <a href="?page=eduplans" class="mnav-link" data-nav data-mnav="eduplans" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
+      <a href="?page=edustudio" class="mnav-link" data-nav data-mnav="edustudio" style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=ek" class="mnav-link" data-nav data-mnav="ek">📎 Ek</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
       <a href="?page=analitik" class="mnav-link" data-nav data-mnav="analitik" id="mnav-analitik" style="display:none">📊 Ziyaretçi Analitiği</a>
@@ -7068,6 +7092,23 @@
   <div id="page-eduplans" class="hidden">
     <div class="eduplans" id="eduplans-root"></div>
   </div>
+  <div id="page-edustudio" class="hidden">
+    <header class="edu-author-head">
+      <div><div class="edu-kicker">ALFA EDU · İÇERİK YÖNETİMİ</div><h1>İçerik Stüdyosu</h1>
+      <p>Konu, video ve notlarını buradan yönet. Yazdıkların hesabına özel cihaz taslağı olarak korunur; “Kaydet” ile sunucuya kaydedilir.</p></div>
+      <a href="?page=egitim" data-nav class="btn">Öğrenci görünümü ↗</a>
+      <button type="button" class="btn" id="edu-author-reload">İçerikleri yenile</button>
+    </header>
+    <div id="edu-author-status" role="status" aria-live="polite"></div>
+    <details id="edu-author-drafts"><summary id="edu-author-drafts-title">Taslaklar</summary><div id="edu-author-draft-list"></div></details>
+    <div class="edu-author-grid">
+      <aside id="edu-author-tree" class="panel"></aside>
+      <section class="edu-author-editor">
+        <div id="edu-author-empty" class="panel">Soldan bir konu seç; “+ Not” ile doğrudan yazmaya başla veya mevcut içeriği düzenle.</div>
+        <div id="edu-author-editor-slot"></div>
+      </section>
+    </div>
+  </div>
   <div id="page-egitim" class="hidden">
     <section class="edu-hero" id="edu-hero">
       <div class="edu-kicker" data-i18n="edu.kicker">ALFA EDU · KURS KÜTÜPHANESİ</div>
@@ -7214,6 +7255,7 @@
     <!-- Kanal formu: bölüm / konu / içerik ekle-düzenle -->
     <div id="ch-form" class="eg-form hidden">
       <div class="eg-form-h" id="ch-form-title" data-i18n="pg.egitim.new">Yeni</div>
+      <div id="ch-editor-context" class="ch-paste-help"></div>
       <input type="text" id="ch-in-title" data-i18n-ph="pg.egitim.titlePh" placeholder="Başlık" maxlength="140">
       <div id="ch-body-tool" class="ch-rt-tool">
         <button type="button" data-wrap="**" title="Kalın">B</button>
@@ -7248,8 +7290,10 @@
       </div>
       <div class="eg-form-btns">
         <button class="btn solid" id="ch-in-save" type="button" data-i18n="act.save">Kaydet</button>
-        <button class="btn" id="ch-in-cancel" type="button" data-i18n="act.cancel">Vazgeç</button>
+        <button class="btn" id="ch-in-cancel" type="button">Kapat · taslağı sakla</button>
+        <button class="btn danger" id="ch-in-discard" type="button">Taslağı sil</button>
       </div>
+      <div id="ch-draft-status" role="status" aria-live="polite"></div>
       <div class="eg-form-err" id="ch-in-err"></div>
     </div>
 
@@ -9242,6 +9286,7 @@
       </div>
     </div>
     <div class="ana-note">Ziyaretler anonim ölçülür; ham IP adresi saklanmaz. İsim/e-posta yalnızca kullanıcı giriş yaptıysa görünür. Yönetici ziyaretleri ve 5 sn altı kazara geçişler sayılmaz; üye girişi veya kayıt adımı olan kısa ziyaretler dahil edilir.</div>
+    <a href="?page=edustudio" data-nav class="btn solid">✎ Alfa Edu İçerik Stüdyosu</a>
     <div id="education-crm-slot"></div>
     <div id="ana-body">
       <div class="ana-loading">Analitik yükleniyor…</div>
@@ -13338,7 +13383,7 @@ let dataTrades = [];
 let dfDir = 'LONG';
 let currentPage = 'home';
 try {
-  const VALID_PAGES = ['eduplans', 'home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna','analitik'];
+   const VALID_PAGES = ['edustudio', 'eduplans', 'home','butce','sosyalmetre','uyap','zaman','strateji','defter','data','review','karne','news','egitim','strategies','analiz','mentoring','pano','indicators','designer','onchain','calendar','basvuru','chat-admin','calc','alfa','apps','alfatrading','portfoy','ek','erisim','ayna','analitik'];
   const lp = localStorage.getItem('df-last-page');
   if (lp && VALID_PAGES.indexOf(lp) >= 0) currentPage = lp;
   const sp = new URLSearchParams(location.search);
@@ -14258,7 +14303,7 @@ async function loadData() {
 async function saveData() { await store.set(DATA_KEY, JSON.stringify(dataTrades)); }
 
 function setInitialPage() {
-  const pages = ['eduplans', 'home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps', 'erisim'];
+  const pages = ['edustudio', 'eduplans', 'home', 'trading', 'alfatrading', 'defter', 'data', 'review', 'karne', 'news', 'egitim', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'apps', 'erisim'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', p !== currentPage);
@@ -14330,6 +14375,7 @@ const AM_PLAN = [
 // yalnizca arayuzu ve yonlendirmeyi belirler; veri erisimi Supabase RLS + API
 // tarafinda korunur.
 const PAGE_TIER = {
+  edustudio: 'admin',
   eduplans: 'free',
   home: 'free', calc: 'free', calendar: 'free', erisim: 'free', influencer: 'free',
   alfatrading: 'free',
@@ -14523,6 +14569,7 @@ function applyTierUi() {
       const need = PAGE_TIER[p];
       ok = need === 'free' || (need === 'ref' ? ref : isAdmin);
     }
+    if (p === 'eduplans' && isAdmin) ok = false; // Yönetici menüsünde doğrudan İçerik Stüdyosu.
     ['tab-', 'mnav-'].forEach(function (pre) {
       const el = document.getElementById(pre + p);
       if (el) el.style.display = ok ? '' : 'none';
@@ -15465,6 +15512,7 @@ function amRenderPlan() {
 
 let _popStateNavigating = false;
 function showPage(name, skipAnim) {
+  if (typeof chDraftCapture === 'function') chDraftCapture();
   if (name !== 'ayna' && window.Ayna && Ayna.voice) Ayna.voice.cancel();
   // Erisim katmani: sayfa, uyelik seviyesine gore acilir. Yetki yoksa
   // kullanici erisim sayfasina yonlendirilir ve hedef saklanir.
@@ -15489,7 +15537,7 @@ function showPage(name, skipAnim) {
   // AYNA:BASLA
   if (name === 'ayna') Ayna.render();
   // AYNA:BITIR
-  const pages = ['eduplans', 'home', 'influencer', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
+  const pages = ['edustudio', 'eduplans', 'home', 'influencer', 'butce', 'sosyalmetre', 'uyap', 'zaman', 'strateji', 'trading', 'alfatrading', 'portfoy', 'defter', 'data', 'review', 'karne', 'news', 'ek', 'egitim', 'strategies', 'analiz', 'mentoring', 'pano', 'indicators', 'designer', 'onchain', 'calendar', 'basvuru', 'chat-admin', 'calc', 'alfa', 'apps', 'ayna', 'erisim', 'analitik'];
   pages.forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.classList.toggle('hidden', name !== p);
@@ -15515,6 +15563,7 @@ function showPage(name, skipAnim) {
   if (name === 'karne') { if (window.renderKarne) renderKarne(); }
   if (name === 'news') openSharedPage('news', loadNews, renderNews);
   if (name === 'egitim') renderEgitim();
+  if (name === 'edustudio') renderEduStudio();
   if (name === 'strategies') renderStrategies();
   if (name === 'analiz') renderAnaliz();
   if (name === 'sosyalmetre') renderSosyal();
@@ -23983,6 +24032,7 @@ function egCurVid(topic) {
 }
 
 function renderEgitim() {
+  chPlaceEditor(false);
   const canEdit = magIsAdmin(); // eski gizli panelin artık erişilmeyen kodunda kullanılıyor
   // ---- Alfa Edu: katalog -> kurs oynatıcı, ara kanal adımı yok ----
   if (!channelsLoaded) {
@@ -24013,8 +24063,8 @@ function renderEgitim() {
     if (hero) hero.classList.add('hidden');
     if (catalog) catalog.classList.add('hidden');
     if (chView) chView.classList.remove('hidden');
-    if (chFormEl) chFormEl.classList.add('hidden');
-    if (chProfEl) chProfEl.classList.add('hidden');
+    if (chFormEl) chFormEl.classList.toggle('hidden', !chForm.mode);
+    if (chProfEl) chProfEl.classList.toggle('hidden', !chProfMode);
     renderChannelView();
     return;
   }
@@ -24434,7 +24484,7 @@ async function saveChannel(trader, silent) {
   } catch (e) {
     const err = document.getElementById(chProfMode ? 'ch-prof-err' : 'ch-in-err');
     if (err) err.textContent = e.message || 'Kaydedilemedi.';
-    if (!chForm.mode && !chProfMode) alert(e.message || 'Kaydedilemedi.');
+    if (!silent && !chForm.mode && !chProfMode) alert(e.message || 'Kaydedilemedi.');
     return false;
   }
 }
@@ -24449,7 +24499,10 @@ async function deleteChannel(traderId) {
     delete channelsData.traders[traderId];
     channelsData.order = channelsData.order.filter(x => x !== traderId);
     chCloseProf();
-    if (channelOpen === traderId) { channelOpen = null; renderEgitim(); } else renderEduChannels();
+    if (channelOpen === traderId) channelOpen = null;
+    if (currentPage === 'edustudio') renderEduStudio();
+    else if (!channelOpen) renderEgitim();
+    else renderEduChannels();
   } catch (e) { document.getElementById('ch-prof-err').textContent = 'Kanal silinemedi. Tekrar dene.'; }
 }
 function eduT(key, fallback) {
@@ -24630,6 +24683,7 @@ function renderEduChannels() {
 function chCurTrader() { return channelOpen ? channelsData.traders[channelOpen] || null : null; }
 function chCanEditCur() { return chCanEdit(chCurTrader()); }
 function openCourse(traderId, secId) {
+  if (chMediaPending && chForm.mode) { chDraftStatus('Görsel hazırlanıyor; birazdan diğer kursu açabilirsin.'); return; }
   const t = channelsData.traders[traderId];
   if (!t) return;
   if (chIsMine(t)) chSeedFromEdu(t);
@@ -24648,6 +24702,7 @@ function openChannel(userId) {
   openCourse(userId, first && first.id);
 }
 function closeChannel() {
+  if (chMediaPending && chForm.mode) { chDraftStatus('Görsel hazırlanıyor; biraz bekle.'); return; }
   channelOpen = null; chDelArmed = null;
   chCloseForm(); chCloseProf();
   renderEgitim();
@@ -24738,6 +24793,7 @@ function chMoveTopic(t, topic, dir) {
 // EDU_FEEDBACK_CONTEXT_BEGIN
 function mountEduFeedback(trader, topic, lesson) {
   if (!window.EduFeedback) return;
+  if (chIsAdmin() || currentPage === 'edustudio') { window.EduFeedback.clear(); return; }
   if (!trader || !topic) { window.EduFeedback.clear(); return; }
   const lessons = Object.values(trader.sections || {}).flatMap(topics => (topics || []).flatMap(item => item.videos || []));
   window.EduFeedback.mount({
@@ -24754,7 +24810,7 @@ function refreshEduFeedback() {
 // EDU_FEEDBACK_CONTEXT_END
 function renderChannelView() {
   const t = chCurTrader();
-  const canEdit = chCanEditCur();
+  const canEdit = chCanEditCur() && !(chIsAdmin() && currentPage === 'egitim');
   if (!t) { if (window.EduFeedback) window.EduFeedback.clear(); return; }
   const sec = chSecMeta(t).find(m => m.id === chSec) || chSecMeta(t)[0] || { id: '', title: 'Alfa Edu' };
   const secTitle = sec.title || 'Alfa Edu';
@@ -25210,14 +25266,19 @@ function chPhotoPreview(urlIn, prev) {
   const v = urlIn.value.trim();
   if (chSafeImage(v)) { prev.onerror = () => { prev.hidden = true; }; prev.src = v; prev.hidden = false; }
   else prev.hidden = true;
+  queueMicrotask(chDraftSchedule);
 }
 function chFileToDataUrl(file, cb) {
   const fail = () => { document.getElementById('ch-in-err').textContent = 'Görsel okunamadı. PNG, JPEG veya WebP kullan (en fazla 10 MB).'; };
   if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 10 * 1024 * 1024) { fail(); return; }
   const form = document.getElementById('ch-form'), generation = form.dataset.generation;
   chMediaPending++;
+  ['ch-in-cancel', 'ch-in-discard'].forEach(id => { const button = document.getElementById(id); if (button) button.disabled = true; });
   const rd = new FileReader();
-  const done = () => { chMediaPending = Math.max(0, chMediaPending - 1); };
+  const done = () => {
+    chMediaPending = Math.max(0, chMediaPending - 1);
+    if (!chMediaPending) ['ch-in-cancel', 'ch-in-discard'].forEach(id => { const button = document.getElementById(id); if (button) button.disabled = false; });
+  };
   rd.onload = () => {
     const img = new Image();
     img.onload = () => {
@@ -25351,15 +25412,236 @@ function chSyncAccessFields() {
   if (!sel || !opts) return;
   opts.hidden = sel.value !== 'paid';
 }
+
+let chDraftId = null, chDraftAccount = '', chDraftBaseline = '', chDraftPersisted = '', chDraftPending = 0;
+let chDraftModule = null, chStudioRestoredFor = '', chStudioBusy = false, chDraftTimer = null;
+const chDraftMemory = new Map();
+function chDraftStore() { return chDraftModule || (chDraftModule = import('/assets/edu-author-drafts.mjs?v=1').catch(error => { chDraftModule = null; throw error; })); }
+function chDraftSchedule() {
+  clearTimeout(chDraftTimer);
+  chDraftTimer = setTimeout(() => { chDraftTimer = null; chDraftCapture(); }, 250);
+}
+function chDraftFields() {
+  const g = id => document.getElementById(id);
+  return {
+    title: g('ch-in-title').value, body: g('ch-in-body').value, tricks: g('ch-in-tricks').value,
+    url: g('ch-in-url').value, access: g('ch-in-access').value, plans: chSelectedPlans(),
+    photos: Array.from(g('ch-photo-ed').children).map(row => ({ url: row.querySelector('.ch-purl').value, caption: row.querySelector('.ch-pcap').value })),
+    vids: Array.from(g('ch-video-ed').children).map(row => ({ url: row.querySelector('.ch-vurl').value })),
+  };
+}
+function chDraftStatus(text) { const el = document.getElementById('ch-draft-status'); if (el) el.textContent = text; }
+async function chDraftCapture() {
+  clearTimeout(chDraftTimer); chDraftTimer = null;
+  if (!chForm.mode || !chDraftId || !chDraftAccount || window.ALFA_PREVIEW_CONFIG ||
+      AUTH.user?.id !== chDraftAccount || !chCanEdit(channelsData.traders[chForm.channelId])) return;
+  const fields = chDraftFields(), signature = JSON.stringify(fields);
+  if (signature === chDraftPersisted || (signature === chDraftBaseline && !chDraftPersisted && !chDraftMemory.has(chDraftAccount + ':' + chDraftId))) return;
+  const account = chDraftAccount, id = chDraftId;
+  const record = { id, account, updatedAt: Date.now(), channelId: chForm.channelId, sectionId: chForm.sectionId, mode: chForm.mode, topicId: chForm.topicId, vidId: chForm.vidId, newId: chForm.newId, fields };
+  const memoryKey = account + ':' + id;
+  chDraftMemory.set(memoryKey, record);
+  chDraftPending++;
+  chDraftStatus('Taslak cihazına kaydediliyor…');
+  try {
+    const { drafts } = await chDraftStore();
+    await drafts.put(account, record);
+    if (chDraftMemory.get(memoryKey) === record) chDraftMemory.delete(memoryKey);
+    if (chDraftId === id && AUTH.user?.id === account) {
+      chDraftPersisted = signature;
+      chDraftStatus('Taslak bu cihazda saklandı · Üyelere kaydetmek için “Kaydet”.');
+    }
+    if (currentPage === 'edustudio' && AUTH.user?.id === account) renderEduDraftList();
+  } catch (e) {
+    if (chDraftId === id && AUTH.user?.id === account) chDraftStatus('Cihaz taslağı saklanamadı. Sekmeyi kapatmadan “Kaydet” ile sunucuya kaydet.');
+    if (AUTH.user?.id === account && currentPage === 'edustudio') chStudioNotice('Bir taslak henüz cihaza yazılamadı. Bu sekmeyi kapatma; metni sunucuya kaydet.');
+  } finally { chDraftPending--; }
+}
+async function chDraftForget(id = chDraftId, account = chDraftAccount) {
+  if (!id || !account) return;
+  try { const { drafts } = await chDraftStore(); await drafts.remove(account, id); }
+  catch (e) { chDraftStatus('Taslak cihazdan silinemedi; tekrar dene.'); return false; }
+  chDraftMemory.delete(account + ':' + id);
+  if (currentPage === 'edustudio' && AUTH.user?.id === account) renderEduDraftList();
+  return true;
+}
+function chPlaceEditor(studio) {
+  const slot = document.getElementById(studio ? 'edu-author-editor-slot' : 'page-egitim');
+  if (!slot) return;
+  ['ch-form', 'ch-prof-form'].forEach(id => { const form = document.getElementById(id); if (form && form.parentNode !== slot) slot.appendChild(form); });
+}
+function chStudioNotice(text) { const el = document.getElementById('edu-author-status'); if (el) el.textContent = text; }
+async function renderEduDraftList(resume = false) {
+  if (!chIsAdmin() || currentPage !== 'edustudio') return;
+  const account = AUTH.user.id;
+  try {
+    let records = [];
+    try { const { drafts } = await chDraftStore(); records = await drafts.list(account); }
+    catch (e) { chStudioNotice('Cihaz taslaklarına ulaşılamadı. Sekmeyi kapatmadan sunucuya kaydet.'); }
+    const combined = new Map(records.map(r => [r.id, r]));
+    for (const record of chDraftMemory.values()) if (record.account === account) combined.set(record.id, record);
+    records = Array.from(combined.values()).sort((a, b) => b.updatedAt - a.updatedAt);
+    if (AUTH.user?.id !== account || currentPage !== 'edustudio') return;
+    const list = document.getElementById('edu-author-draft-list'); if (!list) return;
+    list.replaceChildren();
+    document.getElementById('edu-author-drafts-title').textContent = 'Kaydedilmemiş taslaklar (' + records.length + ')';
+    records.filter(r => chCanEdit(channelsData.traders[r.channelId])).forEach(record => {
+      const row = document.createElement('div'), title = document.createElement('span');
+      title.textContent = (record.fields.title || 'Başlıksız not') + ' · ' + new Date(record.updatedAt).toLocaleString('tr-TR');
+      const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Devam et';
+      open.addEventListener('click', () => chResumeDraft(record));
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn danger'; remove.textContent = 'Taslağı sil';
+      remove.addEventListener('click', async () => {
+        if (!confirm('Yalnızca bu cihazdaki taslak silinsin mi? Yayındaki ders değişmez.')) return;
+        if (record.id === chDraftId) { if (!await chDraftForget()) return; chDraftBaseline = JSON.stringify(chDraftFields()); chDraftPersisted = ''; chCloseForm(); }
+        else await chDraftForget(record.id, account);
+      });
+      row.append(title, open, remove); list.appendChild(row);
+      const channel = channelsData.traders[record.channelId];
+      if (record.mode.startsWith('video-') && !channel.sections?.[record.sectionId]?.some(t => t.id === record.topicId)) {
+        open.disabled = true;
+        const select = document.createElement('select'); select.setAttribute('aria-label', 'Taslağın taşınacağı konu');
+        const blank = document.createElement('option'); blank.value = ''; blank.textContent = 'Yeni hedef konu seç…'; select.appendChild(blank);
+        Object.entries(channel.sections || {}).forEach(([sid, topics]) => topics.forEach(topic => {
+          const option = document.createElement('option'); option.value = JSON.stringify([sid, topic.id]); option.textContent = topic.title; select.appendChild(option);
+        }));
+        const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn'; copy.textContent = 'Bu konuya not olarak aç'; copy.disabled = true;
+        select.addEventListener('change', () => { copy.disabled = !select.value; });
+        copy.addEventListener('click', () => {
+          if (!select.value) return;
+          const [sectionId, topicId] = JSON.parse(select.value);
+          chResumeDraft({ ...record, sectionId, topicId, vidId: null, mode: 'video-add' });
+        });
+        row.append(select, copy);
+      }
+    });
+    if (resume && !chForm.mode && chStudioRestoredFor !== account) {
+      chStudioRestoredFor = account;
+      const latest = records.find(r => chCanEdit(channelsData.traders[r.channelId]));
+      if (latest) chResumeDraft(latest);
+    }
+  } catch (e) { chStudioNotice('Cihaz taslaklarına ulaşılamadı. Açık metnini sunucuya kaydetmeden sekmeyi kapatma.'); }
+}
+function chResumeDraft(record) {
+  if (!chIsAdmin() || chStudioBusy || chMediaPending || !chCanEdit(channelsData.traders[record.channelId])) return;
+  const trader = channelsData.traders[record.channelId], topics = trader.sections?.[record.sectionId] || [];
+  if (record.mode === 'video-edit' && topics.some(t => t.id === record.topicId) && !topics.find(t => t.id === record.topicId).videos?.some(v => v.id === record.vidId)) {
+    record = { ...record, mode: 'video-add', vidId: null };
+  }
+  if (record.mode === 'topic-edit' && !topics.some(t => t.id === record.topicId)) record = { ...record, mode: 'topic-add', topicId: null };
+  if (record.topicId && !topics.some(t => t.id === record.topicId)) {
+    chStudioNotice('Bu taslağın konusu silinmiş. Metin korunuyor; yeni bir konu oluşturup taslağı oraya aktarabilirsin.');
+    return;
+  }
+  chDraftCapture();
+  channelOpen = record.channelId; chSec = record.sectionId; chTopic = record.topicId || null; chVid = record.vidId || null;
+  chOpenForm(record.mode, { topicId: record.topicId, vidId: record.vidId }, record.fields);
+  if (record.newId) chForm.newId = record.newId;
+  chDraftId = record.id; chDraftAccount = AUTH.user.id; chDraftBaseline = ''; chDraftPersisted = JSON.stringify(chDraftFields());
+  chDraftStatus('Cihaz taslağın geri açıldı · Henüz sunucuya kaydedilmedi.');
+  renderEduStudioTree();
+}
+async function renderEduStudio() {
+  if (!chIsAdmin() || currentPage !== 'edustudio') return;
+  chPlaceEditor(true);
+  if (window.EduFeedback) window.EduFeedback.clear();
+  if (!channelsLoaded) { chStudioNotice('İçerikler yükleniyor…'); await loadChannels(); }
+  if (currentPage !== 'edustudio' || !chIsAdmin()) return;
+  if (!channelsLoaded) { chStudioNotice(channelsError); return; }
+  chStudioNotice('');
+  const editable = Object.values(channelsData.traders).filter(chCanEdit);
+  if (!chCanEdit(chCurTrader())) channelOpen = (chMineTrader() || editable[0])?.id || null;
+  const trader = chCurTrader();
+  if (trader && !chSecMeta(trader).some(s => s.id === chSec)) chSec = (chSecMeta(trader).find(s => s.access === 'paid') || chSecMeta(trader)[0])?.id;
+  renderEduStudioTree();
+  document.getElementById('ch-form').classList.toggle('hidden', !chForm.mode);
+  document.getElementById('edu-author-empty').classList.toggle('hidden', !!chForm.mode || !!chProfMode);
+  renderEduDraftList(true);
+}
+async function chStudioMutate(change, message) {
+  if (!chCanEditCur() || chStudioBusy || chMediaPending) return false;
+  chDraftCapture();
+  const trader = structuredClone(chCurTrader());
+  try { change(trader); }
+  catch (e) { chStudioNotice('İçerik değişmiş; güncel listeden yeniden seçip dene.'); return false; }
+  chStudioBusy = true;
+  const tree = document.getElementById('edu-author-tree'); if (tree) tree.inert = true;
+  const saved = await saveChannel(trader, true);
+  chStudioBusy = false;
+  if (tree) tree.inert = false;
+  if (saved) { renderEduStudioTree(); chStudioNotice(message || 'Değişiklik kaydedildi.'); }
+  else chStudioNotice('Değişiklik kaydedilemedi; mevcut içerik değiştirilmedi.');
+  return saved;
+}
+function renderEduStudioTree() {
+  const tree = document.getElementById('edu-author-tree'); if (!tree || !chIsAdmin()) return;
+  tree.replaceChildren();
+  const el = (tag, text) => { const n = document.createElement(tag); if (text) n.textContent = text; return n; };
+  const button = (text, action, parent = tree) => { const b = el('button', text); b.type = 'button'; b.className = 'btn'; b.addEventListener('click', action); parent.appendChild(b); return b; };
+  const channel = el('select'); channel.setAttribute('aria-label', 'Düzenlenecek kanal');
+  Object.values(channelsData.traders).filter(chCanEdit).forEach(t => { const o = el('option', t.name); o.value = t.id; o.selected = t.id === channelOpen; channel.appendChild(o); });
+  channel.addEventListener('change', () => { if (chMediaPending || chStudioBusy) { channel.value = channelOpen; return; } chCloseForm(); channelOpen = channel.value; chSec = chSecMeta(chCurTrader())[0]?.id; renderEduStudioTree(); });
+  tree.appendChild(channel);
+  button('+ Kanal', () => { chCloseForm(); chOpenNew(); });
+  const trader = chCurTrader(); if (!trader) return;
+  button('Kanal profili', () => chOpenProf(trader.id));
+  const sections = el('select'); sections.setAttribute('aria-label', 'Düzenlenecek bölüm');
+  chSecMeta(trader).forEach(s => { const o = el('option', (s.access === 'paid' ? '🔒 ' : '') + s.title); o.value = s.id; o.selected = s.id === chSec; sections.appendChild(o); });
+  sections.addEventListener('change', () => { if (chMediaPending || chStudioBusy) { sections.value = chSec; return; } chCloseForm(); chSec = sections.value; chTopic = null; chVid = null; renderEduStudioTree(); });
+  tree.appendChild(sections);
+  const actions = el('div'); actions.className = 'edu-author-actions'; tree.appendChild(actions);
+  button('+ Bölüm', () => chOpenForm('sec-add', null, { access: 'paid', plans: ['video'] }), actions);
+  button('Bölümü düzenle', () => chOpenForm('sec-edit', null, chSecMeta(trader).find(s => s.id === chSec)), actions);
+  button('Bölümü sil', async () => {
+    if (chSecMeta(trader).length < 2) { chStudioNotice('Son bölüm silinemez; önce başka bir bölüm oluştur.'); return; }
+    if (!confirm('Bu bölüm ve içindeki tüm konu/içerikler silinsin mi?')) return;
+    const sid = chSec;
+    if (await chStudioMutate(t => { t.secMeta = chSecMeta(t).filter(s => s.id !== sid); delete t.sections[sid]; }, 'Bölüm silindi.')) { chCloseForm(); chSec = chSecMeta(chCurTrader())[0].id; renderEduStudioTree(); }
+  }, actions);
+  button('+ Konu', () => chOpenForm('topic-add', null, null));
+  const topics = trader.sections?.[chSec] || [];
+  if (!topics.length) tree.appendChild(el('p', 'Henüz konu yok. “+ Konu” ile başla.'));
+  topics.forEach(topic => {
+    const group = el('div'); group.className = 'edu-author-topic'; tree.appendChild(group);
+    group.appendChild(el('h3', topic.title));
+    const tools = el('div'); tools.className = 'edu-author-actions'; group.appendChild(tools);
+    button('+ Not', () => { chTopic = topic.id; chOpenForm('video-add', { topicId: topic.id }, null); document.getElementById('ch-in-body').focus(); }, tools);
+    button('+ Video', () => { chTopic = topic.id; chOpenForm('video-add', { topicId: topic.id }, null); document.getElementById('ch-in-url').focus(); }, tools);
+    button('Adını düzenle', () => chOpenForm('topic-edit', { topicId: topic.id }, topic), tools);
+    button('Konuyu sil', async () => {
+      if (!confirm('“' + topic.title + '” ve içindeki içerikler silinsin mi?')) return;
+      const sid = chSec;
+      if (await chStudioMutate(t => { t.sections[sid] = t.sections[sid].filter(x => x.id !== topic.id); }, 'Konu silindi.')) { if (chForm.topicId === topic.id) chCloseForm(); }
+    }, tools);
+    (topic.videos || []).forEach((item, index) => {
+      const row = el('div'); row.className = 'edu-author-item'; group.appendChild(row);
+      button((item.url ? '▶ ' : '✎ ') + item.title + (item.access === 'paid' ? ' · ücretli' : ' · ücretsiz'), () => { chTopic = topic.id; chVid = item.id; chOpenForm('video-edit', { topicId: topic.id, vidId: item.id }, item); }, row);
+      const move = delta => chStudioMutate(t => {
+        const list = t.sections[chSec].find(x => x.id === topic.id).videos, to = index + delta;
+        if (to >= 0 && to < list.length) [list[index], list[to]] = [list[to], list[index]];
+      });
+      const up = button('↑', () => move(-1), row); up.title = 'İçeriği yukarı taşı'; up.disabled = index === 0;
+      const down = button('↓', () => move(1), row); down.title = 'İçeriği aşağı taşı'; down.disabled = index === topic.videos.length - 1;
+      button('Sil', async () => {
+        if (!confirm('“' + item.title + '” içeriği silinsin mi?')) return;
+        const sid = chSec;
+        if (await chStudioMutate(t => { const target = t.sections[sid].find(x => x.id === topic.id); target.videos = target.videos.filter(v => v.id !== item.id); }, 'İçerik silindi.')) { if (chForm.vidId === item.id) chCloseForm(); }
+      }, row);
+    });
+  });
+}
 function chOpenForm(mode, ids, prefill) {
-  if (!chCanEditCur()) return;
+  if (!chCanEditCur() || chStudioBusy) return;
+  if (chMediaPending) { chDraftStatus('Görsel hazırlanıyor; tamamlandıktan sonra diğer içeriği açabilirsin.'); return; }
+  chDraftCapture();
+  chCloseProf();
   const g = id => document.getElementById(id);
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
-  const isSec = (mode === 'sec-add');
+  const isSec = (mode === 'sec-add' || mode === 'sec-edit');
   const form = g('ch-form');
   form.dataset.mode = isVideo ? 'content' : isSec ? 'section' : 'topic';
   form.dataset.generation = chUid();
-  chForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, ctype: 'not' };
+  chForm = { mode: mode, channelId: channelOpen, sectionId: chSec, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, newId: mode === 'video-add' ? chUid() : null, ctype: 'not' };
   g('ch-in-title').value = (prefill && prefill.title) || '';
   g('ch-in-body').value = (prefill && prefill.body) || '';
   g('ch-in-tricks').value = (prefill && prefill.tricks) || '';
@@ -25385,19 +25667,32 @@ function chOpenForm(mode, ids, prefill) {
     chItemVids(prefill || {}).forEach(u => videoEd.appendChild(chVideoRow(u)));
   }
   g('ch-in-err').textContent = '';
-  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm' };
+  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik / not', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm', 'sec-edit': 'Bölümü düzenle' };
   g('ch-form-title').textContent = titles[mode] || 'Düzenle';
+  const trader = chCurTrader(), topic = trader.sections?.[chSec]?.find(t => t.id === chForm.topicId);
+  g('ch-editor-context').textContent = [trader.name, sec?.title, topic?.title].filter(Boolean).join(' / ');
   g('ch-in-title').setAttribute('placeholder', isVideo ? 'Başlık (ör. Market Yapısı -1)' : isSec ? 'Bölüm başlığı (ör. Onchain Analizi)' : 'Konu başlığı (ör. Market Yapısı)');
   g('ch-form').classList.remove('hidden');
+  chDraftId = chUid(); chDraftAccount = AUTH.user.id;
+  chDraftBaseline = JSON.stringify(chDraftFields()); chDraftPersisted = '';
+  chDraftStatus('');
+  if (currentPage === 'edustudio') g('edu-author-empty').classList.add('hidden');
   g('ch-in-title').focus();
 }
-function chCloseForm() { chForm = { mode: null, topicId: null, vidId: null, ctype: 'video' }; const f = document.getElementById('ch-form'); if (f) { f.dataset.generation = chUid(); f.classList.add('hidden'); } }
-function chCloseProf() { chProfMode = null; chProfTarget = null; const f = document.getElementById('ch-prof-form'); if (f) f.classList.add('hidden'); }
+function chCloseForm() {
+  chDraftCapture();
+  chForm = { mode: null, topicId: null, vidId: null, ctype: 'video' }; chDraftId = null;
+  const f = document.getElementById('ch-form'); if (f) { f.dataset.generation = chUid(); f.classList.add('hidden'); }
+  const empty = document.getElementById('edu-author-empty'); if (empty && currentPage === 'edustudio' && !chProfMode) empty.classList.remove('hidden');
+}
+function chCloseProf() { chProfMode = null; chProfTarget = null; const f = document.getElementById('ch-prof-form'); if (f) f.classList.add('hidden'); const empty = document.getElementById('edu-author-empty'); if (empty && currentPage === 'edustudio' && !chForm.mode) empty.classList.remove('hidden'); }
 
 async function chSaveForm() {
   const g = id => document.getElementById(id);
-  const t = chCurTrader() && JSON.parse(JSON.stringify(chCurTrader()));
-  if (!t || !chCanEditCur()) { chCloseForm(); return; }
+  const context = { ...chForm }, sectionId = context.sectionId, draftId = chDraftId, account = chDraftAccount;
+  const source = channelsData.traders[context.channelId];
+  const t = source && structuredClone(source);
+  if (!t || !chCanEdit(t) || !context.mode || chStudioBusy) return;
   const title = g('ch-in-title').value.trim();
   const url = g('ch-in-url').value.trim();
   const body = g('ch-in-body').value.trim();
@@ -25410,7 +25705,7 @@ async function chSaveForm() {
   const ctype = hasVideoLink ? 'video' : 'not';
   const access = (g('ch-in-access') && g('ch-in-access').value === 'paid') ? 'paid' : 'free';
   const plans = access === 'paid' ? chSelectedPlans() : [];
-  if ((isVideo || mode === 'sec-add') && access === 'paid' && !plans.length) { g('ch-in-err').textContent = 'Ücretli içerik için en az bir paket seç.'; return; }
+  if ((isVideo || mode === 'sec-add' || mode === 'sec-edit') && access === 'paid' && !plans.length) { g('ch-in-err').textContent = 'Ücretli içerik için en az bir paket seç.'; return; }
   const photos = isVideo ? chCollectPhotos() : [];
   if (photos.some(p => !chSafeImage(p.url))) { g('ch-in-err').textContent = 'Görsel için HTTP(S) bağlantısı veya PNG/JPEG/WebP kullan.'; return; }
   if (isVideo && document.querySelectorAll('#ch-photo-ed .ch-prow').length !== photos.length) { g('ch-in-err').textContent = 'Boş veya okunamayan görsel var. Tamamla veya × ile kaldır.'; return; }
@@ -25420,48 +25715,76 @@ async function chSaveForm() {
     g('ch-in-err').textContent = 'Geçerli bir YouTube video ya da oynatma listesi bağlantısı gir (ya da boş bırak).';
     return;
   }
+  let nextSection = sectionId, nextTopic = context.topicId, nextVid = context.vidId;
   if (mode === 'sec-add') {
     const id = chUid();
     t.secMeta = chSecMeta(t).concat([{ id, title: title || 'Yeni Bölüm', access, plans }]);
     if (!t.sections) t.sections = {};
     if (!t.sections[id]) t.sections[id] = [];
-    chSec = id; chTopic = null; chVid = null;
+    nextSection = id; nextTopic = null; nextVid = null;
+  } else if (mode === 'sec-edit') {
+    const section = chSecMeta(t).find(s => s.id === sectionId);
+    if (!section) { g('ch-in-err').textContent = 'Bölüm bulunamadı; taslağın korunuyor.'; return; }
+    t.secMeta = chSecMeta(t).map(s => s.id === sectionId ? { ...s, title: title || s.title, access, plans } : s);
   } else if (mode === 'topic-add') {
     const id = chUid();
     if (!t.sections) t.sections = {};
-    if (!t.sections[chSec]) t.sections[chSec] = [];
-    t.sections[chSec].push({ id, title: title || 'Konu', videos: [] });
-    chTopic = id;
+    if (!t.sections[sectionId]) t.sections[sectionId] = [];
+    t.sections[sectionId].push({ id, title: title || 'Konu', videos: [] });
+    nextTopic = id;
   } else if (mode === 'topic-edit') {
-    const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
-    if (x) x.title = title || x.title || 'Konu';
+    const x = (t.sections[sectionId] || []).find(k => k.id === context.topicId);
+    if (!x) { g('ch-in-err').textContent = 'Konu bulunamadı; taslağın korunuyor.'; return; }
+    x.title = title || x.title || 'Konu';
   } else if (mode === 'video-add') {
-    const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
+    const x = (t.sections[sectionId] || []).find(k => k.id === context.topicId);
+    if (!x) { g('ch-in-err').textContent = 'Konu bulunamadı; taslağın korunuyor.'; return; }
     if (x) {
       const defTitle = hasVideoLink ? ((ytListId(url) && !ytId(url)) ? 'Oynatma listesi' : 'Video') : 'İçerik';
-      const v = { id: chUid(), title: title || defTitle, url, type: ctype, access, plans, body, tricks, photos, vids: chCollectVideos() };
+      const v = { id: context.newId || chUid(), title: title || defTitle, url, type: ctype, access, plans, body, tricks, photos, vids: chCollectVideos() };
       if (!x.videos) x.videos = [];
-      x.videos.push(v);
-      chTopic = x.id; chVid = v.id;
+      const existing = x.videos.find(item => item.id === v.id);
+      if (existing) Object.assign(existing, v); else x.videos.push(v);
+      nextTopic = x.id; nextVid = v.id;
     }
   } else if (mode === 'video-edit') {
-    const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
-    const v = x && x.videos && x.videos.find(k => k.id === chForm.vidId);
-    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.access = access; v.plans = plans; v.body = body; v.tricks = tricks; v.photos = photos; v.vids = chCollectVideos(); delete v.locked; chVid = v.id; }
+    const x = (t.sections[sectionId] || []).find(k => k.id === context.topicId);
+    const v = x && x.videos && x.videos.find(k => k.id === context.vidId);
+    if (!v) { g('ch-in-err').textContent = 'İçerik bulunamadı; taslağın korunuyor.'; return; }
+    v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.access = access; v.plans = plans; v.body = body; v.tricks = tricks; v.photos = photos; v.vids = chCollectVideos(); delete v.locked;
   }
   g('ch-in-save').disabled = true;
   g('ch-form').inert = true;
+  chStudioBusy = true;
+  const tree = g('edu-author-tree'); if (tree) tree.inert = true;
   g('ch-in-err').textContent = 'Kaydediliyor…';
   const saved = await saveChannel(t);
+  if (saved) await chDraftForget(draftId, account);
+  chStudioBusy = false;
+  if (tree) tree.inert = false;
   g('ch-form').inert = false;
   g('ch-in-save').disabled = false;
   if (!saved) return;
-  chCloseForm();
-  renderChannelView();
+  if (chDraftId !== draftId || AUTH.user?.id !== account) return;
+  chDraftBaseline = JSON.stringify(chDraftFields()); chDraftPersisted = '';
+  channelOpen = t.id; chSec = nextSection; chTopic = nextTopic; chVid = nextVid;
+  if (currentPage === 'edustudio' && isVideo) {
+    chForm.mode = 'video-edit'; chForm.vidId = nextVid;
+    g('ch-form-title').textContent = 'İçeriği düzenle';
+    g('ch-in-err').textContent = '';
+    chDraftStatus('✓ Sunucuya kaydedildi · Yazmaya devam edebilirsin.');
+    renderEduStudioTree();
+  } else {
+    chCloseForm();
+    if (currentPage === 'edustudio') { renderEduStudioTree(); chStudioNotice('✓ Kaydedildi. Konuna “+ Not” veya “+ Video” ekleyebilirsin.'); }
+    else if (currentPage === 'egitim') renderChannelView();
+  }
 }
 
 function chOpenNew() {
-  if (!chIsAdmin()) return;
+  if (!chIsAdmin() || chMediaPending || chStudioBusy) return;
+  chCloseForm();
+  if (currentPage === 'edustudio') document.getElementById('edu-author-empty').classList.add('hidden');
   chProfMode = 'new'; chProfTarget = null;
   const g = id => document.getElementById(id);
   g('ch-prof-name').value = '';
@@ -25477,8 +25800,11 @@ function chOpenNew() {
   g('ch-prof-name').focus();
 }
 function chOpenProf(traderId) {
+  if (chMediaPending || chStudioBusy) return;
   const t = traderId ? channelsData.traders[traderId] : chCurTrader();
   if (!t || !chCanEdit(t)) return;
+  chCloseForm();
+  if (currentPage === 'edustudio') document.getElementById('edu-author-empty').classList.add('hidden');
   chProfMode = 'edit'; chProfTarget = t.id;
   const g = id => document.getElementById(id);
   g('ch-prof-name').value = t.name || '';
@@ -25516,7 +25842,8 @@ async function chSaveProf() {
   g('ch-prof-save').disabled = false;
   if (!saved) return;
   chCloseProf();
-  openChannel(t.id);
+  if (currentPage === 'edustudio') { channelOpen = t.id; chSec = chSecMeta(chCurTrader())[0]?.id; renderEduStudio(); }
+  else openChannel(t.id);
   renderEduChannels();
 }
 async function chDelProf() {
@@ -25529,17 +25856,13 @@ async function chDelProf() {
 
 function bindChannelsPage() {
   const g = id => document.getElementById(id);
+  g('edu-author-reload').addEventListener('click', async () => {
+    if (!chIsAdmin() || chStudioBusy) return;
+    await chDraftCapture(); channelsLoaded = false; renderEduStudio();
+  });
   g('edu-studio').addEventListener('click', async () => {
     if (!chIsAdmin()) return;
-    if (!channelsLoaded) await loadChannels();
-    const mine = await chEnsureMine();
-    if (!mine) return;
-    const paidSection = chSecMeta(mine).find(s => s.access === 'paid');
-    if (paidSection) openCourse(mine.id, paidSection.id);
-    else {
-      openChannel(mine.id);
-      chOpenForm('sec-add', null, { title: 'Ücretli Eğitim', access: 'paid', plans: ['video'] });
-    }
+    showPage('edustudio');
   });
   g('ch-study-tools').addEventListener('click', e => {
     const button = e.target.closest('[data-study]'); if (!button) return;
@@ -25547,6 +25870,31 @@ function bindChannelsPage() {
     g('ch-study-tools').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
   });
   const form = g('ch-form');
+  ['input', 'change'].forEach(type => form.addEventListener(type, chDraftSchedule));
+  form.addEventListener('click', () => queueMicrotask(chDraftSchedule));
+  g('ch-in-discard').addEventListener('click', async () => {
+    if (!chForm.mode || chStudioBusy || !confirm('Bu cihazdaki kaydedilmemiş taslak silinsin mi? Yayındaki içerik değişmez.')) return;
+    if (!await chDraftForget()) return;
+    chDraftBaseline = JSON.stringify(chDraftFields()); chDraftPersisted = '';
+    chCloseForm();
+    if (currentPage === 'edustudio') g('edu-author-empty').classList.remove('hidden');
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && chForm.mode && ['egitim', 'edustudio'].includes(currentPage) && !form.classList.contains('hidden')) {
+      e.preventDefault(); chSaveForm();
+    }
+  });
+  window.addEventListener('beforeunload', e => {
+    chDraftCapture();
+    if (chDraftPending || chMediaPending || Array.from(chDraftMemory.values()).some(r => r.account === AUTH.user?.id)) {
+      e.preventDefault(); e.returnValue = ''; return;
+    }
+    if (!chForm.mode || AUTH.user?.id !== chDraftAccount) return;
+    const signature = JSON.stringify(chDraftFields());
+    if (chMediaPending || chDraftPending || (signature !== chDraftBaseline && signature !== chDraftPersisted)) {
+      chDraftCapture(); e.preventDefault(); e.returnValue = '';
+    }
+  });
   form.addEventListener('paste', e => {
     if (!chCanEditCur() || form.dataset.mode !== 'content') return;
     const files = Array.from(e.clipboardData?.items || []).filter(it => it.kind === 'file' && it.type.startsWith('image/')).map(it => it.getAsFile()).filter(Boolean);
@@ -28390,6 +28738,9 @@ function bootAuth() {
       channelsData = { traders: {}, order: [] }; channelsLoaded = false;
       channelsError = '';
       chCloseForm(); chCloseProf();
+      chDraftAccount = ''; chDraftId = null; chDraftPersisted = ''; chStudioRestoredFor = '';
+      chDraftMemory.clear();
+      const drafts = document.getElementById('edu-author-draft-list'); if (drafts) drafts.replaceChildren();
       const notes = document.getElementById('ch-note-box'); if (notes) notes.replaceChildren();
       const embed = document.getElementById('ch-embed'); if (embed) embed.replaceChildren();
       const source = document.getElementById('ch-now-link'); if (source) { source.removeAttribute('href'); source.style.display = 'none'; }

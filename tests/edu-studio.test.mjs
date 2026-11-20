@@ -137,7 +137,9 @@ test('inline page scripts compile and authoring does not persist paid data in sh
   assert.doesNotMatch(channelCode, /await fetch\('\/api\/edu-shared\?kind=channel'/);
   assert.match(channelCode, /form\.addEventListener\('paste'/);
   assert.match(channelCode, /form\.addEventListener\('drop'/);
-  assert.match(channelCode, /if \(!saved\) return;\s+chCloseForm\(\)/);
+  const saveForm = channelCode.slice(channelCode.indexOf('async function chSaveForm()'), channelCode.indexOf('function chOpenNew()'));
+  assert.ok(saveForm.indexOf('if (!saved) return;') < saveForm.lastIndexOf('chCloseForm()'));
+  assert.match(saveForm, /currentPage === 'edustudio' && isVideo/);
 });
 test('lesson renderer rejects executable links and non-raster data URLs', () => {
   const context = vm.createContext({ esc: value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) });
