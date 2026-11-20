@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { wantsBiasChart, buildBiasChartModel, biasChartSvg, biasChartContext } from '../lib/telegram-bias-chart.mjs';
-import { renderBiasChart } from '../lib/telegram-bias-image.mjs';
+import { wantsBiasChart, buildBiasChartModel, biasChartSvg, biasChartContext, biasChartViewport } from '../lib/telegram-bias-chart.mjs';
+import { renderBiasChart, createBiasChartRenderer } from '../lib/telegram-bias-image.mjs';
 import { deliverQaReply } from '../lib/telegram-qa-delivery.mjs';
-import { handleTelegramUpdate } from '../lib/telegram-qa.mjs';
+import { handleTelegramUpdate, briefMarketFallback, needsBriefRewrite } from '../lib/telegram-qa.mjs';
 import { closedBars, TF_MS } from '../lib/alpha-strategy-v16.mjs';
 
 const history=JSON.parse(fs.readFileSync(new URL('./fixtures/alpha-v16/btc-2025-01.json',import.meta.url)));
@@ -28,6 +28,47 @@ test('two scenarios use real observable pivots; both confirmations remain hypoth
   assert.equal(model.schematic,true);
   assert.ok(model.bars.every(b=>b.closeTime<=asOf));
   assert.match(biasChartContext(model),/henüz gerçekleşmiş teyit/);
+});
+test('wider 36h frame leaves display space above/below data with rounded price ticks',()=>{
+  const model=buildBiasChartModel({detail,asOf,symbol:'BTC'});
+  assert.equal(model.bars.length,144);
+  const viewport=biasChartViewport(model);
+  assert.ok(viewport.bottom<Math.min(...model.bars.map(b=>b.l)));
+  assert.ok(viewport.top>Math.max(...model.bars.map(b=>b.h)));
+  assert.ok(viewport.ticks.length>=5);
+  assert.ok(viewport.ticks.every(p=>Math.abs(p/viewport.step-Math.round(p/viewport.step))<1e-8));
+  assert.match(biasChartSvg(model),/36 saat görünüm/);
+  assert.match(biasChartSvg(model),/Görünen tepe/);
+  assert.match(biasChartSvg(model),/Görünen dip/);
+});
+test('live quote is distinct from the last closed bar and rejects future or different-venue quotes',()=>{
+  const base=buildBiasChartModel({detail,asOf});
+  const quote={price:(base.lower+base.upper)/2,at:asOf,source:detail['15m'].source};
+  const m=buildBiasChartModel({detail,asOf,quote});
+  assert.equal(m.price,base.price);
+  assert.equal(m.anchorPrice,quote.price);
+  assert.match(biasChartSvg(m),/Anlık/);
+  assert.match(biasChartSvg(m),/kapalı mum/);
+  for(const q of [{...quote,at:asOf+1},{...quote,source:'different venue'},{...quote,at:asOf-600000}])
+    assert.equal(buildBiasChartModel({detail,asOf,quote:q}).liveQuote,null);
+});
+test('local event labels only use observable completed candles and never assert a canonical M2 signal',()=>{
+  const m=buildBiasChartModel({detail,asOf});
+  if(m.recentEvent) {
+    assert.ok(m.recentEvent.at<=asOf);
+    assert.ok(!m.recentEvent.reclaimedAt||m.recentEvent.reclaimedAt<=asOf);
+    assert.equal(m.recentEvent.candidateOnly,true);
+    assert.match(biasChartSvg(m),/ana swing teyidi değil/);
+  }
+});
+test('chart fallback remains short but contains the actual two references, not canned placeholder commentary',()=>{
+  const m=buildBiasChartModel({detail,asOf});
+  const reply=briefMarketFallback({symbol:'BTC',price:m.price,trend:'aşağı'},m);
+  assert.ok(reply.includes(Number(m.lower).toLocaleString('tr-TR',{maximumFractionDigits:0})));
+  assert.ok(reply.includes(Number(m.upper).toLocaleString('tr-TR',{maximumFractionDigits:0})));
+  assert.equal(needsBriefRewrite(reply),false);
+  assert.doesNotMatch(reply,/eldeki 1 saatlik görünüm/);
+  assert.match(briefMarketFallback({symbol:'BTC',price:null},m),/son 15M kapanışı/);
 });
 test('chart model cannot see future candles or incomplete OHLC bars',()=>{
   const cutoff=detail['15m'].candles.at(-30).t+TF_MS['15m'];
@@ -56,6 +97,22 @@ test('embedded local font and real OHLC render a valid 1600x1000 PNG without web
   assert.equal(image.readUInt32BE(16),1600);
   assert.equal(image.readUInt32BE(20),1000);
   assert.ok(image.length>10000 && image.length<5*1024*1024);
+});
+test('production-like no-system-font rendering actually paints title and right-axis digits, not just a valid blank PNG',()=>{
+  const renderer=createBiasChartRenderer(buildBiasChartModel({detail,asOf}));
+  const image=renderer.render(),pixels=image.pixels;
+  const count=(x0,y0,x1,y1,min)=>{
+    let n=0;
+    for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
+      const p=(y*image.width+x)*4;
+      if(pixels[p]>min&&pixels[p+1]>min&&pixels[p+2]>min)n++;
+    }
+    return n;
+  };
+  // Renderer explicitly disables system fonts. These regions contain text only,
+  // not candles/grid/price badges, so a font loading regression cannot pass.
+  assert.ok(count(60,35,430,110,150)>500,'title text missing');
+  assert.ok(count(1440,200,1550,740,140)>150,'right price-axis digits missing');
 });
 test('photo reply carries short caption and original topic without duplicate text',async()=>{
   const original=globalThis.fetch,calls=[];
@@ -107,11 +164,12 @@ test('Telegram normal /ask stays text-only; graph /ask and /grafik produce PNG w
   const saved=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
   process.env.GROQ_API_KEY='unit';for(const k of keys.slice(1)) delete process.env[k];
   const prompts=[],calls=[];
+  let verbose=false;
   globalThis.fetch=async(url,opts={})=>{
     const u=String(url);calls.push({url:u,method:opts.method||'GET'});
     if(u.includes('api.groq.com')) {
       prompts.push(JSON.parse(opts.body));
-      return Response.json({choices:[{message:{content:'Ana yön aşağı, fakat tepkide bölgenin korunmasını izlerim. Üst bölge kazanılırsa toparlanma senaryosu güçlenir; alt bölge kaybedilirse satış baskısı sürebilir.'}}]});
+      return Response.json({choices:[{message:{content:verbose?'Piyasa yorumu çok uzun. '.repeat(80):'Ana yön aşağı, fakat tepkide bölgenin korunmasını izlerim. Üst bölge kazanılırsa toparlanma senaryosu güçlenir; alt bölge kaybedilirse satış baskısı sürebilir.'}}]});
     }
     if(u.includes('/rest/v1/edu_shared')) return Response.json([]);
     if(u.includes('/api/v3/ticker/24hr')) return Response.json({lastPrice:'100000'});
@@ -139,6 +197,12 @@ test('Telegram normal /ask stays text-only; graph /ask and /grafik produce PNG w
     const unsupported=await handleTelegramUpdate(update('/grafik SOL'));
     assert.equal(unsupported.photo,undefined);
     assert.match(unsupported.reply,/Şimdilik BTC, ETH/);
+    verbose=true;
+    const fallback=await handleTelegramUpdate(update('/grafik BTC'));
+    assert.ok(Buffer.isBuffer(fallback.photo));
+    assert.match(fallback.reply,/kaybedilip tepki satılırsa/);
+    assert.match(fallback.reply,/geri kazanılıp korunursa/);
+    assert.doesNotMatch(fallback.reply,/eldeki 1 saatlik görünüm/);
     assert.equal(calls.filter(c=>c.method!=='GET'&&!c.url.includes('api.groq.com')).length,0);
   } finally {
     globalThis.fetch=original;
