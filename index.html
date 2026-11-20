@@ -48,6 +48,8 @@
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
+  <link rel="stylesheet" href="/assets/morning-checkin.css?v=1">
+  <script type="module" src="/assets/morning-checkin.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
@@ -5903,6 +5905,36 @@
   </div>
   <!-- ECONOMIC_NEWS_PANEL_END -->
   <div id="page-home" class="hidden">
+    <div id="morning-checkin" class="hidden">
+      <section class="mc-card" id="mc-card" role="dialog" aria-modal="false" aria-labelledby="mc-title">
+        <div class="mc-head">
+          <span class="mc-sun" aria-hidden="true">☀️</span>
+          <span class="mc-head-txt"><strong id="mc-title">Günaydın kanka</strong><span>Bugün nasıl hissediyorsun?</span></span>
+          <button type="button" class="mc-close" id="mc-close" aria-label="Kapat">×</button>
+        </div>
+        <form id="mc-form">
+          <fieldset class="mc-group"><legend>Uyku</legend><div class="mc-chips">
+            <label class="mc-chip"><input type="checkbox" name="mood" value="slept-well"><span>İyi uyudum</span></label>
+            <label class="mc-chip"><input type="checkbox" name="mood" value="tired"><span>Yorgun kalktım</span></label>
+          </div></fieldset>
+          <fieldset class="mc-group"><legend>Duygu</legend><div class="mc-chips">
+            <label class="mc-chip"><input type="checkbox" name="mood" value="angry"><span>Kızgınım</span></label>
+            <label class="mc-chip"><input type="checkbox" name="mood" value="loss-pain"><span>Kayıp acısı yaşıyorum</span></label>
+            <label class="mc-chip"><input type="checkbox" name="mood" value="motivated"><span>Motivasyonum yerinde</span></label>
+            <label class="mc-chip"><input type="checkbox" name="mood" value="clear-after-win"><span>Kazanç sonrası berrak görüyorum</span></label>
+          </div></fieldset>
+          <fieldset class="mc-group"><legend>Odak</legend><div class="mc-chips">
+            <label class="mc-chip"><input type="checkbox" name="mood" value="sees-opportunity"><span>Fırsatı net görüyorum</span></label>
+          </div></fieldset>
+          <div class="mc-actions">
+            <button type="submit" class="mc-save">Kaydet</button>
+            <button type="button" class="mc-later" id="mc-later">Sonra</button>
+            <button type="button" class="mc-reset" id="mc-reset" title="Tekrar göster" aria-label="Tekrar göster">↺</button>
+          </div>
+        </form>
+      </section>
+      <button type="button" class="mc-chip-btn hidden" id="mc-chip" aria-label="Ruh hali check-in'ini aç">☀️ <span id="mc-chip-label">Ruh hali</span></button>
+    </div>
     <script>
     (function () {
       function num(s) { var v = parseFloat(s); return isNaN(v) ? null : v; }

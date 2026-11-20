@@ -1,0 +1,70 @@
+/* Sabah check-in kartı — ana sayfa, sol üst, non-modal. */
+#morning-checkin.hidden { display: none; }
+#morning-checkin .mc-card {
+  position: fixed; top: 72px; left: 20px; z-index: 500;
+  width: 336px; max-width: calc(100vw - 32px);
+  padding: 16px;
+  border: 1px solid rgba(155,147,255,.3);
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(42,48,80,.97), rgba(18,22,40,.98));
+  box-shadow: 0 24px 64px rgba(0,0,0,.42);
+  backdrop-filter: blur(14px);
+  animation: mcIn .35s cubic-bezier(.2,.7,.2,1);
+}
+#morning-checkin .mc-card.hidden { display: none; }
+@keyframes mcIn { from { opacity: 0; transform: translateY(-10px) scale(.97); } to { opacity: 1; transform: none; } }
+#morning-checkin .mc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+#morning-checkin .mc-sun { font-size: 23px; line-height: 1; }
+#morning-checkin .mc-head-txt { display: flex; flex-direction: column; line-height: 1.35; }
+#morning-checkin .mc-head-txt strong { font-size: 14px; color: #fff; }
+#morning-checkin .mc-head-txt span { font-size: 11px; color: #aab0cc; }
+#morning-checkin .mc-close,
+#morning-checkin .mc-reset {
+  margin-left: auto; border: 0; background: none; color: #9aa2c4;
+  cursor: pointer; line-height: 1; padding: 4px;
+}
+#morning-checkin .mc-close { font-size: 20px; }
+#morning-checkin .mc-close:hover,
+#morning-checkin .mc-reset:hover { color: #fff; }
+#morning-checkin .mc-reset { margin-left: 0; font-size: 16px; }
+#morning-checkin .mc-group { border: 0; margin: 0 0 12px; padding: 0; }
+#morning-checkin .mc-group legend { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: #8b93bb; margin-bottom: 7px; padding: 0; }
+#morning-checkin .mc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#morning-checkin .mc-chip { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+#morning-checkin .mc-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+#morning-checkin .mc-chip span {
+  display: inline-block; padding: 6px 10px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.13); background: rgba(255,255,255,.04);
+  color: #c9cee2; font-size: 11px; transition: background .18s, border-color .18s, color .18s, box-shadow .18s;
+}
+#morning-checkin .mc-chip:hover span { border-color: rgba(255,255,255,.3); }
+#morning-checkin .mc-chip input:checked + span {
+  background: rgba(155,147,255,.22); border-color: rgba(155,147,255,.65);
+  color: #fff; box-shadow: 0 0 0 3px rgba(155,147,255,.1);
+}
+#morning-checkin .mc-chip input:focus-visible + span { outline: 2px solid #a89aff; outline-offset: 2px; }
+#morning-checkin .mc-actions { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+#morning-checkin .mc-save,
+#morning-checkin .mc-later { border-radius: 10px; padding: 9px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+#morning-checkin .mc-save { flex: 1; border: 0; background: linear-gradient(135deg, #8b7cf6, #6d5ce0); color: #fff; }
+#morning-checkin .mc-save:hover { filter: brightness(1.1); }
+#morning-checkin .mc-later { flex: 1; border: 1px solid rgba(255,255,255,.16); background: transparent; color: #aab0cc; }
+#morning-checkin .mc-later:hover { border-color: rgba(255,255,255,.35); color: #fff; }
+#morning-checkin .mc-chip-btn {
+  position: fixed; top: 72px; left: 20px; z-index: 500;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 13px; border-radius: 999px;
+  border: 1px solid rgba(155,147,255,.38);
+  background: rgba(24,28,50,.94); color: #e8e9f5;
+  font-size: 11.5px; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+  backdrop-filter: blur(10px);
+}
+#morning-checkin .mc-chip-btn.hidden { display: none; }
+#morning-checkin .mc-chip-btn:hover { border-color: #a89aff; }
+@media (max-width: 640px) {
+  #morning-checkin .mc-card { top: 64px; left: 12px; right: 12px; width: auto; max-width: none; }
+  #morning-checkin .mc-chip-btn { top: 64px; left: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #morning-checkin .mc-card { animation: none; }
+}
