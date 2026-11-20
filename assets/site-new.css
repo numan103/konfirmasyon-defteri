@@ -1,27 +1,28 @@
 /* Sağ üst "Yeni" rozeti, güncelleme paneli ve sayfa içi köşe etiketleri.
-   Renk, sitedeki mevcut #7b78f5 → #22d3ee rozet paletiyle uyumlu. */
+   Koyu temada net görünsün diye parlak mor → camgöbeği, beyaz yazı. */
 .site-new-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 11px; border-radius: 999px;
-  border: 1px solid rgba(123, 120, 245, .45);
-  background: linear-gradient(135deg, rgba(123, 120, 245, .18), rgba(34, 211, 238, .10));
-  color: #cdd2ff; font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  border: 1px solid rgba(255, 255, 255, .38);
+  background: linear-gradient(135deg, #7c5cff, #22d3ee);
+  color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .02em;
   cursor: pointer; white-space: nowrap;
-  transition: border-color .18s, transform .18s, background .18s;
+  box-shadow: 0 4px 18px rgba(124, 92, 255, .42);
+  transition: border-color .18s, transform .18s, box-shadow .18s;
 }
-.site-new-chip:hover { border-color: #a8a4ff; transform: translateY(-1px); }
+.site-new-chip:hover { border-color: #fff; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(124, 92, 255, .55); }
 .site-new-chip .wn-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: #7b78f5;
-  box-shadow: 0 0 0 4px rgba(123, 120, 245, .16);
+  width: 6px; height: 6px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .28);
 }
-.site-new-chip.seen .wn-dot { background: #7d849f; box-shadow: none; }
+.site-new-chip.seen .wn-dot { background: rgba(255, 255, 255, .72); box-shadow: none; }
 .site-new-chip .wn-count {
-  display: inline-grid; place-items: center; min-width: 15px; height: 15px;
-  padding: 0 3px; border-radius: 999px; background: rgba(123, 120, 245, .22);
-  color: #d7d9ff; font-size: 9px; font-weight: 800;
+  display: inline-grid; place-items: center; min-width: 16px; height: 16px;
+  padding: 0 3px; border-radius: 999px; background: rgba(0, 0, 0, .26);
+  color: #fff; font-size: 10px; font-weight: 800;
 }
 .site-new-chip .wn-count:empty { display: none; }
-.site-new-chip:focus-visible { outline: 2px solid #a8a4ff; outline-offset: 2px; }
+.site-new-chip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .site-new-chip[hidden],
 .new-badge[hidden],
 .new-badge.expired,
@@ -35,12 +36,12 @@
   font-family: 'Inter', sans-serif; font-style: normal;
   font-size: 9px; font-weight: 800; letter-spacing: .09em; line-height: 1;
   color: #fff; text-transform: uppercase; white-space: nowrap; pointer-events: none;
-  background: linear-gradient(120deg, #7b78f5, #22d3ee 85%);
-  box-shadow: 0 4px 14px rgba(34, 211, 238, .28);
+  background: linear-gradient(120deg, #7c5cff, #22d3ee 85%);
+  box-shadow: 0 4px 14px rgba(124, 92, 255, .42);
 }
 .new-corner--inline {
   position: static; top: auto; right: auto; padding: 3px 6px;
-  box-shadow: 0 2px 8px rgba(123, 120, 245, .26);
+  box-shadow: 0 2px 8px rgba(124, 92, 255, .26);
 }
 .mc-edit-wrap { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
 .mc-edit-wrap .mc-edit { margin-left: 0; }
@@ -52,7 +53,7 @@
   position: fixed; top: 62px; right: 16px; z-index: 700;
   width: 336px; max-width: calc(100vw - 24px);
   padding: 16px;
-  border: 1px solid rgba(123, 120, 245, .30);
+  border: 1px solid rgba(124, 92, 255, .30);
   border-radius: 18px;
   background: linear-gradient(160deg, rgba(36, 36, 56, .98), rgba(16, 20, 34, .98));
   box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
@@ -75,10 +76,10 @@
   display: grid; grid-template-columns: 24px 1fr; gap: 9px; align-items: start;
   text-decoration: none; color: inherit; padding: 4px; margin: -4px; border-radius: 10px;
 }
-.wn-list li a:hover { background: rgba(123, 120, 245, .10); }
+.wn-list li a:hover { background: rgba(124, 92, 255, .10); }
 .wn-ico {
   width: 24px; height: 24px; display: grid; place-items: center;
-  border-radius: 8px; background: rgba(123, 120, 245, .16); font-size: 13px;
+  border-radius: 8px; background: rgba(124, 92, 255, .16); font-size: 13px;
 }
 .wn-list b { display: block; font-size: 12px; color: #fff; margin-bottom: 2px; }
 .wn-list span { display: block; font-size: 11px; line-height: 1.45; color: #b3b9d0; }

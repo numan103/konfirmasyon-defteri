@@ -103,7 +103,10 @@ test('üst rozet kayıt defterinden beslenir, sabit içerik değildir', () => {
   assert.ok(css.includes('.new-badge[hidden]') && css.includes('.site-new-chip[hidden]') && css.includes('#whats-new-btn-app { font-size: 0'));
   assert.ok(css.includes('z-index: 700'));
   assert.ok(css.includes('.new-corner[hidden]') && css.includes('#page-ayna > .new-corner'));
-  assert.ok(css.includes('#7b78f5') && !css.includes('#ffb14e') && !css.includes('255, 177, 78'), 'turuncu yerine site moru/camgöbeği kullanılmalı');
+  assert.ok(css.includes('background: linear-gradient(135deg, #7c5cff, #22d3ee)'), 'çip parlak gradient olmalı');
+  assert.ok(css.includes('color: #fff; font-size: 11px; font-weight: 800'), 'çip yazısı beyaz ve net olmalı');
+  assert.ok(css.includes('background: rgba(0, 0, 0, .26)') && css.includes('color: #fff; font-size: 10px'), '3 sayacı net görünmeli');
+  assert.ok(!css.includes('#ffb14e') && !css.includes('255, 177, 78') && !css.includes('#7b78f5'), 'eski turuncu/koyu ton kalmamalı');
 });
 
 test('aktif özellikler panelde listelenir, rozet sayısı gösterilir', () => {
