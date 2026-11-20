@@ -76,8 +76,8 @@ test('morning check-in markup is local-only and editable by the trader', () => {
     assert.ok(section.includes(`id="${id}"`), id);
   }
   assert.ok(section.includes('class="mc-edit"') && section.includes('Düzenle'));
-  assert.ok(html.includes('/assets/morning-checkin.css?v=1'));
-  assert.ok(html.includes('/assets/morning-checkin.mjs?v=1'));
+  assert.ok(html.includes('/assets/morning-checkin.css?v=2'));
+  assert.ok(html.includes('/assets/morning-checkin.mjs?v=2'));
   assert.ok(css.includes('.mc-edit-row'));
   assert.ok(css.includes('max-width: calc(100vw - 32px)'));
   assert.ok(/@media \(max-width: 640px\)/.test(css));
