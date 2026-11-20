@@ -50,7 +50,7 @@
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
   <link rel="stylesheet" href="/assets/morning-checkin.css?v=2">
   <script type="module" src="/assets/morning-checkin.mjs?v=2"></script>
-  <link rel="stylesheet" href="/assets/site-new.css?v=3">
+  <link rel="stylesheet" href="/assets/site-new.css?v=4">
   <script type="module" src="/assets/site-features.mjs?v=2"></script>
   <script type="module" src="/assets/site-new.mjs?v=2"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
@@ -5912,10 +5912,14 @@
   <div id="page-home" class="hidden">
     <div id="morning-checkin" class="hidden">
       <section class="mc-card" id="mc-card" role="dialog" aria-modal="false" aria-labelledby="mc-title">
+        <span class="new-corner" data-new-feature="morning-checkin" hidden>YENİ</span>
         <div class="mc-head">
           <span class="mc-sun" aria-hidden="true">☀️</span>
           <span class="mc-head-txt"><strong id="mc-title">Günaydın kanka</strong><span>Bugün nasıl hissediyorsun?</span></span>
-          <button type="button" class="mc-edit" id="mc-edit" title="Kriterleri düzenle" aria-label="Kriterleri düzenle">✎ Düzenle</button>
+          <span class="mc-edit-wrap">
+            <span class="new-corner new-corner--inline" data-new-feature="checkin-config" hidden>YENİ</span>
+            <button type="button" class="mc-edit" id="mc-edit" title="Kriterleri düzenle" aria-label="Kriterleri düzenle">✎ Düzenle</button>
+          </span>
           <button type="button" class="mc-close" id="mc-close" aria-label="Kapat">×</button>
         </div>
         <form id="mc-form">
@@ -9427,6 +9431,7 @@
 
 <!-- AYNA:BASLA -->
 <div id="page-ayna" class="hidden">
+  <span class="new-corner" data-new-feature="ayna-sync" hidden>YENİ</span>
   <div id="ayna-root"></div>
 </div>
 <!-- AYNA:BITIR -->

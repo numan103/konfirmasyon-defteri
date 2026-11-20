@@ -102,6 +102,8 @@ test('üst rozet kayıt defterinden beslenir, sabit içerik değildir', () => {
   assert.ok(html.includes('<span class="wn-count"></span>'));
   assert.ok(css.includes('.new-badge[hidden]') && css.includes('.site-new-chip[hidden]') && css.includes('#whats-new-btn-app { font-size: 0'));
   assert.ok(css.includes('z-index: 700'));
+  assert.ok(css.includes('.new-corner[hidden]') && css.includes('#page-ayna > .new-corner'));
+  assert.ok(css.includes('#7b78f5') && !css.includes('#ffb14e') && !css.includes('255, 177, 78'), 'turuncu yerine site moru/camgöbeği kullanılmalı');
 });
 
 test('aktif özellikler panelde listelenir, rozet sayısı gösterilir', () => {
@@ -192,13 +194,15 @@ test('yeni özellik listesi değişince sunucuya tek bildirim gider', async () =
   assert.deepEqual(cached.fetchCalls, [], 'aynı liste tekrar gönderilmez');
 });
 
-test('tüm rozetler kayıt defterindeki bir kimliğe bağlı', () => {
-  const tags = [...html.matchAll(/<i class="new-badge" data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(tags.length, 13);
+test('tüm rozet ve köşe etiketleri kayıt defterindeki bir kimliğe bağlı', () => {
+  const tags = [...html.matchAll(/data-new-feature="([^"]+)"/g)].map(m => m[1]);
+  assert.equal(tags.length, 16);
   for (const id of tags) {
     const clean = id.includes('c.page') ? 'review' : id;
     assert.ok(registry.findFeature(clean), 'kimlik kayıtlı olmalı: ' + id);
   }
+  const corners = [...html.matchAll(/<span class="new-corner[^"]*" data-new-feature="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'ayna-sync']);
   const dynamic = /data-new-feature="' \+ c\.page \+ '"/.test(html);
   assert.ok(dynamic, 'ek kartları dinamik kimlik taşımalı');
 });

@@ -47,7 +47,9 @@ test('her YENİ rozeti özellik kayıt defterindeki bir kimliğe bağlı', () =>
   assert.equal(tags.length, 13);
   assert.deepEqual([...new Set(tags)], ['defter', 'review', 'pano', "' + c.page + '"]);
   assert.ok(html.includes('/assets/site-features.mjs'), '3 günlük ömür kayıt defteri yüklenmeli');
-  assert.ok(html.includes('/assets/site-new.css?v=3') && html.includes('/assets/site-new.mjs?v=2'));
+  const corners = [...html.matchAll(/<span class="new-corner[^"]*" data-new-feature="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'ayna-sync']);
+  assert.ok(html.includes('/assets/site-new.css?v=4') && html.includes('/assets/site-new.mjs?v=2'));
 });
 
 test('rozet stili ve çeviri anahtarları tanımlı', () => {
