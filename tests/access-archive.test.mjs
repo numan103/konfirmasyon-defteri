@@ -28,4 +28,5 @@ test('archived members can reapply and admin can restore them', () => {
   assert.match(api, /attempts: archived \? 1/);
   assert.match(html, /attrs\.replace\('%OP%', 'restore'\)/);
   assert.match(html, /can_reapply/);
+  assert.match(api, /archived_at: r\.archived_at \|\| null/);
 });

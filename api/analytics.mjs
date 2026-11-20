@@ -675,6 +675,8 @@ export function buildGrowthSummary(summary, interest, access) {
   let memberSessions = 0;
   let activeMsTotal = 0;
   let activeSessions = 0;
+  let longSessions = 0;
+  const activeValues = [];
   const interestPages = new Map();
   rows.forEach(function (s) {
     if (!s || !Array.isArray(s.clicks)) return;
@@ -689,13 +691,18 @@ export function buildGrowthSummary(summary, interest, access) {
     });
     if (s.member) memberSessions += 1;
     const ms = Number(s.activeMs) || 0;
-    if (ms > 0) { activeMsTotal += ms; activeSessions += 1; }
+    if (ms > 0) {
+      activeMsTotal += ms;
+      activeSessions += 1;
+      activeValues.push(ms);
+      if (ms > 30 * 60 * 1000) longSessions += 1;
+    }
     (s.pages || []).forEach(function (p) {
       const key = String((p && p.page) || '');
       if (!key || key === 'landing' || key === 'analitik' || key === 'erisim') return;
-      const cur = interestPages.get(key) || { page: key, label: PAGE_LABELS[key] || key, sessions: 0, ms: 0, views: 0 };
+      const cur = interestPages.get(key) || { page: key, label: PAGE_LABELS[key] || key, sessions: 0, times: [], views: 0 };
       cur.sessions += 1;
-      cur.ms += Number(p.ms) || 0;
+      cur.times.push(Number(p.ms) || 0);
       cur.views += Number(p.v || p.views) || 0;
       interestPages.set(key, cur);
     });
@@ -709,31 +716,48 @@ export function buildGrowthSummary(summary, interest, access) {
   const signupDone = steps[2] ? steps[2].sessions : 0; // signup_submit
   const confirm = steps[3] ? steps[3].sessions : 0;
   const firstLogin = steps[4] ? steps[4].sessions : 0;
+  const funnelEvents = steps.reduce(function (n, s) { return n + s.sessions; }, 0);
+  // Yeni kurulan olcumde tek haneli sayilarla oran uretmek yaniltici.
+  const funnelFresh = funnelEvents < 10 || signupStart < 5;
   const rate = (from, to) => from > 0 ? Math.round((to / from) * 100) : 0;
+  const median = (values) => {
+    if (!values.length) return 0;
+    const sorted = values.slice().sort(function (a, b) { return a - b; });
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+  };
 
   const edu = interest && typeof interest === 'object' ? interest : {};
   const eduPlans = Array.isArray(edu.plans) ? edu.plans.slice(0, 5) : [];
   const eduRoutes = Array.isArray(edu.routes) ? edu.routes.slice(0, 5) : [];
   const pages = Array.from(interestPages.values())
-    .sort(function (a, b) { return (b.ms - a.ms) || (b.views - a.views); })
-    .slice(0, 8)
     .map(function (x) {
       return {
         page: x.page,
         label: x.label,
         sessions: x.sessions,
-        avgMs: x.sessions ? Math.round(x.ms / x.sessions) : 0,
+        avgMs: x.sessions ? Math.round(x.times.reduce((n, v) => n + v, 0) / x.sessions) : 0,
+        medianMs: median(x.times),
         views: x.views,
       };
-    });
+    })
+    // Medyan, uzun acik sekmelerin listeyi bozmasini engeller.
+    .sort(function (a, b) { return (b.medianMs - a.medianMs) || (b.views - a.views); })
+    .slice(0, 8);
 
   const verified = (access && Number(access.verified)) || 0;
   const pending = (access && Number(access.pending)) || 0;
+  const totalSignups = (access && Number(access.total)) || 0;
+  const conversion = totalSignups > 0 ? Math.round((verified / totalSignups) * 100) : 0;
   const recommendations = [];
   if (pending > 0) recommendations.push(pending + ' bekleyen erişim başvurusu var; onaylamak üyeyi anında premium yapar.');
-  if (signupStart > 0 && rate(signupStart, signupDone) < 60) recommendations.push('Kayıt formuna giriş oranı düşük (' + rate(signupStart, signupDone) + '%); CTA metnini sadeleştir.');
-  if (signupDone > 0 && rate(signupDone, confirm) < 60) recommendations.push('Kayıt sonrası onay bağlantısına dönüş zayıf (' + rate(signupDone, confirm) + '%); e-posta akışını kontrol et.');
-  if (pages.length && pages[0].avgMs > 0) recommendations.push('En çok vakit ' + pages[0].label + ' sayfasında geçiyor; burayı teşvik/topluluk girişi için kullan.');
+  if (funnelFresh) recommendations.push('Kayıt hunisi ölçümü yeni başladı (' + funnelEvents + ' olay); oranlar için birkaç gün veri biriksin.');
+  else {
+    if (rate(signupStart, signupDone) < 60) recommendations.push('Kayıt formuna giriş oranı düşük (' + rate(signupStart, signupDone) + '%); CTA metnini sadeleştir.');
+    if (rate(signupDone, confirm) < 60) recommendations.push('Kayıt sonrası onay bağlantısına dönüş zayıf (' + rate(signupDone, confirm) + '%); e-posta akışını kontrol et.');
+  }
+  if (totalSignups >= 5 && conversion < 25) recommendations.push('Başvuru → premium dönüşümü düşük (%' + conversion + '); referans akışını ve ret sebeplerini gözden geçir.');
+  if (pages.length && pages[0].medianMs > 0) recommendations.push('Oturum başına en fazla vakit ' + pages[0].label + ' sayfasında geçiyor; burayı teşvik/topluluk girişi için kullan.');
   if (eduPlans.length) recommendations.push('Eğitim ilgisi öne çıkıyor (' + eduPlans[0].label + '); premium yerine eğitim paketi hatırlatması dene.');
   if (verified === 0 && signupDone > 0) recommendations.push('Kayıt var ama premium Onay yok; referans/erişim akışını kontrol et.');
   if (!recommendations.length) recommendations.push('Şu an kritik bir sinyal yok; mevcut akışı izlemeye devam et.');
@@ -741,15 +765,19 @@ export function buildGrowthSummary(summary, interest, access) {
   return {
     funnel: {
       steps: steps,
+      events: funnelEvents,
+      fresh: funnelFresh,
       authToSignup: rate(signupStart, signupDone),
       signupToConfirm: rate(signupDone, confirm),
       confirmToLogin: rate(confirm, firstLogin),
     },
-    access: { verified: verified, pending: pending },
+    access: { verified: verified, pending: pending, total: totalSignups, conversion: conversion },
     activity: {
       memberSessions: memberSessions,
       activeSessions: activeSessions,
       avgActiveMs: activeSessions ? Math.round(activeMsTotal / activeSessions) : 0,
+      medianActiveMs: median(activeValues),
+      longSessions: longSessions,
     },
     interests: {
       pages: pages,
@@ -852,22 +880,24 @@ async function fetchMemberEmailMap() {
 // Erisim tablosundan yalnizca toplu status sayilari (PII yok, admin-only GET).
 async function readAccessSummary() {
   const key = serviceKey();
-  if (!key) return { verified: 0, pending: 0 };
+  if (!key) return { verified: 0, pending: 0, total: 0 };
   try {
     const url = SUPABASE_URL + '/rest/v1/site_access?select=status&limit=1000';
     const r = await fetch(url, { headers: sbHeaders(key), signal: AbortSignal.timeout(8000) });
-    if (!r.ok) return { verified: 0, pending: 0 };
+    if (!r.ok) return { verified: 0, pending: 0, total: 0 };
     const rows = await r.json().catch(function () { return []; });
     let verified = 0;
     let pending = 0;
+    let total = 0;
     (Array.isArray(rows) ? rows : []).forEach(function (x) {
+      total += 1;
       if (!x || !x.status) return;
       if (x.status === 'verified') verified += 1;
       else if (x.status === 'pending') pending += 1;
     });
-    return { verified: verified, pending: pending };
+    return { verified: verified, pending: pending, total: total };
   } catch (e) {
-    return { verified: 0, pending: 0 };
+    return { verified: 0, pending: 0, total: 0 };
   }
 }
 

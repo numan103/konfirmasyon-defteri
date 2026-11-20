@@ -268,6 +268,9 @@ test('site wires the admin analytics page and anonymous tracker', () => {
   assert.ok(html.includes('anaPendingLanding'), 'pending landing flag wires deferred view');
   assert.ok(html.includes("document.getElementById('tab-analitik')"), 'admin-only nav tab is toggled');
   assert.ok(html.includes('growthSummary'), 'admin panel renders the growth summary');
+  assert.ok(html.includes('Ölçüm yeni başladı'), 'fresh funnel samples are labelled, not scored');
+  assert.ok(html.includes('medianActiveMs'), 'headline time uses a robust median');
+  assert.ok(html.includes('Dönüşüm %'), 'premium conversion denominator is shown');
   assert.ok(html.includes('/assets/signup-funnel.mjs?v=1'), 'signup funnel is wired into the live page');
 });
 
@@ -291,16 +294,51 @@ test('growth summary turns clicks and page time into simple, privacy-safe signal
       },
     ],
   };
-  const g = buildGrowthSummary(summary, { plans: [{ label: 'Video' }], routes: [] }, { verified: 4, pending: 2 });
+  const g = buildGrowthSummary(summary, { plans: [{ label: 'Video' }], routes: [] }, { verified: 4, pending: 2, total: 10 });
   assert.deepEqual(g.funnel.steps.map((s) => s.sessions), [1, 1, 1, 1, 0]);
+  assert.equal(g.funnel.events, 4);
+  assert.equal(g.funnel.fresh, true, 'tiny samples must not produce conversion advice');
   assert.equal(g.funnel.authToSignup, 100);
   assert.equal(g.funnel.signupToConfirm, 100);
   assert.equal(g.funnel.confirmToLogin, 0);
-  assert.deepEqual(g.access, { verified: 4, pending: 2 });
+  assert.deepEqual(g.access, { verified: 4, pending: 2, total: 10, conversion: 40 });
   assert.equal(g.activity.memberSessions, 1);
   assert.equal(g.activity.avgActiveMs, 120000);
+  assert.equal(g.activity.medianActiveMs, 120000);
+  assert.equal(g.activity.longSessions, 0);
   assert.equal(g.interests.pages[0].page, 'defter');
+  assert.ok(g.recommendations.some((r) => r.includes('yeni başladı')));
+  assert.ok(!g.recommendations.some((r) => r.includes('CTA metnini')));
   assert.ok(g.recommendations.some((r) => r.includes('bekleyen erişim')));
   assert.ok(!JSON.stringify(g).includes('u1'), 'no member id leaks into the summary');
+});
+
+test('mature funnel uses median time, per-session interest ordering and conversion rate', () => {
+  const sessions = [];
+  for (let i = 0; i < 12; i += 1) {
+    sessions.push({
+      activeMs: i === 0 ? 8 * 3600000 : 60000,
+      pages: [
+        { page: 'trading', ms: i === 0 ? 8 * 3600000 : 60000, views: 2 },
+        { page: 'eduplans', ms: 600000, views: 1 },
+      ],
+      clicks: [
+        { url: 'funnel:auth_open' },
+        { url: 'funnel:signup_submit' },
+        { url: 'funnel:confirm_click' },
+      ],
+    });
+  }
+  const g = buildGrowthSummary({ sessions }, {}, { verified: 2, pending: 0, total: 20 });
+  assert.equal(g.funnel.fresh, false);
+  assert.equal(g.funnel.authToSignup, 100);
+  assert.equal(g.activity.avgActiveMs, 2455000);
+  assert.equal(g.activity.medianActiveMs, 60000, 'one idle tab must not dominate the headline');
+  assert.equal(g.activity.longSessions, 1);
+  assert.equal(g.interests.pages[0].page, 'eduplans', 'per-session median time drives the ranking');
+  assert.equal(g.interests.pages[0].medianMs, 600000);
+  assert.equal(g.access.conversion, 10);
+  assert.ok(g.recommendations.some((r) => r.includes('dönüşümü düşük')));
+  assert.ok(g.recommendations.some((r) => r.includes(g.interests.pages[0].label)));
 });
 
