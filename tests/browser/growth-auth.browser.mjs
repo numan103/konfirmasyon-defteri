@@ -24,7 +24,9 @@ try {
     window.__authCalls=[];window.__authCase='verify';
     window.supabase={createClient(){return {auth:{
       onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
-      async getSession(){return {data:{session:null}}},
+      async getSession(){return {data:{session:window.__hasSession?{user:{id:'test-user'}}:null}}},
+      async updateUser(){window.__authCalls.push({type:'password'});return {data:{user:{id:'test-user'}}}},
+      async getUser(){return {data:{user:{id:'test-user'}}}},
       async signUp(args){window.__authCalls.push({type:'signup',redirect:args.options.emailRedirectTo});
         if(window.__authCase==='rate')return {error:{message:'Email rate limit exceeded'}};
         return {data:{user:{id:'test-user'},session:window.__authCase==='session'?{access_token:'test'}:null}}},
@@ -71,12 +73,14 @@ try {
   assert.equal(await page.locator('#f-pass').isVisible(),false);
   await page.locator('#au-submit').click();
   await page.getByText('Sıfırlama bağlantısı e-postana gönderildi. Gelen kutunu (ve spam) kontrol et.',{exact:true}).waitFor();
+  await page.locator('#au-submit').click();
+  assert.equal(await page.evaluate(()=>window.__authCalls.filter(x=>x.type==='reset').length),1,'reset requests have a cooldown');
   await page.locator('#back-login').click();
   await page.locator('#tab-register').click();
   await page.evaluate(()=>window.__authCase='rate');
   await page.locator('#au-pass').fill('test-password-123');
   await page.locator('#au-submit').click();
-  await page.getByText('Çok fazla deneme oldu, biraz bekle.',{exact:true}).waitFor();
+  await page.getByText('E-posta servisinin gönderim sınırına ulaşıldı.',{exact:false}).waitFor();
   assert.equal(await page.locator('#au-submit').isEnabled(),true);
   await page.evaluate(()=>window.__authCase='session');
   await page.locator('#au-submit').click();
@@ -91,9 +95,21 @@ try {
   const box=await page.locator('.auth-box').boundingBox();
   assert.ok(box.width<=390&&box.x>=0);
   await page.locator('#auth-close').click();
-  await page.goto(base+'/#error=access_denied&error_code=otp_expired&error_description=expired');
+  await page.evaluate(()=>{
+    AUTH.user={id:'test-user'};window.__hasSession=true;hideLanding();
+    document.getElementById('user-badge').classList.remove('hidden');
+    window.scrollTo(0,0);
+  });
+  await page.locator('#btn-password').click();
+  await page.getByText('Açık oturumundan şifreni belirleyebilirsin. Yeni e-posta gönderilmeyecek.',{exact:true}).waitFor();
+  assert.equal(await page.locator('#f-email').isVisible(),false);
+  await page.locator('#au-pass').fill('new-test-password-123');
+  await page.locator('#au-submit').click();
+  await page.waitForFunction(()=>!document.getElementById('auth-gate').classList.contains('open'));
+  assert.equal(await page.evaluate(()=>window.__authCalls.filter(x=>x.type==='password').length),1);
+  await page.goto(base+'/?auth-test=expired#error=access_denied&error_code=otp_expired&error_description=expired');
   await page.getByText('Doğrulama bağlantısı geçersiz veya süresi dolmuş olabilir. E-postanı yazıp yeni bir bağlantı iste.',{exact:true}).waitFor();
   assert.equal(await page.locator('#resend-verify').isVisible(),true);
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({passed:true,registrationCTA:true,currentFeatures:true,compactAuth:true,verificationFeedback:true,resend:true,resendCooldown:true,unconfirmedLogin:true,passwordReset:true,rateLimitFeedback:true,expiredLink:true,mobile:true,productionSignups:false,productionEmails:false}));
+  console.log(JSON.stringify({passed:true,registrationCTA:true,currentFeatures:true,compactAuth:true,verificationFeedback:true,resend:true,resendCooldown:true,unconfirmedLogin:true,passwordReset:true,recoveryCooldown:true,emailQuotaFeedback:true,authenticatedPasswordChange:true,expiredLink:true,mobile:true,productionSignups:false,productionEmails:false}));
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

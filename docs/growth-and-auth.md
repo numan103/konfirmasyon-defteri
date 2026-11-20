@@ -31,6 +31,24 @@ göremiyordu. Artık doğrulama için ayrı bir ekran açılır, adres gösteril
   Yeniden açılan ödeme penceresiyle eski düğümün kısa süre birlikte kalması
   önlenir. Tutarlar, cüzdan ve manuel onay mantığı değişmez.
 
+### E-posta sınırı ve açık oturumdan şifre değiştirme
+
+- E-posta gönderim kotası, hatalı giriş ve sağlayıcının saniye cinsinden
+  bekleme mesajları artık farklı gösterilir. Bilinmeyen kota için kesin
+  “bir dakika sonra açılır” sözü verilmez.
+- Şifre yenileme e-postası başarılı istendikten veya rate limit alındıktan sonra
+  aynı sekmede en az 60 saniye yeni istek gönderilmez. Bu sadece tekrar
+  isteklerini azaltır; sunucunun gerçek kotasını yükseltmez veya atlatmaz.
+- Açık hesabın üst menüsündeki “Şifre” düğmesi mevcut oturumdan şifre
+  belirlemeye izin verir. SDK oturumundaki kullanıcı ile mevcut kullanıcı
+  eşleştirilir; asıl yetki kontrolü Supabase `updateUser` tarafından yapılır.
+  Sağlayıcı yeniden kimlik doğrulama isterse işlem başarısız sayılır ve açıklanır.
+- Özel SMTP/Email Hook olmadan yerleşik sağlayıcının belgelenmiş varsayılan
+  e-posta kotası proje genelinde saatte 2'dir:
+  https://supabase.com/docs/guides/auth/rate-limits
+- SMTP ayarı veya gerçek kota değiştirilmedi. Yeni e-posta gönderilmeden,
+  hata ve şifre güncelleme yolları izole sağlayıcı yanıtlarıyla test edildi.
+
 ## Kişisel “Yaptım” ve hatırlatma
 
 - Her konu için tamamlandı tarihi ve 0/1/3/7/14/30 günlük tekrar aralığı.

@@ -65,3 +65,4 @@ body.auth-open { overflow:hidden; }
   #auth-gate .auth-form-col { padding:30px 22px 24px; }
   #auth-gate #auth-title { font-size:26px; }
 }
+@media(max-width:480px) { .navbar .user-badge .uname { display:none; } }

@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://alfa-trader.com/alfa-traders-share-v2.png">
 <link rel="stylesheet" href="/assets/influencer-content.css?v=6">
 <link rel="stylesheet" href="/assets/nav-autohide.css">
-<link rel="stylesheet" href="/assets/growth.css">
+<link rel="stylesheet" href="/assets/growth.css?v=2">
 <script type="module" src="/assets/growth.mjs"></script>
 <script type="module" src="/assets/nav-autohide.mjs"></script>
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -5798,6 +5798,7 @@
     <button class="nav-login" id="nav-login-app" type="button" data-i18n="nav.login">Giriş yap</button>
     <div class="user-badge hidden" id="user-badge">
       <span class="uname" id="user-name"></span>
+      <button class="logout" id="btn-password" type="button" title="Şifreni değiştir" aria-label="Şifreni değiştir">Şifre</button>
       <button class="logout" id="btn-logout" data-i18n="app.logout">Çıkış</button>
     </div>
     <button class="nav-mobile-btn" id="nav-mobile-btn" type="button" aria-label="Menü" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -27835,6 +27836,11 @@ async function onAuthed(user) {
 
 function authError(err) {
   const m = (err && err.message) ? err.message : '';
+  const code = String(err && err.code || '');
+  const seconds = m.match(/(?:after|in)\s+(\d+)\s+seconds?/i);
+  if (seconds && /security|request|rate/i.test(m)) return 'Güvenlik nedeniyle yeni bağlantı istemeden önce ' + seconds[1] + ' saniye beklemelisin.';
+  if (code === 'over_email_send_rate_limit' || /email.*rate limit/i.test(m)) return 'E-posta servisinin gönderim sınırına ulaşıldı. Bu bir şifre hatası değil. Daha sonra tekrar dene; açık oturumun varsa üst menüdeki Şifre düğmesini kullanabilirsin.';
+  if (code === 'reauthentication_needed') return 'Güvenlik için yeniden giriş yapman gerekiyor. Şifren henüz değiştirilmedi.';
   if (/Invalid login/i.test(m)) return 'E-posta veya şifre hatalı.';
   if (/already registered/i.test(m)) return 'Bu e-posta zaten kayıtlı. Giriş yapmayı dene.';
   if (/Email not confirmed/i.test(m)) return 'E-postan henüz onaylanmamış. Gelen kutunu kontrol et.';
@@ -27908,7 +27914,7 @@ function bootAuth() {
   $('tab-register').addEventListener('click', () => setMode('register'));
   $('forgot-link').addEventListener('click', () => setMode('reset'));
   $('back-login').addEventListener('click', () => setMode('login'));
-  let resendAfter = 0;
+  let resendAfter = 0, recoveryAfter = 0;
   $('resend-verify').addEventListener('click', async () => {
     const email = $('au-email').value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg('Önce doğru e-posta adresini yaz.', 'err'); return; }
@@ -27919,11 +27925,26 @@ function bootAuth() {
       if (error) throw error;
       resendAfter = Date.now() + 60000;
       msg('Yeni doğrulama bağlantısı istendi. Gelen kutunu ve spam klasörünü kontrol et.', 'ok');
-    } catch (err) { msg(authError(err), 'err'); }
+    } catch (err) {
+      if (err?.status === 429 || /rate limit|too many|seconds/i.test(String(err?.message || ''))) resendAfter = Date.now() + 60000;
+      msg(authError(err), 'err');
+    }
     finally { button.disabled = false; }
   });
   // Tanıtım sayfası -> giriş penceresi
   const openAuth = m => { showGate(); setMode(m); };
+  $('btn-password').addEventListener('click', async () => {
+    try {
+      const { data, error } = await AUTH.client.auth.getSession();
+      if (error || !AUTH.user || data?.session?.user?.id !== AUTH.user.id) {
+        openAuth('login'); msg('Şifre değiştirmek için önce hesabına giriş yap.', 'err'); return;
+      }
+      openAuth('newpass');
+      msg('Açık oturumundan şifreni belirleyebilirsin. Yeni e-posta gönderilmeyecek.', 'ok');
+    } catch (err) {
+      openAuth('login'); msg(authError(err), 'err');
+    }
+  });
   $('nav-login').addEventListener('click', () => openAuth('login'));
   const nlAppBtn2 = document.getElementById('nav-login-app');
   if (nlAppBtn2) nlAppBtn2.addEventListener('click', () => openAuth('login'));
@@ -27965,9 +27986,11 @@ function bootAuth() {
     try {
       if (mode === 'reset') {
         if (!email) { msg('E-postanı yaz.', 'err'); return; }
+        if (Date.now() < recoveryAfter) { msg('Peş peşe e-posta istememek için bir dakika bekle. Sağlayıcının gönderim sınırı daha uzun sürebilir.', 'err'); return; }
         const redirectTo = window.location.origin + window.location.pathname;
         const { error } = await AUTH.client.auth.resetPasswordForEmail(email, { redirectTo });
         if (error) throw error;
+        recoveryAfter = Date.now() + 60000;
         msg('Sıfırlama bağlantısı e-postana gönderildi. Gelen kutunu (ve spam) kontrol et.', 'ok');
       } else if (mode === 'newpass') {
         if (pass.length < 6) { msg('Yeni şifre en az 6 karakter olmalı.', 'err'); return; }
@@ -28004,6 +28027,7 @@ function bootAuth() {
         await onAuthed(data.user);
       }
     } catch (err) {
+      if (mode === 'reset' && (/rate limit|too many|seconds/i.test(String(err?.message || '')) || err?.status === 429)) recoveryAfter = Date.now() + 60000;
       msg(authError(err), 'err');
       const em = String(err && (err.message || err) || '').toLowerCase();
       const rv = $('resend-verify');
