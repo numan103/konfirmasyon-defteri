@@ -51,17 +51,18 @@ Varsayılan yorum 3–4 cümle ve en fazla 90 kelimedir; tablo, model kataloğu 
 ### İsteğe bağlı iki senaryolu Telegram görseli
 
 - “BTC’yi grafikle yorumla”, `/ask BTC grafikle yorumla` veya `/grafik BTC`: aynı veri snapshot'ından 15M PNG ve kısa yorum. `/chart BTC` de desteklenir. Normal sorularda görsel oluşturulmaz.
-- `lib/telegram-bias-chart.mjs`: kapanmış gerçek mumlar, gözlenebilir aday pivotlar, iki koşullu yol. Çizgilerin kontrol noktaları mevcut pivot/görünür pencere ekstreminden gelir; keyfî ileri fiyat hedefi veya M2 fib/TP üretilmez.
-- Kırmızı satış, yeşil alış yolu; 1H/4H betimsel eğilim uyumluysa ana/karşı etiketleri, değilse iki koşullu senaryo. Kesikli çizgi ölçülmüş olasılık değildir.
+- `lib/telegram-bias-chart.mjs`: kapanmış gerçek mumlar, gözlenebilir aday pivotlar, iki koşullu yol. Teyit çemberlerinin fiyatı gerçek referanslardan gelir. Ayrı ekran-geometrisi katmanı çizgileri şematik olarak uzatır; bu uzantılar sayısal hedef/TP olarak analiz modeline aktarılmaz.
+- Kırmızı satış, yeşil alış yolu; ikisi de düz/sürekli fırça çizgisidir. Yataylaşan eski eğriler yerine yumuşak geçişli çizim ve belirgin devam okları kullanılır. Renk/çizgi biçimi ölçülmüş olasılık değildir.
 - Çemberler **beklenen** retest/teyit noktalarıdır. Görsel mevcut durumda hiçbir noktayı gerçekleşmiş M2 teyidi diye işaretlemez. Aday pivotlar kullanıcı onaylı external swing diye sunulmaz.
 - Son kapalı mum, kaynak ve piyasa adı görselde bulunur. Altın için XAUT/USDT proxy etiketi korunur. Gelecek mum verisi çizilmez.
 - `lib/telegram-bias-image.mjs`: ağdan font/görsel indirmeden yerel font ve Resvg ile PNG üretir. WOFF font SFNT'ye açılıp özel çalışma zamanı temp dosyasına yazılır; Resvg'nin desteklediği `fontFiles` seçeneği kullanılır. Desteklenmeyen `fontBuffers` kaldırılmıştır; sistem fontlarına güvenilmez.
 - `deliverQaReply`: mevcut `sendPhoto` yardımcısıyla aynı chat/topic'e gönderir. Kısa yorum caption olur; uzun detay metni ayrı gönderilir. Başarılı kısa caption ikinci defa mesaj olarak gönderilmez.
 - Veri eski/yetersizse, render veya photo gönderimi başarısızsa metin cevap korunur. Photo otomatik tekrar gönderilmez. Testlerde Telegram gönderimleri taklit edildi; production test mesajı gönderilmedi.
 - Yeni API function, DB tablosu, yayın takvimi veya gerçek emir entegrasyonu yoktur.
-- Görünüm 144 kapanmış mumla yaklaşık 36 saati kapsar; fiyat ekseni yuvarlak aralıklarla, üst/alt boşlukla ve yüksek kontrastlı ayrı panelde çizilir. Gözlenen pencere tepesi/dibi belirtilir. Aynı borsada varsa 1H referans pivotları kullanılır; bunlar M2 ana swing onayı değildir.
-- Canlı quote ile son kapalı mum ayrı etiketlenir. Gelecek zamanlı, eski veya farklı borsadan quote çizim başlangıcına karıştırılmaz. Son yerel kırılım/geri kazanım gözlemi kapalı mumlardan çıkarılır; teyit diye sunulmaz.
+- Görünüm 144 kapanmış mumla yaklaşık 36 saati kapsar; fiyat ekseni yuvarlak aralıklarla ve yüksek kontrastlı ayrı panelde çizilir. Kırmızı yolun gözlenen dip altına görsel olarak devam edebilmesi için alt kadraj geniş tutulur. Aynı borsada varsa 1H referans pivotları kullanılır; bunlar M2 ana swing onayı değildir.
+- Canlı quote ile son kapalı mum modelde ayrı tutulur; sade görselde yalnız seçilen fiyat etiketi gösterilir. Gelecek zamanlı, eski veya farklı borsadan quote çizim başlangıcına karıştırılmaz. Son yerel kırılım/geri kazanım gözlemi kapalı mumlardan çıkarılır ve yorumda kullanılabilir; görselde ek açıklama olarak basılmaz.
 - Yeşil/kırmızı beklenen teyit çemberleri fiyatlar yakın olsa da yatayda ayrılır. Metin yedeği grafiğin gerçek iki referansını ve varsa yerel olayı kullanır; genel şablon cevaba düşmez. Normal sohbet istemine işlem-plan formu eklenmez.
+- Sade görsel: üstte yalnız isim/zaman dilimi ve küçük kaynak/tarih; sağda fiyat ekseni ve güncel fiyat etiketi. Anlık/mum teyidi paragrafları, görünen tepe/dip yazıları, ana/karşı senaryo başlıkları ve uzun açıklamalar kaldırıldı. Tek kısa alt not çizimlerin şematik ve çemberlerin beklenen teyit olduğunu belirtir. Ayrıntılar yorum/analiz verisinde korunur.
 
 ## 3. Ek veri bağlantıları
 
@@ -122,7 +123,7 @@ node --test tests/*.test.mjs
 
 ## 6. Regresyon ve güvenlik
 
-Tam test paketi: **846 test / 846 geçti / 0 başarısız**. `git diff --check` temiz. Ek regresyon testi sistem fontları kapalıyken başlık ve sağ fiyat eksenindeki gerçek yazı piksellerini kontrol eder; yalnız PNG dosyasının oluşması yeterli sayılmaz.
+Tam test paketi: **847 test / 847 geçti / 0 başarısız**. `git diff --check` temiz. Ek regresyon testi sistem fontları kapalıyken başlık ve sağ fiyat eksenindeki gerçek yazı piksellerini kontrol eder; yalnız PNG dosyasının oluşması yeterli sayılmaz. İki yolun da sürekli/eğrisel olduğu, kırmızı uzantının dip altına indiği ve bunun strateji seviyelerini değiştirmediği ayrıca test edilir.
 
 Yeni testler iki yönlü MSB/Fibonacci, HTF fitil/kapanış ayrımı, gelecek/eksik kanıt, limitten önce TP, intrabar belirsizliği, fill sonrası hedef, otomatik re-anchor olmaması, LLM plan reddi ve Telegram parçalamayı kapsar. Q&A entegrasyonu ağ/LLM taklitleriyle test edilir; gerçek servis yazımı yapılmaz.
 

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { wantsBiasChart, buildBiasChartModel, biasChartSvg, biasChartContext, biasChartViewport } from '../lib/telegram-bias-chart.mjs';
+import { wantsBiasChart, buildBiasChartModel, biasChartSvg, biasChartContext, biasChartViewport, biasScenarioGeometry } from '../lib/telegram-bias-chart.mjs';
 import { renderBiasChart, createBiasChartRenderer } from '../lib/telegram-bias-image.mjs';
 import { deliverQaReply } from '../lib/telegram-qa-delivery.mjs';
 import { handleTelegramUpdate, briefMarketFallback, needsBriefRewrite } from '../lib/telegram-qa.mjs';
@@ -37,9 +37,8 @@ test('wider 36h frame leaves display space above/below data with rounded price t
   assert.ok(viewport.top>Math.max(...model.bars.map(b=>b.h)));
   assert.ok(viewport.ticks.length>=5);
   assert.ok(viewport.ticks.every(p=>Math.abs(p/viewport.step-Math.round(p/viewport.step))<1e-8));
-  assert.match(biasChartSvg(model),/36 saat görünüm/);
-  assert.match(biasChartSvg(model),/Görünen tepe/);
-  assert.match(biasChartSvg(model),/Görünen dip/);
+  assert.equal((model.lastClosedAt-model.bars[0].t)/3600000,36);
+  assert.doesNotMatch(biasChartSvg(model),/Görünen tepe|Görünen dip|BIAS:|Anlık/);
 });
 test('live quote is distinct from the last closed bar and rejects future or different-venue quotes',()=>{
   const base=buildBiasChartModel({detail,asOf});
@@ -47,8 +46,8 @@ test('live quote is distinct from the last closed bar and rejects future or diff
   const m=buildBiasChartModel({detail,asOf,quote});
   assert.equal(m.price,base.price);
   assert.equal(m.anchorPrice,quote.price);
-  assert.match(biasChartSvg(m),/Anlık/);
-  assert.match(biasChartSvg(m),/kapalı mum/);
+  assert.ok(biasChartSvg(m).includes(Number(quote.price).toLocaleString('tr-TR',{maximumFractionDigits:0})));
+  assert.doesNotMatch(biasChartSvg(m),/mum teyidi ayrı|canlı tick/);
   for(const q of [{...quote,at:asOf+1},{...quote,source:'different venue'},{...quote,at:asOf-600000}])
     assert.equal(buildBiasChartModel({detail,asOf,quote:q}).liveQuote,null);
 });
@@ -58,7 +57,7 @@ test('local event labels only use observable completed candles and never assert 
     assert.ok(m.recentEvent.at<=asOf);
     assert.ok(!m.recentEvent.reclaimedAt||m.recentEvent.reclaimedAt<=asOf);
     assert.equal(m.recentEvent.candidateOnly,true);
-    assert.match(biasChartSvg(m),/ana swing teyidi değil/);
+    assert.match(biasChartContext(m),/M2 ana swing teyidi değildir/);
   }
 });
 test('chart fallback remains short but contains the actual two references, not canned placeholder commentary',()=>{
@@ -87,9 +86,28 @@ test('SVG escapes external metadata, separates future sketch, never labels confi
   const svg=biasChartSvg({...model,source:'<script>alert("x")</script>'});
   assert.doesNotMatch(svg,/<script>/);
   assert.match(svg,/&lt;script&gt;/);
-  for(const label of ['SATIŞ','ALIŞ','teyit henüz yok','GELECEK MUM VERİSİ DEĞİL','OLASI YOLLAR'])
+  for(const label of ['data-scenario="short"','data-scenario="long"','Yollar şematik','beklenen teyit','hedef / işlem planı değil'])
     assert.ok(svg.includes(label));
   assert.ok(!/NaN|Infinity/.test(svg));
+});
+test('clean brush paths are both solid, curve below the observed low, and never modify strategy levels',()=>{
+  const m=buildBiasChartModel({detail,asOf}),before=structuredClone(m);
+  const short=biasScenarioGeometry(m,true),long=biasScenarioGeometry(m,false);
+  const svg=biasChartSvg(m);
+  const paths=[...svg.matchAll(/<path data-scenario="(?:short|long)"[^>]+>/g)].map(p=>p[0]);
+  assert.equal(paths.length,2);
+  assert.ok(paths.every(p=>!p.includes('stroke-dasharray')));
+  for(const g of [short,long]){
+    assert.equal(g.illustrationOnly,true);
+    assert.ok(g.knots.every(([x,y],i)=>Number.isFinite(x)&&Number.isFinite(y)&&(!i||x>g.knots[i-1][0])));
+    assert.equal((g.path.match(/ C/g)||[]).length,g.knots.length-1);
+  }
+  assert.ok(short.knots.at(-1)[1]-short.cy>100);
+  assert.ok(long.knots.at(-1)[1]<long.cy);
+  const v=biasChartViewport(m),lowY=135+(v.top-v.lo)/(v.top-v.bottom)*620;
+  assert.ok(short.knots.at(-1)[1]>lowY,'red extension must visibly continue below the observed low');
+  assert.deepEqual(m,before,'pixel illustration must not manufacture new strategy targets or mutate evidence');
+  assert.doesNotMatch(svg,/ANA SENARYO|KARŞI SENARYO|Görünen dip|Görünen tepe|ana swing teyidi|Anlık|GELECEK MUM/);
 });
 test('embedded local font and real OHLC render a valid 1600x1000 PNG without web assets',()=>{
   const image=renderBiasChart(buildBiasChartModel({detail,asOf}));
