@@ -76,6 +76,19 @@ test('magazine config exposes the two configured sources and fails closed withou
   assert.equal(cfg.ok, true);
 });
 
+test('Alfa News channel is recognized by its title when no chat env is configured', () => {
+  const old = process.env.TG_MAG_NEWS_CHAT;
+  delete process.env.TG_MAG_NEWS_CHAT;
+  try {
+    const base = { message_id: 977, date: 1795000000, from: { id: 42 }, text: 'GOLD & BTC haftalık görünüm' };
+    assert.equal(magazineSource({ ...base, chat: { id: -100999, title: 'Alfa News', type: 'channel' } }), 'Haber');
+    assert.equal(magazineSource({ ...base, chat: { id: -100999, title: 'Alfa News', username: 'alfanews', type: 'channel' } }), 'Haber');
+    assert.equal(magazineSource({ ...base, chat: { id: -1004496172434, title: 'Alfa Traders', username: 'alfakasim', type: 'supergroup' }, message_thread_id: 6 }), null);
+  } finally {
+    if (old === undefined) delete process.env.TG_MAG_NEWS_CHAT; else process.env.TG_MAG_NEWS_CHAT = old;
+  }
+});
+
 test('only the exact news channel and Trader Ahmet topic generate magazine entries', () => {
   assert.equal(magazineSource(newsMsg()), 'Haber');
   assert.equal(magazineSource(newsMsg({ chat: { id: -100999888777, username: 'baskanaları', type: 'channel' }, sender_chat: { id: -100999888777 } })), null);

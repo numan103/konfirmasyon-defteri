@@ -34,6 +34,9 @@ const MAX_PAGES = 80;
 const MAX_CLICKS = 60;
 const MAX_ROWS = 5000;
 const PAGE_SIZE = 1000;
+// 1-2 saniyelik kazara ziyaretler paneli doldurmasin. Uye veya huni tiklamasi
+// olan kisiler kisa surse de sayilir (kayit niyeti gercek sinyaldir).
+const MIN_REAL_MS = 5000;
 const visitReads = createWindowRowsCache({ maxRows: MAX_ROWS });
 
 const SID_RE = /^[A-Za-z0-9_-]{6,64}$/;
@@ -447,6 +450,11 @@ function normalizeSession(row) {
   };
 }
 
+function isRealVisit(s) {
+  if (s.member || (s.activeMs || 0) >= MIN_REAL_MS) return true;
+  return (s.clicks || []).some(function (c) { return String((c && c.url) || '').indexOf('funnel:') === 0; });
+}
+
 export function summarizeSessions(rows, opts) {
   const o = opts || {};
   const now = o.now || Date.now();
@@ -465,6 +473,7 @@ export function summarizeSessions(rows, opts) {
     anonymousSessions: 0,
     adminSessions: 0,
     botSessions: 0,
+    quickBounces: 0,
   };
   const visitors = new Set();
   const online = new Set();
@@ -494,6 +503,7 @@ export function summarizeSessions(rows, opts) {
     if (s.bot) { totals.botSessions++; return; }
     if (s.admin && !includeAdmin) { totals.adminSessions++; return; }
     if (Date.parse(s.last) < since) return;
+    if (!isRealVisit(s)) { totals.quickBounces++; return; }
 
     totals.sessions++;
     totals.pageviews += s.pageviews;

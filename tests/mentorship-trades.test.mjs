@@ -53,6 +53,9 @@ function fixture(t) {
 test('explicit result lines support signed decimals and multiple symbols without manufacturing target outcomes', () => {
   assert.deepEqual(parseMentorResults('BTC +2.3R\nGOLD +2R\nnzdcad +2,8r\nTebrikler.'), [{ coin: 'BTC', r: 2.3 }, { coin: 'GOLD', r: 2 }, { coin: 'NZDCAD', r: 2.8 }]);
   assert.deepEqual(parseMentorResults('BTC -1R'), [{ coin: 'BTC', r: -1 }]);
+  assert.deepEqual(parseMentorResults('GOLD -1R 0.001'), [{ coin: 'GOLD', r: -1 }], 'stray 0.001 is not a result');
+  assert.deepEqual(parseMentorResults('BTC +2.002R ✅'), [{ coin: 'BTC', r: 2 }], '2.002 küsüratı +2 olur');
+  assert.deepEqual(parseMentorResults('BTC +2R 0.002'), [{ coin: 'BTC', r: 2 }]);
   for (const value of ['BTC +2R hedef', 'BTC hedef 3R', 'BTC 2R', 'RR 1:3', 'BTC +2R\nBTC -1R']) assert.deepEqual(parseMentorResults(value), []);
 });
 test('only the exact mentorship author and topic are eligible; Public and forwarded/member messages are ignored', () => {
@@ -75,7 +78,7 @@ test('a multi-coin summary does not attach one coin chart to every result', () =
   assert.equal(records.length, 3); assert.equal(records[0].needsReview, false);
   assert.equal(records[1].needsReview, true); assert.equal(records[1].originalPhotoId, '');
   assert.equal(records[2].needsReview, true);
-  const [standalone] = resultRecords(msg({ reply_to_message: undefined }));
+  const [standalone] = resultRecords(msg({ reply_to_message: undefined, photo: [{ file_id: 'standalone', file_size: 1000 }] }));
   assert.equal(standalone.needsReview, true);
 });
 test('premium records are encrypted with row AAD and cannot be read as plaintext', t => {
@@ -148,11 +151,22 @@ test('Telegram posts are categorized conservatively; trade targets never become 
   assert.equal(classifyMentorPost('BTC long entry 90000 stop 89000 hedef +2R'), 'trade');
   assert.equal(classifyMentorPost('Piyasa üzerine bir not'), 'post');
   assert.equal(postRecords(msg({ text: '/help' })).length, 0);
-  const [post] = postRecords(msg({ text: 'GOLD short girdim' }));
+  const photo = [{ file_id: 'chart', file_size: 1000 }];
+  const [post] = postRecords(msg({ text: 'GOLD & BTC short girdim', photo }));
   assert.equal(post.category, 'trade'); assert.equal(post.r, null);
-  const [target] = postRecords(msg({ text: 'BTC +2R hedef' }));
+  const [target] = postRecords(msg({ text: 'BTC +2R hedef', photo }));
   assert.equal(target.category, 'post'); assert.equal(target.r, null, 'unclear target remains a private post, never a realized result');
-  assert.equal(postRecords(msg({ text: 'BTC +2R\nBTC -1R' })).length, 0);
+  assert.equal(postRecords(msg({ text: 'BTC +2R\nBTC -1R', photo })).length, 0);
+});
+test('plain chat and images without a leading pair never enter the trade feed', () => {
+  const photo = [{ file_id: 'chart', file_size: 1000 }];
+  for (const changes of [
+    { text: 'Bugün nasıl gidiyorsunuz?', photo },
+    { text: 'GOLD & BTC hakkında rastgele sohbet', photo: undefined, reply_to_message: undefined },
+    { text: 'Resimsiz GOLD analizi', reply_to_message: undefined },
+    { text: 'GOLD short girdim', photo: [{ file_id: 'too-big', file_size: 3000000 }], reply_to_message: undefined },
+  ]) assert.equal(postRecords(msg(changes)).length, 0);
+  assert.equal(postRecords(msg({ text: 'GOLD & BTC analiz', photo })).length, 1);
 });
 test('redundant symbols and R lines are removed while meaningful notes stay intact', () => {
   assert.equal(cleanMentorText('gold\ngold +2.2r', 'GOLD'), '');
@@ -178,7 +192,7 @@ test('public projections whitelist completed results and include negative and fl
 test('free member API responses contain no text, links, images, active trades or bias', async t => {
   const f = fixture(t);
   await ingestMentorUpdate({ message: msg() });
-  await ingestMentorUpdate({ message: msg({ message_id: 1000, text: 'BTC bias yukarı SECRET', reply_to_message: undefined }) });
+  await ingestMentorUpdate({ message: msg({ message_id: 1000, text: 'BTC bias yukarı SECRET', reply_to_message: undefined, photo: [{ file_id: 'bias-chart', file_size: 1000 }] }) });
   f.verified(false);
   const out = await f.request('member');
   assert.equal(out.status, 200); assert.equal(out.data.records.length, 1);
@@ -201,11 +215,12 @@ test('premium lists use small encrypted metadata, not image-heavy source rows', 
 });
 test('a closing result removes its original trade from active lists and a loss updates the public curve', async t => {
   const f = fixture(t);
-  await ingestMentorUpdate({ message: msg({ message_id: 889, text: 'BTC short girdim', date: 1794933244, reply_to_message: undefined }) });
+  await ingestMentorUpdate({ message: msg({ message_id: 889, text: 'BTC short girdim', date: 1794933244, reply_to_message: undefined, photo: [{ file_id: 'active-chart', file_size: 1000 }] }) });
   await ingestMentorUpdate({ message: msg() });
   const closed = await f.request('member', { category: 'trade' });
   assert.equal(closed.data.records.length, 0); assert.equal(closed.data.counts.trade, 0);
-  const loss = msg({ message_id: 1001, text: 'ETH -1R', date: 1795105405,
+  const loss = msg({ message_id: 1001, text: 'ETH -1R 0.002', date: 1795105405,
+    photo: [{ file_id: 'loss-chart', file_size: 1000 }],
     reply_to_message: { message_id: 900, text: 'ETH long entry', from: { id: 12345, username: 'traderahmetd' } } });
   await ingestMentorUpdate({ message: loss });
   const summary = await f.request('', { summary: '1' });

@@ -75,7 +75,7 @@ test('analytics reports keep fresh admin authorization while incrementally readi
   process.env.SITE_ADMIN_EMAILS = 'admin@test.dev'; process.env.SUPABASE_SERVICE_ROLE = 'sb_secret_test';
   const now = Date.now(), iso = ms => new Date(ms).toISOString();
   const row = (id, time) => ({ id: 'visit_' + id, updated_at: iso(time),
-    data: { sid: id, vid: id + '_visitor', first: iso(time), last: iso(time), activeMs: 1000, pages: { home: { v: 1, ms: 1000 } } } });
+    data: { sid: id, vid: id + '_visitor', first: iso(time), last: iso(time), activeMs: 12000, pages: { home: { v: 1, ms: 12000 } } } });
   let db = [row('session_old123', now - 86400000), row('session_new123', now - 60000)];
   const filters = []; let authReads = 0, mapReads = 0, allowed = true;
   global.fetch = async url => {

@@ -13,6 +13,9 @@ import eduFeedback from '../lib/edu-feedback.mjs';
 import influencerContent from '../lib/influencer-content.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 import { FEATURES, isNew } from '../assets/site-features.mjs';
+import { bearer, requestUser, requestTier } from '../lib/auth.mjs';
+import { openRecord } from '../lib/education-crm.mjs';
+import { EDU_PLANS } from '../assets/edu-plans-model.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -130,6 +133,62 @@ async function writeJournal(journalUid, data) {
 
 function emptyChannels() { return { traders: {}, order: [] }; }
 
+// Alfa Edu: eski içerikler ücretsizdir (access alanı yoksa/free). Yeni videolar
+// access:'paid' ve opsiyonel plans:[] taşır. edu_shared herkese açık olduğu için
+// ücretli içerğin URL/not/fotoğrafı sunucuda çıkarılır; yalnızca admin/ref veya
+// ilgili paketi onaylanmış üye tam veriyi alır.
+const PAID_PLAN_IDS = new Set(EDU_PLANS.map(p => p.id));
+const isPaidItem = v => !!(v && String(v.access || '').toLowerCase() === 'paid');
+function itemPlans(v) {
+  const raw = Array.isArray(v && v.plans) ? v.plans.map(x => String(x || '').toLowerCase().slice(0, 20)) : [];
+  const list = raw.filter(x => PAID_PLAN_IDS.has(x));
+  return list.length ? Array.from(new Set(list)).slice(0, 3) : ['video'];
+}
+
+// Onaylanmış CRM kayıtları şifreli tutulur. memberId + stage alanlarına göre
+// üyenin hangi paketleri aldığını çıkarır; sırada yalnızca paket kimlikleri döner.
+async function verifiedEduPlans(user) {
+  const plans = new Set();
+  const key = String(process.env.SUPABASE_SERVICE_ROLE || '').trim();
+  if (!user || !user.id || !key) return plans;
+  try {
+    const headers = { apikey: key, ...(key.startsWith('sb_secret_') ? {} : { Authorization: 'Bearer ' + key }) };
+    const url = SUPABASE_URL + '/rest/v1/edu_shared?id=like.' + encodeURIComponent('educrm_%') + '&select=id,data&limit=1000';
+    const r = await fetch(url, { headers, signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return plans;
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return plans;
+    rows.forEach(row => {
+      try {
+        const rec = openRecord(row.id, row.data);
+        if (rec && rec.memberId === user.id && rec.stage === 'verified' && PAID_PLAN_IDS.has(rec.plan)) plans.add(rec.plan);
+      } catch (e) { /* başka kayıt tipi */ }
+    });
+  } catch (e) { /* CRM okunamadıysa kilitli kalır */ }
+  return plans;
+}
+
+function projectChannels(base, viewer) {
+  if (!base || !base.traders || typeof base.traders !== 'object') return base;
+  const out = JSON.parse(JSON.stringify(base));
+  if (viewer.privileged) return out;
+  Object.values(out.traders).forEach(t => {
+    const secs = (t && t.sections) || {};
+    Object.keys(secs).forEach(sid => {
+      (Array.isArray(secs[sid]) ? secs[sid] : []).forEach(topic => {
+        (Array.isArray(topic && topic.videos) ? topic.videos : []).forEach(v => {
+          if (!isPaidItem(v)) return;
+          const plans = itemPlans(v);
+          if (plans.some(p => viewer.plans.has(p))) return;
+          v.url = ''; v.body = ''; v.photos = []; v.vids = [];
+          v.locked = true; v.plans = plans;
+        });
+      });
+    });
+  });
+  return out;
+}
+
 function sanitizeChannel(c) {
   if (!c || typeof c !== 'object') return null;
   const id = String(c.id || '').trim().slice(0, 120);
@@ -180,6 +239,8 @@ function sanitizeChannel(c) {
               title: String((v && v.title) || '').slice(0, 200),
               url: String((v && v.url) || '').slice(0, 600),
               type: isNote ? 'not' : 'video',
+              access: isPaidItem(v) ? 'paid' : 'free',
+              plans: isPaidItem(v) ? itemPlans(v) : [],
               body: isNote ? String((v && v.body) || '').slice(0, 40000) : '',
               photos,
               // içeriğe gömülü ek videolar ({{video:N}} işaretleri bunlara bakar)
@@ -292,7 +353,12 @@ export default async function handler(req, res) {
     if (isChannel) {
       const cur = await load();
       const base = cur.data && cur.data.traders ? cur.data : emptyChannels();
-      return res.status(200).json({ ok: true, data: base, _warn: cur.warn || undefined });
+      const user = bearer(req) ? await requestUser(req) : null;
+      const tier = user ? await requestTier(user) : null;
+      const privileged = !!(user && (user.admin || tier === 'admin' || tier === 'ref'));
+      const plans = privileged ? new Set(PAID_PLAN_IDS) : (user ? await verifiedEduPlans(user) : new Set());
+      res.setHeader('Cache-Control', 'private, no-store');
+      return res.status(200).json({ ok: true, data: projectChannels(base, { privileged, plans }), _warn: cur.warn || undefined });
     }
     const r = await load();
     if (r.data) return res.status(200).json(r.data);

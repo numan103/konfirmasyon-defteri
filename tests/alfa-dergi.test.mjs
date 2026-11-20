@@ -87,6 +87,8 @@ test('Telegram entries share one stream with a category badge and safe same-orig
   const load = html.slice(html.indexOf('async function loadNews()'), html.indexOf('function magAuthor('));
   assert.match(load, /e\.category !== 'Haber' && e\.category !== 'Teknik Analiz'/);
   assert.match(load, /Array\.isArray\(e\.photoIds\)/);
+  assert.match(load, /rawAdmin/, 'admin raw data must map photoIds to proxy URLs too');
+  assert.match(load, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(String\(id\)\)/);
   assert.match(html, /\.e-cat\.news/);
   assert.match(html, /\.e-cat\.tech/);
   assert.match(html, /\.toc-cat\.news/);

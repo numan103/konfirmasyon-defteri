@@ -20,10 +20,10 @@
 <meta name="twitter:description" content="Alfa Traders: trading eğitimleri, güncel piyasa analizleri, haftalık Alfa Dergi ve trader topluluğu. Öğren, geliş, piyasayı birlikte takip et.">
 <meta name="twitter:image" content="https://alfa-trader.com/alfa-traders-share-v2.png">
 <link rel="stylesheet" href="/assets/influencer-content.css?v=6">
-<link rel="stylesheet" href="/assets/nav-autohide.css">
+<link rel="stylesheet" href="/assets/nav-autohide.css?v=2">
 <link rel="stylesheet" href="/assets/growth.css?v=2">
 <script type="module" src="/assets/growth.mjs"></script>
-<script type="module" src="/assets/nav-autohide.mjs"></script>
+<script type="module" src="/assets/nav-autohide.mjs?v=2"></script>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1294,7 +1294,7 @@
   .user-badge .logout:hover { background: var(--pc-soft); border-color: var(--pc); color: var(--pc); }
   /* --- Tanıtım (landing) sayfası --- */
   body.landed .wrap, body.landed .chat-bubble, body.landed .chat-popup, body.landed .theme-toggle { display: none; }
-  #landing { display: none; position: fixed; inset: 0; z-index: 150; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #landing { display: none; position: fixed; inset: 0; z-index: 150; background: var(--bg); overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   /* ===== Premium hero band ===== */
   .lp-hero-band { position: relative; overflow: hidden; background: radial-gradient(1100px 560px at 50% -8%, #20223f 0%, #12132530 0%, transparent 60%), linear-gradient(180deg, #0d0e1c 0%, #0b0c17 60%, #0a0b14 100%); padding-bottom: 30px; }
   .lp-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px); background-size: 46px 46px; -webkit-mask-image: radial-gradient(ellipse 78% 62% at 50% 2%, #000 38%, transparent 74%); mask-image: radial-gradient(ellipse 78% 62% at 50% 2%, #000 38%, transparent 74%); pointer-events: none; }
@@ -1373,7 +1373,20 @@
   .hsw-tr .dot.g { background: #4ade80; } .hsw-tr .dot.r { background: #f87171; }
   @media (max-width: 640px) { .hsw-main { grid-template-columns: 1fr; } .hsw-metrics { grid-template-columns: 1fr 1fr; } }
   #landing.open { display: block; }
-  .lp-nav { max-width: 1000px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .lp-nav { max-width: 1000px; margin: 0 auto; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-width: 0; }
+  /* Mobil: landing içeriği sağa/sola taşmasın, nav satırlara insin. */
+  @media (max-width: 680px) {
+    #landing .lp-hero-band .lp-nav { padding: 10px 12px; row-gap: 8px; }
+    #landing .lp-nav-left { flex: 1 1 100%; min-width: 0; }
+    #landing .lp-brand { min-width: 0; }
+    #landing .lp-brand h1, #landing .lp-brand .sub { overflow-wrap: anywhere; }
+    #landing .lp-hero, #landing .lp-features, #landing .lp-hero-shot { padding-left: 14px; padding-right: 14px; }
+    #landing .hsw-body { padding: 12px; }
+    #landing .hsw-metrics { gap: 8px; }
+    #landing .hsw-m { min-width: 0; padding: 10px; }
+    #landing .lp-proof { gap: 8px; }
+    #landing .lp-nav-rv-pop { max-width: calc(100vw - 24px); }
+  }
   .lp-brand { display: flex; align-items: center; gap: 11px; }
   .lp-brand .logo-mark { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .lp-brand h1 { font-size: 17px; font-weight: 700; }
@@ -1849,6 +1862,35 @@
   .eg-brand-ico { width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 19px; border-radius: 12px; background: var(--pc-soft); border: 1px solid var(--border); box-shadow: 0 6px 16px rgba(0,0,0,.35); }
   .eg-brand-name { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(120deg, var(--pc), #cfd3ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .eg-brand-sub { font-size: 12.5px; color: var(--text-2); font-weight: 500; }
+  /* ===== Erişim: takip edilebilir durum akışı ===== */
+  .acc-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+  .acc-step { position:relative; min-width:0; padding:12px 12px 12px 42px; border:1px solid var(--border); border-radius:12px; background:var(--bg2); color:var(--text-3,var(--dim)); }
+  .acc-step::before { content:attr(data-n); position:absolute; left:10px; top:12px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; background:var(--card); border:1px solid var(--border); color:var(--text-2); }
+  .acc-step b { display:block; font-size:12.5px; color:var(--text); line-height:1.35; }
+  .acc-step span { display:block; margin-top:3px; font-size:11.5px; line-height:1.4; }
+  .acc-step.current { border-color:var(--pc); background:linear-gradient(120deg,var(--pc-soft),var(--bg2)); color:var(--text-2); }
+  .acc-step.current::before { background:linear-gradient(135deg,#7c5cff,#22d3ee); color:#fff; border-color:transparent; }
+  .acc-step.done { border-color:rgba(74,222,128,.35); }
+  .acc-step.done::before { content:'✓'; background:rgba(74,222,128,.16); color:#4ade80; border-color:rgba(74,222,128,.4); }
+  .acc-state { display:flex; gap:12px; align-items:center; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--bg2); margin:6px 0 14px; }
+  .acc-state-ico { width:38px; height:38px; flex:none; display:flex; align-items:center; justify-content:center; border-radius:12px; font-size:18px; background:var(--pc-soft); border:1px solid var(--border); }
+  .acc-state b { display:block; font-size:13px; }
+  .acc-state small { display:block; color:var(--text-3,var(--dim)); font-size:11.5px; margin-top:2px; }
+  .acc-benefit-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px; }
+  @media (max-width:640px) { .acc-steps { grid-template-columns:1fr; } .acc-benefit-grid { grid-template-columns:1fr; } }
+  /* ===== Alfa Edu: ücretli içerik kilidi ===== */
+  .ch-lock { padding:22px; border-radius:14px; border:1px solid rgba(124,92,255,.35); background:radial-gradient(520px 180px at 50% -20%,rgba(124,92,255,.2),transparent 70%),var(--bg2); text-align:center; }
+  .ch-lock-ico { font-size:30px; line-height:1; }
+  .ch-lock h4 { margin:10px 0 6px; font-family:var(--font-display); font-size:17px; }
+  .ch-lock p { margin:0 auto 12px; max-width:420px; font-size:12.5px; line-height:1.6; color:var(--text-2); }
+  .ch-lock-plans { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+  .ch-lock-plan { border:1px solid var(--border); border-radius:999px; padding:5px 11px; font-size:11.5px; font-weight:700; color:var(--text-2); background:var(--card); }
+  .ch-item-lock { margin-left:auto; flex:none; color:#f5b623; font-size:12px; }
+  .ch-access-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:10px 0 2px; border-top:1px solid var(--border); }
+  .ch-access-row label { font-size:12.5px; font-weight:700; color:var(--text-2); }
+  .ch-access-row select { padding:8px 10px; border-radius:9px; border:1px solid var(--border); background:var(--card); color:var(--text); font:inherit; font-size:12.5px; }
+  .ch-plan-opts { display:flex; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--text-2); }
+  .ch-plan-opts label { display:inline-flex; gap:5px; align-items:center; font-weight:500; cursor:pointer; }
   /* EDU sekmeleri */
   .eg-tabs { display: flex; gap: 6px; margin: 0 0 14px; padding: 4px; border: 1px solid var(--border); border-radius: 14px; background: var(--bg2); width: fit-content; max-width: 100%; overflow-x: auto; }
   .eg-tab { border: none; background: transparent; color: var(--text-2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
@@ -4997,6 +5039,15 @@
     #landing .lp-showcase-heading { text-align: center; }
   }
   @media (max-width: 640px) { #landing .lp-hero { padding: 96px 20px 48px; } #landing .lp-showcase { padding-left: 20px; padding-right: 20px; } #landing .lp-demo-detail { padding: 20px 14px; } #landing .lp-art-note { display: none; } #landing .lp-sig-chart svg { height: 78px; } #landing .lp-signal-tabs button { gap: 4px; padding: 6px 1px; font-size: 9px; } }
+  /* Dar ekranda grid öğelerinin min-content genişliği taşmasın. */
+  @media (max-width: 680px) {
+    #landing .lp-hero-copy, #landing .lp-hero-video, #landing .lp-art,
+    #landing .lp-hero-values, #landing .lp-assurance, #landing .lp-badge,
+    #landing .eduplans-entry { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+    #landing .lp-hero-values { grid-template-columns: 1fr; }
+    #landing .lp-video-frame { min-height: 0; }
+    #landing .lp-hero h2, #landing .lp-hero p { overflow-wrap: anywhere; }
+  }
   #landing .lp-section-nav { display: flex; gap: 25px; }
   #landing .lp-section-nav a { color: var(--text-2); text-decoration: none; font-size: 12px; transition: color .2s; }
   #landing .lp-section-nav a:hover { color: var(--lp-accent); }
@@ -5181,6 +5232,14 @@
   .ana-table tr:last-child td { border-bottom:none; }
   .ana-table td b { color:var(--text); font-weight:700; }
   .ana-bar { display:inline-block; height:5px; border-radius:99px; background:linear-gradient(90deg,#38bdf8,#7b78f5); vertical-align:middle; min-width:2px; max-width:110px; }
+  .ana-fold { border:1px solid var(--border); border-radius:14px; background:var(--card); margin-bottom:14px; }
+  .ana-fold > summary { cursor:pointer; list-style:none; padding:13px 16px; display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:14px; font-weight:700; }
+  .ana-fold > summary::-webkit-details-marker { display:none; }
+  .ana-fold > summary::after { content:'▾'; margin-left:auto; color:var(--text-3); transition:transform .2s; }
+  .ana-fold[open] > summary::after { transform:rotate(180deg); }
+  .ana-fold > summary em { font-style:normal; font-size:10.5px; font-weight:600; color:var(--text-3); }
+  .ana-fold-body { padding:0 16px 16px; }
+  .ana-fold-body .ana-section, .ana-grid2 .ana-section { margin-bottom:14px; }
   .ana-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
   .ana-grid2 .ana-section { margin-bottom:0; }
   @media (max-width:760px) { .ana-grid2 { grid-template-columns:1fr; } .ana-controls { margin-left:0; } }
@@ -7137,6 +7196,18 @@
       <div id="ch-video-ed" style="margin-top:8px;"></div>
       <button type="button" id="ch-add-video" class="btn" style="margin:6px 0 0;align-self:flex-start;">＋ Video ekle (yazının içine)</button>
       <input type="text" id="ch-in-url" data-i18n-ph="pg.egitim.urlPh" placeholder="YouTube video ya da oynatma listesi bağlantısı (boş bırakılırsa sadece not)">
+      <div class="ch-access-row" id="ch-access-row">
+        <label for="ch-in-access">Erişim</label>
+        <select id="ch-in-access">
+          <option value="free">Ücretsiz (eski içerikler)</option>
+          <option value="paid">Ücretli (paket)</option>
+        </select>
+        <div class="ch-plan-opts" id="ch-plan-opts" hidden>
+          <label><input type="checkbox" value="video" checked> Video Eğitim</label>
+          <label><input type="checkbox" value="live"> Canlı Grup</label>
+          <label><input type="checkbox" value="personal"> Personal</label>
+        </div>
+      </div>
       <div class="eg-form-btns">
         <button class="btn solid" id="ch-in-save" type="button" data-i18n="act.save">Kaydet</button>
         <button class="btn" id="ch-in-cancel" type="button" data-i18n="act.cancel">Vazgeç</button>
@@ -9132,7 +9203,7 @@
         <button type="button" id="ana-prune" title="90 günden eski analitik kayıtlarını sil">🧹 Eski kayıtları temizle</button>
       </div>
     </div>
-    <div class="ana-note">Ziyaretler anonim ölçülür; ham IP adresi saklanmaz. İsim/e-posta yalnızca kullanıcı giriş yaptıysa görünür. Yönetici ziyaretleri varsayılan olarak sayılmaz.</div>
+    <div class="ana-note">Ziyaretler anonim ölçülür; ham IP adresi saklanmaz. İsim/e-posta yalnızca kullanıcı giriş yaptıysa görünür. Yönetici ziyaretleri ve 5 sn altı kazara geçişler sayılmaz; üye girişi veya kayıt adımı olan kısa ziyaretler dahil edilir.</div>
     <div id="education-crm-slot"></div>
     <div id="ana-body">
       <div class="ana-loading">Analitik yükleniyor…</div>
@@ -9332,14 +9403,18 @@
 
     <div class="panel" style="margin-bottom:12px;">
       <h2><span>3 adımda premium</span><span class="n">Ücretsiz</span></h2>
-      <div style="display:grid;gap:8px;font-size:13px;color:var(--text-2);">
-        <div><b style="color:var(--text);">1.</b> Referans linkinden Bybit veya OKX hesabı aç / taşı.</div>
-        <div><b style="color:var(--text);">2.</b> Bota UID'ni gönder ve doğrulamayı bekle.</div>
-        <div><b style="color:var(--text);">3.</b> Onay sonrası premium özellikler açılır.</div>
+      <div class="acc-steps" id="acc-steps">
+        <div class="acc-step" data-step="1" data-n="1"><b>Hesabını bağla</b><span>Referans linkinden Bybit veya OKX hesabı aç / taşı.</span></div>
+        <div class="acc-step" data-step="2" data-n="2"><b>UID'ni gönder</b><span>Bota UID'ni yaz, doğrulamayı bekle.</span></div>
+        <div class="acc-step" data-step="3" data-n="3"><b>Premium açılsın</b><span>Onay sonrası tüm araçlar ve mentorship senin.</span></div>
       </div>
     </div>
-    <div class="panel">
+    <div class="panel" id="acc-state-panel">
       <h2><span>Durum</span><span class="n" id="acc-status-badge">—</span></h2>
+      <div class="acc-state" id="acc-state">
+        <span class="acc-state-ico" id="acc-state-ico">🔎</span>
+        <span><b id="acc-state-title">Durum kontrol ediliyor</b><small id="acc-state-sub">Giriş yaptıysan referans durumun burada görünür.</small></span>
+      </div>
       <p class="hint" id="acc-status-text" style="margin:0 0 4px;"></p>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px;">
@@ -9437,7 +9512,7 @@
 
     <div class="panel">
       <h2><span>Neler açılır?</span></h2>
-      <div id="acc-benefits" style="font-size:12.5px;line-height:1.9;color:var(--text-3,var(--dim));"></div>
+      <div id="acc-benefits" class="acc-benefit-grid" style="font-size:12.5px;line-height:1.9;color:var(--text-3,var(--dim));"></div>
     </div>
   </div>
 </div>
@@ -13252,6 +13327,7 @@ function magIsAdmin() {
 async function loadNews() {
   if (currentPage !== 'news') return false;
   let d = null;
+  let rawAdmin = false;
   if (magIsAdmin()) {
     // Yönetici tam veriyi kendi oturumuyla okur (düzenleme alanları için).
     const owner = AUTH && AUTH.user && AUTH.user.id;
@@ -13260,7 +13336,7 @@ async function loadNews() {
         const res = window.AlfaSharedDocuments
           ? await window.AlfaSharedDocuments.read(AUTH.client, owner, 1)
           : await AUTH.client.from('alfanews').select('data').eq('id', 1).maybeSingle();
-        if (owner === (AUTH && AUTH.user && AUTH.user.id) && res && res.data && res.data.data) d = res.data.data;
+        if (owner === (AUTH && AUTH.user && AUTH.user.id) && res && res.data && res.data.data) { d = res.data.data; rawAdmin = true; }
       }
     } catch (e) { /* tablo yok / çevrimdışı */ }
   }
@@ -13292,6 +13368,12 @@ async function loadNews() {
     if (typeof e.publishedAt !== 'string') e.publishedAt = '';
     if (!Array.isArray(e.photoIds)) e.photoIds = [];
   });
+  // Admin raw kaydı photoIds tutar; okuyucuya public uçla aynı görseli göster.
+  if (rawAdmin) magData.entries.forEach(function (e) {
+    const proxied = (e.photoIds || []).slice(0, 3)
+      .map(function (id) { return '/api/tg?magPhoto=' + encodeURIComponent(String(id)); });
+    e.images = (e.images || []).concat(proxied).slice(0, 12);
+  });
   // Analist listesi (roster)
   if (!Array.isArray(magData.authors)) magData.authors = [];
   if (typeof magData.rosterVer !== 'number') magData.rosterVer = magData.authorsSeeded ? 1 : 0;
@@ -13318,12 +13400,20 @@ async function loadNews() {
 }
 function magAuthor(id) { return magData.authors.find(a => a.id === id) || null; }
 async function saveNews() {
-  const json = JSON.stringify(magData);
+  // Admin okuyucuda üretilen proxy URL'leri kalıcı photoIds'nin yanına yazma;
+  // aksi halde public yüzde görsel iki kez görünür.
+  const payload = JSON.parse(JSON.stringify(magData));
+  if (Array.isArray(payload.entries)) payload.entries.forEach(function (e) {
+    const proxied = (e.photoIds || []).slice(0, 3)
+      .map(function (id) { return '/api/tg?magPhoto=' + encodeURIComponent(String(id)); });
+    e.images = (e.images || []).filter(function (url) { return proxied.indexOf(url) === -1; });
+  });
+  const json = JSON.stringify(payload);
   try { await store.set(NEWS_KEY, json); } catch (e) { /* yerel */ }
   magInvalidateHome();
   if (magIsAdmin()) {
     try { if (typeof AUTH !== 'undefined' && AUTH.client && AUTH.user) {
-      await AUTH.client.from('alfanews').upsert({ id: 1, data: magData, updated_at: new Date().toISOString() });
+      await AUTH.client.from('alfanews').upsert({ id: 1, data: payload, updated_at: new Date().toISOString() });
       if (window.AlfaSharedDocuments) window.AlfaSharedDocuments.invalidate(AUTH.user.id, 1);
     } } catch (e) { /* tablo yok */ }
   }
@@ -14207,7 +14297,7 @@ const PAGE_TIER = {
   alfatrading: 'free',
   trading: 'admin',          // Trading terminali yalnızca yöneticiye görünür
   alfacharts: 'admin',       // Alfa Charts bağlantısı yalnızca yöneticiye görünür
-  egitim: 'ref', strategies: 'admin', analiz: 'admin', indicators: 'admin', designer: 'admin',
+  egitim: 'free', strategies: 'admin', analiz: 'admin', indicators: 'admin', designer: 'admin',
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
   defter: 'ref', review: 'ref',
   // Asagidakiler sadece yonetici (admin) gorur:
@@ -14604,6 +14694,31 @@ function renderAccessPage() {
   }
   else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı borsanı bağlayınca açılır.'; }
 
+  const stateCopy = {
+    'Kurulum eksik': ['⚠️', 'Kurulum tamamlanmadı', 'Yönetici erişim tablosunu kurmadan kapı çalışmaz.'],
+    'Yönetici': ['👑', 'Yönetici modu', 'Tüm sayfalar ve araçlar açık.'],
+    'Doğrulandı': ['🎉', 'Premium erişim açık', 'Referansın onaylandı, mentorship davetin hazır.'],
+    'Onay bekliyor': ['⏳', 'Onay sırada', 'UID başvurun alındı; yöneticiden haber bekliyorsun.'],
+    'Erişim kapalı': ['🔒', 'Erişim geri alındı', 'Detay için yöneticiye yazabilirsin.'],
+    'Reddedildi': ['↩️', 'Başvuru onaylanmadı', 'Aşağıdaki sebebi kontrol edip tekrar deneyebilirsin.'],
+    'Kısıtlı': ['🔎', 'Ücretsiz moddasın', 'Hesabını bağladığında premium araçlar açılır.']
+  }[badge.textContent] || ['🔎', badge.textContent, text.textContent];
+  const sIco = document.getElementById('acc-state-ico');
+  const sTitle = document.getElementById('acc-state-title');
+  const sSub = document.getElementById('acc-state-sub');
+  if (sIco) sIco.textContent = stateCopy[0];
+  if (sTitle) sTitle.textContent = stateCopy[1];
+  if (sSub) sSub.textContent = stateCopy[2];
+
+  const applied = verified || SITE.status === 'pending' || SITE.status === 'rejected';
+  const stage = verified ? 4 : (applied ? 2 : 1);
+  const steps = document.querySelectorAll('#acc-steps .acc-step');
+  steps.forEach(function (el) {
+    const n = Number(el.getAttribute('data-step'));
+    el.classList.toggle('done', n < stage || verified);
+    el.classList.toggle('current', n === stage);
+  });
+
   const okx = document.getElementById('acc-link-okx');
   const bybit = document.getElementById('acc-link-bybit');
   const missing = document.getElementById('acc-links-missing');
@@ -14637,7 +14752,7 @@ function renderAccessPage() {
       const mark = unlocked ? '✅' : (tier === 'free' ? '✅' : '🔒');
       return '<div>' + mark + ' ' + r[0] + '</div>';
     }).join('') +
-      '<div style="margin-top:10px;color:var(--text-3,var(--dim));">Açık kalanlar (herkese): Ana Menü, Hesaplayıcı, Ekonomik Takvim ve paylaşılan portföy özeti.</div>';
+      '<div style="grid-column:1/-1;margin-top:10px;color:var(--text-3,var(--dim));">Herkese açık: Ana Menü, Hesaplayıcı, Ekonomik Takvim ve paylaşılan portföy özeti. Alfa Edu içindeki eski dersler de açık; yeni videolar paketlere özeldir.</div>';
   }
 
   // Yonetici: bekleyen UID basvurulari
@@ -24173,7 +24288,7 @@ function chDefaultSecMeta() { return Object.keys(EG_SECTIONS).map(id => ({ id, t
 
 async function loadChannels() {
   try {
-    const r = await fetch('/api/edu-shared?kind=channel');
+    const r = await siteFetch('/api/edu-shared?kind=channel');
     if (r.ok) {
       const j = await r.json();
       if (j && j.data && j.data.traders) {
@@ -24719,10 +24834,30 @@ function renderChannelView() {
   const embed = document.getElementById('ch-embed');
   const noteBox = document.getElementById('ch-note-box');
   const foot = document.getElementById('ch-foot');
-  const src = (curVid && curVid.url) ? egEmbedSrc(curVid) : '';
-  const hasNote = !!(curVid && ((curVid.photos && curVid.photos.length) || (curVid.body && String(curVid.body).trim())));
+  const locked = chItemLocked(curVid);
+  const src = (!locked && curVid && curVid.url) ? egEmbedSrc(curVid) : '';
+  const hasNote = !locked && !!(curVid && ((curVid.photos && curVid.photos.length) || (curVid.body && String(curVid.body).trim())));
   embed.innerHTML = '';
-  if (src) {
+  if (locked) {
+    embed.className = 'eg-embed';
+    embed.classList.remove('hidden');
+    const lock = document.createElement('div'); lock.className = 'ch-lock';
+    const ico = document.createElement('div'); ico.className = 'ch-lock-ico'; ico.textContent = '🔒'; lock.appendChild(ico);
+    const h = document.createElement('h4'); h.textContent = 'Bu ders paketlere özel'; lock.appendChild(h);
+    const p = document.createElement('p');
+    p.textContent = 'Eski dersler herkese açık kaldı. Bu videoyu izlemek için ilgili Alfa Edu paketini alman gerekir. Paketin onaylandıysa giriş yapman yeterli.';
+    lock.appendChild(p);
+    const chips = document.createElement('div'); chips.className = 'ch-lock-plans';
+    itemPlans_(curVid).forEach(function (id) {
+      const chip = document.createElement('span'); chip.className = 'ch-lock-plan';
+      chip.textContent = EDU_PLAN_LABELS[id] || id; chips.appendChild(chip);
+    });
+    lock.appendChild(chips);
+    const go = document.createElement('button'); go.type = 'button'; go.className = 'btn solid';
+    go.textContent = 'Paketleri gör ↗'; go.addEventListener('click', () => showPage('eduplans'));
+    lock.appendChild(go);
+    embed.appendChild(lock);
+  } else if (src) {
     embed.className = 'eg-embed';
     embed.classList.remove('hidden');
     const ifr = document.createElement('iframe');
@@ -24739,7 +24874,7 @@ function renderChannelView() {
     ph.appendChild(txt);
     if (canEdit) {
       const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
-      if (curVid) { btn.textContent = '＋ İçerik düzenle'; btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url, type: curVid.type, body: curVid.body, photos: curVid.photos })); }
+      if (curVid) { btn.textContent = '＋ İçerik düzenle'; btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url, type: curVid.type, body: curVid.body, photos: curVid.photos, access: curVid.access, plans: curVid.plans })); }
       else { btn.textContent = '＋ İçerik ekle'; btn.addEventListener('click', () => chOpenForm('video-add', { topicId: cur.id }, null)); }
       ph.appendChild(btn);
     }
@@ -24766,8 +24901,8 @@ function renderChannelView() {
     }
   }
   if (boxShown) noteBox.classList.remove('hidden'); else noteBox.classList.add('hidden');
-  // okudum/izledim tik
-  if (curVid) {
+  // okudum/izledim tik — kilitli içerik izlenemez
+  if (curVid && !locked) {
     foot.classList.remove('hidden');
     foot.innerHTML = '';
     const db = document.createElement('button'); db.type = 'button';
@@ -24782,8 +24917,8 @@ function renderChannelView() {
   const kicker = document.getElementById('ch-now-kicker');
   if (kicker) kicker.textContent = eduT('edu.lesson', 'DERS') + ' ' + (topics.indexOf(cur) + 1);
   const link = document.getElementById('ch-now-link');
-  if (curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
-  else if (curVid && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
+  if (!locked && curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
+  else if (!locked && curVid && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
   else { link.style.display = 'none'; }
   const addVid = document.getElementById('ch-add-vid');
   if (addVid) addVid.classList.toggle('hidden', !canEdit);
@@ -24794,6 +24929,7 @@ function renderChannelView() {
     vlist.appendChild(e);
   }
   vids.forEach((v, i) => {
+    const itemLocked = chItemLocked(v);
     const vtype = (v.url && egEmbedSrc(v)) ? 'video' : 'not';
     const kind = egKind(v);
     const done = chIsDone(t, v);
@@ -24807,17 +24943,20 @@ function renderChannelView() {
     if (vtype === 'not') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = '📝 İçerik'; row.appendChild(tag); }
     else if (kind === 'playlist') { const tag = document.createElement('span'); tag.className = 'eg-item-tag'; tag.textContent = 'Liste'; row.appendChild(tag); }
     else if (kind === 'invalid') { const tag = document.createElement('span'); tag.className = 'eg-item-tag muted'; tag.textContent = 'Link yok'; row.appendChild(tag); }
-    const chk = document.createElement('button'); chk.className = 'eg-check' + (done ? ' on' : ''); chk.type = 'button'; chk.textContent = '✓';
-    chk.title = done ? (vtype === 'not' ? 'Okundu — geri al' : 'İzlendi — geri al') : (vtype === 'not' ? 'Okundu olarak işaretle' : 'İzlendi olarak işaretle');
-    chk.addEventListener('click', (e) => { e.stopPropagation(); chProgSet(t, v, !chIsDone(t, v)); renderChannelView(); });
-    row.appendChild(chk);
+    if (itemLocked) { const tag = document.createElement('span'); tag.className = 'eg-item-tag ch-item-lock'; tag.textContent = '🔒 Paket'; row.appendChild(tag); }
+    if (!itemLocked) {
+      const chk = document.createElement('button'); chk.className = 'eg-check' + (done ? ' on' : ''); chk.type = 'button'; chk.textContent = '✓';
+      chk.title = done ? (vtype === 'not' ? 'Okundu — geri al' : 'İzlendi — geri al') : (vtype === 'not' ? 'Okundu olarak işaretle' : 'İzlendi olarak işaretle');
+      chk.addEventListener('click', (e) => { e.stopPropagation(); chProgSet(t, v, !chIsDone(t, v)); renderChannelView(); });
+      row.appendChild(chk);
+    }
     if (canEdit) {
       const up = document.createElement('button'); up.className = 'eg-vid-move'; up.type = 'button'; up.textContent = '▲'; up.title = 'Yukarı taşı';
       up.addEventListener('click', (e) => { e.stopPropagation(); if (i === 0) return; [cur.videos[i - 1], cur.videos[i]] = [cur.videos[i], cur.videos[i - 1]]; saveChannel(t); renderChannelView(); });
       const dn = document.createElement('button'); dn.className = 'eg-vid-move'; dn.type = 'button'; dn.textContent = '▼'; dn.title = 'Aşağı taşı';
       dn.addEventListener('click', (e) => { e.stopPropagation(); if (i === vids.length - 1) return; [cur.videos[i], cur.videos[i + 1]] = [cur.videos[i + 1], cur.videos[i]]; saveChannel(t); renderChannelView(); });
       const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'İçeriği düzenle';
-      edit.addEventListener('click', (e) => { e.stopPropagation(); chOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url, type: v.type, body: v.body, photos: v.photos }); });
+      edit.addEventListener('click', (e) => { e.stopPropagation(); chOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url, type: v.type, body: v.body, photos: v.photos, access: v.access, plans: v.plans }); });
       const del = document.createElement('button'); del.className = 'eg-vid-del'; del.type = 'button'; del.textContent = '×'; del.title = 'İçeriği sil';
       del.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -25085,6 +25224,24 @@ function chZoomPhoto(src, cap) {
   document.body.appendChild(ov);
 }
 
+const EDU_PLAN_LABELS = { video: 'Video Eğitim', live: 'Canlı Grup', personal: 'Personal Coaching' };
+// Sunucu ücretli içeriğin URL'sini kaldırır; kilit kararı da oradadır.
+function chItemLocked(v) { return !!(v && (v.locked === true || (v.access === 'paid' && !(v.url || v.body || (v.photos && v.photos.length))))); }
+function itemPlans_(v) {
+  const raw = Array.isArray(v && v.plans) ? v.plans.filter(x => EDU_PLAN_LABELS[x]) : [];
+  return raw.length ? Array.from(new Set(raw)).slice(0, 3) : ['video'];
+}
+function chSelectedPlans() {
+  const box = document.getElementById('ch-plan-opts');
+  if (!box) return [];
+  return Array.from(box.querySelectorAll('input[type="checkbox"]')).filter(x => x.checked).map(x => x.value);
+}
+function chSyncAccessFields() {
+  const sel = document.getElementById('ch-in-access');
+  const opts = document.getElementById('ch-plan-opts');
+  if (!sel || !opts) return;
+  opts.hidden = sel.value !== 'paid';
+}
 function chOpenForm(mode, ids, prefill) {
   if (!chCanEditCur()) return;
   const g = id => document.getElementById(id);
@@ -25094,6 +25251,12 @@ function chOpenForm(mode, ids, prefill) {
   g('ch-in-title').value = (prefill && prefill.title) || '';
   g('ch-in-body').value = (prefill && prefill.body) || '';
   g('ch-in-url').value = (prefill && prefill.url) || '';
+  const paid = !!(prefill && prefill.access === 'paid');
+  if (g('ch-in-access')) g('ch-in-access').value = paid ? 'paid' : 'free';
+  const planVals = paid && Array.isArray(prefill.plans) && prefill.plans.length ? prefill.plans : ['video'];
+  const planBox = g('ch-plan-opts');
+  if (planBox) planBox.querySelectorAll('input[type="checkbox"]').forEach(function (box) { box.checked = planVals.indexOf(box.value) !== -1; });
+  chSyncAccessFields();
   const photoEd = g('ch-photo-ed');
   const prePhotos = (prefill && prefill.photos && prefill.photos.length) ? prefill.photos
     : ((prefill && prefill.type === 'foto' && prefill.url) ? [{ url: prefill.url, caption: '' }] : []);
@@ -25127,6 +25290,8 @@ async function chSaveForm() {
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
   const hasVideoLink = !!(url && (ytId(url) || ytListId(url)));
   const ctype = hasVideoLink ? 'video' : 'not';
+  const access = (g('ch-in-access') && g('ch-in-access').value === 'paid') ? 'paid' : 'free';
+  const plans = access === 'paid' ? chSelectedPlans() : [];
   const photos = isVideo ? chCollectPhotos() : [];
   if (isVideo && url && !hasVideoLink && /youtube\.com|youtu\.be/i.test(url)) {
     g('ch-in-err').textContent = 'Geçerli bir YouTube video ya da oynatma listesi bağlantısı gir (ya da boş bırak).';
@@ -25151,7 +25316,7 @@ async function chSaveForm() {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     if (x) {
       const defTitle = hasVideoLink ? ((ytListId(url) && !ytId(url)) ? 'Oynatma listesi' : 'Video') : 'İçerik';
-      const v = { id: chUid(), title: title || defTitle, url, type: ctype, body, photos, vids: chCollectVideos() };
+      const v = { id: chUid(), title: title || defTitle, url, type: ctype, access, plans, body, photos, vids: chCollectVideos() };
       if (!x.videos) x.videos = [];
       x.videos.push(v);
       chTopic = x.id; chVid = v.id;
@@ -25159,7 +25324,7 @@ async function chSaveForm() {
   } else if (mode === 'video-edit') {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     const v = x && x.videos && x.videos.find(k => k.id === chForm.vidId);
-    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.body = body; v.photos = photos; v.vids = chCollectVideos(); chVid = v.id; }
+    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.access = access; v.plans = plans; v.body = body; v.photos = photos; v.vids = chCollectVideos(); delete v.locked; chVid = v.id; }
   }
   chCloseForm();
   await saveChannel(t);
@@ -25334,6 +25499,8 @@ function bindChannelsPage() {
   if (inTitle) inTitle.addEventListener('keydown', e => { if (e.key === 'Enter' && g('ch-in-url').style.display === 'none') chSaveForm(); });
   const inUrl = g('ch-in-url');
   if (inUrl) inUrl.addEventListener('keydown', e => { if (e.key === 'Enter') chSaveForm(); });
+  const inAccess = g('ch-in-access');
+  if (inAccess) inAccess.addEventListener('change', chSyncAccessFields);
   const profCancel = g('ch-prof-cancel');
   if (profCancel) profCancel.addEventListener('click', chCloseProf);
   const profSave = g('ch-prof-save');
@@ -28825,6 +28992,7 @@ function anaRender() {
   (d.sessions || []).forEach(function (s) { if (s.sid === anaState.open) openSession = s; });
   if (openSession) html.push(anaDetailMarkup(openSession));
 
+  html.push('<details class="ana-fold"><summary>🔍 Detaylı analiz <em>sayfa, kaynak, cihaz ve oturumlar</em></summary><div class="ana-fold-body">');
   html.push('<div class="ana-grid2">');
   html.push('<div class="ana-section"><h2>🔥 İlgi alanları <em>sayfa</em></h2>' +
     (d.topPages && d.topPages.length
@@ -28855,6 +29023,7 @@ function anaRender() {
     if (d.sessions.length > 80) html.push('<div class="ana-empty">İlk 80 oturum gösteriliyor. Daha eski kayıtlar için aralığı daralt.</div>');
   }
   html.push('</div>');
+  html.push('</div></details>');
 
   box.innerHTML = html.join('');
 }

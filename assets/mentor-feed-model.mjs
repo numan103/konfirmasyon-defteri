@@ -1,15 +1,39 @@
+// "-1R 0.001" gibi eklenen küsüratlar sonuç değildir. R tremayı (±2.3 / ±2,8)
+// korur; 0.001 / 0.002 gibi binlik artıkları atar, imzayı bozmaz.
+const RESULT_RE = /^\$?([a-z][a-z0-9]{1,14}(?:\/(?:usdt|usd))?)\s*[:：]?\s+([+\-−]\s*\d{1,3}(?:[.,]\d{1,3})?)\s*r(?!\w)(.*)$/i;
+const R_NOISE_RE = /^(?:\s|[\.!✅]|\s*[+\-−]?\s*0[.,]0{1,2}\d)*$/;
+
+export function normalizeMentorR(value) {
+  const raw = String(value == null ? '' : value).replace(/\s/g, '').replace('−', '-').replace(',', '.');
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return null;
+  const frac = Math.abs(n % 1);
+  return frac > 0 && frac < 0.01 ? Math.trunc(n) : n;
+}
+
 export function parseMentorResults(text) {
   const out = [], seen = new Set();
   for (const line of String(text || '').slice(0, 4000).split(/\r?\n/)) {
-    const match = line.trim().match(/^\$?([a-z][a-z0-9]{1,14}(?:\/(?:usdt|usd))?)\s*[:：]?\s+([+\-−]\s*\d{1,3}(?:[.,]\d{1,3})?)\s*r\s*[.!✅]*$/i);
-    if (!match) continue;
+    const match = line.trim().match(RESULT_RE);
+    if (!match || !R_NOISE_RE.test(match[3])) continue;
     const coin = match[1].toUpperCase().replace(/\/(USDT|USD)$/, '');
     if (seen.has(coin)) return [];
-    const r = Number(match[2].replace(/\s/g, '').replace('−', '-').replace(',', '.'));
-    if (!Number.isFinite(r) || Math.abs(r) > 100) continue;
+    const r = normalizeMentorR(match[2]);
+    if (r === null || Math.abs(r) > 100) continue;
     seen.add(coin); out.push({ coin, r });
   }
   return out;
+}
+
+const PAIR_SYMBOLS = new Set(('BTC ETH SOL GOLD XAUUSD XAU NZDCAD USDCHF EURUSD GBPUSD USDJPY AUDUSD USDCAD NZDUSD ' +
+  'DXY NASDAQ NAS100 SPX XRP BNB DOGE ADA AVAX LINK TON TRX LTC DOT MATIC US30 US500 EUR GBP JPY AUD CAD CHF').split(' '));
+// Yalnızca başta parite/sembol olan resimli paylaşımlar işlem sayılır.
+// "GOLD & BTC analyze", "BTC -1R", "XAUUSD long" geçerli; "Bugün ne yapalım" hayır.
+export function hasPairPrefix(text) {
+  const line = String(text || '').split(/\r?\n/).map(s => s.trim()).find(Boolean) || '';
+  const cleaned = line.replace(/^[\s💹📊📈✅🔔]+/, '').replace(/^[#$]/, '').trim();
+  const first = cleaned.split(/[\s,&+|/]+/)[0].replace(/[.:!✅]+$/, '').toUpperCase();
+  return PAIR_SYMBOLS.has(first);
 }
 export function mentorCategory(record) {
   return ['trade', 'bias', 'post', 'result'].includes(record.category) ? record.category :

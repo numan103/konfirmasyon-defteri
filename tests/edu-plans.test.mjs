@@ -55,7 +55,7 @@ test('public package offer is separate from existing course access and has clear
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const client = fs.readFileSync(new URL('../assets/edu-plans.mjs', import.meta.url), 'utf8');
   assert.match(html, /eduplans: 'free'/);
-  assert.match(html, /egitim: 'ref'/);
+  assert.match(html, /egitim: 'free'/);
   assert.match(html, /id="page-eduplans"/);
   assert.match(html, /id="tab-eduplans"/);
   assert.match(html, /data-mnav="eduplans"/);

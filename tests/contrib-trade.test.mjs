@@ -34,6 +34,7 @@ function makeRes() {
 function makeStore() {
   return {
     data: { posts: [] },
+    news: { entries: [], authors: [] },
     telegram: 'ok',
     calls: [],
   };
@@ -51,6 +52,13 @@ function fetchStub(state) {
       const body = JSON.parse(init.body || '{}');
       if (method === 'POST') { state.data = body.data; return { ok: true, status: 201, json: async () => ({}) }; }
       if (method === 'PATCH') { state.data = body.data; return { ok: true, status: 204, json: async () => ({}) }; }
+    }
+    if (u.includes('/rest/v1/alfanews')) {
+      const method = init.method || 'GET';
+      if (method === 'GET') return { ok: true, status: 200, json: async () => [{ id: 1, data: state.news }] };
+      const body = JSON.parse(init.body || '{}');
+      state.news = body.data;
+      return { ok: true, status: 201, json: async () => ({}) };
     }
     if (u.includes('api.telegram.org') && u.includes('/sendMessage')) {
       state.calls.push({ url: u, body: JSON.parse(init.body || '{}') });
@@ -142,7 +150,7 @@ test('analiz (Kanal) paylasimi da public charts hedefine tek bildirim gonderir',
     SITE_ADMIN_EMAILS: 'admin@test.dev',
   });
 
-  const res = await addPost(handler, { type: 'analiz', coin: 'BTC', title: 'Piyasa notu', text: 'Kisa vadeli gorunum.' }, { clientId: 'post-1' });
+  const res = await addPost(handler, { type: 'analiz', coin: 'BTC', title: 'Piyasa notu', text: 'Kisa vadeli gorunum.', img: 'data:image/jpeg;base64,AAAA' }, { clientId: 'post-1' });
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.post.type, 'analiz');
   assert.equal(state.calls.length, 1);
@@ -156,6 +164,11 @@ test('analiz (Kanal) paylasimi da public charts hedefine tek bildirim gonderir',
   assert.equal(res.body.notify.phase, 'sent');
   assert.equal(res.body.notify.kind, 'post');
   assert.equal(state.data.posts[0].tradeNotify.phase, 'sent');
+  assert.equal(res.body.news.ok, true, 'analiz dergiye de kopyalanir');
+  const entry = state.news.entries[0];
+  assert.equal(entry.title, 'Piyasa notu');
+  assert.equal(entry.category, 'Teknik Analiz');
+  assert.deepEqual(entry.images, ['/api/contrib?store=alfatrading&image=' + res.body.post.id]);
 });
 
 test('ayni analiz clientId tekrar gonderildiginde ikinci bildirim atmaz', async () => {

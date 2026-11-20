@@ -3,6 +3,7 @@ if (nav) {
   nav.id ||= 'main-navigation';
   const reveal = document.createElement('button');
   reveal.type = 'button'; reveal.className = 'nav-reveal'; reveal.textContent = '☰ Menü';
+  reveal.setAttribute('aria-label', '☰ Menü');
   reveal.setAttribute('aria-controls', nav.id); reveal.setAttribute('aria-expanded', 'false');
   document.body.append(reveal);
   let scheduled = false, last = window.scrollY;
@@ -10,6 +11,7 @@ if (nav) {
     document.body.classList.toggle('nav-peek', open);
     reveal.setAttribute('aria-expanded', String(open));
     reveal.textContent = open ? 'Menüyü kapat' : '☰ Menü';
+    reveal.setAttribute('aria-label', open ? 'Menüyü kapat' : '☰ Menü');
   }
   function update() {
     scheduled = false;

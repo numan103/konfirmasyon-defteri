@@ -231,6 +231,22 @@ test('summarizeSessions ignores sessions older than the requested range', () => 
   assert.equal(out.sessions.length, 0);
 });
 
+test('one-second bounce visits are hidden but members and signup intent stay', () => {
+  const today = dayKey(NOW);
+  const base = { last: new Date(NOW - 1000).toISOString(), page: 'home', pages: { home: { v: 1, ms: 1200, s: 0 } }, days: { [today]: { ms: 1200, pv: 1 } } };
+  const rows = [
+    row('session_quick01', Object.assign({ sid: 'session_quick01', vid: 'visitor_quick01', activeMs: 1200 }, base)),
+    row('session_member01', Object.assign({ sid: 'session_member01', vid: 'visitor_member01', activeMs: 900, member: { id: 'member-uuid-quick' } }, base)),
+    row('session_intent01', Object.assign({ sid: 'session_intent01', vid: 'visitor_intent01', activeMs: 1500, clicks: [{ url: 'funnel:auth_open' }] }, base)),
+  ];
+  const out = summarizeSessions(rows, { now: NOW, days: 7 });
+  assert.equal(out.totals.sessions, 2);
+  assert.equal(out.totals.quickBounces, 1);
+  assert.equal(out.totals.uniqueVisitors, 2);
+  assert.equal(out.sessions.length, 2);
+  assert.ok(!JSON.stringify(out.sessions).includes('session_quick01'));
+});
+
 test('visit rows are encrypted at rest and legacy plaintext still reads', () => {
   const data = {
     sid: 'session_123456',
@@ -268,6 +284,8 @@ test('site wires the admin analytics page and anonymous tracker', () => {
   assert.ok(html.includes('anaPendingLanding'), 'pending landing flag wires deferred view');
   assert.ok(html.includes("document.getElementById('tab-analitik')"), 'admin-only nav tab is toggled');
   assert.ok(html.includes('growthSummary'), 'admin panel renders the growth summary');
+  assert.ok(html.includes('class="ana-fold"'), 'detailed tables are folded away by default');
+  assert.ok(html.includes('5 sn altı kazara geçişler'), 'quick bounces are excluded from the panel');
   assert.ok(html.includes('Ölçüm yeni başladı'), 'fresh funnel samples are labelled, not scored');
   assert.ok(html.includes('medianActiveMs'), 'headline time uses a robust median');
   assert.ok(html.includes('Dönüşüm %'), 'premium conversion denominator is shown');

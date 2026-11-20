@@ -314,6 +314,56 @@ async function alfaTradingImage(req, res, pid) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   return res.end(buf);
 }
+// Admin "analiz" paylaşımı Alfa Dergi'ye de düşer: gönderi + görsel birlikte.
+// Dergi tek satırdır (alfanews id=1); yazma anahtarı service-role ise onunla,
+// yoksa mevcut publishable anahtarla denenir. Hata ana akışı bozmaz.
+async function mirrorAnalysisToNews(post) {
+  if (!post || atPostType(post) !== 'analiz' || !post.id) return null;
+  const key = String(process.env.SUPABASE_SERVICE_ROLE || SUPABASE_KEY).trim();
+  const base = `${SUPABASE_URL}/rest/v1/alfanews`;
+  try {
+    const read = await fetch(base + '?id=eq.1&select=data,updated_at', { headers: sbHeaders(key), cache: 'no-store' });
+    if (!read.ok) return null;
+    const rows = await read.json();
+    const current = rows && rows[0] && rows[0].data && typeof rows[0].data === 'object' ? rows[0].data : {};
+    const entries = Array.isArray(current.entries) ? current.entries.slice(0, 60) : [];
+    const id = 'analiz_' + post.id;
+    if (entries.some(e => e && e.id === id)) return { ok: true, duplicate: true, id };
+    const authors = Array.isArray(current.authors) ? current.authors.slice(0, 20) : [];
+    let author = authors.find(a => /trader\s*ahmet/i.test(String((a && a.name) || '')));
+    if (!author) {
+      author = { id: 'trader-ahmet', name: 'Trader Ahmet', specialty: 'BTC & Gold', photo: '' };
+      authors.unshift(author);
+    }
+    const image = post.img
+      ? '/api/contrib?store=alfatrading&image=' + encodeURIComponent(post.id)
+      : '';
+    entries.unshift({
+      id,
+      title: atClip(post.title || 'Yeni analiz', 160) || 'Yeni analiz',
+      body: atClip(post.text || '', 4000),
+      type: '', relId: '', result: '',
+      authorId: atClip(author.id, 80),
+      images: image ? [image] : [],
+      photoIds: [],
+      category: 'Teknik Analiz',
+      sourceLink: atClip(atTradeUrl(post.id), 300),
+      publishedAt: new Date(Number(post.ts) || Date.now()).toISOString(),
+    });
+    if (entries.length > 60) entries.length = 60;
+    const next = { ...current, entries, authors, rosterVer: 2, authorsSeeded: true };
+    if (typeof next.issueNo !== 'number') next.issueNo = 1;
+    const write = await fetch(base, {
+      method: 'POST',
+      headers: { ...sbHeaders(key), Prefer: 'resolution=merge-duplicates' },
+      body: JSON.stringify({ id: 1, data: next, updated_at: new Date().toISOString() }),
+    });
+    return write.ok ? { ok: true, id } : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 async function alfaTrading(req, res, user) {
   // Reject unauthorized mutations BEFORE downloading the image-heavy source row.
   let body, action;
@@ -361,7 +411,8 @@ async function alfaTrading(req, res, user) {
     const w = await save();
     if (!w.ok) return res.status(500).json({ error: w.error || 'store_error' });
     const notify = atNotifyWanted(type) ? await atNotifyPost(post, save, body.dryRun === true) : null;
-    return res.status(200).json({ ok: true, post, notify });
+    const news = (type === 'analiz' && body.dryRun !== true) ? await mirrorAnalysisToNews(post) : null;
+    return res.status(200).json({ ok: true, post, notify, news });
   }
   if (action === 'like') {
     const post = find(body.postId); if (!post) return res.status(404).json({ error: 'post yok' });
