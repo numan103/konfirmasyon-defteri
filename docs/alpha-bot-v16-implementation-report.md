@@ -48,6 +48,18 @@ Saf motorun `analyzeV16(detail, asOf, { evidence, mode })` arayüzü incelenmiş
 
 Varsayılan yorum 3–4 cümle ve en fazla 90 kelimedir; tablo, model kataloğu ve iç durum kodları gösterilmez. Uzun yanıt bir kez kısalttırılır ve işlem planı güvenliği tekrar denetlenir; hâlâ uygunsuzsa canlı fiyat/1H betimsel görünümden kısa güvenli cevap döner. Detay/işlem planı açıkça istendiğinde ayrıntıya izin verilir. Saat birimleri “24 saat / 1 saat” diye açık yazılır; defter duvarları HTF supply/demand gibi sunulmaz.
 
+### İsteğe bağlı iki senaryolu Telegram görseli
+
+- “BTC’yi grafikle yorumla”, `/ask BTC grafikle yorumla` veya `/grafik BTC`: aynı veri snapshot'ından 15M PNG ve kısa yorum. `/chart BTC` de desteklenir. Normal sorularda görsel oluşturulmaz.
+- `lib/telegram-bias-chart.mjs`: kapanmış gerçek mumlar, gözlenebilir aday pivotlar, iki koşullu yol. Çizgilerin kontrol noktaları mevcut pivot/görünür pencere ekstreminden gelir; keyfî ileri fiyat hedefi veya M2 fib/TP üretilmez.
+- Kırmızı satış, yeşil alış yolu; 1H/4H betimsel eğilim uyumluysa ana/karşı etiketleri, değilse iki koşullu senaryo. Kesikli çizgi ölçülmüş olasılık değildir.
+- Çemberler **beklenen** retest/teyit noktalarıdır. Görsel mevcut durumda hiçbir noktayı gerçekleşmiş M2 teyidi diye işaretlemez. Aday pivotlar kullanıcı onaylı external swing diye sunulmaz.
+- Son kapalı mum, kaynak ve piyasa adı görselde bulunur. Altın için XAUT/USDT proxy etiketi korunur. Gelecek mum verisi çizilmez.
+- `lib/telegram-bias-image.mjs`: ağdan font/görsel indirmeden yerel font ve Resvg ile PNG üretir. Mevcut WOFF font SFNT'ye bellekte açılır.
+- `deliverQaReply`: mevcut `sendPhoto` yardımcısıyla aynı chat/topic'e gönderir. Kısa yorum caption olur; uzun detay metni ayrı gönderilir. Başarılı kısa caption ikinci defa mesaj olarak gönderilmez.
+- Veri eski/yetersizse, render veya photo gönderimi başarısızsa metin cevap korunur. Photo otomatik tekrar gönderilmez. Testlerde Telegram gönderimleri taklit edildi; production test mesajı gönderilmedi.
+- Yeni API function, DB tablosu, yayın takvimi veya gerçek emir entegrasyonu yoktur.
+
 ## 3. Ek veri bağlantıları
 
 - Coinalyze OI/CVD ve mevcut OpenMarket orderbook okuyucuları korundu; Q&A'da orderbook tekrar okunuyor. Bağımsız kaynaklar paralel çalışır; hata diğer kaynağı veya PA'yı veto etmez.
@@ -107,7 +119,7 @@ node --test tests/*.test.mjs
 
 ## 6. Regresyon ve güvenlik
 
-Tam test paketi: **831 test / 831 geçti / 0 başarısız**. `git diff --check` temiz.
+Tam test paketi: **841 test / 841 geçti / 0 başarısız**. `git diff --check` temiz.
 
 Yeni testler iki yönlü MSB/Fibonacci, HTF fitil/kapanış ayrımı, gelecek/eksik kanıt, limitten önce TP, intrabar belirsizliği, fill sonrası hedef, otomatik re-anchor olmaması, LLM plan reddi ve Telegram parçalamayı kapsar. Q&A entegrasyonu ağ/LLM taklitleriyle test edilir; gerçek servis yazımı yapılmaz.
 
