@@ -102,3 +102,8 @@ test('oturum adımları kalıcıdır, tekrar yüklenmede çift yazılmaz', () =>
   second.click('hero-register');
   assert.equal(second.clicks.length, 0);
 });
+
+test('funnel module is loaded by the live page', () => {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.ok(html.includes('/assets/signup-funnel.mjs?v=1'));
+});

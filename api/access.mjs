@@ -39,6 +39,8 @@ const MAX_ATTEMPTS = 10;
 const MENTOR_REFRESH_MS = 30000;
 
 const BASE_COLS = ['exchange', 'exchange_uid', 'status', 'verified_at', 'verified_by', 'attempts', 'updated_at'];
+// 012_access_archive.sql kurulmadiysa bu kolon yok; sorgularda kosullu eklenir.
+const ARCHIVE_COL = 'archived_at';
 const VOLUME_COLS = ['volume'];
 const MENTOR_COLS = [
   'mentor_status', 'mentor_invite', 'mentor_invite_expires_at',
@@ -124,7 +126,7 @@ async function accessCaps() {
 
 async function probeCaps() {
   const key = process.env.SUPABASE_SERVICE_ROLE || '';
-  if (!key) return { volume: false, mentor: false };
+  if (!key) return { volume: false, mentor: false, archive: false };
   const probe = async (cols) => {
     try {
       const r = await fetch(
@@ -138,16 +140,19 @@ async function probeCaps() {
   };
   const volume = await probe(VOLUME_COLS);
   const mentor = await probe(MENTOR_COLS);
+  const archive = await probe([ARCHIVE_COL]);
   if (!volume || !mentor) {
     console.warn('[ACCESS] sema eksik: volume=' + volume + ' mentor=' + mentor + ' (005_mentorship.sql)');
   }
-  return { volume, mentor };
+  if (!archive) console.warn('[ACCESS] sema eksik: archived_at yok (012_access_archive.sql)');
+  return { volume, mentor, archive };
 }
 
 function allowedFields(caps) {
   const set = new Set(['user_id', 'exchange', 'exchange_uid', 'status', 'verified_by', 'verified_at', 'note', 'attempts']);
   if (caps && caps.volume) VOLUME_COLS.forEach((c) => set.add(c));
   if (caps && caps.mentor) MENTOR_COLS.forEach((c) => set.add(c));
+  if (caps && caps.archive) set.add(ARCHIVE_COL);
   return set;
 }
 
@@ -160,9 +165,10 @@ function pickAllowed(obj, caps) {
 
 // Kullanicinin JWT'si ile okuma: RLS yalniz kendi satirini dondurur.
 async function readOwn(jwt, userId, caps) {
-  const cols = BASE_COLS.slice();
+  const cols = BASE_COLS.concat(['note', 'created_at']);
   if (caps && caps.volume) cols.push(...VOLUME_COLS);
   if (caps && caps.mentor) cols.push(...MENTOR_COLS);
+  if (caps && caps.archive) cols.push(ARCHIVE_COL);
   const r = await fetch(
     SUPABASE_URL + '/rest/v1/site_access?user_id=eq.' + encodeURIComponent(userId) +
       '&select=' + cols.join(','),
@@ -310,17 +316,115 @@ async function emailMap() {
   return map;
 }
 
-async function listHandler(res, user) {
+// ---- Hacim gecmisi (011_access_volume_history.sql) ----
+// Tablo kurulmamissa ozellik sessizce kapanir; panel calismaya devam eder.
+let historyReady = null;
+
+async function volumeHistoryReady() {
+  if (historyReady !== null) return historyReady;
+  try {
+    const r = await fetch(
+      SUPABASE_URL + '/rest/v1/site_volume_history?select=subject_id&limit=1',
+      { headers: svcHeaders() }
+    );
+    historyReady = r.ok;
+  } catch (e) { historyReady = false; }
+  if (!historyReady) console.warn('[ACCESS] site_volume_history yok (011_access_volume_history.sql)');
+  return historyReady;
+}
+
+// Panel acilirken mevcut hacimleri son kayitta karsilastirir; yalnizca
+// degisenleri gecmise ekler. Bot/borsa guncellemeleri boylece birikir.
+async function sweepVolumeHistory(siteRows, tgRows) {
+  if (!(await volumeHistoryReady())) return;
+  const current = [];
+  (Array.isArray(siteRows) ? siteRows : []).forEach((r) => {
+    if (!r || r.volume === null || r.volume === undefined) return;
+    current.push({
+      subject_id: r.user_id, source: 'site',
+      exchange: r.exchange || null, exchange_uid: r.exchange_uid || null,
+      volume: r.volume, volume30d: null
+    });
+  });
+  (Array.isArray(tgRows) ? tgRows : []).forEach((r) => {
+    if (!r || (r.volume === null && r.volume30d === null)) return;
+    current.push({
+      subject_id: 'tg:' + r.telegram_id, source: 'telegram',
+      exchange: r.exchange || null, exchange_uid: r.exchange_uid || null,
+      volume: r.volume === undefined ? null : r.volume,
+      volume30d: r.volume30d === undefined ? null : r.volume30d
+    });
+  });
+  if (!current.length) return;
+
+  let last = [];
+  try {
+    last = await svcRead('/rest/v1/site_volume_history?select=subject_id,volume,volume30d&order=created_at.desc&limit=500');
+  } catch (e) { return; }
+  const latest = {};
+  (last || []).forEach((x) => { if (!latest[x.subject_id]) latest[x.subject_id] = x; });
+
+  const same = (a, b) => {
+    const an = (a === null || a === undefined) ? null : Number(a);
+    const bn = (b === null || b === undefined) ? null : Number(b);
+    return an === bn;
+  };
+  const add = current.filter((c) => {
+    const p = latest[c.subject_id];
+    if (!p) return true;
+    return !(same(p.volume, c.volume) && same(p.volume30d, c.volume30d));
+  });
+  if (!add.length) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/site_volume_history', {
+      method: 'POST',
+      headers: { ...svcHeaders(), Prefer: 'return=minimal' },
+      body: JSON.stringify(add.slice(0, 100))
+    });
+  } catch (e) { /* gecmis opsiyonel */ }
+}
+
+async function readVolumeHistory() {
+  const empty = { enabled: false, bySubject: {} };
+  if (!(await volumeHistoryReady())) return empty;
+  let rows = [];
+  try {
+    rows = await svcRead('/rest/v1/site_volume_history?select=subject_id,source,exchange_uid,volume,volume30d,created_at&order=created_at.desc&limit=500');
+  } catch (e) { return empty; }
+  const bySubject = {};
+  (rows || []).forEach((r) => {
+    const k = r.subject_id;
+    if (!k) return;
+    if (!bySubject[k]) bySubject[k] = [];
+    if (bySubject[k].length >= 5) return;
+    bySubject[k].push({
+      volume: r.volume === undefined ? null : r.volume,
+      volume30d: r.volume30d === undefined ? null : r.volume30d,
+      at: r.created_at
+    });
+  });
+  return { enabled: true, bySubject };
+}
+
+async function listHandler(req, res, user) {
   if (!isAdminUser(user)) return fail(res, 403, 'admin_only');
   const caps = await accessCaps();
   const cols = BASE_COLS.concat(['user_id', 'note', 'created_at']);
   if (caps.volume) cols.push(...VOLUME_COLS);
   if (caps.mentor) cols.push(...MENTOR_COLS);
+  if (caps.archive) cols.push(ARCHIVE_COL);
+
+  // Varsayilan liste SADECE aktif kayitlar. Arsiv ayri istenir.
+  const wantArchive = String(req.query?.archive || '') === '1';
+  const archiveFilter = caps.archive
+    ? (wantArchive ? '&archived_at=not.is.null' : '&archived_at=is.null')
+    : '';
 
   let rows;
   try {
     rows = await svcRead(
       '/rest/v1/site_access?select=' + cols.join(',') +
+      archiveFilter +
       '&order=created_at.desc&limit=200'
     );
   } catch (e) {
@@ -328,6 +432,20 @@ async function listHandler(res, user) {
     return fail(res, 500, 'store_error');
   }
   const mails = await emailMap();
+
+  // Telegram botundan dogrulanan uyeler; site hesabi olmadan katilirlar.
+  // Tablo yoksa (006 calistirilmadiysa) liste bos kalir, panel yine acilir.
+  let tgRows = [];
+  try {
+    tgRows = await svcRead(
+      '/rest/v1/telegram_access?select=telegram_id,username,first_name,exchange,exchange_uid,status,' +
+      'volume,volume30d,verified_at,created_at,updated_at,mentor_status,mentor_invite,' +
+      'mentor_invite_expires_at,mentor_joined_at,support_at,attempts,check_reason' +
+      (caps.archive ? ',archived_at' : '') +
+      archiveFilter +
+      '&order=updated_at.desc&limit=200'
+    );
+  } catch (e) { tgRows = []; }
   const out = (Array.isArray(rows) ? rows : []).map((r) => ({
     user_id: r.user_id,
     email: mails[r.user_id] || '',
@@ -351,6 +469,43 @@ async function listHandler(res, user) {
     last_checked_at: r.last_checked_at || null,
     check_reason: r.check_reason || null
   }));
+
+  const tgOut = (Array.isArray(tgRows) ? tgRows : []).map((r) => ({
+    telegram_id: String(r.telegram_id),
+    username: r.username || '',
+    first_name: r.first_name || '',
+    exchange: r.exchange || null,
+    exchange_uid: r.exchange_uid || null,
+    status: r.status || 'none',
+    volume: r.volume === undefined ? null : r.volume,
+    volume30d: r.volume30d === undefined ? null : r.volume30d,
+    verified_at: r.verified_at || null,
+    created_at: r.created_at || null,
+    updated_at: r.updated_at || null,
+    mentor_status: r.mentor_status || 'none',
+    mentor_invite: r.mentor_invite || null,
+    mentor_invite_expires_at: r.mentor_invite_expires_at || null,
+    mentor_joined_at: r.mentor_joined_at || null,
+    support_at: r.support_at || null,
+    attempts: r.attempts || 0,
+    check_reason: r.check_reason || null
+  }));
+
+  await sweepVolumeHistory(rows, tgRows);
+  const hist = await readVolumeHistory();
+
+  // Aylik trend: onaylanan uye sayisi ve o uyelerin guncel hacmi.
+  const monthly = {};
+  const addMonth = (iso, volume) => {
+    if (!iso) return;
+    const k = String(iso).slice(0, 7);
+    if (!monthly[k]) monthly[k] = { month: k, verified: 0, volume: 0 };
+    monthly[k].verified += 1;
+    monthly[k].volume += Number(volume) || 0;
+  };
+  out.forEach((r) => { if (r.status === 'verified') addMonth(r.verified_at || r.created_at, r.volume); });
+  tgOut.forEach((r) => { if (r.status === 'verified') addMonth(r.verified_at || r.created_at, r.volume || r.volume30d); });
+
   // Aylik sistem: dogrulanan referans sayilarini ay bazinda ozetle.
   const byMonth = {};
   (Array.isArray(rows) ? rows : []).forEach((r) => {
@@ -365,10 +520,16 @@ async function listHandler(res, user) {
   return send(res, 200, {
     ok: true,
     rows: out,
+    telegram: tgOut,
+    volume_history: hist.bySubject,
+    history_enabled: hist.enabled,
+    monthly: Object.keys(monthly).sort().map((k) => monthly[k]),
+    archive: wantArchive,
+    archive_enabled: !!caps.archive,
     open: process.env.SITE_ACCESS_OPEN === '1',
     byMonth: monthList,
     mentor_configured: mentorshipConfigured() && caps.mentor,
-    schema: { volume: caps.volume, mentor: caps.mentor }
+    schema: { volume: caps.volume, mentor: caps.mentor, telegram: true, history: hist.enabled, archive: !!caps.archive }
   });
 }
 
@@ -389,7 +550,16 @@ async function adminOpHandler(res, user, body) {
   } else if (op === 'reject') {
     patch = {
       status: 'rejected', verified_by: 'manual', verified_at: null,
-      note: String(body.note || 'manual reject').slice(0, 200)
+      note: String(body.note || 'manual reject').slice(0, 500)
+    };
+    // Reddedilen kayit aktif listeden cikar; denetim kaydi arsivde kalir.
+    if (caps.archive) patch.archived_at = new Date().toISOString();
+  } else if (op === 'restore') {
+    // Yanlis UID/kod sonrasi tekrar basvuru acma: arsivden aktife dondur.
+    if (!caps.archive) return fail(res, 503, 'schema_missing');
+    patch = {
+      status: 'pending', verified_by: null, verified_at: null,
+      note: null, attempts: 0, archived_at: null
     };
   } else if (op === 'setvolume') {
     const vol = Number(body.volume);
@@ -402,6 +572,7 @@ async function adminOpHandler(res, user, body) {
   } else if (op === 'revoke') {
     patch = { status: 'rejected', verified_by: 'manual', verified_at: null, note: 'revoked' };
     if (caps.mentor) patch.mentor_status = 'revoked';
+    if (caps.archive) patch.archived_at = new Date().toISOString();
   } else {
     return fail(res, 400, 'bad_op');
   }
@@ -497,10 +668,16 @@ async function statusHandler(res, user, jwt) {
     admin,
     gate_active: !missing,
     status: open ? 'verified' : status,
+    note: (!open && status === 'rejected' && row) ? (row.note || null) : null,
     exchange: row ? row.exchange : null,
     exchange_uid: row ? row.exchange_uid : null,
     verified_at: row ? row.verified_at : null,
     verified_by: row ? row.verified_by : null,
+    created_at: row ? row.created_at : null,
+    updated_at: row ? row.updated_at : null,
+    attempts: row && row.attempts !== undefined ? row.attempts : 0,
+    archived_at: row && row.archived_at ? row.archived_at : null,
+    can_reapply: !!row && !!row.archived_at && row.status === 'rejected',
     volume: row && row.volume !== undefined ? row.volume : null,
     store_missing: missing,
     configured: { okx: isConfigured('okx'), bybit: isConfigured('bybit') },
@@ -545,11 +722,13 @@ async function submitHandler(res, user, jwt, body) {
     });
   }
 
-  if (existing && existing.updated_at) {
+  // Arsivlenmis (red/iptal) kayitlar yeni basvuruya engel degil.
+  const archived = !!(existing && existing.archived_at);
+  if (!archived && existing && existing.updated_at) {
     const waited = Date.now() - new Date(existing.updated_at).getTime();
     if (waited >= 0 && waited < COOLDOWN_MS) return fail(res, 429, 'too_soon');
   }
-  if (existing && (existing.attempts || 0) >= MAX_ATTEMPTS) {
+  if (!archived && existing && (existing.attempts || 0) >= MAX_ATTEMPTS) {
     return fail(res, 429, 'too_many_attempts');
   }
 
@@ -567,8 +746,9 @@ async function submitHandler(res, user, jwt, body) {
     verified_by: v.verified ? exchange + '-api' : null,
     verified_at: v.verified ? new Date().toISOString() : null,
     note: v.verified ? null : v.reason,
-    attempts: ((existing && existing.attempts) || 0) + 1
+    attempts: archived ? 1 : (((existing && existing.attempts) || 0) + 1)
   };
+  if (caps.archive) row.archived_at = null;
   if (caps.volume) {
     if (v.volume !== null && v.volume !== undefined) {
       row.volume = v.volume;
@@ -628,7 +808,7 @@ export default async function handler(req, res) {
   if (!user) return fail(res, 401, 'unauthorized');
 
   if (req.method === 'GET') {
-    if (req.query && req.query.op === 'list') return listHandler(res, user);
+    if (req.query && req.query.op === 'list') return listHandler(req, res, user);
     return statusHandler(res, user, jwt);
   }
 
@@ -638,7 +818,7 @@ export default async function handler(req, res) {
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);
     if (op === 'mentor') return mentorOpHandler(res, user, jwt);
-    if (op === 'approve' || op === 'reject' || op === 'revoke' || op === 'setvolume' || op === 'delvolume') return adminOpHandler(res, user, body);
+    if (op === 'approve' || op === 'reject' || op === 'revoke' || op === 'restore' || op === 'setvolume' || op === 'delvolume') return adminOpHandler(res, user, body);
     return fail(res, 400, 'bad_request');
   }
 

@@ -658,6 +658,108 @@ export function summarizeSessions(rows, opts) {
   };
 }
 
+// Yonetici paneli icin sade "kayit -> premium -> kullanım -> ilgi" ozeti.
+// Ham kimlik tasimaz; yalnizca sayi/sinyal ve oneriler uretir.
+export function buildGrowthSummary(summary, interest, access) {
+  const FUNNEL_STEPS = [
+    ['landing_cta', 'Kayıt butonu'],
+    ['auth_open', 'Giriş penceresi'],
+    ['signup_submit', 'Kayıt formu'],
+    ['confirm_click', 'Onay bağlantısı'],
+    ['first_login', 'İlk giriş'],
+  ];
+  const rows = Array.isArray(summary && summary.sessions) ? summary.sessions : [];
+  const funnel = {};
+  FUNNEL_STEPS.forEach(function (s) { funnel[s[0]] = { label: s[1], sessions: 0 }; });
+
+  let memberSessions = 0;
+  let activeMsTotal = 0;
+  let activeSessions = 0;
+  const interestPages = new Map();
+  rows.forEach(function (s) {
+    if (!s || !Array.isArray(s.clicks)) return;
+    const seen = new Set();
+    s.clicks.forEach(function (c) {
+      const url = String((c && c.url) || '');
+      if (url.indexOf('funnel:') !== 0) return;
+      const step = url.slice(7);
+      if (!funnel[step] || seen.has(step)) return;
+      seen.add(step);
+      funnel[step].sessions += 1;
+    });
+    if (s.member) memberSessions += 1;
+    const ms = Number(s.activeMs) || 0;
+    if (ms > 0) { activeMsTotal += ms; activeSessions += 1; }
+    (s.pages || []).forEach(function (p) {
+      const key = String((p && p.page) || '');
+      if (!key || key === 'landing' || key === 'analitik' || key === 'erisim') return;
+      const cur = interestPages.get(key) || { page: key, label: PAGE_LABELS[key] || key, sessions: 0, ms: 0, views: 0 };
+      cur.sessions += 1;
+      cur.ms += Number(p.ms) || 0;
+      cur.views += Number(p.v || p.views) || 0;
+      interestPages.set(key, cur);
+    });
+  });
+
+  const steps = FUNNEL_STEPS.map(function (s) {
+    const x = funnel[s[0]];
+    return { id: s[0], label: x.label, sessions: x.sessions };
+  });
+  const signupStart = steps[1] ? steps[1].sessions : 0; // auth_open
+  const signupDone = steps[2] ? steps[2].sessions : 0; // signup_submit
+  const confirm = steps[3] ? steps[3].sessions : 0;
+  const firstLogin = steps[4] ? steps[4].sessions : 0;
+  const rate = (from, to) => from > 0 ? Math.round((to / from) * 100) : 0;
+
+  const edu = interest && typeof interest === 'object' ? interest : {};
+  const eduPlans = Array.isArray(edu.plans) ? edu.plans.slice(0, 5) : [];
+  const eduRoutes = Array.isArray(edu.routes) ? edu.routes.slice(0, 5) : [];
+  const pages = Array.from(interestPages.values())
+    .sort(function (a, b) { return (b.ms - a.ms) || (b.views - a.views); })
+    .slice(0, 8)
+    .map(function (x) {
+      return {
+        page: x.page,
+        label: x.label,
+        sessions: x.sessions,
+        avgMs: x.sessions ? Math.round(x.ms / x.sessions) : 0,
+        views: x.views,
+      };
+    });
+
+  const verified = (access && Number(access.verified)) || 0;
+  const pending = (access && Number(access.pending)) || 0;
+  const recommendations = [];
+  if (pending > 0) recommendations.push(pending + ' bekleyen erişim başvurusu var; onaylamak üyeyi anında premium yapar.');
+  if (signupStart > 0 && rate(signupStart, signupDone) < 60) recommendations.push('Kayıt formuna giriş oranı düşük (' + rate(signupStart, signupDone) + '%); CTA metnini sadeleştir.');
+  if (signupDone > 0 && rate(signupDone, confirm) < 60) recommendations.push('Kayıt sonrası onay bağlantısına dönüş zayıf (' + rate(signupDone, confirm) + '%); e-posta akışını kontrol et.');
+  if (pages.length && pages[0].avgMs > 0) recommendations.push('En çok vakit ' + pages[0].label + ' sayfasında geçiyor; burayı teşvik/topluluk girişi için kullan.');
+  if (eduPlans.length) recommendations.push('Eğitim ilgisi öne çıkıyor (' + eduPlans[0].label + '); premium yerine eğitim paketi hatırlatması dene.');
+  if (verified === 0 && signupDone > 0) recommendations.push('Kayıt var ama premium Onay yok; referans/erişim akışını kontrol et.');
+  if (!recommendations.length) recommendations.push('Şu an kritik bir sinyal yok; mevcut akışı izlemeye devam et.');
+
+  return {
+    funnel: {
+      steps: steps,
+      authToSignup: rate(signupStart, signupDone),
+      signupToConfirm: rate(signupDone, confirm),
+      confirmToLogin: rate(confirm, firstLogin),
+    },
+    access: { verified: verified, pending: pending },
+    activity: {
+      memberSessions: memberSessions,
+      activeSessions: activeSessions,
+      avgActiveMs: activeSessions ? Math.round(activeMsTotal / activeSessions) : 0,
+    },
+    interests: {
+      pages: pages,
+      educationPlans: eduPlans,
+      educationRoutes: eduRoutes,
+    },
+    recommendations: recommendations.slice(0, 5),
+  };
+}
+
 async function readVisit(sid) {
   const id = VISIT_PREFIX + sid;
   const url = SUPABASE_URL + '/rest/v1/edu_shared?id=eq.' + encodeURIComponent(id) + '&select=data';
@@ -747,6 +849,28 @@ async function fetchMemberEmailMap() {
   return map;
 }
 
+// Erisim tablosundan yalnizca toplu status sayilari (PII yok, admin-only GET).
+async function readAccessSummary() {
+  const key = serviceKey();
+  if (!key) return { verified: 0, pending: 0 };
+  try {
+    const url = SUPABASE_URL + '/rest/v1/site_access?select=status&limit=1000';
+    const r = await fetch(url, { headers: sbHeaders(key), signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return { verified: 0, pending: 0 };
+    const rows = await r.json().catch(function () { return []; });
+    let verified = 0;
+    let pending = 0;
+    (Array.isArray(rows) ? rows : []).forEach(function (x) {
+      if (!x || !x.status) return;
+      if (x.status === 'verified') verified += 1;
+      else if (x.status === 'pending') pending += 1;
+    });
+    return { verified: verified, pending: pending };
+  } catch (e) {
+    return { verified: 0, pending: 0 };
+  }
+}
+
 export default async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -821,6 +945,8 @@ export default async function handler(req, res) {
       includeAdmin: includeAdmin,
       emailMap: emailMap,
     });
+    const interest = educationInterest(out.rows, { now, days, includeAdmin });
+    const accessSummary = await readAccessSummary();
 
     return send(res, 200, Object.assign({
       ok: true,
@@ -828,7 +954,8 @@ export default async function handler(req, res) {
       includeAdmin: includeAdmin,
       pruned: pruned,
       store: serviceKey() ? 'service' : 'publishable',
-      educationInterest: { ...educationInterest(out.rows, { now, days, includeAdmin }), truncated: !!out.truncated },
+      educationInterest: { ...interest, truncated: !!out.truncated },
+      growthSummary: buildGrowthSummary(summary, interest, accessSummary),
     }, summary));
   }
 

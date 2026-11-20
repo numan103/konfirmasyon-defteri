@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 import {
+  buildGrowthSummary,
   dayKey,
   decryptVisit,
   encryptVisit,
@@ -266,5 +267,40 @@ test('site wires the admin analytics page and anonymous tracker', () => {
   assert.ok(html.includes("anaTrack.curPage = 'landing'"), 'landing view is deferred for logged-in members');
   assert.ok(html.includes('anaPendingLanding'), 'pending landing flag wires deferred view');
   assert.ok(html.includes("document.getElementById('tab-analitik')"), 'admin-only nav tab is toggled');
+  assert.ok(html.includes('growthSummary'), 'admin panel renders the growth summary');
+  assert.ok(html.includes('/assets/signup-funnel.mjs?v=1'), 'signup funnel is wired into the live page');
+});
+
+test('growth summary turns clicks and page time into simple, privacy-safe signals', () => {
+  const t = (minute) => new Date(NOW + minute * 60000).toISOString();
+  const summary = {
+    sessions: [
+      {
+        sid: 'sid1', member: { id: 'u1' }, activeMs: 120000,
+        pages: [
+          { page: 'home', label: 'Ana Menü', ms: 20000, views: 2 },
+          { page: 'defter', label: 'Check List', ms: 90000, views: 3 },
+        ],
+        clicks: [
+          { t: t(0), kind: 'cta', label: 'Kayıt CTA', url: 'funnel:landing_cta' },
+          { t: t(1), kind: 'cta', label: 'Giriş penceresi', url: 'funnel:auth_open' },
+          { t: t(2), kind: 'cta', label: 'Kayıt formu', url: 'funnel:signup_submit' },
+          { t: t(3), kind: 'cta', label: 'Onay bağlantısı', url: 'funnel:confirm_click' },
+          { t: t(3), kind: 'cta', label: 'Onay bağlantısı', url: 'funnel:confirm_click' },
+        ],
+      },
+    ],
+  };
+  const g = buildGrowthSummary(summary, { plans: [{ label: 'Video' }], routes: [] }, { verified: 4, pending: 2 });
+  assert.deepEqual(g.funnel.steps.map((s) => s.sessions), [1, 1, 1, 1, 0]);
+  assert.equal(g.funnel.authToSignup, 100);
+  assert.equal(g.funnel.signupToConfirm, 100);
+  assert.equal(g.funnel.confirmToLogin, 0);
+  assert.deepEqual(g.access, { verified: 4, pending: 2 });
+  assert.equal(g.activity.memberSessions, 1);
+  assert.equal(g.activity.avgActiveMs, 120000);
+  assert.equal(g.interests.pages[0].page, 'defter');
+  assert.ok(g.recommendations.some((r) => r.includes('bekleyen erişim')));
+  assert.ok(!JSON.stringify(g).includes('u1'), 'no member id leaks into the summary');
 });
 

@@ -53,6 +53,7 @@
   <link rel="stylesheet" href="/assets/site-new.css?v=5">
   <script type="module" src="/assets/site-features.mjs?v=2"></script>
   <script type="module" src="/assets/site-new.mjs?v=2"></script>
+<script type="module" src="/assets/signup-funnel.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
@@ -5158,6 +5159,15 @@
   .ana-section { border:1px solid var(--border); border-radius:14px; background:var(--card); padding:14px 16px; margin-bottom:14px; }
   .ana-section > h2 { font-family:var(--font-display); font-size:14px; margin:0 0 10px; letter-spacing:-.01em; display:flex; align-items:center; gap:8px; }
   .ana-section > h2 em { font-style:normal; font-size:10.5px; font-weight:600; color:var(--text-3); }
+  .ana-growth { border-color:rgba(124,92,255,.4); background:linear-gradient(160deg,rgba(124,92,255,.10),transparent 60%),var(--card); }
+  .ana-growth-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+  .ana-growth-card { border:1px solid var(--border); border-radius:12px; padding:12px 13px; background:rgba(0,0,0,.10); min-width:0; }
+  .ana-growth-card > b { display:block; font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:7px; }
+  .ana-growth-big { font-family:var(--font-display); font-size:19px; font-weight:800; letter-spacing:-.02em; color:var(--text); margin-bottom:3px; }
+  .ana-growth-card .hint { font-size:10.5px; line-height:1.5; color:var(--text-3); }
+  .ana-recs { margin:0; padding-left:17px; font-size:11.5px; line-height:1.65; color:var(--text-2); }
+  .ana-recs li + li { margin-top:6px; }
+  @media (max-width:760px) { .ana-growth-grid { grid-template-columns:1fr; } }
   .ana-tablewrap { overflow-x:auto; }
   .ana-table { width:100%; border-collapse:collapse; font-size:12px; }
   .ana-table th { text-align:left; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); font-weight:700; padding:7px 9px; border-bottom:1px solid var(--border); white-space:nowrap; }
@@ -9388,14 +9398,11 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;">
         <button class="btn" id="acc-admin-refresh" type="button">Yenile</button>
         <select id="acc-admin-status" style="padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;min-width:150px;">
-          <option value="all">Tumu</option>
           <option value="pending">Bekleyen</option>
-          <option value="verified">Onayli</option>
-          <option value="rejected">Reddedilen</option>
+          <option value="verified">Onaylı</option>
+          <option value="all">Tüm aktif</option>
+          <option value="archive">Arşiv</option>
         </select>
-        <label class="hint" style="display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;">
-          <input type="checkbox" id="acc-admin-all"> Reddedilenler de gorunsun
-        </label>
       </div>
       <div id="acc-admin-list" style="display:flex;flex-direction:column;gap:8px;"></div>
       <div id="acc-admin-totals" class="hint" style="margin-top:10px;font-size:13px;color:var(--green,var(--text));font-weight:600;"></div>
@@ -14217,6 +14224,8 @@ const SITE = {
   admin: false,           // sunucunun onayladigi yonetici
   status: 'none',         // none | pending | verified | rejected
   note: null,             // reddetme sebebi (üyeye gösterilir)
+  archived_at: null,      // red/iptal kaydi arsivde
+  can_reapply: false,     // arsivlenmisse tekrar basvuru acik
   exchange: null,
   exchange_uid: null,
   verified_at: null,
@@ -14317,6 +14326,8 @@ function siteApplyAccess(j) {
   SITE.tier = SITE.admin ? 'admin' : (j.tier || 'free');
   SITE.status = j.status || 'none';
   SITE.note = j.note || null;
+  SITE.archived_at = j.archived_at || null;
+  SITE.can_reapply = !!j.can_reapply;
   SITE.exchange = j.exchange || null;
   SITE.exchange_uid = j.exchange_uid || null;
   SITE.verified_at = j.verified_at || null;
@@ -14581,8 +14592,8 @@ function renderAccessPage() {
       const reason = (noteVal && !internalNotes[noteVal.toLowerCase()]) ? noteVal : '';
       badge.textContent = 'Reddedildi';
       text.textContent = reason
-        ? 'Başvurun reddedildi. Sebep: ' + reason
-        : 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup tekrar dene.';
+        ? 'Başvurun reddedildi. Sebep: ' + reason + (SITE.can_reapply ? ' Dilersen aşağıdan tekrar deneyebilirsin.' : '')
+        : 'Girilen UID referans listemizde bulunamadı. Linkten üye olduğundan emin olup aşağıdan tekrar dene.';
     }
   }
   else { badge.textContent = 'Kısıtlı'; text.textContent = 'Şu an kısıtlı erişimdesin: sonuçları ve temel araçları görürsün, ürünün tamamı borsanı bağlayınca açılır.'; }
@@ -14660,7 +14671,8 @@ async function loadAdminAccess(force) {
   const msg = document.getElementById('acc-admin-msg');
   if (msg) msg.textContent = 'Yükleniyor…';
   try {
-    const r = await siteFetch('/api/access?op=list', { cache: 'no-store' });
+    const archiveMode = (document.getElementById('acc-admin-status') || {}).value === 'archive';
+    const r = await siteFetch('/api/access?op=list' + (archiveMode ? '&archive=1' : ''), { cache: 'no-store' });
     const j = await r.json().catch(function () { return null; });
     if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
     adminAccessRows = Array.isArray(j.rows) ? j.rows : [];
@@ -14685,19 +14697,19 @@ function renderAdminAccess() {
   const count = document.getElementById('acc-admin-count');
   if (!box) return;
   const rows = adminAccessRows || [];
-  const allEl = document.getElementById('acc-admin-all');
-  const allChecked = !!(allEl && allEl.checked);
   const selEl = document.getElementById('acc-admin-status');
   const f = selEl ? selEl.value : 'pending';
-  const statusOk = function (r) { return f === 'all' ? true : r.status === f; };
+  const archiveMode = f === 'archive';
+  const statusOk = function (r) { return f === 'all' || archiveMode ? true : r.status === f; };
   const visible = rows.filter(statusOk);
   const pending = rows.filter(function (r) { return r.status === 'pending'; }).length;
-  if (count) count.textContent = pending + ' bekliyor';
+  if (count) count.textContent = archiveMode ? (rows.length + ' arşiv kaydı') : (pending + ' bekliyor');
   const totalsEl = document.getElementById('acc-admin-totals');
   if (totalsEl) {
     const approved = rows.filter(function (r) { return r.status === 'verified'; }).length;
-    const rejected = rows.filter(function (r) { return r.status === 'rejected'; }).length;
-    totalsEl.textContent = 'Toplam: ' + rows.length + ' kayıt · Onaylı: ' + approved + ' · Reddedilen: ' + rejected;
+    totalsEl.textContent = archiveMode
+      ? 'Arşiv: ' + rows.length + ' kayıt · buradan geri alıp tekrar başvuru açabilirsin.'
+      : 'Aktif: ' + rows.length + ' kayıt · Onaylı: ' + approved + ' · Bekleyen: ' + pending;
   }
   const monthsEl = document.getElementById('acc-admin-months');
   if (monthsEl) {
@@ -14727,11 +14739,13 @@ function renderAdminAccess() {
     const noteVal = (r.note && !noteCodes[String(r.note).trim().toLowerCase()]) ? r.note : '';
     const noteInput = r.status === 'verified' ? ''
       : '<input type="text" data-acc-note-input="' + accEsc(r.user_id) + '" value="' + accEsc(noteVal) + '" maxlength="500" placeholder="Ret sebebi (üyeye gösterilir)" title="Ret sebebi (üyeye gösterilir)" style="width:210px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;">';
-    const act = invite + (r.status === 'verified'
-      ? ('<button class="btn"' + attrs.replace('%OP%', 'revoke') + '>Geri al</button>')
-      : (noteInput +
-        '<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
-        '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>'));
+    const act = archiveMode
+      ? ('<button class="btn solid"' + attrs.replace('%OP%', 'restore') + '>Geri al</button>')
+      : (invite + (r.status === 'verified'
+        ? ('<button class="btn"' + attrs.replace('%OP%', 'revoke') + '>Erişimi al</button>')
+        : (noteInput +
+          '<button class="btn solid"' + attrs.replace('%OP%', 'approve') + '>Onayla</button>' +
+          '<button class="btn"' + attrs.replace('%OP%', 'reject') + '>Reddet</button>')));
     const mentorLbl = r.mentor_status === 'joined' ? 'grupta'
       : (r.mentor_status === 'invited' ? 'davetli'
         : (r.mentor_status === 'revoked' ? 'iptal' : '—'));
@@ -14829,7 +14843,7 @@ async function adminAccessOp(op, userId, email, volume, note) {
     if (inp) inp.focus();
     return;
   }
-  if (op !== 'approve') {
+  if (op !== 'approve' && op !== 'restore') {
     const who = email || 'bu üye';
     const q = op === 'reject'
       ? '"' + who + '" başvurusunu reddetmek istiyor musun?\n\nRet sebebi: ' + note
@@ -14849,7 +14863,7 @@ async function adminAccessOp(op, userId, email, volume, note) {
     });
     const j = await r.json().catch(function () { return null; });
     if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
-    if (msg) msg.textContent = op === 'approve' ? 'Onaylandı ✓' : (op === 'reject' ? 'Reddedildi.' : 'Erişim geri alındı.');
+    if (msg) msg.textContent = op === 'approve' ? 'Onaylandı ✓' : (op === 'reject' ? 'Reddedildi, arşive taşındı.' : (op === 'restore' ? 'Arşivden geri alındı, üye tekrar başvurabilir.' : 'Erişim geri alındı, arşive taşındı.'));
     await loadSiteAccess();
     applyTierUi();
   } catch (e) {
@@ -14875,10 +14889,8 @@ function bindAccessForm() {
   if (mRefresh) mRefresh.addEventListener('click', refreshMentorInvite);
   const accRefresh = document.getElementById('acc-admin-refresh');
   if (accRefresh) accRefresh.addEventListener('click', function () { loadAdminAccess(true); });
-  const accAll = document.getElementById('acc-admin-all');
-  if (accAll) accAll.addEventListener('change', renderAdminAccess);
   const accStatus = document.getElementById('acc-admin-status');
-  if (accStatus) accStatus.addEventListener('change', renderAdminAccess);
+  if (accStatus) accStatus.addEventListener('change', function () { loadAdminAccess(true); });
   const accList = document.getElementById('acc-admin-list');
   if (accList) accList.addEventListener('click', function (e) {
     const b = e.target && e.target.closest ? e.target.closest('[data-acc-op]') : null;
@@ -28723,6 +28735,52 @@ function anaRender() {
   var rangeDays = (d.range && d.range.days) || anaState.days;
   var scope = rangeDays === 1 ? 'bugün' : 'son ' + rangeDays + ' gün';
   var html = [];
+
+  var g = d.growthSummary;
+  if (g) {
+    var steps = (g.funnel && g.funnel.steps) || [];
+    var funnelMax = 1;
+    steps.forEach(function (s) { funnelMax = Math.max(funnelMax, Number(s.sessions) || 0); });
+    var funnelRows = steps.map(function (s) {
+      var n = Number(s.sessions) || 0;
+      var pct = Math.max(3, Math.round((n / funnelMax) * 100));
+      return '<div class="ana-tlrow"><span>' + esc(s.label) + '</span>' +
+        '<span class="ana-tltrack"><i style="width:' + pct + '%"></i></span>' +
+        '<span>' + n + '</span></div>';
+    }).join('');
+    var acc = g.access || {};
+    var act = g.activity || {};
+    var interests = (g.interests && g.interests.pages) || [];
+    var interestRows = interests.length
+      ? interests.slice(0, 5).map(function (p) {
+          return '<div class="ana-tlrow"><span>' + esc(p.label) + '</span>' +
+            '<span class="ana-tltrack"><i style="width:' + Math.max(3, Math.round(((Number(p.avgMs) || 0) / Math.max(1, Number(interests[0].avgMs) || 1)) * 100)) + '%"></i></span>' +
+            '<span>' + esc(anaDur(p.avgMs)) + '</span></div>';
+        }).join('')
+      : '<div class="ana-empty">İlgi verisi yok.</div>';
+    var recs = (g.recommendations || []).map(function (r) {
+      return '<li>' + esc(r) + '</li>';
+    }).join('');
+
+    html.push('<div class="ana-section ana-growth"><h2>🎯 Büyüme özeti <em>' + esc(scope) + '</em></h2>' +
+      '<div class="ana-growth-grid">' +
+      '<div class="ana-growth-card"><b>Kayıt → Premium</b>' +
+        '<div class="ana-growth-big">' + (acc.verified || 0) + ' premium · ' + (acc.pending || 0) + ' bekliyor</div>' +
+        '<div class="hint">Onaylı üyeler ve bekleyen başvurular</div>' +
+        '<div class="ana-timeline">' + funnelRows + '</div>' +
+        '<div class="hint"> Kayıt→form %' + ((g.funnel && g.funnel.authToSignup) || 0) + ' · form→onay %' + ((g.funnel && g.funnel.signupToConfirm) || 0) + '</div>' +
+      '</div>' +
+      '<div class="ana-growth-card"><b>Ne kadar vakit?</b>' +
+        '<div class="ana-growth-big">' + esc(anaDur(act.avgActiveMs)) + '</div>' +
+        '<div class="hint">' + (act.memberSessions || 0) + ' üye oturumu · ' + (act.activeSessions || 0) + ' aktif oturum</div>' +
+        '<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:10px 0 6px;">İlgi alanları</div>' +
+        '<div class="ana-timeline">' + interestRows + '</div>' +
+      '</div>' +
+      '<div class="ana-growth-card"><b>Ne yapmalı?</b>' +
+        '<ul class="ana-recs">' + recs + '</ul>' +
+      '</div>' +
+      '</div></div>');
+  }
 
   html.push('<div class="ana-cards">' +
     anaCard('Çevrimiçi', t.onlineNow || 0, 'son 90 saniye') +
