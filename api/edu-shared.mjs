@@ -11,12 +11,15 @@ import podcast from '../lib/podcast.mjs';
 import youtubeLatest from '../lib/youtube-latest.mjs';
 import eduFeedback from '../lib/edu-feedback.mjs';
 import influencerContent from '../lib/influencer-content.mjs';
+import { sendTelegram } from '../lib/telegram.mjs';
+import { FEATURES, isNew } from '../assets/site-features.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
   shared: { rowId: 'v1', journalUid: '00000000-0000-0000-0000-00000000e000' },
   channel: { rowId: 'channels', journalUid: '00000000-0000-0000-0000-00000000e002' },
   short: { rowId: 'shortlinks', journalUid: '00000000-0000-0000-0000-00000000e003' },
+  features: { rowId: 'site-features' },
 };
 
 const sbHeaders = (key) => ({
@@ -25,9 +28,9 @@ const sbHeaders = (key) => ({
   'Content-Type': 'application/json',
 });
 
-async function readEduShared(rowId) {
+async function readEduShared(rowId, key = SUPABASE_KEY) {
   const url = `${SUPABASE_URL}/rest/v1/edu_shared?id=eq.${rowId}&select=data`;
-  const res = await fetch(url, { headers: sbHeaders(SUPABASE_KEY) });
+  const res = await fetch(url, { headers: sbHeaders(key) });
   if (res.status === 404) return { missing: true };
   if (!res.ok) return { error: `Supabase read ${res.status}: ${(await res.text()).slice(0, 160)}` };
   const rows = await res.json();
@@ -90,11 +93,11 @@ async function alfaNews(req, res) {
   }
 }
 
-async function writeEduShared(rowId, data) {
+async function writeEduShared(rowId, data, key = SUPABASE_KEY) {
   const url = `${SUPABASE_URL}/rest/v1/edu_shared`;
   const res = await fetch(url, {
     method: 'POST',
-    headers: { ...sbHeaders(SUPABASE_KEY), Prefer: 'resolution=merge-duplicates' },
+    headers: { ...sbHeaders(key), Prefer: 'resolution=merge-duplicates' },
     body: JSON.stringify({ id: rowId, data }),
   });
   if (res.status === 404) return { missing: true };
@@ -194,6 +197,54 @@ function sanitizeChannel(c) {
   return clean;
 }
 
+// Yeni özellik bildirimi: kayıt defterindeki "yeni" satırları Telegram'a gönderir.
+// edu_shared içinde hangi id'lerin bildirildiği tutulur; aynı özellik iki kez haber olmaz.
+async function siteFeatures(req, res) {
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      ok: true,
+      features: FEATURES.filter(f => isNew(f)).map(f => ({ id: f.id, label: f.label, since: f.since })),
+    });
+  }
+  if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
+
+  const token = (process.env.TG_BOT_TOKEN || '').trim();
+  const chat = (process.env.TG_CHAT_ID || '').trim();
+  if (!token || !chat) return res.status(200).json({ ok: true, skipped: true, reason: 'telegram_not_configured' });
+
+  let body = {};
+  try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch { /* boş gövde */ }
+  const requested = Array.isArray(body && body.features)
+    ? body.features.map(x => String(x || '').slice(0, 80))
+    : null;
+
+  // Bildirim durumu RLS'e takılmasın; service-role varsa onunla oku/yaz.
+  const stateKey = (process.env.SUPABASE_SERVICE_ROLE || SUPABASE_KEY).trim();
+  const cur = await readEduShared(ROWS.features.rowId, stateKey);
+  if (cur.error) return res.status(200).json({ ok: false, error: cur.error });
+  const data = cur.data && typeof cur.data === 'object' ? cur.data : {};
+  const announced = Array.isArray(data.announced) ? data.announced.map(x => String(x)) : [];
+  const pending = FEATURES.filter(f =>
+    isNew(f) && !announced.includes(f.id) && (!requested || requested.includes(f.id))
+  );
+  if (!pending.length) return res.status(200).json({ ok: true, sent: 0, announced });
+
+  const lines = pending.map(f => '• ' + (f.icon || '✦') + ' ' + f.label + ' — ' + (f.desc || '')).join('\n');
+  const text = '🆕 Alfa Traders — yeni özellik\n\n' + lines + '\n\n#yeniözellik';
+  const sent = await sendTelegram(text, chat);
+  if (sent.http !== 200 || !sent.ok) {
+    return res.status(200).json({ ok: false, error: 'telegram_send_failed', status: sent.http });
+  }
+
+  const next = {
+    announced: announced.concat(pending.map(f => f.id)).slice(-200),
+    updatedAt: new Date().toISOString(),
+  };
+  const saved = await writeEduShared(ROWS.features.rowId, next, stateKey);
+  if (!saved.ok) return res.status(200).json({ ok: true, sent: pending.length, warn: saved.error });
+  return res.status(200).json({ ok: true, sent: pending.length, announced: next.announced });
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -206,6 +257,7 @@ export default async function handler(req, res) {
   if (req.query?.kind === 'podcast') return podcast(req, res);
   if (req.query?.kind === 'youtube') return youtubeLatest(req, res);
   if (req.query?.kind === 'news') return alfaNews(req, res);
+  if (req.query?.kind === 'site-features') return siteFeatures(req, res);
 
   const isChannel = String(req.query && req.query.kind) === 'channel';
   const isShort = String(req.query && req.query.kind) === 'short';

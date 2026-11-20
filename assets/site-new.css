@@ -14,7 +14,16 @@
   box-shadow: 0 0 0 4px rgba(255, 177, 78, .14);
 }
 .site-new-chip.seen .wn-dot { background: #7d849f; box-shadow: none; }
+.site-new-chip .wn-count {
+  display: inline-grid; place-items: center; min-width: 15px; height: 15px;
+  padding: 0 3px; border-radius: 999px; background: rgba(255,177,78,.2);
+  color: #ffcf8a; font-size: 9px; font-weight: 800;
+}
+.site-new-chip .wn-count:empty { display: none; }
 .site-new-chip:focus-visible { outline: 2px solid #ffc46b; outline-offset: 2px; }
+.site-new-chip[hidden],
+.new-badge[hidden],
+.new-badge.expired { display: none !important; }
 
 .whats-new-panel {
   position: fixed; top: 62px; right: 16px; z-index: 700;
@@ -38,7 +47,12 @@
 .wn-head .wn-close:hover { color: #fff; }
 .wn-sub { margin: 5px 0 12px; font-size: 11px; color: #a8afc9; }
 .wn-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.wn-list li { display: grid; grid-template-columns: 24px 1fr; gap: 9px; align-items: start; }
+.wn-list li { display: grid; grid-template-columns: 1fr; }
+.wn-list li a {
+  display: grid; grid-template-columns: 24px 1fr; gap: 9px; align-items: start;
+  text-decoration: none; color: inherit; padding: 4px; margin: -4px; border-radius: 10px;
+}
+.wn-list li a:hover { background: rgba(255,255,255,.05); }
 .wn-ico {
   width: 24px; height: 24px; display: grid; place-items: center;
   border-radius: 8px; background: rgba(255, 177, 78, .12); font-size: 13px;
@@ -53,6 +67,11 @@
 .wn-actions button { border: 0; background: linear-gradient(135deg, #8b7cf6, #6d5ce0); color: #fff; }
 .wn-actions a { border: 1px solid rgba(255, 255, 255, .18); color: #c9cee2; }
 .wn-actions a:hover { color: #fff; border-color: rgba(255, 255, 255, .4); }
+@media (max-width: 680px) {
+  #whats-new-btn-app { font-size: 0; gap: 3px; padding: 6px 6px; }
+  #whats-new-btn-app .wn-dot { width: 7px; height: 7px; box-shadow: none; }
+  #whats-new-btn-app .wn-count { font-size: 10px; min-width: 14px; height: 14px; }
+}
 @media (max-width: 640px) {
   .whats-new-panel { top: 58px; right: 10px; left: 10px; width: auto; max-width: none; }
   .site-new-chip { padding: 6px 9px; font-size: 10px; }

@@ -42,6 +42,14 @@ test('yeni özellik sayfa başlıkları ve ek kartları rozet taşır', () => {
   assert.match(html, /c\.page === 'review' \|\| c\.page === 'pano'/, 'ek kartlarında rozet koşulu olmalı');
 });
 
+test('her YENİ rozeti özellik kayıt defterindeki bir kimliğe bağlı', () => {
+  const tags = [...html.matchAll(/<i class="new-badge" data-new-feature="([^"]+)"/g)].map(m => m[1]);
+  assert.equal(tags.length, 13);
+  assert.deepEqual([...new Set(tags)], ['defter', 'review', 'pano', "' + c.page + '"]);
+  assert.ok(html.includes('/assets/site-features.mjs'), '3 günlük ömür kayıt defteri yüklenmeli');
+  assert.ok(html.includes('/assets/site-new.css?v=3') && html.includes('/assets/site-new.mjs?v=2'));
+});
+
 test('rozet stili ve çeviri anahtarları tanımlı', () => {
   assert.match(html, /\.new-badge\s*\{/, 'rozet stili tanımlı olmalı');
   assert.match(html, /'ui\.new':\s*\{\s*tr:\s*'YENİ',\s*en:\s*'NEW'\s*\}/);

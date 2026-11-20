@@ -50,8 +50,9 @@
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
   <link rel="stylesheet" href="/assets/morning-checkin.css?v=2">
   <script type="module" src="/assets/morning-checkin.mjs?v=2"></script>
-  <link rel="stylesheet" href="/assets/site-new.css?v=1">
-  <script type="module" src="/assets/site-new.mjs?v=1"></script>
+  <link rel="stylesheet" href="/assets/site-new.css?v=3">
+  <script type="module" src="/assets/site-features.mjs?v=2"></script>
+  <script type="module" src="/assets/site-new.mjs?v=2"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
@@ -5384,7 +5385,7 @@
       <a href="#lp-access-title">Üyelik</a>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button type="button" class="site-new-chip" id="whats-new-btn" aria-haspopup="dialog" aria-expanded="false"><span class="wn-dot" aria-hidden="true"></span>Yeni</button>
+      <button type="button" class="site-new-chip" id="whats-new-btn" aria-haspopup="dialog" aria-expanded="false" aria-label="Yeni özellikler"><span class="wn-dot" aria-hidden="true"></span>Yeni <span class="wn-count"></span></button>
       <button class="nav-lang" id="lang-btn" type="button" title="Dil / Language">EN</button>
       <button class="nav-login" id="nav-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
@@ -5795,9 +5796,9 @@
         <button type="button" class="nav-link drop-btn" data-i18n="app.trader">⚡ Trader ▾</button>
         <div class="drop-menu">
           <a href="/alfa-charts.html" class="nav-link" id="tab-alfacharts" data-i18n="tv.alfaCharts" style="display:none">📈 ALFA CHARTS</a>
-          <a href="?page=defter" class="nav-link has-new" id="tab-defter" data-nav><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-          <a href="?page=review" class="nav-link has-new" id="tab-review" data-nav><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-          <a href="?page=pano" class="nav-link has-new" id="tab-pano" data-nav><span data-i18n="app.pano">🛠️ Çalışma Panosu</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+          <a href="?page=defter" class="nav-link has-new" id="tab-defter" data-nav><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-new-feature="defter" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+          <a href="?page=review" class="nav-link has-new" id="tab-review" data-nav><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-new-feature="review" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+          <a href="?page=pano" class="nav-link has-new" id="tab-pano" data-nav><span data-i18n="app.pano">🛠️ Çalışma Panosu</span><i class="new-badge" data-new-feature="pano" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
           <a href="?page=calc" class="nav-link" id="tab-calc" data-nav data-i18n="app.calc">🧮 Alfa Calculator</a>
           <a href="?page=zaman" class="nav-link" id="tab-zaman" data-nav>⏱️ Zaman</a>
           <a href="?page=strateji" class="nav-link" id="tab-strateji" data-nav>🧭 Strateji</a>
@@ -5817,7 +5818,7 @@
       <a class="soc-link x" id="nc-x" href="#" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.06l-4.74-6.2L5.6 21H2.6l7-8L2.2 3h6.2l4.3 5.68L17.5 3zm-1.05 16.2h1.66L7.63 4.7H5.85z"/></svg></a>
       <a class="soc-link yt" id="nc-yt" href="#" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 7.5c-.26-1-.9-1.6-1.9-1.8C19.3 5.3 12 5.3 12 5.3s-7.3 0-9.1.4C1.9 5.9 1.26 6.5 1 7.5.6 9.3.6 12 .6 12s0 2.7.4 4.5c.26 1 .9 1.6 1.9 1.8 1.8.4 9.1.4 9.1.4s7.3 0 9.1-.4c1-.2 1.64-.8 1.9-1.8.4-1.8.4-4.5.4-4.5s0-2.7-.4-4.5zM9.75 15.3V8.7l6.3 3.3z"/></svg></a>
     </div>
-    <button type="button" class="site-new-chip" id="whats-new-btn-app" aria-haspopup="dialog" aria-expanded="false"><span class="wn-dot" aria-hidden="true"></span>Yeni</button>
+    <button type="button" class="site-new-chip" id="whats-new-btn-app" aria-haspopup="dialog" aria-expanded="false" aria-label="Yeni özellikler"><span class="wn-dot" aria-hidden="true"></span>Yeni <span class="wn-count"></span></button>
     <span class="nav-live" id="nav-live" title="Şu an sitede olan kişi sayısı" data-i18n-title="app.live.online">
       <span class="nl-dot"></span>
       <b id="nav-live-online">—</b> <span data-i18n="app.live.online">çevrimiçi</span> · <b id="nav-live-total">—</b> <span data-i18n="app.live.total">ziyaret</span> · <b id="nav-live-reg">—</b> <span data-i18n="app.live.members">üye</span>
@@ -5847,9 +5848,9 @@
       <a href="?page=uyap" class="mnav-link" id="mnav-uyap" data-nav data-mnav="uyap">🏠 Real Estate</a>
       <div class="mnav-group" data-i18n="app.trader">⚡ Trader</div>
       <a href="/alfa-charts.html" class="mnav-link" data-mnav="alfacharts" id="mnav-alfacharts" data-i18n="tv.alfaCharts" style="display:none">📈 ALFA CHARTS</a>
-      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" id="mnav-defter"><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-      <a href="?page=review" class="mnav-link" data-nav data-mnav="review" id="mnav-review"><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-      <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" id="mnav-pano"><span data-i18n="app.pano">🛠️ Çalışma Panosu</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+      <a href="?page=defter" class="mnav-link" data-nav data-mnav="defter" id="mnav-defter"><span data-i18n="app.check">✅ Check List</span><i class="new-badge" data-new-feature="defter" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+      <a href="?page=review" class="mnav-link" data-nav data-mnav="review" id="mnav-review"><span data-i18n="pg.review.t">📊 Haftalık Değerlendirme</span><i class="new-badge" data-new-feature="review" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+      <a href="?page=pano" class="mnav-link" data-nav data-mnav="pano" id="mnav-pano"><span data-i18n="app.pano">🛠️ Çalışma Panosu</span><i class="new-badge" data-new-feature="pano" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
       <a href="?page=calc" class="mnav-link" data-nav data-mnav="calc" data-i18n="app.calc">🧮 Alfa Calculator</a>
       <a href="?page=zaman" class="mnav-link" data-nav data-mnav="zaman" id="mnav-zaman">⏱️ Zaman</a>
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
@@ -6177,9 +6178,9 @@
       <div class="home-quick" id="home-quick">
         <a href="?page=calc" data-nav>🧮 Calculator</a>
         <a href="?page=calendar" data-nav>📅 Takvim</a>
-        <a href="?page=defter" data-nav data-ref-only>✅ Check List <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-        <a href="?page=review" data-nav data-ref-only>📊 Haftalık Değerlendirme <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-        <a href="?page=pano" data-nav data-ref-only>🛠️ Çalışma Panosu <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+        <a href="?page=defter" data-nav data-ref-only>✅ Check List <i class="new-badge" data-new-feature="defter" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+        <a href="?page=review" data-nav data-ref-only>📊 Haftalık Değerlendirme <i class="new-badge" data-new-feature="review" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
+        <a href="?page=pano" data-nav data-ref-only>🛠️ Çalışma Panosu <i class="new-badge" data-new-feature="pano" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
         <a href="?page=butce" data-nav data-ref-only>💰 Gelir/Gider</a>
         <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
         <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
@@ -6371,7 +6372,7 @@
     </script>
   </div>
   <div id="page-defter" class="hidden">
-    <div class="eg-brand"><span class="eg-brand-ico">✅</span><span class="eg-brand-name" data-i18n="pg.defter.t">Alfa-Check List</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i><span class="eg-brand-sub" data-i18n="pg.defter.s">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
+    <div class="eg-brand"><span class="eg-brand-ico">✅</span><span class="eg-brand-name" data-i18n="pg.defter.t">Alfa-Check List</span><i class="new-badge" data-new-feature="defter" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i><span class="eg-brand-sub" data-i18n="pg.defter.s">Her işlem öncesi kriterleri puanla, kararını ver.</span></div>
   <div class="ai-wrap panel" id="ai-wrap">
     <div class="ai-head" id="ai-head" role="button" tabindex="0" aria-expanded="false">
       <span class="ai-title" data-i18n="pg.defter.aiT">🧠 Yapay Zeka ile Kişisel Checklist</span>
@@ -6820,7 +6821,7 @@
   </div>
 
   <div id="page-review" class="hidden">
-    <div class="eg-brand"><span class="eg-brand-ico">📊</span><span class="eg-brand-name" data-i18n="pg.review.t">Haftalık Değerlendirme</span><i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i><span class="eg-brand-sub" data-i18n="pg.review.s">Haftalık RR gir, kümülatif eğrini ve retrospektini izle.</span></div>
+    <div class="eg-brand"><span class="eg-brand-ico">📊</span><span class="eg-brand-name" data-i18n="pg.review.t">Haftalık Değerlendirme</span><i class="new-badge" data-new-feature="review" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i><span class="eg-brand-sub" data-i18n="pg.review.s">Haftalık RR gir, kümülatif eğrini ve retrospektini izle.</span></div>
     <div class="rv-head">
       <button class="rv-nav" id="rv-prev" type="button">◀</button>
       <div class="rv-week" id="rv-week">—</div>
@@ -8455,7 +8456,7 @@
           </span>
           <span class="pano-room-grp" title="Bu pano yalnızca size özeldir; başka üyeler göremez ve değiştiremez.">
             <span class="pano-t">🔒 Kişisel Panon</span>
-            <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>
+            <i class="new-badge" data-new-feature="pano" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>
             <span class="pano-tip">sadece siz görürsünüz</span>
           </span>
           <span class="pano-tools" id="pano-tools">
@@ -12684,7 +12685,7 @@ function renderEk() {
     const isNew = c.page === 'review' || c.page === 'pano';
     return '<a href="?page=' + c.page + '" data-nav onclick="event.preventDefault();showPage(\'' + c.page + '\')" style="display:block;padding:18px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);transition:box-shadow .15s,border-color .15s;">' +
       '<div style="font-size:26px;margin-bottom:8px;">' + c.icon + '</div>' +
-      '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + c.title + (isNew ? ' <i class="new-badge" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>' : '') + '</div>' +
+      '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + c.title + (isNew ? ' <i class="new-badge" data-new-feature="' + c.page + '" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i>' : '') + '</div>' +
       '<div style="font-size:11.5px;color:var(--dim);line-height:1.45;">' + c.desc + '</div>' +
       (canOpen ? '' : '<div style="margin-top:8px;font-size:10px;color:var(--amber);">' + lockText + '</div>') +
       '</a>';
@@ -33764,12 +33765,9 @@ document.addEventListener('input', function (e) {
 </script>
   <div class="whats-new-panel hidden" id="whats-new-panel" role="dialog" aria-label="Yeni güncellemeler">
     <div class="wn-head"><strong>✦ Sitede yeni</strong><button type="button" class="wn-close" id="wn-close" aria-label="Kapat">×</button></div>
-    <p class="wn-sub">Son eklenenler — hemen dene</p>
-    <ul class="wn-list">
-      <li><span class="wn-ico" aria-hidden="true">☀️</span><div><b>Sabah Kartı</b><span>Açılışta ruh halini 10 saniyede işaretle, gün boyu küçük çipten tekrar aç.</span></div></li>
-      <li><span class="wn-ico" aria-hidden="true">✎</span><div><b>Kendi kriterini ekle</b><span>Karta istediğin soruyu ekle veya çıkar; sorular sana özel kalır.</span></div></li>
-      <li><span class="wn-ico" aria-hidden="true">📓</span><div><b>Ayna'ya otomatik kayıt</b><span>Sabah işaretlerin günlük olarak kişisel günlük asistanına işlenir.</span></div></li>
-    </ul>
+    <p class="wn-sub" id="wn-sub">Son eklenenler — hemen dene</p>
+    <ul class="wn-list" id="wn-list"></ul>
+    
     <div class="wn-actions">
       <button type="button" id="wn-open-checkin">Sabah Kartı'nı aç</button>
       <a href="?page=ayna">Ayna'ya git →</a>
