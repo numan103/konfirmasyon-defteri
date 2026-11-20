@@ -16,6 +16,7 @@ import { FEATURES, isNew } from '../assets/site-features.mjs';
 import { bearer, requestUser, requestTier } from '../lib/auth.mjs';
 import { openRecord } from '../lib/education-crm.mjs';
 import { EDU_PLANS } from '../assets/edu-plans-model.mjs';
+import { sealChannels, openChannels } from '../lib/edu-channel-storage.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -27,7 +28,7 @@ const ROWS = {
 
 const sbHeaders = (key) => ({
   apikey: key,
-  Authorization: 'Bearer ' + key,
+  ...(String(key).startsWith('sb_secret_') ? {} : { Authorization: 'Bearer ' + key }),
   'Content-Type': 'application/json',
 });
 
@@ -171,8 +172,11 @@ async function verifiedEduPlans(user) {
 function projectChannels(base, viewer) {
   if (!base || !base.traders || typeof base.traders !== 'object') return base;
   const out = JSON.parse(JSON.stringify(base));
-  if (viewer.privileged) return out;
   Object.values(out.traders).forEach(t => {
+    const canEdit = channelEditor(t, viewer.user);
+    if (!canEdit) { delete t.owner; delete t.editors; }
+    t.canEdit = canEdit;
+    if (viewer.privileged || canEdit) return;
     const secs = (t && t.sections) || {};
     Object.keys(secs).forEach(sid => {
       (Array.isArray(secs[sid]) ? secs[sid] : []).forEach(topic => {
@@ -181,6 +185,7 @@ function projectChannels(base, viewer) {
           const plans = itemPlans(v);
           if (plans.some(p => viewer.plans.has(p))) return;
           v.url = ''; v.body = ''; v.photos = []; v.vids = [];
+          v.tricks = '';
           v.locked = true; v.plans = plans;
         });
       });
@@ -189,10 +194,17 @@ function projectChannels(base, viewer) {
   return out;
 }
 
+function channelEditor(channel, user) {
+  if (!user) return false;
+  const email = String(user.email || '').toLowerCase();
+  return !!(user.admin || (email && (String(channel?.owner || '').toLowerCase() === email ||
+    (Array.isArray(channel?.editors) && channel.editors.some(value => String(value).toLowerCase() === email)))));
+}
+
 function sanitizeChannel(c) {
   if (!c || typeof c !== 'object') return null;
   const id = String(c.id || '').trim().slice(0, 120);
-  if (!id) return null;
+  if (!/^[a-zA-Z0-9_-]+$/.test(id) || ['__proto__', 'constructor', 'prototype'].includes(id)) return null;
   const name = String(c.name || '').trim().slice(0, 80);
   if (!name) return null;
   const bio = String(c.bio || '').trim().slice(0, 500);
@@ -204,18 +216,22 @@ function sanitizeChannel(c) {
     name,
     bio,
     editors,
+    owner: String(c.owner || '').trim().toLowerCase().slice(0, 120),
+    seeded: c.seeded === true,
     createdAt: typeof c.createdAt === 'number' ? c.createdAt : Date.now(),
     sections: {},
     secMeta: Array.isArray(c.secMeta)
-      ? c.secMeta.map(s => ({ id: String((s && s.id) || '').slice(0, 60), title: String((s && s.title) || '').slice(0, 120) })).filter(s => s.id)
+      ? c.secMeta.slice(0, 50).map(s => ({ id: String((s && s.id) || '').slice(0, 60), title: String((s && s.title) || '').slice(0, 120), access: isPaidItem(s) ? 'paid' : 'free', plans: isPaidItem(s) ? itemPlans(s) : [] })).filter(s => s.id && !['__proto__', 'constructor', 'prototype'].includes(s.id))
       : null,
   };
   const secs = (c.sections && typeof c.sections === 'object') ? c.sections : {};
   Object.keys(secs).forEach(sid => {
+    if (['__proto__', 'constructor', 'prototype'].includes(sid)) return;
     const arr = Array.isArray(secs[sid]) ? secs[sid] : [];
     clean.sections[String(sid).slice(0, 60)] = arr.slice(0, 200).map(t => ({
       id: String((t && t.id) || '').slice(0, 60),
       title: String((t && t.title) || '').slice(0, 200),
+      level: String((t && t.level) || '').slice(0, 30),
       videos: Array.isArray(t && t.videos)
         ? t.videos.slice(0, 200).map(v => {
             const vtype = String((v && v.type) || 'video').toLowerCase();
@@ -223,16 +239,14 @@ function sanitizeChannel(c) {
             // foto kayıtları URL'sini notun foto listesinin ilk fotoğrafı olarak taşır.
             const isNote = (vtype === 'article' || vtype === 'post' || vtype === 'not' || vtype === 'foto');
             const photos = [];
-            if (isNote) {
-              if (vtype === 'foto' && v && v.url) photos.push({ url: String(v.url).trim().slice(0, 500000), caption: '' });
-              if (Array.isArray(v && v.photos)) {
-                v.photos.slice(0, 10).forEach(p => {
-                  const u = String((p && p.url) || '').trim().slice(0, 500000);
-                  if (!u) return;
-                  if (photos.some(x => x.url === u)) return;
-                  photos.push({ url: u, caption: String((p && p.caption) || '').trim().slice(0, 500) });
-                });
-              }
+            if (vtype === 'foto' && v && v.url) photos.push({ url: String(v.url).trim().slice(0, 500000), caption: '' });
+            if (Array.isArray(v && v.photos)) {
+              v.photos.slice(0, 10).forEach(p => {
+                const u = String((p && p.url) || '').trim().slice(0, 500000);
+                if (!u) return;
+                if (photos.some(x => x.url === u)) return;
+                photos.push({ url: u, caption: String((p && p.caption) || '').trim().slice(0, 500) });
+              });
             }
             return {
               id: String((v && v.id) || '').slice(0, 60),
@@ -241,7 +255,8 @@ function sanitizeChannel(c) {
               type: isNote ? 'not' : 'video',
               access: isPaidItem(v) ? 'paid' : 'free',
               plans: isPaidItem(v) ? itemPlans(v) : [],
-              body: isNote ? String((v && v.body) || '').slice(0, 40000) : '',
+              body: String((v && v.body) || '').slice(0, 40000),
+              tricks: String((v && v.tricks) || '').slice(0, 12000),
               photos,
               // içeriğe gömülü ek videolar ({{video:N}} işaretleri bunlara bakar)
               vids: Array.isArray(v && v.vids)
@@ -321,23 +336,26 @@ export default async function handler(req, res) {
   if (req.query?.kind === 'site-features') return siteFeatures(req, res);
 
   const isChannel = String(req.query && req.query.kind) === 'channel';
+  if (isChannel) { res.setHeader('Cache-Control', 'private, no-store'); res.setHeader('Vary', 'Authorization'); }
   const isShort = String(req.query && req.query.kind) === 'short';
   const meta = isShort ? ROWS.short : (isChannel ? ROWS.channel : ROWS.shared);
 
   // Ortak oku/yaz katmanı
   const load = async () => {
     const r = await readEduShared(meta.rowId);
-    if (r.data) return { data: r.data, warn: '' };
+    if (r.data) return { data: isChannel ? openChannels(r.data) : r.data, warn: '' };
     if (!r.error && !r.missing) return { data: isChannel ? emptyChannels() : null, warn: '' };
     const j = await readJournal(meta.journalUid);
-    if (j.data) return { data: j.data, warn: '' };
+    if (j.data) return { data: isChannel ? openChannels(j.data) : j.data, warn: '' };
     return { data: isChannel ? emptyChannels() : null, warn: r.error || (r.missing ? 'edu_shared tablosu yok (SQL kurulumu gerekli)' : '') || j.error || '' };
   };
   const store = async (data) => {
-    const r = await writeEduShared(meta.rowId, data);
+    if (isChannel && !process.env.SUPABASE_SERVICE_ROLE) return { ok: false, error: 'channel_storage_unavailable' };
+    const payload = isChannel ? sealChannels(data) : data;
+    const r = await writeEduShared(meta.rowId, payload, isChannel ? process.env.SUPABASE_SERVICE_ROLE : SUPABASE_KEY);
     if (r.ok) return { ok: true };
     if (!r.missing) return { ok: false, error: r.error };
-    const j = await writeJournal(meta.journalUid, data);
+    const j = await writeJournal(meta.journalUid, payload);
     if (j.ok) return { ok: true };
     return { ok: false, error: j.error || 'Paylaşım depolaması hazır değil.' };
   };
@@ -351,14 +369,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, found: !!target, target });
     }
     if (isChannel) {
-      const cur = await load();
+      let cur;
+      try { cur = await load(); } catch { return res.status(503).json({ ok: false, error: 'channel_storage_unavailable' }); }
+      if (cur.warn) return res.status(503).json({ ok: false, error: 'channel_storage_unavailable' });
       const base = cur.data && cur.data.traders ? cur.data : emptyChannels();
       const user = bearer(req) ? await requestUser(req) : null;
       const tier = user ? await requestTier(user) : null;
       const privileged = !!(user && (user.admin || tier === 'admin' || tier === 'ref'));
       const plans = privileged ? new Set(PAID_PLAN_IDS) : (user ? await verifiedEduPlans(user) : new Set());
       res.setHeader('Cache-Control', 'private, no-store');
-      return res.status(200).json({ ok: true, data: projectChannels(base, { privileged, plans }), _warn: cur.warn || undefined });
+      return res.status(200).json({ ok: true, data: projectChannels(base, { privileged, plans, user }), _warn: cur.warn || undefined });
     }
     const r = await load();
     if (r.data) return res.status(200).json(r.data);
@@ -397,13 +417,21 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, code, target: cleanT });
     }
 
-    if (isChannel || body.trader || body.channel || body.remove) {
-      const cur = await load();
+    if (!isChannel && (body.trader || body.channel || body.remove || body.traders)) return res.status(400).json({ error: 'channel_route_required' });
+    if (isChannel) {
+      res.setHeader('Cache-Control', 'private, no-store');
+      const user = await requestUser(req);
+      if (!user) return res.status(401).json({ error: 'unauthorized' });
+      if (Buffer.byteLength(JSON.stringify(body)) > 2800000) return res.status(413).json({ error: 'channel_too_large' });
+      let cur;
+      try { cur = await load(); } catch { return res.status(503).json({ error: 'channel_storage_unavailable' }); }
+      if (cur.warn) return res.status(503).json({ error: 'channel_storage_unavailable' });
       const base = (cur.data && cur.data.traders) ? JSON.parse(JSON.stringify(cur.data)) : emptyChannels();
       if (!base.traders || typeof base.traders !== 'object') base.traders = {};
       if (!Array.isArray(base.order)) base.order = [];
 
       if (body.remove) {
+        if (!user.admin) return res.status(403).json({ error: 'forbidden' });
         const id = String(body.remove);
         if (base.traders[id]) {
           delete base.traders[id];
@@ -411,11 +439,17 @@ export default async function handler(req, res) {
           const s = await store(base);
           if (!s.ok) return res.status(500).json({ error: s.error });
         }
-        return res.status(200).json({ ok: true, data: base });
+        return res.status(200).json({ ok: true });
       }
 
       const ch = sanitizeChannel(body.trader || body.channel);
       if (!ch) return res.status(400).json({ error: 'trader (id + name) gerekli' });
+      const existing = Object.hasOwn(base.traders, ch.id) ? base.traders[ch.id] : null;
+      if (existing ? !channelEditor(existing, user) : !user.admin) return res.status(403).json({ error: 'forbidden' });
+      if (!user.admin) {
+        ch.owner = existing.owner || '';
+        ch.editors = existing.editors || [];
+      }
       if (base.traders[ch.id]) {
         const old = base.traders[ch.id];
         ch.createdAt = old.createdAt || ch.createdAt;
@@ -425,7 +459,7 @@ export default async function handler(req, res) {
       base.traders[ch.id] = ch;
       const s = await store(base);
       if (!s.ok) return res.status(500).json({ error: s.error });
-      return res.status(200).json({ ok: true, data: base });
+      return res.status(200).json({ ok: true, trader: ch });
     }
 
     if (!body || !body.sections) return res.status(400).json({ error: 'Missing sections in body' });

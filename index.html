@@ -2994,6 +2994,32 @@
   /* zengin not görünümü: video altında (veya tek başına) aynı genişlikte panel */
   .ch-note-view { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; box-sizing: border-box; }
   .ch-note-box { margin-top: 14px; }
+  .ch-study { min-width:0; }
+  #ch-view .eg-course > .panel { min-width:0; }
+  #ch-view .eg-item-t { min-width:0; overflow-wrap:anywhere; }
+  .ch-study-tools { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .ch-study-tools button[aria-pressed="true"] { border-color:var(--pc); color:var(--pc); }
+  .ch-study.has-both[data-layout="split"] { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:16px; align-items:start; }
+  #ch-view .ch-study.has-both[data-layout="split"] .ch-note-box { margin-top:0; max-height:75vh; overflow:auto; padding-right:8px; }
+  .ch-study.has-both[data-layout="video"] > .ch-note-box,
+  .ch-study.has-both[data-layout="notes"] > .eg-embed { display:none; }
+  .ch-tricks { margin-top:18px; padding:16px; border:1px solid var(--border); border-left:3px solid var(--pc); border-radius:12px; background:var(--bg); }
+  .ch-tricks h3 { font-size:14px; margin:0 0 10px; }
+  .ch-paste-help { font-size:12px; color:var(--text-3); line-height:1.6; }
+  #ch-form[data-mode="topic"] > :not(#ch-form-title):not(#ch-in-title):not(.eg-form-btns):not(#ch-in-err) { display:none; }
+  #ch-form[data-mode="section"] > .ch-content-field,
+  #ch-form[data-mode="section"] > #ch-body-tool,
+  #ch-form[data-mode="section"] > #ch-photo-ed,
+  #ch-form[data-mode="section"] > #ch-video-ed,
+  #ch-form[data-mode="section"] > #ch-add-photo,
+  #ch-form[data-mode="section"] > #ch-add-video,
+  #ch-form[data-mode="section"] > #ch-in-url { display:none; }
+  #ch-form.drag-over { outline:2px dashed var(--pc); }
+  @media (max-width:1100px) {
+    .ch-study.has-both[data-layout="split"] { grid-template-columns:minmax(0,1fr); }
+    #ch-view .ch-study.has-both[data-layout="split"] .ch-note-box { max-height:none; overflow:visible; }
+  }
+  @media (max-width:820px) { #ch-view .eg-course { grid-template-columns:minmax(0,1fr); } }
   .eg-embed.ch-note-embed { aspect-ratio: auto; overflow: visible; }
   .ch-article .ch-photo-item { margin: 14px 0; }
   .ch-note-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -.01em; line-height: 1.35; }
@@ -7051,6 +7077,7 @@
         <button type="button" class="btn solid" id="edu-browse" data-i18n="edu.browse">Kursları keşfet →</button>
         <a href="?page=eduplans" data-nav class="btn" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
         <button type="button" class="btn hidden" id="edu-continue" data-i18n="edu.continue">Kaldığın yerden devam et</button>
+        <button type="button" class="btn hidden" id="edu-studio">✎ Eğitmen Stüdyosu</button>
       </div>
       <div class="edu-progress-summary" id="edu-overall"></div>
     </section>
@@ -7153,8 +7180,15 @@
         </aside>
         <section class="panel eg-player-panel">
           <div id="ch-player-wrap">
+            <div id="ch-study-tools" class="ch-study-tools hidden" role="group" aria-label="Ders görünümü">
+              <button type="button" class="btn" data-study="split" aria-pressed="true">Video + notlar</button>
+              <button type="button" class="btn" data-study="video" aria-pressed="false">Yalnız video</button>
+              <button type="button" class="btn" data-study="notes" aria-pressed="false">Yalnız notlar</button>
+            </div>
+            <div id="ch-study" class="ch-study" data-layout="split">
             <div class="eg-embed hidden" id="ch-embed"></div>
             <div class="ch-note-box hidden" id="ch-note-box"></div>
+            </div>
             <div class="ch-embed-foot hidden" id="ch-foot"></div>
             <div class="eg-now">
               <div class="edu-now-kicker" id="ch-now-kicker">DERS</div>
@@ -7190,7 +7224,11 @@
         <button type="button" data-img="1" title="Fotoğrafı yazının içine koy (imleç konumuna)">📷</button>
         <button type="button" data-vid="1" title="Videoyu yazının içine koy (imleç konumuna)">🎞</button>
       </div>
-      <textarea id="ch-in-body" class="eg-notes" data-i18n-ph="pg.egitim.bodyPh" placeholder="Videonun altına not yaz — fotoğraf ve metin karışık olabilir…" maxlength="40000" style="height:160px;"></textarea>
+       <label for="ch-in-body" class="ch-content-field">Ders açıklaması ve notlar</label>
+       <textarea id="ch-in-body" class="eg-notes ch-content-field" placeholder="Örn. OBO – TOBO: oluşum, boyun çizgisi ve teyit… Görseli buraya Ctrl+V ile yapıştır." maxlength="40000" style="height:160px;"></textarea>
+       <label for="ch-in-tricks" class="ch-content-field">Trickler / püf noktaları</label>
+       <textarea id="ch-in-tricks" class="eg-notes ch-content-field" placeholder="Örn. Boyun çizgisi kırılmadan formasyonu tamamlanmış sayma.&#10;- Sık yapılan hata&#10;- Geçersizlik koşulu" maxlength="12000" style="height:110px;"></textarea>
+       <p class="ch-content-field ch-paste-help">Görseli açıklamaya veya trick alanına Ctrl+V ile yapıştır; dosyayı bu forma sürükleyebilir ya da “Fotoğraf ekle” ile seçebilirsin. En fazla 10 görsel; dosya başına 10 MB. Kaydederken küçültülür.</p>
       <div id="ch-photo-ed" style="margin-top:8px;"></div>
       <button type="button" id="ch-add-photo" class="btn" style="margin:6px 0 0;align-self:flex-start;">＋ Fotoğraf ekle</button>
       <div id="ch-video-ed" style="margin-top:8px;"></div>
@@ -23950,12 +23988,10 @@ function renderEgitim() {
   if (!channelsLoaded) {
     channelsLoaded = true;
     loadChannels().then(async () => {
-      await chEnsureMine(); chSeedFromEdu(chMineTrader());
       renderEduChannels(); renderEduCatalog(); applyChDeep();
     });
   } else {
     applyChDeep();
-    chSeedFromEdu(chMineTrader());
   }
   renderEduChannels();
   const chView = document.getElementById('ch-view');
@@ -23971,6 +24007,8 @@ function renderEgitim() {
   if (egAddForm) egAddForm.classList.add('hidden');
   if (adminControls) adminControls.classList.toggle('hidden', !channelOpen || !chCanEditCur());
   if (manageBtn) manageBtn.classList.toggle('hidden', !chIsAdmin() || !!channelOpen);
+  const studio = document.getElementById('edu-studio');
+  if (studio) studio.classList.toggle('hidden', !chIsAdmin());
   if (channelOpen) {
     if (hero) hero.classList.add('hidden');
     if (catalog) catalog.classList.add('hidden');
@@ -24232,6 +24270,7 @@ function egFlashSaved() {
 // ============ Eğitsel Kanal (trader kanalları) ============
 let channelsData = { traders: {}, order: [] };
 let channelsLoaded = false;
+let channelsError = '';
 let channelOpen = null;   // açık kanalın trader userId'si
 let chSec = 'teknik';     // kanal içinde seçili bölüm id
 let chTopic = null;       // kanal içinde seçili konu id
@@ -24262,13 +24301,14 @@ function chProgSet(t, v, on) {
   if (on) m[u][chProgKey(t, v)] = 1; else delete m[u][chProgKey(t, v)];
   try { localStorage.setItem('alfa-chprog-v1', JSON.stringify(m)); } catch (e) {}
 }
-function chIsAdmin() { return !!(AUTH && AUTH.user && (AUTH.user.email || '').toLowerCase() === (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '')); }
+function chIsAdmin() { return !window.ALFA_PREVIEW_CONFIG && !!(AUTH && AUTH.user && siteIsAdmin()); }
 function chCanEdit(trader) {
+  if (window.ALFA_PREVIEW_CONFIG) return false;
   if (!trader) return false;
   if (chIsAdmin()) return true;
   const email = chUserEmail();
   if (!email) return false;
-  return (trader.editors || []).map(e => String(e).toLowerCase()).indexOf(email) !== -1;
+  return trader.canEdit === true || trader.owner === email || (trader.editors || []).map(e => String(e).toLowerCase()).indexOf(email) !== -1;
 }
 function chCount(t) {
   let n = 0;
@@ -24287,23 +24327,25 @@ function chSecMeta(t) {
 function chDefaultSecMeta() { return Object.keys(EG_SECTIONS).map(id => ({ id, title: EG_SECTIONS[id] })); }
 
 async function loadChannels() {
+  const identity = chUserEmail();
+  try { localStorage.removeItem('alfa-channels-v1'); } catch (e) {}
   try {
     const r = await siteFetch('/api/edu-shared?kind=channel');
     if (r.ok) {
       const j = await r.json();
-      if (j && j.data && j.data.traders) {
+      if (j && j.ok && j.data && j.data.traders && identity === chUserEmail()) {
         channelsData = j.data;
         channelsLoaded = true;
-        try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
+        channelsError = '';
         return;
       }
     }
-  } catch (e) { /* ağ kapalıysa yedek */ }
-  try {
-    const raw = localStorage.getItem('alfa-channels-v1');
-    if (raw) { const p = JSON.parse(raw); if (p && p.traders) channelsData = p; }
-    channelsLoaded = true;
-  } catch (e) { /* */ }
+  } catch (e) { /* Ücretli içerik için ortak/offline önbellek kullanılmaz. */ }
+  if (identity !== chUserEmail()) return;
+  channelsData = { traders: {}, order: [] };
+  channelsLoaded = false;
+  channelOpen = null;
+  channelsError = 'Eğitimler yüklenemedi. Bağlantını kontrol edip tekrar dene.';
 }
 // Adminin kendi kanalı (Trader Ahmet): Alfa Edu içeriğiyle bir kez tohumlanır, üstüne eklenebilir
 function chIsMine(t) {
@@ -24321,14 +24363,14 @@ function chMineTrader() {
   return null;
 }
 async function chEnsureMine() {
-  if (!chIsAdmin()) return null;
+  if (!chIsAdmin() || !channelsLoaded) return null;
   const mine = chMineTrader();
   if (mine) {
     // Eski kanalı sahiplen (owner alanı yoksa)
     if (!mine.owner) {
       mine.owner = (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : '').toLowerCase();
       if (Object.values(mine.sections || {}).some(arr => arr && arr.length)) mine.seeded = true;
-      saveChannel(mine, true);
+      if (!await saveChannel(mine, true)) return null;
     }
     return mine;
   }
@@ -24343,14 +24385,10 @@ async function chEnsureMine() {
     secMeta: null,
     seeded: false,
   };
-  channelsData.traders[t.id] = t;
-  if (channelsData.order.indexOf(t.id) === -1) channelsData.order.push(t.id);
-  try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
-  try { await fetch('/api/edu-shared?kind=channel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trader: t }) }); } catch (e) {}
-  return t;
+  return await saveChannel(t, true) ? channelsData.traders[t.id] : null;
 }
 function chSeedFromEdu(t) {
-  if (!t || t.seeded) return;
+  if (!chIsAdmin() || !t || t.seeded) return;
   if (!egitimData || !egitimData.sections) return;
   if (Object.values(t.sections || {}).some(arr => arr && arr.length)) { t.seeded = true; return; }
   const meta = chSecMeta(t);
@@ -24376,29 +24414,43 @@ function chSeedFromEdu(t) {
   saveChannel(t, true);
 }
 async function saveChannel(trader, silent) {
-  if (!trader) return;
-  channelsData.traders[trader.id] = trader;
-  if (channelsData.order.indexOf(trader.id) === -1) channelsData.order.push(trader.id);
-  try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
-  if (!silent) renderEduChannels();
+  if (!trader || window.ALFA_PREVIEW_CONFIG) return false;
+  const identity = chUserEmail();
   try {
-    await fetch('/api/edu-shared?kind=channel', {
+    const payload = JSON.stringify({ trader });
+    if (new Blob([payload]).size > 2800000) throw new Error('Kanal boyutu sınırı aşıldı. Görselleri azalt veya görsel bağlantısı kullan.');
+    const r = await siteFetch('/api/edu-shared?kind=channel', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ trader }),
+      signal: AbortSignal.timeout(20000),
+      body: payload,
     });
-  } catch (e) { /* */ }
+    const j = await r.json();
+    if (!r.ok || !j.ok || !j.trader) throw new Error(r.status === 401 ? 'Oturumun sona erdi; yeniden giriş yap.' : r.status === 403 ? 'Bu kanalı düzenleme yetkin yok.' : 'Sunucu kaydedemedi. Metnin formda duruyor; tekrar dene.');
+    if (identity !== chUserEmail()) return false;
+    channelsData.traders[trader.id] = j.trader;
+    if (!channelsData.order.includes(trader.id)) channelsData.order.push(trader.id);
+    if (!silent) renderEduChannels();
+    return true;
+  } catch (e) {
+    const err = document.getElementById(chProfMode ? 'ch-prof-err' : 'ch-in-err');
+    if (err) err.textContent = e.message || 'Kaydedilemedi.';
+    if (!chForm.mode && !chProfMode) alert(e.message || 'Kaydedilemedi.');
+    return false;
+  }
 }
 async function deleteChannel(traderId) {
-  delete channelsData.traders[traderId];
-  channelsData.order = channelsData.order.filter(x => x !== traderId);
-  try { localStorage.setItem('alfa-channels-v1', JSON.stringify(channelsData)); } catch (e) {}
-  if (channelOpen === traderId) { channelOpen = null; renderEgitim(); } else renderEduChannels();
   try {
-    await fetch('/api/edu-shared?kind=channel', {
+    const r = await siteFetch('/api/edu-shared?kind=channel', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ remove: traderId }),
     });
-  } catch (e) { /* */ }
+    const j = await r.json();
+    if (!r.ok || !j.ok) throw new Error('Kanal silinemedi.');
+    delete channelsData.traders[traderId];
+    channelsData.order = channelsData.order.filter(x => x !== traderId);
+    chCloseProf();
+    if (channelOpen === traderId) { channelOpen = null; renderEgitim(); } else renderEduChannels();
+  } catch (e) { document.getElementById('ch-prof-err').textContent = 'Kanal silinemedi. Tekrar dene.'; }
 }
 function eduT(key, fallback) {
   try { return (typeof window.t === 'function') ? window.t(key) : fallback; } catch (e) { return fallback; }
@@ -24533,6 +24585,12 @@ function renderEduCatalog() {
     const bar = document.createElement('span'); bar.className = 'edu-bar';
     const fill = document.createElement('span'); fill.style.width = (total ? Math.round(done / total * 100) : 0) + '%'; bar.appendChild(fill);
     overall.append(label, bar);
+    if (channelsError) {
+      overall.replaceChildren(document.createTextNode(channelsError));
+      const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'btn'; retry.textContent = 'Tekrar dene';
+      retry.addEventListener('click', () => renderEgitim());
+      overall.appendChild(retry);
+    }
   }
   const cont = document.getElementById('edu-continue');
   const last = eduLast();
@@ -24836,7 +24894,7 @@ function renderChannelView() {
   const foot = document.getElementById('ch-foot');
   const locked = chItemLocked(curVid);
   const src = (!locked && curVid && curVid.url) ? egEmbedSrc(curVid) : '';
-  const hasNote = !locked && !!(curVid && ((curVid.photos && curVid.photos.length) || (curVid.body && String(curVid.body).trim())));
+  const hasNote = !locked && !!(curVid && ((curVid.photos && curVid.photos.length) || (curVid.body && String(curVid.body).trim()) || curVid.tricks));
   embed.innerHTML = '';
   if (locked) {
     embed.className = 'eg-embed';
@@ -24874,7 +24932,7 @@ function renderChannelView() {
     ph.appendChild(txt);
     if (canEdit) {
       const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn solid';
-      if (curVid) { btn.textContent = '＋ İçerik düzenle'; btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, { title: curVid.title, url: curVid.url, type: curVid.type, body: curVid.body, photos: curVid.photos, access: curVid.access, plans: curVid.plans })); }
+      if (curVid) { btn.textContent = '＋ İçerik düzenle'; btn.addEventListener('click', () => chOpenForm('video-edit', { topicId: cur.id, vidId: curVid.id }, curVid)); }
       else { btn.textContent = '＋ İçerik ekle'; btn.addEventListener('click', () => chOpenForm('video-add', { topicId: cur.id }, null)); }
       ph.appendChild(btn);
     }
@@ -24890,7 +24948,7 @@ function renderChannelView() {
     const nv = chBuildNoteBox(curVid, cur.title);
     if (nv) noteBox.appendChild(nv);
   }
-  if (curVid) {
+  if (curVid && !locked) {
     const used = chUsedVidSet(curVid);
     const extraHtml = chItemVids(curVid).map((u, i) => used.has(i) ? '' : chVideoEmbedHtml(u)).filter(Boolean).join('');
     if (extraHtml) {
@@ -24901,6 +24959,9 @@ function renderChannelView() {
     }
   }
   if (boxShown) noteBox.classList.remove('hidden'); else noteBox.classList.add('hidden');
+  const study = document.getElementById('ch-study');
+  study.classList.toggle('has-both', !!src && boxShown && !locked);
+  document.getElementById('ch-study-tools').classList.toggle('hidden', !src || !boxShown || locked);
   // okudum/izledim tik — kilitli içerik izlenemez
   if (curVid && !locked) {
     foot.classList.remove('hidden');
@@ -24918,7 +24979,7 @@ function renderChannelView() {
   if (kicker) kicker.textContent = eduT('edu.lesson', 'DERS') + ' ' + (topics.indexOf(cur) + 1);
   const link = document.getElementById('ch-now-link');
   if (!locked && curVid && src) { link.style.display = ''; link.href = egWatchHref(curVid); link.textContent = egKind(curVid) === 'playlist' ? "Oynatma listesini YouTube'da aç ↗" : "YouTube'da aç ↗"; }
-  else if (!locked && curVid && curVid.url) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
+  else if (!locked && curVid && /^https?:\/\//i.test(curVid.url || '')) { link.style.display = ''; link.href = curVid.url; link.textContent = 'Kaynağı aç ↗'; }
   else { link.style.display = 'none'; }
   const addVid = document.getElementById('ch-add-vid');
   if (addVid) addVid.classList.toggle('hidden', !canEdit);
@@ -24956,7 +25017,7 @@ function renderChannelView() {
       const dn = document.createElement('button'); dn.className = 'eg-vid-move'; dn.type = 'button'; dn.textContent = '▼'; dn.title = 'Aşağı taşı';
       dn.addEventListener('click', (e) => { e.stopPropagation(); if (i === vids.length - 1) return; [cur.videos[i], cur.videos[i + 1]] = [cur.videos[i + 1], cur.videos[i]]; saveChannel(t); renderChannelView(); });
       const edit = document.createElement('button'); edit.className = 'eg-vid-edit'; edit.type = 'button'; edit.textContent = '✎'; edit.title = 'İçeriği düzenle';
-      edit.addEventListener('click', (e) => { e.stopPropagation(); chOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, { title: v.title, url: v.url, type: v.type, body: v.body, photos: v.photos, access: v.access, plans: v.plans }); });
+      edit.addEventListener('click', (e) => { e.stopPropagation(); chOpenForm('video-edit', { topicId: cur.id, vidId: v.id }, v); });
       const del = document.createElement('button'); del.className = 'eg-vid-del'; del.type = 'button'; del.textContent = '×'; del.title = 'İçeriği sil';
       del.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -24975,19 +25036,21 @@ function renderChannelView() {
 function chBuildNoteBox(vid, fallbackTitle) {
   const photos = (vid && vid.photos && vid.photos.length) ? vid.photos : [];
   const body = (vid && vid.body) ? String(vid.body).trim() : '';
-  if (!vid || (!photos.length && !body)) return null;
+  const tricks = String(vid && vid.tricks || '').trim();
+  if (!vid || chItemLocked(vid) || (!photos.length && !body && !tricks)) return null;
   const view = document.createElement('div'); view.className = 'ch-note-view';
   const ttl = document.createElement('div'); ttl.className = 'ch-note-title'; ttl.textContent = vid.title || fallbackTitle || 'İçerik';
   view.appendChild(ttl);
   const inBody = new Set();
-  if (body) {
+  if (body || tricks) {
     const re = /\{\{foto:(\d+)\}\}|!\[[^\]]*\]\(([^)]+)\)/g;
-    let mm; while ((mm = re.exec(body))) {
+    let mm; while ((mm = re.exec(body + '\n' + tricks))) {
       if (mm[1]) { const ph = photos[Number(mm[1]) - 1]; if (ph) inBody.add(String(ph.url).trim()); }
       else inBody.add(String(mm[2]).trim());
     }
   }
   photos.forEach(p => {
+    if (!chSafeImage(p.url)) return;
     if (inBody.has(String(p.url || '').trim())) return;
     const fig = document.createElement('figure'); fig.className = 'ch-photo-item';
     const img = document.createElement('img');
@@ -25004,7 +25067,15 @@ function chBuildNoteBox(vid, fallbackTitle) {
     art.addEventListener('click', (e) => { const im = e.target.closest('.ch-photo'); if (im) chZoomPhoto(im.src, im.getAttribute('data-cap') || ''); });
     view.appendChild(art);
   }
-  if (vid.url) {
+  if (tricks) {
+    const tips = document.createElement('section'); tips.className = 'ch-tricks';
+    const h = document.createElement('h3'); h.textContent = '✦ Trickler / püf noktaları';
+    const art = document.createElement('div'); art.className = 'ch-article';
+    art.innerHTML = chFormatBody(tricks, photos, chItemVids(vid));
+    art.addEventListener('click', e => { const im = e.target.closest('.ch-photo'); if (im) chZoomPhoto(im.src, im.getAttribute('data-cap') || ''); });
+    tips.append(h, art); view.appendChild(tips);
+  }
+  if (/^https?:\/\//i.test(vid.url || '')) {
     const a = document.createElement('a'); a.className = 'ch-src-link'; a.href = vid.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
     a.textContent = 'Kaynağı aç ↗';
     view.appendChild(a);
@@ -25013,16 +25084,18 @@ function chBuildNoteBox(vid, fallbackTitle) {
 }
 function chInline(t) {
   t = esc(t);
-  t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, label, url) => /^https?:\/\//i.test(url) ? '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>' : label);
   t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   t = t.replace(/(^|.)\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
   return t;
 }
 function chImgFigure(cap, url) {
+  if (!chSafeImage(url)) return '';
   const c = esc(cap || '');
   return '<figure class="ch-photo-item"><img class="ch-photo" src="' + esc(url) + '" alt="' + c + '" loading="lazy" data-cap="' + c + '">'
     + (c ? '<figcaption class="ch-photo-cap">' + c + '</figcaption>' : '') + '</figure>';
 }
+function chSafeImage(url) { return /^(https?:\/\/|data:image\/(?:png|jpeg|webp);base64,)/i.test(String(url || '')); }
 function chFormatBody(text, photos, vids) {
   const lines = String(text || '').split(/\r?\n/);
   let html = '', ul = false, para = [];
@@ -25088,7 +25161,7 @@ function chPhotoRow(photo) {
   const prev = document.createElement('img'); prev.className = 'ch-pprev'; prev.alt = 'önizleme'; prev.hidden = true;
   const urlIn = document.createElement('input'); urlIn.type = 'text'; urlIn.className = 'ch-purl'; urlIn.placeholder = 'Görsel bağlantısı (URL) — veya Ctrl+V yapıştır'; urlIn.maxLength = 500000;
   const fileBtn = document.createElement('button'); fileBtn.type = 'button'; fileBtn.className = 'ch-pfile'; fileBtn.textContent = '📁 PC\u2019den';
-  const fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'image/*'; fileIn.style.display = 'none';
+  const fileIn = document.createElement('input'); fileIn.type = 'file'; fileIn.accept = 'image/png,image/jpeg,image/webp'; fileIn.style.display = 'none';
   const capIn = document.createElement('input'); capIn.type = 'text'; capIn.className = 'ch-pcap'; capIn.placeholder = 'Fotoğrafın altına yazılacak metin'; capIn.maxLength = 500;
   const ins = document.createElement('button'); ins.type = 'button'; ins.className = 'ch-pins'; ins.textContent = '↪'; ins.title = 'Fotoğrafı yazının içine koy (imleç konumuna)';
   const del = document.createElement('button'); del.type = 'button'; del.className = 'ch-pdel'; del.textContent = '×'; del.title = 'Bu fotoğrafı kaldır';
@@ -25104,7 +25177,7 @@ function chPhotoRow(photo) {
     ta.setRangeText('\n{{foto:' + idx + '}}\n', s, e2, 'end');
     ta.focus();
   });
-  del.addEventListener('click', () => row.remove());
+  del.addEventListener('click', () => chRemoveMediaRow(row, 'foto'));
   fileBtn.addEventListener('click', () => fileIn.click());
   fileIn.addEventListener('change', () => {
     const f = fileIn.files && fileIn.files[0];
@@ -25116,6 +25189,7 @@ function chPhotoRow(photo) {
     for (const it of items) {
       if (it.type && it.type.indexOf('image') === 0) {
         e.preventDefault();
+        e.stopPropagation();
         const f = it.getAsFile();
         if (f) chFileToDataUrl(f, du => { urlIn.value = du; chPhotoPreview(urlIn, prev); });
         return;
@@ -25134,28 +25208,63 @@ function chPhotoRow(photo) {
 }
 function chPhotoPreview(urlIn, prev) {
   const v = urlIn.value.trim();
-  if (v) { prev.onerror = () => { prev.hidden = true; }; prev.src = v; prev.hidden = false; }
+  if (chSafeImage(v)) { prev.onerror = () => { prev.hidden = true; }; prev.src = v; prev.hidden = false; }
   else prev.hidden = true;
 }
 function chFileToDataUrl(file, cb) {
+  const fail = () => { document.getElementById('ch-in-err').textContent = 'Görsel okunamadı. PNG, JPEG veya WebP kullan (en fazla 10 MB).'; };
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 10 * 1024 * 1024) { fail(); return; }
+  const form = document.getElementById('ch-form'), generation = form.dataset.generation;
+  chMediaPending++;
   const rd = new FileReader();
+  const done = () => { chMediaPending = Math.max(0, chMediaPending - 1); };
   rd.onload = () => {
     const img = new Image();
     img.onload = () => {
+      try {
+      if (!img.width || !img.height || img.width * img.height > 40000000) { fail(); return; }
       const MAX = 1400;
       let w = img.width, h = img.height;
       const sc = Math.min(1, MAX / Math.max(w, h));
       if (sc < 1) { w = Math.round(w * sc); h = Math.round(h * sc); }
       const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
       cv.getContext('2d').drawImage(img, 0, 0, w, h);
-      const mime = (file.type && file.type.indexOf('png') !== -1) ? 'image/png' : 'image/jpeg';
-      cb(cv.toDataURL(mime, 0.82));
+      let du = cv.toDataURL('image/webp', 0.82);
+      if (du.length > 300000) du = cv.toDataURL('image/jpeg', 0.65);
+      if (du.length > 450000) { document.getElementById('ch-in-err').textContent = 'Görsel çok büyük; daha küçük bir kırpım kullan.'; return; }
+      if (form.dataset.generation === generation && chForm.mode) cb(du);
+      } catch (e) { fail(); } finally { done(); }
     };
-    img.onerror = () => { try { cb(rd.result); } catch (e) {} };
+    img.onerror = () => { done(); fail(); };
     img.src = rd.result;
   };
-  rd.onerror = () => {};
+  rd.onerror = () => { done(); fail(); };
   rd.readAsDataURL(file);
+}
+let chMediaPending = 0;
+function chRemoveMediaRow(row, kind) {
+  const index = Array.from(row.parentNode.children).indexOf(row) + 1;
+  ['ch-in-body', 'ch-in-tricks'].forEach(id => {
+    const ta = document.getElementById(id);
+    ta.value = ta.value.replace(new RegExp('\\{\\{' + kind + ':(\\d+)\\}\\}', 'g'), (m, n) => +n === index ? '' : +n > index ? '{{' + kind + ':' + (+n - 1) + '}}' : m);
+  });
+  row.remove();
+}
+function chPasteImages(files, target) {
+  const ed = document.getElementById('ch-photo-ed');
+  for (const file of files) {
+    if (ed.children.length >= 10) { document.getElementById('ch-in-err').textContent = 'En fazla 10 görsel ekleyebilirsin.'; break; }
+    const row = chPhotoRow(null); ed.appendChild(row);
+    // Reserve the reference before decoding so multiple pastes preserve order.
+    const ta = target && ['ch-in-body', 'ch-in-tricks'].includes(target.id) ? target : document.getElementById('ch-in-body');
+    const index = ed.children.length;
+    ta.setRangeText('\n{{foto:' + index + '}}\n', ta.selectionStart, ta.selectionEnd, 'end');
+    chFileToDataUrl(file, du => {
+      if (!row.isConnected) return;
+      const input = row.querySelector('.ch-purl'); input.value = du;
+      chPhotoPreview(input, row.querySelector('.ch-pprev'));
+    });
+  }
 }
 function chCollectPhotos() {
   const out = [];
@@ -25182,7 +25291,7 @@ function chVideoRow(url) {
     ta.focus();
   });
   const del = document.createElement('button'); del.type = 'button'; del.className = 'ch-pdel'; del.textContent = '×'; del.title = 'Bu videoyu kaldır';
-  del.addEventListener('click', () => row.remove());
+  del.addEventListener('click', () => chRemoveMediaRow(row, 'video'));
   row.appendChild(urlIn); row.appendChild(ins); row.appendChild(del);
   return row;
 }
@@ -25202,7 +25311,7 @@ function chItemVids(v) {
 }
 function chUsedVidSet(v) {
   const used = new Set();
-  const body = (v && v.body) ? String(v.body) : '';
+  const body = String(v && v.body || '') + '\n' + String(v && v.tricks || '');
   const re = /\{\{video:(\d+)\}\}/g;
   let mm; while ((mm = re.exec(body))) used.add(Number(mm[1]) - 1);
   return used;
@@ -25226,7 +25335,7 @@ function chZoomPhoto(src, cap) {
 
 const EDU_PLAN_LABELS = { video: 'Video Eğitim', live: 'Canlı Grup', personal: 'Personal Coaching' };
 // Sunucu ücretli içeriğin URL'sini kaldırır; kilit kararı da oradadır.
-function chItemLocked(v) { return !!(v && (v.locked === true || (v.access === 'paid' && !(v.url || v.body || (v.photos && v.photos.length))))); }
+function chItemLocked(v) { return !!(v && (v.locked === true || (v.access === 'paid' && !(v.url || v.body || v.tricks || (v.photos && v.photos.length) || (v.vids && v.vids.length))))); }
 function itemPlans_(v) {
   const raw = Array.isArray(v && v.plans) ? v.plans.filter(x => EDU_PLAN_LABELS[x]) : [];
   return raw.length ? Array.from(new Set(raw)).slice(0, 3) : ['video'];
@@ -25247,13 +25356,19 @@ function chOpenForm(mode, ids, prefill) {
   const g = id => document.getElementById(id);
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
   const isSec = (mode === 'sec-add');
+  const form = g('ch-form');
+  form.dataset.mode = isVideo ? 'content' : isSec ? 'section' : 'topic';
+  form.dataset.generation = chUid();
   chForm = { mode: mode, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, ctype: 'not' };
   g('ch-in-title').value = (prefill && prefill.title) || '';
   g('ch-in-body').value = (prefill && prefill.body) || '';
+  g('ch-in-tricks').value = (prefill && prefill.tricks) || '';
   g('ch-in-url').value = (prefill && prefill.url) || '';
-  const paid = !!(prefill && prefill.access === 'paid');
+  const sec = chSecMeta(chCurTrader()).find(s => s.id === chSec);
+  const defaults = prefill || (isVideo ? sec : null);
+  const paid = !!(defaults && defaults.access === 'paid');
   if (g('ch-in-access')) g('ch-in-access').value = paid ? 'paid' : 'free';
-  const planVals = paid && Array.isArray(prefill.plans) && prefill.plans.length ? prefill.plans : ['video'];
+  const planVals = paid && Array.isArray(defaults.plans) && defaults.plans.length ? defaults.plans : ['video'];
   const planBox = g('ch-plan-opts');
   if (planBox) planBox.querySelectorAll('input[type="checkbox"]').forEach(function (box) { box.checked = planVals.indexOf(box.value) !== -1; });
   chSyncAccessFields();
@@ -25276,30 +25391,38 @@ function chOpenForm(mode, ids, prefill) {
   g('ch-form').classList.remove('hidden');
   g('ch-in-title').focus();
 }
-function chCloseForm() { chForm = { mode: null, topicId: null, vidId: null, ctype: 'video' }; const f = document.getElementById('ch-form'); if (f) f.classList.add('hidden'); }
+function chCloseForm() { chForm = { mode: null, topicId: null, vidId: null, ctype: 'video' }; const f = document.getElementById('ch-form'); if (f) { f.dataset.generation = chUid(); f.classList.add('hidden'); } }
 function chCloseProf() { chProfMode = null; chProfTarget = null; const f = document.getElementById('ch-prof-form'); if (f) f.classList.add('hidden'); }
 
 async function chSaveForm() {
   const g = id => document.getElementById(id);
-  const t = chCurTrader();
+  const t = chCurTrader() && JSON.parse(JSON.stringify(chCurTrader()));
   if (!t || !chCanEditCur()) { chCloseForm(); return; }
   const title = g('ch-in-title').value.trim();
   const url = g('ch-in-url').value.trim();
   const body = g('ch-in-body').value.trim();
+  const tricks = g('ch-in-tricks').value.trim();
+  if (g('ch-in-save').disabled) return;
+  if (chMediaPending) { g('ch-in-err').textContent = 'Görseller hazırlanıyor; biraz bekle.'; return; }
   const mode = chForm.mode;
   const isVideo = (mode === 'video-add' || mode === 'video-edit');
   const hasVideoLink = !!(url && (ytId(url) || ytListId(url)));
   const ctype = hasVideoLink ? 'video' : 'not';
   const access = (g('ch-in-access') && g('ch-in-access').value === 'paid') ? 'paid' : 'free';
   const plans = access === 'paid' ? chSelectedPlans() : [];
+  if ((isVideo || mode === 'sec-add') && access === 'paid' && !plans.length) { g('ch-in-err').textContent = 'Ücretli içerik için en az bir paket seç.'; return; }
   const photos = isVideo ? chCollectPhotos() : [];
+  if (photos.some(p => !chSafeImage(p.url))) { g('ch-in-err').textContent = 'Görsel için HTTP(S) bağlantısı veya PNG/JPEG/WebP kullan.'; return; }
+  if (isVideo && document.querySelectorAll('#ch-photo-ed .ch-prow').length !== photos.length) { g('ch-in-err').textContent = 'Boş veya okunamayan görsel var. Tamamla veya × ile kaldır.'; return; }
+  if (photos.length > 10 || photos.some(p => p.url.length > 500000)) { g('ch-in-err').textContent = 'Görsel sınırı aşıldı.'; return; }
+  if (isVideo && url && !/^https?:\/\//i.test(url)) { g('ch-in-err').textContent = 'Video/kaynak için HTTP(S) bağlantısı kullan.'; return; }
   if (isVideo && url && !hasVideoLink && /youtube\.com|youtu\.be/i.test(url)) {
     g('ch-in-err').textContent = 'Geçerli bir YouTube video ya da oynatma listesi bağlantısı gir (ya da boş bırak).';
     return;
   }
   if (mode === 'sec-add') {
     const id = chUid();
-    t.secMeta = chSecMeta(t).concat([{ id, title: title || 'Yeni Bölüm' }]);
+    t.secMeta = chSecMeta(t).concat([{ id, title: title || 'Yeni Bölüm', access, plans }]);
     if (!t.sections) t.sections = {};
     if (!t.sections[id]) t.sections[id] = [];
     chSec = id; chTopic = null; chVid = null;
@@ -25316,7 +25439,7 @@ async function chSaveForm() {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     if (x) {
       const defTitle = hasVideoLink ? ((ytListId(url) && !ytId(url)) ? 'Oynatma listesi' : 'Video') : 'İçerik';
-      const v = { id: chUid(), title: title || defTitle, url, type: ctype, access, plans, body, photos, vids: chCollectVideos() };
+      const v = { id: chUid(), title: title || defTitle, url, type: ctype, access, plans, body, tricks, photos, vids: chCollectVideos() };
       if (!x.videos) x.videos = [];
       x.videos.push(v);
       chTopic = x.id; chVid = v.id;
@@ -25324,10 +25447,16 @@ async function chSaveForm() {
   } else if (mode === 'video-edit') {
     const x = (t.sections[chSec] || []).find(k => k.id === chForm.topicId);
     const v = x && x.videos && x.videos.find(k => k.id === chForm.vidId);
-    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.access = access; v.plans = plans; v.body = body; v.photos = photos; v.vids = chCollectVideos(); delete v.locked; chVid = v.id; }
+    if (v) { v.title = title || v.title || 'Video'; v.url = url; v.type = ctype; v.access = access; v.plans = plans; v.body = body; v.tricks = tricks; v.photos = photos; v.vids = chCollectVideos(); delete v.locked; chVid = v.id; }
   }
+  g('ch-in-save').disabled = true;
+  g('ch-form').inert = true;
+  g('ch-in-err').textContent = 'Kaydediliyor…';
+  const saved = await saveChannel(t);
+  g('ch-form').inert = false;
+  g('ch-in-save').disabled = false;
+  if (!saved) return;
   chCloseForm();
-  await saveChannel(t);
   renderChannelView();
 }
 
@@ -25375,13 +25504,18 @@ async function chSaveProf() {
     if (!chIsAdmin()) { g('ch-prof-err').textContent = 'Yeni kanal sadece admin açabilir.'; return; }
     var t = { id: chUid(), name, bio, editors, createdAt: Date.now(), sections: {}, secMeta: null };
   } else {
-    var t = chProfTarget ? channelsData.traders[chProfTarget] : chCurTrader();
+    var original = chProfTarget ? channelsData.traders[chProfTarget] : chCurTrader();
+    var t = original && JSON.parse(JSON.stringify(original));
     if (!t || !chCanEdit(t)) { chCloseProf(); return; }
     t.name = name; t.bio = bio;
     if (chIsAdmin()) t.editors = editors;
   }
+  if (g('ch-prof-save').disabled) return;
+  g('ch-prof-save').disabled = true;
+  const saved = await saveChannel(t);
+  g('ch-prof-save').disabled = false;
+  if (!saved) return;
   chCloseProf();
-  await saveChannel(t);
   openChannel(t.id);
   renderEduChannels();
 }
@@ -25390,12 +25524,47 @@ async function chDelProf() {
   const t = chProfTarget ? channelsData.traders[chProfTarget] : chCurTrader();
   if (!t) return;
   if (!confirm('“' + t.name + '” kanalı silinsin mi? Tüm konu ve içerikler kaldırılır.')) return;
-  chCloseProf();
   await deleteChannel(t.id);
 }
 
 function bindChannelsPage() {
   const g = id => document.getElementById(id);
+  g('edu-studio').addEventListener('click', async () => {
+    if (!chIsAdmin()) return;
+    if (!channelsLoaded) await loadChannels();
+    const mine = await chEnsureMine();
+    if (!mine) return;
+    const paidSection = chSecMeta(mine).find(s => s.access === 'paid');
+    if (paidSection) openCourse(mine.id, paidSection.id);
+    else {
+      openChannel(mine.id);
+      chOpenForm('sec-add', null, { title: 'Ücretli Eğitim', access: 'paid', plans: ['video'] });
+    }
+  });
+  g('ch-study-tools').addEventListener('click', e => {
+    const button = e.target.closest('[data-study]'); if (!button) return;
+    g('ch-study').dataset.layout = button.dataset.study;
+    g('ch-study-tools').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+  });
+  const form = g('ch-form');
+  form.addEventListener('paste', e => {
+    if (!chCanEditCur() || form.dataset.mode !== 'content') return;
+    const files = Array.from(e.clipboardData?.items || []).filter(it => it.kind === 'file' && it.type.startsWith('image/')).map(it => it.getAsFile()).filter(Boolean);
+    if (!files.length) return;
+    e.preventDefault(); chPasteImages(files, e.target);
+  });
+  form.addEventListener('dragover', e => {
+    if (form.dataset.mode !== 'content' || !Array.from(e.dataTransfer?.types || []).includes('Files')) return;
+    e.preventDefault(); form.classList.add('drag-over');
+  });
+  form.addEventListener('dragleave', e => { if (!form.contains(e.relatedTarget)) form.classList.remove('drag-over'); });
+  form.addEventListener('drop', e => {
+    form.classList.remove('drag-over');
+    if (!chCanEditCur() || form.dataset.mode !== 'content') return;
+    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    e.preventDefault(); chPasteImages(files, e.target);
+  });
   const search = g('edu-search');
   if (search) search.addEventListener('input', renderEduCatalog);
   const browse = g('edu-browse');
@@ -25433,6 +25602,7 @@ function bindChannelsPage() {
   const addPhoto = g('ch-add-photo');
   if (addPhoto) addPhoto.addEventListener('click', () => {
     const ed = g('ch-photo-ed');
+    if (ed && ed.children.length >= 10) { g('ch-in-err').textContent = 'En fazla 10 görsel ekleyebilirsin.'; return; }
     if (ed) { ed.appendChild(chPhotoRow(null)); ed.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
   });
   const addVideo = g('ch-add-video');
@@ -28216,6 +28386,16 @@ function bootAuth() {
   });
   // Şifre sıfırlama bağlantısına tıklayınca Supabase bu olayı tetikler
   AUTH.client.auth.onAuthStateChange((event) => {
+    if (['SIGNED_IN', 'SIGNED_OUT', 'USER_UPDATED'].includes(event)) {
+      channelsData = { traders: {}, order: [] }; channelsLoaded = false;
+      channelsError = '';
+      chCloseForm(); chCloseProf();
+      const notes = document.getElementById('ch-note-box'); if (notes) notes.replaceChildren();
+      const embed = document.getElementById('ch-embed'); if (embed) embed.replaceChildren();
+      const source = document.getElementById('ch-now-link'); if (source) { source.removeAttribute('href'); source.style.display = 'none'; }
+      const studyTools = document.getElementById('ch-study-tools'); if (studyTools) studyTools.classList.add('hidden');
+      try { localStorage.removeItem('alfa-channels-v1'); } catch (e) {}
+    }
     if (event === 'PASSWORD_RECOVERY') {
       recovering = true;
       showGate(); setMode('newpass');

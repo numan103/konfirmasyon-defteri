@@ -79,7 +79,7 @@ test('Edu sayfası herkese açık; ücretli içerik kilidi istemcide değil sunu
   assert.match(html, /id="ch-plan-opts"/);
   assert.match(html, /function chItemLocked\(v\)/);
   assert.match(html, /className = 'ch-lock'/);
-  assert.ok(api.includes('projectChannels(base, { privileged, plans })'));
+  assert.ok(api.includes('projectChannels(base, { privileged, plans, user })'));
   assert.ok(api.includes("v.url = ''; v.body = ''; v.photos = []; v.vids = [];"));
   assert.ok(api.includes("res.setHeader('Cache-Control', 'private, no-store')"));
 });

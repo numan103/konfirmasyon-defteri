@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import handler from '../lib/edu-feedback.mjs';
+import { sealChannels } from '../lib/edu-channel-storage.mjs';
 
 const scope = { channel: 'teacher-1', section: 'teknik', topic: 'course-1' };
 let serial = 0;
-function fixture(t, { admin = false, premium = true, missing = false, posts = [] } = {}) {
+function fixture(t, { admin = false, premium = true, missing = false, posts = [], encrypted = false } = {}) {
   const userId = '10000000-0000-0000-0000-' + String(++serial).padStart(12, '0');
   const rows = structuredClone(posts), calls = [];
   let clock = Date.now();
@@ -23,9 +24,12 @@ function fixture(t, { admin = false, premium = true, missing = false, posts = []
       id: userId, email: admin ? 'ahmetnuman20@gmail.com' : 'student-secret@example.com'
     });
     if (u.pathname.endsWith('/site_access')) return missing ? Response.json({}, { status: 404 }) : Response.json(premium ? [{ status: 'verified' }] : []);
-    if (u.pathname.endsWith('/edu_shared')) return Response.json([{ data: { traders: {
+    if (u.pathname.endsWith('/edu_shared')) {
+      const data = { traders: {
       'teacher-1': { sections: { teknik: [{ id: 'course-1', videos: [{ id: 'lesson-1' }, { id: 'lesson-2' }] }] } }
-    } } }]);
+      } };
+      return Response.json([{ data: encrypted ? sealChannels(data) : data }]);
+    }
     if (!u.pathname.endsWith('/edu_feedback')) throw new Error('unexpected URL');
     if (missing) return Response.json({}, { status: 404 });
     const method = opts.method || 'GET';
@@ -69,6 +73,11 @@ test('girişsiz kullanıcı okuyamaz veya paylaşamaz', async t => {
   const f = fixture(t);
   assert.equal((await f.request({}, 'GET', {})).status, 401);
   assert.equal(f.calls.length, 0);
+});
+test('şifreli kanal belgesi yorum sisteminin kurs doğrulamasını bozmaz', async t => {
+  const f = fixture(t, { encrypted: true });
+  const result = await f.request();
+  assert.equal(result.status, 200);
 });
 test('premium olmayan öğrenci ve eksik erişim tablosu fail-closed çalışır', async t => {
   const f = fixture(t, { premium: false });
