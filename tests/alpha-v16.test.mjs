@@ -5,7 +5,7 @@ import { closedBars, msbCheck, m2Levels, evaluateM2, replayPending, analyzeV16, 
 import { validatePlan } from '../lib/trade-plan.mjs';
 import { formatStrategyContext } from '../lib/telegram-qa.mjs';
 import { splitQaReply } from '../lib/telegram-qa-delivery.mjs';
-import { getCandles, answerQuestion, TELEGRAM_ANALYSIS_STYLE, wantsTechnicalAudit } from '../lib/telegram-qa.mjs';
+import { getCandles, answerQuestion, TELEGRAM_ANALYSIS_STYLE, wantsTechnicalAudit, wantsDetailedAnalysis, needsBriefRewrite, briefMarketFallback } from '../lib/telegram-qa.mjs';
 
 const D = 900000, T = Date.parse('2025-01-08T00:00:00Z');
 const bar = (i,o,h,l,c) => ({ t:T+i*D, o,h,l,c });
@@ -42,6 +42,17 @@ test('normal Telegram opinions get market analysis, not mandatory manual labelin
   assert.equal(wantsTechnicalAudit('BTC teknik denetim raporu'),true);
   assert.match(TELEGRAM_ANALYSIS_STYLE,/iki senaryoyu ENGELLEMEZ/);
   assert.match(TELEGRAM_ANALYSIS_STYLE,/manuel etiketleme isteme/);
+});
+test('brief delivery enforces length, excludes tables/internal models; detail is opt-in',()=>{
+  assert.equal(wantsDetailedAnalysis('BTC hakkında fikrin nedir?'),false);
+  assert.equal(wantsDetailedAnalysis('BTC detaylı analiz'),true);
+  assert.equal(needsBriefRewrite('kelime '.repeat(91)),true);
+  assert.equal(needsBriefRewrite('| TF | Fiyat |'),true);
+  assert.equal(needsBriefRewrite('M2 NEEDS_REVIEW, manuel onay bekliyor'),true);
+  assert.equal(needsBriefRewrite('Ana yön aşağı; hızlı geri kazanım sonrası güçsüzlük beklerim.'),false);
+  const fallback=briefMarketFallback({symbol:'BTC',price:61000,trend:'aşağı'});
+  assert.equal(needsBriefRewrite(fallback),false);
+  assert.match(fallback,/1 saatlik/);
 });
 test('full v16 analysis delivery does not exceed Telegram message length',()=>{
   const text=('MSB ve swing kontrolü 🧭\n').repeat(400);
@@ -189,6 +200,7 @@ test('QA end-to-end mocked data preserves timestamps, drops open bars, refuses i
     const u=String(url);calls.push({url:u,method:options.method||'GET'});
     if(u.includes('api.groq.com')) {
       prompts.push(JSON.parse(options.body));
+      if(prompts.length===2) return Response.json({choices:[{message:{content:'Piyasa yorumunda kapanışları izliyorum. '.repeat(80)}}]});
       if(prompts.length>1) return Response.json({choices:[{message:{content:'Görüşüm: fiyat range içinde. Yukarıda kapanış alıcı lehine; alt sınır kaybı satıcı lehine. 0.382 için anchor henüz net değil; kesin işlem planı vermiyorum.'}}]});
       return Response.json({choices:[{message:{content:'**Strateji:** M2 BTC 15M 0.382\n**Yön:** LONG\n**Giriş:** $100000\n**Stop:** $99000\n**Hedef:** $102500\n**Gerekçe:** test'}}]});
     }
@@ -206,11 +218,12 @@ test('QA end-to-end mocked data preserves timestamps, drops open bars, refuses i
     assert.equal(data.candles.length,79);
     assert.ok(data.candles.every(b=>Number.isFinite(b.o)&&Number.isFinite(b.t)&&b.closeTime<=Date.now()));
     const reply=await answerQuestion('BTC hakkında fikrin nedir?',123);
-    assert.equal(prompts.length,2,'invalid LLM plan gets one correction attempt only');
+    assert.equal(prompts.length,3,'invalid plan corrected once, verbose commentary shortened once');
     assert.match(prompts[0].messages[0].content,/KANONİK v16/);
     assert.doesNotMatch(reply,/\*\*Giriş:\*\* \$100000/);
     assert.doesNotMatch(reply,/Kanonik denetim/);
     assert.match(reply,/Görüşüm: fiyat range içinde/);
+    assert.equal(needsBriefRewrite(reply),false);
     assert.match(prompts[0].messages[0].content,/TELEGRAM SOHBET AMACI/);
     assert.equal(calls.filter(c=>c.method!=='GET'&&!c.url.includes('api.groq.com')).length,0,'no DB/trade writes');
   } finally {

@@ -44,6 +44,10 @@ Q&A, şu anda kullanıcıdan/sunucudan zaman damgalı incelenmiş anchor kanıt�
 
 Saf motorun `analyzeV16(detail, asOf, { evidence, mode })` arayüzü incelenmiş kanıtla çalışabilir; testlerde iki yön için doğrulandı. `analysis` modu da kanıtsız kesin sinyale izin vermez. Bu mühendislik önlemidir, yeni strateji filtresi değildir.
 
+### Kısa Telegram yanıtı
+
+Varsayılan yorum 3–4 cümle ve en fazla 90 kelimedir; tablo, model kataloğu ve iç durum kodları gösterilmez. Uzun yanıt bir kez kısalttırılır ve işlem planı güvenliği tekrar denetlenir; hâlâ uygunsuzsa canlı fiyat/1H betimsel görünümden kısa güvenli cevap döner. Detay/işlem planı açıkça istendiğinde ayrıntıya izin verilir. Saat birimleri “24 saat / 1 saat” diye açık yazılır; defter duvarları HTF supply/demand gibi sunulmaz.
+
 ## 3. Ek veri bağlantıları
 
 - Coinalyze OI/CVD ve mevcut OpenMarket orderbook okuyucuları korundu; Q&A'da orderbook tekrar okunuyor. Bağımsız kaynaklar paralel çalışır; hata diğer kaynağı veya PA'yı veto etmez.
@@ -103,7 +107,7 @@ node --test tests/*.test.mjs
 
 ## 6. Regresyon ve güvenlik
 
-Tam test paketi: **830 test / 830 geçti / 0 başarısız**. `git diff --check` temiz.
+Tam test paketi: **831 test / 831 geçti / 0 başarısız**. `git diff --check` temiz.
 
 Yeni testler iki yönlü MSB/Fibonacci, HTF fitil/kapanış ayrımı, gelecek/eksik kanıt, limitten önce TP, intrabar belirsizliği, fill sonrası hedef, otomatik re-anchor olmaması, LLM plan reddi ve Telegram parçalamayı kapsar. Q&A entegrasyonu ağ/LLM taklitleriyle test edilir; gerçek servis yazımı yapılmaz.
 
