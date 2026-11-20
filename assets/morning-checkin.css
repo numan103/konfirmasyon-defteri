@@ -43,6 +43,41 @@
   color: #fff; box-shadow: 0 0 0 3px rgba(155,147,255,.1);
 }
 #morning-checkin .mc-chip input:focus-visible + span { outline: 2px solid #a89aff; outline-offset: 2px; }
+#morning-checkin .mc-edit {
+  margin-left: auto; border: 1px solid rgba(255,255,255,.16); background: transparent;
+  color: #b9c0dd; border-radius: 8px; padding: 5px 8px; font-size: 10.5px; cursor: pointer;
+}
+#morning-checkin .mc-edit:hover { color: #fff; border-color: rgba(255,255,255,.38); }
+#morning-checkin .mc-editor { margin-top: 4px; }
+#morning-checkin .mc-editor.hidden,
+#morning-checkin [hidden] { display: none !important; }
+#morning-checkin .mc-editor-hint { font-size: 10.5px; color: #9aa2c4; margin: 0 0 8px; }
+#morning-checkin .mc-editor-list { display: grid; gap: 6px; max-height: 210px; overflow-y: auto; padding-right: 2px; }
+#morning-checkin .mc-edit-row { display: grid; grid-template-columns: 1fr 78px 24px; gap: 5px; align-items: center; }
+#morning-checkin .mc-edit-label,
+#morning-checkin .mc-edit-group {
+  width: 100%; min-width: 0; border-radius: 8px; border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.05); color: #e8e9f5; font-size: 11px; padding: 6px 7px;
+}
+#morning-checkin .mc-edit-group { padding: 6px 2px; }
+#morning-checkin .mc-edit-label::placeholder { color: #767e9e; }
+#morning-checkin .mc-edit-remove {
+  border: 0; background: rgba(255,255,255,.05); color: #ff9c9c;
+  border-radius: 8px; height: 27px; cursor: pointer; font-size: 15px; line-height: 1;
+}
+#morning-checkin .mc-edit-remove:hover { background: rgba(255,120,120,.16); }
+#morning-checkin .mc-editor-actions { display: flex; gap: 7px; margin-top: 10px; }
+#morning-checkin .mc-add,
+#morning-checkin .mc-config-reset {
+  border-radius: 8px; padding: 7px 8px; font-size: 10.5px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.16); background: transparent; color: #c9cee2;
+}
+#morning-checkin .mc-add:hover,
+#morning-checkin .mc-config-reset:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+#morning-checkin .mc-editor-done {
+  flex: 1; border: 0; border-radius: 8px; padding: 7px 8px; font-size: 11px; font-weight: 700;
+  background: linear-gradient(135deg, #8b7cf6, #6d5ce0); color: #fff; cursor: pointer;
+}
 #morning-checkin .mc-actions { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
 #morning-checkin .mc-save,
 #morning-checkin .mc-later { border-radius: 10px; padding: 9px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }

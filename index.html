@@ -50,6 +50,8 @@
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
   <link rel="stylesheet" href="/assets/morning-checkin.css?v=1">
   <script type="module" src="/assets/morning-checkin.mjs?v=1"></script>
+  <link rel="stylesheet" href="/assets/site-new.css?v=1">
+  <script type="module" src="/assets/site-new.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
@@ -5382,6 +5384,7 @@
       <a href="#lp-access-title">Üyelik</a>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
+      <button type="button" class="site-new-chip" id="whats-new-btn" aria-haspopup="dialog" aria-expanded="false"><span class="wn-dot" aria-hidden="true"></span>Yeni</button>
       <button class="nav-lang" id="lang-btn" type="button" title="Dil / Language">EN</button>
       <button class="nav-login" id="nav-login" type="button" data-i18n="nav.login">Giriş yap</button>
     </div>
@@ -5814,6 +5817,7 @@
       <a class="soc-link x" id="nc-x" href="#" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.06l-4.74-6.2L5.6 21H2.6l7-8L2.2 3h6.2l4.3 5.68L17.5 3zm-1.05 16.2h1.66L7.63 4.7H5.85z"/></svg></a>
       <a class="soc-link yt" id="nc-yt" href="#" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 7.5c-.26-1-.9-1.6-1.9-1.8C19.3 5.3 12 5.3 12 5.3s-7.3 0-9.1.4C1.9 5.9 1.26 6.5 1 7.5.6 9.3.6 12 .6 12s0 2.7.4 4.5c.26 1 .9 1.6 1.9 1.8 1.8.4 9.1.4 9.1.4s7.3 0 9.1-.4c1-.2 1.64-.8 1.9-1.8.4-1.8.4-4.5.4-4.5s0-2.7-.4-4.5zM9.75 15.3V8.7l6.3 3.3z"/></svg></a>
     </div>
+    <button type="button" class="site-new-chip" id="whats-new-btn-app" aria-haspopup="dialog" aria-expanded="false"><span class="wn-dot" aria-hidden="true"></span>Yeni</button>
     <span class="nav-live" id="nav-live" title="Şu an sitede olan kişi sayısı" data-i18n-title="app.live.online">
       <span class="nl-dot"></span>
       <b id="nav-live-online">—</b> <span data-i18n="app.live.online">çevrimiçi</span> · <b id="nav-live-total">—</b> <span data-i18n="app.live.total">ziyaret</span> · <b id="nav-live-reg">—</b> <span data-i18n="app.live.members">üye</span>
@@ -5910,28 +5914,26 @@
         <div class="mc-head">
           <span class="mc-sun" aria-hidden="true">☀️</span>
           <span class="mc-head-txt"><strong id="mc-title">Günaydın kanka</strong><span>Bugün nasıl hissediyorsun?</span></span>
+          <button type="button" class="mc-edit" id="mc-edit" title="Kriterleri düzenle" aria-label="Kriterleri düzenle">✎ Düzenle</button>
           <button type="button" class="mc-close" id="mc-close" aria-label="Kapat">×</button>
         </div>
         <form id="mc-form">
-          <fieldset class="mc-group"><legend>Uyku</legend><div class="mc-chips">
-            <label class="mc-chip"><input type="checkbox" name="mood" value="slept-well"><span>İyi uyudum</span></label>
-            <label class="mc-chip"><input type="checkbox" name="mood" value="tired"><span>Yorgun kalktım</span></label>
-          </div></fieldset>
-          <fieldset class="mc-group"><legend>Duygu</legend><div class="mc-chips">
-            <label class="mc-chip"><input type="checkbox" name="mood" value="angry"><span>Kızgınım</span></label>
-            <label class="mc-chip"><input type="checkbox" name="mood" value="loss-pain"><span>Kayıp acısı yaşıyorum</span></label>
-            <label class="mc-chip"><input type="checkbox" name="mood" value="motivated"><span>Motivasyonum yerinde</span></label>
-            <label class="mc-chip"><input type="checkbox" name="mood" value="clear-after-win"><span>Kazanç sonrası berrak görüyorum</span></label>
-          </div></fieldset>
-          <fieldset class="mc-group"><legend>Odak</legend><div class="mc-chips">
-            <label class="mc-chip"><input type="checkbox" name="mood" value="sees-opportunity"><span>Fırsatı net görüyorum</span></label>
-          </div></fieldset>
+          <div id="mc-groups"></div>
           <div class="mc-actions">
             <button type="submit" class="mc-save">Kaydet</button>
             <button type="button" class="mc-later" id="mc-later">Sonra</button>
             <button type="button" class="mc-reset" id="mc-reset" title="Tekrar göster" aria-label="Tekrar göster">↺</button>
           </div>
         </form>
+        <div class="mc-editor hidden" id="mc-editor">
+          <p class="mc-editor-hint" id="mc-editor-hint">Sorularını düzenle</p>
+          <div class="mc-editor-list" id="mc-editor-list"></div>
+          <div class="mc-editor-actions">
+            <button type="button" class="mc-add" id="mc-add-item">+ Soru ekle</button>
+            <button type="button" class="mc-config-reset" id="mc-config-reset">Varsayılan</button>
+            <button type="button" class="mc-editor-done" id="mc-editor-done">Bitti</button>
+          </div>
+        </div>
       </section>
       <button type="button" class="mc-chip-btn hidden" id="mc-chip" aria-label="Ruh hali check-in'ini aç">☀️ <span id="mc-chip-label">Ruh hali</span></button>
     </div>
@@ -33738,6 +33740,7 @@ document.addEventListener('input', function (e) {
 <!-- AYNA:BASLA -->
 <script src="/ayna/ayna-i18n.js?v=16"></script>
 <script src="/ayna/ayna-core.js?v=10"></script>
+<script src="/ayna/ayna-morning-sync.js?v=1"></script>
 <script src="/ayna/ayna-voice.js?v=1"></script>
 <script src="/ayna/ayna-followup.js?v=1"></script>
 <script src="/ayna/ayna-notion.js?v=2"></script>
@@ -33759,5 +33762,18 @@ document.addEventListener('input', function (e) {
   else window.addEventListener('load', go);
 })();
 </script>
+  <div class="whats-new-panel hidden" id="whats-new-panel" role="dialog" aria-label="Yeni güncellemeler">
+    <div class="wn-head"><strong>✦ Sitede yeni</strong><button type="button" class="wn-close" id="wn-close" aria-label="Kapat">×</button></div>
+    <p class="wn-sub">Son eklenenler — hemen dene</p>
+    <ul class="wn-list">
+      <li><span class="wn-ico" aria-hidden="true">☀️</span><div><b>Sabah Kartı</b><span>Açılışta ruh halini 10 saniyede işaretle, gün boyu küçük çipten tekrar aç.</span></div></li>
+      <li><span class="wn-ico" aria-hidden="true">✎</span><div><b>Kendi kriterini ekle</b><span>Karta istediğin soruyu ekle veya çıkar; sorular sana özel kalır.</span></div></li>
+      <li><span class="wn-ico" aria-hidden="true">📓</span><div><b>Ayna'ya otomatik kayıt</b><span>Sabah işaretlerin günlük olarak kişisel günlük asistanına işlenir.</span></div></li>
+    </ul>
+    <div class="wn-actions">
+      <button type="button" id="wn-open-checkin">Sabah Kartı'nı aç</button>
+      <a href="?page=ayna">Ayna'ya git →</a>
+    </div>
+  </div>
 </body>
 </html>
