@@ -43,10 +43,10 @@ try {
   await page.evaluate(()=>{onAuthed=async user=>{window.__authenticated=user.id;hideGate();};});
   assert.equal(await page.locator('.lp-pricing').count(),0);
   assert.equal(await page.locator('.auth-pricing').count(),0);
-  for(const name of ['Alfa Dergi','Alfa Influencer','Alfa Edu'])assert.equal(await page.locator('.growth-features').getByRole('heading',{name,exact:true}).count(),1);
+  for(const name of ['İşlem Kanalı','Paylaşılan Portföy','Alfa Edu'])assert.equal(await page.locator('.lp-features').getByRole('heading',{name,exact:true}).count(),1);
   assert.ok(await page.locator('#hero-register').evaluate(n=>n.getBoundingClientRect().top<innerHeight),'registration is visible without scrolling');
   if(arg('screenshot')) await page.screenshot({path:arg('screenshot')});
-  await page.locator('[data-growth-register]').first().click();
+  await page.locator('#hero-register').click();
   await page.locator('#auth-gate.open').waitFor();
   assert.equal(await page.locator('#f-name').isVisible(),true);
   assert.equal(await page.locator('#au-name').evaluate(n=>n===document.activeElement),true,'register focuses first visible field');

@@ -16,10 +16,10 @@ test('landing keeps registration hooks and accurate premium descriptions', () =>
   for (const id of ['nav-login', 'hero-register', 'hero-login', 'cta-register']) {
     assert.ok(landing.includes(`id="${id}"`), id);
   }
-  assert.equal((landing.match(/<article class="lp-card">/g) || []).length, 4);
+  assert.equal((landing.match(/<article class="lp-card">/g) || []).length, 6);
   assert.ok(landing.includes('salt okunur'));
   assert.ok(landing.includes('Borsanı bağla'));
-  assert.ok(landing.includes('Kayıt ücretsizdir; tüm eğitim paketlerini veya özel kanalları otomatik olarak açmaz.'));
+  assert.ok(landing.includes('Aidat yok, kredi kartı yok. Kayıt yeterli;'));
   assert.ok(!landing.includes('class="lp-pricing"'));
   assert.ok(!landing.includes('Referansla aç'));
   assert.ok(!landing.includes('onaylandığında'));
