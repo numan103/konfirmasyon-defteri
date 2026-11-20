@@ -216,7 +216,7 @@
       renderPortfolio(data.portfolio, data.status?.portfolio);
       if (!trades.dataset?.mentorOwned) renderPost(trades, data.channel?.trades, data.status?.channel, 'trade');
       if (!bias.dataset?.mentorOwned) renderPost(bias, data.channel?.biases, data.status?.channel, 'bias');
-      if (!results?.dataset?.mentorOwned) renderResults(results, data.channel?.results, data.status?.channel);
+      if (results && !results.dataset?.mentorOwned) renderResults(results, data.channel?.results, data.status?.channel);
     } catch (_) {
       state(portfolio, 'Portföy verisi şu an alınamıyor.');
       if (!trades.dataset?.mentorOwned) state(trades, 'İşlem paylaşımı şu an alınamıyor.');

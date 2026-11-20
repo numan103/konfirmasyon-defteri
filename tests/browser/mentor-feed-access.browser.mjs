@@ -64,7 +64,8 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.evaluate(() => { AUTH.user = null; AlfaMentorTrades.refreshContext(); AlfaMentorPreview.refresh(); });
   assert.equal(await root.textContent(), '');
-  await page.waitForFunction(() => document.getElementById('lp-live-results').textContent.includes('ücretsiz kaydol'));
+  assert.equal(await page.locator('#lp-live-results').count(), 0, 'landing results tab removed');
+  await page.waitForFunction(() => document.querySelector('#home-results-panel .mentor-curve-svg'));
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, categories: true, cleanDescriptions: true, lossInCurve: true, deferredOriginalImage: true, freeResultsOnly: true, downgradeClearsPlans: true, mobile: true, productionWrites: false }));
 } finally { await browser.close(); }

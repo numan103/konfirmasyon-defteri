@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" role="img" aria-labelledby="t">
+  <title id="t">Grafik ve notlarla piyasayı inceleyen bir trader</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d2740"/>
+      <stop offset=".6" stop-color="#111726"/>
+      <stop offset="1" stop-color="#0a0d16"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#8b7cf6" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#8b7cf6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warm" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffc27a" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#ffc27a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#40352f"/>
+      <stop offset="1" stop-color="#1f1a19"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b2540"/>
+      <stop offset="1" stop-color="#0d1322"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3f8f80"/>
+      <stop offset="1" stop-color="#23594f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="600" fill="url(#bg)"/>
+  <ellipse cx="250" cy="180" rx="360" ry="280" fill="url(#glow)"/>
+  <ellipse cx="720" cy="360" rx="300" ry="240" fill="url(#warm)"/>
+
+  <!-- arka planda yumuşak grafik çizgileri -->
+  <g stroke="#a89aff" stroke-opacity=".12" stroke-width="2" fill="none">
+    <path d="M0 200q120-40 220 10t220-20 220 30 240-30"/>
+    <path d="M0 250q140-30 240 20t200-10 240 20 220-20"/>
+  </g>
+  <g stroke="#5eead4" stroke-opacity=".1" stroke-width="1">
+    <path d="M0 120h900M0 300h900M0 380h900"/>
+  </g>
+
+  <!-- masa -->
+  <path d="M0 440q450-26 900 0v160H0z" fill="url(#desk)"/>
+  <path d="M0 440q450-26 900 0" fill="none" stroke="#6b5346" stroke-width="3" opacity=".7"/>
+
+  <!-- dizüstü -->
+  <g>
+    <path d="M250 300h300l18 140H232z" fill="#0a0e1a" stroke="#394462" stroke-width="3"/>
+    <rect x="262" y="310" width="276" height="120" rx="5" fill="url(#screen)"/>
+    <g fill="#5eead4" opacity=".65">
+      <rect x="278" y="380" width="12" height="34" rx="3"/><rect x="300" y="362" width="12" height="52" rx="3"/>
+      <rect x="322" y="374" width="12" height="40" rx="3"/><rect x="344" y="344" width="12" height="70" rx="3"/>
+      <rect x="366" y="356" width="12" height="58" rx="3"/><rect x="388" y="330" width="12" height="84" rx="3"/>
+      <rect x="410" y="342" width="12" height="72" rx="3"/><rect x="432" y="318" width="12" height="96" rx="3"/>
+      <rect x="454" y="332" width="12" height="82" rx="3"/><rect x="476" y="312" width="12" height="102" rx="3"/>
+    </g>
+    <path d="M272 356q60-34 112-14t116-30" fill="none" stroke="#a89aff" stroke-width="3" stroke-linecap="round"/>
+    <rect x="232" y="440" width="336" height="12" rx="6" fill="#2a3350"/>
+  </g>
+
+  <!-- defter -->
+  <g transform="rotate(6 640 470)">
+    <rect x="560" y="410" width="180" height="120" rx="7" fill="#eae3d4" opacity=".94"/>
+    <path d="M578 442h120M578 462h100M578 482h130M578 502h80" stroke="#8b8271" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+    <path d="M584 430q10-14 20 0t20 0 20 0" fill="none" stroke="#3f8f80" stroke-width="2.6"/>
+    <circle cx="690" cy="478" r="16" fill="none" stroke="#ffb96b" stroke-width="3"/>
+    <path d="M690 462v32M674 478h32" stroke="#ffb96b" stroke-width="2" opacity=".7"/>
+  </g>
+
+  <!-- trader karakteri -->
+  <g>
+    <path d="M330 440q-10-96 44-124h96q54 28 44 124z" fill="#172033"/>
+    <path d="M352 440q4-80 52-100 24-9 48 0 48 20 52 100z" fill="url(#shirt)"/>
+    <rect x="416" y="298" width="32" height="30" rx="11" fill="#c98f68"/>
+    <ellipse cx="432" cy="258" rx="52" ry="58" fill="#e3ac83"/>
+    <ellipse cx="380" cy="262" rx="9" ry="14" fill="#c98f68"/>
+    <ellipse cx="484" cy="262" rx="9" ry="14" fill="#c98f68"/>
+    <!-- saç -->
+    <path d="M381 250q-6-58 51-62 58 2 52 64-12-26-30-26-16 12-40 4-20 8-33 20z" fill="#332a30"/>
+    <path d="M388 220q44-26 90 4" fill="none" stroke="#4d3e44" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+    <!-- gözlük -->
+    <g fill="none" stroke="#2a2a38" stroke-width="4">
+      <rect x="396" y="250" width="32" height="24" rx="10"/>
+      <rect x="438" y="250" width="32" height="24" rx="10"/>
+      <path d="M428 260h10M396 258l-14-6M470 258l14-6"/>
+    </g>
+    <g fill="#dff3ef" opacity=".22">
+      <rect x="398" y="252" width="28" height="20" rx="9"/>
+      <rect x="440" y="252" width="28" height="20" rx="9"/>
+    </g>
+    <ellipse cx="412" cy="262" rx="4" ry="5" fill="#2a2a38"/>
+    <ellipse cx="454" cy="262" rx="4" ry="5" fill="#2a2a38"/>
+    <path d="M416 288q16 12 32 0" fill="none" stroke="#9c6150" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- el / kalem -->
+    <path d="M520 380q40 30 70 62" fill="none" stroke="#2e786c" stroke-width="30" stroke-linecap="round"/>
+    <ellipse cx="596" cy="448" rx="17" ry="12" fill="#e3ac83" transform="rotate(-24 596 448)"/>
+    <path d="M600 446l24-34" stroke="#ffb96b" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- kahve -->
+  <g>
+    <ellipse cx="790" cy="470" rx="30" ry="9" fill="#0c101c" opacity=".7"/>
+    <path d="M764 420h52l-6 44a10 10 0 0 1-10 8h-20a10 10 0 0 1-10-8z" fill="#efe6d6"/>
+    <path d="M814 430h12a12 12 0 0 1 0 24h-13" fill="none" stroke="#efe6d6" stroke-width="6"/>
+    <ellipse cx="790" cy="420" rx="26" ry="7" fill="#6b4a35"/>
+  </g>
+
+  <g fill="#fff" opacity=".035">
+    <circle cx="120" cy="120" r="2"/><circle cx="700" cy="100" r="1.6"/><circle cx="820" cy="280" r="2"/>
+    <circle cx="200" cy="380" r="1.5"/><circle cx="500" cy="80" r="2"/>
+  </g>
+</svg>

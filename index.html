@@ -4774,8 +4774,9 @@
   #landing .lp-eyebrow { font-size: 10px; letter-spacing: .18em; color: var(--lp-accent); margin-bottom: 14px; }
   #landing .lp-section-head h3 { font-size: clamp(25px, 3vw, 36px); line-height: 1.25; letter-spacing: -.035em; }
   #landing .lp-section-head p { color: var(--text-2); line-height: 1.7; margin-top: 14px; }
-  #landing .lp-features { max-width: 1120px; padding: 32px 32px 0; gap: 16px; }
-  #landing .lp-card { border-radius: 12px; box-shadow: none; background: var(--card); }
+  #landing .lp-features { max-width: 1120px; padding: 40px 32px 0; gap: 20px; position: relative; }
+  #landing .lp-features::before { content: ''; position: absolute; left: 10%; right: 10%; top: 50%; height: 1px; background: linear-gradient(90deg, transparent, var(--lp-accent), #66cbb3, var(--lp-accent), transparent); opacity: .18; pointer-events: none; }
+  #landing .lp-card { border-radius: 28px; box-shadow: none; background: var(--card); }
   #landing .lp-card:hover { transform: translateY(-3px); border-color: var(--lp-accent); box-shadow: none; }
   #landing .lp-card-body { padding: 26px; display: flex; flex-direction: column; height: 100%; }
   #landing .lp-feature-label { font-size: 10px; letter-spacing: .13em; color: var(--text-3); margin-bottom: 24px; }
@@ -4960,9 +4961,12 @@
   #landing .lp-demo-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
   #landing .lp-demo-chips span { padding: 5px 9px; border: 1px solid var(--border); border-radius: 6px; color: var(--text-3); font-size: 10px; }
   #landing .lp-demo-caption { border-top: 1px solid var(--border); margin: 0 14px; padding: 12px 0 4px; color: var(--text-3); font-size: 10px; line-height: 1.6; }
-  #landing .lp-card { position: relative; overflow: hidden; transition: transform .25s, border-color .25s, box-shadow .25s; }
-  #landing .lp-card::before { content: ''; position: absolute; top: 0; left: 26px; right: 26px; height: 1px; background: linear-gradient(90deg, transparent, var(--lp-accent), transparent); opacity: .4; }
-  #landing .lp-card:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,.12); }
+  #landing .lp-card { position: relative; overflow: visible; transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s, box-shadow .3s; }
+  #landing .lp-card::before { display: none; }
+  #landing .lp-card::after { content: ''; position: absolute; right: -20px; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--lp-accent); box-shadow: 0 0 0 5px var(--bg), 0 0 18px var(--lp-accent); transform: translateY(-50%); z-index: 2; pointer-events: none; }
+  #landing .lp-card:nth-child(3n)::after { display: none; }
+  #landing .lp-card:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(0,0,0,.14); }
+  @media (max-width: 939px) { #landing .lp-features::before, #landing .lp-card::after { display: none; } }
   #landing .lp-price-card.featured { background: radial-gradient(ellipse at 80% 0%, rgba(155,147,255,.1), transparent 60%), var(--card); }
   #landing .lp-cta-band { position: relative; overflow: hidden; background: radial-gradient(ellipse at 50% 100%, rgba(155,147,255,.15), transparent 70%), var(--card); }
   #landing .lp-reveal { opacity: 0; transform: translateY(22px); transition: opacity .65s ease, transform .65s ease; }
@@ -5005,8 +5009,8 @@
   #landing .lp-photo-copy a span { transition: transform .25s; }
   #landing .lp-photo-copy a:hover span { transform: translate(3px,-3px); }
   #landing .lp-photo-tag { position: absolute; top: 22px; left: 26px; font-size: 9px; letter-spacing: .17em; color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 5px; padding: 8px 10px; background: rgba(10,12,24,.4); }
-  #landing .lp-feature-label { display: flex; align-items: center; gap: 9px; }
-  #landing .lp-feature-label::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--lp-accent); box-shadow: 0 0 14px rgba(155,147,255,.2); }
+  #landing .lp-feature-label { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: rgba(155,147,255,.07); }
+  #landing .lp-feature-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--lp-accent); box-shadow: 0 0 12px rgba(155,147,255,.5); }
   #landing .lp-card:nth-child(2n) .lp-feature-label::before { background: #66cbb3; }
   #landing .lp-card:hover .lp-feature-label::before { transform: rotate(90deg); transition: transform .4s; }
   #landing .lp-card.lp-reveal, #landing .lp-photo-card.lp-reveal { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1), border-color .3s, box-shadow .3s; }
@@ -5422,12 +5426,11 @@
       <div class="lp-art-halo" aria-hidden="true"></div>
             <div class="lp-signal-board" role="group" aria-label="Platform önizlemesi: işlem, bias, portföy ve topluluk sekmeleri">
         <div class="lp-signal-top"><span class="lp-status-dot" aria-hidden="true"></span><b>ALFA'NIN İÇİNDEN</b><em>gerçek kayıtlar</em></div>
-        <div class="lp-preview-intro"><h3>Alfa'nın içinden.</h3><span>Portföy özeti · sonuçlanan işlemlerin R eğrisi.</span></div>
+        <div class="lp-preview-intro"><h3>Alfa'nın içinden.</h3><span>Portföy özeti · işlem akışı ve bias.</span></div>
         <div class="lp-signal-tabs" role="tablist" aria-label="Önizleme sekmeleri">
           <button type="button" role="tab" id="lp-sig-tab-portfolio" aria-controls="lp-sig-panel-portfolio" aria-selected="true" data-lp-hero-tab="portfolio"><span class="lp-tab-dot teal" aria-hidden="true"></span>Portföy</button>
           <button type="button" role="tab" id="lp-sig-tab-trade" aria-controls="lp-sig-panel-trade" aria-selected="false" tabindex="-1" data-lp-hero-tab="trade"><span class="lp-tab-dot green" aria-hidden="true"></span>İşlemler</button>
           <button type="button" role="tab" id="lp-sig-tab-bias" aria-controls="lp-sig-panel-bias" aria-selected="false" tabindex="-1" data-lp-hero-tab="bias"><span class="lp-tab-dot violet" aria-hidden="true"></span>Bias</button>
-          <button type="button" role="tab" id="lp-sig-tab-results" aria-controls="lp-sig-panel-results" aria-selected="false" tabindex="-1" data-lp-hero-tab="results"><span class="lp-tab-dot green" aria-hidden="true"></span>Sonuçlar</button>
           <button type="button" role="tab" id="lp-sig-tab-community" aria-controls="lp-sig-panel-community" aria-selected="false" tabindex="-1" data-lp-hero-tab="community"><span class="lp-tab-dot amber" aria-hidden="true"></span>Topluluk</button>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-trade" role="tabpanel" aria-labelledby="lp-sig-tab-trade" data-lp-hero-panel="trade" hidden>
@@ -5439,11 +5442,6 @@
           <article class="lp-signal-card lp-live-card" id="lp-live-bias" aria-live="polite"><p class="lp-live-state">Bias ve analiz paylaşımları yükleniyor…</p></article>
           <div class="lp-preview-summary"><span class="lp-preview-access">PREMIUM · BİAS &amp; ANALİZ</span><h4>Yönü ve gerekçesini birlikte oku.</h4><p>Canlı bias, analiz ve grafikler yalnızca premium üyelere açıktır.</p></div>
           <a class="lp-sig-link" href="?page=alfatrading">Bias paylaşımlarını aç <span aria-hidden="true">→</span></a>
-        </div>
-        <div class="lp-sig-panel" id="lp-sig-panel-results" role="tabpanel" aria-labelledby="lp-sig-tab-results" data-lp-hero-panel="results" hidden>
-          <article class="lp-signal-card lp-live-card" id="lp-live-results" aria-live="polite"><p class="lp-live-state">Tamamlanan işlemler yükleniyor…</p></article>
-          <div class="lp-preview-summary"><span class="lp-preview-access">KAYITLI ÜYELERE · SONUÇLAR</span><h4>Artı ve eksi sonuçlar birlikte.</h4><p>Ücretsiz üyeler sonuçlanan işlemlerin sembol/R özetini görür. İşlem planı, bias, açıklama ve fotoğraflar premium'a özel.</p></div>
-          <a class="lp-sig-link" href="?page=alfatrading">İşlem kanalını aç <span aria-hidden="true">→</span></a>
         </div>
         <div class="lp-sig-panel" id="lp-sig-panel-portfolio" role="tabpanel" aria-labelledby="lp-sig-tab-portfolio" data-lp-hero-panel="portfolio">
           <article class="lp-signal-card lp-live-card" id="lp-live-portfolio" aria-live="polite"><p class="lp-live-state">Paylaşılan portföy yükleniyor…</p></article>
@@ -5493,18 +5491,18 @@
     <div class="lp-stories-intro"><div><span class="lp-eyebrow">BİRLİKTE OKUMAK</span><h3 id="lp-stories-title">Tek başına bakmak<br>zorunda değilsin.</h3></div><p>İşlemleri ve biasları paylaşıyor, gerekçeleri birlikte tartışıyoruz. Sorunu sor, fikrini söyle, topluluğun okumasını gör.</p></div>
     <div class="lp-photo-grid">
       <article class="lp-photo-card lp-photo-main">
-        <img src="/assets/landing-workspace-scene.svg" alt="Çok ekranlı trading masası ve grafik panellerini gösteren illüstrasyon" width="1100" height="733" loading="lazy" decoding="async">
+        <img src="/assets/landing-trader-workspace.svg" alt="Gerekçesini not eden bir trader'ın sıcak ışıklı çalışma masası illüstrasyonu" width="1100" height="733" loading="lazy" decoding="async">
         <div class="lp-photo-shade" aria-hidden="true"></div>
         <div class="lp-photo-copy"><span>01 — İŞLEM</span><h4>Gerekçesiyle paylaşılan işlemler.</h4><p>Grafik, seviye ve senaryo aynı akışta. Sonucu değil, kararın arkasındaki mantığı gör.</p><a href="#lp-showcase">İşlem kanalını incele <span aria-hidden="true">↗</span></a></div>
         <span class="lp-photo-tag" aria-hidden="true">ALFA / TRADES</span>
       </article>
       <article class="lp-photo-card">
-        <img src="/assets/landing-research-scene.svg" alt="Onchain veri akışını ve piyasa yönünü gösteren soyut illüstrasyon" width="900" height="600" loading="lazy" decoding="async">
+        <img src="/assets/landing-trader-research.svg" alt="Grafik ve notlarla piyasayı inceleyen bir trader illüstrasyonu" width="900" height="600" loading="lazy" decoding="async">
         <div class="lp-photo-shade" aria-hidden="true"></div>
         <div class="lp-photo-copy"><span>02 — VERİ</span><h4>Bias ve onchain okuması.</h4><p>Yön görüşünü funding, CVD ve akış verileriyle birlikte oku; fiyatın neden hareket ettiğini gör.</p></div>
       </article>
       <article class="lp-photo-card">
-        <img src="/assets/landing-community-scene.svg" alt="Tartışan ve fikir alışverişi yapan bir trader topluluğu illüstrasyonu" width="900" height="600" loading="lazy" decoding="async">
+        <img src="/assets/landing-trader-community.svg" alt="Birlikte tartışan ve fikir alışverişi yapan traderlar illüstrasyonu" width="900" height="600" loading="lazy" decoding="async">
         <div class="lp-photo-shade" aria-hidden="true"></div>
         <div class="lp-photo-copy"><span>03 — TOPLULUK</span><h4>Fikrini paylaş, tartış.</h4><p>Sorular sor, alternatif görüşleri dinle, kendi yaklaşımını geliştir. Topluluk akışı herkese açık.</p></div>
       </article>

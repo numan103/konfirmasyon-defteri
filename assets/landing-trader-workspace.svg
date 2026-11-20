@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 733" width="1100" height="733" role="img" aria-labelledby="t">
+  <title id="t">Gerekçesini not eden bir trader'ın sıcak ışıklı çalışma masası</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#202a46"/>
+      <stop offset=".55" stop-color="#12182b"/>
+      <stop offset="1" stop-color="#0b0e19"/>
+    </linearGradient>
+    <radialGradient id="warm" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffb96b" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#ffb96b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="teal" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#4ad9c0" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#4ad9c0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a3a33"/>
+      <stop offset="1" stop-color="#241c1b"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2742"/>
+      <stop offset="1" stop-color="#0e1424"/>
+    </linearGradient>
+    <linearGradient id="hoodie" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a5578"/>
+      <stop offset="1" stop-color="#29324f"/>
+    </linearGradient>
+    <linearGradient id="lamp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd89b" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#ffd89b" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+
+  <rect width="1100" height="733" fill="url(#bg)"/>
+  <ellipse cx="760" cy="250" rx="420" ry="320" fill="url(#warm)"/>
+  <ellipse cx="230" cy="420" rx="330" ry="300" fill="url(#teal)"/>
+
+  <!-- gece penceresi ve şehir ışıkları -->
+  <g opacity=".85">
+    <rect x="40" y="70" width="270" height="330" rx="10" fill="#0d1222" stroke="#2c3655" stroke-width="3"/>
+    <rect x="52" y="82" width="246" height="306" rx="5" fill="#141d33"/>
+    <g fill="#ffd89b" opacity=".55">
+      <circle cx="90" cy="150" r="3"/><circle cx="130" cy="120" r="2.4"/><circle cx="180" cy="160" r="3.2"/>
+      <circle cx="220" cy="130" r="2"/><circle cx="260" cy="175" r="2.8"/><circle cx="110" cy="210" r="2.4"/>
+      <circle cx="165" cy="230" r="3"/><circle cx="245" cy="240" r="2.2"/><circle cx="200" cy="285" r="2.6"/>
+    </g>
+    <g fill="#7fe3d0" opacity=".35">
+      <circle cx="75" cy="270" r="2"/><circle cx="150" cy="320" r="2.4"/><circle cx="235" cy="310" r="2"/>
+    </g>
+    <path d="M52 340h246" stroke="#2c3655" stroke-width="2"/>
+    <path d="M175 82v306" stroke="#2c3655" stroke-width="2"/>
+  </g>
+
+  <!-- masa -->
+  <path d="M0 520Q550 496 1100 520V733H0Z" fill="url(#desk)"/>
+  <path d="M0 520Q550 496 1100 520" fill="none" stroke="#6b5346" stroke-width="3" opacity=".7"/>
+
+  <!-- monitör + yumuşak grafik -->
+  <g>
+    <rect x="620" y="170" width="360" height="242" rx="14" fill="#0a0e1a" stroke="#394462" stroke-width="3"/>
+    <rect x="632" y="182" width="336" height="218" rx="7" fill="url(#screen)"/>
+    <g stroke="#8b97c0" stroke-opacity=".16"><path d="M632 236h336M632 290h336M632 344h336M700 182v218M780 182v218M860 182v218"/></g>
+    <g fill="#5eead4" opacity=".7">
+      <rect x="656" y="330" width="14" height="38" rx="4"/><rect x="684" y="310" width="14" height="58" rx="4"/>
+      <rect x="712" y="322" width="14" height="46" rx="4"/><rect x="740" y="288" width="14" height="80" rx="4"/>
+      <rect x="768" y="300" width="14" height="68" rx="4"/><rect x="796" y="268" width="14" height="100" rx="4"/>
+      <rect x="824" y="282" width="14" height="86" rx="4"/><rect x="852" y="252" width="14" height="116" rx="4"/>
+      <rect x="880" y="270" width="14" height="98" rx="4"/><rect x="908" y="240" width="14" height="128" rx="4"/>
+    </g>
+    <path d="M650 300q70-40 130-18t130-42 100-30" fill="none" stroke="#a89aff" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+    <rect x="770" y="412" width="60" height="22" rx="6" fill="#11172a"/>
+  </g>
+
+  <!-- defter + kalem -->
+  <g transform="rotate(-7 470 560)">
+    <rect x="360" y="510" width="220" height="110" rx="8" fill="#e9e2d2" opacity=".92"/>
+    <rect x="360" y="510" width="220" height="110" rx="8" fill="none" stroke="#c9bfa8" stroke-width="2"/>
+    <path d="M380 540h150M380 560h120M380 580h165M380 600h90" stroke="#8b8271" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+    <path d="M386 528c8-12 16 10 24-2s16 8 24-4" fill="none" stroke="#4a5578" stroke-width="2.4" opacity=".7"/>
+    <path d="M520 520l60-56" stroke="#ffb96b" stroke-width="6" stroke-linecap="round"/>
+    <path d="M578 466l8-8 8 10-10 8z" fill="#ffd89b"/>
+  </g>
+
+  <!-- kahve fincanı -->
+  <g>
+    <ellipse cx="935" cy="556" rx="40" ry="12" fill="#0d111e" opacity=".7"/>
+    <path d="M900 500h70l-8 52a12 12 0 0 1-12 10h-30a12 12 0 0 1-12-10z" fill="#f0e7d8"/>
+    <path d="M968 512h14a14 14 0 0 1 0 28h-17" fill="none" stroke="#f0e7d8" stroke-width="7"/>
+    <ellipse cx="935" cy="500" rx="35" ry="9" fill="#6b4a35"/>
+    <path d="M922 486q-6-12 4-22M940 486q6-12-4-22" fill="none" stroke="#ffd89b" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+  </g>
+
+  <!-- trader karakteri -->
+  <g>
+    <!-- sandalye arkalığı -->
+    <path d="M400 500q-14-120 40-160h130q54 40 40 160z" fill="#1b2237"/>
+    <!-- gövde / hoodie -->
+    <path d="M438 508q6-104 56-130 26-12 52 0 50 26 56 130z" fill="url(#hoodie)"/>
+    <path d="M494 378q22 26 44 0" fill="none" stroke="#6a7598" stroke-width="5" stroke-linecap="round"/>
+    <path d="M494 378q22 40 44 0" fill="#232c46"/>
+    <!-- boyun -->
+    <rect x="514" y="352" width="34" height="34" rx="12" fill="#d9a17a"/>
+    <!-- baş -->
+    <ellipse cx="531" cy="308" rx="56" ry="64" fill="#e8b28b"/>
+    <!-- kulak -->
+    <ellipse cx="477" cy="312" rx="10" ry="16" fill="#d9a17a"/>
+    <ellipse cx="585" cy="312" rx="10" ry="16" fill="#d9a17a"/>
+    <!-- saç -->
+    <path d="M476 300q-4-64 56-68 62 2 56 70-14-30-34-30-18 14-44 6-22 10-34 22z" fill="#2c2635"/>
+    <path d="M484 268q46-30 96 4" fill="none" stroke="#46384b" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+    <!-- kaşlar -->
+    <path d="M502 296q12-8 24-2M542 294q12-6 24 2" fill="none" stroke="#4a3a35" stroke-width="4" stroke-linecap="round"/>
+    <!-- gözler -->
+    <ellipse cx="514" cy="310" rx="5" ry="6" fill="#2c2635"/>
+    <ellipse cx="554" cy="310" rx="5" ry="6" fill="#2c2635"/>
+    <circle cx="516" cy="308" r="1.6" fill="#fff" opacity=".8"/>
+    <circle cx="556" cy="308" r="1.6" fill="#fff" opacity=".8"/>
+    <!-- burun + gülümseme -->
+    <path d="M534 316q-4 10 4 12" fill="none" stroke="#c68e6b" stroke-width="3" stroke-linecap="round"/>
+    <path d="M516 338q16 14 34 0" fill="none" stroke="#a4654f" stroke-width="4" stroke-linecap="round"/>
+    <!-- kol + el (klavyeye uzanan) -->
+    <path d="M470 430q-40 44-6 92 8 12 26 14" fill="none" stroke="#414d70" stroke-width="34" stroke-linecap="round"/>
+    <ellipse cx="500" cy="540" rx="20" ry="13" fill="#e8b28b" transform="rotate(-18 500 540)"/>
+    <!-- kulaklık -->
+    <path d="M474 296q-14 4-10 22" fill="none" stroke="#2c2635" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="470" cy="320" r="9" fill="#2c2635"/>
+  </g>
+
+  <!-- klavye -->
+  <g>
+    <rect x="470" y="548" width="230" height="44" rx="10" fill="#161c2e" stroke="#38415e" stroke-width="2"/>
+    <g fill="#4a5578">
+      <rect x="482" y="558" width="18" height="10" rx="3"/><rect x="506" y="558" width="18" height="10" rx="3"/>
+      <rect x="530" y="558" width="18" height="10" rx="3"/><rect x="554" y="558" width="18" height="10" rx="3"/>
+      <rect x="578" y="558" width="18" height="10" rx="3"/><rect x="602" y="558" width="18" height="10" rx="3"/>
+      <rect x="626" y="558" width="18" height="10" rx="3"/><rect x="650" y="558" width="18" height="10" rx="3"/>
+      <rect x="490" y="574" width="24" height="9" rx="3"/><rect x="520" y="574" width="130" height="9" rx="3"/>
+    </g>
+  </g>
+
+  <!-- küçük bitki -->
+  <g>
+    <path d="M1030 540h56l-8 42a8 8 0 0 1-8 7h-24a8 8 0 0 1-8-7z" fill="#b9846a"/>
+    <path d="M1058 540q-34-40-10-72 12 30 10 72M1058 540q34-34 14-64-10 28-14 64M1058 540q-6-48 6-62 6 30-6 62" fill="#5c9c78"/>
+  </g>
+
+  <!-- lamba ışığı -->
+  <path d="M700 90h150l90 340H610z" fill="url(#lamp)" opacity=".5" filter="url(#soft)"/>
+  <path d="M760 96h60l-14 54h-32z" fill="#3a4468"/>
+  <ellipse cx="790" cy="152" rx="18" ry="7" fill="#ffd89b" opacity=".85"/>
+  <path d="M790 96V60" stroke="#3a4468" stroke-width="5"/>
+  <path d="M820 96q40 0 40 40" fill="none" stroke="#3a4468" stroke-width="5"/>
+
+  <!-- ince tane -->
+  <g fill="#fff" opacity=".035">
+    <circle cx="120" cy="600" r="2"/><circle cx="300" cy="180" r="1.5"/><circle cx="640" cy="620" r="2"/>
+    <circle cx="980" cy="420" r="1.5"/><circle cx="420" cy="90" r="2"/><circle cx="860" cy="660" r="1.5"/>
+  </g>
+</svg>
