@@ -24,9 +24,13 @@ göremiyordu. Artık doğrulama için ayrı bir ekran açılır, adres gösteril
 - Auth modalında klavye odağı tutulur, Escape ile kapanır ve eski odağa dönülür.
 - Canlı public `/auth/v1/settings` salt okunur kontrolünde kayıt açık,
   e-posta sağlayıcısı açık ve e-posta onayı zorunlu görüldü.
-- Gerçek hesap/kayıt e-postası oluşturulmadı. SMTP teslimatı, spam klasörüne
-  düşme veya redirect allowlist'in tamamı bu testlerle doğrulanmış sayılmaz.
-- AUTH/SITE, Supabase ayarları, RLS ve ödeme/onay kuralları değiştirilmedi.
+- Resend üzerinden `auth.alfa-trader.com` doğrulandı ve Supabase Auth için
+  özel SMTP bağlandı. Gerçek şifre yenileme e-postası gönderildi; Resend
+  loglarında `cryptotraderahmet@gmail.com` adresine `Delivered` görüldü.
+  Teslimat spam klasörüne düşme ihtimalini sıfırlamaz; redirect allowlist'in
+  tamamı ayrıca doğrulanmış sayılmaz.
+- AUTH/SITE ve SITE URL'si, RLS, ödeme/onay kuralları ve production veri yazımı
+  değiştirilmedi. Yalnızca Supabase Auth SMTP ayarları ve e-posta limiti güncellendi.
 - Eğitim katılımından girişe geçerken kapanmış dialog eşzamanlı kaldırılır.
   Yeniden açılan ödeme penceresiyle eski düğümün kısa süre birlikte kalması
   önlenir. Tutarlar, cüzdan ve manuel onay mantığı değişmez.
@@ -43,11 +47,17 @@ göremiyordu. Artık doğrulama için ayrı bir ekran açılır, adres gösteril
   belirlemeye izin verir. SDK oturumundaki kullanıcı ile mevcut kullanıcı
   eşleştirilir; asıl yetki kontrolü Supabase `updateUser` tarafından yapılır.
   Sağlayıcı yeniden kimlik doğrulama isterse işlem başarısız sayılır ve açıklanır.
-- Özel SMTP/Email Hook olmadan yerleşik sağlayıcının belgelenmiş varsayılan
-  e-posta kotası proje genelinde saatte 2'dir:
+- Supabase Auth, Resend SMTP üzerinden `noreply@auth.alfa-trader.com`
+  adresiyle gönderim yapıyor. Domain Resend'de `Verified`; SMTP ayarı yeniden
+  yükleme sonrasında da korundu.
+- Özel SMTP açılınca projenin e-posta limiti varsayılan saatte 2'den saatte 30'a
+  çıktı; `RATE_LIMIT_EMAIL_SENT=30`, `SMTP_MAX_FREQUENCY=60`. Kaynak:
   https://supabase.com/docs/guides/auth/rate-limits
-- SMTP ayarı veya gerçek kota değiştirilmedi. Yeni e-posta gönderilmeden,
-  hata ve şifre güncelleme yolları izole sağlayıcı yanıtlarıyla test edildi.
+- Gerçek şifre yenileme akışı tek bir e-posta üretti ve Resend loglarında
+  `Delivered` görüldü. API anahtarı yalnızca Supabase'in güvenli SMTP formunda
+  tutuluyor; dokümana veya koda yazılmadı.
+- Hata mesajları ve açık oturumdan şifre değiştirme yolları izole sağlayıcı
+  yanıtlarıyla test edildi.
 
 ## Kişisel “Yaptım” ve hatırlatma
 
