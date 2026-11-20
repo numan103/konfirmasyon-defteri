@@ -158,3 +158,91 @@ test('section defaults can be edited without repricing existing free lessons', a
   assert.equal(f.saves[0].secMeta[0].access, 'paid');
   assert.equal(f.saves[0].sections.paid[0].videos[0].access, 'free');
 });
+test('same-account sign-in, token refresh and profile updates never invalidate author workspace', () => {
+  const context = vm.createContext({});
+  vm.runInContext(html.slice(html.indexOf('function chWorkspaceIdentityChanged('), html.indexOf('function chStudioNavigate(')), context);
+  for (const event of ['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED']) {
+    assert.equal(vm.runInContext(`chWorkspaceIdentityChanged('${event}','same-id','same-id')`, context), false);
+  }
+  assert.equal(vm.runInContext("chWorkspaceIdentityChanged('SIGNED_OUT','same-id',undefined)", context), true);
+  assert.equal(vm.runInContext("chWorkspaceIdentityChanged('SIGNED_IN','old-id','new-id')", context), true);
+});
+test('actual auth callback preserves form/data on tab-focus reauthentication and captures drafts before account reset', () => {
+  let callback, closes = 0, capturedWithData = false;
+  const state = {
+    AUTH: { user: { id: 'author' }, client: { auth: { onAuthStateChange(fn) { callback = fn; } } } },
+    channelsData: { traders: { teacher: { id: 'teacher' } }, order: ['teacher'] }, channelsLoaded: true, channelsLoading: null, channelsError: '',
+    chDraftAccount: 'author', chDraftId: 'draft', chDraftPersisted: 'body', chStudioRestoredFor: 'author',
+    chDraftMemory: new Map(), chStudioWorkspace: { account: 'author' }, chWorkspaceEpoch: 0,
+    chDraftCapture() { capturedWithData = !!state.channelsData.traders.teacher; }, chCloseForm() { closes++; }, chCloseProf() {},
+    document: { getElementById: () => null, querySelectorAll: () => [] }, localStorage: { removeItem() {} },
+  };
+  const context = vm.createContext(state);
+  vm.runInContext(html.slice(html.indexOf('function chWorkspaceIdentityChanged('), html.indexOf('function chStudioNavigate(')), context);
+  vm.runInContext(html.slice(html.indexOf('AUTH.client.auth.onAuthStateChange((event, session)'), html.indexOf("  $('auth-form').addEventListener")), context);
+  callback('SIGNED_IN', { user: { id: 'author' } });
+  callback('USER_UPDATED', { user: { id: 'author' } });
+  assert.equal(closes, 0); assert.ok(state.channelsData.traders.teacher); assert.ok(state.chStudioWorkspace);
+  callback('SIGNED_OUT', null);
+  assert.equal(closes, 1); assert.equal(capturedWithData, true);
+  assert.equal(Object.keys(state.channelsData.traders).length, 0); assert.equal(state.chStudioWorkspace, null);
+});
+test('journal setup is deterministic per day, does not mutate existing courses and only materializes on save', () => {
+  const context = vm.createContext({ chSecMeta: t => t.secMeta });
+  vm.runInContext(html.slice(html.indexOf('function chJournalSetup('), html.indexOf('function chQuickJournal(')), context);
+  vm.runInContext(html.slice(html.indexOf('function chEnsureJournal('), html.indexOf('function chDraftStore(')), context);
+  const trader = { id: 'teacher', secMeta: [{ id: 'free', title: 'Ücretsiz kurs' }], sections: { free: [{ id: 'old', videos: [{ id: 'free-video', access: 'free' }] }] } };
+  context.trader = trader;
+  vm.runInContext("setup=chJournalSetup(trader,'2026-11-20')", context);
+  assert.equal(trader.secMeta.length, 1, 'opening a journal editor must not create saved content');
+  vm.runInContext('chEnsureJournal(trader,setup);chEnsureJournal(trader,setup)', context);
+  assert.equal(trader.secMeta.length, 2);
+  assert.equal(trader.secMeta[1].kind, 'journal');
+  assert.equal(trader.secMeta[1].access, 'paid', 'private-source notes do not default to public');
+  assert.equal(trader.sections['trader-gunlugu'].length, 1, 'same-day retries never duplicate a topic');
+  assert.equal(trader.sections.free[0].videos[0].access, 'free');
+  vm.runInContext("chEnsureJournal(trader,chJournalSetup(trader,'2026-11-21'))", context);
+  assert.equal(trader.sections['trader-gunlugu'][0].title, '2026-11-21');
+  trader.sections['trader-gunlugu'] = Array.from({ length: 1000 }, (_, i) => ({ id: 'old-' + i, videos: [] }));
+  trader.secMeta[1].access = 'free';
+  const rollover = vm.runInContext("chJournalSetup(trader,'2026-11-22')", context);
+  assert.equal(rollover.sectionId, 'trader-gunlugu-2');
+  assert.equal(rollover.title, 'Trader Günlüğü · 2');
+  assert.equal(rollover.access, 'free', 'archive rollover inherits the author-selected visibility');
+  assert.equal(trader.sections['trader-gunlugu'].length, 1000);
+});
+function channelLoaderFixture(siteFetch) {
+  const original = { traders: { teacher: { id: 'teacher', name: 'Saved channel' } }, order: ['teacher'] };
+  const state = {
+    channelsData: original, channelsLoaded: false, channelsLoading: null, channelOpen: 'teacher',
+    chWorkspaceEpoch: 0, channelsError: '', chUserEmail: () => 'admin@test.dev',
+    localStorage: { removeItem() {} }, siteFetch, AbortSignal,
+  };
+  const context = vm.createContext(state);
+  vm.runInContext(html.slice(html.indexOf('async function loadChannels()'), html.indexOf('// Adminin kendi kanalı')), context);
+  return { state, original, load: () => vm.runInContext('loadChannels()', context) };
+}
+test('concurrent student/studio loading shares one request instead of marking an empty cache as loaded', async () => {
+  let resolve, calls = 0;
+  const f = channelLoaderFixture(() => { calls++; return new Promise(r => { resolve = r; }); });
+  const a = f.load(), b = f.load();
+  assert.equal(calls, 1); assert.equal(f.state.channelsLoaded, false);
+  resolve(Response.json({ ok: true, data: { traders: { loaded: { id: 'loaded' } }, order: ['loaded'] } }));
+  await Promise.all([a, b]);
+  assert.equal(f.state.channelsLoaded, true); assert.ok(f.state.channelsData.traders.loaded);
+});
+test('account-epoch guard prevents late requests from putting the previous user data back into the workspace', async () => {
+  let resolve;
+  const f = channelLoaderFixture(() => new Promise(r => { resolve = r; }));
+  const pending = f.load();
+  f.state.chWorkspaceEpoch++; f.state.channelsData = { traders: {}, order: [] }; f.state.channelsLoading = null;
+  resolve(Response.json({ ok: true, data: { traders: { secret: { body: 'Old account data' } }, order: ['secret'] } }));
+  await pending;
+  assert.equal(Object.keys(f.state.channelsData.traders).length, 0);
+});
+test('temporary channel read failure keeps the saved channel and current selection visible', async () => {
+  const f = channelLoaderFixture(async () => Response.json({}, { status: 503 }));
+  await f.load();
+  assert.equal(f.state.channelsData, f.original); assert.equal(f.state.channelOpen, 'teacher');
+  assert.equal(f.state.channelsLoaded, true); assert.match(f.state.channelsError, /yüklenemedi/);
+});

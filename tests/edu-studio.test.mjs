@@ -52,6 +52,9 @@ test('anonymous/forged writes, wrong routes, non-admin creation and deletion are
 });
 test('admin save keeps video notes/photos/tricks/extra videos and paid defaults encrypted', async t => {
   const f = fixture(t);
+  f.channel.secMeta[0].kind = 'journal';
+  f.channel.sections.s[0].videos[1].journalDate = '2026-11-20';
+  f.channel.sections.s[0].videos[1].publishedAt = 1795180000000;
   const result = await f.request({ trader: f.channel });
   assert.equal(result.code, 200);
   const raw = JSON.stringify(f.stored());
@@ -63,6 +66,9 @@ test('admin save keeps video notes/photos/tricks/extra videos and paid defaults 
   assert.equal(restored.sections.s[0].videos[1].photos.length, 1);
   assert.equal(restored.sections.s[0].videos[1].vids.length, 1);
   assert.equal(restored.secMeta[0].access, 'paid');
+  assert.equal(restored.secMeta[0].kind, 'journal');
+  assert.equal(restored.sections.s[0].videos[1].journalDate, '2026-11-20');
+  assert.equal(restored.sections.s[0].videos[1].publishedAt, 1795180000000);
   assert.equal(restored.seeded, true);
   assert.equal(restored.owner, 'owner@test.dev');
   assert.ok(!result.body.data, 'save never returns other channels');
@@ -149,4 +155,26 @@ test('lesson renderer rejects executable links and non-raster data URLs', () => 
   assert.match(vm.runInContext("chInline('[kaynak](https://example.com)')", context), /href="https:/);
   assert.equal(vm.runInContext("chImgFigure('', 'data:image/svg+xml;base64,evil')", context), '');
   assert.equal(vm.runInContext("chSafeImage('data:image/png;base64,AAAA')", context), true);
+});
+test('daily journal preserves more than 200 days and rejects overflow without silently deleting old notes', async t => {
+  const f = fixture(t);
+  f.channel.secMeta[0].kind = 'journal';
+  f.channel.sections.s = Array.from({ length: 201 }, (_, i) => ({ id: 'day-' + i, title: 'Gün ' + i, videos: [] }));
+  const saved = await f.request({ trader: f.channel });
+  assert.equal(saved.code, 200); assert.equal(saved.body.trader.sections.s.length, 201);
+  f.channel.sections.s = Array.from({ length: 1001 }, (_, i) => ({ id: 'day-' + i, title: 'Gün ' + i, videos: [] }));
+  const overflow = await f.request({ trader: f.channel });
+  assert.equal(overflow.code, 413); assert.equal(overflow.body.error, 'channel_limit_exceeded');
+  assert.equal(f.writes.length, 1, 'overflow must not overwrite the saved journal');
+  assert.equal(openChannels(f.stored()).traders.teacher.sections.s.length, 201);
+});
+test('repeated image URLs keep captions and inline photo indexes instead of deduplicating away the second figure', async t => {
+  const f = fixture(t), video = f.channel.sections.s[0].videos[1];
+  video.body = 'İlk örnek {{foto:1}}\nİkinci açıklama {{foto:2}}';
+  video.photos = [{ url: 'https://example.com/chart.png', caption: 'İlk bakış' }, { url: 'https://example.com/chart.png', caption: 'Teyit bölgesi' }];
+  const saved = await f.request({ trader: f.channel });
+  assert.equal(saved.code, 200);
+  const item = saved.body.trader.sections.s[0].videos[1];
+  assert.equal(item.photos.length, 2);
+  assert.equal(item.photos[1].caption, 'Teyit bölgesi'); assert.match(item.body, /\{\{foto:2\}\}/);
 });

@@ -17,6 +17,7 @@ import { bearer, requestUser, requestTier } from '../lib/auth.mjs';
 import { openRecord } from '../lib/education-crm.mjs';
 import { EDU_PLANS } from '../assets/edu-plans-model.mjs';
 import { sealChannels, openChannels } from '../lib/edu-channel-storage.mjs';
+import eduTelegramInbox from '../lib/edu-telegram-inbox.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -200,6 +201,23 @@ function channelEditor(channel, user) {
   return !!(user.admin || (email && (String(channel?.owner || '').toLowerCase() === email ||
     (Array.isArray(channel?.editors) && channel.editors.some(value => String(value).toLowerCase() === email)))));
 }
+function channelCapacityError(c) {
+  if (!c || typeof c !== 'object') return '';
+  if ((c.secMeta?.length || 0) > 50 || Object.keys(c.sections || {}).length > 50) return 'En fazla 50 bölüm saklanabilir.';
+  for (const [sid, topics] of Object.entries(c.sections || {})) {
+    if (!Array.isArray(topics)) continue;
+    const journal = Array.isArray(c.secMeta) && c.secMeta.some(s => s?.id === sid && s.kind === 'journal');
+    if (topics.length > (journal ? 1000 : 200)) return journal ? 'Günlükte en fazla 1000 gün saklanabilir; yeni bir günlük bölümü aç.' : 'Bir bölümde en fazla 200 konu saklanabilir.';
+    for (const topic of topics) {
+      if ((topic?.videos?.length || 0) > 200) return 'Bir konu/günde en fazla 200 içerik saklanabilir.';
+      for (const item of Array.isArray(topic?.videos) ? topic.videos : []) {
+        if ((item?.photos?.length || 0) > 10 || (item?.vids?.length || 0) > 30) return 'Bir içerikte en fazla 10 görsel ve 30 ek video saklanabilir.';
+        if (String(item?.body || '').length > 40000 || String(item?.tricks || '').length > 12000) return 'Açıklama 40.000, trick metni 12.000 karakteri aşamaz.';
+      }
+    }
+  }
+  return '';
+}
 
 function sanitizeChannel(c) {
   if (!c || typeof c !== 'object') return null;
@@ -221,14 +239,14 @@ function sanitizeChannel(c) {
     createdAt: typeof c.createdAt === 'number' ? c.createdAt : Date.now(),
     sections: {},
     secMeta: Array.isArray(c.secMeta)
-      ? c.secMeta.slice(0, 50).map(s => ({ id: String((s && s.id) || '').slice(0, 60), title: String((s && s.title) || '').slice(0, 120), access: isPaidItem(s) ? 'paid' : 'free', plans: isPaidItem(s) ? itemPlans(s) : [] })).filter(s => s.id && !['__proto__', 'constructor', 'prototype'].includes(s.id))
+      ? c.secMeta.slice(0, 50).map(s => ({ id: String((s && s.id) || '').slice(0, 60), title: String((s && s.title) || '').slice(0, 120), kind: s?.kind === 'journal' ? 'journal' : 'course', access: isPaidItem(s) ? 'paid' : 'free', plans: isPaidItem(s) ? itemPlans(s) : [] })).filter(s => s.id && !['__proto__', 'constructor', 'prototype'].includes(s.id))
       : null,
   };
   const secs = (c.sections && typeof c.sections === 'object') ? c.sections : {};
   Object.keys(secs).forEach(sid => {
     if (['__proto__', 'constructor', 'prototype'].includes(sid)) return;
     const arr = Array.isArray(secs[sid]) ? secs[sid] : [];
-    clean.sections[String(sid).slice(0, 60)] = arr.slice(0, 200).map(t => ({
+    clean.sections[String(sid).slice(0, 60)] = arr.map(t => ({
       id: String((t && t.id) || '').slice(0, 60),
       title: String((t && t.title) || '').slice(0, 200),
       level: String((t && t.level) || '').slice(0, 30),
@@ -239,12 +257,11 @@ function sanitizeChannel(c) {
             // foto kayıtları URL'sini notun foto listesinin ilk fotoğrafı olarak taşır.
             const isNote = (vtype === 'article' || vtype === 'post' || vtype === 'not' || vtype === 'foto');
             const photos = [];
-            if (vtype === 'foto' && v && v.url) photos.push({ url: String(v.url).trim().slice(0, 500000), caption: '' });
+            if (vtype === 'foto' && v && v.url && !v.photos?.length) photos.push({ url: String(v.url).trim().slice(0, 500000), caption: '' });
             if (Array.isArray(v && v.photos)) {
               v.photos.slice(0, 10).forEach(p => {
                 const u = String((p && p.url) || '').trim().slice(0, 500000);
                 if (!u) return;
-                if (photos.some(x => x.url === u)) return;
                 photos.push({ url: u, caption: String((p && p.caption) || '').trim().slice(0, 500) });
               });
             }
@@ -257,6 +274,8 @@ function sanitizeChannel(c) {
               plans: isPaidItem(v) ? itemPlans(v) : [],
               body: String((v && v.body) || '').slice(0, 40000),
               tricks: String((v && v.tricks) || '').slice(0, 12000),
+              publishedAt: Number.isFinite(v?.publishedAt) ? v.publishedAt : null,
+              journalDate: /^\d{4}-\d{2}-\d{2}$/.test(v?.journalDate || '') ? v.journalDate : '',
               photos,
               // içeriğe gömülü ek videolar ({{video:N}} işaretleri bunlara bakar)
               vids: Array.isArray(v && v.vids)
@@ -326,6 +345,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.query?.kind === 'channel' && req.query?.view === 'telegram-inbox') return eduTelegramInbox(req, res);
   if (req.query?.kind === 'feedback') return eduFeedback(req, res);
   if (['influencer-content', 'influencer-progress'].includes(req.query?.kind)) return influencerContent(req, res);
   if (req.query?.kind === 'portfolio') return portfolio(req, res);
@@ -442,6 +462,8 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      const capacityError = channelCapacityError(body.trader || body.channel);
+      if (capacityError) return res.status(413).json({ error: 'channel_limit_exceeded', detail: capacityError });
       const ch = sanitizeChannel(body.trader || body.channel);
       if (!ch) return res.status(400).json({ error: 'trader (id + name) gerekli' });
       const existing = Object.hasOwn(base.traders, ch.id) ? base.traders[ch.id] : null;

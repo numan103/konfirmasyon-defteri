@@ -16,20 +16,22 @@ http.createServer((req, res) => {
   const style = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n');
   const fragment = html.slice(html.indexOf('<div id="page-edustudio"'), html.indexOf('<div id="page-strategies"'));
   const code = html.slice(html.indexOf("const EGITIM_KEY ="), html.indexOf('function panoRoomId()'));
+  const authCallback = html.slice(html.indexOf('AUTH.client.auth.onAuthStateChange((event, session)'), html.indexOf("  $('auth-form').addEventListener"));
   const bootstrap = `
-    const AUTH={user:{id:'local-synthetic',email:${JSON.stringify(role === 'admin' ? 'admin@test.dev' : 'reader@test.dev')}}}, ADMIN_EMAIL='admin@test.dev', SITE={admin:${role === 'admin'},tier:'free'};
+    const AUTH={user:{id:'local-synthetic',email:${JSON.stringify(role === 'admin' ? 'admin@test.dev' : 'reader@test.dev')}},client:{auth:{onAuthStateChange(fn){window.syntheticAuthEvent=fn}}}}, ADMIN_EMAIL='admin@test.dev', SITE={admin:${role === 'admin'},tier:'free'};
     let currentPage='egitim'; const lang='tr'; const LANG='tr';
     function siteIsAdmin(){return SITE.admin}
     function magIsAdmin(){return SITE.admin}
     function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-    function showPage(name){chDraftCapture();currentPage=name;document.querySelectorAll('[id^="page-"]').forEach(e=>e.classList.toggle('hidden',e.id!=='page-'+name));if(name==='edustudio')renderEduStudio();if(name==='egitim')renderEgitim()}
+    function showPage(name){chDraftCapture();chStudioNavigate(name);currentPage=name;document.querySelectorAll('[id^="page-"]').forEach(e=>e.classList.toggle('hidden',e.id!=='page-'+name));if(name==='edustudio')renderEduStudio();if(name==='egitim')renderEgitim()}
     function mountEduFeedback(){}
     window.syntheticFail=false; window.syntheticWrites=[];
-    async function siteFetch(url,opts={}){if(opts.method==='POST'){const b=JSON.parse(opts.body);window.syntheticWrites.push(b);return window.syntheticFail?Response.json({error:'failed'},{status:500}):Response.json({ok:true,trader:b.trader})} return Response.json({ok:true,data:channelsData})}
+    async function siteFetch(url,opts={}){if(String(url).includes('telegram-inbox'))return Response.json({ok:true,items:[],configured:false});if(opts.method==='POST'){const b=JSON.parse(opts.body);window.syntheticWrites.push(b);return window.syntheticFail?Response.json({error:'failed'},{status:500}):Response.json({ok:true,trader:b.trader})} return Response.json({ok:true,data:channelsData})}
   `;
   const init = `
     channelsLoaded=true;
     channelsData={traders:{teacher:{id:'teacher',name:'Eğitmen · Yerel Test',owner:'admin@test.dev',seeded:true,sections:{paid:[{id:'obo',title:'OBO – TOBO',videos:[{id:'lesson',title:'Oluşum, teyit ve trickler',type:'video',url:${JSON.stringify(role === 'admin' ? 'https://youtu.be/abcdefghijk' : '')},access:'paid',plans:['video'],locked:${role === 'reader'},body:${JSON.stringify(role === 'admin' ? '## Formasyonu nasıl okuyoruz?\nBaş ve omuzları ayır; boyun çizgisi kapanışını bekle.\n{{foto:1}}' : '')},tricks:${JSON.stringify(role === 'admin' ? '- Kırılım öncesinde kesinleşmiş formasyon sayma.\n- Retestte tepkiyi izle.' : '')},photos:${role === 'admin' ? "[{url:'http://127.0.0.1:4319/example.svg',caption:'Boyun çizgisi — sentetik örnek'}]" : '[]'},vids:[]}]}]},secMeta:[{id:'paid',title:'Ücretli Teknik Eğitim',access:'paid',plans:['video']}]}},order:['teacher']};
+    ${authCallback}
     bindChannelsPage(); channelOpen='teacher';chSec='paid';
     showPage(${role === 'admin' ? "'edustudio'" : "'egitim'"}); if(${role === 'reader'})openCourse('teacher','paid');
     document.body.dataset.fixtureRole=${JSON.stringify(role)};
