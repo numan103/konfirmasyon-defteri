@@ -1,0 +1,27 @@
+{
+  "source": "Binance BTCUSDT spot",
+  "start": "2025-01-01T00:00:00.000Z",
+  "endExclusive": "2025-01-15T00:00:00.000Z",
+  "fixtureSha256": "8c6d69144df77f27d78033f3f17fa03da3c078ebade5a04108af665202a30009",
+  "bars": {
+    "15m": 1344,
+    "1h": 336,
+    "4h": 84
+  },
+  "cutoffsChecked": 1344,
+  "futureSuffixComparisonsPassed": 1344,
+  "states": {
+    "NEEDS_REVIEW": 1344
+  },
+  "descriptiveMsbCandidates": 315,
+  "candleRulePass": {
+    "long": 107,
+    "short": 99
+  },
+  "protectedCandidates": 27,
+  "approvedSignals": 0,
+  "actualOrders": 0,
+  "realizedWins": null,
+  "winRate": null,
+  "limitation": "Candidate/prefix causality audit, not a performance backtest. No reviewed external swing/anchor/pullback labels; no trade claims. No historical supplemental snapshots."
+}

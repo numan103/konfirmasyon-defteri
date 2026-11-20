@@ -3,3 +3,7 @@ supabase/
 ayna-denetim/
 ayna-denetim.zip
 .env*
+docs/alpha-bot-strategy-v16.md
+docs/alpha-bot-v16-implementation-report.md
+docs/alpha-v16-history/
+tests/fixtures/alpha-v16/

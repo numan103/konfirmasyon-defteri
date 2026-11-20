@@ -219,11 +219,12 @@ test('QA bot feeds live price/structure and validates plans before answering', (
   assert.match(src, /okx\.com\/api\/v5\/market\/candles/);
   assert.match(src, /api\.bybit\.com\/v5\/market\/kline/);
   assert.match(src, /api\.exchange\.coinbase\.com\/products/);
-  assert.match(src, /ATR\/swing satırı eksikse 24s yüksek\/düşük ile kur/);
+  assert.match(src, /Ana swing\/HTF\/anchor eksikse 24s aralığıyla ikame etme/);
   assert.match(src, /formatStrategyContext\(/);
   assert.match(src, /planRefFor\(/);
   assert.match(src, /requireStrategy: true/);
-  assert.match(src, /BTC’de 5m IFVG kullanılmıyor/);
+  assert.match(src, /CANONICAL_V16/);
+  assert.doesNotMatch(src, /BTC’de 5m IFVG kullanılmıyor/);
   assert.match(src, /Eski notlardaki fiyatlar/);
   assert.match(src, /LONG Stop < Giriş < Hedef/);
   assert.match(src, /SHORT Hedef < Giriş < Stop/);
