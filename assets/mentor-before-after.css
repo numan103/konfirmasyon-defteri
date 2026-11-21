@@ -1,0 +1,22 @@
+.mentor-ba { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.mentor-ba-kicker { display: block; font-size: 10px; letter-spacing: .14em; font-weight: 800; color: var(--pc); margin-bottom: 4px; }
+.mentor-ba-title { margin: 0 0 4px; font-size: 15px; font-weight: 800; color: var(--text); }
+.mentor-ba .mentor-trades-note { margin: 0 0 10px; font-size: 11px; line-height: 1.5; color: var(--text-3); }
+.mentor-ba-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mentor-ba-card { min-width: 0; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+.mentor-ba-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.mentor-ba-top b { font-size: 13px; color: var(--text); }
+.mentor-ba-top strong { font-size: 12px; }
+.mentor-ba-top small { margin-left: auto; font-size: 10px; color: var(--text-3); }
+.mentor-ba-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.mentor-ba-shot { min-width: 0; margin: 0; }
+.mentor-ba-frame { display: flex; align-items: center; justify-content: center; min-height: 110px; overflow: hidden; border-radius: 8px; background: var(--bg2); }
+.mentor-ba-frame img { display: block; width: 100%; height: 140px; object-fit: cover; }
+.mentor-ba-loading, .mentor-ba-missing { padding: 8px; font-size: 11px; text-align: center; color: var(--text-3); }
+.mentor-ba-shot figcaption { margin-top: 5px; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; color: var(--text-3); }
+.mentor-ba-shot:last-child figcaption { color: var(--green); }
+@media (max-width: 760px) {
+  .mentor-ba-grid { grid-template-columns: 1fr; }
+  .mentor-ba-frame { min-height: 90px; }
+  .mentor-ba-frame img { height: 118px; }
+}

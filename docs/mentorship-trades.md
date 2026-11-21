@@ -77,8 +77,11 @@ Kalıcı sürümde ayrı kurulum anahtarı yolu yoktur; yönetim yalnızca admin
   işlem/gönderi listesinde tekrar gösterilmez. Sembol/R satırları açıklamadan
   temizlenir, gerçek açıklamalar korunur. Tek sonuçta R tek yerde görünür.
 - Premium: işlem, bias, gönderi, açıklama, kaynak ve kimlik doğrulamalı fotoğraf.
-- Kayıtlı ücretsiz: yalnızca teyitli, sonuçlanmış kayıtların opak ID/sembol/R/tarih
-  allowlist'i. Açık işlemler, notlar, Telegram linkleri ve medya verilmez.
+- Kayıtlı ücretsiz: teyitli, sonuçlanmış kayıtların opak ID/sembol/R/tarih
+  allowlist'i ve iki görseli olan sonuçlar için before/after kapasite bayrağı.
+  Açık işlemler, notlar ve Telegram linkleri verilmez; görseller yalnızca
+  allowlist'teki sonuç ID'leri için kimlik doğrulamalı, aynı kökenli proxy ile
+  gelir. Ham dosya ID'si, kaynak mesajı veya medya verisi tarayıcıya çıkmaz.
 - Giriş sayfasının sağındaki İşlemler sekmesi ve üye ana sayfasında günlük
   kümülatif R: başlangıç 0R, tüm aktarılan teyitli sonuçlar, negatif/0R dahil.
   Günlük kapanış eğrisidir, gün içi drawdown iddiası değildir. Kayıt sayısı ve
@@ -88,8 +91,11 @@ Kalıcı sürümde ayrı kurulum anahtarı yolu yoktur; yönetim yalnızca admin
 
 `?summary=1` anonim toplu eğri; `?results=1` kayıtlı üyeye güvenli sonuç listesi.
 Normal liste API'si premium üyeye özel akış, free üyeye güvenli sonuçlar döner.
-`PAGE_TIER.alfatrading=free` sadece sonuç sayfasını açar; medya sunucuda premium
-doğrulanmaya devam eder. Eski manuel tam akış free istemcide yüklenmez.
+`?image=<id>&index=0|1` free üyede yalnızca public allowlist'teki, teyitli ve
+iki görseli olan sonuçlar için açılır; tek görselin "önce" slotu ve teyit
+bekleyen kayıtlar kapalı kalır. `PAGE_TIER.alfatrading=free` sadece sonuç
+sayfasını açar; açık işlem/bias ve ham medya sunucuda premium doğrulanmaya
+devam eder. Eski manuel tam akış free istemcide yüklenmez.
 
 Metadata `mentormeta_<hash>` satırlarında AES-GCM şifrelidir; fotoğraf byte'ı ve
 dosya ID'si içermez. Liste/filtreler bu küçük metadata'yı okur. Eski kayıtlar ilk

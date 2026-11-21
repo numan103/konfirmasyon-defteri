@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler, { parseMentorResults, resultRecords, postRecords, isMentorMessage, sealTrade, openTrade, ingestMentorUpdate, parseMentorWidget } from '../lib/mentorship-trades.mjs';
+import handler, { parseMentorResults, resultRecords, postRecords, isMentorMessage, sealTrade, openTrade, ingestMentorUpdate, parseMentorWidget, saveMentorResult, publishMentorResults } from '../lib/mentorship-trades.mjs';
 import { classifyMentorPost, cleanMentorText, mentorDescription, completedMentorResults, mentorResultSummary } from '../assets/mentor-feed-model.mjs';
 import webhook from '../lib/telegram-webhook.mjs';
 const msg = overrides => ({
@@ -128,6 +128,32 @@ test('authorized feed is private/no-store and never leaks Telegram file identifi
   assert.equal(Object.hasOwn(out.data.records[0], 'originalPhotoId'), false);
   assert.equal(out.headers['Cache-Control'], 'private, no-store');
 });
+test('free members get before/after bytes only for confirmed results with two safe images', async t => {
+  const f = fixture(t); f.verified(false);
+  const jpeg = 'data:image/jpeg;base64,' + Buffer.from([255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1]).toString('base64');
+  const pair = resultRecords(msg({ photo: [{ file_id: 'after', file_size: 1000 }] }))[0];
+  pair.images = [jpeg, jpeg];
+  await saveMentorResult(pair);
+  const single = resultRecords(msg({ message_id: 948, text: 'ETH +1R', photo: [{ file_id: 'after2', file_size: 1000 }] }))[0];
+  single.images = [jpeg];
+  await saveMentorResult(single);
+  await publishMentorResults();
+  const list = await f.request('member', { results: '1' });
+  const byId = new Map(list.data.records.map(record => [record.id, record]));
+  assert.equal(byId.get(pair.id).imageCount, 2);
+  assert.equal(byId.get(single.id).imageCount, 1);
+  for (const index of [0, 1]) {
+    const image = await f.request('member', { image: pair.id, index: String(index) });
+    assert.equal(image.status, 200);
+    assert.equal(image.headers['Content-Type'], 'image/jpeg');
+    assert.equal(image.headers['X-Content-Type-Options'], 'nosniff');
+  }
+  assert.equal((await f.request('member', { image: single.id, index: '1' })).status, 403);
+  const unknown = resultRecords(msg({ message_id: 949, text: 'SOL +1R', photo: [{ file_id: 'sol', file_size: 1000 }],
+    reply_to_message: { message_id: 890, from: { id: 12345, username: 'traderahmetd' }, text: 'SOL işlem' } }))[0];
+  assert.equal((await f.request('member', { image: unknown.id })).status, 403);
+  assert.ok(!JSON.stringify(list.data).includes('t.me'));
+});
 test('widget imports require exact author provenance and parse only chart images, not avatars', () => {
   const html = '<div data-post="alfakasim/946"><a class="tgme_widget_message_author_name" href="https://t.me/traderahmetd">Trader Ahmet</a>' +
     '<a class="tgme_widget_message_reply x" href="https://t.me/alfakasim/889"></a>' +
@@ -183,7 +209,7 @@ test('public projections whitelist completed results and include negative and fl
     { ...base, id: 'pending', needsReview: true },
     { ...base, id: 'removed', retracted: true },
   ]);
-  assert.equal(data.length, 3); assert.deepEqual(Object.keys(data[0]).sort(), ['coin','date','id','r']);
+  assert.equal(data.length, 3); assert.deepEqual(Object.keys(data[0]).sort(), ['coin','date','id','imageCount','r']);
   assert.ok(!JSON.stringify(data).includes('secret'));
   const summary = mentorResultSummary(data);
   assert.equal(summary.netR, 1.3); assert.equal(summary.wins, 1); assert.equal(summary.losses, 1); assert.equal(summary.flat, 1);
@@ -196,7 +222,7 @@ test('free member API responses contain no text, links, images, active trades or
   f.verified(false);
   const out = await f.request('member');
   assert.equal(out.status, 200); assert.equal(out.data.records.length, 1);
-  assert.deepEqual(Object.keys(out.data.records[0]).sort(), ['coin','date','id','r']);
+  assert.deepEqual(Object.keys(out.data.records[0]).sort(), ['coin','date','id','imageCount','r']);
   assert.ok(!JSON.stringify(out.data).includes('SECRET'));
   const aggregate = await f.request('', { summary: '1' });
   assert.equal(aggregate.status, 200); assert.equal(aggregate.data.summary.count, 1);

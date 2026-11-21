@@ -71,9 +71,11 @@ export function completedMentorResults(records) {
     const old = unique.get(record.id);
     if (!old || (record.version || 0) >= (old.version || 0)) unique.set(record.id, record);
   }
-  // Explicit allowlist: no text, images, links, source message IDs or trade plans.
+  // Explicit allowlist: no text, image bytes, links, source message IDs or trade plans.
+  // imageCount is only a small capability flag for the safe same-origin proxy.
   return [...unique.values()].sort((a,b) => a.date - b.date || a.id.localeCompare(b.id))
-    .map(({ id, coin, r, date }) => ({ id, coin, r, date }));
+    .map(({ id, coin, r, date, imageCount }) => ({ id, coin, r, date,
+      imageCount: Math.min(2, Math.max(0, Number(imageCount) || 0)) }));
 }
 export function mentorResultSummary(results) {
   const byDay = new Map(); let total = 0;

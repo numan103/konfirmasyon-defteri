@@ -1,4 +1,5 @@
 import { renderMentorCurve, renderMentorEvaluation, resultTeasers } from './mentor-curve.mjs?v=2';
+import { renderMentorBeforeAfter } from './mentor-before-after.mjs?v=1';
 const API = '/api/ai?mentorTrades=1';
 const trade = document.getElementById('lp-live-trades'), bias = document.getElementById('lp-live-bias'), results = document.getElementById('lp-live-results'), home = document.getElementById('home-results-panel');
 const el = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
@@ -43,11 +44,12 @@ async function refresh() {
     const out = await response.json();
     if (run !== epoch || current !== uid()) return;
     const records = out.records || [];
-    if (results) { resultTeasers(results, records); premiumLink(results); }
+    if (results) { resultTeasers(results, records); renderMentorBeforeAfter(results, records); premiumLink(results); }
     if (home) {
       const card = el('div', undefined, 'mentor-evaluation');
       renderMentorEvaluation(card, records, { title:'Kasım · kümülatif sonuçlar' });
       home.replaceChildren(card);
+      renderMentorBeforeAfter(home, records);
       const count = document.getElementById('home-results-count');
       if (count) count.textContent = records.length;
     }
