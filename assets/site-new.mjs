@@ -1,7 +1,7 @@
-// Sağ üst "Yeni" rozeti — 3 günlük ömür, özellik kayıt defterinden beslenir.
+// Sağ üst "Yeni" rozeti — 1 haftalık ömür, özellik kayıt defterinden beslenir.
 // Hangi özelliğin kaç gün "yeni" kalacağı assets/site-features.mjs'de.
 const SF = window.ALFA_SITE_FEATURES || {
-  FEATURES: [], NEW_DAYS: 3,
+  FEATURES: [], NEW_DAYS: 7,
   findFeature: () => null, isNew: () => false,
   activeFeatures: () => [], activeIds: () => [],
 };
@@ -51,7 +51,7 @@ function renderPanel() {
       '<div><b>' + esc(f.label) + '</b><span>' + esc(f.desc) + '</span></div></a></li>';
   }).join('');
   if (sub) sub.textContent = items.length
-    ? 'Son eklenenler — hemen dene'
+    ? 'Son 1 haftadaki yenilikler — hemen dene'
     : 'Şu an yeni özellik yok.';
 }
 

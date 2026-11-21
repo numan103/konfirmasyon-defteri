@@ -8,11 +8,11 @@ const mod = fs.readFileSync(new URL('../assets/my-portfolio.mjs', import.meta.ur
 
 test('portföy menüsü Trader gibi dropdown, içerik Alfa Portföy / Portföyüm sekmeleri', () => {
   assert.ok(html.includes('/assets/my-portfolio.css?v=2'));
-  assert.ok(html.includes('/assets/my-portfolio.mjs?v=2'));
+  assert.ok(html.includes('/assets/my-portfolio.mjs?v=3'));
   assert.ok(html.includes('id="navdrop-portfoy"') && html.includes('class="nav-link drop-btn" id="tab-portfoy"'));
   assert.ok(html.includes('class="drop-menu"'));
-  assert.ok(html.includes('id="tab-portfoy-alpha"') && html.includes('↳ Alfa Portföy</a>'));
-  assert.ok(html.includes('id="tab-portfoy-mine"') && html.includes('↳ Portföyüm</a>'));
+  assert.ok(html.includes('id="tab-portfoy-alpha"') && html.includes('📊 Alfa Portföy</a>'));
+  assert.ok(html.includes('id="tab-portfoy-mine"') && html.includes('💼 Portföyüm</a>'));
   assert.ok(html.includes('id="mnav-portfoy"') && html.includes('class="mnav-link sub"'));
   assert.ok(html.includes('id="mnav-portfoy-alpha"') && html.includes('id="mnav-portfoy-mine"'));
   assert.ok(html.includes('id="ap2-tab-alpha"') && html.includes('id="ap2-tab-mine"'));
@@ -55,4 +55,22 @@ test('giriş yapmayan üye kişisel portföy formunu kullanamaz', () => {
   assert.match(mod, /if \(!uid\(\)\) return \{ active: '', items: \{\} \};/);
   assert.match(mod, /if \(!uid\(\)\) return;/);
   assert.match(mod, /classList\.toggle\('hidden', signed\)/);
+});
+
+test('premium kilidi yalnızca Alfa Portföy panelini etkiler, hesaba özel Portföyümü değil', () => {
+  // ap2ShowGate artık ilk .ap2-layout / .ap2-hd-actions yerine alpha panelini hedefliyor.
+  const gate = html.slice(html.indexOf('function ap2ShowGate()'), html.indexOf('function ap2RenderPublicTeaser()'));
+  assert.match(gate, /getElementById\('ap2-panel-alpha'\)/, 'gate alpha paneline scoped olmalı');
+  assert.doesNotMatch(gate, /querySelector\('#page-portfoy \.ap2-layout'\)/);
+  assert.doesNotMatch(gate, /querySelector\('#page-portfoy \.ap2-hd-actions'\)/);
+
+  // Girişli üye Portföyüm sekmesindeyse renderAlfaPortfoy2 premium gate\'i atlar.
+  const render = html.slice(html.indexOf('function renderAlfaPortfoy2()'), html.indexOf('function renderAlfaPortfoy2()') + 900);
+  assert.match(render, /ap2-tab-mine.*classList\.contains\('on'\)/);
+  assert.match(render, /AUTH\.user && AUTH\.user\.id/);
+  assert.match(render, /classList\.remove\('ap2-viewer'\)/);
+
+  // Sekme değişince kişisel panelin gizlenmiş stilleri temizlenir.
+  assert.match(mod, /const layout = \$\('mp-layout'\); if \(layout\) layout\.style\.display = ''/);
+  assert.match(mod, /window\.renderAlfaPortfoy2\(\)/);
 });

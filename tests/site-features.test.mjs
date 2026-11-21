@@ -32,9 +32,9 @@ async function withFetch(impl, fn) {
   try { return await fn(); } finally { globalThis.fetch = original; }
 }
 
-test('özellik kayıt defteri 3 günlük pencereyi uygular', () => {
-  assert.equal(NEW_DAYS, 3);
-  assert.ok(FEATURES.length >= 6);
+test('özellik kayıt defteri 1 haftalık (7 günlük) pencereyi uygular', () => {
+  assert.equal(NEW_DAYS, 7);
+  assert.ok(FEATURES.length >= 8);
   assert.equal(dayDiff('2026-11-20', launch), 0);
   assert.equal(dayDiff('2026-11-18', launch), 2);
   assert.equal(dayDiff('2026-11-01', launch), 19);
@@ -44,14 +44,26 @@ test('özellik kayıt defteri 3 günlük pencereyi uygular', () => {
   for (const id of ['defter', 'review', 'pano']) {
     assert.equal(isNewId(id, launch), false, id);
   }
-  // Yeni eklenenler 3 gün boyunca yeni.
+  // 20 Kasım'da eklenenler 1 hafta boyunca yeni.
   for (const id of ['morning-checkin', 'checkin-config', 'ayna-sync']) {
     assert.equal(isNewId(id, launch), true, id);
-    assert.equal(isNewId(id, new Date(launch.getTime() + 2 * DAY)), true, id + ' 3. gün');
-    assert.equal(isNewId(id, new Date(launch.getTime() + 3 * DAY)), false, id + ' 4. gün');
+    assert.equal(isNewId(id, new Date(launch.getTime() + 6 * DAY)), true, id + ' 7. gün');
+    assert.equal(isNewId(id, new Date(launch.getTime() + 7 * DAY)), false, id + ' 8. gün');
   }
   assert.deepEqual(activeIds(launch), ['morning-checkin', 'checkin-config', 'ayna-sync']);
   assert.equal(activeFeatures(launch).length, 3);
+
+  // 21 Kasım'da yayına giren portföy kopyası ve günlük görevler de yeni.
+  const today = new Date('2026-11-21T12:34:00Z');
+  for (const id of ['portfoy-clone', 'daily-tasks']) {
+    assert.equal(isNewId(id, today), true, id);
+    assert.equal(isNewId(id, new Date(today.getTime() + 6 * DAY)), true, id + ' 7. gün');
+    assert.equal(isNewId(id, new Date(today.getTime() + 7 * DAY)), false, id + ' 8. gün');
+  }
+  assert.deepEqual(activeIds(today), [
+    'morning-checkin', 'checkin-config', 'ayna-sync', 'portfoy-clone', 'daily-tasks',
+  ]);
+  assert.equal(activeFeatures(today).length, 5);
   assert.equal(isNew(null, launch), false);
   assert.equal(isNew({ since: '' }, launch), false);
   assert.equal(findFeature('yok'), null);
@@ -82,10 +94,12 @@ test('siteye yeni özellik eklenince Telegrama tek mesaj gider', async () => {
 
   assert.equal(res.code, 200);
   assert.equal(res.body.ok, true);
-  assert.equal(res.body.sent, 3);
+  assert.equal(res.body.sent, 5);
   assert.equal(calls.tg.length, 1);
   assert.match(calls.tg[0].body.text, /Sabah Kartı/);
   assert.match(calls.tg[0].body.text, /Ayna'ya otomatik kayıt/);
+  assert.match(calls.tg[0].body.text, /Portföyüm/);
+  assert.match(calls.tg[0].body.text, /Günlük Görevler/);
   assert.doesNotMatch(calls.tg[0].body.text, /Check List/);
   assert.equal(calls.writes.length, 1);
   assert.deepEqual(calls.writes[0].id, 'site-features');

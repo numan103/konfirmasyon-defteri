@@ -95,8 +95,8 @@ test('üst rozet kayıt defterinden beslenir, sabit içerik değildir', () => {
   assert.ok(landing.includes('id="whats-new-btn"'));
   assert.ok(appNav.includes('id="whats-new-btn-app"'));
   assert.ok(!/class="new-badge"/.test(landing));
-  assert.ok(html.includes('/assets/site-features.mjs?v=2'));
-  assert.ok(html.includes('/assets/site-new.mjs?v=2'));
+  assert.ok(html.includes('/assets/site-features.mjs?v=3'));
+  assert.ok(html.includes('/assets/site-new.mjs?v=3'));
   assert.ok(html.includes('id="wn-list"') && html.includes('id="wn-sub"'));
   assert.ok(!html.includes('Sabah Kartı</b>'), 'panel sabit satır içermemeli');
   assert.ok(html.includes('<span class="wn-count"></span>'));
@@ -105,7 +105,7 @@ test('üst rozet kayıt defterinden beslenir, sabit içerik değildir', () => {
   assert.ok(css.includes('.new-corner[hidden]') && css.includes('#page-ayna > .new-corner'));
   assert.ok(css.includes('background: linear-gradient(135deg, #7c5cff, #22d3ee)'), 'çip parlak gradient olmalı');
   assert.ok(css.includes('color: #fff; font-size: 11px; font-weight: 800'), 'çip yazısı beyaz ve net olmalı');
-  assert.ok(css.includes('background: rgba(0, 0, 0, .26)') && css.includes('color: #fff; font-size: 10px'), '3 sayacı net görünmeli');
+  assert.ok(css.includes('background: rgba(0, 0, 0, .26)') && css.includes('color: #fff; font-size: 10px'), 'sayaç net görünmeli');
   assert.ok(!css.includes('#ffb14e') && !css.includes('255, 177, 78') && !css.includes('#7b78f5'), 'eski turuncu/koyu ton kalmamalı');
 });
 
@@ -113,14 +113,14 @@ test('aktif özellikler panelde listelenir, rozet sayısı gösterilir', () => {
   const app = load();
   assert.equal(app.panel.classes.has('hidden'), true);
   assert.equal(app.list.innerHTML.length > 0, true);
-  for (const label of ['Sabah Kartı', 'Kendi kriterini ekle', 'Ayna', 'otomatik kayıt']) {
+  for (const label of ['Sabah Kartı', 'Kendi kriterini ekle', 'Ayna', 'otomatik kayıt', 'Portföyüm', 'Günlük Görevler']) {
     assert.ok(app.list.innerHTML.includes(label), label);
   }
   assert.doesNotMatch(app.list.innerHTML, /Check List/);
-  assert.equal(app.counts[0].textContent, '3');
+  assert.equal(app.counts[0].textContent, '5');
   assert.equal(app.buttons[0].hidden, false);
   assert.equal(app.buttons[0].classes.has('seen'), false);
-  assert.match(app.sub.textContent, /Son eklenenler/);
+  assert.match(app.sub.textContent, /Son 1 haftadaki yenilikler/);
 });
 
 test('süresi dolan rozetler gizlenir, yeni özellik rozeti kalır', () => {
@@ -199,13 +199,13 @@ test('yeni özellik listesi değişince sunucuya tek bildirim gider', async () =
 
 test('tüm rozet ve köşe etiketleri kayıt defterindeki bir kimliğe bağlı', () => {
   const tags = [...html.matchAll(/data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(tags.length, 16);
+  assert.equal(tags.length, 19);
   for (const id of tags) {
     const clean = id.includes('c.page') ? 'review' : id;
     assert.ok(registry.findFeature(clean), 'kimlik kayıtlı olmalı: ' + id);
   }
   const corners = [...html.matchAll(/<span class="new-corner[^"]*" data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'ayna-sync']);
+  assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'daily-tasks', 'ayna-sync']);
   const dynamic = /data-new-feature="' \+ c\.page \+ '"/.test(html);
   assert.ok(dynamic, 'ek kartları dinamik kimlik taşımalı');
 });

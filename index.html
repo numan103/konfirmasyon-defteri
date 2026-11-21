@@ -54,9 +54,9 @@
   <script type="module" src="/assets/morning-checkin.mjs?v=3"></script>
   <link rel="stylesheet" href="/assets/daily-tasks.css?v=1">
   <script type="module" src="/assets/daily-tasks.mjs?v=1"></script>
-  <link rel="stylesheet" href="/assets/site-new.css?v=5">
-  <script type="module" src="/assets/site-features.mjs?v=2"></script>
-  <script type="module" src="/assets/site-new.mjs?v=2"></script>
+  <link rel="stylesheet" href="/assets/site-new.css?v=6">
+  <script type="module" src="/assets/site-features.mjs?v=3"></script>
+  <script type="module" src="/assets/site-new.mjs?v=3"></script>
 <script type="module" src="/assets/signup-funnel.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <link rel="stylesheet" href="/assets/daily-note-social.css?v=1">
@@ -75,7 +75,7 @@
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
 <link rel="stylesheet" href="/assets/my-portfolio.css?v=2">
-<script type="module" src="/assets/my-portfolio.mjs?v=2"></script>
+<script type="module" src="/assets/my-portfolio.mjs?v=3"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -6071,10 +6071,10 @@
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <div class="nav-drop" id="navdrop-portfoy">
-        <button type="button" class="nav-link drop-btn" id="tab-portfoy" aria-label="Portföy Yönetimi menüsü"><span id="portfoy-label">💼 Portföy Yönetimi</span> ▾</button>
+        <button type="button" class="nav-link drop-btn" id="tab-portfoy" aria-label="Portföy Yönetimi menüsü"><span id="portfoy-label">💼 Portföy Yönetimi</span> ▾<i class="new-badge" data-new-feature="portfoy-clone" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Hesabına özel Portföyüm ve çoklu portföy">YENİ</i></button>
         <div class="drop-menu">
-          <a href="?page=portfoy&portfoyTab=alpha" class="nav-link" id="tab-portfoy-alpha" data-nav>↳ Alfa Portföy</a>
-          <a href="?page=portfoy&portfoyTab=mine" class="nav-link" id="tab-portfoy-mine" data-nav>↳ Portföyüm</a>
+          <a href="?page=portfoy&portfoyTab=alpha" class="nav-link" id="tab-portfoy-alpha" data-nav>📊 Alfa Portföy</a>
+          <a href="?page=portfoy&portfoyTab=mine" class="nav-link" id="tab-portfoy-mine" data-nav>💼 Portföyüm</a>
         </div>
       </div>
       <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
@@ -6125,9 +6125,9 @@
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
-      <div class="mnav-group" data-mnav="portfoy" id="mnav-portfoy"><span id="mnav-portfoy-label">💼 Portföy Yönetimi</span></div>
-      <a href="?page=portfoy&portfoyTab=alpha" class="mnav-link sub" data-nav data-mnav="portfoy-alpha" id="mnav-portfoy-alpha">↳ Alfa Portföy</a>
-      <a href="?page=portfoy&portfoyTab=mine" class="mnav-link sub" data-nav data-mnav="portfoy-mine" id="mnav-portfoy-mine">↳ Portföyüm</a>
+      <div class="mnav-group" data-mnav="portfoy" id="mnav-portfoy"><span id="mnav-portfoy-label">💼 Portföy Yönetimi</span><i class="new-badge" data-new-feature="portfoy-clone" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Hesabına özel Portföyüm ve çoklu portföy">YENİ</i></div>
+      <a href="?page=portfoy&portfoyTab=alpha" class="mnav-link sub" data-nav data-mnav="portfoy-alpha" id="mnav-portfoy-alpha">📊 Alfa Portföy</a>
+      <a href="?page=portfoy&portfoyTab=mine" class="mnav-link sub" data-nav data-mnav="portfoy-mine" id="mnav-portfoy-mine">💼 Portföyüm</a>
       <a href="?page=eduplans" class="mnav-link" data-nav data-mnav="eduplans" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=edustudio" class="mnav-link" data-nav data-mnav="edustudio" style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
@@ -6409,6 +6409,7 @@
         <div class="hg-steps" id="hg-steps"></div>
       </section>
       <section id="daily-tasks-panel" class="panel dt-panel" aria-label="Günlük görevler">
+        <span class="new-corner" data-new-feature="daily-tasks" hidden>YENİ</span>
         <div class="dt-head">
           <div>
             <span class="daily-kicker">✅ Gün içi görevler</span>
@@ -19938,10 +19939,14 @@ function ap2SummaryMarkup(d) {
 }
 function ap2ShowGate() {
   document.getElementById('page-portfoy').classList.add('ap2-viewer');
-  document.querySelector('#page-portfoy .ap2-hd-actions').style.display = 'none';
-  document.querySelector('#page-portfoy .ap2-layout').style.display = 'none';
+  // Premium kilidi yalnızca paylaşılan Alfa Portföy panelini etkiler.
+  // "Portföyüm" hesaba özel ve cihaz içi olduğu için asla gizlenmez.
+  var alpha = document.getElementById('ap2-panel-alpha') || document.getElementById('page-portfoy');
+  var alphaActions = alpha.querySelector('.ap2-hd-actions'); if (alphaActions) alphaActions.style.display = 'none';
+  var alphaLayout = alpha.querySelector('.ap2-layout'); if (alphaLayout) alphaLayout.style.display = 'none';
   ['ap2-trades', 'ap2-monthly'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
   var target = document.getElementById('ap2-empty');
+  if (!target) return;
   target.style.display = '';
   target.classList.add('ap2-summary-only');
   if (!target.querySelector('.ap2-sum-row')) target.textContent = 'Portföy özeti yükleniyor…';
@@ -21674,7 +21679,17 @@ async function ap2ResetAll() {
   finally { ap2Restoring = false; ap2SafetyControls(); }
 }
 function renderAlfaPortfoy2() {
-  if (!ap2IsMember()) { ap2ShowGate(); return; }
+  if (!ap2IsMember()) {
+    // "Portföyüm" tamamen cihaz içi ve hesaba özel; premium doğrulaması gerekmez.
+    // Aktif sekme Portföyüm ise giriş yapmış üyenin kendi kartlarını engelleme.
+    var mineOn = false;
+    try { mineOn = !!document.getElementById('ap2-tab-mine')?.classList.contains('on'); } catch (e) {}
+    if (mineOn && typeof AUTH !== 'undefined' && AUTH.user && AUTH.user.id) {
+      document.getElementById('page-portfoy').classList.remove('ap2-viewer');
+      return;
+    }
+    ap2ShowGate(); return;
+  }
   ap2RenderRecoveryNotice();
   ap2SafetyControls();
   document.querySelector('#page-portfoy .ap2-hd-actions').style.display = '';
@@ -35759,7 +35774,7 @@ document.addEventListener('input', function (e) {
 </script>
   <div class="whats-new-panel hidden" id="whats-new-panel" role="dialog" aria-label="Yeni güncellemeler">
     <div class="wn-head"><strong>✦ Sitede yeni</strong><button type="button" class="wn-close" id="wn-close" aria-label="Kapat">×</button></div>
-    <p class="wn-sub" id="wn-sub">Son eklenenler — hemen dene</p>
+    <p class="wn-sub" id="wn-sub">Son 1 haftadaki yenilikler — hemen dene</p>
     <ul class="wn-list" id="wn-list"></ul>
     
     <div class="wn-actions">

@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v132-daily-tasks';
-const BUILD_ID = 'b193-daily-tasks';
+﻿const CACHE = 'alfa-v133-new-badges';
+const BUILD_ID = 'b194-new-badges';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

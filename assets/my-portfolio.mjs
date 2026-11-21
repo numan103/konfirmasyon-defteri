@@ -475,7 +475,16 @@ function activate(which) {
   $('ap2-panel-alpha')?.classList.toggle('hidden', mine);
   $('ap2-panel-mine')?.classList.toggle('hidden', !mine);
   markActive(mine ? 'mine' : 'alpha');
-  if (mine) render();
+  if (mine) {
+    // Kişisel panel premium kilidinden etkilenmez; eski gating stillerini temizle.
+    const page = $('page-portfoy'); if (page) page.classList.remove('ap2-viewer');
+    const layout = $('mp-layout'); if (layout) layout.style.display = '';
+    const actions = $('mp-app')?.querySelector('.ap2-hd-actions'); if (actions) actions.style.display = '';
+    render();
+  } else if (typeof window.renderAlfaPortfoy2 === 'function') {
+    // Paylaşılan panele dönünce erişim kilidini yeniden uygula.
+    window.renderAlfaPortfoy2();
+  }
   try {
     const u = new URL(location.href);
     if (u.searchParams.get('portfoyTab') !== (mine ? 'mine' : 'alpha')) {

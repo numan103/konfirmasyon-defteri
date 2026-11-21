@@ -44,12 +44,12 @@ test('yeni özellik sayfa başlıkları ve ek kartları rozet taşır', () => {
 
 test('her YENİ rozeti özellik kayıt defterindeki bir kimliğe bağlı', () => {
   const tags = [...html.matchAll(/<i class="new-badge" data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(tags.length, 13);
-  assert.deepEqual([...new Set(tags)], ['defter', 'review', 'pano', "' + c.page + '"]);
-  assert.ok(html.includes('/assets/site-features.mjs'), '3 günlük ömür kayıt defteri yüklenmeli');
+  assert.equal(tags.length, 15);
+  assert.deepEqual([...new Set(tags)], ['defter', 'review', 'pano', 'portfoy-clone', "' + c.page + '"]);
+  assert.ok(html.includes('/assets/site-features.mjs'), '1 haftalık ömür kayıt defteri yüklenmeli');
   const corners = [...html.matchAll(/<span class="new-corner[^"]*" data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'ayna-sync']);
-  assert.ok(html.includes('/assets/site-new.css?v=5') && html.includes('/assets/site-new.mjs?v=2'));
+  assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'daily-tasks', 'ayna-sync']);
+  assert.ok(html.includes('/assets/site-new.css?v=6') && html.includes('/assets/site-new.mjs?v=3'));
 });
 
 test('rozet stili ve çeviri anahtarları tanımlı', () => {

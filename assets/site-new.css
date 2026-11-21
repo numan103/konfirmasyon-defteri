@@ -48,6 +48,7 @@
 #page-ayna { position: relative; }
 #page-ayna > .new-corner { top: 8px; right: 12px; }
 #mc-card { position: relative; }
+#daily-tasks-panel { position: relative; }
 
 .whats-new-panel {
   position: fixed; top: 62px; right: 16px; z-index: 700;
