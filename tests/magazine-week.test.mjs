@@ -7,11 +7,11 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const start = html.indexOf('function magPostDate(');
 const end = html.indexOf('function magKbIsolate(');
 assert.ok(start > 0 && end > start, 'haftalık dergi yardımcıları bulunamadı');
-const ctx = { magWeek: () => '16 – 22 Kasım' };
+const ctx = { Date, magWeek: () => '16 – 22 Kasım' };
 vm.runInNewContext(html.slice(start, end) + '\nthis.magApplyWeek = magApplyWeek; this.magWeekLabelFromDates = magWeekLabelFromDates; this.magIsoWeek = magIsoWeek;', ctx);
 
 const NOW = new Date(2026, 10, 21, 12, 0, 0);
-const entry = (id, publishedAt, extra = {}) => ({ id, title: id, publishedAt, type: '', ...extra });
+const entry = (id, publishedAt, extra = {}) => ({ id, title: id, publishedAt, type: '', sourceKind: 'news-channel', ...extra });
 
 test('haftalık dergi Telegram tarihi olmayan eski seed gönderilerini dışarı atar', () => {
   const data = {
@@ -26,12 +26,12 @@ test('haftalık dergi Telegram tarihi olmayan eski seed gönderilerini dışarı
     ],
   };
   ctx.magApplyWeek(data, NOW);
-  assert.deepEqual(data.entries.map((e) => e.id), ['fresh-a', 'fresh-b']);
+  assert.deepEqual(data.entries.map((e) => e.id), ['fresh-b', 'fresh-a']);
   assert.equal(data.weekLabel, '19 – 20 Kasım');
   assert.equal(data.issueNo, ctx.magIsoWeek(new Date(2026, 10, 19)));
 });
 
-test('güncellemeler yalnızca korunan analize bağlıysa haftada kalır', () => {
+test('işlem güncellemeleri dergi kanalının haftalık sayfasına girmez', () => {
   const data = {
     entries: [
       entry('old', '2026-11-02T10:00:00.000Z'),
@@ -41,14 +41,14 @@ test('güncellemeler yalnızca korunan analize bağlıysa haftada kalır', () =>
     ],
   };
   ctx.magApplyWeek(data, NOW);
-  assert.deepEqual(data.entries.map((e) => e.id), ['fresh', 'upd-keep']);
+  assert.deepEqual(data.entries.map((e) => e.id), ['fresh']);
 });
 
 test('bu hafta gönderi yoksa dergi boş kalır ve eski etiket uydurulmaz', () => {
   const data = { issueNo: 7, weekLabel: '1 Kasım', entries: [entry('old', '2026-11-09T10:00:00.000Z')] };
   ctx.magApplyWeek(data, NOW);
   assert.deepEqual(data.entries, []);
-  assert.equal(data.weekLabel, '1 Kasım');
+  assert.equal(data.weekLabel, '16 – 22 Kasım');
   assert.equal(data.issueNo, 7);
 });
 
@@ -64,6 +64,16 @@ test('hem tam dergi hem ana sayfa gömülü dergi haftalık filtreyi uygular', (
   const home = html.slice(html.indexOf('async function loadHomeMagazine()'), html.indexOf('function invalidateHomeMagazine()'));
   assert.match(full, /magApplyWeek\(magData\)/);
   assert.match(home, /homeMagData = magApplyWeek\(j\.data\)/);
-  assert.match(html, /className = 'e-img-none'/);
-  assert.match(html, /className = 'dn-photo-empty'/);
+  assert.ok(html.includes('/assets/alfa-dergi-cover.svg?v=1'));
+  assert.ok(html.includes('/assets/daily-notes-cover.svg?v=1'));
+});
+
+test('forum sohbeti ve teknik başlık yanıtları içindekilere karışmaz', () => {
+  const data = { entries: [
+    entry('channel', '2026-11-20T10:00:00Z', { sourceKind: undefined, sourceLink: 'https://t.me/alfakasim/963' }),
+    entry('chat', '2026-11-20T11:00:00Z', { sourceKind: undefined, sourceLink: 'https://t.me/alfakasim/6/965' }),
+    entry('topic', '2026-11-20T12:00:00Z', { sourceKind: 'tech-topic' }),
+  ] };
+  ctx.magApplyWeek(data, NOW);
+  assert.deepEqual(data.entries.map(e => e.id), ['channel']);
 });

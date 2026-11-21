@@ -77,7 +77,7 @@ test('morning check-in markup is local-only and editable by the trader', () => {
   }
   assert.ok(section.includes('class="mc-edit"') && section.includes('Düzenle'));
   assert.ok(html.includes('/assets/morning-checkin.css?v=2'));
-  assert.ok(html.includes('/assets/morning-checkin.mjs?v=2'));
+  assert.ok(html.includes('/assets/morning-checkin.mjs?v=3'));
   assert.ok(css.includes('.mc-edit-row'));
   assert.ok(css.includes('max-width: calc(100vw - 32px)'));
   assert.ok(/@media \(max-width: 640px\)/.test(css));
@@ -185,10 +185,27 @@ test('later, reset, chip reopen, Escape and stale records behave correctly', () 
   assert.equal(app.els['mc-card'].classes.has('hidden'), false);
   app.document.fire('keydown', { key: 'Escape' });
   assert.equal(app.els['mc-card'].classes.has('hidden'), true);
-  assert.equal(app.els['mc-chip'].classes.has('hidden'), true);
+  assert.equal(app.els['mc-chip'].classes.has('hidden'), false);
 
   store[KEY] = JSON.stringify({ date: '1999-01-01', done: true, values: ['angry'] });
+  delete store['alfa-morning-checkin-seen-v1'];
   assert.equal(load(store).els['mc-card'].classes.has('hidden'), false);
+});
+
+test('shown once per day even without answering; close, reload and navigation leave the manual chip', () => {
+  const store = {};
+  const first = load(store);
+  assert.equal(first.els['mc-card'].classes.has('hidden'), false);
+  assert.ok(store['alfa-morning-checkin-seen-v1']);
+  first.els['mc-close'].fire('click');
+  assert.equal(first.els['mc-chip'].classes.has('hidden'), false);
+  const second = load(store);
+  assert.equal(second.els['mc-card'].classes.has('hidden'), true);
+  second.els['mc-chip'].fire('click');
+  assert.equal(second.els['mc-card'].classes.has('hidden'), false);
+  second.document.body.dataset.page = 'defter'; second.observerCb();
+  second.document.body.dataset.page = 'home'; second.observerCb();
+  assert.equal(second.els['mc-card'].classes.has('hidden'), true);
 });
 
 test('card stays closed outside home and follows data-page changes', () => {

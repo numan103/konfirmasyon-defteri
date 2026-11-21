@@ -118,7 +118,8 @@ test('complete data URI media survives the public projection; truncated ones are
   assert.match(api, /coverBg: media\(raw\.coverBg\)/);
   const safe = html.slice(html.indexOf('function magSafeBg('), html.indexOf('async function saveNews('));
   assert.match(safe, /payload\.length % 4 !== 0/);
-  assert.match(html, /const coverBg = magSafeBg\(magData\.coverBg\)/);
+  assert.ok(html.includes("magData.coverTheme === 'custom' && magSafeBg(magData.coverBg)"));
+  assert.ok(html.includes("'/assets/alfa-dergi-cover.svg?v=1'"));
   assert.match(html, /const avBg = magSafeBg\(a\.photo\)/);
   assert.match(html, /const avBg = author && magSafeBg\(author\.photo\)/);
 });

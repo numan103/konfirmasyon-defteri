@@ -65,6 +65,30 @@ const techMsg = over => ({
   ...over,
 });
 
+test('real channel_post and edited_channel_post are ingested with largest photo only', async t => {
+  const f = fixture(t);
+  const message = newsMsg({ photo: [{ file_id: 'small' }, { file_id: 'large' }] });
+  assert.equal(isMagazineUpdate({ channel_post: message }), true);
+  await ingestMagazineUpdate({ channel_post: message });
+  assert.equal(f.row.data.entries.length, 1);
+  assert.equal(f.row.data.entries[0].sourceKind, 'news-channel');
+  assert.deepEqual(f.row.data.entries[0].photoIds, ['large']);
+  await ingestMagazineUpdate({ edited_channel_post: { ...message, text: 'Düzenlenmiş haftalık bülten' } });
+  assert.equal(f.row.data.entries[0].body, 'Düzenlenmiş haftalık bülten');
+});
+
+test('Telegram album stays one article with all distinct photos, including captionless parts', async t => {
+  const f = fixture(t);
+  const first = newsMsg({ media_group_id: 'album1', message_id: 601 });
+  const next = newsMsg({ media_group_id: 'album1', message_id: 602, text: '', photo: [{ file_id: 'second-photo' }] });
+  await ingestMagazineUpdate({ channel_post: first });
+  await ingestMagazineUpdate({ channel_post: next });
+  await ingestMagazineUpdate({ channel_post: next });
+  assert.equal(f.row.data.entries.length, 1);
+  assert.deepEqual(f.row.data.entries[0].photoIds, ['news_photo_file_id_123', 'second-photo']);
+  assert.equal(f.row.data.entries[0].body, first.text);
+});
+
 test('magazine config exposes the two configured sources and fails closed without a news chat', () => {
   assert.deepEqual(MAG_CATEGORIES, ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz']);
   const cfg = magazineConfig();

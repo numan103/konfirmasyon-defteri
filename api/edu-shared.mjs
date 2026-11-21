@@ -64,7 +64,13 @@ async function alfaNews(req, res) {
       }
       return text(s, 600);
     };
-    const entries = Array.isArray(raw.entries) ? raw.entries.slice(0, 60).map(e => ({
+    // Only the magazine channel belongs in the reader; forum replies and seeded
+    // undated entries remain stored for the editor, not published as weekly pages.
+    const channelEntries = (Array.isArray(raw.entries) ? raw.entries : []).filter(e =>
+      e && e.type !== 'update' && e.publishedAt &&
+      (e.sourceKind === 'news-channel' || (!e.sourceKind && /^https:\/\/t\.me\/[^/]+\/\d+$/.test(e.sourceLink || '')))
+    );
+    const entries = channelEntries.slice(0, 60).map(e => ({
       id: text(e && e.id, 80),
       title: text(e && e.title, 200),
       body: text(e && e.body, 40000),
@@ -75,7 +81,7 @@ async function alfaNews(req, res) {
       images: (function () {
         const own = Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => media(u)).filter(Boolean) : [];
         const tg = Array.isArray(e && e.photoIds)
-          ? e.photoIds.slice(0, 3).map(id => text(id, 250)).filter(Boolean)
+           ? (e.mediaGroupId ? e.photoIds.slice(0, 12) : e.photoIds.slice(-1)).map(id => text(id, 250)).filter(Boolean)
             .map(id => '/api/tg?magPhoto=' + encodeURIComponent(id))
           : [];
         return own.concat(tg).slice(0, 12);
@@ -85,8 +91,9 @@ async function alfaNews(req, res) {
       ctaUrl: text(e && e.ctaUrl, 600),
       category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
       sourceLink: text(e && e.sourceLink, 300),
+      sourceKind: 'news-channel',
       publishedAt: text(e && e.publishedAt, 40),
-    })) : [];
+    }));
     const authors = Array.isArray(raw.authors) ? raw.authors.slice(0, 20).map(a => ({
       id: text(a && a.id, 80),
       name: text(a && a.name, 120),
@@ -97,6 +104,7 @@ async function alfaNews(req, res) {
       issueNo: Number.isFinite(raw.issueNo) ? raw.issueNo : 1,
       weekLabel: text(raw.weekLabel, 120),
       coverBg: media(raw.coverBg),
+      coverTheme: raw.coverTheme === 'custom' ? 'custom' : 'editorial',
       ctaLabel: text(raw.ctaLabel, 120),
       ctaUrl: text(raw.ctaUrl, 600),
       rosterVer: 2,

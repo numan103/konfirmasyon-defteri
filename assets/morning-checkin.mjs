@@ -1,6 +1,13 @@
 // Sabah trader check-in'i. Yalnızca yerel kayıt; sunucuya veri gönderilmez.
 const KEY = 'alfa-morning-checkin-v1';
 const CFG_KEY = 'alfa-morning-checkin-config-v1';
+const SEEN_KEY = 'alfa-morning-checkin-seen-v1';
+let seenToday = '';
+try { seenToday = localStorage.getItem(SEEN_KEY) || ''; } catch {}
+function markSeen() {
+  seenToday = localDate();
+  try { localStorage.setItem(SEEN_KEY, seenToday); } catch {}
+}
 const GROUPS = ['Uyku', 'Duygu', 'Odak', 'Genel'];
 
 const DEFAULT_ITEMS = [
@@ -69,6 +76,7 @@ if (root) {
   let config = loadConfig();
 
   const showCard = () => {
+    markSeen();
     card.classList.remove('hidden');
     chip.classList.add('hidden');
     card.querySelector('.mc-save')?.focus();
@@ -124,7 +132,7 @@ if (root) {
     }
     const record = read();
     const today = localDate();
-    if (!record || record.date !== today || (!record.done && !record.dismissed)) {
+    if (seenToday !== today && (!record || record.date !== today || (!record.done && !record.dismissed))) {
       root.classList.remove('hidden');
       showCard();
       return;
@@ -207,12 +215,12 @@ if (root) {
     renderEditor();
   });
 
-  closeBtn?.addEventListener('click', hideAll);
+   closeBtn?.addEventListener('click', showChip);
   chip?.addEventListener('click', showCard);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
       if (editor && !editor.classList.contains('hidden')) closeEditor();
-      else if (!card.classList.contains('hidden')) hideAll();
+      else if (!card.classList.contains('hidden')) showChip();
     }
   });
 
