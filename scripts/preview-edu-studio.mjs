@@ -11,7 +11,8 @@ http.createServer((req, res) => {
   }
   if (u.pathname === '/example.svg') { res.setHeader('Content-Type', 'image/svg+xml'); res.end(decodeURIComponent(image.split(',')[1])); return; }
   if (u.pathname !== '/') { res.statusCode = 404; res.end(); return; }
-  const role = u.searchParams.get('role') === 'reader' ? 'reader' : 'admin';
+  const wanted = u.searchParams.get('role');
+  const role = wanted === 'reader' || wanted === 'premium' ? wanted : 'admin';
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const style = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n');
   const fragment = html.slice(html.indexOf('<div id="page-edustudio"'), html.indexOf('<div id="page-strategies"'));
@@ -20,10 +21,11 @@ http.createServer((req, res) => {
   const code = html.slice(html.indexOf("const EGITIM_KEY ="), html.indexOf('function panoRoomId()'));
   const authCallback = html.slice(html.indexOf('AUTH.client.auth.onAuthStateChange((event, session)'), html.indexOf("  $('auth-form').addEventListener"));
   const bootstrap = `
-    const AUTH={user:{id:'local-synthetic',email:${JSON.stringify(role === 'admin' ? 'admin@test.dev' : 'reader@test.dev')}},client:{auth:{onAuthStateChange(fn){window.syntheticAuthEvent=fn}}}}, ADMIN_EMAIL='admin@test.dev', SITE={admin:${role === 'admin'},tier:'free'};
+    const AUTH={user:{id:'local-synthetic',email:${JSON.stringify(role === 'admin' ? 'admin@test.dev' : 'reader@test.dev')}},client:{auth:{onAuthStateChange(fn){window.syntheticAuthEvent=fn}}}}, ADMIN_EMAIL='admin@test.dev', SITE={admin:${role === 'admin'},tier:${JSON.stringify(role === 'premium' ? 'ref' : 'free')}};
     let currentPage='egitim'; const lang='tr'; const LANG='tr';
     function siteIsAdmin(){return SITE.admin}
     function magIsAdmin(){return SITE.admin}
+    function refUnlocked(){return SITE.admin||SITE.tier==='ref'}
     function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
     function showPage(name){chDraftCapture();chStudioNavigate(name);currentPage=name;document.querySelectorAll('[id^="page-"]').forEach(e=>e.classList.toggle('hidden',e.id!=='page-'+name));if(name==='edustudio')renderEduStudio();if(name==='egitim')renderEgitim();if(name==='home')chLoadHomeDaily()}
     function mountEduFeedback(){}
@@ -62,10 +64,11 @@ http.createServer((req, res) => {
   `;
   const init = `
     channelsLoaded=true;
-    channelsData={traders:{teacher:{id:'teacher',name:'Eğitmen · Yerel Test',owner:'admin@test.dev',seeded:true,sections:{paid:[{id:'obo',title:'OBO – TOBO',videos:[{id:'lesson',title:'Oluşum, teyit ve trickler',type:'video',url:${JSON.stringify(role === 'admin' ? 'https://youtu.be/abcdefghijk' : '')},access:'paid',plans:['video'],locked:${role === 'reader'},body:${JSON.stringify(role === 'admin' ? '## Formasyonu nasıl okuyoruz?\nBaş ve omuzları ayır; boyun çizgisi kapanışını bekle.\n{{foto:1}}' : '')},tricks:${JSON.stringify(role === 'admin' ? '- Kırılım öncesinde kesinleşmiş formasyon sayma.\n- Retestte tepkiyi izle.' : '')},photos:${role === 'admin' ? "[{url:'http://127.0.0.1:4319/example.svg',caption:'Boyun çizgisi — sentetik örnek'}]" : '[]'},vids:[]}]}]},secMeta:[{id:'paid',title:'Ücretli Teknik Eğitim',access:'paid',plans:['video']}]}},order:['teacher']};
+    channelsData={traders:{teacher:{id:'teacher',name:'Eğitmen · Yerel Test',owner:'admin@test.dev',seeded:true,sections:{paid:[{id:'obo',title:'OBO – TOBO',videos:[{id:'lesson',title:'Oluşum, teyit ve trickler',type:'video',url:${JSON.stringify(role !== 'reader' ? 'https://youtu.be/abcdefghijk' : '')},access:'paid',plans:['video'],locked:${role === 'reader'},body:${JSON.stringify(role !== 'reader' ? '## Formasyonu nasıl okuyoruz?\nBaş ve omuzları ayır; boyun çizgisi kapanışını bekle.\n{{foto:1}}' : '')},tricks:${JSON.stringify(role !== 'reader' ? '- Kırılım öncesinde kesinleşmiş formasyon sayma.\n- Retestte tepkiyi izle.' : '')},photos:${role !== 'reader' ? "[{url:'http://127.0.0.1:4319/example.svg',caption:'Boyun çizgisi — sentetik örnek'}]" : '[]'},vids:[]}]}]},secMeta:[{id:'paid',title:'Ücretli Teknik Eğitim',access:'paid',plans:['video']}]}},order:['teacher']};
     ${authCallback}
-    bindChannelsPage(); channelOpen='teacher';chSec='paid';
-    showPage(${role === 'admin' ? "'edustudio'" : "'egitim'"}); if(${role === 'reader'})openCourse('teacher','paid');
+    bindChannelsPage(); chSec='paid';
+    ${role === 'reader' ? "channelOpen='teacher';" : ''}
+    showPage(${role === 'admin' ? "'edustudio'" : "'egitim'"}); ${role === 'reader' ? "openCourse('teacher','paid');" : ''}
     document.body.dataset.fixtureRole=${JSON.stringify(role)};
   `;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');

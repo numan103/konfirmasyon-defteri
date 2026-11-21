@@ -285,6 +285,8 @@ test('site wires the admin analytics page and anonymous tracker', () => {
   assert.ok(html.includes("document.getElementById('tab-analitik')"), 'admin-only nav tab is toggled');
   assert.ok(html.includes('growthSummary'), 'admin panel renders the growth summary');
   assert.ok(html.includes('class="ana-fold"'), 'detailed tables are folded away by default');
+  assert.ok(html.includes('id="ana-shortcuts"'), 'admin panel opens with one-click shortcuts');
+  assert.ok(html.includes('class="ana-fold ana-visual-fold"'), 'growth charts sit below the KPI cards');
   assert.ok(html.includes('5 sn altı kazara geçişler'), 'quick bounces are excluded from the panel');
   assert.ok(html.includes('Ölçüm yeni başladı'), 'fresh funnel samples are labelled, not scored');
   assert.ok(html.includes('medianActiveMs'), 'headline time uses a robust median');

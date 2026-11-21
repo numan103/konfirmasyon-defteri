@@ -2,7 +2,7 @@
 
 ## İki ayrı akış
 
-- **Günlük Notlar:** ana sayfada herkese açık paylaşım akışı. Telegram’daki kaynak yönetici gönderileri onay/taslağa alma olmadan buraya gelir. Ücretsiz/ücretli eğitimlerden ve paketlerden bağımsızdır.
+- **Günlük Notlar:** ana sayfada ve eğitim sayfasında herkese açık paylaşım akışı. En yeni not büyük **Günün yazısı** kartı, sonraki notlar küçük kartlar olarak gösterilir. Telegram’daki kaynak yönetici gönderileri onay/taslağa alma olmadan buraya gelir. Ücretsiz/ücretli eğitimlerden ve paketlerden bağımsızdır.
 - **Eğitim İçerikleri:** kanal → bölüm → konu → not/video ağacı. Mevcut ücretsiz dersler ve paid gating korunur; günlük akış bunlara yazmaz.
 
 ## Kullanım
@@ -16,14 +16,20 @@
 
 Stüdyoda öğrenci değerlendirmesi, video oynatıcı veya paket satış kartı bulunmaz. Öğrenci değerlendirmeleri gerçek adminin öğrenci görünümünde de yüklenmez; üyelerdeki değerlendirme akışı korunur.
 
-## Günlük not editörü ve ana sayfa
+## Günlük not editörü, ana sayfa ve eğitim sayfası
 
-- Editör açıkça **HERKESE AÇIK · Ana Sayfa / Günlük Notlar · Ücretli derslerden bağımsız** etiketini taşır. Fiyat, paket ve video alanları gizlidir.
+- Editör açıkça **HERKESE AÇIK · Günlük Notlar · Ücretli derslerden bağımsız** etiketini taşır. Fiyat, paket ve video alanları gizlidir.
 - Elle yazılan not stabil `draftId` ile aynı kaydı günceller. Kayıt sonrası editör açık kalır; ana sayfa listesi ve yönetim listesi birlikte yenilenir.
 - **Yayındaki notu aç** herkese açık okuyucu modalını gösterir; yöneticide **Stüdyoda düzenle** kısayolu vardır. Medya yüklenemezse not başlığı, açıklama ve varsa kaynak bağlantısı gösterilir; uydurma içerik üretilmez.
-- Ana sayfa yalnız küçük özet indeksini çeker; tam metin ve görseller “Notu aç” ile yüklenir. Feed cache 15 saniyedir; açık ana sayfa 60 saniyede bir, sekme odağında ve **Yenile** ile yenilenir. Açık arşiv/modal durumu bozulmaz; aynı not kartı iki kez eklenmez.
+- Ana sayfa ve eğitim sayfası aynı public feed’i kullanır; eğitim sayfası ilk dört notu gösterir. Her iki yüzde de ilk not **Günün yazısı** kartıdır, kalanlar kompakt listedir. Yalnız küçük özet indeksini çeker; tam metin ve görseller “Yazıyı oku / Notu aç” ile yüklenir. Feed cache 15 saniyedir; açık ana sayfa 60 saniyede bir, sekme odağında ve **Yenile** ile yenilenir. Eğitim paneli ayrı **Yenile** düğmesiyle zorla tazelenir. Aynı not kartı iki kez eklenmez.
 - **Yayından kaldır** fiziksel silme değil, gizleme tombstone’udur. Not ana sayfadan ve public detay/görsel endpoint’lerinden düşer; **Yayınla** ile geri gelir. Stüdyoda düzenlenen veya kaldırılan notu geç Telegram tekrarı geri almaz.
-- Var olan kurs günlükleri ve ücretli içerikler değişmez; yeni günlük paylaşımının oluşturulduğu yer artık ana sayfadır.
+- Var olan kurs günlükleri ve ücretli içerikler değişmez; yeni günlük paylaşımının oluşturulduğu yer artık günlük feed’dir. Kurs oynatıcı açıkken eğitim sayfasındaki günlük paneli gizlenir.
+
+## Eğitim ve yönetici görünümü
+
+- Premium/ref üye eğitim sayfasında varsayılan olarak **Sana açık** görünümünü görür: kendi açık/premium eğitimleri önce, ilerleme yalnız bu derslerin üzerinden hesaplanır. Kilitli içerik varsa **Pakete özel** sekmesi seçenek olarak durur; ücretsiz üyede bu sekme paketleri gösterir. Kilitli görünüm boşsa sekme gizlenir, paket seçeneği hero ve stüdyo bağlantısıyla kalır.
+- Kartlarda kaç açık/kilitli ders olduğu ve eğitmen adı net yazılır; paket kartı yalnız ücretsiz karşılaştırma sayfasına götürür, ders içeriği veya erişim kodu içermez.
+- Yönetici analitik sayfası üstte tek tıkla kısayollarla açılır (İçerik Stüdyosu, Günlük Notlar, Eğitim Paketleri, Başvurular, Üye Erişimi, Uygulamalar). Büyüme özeti, günlük görüntüleme grafiği ve öneriler **Büyüme & grafikler** başlığı altında katlanır; KPI kartları ve kısayollar açık kalır.
 
 ## Telegram → Ana Sayfa / Günlük Notlar
 

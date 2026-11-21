@@ -3089,6 +3089,38 @@
   #ch-form[data-daily="true"] [data-vid] { display:none; }
   @media(max-width:900px) { .daily-notes-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
   @media(max-width:640px) { .daily-notes-grid { grid-template-columns:minmax(0,1fr); } }
+  .daily-kicker { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--pc); }
+  .daily-feature-card { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:18px; margin:14px 0; padding:16px; border:1px solid rgba(124,92,255,.32); border-radius:16px; background:linear-gradient(135deg,rgba(124,92,255,.13),rgba(56,189,248,.05) 55%,var(--card)); min-height:250px; overflow:hidden; }
+  .daily-feature-media { min-width:0; max-height:290px; border-radius:12px; overflow:hidden; background:rgba(0,0,0,.16); display:flex; align-items:center; justify-content:center; }
+  .daily-feature-media img { width:100%; height:100%; max-height:290px; object-fit:cover; cursor:zoom-in; }
+  .daily-feature-media a { color:var(--text-2); font-size:12px; padding:18px; text-align:center; }
+  .daily-feature-body { min-width:0; display:flex; flex-direction:column; justify-content:center; gap:8px; }
+  .daily-feature-body h3 { margin:0; font-family:var(--font-display); font-size:clamp(20px,2.4vw,30px); line-height:1.16; letter-spacing:-.02em; overflow-wrap:anywhere; }
+  .daily-feature-body p { margin:0; color:var(--text-2); font-size:13px; line-height:1.65; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; }
+  .daily-feature-foot { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  .daily-feature-foot time { font-size:11px; color:var(--text-3); }
+  .daily-feature-empty { padding:18px; border:1px dashed var(--border); border-radius:12px; color:var(--text-3); font-size:12.5px; }
+  .daily-notes-grid.compact { margin:8px 0 0; }
+  .daily-notes-grid.compact .daily-note-card img { height:96px; }
+  .edu-daily-panel { margin:16px 0; }
+  .edu-access-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:18px 0 12px; }
+  .edu-access-head h2 { margin:4px 0; font-family:var(--font-display); font-size:22px; letter-spacing:-.02em; }
+  .edu-access-head p { margin:0; color:var(--text-3); font-size:12px; line-height:1.55; }
+  .edu-access-tabs { display:flex; gap:8px; flex-wrap:wrap; }
+  .edu-access-tabs button { display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text-2); font-size:12px; font-weight:700; cursor:pointer; }
+  .edu-access-tabs button[aria-pressed="true"] { color:var(--pc); border-color:var(--pc); background:var(--pc-soft); }
+  .edu-access-tabs button b { min-width:20px; padding:1px 6px; border-radius:99px; background:rgba(255,255,255,.07); font-size:10px; }
+  .edu-card.package { border-style:dashed; }
+  .edu-card.package .edu-lock { display:grid; place-items:center; }
+  .edu-card-sub strong { color:var(--pc); }
+  .ana-shortcuts { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:0 0 16px; }
+  .ana-shortcut { min-width:0; text-align:left; display:flex; flex-direction:column; gap:3px; padding:12px 13px; border:1px solid var(--border); border-radius:13px; background:var(--card); color:var(--text); cursor:pointer; transition:border-color .18s,transform .18s; }
+  .ana-shortcut:hover { border-color:var(--pc); transform:translateY(-2px); }
+  .ana-shortcut i { font-style:normal; font-size:18px; }
+  .ana-shortcut b { font-size:12.5px; }
+  .ana-shortcut small { font-size:10.5px; color:var(--text-3); line-height:1.4; }
+  .ana-visual-fold > summary { background:linear-gradient(90deg,rgba(124,92,255,.10),transparent); }
+  @media(max-width:640px) { .daily-feature-card { grid-template-columns:minmax(0,1fr); } .daily-feature-media, .daily-feature-media img { max-height:190px; } }
   .ch-pfile { flex: none; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--text-2); cursor: pointer; }
   .ch-pfile:hover { border-color: var(--pc); color: var(--pc); }
   .ch-pdel { flex: none; width: 26px; height: 26px; border: 1px solid var(--border); background: var(--card); color: var(--red); border-radius: 7px; font-size: 15px; line-height: 1; cursor: pointer; }
@@ -6258,6 +6290,14 @@
             <div class="mag-foot"><div class="mag-dots" id="hmr-dots"></div><div class="mag-counter" id="hmr-counter">1 / 1</div></div>
           </div>
         </section>
+      <section id="home-daily-notes" class="panel">
+        <div class="hd-head"><div><span class="daily-kicker">✍️ Günün yazısı · Alfa Edu</span><h2>Günlük Notlar</h2><p class="hint">Telegram’daki eğitsel paylaşımlar onay beklemeden buraya gelir.</p></div>
+          <button type="button" class="btn" id="home-daily-refresh">Yenile</button></div>
+        <div id="home-daily-status" role="status"></div>
+        <div id="home-daily-feature"></div>
+        <div id="home-daily-list" class="daily-notes-grid compact"></div>
+        <button type="button" class="btn hidden" id="home-daily-more">Önceki notlar</button>
+      </section>
 <a id="home-diary-link" href="?page=ayna" data-nav hidden style="margin:12px 0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;">
          <strong>📓 Kişisel Günlük Asistan →</strong><br><span class="hint">Sana özel alanın: gününü planla, düşüncelerini kaydet, akşam küçük bir sonraki adım belirle.</span>
        </a>
@@ -6355,13 +6395,6 @@
         </div>
         <a href="?page=egitim" class="he-link" data-nav>Eğitime git →</a>
       </div>
-      <section id="home-daily-notes" class="panel">
-        <div class="hd-head"><div><h2>📓 Günlük Notlar</h2><p class="hint">Alfa Edu’dan günlük eğitsel paylaşımlar · Telegram’dan otomatik güncellenir.</p></div>
-          <button type="button" class="btn" id="home-daily-refresh">Yenile</button></div>
-        <div id="home-daily-status" role="status"></div>
-        <div id="home-daily-list" class="daily-notes-grid"></div>
-        <button type="button" class="btn hidden" id="home-daily-more">Önceki notlar</button>
-      </section>
       <div class="home-channel" id="home-channel">
         <div class="hc2-head">
           <h2>📡 İşlem Kanalı — Son Güncellemeler</h2>
@@ -7163,8 +7196,8 @@
   <div id="page-egitim" class="hidden">
     <section class="edu-hero" id="edu-hero">
       <div class="edu-kicker" data-i18n="edu.kicker">ALFA EDU · KURS KÜTÜPHANESİ</div>
-      <h1 data-i18n="edu.heroTitle">İzle. Öğren. Uygula.</h1>
-      <p data-i18n="edu.heroSub">Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.</p>
+      <h1 id="edu-hero-title" data-i18n="edu.heroTitle">İzle. Öğren. Uygula.</h1>
+      <p id="edu-hero-sub" data-i18n="edu.heroSub">Teknik analizden psikolojiye, onchain veriden makro okumaya kadar tüm eğitimler tek yerde. Kursu seç, ilk derse direkt başla.</p>
       <div class="edu-hero-actions">
         <button type="button" class="btn solid" id="edu-browse" data-i18n="edu.browse">Kursları keşfet →</button>
         <a href="?page=eduplans" data-nav class="btn" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
@@ -7173,7 +7206,26 @@
       </div>
       <div class="edu-progress-summary" id="edu-overall"></div>
     </section>
+    <section id="edu-daily-notes" class="panel edu-daily-panel">
+      <div class="hd-head"><div><span class="daily-kicker">✍️ Günün yazısı · Alfa Edu</span><h2>Günlük Notlar</h2><p class="hint">Telegram’dan gelen kısa eğitsel notlar. Ücretli derslerden bağımsız, herkese açık.</p></div>
+        <button type="button" class="btn" id="edu-daily-refresh">Yenile</button></div>
+      <div id="edu-daily-status" role="status"></div>
+      <div id="edu-daily-feature"></div>
+      <div id="edu-daily-list" class="daily-notes-grid compact"></div>
+      <a href="?page=home" data-nav class="hd-link" style="display:inline-block;margin-top:10px;">Tüm günlük notlar ana sayfada →</a>
+    </section>
     <section id="edu-catalog">
+      <div class="edu-access-head">
+        <div>
+          <span class="daily-kicker" id="edu-access-kicker">ALFA EDU · SANA AÇIK</span>
+          <h2 id="edu-access-title">Benim eğitimlerim</h2>
+          <p id="edu-access-note">Açık dersler önce. Pakete özel içerikler ayrı bir sekmede.</p>
+        </div>
+        <div class="edu-access-tabs" id="edu-access-tabs" role="group" aria-label="Eğitim görünümü">
+          <button type="button" data-access="mine" aria-pressed="true">Sana açık <b id="edu-open-count">0</b></button>
+          <button type="button" data-access="package" aria-pressed="false">Pakete özel <b id="edu-package-count">0</b></button>
+        </div>
+      </div>
       <div class="edu-toolbar">
         <input type="search" id="edu-search" class="edu-search" data-i18n-ph="edu.searchPh" placeholder="Kurs veya konu ara…" autocomplete="off">
         <div id="edu-chips" class="edu-chips"></div>
@@ -9337,7 +9389,14 @@
       </div>
     </div>
     <div class="ana-note">Ziyaretler anonim ölçülür; ham IP adresi saklanmaz. İsim/e-posta yalnızca kullanıcı giriş yaptıysa görünür. Yönetici ziyaretleri ve 5 sn altı kazara geçişler sayılmaz; üye girişi veya kayıt adımı olan kısa ziyaretler dahil edilir.</div>
-    <a href="?page=edustudio" data-nav class="btn solid">✎ Alfa Edu İçerik Stüdyosu</a>
+    <div class="ana-shortcuts" id="ana-shortcuts" aria-label="Yönetici kısayolları">
+      <button type="button" class="ana-shortcut" data-ana-go="edustudio"><i>✎</i><b>İçerik Stüdyosu</b><small>Kurs, video ve notları düzenle</small></button>
+      <button type="button" class="ana-shortcut" data-ana-go="daily"><i>📓</i><b>Günlük Notlar</b><small>Telegram akışını yönet</small></button>
+      <button type="button" class="ana-shortcut" data-ana-go="eduplans"><i>🎓</i><b>Eğitim Paketleri</b><small>Fiyat ve kapsamı göster</small></button>
+      <button type="button" class="ana-shortcut" data-ana-go="basvuru"><i>📥</i><b>Başvurular</b><small>Yeni üye talepleri</small></button>
+      <button type="button" class="ana-shortcut" data-ana-go="erisim"><i>🔐</i><b>Üye Erişimi</b><small>Premium durumları</small></button>
+      <button type="button" class="ana-shortcut" data-ana-go="apps"><i>🧩</i><b>Uygulamalar</b><small>Ek özellikler ve araçlar</small></button>
+    </div>
     <div id="education-crm-slot"></div>
     <div id="ana-body">
       <div class="ana-loading">Analitik yükleniyor…</div>
@@ -24105,6 +24164,22 @@ function renderEgitim() {
   const egAddForm = document.getElementById('eg-add-form');
   const chFormEl = document.getElementById('ch-form');
   const chProfEl = document.getElementById('ch-prof-form');
+  const dailyPanel = document.getElementById('edu-daily-notes');
+  const premium = !!refUnlocked();
+  const heroTitle = document.getElementById('edu-hero-title');
+  const heroSub = document.getElementById('edu-hero-sub');
+  if (premium) {
+    if (heroTitle) { heroTitle.removeAttribute('data-i18n'); heroTitle.textContent = 'Eğitimlerin hazır.'; }
+    if (heroSub) { heroSub.removeAttribute('data-i18n'); heroSub.textContent = 'Açık ve premium eğitimlerin önce. Pakete özel dersler ayrı sekmede — istersen oraya da geç.'; }
+  }
+  const accessKicker = document.getElementById('edu-access-kicker');
+  const accessTitle = document.getElementById('edu-access-title');
+  const accessNote = document.getElementById('edu-access-note');
+  if (accessKicker) accessKicker.textContent = premium ? 'ALFA EDU · SANA AÇIK' : 'ALFA EDU · ÜCRETSİZ EĞİTİMLER';
+  if (accessTitle) accessTitle.textContent = premium ? 'Benim eğitimlerim' : 'Ücretsiz eğitimler';
+  if (accessNote) accessNote.textContent = premium
+    ? 'Açık ve premium eğitimlerin burada. Pakete özel içerikler ayrı sekmede.'
+    : 'Herkese açık dersler burada. Pakete özel içerikler ayrı sekmede.';
   if (oldCourse) oldCourse.classList.add('hidden');
   if (egAddForm) egAddForm.classList.add('hidden');
   if (adminControls) adminControls.classList.toggle('hidden', !channelOpen || !chCanEditCur());
@@ -24114,6 +24189,7 @@ function renderEgitim() {
   if (channelOpen) {
     if (hero) hero.classList.add('hidden');
     if (catalog) catalog.classList.add('hidden');
+    if (dailyPanel) dailyPanel.classList.add('hidden');
     if (chView) chView.classList.remove('hidden');
     if (chFormEl) chFormEl.classList.toggle('hidden', !chForm.mode);
     if (chProfEl) chProfEl.classList.toggle('hidden', !chProfMode);
@@ -24122,7 +24198,9 @@ function renderEgitim() {
   }
   if (hero) hero.classList.remove('hidden');
   if (catalog) catalog.classList.remove('hidden');
+  if (dailyPanel) dailyPanel.classList.remove('hidden');
   if (chView) chView.classList.add('hidden');
+  chLoadEduDaily();
   renderEduCatalog();
   if (window.EduFeedback) window.EduFeedback.clear();
   return;
@@ -24385,6 +24463,7 @@ let chProfTarget = null;  // edit edilen kanal id
 let chDeep = null;        // derin bağlantı (?ch=&sec=&t=&v=) bekliyorsa burada
 let chProg = null;        // kullanıcıya özel "okudum/izledim" tik haritası (yerel)
 let eduFilter = 'all';    // katalog bölüm filtresi
+let eduAccessView = 'mine'; // 'mine' = sana açık, 'package' = pakete özel
 
 function chUid() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function chUserEmail() { return (AUTH && AUTH.user && AUTH.user.email) ? String(AUTH.user.email).toLowerCase() : ''; }
@@ -24581,8 +24660,9 @@ function eduCourses() {
     chSecMeta(t).forEach((sec, si) => {
       const lessons = (t.sections && Array.isArray(t.sections[sec.id])) ? t.sections[sec.id] : [];
       const items = lessons.reduce((all, lesson) => all.concat((lesson.videos || []).map(v => ({ lesson, video: v }))), []);
-      const done = items.filter(x => chIsDone(t, x.video)).length;
-      out.push({ t, sec, lessons, items, done, total: items.length, order: oi * 100 + si });
+      const openItems = items.filter(x => !chItemLocked(x.video));
+      const done = openItems.filter(x => chIsDone(t, x.video)).length;
+      out.push({ t, sec, lessons, items, done, total: items.length, openTotal: openItems.length, lockedTotal: items.length - openItems.length, order: oi * 100 + si });
     });
   });
   out.sort((a, b) => (Number(b.total > 0) - Number(a.total > 0)) || (a.order - b.order));
@@ -24632,45 +24712,64 @@ function eduAdvancedCard() {
   card.append(thumb, body);
   return card;
 }
-function eduCard(c, i) {
+function eduCard(c, i, packageView = false) {
   const card = document.createElement('button');
   card.type = 'button';
-  card.className = 'edu-card' + (c.total ? '' : ' soon');
+  card.className = 'edu-card' + (packageView ? ' package' : (c.openTotal ? '' : ' soon'));
   card.dataset.trader = c.t.id;
   card.dataset.course = c.sec.id;
   const thumb = document.createElement('div'); thumb.className = 'edu-thumb';
   const img = document.createElement('img');
   img.src = eduThumb(c.sec.id); img.alt = c.sec.title || 'Alfa Edu'; img.loading = 'lazy';
   const topic = document.createElement('span'); topic.className = 'edu-thumb-topic'; topic.textContent = eduTopicTag(c.sec.id);
-  const play = document.createElement('span'); play.className = 'edu-play'; play.textContent = '▶';
+  const play = document.createElement('span'); play.className = 'edu-play'; play.textContent = packageView ? '🔒' : '▶';
   const tag = document.createElement('span'); tag.className = 'edu-thumb-tag';
-  tag.textContent = c.total ? ('KURS · ' + c.lessons.length + ' ' + eduT('edu.lessonsCount', 'ders')) : eduT('edu.soon', 'Yakında');
+  tag.textContent = packageView ? ('PAKETE ÖZEL · ' + c.lockedTotal + ' ders') : ('KURS · ' + c.openTotal + ' açık ders');
   thumb.append(img, topic, play, tag);
   const body = document.createElement('div'); body.className = 'edu-card-body';
   const title = document.createElement('div'); title.className = 'edu-card-title'; title.textContent = c.sec.title || 'Alfa Edu';
-  const sub = document.createElement('div'); sub.className = 'edu-card-sub'; sub.textContent = 'Alfa Edu · ' + (c.t.name || eduT('edu.instructor', 'Eğitmen'));
+  const sub = document.createElement('div'); sub.className = 'edu-card-sub';
+  sub.innerHTML = 'Alfa Edu · <strong>' + esc(c.t.name || eduT('edu.instructor', 'Eğitmen')) + '</strong>';
   const foot = document.createElement('div'); foot.className = 'edu-card-foot';
   const bar = document.createElement('span'); bar.className = 'edu-bar';
-  const fill = document.createElement('span'); fill.style.width = (c.total ? Math.round(c.done / c.total * 100) : 0) + '%'; bar.appendChild(fill);
-  const count = document.createElement('span'); count.textContent = c.done + '/' + c.total;
+  const fill = document.createElement('span'); fill.style.width = (c.openTotal ? Math.round(c.done / c.openTotal * 100) : 0) + '%'; bar.appendChild(fill);
+  const count = document.createElement('span'); count.textContent = packageView ? (c.lockedTotal + ' ders kilitli') : (c.done + '/' + c.openTotal);
   foot.append(bar, count);
-  if (c.done && c.total) { const badge = document.createElement('span'); badge.className = 'edu-badge'; badge.textContent = eduT('edu.resume', 'Devam et'); foot.appendChild(badge); }
+  if (!packageView && c.done && c.openTotal) { const badge = document.createElement('span'); badge.className = 'edu-badge'; badge.textContent = eduT('edu.resume', 'Devam et'); foot.appendChild(badge); }
   body.append(title, sub, foot);
   card.append(thumb, body);
-  if (c.total) card.addEventListener('click', () => openCourse(c.t.id, c.sec.id));
+  if (packageView) card.addEventListener('click', () => showPage('eduplans'));
+  else if (c.openTotal) card.addEventListener('click', () => openCourse(c.t.id, c.sec.id));
   return card;
 }
 function renderEduCatalog() {
   const grid = document.getElementById('edu-grid');
   if (!grid) return;
   const courses = eduCourses();
+  const mine = courses.filter(c => c.openTotal > 0);
+  const locked = courses.filter(c => c.lockedTotal > 0);
+  if (eduAccessView === 'package' && !locked.length) eduAccessView = 'mine';
+  const packageView = eduAccessView === 'package';
+  const viewCourses = packageView ? locked : mine;
+
+  const openCount = document.getElementById('edu-open-count');
+  const packageCount = document.getElementById('edu-package-count');
+  if (openCount) openCount.textContent = String(mine.length);
+  if (packageCount) packageCount.textContent = String(locked.length);
+  document.querySelectorAll('#edu-access-tabs [data-access]').forEach(button => {
+    const isPackage = button.dataset.access === 'package';
+    button.setAttribute('aria-pressed', String(isPackage === packageView));
+    button.classList.toggle('hidden', isPackage && !locked.length);
+  });
+
   const searchEl = document.getElementById('edu-search');
   const q = ((searchEl && searchEl.value) || '').trim().toLocaleLowerCase();
   const chips = document.getElementById('edu-chips');
   if (chips) {
     const defs = [{ id: 'all', title: eduT('edu.all', 'Tümü') }];
     const seen = Object.create(null);
-    courses.forEach(c => { if (!seen[c.sec.id]) { seen[c.sec.id] = 1; defs.push({ id: c.sec.id, title: c.sec.title }); } });
+    viewCourses.forEach(c => { if (!seen[c.sec.id]) { seen[c.sec.id] = 1; defs.push({ id: c.sec.id, title: c.sec.title }); } });
+    if (eduFilter !== 'all' && !seen[eduFilter]) eduFilter = 'all';
     chips.replaceChildren();
     defs.forEach(d => {
       const b = document.createElement('button');
@@ -24680,26 +24779,27 @@ function renderEduCatalog() {
       chips.appendChild(b);
     });
   }
-  const list = courses.filter(c => {
+  const list = viewCourses.filter(c => {
     if (eduFilter !== 'all' && c.sec.id !== eduFilter) return false;
     if (!q) return true;
     const hay = [c.sec.title, c.t.name, c.t.bio].concat(c.lessons.map(l => l.title)).join(' ').toLocaleLowerCase();
     return hay.indexOf(q) !== -1;
   });
   grid.replaceChildren();
-  grid.appendChild(eduAdvancedCard());
-  list.forEach((c, i) => grid.appendChild(eduCard(c, i)));
+  if (packageView) grid.appendChild(eduAdvancedCard());
+  list.forEach((c, i) => grid.appendChild(eduCard(c, i, packageView)));
   const empty = document.getElementById('edu-empty');
   if (empty) empty.classList.toggle('hidden', list.length > 0);
-  let total = 0, done = 0;
-  courses.forEach(c => { total += c.total; done += c.done; });
+
+  const openTotal = mine.reduce((sum, c) => sum + c.openTotal, 0);
+  const done = mine.reduce((sum, c) => sum + c.done, 0);
   const overall = document.getElementById('edu-overall');
   if (overall) {
     overall.replaceChildren();
     const label = document.createElement('span');
-    label.textContent = eduT('edu.overall', 'Genel ilerleme') + ': ' + done + '/' + total;
+    label.textContent = (refUnlocked() ? 'Eğitimlerin' : 'Açık dersler') + ': ' + done + '/' + openTotal;
     const bar = document.createElement('span'); bar.className = 'edu-bar';
-    const fill = document.createElement('span'); fill.style.width = (total ? Math.round(done / total * 100) : 0) + '%'; bar.appendChild(fill);
+    const fill = document.createElement('span'); fill.style.width = (openTotal ? Math.round(done / openTotal * 100) : 0) + '%'; bar.appendChild(fill);
     overall.append(label, bar);
     if (channelsError) {
       overall.replaceChildren(document.createTextNode(channelsError));
@@ -24710,7 +24810,7 @@ function renderEduCatalog() {
   }
   const cont = document.getElementById('edu-continue');
   const last = eduLast();
-  const target = last && courses.find(c => c.t.id === last.ch && c.sec.id === last.sec && c.total);
+  const target = last && mine.find(c => c.t.id === last.ch && c.sec.id === last.sec && c.openTotal);
   if (cont) {
     cont.classList.toggle('hidden', !target);
     if (target) cont.textContent = (target.done ? eduT('edu.continue', 'Kaldığın yerden devam et') : eduT('edu.start', 'Başla'));
@@ -25702,44 +25802,89 @@ async function chSetDailyPublication(id, action) {
   finally { if (epoch === chWorkspaceEpoch) chStudioBusy = false; }
 }
 let chHomeDailyOffset = 0, chHomeDailyLast = 0, chHomeDailyRequest = null;
+let chEduDailyRequest = null, chEduDailyLoaded = false;
+function chDailyDate(stamp, long = false) {
+  try { return new Date(stamp).toLocaleDateString('tr-TR', long ? { weekday: 'long', day: 'numeric', month: 'long' } : { day: 'numeric', month: 'short' }); }
+  catch { return ''; }
+}
+function chDailyImage(url, title, onFail) {
+  if (!url || !chSafeImage(url)) return null;
+  const image = document.createElement('img'); image.src = url; image.alt = title; image.loading = 'lazy'; image.tabIndex = 0; image.setAttribute('role', 'button');
+  image.onclick = () => chZoomPhoto(url, title);
+  image.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); image.click(); } };
+  image.onerror = () => { if (onFail) onFail(); else image.remove(); };
+  return image;
+}
+function chDailyCard(item) {
+  const card = document.createElement('article'); card.className = 'daily-note-card'; card.dataset.dailyId = item.id;
+  const time = document.createElement('time'); time.dateTime = new Date(item.publishedAt).toISOString(); time.textContent = chDailyDate(item.publishedAt);
+  const title = document.createElement('h3'); title.textContent = item.title;
+  const image = chDailyImage(item.photoUrl, item.title); if (image) card.appendChild(image);
+  const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
+  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyViewer(item.id);
+  card.append(time, title, excerpt, open); return card;
+}
+function chDailyFeature(item) {
+  const box = document.createElement('article'); box.className = 'daily-feature-card'; box.dataset.dailyId = item.id;
+  const media = document.createElement('div'); media.className = 'daily-feature-media';
+  const placeholder = () => {
+    const span = document.createElement('span'); span.textContent = '✍️ Alfa Edu · günün notu';
+    media.replaceChildren(span);
+  };
+  const image = chDailyImage(item.photoUrl, item.title, placeholder);
+  if (image) media.appendChild(image); else placeholder();
+  const body = document.createElement('div'); body.className = 'daily-feature-body';
+  const kicker = document.createElement('span'); kicker.className = 'daily-kicker'; kicker.textContent = 'Günün yazısı · ' + chDailyDate(item.publishedAt, true);
+  const title = document.createElement('h3'); title.textContent = item.title;
+  const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
+  const foot = document.createElement('div'); foot.className = 'daily-feature-foot';
+  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = 'Yazıyı oku →'; open.onclick = () => chOpenDailyViewer(item.id);
+  const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = item.photoCount ? item.photoCount + ' görsel · herkese açık' : 'Herkese açık';
+  foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body); return box;
+}
+function chRenderDaily(scope, items, more, hasMore) {
+  const list = document.getElementById(scope + '-daily-list'), feature = document.getElementById(scope + '-daily-feature'), status = document.getElementById(scope + '-daily-status');
+  if (!list) return;
+  if (!more) {
+    list.replaceChildren(); feature?.replaceChildren();
+    if (items.length && feature) feature.appendChild(chDailyFeature(items[0]));
+    items.slice(feature ? 1 : 0).forEach(item => list.appendChild(chDailyCard(item)));
+  } else {
+    const existing = new Set(Array.from(list.children, card => card.dataset.dailyId));
+    items.forEach(item => { if (!existing.has(item.id)) { existing.add(item.id); list.appendChild(chDailyCard(item)); } });
+  }
+  if (status) status.textContent = !list.children.length && !feature?.children.length ? 'Günlük notlar burada görünecek.' : '';
+  if (scope === 'home') document.getElementById('home-daily-more')?.classList.toggle('hidden', !hasMore);
+}
+async function chFetchDaily(offset, force) {
+  const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&offset=' + offset + (force ? '&v=' + Date.now() : ''), { credentials: 'omit', signal: AbortSignal.timeout(10000) }), data = await r.json();
+  if (!r.ok || !data.ok || !Array.isArray(data.items)) throw new Error('daily_unavailable');
+  return data;
+}
 function chLoadHomeDaily(more = false, force = false) {
-  const list = document.getElementById('home-daily-list'), status = document.getElementById('home-daily-status');
+  const list = document.getElementById('home-daily-list');
   if (!list) return Promise.resolve();
   if (chHomeDailyRequest) return force ? chHomeDailyRequest.then(() => chLoadHomeDaily(more, true)) : chHomeDailyRequest;
   if (!more && !force && (list.children.length > 3 || Date.now() - chHomeDailyLast < 15000)) return Promise.resolve();
-  const pending = chFetchHomeDaily(more, force).finally(() => { if (chHomeDailyRequest === pending) chHomeDailyRequest = null; });
-  chHomeDailyRequest = pending; return pending;
-}
-async function chFetchHomeDaily(more, force) {
-  const list = document.getElementById('home-daily-list'), status = document.getElementById('home-daily-status');
   const moreButton = document.getElementById('home-daily-more'); if (moreButton) moreButton.disabled = true;
   const offset = more ? chHomeDailyOffset : 0;
-  try {
-    const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&offset=' + offset + (force ? '&v=' + Date.now() : ''), { credentials: 'omit', signal: AbortSignal.timeout(10000) }), data = await r.json();
-    if (!r.ok || !data.ok || !Array.isArray(data.items)) throw new Error('daily_unavailable');
-    if (!more) list.replaceChildren();
-    const existing = new Set(Array.from(list.children, card => card.dataset.dailyId));
-    data.items.forEach(item => {
-      if (existing.has(item.id)) return; existing.add(item.id);
-      const card = document.createElement('article'); card.className = 'daily-note-card';
-      card.dataset.dailyId = item.id;
-      const time = document.createElement('time'); time.dateTime = new Date(item.publishedAt).toISOString(); time.textContent = new Date(item.publishedAt).toLocaleDateString('tr-TR');
-      const title = document.createElement('h3'); title.textContent = item.title;
-      if (item.photoUrl && chSafeImage(item.photoUrl)) {
-        const image = document.createElement('img'); image.src = item.photoUrl; image.alt = item.title; image.loading = 'lazy'; image.tabIndex = 0; image.setAttribute('role', 'button');
-        image.onclick = () => chZoomPhoto(item.photoUrl, item.title);
-        image.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); image.click(); } };
-        image.onerror = () => image.remove(); card.appendChild(image);
-      }
-      const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
-      const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyViewer(item.id);
-      card.append(time, title, excerpt, open); list.appendChild(card);
-    });
+  const pending = chFetchDaily(offset, force).then(data => {
+    chRenderDaily('home', data.items, more, data.hasMore);
     chHomeDailyOffset = offset + data.items.length; chHomeDailyLast = Date.now();
-    status.textContent = !list.children.length ? 'Günlük notlar burada görünecek.' : '';
-    document.getElementById('home-daily-more')?.classList.toggle('hidden', !data.hasMore);
-  } catch { status.textContent = 'Günlük notlar şu an yüklenemedi. Yenile ile tekrar dene.'; }
-  finally { if (moreButton) moreButton.disabled = false; }
+  }).catch(() => {
+    const status = document.getElementById('home-daily-status');
+    if (status) status.textContent = 'Günlük notlar şu an yüklenemedi. Yenile ile tekrar dene.';
+  }).finally(() => { if (moreButton) moreButton.disabled = false; if (chHomeDailyRequest === pending) chHomeDailyRequest = null; });
+  chHomeDailyRequest = pending; return pending;
+}
+function chLoadEduDaily(force = false) {
+  if (!document.getElementById('edu-daily-list')) return Promise.resolve();
+  if (chEduDailyRequest) return force ? chEduDailyRequest.then(() => chLoadEduDaily(true)) : chEduDailyRequest;
+  if (!force && chEduDailyLoaded) return Promise.resolve();
+  const pending = chFetchDaily(0, force).then(data => { chRenderDaily('edu', data.items.slice(0, 4), false, false); chEduDailyLoaded = true; })
+    .catch(() => { const status = document.getElementById('edu-daily-status'); if (status) status.textContent = 'Günlük notlar şu an yüklenemedi.'; })
+    .finally(() => { if (chEduDailyRequest === pending) chEduDailyRequest = null; });
+  chEduDailyRequest = pending; return pending;
 }
 async function chOpenDailyViewer(id) {
   if (!/^edutg_[a-f0-9]{64}$/.test(id || '')) return;
@@ -26285,6 +26430,19 @@ function bindChannelsPage() {
   const g = id => document.getElementById(id);
   g('home-daily-refresh')?.addEventListener('click', () => chLoadHomeDaily(false, true));
   g('home-daily-more')?.addEventListener('click', () => chLoadHomeDaily(true));
+  g('edu-daily-refresh')?.addEventListener('click', () => chLoadEduDaily(true));
+  g('edu-access-tabs')?.addEventListener('click', e => {
+    const button = e.target.closest('[data-access]'); if (!button) return;
+    eduAccessView = button.dataset.access === 'package' ? 'package' : 'mine';
+    eduFilter = 'all'; renderEduCatalog();
+  });
+  g('ana-shortcuts')?.addEventListener('click', e => {
+    const button = e.target.closest('[data-ana-go]'); if (!button) return;
+    const go = button.dataset.anaGo;
+    if (go === 'daily') { showPage('edustudio'); chSetStudioMode('daily'); return; }
+    if (go === 'edustudio') { showPage('edustudio'); chSetStudioMode('course'); return; }
+    showPage(go);
+  });
   window.addEventListener('focus', () => { if (currentPage === 'home') chLoadHomeDaily(); });
   setInterval(() => { if (currentPage === 'home' && !document.hidden && !document.querySelector('dialog[open]')) chLoadHomeDaily(); }, 60000);
   g('edu-author-modes').addEventListener('click', e => { const button = e.target.closest('[data-author-mode]'); if (button) chSetStudioMode(button.dataset.authorMode); });
@@ -29883,7 +30041,7 @@ function anaRender() {
   var t = d.totals || {};
   var rangeDays = (d.range && d.range.days) || anaState.days;
   var scope = rangeDays === 1 ? 'bugün' : 'son ' + rangeDays + ' gün';
-  var html = [];
+  var html = [], visual = [];
 
   var g = d.growthSummary;
   if (g) {
@@ -29915,7 +30073,7 @@ function anaRender() {
       return '<li>' + esc(r) + '</li>';
     }).join('');
 
-    html.push('<div class="ana-section ana-growth"><h2>🎯 Büyüme özeti <em>' + esc(scope) + '</em></h2>' +
+    visual.push('<div class="ana-section ana-growth"><h2>🎯 Büyüme özeti <em>' + esc(scope) + '</em></h2>' +
       '<div class="ana-growth-grid">' +
       '<div class="ana-growth-card"><b>Kayıt → Premium</b>' +
         '<div class="ana-growth-big">' + (acc.verified || 0) + ' premium / ' + (acc.total || 0) + ' başvuru</div>' +
@@ -29945,6 +30103,12 @@ function anaRender() {
     anaCard('Üye / Anonim', (t.memberSessions || 0) + ' / ' + (t.anonymousSessions || 0), 'giriş yapan / yapmayan') +
     '</div>');
 
+  if (visual.length) {
+    html.push('<details class="ana-fold ana-visual-fold"><summary>📊 Büyüme & grafikler <em>özet, günlük trend ve öneriler</em></summary><div class="ana-fold-body">');
+    html.push(visual.join(''));
+    html.push('</div></details>');
+  }
+
   if (d.daily && d.daily.length > 1) {
     var maxPv = 1;
     d.daily.forEach(function (x) { maxPv = Math.max(maxPv, Number(x.pageviews) || 0); });
@@ -29956,7 +30120,7 @@ function anaRender() {
     var labels = d.daily.map(function (x, i) {
       return '<span>' + (i % step === 0 || i === d.daily.length - 1 ? esc(x.date.slice(5)) : '') + '</span>';
     }).join('');
-    html.push('<div class="ana-section"><h2>📈 Günlük görüntüleme <em>' + esc(scope) + '</em></h2><div class="ana-days">' + bars + '</div><div class="ana-day-lbls">' + labels + '</div></div>');
+    visual.push('<div class="ana-section"><h2>📈 Günlük görüntüleme <em>' + esc(scope) + '</em></h2><div class="ana-days">' + bars + '</div><div class="ana-day-lbls">' + labels + '</div></div>');
   }
 
   html.push('<div class="ana-section"><h2>🟢 Şu an çevrimiçi <em>son 90 saniye</em></h2>');

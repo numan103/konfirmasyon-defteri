@@ -264,15 +264,15 @@ test('Edu paket kartı herkese açık karşılaştırmaya gider; ders veya eriş
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const css = fs.readFileSync(new URL('../assets/edu-feedback.css', import.meta.url), 'utf8');
   const start = html.indexOf('function eduAdvancedCard()');
-  const end = html.indexOf('function eduCard(c, i)', start);
+  const end = html.indexOf('function eduCard(c, i, packageView = false)', start);
   assert.ok(start > -1 && end > start);
   const block = html.slice(start, end);
   assert.ok(block.includes("card.className = 'edu-card edu-plan-link'"));
   assert.ok(block.includes("img.src = 'assets/edu-advanced.jpg'"));
   assert.ok(block.includes("showPage('eduplans')"));
   assert.ok(!block.includes('card.disabled = true'));
-  assert.ok(html.includes('grid.appendChild(eduAdvancedCard())'));
-  assert.ok(html.indexOf('grid.appendChild(eduAdvancedCard())') < html.indexOf('list.forEach((c, i) => grid.appendChild(eduCard(c, i)))'));
+  assert.ok(html.includes('if (packageView) grid.appendChild(eduAdvancedCard());'));
+  assert.ok(html.indexOf('if (packageView) grid.appendChild(eduAdvancedCard());') < html.indexOf('list.forEach((c, i) => grid.appendChild(eduCard(c, i, packageView)))'));
   for (const leak of ['href', 'location', 'fetch(', 'accessCode', 't.me', 'http', '?page=']) {
     assert.ok(!block.toLowerCase().includes(leak.toLowerCase()), leak + ' kilitli kartta sızdı');
   }

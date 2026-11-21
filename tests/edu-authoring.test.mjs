@@ -255,3 +255,36 @@ test('public Daily Notes belong to the home page and have a separate studio mode
   assert.match(html, /g\('edu-author-journal'\)\.addEventListener\('click', \(\) => chOpenDailyNote\(\)\)/);
   assert.match(html, /dailyId: chForm\.dailyId/);
 });
+test('Daily Notes live on the education page too, with a featured "günün yazısı" on both surfaces', () => {
+  const edu = html.indexOf('id="page-egitim"'), eduNotes = html.indexOf('id="edu-daily-notes"');
+  assert.ok(edu > 0 && eduNotes > edu);
+  assert.equal([...html.matchAll(/id="home-daily-feature"/g)].length, 1);
+  assert.equal([...html.matchAll(/id="edu-daily-feature"/g)].length, 1);
+  assert.equal([...html.matchAll(/Günün yazısı · Alfa Edu/g)].length, 2);
+  assert.match(html, /function chDailyFeature\(item\)/);
+  assert.match(html, /function chRenderDaily\(scope, items, more, hasMore\)/);
+  assert.match(html, /chLoadEduDaily\(\)/);
+  assert.match(html, /g\('edu-daily-refresh'\)\?\.addEventListener\('click', \(\) => chLoadEduDaily\(true\)\)/);
+  assert.match(html, /if \(dailyPanel\) dailyPanel\.classList\.add\('hidden'\);/);
+});
+test('education catalog opens on "Sana açık" with a separate package option', () => {
+  assert.match(html, /id="edu-access-tabs"/);
+  assert.match(html, /data-access="mine" aria-pressed="true"/);
+  assert.match(html, /data-access="package" aria-pressed="false"/);
+  assert.match(html, /let eduAccessView = 'mine'/);
+  assert.match(html, /const mine = courses\.filter\(c => c\.openTotal > 0\)/);
+  assert.match(html, /const locked = courses\.filter\(c => c\.lockedTotal > 0\)/);
+  assert.match(html, /grid\.appendChild\(eduCard\(c, i, packageView\)\)/);
+  assert.doesNotMatch(html, /grid\.appendChild\(eduAdvancedCard\(\)\);\s*list\.forEach\(\(c, i\) => grid\.appendChild\(eduCard\(c, i\)\)\)/);
+  assert.match(html, /button\.classList\.toggle\('hidden', isPackage && !locked\.length\)/);
+  assert.match(html, /g\('edu-access-tabs'\)\?\.addEventListener\('click'/);
+});
+test('admin analytics opens with shortcut cards and folds the heavy charts', () => {
+  const page = html.indexOf('id="page-analitik"'), shortcuts = html.indexOf('id="ana-shortcuts"');
+  assert.ok(page > 0 && shortcuts > page);
+  assert.match(html, /data-ana-go="daily"/);
+  assert.match(html, /data-ana-go="edustudio"/);
+  assert.match(html, /class="ana-fold ana-visual-fold"/);
+  assert.match(html, /visual\.push\('<div class="ana-section ana-growth"/);
+  assert.match(html, /if \(go === 'daily'\) \{ showPage\('edustudio'\); chSetStudioMode\('daily'\); return; \}/);
+});
