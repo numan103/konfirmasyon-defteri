@@ -132,3 +132,11 @@ Tam test paketi: **851 test / 851 geçti / 0 başarısız**. `git diff --check` 
 Yeni testler iki yönlü MSB/Fibonacci, HTF fitil/kapanış ayrımı, gelecek/eksik kanıt, limitten önce TP, intrabar belirsizliği, fill sonrası hedef, otomatik re-anchor olmaması, LLM plan reddi ve Telegram parçalamayı kapsar. Q&A entegrasyonu ağ/LLM taklitleriyle test edilir; gerçek servis yazımı yapılmaz.
 
 Kaynak belge ve tarihsel fixture/grafikler `.vercelignore` ile public deploy dosyalarından dışlandı. Trading emir bağlantısı eklenmedi; mevcut Paper Trading motoru, site tasarımı, üyelik ve production verisi değiştirilmedi.
+
+## 7. Duyurular konusu sessize alındı
+
+`https://t.me/alfatraderspublic/1` (Duyurular) konusuna yazılan mesajlara bot artık cevap vermez. `lib/telegram-topics.mjs` içindeki `DUYURU_THREAD = 1` sabiti webhook ve Q&A katmanında ortak kullanılır:
+
+- `lib/telegram-webhook.mjs`: `message` / `edited_message` içinde `message_thread_id: 1` ise hiçbir komut, mention, fotoğraf veya Q&A akışına girilmeden `200` döner.
+- `lib/telegram-qa.mjs`: ikinci savunma olarak aynı konuda cevap üretmez (başka bir çağrı yolu oluşursa da sessiz kalır).
+- Diğer konular (`/4` public charts, Q&A konuları, DM) ve ingestion akışları (Edu `/4`, mentor `/6`, dergi `/977`) etkilenmez. Yeni env var veya Telegram ayarı gerekmez.
