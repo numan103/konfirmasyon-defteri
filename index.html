@@ -74,8 +74,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
-<link rel="stylesheet" href="/assets/my-portfolio.css?v=2">
-<script type="module" src="/assets/my-portfolio.mjs?v=3"></script>
+<link rel="stylesheet" href="/assets/my-portfolio.css?v=3">
+<script type="module" src="/assets/my-portfolio.mjs?v=4"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -8833,6 +8833,8 @@
             </div>
             <div class="ap2-hd-actions">
               <input type="search" id="mp-search" class="ap2-search" placeholder="Sembol / not ara…" autocomplete="off">
+              <button type="button" class="ap2-btn-ghost mp-price-btn" id="mp-price-refresh" title="Canlı fiyatları yenile (kripto)">⟳ Fiyat</button>
+              <span class="mp-price-status" id="mp-price-status" data-state="idle" title="Kripto pozisyonların fiyatı sitedeki açık kaynaklardan canlı çekilir; diğer tipler elle girilen fiyatı kullanır.">Fiyat bekleniyor</span>
               <button type="button" class="ap2-btn-ghost" id="mp-settings">⚙ Ayarlar</button>
               <button type="button" class="ap2-btn-primary" id="mp-add">＋ Yeni Enstrüman</button>
             </div>

@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v133-new-badges';
-const BUILD_ID = 'b194-new-badges';
+﻿const CACHE = 'alfa-v134-live-portfolio-prices';
+const BUILD_ID = 'b195-live-portfolio-prices';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

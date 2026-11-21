@@ -7,8 +7,8 @@ const css = fs.readFileSync(new URL('../assets/my-portfolio.css', import.meta.ur
 const mod = fs.readFileSync(new URL('../assets/my-portfolio.mjs', import.meta.url), 'utf8');
 
 test('portföy menüsü Trader gibi dropdown, içerik Alfa Portföy / Portföyüm sekmeleri', () => {
-  assert.ok(html.includes('/assets/my-portfolio.css?v=2'));
-  assert.ok(html.includes('/assets/my-portfolio.mjs?v=3'));
+  assert.ok(html.includes('/assets/my-portfolio.css?v=3'));
+  assert.ok(html.includes('/assets/my-portfolio.mjs?v=4'));
   assert.ok(html.includes('id="navdrop-portfoy"') && html.includes('class="nav-link drop-btn" id="tab-portfoy"'));
   assert.ok(html.includes('class="drop-menu"'));
   assert.ok(html.includes('id="tab-portfoy-alpha"') && html.includes('📊 Alfa Portföy</a>'));
@@ -73,4 +73,33 @@ test('premium kilidi yalnızca Alfa Portföy panelini etkiler, hesaba özel Port
   // Sekme değişince kişisel panelin gizlenmiş stilleri temizlenir.
   assert.match(mod, /const layout = \$\('mp-layout'\); if \(layout\) layout\.style\.display = ''/);
   assert.match(mod, /window\.renderAlfaPortfoy2\(\)/);
+});
+
+test('Portföyüm kripto pozisyonları canlı fiyatlıyor (yeni API yok, yerel kayda yazmaz)', () => {
+  assert.ok(html.includes('id="mp-price-refresh"'));
+  assert.ok(html.includes('id="mp-price-status"'));
+  assert.ok(html.includes('data-state="idle"'));
+  assert.match(mod, /kripto fiyatları canlı/);
+  assert.match(css, /\.mp-price-status\[data-state="live"\]/);
+
+  const body = mod.slice(mod.indexOf('async function refreshPrices(force)'), mod.indexOf('\nfunction panelVisible()'));
+  assert.match(body, /function refreshPrices\(force\)/);
+  assert.match(body, /api\.binance\.com\/api\/v3\/ticker\/24hr/);
+  assert.match(body, /www\.okx\.com\/api\/v5\/market\/tickers/);
+  assert.match(body, /api\.coingecko\.com\/api\/v3\/simple\/price/);
+  assert.equal(/['"]\/api\//.test(body), false, 'sunucu endpoint\'i yok');
+  assert.doesNotMatch(body, /\bsave\(\)|\bmutate\(|localStorage\.setItem/, 'canlı fiyat kalıcı veriye yazılmaz');
+  assert.match(body, /if \(active\(\) !== p\) return;/, 'portföy değişirse eski fiyat uygulanmaz');
+  assert.match(body, /priceTick = Date\.now\(\);/);
+  assert.match(body, /● CANLI/);
+
+  assert.match(mod, /setInterval\(maybeRefresh, PRICE_TTL\)/);
+  assert.match(mod, /refreshPrices\(true\);\n  \} else if/);
+  assert.match(mod, /window\.AlfaMyPortfolio = \{ activate, refresh: render, markActive, refreshPrices, normSym \}/);
+  assert.match(mod, /function normSym\(s\)/);
+  assert.match(mod, /v\.endsWith\('USDT'\)/, 'BTC/USDT ve BTCUSDT aynı sembol');
+
+  const sw = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.match(sw, /const CACHE = 'alfa-v134-live-portfolio-prices';/);
+  assert.match(sw, /const BUILD_ID = 'b195-live-portfolio-prices';/);
 });

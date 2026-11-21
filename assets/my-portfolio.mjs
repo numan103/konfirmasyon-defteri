@@ -4,6 +4,17 @@
 const $ = id => document.getElementById(id);
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const COLORS = ['#7b78f5', '#34d399', '#fbbf24', '#f87171', '#38bdf8', '#c084fc', '#fb923c', '#a3e635'];
+// Canlı fiyatlar: sitede zaten kullanılan açık kaynaklar (yeni API/endpoint yok).
+const PRICE_TTL = 30000;
+const CG_IDS = {
+  BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', SOL: 'solana', XRP: 'ripple', ADA: 'cardano',
+  DOGE: 'dogecoin', AVAX: 'avalanche-2', LINK: 'chainlink', DOT: 'polkadot', MATIC: 'matic-network',
+  LTC: 'litecoin', TRX: 'tron', TON: 'the-open-network', SHIB: 'shiba-inu', BCH: 'bitcoin-cash',
+  UNI: 'uniswap', ATOM: 'cosmos', NEAR: 'near', APT: 'aptos', ARB: 'arbitrum', OP: 'optimism',
+  SUI: 'sui', INJ: 'injective-protocol', FET: 'fetch-ai'
+};
+let priceTick = 0;
+let priceBusy = false;
 let state = null;
 let formEditId = '';
 let ideaEditId = '';
@@ -31,6 +42,92 @@ const pctFmt = v => (v >= 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maxim
 const dateFmt = d => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1].slice(2) : '—'; };
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function newId(prefix) { return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
+
+function normSym(s) {
+  let v = String(s || '').trim().toUpperCase().replace(/[_-\s/]/g, '');
+  if (v.length > 4 && v.endsWith('USDT')) v = v.slice(0, -4);
+  return v;
+}
+function priceStatus(text, kind) {
+  const box = $('mp-price-status');
+  if (box) { box.textContent = text || ''; box.dataset.state = kind || 'idle'; }
+  const btn = $('mp-price-refresh');
+  if (btn) btn.classList.toggle('busy', kind === 'loading');
+}
+function renderLiveViews() {
+  renderSummary(); renderGrowth(); renderHedge(); renderPositions(); renderDonut(); renderChart();
+}
+async function refreshPrices(force) {
+  if (priceBusy) return;
+  const p = active();
+  if (!uid() || !p) { priceStatus('Giriş yapınca canlı fiyat', 'idle'); return; }
+  const cryptos = (p.positions || []).filter(x => x && x.symbol && (x.type || 'kripto') === 'kripto');
+  if (!cryptos.length) { priceStatus('Kripto poz ekleyince canlı fiyat', 'idle'); return; }
+  if (!force && Date.now() - priceTick < PRICE_TTL) return;
+  const syms = [...new Set(cryptos.map(x => normSym(x.symbol)).filter(Boolean))];
+  if (!syms.length) return;
+  priceBusy = true;
+  priceStatus('⟳ Canlı fiyatlar alınıyor…', 'loading');
+  const quotes = {};
+  try {
+    // Sitede zaten kullanılan açık kaynaklar: Binance -> OKX -> CoinGecko.
+    try {
+      const q = encodeURIComponent('[' + syms.map(s => '"' + s + 'USDT"').join(',') + ']');
+      const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=' + q);
+      if (r && r.ok) {
+        const j = await r.json();
+        if (Array.isArray(j)) j.forEach(t => {
+          const s = String(t.symbol || '').replace(/USDT$/, '');
+          if (syms.indexOf(s) >= 0 && num(t.lastPrice) > 0) quotes[s] = num(t.lastPrice);
+        });
+      }
+    } catch (e) { /* Binance yok */ }
+    try {
+      const missing = syms.filter(s => !(quotes[s] > 0));
+      if (missing.length) {
+        const r = await fetch('https://www.okx.com/api/v5/market/tickers?instType=SPOT');
+        if (r && r.ok) {
+          const j = await r.json();
+          if (j && Array.isArray(j.data)) j.data.forEach(t => {
+            const m = String(t.instId || '').match(/^([A-Z0-9]+)-USDT$/);
+            if (m && missing.indexOf(m[1]) >= 0 && num(t.last) > 0) quotes[m[1]] = num(t.last);
+          });
+        }
+      }
+    } catch (e) { /* OKX yok */ }
+    try {
+      const cgMissing = syms.filter(s => !(quotes[s] > 0)).map(s => ({ s, id: CG_IDS[s] })).filter(x => x.id);
+      if (cgMissing.length) {
+        const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + encodeURIComponent(cgMissing.map(x => x.id).join(',')) + '&vs_currencies=usd');
+        if (r && r.ok) {
+          const j = await r.json();
+          cgMissing.forEach(x => { if (j && j[x.id] && num(j[x.id].usd) > 0) quotes[x.s] = num(j[x.id].usd); });
+        }
+      }
+    } catch (e) { /* CoinGecko yok */ }
+  } finally {
+    priceBusy = false;
+  }
+  // Canlı fiyat SADECE ekranda: yerel kayda, geçmişe veya paylaşılan portföye yazılmaz.
+  if (active() !== p) return;
+  let updated = 0;
+  p.positions.forEach(pos => {
+    if (!pos || (pos.type || 'kripto') !== 'kripto') return;
+    const q = quotes[normSym(pos.symbol)];
+    if (q > 0) { pos.price = q; updated++; }
+  });
+  priceTick = Date.now();
+  renderLiveViews();
+  priceStatus(updated > 0 ? '● CANLI · ' + updated + '/' + cryptos.length + ' fiyat' : 'Fiyat kaynağına ulaşılamadı', updated > 0 ? 'live' : 'off');
+}
+function panelVisible() {
+  const panel = $('ap2-panel-mine');
+  return !!panel && !panel.classList.contains('hidden');
+}
+function maybeRefresh() {
+  if (document.hidden || !panelVisible()) return;
+  refreshPrices(false);
+}
 
 function cleanPosition(p) {
   if (!p || typeof p !== 'object') return null;
@@ -213,7 +310,7 @@ function renderHeader() {
   if ($('mp-idea-add')) $('mp-idea-add').disabled = !signed;
   if ($('mp-title')) $('mp-title').textContent = p ? '💼 ' + p.name : '💼 Portföyüm';
   if ($('mp-sub')) $('mp-sub').textContent = p
-    ? `Alfa Portföy'ün kendi hesabına özel kopyası · ${p.positions.length} pozisyon · veriler sadece bu cihazda.`
+    ? `Alfa Portföy'ün kendi hesabına özel kopyası · ${p.positions.length} pozisyon · kripto fiyatları canlı · veriler sadece bu cihazda.`
     : 'Giriş yapınca kendi portföyünü oluşturabilirsin.';
 }
 function renderSummary() {
@@ -481,6 +578,7 @@ function activate(which) {
     const layout = $('mp-layout'); if (layout) layout.style.display = '';
     const actions = $('mp-app')?.querySelector('.ap2-hd-actions'); if (actions) actions.style.display = '';
     render();
+    refreshPrices(true);
   } else if (typeof window.renderAlfaPortfoy2 === 'function') {
     // Paylaşılan panele dönünce erişim kilidini yeniden uygula.
     window.renderAlfaPortfoy2();
@@ -615,6 +713,7 @@ function promptName(defaultName) {
 function bind() {
   $('ap2-tab-alpha')?.addEventListener('click', () => activate('alpha'));
   $('ap2-tab-mine')?.addEventListener('click', () => activate('mine'));
+  $('mp-price-refresh')?.addEventListener('click', () => refreshPrices(true));
   $('mp-login-btn')?.addEventListener('click', () => { try { showGate(); } catch (e) { try { showPage('erisim'); } catch (e2) {} } });
   $('mp-select')?.addEventListener('change', e => { state.active = e.target.value; save(); render(); });
   $('mp-new')?.addEventListener('click', () => {
@@ -739,11 +838,16 @@ function bind() {
     }
   });
   $('mp-search')?.addEventListener('input', renderPositions);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && uid() !== currentUid) { state = load(); render(); } });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    if (uid() !== currentUid) { state = load(); render(); }
+    maybeRefresh();
+  });
+  setInterval(maybeRefresh, PRICE_TTL);
 }
 
 bind();
 state = load();
 render();
 try { if (new URLSearchParams(location.search).get('portfoyTab') === 'mine') activate('mine'); else markActive('alpha'); } catch (e) { markActive('alpha'); }
-window.AlfaMyPortfolio = { activate, refresh: render, markActive };
+window.AlfaMyPortfolio = { activate, refresh: render, markActive, refreshPrices, normSym };

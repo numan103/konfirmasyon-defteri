@@ -37,6 +37,16 @@ ${themeCss}</style>
 <div id="ap2-panel-alpha" role="tabpanel"><p>Alfa portföyü burada.</p></div>
 <div id="ap2-panel-mine" class="hidden" role="tabpanel">${mpMarkup}</div>
 </div>
+<script>
+window.__priceFetchCount = 0;
+window.fetch = function (url) {
+  window.__priceFetchCount++;
+  if (String(url).indexOf('api.binance.com') >= 0) {
+    return Promise.resolve({ ok: true, json: function () { return Promise.resolve([{ symbol: 'BTCUSDT', lastPrice: '63000' }]); } });
+  }
+  return Promise.reject(new Error('beklenmeyen fiyat kaynagi: ' + url));
+};
+</script>
 <script type="module" src="/assets/my-portfolio.mjs"></script>
 </body></html>`;
 const server = http.createServer(async (req, res) => {
@@ -90,6 +100,18 @@ try {
   assert.ok(Math.abs(pf.positions[0].qty - 0.5) < 1e-9, 'tutar / giriş fiyatı = adet');
   assert.match(await page.locator('#mp-summary-area').innerText(), /\+1\.000,00 \$/);
   assert.match(await page.locator('#mp-title').innerText(), /Portföyüm/);
+
+  // Canlı fiyat: stub'lanan Binance yanıtı kartı, özeti ve durumu günceller; yerel kayda yazmaz.
+  await page.evaluate(() => window.AlfaMyPortfolio.refreshPrices(true));
+  await page.waitForFunction(() => document.querySelector('#mp-grid .ap2-card-prices')?.innerText.includes('63.000,00'));
+  assert.match(await page.locator('#mp-summary-area').innerText(), /\+11\.500,00 \$/, '0.5 BTC * (63000-40000)');
+  assert.match(await page.locator('#mp-price-status').innerText(), /CANLI/);
+  assert.equal(await page.locator('#mp-price-status').getAttribute('data-state'), 'live');
+  assert.ok(await page.evaluate(() => window.__priceFetchCount >= 1), 'canlı fiyat fetch çağrısı yapıldı');
+  assert.equal(await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('alfa_my_portfolios_student-a'));
+    return d.items[d.active].positions[0].price;
+  }), 42000, 'canlı fiyat kalıcı veriye yazılmaz');
 
   await page.locator('#mp-grid [data-mp-edit]').first().click();
   await page.locator('#mp-f-price').fill('50000');
