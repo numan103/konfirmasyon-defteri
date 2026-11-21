@@ -6,6 +6,7 @@
 // varsa ve TG_PREMIUM_CHAT_ID tanımlıysa sadece premium kanalına gider.
 import { requestUser, requestTier, throttle } from '../lib/auth.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
+import { magazinePublicPhoto } from '../lib/telegram-magazine-source.mjs';
 
 const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
 const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
@@ -262,6 +263,8 @@ function extractPosts(html) {
 }
 
 export default async function handler(req, res) {
+  const publicPhoto = String(req.query?.magPhoto || '').match(/^publicmag_(\d+)_(\d+)$/);
+  if (req.method === 'GET' && publicPhoto) return magazinePublicPhoto({ ...req, query: { magazinePost: publicPhoto[1], image: publicPhoto[2] } }, res);
   if (req.method === 'GET' && req.query && req.query.magPhoto) return handleMagPhoto(req, res);
   const notify = (req.method === 'POST') || (req.query && String(req.query.notify) === '1');
   if (notify) return handleNotify(req, res);

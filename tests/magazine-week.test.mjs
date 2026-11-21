@@ -11,7 +11,7 @@ const ctx = { Date, magWeek: () => '16 – 22 Kasım' };
 vm.runInNewContext(html.slice(start, end) + '\nthis.magApplyWeek = magApplyWeek; this.magWeekLabelFromDates = magWeekLabelFromDates; this.magIsoWeek = magIsoWeek;', ctx);
 
 const NOW = new Date(2026, 10, 21, 12, 0, 0);
-const entry = (id, publishedAt, extra = {}) => ({ id, title: id, publishedAt, type: '', sourceKind: 'news-channel', ...extra });
+const entry = (id, publishedAt, extra = {}) => ({ id, title: id, publishedAt, type: '', sourceKind: 'mentorship-magazine', sourceThread: 977, ...extra });
 
 test('haftalık dergi Telegram tarihi olmayan eski seed gönderilerini dışarı atar', () => {
   const data = {
@@ -70,9 +70,9 @@ test('hem tam dergi hem ana sayfa gömülü dergi haftalık filtreyi uygular', (
 
 test('forum sohbeti ve teknik başlık yanıtları içindekilere karışmaz', () => {
   const data = { entries: [
-    entry('channel', '2026-11-20T10:00:00Z', { sourceKind: undefined, sourceLink: 'https://t.me/alfakasim/963' }),
-    entry('chat', '2026-11-20T11:00:00Z', { sourceKind: undefined, sourceLink: 'https://t.me/alfakasim/6/965' }),
-    entry('topic', '2026-11-20T12:00:00Z', { sourceKind: 'tech-topic' }),
+    entry('channel', '2026-11-20T10:00:00Z', { sourceThread: undefined, sourceLink: 'https://t.me/alfakasim/977/987' }),
+    entry('chat', '2026-11-20T11:00:00Z', { sourceThread: undefined, sourceLink: 'https://t.me/alfakasim/6/965' }),
+    entry('topic', '2026-11-20T12:00:00Z', { sourceThread: undefined, sourceKind: 'tech-topic' }),
   ] };
   ctx.magApplyWeek(data, NOW);
   assert.deepEqual(data.entries.map(e => e.id), ['channel']);

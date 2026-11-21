@@ -1,0 +1,16 @@
+.edu-learning-rewards{margin:28px 0 12px;padding:22px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,rgba(202,161,83,.1),var(--card) 65%);overflow-wrap:anywhere}
+.edu-learning-rewards[hidden]{display:none}
+.elr-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.elr-head h3{margin:6px 0 0;font-size:24px;letter-spacing:-.04em}
+.elr-level{color:#d7ab60;border:1px solid rgba(202,161,83,.4);padding:7px 12px;border-radius:99px;font-size:12px}
+.elr-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0}
+.elr-stats>div{min-width:0;display:grid;gap:5px;border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--card)}
+.elr-stats b{font-size:22px;color:var(--text)}
+.elr-stats span{font-size:11px;color:var(--text-3)}
+.edu-learning-rewards progress{width:100%;height:9px;accent-color:#cfab6a;border:0}
+.elr-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;margin:18px 0}
+.elr-badge{display:grid;justify-items:center;text-align:center;gap:8px;padding:14px 8px;border:1px dashed var(--border);border-radius:12px;color:var(--text-3);filter:grayscale(1)}
+.elr-badge.earned{border:1px solid rgba(202,161,83,.5);color:var(--text);filter:none;background:rgba(202,161,83,.08)}
+.elr-icon{font-size:26px}.elr-badge b{font-size:12px}.elr-badge small{font-size:10px}
+.elr-next{font-size:13px;color:var(--text-2);line-height:1.6}.elr-disclaimer{font-size:10px;color:var(--text-3);line-height:1.6;margin:14px 0 0}
+@media(max-width:480px){.edu-learning-rewards{padding:15px}.elr-stats{gap:6px}.elr-stats>div{padding:10px}.elr-stats b{font-size:18px}}

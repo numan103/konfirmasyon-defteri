@@ -50,8 +50,8 @@ function fixture(t) {
 
 const newsMsg = over => ({
   message_id: 501, date: 1795019005,
-  chat: { id: -100111222333, username: 'haberler', type: 'channel' },
-  sender_chat: { id: -100111222333, username: 'haberler', type: 'channel' },
+  chat: { id: -1004496172434, username: 'alfakasim', type: 'supergroup' },
+  message_thread_id: 977, from: { id: 777, username: 'traderahmetd' },
   text: 'Haftalık piyasa bülteni yayında\nDetaylar dergide.',
   photo: [{ file_id: 'news_photo_file_id_123', file_size: 900000 }],
   ...over,
@@ -65,13 +65,13 @@ const techMsg = over => ({
   ...over,
 });
 
-test('real channel_post and edited_channel_post are ingested with largest photo only', async t => {
+test('mentorship posts and edits are ingested with largest photo only', async t => {
   const f = fixture(t);
   const message = newsMsg({ photo: [{ file_id: 'small' }, { file_id: 'large' }] });
   assert.equal(isMagazineUpdate({ channel_post: message }), true);
   await ingestMagazineUpdate({ channel_post: message });
   assert.equal(f.row.data.entries.length, 1);
-  assert.equal(f.row.data.entries[0].sourceKind, 'news-channel');
+  assert.equal(f.row.data.entries[0].sourceKind, 'mentorship-magazine');
   assert.deepEqual(f.row.data.entries[0].photoIds, ['large']);
   await ingestMagazineUpdate({ edited_channel_post: { ...message, text: 'Düzenlenmiş haftalık bülten' } });
   assert.equal(f.row.data.entries[0].body, 'Düzenlenmiş haftalık bülten');
@@ -89,41 +89,39 @@ test('Telegram album stays one article with all distinct photos, including capti
   assert.equal(f.row.data.entries[0].body, first.text);
 });
 
-test('magazine config exposes the two configured sources and fails closed without a news chat', () => {
+test('magazine source is pinned to the owner-provided mentorship 977, not obsolete environment settings', () => {
   assert.deepEqual(MAG_CATEGORIES, ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz']);
   const cfg = magazineConfig();
-  assert.equal(cfg.newsChat, 'haberler');
-  assert.equal(cfg.newsThread, 0);
-  assert.equal(cfg.techChat, 'alfakasim');
-  assert.equal(cfg.techThread, 6);
-  assert.equal(cfg.techAuthor, 'traderahmetd');
+  assert.equal(cfg.newsChat, 'alfakasim');
+  assert.equal(cfg.newsThread, 977);
   assert.equal(cfg.ok, true);
 });
 
-test('Alfa News channel is recognized by its title when no chat env is configured', () => {
+test('old Alfa News channel title is no longer a magazine source', () => {
   const old = process.env.TG_MAG_NEWS_CHAT;
   delete process.env.TG_MAG_NEWS_CHAT;
   try {
     const base = { message_id: 977, date: 1795000000, from: { id: 42 }, text: 'GOLD & BTC haftalık görünüm' };
-    assert.equal(magazineSource({ ...base, chat: { id: -100999, title: 'Alfa News', type: 'channel' } }), 'Haber');
-    assert.equal(magazineSource({ ...base, chat: { id: -100999, title: 'Alfa News', username: 'alfanews', type: 'channel' } }), 'Haber');
+    assert.equal(magazineSource({ ...base, chat: { id: -100999, title: 'Alfa News', type: 'channel' } }), null);
+    assert.equal(magazineSource({ ...base, chat: { id: -100999, title: 'Alfa News', username: 'alfanews', type: 'channel' } }), null);
     assert.equal(magazineSource({ ...base, chat: { id: -1004496172434, title: 'Alfa Traders', username: 'alfakasim', type: 'supergroup' }, message_thread_id: 6 }), null);
   } finally {
     if (old === undefined) delete process.env.TG_MAG_NEWS_CHAT; else process.env.TG_MAG_NEWS_CHAT = old;
   }
 });
 
-test('only the exact news channel and Trader Ahmet topic generate magazine entries', () => {
+test('only Trader Ahmet inside the exact mentorship magazine topic generates entries', () => {
   assert.equal(magazineSource(newsMsg()), 'Haber');
   assert.equal(magazineSource(newsMsg({ chat: { id: -100999888777, username: 'baskanaları', type: 'channel' }, sender_chat: { id: -100999888777 } })), null);
-  assert.equal(magazineSource(newsMsg({ chat: { id: -100111222333, username: 'haberler', type: 'channel' }, sender_chat: undefined })), 'Haber');
-  assert.equal(magazineSource(techMsg()), 'Teknik Analiz');
+  assert.equal(magazineSource(newsMsg({ chat: { id: -100111222333, username: 'haberler', type: 'channel' }, sender_chat: undefined })), null);
+  assert.equal(magazineSource(techMsg()), null);
   for (const changes of [
     { message_thread_id: 7 },
     { from: { id: 9, username: 'biri' } },
     { from: { id: 777, username: 'traderahmetd', is_bot: true } },
     { sender_chat: { id: 5 } },
   ]) assert.equal(magazineSource(techMsg(changes)), null, 'tech source requires exact topic and author');
+  assert.equal(magazineSource(newsMsg({ from: { id: 9, username: 'biri' } })), null);
   for (const changes of [
     { forward_origin: { type: 'user' } },
     { forward_from_chat: { id: 1 } },
@@ -138,12 +136,12 @@ test('only the exact news channel and Trader Ahmet topic generate magazine entri
   assert.equal(magazineSource(techMsg({ chat: { id: 1, username: 'alfatraderspublic', type: 'channel' }, from: undefined, sender_chat: { id: 1 } })), null);
 });
 
-test('numeric news chat ids and anonymous channel posts are supported without accepting other senders', () => {
+test('old numeric chat configuration cannot redirect the source; unrelated anonymous senders fail closed', () => {
   const prev = process.env.TG_MAG_NEWS_CHAT;
   process.env.TG_MAG_NEWS_CHAT = '-100111222333';
   try {
     assert.equal(magazineSource(newsMsg()), 'Haber');
-    assert.equal(magazineSource(newsMsg({ chat: { id: -100111222333, username: 'biri', type: 'channel' }, sender_chat: { id: -100111222333 } })), 'Haber');
+    assert.equal(magazineSource(newsMsg({ chat: { id: -100111222333, username: 'biri', type: 'channel' }, sender_chat: { id: -100111222333 } })), null);
     assert.equal(magazineSource(newsMsg({ chat: { id: -100999888777, username: 'baskanaları', type: 'channel' }, sender_chat: { id: -100999888777 } })), null);
   } finally {
     process.env.TG_MAG_NEWS_CHAT = prev;
@@ -151,18 +149,19 @@ test('numeric news chat ids and anonymous channel posts are supported without ac
   assert.equal(magazineSource(newsMsg({ sender_chat: { id: 999 } })), null, 'anonymous admin from another chat is rejected');
 });
 
-test('the production setup separates news and technical topics inside alfakasim', () => {
+test('the corrected setup excludes the old 862 and 6 topics even with obsolete environment settings', () => {
   const prevChat = process.env.TG_MAG_NEWS_CHAT, prevThread = process.env.TG_MAG_NEWS_THREAD;
   process.env.TG_MAG_NEWS_CHAT = 'alfakasim';
   process.env.TG_MAG_NEWS_THREAD = '862';
   try {
-    assert.equal(magazineConfig().newsThread, 862);
+    assert.equal(magazineConfig().newsThread, 977);
     const inGroup = over => ({
       message_id: 700, date: 1795019000, chat: { id: -1004496172434, username: 'alfakasim', type: 'supergroup' },
       from: { id: 9, username: 'admin' }, text: 'Piyasa haberleri bugün', ...over,
     });
-    assert.equal(magazineSource(inGroup({ message_thread_id: 862 })), 'Haber');
-    assert.equal(magazineSource(inGroup({ message_thread_id: 6, from: { id: 777, username: 'traderahmetd' } })), 'Teknik Analiz');
+    assert.equal(magazineSource(inGroup({ message_thread_id: 862 })), null);
+    assert.equal(magazineSource(inGroup({ message_thread_id: 6, from: { id: 777, username: 'traderahmetd' } })), null);
+    assert.equal(magazineSource(inGroup({ message_thread_id: 977, from: { id: 777, username: 'traderahmetd' } })), 'Haber');
     assert.equal(magazineSource(inGroup({ message_thread_id: 6 })), null, 'other members in the tech topic stay out');
     assert.equal(magazineSource(inGroup({ message_thread_id: 7 })), null);
     assert.equal(magazineSource(inGroup()), null, 'general topic is not a magazine source');
@@ -178,7 +177,7 @@ test('entry extraction keeps category, source link, photos and deterministic pro
   assert.equal(hab.title, 'Haftalık piyasa bülteni yayında');
   assert.match(hab.body, /Detaylar dergide/);
   assert.deepEqual(hab.photoIds, ['news_photo_file_id_123']);
-  assert.equal(hab.sourceLink, 'https://t.me/haberler/501');
+  assert.equal(hab.sourceLink, 'https://t.me/alfakasim/977/501');
   assert.match(hab.id, /^mag_[a-f0-9]{64}$/);
   assert.equal(hab.id, entryFromMessage(newsMsg(), 'Haber').id);
   const tech = entryFromMessage(techMsg(), 'Teknik Analiz');
@@ -222,12 +221,12 @@ test('ingest writes new entries once, dedupes redelivery and applies genuine edi
   assert.equal(f.row.data.entries[0].title, 'Fed faiz kararı sonrası piyasalarda hareket');
 });
 
-test('both categories share one alfanews stream and author roster stays valid', async t => {
+test('only the correct topic is stored and author roster is Trader Ahmet', async t => {
   const f = fixture(t);
   await ingestMagazineUpdate({ message: newsMsg() });
   await ingestMagazineUpdate({ message: techMsg() });
-  assert.equal(f.row.data.entries.length, 2);
-  assert.deepEqual(f.row.data.entries.map(e => e.category), ['Haber', 'Teknik Analiz']);
+  assert.equal(f.row.data.entries.length, 1);
+  assert.deepEqual(f.row.data.entries.map(e => e.category), ['Haber']);
   assert.ok(f.row.data.authors.some(a => a.id === 'traderahmetd'));
 });
 
@@ -236,7 +235,7 @@ test('unrelated updates never touch storage; storage failures are retryable', as
   assert.deepEqual(await ingestMagazineUpdate({ message: newsMsg({ chat: { id: 5, username: 'other', type: 'channel' }, sender_chat: undefined }) }), { handled: false, count: 0 });
   assert.equal(f.calls.length, 0);
   assert.equal(isMagazineUpdate({ message: newsMsg() }), true);
-  assert.equal(isMagazineUpdate({ edited_message: techMsg() }), true);
+  assert.equal(isMagazineUpdate({ edited_message: techMsg() }), false);
   f.outage(true);
   await assert.rejects(ingestMagazineUpdate({ message: newsMsg() }), /storage_unavailable/);
   f.outage(false);

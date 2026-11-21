@@ -18,6 +18,7 @@ import { openRecord } from '../lib/education-crm.mjs';
 import { EDU_PLANS } from '../assets/edu-plans-model.mjs';
 import { sealChannels, openChannels } from '../lib/edu-channel-storage.mjs';
 import eduTelegramInbox from '../lib/edu-telegram-inbox.mjs';
+import { readMagazineSnapshot } from '../lib/telegram-magazine-source.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -68,7 +69,7 @@ async function alfaNews(req, res) {
     // undated entries remain stored for the editor, not published as weekly pages.
     const channelEntries = (Array.isArray(raw.entries) ? raw.entries : []).filter(e =>
       e && e.type !== 'update' && e.publishedAt &&
-      (e.sourceKind === 'news-channel' || (!e.sourceKind && /^https:\/\/t\.me\/[^/]+\/\d+$/.test(e.sourceLink || '')))
+      (e.sourceThread === 977 || /^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(e.sourceLink || ''))
     );
     const entries = channelEntries.slice(0, 60).map(e => ({
       id: text(e && e.id, 80),
@@ -91,15 +92,20 @@ async function alfaNews(req, res) {
       ctaUrl: text(e && e.ctaUrl, 600),
       category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
       sourceLink: text(e && e.sourceLink, 300),
-      sourceKind: 'news-channel',
+      sourceKind: 'mentorship-magazine', sourceThread: 977,
       publishedAt: text(e && e.publishedAt, 40),
     }));
+    const publicEntries = await readMagazineSnapshot();
+    for (const entry of publicEntries) {
+      if (!entries.some(existing => existing.sourceLink === entry.sourceLink)) entries.push(entry);
+    }
     const authors = Array.isArray(raw.authors) ? raw.authors.slice(0, 20).map(a => ({
       id: text(a && a.id, 80),
       name: text(a && a.name, 120),
       specialty: text(a && a.specialty, 120),
       photo: media(a && a.photo),
     })) : [];
+    if (!authors.some(a => a.id === 'traderahmetd')) authors.push({ id: 'traderahmetd', name: 'Trader Ahmet', specialty: 'Piyasa analizi', photo: '' });
     return res.status(200).json({ ok: true, updatedAt: rows[0].updated_at || null, data: {
       issueNo: Number.isFinite(raw.issueNo) ? raw.issueNo : 1,
       weekLabel: text(raw.weekLabel, 120),

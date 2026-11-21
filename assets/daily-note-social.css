@@ -1,0 +1,15 @@
+.daily-social{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;min-width:0}
+.daily-feature-card>.daily-social{grid-column:1 / -1}
+.daily-social-actions{display:flex;gap:8px;flex-wrap:wrap}
+.daily-social [aria-pressed=true]{color:#f47299;border-color:#f47299}
+.daily-social-comments{margin-top:14px;max-height:560px;overflow:auto;overscroll-behavior:contain}
+.daily-social form{display:grid;gap:10px;margin-bottom:16px}
+.daily-social label{display:grid;gap:6px;font-size:12px;color:var(--text-2)}
+.daily-social input,.daily-social textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);padding:10px;font:inherit}
+.daily-social textarea{min-height:90px;resize:vertical}
+.daily-social-comment{border-top:1px solid var(--border);padding:12px 0;overflow-wrap:anywhere}
+.daily-social-comment>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px}
+.daily-social-comment p{display:block!important;-webkit-line-clamp:unset!important;white-space:pre-wrap;color:var(--text-2);line-height:1.6}
+.daily-social time{font-size:10px;color:var(--text-3)}
+.daily-social-badge{color:var(--pc);font-size:10px;border:1px solid var(--border);padding:2px 6px;border-radius:99px}
+.daily-social-error{color:var(--red);font-size:12px}

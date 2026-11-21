@@ -55,6 +55,10 @@
   <script type="module" src="/assets/site-new.mjs?v=2"></script>
 <script type="module" src="/assets/signup-funnel.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
+<link rel="stylesheet" href="/assets/daily-note-social.css?v=1">
+<script type="module" src="/assets/daily-note-social.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/edu-learning-rewards.css?v=1">
+<script type="module" src="/assets/edu-learning-rewards.mjs?v=1"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
 <!-- AYNA:BASLA -->
@@ -7406,6 +7410,7 @@
     </div>
 
     <!-- Kanal formu: bölüm / konu / içerik ekle-düzenle -->
+    <section id="edu-learning-rewards" class="edu-learning-rewards" aria-label="Öğrenme ödüllerin" hidden></section>
     <div id="ch-form" class="eg-form hidden">
       <div class="eg-form-h" id="ch-form-title" data-i18n="pg.egitim.new">Yeni</div>
       <div id="ch-editor-context" class="ch-paste-help"></div>
@@ -13580,10 +13585,18 @@ async function loadNews() {
     } catch (e) { /* tablo yok / çevrimdışı */ }
   }
   // Yeni kayıt, premium, misafir ve preview rolleri için ortak okuma ucu.
-  if (!d) {
+  if (!d || rawAdmin) {
     try {
       const res = await fetch('/api/edu-shared?kind=news', { cache: 'no-store' });
-      if (res.ok) { const j = await res.json(); if (j && j.ok && j.data && typeof j.data === 'object') d = j.data; }
+      if (res.ok) {
+        const j = await res.json();
+        if (j && j.ok && j.data && typeof j.data === 'object') {
+          if (rawAdmin) {
+            d = { ...d, entries: (d.entries || []).concat((j.data.entries || []).filter(e => !(d.entries || []).some(old => old.id === e.id || (old.sourceLink && old.sourceLink === e.sourceLink)))),
+              authors: (d.authors || []).concat((j.data.authors || []).filter(a => !(d.authors || []).some(old => old.id === a.id))) };
+          } else d = j.data;
+        }
+      }
     } catch (e) { /* ortak dergi okunamadı */ }
   }
   if (!d) { try { const raw = await store.get(NEWS_KEY); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; } }
@@ -13750,7 +13763,7 @@ function magApplyWeek(data, now) {
   const { start, end } = magWeekBounds(now);
   const inWeek = d => d && d >= start && d <= end;
   const dated = all.filter(e => inWeek(magPostDate(e && e.publishedAt)) && e.type !== 'update' &&
-    (e.sourceKind === 'news-channel' || (!e.sourceKind && /^https:\/\/t\.me\/[^/]+\/\d+$/.test(e.sourceLink || ''))));
+    (e.sourceThread === 977 || /^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(e.sourceLink || '')));
   const entries = dated.slice().sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
   data.entries = entries;
   const dates = entries.map(e => magPostDate(e && e.publishedAt)).filter(d => inWeek(d));
@@ -14286,7 +14299,7 @@ function renderNewsWeekly() {
     const empty = document.createElement('p'); empty.className = 'nw-empty'; empty.textContent = 'Bu hafta için dergi yazısı bekleniyor.';
     box.appendChild(empty); return;
   }
-  const week = magData.weekLabel || magWeek();
+  const week = magApplyWeek({ ...magData, entries: magData.entries.slice() }).weekLabel || magWeek();
   entries.slice(0, 12).forEach(function (e) {
     const card = document.createElement('article'); card.className = 'nw-card';
     const meta = document.createElement('div'); meta.className = 'nw-meta';
@@ -24709,8 +24722,21 @@ function chProgSet(t, v, on) {
   if (!m[u]) m[u] = {};
   if (on) m[u][chProgKey(t, v)] = 1; else delete m[u][chProgKey(t, v)];
   try { localStorage.setItem('alfa-chprog-v1', JSON.stringify(m)); } catch (e) {}
+  if (typeof refreshEduLearningRewards === 'function') refreshEduLearningRewards();
 }
 function chIsAdmin() { return !window.ALFA_PREVIEW_CONFIG && !!(AUTH && AUTH.user && siteIsAdmin()); }
+function refreshEduLearningRewards() {
+  if (!window.EduLearningRewards) return;
+  const courses = eduCourses().filter(c => c.openTotal > 0);
+  const next = courses.flatMap(c => c.items.map(item => ({ c, ...item }))).find(item => !chItemLocked(item.video) && !chIsDone(item.c.t, item.video));
+  window.EduLearningRewards.draw(document.getElementById('edu-learning-rewards'), {
+    account: AUTH.user?.id || '', admin: chIsAdmin(), preview: !!window.ALFA_PREVIEW_CONFIG, page: currentPage,
+    courses: courses.map(c => ({ id: c.t.id + ':' + c.sec.id, title: c.sec.title, items: c.items.map(item => ({
+      id: c.t.id + ':' + item.video.id, done: chIsDone(c.t, item.video), locked: chItemLocked(item.video)
+    })) })),
+    continue: next ? () => { openCourse(next.c.t.id, next.c.sec.id); chTopic = next.lesson.id; chVid = next.video.id; renderChannelView(); document.getElementById('ch-study')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } : null
+  });
+}
 function chCanEdit(trader) {
   if (window.ALFA_PREVIEW_CONFIG) return false;
   if (!trader) return false;
@@ -25037,6 +25063,7 @@ function renderEduCatalog() {
 
   const openTotal = mine.reduce((sum, c) => sum + c.openTotal, 0);
   const done = mine.reduce((sum, c) => sum + c.done, 0);
+  refreshEduLearningRewards();
   const overall = document.getElementById('edu-overall');
   if (overall) {
     overall.replaceChildren();
@@ -25495,6 +25522,7 @@ function renderChannelView() {
     vlist.appendChild(row);
   });
   mountEduFeedback(t, cur, curVid);
+  refreshEduLearningRewards();
 }
 
 function chBuildNoteBox(vid, fallbackTitle) {
@@ -25848,6 +25876,7 @@ function chClosePhotoOverlays() {
   document.querySelectorAll('.ch-photo-dialog, .ch-content-preview').forEach(dialog => { dialog.close(); dialog.remove(); });
 }
 function chClearAuthorWorkspace() {
+  const rewards = document.getElementById('edu-learning-rewards'); if (rewards) { rewards.replaceChildren(); rewards.hidden = true; }
   chClosePhotoOverlays();
   chStudioBusy = false;
   chStudioMode = 'daily';
@@ -26046,6 +26075,7 @@ async function chSetDailyPublication(id, action) {
   finally { if (epoch === chWorkspaceEpoch) chStudioBusy = false; }
 }
 let chHomeDailyOffset = 0, chHomeDailyLast = 0, chHomeDailyRequest = null;
+let chDailyReaderEpoch = 0;
 let chEduDailyRequest = null, chEduDailyLoaded = false, chEduDailyOffset = 0, chEduDailyHasMore = false;
 function chDailyDate(stamp, long = false) {
   try { return new Date(stamp).toLocaleDateString('tr-TR', long ? { weekday: 'long', day: 'numeric', month: 'long' } : { day: 'numeric', month: 'short' }); }
@@ -26059,6 +26089,11 @@ function chDailyImage(url, title, onFail) {
   image.onerror = () => { if (onFail) onFail(); else image.remove(); };
   return image;
 }
+function chDailySocialBlock(id) {
+  const root = document.createElement('div'); root.className = 'daily-social'; root.dataset.noteId = id;
+  if (window.DailyNoteSocial) window.DailyNoteSocial.mount(root, id);
+  return root;
+}
 function chDailyCard(item) {
   const card = document.createElement('article'); card.className = 'daily-note-card'; card.dataset.dailyId = item.id;
   const time = document.createElement('time'); time.dateTime = new Date(item.publishedAt).toISOString(); time.textContent = chDailyDate(item.publishedAt);
@@ -26067,7 +26102,7 @@ function chDailyCard(item) {
   else { const visual = document.createElement('img'); visual.src = '/assets/daily-notes-cover.svg?v=1'; visual.alt = 'Günlük notlar için defter illüstrasyonu'; visual.loading = 'lazy'; card.appendChild(visual); }
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
   const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyReader(item.id);
-  card.append(time, title, excerpt, open); return card;
+  card.append(time, title, excerpt, open, chDailySocialBlock(item.id)); return card;
 }
 function chDailyFeature(item) {
   const box = document.createElement('article'); box.className = 'daily-feature-card'; box.dataset.dailyId = item.id;
@@ -26086,7 +26121,7 @@ function chDailyFeature(item) {
   const foot = document.createElement('div'); foot.className = 'daily-feature-foot';
   const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = 'Yazıyı oku →'; open.onclick = () => chOpenDailyReader(item.id);
   const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = item.photoCount ? item.photoCount + ' görsel · herkese açık' : 'Herkese açık';
-  foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body); return box;
+  foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body, chDailySocialBlock(item.id)); return box;
 }
 function chRenderDaily(scope, items, more, hasMore) {
   const list = document.getElementById(scope + '-daily-list'), feature = document.getElementById(scope + '-daily-feature'), status = document.getElementById(scope + '-daily-status');
@@ -26138,6 +26173,7 @@ function chLoadEduDaily(more = false, force = false) {
   chEduDailyRequest = pending; return pending;
 }
 function chCloseDailyReader() {
+  chDailyReaderEpoch++;
   const reader = document.getElementById('edu-daily-reader'); if (!reader) return;
   reader.replaceChildren(); reader.classList.add('hidden');
   document.getElementById('edu-daily-feature')?.classList.remove('hidden');
@@ -26146,6 +26182,7 @@ function chCloseDailyReader() {
 }
 async function chOpenDailyReader(id) {
   if (!/^edutg_[a-f0-9]{64}$/.test(id || '')) return;
+  const sequence = ++chDailyReaderEpoch;
   if (currentPage !== 'egitim') showPage('egitim');
   if (channelOpen) { channelOpen = null; renderEgitim(); }
   const panel = document.getElementById('edu-daily-notes'), reader = document.getElementById('edu-daily-reader');
@@ -26159,6 +26196,7 @@ async function chOpenDailyReader(id) {
   reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
   try {
     const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&note=' + id, { credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10000) }), data = await r.json();
+    if (sequence !== chDailyReaderEpoch) return;
     if (!r.ok || !data.ok || !data.item) throw new Error('not_found');
     const item = data.item;
     reader.replaceChildren();
@@ -26183,8 +26221,9 @@ async function chOpenDailyReader(id) {
       const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Bu paylaşımın medyası şu an görüntülenemiyor.'; body.appendChild(hint);
       if (/^https?:\/\//i.test(item.url || '')) { const source = document.createElement('a'); source.href = item.url; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = 'Telegram kaynağını aç ↗'; body.appendChild(source); }
     }
-    reader.append(head, body);
+    reader.append(head, body, chDailySocialBlock(item.id));
   } catch {
+    if (sequence !== chDailyReaderEpoch) return;
     reader.replaceChildren();
     const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Bu not yayından kaldırılmış veya şu an yüklenemiyor.';
     const close = document.createElement('button'); close.type = 'button'; close.className = 'btn'; close.textContent = 'Listeye dön'; close.onclick = chCloseDailyReader;
@@ -29394,6 +29433,7 @@ function migrateLegacyLocal() {
 
 async function onAuthed(user) {
   AUTH.user = user;
+  if (window.DailyNoteSocial) { window.DailyNoteSocial.reset(); window.DailyNoteSocial.scan(); }
   AUTH.ns = 'u:' + user.id + ':';
   // Buluttan bu kullanıcının verisini çek
   let data = null;
@@ -29646,6 +29686,7 @@ function bootAuth() {
     if (chWorkspaceIdentityChanged(event, AUTH.user?.id || chDraftAccount, session?.user?.id)) {
       chDraftCapture();
       chWorkspaceEpoch++;
+      if (typeof window !== 'undefined' && window.DailyNoteSocial) window.DailyNoteSocial.reset();
       channelsData = { traders: {}, order: [] }; channelsLoaded = false;
       channelsLoading = null;
       channelsError = '';
