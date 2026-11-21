@@ -51,6 +51,28 @@ test('partner assets are local, inert and the marquee supports accessible motion
   assert.match(css, /prefers-reduced-motion:reduce/);
   assert.match(css, /focus-within/);
 });
+test('eğitim paketleri hero posteri sağda, dikey ve kırpılmadan gösterilir', () => {
+  const poster = fs.readFileSync(new URL('../assets/edu-apply-poster.webp', import.meta.url));
+  assert.equal(poster.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(poster.toString('ascii', 8, 12), 'WEBP');
+  assert.ok(poster.length > 100000, 'poster dosyası gerçek görsel olmalı');
+
+  const client = fs.readFileSync(new URL('../assets/edu-plans.mjs', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../assets/edu-plans.css', import.meta.url), 'utf8');
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(client, /edu-apply-poster\.webp\?v=1/);
+  assert.match(client, /img\.width = 1122; img\.height = 1402/);
+  assert.match(client, /ALFA EDU eğitim paketleri/);
+  assert.match(client, /hero\.append\(copy, art\)/, 'poster hero sağında');
+  assert.doesNotMatch(client, /edu-execution\.jpg/);
+  assert.doesNotMatch(client, /Fotoğraf temsilidir/);
+
+  assert.match(css, /\.eduplans-art img \{[^}]*aspect-ratio: 1122\/1402[^}]*object-fit: contain/);
+  assert.doesNotMatch(css, /\.eduplans-art img \{[^}]*object-fit: cover/);
+  assert.doesNotMatch(css, /\.eduplans-art img \{ aspect-ratio: (4\/3|16\/9)/);
+  assert.match(html, /\/assets\/edu-plans\.css\?v=5/);
+  assert.match(html, /\/assets\/edu-plans\.mjs\?v=8/);
+});
 test('public package offer is separate from existing course access and has clear continuation conditions', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const client = fs.readFileSync(new URL('../assets/edu-plans.mjs', import.meta.url), 'utf8');

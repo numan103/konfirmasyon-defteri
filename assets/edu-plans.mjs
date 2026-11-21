@@ -33,8 +33,10 @@ if (root) {
       link(text('Mevcut derslerime git →', 'Go to my existing courses →'), '?page=egitim'));
     copy.appendChild(actions);
     const art = el('figure', undefined, 'eduplans-art'), img = el('img');
-    img.src = '/assets/edu-execution.jpg'; img.alt = text('Temsili grafik ve işlem planlama çalışması', 'Illustrative chart and trade-planning study'); img.loading = 'eager'; img.width = 960; img.height = 540;
-    art.append(img, el('figcaption', text('Fotoğraf temsilidir.', 'Illustrative photo.')));
+    img.src = '/assets/edu-apply-poster.webp?v=1';
+    img.alt = text('ALFA EDU eğitim paketleri: sadece izleme değil uygulamaya geç; ömür boyu video, canlı eğitim ve birebir odak posterimi', 'ALFA EDU education packages: not just watching but practising; lifetime videos, live training and personal focus poster');
+    img.loading = 'eager'; img.width = 1122; img.height = 1402;
+    art.appendChild(img);
     hero.append(copy, art); root.appendChild(hero);
     const flow = el('section', undefined, 'eduplans-flow'); flow.setAttribute('aria-label', text('Üç adımda katıl', 'Join in three steps'));
     [[text('Paketini seç', 'Choose a package'), text('Video · Canlı · Birebir', 'Video · Live · Personal')],

@@ -100,6 +100,6 @@ test('Portföyüm kripto pozisyonları canlı fiyatlıyor (yeni API yok, yerel k
   assert.match(mod, /v\.endsWith\('USDT'\)/, 'BTC/USDT ve BTCUSDT aynı sembol');
 
   const sw = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /const CACHE = 'alfa-v134-live-portfolio-prices';/);
-  assert.match(sw, /const BUILD_ID = 'b195-live-portfolio-prices';/);
+  assert.match(sw, /const CACHE = 'alfa-v\d+-/);
+  assert.match(sw, /const BUILD_ID = 'b\d+-/);
 });

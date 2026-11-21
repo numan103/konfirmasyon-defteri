@@ -3,9 +3,8 @@
 .eduplans-kicker { font-size: 10px; font-weight: 800; letter-spacing: .16em; color: var(--pc); }
 .eduplans h1 { margin: 12px 0; font-family: var(--font-display); font-size: clamp(26px,4vw,42px); line-height: 1.13; letter-spacing: -.035em; }
 .eduplans-lead { color: var(--text-3); line-height: 1.75; font-size: 13px; max-width: 620px; }
-.eduplans-art { margin: 0; }
-.eduplans-art img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 15px; }
-.eduplans-art figcaption { font-size: 10px; color: var(--text-3); margin-top: 7px; }
+.eduplans-art { margin: 0; display: flex; justify-content: center; }
+.eduplans-art img { display: block; width: auto; max-width: 100%; height: auto; max-height: 460px; aspect-ratio: 1122/1402; object-fit: contain; border-radius: 15px; background: var(--card); }
 .eduplans-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
 .eduplans a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: normal; text-align: center; line-height: 1.45; }
 .eduplans-intro { margin: 26px 0 18px; }
@@ -68,7 +67,7 @@
 @media(max-width:600px) { .eduplans-hero { grid-template-columns: 1fr; padding: 22px 18px; gap: 18px; } .eduplans-grid,.eduplans-terms { grid-template-columns: 1fr; } }
 .eduplans-hero { grid-template-columns: 1.1fr 1fr; padding: 28px; }
 .eduplans-hero .eduplans-lead { font-size: 14px; max-width: 470px; }
-.eduplans-art img { aspect-ratio: 4/3; }
+.eduplans-art img { max-height: 430px; }
 .eduplans-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
 .eduplans-chips span { border: 1px solid var(--border); background: var(--panel-alt); color: var(--text-2); padding: 7px 10px; border-radius: 99px; font-size: 10px; }
 .eduplans .btn { min-height: 40px; white-space: normal; line-height: 1.5; }
@@ -98,7 +97,7 @@
 .eduplans-term p { margin-top: 12px; font-size: 11px; }
 @media(max-width:650px) {
   .eduplans-hero { grid-template-columns: 1fr; padding: 20px 18px; }
-  .eduplans-art img { aspect-ratio: 16/9; }
+  .eduplans-art img { max-height: 420px; }
   .eduplans-flow { gap: 7px; }
   .eduplans-flow > div { display: flex; flex-direction: column; gap: 7px; padding: 12px 10px; }
   .eduplans-flow b { font-size: 21px; }

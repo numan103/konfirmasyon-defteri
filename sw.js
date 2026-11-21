@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v134-live-portfolio-prices';
-const BUILD_ID = 'b195-live-portfolio-prices';
+﻿const CACHE = 'alfa-v135-edu-poster';
+const BUILD_ID = 'b196-edu-poster';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
