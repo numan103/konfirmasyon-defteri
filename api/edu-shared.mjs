@@ -345,7 +345,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.query?.kind === 'channel' && req.query?.view === 'telegram-inbox') return eduTelegramInbox(req, res);
+  if (req.query?.kind === 'channel' && ['telegram-inbox', 'daily-notes'].includes(req.query?.view)) return eduTelegramInbox(req, res);
   if (req.query?.kind === 'feedback') return eduFeedback(req, res);
   if (['influencer-content', 'influencer-progress'].includes(req.query?.kind)) return influencerContent(req, res);
   if (req.query?.kind === 'portfolio') return portfolio(req, res);

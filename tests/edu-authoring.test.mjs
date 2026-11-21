@@ -109,7 +109,7 @@ function saveFixture({ succeeds = true, mode = 'video-add' } = {}) {
     chDraftId: 'draft-1', chDraftAccount: 'author', chDraftBaseline: '', chDraftPersisted: '',
     chStudioBusy: false, chMediaPending: 0, AUTH: { user: { id: 'author' } },
     currentPage: 'edustudio', channelOpen: 'teacher', chSec: 'other', chTopic: 'other-topic', chVid: null,
-    chCanEdit: () => true, ytId: () => null, ytListId: () => null, chUid: () => 'new-item',
+    chCanEdit: () => true, chIsDailyForm: () => false, ytId: () => null, ytListId: () => null, chUid: () => 'new-item',
     chSelectedPlans: () => ['video'], chCollectPhotos: () => [], chCollectVideos: () => [],
     chSecMeta: t => t.secMeta, chDraftFields: () => ({ body: get('ch-in-body').value }),
     chDraftForget: async () => true, chDraftStatus: text => { state.status = text; },
@@ -245,4 +245,13 @@ test('temporary channel read failure keeps the saved channel and current selecti
   await f.load();
   assert.equal(f.state.channelsData, f.original); assert.equal(f.state.channelOpen, 'teacher');
   assert.equal(f.state.channelsLoaded, true); assert.match(f.state.channelsError, /yüklenemedi/);
+});
+test('public Daily Notes belong to the home page and have a separate studio mode without a Telegram approval step', () => {
+  const home = html.indexOf('id="page-home"'), notes = html.indexOf('id="home-daily-notes"'), studio = html.indexOf('id="page-edustudio"');
+  assert.ok(home >= 0 && notes > home && notes < studio);
+  assert.equal([...html.matchAll(/id="home-daily-notes"/g)].length, 1);
+  assert.match(html, /data-author-mode="daily"/); assert.match(html, /data-author-mode="course"/);
+  assert.doesNotMatch(html, /Günlüğe taslak olarak al|Taslağa alıp kontrol ederek kaydet/);
+  assert.match(html, /g\('edu-author-journal'\)\.addEventListener\('click', \(\) => chOpenDailyNote\(\)\)/);
+  assert.match(html, /dailyId: chForm\.dailyId/);
 });

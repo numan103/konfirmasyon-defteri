@@ -1,4 +1,4 @@
-import { previewRequest, resultProjection } from './admin-preview-policy.mjs?v=2';
+import { previewRequest, resultProjection } from './admin-preview-policy.mjs?v=3';
 const labels = { landing:'Giriş sayfası', free:'Yeni kayıt', premium:'Premium üye', admin:'Yönetici' };
 const icons = { landing:'⌂', free:'＋', premium:'★', admin:'⚙' };
 const el = (tag, text) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; return n; };

@@ -40,6 +40,14 @@ export function previewRequest(raw, method, role, origin) {
     return { url:'/api/tg?magPhoto=' + q.get('magPhoto'), authenticated:false };
   if (u.pathname === '/api/edu-shared') {
     const kind = q.get('kind') || '';
+    if (kind === 'channel' && q.get('view') === 'daily-notes') {
+      const id = q.get('note') || q.get('photo');
+      if (id && !/^edutg_[a-f0-9]{64}$/.test(id)) return deny();
+      const offset = q.get('offset') || '0', n = q.get('n') || '0';
+      if (!/^\d{1,4}$/.test(offset) || Number(offset) > 1000 || !/^\d$/.test(n)) return deny();
+      return { url:'/api/edu-shared?kind=channel&view=daily-notes' +
+        (id ? (q.has('photo') ? '&photo=' + id + '&n=' + n : '&note=' + id) : '&offset=' + Number(offset)), authenticated:false };
+    }
     if (['landing','podcast','youtube','news'].includes(kind))
       return { url:'/api/edu-shared?kind=' + kind, authenticated:false };
     if (kind === 'portfolio' && member(role)) {

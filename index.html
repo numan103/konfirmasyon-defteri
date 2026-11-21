@@ -37,7 +37,7 @@
 <script type="module" src="/assets/member-video.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/edu-plans.css?v=4">
 <link rel="stylesheet" href="/assets/admin-preview.css?v=3">
-<script type="module" src="/assets/admin-preview.mjs?v=3"></script>
+<script type="module" src="/assets/admin-preview.mjs?v=4"></script>
 <script type="module" src="/assets/edu-plans.mjs?v=7"></script>
 <link rel="stylesheet" href="/assets/education-crm.css?v=3">
 <script type="module" src="/assets/education-crm.mjs?v=3"></script>
@@ -3071,6 +3071,24 @@
   .ch-photo-viewport img { display:block; width:100%; max-height:72vh; object-fit:contain; }
   .ch-content-preview > .ch-preview-body { overflow:auto; max-height:78vh; }
   #edu-telegram-list article { border-top:1px solid var(--border); padding:12px 0; }
+  #edu-telegram-list { max-height:55vh; overflow:auto; }
+  #edu-telegram-list article > small { display:block; margin-bottom:6px; color:var(--text-3); }
+  #edu-telegram-list article.on { border-left:3px solid var(--pc); padding-left:10px; }
+  #edu-telegram-list article > p:not(.ch-paste-help) { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  #edu-author-modes button[aria-pressed="true"] { color:var(--pc); border-color:var(--pc); background:var(--pc-soft); }
+  .daily-notes-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:14px 0; }
+  .daily-note-card { min-width:0; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--card); overflow-wrap:anywhere; }
+  .daily-note-card img { width:100%; height:150px; object-fit:contain; border-radius:8px; cursor:zoom-in; background:var(--bg); }
+  .daily-note-card h3 { margin:8px 0; font-size:16px; }
+  .daily-note-card p { color:var(--text-2); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .daily-note-card time { color:var(--text-3); font-size:12px; }
+  #ch-form[data-daily="true"] #ch-access-row,
+  #ch-form[data-daily="true"] #ch-in-url,
+  #ch-form[data-daily="true"] #ch-video-ed,
+  #ch-form[data-daily="true"] #ch-add-video,
+  #ch-form[data-daily="true"] [data-vid] { display:none; }
+  @media(max-width:900px) { .daily-notes-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:640px) { .daily-notes-grid { grid-template-columns:minmax(0,1fr); } }
   .ch-pfile { flex: none; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--text-2); cursor: pointer; }
   .ch-pfile:hover { border-color: var(--pc); color: var(--pc); }
   .ch-pdel { flex: none; width: 26px; height: 26px; border: 1px solid var(--border); background: var(--card); color: var(--red); border-radius: 7px; font-size: 15px; line-height: 1; cursor: pointer; }
@@ -6337,6 +6355,13 @@
         </div>
         <a href="?page=egitim" class="he-link" data-nav>Eğitime git →</a>
       </div>
+      <section id="home-daily-notes" class="panel">
+        <div class="hd-head"><div><h2>📓 Günlük Notlar</h2><p class="hint">Alfa Edu’dan günlük eğitsel paylaşımlar · Telegram’dan otomatik güncellenir.</p></div>
+          <button type="button" class="btn" id="home-daily-refresh">Yenile</button></div>
+        <div id="home-daily-status" role="status"></div>
+        <div id="home-daily-list" class="daily-notes-grid"></div>
+        <button type="button" class="btn hidden" id="home-daily-more">Önceki notlar</button>
+      </section>
       <div class="home-channel" id="home-channel">
         <div class="hc2-head">
           <h2>📡 İşlem Kanalı — Son Güncellemeler</h2>
@@ -7106,20 +7131,29 @@
       <div class="edu-author-actions">
         <button type="button" class="btn" id="edu-author-preview">İçeriği önizle</button>
         <button type="button" class="btn" id="edu-author-student">Yayındaki öğrenci görünümü ↗</button>
-        <button type="button" class="btn solid" id="edu-author-journal">＋ Günlük not</button>
+        <button type="button" class="btn solid" id="edu-author-journal">＋ Ana sayfa günlük not</button>
       </div>
       <button type="button" class="btn" id="edu-author-reload">İçerikleri yenile</button>
     </header>
     <div id="edu-author-status" role="status" aria-live="polite"></div>
-    <details id="edu-telegram-inbox"><summary>Telegram · Alfa Edu paylaşımları</summary>
-      <p class="ch-paste-help">alfakasim / konu 4 · Botun aldığı yeni yönetici paylaşımları burada taslağa çevrilir. Geçmiş mesajlar otomatik okunamaz. Üyelere yayınlamak için ayrıca Kaydet.</p>
-      <button class="btn" type="button" id="edu-telegram-refresh">Telegram kutusunu yenile</button>
-      <button class="btn" type="button" id="edu-telegram-check">Bağlantıyı kontrol et</button>
-      <div id="edu-telegram-status" role="status"></div><div id="edu-telegram-list"></div>
-    </details>
+    <div id="edu-author-modes" class="edu-author-actions" role="group" aria-label="İçerik türü">
+      <button type="button" class="btn" data-author-mode="daily" aria-pressed="true">Günlük Notlar</button>
+      <button type="button" class="btn" data-author-mode="course" aria-pressed="false">Eğitim İçerikleri</button>
+    </div>
     <details id="edu-author-drafts"><summary id="edu-author-drafts-title">Taslaklar</summary><div id="edu-author-draft-list"></div></details>
     <div class="edu-author-grid">
-      <div><input type="search" id="edu-author-search" class="edu-search" placeholder="Bu bölümde konu/not ara…" aria-label="Seçili bölümde konu veya not ara"><aside id="edu-author-tree" class="panel"></aside></div>
+      <div class="edu-author-sidebar">
+        <details id="edu-telegram-inbox" class="panel" open><summary>Günlük Notlar · otomatik yayın</summary>
+          <p class="ch-paste-help">alfakasim / konu 4’teki yeni yönetici gönderileri onay beklemeden ana sayfaya gelir. Ücretli derslerden bağımsızdır.</p>
+          <div class="edu-author-actions">
+            <button class="btn solid" type="button" id="edu-daily-add">＋ Ana sayfaya günlük not</button>
+            <button class="btn" type="button" id="edu-telegram-refresh">Listeyi yenile</button>
+            <button class="btn" type="button" id="edu-telegram-check">Bağlantıyı kontrol et</button>
+          </div>
+          <div id="edu-telegram-status" role="status"></div><div id="edu-telegram-list"></div>
+        </details>
+        <div id="edu-course-manager" class="hidden"><input type="search" id="edu-author-search" class="edu-search" placeholder="Bu bölümde konu/not ara…" aria-label="Seçili bölümde konu veya not ara"><aside id="edu-author-tree" class="panel"></aside></div>
+      </div>
       <section class="edu-author-editor">
         <div id="edu-author-empty" class="panel">Soldan bir konu seç; “+ Not” ile doğrudan yazmaya başla veya mevcut içeriği düzenle.</div>
         <div id="edu-author-editor-slot"></div>
@@ -15572,7 +15606,7 @@ function showPage(name, skipAnim) {
   const shown = document.getElementById('page-' + name);
   if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   try { localStorage.setItem('df-last-page', name); } catch (e) {}
-  if (name === 'home') { try { renderHomeDash(); } catch (e) {} try { renderHomeTeaser(); } catch (e) {} try { renderHomeChannel(); } catch (e) {} try { loadHomeMagazine(); } catch (e) {} }
+  if (name === 'home') { try { renderHomeDash(); } catch (e) {} try { renderHomeTeaser(); } catch (e) {} try { renderHomeChannel(); } catch (e) {} try { loadHomeMagazine(); } catch (e) {} try { chLoadHomeDaily(); } catch (e) {} }
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   const tvBar = document.querySelector('.tv-bar');
   if (tvBar) tvBar.style.display = name === 'home' ? '' : 'none';
@@ -25183,7 +25217,7 @@ function chImgFigure(cap, url) {
   return '<figure class="ch-photo-item"><img class="ch-photo" src="' + esc(url) + '" alt="' + c + '" loading="lazy" data-cap="' + c + '">'
     + (c ? '<figcaption class="ch-photo-cap">' + c + '</figcaption>' : '') + '</figure>';
 }
-function chSafeImage(url) { return /^(https?:\/\/|data:image\/(?:png|jpeg|webp);base64,)/i.test(String(url || '')); }
+function chSafeImage(url) { return /^(https?:\/\/|data:image\/(?:png|jpeg|webp);base64,|\/api\/edu-shared\?kind=channel&view=daily-notes&photo=edutg_[a-f0-9]{64}(?:&|$))/i.test(String(url || '')); }
 function chFormatBody(text, photos, vids) {
   const lines = String(text || '').split(/\r?\n/);
   let html = '', ul = false, para = [];
@@ -25459,7 +25493,9 @@ function chSyncAccessFields() {
 
 let chDraftId = null, chDraftAccount = '', chDraftBaseline = '', chDraftPersisted = '', chDraftPending = 0;
 let chDraftModule = null, chStudioRestoredFor = '', chStudioBusy = false, chDraftTimer = null;
-let chStudioWorkspace = null, chStudioRestore = false, chWorkspaceEpoch = 0;
+let chStudioWorkspace = null, chStudioRestore = false, chWorkspaceEpoch = 0, chStudioMode = 'daily';
+let chDailyOpenSequence = 0, chDailyListSequence = 0;
+const chDailyLegacyChecked = new Set();
 const chDraftMemory = new Map();
 function chWorkspaceIdentityChanged(event, previousId, nextId) {
   return event === 'SIGNED_OUT' || (['SIGNED_IN', 'USER_UPDATED'].includes(event) && !!nextId && nextId !== previousId);
@@ -25469,6 +25505,10 @@ function chClosePhotoOverlays() {
 }
 function chClearAuthorWorkspace() {
   chClosePhotoOverlays();
+  chStudioBusy = false;
+  chStudioMode = 'daily';
+  const form = document.getElementById('ch-form'); if (form) form.inert = false;
+  const save = document.getElementById('ch-in-save'); if (save) save.disabled = false;
   ['ch-in-title', 'ch-in-body', 'ch-in-tricks', 'ch-in-url', 'ch-prof-name', 'ch-prof-bio', 'ch-prof-editors'].forEach(id => {
     const field = document.getElementById(id); if (field) field.value = '';
   });
@@ -25489,7 +25529,7 @@ function chStudioNavigate(next) {
 function chPreviewContent() {
   if (!chIsAdmin()) return;
   if (chMediaPending) { chDraftStatus('Önizleme için görselin hazırlanmasını bekle.'); return; }
-  const fields = chForm.mode?.startsWith('video-') ? chDraftFields() : chCurTrader()?.sections?.[chSec]?.find(t => t.id === chTopic)?.videos?.find(v => v.id === chVid);
+  const fields = chIsDailyForm() || chForm.mode?.startsWith('video-') ? chDraftFields() : chCurTrader()?.sections?.[chSec]?.find(t => t.id === chTopic)?.videos?.find(v => v.id === chVid);
   if (!fields) { chStudioNotice('Önce önizlenecek bir not veya video aç.'); return; }
   chDraftCapture();
   const dialog = document.createElement('dialog'); dialog.className = 'ch-content-preview'; dialog.setAttribute('aria-label', 'İçerik önizleme');
@@ -25508,6 +25548,7 @@ function chPreviewContent() {
 }
 function chStudentView() {
   if (!chIsAdmin() || chMediaPending) return;
+  if (chIsDailyForm()) { if (chForm.dailyId) chOpenDailyViewer(chForm.dailyId); else chStudioNotice('Bu günlük not henüz yayında değil; İçeriği önizle veya Kaydet.'); return; }
   const context = chForm.mode ? chForm : { channelId: channelOpen, sectionId: chSec, topicId: chTopic, vidId: chVid };
   const trader = channelsData.traders[context.channelId], topic = trader?.sections?.[context.sectionId]?.find(t => t.id === context.topicId);
   const itemId = context.vidId || context.newId;
@@ -25546,50 +25587,184 @@ function chQuickJournal(prefill = null) {
 }
 async function chLoadTelegramInbox() {
   if (!chIsAdmin()) return;
+  const sequence = ++chDailyListSequence;
   const account = AUTH.user.id, epoch = chWorkspaceEpoch, status = document.getElementById('edu-telegram-status'), list = document.getElementById('edu-telegram-list');
-  status.textContent = 'Telegram kutusu yükleniyor…';
+  status.textContent = 'Günlük notlar yükleniyor…';
   try {
-    const r = await siteFetch('/api/edu-shared?kind=channel&view=telegram-inbox', { cache: 'no-store' }), data = await r.json();
-    if (AUTH.user?.id !== account || epoch !== chWorkspaceEpoch || !chIsAdmin()) return;
+    const r = await siteFetch('/api/edu-shared?kind=channel&view=telegram-inbox', { cache: 'no-store' });
+    let data = await r.json();
+    if (sequence !== chDailyListSequence || AUTH.user?.id !== account || epoch !== chWorkspaceEpoch || !chIsAdmin()) return;
     if (!r.ok || !data.ok || !Array.isArray(data.items)) throw new Error('inbox_unavailable');
+    const legacy = data.items.filter(item => !item.publication && !chDailyLegacyChecked.has(epoch + ':' + item.id)).map(item => item.id);
+    for (let offset = 0; offset < legacy.length; offset += 6) {
+      status.textContent = 'Önceki Telegram kayıtları yeni otomatik akışa aktarılıyor…';
+      const ids = legacy.slice(offset, offset + 6);
+      const synced = await siteFetch('/api/edu-shared?kind=channel&view=daily-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'sync-source', ids }) });
+      if (synced.ok) ids.forEach(id => chDailyLegacyChecked.add(epoch + ':' + id));
+    }
+    if (legacy.length) {
+      const fresh = await siteFetch('/api/edu-shared?kind=channel&view=telegram-inbox', { cache: 'no-store' });
+      if (fresh.ok) data = await fresh.json();
+    }
+    if (sequence !== chDailyListSequence || epoch !== chWorkspaceEpoch || AUTH.user?.id !== account) return;
     list.replaceChildren();
-    status.textContent = data.configured ? (data.items.length ? data.items.length + ' paylaşım · Taslağa alıp kontrol ederek kaydet.' :
-      'Henüz alınan paylaşım yok. Botun bu grupta yönetici olması ve konu 4 paylaşımlarını alması gerekir; geçmiş otomatik çekilmez.') :
-      'Telegram aktarımının sunucu yapılandırması eksik. Notlarını şimdilik “+ Günlük not” ile ekleyebilirsin.';
+    status.textContent = data.configured ? (data.items.length ? 'Telegram’dan gelen yeni yönetici paylaşımları ana sayfada otomatik yayınlanır; onay gerekmez.' :
+      'Henüz paylaşım yok. Kaynak konuya gelen yeni yönetici gönderileri otomatik yayınlanacak. Bot grupta yönetici olmalı; geçmiş mesajlar okunmaz.') :
+      'Telegram bağlantısını kontrol et. Elle günlük not ekleyebilirsin.';
     data.items.forEach(item => {
       const article = document.createElement('article'), h = document.createElement('strong'), p = document.createElement('p');
-      h.textContent = item.title; p.textContent = String(item.body || '').slice(0, 500); p.style.whiteSpace = 'pre-wrap';
+      article.dataset.dailyId = item.id; article.classList.toggle('on', chForm.dailyId === item.id);
+      h.textContent = item.title; p.textContent = String(item.excerpt || item.body || '').slice(0, 260); p.style.whiteSpace = 'pre-wrap';
       article.append(h, p);
+      const badge = document.createElement('small'); badge.textContent = item.publication === 'daily' ? '● Ana sayfada yayında' : item.publication === 'hidden' ? '○ Yayından kaldırıldı' : 'Önceki sürüm kaydı';
+      badge.textContent += item.photoCount ? ' · ' + item.photoCount + ' görsel' : '';
+      article.prepend(badge);
       if (item.photos?.[0] && chSafeImage(item.photos[0].url)) {
         const image = document.createElement('button'); image.type = 'button'; image.className = 'btn'; image.textContent = 'Görseli büyüt';
         image.addEventListener('click', () => chZoomPhoto(item.photos[0].url, item.title)); article.appendChild(image);
       }
-      if (item.photoMissing) { const warning = document.createElement('p'); warning.textContent = 'Görsel alınamadı; taslakta elle ekleyebilirsin.'; article.appendChild(warning); }
-      const take = document.createElement('button'); take.type = 'button'; take.className = 'btn solid'; take.textContent = 'Günlüğe taslak olarak al';
-      take.addEventListener('click', () => {
-        if (chStudioBusy || chMediaPending) return;
-        const stableId = 'tg_' + item.id.slice(6, 54), trader = chCurTrader();
-        if (!trader) { chStudioNotice('Önce bir kanal seç.'); return; }
-        for (const [sid, topics] of Object.entries(trader.sections || {})) for (const topic of topics) {
-          const saved = topic.videos?.find(v => v.id === stableId);
-          if (saved) { chSec = sid; chTopic = topic.id; chVid = saved.id; chOpenForm('video-edit', { topicId: topic.id, vidId: saved.id }, saved); chStudioNotice('Bu paylaşım zaten ekli; mevcut not açıldı.'); return; }
-        }
-        chQuickJournal({ title: item.title, body: item.body + (item.url ? '\n\n[Telegram kaynağı](' + item.url + ')' : ''), photos: item.photos || [], journalDate: item.journalDate });
-        chForm.newId = stableId; chDraftCapture();
-        take.textContent = 'Taslak açıldı · Kaydet ile yayınla';
-      });
-      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn'; remove.textContent = 'Kutudan kaldır';
-      remove.addEventListener('click', async () => {
-        if (!confirm('Yalnız Telegram kutusundaki bu kopya kaldırılsın mı? Kaydettiğin ders/not değişmez.')) return;
-        remove.disabled = true;
-        try {
-          const result = await siteFetch('/api/edu-shared?kind=channel&view=telegram-inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dismiss: item.id }) });
-          if (!result.ok) throw new Error('failed'); article.remove();
-        } catch { status.textContent = 'Kopya kaldırılamadı; tekrar dene.'; remove.disabled = false; }
-      });
-      article.append(take, remove); list.appendChild(article);
+      if (item.photoMissing) { const warning = document.createElement('p'); warning.textContent = 'Görsel alınamadı; düzenleyerek elle ekleyebilirsin.'; article.appendChild(warning); }
+      const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'btn solid'; edit.textContent = 'Düzenle';
+      edit.addEventListener('click', () => chEditDailyById(item.id));
+      const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'btn'; toggle.textContent = item.publication === 'daily' ? 'Yayından kaldır' : 'Yayınla';
+      toggle.addEventListener('click', () => chSetDailyPublication(item.id, item.publication === 'daily' ? 'remove' : 'restore'));
+      article.append(edit, toggle);
+      if (item.publication === 'daily') { const view = document.createElement('button'); view.type = 'button'; view.className = 'btn'; view.textContent = 'Yayındaki notu aç'; view.onclick = () => chOpenDailyViewer(item.id); article.appendChild(view); }
+      if (item.manualOverride && item.source === 'telegram') { const info = document.createElement('p'); info.className = 'ch-paste-help'; info.textContent = 'Stüdyoda düzenlendi · Telegram tekrarları bu değişikliği veya yayından kaldırmayı geri almaz.'; article.appendChild(info); }
+      list.appendChild(article);
     });
   } catch { if (AUTH.user?.id === account && epoch === chWorkspaceEpoch) status.textContent = 'Telegram kutusuna ulaşılamadı. Günlük notlarını elle ekleyebilir, kutuyu sonra yenileyebilirsin.'; }
+}
+function chSetStudioMode(mode, load = true) {
+  if (!chIsAdmin()) return;
+  chStudioMode = mode === 'course' ? 'course' : 'daily';
+  document.getElementById('edu-telegram-inbox')?.classList.toggle('hidden', chStudioMode !== 'daily');
+  document.getElementById('edu-course-manager')?.classList.toggle('hidden', chStudioMode !== 'course');
+  document.querySelectorAll('[data-author-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.authorMode === chStudioMode)));
+  const empty = document.getElementById('edu-author-empty');
+  if (empty) empty.textContent = chStudioMode === 'daily' ? 'Soldan bir günlük not seç veya “＋ Ana sayfa günlük not” ile yazmaya başla. Telegram gönderileri otomatik yayınlanır.' : 'Soldan bir konu seç; “+ Not” veya “+ Video” ile eğitim içeriği ekle.';
+  if (load && chStudioMode === 'daily') chLoadTelegramInbox();
+  if (load && chStudioMode === 'course' && !channelsLoaded) renderEduStudio();
+}
+async function chEditDailyById(id) {
+  if (!chIsAdmin() || chStudioBusy || chMediaPending) return;
+  const epoch = chWorkspaceEpoch, sequence = ++chDailyOpenSequence;
+  chStudioNotice('Not açılıyor…');
+  try {
+    const r = await siteFetch('/api/edu-shared?kind=channel&view=telegram-inbox&manage=' + encodeURIComponent(id), { cache: 'no-store', signal: AbortSignal.timeout(10000) }), data = await r.json();
+    if (epoch !== chWorkspaceEpoch || sequence !== chDailyOpenSequence) return;
+    if (!r.ok || !data.ok || !data.item) throw new Error('failed');
+    chOpenDailyNote(data.item); chStudioNotice('');
+  } catch { if (epoch === chWorkspaceEpoch && sequence === chDailyOpenSequence) chStudioNotice('Not açılamadı; tekrar dene.'); }
+}
+function chOpenDailyNote(item = null) {
+  if (!chIsAdmin() || chStudioBusy || chMediaPending) return;
+  if (currentPage !== 'edustudio') showPage('edustudio');
+  chPlaceEditor(true);
+  chOpenForm(item ? 'daily-edit' : 'daily-add', null, item || { title: new Date().toLocaleDateString('tr-TR') + ' · Günlük not' });
+  chForm.dailyId = item?.id || null;
+  document.querySelectorAll('#edu-telegram-list article').forEach(article => article.classList.toggle('on', article.dataset.dailyId === chForm.dailyId));
+  document.getElementById('ch-in-body').focus();
+}
+async function chSaveDailyNote() {
+  if (!chIsAdmin() || chStudioBusy || chMediaPending) return;
+  const g = id => document.getElementById(id), fields = chDraftFields(), id = chDraftId, account = AUTH.user.id, epoch = chWorkspaceEpoch;
+  if (fields.photos.some(p => !p.url || !chSafeImage(p.url)) || fields.photos.length > 10) { g('ch-in-err').textContent = 'Görselleri tamamla veya boş satırı kaldır.'; return; }
+  if (!fields.body.trim() && !fields.tricks.trim() && !fields.photos.length) { g('ch-in-err').textContent = 'Not metni veya görsel ekle.'; return; }
+  chStudioBusy = true; g('ch-form').inert = true; g('ch-in-save').disabled = true; g('ch-in-err').textContent = 'Ana sayfaya kaydediliyor…';
+  await chDraftCapture();
+  try {
+    const body = JSON.stringify({ action: 'save', id: chForm.dailyId || undefined, draftId: id, fields });
+    if (new Blob([body]).size > 2800000) throw new Error('Not çok büyük; görselleri azalt.');
+    const r = await siteFetch('/api/edu-shared?kind=channel&view=daily-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, signal: AbortSignal.timeout(20000) }), data = await r.json();
+    if (!r.ok || !data.ok || !data.item) throw new Error('Kaydedilemedi; yazın formda ve cihaz taslağında korunuyor.');
+    if (epoch !== chWorkspaceEpoch || AUTH.user?.id !== account || chDraftId !== id) return;
+    await chDraftForget(id, account);
+    chForm.mode = 'daily-edit'; chForm.dailyId = data.item.id;
+    g('ch-in-title').value = data.item.title;
+    chDraftBaseline = JSON.stringify(chDraftFields()); chDraftPersisted = '';
+    g('ch-in-err').textContent = ''; chDraftStatus('✓ Ana sayfadaki Günlük Notlar’a kaydedildi. Editör açık; devam edebilirsin.');
+    await Promise.all([chLoadTelegramInbox(), chLoadHomeDaily(false, true)]);
+  } catch (error) { if (epoch === chWorkspaceEpoch) g('ch-in-err').textContent = error.message; }
+  finally { if (epoch === chWorkspaceEpoch) { chStudioBusy = false; g('ch-form').inert = false; g('ch-in-save').disabled = false; } }
+}
+async function chSetDailyPublication(id, action) {
+  if (!chIsAdmin() || chStudioBusy || !confirm(action === 'remove' ? 'Bu not ana sayfadan kaldırılsın mı? Telegram mesajı ve ücretli dersler değişmez.' : 'Bu not ana sayfada yeniden yayınlansın mı?')) return;
+  const epoch = chWorkspaceEpoch;
+  chStudioBusy = true;
+  try {
+    const r = await siteFetch('/api/edu-shared?kind=channel&view=daily-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, id }) });
+    if (!r.ok) throw new Error('failed');
+    if (epoch !== chWorkspaceEpoch) return;
+    await Promise.all([chLoadTelegramInbox(), chLoadHomeDaily(false, true)]);
+    if (chForm.dailyId === id) chDraftStatus(action === 'remove' ? 'Not yayından kaldırıldı. Kaydet dediğinde yeniden yayınlanır.' : 'Not yeniden yayında.');
+  } catch { if (epoch === chWorkspaceEpoch) chStudioNotice('Yayın durumu değiştirilemedi; tekrar dene.'); }
+  finally { if (epoch === chWorkspaceEpoch) chStudioBusy = false; }
+}
+let chHomeDailyOffset = 0, chHomeDailyLast = 0, chHomeDailyRequest = null;
+function chLoadHomeDaily(more = false, force = false) {
+  const list = document.getElementById('home-daily-list'), status = document.getElementById('home-daily-status');
+  if (!list) return Promise.resolve();
+  if (chHomeDailyRequest) return force ? chHomeDailyRequest.then(() => chLoadHomeDaily(more, true)) : chHomeDailyRequest;
+  if (!more && !force && (list.children.length > 3 || Date.now() - chHomeDailyLast < 15000)) return Promise.resolve();
+  const pending = chFetchHomeDaily(more, force).finally(() => { if (chHomeDailyRequest === pending) chHomeDailyRequest = null; });
+  chHomeDailyRequest = pending; return pending;
+}
+async function chFetchHomeDaily(more, force) {
+  const list = document.getElementById('home-daily-list'), status = document.getElementById('home-daily-status');
+  const moreButton = document.getElementById('home-daily-more'); if (moreButton) moreButton.disabled = true;
+  const offset = more ? chHomeDailyOffset : 0;
+  try {
+    const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&offset=' + offset + (force ? '&v=' + Date.now() : ''), { credentials: 'omit', signal: AbortSignal.timeout(10000) }), data = await r.json();
+    if (!r.ok || !data.ok || !Array.isArray(data.items)) throw new Error('daily_unavailable');
+    if (!more) list.replaceChildren();
+    const existing = new Set(Array.from(list.children, card => card.dataset.dailyId));
+    data.items.forEach(item => {
+      if (existing.has(item.id)) return; existing.add(item.id);
+      const card = document.createElement('article'); card.className = 'daily-note-card';
+      card.dataset.dailyId = item.id;
+      const time = document.createElement('time'); time.dateTime = new Date(item.publishedAt).toISOString(); time.textContent = new Date(item.publishedAt).toLocaleDateString('tr-TR');
+      const title = document.createElement('h3'); title.textContent = item.title;
+      if (item.photoUrl && chSafeImage(item.photoUrl)) {
+        const image = document.createElement('img'); image.src = item.photoUrl; image.alt = item.title; image.loading = 'lazy'; image.tabIndex = 0; image.setAttribute('role', 'button');
+        image.onclick = () => chZoomPhoto(item.photoUrl, item.title);
+        image.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); image.click(); } };
+        image.onerror = () => image.remove(); card.appendChild(image);
+      }
+      const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
+      const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyViewer(item.id);
+      card.append(time, title, excerpt, open); list.appendChild(card);
+    });
+    chHomeDailyOffset = offset + data.items.length; chHomeDailyLast = Date.now();
+    status.textContent = !list.children.length ? 'Günlük notlar burada görünecek.' : '';
+    document.getElementById('home-daily-more')?.classList.toggle('hidden', !data.hasMore);
+  } catch { status.textContent = 'Günlük notlar şu an yüklenemedi. Yenile ile tekrar dene.'; }
+  finally { if (moreButton) moreButton.disabled = false; }
+}
+async function chOpenDailyViewer(id) {
+  if (!/^edutg_[a-f0-9]{64}$/.test(id || '')) return;
+  const dialog = document.createElement('dialog'); dialog.className = 'ch-content-preview'; dialog.setAttribute('aria-label', 'Günlük not');
+  const close = document.createElement('button'); close.type = 'button'; close.className = 'btn'; close.textContent = 'Kapat ×'; close.onclick = () => dialog.close();
+  const body = document.createElement('div'); body.className = 'ch-preview-body'; body.textContent = 'Not yükleniyor…';
+  dialog.append(close, body); dialog.addEventListener('close', () => dialog.remove(), { once: true }); document.body.appendChild(dialog); dialog.showModal();
+  if (chIsAdmin()) {
+    const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'btn'; edit.textContent = 'Stüdyoda düzenle';
+    edit.onclick = () => { dialog.close(); dialog.remove(); showPage('edustudio'); chEditDailyById(id); };
+    close.after(edit);
+  }
+  try {
+    const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&note=' + id, { credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10000) }), data = await r.json();
+    if (!dialog.open) return;
+    if (!r.ok || !data.ok || !data.item) throw new Error('not_found');
+    body.replaceChildren();
+    const note = chBuildNoteBox({ ...data.item, access: 'free' }, data.item.title);
+    if (note) body.appendChild(note);
+    else {
+      const title = document.createElement('h3'); title.textContent = data.item.title; body.appendChild(title);
+      const hint = document.createElement('p'); hint.textContent = 'Bu paylaşımın medyası burada görüntülenemedi.'; body.appendChild(hint);
+      if (/^https?:\/\//i.test(data.item.url || '')) { const source = document.createElement('a'); source.href = data.item.url; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = 'Telegram kaynağını aç ↗'; body.appendChild(source); }
+    }
+  } catch { if (dialog.open) body.textContent = 'Bu not yayından kaldırılmış veya şu an yüklenemiyor.'; }
 }
 async function chCheckTelegramConnection() {
   if (!chIsAdmin()) return;
@@ -25600,7 +25775,7 @@ async function chCheckTelegramConnection() {
     if (AUTH.user?.id !== account || epoch !== chWorkspaceEpoch) return;
     if (!r.ok || !data.ok || !data.connection) throw new Error('check_failed');
     const c = data.connection, bot = c.botUsername ? '@' + c.botUsername : 'Bot';
-    status.textContent = c.ready ? bot + ' kaynak grupta yönetici; webhook hazır. Bundan sonraki yönetici paylaşımları kutuya alınabilir. Geçmiş mesajlar okunmaz.' :
+    status.textContent = c.ready ? bot + ' kaynak grupta yönetici; webhook hazır. Yeni yönetici gönderileri ana sayfada otomatik yayınlanır; onay gerekmez. Geçmiş mesajlar okunmaz.' :
       bot + ': ' + (!c.sourceReady ? 'alfakasim grubunda yönetici erişimi doğrulanamadı. Botu gruba yönetici ekle. ' : '') +
       (!c.webhookReady ? 'Bu siteye mesaj ileten webhook doğrulanamadı. ' : '') + 'Kurulumu tamamlayıp tekrar kontrol et.';
   } catch { if (AUTH.user?.id === account && epoch === chWorkspaceEpoch) status.textContent = 'Telegram bağlantısı doğrulanamadı; bağlıymış gibi göstermedim. Biraz sonra tekrar kontrol et.'; }
@@ -25627,15 +25802,17 @@ function chDraftFields() {
     vids: Array.from(g('ch-video-ed').children).map(row => ({ url: row.querySelector('.ch-vurl').value })),
   };
 }
+function chIsDailyForm() { return ['daily-add', 'daily-edit'].includes(chForm.mode); }
+function chCanEditForm() { return chIsDailyForm() ? chIsAdmin() : chCanEditCur(); }
 function chDraftStatus(text) { const el = document.getElementById('ch-draft-status'); if (el) el.textContent = text; }
 async function chDraftCapture() {
   clearTimeout(chDraftTimer); chDraftTimer = null;
   if (!chForm.mode || !chDraftId || !chDraftAccount || window.ALFA_PREVIEW_CONFIG ||
-      AUTH.user?.id !== chDraftAccount || !chCanEdit(channelsData.traders[chForm.channelId])) return;
+      AUTH.user?.id !== chDraftAccount || !(chIsDailyForm() ? chIsAdmin() : chCanEdit(channelsData.traders[chForm.channelId]))) return;
   const fields = chDraftFields(), signature = JSON.stringify(fields);
   if (signature === chDraftPersisted || (signature === chDraftBaseline && !chDraftPersisted && !chDraftMemory.has(chDraftAccount + ':' + chDraftId))) return;
   const account = chDraftAccount, id = chDraftId;
-  const record = { id, account, updatedAt: Date.now(), channelId: chForm.channelId, sectionId: chForm.sectionId, mode: chForm.mode, topicId: chForm.topicId, vidId: chForm.vidId, newId: chForm.newId, journalSetup: chForm.journalSetup, fields };
+  const record = { id, account, updatedAt: Date.now(), channelId: chForm.channelId || 'daily-notes', sectionId: chForm.sectionId, mode: chForm.mode, dailyId: chForm.dailyId, topicId: chForm.topicId, vidId: chForm.vidId, newId: chForm.newId, journalSetup: chForm.journalSetup, fields };
   const memoryKey = account + ':' + id;
   chDraftMemory.set(memoryKey, record);
   chDraftPending++;
@@ -25682,7 +25859,7 @@ async function renderEduDraftList(resume = false) {
     const list = document.getElementById('edu-author-draft-list'); if (!list) return;
     list.replaceChildren();
     document.getElementById('edu-author-drafts-title').textContent = 'Kaydedilmemiş taslaklar (' + records.length + ')';
-    records.filter(r => chCanEdit(channelsData.traders[r.channelId])).forEach(record => {
+    records.filter(r => r.mode?.startsWith('daily-') || chCanEdit(channelsData.traders[r.channelId])).forEach(record => {
       const row = document.createElement('div'), title = document.createElement('span');
       title.textContent = (record.fields.title || 'Başlıksız not') + ' · ' + new Date(record.updatedAt).toLocaleString('tr-TR');
       const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Devam et';
@@ -25695,7 +25872,7 @@ async function renderEduDraftList(resume = false) {
       });
       row.append(title, open, remove); list.appendChild(row);
       const channel = channelsData.traders[record.channelId];
-      if (!record.journalSetup && record.mode.startsWith('video-') && !channel.sections?.[record.sectionId]?.some(t => t.id === record.topicId)) {
+      if (!record.journalSetup && record.mode.startsWith('video-') && !channel?.sections?.[record.sectionId]?.some(t => t.id === record.topicId)) {
         open.disabled = true;
         const select = document.createElement('select'); select.setAttribute('aria-label', 'Taslağın taşınacağı konu');
         const blank = document.createElement('option'); blank.value = ''; blank.textContent = 'Yeni hedef konu seç…'; select.appendChild(blank);
@@ -25714,12 +25891,19 @@ async function renderEduDraftList(resume = false) {
     });
     if (resume && !chForm.mode && chStudioRestoredFor !== account) {
       chStudioRestoredFor = account;
-      const latest = records.find(r => chCanEdit(channelsData.traders[r.channelId]));
+      const latest = records.find(r => r.mode?.startsWith('daily-') || chCanEdit(channelsData.traders[r.channelId]));
       if (latest) chResumeDraft(latest);
     }
   } catch (e) { chStudioNotice('Cihaz taslaklarına ulaşılamadı. Açık metnini sunucuya kaydetmeden sekmeyi kapatma.'); }
 }
 function chResumeDraft(record) {
+  if (record.mode?.startsWith('daily-')) {
+    if (!chIsAdmin() || chStudioBusy || chMediaPending) return;
+    chOpenForm(record.mode, null, record.fields);
+    chForm.dailyId = record.dailyId || null;
+    chDraftId = record.id; chDraftAccount = AUTH.user.id; chDraftBaseline = ''; chDraftPersisted = JSON.stringify(chDraftFields());
+    chDraftStatus('Ana sayfa notunun cihaz taslağı geri açıldı · Kaydetmeden yayınlanmaz.'); return;
+  }
   if (!chIsAdmin() || chStudioBusy || chMediaPending || !chCanEdit(channelsData.traders[record.channelId])) return;
   const trader = channelsData.traders[record.channelId], topics = trader.sections?.[record.sectionId] || [];
   if (record.mode === 'video-edit' && topics.some(t => t.id === record.topicId) && !topics.find(t => t.id === record.topicId).videos?.some(v => v.id === record.vidId)) {
@@ -25746,7 +25930,12 @@ async function renderEduStudio() {
   if (window.EduFeedback) window.EduFeedback.clear();
   if (!channelsLoaded) { chStudioNotice('İçerikler yükleniyor…'); await loadChannels(); }
   if (epoch !== chWorkspaceEpoch || currentPage !== 'edustudio' || !chIsAdmin()) return;
-  if (!channelsLoaded) { chStudioNotice(channelsError); return; }
+  if (!channelsLoaded) {
+    chStudioNotice(channelsError);
+    chSetStudioMode('daily', false); chLoadTelegramInbox(); renderEduDraftList(true);
+    document.getElementById('ch-form').classList.toggle('hidden', !chForm.mode);
+    return;
+  }
   const workspace = chStudioRestore && chStudioWorkspace?.account === AUTH.user.id ? chStudioWorkspace : null;
   if (workspace && channelsData.traders[workspace.channel]) {
     channelOpen = workspace.channel; chSec = workspace.section; chTopic = workspace.topic; chVid = workspace.video;
@@ -25763,6 +25952,7 @@ async function renderEduStudio() {
   document.getElementById('ch-form').classList.toggle('hidden', !chForm.mode);
   document.getElementById('edu-author-empty').classList.toggle('hidden', !!chForm.mode || !!chProfMode);
   renderEduDraftList(true);
+  chSetStudioMode(chStudioMode, false);
   chStudioRestore = false;
   if (workspace) requestAnimationFrame(() => {
     if (currentPage !== 'edustudio') return;
@@ -25771,6 +25961,7 @@ async function renderEduStudio() {
     const field = document.getElementById(workspace.focus);
     if (field && !field.closest('.hidden')) { field.focus({ preventScroll: true }); if (Number.isInteger(workspace.start) && field.setSelectionRange) field.setSelectionRange(workspace.start, workspace.end); }
   });
+  if (chStudioMode === 'daily' && document.getElementById('edu-telegram-inbox')?.open) chLoadTelegramInbox();
 }
 async function chStudioMutate(change, message) {
   if (!chCanEditCur() || chStudioBusy || chMediaPending) return false;
@@ -25850,24 +26041,28 @@ function renderEduStudioTree() {
   });
 }
 function chOpenForm(mode, ids, prefill) {
-  if (!chCanEditCur() || chStudioBusy) return;
+  const daily = ['daily-add', 'daily-edit'].includes(mode);
+  if (!(daily ? chIsAdmin() : chCanEditCur()) || chStudioBusy) return;
   if (chMediaPending) { chDraftStatus('Görsel hazırlanıyor; tamamlandıktan sonra diğer içeriği açabilirsin.'); return; }
+  chDailyOpenSequence++;
   chDraftCapture();
   chCloseProf();
+  chSetStudioMode(daily ? 'daily' : 'course', false);
   const g = id => document.getElementById(id);
-  const isVideo = (mode === 'video-add' || mode === 'video-edit');
+  const isVideo = daily || (mode === 'video-add' || mode === 'video-edit');
   const isSec = (mode === 'sec-add' || mode === 'sec-edit');
   const form = g('ch-form');
   form.dataset.mode = isVideo ? 'content' : isSec ? 'section' : 'topic';
+  form.dataset.daily = String(daily);
   form.dataset.generation = chUid();
-  chForm = { mode: mode, channelId: channelOpen, sectionId: chSec, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, newId: mode === 'video-add' ? chUid() : null, ctype: 'not' };
+  chForm = { mode: mode, channelId: daily ? null : channelOpen, sectionId: daily ? null : chSec, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, newId: mode === 'video-add' ? chUid() : null, ctype: 'not' };
   g('ch-in-title').value = (prefill && prefill.title) || '';
   g('ch-in-body').value = (prefill && prefill.body) || '';
   g('ch-in-tricks').value = (prefill && prefill.tricks) || '';
   g('ch-in-url').value = (prefill && prefill.url) || '';
   const sec = chSecMeta(chCurTrader()).find(s => s.id === chSec);
   const defaults = prefill || (isVideo ? sec : null);
-  const paid = !!(defaults && defaults.access === 'paid');
+  const paid = !daily && !!(defaults && defaults.access === 'paid');
   if (g('ch-in-access')) g('ch-in-access').value = paid ? 'paid' : 'free';
   const planVals = paid && Array.isArray(defaults.plans) && defaults.plans.length ? defaults.plans : ['video'];
   const planBox = g('ch-plan-opts');
@@ -25886,10 +26081,12 @@ function chOpenForm(mode, ids, prefill) {
     (Array.isArray(prefill?.vids) ? prefill.vids : []).forEach(video => videoEd.appendChild(chVideoRow(typeof video === 'string' ? video : (video?.url || ''))));
   }
   g('ch-in-err').textContent = '';
-  const titles = { 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik / not', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm', 'sec-edit': 'Bölümü düzenle' };
+  const titles = { 'daily-add': 'Ana sayfaya yeni günlük not', 'daily-edit': 'Günlük notu düzenle', 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik / not', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm', 'sec-edit': 'Bölümü düzenle' };
   g('ch-form-title').textContent = titles[mode] || 'Düzenle';
-  const trader = chCurTrader(), topic = trader.sections?.[chSec]?.find(t => t.id === chForm.topicId);
-  g('ch-editor-context').textContent = [trader.name, sec?.title, topic?.title].filter(Boolean).join(' / ');
+  const trader = chCurTrader(), topic = trader?.sections?.[chSec]?.find(t => t.id === chForm.topicId);
+  g('ch-editor-context').textContent = daily ? 'HERKESE AÇIK · Ana Sayfa / Günlük Notlar · Ücretli derslerden bağımsız' : [trader?.name, sec?.title, topic?.title].filter(Boolean).join(' / ');
+  g('ch-in-save').textContent = daily ? 'Ana sayfaya kaydet' : 'Kaydet';
+  g('edu-author-student').textContent = daily ? 'Yayındaki notu aç ↗' : 'Yayındaki öğrenci görünümü ↗';
   g('ch-in-title').setAttribute('placeholder', isVideo ? 'Başlık (ör. Market Yapısı -1)' : isSec ? 'Bölüm başlığı (ör. Onchain Analizi)' : 'Konu başlığı (ör. Market Yapısı)');
   g('ch-form').classList.remove('hidden');
   chDraftId = chUid(); chDraftAccount = AUTH.user.id;
@@ -25912,6 +26109,7 @@ function chCloseForm() {
 function chCloseProf() { chProfMode = null; chProfTarget = null; const f = document.getElementById('ch-prof-form'); if (f) f.classList.add('hidden'); const empty = document.getElementById('edu-author-empty'); if (empty && currentPage === 'edustudio' && !chForm.mode) empty.classList.remove('hidden'); }
 
 async function chSaveForm() {
+  if (chIsDailyForm()) return chSaveDailyNote();
   const g = id => document.getElementById(id);
   const context = { ...chForm }, sectionId = context.sectionId, draftId = chDraftId, account = chDraftAccount;
   const source = channelsData.traders[context.channelId];
@@ -26085,9 +26283,15 @@ async function chDelProf() {
 
 function bindChannelsPage() {
   const g = id => document.getElementById(id);
+  g('home-daily-refresh')?.addEventListener('click', () => chLoadHomeDaily(false, true));
+  g('home-daily-more')?.addEventListener('click', () => chLoadHomeDaily(true));
+  window.addEventListener('focus', () => { if (currentPage === 'home') chLoadHomeDaily(); });
+  setInterval(() => { if (currentPage === 'home' && !document.hidden && !document.querySelector('dialog[open]')) chLoadHomeDaily(); }, 60000);
+  g('edu-author-modes').addEventListener('click', e => { const button = e.target.closest('[data-author-mode]'); if (button) chSetStudioMode(button.dataset.authorMode); });
   g('edu-author-preview').addEventListener('click', chPreviewContent);
   g('edu-author-student').addEventListener('click', chStudentView);
-  g('edu-author-journal').addEventListener('click', () => chQuickJournal());
+  g('edu-author-journal').addEventListener('click', () => chOpenDailyNote());
+  g('edu-daily-add').addEventListener('click', () => chOpenDailyNote());
   g('edu-author-search').addEventListener('input', renderEduStudioTree);
   g('edu-telegram-refresh').addEventListener('click', chLoadTelegramInbox);
   g('edu-telegram-check').addEventListener('click', chCheckTelegramConnection);
@@ -26132,7 +26336,7 @@ function bindChannelsPage() {
     }
   });
   form.addEventListener('paste', e => {
-    if (!chCanEditCur() || form.dataset.mode !== 'content') return;
+    if (!chCanEditForm() || form.dataset.mode !== 'content') return;
     const files = Array.from(e.clipboardData?.items || []).filter(it => it.kind === 'file' && it.type.startsWith('image/')).map(it => it.getAsFile()).filter(Boolean);
     if (!files.length) return;
     e.preventDefault(); chPasteImages(files, e.target);
@@ -26144,7 +26348,7 @@ function bindChannelsPage() {
   form.addEventListener('dragleave', e => { if (!form.contains(e.relatedTarget)) form.classList.remove('drag-over'); });
   form.addEventListener('drop', e => {
     form.classList.remove('drag-over');
-    if (!chCanEditCur() || form.dataset.mode !== 'content') return;
+    if (!chCanEditForm() || form.dataset.mode !== 'content') return;
     const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
     if (!files.length) return;
     e.preventDefault(); chPasteImages(files, e.target);

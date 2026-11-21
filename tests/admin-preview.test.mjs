@@ -84,3 +84,16 @@ test('magazine Telegram photos stay same-origin and allowlisted in previews', ()
   for (const bad of ['/api/tg?magPhoto=short','/api/tg?magPhoto=../../etc/passwd','/api/tg?magPhoto=' + 'a'.repeat(251),
     '/api/tg?notify=1','/api/tg?magPhoto=' + id + '&notify=1']) assert.equal(policy(bad,'premium').status,403,bad);
 });
+test('public Daily Notes stay readable in member previews without forwarding admin credentials or permitting writes', () => {
+  const id = 'edutg_' + 'a'.repeat(64);
+  for (const role of ['landing', 'free', 'premium']) {
+    const feed = policy('/api/edu-shared?kind=channel&view=daily-notes&offset=3&admin=1', role);
+    assert.equal(feed.url, '/api/edu-shared?kind=channel&view=daily-notes&offset=3');
+    assert.equal(feed.authenticated, false);
+    assert.equal(policy('/api/edu-shared?kind=channel&view=daily-notes&note=' + id, role).authenticated, false);
+    assert.equal(policy('/api/edu-shared?kind=channel&view=daily-notes&photo=' + id + '&n=0', role).authenticated, false);
+    assert.equal(policy('/api/edu-shared?kind=channel&view=daily-notes', role, 'POST').status, 403);
+  }
+  assert.equal(policy('/api/edu-shared?kind=channel&view=daily-notes&note=channels').status, 403);
+  assert.equal(policy('/api/edu-shared?kind=channel&view=daily-notes&offset=9999').status, 403);
+});
