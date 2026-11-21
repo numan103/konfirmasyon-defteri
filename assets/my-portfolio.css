@@ -1,0 +1,45 @@
+.nav-link.nav-sub { padding:6px 10px 6px 14px; font-size:11.5px; font-weight:600; color:var(--text-3); }
+.nav-link.nav-sub:hover { color:var(--pc); }
+.ap2-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 16px; border-bottom:1px solid var(--border); }
+.ap2-tabs button { appearance:none; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--text-3); font-size:13px; font-weight:700; padding:9px 14px; cursor:pointer; }
+.ap2-tabs button.on { color:var(--pc); border-bottom-color:var(--pc); }
+.mp-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 0 14px; }
+.mp-title { margin:0; font-size:20px; font-weight:800; color:var(--text); }
+.mp-sub { margin:6px 0 0; color:var(--text-3); font-size:12px; line-height:1.6; max-width:620px; }
+.mp-login { padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--card); font-size:13px; color:var(--text-2); margin-bottom:12px; }
+.mp-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:12px 0 16px; }
+.mp-summary > div { min-width:0; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--card); }
+.mp-summary small { display:block; color:var(--text-3); font-size:10px; text-transform:uppercase; letter-spacing:.06em; }
+.mp-summary strong { display:block; margin-top:5px; font-size:16px; color:var(--text); overflow-wrap:anywhere; }
+.mp-summary strong.green { color:var(--green); }
+.mp-summary strong.red { color:var(--red); }
+.mp-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.mp-card { min-width:0; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--card); }
+.mp-card-top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.mp-card-top b { font-size:14px; color:var(--text); overflow-wrap:anywhere; }
+.mp-card-top span { font-size:10px; color:var(--text-3); }
+.mp-card-top em { margin-left:auto; font-size:10px; font-style:normal; font-weight:800; padding:2px 6px; border-radius:6px; background:var(--acc-soft,var(--pc-soft)); color:var(--acc-2,var(--pc)); }
+.mp-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px; }
+.mp-grid > div { min-width:0; }
+.mp-grid small { display:block; font-size:10px; color:var(--text-3); }
+.mp-grid strong { display:block; margin-top:2px; font-size:12px; color:var(--text); overflow-wrap:anywhere; }
+.mp-grid strong.green { color:var(--green); }
+.mp-grid strong.red { color:var(--red); }
+.mp-card-note { margin-top:8px; font-size:11px; color:var(--text-2); line-height:1.5; overflow-wrap:anywhere; }
+.mp-card-actions { display:flex; gap:6px; margin-top:10px; }
+.mp-card-actions button { font-size:11px; padding:4px 10px; }
+.mp-empty { padding:24px; text-align:center; border:1px dashed var(--border); border-radius:12px; color:var(--text-3); font-size:13px; }
+.mp-form { margin-top:12px; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--card); }
+.mp-form-head { display:flex; align-items:center; justify-content:space-between; font-weight:800; color:var(--text); margin-bottom:12px; }
+.mp-form-body label { display:block; margin:10px 0 4px; font-size:11px; font-weight:700; color:var(--text-2); }
+.mp-form-body label span { font-weight:400; color:var(--text-3); }
+.mp-form-body input { width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg-2,var(--bg)); color:var(--text); font-size:13px; }
+.mp-seg { display:flex; gap:6px; }
+.mp-seg button { flex:1; font-size:12px; padding:8px; border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--text-2); cursor:pointer; }
+.mp-seg button.on { color:var(--acc-2,var(--pc)); border-color:var(--acc-2,var(--pc)); background:var(--acc-soft,var(--pc-soft)); }
+.mp-form-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.mp-form-err { margin-top:8px; min-height:16px; font-size:12px; color:var(--red); }
+@media (max-width:760px) {
+  .mp-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .mp-list { grid-template-columns:1fr; }
+}

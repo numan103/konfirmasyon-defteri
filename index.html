@@ -72,6 +72,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
+<link rel="stylesheet" href="/assets/my-portfolio.css?v=1">
+<script type="module" src="/assets/my-portfolio.mjs?v=1"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -3155,6 +3157,18 @@
   .daily-reader-actions { display:flex; gap:8px; flex-wrap:wrap; }
   .daily-reader-body { margin-top:12px; }
   .daily-reader-body img { max-width:100%; height:auto; border-radius:10px; }
+  /* Günün notu okuma rengi: yalnızca not yazı alanına uygulanır, sayfanın geri kalanına dokunmaz. */
+  .daily-theme-picker { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 10px; }
+  .daily-theme-picker > span { font-size:11px; color:var(--text-3); margin-right:2px; }
+  .daily-theme-picker button { width:20px; height:20px; padding:0; border:2px solid var(--border); border-radius:50%; background:var(--sw); cursor:pointer; box-shadow:inset 0 0 0 1px rgba(0,0,0,.14); }
+  .daily-theme-picker button[aria-pressed="true"] { border-color:var(--pc); box-shadow:0 0 0 2px var(--pc-soft); }
+  .ch-note-view[data-daily-theme] { transition:background-color .18s ease, color .18s ease, border-color .18s ease; }
+  .ch-note-view.daily-theme-sepia { --card:#FBF0D9; --bg:#FBF0D9; --bg2:#F3E6C9; --text:#3F301D; --text-2:#4A3A22; --text-3:#6B5737; --border:#D8C29C; --pc:#7A5A24; background:#FBF0D9; color:#3F301D; border-color:#D8C29C; }
+  .ch-note-view.daily-theme-light { --card:#F8F9FA; --bg:#F8F9FA; --bg2:#EEF0F2; --text:#1A1A1A; --text-2:#33363B; --text-3:#5A5F66; --border:#D7DBE0; --pc:#5A48C8; background:#F8F9FA; color:#1A1A1A; border-color:#D7DBE0; }
+  .ch-note-view.daily-theme-night { --card:#0F1123; --bg:#0F1123; --bg2:#171A31; --text:#E2E8F0; --text-2:#C2CADB; --text-3:#97A2BA; --border:#2B3357; --pc:#A78BFA; background:#0F1123; color:#E2E8F0; border-color:#2B3357; }
+  .ch-note-view.daily-theme-oled { --card:#000000; --bg:#000000; --bg2:#0A0A0A; --text:#D1D5DB; --text-2:#B4BAC4; --text-3:#8A909B; --border:#2A2D33; --pc:#A78BFA; background:#000000; color:#D1D5DB; border-color:#2A2D33; }
+  .ch-note-view.daily-theme-sage { --card:#E8F0EC; --bg:#E8F0EC; --bg2:#DCE9E2; --text:#1E2C24; --text-2:#31483A; --text-3:#55705F; --border:#BFD4C7; --pc:#3F7A5A; background:#E8F0EC; color:#1E2C24; border-color:#BFD4C7; }
+  .ch-note-view.daily-theme-night a, .ch-note-view.daily-theme-oled a { color:#93C5FD; }
   .edu-daily-panel { margin:16px 0; }
   .edu-access-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:18px 0 12px; }
   .edu-access-head h2 { margin:4px 0; font-family:var(--font-display); font-size:22px; letter-spacing:-.02em; }
@@ -6055,6 +6069,8 @@
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
+      <a href="?page=portfoy&portfoyTab=alpha" class="nav-link nav-sub" id="tab-portfoy-alpha" data-nav onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('alpha')">↳ Alfa Portföy</a>
+      <a href="?page=portfoy&portfoyTab=mine" class="nav-link nav-sub" id="tab-portfoy-mine" data-nav onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('mine')">↳ Portföyüm</a>
       <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=edustudio" class="nav-link" id="tab-edustudio" data-nav style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
@@ -6104,6 +6120,8 @@
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
       <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
+      <a href="?page=portfoy&portfoyTab=alpha" class="mnav-link sub" data-nav data-mnav="portfoy-alpha" id="mnav-portfoy-alpha" onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('alpha')">↳ Alfa Portföy</a>
+      <a href="?page=portfoy&portfoyTab=mine" class="mnav-link sub" data-nav data-mnav="portfoy-mine" id="mnav-portfoy-mine" onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('mine')">↳ Portföyüm</a>
       <a href="?page=eduplans" class="mnav-link" data-nav data-mnav="eduplans" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=edustudio" class="mnav-link" data-nav data-mnav="edustudio" style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
@@ -8547,6 +8565,11 @@
 
   <div id="page-portfoy" class="hidden">
     <div class="wrap">
+      <div class="ap2-tabs" role="tablist" aria-label="Portföy görünümü">
+        <button type="button" role="tab" id="ap2-tab-alpha" class="on" aria-controls="ap2-panel-alpha" aria-selected="true">Alfa Portföy</button>
+        <button type="button" role="tab" id="ap2-tab-mine" aria-controls="ap2-panel-mine" aria-selected="false">Portföyüm</button>
+      </div>
+      <div id="ap2-panel-alpha" role="tabpanel" aria-labelledby="ap2-tab-alpha">
       <div class="ap2-hd">
         <div class="ap2-hd-t">
           <h2 class="ap2-hd-title">💼 Portföy Yönetimi</h2>
@@ -8760,6 +8783,45 @@
             <button type="button" class="btn" id="ap2-hist-cancel2">Vazgeç</button>
           </div>
           <div class="strat-form-err" id="ap2-hist-err"></div>
+        </div>
+      </div>
+      </div>
+      <div id="ap2-panel-mine" class="hidden" role="tabpanel" aria-labelledby="ap2-tab-mine">
+        <div class="mp-head">
+          <div>
+            <h2 class="mp-title">💼 Portföyüm</h2>
+            <p class="mp-sub">Kendi pozisyonlarını ekle. Veriler yalnızca bu cihazda, hesabına özel saklanır; başka üyeler göremez.</p>
+          </div>
+          <div class="mp-actions">
+            <button type="button" class="ap2-btn-primary" id="mp-add">＋ Pozisyon Ekle</button>
+          </div>
+        </div>
+        <div id="mp-login" class="mp-login hidden">Portföyünü kaydetmek için giriş yapmalısın. <button type="button" class="btn solid" id="mp-login-btn">Giriş yap</button></div>
+        <div id="mp-summary" class="mp-summary"></div>
+        <div id="mp-list" class="mp-list"></div>
+        <div id="mp-empty" class="mp-empty">Henüz pozisyon yok — “Pozisyon Ekle” ile başla.</div>
+        <div id="mp-form" class="mp-form hidden">
+          <div class="mp-form-head"><span id="mp-form-title">Yeni Pozisyon</span><button type="button" class="btn" id="mp-form-cancel">✕</button></div>
+          <div class="mp-form-body">
+            <label>Enstrüman / Sembol</label>
+            <input type="text" id="mp-f-symbol" placeholder="Örn: BTC, ETH, XAUUSD" maxlength="40" autocomplete="off">
+            <label>Tür</label>
+            <input type="text" id="mp-f-type" placeholder="Kripto, hisse, altın…" maxlength="24" autocomplete="off">
+            <label>Yön</label>
+            <div class="mp-seg" id="mp-f-side"><button type="button" class="on" data-mpside="LONG">📈 UZUN</button><button type="button" data-mpside="SHORT">📉 KISA</button></div>
+            <label>Miktar</label>
+            <input type="number" id="mp-f-qty" placeholder="Örn: 0.05" step="any" min="0">
+            <label>Ortalama giriş fiyatı ($)</label>
+            <input type="number" id="mp-f-cost" placeholder="Örn: 35000" step="any" min="0">
+            <label>Güncel fiyat ($) <span>— boş bırakırsan giriş fiyatı kullanılır</span></label>
+            <input type="number" id="mp-f-price" placeholder="Opsiyonel" step="any" min="0">
+            <label>Tarih</label>
+            <input type="date" id="mp-f-date">
+            <label>Not</label>
+            <input type="text" id="mp-f-note" placeholder="Opsiyonel not..." maxlength="120">
+            <div class="mp-form-actions"><button type="button" class="btn solid" id="mp-f-save">💾 Kaydet</button><button type="button" class="btn" id="mp-f-cancel2">Vazgeç</button></div>
+            <div class="mp-form-err" id="mp-f-err"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -14832,6 +14894,7 @@ function applyTierUi() {
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();
   if (window.AlfaMentorPreview) window.AlfaMentorPreview.refresh();
   if (window.AlfaEduCheckout) window.AlfaEduCheckout.refreshContext();
+  if (window.AlfaMyPortfolio) window.AlfaMyPortfolio.refresh();
 
   const isAdmin = siteIsAdmin();
   const ref = refUnlocked();
@@ -14855,7 +14918,7 @@ function applyTierUi() {
   });
   // Trading terminali artık yalnızca Ek sayfasında; Alfa Charts PAGE_TIER ile yöneticiye özel.
   // Uyelige gore portfoy adi: yonetici disindakiler paylasilan ozeti gorur.
-  const pfName = (ref || isAdmin) ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
+  const pfName = (AUTH.user || ref || isAdmin) ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
   ['tab-portfoy', 'mnav-portfoy'].forEach(function (id) {
     const el = document.getElementById(id);
     if (el) el.textContent = pfName;
@@ -26127,6 +26190,44 @@ function chDailySocialBlock(id) {
   if (window.DailyNoteSocial) window.DailyNoteSocial.mount(root, id);
   return root;
 }
+// Günün notu okuma rengi: seçim tarayıcıda saklanır, yalnızca not yazı alanına uygulanır.
+const DAILY_NOTE_THEME_KEY = 'alfa_daily_note_theme';
+const DAILY_NOTE_THEMES = [
+  { id: 'sepia', label: 'Sepya / Parşömen', bg: '#FBF0D9', fg: '#3F301D' },
+  { id: 'light', label: 'Aydınlık / Gündüz', bg: '#F8F9FA', fg: '#1A1A1A' },
+  { id: 'night', label: 'Gece / Lacivert', bg: '#0F1123', fg: '#E2E8F0' },
+  { id: 'oled', label: 'OLED / Zifiri Karanlık', bg: '#000000', fg: '#D1D5DB' },
+  { id: 'sage', label: 'Adaçayı / Mint Yeşili', bg: '#E8F0EC', fg: '#1E2C24' }
+];
+function chDailyThemeCurrent() {
+  try { const v = localStorage.getItem(DAILY_NOTE_THEME_KEY); return DAILY_NOTE_THEMES.some(t => t.id === v) ? v : 'sepia'; }
+  catch { return 'sepia'; }
+}
+function chDailyThemeApply(node) {
+  if (!node) return;
+  const theme = chDailyThemeCurrent();
+  node.dataset.dailyTheme = theme;
+  DAILY_NOTE_THEMES.forEach(t => node.classList.remove('daily-theme-' + t.id));
+  node.classList.add('daily-theme-' + theme);
+}
+function chDailyThemePicker() {
+  const bar = document.createElement('div'); bar.className = 'daily-theme-picker';
+  const label = document.createElement('span'); label.textContent = 'Not rengi'; bar.appendChild(label);
+  const current = chDailyThemeCurrent();
+  DAILY_NOTE_THEMES.forEach(theme => {
+    const btn = document.createElement('button'); btn.type = 'button';
+    btn.title = theme.label; btn.setAttribute('aria-label', theme.label);
+    btn.setAttribute('aria-pressed', String(theme.id === current));
+    btn.style.setProperty('--sw', theme.bg);
+    btn.onclick = () => {
+      try { localStorage.setItem(DAILY_NOTE_THEME_KEY, theme.id); } catch (e) {}
+      document.querySelectorAll('.ch-note-view[data-daily-theme]').forEach(chDailyThemeApply);
+      bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    };
+    bar.appendChild(btn);
+  });
+  return bar;
+}
 function chDailyCard(item) {
   const card = document.createElement('article'); card.className = 'daily-note-card'; card.dataset.dailyId = item.id;
   const time = document.createElement('time'); time.dateTime = new Date(item.publishedAt).toISOString(); time.textContent = chDailyDate(item.publishedAt);
@@ -26248,8 +26349,9 @@ async function chOpenDailyReader(id) {
     actions.appendChild(close);
     head.append(heading, actions);
     const body = document.createElement('div'); body.className = 'daily-reader-body';
+    body.appendChild(chDailyThemePicker());
     const note = chBuildNoteBox({ ...item, access: 'free' }, item.title);
-    if (note) body.appendChild(note);
+    if (note) { chDailyThemeApply(note); body.appendChild(note); }
     else {
       const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Bu paylaşımın medyası şu an görüntülenemiyor.'; body.appendChild(hint);
       if (/^https?:\/\//i.test(item.url || '')) { const source = document.createElement('a'); source.href = item.url; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = 'Telegram kaynağını aç ↗'; body.appendChild(source); }
@@ -26280,9 +26382,9 @@ async function chOpenDailyViewer(id) {
     const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&note=' + id, { credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10000) }), data = await r.json();
     if (!dialog.open) return;
     if (!r.ok || !data.ok || !data.item) throw new Error('not_found');
-    body.replaceChildren();
+    body.replaceChildren(chDailyThemePicker());
     const note = chBuildNoteBox({ ...data.item, access: 'free' }, data.item.title);
-    if (note) body.appendChild(note);
+    if (note) { chDailyThemeApply(note); body.appendChild(note); }
     else {
       const title = document.createElement('h3'); title.textContent = data.item.title; body.appendChild(title);
       const hint = document.createElement('p'); hint.textContent = 'Bu paylaşımın medyası burada görüntülenemedi.'; body.appendChild(hint);
