@@ -53,6 +53,17 @@ async function alfaNews(req, res) {
     const raw = rows && rows[0] && rows[0].data;
     if (!raw || typeof raw !== 'object') return res.status(200).json({ ok: true, data: null });
     const text = (value, max) => String(value == null ? '' : value).slice(0, max);
+    // data:image URL'leri 600 karaktere kırpılırsa bozulur (ERR_INVALID_URL).
+    // Yalnızca eksiksiz base64 veri URI'lerini koru, kırıkları boş kabul et.
+    const media = (value, max = 500000) => {
+      const s = String(value == null ? '' : value);
+      if (/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(s)) {
+        const payload = s.slice(s.indexOf(',') + 1);
+        if (s.length <= max && /^[A-Za-z0-9+/]+={0,2}$/.test(payload) && payload.length % 4 === 0) return s;
+        return '';
+      }
+      return text(s, 600);
+    };
     const entries = Array.isArray(raw.entries) ? raw.entries.slice(0, 60).map(e => ({
       id: text(e && e.id, 80),
       title: text(e && e.title, 200),
@@ -62,15 +73,15 @@ async function alfaNews(req, res) {
       result: text(e && e.result, 200),
       authorId: text(e && e.authorId, 80),
       images: (function () {
-        const own = Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => text(u, 600)).filter(Boolean) : [];
+        const own = Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => media(u)).filter(Boolean) : [];
         const tg = Array.isArray(e && e.photoIds)
           ? e.photoIds.slice(0, 3).map(id => text(id, 250)).filter(Boolean)
             .map(id => '/api/tg?magPhoto=' + encodeURIComponent(id))
           : [];
         return own.concat(tg).slice(0, 12);
       })(),
-      beforeImg: text(e && e.beforeImg, 600),
-      afterImg: text(e && e.afterImg, 600),
+      beforeImg: media(e && e.beforeImg),
+      afterImg: media(e && e.afterImg),
       ctaUrl: text(e && e.ctaUrl, 600),
       category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
       sourceLink: text(e && e.sourceLink, 300),
@@ -80,12 +91,12 @@ async function alfaNews(req, res) {
       id: text(a && a.id, 80),
       name: text(a && a.name, 120),
       specialty: text(a && a.specialty, 120),
-      photo: text(a && a.photo, 600),
+      photo: media(a && a.photo),
     })) : [];
     return res.status(200).json({ ok: true, updatedAt: rows[0].updated_at || null, data: {
       issueNo: Number.isFinite(raw.issueNo) ? raw.issueNo : 1,
       weekLabel: text(raw.weekLabel, 120),
-      coverBg: text(raw.coverBg, 600),
+      coverBg: media(raw.coverBg),
       ctaLabel: text(raw.ctaLabel, 120),
       ctaUrl: text(raw.ctaUrl, 600),
       rosterVer: 2,

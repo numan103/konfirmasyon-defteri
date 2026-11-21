@@ -107,3 +107,18 @@ test('Telegram entries share one stream with a category badge and safe same-orig
   assert.match(api, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(id\)/);
   assert.ok(!/\/api\/edu-shared[\s\S]{0,400}t\.me\//.test(api), 'no Telegram CDN hotlink in the public projection');
 });
+
+test('complete data URI media survives the public projection; truncated ones are dropped', () => {
+  const projection = api.slice(api.indexOf('const media ='), api.indexOf('const entries ='));
+  assert.match(projection, /payload\.length % 4 === 0/);
+  assert.match(api, /images\.slice\(0, 12\)\.map\(u => media\(u\)\)/);
+  assert.match(api, /beforeImg: media\(e && e\.beforeImg\)/);
+  assert.match(api, /afterImg: media\(e && e\.afterImg\)/);
+  assert.match(api, /photo: media\(a && a\.photo\)/);
+  assert.match(api, /coverBg: media\(raw\.coverBg\)/);
+  const safe = html.slice(html.indexOf('function magSafeBg('), html.indexOf('async function saveNews('));
+  assert.match(safe, /payload\.length % 4 !== 0/);
+  assert.match(html, /const coverBg = magSafeBg\(magData\.coverBg\)/);
+  assert.match(html, /const avBg = magSafeBg\(a\.photo\)/);
+  assert.match(html, /const avBg = author && magSafeBg\(author\.photo\)/);
+});

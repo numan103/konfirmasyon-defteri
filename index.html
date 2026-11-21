@@ -9249,14 +9249,14 @@
           <h2 data-i18n="pg.bas.senT">Senior Alfa Trader</h2>
           <p class="sub" data-i18n="pg.bas.senS">Deneyimli trader burada yerini alıyor. Sende aradıklarımız: aktiflik, chart paylaşımı ve gelişime açıklık. Karşılığında ekip işlemleri, mentörlük ve sohbet ortamı.</p>
           <div class="form" id="senior-form">
-            <input type="text" id="sf-name" data-i18n-ph="pg.bas.fName" placeholder="Adın / Nick" />
+            <input type="text" id="sr-name" data-i18n-ph="pg.bas.fName" placeholder="Adın / Nick" />
             <div class="row">
               <input type="text" id="sf-tg" data-i18n-ph="pg.bas.fTg" placeholder="Telegram kullanıcı adın" />
               <input type="text" id="sf-x" data-i18n-ph="pg.bas.fX" placeholder="X hesabın (opsiyonel)" />
             </div>
             <div class="row">
               <select id="sf-exp"><option value="" data-i18n="pg.bas.fExp">Tecrübe</option><option>&lt;1 yıl</option><option>1-2 yıl</option><option>2-4 yıl</option><option>4+ yıl</option></select>
-              <select id="sf-market"><option value="" data-i18n="pg.bas.fMarket">Piyasa</option><option>Kripto</option><option>Forex</option><option>Hisse</option><option>Birden fazla</option></select>
+              <select id="sr-market"><option value="" data-i18n="pg.bas.fMarket">Piyasa</option><option>Kripto</option><option>Forex</option><option>Hisse</option><option>Birden fazla</option></select>
             </div>
             <div class="row">
               <select id="sf-freq"><option value="" data-i18n="pg.bas.fFreq">Sıklık</option><option>Scamper</option><option>Günlük</option><option>Swing</option><option>Pozisyon</option></select>
@@ -9299,7 +9299,7 @@
         </div>
         <div class="sfx-lg hidden" id="sfx-lg">
           <button class="sfx-lg-x" type="button" aria-label="Kapat" onclick="closeSfxLightbox()">✕</button>
-          <img id="sfx-lg-img" src="" alt="" />
+          <img id="sfx-lg-img" alt="" />
         </div>
         <div class="sfx-modal hidden" id="sfx-modal">
           <div class="sfx-modal-card">
@@ -13152,13 +13152,18 @@ function renderInfluencer(skipLoad = false) {
   };
   document.getElementById('inf-refresh-orders').onclick = loadInfluencerOrders;
   if (!skipLoad) {
-    loadInfluencerAdmin();
     const seq = ++infRequest;
-    infApi().then(data => {
-      if (seq !== infRequest) return;
-      infAccess = !!data.unlocked;
-      renderInfluencer(true);
-    }).catch(() => { if (seq === infRequest) { infAccess = false; renderInfluencer(true); } });
+    // Anonim ziyaretçide kilitli API'ye gidip 401 konsol hatası üretme; teaser zaten görünür.
+    if (typeof AUTH === 'undefined' || !AUTH.user) {
+      infAccess = false;
+    } else {
+      loadInfluencerAdmin();
+      infApi().then(data => {
+        if (seq !== infRequest) return;
+        infAccess = !!data.unlocked;
+        renderInfluencer(true);
+      }).catch(() => { if (seq === infRequest) { infAccess = false; renderInfluencer(true); } });
+    }
   }
   if (!unlocked) { document.getElementById('inf-checks').replaceChildren(); return; }
   const box = document.getElementById('inf-checks');
@@ -13444,8 +13449,6 @@ function init() {
       document.querySelectorAll('.picker.open').forEach(o => o.classList.remove('open'));
     }
   });
-  // Notion'dan strateji & entry model seçeneklerini getir (async, hata sessiz)
-  loadNotionOptions();
   // Mobil hamburger menü (kenar çekmecesi)
   const mnavBtn = document.getElementById('nav-mobile-btn');
   const mnav = document.getElementById('nav-mobile');
@@ -13602,6 +13605,16 @@ async function loadNews() {
   return available;
 }
 function magAuthor(id) { return magData.authors.find(a => a.id === id) || null; }
+// Kırpılmış/broken data URI'ler CSS arka planına verilmez; yer tutucu (baş harf) kullanılır.
+function magSafeBg(value) {
+  const s = String(value || '');
+  if (!s) return '';
+  if (/^data:image\//i.test(s)) {
+    const payload = s.slice(s.indexOf(',') + 1);
+    if (s.length > 500000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(payload) || payload.length % 4 !== 0) return '';
+  } else if (!/^(https?:\/\/|\/api\/tg\?magPhoto=)/i.test(s)) return '';
+  return s.replace(/["')]/g, '');
+}
 async function saveNews() {
   // Admin okuyucuda üretilen proxy URL'leri kalıcı photoIds'nin yanına yazma;
   // aksi halde public yüzde görsel iki kez görünür.
@@ -13687,7 +13700,8 @@ function magArea(val, ph, oninput) {
 function magBuildCover() {
   const page = document.createElement('div'); page.className = 'mag-page mag-cover3';
   const inner = document.createElement('div'); inner.className = 'mag-inner';
-  if (magData.coverBg) { const bg = document.createElement('div'); bg.className = 'cv-bg'; bg.style.backgroundImage = 'url("' + String(magData.coverBg).replace(/"/g, '') + '")'; inner.appendChild(bg); }
+  const coverBg = magSafeBg(magData.coverBg);
+  if (coverBg) { const bg = document.createElement('div'); bg.className = 'cv-bg'; bg.style.backgroundImage = 'url("' + coverBg + '")'; inner.appendChild(bg); }
   else {
     // Gömülü kapak tasarımı — trading temalı grafik motifi
     const glow = document.createElement('div'); glow.className = 'cv-glow'; inner.appendChild(glow);
@@ -13735,7 +13749,8 @@ function magBuildCover() {
     const n = list.length, R = 62, cx = 150, cy = 150;
     list.forEach((a, idx) => {
       const av = document.createElement('div'); av.className = 'cv-an'; av.title = (a.name || '') + (a.specialty ? (' · ' + a.specialty) : '');
-      if (a.photo) av.style.backgroundImage = 'url("' + String(a.photo).replace(/"/g, '') + '")';
+      const avBg = magSafeBg(a.photo);
+      if (avBg) av.style.backgroundImage = 'url("' + avBg + '")';
       else { av.classList.add('empty'); av.textContent = (a.name || '?').trim().charAt(0).toUpperCase(); }
       const t = n > 1 ? idx / (n - 1) : 0.5;
       const ang = Math.PI + (Math.PI * 0.5) * t;
@@ -13962,7 +13977,8 @@ function magBuildEntry(en, i, admin) {
   const by = document.createElement('div'); by.className = 'mag-byline';
   const author = magAuthor(en.authorId);
   const av = document.createElement('div'); av.className = 'b-av';
-  if (author && author.photo) { av.style.backgroundImage = 'url("' + author.photo.replace(/"/g, '') + '")'; }
+  const avBg = author && magSafeBg(author.photo);
+  if (avBg) { av.style.backgroundImage = 'url("' + avBg + '")'; }
   else { av.textContent = (author && author.name) ? author.name.trim().charAt(0).toUpperCase() : '?'; }
   by.appendChild(av);
   if (admin) {
@@ -15725,7 +15741,9 @@ async function renderHomeTeaser() {
   let d = null;
   try { d = await ap2FetchSummary(); } catch (e) {}
   if (!d) {
-    if (list) list.innerHTML = '<div class="hd-empty">Önizleme verisi yüklenemedi.</div>';
+    if (list) list.innerHTML = AUTH.user
+      ? '<div class="hd-empty">Önizleme verisi yüklenemedi.</div>'
+      : '<div class="hd-empty">Önizleme için giriş yapman yeterli.</div>';
     return;
   }
   if (list) list.innerHTML = ap2SummaryMarkup(d);
@@ -19600,6 +19618,8 @@ function ap2IsMember() { return refUnlocked(); }
 let ap2SummaryCache = null;
 let ap2SummaryRequest = null;
 async function ap2FetchSummary() {
+  // Özet uçları girişli oturum ister; anonimde 401 yerine boş önizleme döndür.
+  if (typeof AUTH === 'undefined' || !AUTH.user) return null;
   if (ap2SummaryCache && Date.now() - ap2SummaryCache.at < 30000) return ap2SummaryCache.data;
   if (ap2SummaryRequest) return ap2SummaryRequest;
   ap2SummaryRequest = (async function() {
@@ -29280,6 +29300,8 @@ async function onAuthed(user) {
   const wrap = document.querySelector('.wrap');
   if (wrap) wrap.classList.remove('hidden');
   await refreshAppData();
+  // Notion seçenekleri girişli oturumda yüklenir; anonimde 401 konsol hatası üretmez.
+  loadNotionOptions();
   scheduleCloudSync();
   handleNotionHash();
   try { renderSiteReviews(); } catch (e) {}
@@ -31373,11 +31395,11 @@ const BAS_GS_URL = 'https://script.google.com/macros/s/AKfycbxemXXvOyEW6tqwPv2ib
 async function submitSeniorForm() {
   const btn = document.getElementById('sf-submit');
   const result = document.getElementById('sf-result');
-  const name = document.getElementById('sf-name').value.trim();
+  const name = document.getElementById('sr-name').value.trim();
   const tg = document.getElementById('sf-tg').value.trim();
   const x = document.getElementById('sf-x').value.trim();
   const exp = document.getElementById('sf-exp').value;
-  const market = document.getElementById('sf-market').value;
+  const market = document.getElementById('sr-market').value;
   const freq = document.getElementById('sf-freq').value;
   const method = document.getElementById('sf-method').value;
   const level = document.getElementById('sf-level').value;

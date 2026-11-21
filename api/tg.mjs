@@ -25,6 +25,12 @@ const PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Premium\'a geç →', url: '
 // Dergi görselleri Telegram CDN'ine hotlink edilmez: file_id same-origin proxy ile
 // sunucuda çözülür. Yalnızca alfanews satırında kayıtlı file_id'ler kabul edilir.
 const magPhotoAllow = new Map();
+function sniffImageType(buf) {
+  if (buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf.length > 8 && buf[0] === 0x89 && buf.toString('ascii', 1, 4) === 'PNG') return 'image/png';
+  if (buf.length > 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  return '';
+}
 async function magPhotoAllowed(fileId) {
   const hit = magPhotoAllow.get(fileId);
   if (hit && hit > Date.now()) return true;
@@ -58,9 +64,15 @@ async function handleMagPhoto(req, res) {
     if (!path || !/^[\w./-]+$/.test(path)) return res.status(404).json({ error: 'photo_unavailable' });
     const file = await fetch(`https://api.telegram.org/file/bot${TG_TOKEN}/${path}`, { signal: AbortSignal.timeout(12000) });
     if (!file.ok) return res.status(502).json({ error: 'photo_fetch_failed' });
-    const type = String(file.headers.get('content-type') || '').split(';')[0].toLowerCase();
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(type)) return res.status(415).json({ error: 'unsupported_media' });
+    // Telegram file API bazı fotoğrafları application/octet-stream olarak verir;
+    // içerik türüne değil sihirli baytlara bakarak doğrula (eski 415 kırıklığını giderir).
+    const declared = String(file.headers.get('content-type') || '').split(';')[0].toLowerCase();
+    if (declared && !['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/octet-stream'].includes(declared)) {
+      return res.status(415).json({ error: 'unsupported_media' });
+    }
     const buf = Buffer.from(await file.arrayBuffer());
+    const type = sniffImageType(buf);
+    if (!type) return res.status(415).json({ error: 'unsupported_media' });
     if (buf.length > 2_000_000) return res.status(413).json({ error: 'photo_too_large' });
     res.setHeader('Content-Type', type);
     res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
