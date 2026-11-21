@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v131-podcast1';
-const BUILD_ID = 'b192-podcast1';
+﻿const CACHE = 'alfa-v132-daily-tasks';
+const BUILD_ID = 'b193-daily-tasks';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

@@ -12,12 +12,20 @@ const themeSrc = html.slice(html.indexOf('const DAILY_NOTE_THEME_KEY'), html.ind
 const themeCss = html.slice(html.indexOf('  .daily-theme-picker {'), html.indexOf('  .edu-daily-panel {'));
 assert.ok(themeSrc.includes('DAILY_NOTE_THEMES'), 'daily theme source not found');
 assert.ok(themeCss.includes('.ch-note-view.daily-theme-oled'), 'daily theme css not found');
+const mpMatch = html.match(/<div id="mp-app">[\s\S]*?<div id="mp-toast" class="at-toast"><\/div>\s*<\/div>/);
+assert.ok(mpMatch, 'my portfolio clone markup not found');
+const mpMarkup = mpMatch[0];
 
 const pageHtml = user => `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <link rel="stylesheet" href="/assets/my-portfolio.css">
-<style>:root{--bg:#0c0d1b;--bg-2:#121426;--card:#161832;--border:#262a4e;--text:#edefff;--text-2:#b8bcd9;--text-3:#7d82a6;--pc:#7b78f5;--pc-soft:#262952;--green:#34d399;--red:#f87171;--acc-soft:#262952;--acc-2:#a78bfa}
+<style>:root{--bg:#0c0d1b;--bg-2:#121426;--card:#161832;--border:#262a4e;--text:#edefff;--text-2:#b8bcd9;--text-3:#7d82a6;--pc:#7b78f5;--pc-soft:#262952;--green:#34d399;--red:#f87171;--amber:#fbbf24;--acc-soft:#262952;--acc-2:#a78bfa}
 body{background:var(--bg);color:var(--text);font:14px sans-serif;margin:12px}*{box-sizing:border-box}.hidden{display:none!important}.btn{padding:6px 10px;cursor:pointer}
 .ch-note-view{background:var(--card);color:var(--text);border:1px solid var(--border);padding:16px;border-radius:12px}
+.ap2-sum-sm,.ap2-card,.ap2-donut-panel,.ap2-chart-panel,.ap2-ideas{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
+.ap2-grid{display:grid;gap:8px}.ap2-sum-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ap2-layout{display:grid;grid-template-columns:1fr 260px;gap:10px}
+@media(max-width:860px){.ap2-layout,.ap2-sum-row{grid-template-columns:1fr}}
+input,select,button{max-width:100%}.ap2-hd-actions,.mp-portfolio-bar{display:flex;flex-wrap:wrap;gap:6px}
+.at-toast{position:fixed;bottom:12px;left:12px;background:var(--card);border:1px solid var(--pc);padding:8px 12px;border-radius:8px;opacity:0;pointer-events:none}.at-toast.open{opacity:1}
 ${themeCss}</style>
 <script>var AUTH={user:{id:${JSON.stringify(user)}}};function showGate(){window.gateOpened=true}</script>
 <script>${themeSrc}</script>
@@ -27,14 +35,8 @@ ${themeCss}</style>
 <div id="themeHost"></div>
 <div class="ap2-tabs" role="tablist"><button type="button" id="ap2-tab-alpha" class="on" aria-controls="ap2-panel-alpha" aria-selected="true">Alfa Portföy</button><button type="button" id="ap2-tab-mine" aria-controls="ap2-panel-mine" aria-selected="false">Portföyüm</button></div>
 <div id="ap2-panel-alpha" role="tabpanel"><p>Alfa portföyü burada.</p></div>
-<div id="ap2-panel-mine" class="hidden" role="tabpanel">
-<div class="mp-head"><div><h2 class="mp-title">Portföyüm</h2><p class="mp-sub">Başka üyeler göremez.</p></div><div><button type="button" id="mp-add">＋ Pozisyon Ekle</button></div></div>
-<div id="mp-login" class="mp-login hidden">Giriş yap</div><div id="mp-summary" class="mp-summary"></div><div id="mp-list" class="mp-list"></div><div id="mp-empty" class="mp-empty">Henüz pozisyon yok</div>
-<div id="mp-form" class="mp-form hidden"><div><span id="mp-form-title">Yeni Pozisyon</span><button type="button" id="mp-form-cancel">✕</button></div>
-<input id="mp-f-symbol"><input id="mp-f-type"><div id="mp-f-side"><button type="button" class="on" data-mpside="LONG">LONG</button><button type="button" data-mpside="SHORT">SHORT</button></div>
-<input id="mp-f-qty"><input id="mp-f-cost"><input id="mp-f-price"><input id="mp-f-date"><input id="mp-f-note">
-<button type="button" id="mp-f-save">Kaydet</button><button type="button" id="mp-f-cancel2">Vazgeç</button><div id="mp-f-err"></div></div>
-</div></div>
+<div id="ap2-panel-mine" class="hidden" role="tabpanel">${mpMarkup}</div>
+</div>
 <script type="module" src="/assets/my-portfolio.mjs"></script>
 </body></html>`;
 const server = http.createServer(async (req, res) => {
@@ -73,33 +75,47 @@ try {
   assert.equal(await page.locator('#ap2-panel-alpha').isVisible(), false);
   assert.equal(await page.locator('#ap2-tab-mine').getAttribute('aria-selected'), 'true');
   await page.locator('#mp-add').click();
-  await page.locator('#mp-f-symbol').fill('BTC');
-  await page.locator('#mp-f-qty').fill('0.5');
+  await page.locator('#mp-f-sym').fill('BTC');
+  await page.locator('#mp-f-amount').fill('20000');
   await page.locator('#mp-f-cost').fill('40000');
   await page.locator('#mp-f-price').fill('42000');
   await page.locator('#mp-f-save').click();
-  await page.waitForFunction(() => document.querySelectorAll('#mp-list .mp-card').length === 1);
-  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('alfa_my_portfolio_student-a')));
-  assert.equal(stored.positions[0].symbol, 'BTC');
-  assert.equal(stored.positions[0].side, 'LONG');
-  assert.match(await page.locator('#mp-summary').innerText(), /\+1\.000,00 \$/);
-  await page.locator('[data-mp-edit="0"]').click();
+  assert.deepEqual(errors, [], errors.join(' | '));
+  assert.equal(await page.locator('#mp-f-err').innerText(), '', 'form error: ' + await page.locator('#mp-f-err').innerText());
+  await page.waitForFunction(() => document.querySelectorAll('#mp-grid .ap2-card').length === 1);
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('alfa_my_portfolios_student-a')));
+  const pf = stored.items[stored.active];
+  assert.equal(pf.positions[0].symbol, 'BTC');
+  assert.equal(pf.positions[0].side, 'LONG');
+  assert.ok(Math.abs(pf.positions[0].qty - 0.5) < 1e-9, 'tutar / giriş fiyatı = adet');
+  assert.match(await page.locator('#mp-summary-area').innerText(), /\+1\.000,00 \$/);
+  assert.match(await page.locator('#mp-title').innerText(), /Portföyüm/);
+
+  await page.locator('#mp-grid [data-mp-edit]').first().click();
   await page.locator('#mp-f-price').fill('50000');
   await page.locator('#mp-f-save').click();
-  await page.waitForFunction(() => document.querySelector('#mp-list .mp-card .mp-grid')?.innerText.includes('50.000,00'));
+  await page.waitForFunction(() => document.querySelector('#mp-grid .ap2-card-prices')?.innerText.includes('50.000,00'));
+
+  page.once('dialog', d => d.accept('Uzun Vadeli'));
+  await page.locator('#mp-new').click();
+  await page.waitForFunction(() => document.querySelectorAll('#mp-select option').length === 2);
+  assert.match(await page.locator('#mp-title').innerText(), /Uzun Vadeli/);
+  assert.equal(await page.locator('#mp-grid .ap2-card').count(), 0, 'yeni portföy boş başlar');
+  await page.locator('#mp-select').selectOption({ index: 0 });
+  assert.equal(await page.locator('#mp-grid .ap2-card').count(), 1, 'portföyler birbirinden ayrı');
 
   await page.reload();
   await page.waitForFunction(() => !!window.AlfaMyPortfolio);
   await page.evaluate(() => window.setupTheme());
   assert.match(await page.locator('.ch-note-view').getAttribute('class'), /daily-theme-oled/);
   await page.locator('#ap2-tab-mine').click();
-  assert.equal(await page.locator('#mp-list .mp-card').count(), 1, 'kendi cihazında kalıcı');
+  assert.equal(await page.locator('#mp-grid .ap2-card').count(), 1, 'kendi cihazında kalıcı');
 
   await page.goto(origin + '/?user=student-b');
   await page.waitForFunction(() => !!window.AlfaMyPortfolio);
   await page.locator('#ap2-tab-mine').click();
-  assert.equal(await page.locator('#mp-list .mp-card').count(), 0, 'başka üyenin pozisyonu görünmez');
-  assert.ok((await page.evaluate(() => localStorage.getItem('alfa_my_portfolio_student-b'))) === null || true);
+  assert.equal(await page.locator('#mp-grid .ap2-card').count(), 0, 'başka üyenin pozisyonu görünmez');
+  assert.equal(await page.evaluate(() => localStorage.getItem('alfa_my_portfolios_student-b') === null), true);
 
   await page.setViewportSize({ width: 360, height: 780 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);

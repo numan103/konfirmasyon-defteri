@@ -6,6 +6,7 @@ import { speechChunks } from '../assets/article-speech.mjs';
 import { cleanPDF, MAX_PDF_BYTES } from '../lib/edu-pdf.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const reader = fs.readFileSync(new URL('../assets/magazine-reading.mjs', import.meta.url), 'utf8');
 const publishedAt = '2026-11-21T12:18:08.000Z';
 const part = (n, body, extra = {}) => ({
   id: 'mag_' + n, authorId: 'traderahmetd', publishedAt,
@@ -68,16 +69,21 @@ test('speech reading keeps every word inside bounded chunks', () => {
   assert.deepEqual(chunks.join(' ').split(' ').filter(Boolean), ['Başlık', ...words]);
 });
 
-test('continuous reader and speech controls are wired into both surfaces', () => {
+test('Alfa Edu reader and speech controls live on; home continuous reader is gone', () => {
   for (const marker of [
-    'id="home-mag-article-reader"', 'id="edu-magazine-reading"', 'id="ch-pdf-editor"',
-    '/assets/magazine-reading.mjs?v=2', '/assets/magazine-reading.css?v=1',
-    'AlfaArticleSpeech.controls', 'window.MagazineReading.renderHome'
+    'id="edu-magazine-reading"', 'id="ch-pdf-editor"',
+    '/assets/magazine-reading.mjs?v=3', '/assets/magazine-reading.css?v=1',
+    'AlfaArticleSpeech.controls', 'window.MagazineReading.openEdu'
   ]) assert.ok(html.includes(marker), marker + ' bulunamadı');
+  assert.equal(html.includes('id="home-mag-article-reader"'), false, 'kesintisiz okuma ana sayfada kalmamalı');
+  assert.equal(html.includes('Tam metni rahat oku'), false, 'eski tam metin tetikleyicisi kalmamalı');
+  assert.equal(reader.includes('KESİNTİSİZ OKUMA'), false);
+  assert.equal(reader.includes('openHome'), false);
+  assert.equal(reader.includes('renderHome'), false);
+  assert.ok(reader.includes('ALFA EDU · DERGİDEN EĞİTİM YAZILARI'));
 });
 
 test('mentorship magazine never renders a Telegram exit link', () => {
-  const reader = fs.readFileSync(new URL('../assets/magazine-reading.mjs', import.meta.url), 'utf8');
   const api = fs.readFileSync(new URL('../api/edu-shared.mjs', import.meta.url), 'utf8');
   for (const marker of ['Telegram’da aç', 'Telegram’daki kaynağı aç', 'pdfLink', 'sourceLink: text(']) {
     assert.ok(!reader.includes(marker) && !api.includes(marker) && !html.includes(marker), marker + ' hâlâ public yüzeyde');

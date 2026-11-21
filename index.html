@@ -52,6 +52,8 @@
 <script type="module" src="/assets/economic-news.mjs?v=2"></script>
   <link rel="stylesheet" href="/assets/morning-checkin.css?v=2">
   <script type="module" src="/assets/morning-checkin.mjs?v=3"></script>
+  <link rel="stylesheet" href="/assets/daily-tasks.css?v=1">
+  <script type="module" src="/assets/daily-tasks.mjs?v=1"></script>
   <link rel="stylesheet" href="/assets/site-new.css?v=5">
   <script type="module" src="/assets/site-features.mjs?v=2"></script>
   <script type="module" src="/assets/site-new.mjs?v=2"></script>
@@ -62,7 +64,7 @@
 <link rel="stylesheet" href="/assets/edu-learning-rewards.css?v=1">
 <script type="module" src="/assets/edu-learning-rewards.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/magazine-reading.css?v=1">
-<script type="module" src="/assets/magazine-reading.mjs?v=2"></script>
+<script type="module" src="/assets/magazine-reading.mjs?v=3"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
 <!-- AYNA:BASLA -->
@@ -72,8 +74,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
-<link rel="stylesheet" href="/assets/my-portfolio.css?v=1">
-<script type="module" src="/assets/my-portfolio.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/my-portfolio.css?v=2">
+<script type="module" src="/assets/my-portfolio.mjs?v=2"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
   #page-portfoy.ap2-viewer #ap2-add,
@@ -6068,9 +6070,13 @@
       </div>
       <a href="?page=alfatrading" class="nav-link" id="tab-alfatrading" data-nav>📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="nav-link" id="tab-influencer" data-nav data-i18n="app.influencer">🚀 Alfa Influencer</a>
-      <a href="?page=portfoy" class="nav-link" id="tab-portfoy" data-nav>💼 Portföy Yönetimi</a>
-      <a href="?page=portfoy&portfoyTab=alpha" class="nav-link nav-sub" id="tab-portfoy-alpha" data-nav onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('alpha')">↳ Alfa Portföy</a>
-      <a href="?page=portfoy&portfoyTab=mine" class="nav-link nav-sub" id="tab-portfoy-mine" data-nav onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('mine')">↳ Portföyüm</a>
+      <div class="nav-drop" id="navdrop-portfoy">
+        <button type="button" class="nav-link drop-btn" id="tab-portfoy" aria-label="Portföy Yönetimi menüsü"><span id="portfoy-label">💼 Portföy Yönetimi</span> ▾</button>
+        <div class="drop-menu">
+          <a href="?page=portfoy&portfoyTab=alpha" class="nav-link" id="tab-portfoy-alpha" data-nav>↳ Alfa Portföy</a>
+          <a href="?page=portfoy&portfoyTab=mine" class="nav-link" id="tab-portfoy-mine" data-nav>↳ Portföyüm</a>
+        </div>
+      </div>
       <a href="?page=eduplans" class="nav-link" id="tab-eduplans" data-nav data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=edustudio" class="nav-link" id="tab-edustudio" data-nav style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=erisim" class="nav-link" id="tab-erisim" data-nav style="display:none">🔓 Erişim</a>
@@ -6119,9 +6125,9 @@
       <a href="?page=strateji" class="mnav-link" data-nav data-mnav="strateji" id="mnav-strateji">🧭 Strateji</a>
       <a href="?page=alfatrading" class="mnav-link" data-nav data-mnav="alfatrading" id="mnav-alfatrading">📢 İşlem Kanalı</a>
       <a href="?page=influencer" class="mnav-link" data-nav data-mnav="influencer" id="mnav-influencer" data-i18n="app.influencer">🚀 Alfa Influencer</a>
-      <a href="?page=portfoy" class="mnav-link" data-nav data-mnav="portfoy" id="mnav-portfoy">💼 Portföy Yönetimi</a>
-      <a href="?page=portfoy&portfoyTab=alpha" class="mnav-link sub" data-nav data-mnav="portfoy-alpha" id="mnav-portfoy-alpha" onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('alpha')">↳ Alfa Portföy</a>
-      <a href="?page=portfoy&portfoyTab=mine" class="mnav-link sub" data-nav data-mnav="portfoy-mine" id="mnav-portfoy-mine" onclick="window.AlfaMyPortfolio&&window.AlfaMyPortfolio.activate('mine')">↳ Portföyüm</a>
+      <div class="mnav-group" data-mnav="portfoy" id="mnav-portfoy"><span id="mnav-portfoy-label">💼 Portföy Yönetimi</span></div>
+      <a href="?page=portfoy&portfoyTab=alpha" class="mnav-link sub" data-nav data-mnav="portfoy-alpha" id="mnav-portfoy-alpha">↳ Alfa Portföy</a>
+      <a href="?page=portfoy&portfoyTab=mine" class="mnav-link sub" data-nav data-mnav="portfoy-mine" id="mnav-portfoy-mine">↳ Portföyüm</a>
       <a href="?page=eduplans" class="mnav-link" data-nav data-mnav="eduplans" data-i18n="edu.plansNav">🎓 Eğitim Paketleri</a>
       <a href="?page=edustudio" class="mnav-link" data-nav data-mnav="edustudio" style="display:none">✎ İçerik Stüdyosu</a>
       <a href="?page=erisim" class="mnav-link" data-nav data-mnav="erisim" id="mnav-erisim" style="display:none">🔓 Borsanı Bağla</a>
@@ -6389,7 +6395,6 @@
             <div class="mag-foot"><div class="mag-dots" id="hmr-dots"></div><div class="mag-counter" id="hmr-counter">1 / 1</div></div>
           </div>
         </section>
-      <section id="home-mag-article-reader" class="magazine-reading" aria-label="Dergi tam metin okuma alanı" hidden></section>
       <section id="home-daily-notes" class="panel">
         <div class="hd-head"><div><span class="daily-kicker">✍️ Günün yazısı · Alfa Edu</span><h2>Günlük Notlar</h2><p class="hint">Telegram’daki eğitsel paylaşımlar onay beklemeden buraya gelir.</p></div>
           <button type="button" class="btn" id="home-daily-refresh">Yenile</button></div>
@@ -6402,6 +6407,32 @@
         <div class="hg-head"><h2 data-i18n="home.guide.title">🚀 Başlangıç rehberi</h2><span class="hg-count" id="hg-count">0 / 4</span></div>
         <div class="hg-track"><div class="hg-fill" id="hg-fill"></div></div>
         <div class="hg-steps" id="hg-steps"></div>
+      </section>
+      <section id="daily-tasks-panel" class="panel dt-panel" aria-label="Günlük görevler">
+        <div class="dt-head">
+          <div>
+            <span class="daily-kicker">✅ Gün içi görevler</span>
+            <h2>Bugünün Görevleri</h2>
+            <p class="hint">Bitirdikçe XP ve rozet kazan. Hatırlatıcıyı açarsan saatinde haber veririz — hepsi bu cihazda.</p>
+          </div>
+          <div class="dt-head-right">
+            <button type="button" class="btn" id="dt-remind">🔔 Hatırlatıcı: kapalı</button>
+            <div class="dt-level"><span id="dt-level">Seviye 1</span><div class="dt-xp-track"><i id="dt-xp-fill"></i></div><small id="dt-xp-text">0 / 150 XP</small></div>
+          </div>
+        </div>
+        <div class="dt-progress">
+          <span id="dt-count">0 / 6 tamamlandı</span>
+          <div class="dt-progress-track"><i id="dt-progress-fill"></i></div>
+          <span id="dt-streak">🔥 0 gün</span>
+        </div>
+        <div id="dt-list" class="dt-list"></div>
+        <div class="dt-add">
+          <input type="text" id="dt-new" placeholder="Kendi görevinı ekle…" maxlength="80" autocomplete="off">
+          <input type="time" id="dt-time" aria-label="Hatırlatma saati">
+          <button type="button" class="btn solid" id="dt-add">＋ Ekle</button>
+        </div>
+        <div id="dt-badges" class="dt-badges"></div>
+        <div id="dt-toast" class="at-toast"></div>
       </section>
 <a id="home-diary-link" href="?page=ayna" data-nav hidden style="margin:12px 0;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;">
          <strong>📓 Kişisel Günlük Asistan →</strong><br><span class="hint">Sana özel alanın: gününü planla, düşüncelerini kaydet, akşam küçük bir sonraki adım belirle.</span>
@@ -8787,41 +8818,105 @@
       </div>
       </div>
       <div id="ap2-panel-mine" class="hidden" role="tabpanel" aria-labelledby="ap2-tab-mine">
-        <div class="mp-head">
-          <div>
-            <h2 class="mp-title">💼 Portföyüm</h2>
-            <p class="mp-sub">Kendi pozisyonlarını ekle. Veriler yalnızca bu cihazda, hesabına özel saklanır; başka üyeler göremez.</p>
+        <div id="mp-app">
+          <div class="ap2-hd mp-hd">
+            <div class="ap2-hd-t">
+              <div class="mp-portfolio-bar">
+                <select id="mp-select" class="mp-select" aria-label="Portföy seç"></select>
+                <button type="button" class="ap2-btn-ghost" id="mp-new">＋ Portföy</button>
+                <button type="button" class="ap2-btn-ghost" id="mp-rename">✎ Ad</button>
+                <button type="button" class="ap2-btn-ghost" id="mp-delete" title="Portföyü sil">🗑</button>
+              </div>
+              <h2 class="ap2-hd-title" id="mp-title">💼 Portföyüm</h2>
+              <p class="ap2-hd-sub" id="mp-sub">Alfa Portföy'ün kendi hesabına özel kopyası — adını sen koy, veriler sadece bu cihazda.</p>
+            </div>
+            <div class="ap2-hd-actions">
+              <input type="search" id="mp-search" class="ap2-search" placeholder="Sembol / not ara…" autocomplete="off">
+              <button type="button" class="ap2-btn-ghost" id="mp-settings">⚙ Ayarlar</button>
+              <button type="button" class="ap2-btn-primary" id="mp-add">＋ Yeni Enstrüman</button>
+            </div>
           </div>
-          <div class="mp-actions">
-            <button type="button" class="ap2-btn-primary" id="mp-add">＋ Pozisyon Ekle</button>
+          <div id="mp-login" class="mp-login hidden">Portföyünü kaydetmek için giriş yapmalısın. <button type="button" class="btn solid" id="mp-login-btn">Giriş yap</button></div>
+          <div id="mp-empty" class="data-empty hidden">Henüz pozisyon yok — <b>＋ Yeni Enstrüman</b> ile başla.</div>
+          <div class="ap2-layout" id="mp-layout">
+            <div class="ap2-layout-left">
+              <div id="mp-summary-area"></div>
+              <div class="ap2-growth-row" id="mp-growth"></div>
+              <div id="mp-hedge-strip" class="ap2-hedge-strip"></div>
+              <div id="mp-grid" class="ap2-grid"></div>
+              <div class="ap2-ideas" id="mp-ideas">
+                <div class="ap2-ideas-head"><h4>💡 Potansiyel Portföy Değerlendirmeleri</h4><button type="button" class="ap2-btn-ghost" id="mp-idea-add">+ Not Ekle</button></div>
+                <div id="mp-idea-list" style="display:flex;flex-direction:column;gap:8px"></div>
+                <div id="mp-idea-empty" class="mp-muted">Henüz not yok — potansiyel yatırımlar hakkında değerlendirme notları ekle.</div>
+              </div>
+            </div>
+            <div class="ap2-layout-right">
+              <div class="ap2-donut-panel" id="mp-donut-panel">
+                <div class="ap2-donut-header">Dağılım</div>
+                <div class="ap2-donut-wrap"><svg id="mp-donut-svg" viewBox="0 0 200 200" class="ap2-donut-svg"></svg><div class="ap2-donut-center"><div class="ap2-donut-center-val" id="mp-donut-center">—</div><div class="ap2-donut-center-lbl">Toplam</div></div></div>
+                <div class="ap2-donut-legend" id="mp-donut-legend"></div>
+              </div>
+              <div class="ap2-chart-panel" id="mp-chart-panel">
+                <div class="ap2-chart-header"><span class="ap2-chart-title">📈 Büyüme</span><span class="ap2-chart-change" id="mp-chart-change"></span></div>
+                <div class="ap2-chart-range" id="mp-chart-range"><button type="button" class="on" data-mpr="week">Bu Hafta</button><button type="button" data-mpr="month">Bu Ay</button><button type="button" data-mpr="all">Tümü</button></div>
+                <div class="mp-chart-meta"><div><small>Başlangıç</small><b id="mp-chart-start">—</b></div><div><small>Süre</small><b id="mp-chart-duration">—</b></div><div><small>Kümülatif</small><b id="mp-chart-cum">—</b></div></div>
+                <div class="ap2-chart-canvas" id="mp-chart-canvas"><svg id="mp-chart-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg></div>
+              </div>
+              <div class="ap2-settings-panel hidden" id="mp-settings-panel">
+                <div class="ap2-donut-header">⚙ Portföy Ayarları</div>
+                <label>Portföy adı</label><input type="text" id="mp-set-name" maxlength="40" placeholder="Örn: Uzun Vadeli Portföy">
+                <label>Başlangıç sermayesi ($)</label><input type="number" id="mp-set-balance" step="any" min="0" placeholder="1000">
+                <div class="mp-settings-actions"><button type="button" class="btn solid" id="mp-set-save">💾 Kaydet</button><button type="button" class="btn" id="mp-set-export">⬇ Yedek Al</button><button type="button" class="btn" id="mp-set-reset">🗑 Sıfırla</button></div>
+                <div class="mp-settings-note">Veriler yalnızca bu cihazda, hesabına özel saklanır. Sunucuya gönderilmez.</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div id="mp-login" class="mp-login hidden">Portföyünü kaydetmek için giriş yapmalısın. <button type="button" class="btn solid" id="mp-login-btn">Giriş yap</button></div>
-        <div id="mp-summary" class="mp-summary"></div>
-        <div id="mp-list" class="mp-list"></div>
-        <div id="mp-empty" class="mp-empty">Henüz pozisyon yok — “Pozisyon Ekle” ile başla.</div>
-        <div id="mp-form" class="mp-form hidden">
-          <div class="mp-form-head"><span id="mp-form-title">Yeni Pozisyon</span><button type="button" class="btn" id="mp-form-cancel">✕</button></div>
-          <div class="mp-form-body">
-            <label>Enstrüman / Sembol</label>
-            <input type="text" id="mp-f-symbol" placeholder="Örn: BTC, ETH, XAUUSD" maxlength="40" autocomplete="off">
-            <label>Tür</label>
-            <input type="text" id="mp-f-type" placeholder="Kripto, hisse, altın…" maxlength="24" autocomplete="off">
-            <label>Yön</label>
-            <div class="mp-seg" id="mp-f-side"><button type="button" class="on" data-mpside="LONG">📈 UZUN</button><button type="button" data-mpside="SHORT">📉 KISA</button></div>
-            <label>Miktar</label>
-            <input type="number" id="mp-f-qty" placeholder="Örn: 0.05" step="any" min="0">
-            <label>Ortalama giriş fiyatı ($)</label>
-            <input type="number" id="mp-f-cost" placeholder="Örn: 35000" step="any" min="0">
-            <label>Güncel fiyat ($) <span>— boş bırakırsan giriş fiyatı kullanılır</span></label>
-            <input type="number" id="mp-f-price" placeholder="Opsiyonel" step="any" min="0">
-            <label>Tarih</label>
-            <input type="date" id="mp-f-date">
-            <label>Not</label>
-            <input type="text" id="mp-f-note" placeholder="Opsiyonel not..." maxlength="120">
-            <div class="mp-form-actions"><button type="button" class="btn solid" id="mp-f-save">💾 Kaydet</button><button type="button" class="btn" id="mp-f-cancel2">Vazgeç</button></div>
-            <div class="mp-form-err" id="mp-f-err"></div>
+          <div id="mp-trades" class="ap2-sell-hist hidden"><h4>Gerçekleşen İşlemler <span id="mp-trades-total"></span></h4><div id="mp-trades-body"></div></div>
+          <div class="ap2-monthly" id="mp-monthly"><div class="ap2-monthly-head" id="mp-monthly-head"><span>📊 Aylık Performans</span><span class="ap2-monthly-this" id="mp-monthly-this"></span><span class="ap2-monthly-caret">▾</span></div><div class="ap2-monthly-body hidden" id="mp-monthly-body"></div></div>
+          <div id="mp-form" class="strat-form hidden">
+            <div class="strat-form-head"><span id="mp-form-title">Yeni Enstrüman</span><button type="button" class="btn" id="mp-form-cancel">✕</button></div>
+            <div class="strat-form-body">
+              <label>Enstrüman / Sembol</label>
+              <input type="text" id="mp-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
+              <div class="ap2-chip-row" id="mp-f-chips"><button type="button" data-mpsym="BTC">₿ BTC</button><button type="button" data-mpsym="ETH">Ξ ETH</button><button type="button" data-mpsym="SOL">◎ SOL</button><button type="button" data-mpsym="BNB">BNB</button><button type="button" data-mpsym="XRP">XRP</button><button type="button" data-mpsym="XAUUSD">🥇 XAUUSD</button></div>
+              <label>Tür</label>
+              <div class="ap2-type-chips" id="mp-f-type"><button type="button" class="ap2-type-chip on" data-mptype="kripto">🪙 Kripto</button><button type="button" class="ap2-type-chip" data-mptype="hisse">📈 Hisse</button><button type="button" class="ap2-type-chip" data-mptype="altin">🥇 Altın</button><button type="button" class="ap2-type-chip" data-mptype="emtia">🛢️ Emtia</button><button type="button" class="ap2-type-chip" data-mptype="doviz">💵 Döviz</button><button type="button" class="ap2-type-chip" data-mptype="custom">✍️ Özel</button></div>
+              <label>Tarih</label><input type="date" id="mp-f-date">
+              <div class="ap2-seg" id="mp-f-side"><button type="button" class="on" data-mpside="LONG">📈 UZUN</button><button type="button" data-mpside="SHORT">📉 KISA <span>(hedge)</span></button></div>
+              <div class="ap2-seg" id="mp-f-mode"><button type="button" class="on" data-mpmode="tutar">💵 Tutar ile</button><button type="button" data-mpmode="adet">🪙 Adet ile</button></div>
+              <div id="mp-f-amount-box"><label>Ne kadar harcadın? ($)</label><input type="number" id="mp-f-amount" placeholder="Örn: 500" step="any" min="0"></div>
+              <div id="mp-f-qty-box" class="hidden"><label>Kaç adet aldın?</label><input type="number" id="mp-f-qty-field" placeholder="Örn: 0.05" step="any" min="0"></div>
+              <label>Birim maliyet (ortalama giriş fiyatı, $)</label><input type="number" id="mp-f-cost" placeholder="Örn: 35000" step="any" min="0">
+              <label>Güncel fiyat ($) <span class="mp-lbl-hint">— boş bırakırsan giriş fiyatı kullanılır</span></label><input type="number" id="mp-f-price" placeholder="Opsiyonel" step="any" min="0">
+              <label>Not</label><input type="text" id="mp-f-note" placeholder="Opsiyonel not..." maxlength="120">
+              <div class="ap2-form-preview" id="mp-f-preview">Bilgileri girince özet burada görünür.</div>
+              <div class="mp-form-actions"><button type="button" class="btn solid" id="mp-f-save">💾 Kaydet</button><button type="button" class="btn" id="mp-f-cancel2">Vazgeç</button></div>
+              <div class="strat-form-err" id="mp-f-err"></div>
+            </div>
           </div>
+          <div id="mp-sell-form" class="strat-form hidden">
+            <div class="strat-form-head"><span id="mp-sell-title">💰 Sat</span><button type="button" class="btn" id="mp-sell-cancel">✕</button></div>
+            <div class="strat-form-body">
+              <div id="mp-sell-sym" class="mp-sell-sym"></div><div id="mp-sell-info" class="mp-lbl-hint"></div>
+              <label>Miktar Sat</label><input type="number" id="mp-sell-qty" placeholder="Satılacak miktar" step="any" min="0">
+              <label>Satış Fiyatı ($)</label><input type="number" id="mp-sell-price" placeholder="Piyasa fiyatı" step="any" min="0">
+              <div class="mp-sell-total"><span>Tutar:</span><strong id="mp-sell-amount">—</strong></div>
+              <label>Satış notu (opsiyonel)</label><input type="text" id="mp-sell-note" maxlength="120">
+              <div class="mp-form-actions"><button type="button" class="btn solid" id="mp-sell-confirm" style="background:var(--amber);color:#000">💰 Satışı Onayla</button><button type="button" class="btn" id="mp-sell-cancel2">Vazgeç</button></div>
+              <div class="strat-form-err" id="mp-sell-err"></div>
+            </div>
+          </div>
+          <div id="mp-idea-form" class="strat-form hidden">
+            <div class="strat-form-head"><span id="mp-idea-form-title">💡 Yeni Değerlendirme</span><button type="button" class="btn" id="mp-idea-cancel">✕</button></div>
+            <div class="strat-form-body">
+              <label>Enstrüman</label><input type="text" id="mp-idea-sym" placeholder="Örn: BTC" maxlength="40">
+              <label>Değerlendirme</label><textarea id="mp-idea-text" rows="4" placeholder="Potansiyel yatırım notun…"></textarea>
+              <label>Etiketler (virgülle)</label><input type="text" id="mp-idea-tags" placeholder="uzun vade, push" maxlength="120">
+              <div class="mp-form-actions"><button type="button" class="btn solid" id="mp-idea-save">💾 Kaydet</button><button type="button" class="btn" id="mp-idea-cancel2">Vazgeç</button></div>
+              <div class="strat-form-err" id="mp-idea-err"></div>
+            </div>
+          </div>
+          <div id="mp-toast" class="at-toast"></div>
         </div>
       </div>
     </div>
@@ -13578,17 +13673,27 @@ function init() {
     window.addEventListener('resize', () => { if (window.innerWidth > 680) closeMobileNav(); });
     document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-close]')) closeMobileNav(); });
   }
-  // Global nav link handling (SPA intercept, sağ tık açma)
-  document.querySelectorAll('[data-nav]').forEach(el => {
-    el.addEventListener('click', e => {
-      if (e.button !== 0) return;
-      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      e.preventDefault();
-      const href = el.getAttribute('href');
-      if (!href) return;
-      const m = href.match(/[?&]page=(\w+)/);
-      if (m) { showPage(m[1]); closeMobileNav(); }
-    });
+  // Global nav link handling (SPA intercept, sağ tık açma). Delegasyon: sonradan eklenen görev linkleri de çalışır.
+  document.addEventListener('click', e => {
+    if (!e.target.closest) return;
+    const el = e.target.closest('[data-nav]');
+    if (!el) return;
+    if (e.button !== 0) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    const href = el.getAttribute('href');
+    if (!href) return;
+    const m = href.match(/[?&]page=(\w+)/);
+    if (m) {
+      showPage(m[1]);
+      if (m[1] === 'portfoy' && window.AlfaMyPortfolio) {
+        try {
+          const tab = new URL(href, location.href).searchParams.get('portfoyTab');
+          if (tab) window.AlfaMyPortfolio.activate(tab === 'mine' ? 'mine' : 'alpha');
+        } catch (e) {}
+      }
+      closeMobileNav();
+    }
   });
   // Sayfa yüklendiğinde ?page= parametresini oku
   const pm = window.location.search.match(/[?&]page=(\w+)/);
@@ -14108,10 +14213,7 @@ function magBuildEntry(en, i, admin) {
   else { const t = document.createElement('h2'); t.className = 'e-title'; t.textContent = en.title || 'Analiz'; main.appendChild(t); }
   if (!admin) {
     if (window.AlfaArticleSpeech) main.appendChild(window.AlfaArticleSpeech.controls(en.body, en.title));
-    const embedded = !!window.__magForceReader;
-    const read = document.createElement('button'); read.type = 'button'; read.className = 'btn'; read.textContent = '📖 Tam metni rahat oku';
-    read.onclick = () => { if (!embedded) showPage('home'); if (window.MagazineReading) window.MagazineReading.openHome(en.id); };
-    main.appendChild(read);
+    // Kesintisiz okuma kaldırıldı: tam metin zaten dergi kartında, Alfa Dergi sayfası da açık.
     if (en.education) {
       const edu = document.createElement('button'); edu.type = 'button'; edu.className = 'btn'; edu.textContent = '🎓 Alfa Edu’da oku';
       edu.onclick = () => { if (window.MagazineReading) window.MagazineReading.openEdu(en.id); }; main.appendChild(edu);
@@ -14475,10 +14577,7 @@ function bindHomeMagazine() {
 function renderHomeMagazine() {
   const stage = document.getElementById('hmr-stage'); if (!stage) return;
   const signature = JSON.stringify(homeMagData);
-  if (homeMagData && signature === hmrRenderedSignature && stage.children.length) {
-    if (window.MagazineReading) window.MagazineReading.renderHome(homeMagData.entries);
-    return;
-  }
+  if (homeMagData && signature === hmrRenderedSignature && stage.children.length) return;
   hmrRenderedSignature = signature;
   const dots = document.getElementById('hmr-dots'); if (dots) dots.innerHTML = '';
   const weekEl = document.getElementById('hmr-week');
@@ -14517,7 +14616,6 @@ function renderHomeMagazine() {
     if (dots) dots.appendChild(d);
   }
   hmrApply();
-  if (window.MagazineReading) window.MagazineReading.renderHome(homeMagData.entries);
 }
 function renderNews() {
   const stage = document.getElementById('mag-stage'); if (!stage) return;
@@ -14919,7 +15017,7 @@ function applyTierUi() {
   // Trading terminali artık yalnızca Ek sayfasında; Alfa Charts PAGE_TIER ile yöneticiye özel.
   // Uyelige gore portfoy adi: yonetici disindakiler paylasilan ozeti gorur.
   const pfName = (AUTH.user || ref || isAdmin) ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
-  ['tab-portfoy', 'mnav-portfoy'].forEach(function (id) {
+  ['portfoy-label', 'mnav-portfoy-label'].forEach(function (id) {
     const el = document.getElementById(id);
     if (el) el.textContent = pfName;
   });
@@ -29649,11 +29747,12 @@ async function onAuthed(user) {
   const bdMob = document.getElementById('mnav-butce');
   if (bdTab) bdTab.style.display = isAdmin ? '' : 'none';
   if (bdMob) bdMob.style.display = isAdmin ? '' : 'none';
-  // Portföy Yönetimi: sadece admin hesabında
-  const pfTab = document.getElementById('tab-portfoy');
-  const pfMob = document.getElementById('mnav-portfoy');
-  if (pfTab) pfTab.style.display = isAdmin ? '' : 'none';
-  if (pfMob) pfMob.style.display = isAdmin ? '' : 'none';
+  // Portföy Yönetimi ve alt sayfaları herkese açık (paylaşılan özet de görünür).
+  const pfOpen = (typeof siteCanOpen === 'function') ? siteCanOpen('portfoy') : true;
+  ['tab-portfoy', 'mnav-portfoy', 'tab-portfoy-alpha', 'tab-portfoy-mine', 'mnav-portfoy-alpha', 'mnav-portfoy-mine'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = pfOpen ? '' : 'none';
+  });
   // Mentoring erişimi: sadece Ahmet + Çağatay (e-postası sonradan eklenecek)
   const mtDesk = document.getElementById('tab-mentoring');
   const mtMob = document.getElementById('mnav-mentoring');
