@@ -4193,12 +4193,12 @@
   .am-tab:hover { border-color: var(--pc); }
   .am-pane { display: none; }
   .am-pane.on { display: block; animation: basFadeIn .18s ease; }
-  .am-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .am-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+  .am-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .am-card { min-width: 0; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
   .am-card h3 { margin: 0 0 12px; font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .am-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
   .am-row label { font-size: 12px; font-weight: 600; color: var(--text-2); }
-  .am-row input, .am-row select { padding: 9px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text); font: inherit; font-size: 13.5px; }
+  .am-row input, .am-row select { min-width: 0; max-width: 100%; padding: 9px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text); font: inherit; font-size: 13.5px; }
   .am-row input:focus, .am-row select:focus { outline: none; border-color: var(--pc); }
   .am-btn { border: none; border-radius: 10px; padding: 10px 16px; background: var(--pc); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity .15s; font-family: 'Inter', sans-serif; }
   .am-btn:hover { opacity: .85; }
@@ -4248,7 +4248,7 @@
   .am-ex-log-row .ec { font-size: 11.5px; color: var(--text-2); }
   .am-ex-log-row .del { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 14px; padding: 2px 6px; }
   .am-ex-log-row .del:hover { color: var(--red); }
-  @media (max-width: 720px) { .am-grid { grid-template-columns: 1fr; } .am-metrics, .am-macro { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 720px) { .am-grid { grid-template-columns: minmax(0, 1fr); } .am-metrics, .am-macro { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   /* ===== Günün İşlem Karnesi ===== */
   .kr-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 16px 0; }
   .kr-date-row { display: flex; align-items: center; gap: 8px; }
