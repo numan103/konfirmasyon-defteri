@@ -3130,6 +3130,9 @@
   .daily-feature-media { min-width:0; max-height:290px; border-radius:12px; overflow:hidden; background:rgba(0,0,0,.16); display:flex; align-items:center; justify-content:center; }
   .daily-feature-media img { width:100%; height:100%; max-height:290px; object-fit:cover; cursor:zoom-in; }
   .daily-feature-media a { color:var(--text-2); font-size:12px; padding:18px; text-align:center; }
+  .dn-photo-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:120px; padding:18px; color:var(--text-3); font-size:12px; line-height:1.45; text-align:center; }
+  .dn-photo-empty b { font-size:20px; font-weight:400; }
+  .daily-note-card .dn-photo-empty { min-height:74px; padding:10px; border:1px dashed var(--border); border-radius:10px; font-size:11px; margin-bottom:8px; }
   .daily-feature-body { min-width:0; display:flex; flex-direction:column; justify-content:center; gap:8px; }
   .daily-feature-body h3 { margin:0; font-family:var(--font-display); font-size:clamp(20px,2.4vw,30px); line-height:1.16; letter-spacing:-.02em; overflow-wrap:anywhere; }
   .daily-feature-body p { margin:0; color:var(--text-2); font-size:13px; line-height:1.65; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; }
@@ -3672,6 +3675,7 @@
   .e-imgwrap { position: relative; }
   .e-img { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid var(--border); cursor: zoom-in; background: transparent; }
   .e-img-missing { display: block; padding: 14px; border: 1px dashed var(--border); border-radius: 10px; color: var(--text-3); font-size: 12px; text-align: center; }
+  .e-img-none { display:flex; align-items:center; justify-content:center; gap:8px; min-height:96px; padding:14px; border:1px dashed var(--border); border-radius:10px; background:linear-gradient(135deg,rgba(124,92,255,.07),transparent); color:var(--text-3); font-size:12px; text-align:center; }
   .e-imgdel { position: absolute; top: 7px; right: 7px; width: 26px; height: 26px; border: none; border-radius: 7px; background: rgba(20,22,35,.72); color: #fff; font-size: 16px; cursor: pointer; }
   .e-imgdel:hover { background: var(--red); }
   .e-addimg { display: flex; gap: 7px; margin-top: 8px; }
@@ -13639,6 +13643,7 @@ async function loadNews() {
       .map(function (id) { return '/api/tg?magPhoto=' + encodeURIComponent(String(id)); });
     e.images = (e.images || []).concat(proxied).slice(0, 12);
   });
+  magApplyWeek(magData);
   // Analist listesi (roster)
   if (!Array.isArray(magData.authors)) magData.authors = [];
   if (typeof magData.rosterVer !== 'number') magData.rosterVer = magData.authorsSeeded ? 1 : 0;
@@ -13736,6 +13741,57 @@ function magWeek() {
   const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
   const f = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
   return f(mon) + ' – ' + f(sun);
+}
+function magPostDate(value) {
+  if (!value || typeof value !== 'string') return null;
+  const d = new Date(value);
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+function magWeekBounds(now) {
+  const t = now instanceof Date ? now : new Date();
+  const start = new Date(t.getFullYear(), t.getMonth(), t.getDate() - ((t.getDay() + 6) % 7));
+  const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59, 999);
+  return { start, end };
+}
+function magIsoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+}
+function magWeekLabelFromDates(dates) {
+  if (!dates.length) return magWeek();
+  const sorted = dates.slice().sort((a, b) => a - b);
+  const f = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+  const day = d => d.toLocaleDateString('tr-TR', { day: 'numeric' });
+  const first = sorted[0], last = sorted[sorted.length - 1];
+  if (first.getFullYear() === last.getFullYear() && first.getMonth() === last.getMonth() && first.getDate() === last.getDate()) return f(first);
+  if (first.getFullYear() === last.getFullYear() && first.getMonth() === last.getMonth()) return day(first) + ' – ' + f(last);
+  return f(first) + ' – ' + f(last);
+}
+// Dergiyi Telegram gönderi tarihine göre haftalık tazeler: tarihsiz/eski seed
+// gönderiler "Bu haftanın dergisi"ne karışmaz. Güncellemeler bağlı analizlerle
+// birlikte taşınır; elle eklenmiş dizi sırası korunur.
+function magApplyWeek(data, now) {
+  if (!data || typeof data !== 'object') return data;
+  const all = Array.isArray(data.entries) ? data.entries : [];
+  if (!all.length) return data;
+  const { start, end } = magWeekBounds(now);
+  const inWeek = d => d && d >= start && d <= end;
+  const dated = all.filter(e => inWeek(magPostDate(e && e.publishedAt)));
+  const keepIds = new Set(dated.map(e => e.id));
+  const updates = all.filter(e => e && e.type === 'update' && (
+    keepIds.has(e.relId) || inWeek(magPostDate(e.publishedAt))
+  ));
+  const entries = all.filter(e => dated.includes(e) || updates.includes(e));
+  data.entries = entries;
+  const dates = entries.map(e => magPostDate(e && e.publishedAt)).filter(d => inWeek(d));
+  if (dates.length) {
+    data.weekLabel = magWeekLabelFromDates(dates);
+    data.issueNo = magIsoWeek(dates[0]);
+  }
+  return data;
 }
 
 function magKbIsolate(el) {
@@ -14008,6 +14064,11 @@ function magBuildEntry(en, i, admin) {
     if (admin) { const x = document.createElement('button'); x.type = 'button'; x.className = 'e-imgdel'; x.textContent = '×'; x.title = 'Görseli kaldır'; x.addEventListener('click', e => { e.stopPropagation(); en.images.splice(k, 1); saveNews(); renderNews(); }); wrap.appendChild(x); }
     imgs.appendChild(wrap);
   });
+  if (!imgs.children.length) {
+    const none = document.createElement('div'); none.className = 'e-img-none';
+    none.textContent = '📷 Bu Telegram gönderisinde fotoğraf yok';
+    imgs.appendChild(none);
+  }
   main.appendChild(imgs);
   if (admin) {
     const dz = document.createElement('div'); dz.className = 'e-dz'; dz.tabIndex = 0;
@@ -14301,7 +14362,7 @@ async function loadHomeMagazine() {
       const res = await fetch('/api/edu-shared?kind=news', { cache: 'no-store' });
       if (res.ok) {
         const j = await res.json();
-        if (j && j.ok && j.data && typeof j.data === 'object') homeMagData = j.data;
+        if (j && j.ok && j.data && typeof j.data === 'object') homeMagData = magApplyWeek(j.data);
       }
     } catch (e) { /* dergi okunamadı; sessizce boş kalır */ }
     homeMagLoading = null;
@@ -26035,6 +26096,7 @@ function chDailyCard(item) {
   const time = document.createElement('time'); time.dateTime = new Date(item.publishedAt).toISOString(); time.textContent = chDailyDate(item.publishedAt);
   const title = document.createElement('h3'); title.textContent = item.title;
   const image = chDailyImage(item.photoUrl, item.title); if (image) card.appendChild(image);
+  else { const none = document.createElement('div'); none.className = 'dn-photo-empty'; none.innerHTML = '<b>📷</b><span>Telegram notunda fotoğraf yok</span>'; card.appendChild(none); }
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
   const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyReader(item.id);
   card.append(time, title, excerpt, open); return card;
@@ -26043,7 +26105,8 @@ function chDailyFeature(item) {
   const box = document.createElement('article'); box.className = 'daily-feature-card'; box.dataset.dailyId = item.id;
   const media = document.createElement('div'); media.className = 'daily-feature-media';
   const placeholder = () => {
-    const span = document.createElement('span'); span.textContent = '✍️ Alfa Edu · günün notu';
+    const span = document.createElement('span'); span.className = 'dn-photo-empty';
+    span.innerHTML = '<b>✍️</b><span>Alfa Edu · günün notu<br>Bu Telegram gönderisinde fotoğraf yok</span>';
     media.replaceChildren(span);
   };
   const image = chDailyImage(item.photoUrl, item.title, placeholder);
