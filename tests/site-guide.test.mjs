@@ -31,8 +31,8 @@ function collectSources(dir) {
 const sourceText = html + collectSources('assets') + collectSources('ayna');
 
 test('eski üst menü turu kaldırıldı, yeni rehber varlıkları bağlandı', () => {
-  assert.ok(html.includes('/assets/site-guide.css?v=3'));
-  assert.ok(html.includes('/assets/site-guide.mjs?v=3'));
+  assert.ok(html.includes('/assets/site-guide.css?v=4'));
+  assert.ok(html.includes('/assets/site-guide.mjs?v=4'));
   assert.ok(!html.includes('platform-tour'));
   assert.ok(!html.includes('pt-restart'));
   assert.ok(!html.includes('platform-tour-welcome'));
@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği yeni rehber için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v142-site-guide'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b203-site-guide'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v143-site-guide'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b204-site-guide'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 
@@ -161,14 +161,25 @@ function fakeDom() {
   label.className = 'sg-toggle-label';
   toggle.appendChild(label);
   toggle._find = sel => sel === '.sg-toggle-label' ? [label] : [];
+  const mnav = new FakeNode('div');
+  const backdrop = new FakeNode('div');
+  const menuBtn = new FakeNode('button');
+  menuBtn.setAttribute('aria-expanded', 'false');
 
   registry.set('#nav-home', [navHome]);
   registry.set('.sg-toggle', [toggle]);
 
+  const byId = {
+    'page-home': pageHome,
+    'page-defter': pageDefter,
+    'nav-mobile': mnav,
+    'nav-mobile-backdrop': backdrop,
+    'nav-mobile-btn': menuBtn
+  };
   const document = {
     body,
     createElement: tag => new FakeNode(tag),
-    getElementById: id => (id === 'page-home' ? pageHome : id === 'page-defter' ? pageDefter : null),
+    getElementById: id => byId[id] || null,
     querySelectorAll: sel => registry.get(sel) || [],
     addEventListener() {}, removeEventListener() {}
   };
@@ -183,7 +194,7 @@ function fakeDom() {
     getItem: k => store.has(k) ? store.get(k) : null,
     setItem: (k, v) => store.set(k, String(v))
   };
-  return { document, body, navHome, navHomeParent, pageHome, pageDefter, toggle, label, store };
+  return { document, body, navHome, navHomeParent, pageHome, pageDefter, toggle, label, mnav, backdrop, menuBtn, store };
 }
 
 test('rehber açılınca panel ve ipuçları eklenir, kapanınca temizlenir', async () => {
@@ -232,6 +243,21 @@ test('düğme tıklaması modu açar ve sayfa değişimi paneli yeniler', async 
   const intro = dom.pageDefter.children.find(n => n.className === 'sg-intro');
   assert.equal(intro.textContent.includes('Alfa Check List'), true);
   assert.equal(dom.pageHome.children.some(n => n.className === 'sg-intro'), false);
+});
+
+test('mobil menüde rehber açılınca çekmece kapanır', async () => {
+  const dom = fakeDom();
+  await import('../assets/site-guide.mjs?mnav=' + Date.now());
+  const api = global.window.AlfaSiteGuide;
+  dom.mnav.classList.add('open');
+  dom.backdrop.classList.add('open');
+  dom.menuBtn.setAttribute('aria-expanded', 'true');
+
+  api.setEnabled(true);
+
+  assert.equal(dom.mnav.classList.contains('open'), false, 'mobil çekmece açık kalmamalı');
+  assert.equal(dom.backdrop.classList.contains('open'), false, 'karartma perdesi açık kalmamalı');
+  assert.equal(dom.menuBtn.getAttribute('aria-expanded'), 'false');
 });
 
 test('görünmeyen butonlar ipucu almaz', async () => {

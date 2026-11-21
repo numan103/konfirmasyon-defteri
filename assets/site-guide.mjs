@@ -816,8 +816,22 @@ function apply() {
   }
 }
 
+function closeMobileNav() {
+  // Mobil menü açıkken rehber açılırsa arka plandaki sayfa kaydırılamaz;
+  // çekmeceyi ve perdeyi kapat ki içerik hemen kaydırılabilsin.
+  try {
+    const mnav = document.getElementById('nav-mobile');
+    const backdrop = document.getElementById('nav-mobile-backdrop');
+    const menuBtn = document.getElementById('nav-mobile-btn');
+    if (mnav) mnav.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+  } catch (e) {}
+}
+
 function setEnabled(next) {
   enabled = next === true;
+  closeMobileNav();
   writePref({ enabled });
   apply();
   return enabled;
