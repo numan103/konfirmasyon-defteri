@@ -43,6 +43,7 @@ try {
   const root = page.locator('.mentor-trades');
   await root.locator('[data-mentor-trade]').first().waitFor();
   assert.equal(await root.locator('[data-mentor-trade]').count(), 3);
+  assert.equal(await root.locator('.mentor-curve-svg').count(), 0, 'premium trade feed hides the cumulative curve');
   const result = root.locator('[data-mentor-trade]').first();
   assert.equal(await result.locator('.mentor-trade-text').innerText(), 'Risk azaltıldı.');
   await result.scrollIntoViewIfNeeded();
@@ -56,6 +57,7 @@ try {
   await page.evaluate(() => { SITE.tier = 'free'; AlfaMentorTrades.refreshContext(); AlfaMentorPreview.refresh(); });
   await page.waitForFunction(() => document.body.dataset.mentorAccess === 'results');
   assert.equal(await root.locator('[data-mentor-trade]').count(), 2);
+  assert.equal(await root.locator('.mentor-curve-svg').count(), 1, 'free members still see the curve in the trade feed');
   assert.equal(await root.locator('img').count(), 0);
   assert.equal(await root.locator('a[href*="t.me"]').count(), 0);
   assert.ok(!(await root.innerText()).includes('SECRET'));

@@ -52,7 +52,7 @@ const newsMsg = over => ({
   message_id: 501, date: 1795019005,
   chat: { id: -100111222333, username: 'haberler', type: 'channel' },
   sender_chat: { id: -100111222333, username: 'haberler', type: 'channel' },
-  text: 'Fed faiz kararı sonrası piyasalarda hareket\nDXY geriledi, altın yükseldi.',
+  text: 'Haftalık piyasa bülteni yayında\nDetaylar dergide.',
   photo: [{ file_id: 'news_photo_file_id_123', file_size: 900000 }],
   ...over,
 });
@@ -66,7 +66,7 @@ const techMsg = over => ({
 });
 
 test('magazine config exposes the two configured sources and fails closed without a news chat', () => {
-  assert.deepEqual(MAG_CATEGORIES, ['Haber', 'Teknik Analiz']);
+  assert.deepEqual(MAG_CATEGORIES, ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz']);
   const cfg = magazineConfig();
   assert.equal(cfg.newsChat, 'haberler');
   assert.equal(cfg.newsThread, 0);
@@ -151,8 +151,8 @@ test('the production setup separates news and technical topics inside alfakasim'
 test('entry extraction keeps category, source link, photos and deterministic provenance id', () => {
   const hab = entryFromMessage(newsMsg(), 'Haber');
   assert.equal(hab.category, 'Haber');
-  assert.equal(hab.title, 'Fed faiz kararı sonrası piyasalarda hareket');
-  assert.match(hab.body, /DXY geriledi/);
+  assert.equal(hab.title, 'Haftalık piyasa bülteni yayında');
+  assert.match(hab.body, /Detaylar dergide/);
   assert.deepEqual(hab.photoIds, ['news_photo_file_id_123']);
   assert.equal(hab.sourceLink, 'https://t.me/haberler/501');
   assert.match(hab.id, /^mag_[a-f0-9]{64}$/);
@@ -164,10 +164,24 @@ test('entry extraction keeps category, source link, photos and deterministic pro
   assert.deepEqual(tech.photoIds, ['tech_chart_file_id_456']);
 });
 
-test('realized result lines are not duplicated into the public magazine', () => {
+test('realized results and intraday trade posts stay out of the magazine', () => {
   assert.equal(entryFromMessage(techMsg({ text: 'BTC +2.3R' }), 'Teknik Analiz'), null);
-  assert.equal(entryFromMessage(newsMsg({ text: 'BTC +2.3R\nPiyasa haberleri' }), 'Haber')?.category, 'Haber');
+  assert.equal(entryFromMessage(newsMsg({ text: 'BTC +2.3R\nPiyasa haberleri' }), 'Haber'), null);
+  for (const text of ['BTC long 64000 stop 63000', 'ETH #işlem girdim', 'XAUUSD +1.2R']) {
+    assert.equal(entryFromMessage(newsMsg({ text }), 'Haber'), null);
+  }
   assert.equal(entryFromMessage(newsMsg({ text: '', photo: [] }), 'Haber'), null);
+});
+test('Alfa News topics are routed to BTC Bias and Makro sections', () => {
+  const bias = entryFromMessage(newsMsg({ text: 'BTC -HTF\nHaftalık yapı ve likidite notları' }), 'Haber');
+  assert.equal(bias.category, 'BTC Bias');
+  assert.equal(bias.title, 'BTC -HTF');
+  assert.deepEqual(bias.photoIds, ['news_photo_file_id_123']);
+  const macro = entryFromMessage(newsMsg({ text: 'Makro: Fed faiz kararı ve enflasyon verisi' }), 'Haber');
+  assert.equal(macro.category, 'Makro');
+  assert.equal(macro.title, 'Makro: Fed faiz kararı ve enflasyon verisi');
+  assert.equal(entryFromMessage(newsMsg({ text: 'Makro: dolar likiditesi ve faiz patikası' }), 'Haber').category, 'Makro');
+  assert.equal(entryFromMessage(newsMsg({ text: 'Genel bülten', photo: [] }), 'Haber').category, 'Haber');
 });
 
 test('ingest writes new entries once, dedupes redelivery and applies genuine edits', async t => {

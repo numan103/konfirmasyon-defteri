@@ -264,8 +264,21 @@ test('Daily Notes live on the education page too, with a featured "günün yazı
   assert.match(html, /function chDailyFeature\(item\)/);
   assert.match(html, /function chRenderDaily\(scope, items, more, hasMore\)/);
   assert.match(html, /chLoadEduDaily\(\)/);
-  assert.match(html, /g\('edu-daily-refresh'\)\?\.addEventListener\('click', \(\) => chLoadEduDaily\(true\)\)/);
+  assert.match(html, /g\('edu-daily-refresh'\)\?\.addEventListener\('click', \(\) => \{ chCloseDailyReader\(\); chLoadEduDaily\(false, true\); \}\)/);
   assert.match(html, /if \(dailyPanel\) dailyPanel\.classList\.add\('hidden'\);/);
+});
+test('daily notes open inline in the education panel with paging for older notes', () => {
+  assert.match(html, /id="edu-daily-reader" class="daily-reader hidden"/);
+  assert.match(html, /id="edu-daily-more"/);
+  assert.match(html, /g\('edu-daily-more'\)\?\.addEventListener\('click', \(\) => chLoadEduDaily\(true\)\)/);
+  assert.match(html, /async function chOpenDailyReader\(id\)/);
+  assert.match(html, /function chCloseDailyReader\(\)/);
+  assert.match(html, /view=daily-notes&note=' \+ id/);
+  assert.match(html, /chBuildNoteBox\(\{ \.\.\.item, access: 'free' \}, item\.title\)/);
+  assert.match(html, /showPage\('egitim'\)/);
+  assert.match(html, /chEditDailyById\(id\)/);
+  assert.match(html, /'Listeye dön ×'/);
+  assert.doesNotMatch(html, /Yazıyı oku →'.*chOpenDailyViewer/);
 });
 test('education catalog opens on "Sana açık" with a separate package option', () => {
   assert.match(html, /id="edu-access-tabs"/);

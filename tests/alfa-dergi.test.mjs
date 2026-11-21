@@ -85,20 +85,23 @@ test('news read endpoint is a public, read-only projection without personal data
 
 test('Telegram entries share one stream with a category badge and safe same-origin photos', () => {
   const load = html.slice(html.indexOf('async function loadNews()'), html.indexOf('function magAuthor('));
-  assert.match(load, /e\.category !== 'Haber' && e\.category !== 'Teknik Analiz'/);
+  assert.match(load, /\['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'\]\.includes\(e\.category\)/);
   assert.match(load, /Array\.isArray\(e\.photoIds\)/);
   assert.match(load, /rawAdmin/, 'admin raw data must map photoIds to proxy URLs too');
   assert.match(load, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(String\(id\)\)/);
   assert.match(html, /\.e-cat\.news/);
   assert.match(html, /\.e-cat\.tech/);
   assert.match(html, /\.toc-cat\.news/);
+  assert.match(html, /\.e-cat\.bias/);
+  assert.match(html, /\.e-cat\.macro/);
   const toc = html.slice(html.indexOf('function magBuildToc('), html.indexOf('function magBuildEntry('));
   assert.match(toc, /toc-cat/);
-  assert.match(toc, /cat === 'Haber' \? 'news' : 'tech'/);
+  assert.match(toc, /MAG_CATS\.includes\(en\.category\)/);
   const entry = html.slice(html.indexOf('function magBuildEntry('), html.indexOf('function magBuildUpdates('));
-  assert.match(entry, /label = cat === 'Haber' \? 'HABER' : \(cat === 'Teknik Analiz' \? 'TEKNİK ANALİZ' : 'ANALİZ'\)/);
-  assert.match(entry, /\[\['', 'Analiz'\], \['Haber', 'Haber'\], \['Teknik Analiz', 'Teknik Analiz'\]\]/);
-  assert.match(api, /category: \(e && e\.category === 'Haber'\)/);
+  assert.match(entry, /'BTC Bias': 'BTC BIAS'/);
+  assert.match(entry, /\[\['', 'Analiz'\]\]\.concat\(MAG_CATS\.map/);
+  assert.match(entry, /e-img-missing/);
+  assert.match(api, /\['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'\]\.includes\(e && e\.category\)/);
   assert.match(api, /sourceLink: text\(e && e\.sourceLink, 300\)/);
   assert.match(api, /publishedAt: text\(e && e\.publishedAt, 40\)/);
   assert.match(api, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(id\)/);

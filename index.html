@@ -43,7 +43,7 @@
 <script type="module" src="/assets/education-crm.mjs?v=3"></script>
 <script type="module" src="/assets/edu-application.mjs?v=4"></script>
 <link rel="stylesheet" href="/assets/mentorship-trades.css?v=4">
-<script type="module" src="/assets/mentorship-trades.mjs?v=3"></script>
+<script type="module" src="/assets/mentorship-trades.mjs?v=4"></script>
 <script type="module" src="/assets/mentor-results-preview.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/edu-feedback.css?v=4">
 <link rel="stylesheet" href="/assets/economic-news.css?v=2">
@@ -1807,6 +1807,8 @@
   .edu-progress-summary { margin-top: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-3); }
   .edu-progress-summary .edu-bar { width: 130px; }
   .edu-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .edu-rename-bar { padding: 10px 12px; border: 1px dashed rgba(244,114,182,.4); border-radius: 12px; background: rgba(244,114,182,.05); }
+  .edu-rename-select { flex: 1 1 240px; max-width: 360px; background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 9px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; }
   .edu-search { flex: 1 1 240px; max-width: 360px; background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 10px 13px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); outline: none; }
   .edu-search:focus { border-color: var(--pc); }
   .edu-chips { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -3102,6 +3104,12 @@
   .daily-feature-empty { padding:18px; border:1px dashed var(--border); border-radius:12px; color:var(--text-3); font-size:12.5px; }
   .daily-notes-grid.compact { margin:8px 0 0; }
   .daily-notes-grid.compact .daily-note-card img { height:96px; }
+  .daily-reader { margin:14px 0; padding:16px; border:1px solid rgba(124,92,255,.32); border-radius:16px; background:linear-gradient(180deg,rgba(124,92,255,.08),var(--card)); }
+  .daily-reader-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .daily-reader-head h3 { margin:4px 0 0; font-family:var(--font-display); font-size:22px; letter-spacing:-.02em; overflow-wrap:anywhere; }
+  .daily-reader-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .daily-reader-body { margin-top:12px; }
+  .daily-reader-body img { max-width:100%; height:auto; border-radius:10px; }
   .edu-daily-panel { margin:16px 0; }
   .edu-access-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:18px 0 12px; }
   .edu-access-head h2 { margin:4px 0; font-family:var(--font-display); font-size:22px; letter-spacing:-.02em; }
@@ -3610,10 +3618,14 @@
   .e-cat { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
   .e-cat.news { color: #f59e0b; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.32); }
   .e-cat.tech { color: var(--pc); background: var(--pc-soft); border: 1px solid rgba(123,120,245,.35); }
+  .e-cat.bias { color: #38bdf8; background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.32); }
+  .e-cat.macro { color: #34d399; background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.32); }
   .e-cat-in { width: auto; max-width: 140px; padding: 5px 8px; font-size: 11px; font-weight: 700; }
   .toc-cat { display: inline-flex; align-self: flex-start; border-radius: 999px; padding: 2px 7px; font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
   .toc-cat.news { color: #f59e0b; background: rgba(245,158,11,.12); }
   .toc-cat.tech { color: var(--pc); background: var(--pc-soft); }
+  .toc-cat.bias { color: #38bdf8; background: rgba(56,189,248,.12); }
+  .toc-cat.macro { color: #34d399; background: rgba(52,211,153,.12); }
   .e-kicker { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--pc); }
   .e-tools { display: flex; gap: 5px; }
   .e-tools button { border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 7px; font-size: 12px; font-weight: 700; padding: 4px 9px; cursor: pointer; }
@@ -3625,6 +3637,7 @@
   .e-upd-big { margin: 14px 0 4px; }
   .e-imgwrap { position: relative; }
   .e-img { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid var(--border); cursor: zoom-in; background: transparent; }
+  .e-img-missing { display: block; padding: 14px; border: 1px dashed var(--border); border-radius: 10px; color: var(--text-3); font-size: 12px; text-align: center; }
   .e-imgdel { position: absolute; top: 7px; right: 7px; width: 26px; height: 26px; border: none; border-radius: 7px; background: rgba(20,22,35,.72); color: #fff; font-size: 16px; cursor: pointer; }
   .e-imgdel:hover { background: var(--red); }
   .e-addimg { display: flex; gap: 7px; margin-top: 8px; }
@@ -7210,8 +7223,10 @@
       <div class="hd-head"><div><span class="daily-kicker">✍️ Günün yazısı · Alfa Edu</span><h2>Günlük Notlar</h2><p class="hint">Telegram’dan gelen kısa eğitsel notlar. Ücretli derslerden bağımsız, herkese açık.</p></div>
         <button type="button" class="btn" id="edu-daily-refresh">Yenile</button></div>
       <div id="edu-daily-status" role="status"></div>
+      <div id="edu-daily-reader" class="daily-reader hidden"></div>
       <div id="edu-daily-feature"></div>
       <div id="edu-daily-list" class="daily-notes-grid compact"></div>
+      <button type="button" class="btn hidden" id="edu-daily-more">Önceki notlar</button>
       <a href="?page=home" data-nav class="hd-link" style="display:inline-block;margin-top:10px;">Tüm günlük notlar ana sayfada →</a>
     </section>
     <section id="edu-catalog">
@@ -7229,6 +7244,10 @@
       <div class="edu-toolbar">
         <input type="search" id="edu-search" class="edu-search" data-i18n-ph="edu.searchPh" placeholder="Kurs veya konu ara…" autocomplete="off">
         <div id="edu-chips" class="edu-chips"></div>
+      </div>
+      <div class="edu-toolbar edu-rename-bar hidden" id="edu-rename-bar">
+        <select id="edu-rename-section" class="edu-rename-select" aria-label="Düzenlenecek bölüm"></select>
+        <button type="button" class="btn" id="edu-rename-btn">Bölüm adını düzenle</button>
       </div>
       <div id="edu-grid" class="edu-grid"></div>
       <div class="edu-photo-note" data-i18n="edu.photoNote">Fotoğraflar temsilidir.</div>
@@ -8383,16 +8402,7 @@
         <button type="button" class="btn solid at-new-btn" id="at-new-btn" style="display:none">+ Paylaşım Ekle</button>
       </div>
     </div>
-    <div class="at-filters" id="at-filters">
-      <button type="button" class="at-fbtn on" data-atf="all">Hepsi</button>
-      <button type="button" class="at-fbtn" data-atf="analiz">📢 Kanal</button>
-      <button type="button" class="at-fbtn" data-atf="islem">📊 İşlem</button>
-      <button type="button" class="at-fbtn" data-atf="onchain">📡 Onchain & Bias</button>
-      <input type="text" id="at-coin-search" class="at-coin-search" placeholder="Coin ara (BTC, ETH…)" autocomplete="off">
-    </div>
-    <div class="at-feed" id="at-feed">
-      <div class="at-empty">Yükleniyor…</div>
-    </div>
+    <!-- Eski “kanal / işlem” akışı kaldırıldı; mentor işlem akışı .mentor-trades altında tek yüzeyde toplandı. -->
   </div>
   <div id="at-modal" class="at-modal">
     <div class="at-modal-box">
@@ -13556,7 +13566,7 @@ async function loadNews() {
     if (typeof e.afterImg !== 'string') e.afterImg = '';
     if (typeof e.result !== 'string') e.result = '';
     if (typeof e.ctaUrl !== 'string') e.ctaUrl = '';
-    if (e.category !== 'Haber' && e.category !== 'Teknik Analiz') e.category = '';
+    if (!['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e.category)) e.category = '';
     if (typeof e.sourceLink !== 'string') e.sourceLink = '';
     if (typeof e.publishedAt !== 'string') e.publishedAt = '';
     if (!Array.isArray(e.photoIds)) e.photoIds = [];
@@ -13762,8 +13772,8 @@ function magBuildToc(go) {
     const it = document.createElement('button'); it.className = 'toc-item' + (nUpd ? ' has-upd' : ''); it.type = 'button';
     const au = magAuthor(en.authorId);
     const auName = au && au.name ? au.name : (en.authorName || '');
-    const cat = (en.category === 'Haber' || en.category === 'Teknik Analiz') ? en.category : '';
-    const catHtml = cat ? '<span class="toc-cat ' + (cat === 'Haber' ? 'news' : 'tech') + '">' + magEsc(cat) + '</span>' : '';
+    const cat = MAG_CATS.includes(en.category) ? en.category : '';
+    const catHtml = cat ? '<span class="toc-cat ' + magCatClass(cat) + '">' + magEsc(cat) + '</span>' : '';
     it.innerHTML = '<b>' + String(k).padStart(2, '0') + '</b><span class="tt">' + magEsc(en.title || 'Analiz') + catHtml + (auName ? '<small>✍ ' + magEsc(auName) + '</small>' : '') + '</span>' + (nUpd ? '<span class="toc-upd">↺ ' + nUpd + '</span>' : '') + '<span class="pg">sf ' + (k + 2) + '</span>';
     const tgt = magMainIdx(i);
     it.addEventListener('click', () => (typeof go === 'function' ? go : magGoTo)(tgt));
@@ -13781,6 +13791,8 @@ function magBuildToc(go) {
   inner.appendChild(pad); page.appendChild(inner); return page;
 }
 function magEsc(v) { const d = document.createElement('div'); d.textContent = String(v == null ? '' : v); return d.innerHTML; }
+const MAG_CATS = ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'];
+function magCatClass(cat) { return { 'Haber': 'news', 'BTC Bias': 'bias', 'Makro': 'macro', 'Teknik Analiz': 'tech' }[cat] || ''; }
 
 function magAddImg(en, url) { if (!url) return; if (!Array.isArray(en.images)) en.images = []; if (en.images.includes(url)) return; en.images.push(url); saveNews().then(renderNews); }
 function magFilesToEntry(en, files) {
@@ -13881,15 +13893,15 @@ function magBuildEntry(en, i, admin) {
   const pad = document.createElement('div'); pad.className = 'mag-pad';
   // başlık satırı
   const head = document.createElement('div'); head.className = 'e-head';
-  const cat = (en.category === 'Haber' || en.category === 'Teknik Analiz') ? en.category : '';
-  const label = cat === 'Haber' ? 'HABER' : (cat === 'Teknik Analiz' ? 'TEKNİK ANALİZ' : 'ANALİZ');
+  const cat = MAG_CATS.includes(en.category) ? en.category : '';
+  const label = { 'Haber': 'HABER', 'BTC Bias': 'BTC BIAS', 'Makro': 'MAKRO', 'Teknik Analiz': 'TEKNİK ANALİZ' }[cat] || 'ANALİZ';
   const left = document.createElement('span'); left.className = 'e-head-left';
   const kick = document.createElement('span'); kick.className = 'e-kicker'; kick.textContent = label + ' · sf ' + (magMainIdx(i) + 1); left.appendChild(kick);
-  if (cat) { const badge = document.createElement('span'); badge.className = 'e-cat ' + (cat === 'Haber' ? 'news' : 'tech'); badge.textContent = cat; left.appendChild(badge); }
+  if (cat) { const badge = document.createElement('span'); badge.className = 'e-cat ' + magCatClass(cat); badge.textContent = cat; left.appendChild(badge); }
   head.appendChild(left);
   if (admin) {
     const sel = document.createElement('select'); sel.className = 'mag-in e-cat-in'; magKbIsolate(sel);
-    [['', 'Analiz'], ['Haber', 'Haber'], ['Teknik Analiz', 'Teknik Analiz']].forEach(opt => {
+    [['', 'Analiz']].concat(MAG_CATS.map(c => [c, c])).forEach(opt => {
       const o = document.createElement('option'); o.value = opt[0]; o.textContent = opt[1]; if (opt[0] === cat) o.selected = true; sel.appendChild(o);
     });
     sel.addEventListener('change', () => { en.category = sel.value; saveNews(); renderNews(); });
@@ -13911,7 +13923,12 @@ function magBuildEntry(en, i, admin) {
   const imgs = document.createElement('div'); imgs.className = 'e-imgs';
   (en.images || []).forEach((url, k) => {
     const wrap = document.createElement('div'); wrap.className = 'e-imgwrap';
-    const img = document.createElement('img'); img.className = 'e-img'; img.src = url; img.alt = 'Analiz görseli'; img.loading = 'lazy';
+    const img = document.createElement('img'); img.className = 'e-img'; img.src = url; img.alt = 'Analiz görseli'; img.loading = k < 2 ? 'eager' : 'lazy';
+    img.addEventListener('error', () => {
+      if (wrap.dataset.imgFailed) return; wrap.dataset.imgFailed = '1'; img.remove();
+      const hint = document.createElement('span'); hint.className = 'e-img-missing'; hint.textContent = '📷 Telegram görseli yüklenemedi';
+      wrap.appendChild(hint);
+    });
     img.addEventListener('click', () => magZoom(url, en.body));
     wrap.appendChild(img);
     if (admin) { const x = document.createElement('button'); x.type = 'button'; x.className = 'e-imgdel'; x.textContent = '×'; x.title = 'Görseli kaldır'; x.addEventListener('click', e => { e.stopPropagation(); en.images.splice(k, 1); saveNews(); renderNews(); }); wrap.appendChild(x); }
@@ -24742,10 +24759,27 @@ function eduCard(c, i, packageView = false) {
   else if (c.openTotal) card.addEventListener('click', () => openCourse(c.t.id, c.sec.id));
   return card;
 }
+function chRenameSection(secId) {
+  if (!siteIsAdmin()) return;
+  const course = eduCourses().find(c => c.sec.id === secId);
+  if (!course) return;
+  channelOpen = course.t.id; chSec = secId;
+  showPage('edustudio');
+  chOpenForm('sec-edit', null, course.sec);
+}
 function renderEduCatalog() {
   const grid = document.getElementById('edu-grid');
   if (!grid) return;
   const courses = eduCourses();
+  const renameBar = document.getElementById('edu-rename-bar'), renameSelect = document.getElementById('edu-rename-section');
+  if (renameBar) renameBar.classList.toggle('hidden', !siteIsAdmin());
+  if (renameSelect && siteIsAdmin()) {
+    const selected = renameSelect.value;
+    renameSelect.replaceChildren();
+    const seen = Object.create(null);
+    courses.forEach(c => { if (seen[c.sec.id]) return; seen[c.sec.id] = 1; const option = document.createElement('option'); option.value = c.sec.id; option.textContent = c.sec.title || c.sec.id; renameSelect.appendChild(option); });
+    if (seen[selected]) renameSelect.value = selected;
+  }
   const mine = courses.filter(c => c.openTotal > 0);
   const locked = courses.filter(c => c.lockedTotal > 0);
   if (eduAccessView === 'package' && !locked.length) eduAccessView = 'mine';
@@ -25729,7 +25763,7 @@ async function chLoadTelegramInbox() {
       const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'btn'; toggle.textContent = item.publication === 'daily' ? 'Yayından kaldır' : 'Yayınla';
       toggle.addEventListener('click', () => chSetDailyPublication(item.id, item.publication === 'daily' ? 'remove' : 'restore'));
       article.append(edit, toggle);
-      if (item.publication === 'daily') { const view = document.createElement('button'); view.type = 'button'; view.className = 'btn'; view.textContent = 'Yayındaki notu aç'; view.onclick = () => chOpenDailyViewer(item.id); article.appendChild(view); }
+      if (item.publication === 'daily') { const view = document.createElement('button'); view.type = 'button'; view.className = 'btn'; view.textContent = 'Yayındaki notu aç'; view.onclick = () => chOpenDailyReader(item.id); article.appendChild(view); }
       if (item.manualOverride && item.source === 'telegram') { const info = document.createElement('p'); info.className = 'ch-paste-help'; info.textContent = 'Stüdyoda düzenlendi · Telegram tekrarları bu değişikliği veya yayından kaldırmayı geri almaz.'; article.appendChild(info); }
       list.appendChild(article);
     });
@@ -25802,7 +25836,7 @@ async function chSetDailyPublication(id, action) {
   finally { if (epoch === chWorkspaceEpoch) chStudioBusy = false; }
 }
 let chHomeDailyOffset = 0, chHomeDailyLast = 0, chHomeDailyRequest = null;
-let chEduDailyRequest = null, chEduDailyLoaded = false;
+let chEduDailyRequest = null, chEduDailyLoaded = false, chEduDailyOffset = 0, chEduDailyHasMore = false;
 function chDailyDate(stamp, long = false) {
   try { return new Date(stamp).toLocaleDateString('tr-TR', long ? { weekday: 'long', day: 'numeric', month: 'long' } : { day: 'numeric', month: 'short' }); }
   catch { return ''; }
@@ -25821,7 +25855,7 @@ function chDailyCard(item) {
   const title = document.createElement('h3'); title.textContent = item.title;
   const image = chDailyImage(item.photoUrl, item.title); if (image) card.appendChild(image);
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
-  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyViewer(item.id);
+  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyReader(item.id);
   card.append(time, title, excerpt, open); return card;
 }
 function chDailyFeature(item) {
@@ -25838,7 +25872,7 @@ function chDailyFeature(item) {
   const title = document.createElement('h3'); title.textContent = item.title;
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
   const foot = document.createElement('div'); foot.className = 'daily-feature-foot';
-  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = 'Yazıyı oku →'; open.onclick = () => chOpenDailyViewer(item.id);
+  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = 'Yazıyı oku →'; open.onclick = () => chOpenDailyReader(item.id);
   const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = item.photoCount ? item.photoCount + ' görsel · herkese açık' : 'Herkese açık';
   foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body); return box;
 }
@@ -25855,6 +25889,7 @@ function chRenderDaily(scope, items, more, hasMore) {
   }
   if (status) status.textContent = !list.children.length && !feature?.children.length ? 'Günlük notlar burada görünecek.' : '';
   if (scope === 'home') document.getElementById('home-daily-more')?.classList.toggle('hidden', !hasMore);
+  if (scope === 'edu') { chEduDailyHasMore = !!hasMore; document.getElementById('edu-daily-more')?.classList.toggle('hidden', !hasMore); }
 }
 async function chFetchDaily(offset, force) {
   const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&offset=' + offset + (force ? '&v=' + Date.now() : ''), { credentials: 'omit', signal: AbortSignal.timeout(10000) }), data = await r.json();
@@ -25877,14 +25912,72 @@ function chLoadHomeDaily(more = false, force = false) {
   }).finally(() => { if (moreButton) moreButton.disabled = false; if (chHomeDailyRequest === pending) chHomeDailyRequest = null; });
   chHomeDailyRequest = pending; return pending;
 }
-function chLoadEduDaily(force = false) {
+function chLoadEduDaily(more = false, force = false) {
   if (!document.getElementById('edu-daily-list')) return Promise.resolve();
-  if (chEduDailyRequest) return force ? chEduDailyRequest.then(() => chLoadEduDaily(true)) : chEduDailyRequest;
-  if (!force && chEduDailyLoaded) return Promise.resolve();
-  const pending = chFetchDaily(0, force).then(data => { chRenderDaily('edu', data.items.slice(0, 4), false, false); chEduDailyLoaded = true; })
-    .catch(() => { const status = document.getElementById('edu-daily-status'); if (status) status.textContent = 'Günlük notlar şu an yüklenemedi.'; })
-    .finally(() => { if (chEduDailyRequest === pending) chEduDailyRequest = null; });
+  if (chEduDailyRequest) return force ? chEduDailyRequest.then(() => chLoadEduDaily(more, true)) : chEduDailyRequest;
+  if (!more && !force && chEduDailyLoaded) return Promise.resolve();
+  const moreButton = document.getElementById('edu-daily-more'); if (moreButton) moreButton.disabled = true;
+  const offset = more ? chEduDailyOffset : 0;
+  const pending = chFetchDaily(offset, force).then(data => {
+    chRenderDaily('edu', more ? data.items : data.items.slice(0, 4), more, data.hasMore);
+    chEduDailyOffset = offset + data.items.length; chEduDailyLoaded = true;
+  }).catch(() => { const status = document.getElementById('edu-daily-status'); if (status) status.textContent = 'Günlük notlar şu an yüklenemedi.'; })
+    .finally(() => { if (moreButton) moreButton.disabled = false; if (chEduDailyRequest === pending) chEduDailyRequest = null; });
   chEduDailyRequest = pending; return pending;
+}
+function chCloseDailyReader() {
+  const reader = document.getElementById('edu-daily-reader'); if (!reader) return;
+  reader.replaceChildren(); reader.classList.add('hidden');
+  document.getElementById('edu-daily-feature')?.classList.remove('hidden');
+  document.getElementById('edu-daily-list')?.classList.remove('hidden');
+  document.getElementById('edu-daily-more')?.classList.toggle('hidden', !chEduDailyHasMore);
+}
+async function chOpenDailyReader(id) {
+  if (!/^edutg_[a-f0-9]{64}$/.test(id || '')) return;
+  if (currentPage !== 'egitim') showPage('egitim');
+  if (channelOpen) { channelOpen = null; renderEgitim(); }
+  const panel = document.getElementById('edu-daily-notes'), reader = document.getElementById('edu-daily-reader');
+  if (!reader) return;
+  if (panel) panel.classList.remove('hidden');
+  document.getElementById('edu-daily-feature')?.classList.add('hidden');
+  document.getElementById('edu-daily-list')?.classList.add('hidden');
+  document.getElementById('edu-daily-more')?.classList.add('hidden');
+  reader.classList.remove('hidden');
+  reader.innerHTML = '<p class="hint">Not yükleniyor…</p>';
+  reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  try {
+    const r = await fetch('/api/edu-shared?kind=channel&view=daily-notes&note=' + id, { credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10000) }), data = await r.json();
+    if (!r.ok || !data.ok || !data.item) throw new Error('not_found');
+    const item = data.item;
+    reader.replaceChildren();
+    const head = document.createElement('div'); head.className = 'daily-reader-head';
+    const heading = document.createElement('div');
+    const kicker = document.createElement('span'); kicker.className = 'daily-kicker'; kicker.textContent = 'Günün yazısı · ' + chDailyDate(item.publishedAt, true);
+    const title = document.createElement('h3'); title.textContent = item.title;
+    heading.append(kicker, title);
+    const actions = document.createElement('div'); actions.className = 'daily-reader-actions';
+    if (chIsAdmin()) {
+      const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'btn'; edit.textContent = 'Stüdyoda düzenle';
+      edit.onclick = () => { chCloseDailyReader(); showPage('edustudio'); chEditDailyById(id); };
+      actions.appendChild(edit);
+    }
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'btn'; close.textContent = 'Listeye dön ×'; close.onclick = chCloseDailyReader;
+    actions.appendChild(close);
+    head.append(heading, actions);
+    const body = document.createElement('div'); body.className = 'daily-reader-body';
+    const note = chBuildNoteBox({ ...item, access: 'free' }, item.title);
+    if (note) body.appendChild(note);
+    else {
+      const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Bu paylaşımın medyası şu an görüntülenemiyor.'; body.appendChild(hint);
+      if (/^https?:\/\//i.test(item.url || '')) { const source = document.createElement('a'); source.href = item.url; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = 'Telegram kaynağını aç ↗'; body.appendChild(source); }
+    }
+    reader.append(head, body);
+  } catch {
+    reader.replaceChildren();
+    const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Bu not yayından kaldırılmış veya şu an yüklenemiyor.';
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'btn'; close.textContent = 'Listeye dön'; close.onclick = chCloseDailyReader;
+    reader.append(hint, close);
+  }
 }
 async function chOpenDailyViewer(id) {
   if (!/^edutg_[a-f0-9]{64}$/.test(id || '')) return;
@@ -26430,7 +26523,9 @@ function bindChannelsPage() {
   const g = id => document.getElementById(id);
   g('home-daily-refresh')?.addEventListener('click', () => chLoadHomeDaily(false, true));
   g('home-daily-more')?.addEventListener('click', () => chLoadHomeDaily(true));
-  g('edu-daily-refresh')?.addEventListener('click', () => chLoadEduDaily(true));
+  g('edu-daily-refresh')?.addEventListener('click', () => { chCloseDailyReader(); chLoadEduDaily(false, true); });
+  g('edu-daily-more')?.addEventListener('click', () => chLoadEduDaily(true));
+  g('edu-rename-btn')?.addEventListener('click', () => chRenameSection(g('edu-rename-section')?.value));
   g('edu-access-tabs')?.addEventListener('click', e => {
     const button = e.target.closest('[data-access]'); if (!button) return;
     eduAccessView = button.dataset.access === 'package' ? 'package' : 'mine';
@@ -28343,6 +28438,8 @@ async function atApi(action, payload) {
   return res.json();
 }
 async function loadAlfaTrading() {
+  // Eski feed DOM'u kaldırıldı; gereksiz eski istek yapma.
+  if (!document.getElementById('at-feed')) return;
   // Free members use the whitelisted result projection, not the full manual feed.
   if (!refUnlocked()) { alfaPosts = []; alfaLoaded = false; document.getElementById('at-feed')?.replaceChildren(); return; }
   try {

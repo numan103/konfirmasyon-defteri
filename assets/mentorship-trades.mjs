@@ -3,10 +3,10 @@ import { renderMentorCurve, signedR } from './mentor-curve.mjs?v=2';
 const API = '/api/ai?mentorTrades=1';
 const page = document.getElementById('page-alfatrading');
 const root = document.createElement('section'); root.className = 'mentor-trades'; root.hidden = true;
-page?.insertBefore(root, page.querySelector('.at-filters'));
+page?.insertBefore(root, page.querySelector('.at-filters') || page.querySelector('#at-feed') || null);
 let owner = '', generation = 0, loading = false, lastLoad = 0, index = 0, urls = [];
 let category = 'all', coin = '', observers = [], imageQueue = [], inFlight = 0;
-const labels = { all: 'Hepsi', trade: 'Aktif işlemler', bias: 'Bias', result: 'Sonuçlar', post: 'Gönderiler' };
+const labels = { all: 'Tümü', trade: 'İşlemler', bias: 'Bias görüşleri', result: 'Sonuçlar', post: 'Analiz / Onchain' };
 const el = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
 const btn = (text, action) => { const n = el('button', text, 'btn'); n.type = 'button'; n.onclick = action; return n; };
 function userId() { try { return AUTH.user?.id || ''; } catch { return ''; } }
@@ -31,7 +31,7 @@ function lazyImage(figure, record, i, valid) {
   const observer = new IntersectionObserver(entries => {
     if (!entries.some(entry => entry.isIntersecting)) return;
     observer.disconnect();
-    imageQueue.push(async () => {
+    const job = async () => {
       if (!valid()) return;
       placeholder.textContent = 'Fotoğraf yükleniyor…';
       try {
@@ -48,8 +48,13 @@ function lazyImage(figure, record, i, valid) {
         });
         button.className = 'mentor-image-open'; button.setAttribute('aria-label', record.coin + ' grafiğini büyüt'); button.appendChild(img);
         placeholder.replaceWith(button);
-      } catch { if (valid()) placeholder.textContent = 'Fotoğraf alınamadı. Telegram kaynağından açabilirsin.'; }
-    }); pumpImages();
+      } catch {
+        if (!valid()) return;
+        const retry = btn('Tekrar dene', () => { if (valid()) { imageQueue.push(job); pumpImages(); } });
+        placeholder.replaceChildren(document.createTextNode('Fotoğraf alınamadı. '), retry);
+      }
+    };
+    imageQueue.push(job); pumpImages();
   }, { rootMargin: '120px' });
   observers.push(observer); observer.observe(figure);
 }
@@ -69,14 +74,16 @@ async function load(force = false) {
   const title = el('div');
   title.append(el('span', 'MENTORSHIP', 'mentor-trades-kicker'), el('h2', 'Trader Ahmet · İşlem Akışı'));
   head.append(title, btn('Yenile', () => load(true)));
-  root.append(head, el('p', 'İşlemler, biaslar ve gönderiler. R değerleri paylaşılan sonuçlardır; bağımsız olarak doğrulanmış getiri veya kazanç garantisi değildir.', 'mentor-trades-note'));
+  root.append(head, el('p', 'İşlem = aktif pozisyon · Bias = yön görüşü · Analiz / Onchain = zincir ve grafik yorumu · Sonuç = kapanmış R. R değerleri paylaşılan sonuçlardır; bağımsız doğrulanmış getiri veya kazanç garantisi değildir.', 'mentor-trades-note'));
   const status = el('p', 'Yükleniyor…'); status.setAttribute('role', 'status'); root.appendChild(status);
   try {
     const data = await request(null, '&page=' + index + '&category=' + category + '&coin=' + encodeURIComponent(coin));
     if (!valid()) return;
     const premium = data.access !== 'results';
+    const admin = typeof SITE !== 'undefined' && !!SITE.admin && !!window.siteIsAdmin?.();
     document.body.dataset.mentorAccess = premium ? 'premium' : 'results';
-    if (data.summary) { const curve = el('div', undefined, 'mentor-curve'); renderMentorCurve(curve, data.summary); root.appendChild(curve); }
+    // Kümülatif eğri giriş/kayıt yüzeyinde; premium üye ve admin işlem akışında görmez.
+    if (data.summary && !premium && !admin) { const curve = el('div', undefined, 'mentor-curve'); renderMentorCurve(curve, data.summary); root.appendChild(curve); }
     const filters = el('div', undefined, 'mentor-trades-filters');
     for (const [kind, label] of Object.entries(labels)) {
       const button = btn(label + (data.counts?.[kind] != null ? ' · ' + data.counts[kind] : ''), () => { category = kind; index = 0; load(true); });
@@ -120,7 +127,7 @@ async function load(force = false) {
     const pager = el('div', undefined, 'mentor-trades-head');
     const prev = btn('← Önceki', () => { index--; load(true); }); prev.disabled = index === 0;
     const next = btn('Sonraki →', () => { index++; load(true); }); next.disabled = !data.more;
-    pager.append(prev, el('small', 'Liste sayfası ' + (index + 1) + ' · Eğri tüm aktarılan teyitli sonuçları kapsar.'), next);
+    pager.append(prev, el('small', 'Liste sayfası ' + (index + 1) + (premium || admin ? ' · Kümülatif eğri giriş ekranında gösterilir.' : ' · Eğri tüm aktarılan teyitli sonuçları kapsar.')), next);
     root.appendChild(pager);
     if (typeof SITE !== 'undefined' && SITE.admin && window.siteIsAdmin?.()) {
       const controls = el('div', undefined, 'mentor-trades-admin');

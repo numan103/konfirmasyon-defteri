@@ -99,6 +99,17 @@ test('small Telegram photos are copied without a bot-token URL; oversized images
   row = f.notes()[0]; record = openChannels(row.data, 'telegram-inbox:' + row.id.slice(6));
   assert.equal(record.photos.length, 0); assert.equal(record.photoMissing, true);
 });
+test('Telegram falls back to a smaller usable photo variant and accepts missing file_size', async t => {
+  const f = fixture(t);
+  await ingestEduTelegramUpdate(message({ text: undefined, caption: 'Grafik', photo: [
+    { file_id: 'too-big', file_size: 900000 }, { file_id: 'usable', file_size: 220000 }, { file_id: 'unknown-size' },
+  ] }));
+  const record = openChannels(f.notes()[0].data, 'telegram-inbox:' + f.notes()[0].id.slice(6));
+  assert.equal(record.photoMissing, false);
+  assert.match(record.photos[0].url, /^data:image\/jpeg;base64,/);
+  assert.ok(f.calls.some(c => c.url.endsWith('/getFile') && String(c.body || '').includes('usable')));
+  assert.ok(!f.calls.some(c => String(c.body || '').includes('too-big')));
+});
 test('inbox reads/deletions require real admin authentication and never return plain storage rows', async t => {
   const f = fixture(t, { admin: false });
   assert.equal((await f.request({ authenticated: false })).code, 401);

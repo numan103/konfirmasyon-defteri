@@ -72,7 +72,7 @@ async function alfaNews(req, res) {
       beforeImg: text(e && e.beforeImg, 600),
       afterImg: text(e && e.afterImg, 600),
       ctaUrl: text(e && e.ctaUrl, 600),
-      category: (e && e.category === 'Haber') ? 'Haber' : ((e && e.category === 'Teknik Analiz') ? 'Teknik Analiz' : ''),
+      category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
       sourceLink: text(e && e.sourceLink, 300),
       publishedAt: text(e && e.publishedAt, 40),
     })) : [];
