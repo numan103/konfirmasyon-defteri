@@ -70,8 +70,8 @@ test('hem tam dergi hem ana sayfa gömülü dergi haftalık filtreyi uygular', (
 
 test('forum sohbeti ve teknik başlık yanıtları içindekilere karışmaz', () => {
   const data = { entries: [
-    entry('channel', '2026-11-20T10:00:00Z', { sourceThread: undefined, sourceLink: 'https://t.me/alfakasim/977/987' }),
-    entry('chat', '2026-11-20T11:00:00Z', { sourceThread: undefined, sourceLink: 'https://t.me/alfakasim/6/965' }),
+    entry('channel', '2026-11-20T10:00:00Z', { sourceThread: undefined, sourceMessageId: 987 }),
+    entry('chat', '2026-11-20T11:00:00Z', { sourceKind: 'telegram-chat', sourceThread: 6, sourceMessageId: 965 }),
     entry('topic', '2026-11-20T12:00:00Z', { sourceThread: undefined, sourceKind: 'tech-topic' }),
   ] };
   ctx.magApplyWeek(data, NOW);

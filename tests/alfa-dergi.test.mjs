@@ -102,7 +102,8 @@ test('Telegram entries share one stream with a category badge and safe same-orig
   assert.match(entry, /\[\['', 'Analiz'\]\]\.concat\(MAG_CATS\.map/);
   assert.match(entry, /e-img-missing/);
   assert.match(api, /\['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'\]\.includes\(e && e\.category\)/);
-  assert.match(api, /sourceLink: text\(e && e\.sourceLink, 300\)/);
+  assert.match(api, /sourceMessageId: sourceMessageId\(e\)/);
+  assert.ok(!/sourceLink: text\(/.test(api), 'public projection must not expose a Telegram link');
   assert.match(api, /publishedAt: text\(e && e\.publishedAt, 40\)/);
   assert.match(api, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(id\)/);
   assert.ok(!/\/api\/edu-shared[\s\S]{0,400}t\.me\//.test(api), 'no Telegram CDN hotlink in the public projection');

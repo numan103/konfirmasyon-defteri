@@ -1,4 +1,4 @@
-import { isEducationArticle } from './magazine-articles.mjs?v=1';
+import { isEducationArticle } from './magazine-articles.mjs?v=2';
 import { speechControls } from './article-speech.mjs?v=1';
 import { pdfViewer } from './edu-pdf.mjs?v=1';
 const node = (tag, text, cls) => { const el = document.createElement(tag); if (text != null) el.textContent = text; if (cls) el.className = cls; return el; };
@@ -11,7 +11,7 @@ function render(scope, entries, force = false) {
   if (!root) return;
   const list = (entries || []).filter(e => scope !== 'edu' || isEducationArticle(e)).slice().sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
   records[scope] = list;
-  const signature = JSON.stringify(list.map(e => [e.id, e.title, e.body, e.images, e.pdf, e.pdfLink, e.pdfName]));
+  const signature = JSON.stringify(list.map(e => [e.id, e.title, e.body, e.images, e.pdf, e.pdfName]));
   if (!force && root.dataset.signature === signature) return;
   root.dataset.signature = signature; root.replaceChildren(); root.hidden = !list.length;
   if (!list.length) return;
@@ -23,12 +23,7 @@ function render(scope, entries, force = false) {
   root.append(picker, node('h2', entry.title));
   const meta = node('p', 'Trader Ahmet · ' + new Date(entry.publishedAt).toLocaleDateString('tr-TR') + ' · ' + Math.max(1, Math.ceil(String(entry.body || '').split(/\s+/).length / 180)) + ' dk okuma', 'hint');
   root.append(meta, speechControls(entry.body, entry.title));
-  if (entry.sourceParts?.length > 1) root.append(node('p', 'Telegram’daki ' + entry.sourceParts.length + ' parça, tek yazıda birleştirildi.', 'hint'));
-  if (entry.pdfLink && !entry.pdf) {
-    const pdfLink = node('a', '📄 ' + (entry.pdfName || 'Eğitim PDF’si') + ' · Telegram’da aç ↗', 'btn');
-    pdfLink.href = entry.pdfLink; pdfLink.target = '_blank'; pdfLink.rel = 'noopener noreferrer';
-    root.append(pdfLink);
-  }
+  if (entry.sourceParts?.length > 1) root.append(node('p', 'Uzun paylaşımın ' + entry.sourceParts.length + ' parçası tek yazıda birleştirildi.', 'hint'));
   const toggle = node('button', expanded[scope] ? 'Yazıyı daralt ↑' : 'Tamamını burada oku ↓', 'btn solid'); toggle.type = 'button';
   toggle.setAttribute('aria-expanded', String(expanded[scope]));
   root.append(toggle);
@@ -41,9 +36,6 @@ function render(scope, entries, force = false) {
     }
     for (const paragraph of String(entry.body || '').split(/\n\s*\n/)) article.append(node('p', paragraph));
     const pdf = pdfViewer(entry.pdf); if (pdf) article.append(pdf);
-    if (/^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(entry.sourceLink || '')) {
-      const link = node('a', 'Telegram’daki kaynağı aç ↗'); link.href = entry.sourceLink; link.target = '_blank'; link.rel = 'noopener noreferrer'; article.append(link);
-    }
   } else article.append(node('p', String(entry.body || '').slice(0, 420) + (String(entry.body || '').length > 420 ? '…' : '')));
   }
   toggle.onclick = () => {

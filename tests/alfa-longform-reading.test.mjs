@@ -9,7 +9,7 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const publishedAt = '2026-11-21T12:18:08.000Z';
 const part = (n, body, extra = {}) => ({
   id: 'mag_' + n, authorId: 'traderahmetd', publishedAt,
-  sourceLink: 'https://t.me/alfakasim/977/' + n, body, images: [], ...extra,
+  sourceMessageId: n, sourceThread: 977, body, images: [], ...extra,
 });
 
 test('long Alfa Edu Telegram split is read as one continuous article', () => {
@@ -22,21 +22,18 @@ test('long Alfa Edu Telegram split is read as one continuous article', () => {
   ];
   const grouped = groupMagazineArticles(entries);
   assert.equal(grouped.length, 2);
-  const article = grouped.find(e => e.sourceLink.endsWith('/992'));
+  const article = grouped.find(e => e.sourceMessageId === 992);
   assert.equal(article.education, true);
   assert.equal(article.title, 'PİYASAYI OKUMAK: MAKRODAN TRADER PSİKOLOJİSİNE');
   assert.equal(article.sourceParts.length, 3);
-  assert.deepEqual(article.sourceParts.map(p => p.sourceLink), [
-    'https://t.me/alfakasim/977/992',
-    'https://t.me/alfakasim/977/993',
-    'https://t.me/alfakasim/977/994',
-  ]);
+  assert.deepEqual(article.sourceParts.map(p => p.messageId), [992, 993, 994]);
   assert.deepEqual(article.images, ['https://example.com/chart.jpg']);
   assert.ok(article.body.startsWith('# Alfa Edu'));
   assert.ok(article.body.includes('olduğu sonucuna varılamaz.'));
   assert.ok(article.body.endsWith('C'.repeat(2500)));
   assert.equal(article.body.length, entries.slice(1, 4).reduce((sum, e) => sum + e.body.length + 2, 0) - 2);
-  assert.equal(article.pdfLink, 'https://t.me/alfakasim/977/995');
+  assert.equal(article.sourceLink, undefined);
+  assert.equal(article.pdfLink, undefined);
 });
 
 test('continuations never swallow another topic, author or oversized document', () => {
@@ -74,7 +71,17 @@ test('speech reading keeps every word inside bounded chunks', () => {
 test('continuous reader and speech controls are wired into both surfaces', () => {
   for (const marker of [
     'id="home-mag-article-reader"', 'id="edu-magazine-reading"', 'id="ch-pdf-editor"',
-    '/assets/magazine-reading.mjs?v=1', '/assets/magazine-reading.css?v=1',
+    '/assets/magazine-reading.mjs?v=2', '/assets/magazine-reading.css?v=1',
     'AlfaArticleSpeech.controls', 'window.MagazineReading.renderHome'
   ]) assert.ok(html.includes(marker), marker + ' bulunamadı');
+});
+
+test('mentorship magazine never renders a Telegram exit link', () => {
+  const reader = fs.readFileSync(new URL('../assets/magazine-reading.mjs', import.meta.url), 'utf8');
+  const api = fs.readFileSync(new URL('../api/edu-shared.mjs', import.meta.url), 'utf8');
+  for (const marker of ['Telegram’da aç', 'Telegram’daki kaynağı aç', 'pdfLink', 'sourceLink: text(']) {
+    assert.ok(!reader.includes(marker) && !api.includes(marker) && !html.includes(marker), marker + ' hâlâ public yüzeyde');
+  }
+  assert.ok(!/href\s*=\s*[^;]*sourceLink/.test(html + reader), 'kaynak URL’si bağlantıya dönüştürülmemeli');
+  assert.ok(!reader.includes('Telegram'), 'okuyucu kaynak uygulamayı hiç anmamalı');
 });

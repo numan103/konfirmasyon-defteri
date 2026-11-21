@@ -20,6 +20,6 @@ test('new cover and journal illustration are local assets; reader filters never 
   }
   assert.ok(html.includes('if (!rawAdmin) magApplyWeek(magData)'));
   assert.ok(html.includes('magMainList().forEach(en =>'));
-  assert.ok(api.includes('e.sourceThread === 977'));
+  assert.ok(api.includes('Number(e.sourceThread) === 977'));
   assert.ok(api.includes("e.type !== 'update'"));
 });

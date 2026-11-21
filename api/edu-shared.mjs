@@ -67,11 +67,19 @@ async function alfaNews(req, res) {
       }
       return text(s, 600);
     };
+    // Telegram provenance is reduced to a numeric message id. Mentorship readers
+    // must never receive a link back into the private Telegram source.
+    const sourceMessageId = e => {
+      const direct = Number(e && e.sourceMessageId);
+      if (Number.isSafeInteger(direct) && direct > 0) return direct;
+      const match = String(e && e.sourceLink || '').match(/^https:\/\/t\.me\/alfakasim\/977\/(\d+)$/);
+      return match ? Number(match[1]) : 0;
+    };
     // Only the magazine channel belongs in the reader; forum replies and seeded
     // undated entries remain stored for the editor, not published as weekly pages.
     const channelEntries = (Array.isArray(raw.entries) ? raw.entries : []).filter(e =>
       e && e.type !== 'update' && e.publishedAt &&
-      (e.sourceThread === 977 || /^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(e.sourceLink || ''))
+      (Number(e.sourceThread) === 977 || sourceMessageId(e) > 0)
     );
     const entries = channelEntries.slice(-200).map(e => ({
       id: text(e && e.id, 80),
@@ -94,13 +102,14 @@ async function alfaNews(req, res) {
       afterImg: media(e && e.afterImg),
       ctaUrl: text(e && e.ctaUrl, 600),
       category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
-      sourceLink: text(e && e.sourceLink, 300),
+      sourceMessageId: sourceMessageId(e),
       sourceKind: 'mentorship-magazine', sourceThread: 977,
       publishedAt: text(e && e.publishedAt, 40),
     }));
     const publicEntries = await readMagazineSnapshot();
     for (const entry of publicEntries) {
-      if (!entries.some(existing => existing.sourceLink === entry.sourceLink)) entries.push(entry);
+      if (!entries.some(existing => existing.id === entry.id ||
+          (sourceMessageId(existing) && sourceMessageId(existing) === sourceMessageId(entry)))) entries.push(entry);
     }
     const authors = Array.isArray(raw.authors) ? raw.authors.slice(0, 20).map(a => ({
       id: text(a && a.id, 80),

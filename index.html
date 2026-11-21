@@ -60,7 +60,7 @@
 <link rel="stylesheet" href="/assets/edu-learning-rewards.css?v=1">
 <script type="module" src="/assets/edu-learning-rewards.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/magazine-reading.css?v=1">
-<script type="module" src="/assets/magazine-reading.mjs?v=1"></script>
+<script type="module" src="/assets/magazine-reading.mjs?v=2"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
 <!-- AYNA:BASLA -->
@@ -13597,7 +13597,7 @@ async function loadNews() {
         const j = await res.json();
         if (j && j.ok && j.data && typeof j.data === 'object') {
           if (rawAdmin) {
-            d = { ...d, entries: (d.entries || []).concat((j.data.entries || []).filter(e => !(d.entries || []).some(old => old.id === e.id || (old.sourceLink && old.sourceLink === e.sourceLink)))),
+            d = { ...d, entries: (d.entries || []).concat((j.data.entries || []).filter(e => !(d.entries || []).some(old => old.id === e.id || (old.sourceMessageId && old.sourceMessageId === e.sourceMessageId)))),
               authors: (d.authors || []).concat((j.data.authors || []).filter(a => !(d.authors || []).some(old => old.id === a.id))) };
           } else d = j.data;
         }
@@ -13769,7 +13769,7 @@ function magApplyWeek(data, now) {
   const { start, end } = magWeekBounds(now);
   const inWeek = d => d && d >= start && d <= end;
   const dated = all.filter(e => inWeek(magPostDate(e && e.publishedAt)) && e.type !== 'update' &&
-    (e.sourceThread === 977 || /^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(e.sourceLink || '')));
+    e.sourceKind === 'mentorship-magazine' && (Number(e.sourceThread) === 977 || Number(e.sourceMessageId) > 0));
   const grouped = typeof window !== 'undefined' && window.AlfaMagazineArticles ? window.AlfaMagazineArticles.group(dated) : dated;
   const entries = grouped.slice().sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
   data.entries = entries;
@@ -14051,10 +14051,6 @@ function magBuildEntry(en, i, admin) {
     if (en.education) {
       const edu = document.createElement('button'); edu.type = 'button'; edu.className = 'btn'; edu.textContent = '🎓 Alfa Edu’da oku';
       edu.onclick = () => { if (window.MagazineReading) window.MagazineReading.openEdu(en.id); }; main.appendChild(edu);
-    }
-    if (en.pdfLink && !en.pdf) {
-      const pdf = document.createElement('a'); pdf.className = 'btn'; pdf.target = '_blank'; pdf.rel = 'noopener noreferrer';
-      pdf.href = en.pdfLink; pdf.textContent = '📄 ' + (en.pdfName || 'Eğitim PDF’si') + ' ↗'; main.appendChild(pdf);
     }
   }
   // görseller (normal analiz)

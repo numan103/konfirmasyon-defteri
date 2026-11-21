@@ -9,7 +9,8 @@ const html = (thread = 977, photo = 'https://cdn4.telesco.pe/file/photo.jpg') =>
 <time datetime="2026-11-20T19:09:35+00:00"></time></div>`;
 test('owner link is parsed as mentorship 977, credited to Trader Ahmet, photos proxied same-origin', () => {
   const entry = parseMagazineWidget(html(), 987);
-  assert.equal(entry.sourceThread, 977); assert.equal(entry.authorId, 'traderahmetd');
+  assert.equal(entry.sourceThread, 977); assert.equal(entry.sourceMessageId, 987);
+  assert.equal(entry.sourceLink, undefined); assert.equal(entry.authorId, 'traderahmetd');
   assert.equal(entry.body, 'BTC - HTF\nGerçek bilgi & görsel');
   assert.deepEqual(entry.images, ['/api/tg?magPhoto=publicmag_987_0']);
   assert.equal(entry.publishedAt, '2026-11-20T19:09:35.000Z');
