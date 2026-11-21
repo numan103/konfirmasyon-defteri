@@ -59,6 +59,8 @@
 <script type="module" src="/assets/daily-note-social.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-learning-rewards.css?v=1">
 <script type="module" src="/assets/edu-learning-rewards.mjs?v=1"></script>
+<link rel="stylesheet" href="/assets/magazine-reading.css?v=1">
+<script type="module" src="/assets/magazine-reading.mjs?v=1"></script>
 <script type="module" src="/assets/alfa-podcast.mjs?v=5"></script>
 
 <!-- AYNA:BASLA -->
@@ -6367,6 +6369,7 @@
             <div class="mag-foot"><div class="mag-dots" id="hmr-dots"></div><div class="mag-counter" id="hmr-counter">1 / 1</div></div>
           </div>
         </section>
+      <section id="home-mag-article-reader" class="magazine-reading" aria-label="Dergi tam metin okuma alanı" hidden></section>
       <section id="home-daily-notes" class="panel">
         <div class="hd-head"><div><span class="daily-kicker">✍️ Günün yazısı · Alfa Edu</span><h2>Günlük Notlar</h2><p class="hint">Telegram’daki eğitsel paylaşımlar onay beklemeden buraya gelir.</p></div>
           <button type="button" class="btn" id="home-daily-refresh">Yenile</button></div>
@@ -7264,6 +7267,7 @@
       <button type="button" class="btn hidden" id="edu-daily-more">Önceki notlar</button>
       <a href="?page=home" data-nav class="hd-link" style="display:inline-block;margin-top:10px;">Tüm günlük notlar ana sayfada →</a>
     </section>
+    <section id="edu-magazine-reading" class="magazine-reading" aria-label="Alfa Edu eğitim yazıları" hidden></section>
     <section id="edu-catalog">
       <div class="edu-access-head">
         <div>
@@ -7426,6 +7430,7 @@
       </div>
        <label for="ch-in-body" class="ch-content-field">Ders açıklaması ve notlar</label>
        <textarea id="ch-in-body" class="eg-notes ch-content-field" placeholder="Örn. OBO – TOBO: oluşum, boyun çizgisi ve teyit… Görseli buraya Ctrl+V ile yapıştır." maxlength="40000" style="height:160px;"></textarea>
+       <div id="ch-pdf-editor"></div>
        <label for="ch-in-tricks" class="ch-content-field">Trickler / püf noktaları</label>
        <textarea id="ch-in-tricks" class="eg-notes ch-content-field" placeholder="Örn. Boyun çizgisi kırılmadan formasyonu tamamlanmış sayma.&#10;- Sık yapılan hata&#10;- Geçersizlik koşulu" maxlength="12000" style="height:110px;"></textarea>
        <p class="ch-content-field ch-paste-help">Görseli açıklamaya veya trick alanına Ctrl+V ile yapıştır; dosyayı bu forma sürükleyebilir ya da “Fotoğraf ekle” ile seçebilirsin. En fazla 10 görsel; dosya başına 10 MB. Kaydederken küçültülür.</p>
@@ -13687,9 +13692,10 @@ function magSaveT() { clearTimeout(magSaveTimer); magSaveTimer = setTimeout(() =
 function magInvalidateHome() { try { invalidateHomeMagazine(); } catch (e) {} }
 function magIsUpd(en) { return en && en.type === 'update'; }
 function magMainList() { return magApplyWeek({ ...magData, entries: magData.entries.slice() }).entries.filter(e => !magIsUpd(e)); }
+function magEntryIndex(entry) { return magData.entries.findIndex(e => e.id === entry?.id); }
 function magCount() { return 2 + magMainList().length; }
 function magMainIdx(entryIdx) {
-  return 2 + Math.max(0, magMainList().indexOf(magData.entries[entryIdx]));
+  return 2 + Math.max(0, magMainList().findIndex(e => e.id === magData.entries[entryIdx]?.id));
 }
 function magUpdParentIdx(upd) {
   // Güncellemenin bağlı olduğu analiz indeksi (relId öncelikli, yoksa en yakın önceki analiz)
@@ -13712,7 +13718,7 @@ function magUpdBefore(upd) {
   return '';
 }
 function magUpdList(parentIdx) { return magData.entries.filter(e => magIsUpd(e) && magUpdParentIdx(e) === parentIdx); }
-function magUpdCount(en) { return magUpdList(magData.entries.indexOf(en)).length; }
+function magUpdCount(en) { return magUpdList(magEntryIndex(en)).length; }
 function magMainNeighbor(i, dir) {
   let j = i + dir;
   while (j >= 0 && j < magData.entries.length && magIsUpd(magData.entries[j])) j += dir;
@@ -13764,7 +13770,8 @@ function magApplyWeek(data, now) {
   const inWeek = d => d && d >= start && d <= end;
   const dated = all.filter(e => inWeek(magPostDate(e && e.publishedAt)) && e.type !== 'update' &&
     (e.sourceThread === 977 || /^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(e.sourceLink || '')));
-  const entries = dated.slice().sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+  const grouped = typeof window !== 'undefined' && window.AlfaMagazineArticles ? window.AlfaMagazineArticles.group(dated) : dated;
+  const entries = grouped.slice().sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
   data.entries = entries;
   const dates = entries.map(e => magPostDate(e && e.publishedAt)).filter(d => inWeek(d));
   if (dates.length) {
@@ -13878,7 +13885,7 @@ function magBuildToc(go) {
   const adminToc = magIsAdmin() && !magPreview;
   let k = 0;
   magMainList().forEach(en => {
-    const i = magData.entries.indexOf(en);
+    const i = magEntryIndex(en);
     if (magIsUpd(en)) return; // güncellemeler ayrı sayfa değil, analiz sayfasının altında
     k++;
     const nUpd = magUpdCount(en);
@@ -13892,7 +13899,7 @@ function magBuildToc(go) {
     const tgt = magMainIdx(i);
     it.addEventListener('click', () => (typeof go === 'function' ? go : magGoTo)(tgt));
     row.appendChild(it);
-    if (adminToc) {
+    if (adminToc && !(en.sourceParts?.length > 1)) {
       const ord = document.createElement('div'); ord.className = 'toc-ord';
       const up = document.createElement('button'); up.type = 'button'; up.textContent = '↑'; up.title = 'Yukarı taşı'; up.disabled = !magMainNeighbor(i, -1);
       up.addEventListener('click', e => { e.stopPropagation(); magMoveEntry(i, magMainNeighbor(i, -1), 1); });
@@ -14002,6 +14009,8 @@ function magShare(en, i) {
   else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); done(); }
 }
 function magBuildEntry(en, i, admin) {
+  i = magEntryIndex(en);
+  if (en.sourceParts?.length > 1) admin = false;
   const page = document.createElement('div'); page.className = 'mag-page mag-entry';
   const inner = document.createElement('div'); inner.className = 'mag-inner';
   const pad = document.createElement('div'); pad.className = 'mag-pad';
@@ -14033,6 +14042,21 @@ function magBuildEntry(en, i, admin) {
   // başlık
   if (admin) main.appendChild(magInput(en.title, 'Analiz başlığı (ör. BTC Haftalık Görünüm)', 'e-title-in', v => en.title = v));
   else { const t = document.createElement('h2'); t.className = 'e-title'; t.textContent = en.title || 'Analiz'; main.appendChild(t); }
+  if (!admin) {
+    if (window.AlfaArticleSpeech) main.appendChild(window.AlfaArticleSpeech.controls(en.body, en.title));
+    const embedded = !!window.__magForceReader;
+    const read = document.createElement('button'); read.type = 'button'; read.className = 'btn'; read.textContent = '📖 Tam metni rahat oku';
+    read.onclick = () => { if (!embedded) showPage('home'); if (window.MagazineReading) window.MagazineReading.openHome(en.id); };
+    main.appendChild(read);
+    if (en.education) {
+      const edu = document.createElement('button'); edu.type = 'button'; edu.className = 'btn'; edu.textContent = '🎓 Alfa Edu’da oku';
+      edu.onclick = () => { if (window.MagazineReading) window.MagazineReading.openEdu(en.id); }; main.appendChild(edu);
+    }
+    if (en.pdfLink && !en.pdf) {
+      const pdf = document.createElement('a'); pdf.className = 'btn'; pdf.target = '_blank'; pdf.rel = 'noopener noreferrer';
+      pdf.href = en.pdfLink; pdf.textContent = '📄 ' + (en.pdfName || 'Eğitim PDF’si') + ' ↗'; main.appendChild(pdf);
+    }
+  }
   // görseller (normal analiz)
   const imgs = document.createElement('div'); imgs.className = 'e-imgs';
   (en.images || []).forEach((url, k) => {
@@ -14316,7 +14340,7 @@ function renderNewsWeekly() {
     btn.addEventListener('click', function () {
       let page;
       if (magIsUpd(e)) { const pi = magUpdParentIdx(e); page = pi >= 0 ? magMainIdx(pi) : 0; }
-      else { const idx = magData.entries.indexOf(e); page = idx >= 0 ? magMainIdx(idx) : 2; }
+      else { const idx = magEntryIndex(e); page = idx >= 0 ? magMainIdx(idx) : 2; }
       magGoTo(page);
       const book = document.getElementById('mag-book');
       if (book && book.scrollIntoView) book.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -14332,6 +14356,7 @@ let homeMagLoading = null;
 let hmrIndex = 0;
 let hmrPages = 0;
 let hmrBound = false;
+let hmrRenderedSignature = '';
 async function loadHomeMagazine() {
   bindHomeMagazine();
   if (homeMagData && Date.now() - homeMagFetchedAt < 60000) { renderHomeMagazine(); return homeMagData; }
@@ -14363,7 +14388,7 @@ function hmrApply() {
   if (p) p.disabled = hmrIndex <= 0; if (nx) nx.disabled = hmrIndex >= hmrPages - 1;
   const cur = stage.children[hmrIndex]; if (cur) { const inr = cur.querySelector('.mag-inner'); if (inr) inr.scrollTop = 0; }
 }
-function hmrGoTo(i) { if (!hmrPages) return; i = Math.max(0, Math.min(hmrPages - 1, i)); if (i === hmrIndex) return; hmrIndex = i; hmrApply(); }
+function hmrGoTo(i) { if (!hmrPages) return; i = Math.max(0, Math.min(hmrPages - 1, i)); if (i === hmrIndex) return; if (window.AlfaArticleSpeech) window.AlfaArticleSpeech.stop(); hmrIndex = i; hmrApply(); }
 function hmrNext() { hmrGoTo(hmrIndex + 1); }
 function hmrPrev() { hmrGoTo(hmrIndex - 1); }
 function bindHomeMagazine() {
@@ -14389,6 +14414,12 @@ function bindHomeMagazine() {
 }
 function renderHomeMagazine() {
   const stage = document.getElementById('hmr-stage'); if (!stage) return;
+  const signature = JSON.stringify(homeMagData);
+  if (homeMagData && signature === hmrRenderedSignature && stage.children.length) {
+    if (window.MagazineReading) window.MagazineReading.renderHome(homeMagData.entries);
+    return;
+  }
+  hmrRenderedSignature = signature;
   const dots = document.getElementById('hmr-dots'); if (dots) dots.innerHTML = '';
   const weekEl = document.getElementById('hmr-week');
   const week = (homeMagData && homeMagData.weekLabel) || magWeek();
@@ -14426,6 +14457,7 @@ function renderHomeMagazine() {
     if (dots) dots.appendChild(d);
   }
   hmrApply();
+  if (window.MagazineReading) window.MagazineReading.renderHome(homeMagData.entries);
 }
 function renderNews() {
   const stage = document.getElementById('mag-stage'); if (!stage) return;
@@ -25529,10 +25561,11 @@ function chBuildNoteBox(vid, fallbackTitle) {
   const photos = (vid && vid.photos && vid.photos.length) ? vid.photos : [];
   const body = (vid && vid.body) ? String(vid.body).trim() : '';
   const tricks = String(vid && vid.tricks || '').trim();
-  if (!vid || chItemLocked(vid) || (!photos.length && !body && !tricks)) return null;
+  if (!vid || chItemLocked(vid) || (!photos.length && !body && !tricks && !vid.pdf)) return null;
   const view = document.createElement('div'); view.className = 'ch-note-view';
   const ttl = document.createElement('div'); ttl.className = 'ch-note-title'; ttl.textContent = vid.title || fallbackTitle || 'İçerik';
   view.appendChild(ttl);
+  if (vid.pdf && window.EduPDF) { const pdf = window.EduPDF.viewer(vid.pdf); if (pdf) view.appendChild(pdf); }
   const inBody = new Set(), inlineUrls = new Set();
   if (body || tricks) {
     const re = /\{\{foto:(\d+)\}\}|!\[[^\]]*\]\(([^)]+)\)/g;
@@ -25876,6 +25909,7 @@ function chClosePhotoOverlays() {
   document.querySelectorAll('.ch-photo-dialog, .ch-content-preview').forEach(dialog => { dialog.close(); dialog.remove(); });
 }
 function chClearAuthorWorkspace() {
+  const pdfEditor = document.getElementById('ch-pdf-editor'); if (pdfEditor) { pdfEditor._pdf = null; if (typeof window !== 'undefined' && window.EduPDF) window.EduPDF.paint(); }
   const rewards = document.getElementById('edu-learning-rewards'); if (rewards) { rewards.replaceChildren(); rewards.hidden = true; }
   chClosePhotoOverlays();
   chStudioBusy = false;
@@ -26043,7 +26077,8 @@ async function chSaveDailyNote() {
   if (!chIsAdmin() || chStudioBusy || chMediaPending) return;
   const g = id => document.getElementById(id), fields = chDraftFields(), id = chDraftId, account = AUTH.user.id, epoch = chWorkspaceEpoch;
   if (fields.photos.some(p => !p.url || !chSafeImage(p.url)) || fields.photos.length > 10) { g('ch-in-err').textContent = 'Görselleri tamamla veya boş satırı kaldır.'; return; }
-  if (!fields.body.trim() && !fields.tricks.trim() && !fields.photos.length) { g('ch-in-err').textContent = 'Not metni veya görsel ekle.'; return; }
+  if (g('ch-pdf-editor')?.dataset.uploading === 'true') { g('ch-in-err').textContent = 'PDF yüklemesinin tamamlanmasını bekle.'; return; }
+  if (!fields.body.trim() && !fields.tricks.trim() && !fields.photos.length && !fields.pdf) { g('ch-in-err').textContent = 'Not metni, görsel veya PDF ekle.'; return; }
   chStudioBusy = true; g('ch-form').inert = true; g('ch-in-save').disabled = true; g('ch-in-err').textContent = 'Ana sayfaya kaydediliyor…';
   await chDraftCapture();
   try {
@@ -26101,7 +26136,7 @@ function chDailyCard(item) {
   const image = chDailyImage(item.photoUrl, item.title); if (image) card.appendChild(image);
   else { const visual = document.createElement('img'); visual.src = '/assets/daily-notes-cover.svg?v=1'; visual.alt = 'Günlük notlar için defter illüstrasyonu'; visual.loading = 'lazy'; card.appendChild(visual); }
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
-  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = 'Notu aç →'; open.onclick = () => chOpenDailyReader(item.id);
+  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = item.pdf ? 'PDF ve notu aç →' : 'Notu aç →'; open.onclick = () => chOpenDailyReader(item.id);
   card.append(time, title, excerpt, open, chDailySocialBlock(item.id)); return card;
 }
 function chDailyFeature(item) {
@@ -26119,7 +26154,7 @@ function chDailyFeature(item) {
   const title = document.createElement('h3'); title.textContent = item.title;
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
   const foot = document.createElement('div'); foot.className = 'daily-feature-foot';
-  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = 'Yazıyı oku →'; open.onclick = () => chOpenDailyReader(item.id);
+  const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = item.pdf ? 'PDF ve yazıyı aç →' : 'Yazıyı oku →'; open.onclick = () => chOpenDailyReader(item.id);
   const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = item.photoCount ? item.photoCount + ' görsel · herkese açık' : 'Herkese açık';
   foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body, chDailySocialBlock(item.id)); return box;
 }
@@ -26221,7 +26256,9 @@ async function chOpenDailyReader(id) {
       const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Bu paylaşımın medyası şu an görüntülenemiyor.'; body.appendChild(hint);
       if (/^https?:\/\//i.test(item.url || '')) { const source = document.createElement('a'); source.href = item.url; source.target = '_blank'; source.rel = 'noopener noreferrer'; source.textContent = 'Telegram kaynağını aç ↗'; body.appendChild(source); }
     }
-    reader.append(head, body, chDailySocialBlock(item.id));
+    reader.append(head);
+    if (window.AlfaArticleSpeech) reader.appendChild(window.AlfaArticleSpeech.controls([item.body, item.tricks].filter(Boolean).join('\n\n'), item.title));
+    reader.append(body, chDailySocialBlock(item.id));
   } catch {
     if (sequence !== chDailyReaderEpoch) return;
     reader.replaceChildren();
@@ -26286,6 +26323,7 @@ function chDraftFields() {
   const g = id => document.getElementById(id);
   return {
     title: g('ch-in-title').value, body: g('ch-in-body').value, tricks: g('ch-in-tricks').value,
+    pdf: g('ch-pdf-editor')?._pdf || null,
     url: g('ch-in-url').value, access: g('ch-in-access').value, plans: chSelectedPlans(),
     photos: Array.from(g('ch-photo-ed').children).map(row => ({ url: row.querySelector('.ch-purl').value, caption: row.querySelector('.ch-pcap').value })),
     vids: Array.from(g('ch-video-ed').children).map(row => ({ url: row.querySelector('.ch-vurl').value })),
@@ -26547,6 +26585,8 @@ function chOpenForm(mode, ids, prefill) {
   chForm = { mode: mode, channelId: daily ? null : channelOpen, sectionId: daily ? null : chSec, topicId: (ids && ids.topicId) || null, vidId: (ids && ids.vidId) || null, newId: mode === 'video-add' ? chUid() : null, ctype: 'not' };
   g('ch-in-title').value = (prefill && prefill.title) || '';
   g('ch-in-body').value = (prefill && prefill.body) || '';
+  g('ch-in-body').maxLength = daily ? 200000 : 40000;
+  const pdfEditor = g('ch-pdf-editor'); if (pdfEditor) { pdfEditor._pdf = prefill?.pdf || null; if (window.EduPDF) window.EduPDF.paint(); }
   g('ch-in-tricks').value = (prefill && prefill.tricks) || '';
   g('ch-in-url').value = (prefill && prefill.url) || '';
   const sec = chSecMeta(chCurTrader()).find(s => s.id === chSec);

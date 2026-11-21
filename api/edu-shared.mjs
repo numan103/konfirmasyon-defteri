@@ -19,6 +19,8 @@ import { EDU_PLANS } from '../assets/edu-plans-model.mjs';
 import { sealChannels, openChannels } from '../lib/edu-channel-storage.mjs';
 import eduTelegramInbox from '../lib/edu-telegram-inbox.mjs';
 import { readMagazineSnapshot } from '../lib/telegram-magazine-source.mjs';
+import { groupMagazineArticles } from '../assets/magazine-articles.mjs';
+import { cleanPDF } from '../lib/edu-pdf.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const ROWS = {
@@ -71,10 +73,11 @@ async function alfaNews(req, res) {
       e && e.type !== 'update' && e.publishedAt &&
       (e.sourceThread === 977 || /^https:\/\/t\.me\/alfakasim\/977\/\d+$/.test(e.sourceLink || ''))
     );
-    const entries = channelEntries.slice(0, 60).map(e => ({
+    const entries = channelEntries.slice(-200).map(e => ({
       id: text(e && e.id, 80),
       title: text(e && e.title, 200),
-      body: text(e && e.body, 40000),
+      body: text(e && e.body, 200000),
+      pdf: cleanPDF(e && e.pdf),
       type: e && e.type === 'update' ? 'update' : '',
       relId: text(e && e.relId, 80),
       result: text(e && e.result, 200),
@@ -116,7 +119,7 @@ async function alfaNews(req, res) {
       rosterVer: 2,
       authorsSeeded: true,
       authors,
-      entries,
+      entries: groupMagazineArticles(entries).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).slice(0, 60),
     } });
   } catch (error) {
     return res.status(200).json({ ok: false, data: null, _warn: 'alfanews okunamadı' });

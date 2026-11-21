@@ -271,7 +271,7 @@ test('public summaries whitelist fields even if private metadata is accidentally
 });
 test('manual daily validation rejects malformed media and overflow before writing, and cannot address lesson rows', async t => {
   const f = fixture(t), base = { action: 'save', draftId: 'draft-1', fields: { body: 'Not', photos: [] } };
-  for (const fields of [{ body: 'x'.repeat(40001), photos: [] }, { body: 'Not', photos: [null] }, { body: 'Not', photos: [{ url: 'javascript:alert(1)' }] }, { body: '', photos: [] }]) {
+  for (const fields of [{ body: 'x'.repeat(200001), photos: [] }, { body: 'Not', photos: [null] }, { body: 'Not', photos: [{ url: 'javascript:alert(1)' }] }, { body: '', photos: [] }]) {
     assert.equal((await f.request({ method: 'POST', query: { view: 'daily-notes' }, body: { ...base, fields } })).code, 400);
   }
   assert.equal((await f.request({ method: 'POST', query: { view: 'daily-notes' }, body: { ...base, id: 'channels' } })).code, 400);
