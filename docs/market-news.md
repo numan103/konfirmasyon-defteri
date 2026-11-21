@@ -123,7 +123,7 @@ Invoke-WebRequest -Uri "https://alfa-trader.com/api/ai?news=1&force=1" -Headers 
 
 ## Hedef sohbet
 - `NEWS_CHAT_ID || TG_TRADE_CHAT_ID || TG_CHAT_ID`
-- `NEWS_THREAD || TG_TRADE_THREAD || MACRO_TARGET_THREAD || TG_THREAD`
+- `NEWS_THREAD || TG_TRADE_THREAD || WEBSITE_NOTIFY_THREAD` (varsayilan `434`)
 
 ## Bilinen sinirlar
 - RSS basliklari dogrulanmis haber metni degildir; AI yorumu "yorum" olarak etiketlenir.

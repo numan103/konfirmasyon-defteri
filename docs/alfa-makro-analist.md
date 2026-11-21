@@ -20,7 +20,7 @@ Gerekli yeni: `MACRO_CRON_SECRET` (en az 32 karakter, kriptografik rastgele).
 
 Premium hedef zaten varsa `TG_PREMIUM_CHAT_ID`, `TG_PREMIUM_THREAD` yeniden kullanılır. Makro yeni hedef veya bot oluşturmaz. Tek yapılandırılmış hedef otomatik seçilebilir; iki hedef varsa `MACRO_TARGET` ile `public` veya `premium` açıkça seçilmelidir. İkisine birden gönderilmez. Forum konusu desteklenmiyorsa gönderim durur; yalnızca makro için konuyu kaldırmak isterseniz `MACRO_TARGET_THREAD=0` kullanın. Mevcut bildirimlerin `TG_THREAD` değerini değiştirmeyin.
 
-7 Kasım kullanıcı düzeltmesi: makro hedefi **Alfa Makro konusu**, `https://t.me/alfatraderspublic/772`. Production'da yalnız `MACRO_TARGET_THREAD=772` kullanılır; önce belirtilen `/434` makro hedefi değildir. Mevcut `TG_THREAD` ve portföy bildirimleri korunur. Konu değişikliği hedef parmak izini değiştirir; eski test/etkinleştirme onayı yeni konuya taşınmaz.
+7 Kasım kullanıcı düzeltmesi makroyu `/772` konusuna almıştı. **21 Kasım 2026 kullanıcı yönergesiyle tüm website bildirimleri** (yeni özellik, orderbook, coinalyze, makro, makro takvim/haber) `https://t.me/alfatraderspublic/434` konusuna taşınır. Makro konusu artık `MACRO_TARGET_THREAD` değil `WEBSITE_NOTIFY_THREAD` (varsayilan `434`) üzerinden çözülür; eski `MACRO_TARGET_THREAD=772` okunmaz. `TG_THREAD` (public charts) ve portföy bildirimleri değişmez. Konu değişikliği hedef parmak izini değiştirir; eski test/etkinleştirme onayı yeni konuya taşınmaz.
 
 `MACRO_ENABLED=0` acil sunucu durdurmasıdır. Bu değer olmasa bile ilk kurulumda DB ayarı **kapalıdır**. Başarılı, kullanıcı tarafından onaylanmış test ve ayrı etkinleştirme olmadan otomatik gönderim açılamaz.
 

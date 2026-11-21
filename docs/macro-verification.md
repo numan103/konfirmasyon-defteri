@@ -79,7 +79,7 @@
 
 ## 7 Kasım — tek mesaj ve Alfa Makro konusu
 
-- Kullanıcı son düzeltmesinde yalnız `https://t.me/alfatraderspublic/772` konusunu istedi; önceki `/434` seçimi kullanılmaz. Production'a yalnız `MACRO_TARGET_THREAD=772` eklendi. Portföyün `TG_THREAD`, hedef/bot ve webhook ayarlarına dokunulmadı.
+- 7 Kasım düzeltmesinde `/772` konusu istenmişti. 21 Kasım 2026 yönergesiyle website bildirimlerinin tamamı `https://t.me/alfatraderspublic/434` konusuna alındı; makro artık `WEBSITE_NOTIFY_THREAD` (varsayilan `434`) kullanır, `MACRO_TARGET_THREAD=772` okunmaz. Portföyün `TG_THREAD`, hedef/bot ve webhook ayarlarına dokunulmadı. Hedef parmak izi değiştiği için onay yenilenmelidir.
 - Yeni raporlar tek Telegram mesajıdır. Tam metnin kaynak URL satırları `text_link` entities ile tıklanabilir “Kaynağı aç” etiketlerine dönüştürülür. İçerik ve gerçek kaynak adresleri korunur; parse_mode/HTML açılmaz. 3900 UTF-16 üst sınırı, test öneki için boşluk ve etiket sonrası doğru kaynak offset'leri kontrol edilir. Eski çok parçalı hazır rapor da artık gönderilemez.
 - Gerçek 09:36 metniyle yalnız biçim doğrulaması: **3789 karakter, test etiketiyle 3804, 529 görünür kelime, 6 bağlantı, tek mesaj**. Yerel HTML önizleme oluşturuldu; yeni model/araştırma çağrısı veya Telegram mesajı yoktur. Önceki iki parçalı test silinmedi veya yeniden gönderilmedi; günlük `sent` kaydı korundu.
 - **161/161 test** geçti: Unicode/UTF-16 bağlantıları, tek mesaj üst sınırı, eski çok parçalı taslağın engellenmesi, tek çağrı/kalıcı teslim teyidi ve yalnız makro konu override'ı kapsanır. Hedef parmak izi konu değişince farklı olduğundan eski test onayı yeni hedefe geçmez; otomasyon kapalı tutulur.

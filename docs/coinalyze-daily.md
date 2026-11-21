@@ -1,8 +1,10 @@
 # Coinalyze gunluk BTC turev ozeti
 
 ## Hedef
-- Her gun **Istanbul 11:00** civarinda, Alfa Traders Public grubundaki **charts**
-  konusuna (`TG_THREAD` = `/434`) tek bir Telegram mesaji gonderilir.
+- Her gun **Istanbul 11:00** civarinda, Alfa Traders Public grubundaki **website bildirim**
+  konusuna (`https://t.me/alfatraderspublic/434`) tek bir Telegram mesaji gonderilir.
+  Hedef `WEBSITE_NOTIFY_THREAD` (varsayilan `434`) ile yonetilir; `TG_THREAD` (public charts)
+  trade bildirimlerinde kalir.
 - Mesaj uc veriyi birlikte verir:
   - **Spot CVD (24s):** BTC spot marketlerinin alim-satim hacim farki (base coin).
   - **Long/Short:** BTC perpetual marketlerinin long/short hesap orani ortalamasi.

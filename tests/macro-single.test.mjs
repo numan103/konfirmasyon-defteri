@@ -43,20 +43,24 @@ test('existing Telegram transport uses explicit link entities but never activate
   assert.equal(requests[1].entities, undefined);
 });
 
-test('macro topic override changes approval fingerprint without changing portfolio topic', async t => {
-  const keys = ['TG_CHAT_ID', 'TG_PREMIUM_CHAT_ID', 'TG_BOT_TOKEN', 'TG_THREAD', 'MACRO_TARGET', 'MACRO_TARGET_THREAD'];
+test('makro website bildirim konusuna gider, public charts konusu degismez', async t => {
+  const keys = ['TG_CHAT_ID', 'TG_PREMIUM_CHAT_ID', 'TG_BOT_TOKEN', 'TG_THREAD', 'MACRO_TARGET', 'MACRO_TARGET_THREAD', 'WEBSITE_NOTIFY_THREAD', 'WEBSITE_NOTIFY_CHAT_ID'];
   const saved = Object.fromEntries(keys.map(k => [k, process.env[k]]));
   const oldFetch = global.fetch;
   t.after(() => { global.fetch = oldFetch; for (const k of keys) { if (saved[k] === undefined) delete process.env[k]; else process.env[k] = saved[k]; } });
-  Object.assign(process.env, { TG_CHAT_ID: 'test-chat', TG_BOT_TOKEN: 'test-only', TG_THREAD: '434', MACRO_TARGET: 'public' });
+  Object.assign(process.env, { TG_CHAT_ID: 'test-chat', TG_BOT_TOKEN: 'test-only', TG_THREAD: '4', MACRO_TARGET: 'public', MACRO_TARGET_THREAD: '772' });
   delete process.env.TG_PREMIUM_CHAT_ID;
-  delete process.env.MACRO_TARGET_THREAD;
+  delete process.env.WEBSITE_NOTIFY_THREAD;
+  delete process.env.WEBSITE_NOTIFY_CHAT_ID;
   global.fetch = async () => ({ ok: true, json: async () => ({ ok: true, result: { id: -123, type: 'supergroup', is_forum: true, title: 'Alfa Traders Public', username: 'alfatraderspublic' } }) });
-  const previous = await macroTarget();
-  process.env.MACRO_TARGET_THREAD = '772';
-  const next = await macroTarget();
-  assert.equal(next.threadId, 772);
-  assert.equal(next.public.topicUrl, 'https://t.me/alfatraderspublic/772');
-  assert.notEqual(next.public.targetHash, previous.public.targetHash);
-  assert.equal(process.env.TG_THREAD, '434');
+  const current = await macroTarget();
+  assert.equal(current.threadId, 434);
+  assert.equal(current.public.topicUrl, 'https://t.me/alfatraderspublic/434');
+  assert.equal(process.env.TG_THREAD, '4');
+  assert.notEqual(current.public.targetHash, null);
+
+  process.env.WEBSITE_NOTIFY_THREAD = '999';
+  const overridden = await macroTarget();
+  assert.equal(overridden.threadId, 999);
+  assert.notEqual(overridden.public.targetHash, current.public.targetHash);
 });

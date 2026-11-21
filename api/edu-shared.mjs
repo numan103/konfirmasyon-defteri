@@ -12,6 +12,7 @@ import youtubeLatest from '../lib/youtube-latest.mjs';
 import eduFeedback from '../lib/edu-feedback.mjs';
 import influencerContent from '../lib/influencer-content.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
+import { websiteNotifyTarget } from '../lib/website-notify.mjs';
 import { FEATURES, isNew } from '../assets/site-features.mjs';
 import { bearer, requestUser, requestTier } from '../lib/auth.mjs';
 import { openRecord } from '../lib/education-crm.mjs';
@@ -341,8 +342,8 @@ async function siteFeatures(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
 
   const token = (process.env.TG_BOT_TOKEN || '').trim();
-  const chat = (process.env.TG_CHAT_ID || '').trim();
-  if (!token || !chat) return res.status(200).json({ ok: true, skipped: true, reason: 'telegram_not_configured' });
+  const target = websiteNotifyTarget();
+  if (!token || !target.ready) return res.status(200).json({ ok: true, skipped: true, reason: 'telegram_not_configured' });
 
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch { /* boş gövde */ }
@@ -363,7 +364,7 @@ async function siteFeatures(req, res) {
 
   const lines = pending.map(f => '• ' + (f.icon || '✦') + ' ' + f.label + ' — ' + (f.desc || '')).join('\n');
   const text = '🆕 Alfa Traders — yeni özellik\n\n' + lines + '\n\n#yeniözellik';
-  const sent = await sendTelegram(text, chat);
+  const sent = await sendTelegram(text, target.chat, target.thread);
   if (sent.http !== 200 || !sent.ok) {
     return res.status(200).json({ ok: false, error: 'telegram_send_failed', status: sent.http });
   }

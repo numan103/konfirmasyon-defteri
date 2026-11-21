@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 const ENV_KEYS = [
   'COINALYZE_API_KEY', 'COINALYZE_CHAT_ID', 'COINALYZE_THREAD',
   'TG_BOT_TOKEN', 'TG_CHAT_ID', 'TG_THREAD', 'TG_TRADE_CHAT_ID', 'TG_TRADE_THREAD',
+  'WEBSITE_NOTIFY_THREAD', 'WEBSITE_NOTIFY_CHAT_ID',
   'CRON_SECRET', 'MACRO_CRON_SECRET', 'SUPABASE_SERVICE_ROLE', 'SUPABASE_PUBLISHABLE', 'SUPABASE_URL',
   'SITE_ADMIN_EMAILS',
 ];
@@ -154,7 +155,7 @@ test('yetici dryRun ile veriyi gorur, Telegram mesaji atmaz', async () => {
 test('zamanlanmis gonderim gun icinde tek mesaj atar', async () => {
   const state = makeState(NOW);
   globalThis.fetch = fetchStub(state, NOW);
-  const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@charts', TG_THREAD: '434', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
+  const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@charts', TG_THREAD: '4', COINALYZE_THREAD: '4', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
   const req = { method: 'GET', url: 'https://x/api/ai?coinalyze=1', headers: { 'x-vercel-cron': '1', 'user-agent': 'vercel-cron/1.0' } };
   const first = makeRes();
   await withNow(NOW, () => mod.default(req, first));

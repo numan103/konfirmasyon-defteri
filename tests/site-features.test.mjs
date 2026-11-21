@@ -21,7 +21,9 @@ function response() {
 async function loadHandler() {
   process.env.TG_BOT_TOKEN = 'test-token';
   process.env.TG_CHAT_ID = '123456';
-  process.env.TG_THREAD = '';
+  process.env.TG_THREAD = '4'; // public charts — website bildirimleri buraya gitmemeli
+  delete process.env.WEBSITE_NOTIFY_THREAD;
+  delete process.env.WEBSITE_NOTIFY_CHAT_ID;
   const mod = await import('../api/edu-shared.mjs?site-features-test=' + Math.random());
   return mod.default;
 }
@@ -96,6 +98,8 @@ test('siteye yeni özellik eklenince Telegrama tek mesaj gider', async () => {
   assert.equal(res.body.ok, true);
   assert.equal(res.body.sent, 5);
   assert.equal(calls.tg.length, 1);
+  assert.equal(calls.tg[0].body.chat_id, '123456');
+  assert.equal(calls.tg[0].body.message_thread_id, 434);
   assert.match(calls.tg[0].body.text, /Sabah Kartı/);
   assert.match(calls.tg[0].body.text, /Ayna'ya otomatik kayıt/);
   assert.match(calls.tg[0].body.text, /Portföyüm/);

@@ -1,4 +1,4 @@
-import test from 'node:test';
+﻿import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
@@ -7,7 +7,7 @@ const css = fs.readFileSync(new URL('../assets/my-portfolio.css', import.meta.ur
 const mod = fs.readFileSync(new URL('../assets/my-portfolio.mjs', import.meta.url), 'utf8');
 
 test('portföy menüsü Trader gibi dropdown, içerik Alfa Portföy / Portföyüm sekmeleri', () => {
-  assert.ok(html.includes('/assets/my-portfolio.css?v=3'));
+  assert.ok(html.includes('/assets/my-portfolio.css?v=4'));
   assert.ok(html.includes('/assets/my-portfolio.mjs?v=4'));
   assert.ok(html.includes('id="navdrop-portfoy"') && html.includes('class="nav-link drop-btn" id="tab-portfoy"'));
   assert.ok(html.includes('class="drop-menu"'));
@@ -64,7 +64,7 @@ test('premium kilidi yalnızca Alfa Portföy panelini etkiler, hesaba özel Port
   assert.doesNotMatch(gate, /querySelector\('#page-portfoy \.ap2-layout'\)/);
   assert.doesNotMatch(gate, /querySelector\('#page-portfoy \.ap2-hd-actions'\)/);
 
-  // Girişli üye Portföyüm sekmesindeyse renderAlfaPortfoy2 premium gate\'i atlar.
+  // Girişli üye Portföyüm sekmesindeyse renderAlfaPortfoy2 premium gate'i atlar.
   const render = html.slice(html.indexOf('function renderAlfaPortfoy2()'), html.indexOf('function renderAlfaPortfoy2()') + 900);
   assert.match(render, /ap2-tab-mine.*classList\.contains\('on'\)/);
   assert.match(render, /AUTH\.user && AUTH\.user\.id/);
@@ -98,6 +98,30 @@ test('Portföyüm kripto pozisyonları canlı fiyatlıyor (yeni API yok, yerel k
   assert.match(mod, /window\.AlfaMyPortfolio = \{ activate, refresh: render, markActive, refreshPrices, normSym \}/);
   assert.match(mod, /function normSym\(s\)/);
   assert.match(mod, /v\.endsWith\('USDT'\)/, 'BTC/USDT ve BTCUSDT aynı sembol');
+});
+
+test('yeni enstrüman paneli adım adım, site buton/renk diliyle düzenli', () => {
+  for (const id of ['ap2-form', 'mp-form']) {
+    const start = html.indexOf('id="' + id + '"');
+    assert.ok(start >= 0, id + ' eksik');
+    const form = html.slice(start, start + 6500);
+    assert.match(form, /pf-entry-form/, id + ' yeni form stili');
+    assert.match(form, /pf-form-title[\s\S]*pf-form-icon/, id + ' başlık ikonu');
+    assert.match(form, /class="pf-form-close"/, id + ' küçük kapatma butonu');
+    for (const step of ['Enstrüman', 'Pozisyon', 'Fiyat & Not']) {
+      assert.ok(form.includes('>' + step + '<'), id + ' adım: ' + step);
+    }
+    assert.match(form, /pf-step-no">1/, id + ' 1. adım');
+    assert.match(form, /pf-step-no">2/, id + ' 2. adım');
+    assert.match(form, /pf-step-no">3/, id + ' 3. adım');
+    assert.match(form, /pf-form-actions/, id + ' buton grubu');
+    assert.match(form, /pf-preview/, id + ' özet kutusu');
+  }
+  assert.match(css, /#page-portfoy \.strat-form-head \{ display:flex/);
+  assert.match(css, /\.pf-field input:focus \{ outline:none; border-color:var\(--pc\)/);
+  assert.match(css, /\.pf-form-actions \.btn \{ flex:0 0 132px/);
+  assert.match(css, /\.pf-form-actions \.btn\.solid \{ flex:1 1 auto/);
+  assert.match(css, /@media \(max-width:560px\)[\s\S]*\.pf-grid \{ grid-template-columns:1fr/);
 
   const sw = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
   assert.match(sw, /const CACHE = 'alfa-v\d+-/);

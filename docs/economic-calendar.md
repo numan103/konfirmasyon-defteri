@@ -137,7 +137,7 @@ Aksi halde `401 unauthorized`.
 |---|---|---|
 | `ECON_ALERT_SECRET` | — | Elle tetikleme sirri (opsiyonel; diger sir isimleri de kabul edilir) |
 | `ECON_CHAT_ID` | `NEWS_CHAT_ID` / `TG_TRADE_CHAT_ID` / `TG_CHAT_ID` | Hedef sohbet |
-| `ECON_THREAD` | `NEWS_THREAD` / `TG_TRADE_THREAD` / `MACRO_TARGET_THREAD` / `TG_THREAD` | Konu/thread id |
+| `ECON_THREAD` | `NEWS_THREAD` / `TG_TRADE_THREAD` / `WEBSITE_NOTIFY_THREAD` (varsayilan `434`) | Konu/thread id |
 | `ECON_COUNTRIES` | `USD` | Virgulle ayrilmis ulke kodlari |
 | `ECON_IMPACTS` | `High` | Etki seviyeleri |
 | `ECON_AGENDA_START` | `08:30` | Ajanda baslangici (TSİ) |

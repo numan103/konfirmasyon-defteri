@@ -74,7 +74,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/shared-documents.js?v=1"></script>
 <script src="/assets/portfolio-recovery.js?v=1"></script>
-<link rel="stylesheet" href="/assets/my-portfolio.css?v=3">
+<link rel="stylesheet" href="/assets/my-portfolio.css?v=4">
 <script type="module" src="/assets/my-portfolio.mjs?v=4"></script>
 <style>
   #home-diary-link:not([hidden]) { display:block; }
@@ -8717,67 +8717,65 @@
           <div class="ap2-gate-err" id="ap2-gate-err"></div>
         </div>
       </div>
-      <div id="ap2-form" class="strat-form hidden">
+      <div id="ap2-form" class="strat-form hidden pf-entry-form">
         <div class="strat-form-head">
-          <span id="ap2-form-title">Yeni Enstrüman</span>
-          <button type="button" class="btn" id="ap2-form-cancel">✕</button>
+          <div class="pf-form-title"><span class="pf-form-icon">＋</span><span><span id="ap2-form-title">Yeni Enstrüman</span><small class="pf-form-sub">Sırayla doldur — özet anında güncellensin.</small></span></div>
+          <button type="button" class="pf-form-close" id="ap2-form-cancel" aria-label="Kapat">✕</button>
         </div>
         <div class="strat-form-body">
-          <label>Enstrüman / Sembol</label>
-          <input type="text" id="ap2-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
-          <div class="ap2-chip-row" id="ap2-f-sym-chips">
-            <button type="button" data-sym="BTC">₿ BTC</button>
-            <button type="button" data-sym="ETH">Ξ ETH</button>
-            <button type="button" data-sym="SOL">◎ SOL</button>
-            <button type="button" data-sym="BNB">BNB</button>
-            <button type="button" data-sym="XRP">XRP</button>
-            <button type="button" data-sym="DOGE">Ð DOGE</button>
-            <button type="button" data-sym="LTC">Ł LTC</button>
-            <button type="button" data-sym="ADA">ADA</button>
-            <button type="button" data-sym="AVAX">AVAX</button>
-            <button type="button" data-sym="XAUUSD">🥇 XAUUSD</button>
-          </div>
-          <label>Tür</label>
-          <div id="ap2-f-type" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-            <button type="button" class="ap2-type-chip on" data-ap2t="kripto">🪙 Kripto</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="hisse">📈 Hisse</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="altin">🥇 Altın</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="gumus">🪙 Gümüş</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="emtia">🛢️ Emtia</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="doviz">💵 Döviz</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="endeks">📊 Endeks</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="fon">🏢 Fon</button>
-            <button type="button" class="ap2-type-chip" data-ap2t="custom">✍️ Özel</button>
-          </div>
-          <label>Tarih</label>
-          <input type="date" id="ap2-f-date">
-          <div class="ap2-seg" id="ap2-f-side">
-            <button type="button" class="on" data-ap2side="LONG">📈 UZUN</button>
-            <button type="button" data-ap2side="SHORT">📉 KISA <span style="font-weight:500;opacity:.65">(hedge)</span></button>
-          </div>
-          <div class="ap2-seg" id="ap2-f-mode">
-            <button type="button" class="on" data-ap2m="tutar">💵 Tutar ile</button>
-            <button type="button" data-ap2m="adet">🪙 Adet ile</button>
-          </div>
-          <div id="ap2-f-amount-box">
-            <label>Ne kadar harcadın? ($)</label>
-            <input type="number" id="ap2-f-amount" placeholder="Örn: 500" step="any" min="0">
-          </div>
-          <div id="ap2-f-qty-box" style="display:none">
-            <label>Kaç adet aldın?</label>
-            <input type="number" id="ap2-f-qty" placeholder="Örn: 0.05" step="any" min="0">
-          </div>
-          <label>Birim maliyet (ortalama giriş fiyatı, $)</label>
-          <input type="number" id="ap2-f-cost" placeholder="Örn: 35000" step="any" min="0">
-          <label>Güncel fiyat ($) <span style="color:var(--text-3);font-weight:400;font-size:11px">— boş bırakırsan canlı fiyat dene</span></label>
-          <input type="number" id="ap2-f-price" placeholder="Otomatik getirilecek" step="any" min="0">
-          <label>Not</label>
-          <input type="text" id="ap2-f-note" placeholder="Opsiyonel not..." maxlength="120">
-          <div class="ap2-form-preview" id="ap2-f-preview"></div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button type="button" class="btn solid" id="ap2-f-save">💾 Kaydet</button>
-            <button type="button" class="btn" id="ap2-f-cancel">Vazgeç</button>
-          </div>
+          <section class="pf-step">
+            <div class="pf-step-head"><span class="pf-step-no">1</span><span class="pf-step-title">Enstrüman</span><span class="pf-step-hint">Önce neyi takip ettiğini seç</span></div>
+            <div class="pf-field">
+              <label for="ap2-f-sym">Enstrüman / Sembol</label>
+              <input type="text" id="ap2-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
+              <div class="ap2-chip-row" id="ap2-f-sym-chips">
+                <button type="button" data-sym="BTC">₿ BTC</button>
+                <button type="button" data-sym="ETH">Ξ ETH</button>
+                <button type="button" data-sym="SOL">◎ SOL</button>
+                <button type="button" data-sym="BNB">BNB</button>
+                <button type="button" data-sym="XRP">XRP</button>
+                <button type="button" data-sym="DOGE">Ð DOGE</button>
+                <button type="button" data-sym="LTC">Ł LTC</button>
+                <button type="button" data-sym="ADA">ADA</button>
+                <button type="button" data-sym="AVAX">AVAX</button>
+                <button type="button" data-sym="XAUUSD">🥇 XAUUSD</button>
+              </div>
+            </div>
+            <div class="pf-field" style="margin-top:12px">
+              <span class="pf-label">Tür</span>
+              <div class="ap2-type-chips" id="ap2-f-type">
+                <button type="button" class="ap2-type-chip on" data-ap2t="kripto">🪙 Kripto</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="hisse">📈 Hisse</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="altin">🥇 Altın</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="gumus">🪙 Gümüş</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="emtia">🛢️ Emtia</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="doviz">💵 Döviz</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="endeks">📊 Endeks</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="fon">🏢 Fon</button>
+                <button type="button" class="ap2-type-chip" data-ap2t="custom">✍️ Özel</button>
+              </div>
+            </div>
+          </section>
+          <section class="pf-step">
+            <div class="pf-step-head"><span class="pf-step-no">2</span><span class="pf-step-title">Pozisyon</span><span class="pf-step-hint">Tarih, yön ve miktar</span></div>
+            <div class="pf-grid">
+              <div class="pf-field"><label for="ap2-f-date">İşlem tarihi</label><input type="date" id="ap2-f-date"></div>
+              <div class="pf-field"><span class="pf-label">Yön</span><div class="ap2-seg" id="ap2-f-side"><button type="button" class="on" data-ap2side="LONG">📈 UZUN</button><button type="button" data-ap2side="SHORT">📉 KISA <span>(hedge)</span></button></div></div>
+              <div class="pf-field full"><span class="pf-label">Giriş yöntemi</span><div class="ap2-seg" id="ap2-f-mode"><button type="button" class="on" data-ap2m="tutar">💵 Tutar ile</button><button type="button" data-ap2m="adet">🪙 Adet ile</button></div></div>
+              <div class="pf-field" id="ap2-f-amount-box"><label for="ap2-f-amount">Harcanan tutar ($)</label><input type="number" id="ap2-f-amount" placeholder="Örn: 500" step="any" min="0"></div>
+              <div class="pf-field" id="ap2-f-qty-box" style="display:none"><label for="ap2-f-qty">Alınan adet</label><input type="number" id="ap2-f-qty" placeholder="Örn: 0.05" step="any" min="0"></div>
+            </div>
+          </section>
+          <section class="pf-step">
+            <div class="pf-step-head"><span class="pf-step-no">3</span><span class="pf-step-title">Fiyat & Not</span><span class="pf-step-hint">Kâr/zarar buradan hesaplanır</span></div>
+            <div class="pf-grid">
+              <div class="pf-field"><label for="ap2-f-cost">Birim maliyet ($)</label><input type="number" id="ap2-f-cost" placeholder="Örn: 35000" step="any" min="0"></div>
+              <div class="pf-field"><label for="ap2-f-price">Güncel fiyat ($)</label><input type="number" id="ap2-f-price" placeholder="Otomatik getirilecek" step="any" min="0"><span class="pf-hint">Boş bırakırsan canlı fiyat denenir.</span></div>
+              <div class="pf-field full"><label for="ap2-f-note">Not (opsiyonel)</label><input type="text" id="ap2-f-note" placeholder="Örn: uzun vadeli birikim" maxlength="120"></div>
+            </div>
+          </section>
+          <div class="ap2-form-preview pf-preview" id="ap2-f-preview"></div>
+          <div class="pf-form-actions"><button type="button" class="btn solid" id="ap2-f-save">💾 Kaydet</button><button type="button" class="btn" id="ap2-f-cancel">Vazgeç</button></div>
           <div class="strat-form-err" id="ap2-f-err"></div>
         </div>
       </div>
@@ -8876,24 +8874,44 @@
           </div>
           <div id="mp-trades" class="ap2-sell-hist hidden"><h4>Gerçekleşen İşlemler <span id="mp-trades-total"></span></h4><div id="mp-trades-body"></div></div>
           <div class="ap2-monthly" id="mp-monthly"><div class="ap2-monthly-head" id="mp-monthly-head"><span>📊 Aylık Performans</span><span class="ap2-monthly-this" id="mp-monthly-this"></span><span class="ap2-monthly-caret">▾</span></div><div class="ap2-monthly-body hidden" id="mp-monthly-body"></div></div>
-          <div id="mp-form" class="strat-form hidden">
-            <div class="strat-form-head"><span id="mp-form-title">Yeni Enstrüman</span><button type="button" class="btn" id="mp-form-cancel">✕</button></div>
+          <div id="mp-form" class="strat-form hidden pf-entry-form">
+            <div class="strat-form-head">
+              <div class="pf-form-title"><span class="pf-form-icon">＋</span><span><span id="mp-form-title">Yeni Enstrüman</span><small class="pf-form-sub">Sırayla doldur — özet anında güncellensin.</small></span></div>
+              <button type="button" class="pf-form-close" id="mp-form-cancel" aria-label="Kapat">✕</button>
+            </div>
             <div class="strat-form-body">
-              <label>Enstrüman / Sembol</label>
-              <input type="text" id="mp-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
-              <div class="ap2-chip-row" id="mp-f-chips"><button type="button" data-mpsym="BTC">₿ BTC</button><button type="button" data-mpsym="ETH">Ξ ETH</button><button type="button" data-mpsym="SOL">◎ SOL</button><button type="button" data-mpsym="BNB">BNB</button><button type="button" data-mpsym="XRP">XRP</button><button type="button" data-mpsym="XAUUSD">🥇 XAUUSD</button></div>
-              <label>Tür</label>
-              <div class="ap2-type-chips" id="mp-f-type"><button type="button" class="ap2-type-chip on" data-mptype="kripto">🪙 Kripto</button><button type="button" class="ap2-type-chip" data-mptype="hisse">📈 Hisse</button><button type="button" class="ap2-type-chip" data-mptype="altin">🥇 Altın</button><button type="button" class="ap2-type-chip" data-mptype="emtia">🛢️ Emtia</button><button type="button" class="ap2-type-chip" data-mptype="doviz">💵 Döviz</button><button type="button" class="ap2-type-chip" data-mptype="custom">✍️ Özel</button></div>
-              <label>Tarih</label><input type="date" id="mp-f-date">
-              <div class="ap2-seg" id="mp-f-side"><button type="button" class="on" data-mpside="LONG">📈 UZUN</button><button type="button" data-mpside="SHORT">📉 KISA <span>(hedge)</span></button></div>
-              <div class="ap2-seg" id="mp-f-mode"><button type="button" class="on" data-mpmode="tutar">💵 Tutar ile</button><button type="button" data-mpmode="adet">🪙 Adet ile</button></div>
-              <div id="mp-f-amount-box"><label>Ne kadar harcadın? ($)</label><input type="number" id="mp-f-amount" placeholder="Örn: 500" step="any" min="0"></div>
-              <div id="mp-f-qty-box" class="hidden"><label>Kaç adet aldın?</label><input type="number" id="mp-f-qty-field" placeholder="Örn: 0.05" step="any" min="0"></div>
-              <label>Birim maliyet (ortalama giriş fiyatı, $)</label><input type="number" id="mp-f-cost" placeholder="Örn: 35000" step="any" min="0">
-              <label>Güncel fiyat ($) <span class="mp-lbl-hint">— boş bırakırsan giriş fiyatı kullanılır</span></label><input type="number" id="mp-f-price" placeholder="Opsiyonel" step="any" min="0">
-              <label>Not</label><input type="text" id="mp-f-note" placeholder="Opsiyonel not..." maxlength="120">
-              <div class="ap2-form-preview" id="mp-f-preview">Bilgileri girince özet burada görünür.</div>
-              <div class="mp-form-actions"><button type="button" class="btn solid" id="mp-f-save">💾 Kaydet</button><button type="button" class="btn" id="mp-f-cancel2">Vazgeç</button></div>
+              <section class="pf-step">
+                <div class="pf-step-head"><span class="pf-step-no">1</span><span class="pf-step-title">Enstrüman</span><span class="pf-step-hint">Önce neyi takip ettiğini seç</span></div>
+                <div class="pf-field">
+                  <label for="mp-f-sym">Enstrüman / Sembol</label>
+                  <input type="text" id="mp-f-sym" placeholder="Örn: BTC, ETH, SOL, XAUUSD" maxlength="40" autocomplete="off">
+                  <div class="ap2-chip-row" id="mp-f-chips"><button type="button" data-mpsym="BTC">₿ BTC</button><button type="button" data-mpsym="ETH">Ξ ETH</button><button type="button" data-mpsym="SOL">◎ SOL</button><button type="button" data-mpsym="BNB">BNB</button><button type="button" data-mpsym="XRP">XRP</button><button type="button" data-mpsym="XAUUSD">🥇 XAUUSD</button></div>
+                </div>
+                <div class="pf-field" style="margin-top:12px">
+                  <span class="pf-label">Tür</span>
+                  <div class="ap2-type-chips" id="mp-f-type"><button type="button" class="ap2-type-chip on" data-mptype="kripto">🪙 Kripto</button><button type="button" class="ap2-type-chip" data-mptype="hisse">📈 Hisse</button><button type="button" class="ap2-type-chip" data-mptype="altin">🥇 Altın</button><button type="button" class="ap2-type-chip" data-mptype="emtia">🛢️ Emtia</button><button type="button" class="ap2-type-chip" data-mptype="doviz">💵 Döviz</button><button type="button" class="ap2-type-chip" data-mptype="custom">✍️ Özel</button></div>
+                </div>
+              </section>
+              <section class="pf-step">
+                <div class="pf-step-head"><span class="pf-step-no">2</span><span class="pf-step-title">Pozisyon</span><span class="pf-step-hint">Tarih, yön ve miktar</span></div>
+                <div class="pf-grid">
+                  <div class="pf-field"><label for="mp-f-date">İşlem tarihi</label><input type="date" id="mp-f-date"></div>
+                  <div class="pf-field"><span class="pf-label">Yön</span><div class="ap2-seg" id="mp-f-side"><button type="button" class="on" data-mpside="LONG">📈 UZUN</button><button type="button" data-mpside="SHORT">📉 KISA <span>(hedge)</span></button></div></div>
+                  <div class="pf-field full"><span class="pf-label">Giriş yöntemi</span><div class="ap2-seg" id="mp-f-mode"><button type="button" class="on" data-mpmode="tutar">💵 Tutar ile</button><button type="button" data-mpmode="adet">🪙 Adet ile</button></div></div>
+                  <div class="pf-field" id="mp-f-amount-box"><label for="mp-f-amount">Harcanan tutar ($)</label><input type="number" id="mp-f-amount" placeholder="Örn: 500" step="any" min="0"></div>
+                  <div class="pf-field hidden" id="mp-f-qty-box"><label for="mp-f-qty-field">Alınan adet</label><input type="number" id="mp-f-qty-field" placeholder="Örn: 0.05" step="any" min="0"></div>
+                </div>
+              </section>
+              <section class="pf-step">
+                <div class="pf-step-head"><span class="pf-step-no">3</span><span class="pf-step-title">Fiyat & Not</span><span class="pf-step-hint">Kâr/zarar buradan hesaplanır</span></div>
+                <div class="pf-grid">
+                  <div class="pf-field"><label for="mp-f-cost">Birim maliyet ($)</label><input type="number" id="mp-f-cost" placeholder="Örn: 35000" step="any" min="0"></div>
+                  <div class="pf-field"><label for="mp-f-price">Güncel fiyat ($)</label><input type="number" id="mp-f-price" placeholder="Opsiyonel" step="any" min="0"><span class="pf-hint">Boş bırakırsan giriş fiyatı kullanılır.</span></div>
+                  <div class="pf-field full"><label for="mp-f-note">Not (opsiyonel)</label><input type="text" id="mp-f-note" placeholder="Örn: uzun vadeli birikim" maxlength="120"></div>
+                </div>
+              </section>
+              <div class="ap2-form-preview pf-preview" id="mp-f-preview">Bilgileri girince özet burada görünür.</div>
+              <div class="mp-form-actions pf-form-actions"><button type="button" class="btn solid" id="mp-f-save">💾 Kaydet</button><button type="button" class="btn" id="mp-f-cancel2">Vazgeç</button></div>
               <div class="strat-form-err" id="mp-f-err"></div>
             </div>
           </div>
