@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği yeni rehber için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v147-guide-details'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b208-guide-details'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v148-leverage-hedge'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b209-leverage-hedge'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 

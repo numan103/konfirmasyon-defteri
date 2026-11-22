@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v147-guide-details';
-const BUILD_ID = 'b208-guide-details';
+﻿const CACHE = 'alfa-v148-leverage-hedge';
+const BUILD_ID = 'b209-leverage-hedge';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

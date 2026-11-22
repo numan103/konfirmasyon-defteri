@@ -36,6 +36,27 @@ yükleme yolları vardı. Bunlar sunucu kapanmasından farklı veri güvenliği 
 - Cache yükleme okuma işlemidir; yüklerken birleştirme, tarih yeniden yazma veya
   kayıt gönderme yapılmaz. Not düzenleme çift tıklama işleyicisi de düzeltildi.
 
+## Kaldıraçlı hedge (paper portföy)
+
+- Yeni pozisyon formunda kaldıraç serbest sayısal girişidir (hazır 1x–100x
+  kısayolları yardımcıdır; 1.5, 10, 100 gibi değerler yazılabilir). Geçerli
+  aralık 0.01–1000x'tir; boş, geçersiz veya sınır dışı değer kaydı engeller.
+- "Marj ile" yöntemi seçildiğinde girilen tutar marjdır ve
+  `notional = marj × kaldıraç` hesaplanır. "Tutar ile" yönteminde girilen tutar
+  notional, "Adet ile" yönteminde `adet × birim maliyet` notional olur.
+- Kaldıraçlı pozisyonda nakitten yalnızca `marj = notional / kaldıraç` (2 hane
+  yuvarlanmış) blokelenir; K/Z notional üzerinden hesaplanır. Örnekler:
+  168 $ nakit + 1.49x + 250 $ notional → 167.79 $ marj, 0.21 $ serbest;
+  10 $ marj + 100x → 1.000 $ notional.
+- Kaldıraç alanı olmayan/eski kayıtlar birebir eski spot davranışını korur
+  (tam notional blokelenir). Sunucu `reconcileCash` ve özet hesabı aynı kuralı
+  uygular; istemci önizlemesiyle sunucu düzeltmesi tutarlıdır.
+- Aynı sembol/yön/kaldıraçtaki short eklemeleri tek pozisyonda ağırlıklı
+  ortalama maliyetle birleşir; farklı kaldıraç ayrı lot olarak durur. Kısmi
+  kapanışta marj oranında serbest bırakılır, gerçekleşen K/Z eklenir.
+- Bu bir paper/portfolio simülasyonudur; gerçek borsa emri, likidasyon,
+  funding veya borç faizi motoru içermez.
+
 ## Kullanım
 
 Normal Portföy Yönetimi ekranında güvenlik paneli, sürüm listesi veya yedek

@@ -41,6 +41,25 @@ const money = v => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, ma
 const pctFmt = v => (v >= 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(num(v)) + ' %';
 const dateFmt = d => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1].slice(2) : '—'; };
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const MAX_LEVERAGE = 1000;
+function leverageValid(raw) {
+  if (raw === null || raw === undefined) return true;
+  const v = Number(raw);
+  return Number.isFinite(v) && v > 0 && v <= MAX_LEVERAGE;
+}
+function leverageOf(p) {
+  const raw = p && p.leverage;
+  if (!leverageValid(raw)) return 1;
+  return (raw === null || raw === undefined) ? 1 : Number(raw);
+}
+function marginFor(notional, leverage) {
+  const lev = leverageValid(leverage) ? (leverage === null || leverage === undefined ? 1 : Number(leverage)) : 1;
+  if (!(lev > 1)) return notional;
+  return Math.round((notional / lev) * 100) / 100;
+}
+function reservedOf(p) {
+  return marginFor(num(p && p.qty) * num(p && p.cost), p && p.leverage);
+}
 function newId(prefix) { return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
 
 function normSym(s) {
@@ -135,7 +154,8 @@ function cleanPosition(p) {
   if (!symbol) return null;
   const qty = Math.max(0, num(p.qty)), cost = Math.max(0, num(p.cost));
   if (!qty || !cost) return null;
-  return {
+  const lev = leverageValid(p.leverage) ? (p.leverage == null || p.leverage === '' ? 1 : Number(p.leverage)) : 1;
+  const rec = {
     id: str(p.id, 60) || newId('mp'), symbol,
     type: str(p.type, 24) || 'kripto',
     side: p.side === 'SHORT' ? 'SHORT' : 'LONG',
@@ -145,14 +165,18 @@ function cleanPosition(p) {
     date: str(p.date, 10) || now().slice(0, 10),
     note: str(p.note, 120)
   };
+  if (lev !== 1) rec.leverage = lev;
+  return rec;
 }
 function cleanSell(s) {
   if (!s || typeof s !== 'object' || !str(s.symbol, 40)) return null;
-  return {
+  const rec = {
     id: str(s.id, 60) || newId('ms'), symbol: str(s.symbol, 40),
     qty: Math.max(0, num(s.qty)), price: Math.max(0, num(s.price)),
     profit: num(s.profit), note: str(s.note, 120), date: str(s.date, 10) || now().slice(0, 10)
   };
+  if (leverageValid(s.leverage) && Number(s.leverage) > 1) rec.leverage = Number(s.leverage);
+  return rec;
 }
 function cleanIdea(i) {
   if (!i || typeof i !== 'object' || !str(i.text, 2000)) return null;
@@ -235,11 +259,15 @@ function stats(p) {
   const invested = longs.reduce((s, x) => s + num(x.qty) * num(x.cost), 0);
   const unrealized = positions.reduce((s, x) => s + pnlOf(x), 0);
   const realized = (p.sells || []).reduce((s, x) => s + num(x.profit), 0);
-  const proceeds = (p.sells || []).reduce((s, x) => s + num(x.qty) * num(x.price), 0);
+  // Eski kayıtlarda nakit: başlangıç - uzun notional + satış hasilatı.
+  // Kaldıraçlı kayıtlarda yalnızca marj blokelenir; kapanan işte K/Z eklenir.
+  const reserved = positions.reduce((s, x) => s + (leverageOf(x) > 1 ? reservedOf(x) : (x.side !== 'SHORT' ? num(x.qty) * num(x.cost) : 0)), 0);
+  const legacyProceeds = (p.sells || []).reduce((s, x) => s + (leverageOf(x) > 1 ? 0 : num(x.qty) * num(x.price)), 0);
+  const leveredRealized = (p.sells || []).reduce((s, x) => s + (leverageOf(x) > 1 ? num(x.profit) : 0), 0);
   const start = num(p.startBalance) || 1000;
   return {
     positions, invested, unrealized, realized,
-    cash: start - invested + proceeds,
+    cash: start - reserved + legacyProceeds + leveredRealized,
     equity: start + unrealized + realized,
     gain: unrealized + realized,
     pct: start > 0 ? ((unrealized + realized) / start) * 100 : 0,
@@ -384,6 +412,11 @@ function positionCard(p, pos) {
   const pp = el('div', (gainPct >= 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(gainPct) + ' %  ' + pos.side, 'mp-card-pct ' + cls);
   pnl.append(pv, pp);
   const meta = el('div', dateFmt(pos.date) + ' · ' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(pos.qty) + ' adet', 'ap2-card-meta');
+  if (leverageOf(pos) > 1) {
+    const badge = el('span', '⚙ ' + leverageOf(pos) + 'x · ' + money(reservedOf(pos)) + ' marj · ' + money(num(pos.qty) * num(pos.cost)) + ' notional', 'ap2-lev-badge');
+    meta.appendChild(document.createTextNode(' · '));
+    meta.appendChild(badge);
+  }
   card.append(top, prices, pnl, meta);
   if (pos.note) card.appendChild(el('div', '📝 ' + pos.note, 'ap2-card-meta'));
   const target = el('div', undefined, 'ap2-card-target');
@@ -597,6 +630,23 @@ function closeForms() {
   ['mp-f-err', 'mp-sell-err', 'mp-idea-err'].forEach(id => { if ($(id)) $(id).textContent = ''; });
   formEditId = ''; ideaEditId = ''; sellTargetId = '';
 }
+function mpFormLeverage() {
+  const el = $('mp-f-leverage');
+  const raw = el && el.value !== '' ? String(el.value).trim() : '1';
+  if (raw === '') return 0;
+  return leverageValid(raw) ? Number(raw) : 0;
+}
+function setMpLeveragePreset(v) {
+  const inp = $('mp-f-leverage');
+  if (inp) inp.value = v;
+  const row = $('mp-f-lev-presets');
+  if (row) row.querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.mplev) === Number(v)));
+  previewForm();
+}
+function setMpAmountLabel(mode) {
+  const lbl = $('mp-f-amount-lbl');
+  if (lbl) lbl.textContent = mode === 'marj' ? 'Marj tutarı ($)' : 'Notional tutar ($)';
+}
 function openPositionForm(pos) {
   if (!uid()) return;
   closeForms();
@@ -610,6 +660,8 @@ function openPositionForm(pos) {
   $('mp-f-cost').value = pos ? String(pos.cost) : '';
   $('mp-f-price').value = pos ? String(pos.price) : '';
   $('mp-f-note').value = pos ? pos.note : '';
+  if ($('mp-f-leverage')) $('mp-f-leverage').value = pos ? leverageOf(pos) : 1;
+  setMpLeveragePreset(pos ? leverageOf(pos) : 1);
   $('mp-form-title').textContent = pos ? 'Enstrümanı Düzenle' : 'Yeni Enstrüman';
   $('mp-f-side').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.mpside === formSide));
   $('mp-f-type').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.mptype === formType));
@@ -617,6 +669,7 @@ function openPositionForm(pos) {
   $('mp-f-mode').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.mpmode === 'tutar'));
   $('mp-f-amount-box').classList.remove('hidden');
   $('mp-f-qty-box').classList.add('hidden');
+  setMpAmountLabel('tutar');
   previewForm();
   $('mp-form').classList.remove('hidden');
 }
@@ -624,30 +677,56 @@ function previewForm() {
   const box = $('mp-f-preview');
   if (!box) return;
   const amount = num($('mp-f-amount').value), qtyField = num($('mp-f-qty-field').value);
-  const qty = formMode === 'tutar' ? amount / (num($('mp-f-cost').value) || 1) : qtyField;
-  const total = formMode === 'tutar' ? amount : qtyField * num($('mp-f-cost').value);
-  const live = num($('mp-f-price').value) || num($('mp-f-cost').value);
-  const gain = formSide === 'SHORT' ? qty * (num($('mp-f-cost').value) - live) : qty * (live - num($('mp-f-cost').value));
-  box.textContent = qty > 0 && total > 0
-    ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(qty) + ' adet · ' + money(total) + ' · tahmini K/Z ' + (gain >= 0 ? '+' : '') + money(gain)
-    : 'Bilgileri girince özet burada görünür.';
+  const cost = num($('mp-f-cost').value);
+  const lev = mpFormLeverage();
+  const qty = formMode === 'adet' ? qtyField : (formMode === 'marj' ? (lev > 0 ? amount * lev : 0) : amount) / (cost || 1);
+  const total = formMode === 'adet' ? qtyField * cost : formMode === 'marj' ? (lev > 0 ? amount * lev : 0) : amount;
+  const margin = lev > 0 ? marginFor(total, lev) : 0;
+  const live = num($('mp-f-price').value) || cost;
+  const gain = formSide === 'SHORT' ? qty * (cost - live) : qty * (live - cost);
+  const parts = [];
+  if (!lev) parts.push('⚠ Kaldıraç 0.01 ile ' + MAX_LEVERAGE + ' arasında olmalı.');
+  if (qty > 0 && total > 0) {
+    parts.push(new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(qty) + ' adet');
+    parts.push('notional ' + money(total));
+    parts.push(lev + 'x · marj ' + money(margin));
+    if (formMode === 'marj') parts.push(money(amount) + ' × ' + lev + 'x');
+    parts.push('tahmini K/Z ' + (gain >= 0 ? '+' : '') + money(gain));
+    const st = stats(active() || { positions: [], sells: [], startBalance: 0 });
+    parts.push('serbest nakit ' + money(st.cash - margin));
+  }
+  box.textContent = parts.length ? parts.join(' · ') : 'Bilgileri girince özet burada görünür.';
 }
 function savePositionForm() {
   const err = $('mp-f-err');
   const symbol = str($('mp-f-sym').value, 40);
   const amount = num($('mp-f-amount').value), qtyField = num($('mp-f-qty-field').value);
   const cost = num($('mp-f-cost').value);
-  if (!symbol || cost <= 0 || (formMode === 'tutar' ? amount <= 0 : qtyField <= 0)) {
-    err.textContent = 'Sembol, tutar/adet ve giriş fiyatı zorunlu.'; return;
+  if (!symbol || cost <= 0 || (formMode === 'adet' ? qtyField <= 0 : amount <= 0)) {
+    err.textContent = 'Sembol, tutar/marj/adet ve giriş fiyatı zorunlu.'; return;
   }
-  const qty = formMode === 'tutar' ? amount / cost : qtyField;
-  const total = formMode === 'tutar' ? amount : qtyField * cost;
+  const lev = mpFormLeverage();
+  if (!lev) { err.textContent = 'Kaldıraç 0.01 ile ' + MAX_LEVERAGE + ' arasında olmalı.'; return; }
+  const qty = formMode === 'adet' ? qtyField : (formMode === 'marj' ? amount * lev : amount) / cost;
+  const total = formMode === 'adet' ? qtyField * cost : formMode === 'marj' ? amount * lev : amount;
   const price = num($('mp-f-price').value) || cost;
   mutate(p => {
     const rec = cleanPosition({ id: formEditId || newId('mp'), symbol, type: formType, side: formSide,
-      qty, cost, price, total, date: $('mp-f-date').value, note: $('mp-f-note').value });
+      qty, cost, price, total, leverage: lev, date: $('mp-f-date').value, note: $('mp-f-note').value });
     const i = p.positions.findIndex(x => x.id === formEditId);
-    if (i >= 0) p.positions[i] = rec; else p.positions.unshift(rec);
+    if (i >= 0) { p.positions[i] = rec; return; }
+    // Aynı sembol/yön/kaldıraçlı short tekrar eklenirse ağırlıklı ortalama yap.
+    const merge = lev > 1 && formSide === 'SHORT'
+      ? p.positions.find(x => x.side === 'SHORT' && x.symbol.toUpperCase() === symbol.toUpperCase() && leverageOf(x) === lev) : null;
+    if (merge) {
+      const oldQty = num(merge.qty), oldNotional = oldQty * num(merge.cost);
+      const newQty = oldQty + qty;
+      merge.cost = newQty > 0 ? (oldNotional + total) / newQty : merge.cost;
+      merge.qty = newQty;
+      merge.total = newQty * merge.cost;
+      merge.date = rec.date < merge.date ? rec.date : merge.date;
+      merge.note = [merge.note, rec.note].filter(Boolean).join(' | ');
+    } else p.positions.unshift(rec);
   });
   closeForms(); toast(formEditId ? 'Pozisyon güncellendi.' : 'Pozisyon eklendi.');
 }
@@ -680,6 +759,7 @@ function confirmSell() {
     target.total = num(target.qty) * num(target.cost);
     if (target.qty <= 1e-9) portfolio.positions = portfolio.positions.filter(x => x.id !== sellTargetId);
     portfolio.sells.unshift(cleanSell({ id: newId('ms'), symbol: target.symbol, qty, price, profit,
+      leverage: leverageOf(target) > 1 ? leverageOf(target) : undefined,
       note: $('mp-sell-note').value, date: new Date().toISOString().slice(0, 10) }));
   });
   closeForms(); toast('Satış kaydedildi.');
@@ -796,13 +876,17 @@ function bind() {
   });
   $('mp-f-mode')?.addEventListener('click', e => {
     const b = e.target.closest('[data-mpmode]'); if (!b) return;
-    formMode = b.dataset.mpmode === 'adet' ? 'adet' : 'tutar';
+    formMode = b.dataset.mpmode === 'adet' ? 'adet' : b.dataset.mpmode === 'marj' ? 'marj' : 'tutar';
     $('mp-f-mode').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
     $('mp-f-amount-box').classList.toggle('hidden', formMode === 'adet');
     $('mp-f-qty-box').classList.toggle('hidden', formMode !== 'adet');
+    setMpAmountLabel(formMode);
     previewForm();
   });
-  ['mp-f-amount', 'mp-f-qty-field', 'mp-f-cost', 'mp-f-price'].forEach(id => $(id)?.addEventListener('input', previewForm));
+  $('mp-f-lev-presets')?.addEventListener('click', e => {
+    const b = e.target.closest('button[data-mplev]'); if (b) setMpLeveragePreset(b.dataset.mplev);
+  });
+  ['mp-f-amount', 'mp-f-qty-field', 'mp-f-cost', 'mp-f-price', 'mp-f-leverage'].forEach(id => $(id)?.addEventListener('input', previewForm));
   $('mp-sell-cancel')?.addEventListener('click', closeForms);
   $('mp-sell-cancel2')?.addEventListener('click', closeForms);
   $('mp-sell-confirm')?.addEventListener('click', confirmSell);

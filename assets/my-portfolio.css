@@ -76,6 +76,8 @@
 #page-portfoy .ap2-chip-row { gap:6px; margin:2px 0 0; }
 #page-portfoy .ap2-chip-row button, #page-portfoy .ap2-type-chip { font-family:'Inter',sans-serif; font-size:11.5px; font-weight:700; padding:7px 11px; border-radius:999px; background:var(--bg-2,var(--bg)); color:var(--text-2); }
 #page-portfoy .ap2-chip-row button:hover, #page-portfoy .ap2-type-chip:hover:not(.on) { border-color:var(--pc); color:var(--text); }
+#page-portfoy .ap2-chip-row button.on { background:var(--pc-soft); color:var(--pc-text,var(--pc)); border-color:var(--pc); }
+.ap2-lev-badge { display:inline-block; padding:2px 7px; border-radius:999px; background:var(--pc-soft); color:var(--pc-text,var(--pc)); font-size:10.5px; font-weight:700; white-space:nowrap; }
 #page-portfoy .ap2-type-chip { border-radius:9px; }
 #page-portfoy .ap2-seg { gap:4px; padding:3px; margin:0; }
 #page-portfoy .ap2-seg button { padding:9px 8px; font-size:12px; white-space:nowrap; }
