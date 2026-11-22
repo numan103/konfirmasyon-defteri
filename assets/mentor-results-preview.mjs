@@ -1,4 +1,4 @@
-import { renderMentorCurve, renderMentorEvaluation, resultTeasers } from './mentor-curve.mjs?v=2';
+import { renderMentorCurve, renderMentorEvaluation, resultTeasers } from './mentor-curve.mjs?v=3';
 import { renderMentorBeforeAfter } from './mentor-before-after.mjs?v=1';
 const API = '/api/ai?mentorTrades=1';
 const trade = document.getElementById('lp-live-trades'), bias = document.getElementById('lp-live-bias'), results = document.getElementById('lp-live-results'), home = document.getElementById('home-results-panel');

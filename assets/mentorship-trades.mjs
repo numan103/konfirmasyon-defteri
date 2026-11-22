@@ -1,5 +1,5 @@
 import { mentorCategory, mentorDescription } from './mentor-feed-model.mjs?v=1';
-import { renderMentorCurve, signedR } from './mentor-curve.mjs?v=2';
+import { renderMentorCurve, signedR } from './mentor-curve.mjs?v=3';
 const API = '/api/ai?mentorTrades=1';
 const page = document.getElementById('page-alfatrading');
 const root = document.createElement('section'); root.className = 'mentor-trades'; root.hidden = true;

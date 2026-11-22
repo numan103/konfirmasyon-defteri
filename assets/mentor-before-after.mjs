@@ -1,4 +1,4 @@
-import { signedR } from './mentor-curve.mjs?v=2';
+import { signedR } from './mentor-curve.mjs?v=3';
 const API = '/api/ai?mentorTrades=1';
 const el = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
 const runs = new WeakMap(), owned = new WeakMap();
