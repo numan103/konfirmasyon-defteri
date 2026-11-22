@@ -22,6 +22,8 @@ const TG_PREMIUM_THREAD = process.env.TG_PREMIUM_THREAD ? Number(String(process.
 
 const PUBLIC_FALLBACK = '🔔 Portföyde yeni bir hamle yapıldı.\n\nAyrıntılar ve canlı portföy premium üyeler için açık.\nPremium\'a geç → https://alfa-trader.com/?page=erisim';
 const PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Premium\'a geç →', url: 'https://alfa-trader.com/?page=erisim' }]] };
+const MAGAZINE_PUBLIC_MESSAGE = '📰 Alfa Dergi yayında!\n\nBu haftanın yeni sayısı hazır. Okumak için tıklayın.';
+const MAGAZINE_PUBLIC_BUTTON = { inline_keyboard: [[{ text: 'Dergiyi oku →', url: 'https://alfa-trader.com/?page=haberler' }]] };
 
 // Dergi görselleri Telegram CDN'ine hotlink edilmez: file_id same-origin proxy ile
 // sunucuda çözülür. Yalnızca alfanews satırında kayıtlı file_id'ler kabul edilir.
@@ -102,20 +104,29 @@ async function handleNotify(req, res) {
 
   let message = null;
   let teaser = null;
+  let kind = '';
   if (req.method === 'POST') {
     let body;
     try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
+    kind = String((body && body.kind) || '').trim();
     message = String((body && (body.message || body.text)) || '').trim().slice(0, 4000);
     teaser = String((body && (body.publicMessage || body.teaser)) || '').trim().slice(0, 1200);
+  }
+  if (kind === 'magazine_publish') {
+    if (tier !== 'admin') return res.status(403).json({ ok: false, error: 'admin_required' });
+    teaser = MAGAZINE_PUBLIC_MESSAGE;
+    message = null;
   }
   if (!message && !teaser) return res.status(400).json({ error: 'message gerekli' });
 
   // Herkese acik kanal yalnizca genel/davet edici metni alir. Ayrintili metin
   // (miktar, fiyat, kâr/zarar) sadece premium kanalina gider. publicMessage
   // gelmezse guvenli tarafta kalip genel metni yollariz; ayrinti asla sizmaz.
-  const publicOut = await sendTelegram(teaser || PUBLIC_FALLBACK, TG_CHAT, TG_THREAD, PUBLIC_BUTTON);
+  const publicButton = kind === 'magazine_publish' ? MAGAZINE_PUBLIC_BUTTON : PUBLIC_BUTTON;
+  const publicOut = await sendTelegram(teaser || PUBLIC_FALLBACK, TG_CHAT, TG_THREAD, publicButton);
   const result = {
     ok: !!publicOut.ok,
+    kind: kind || undefined,
     link: publicOut.ok ? 'https://t.me/' + CHANNEL + '/' + (publicOut.result && publicOut.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') : undefined,
   };
   if (TG_PREMIUM_CHAT && message && tier === 'admin') {

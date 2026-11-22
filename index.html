@@ -6433,6 +6433,7 @@
               <p class="hmr-week" id="hmr-week">Haftanın içerikleri hazırlanıyor…</p>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="hmr-edit-btn" id="hmr-telegram-publish" hidden>📣 Yayında bildir</button>
               <button type="button" class="hmr-edit-btn" id="hmr-edit-toggle" hidden>Düzenle</button>
               <button type="button" class="hmr-collapse" id="hmr-collapse" aria-expanded="true" aria-controls="hmr-book" data-i18n="home.mag.less">Daralt</button>
               <a id="home-magazine-link" href="?page=news" data-nav class="home-magazine">Tam ekranda aç <span class="hm-arrow" aria-hidden="true">→</span></a>
@@ -14638,6 +14639,38 @@ function bindHomeMagazine() {
     hmrRenderedSignature = '';
     renderHomeMagazine();
   });
+  const pubBtn = document.getElementById('hmr-telegram-publish');
+  if (pubBtn) pubBtn.addEventListener('click', async () => {
+    if (!magIsAdmin()) return;
+    if (pubBtn.dataset.busy === '1') return;
+    if (!confirm('Alfa Dergi yayında bildirimi Telegram\'a gönderilsin mi?')) return;
+    pubBtn.dataset.busy = '1';
+    const prev = pubBtn.textContent;
+    pubBtn.textContent = 'Gönderiliyor…';
+    pubBtn.disabled = true;
+    try {
+      const r = await fetch('/api/tg?notify=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ kind: 'magazine_publish' })
+      });
+      const out = await r.json().catch(() => ({}));
+      if (r.ok && out && out.ok) {
+        pubBtn.textContent = 'Bildirildi ✓';
+        setTimeout(() => { pubBtn.textContent = prev; }, 2500);
+      } else {
+        alert('Telegram bildirimi gönderilemedi: ' + ((out && (out.error || out.description)) || r.status));
+        pubBtn.textContent = prev;
+      }
+    } catch (e) {
+      alert('Telegram bildirimi gönderilemedi.');
+      pubBtn.textContent = prev;
+    } finally {
+      pubBtn.dataset.busy = '0';
+      pubBtn.disabled = false;
+    }
+  });
   const vp = document.getElementById('hmr-viewport');
   if (vp) {
     let sx = null;
@@ -14754,8 +14787,11 @@ function hmrBuildSectionPage(sec, entries, data, pageNo, opts) {
 }
 function renderHomeMagazine() {
   const stage = document.getElementById('hmr-stage'); if (!stage) return;
+  const isAdmin = magIsAdmin();
   const editBtn = document.getElementById('hmr-edit-toggle');
-  if (editBtn) { editBtn.hidden = !magIsAdmin(); editBtn.classList.toggle('on', hmrEditMode); editBtn.textContent = hmrEditMode ? 'Düzenlemeyi bitir' : 'Düzenle'; }
+  if (editBtn) { editBtn.hidden = !isAdmin; editBtn.classList.toggle('on', hmrEditMode); editBtn.textContent = hmrEditMode ? 'Düzenlemeyi bitir' : 'Düzenle'; }
+  const pubBtn = document.getElementById('hmr-telegram-publish');
+  if (pubBtn) pubBtn.hidden = !isAdmin;
   const secData = hmrHomeSectionsData();
   const signature = JSON.stringify({ d: homeMagData, e: hmrEditMode, s: secData, a: magIsAdmin() });
   if (signature === hmrRenderedSignature && stage.children.length) return;
