@@ -60,7 +60,7 @@
   <link rel="stylesheet" href="/assets/site-guide.css?v=6">
   <script type="module" src="/assets/site-guide.mjs?v=7"></script>
   <script type="module" src="/assets/site-features.mjs?v=3"></script>
-  <script type="module" src="/assets/site-new.mjs?v=3"></script>
+  <script type="module" src="/assets/site-new.mjs?v=4"></script>
 <script type="module" src="/assets/signup-funnel.mjs?v=1"></script>
 <script defer src="/assets/edu-feedback.js?v=4"></script>
 <link rel="stylesheet" href="/assets/daily-note-social.css?v=1">
@@ -24619,7 +24619,7 @@ async function saveEgitim() {
         topicCount += list.length;
         list.forEach(t => { videoCount += (t.videos || []).filter(v => v.url).length; });
       });
-      const res = await fetch('/api/edu-shared', {
+      const res = await siteFetch('/api/edu-shared', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
@@ -25485,7 +25485,7 @@ async function chTopicLink(t) {
     + (target.t ? '&t=' + encodeURIComponent(target.t) : '')
     + (target.v ? '&v=' + encodeURIComponent(target.v) : '');
   try {
-    const r = await fetch('/api/edu-shared?kind=short', {
+    const r = await siteFetch('/api/edu-shared?kind=short', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ target }),
     });
@@ -26155,8 +26155,9 @@ function chZoomPhoto(src, cap) {
 }
 
 const EDU_PLAN_LABELS = { video: 'Video Eğitim', live: 'Canlı Grup', personal: 'Personal Coaching' };
-// Sunucu ücretli içeriğin URL'sini kaldırır; kilit kararı da oradadır.
-function chItemLocked(v) { return !!(v && (v.locked === true || (v.access === 'paid' && !(v.url || v.body || v.tricks || (v.photos && v.photos.length) || (v.vids && v.vids.length))))); }
+// Sunucu ücretli içeriğin URL'sini kaldırır ve locked alanını her öğe için yazar.
+// İstemci içerik boşluğundan kilit tahmin etmez; yalnızca sunucu kararını okur.
+function chItemLocked(v) { return !!(v && v.locked === true); }
 function itemPlans_(v) {
   const raw = Array.isArray(v && v.plans) ? v.plans.filter(x => EDU_PLAN_LABELS[x]) : [];
   return raw.length ? Array.from(new Set(raw)).slice(0, 3) : ['video'];

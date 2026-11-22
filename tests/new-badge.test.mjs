@@ -49,7 +49,7 @@ test('her YENİ rozeti özellik kayıt defterindeki bir kimliğe bağlı', () =>
   assert.ok(html.includes('/assets/site-features.mjs'), '1 haftalık ömür kayıt defteri yüklenmeli');
   const corners = [...html.matchAll(/<span class="new-corner[^"]*" data-new-feature="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(corners, ['morning-checkin', 'checkin-config', 'daily-tasks', 'ayna-sync']);
-  assert.ok(html.includes('/assets/site-new.css?v=6') && html.includes('/assets/site-new.mjs?v=3'));
+  assert.ok(html.includes('/assets/site-new.css?v=6') && html.includes('/assets/site-new.mjs?v=4'));
 });
 
 test('rozet stili ve çeviri anahtarları tanımlı', () => {

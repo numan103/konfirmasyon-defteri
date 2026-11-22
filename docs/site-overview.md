@@ -114,4 +114,4 @@ Bu üç özellik giriş sayfası, menü ve hızlı erişimde "YENİ" rozeti ile 
 - 12 serverless fonksiyon limiti (Hobby): access, ai-checklist, ai, chat-admin, contrib, eco-cal, edu-shared, notion-callback, notion-sync, notion-trades, tg, analytics.
 - Veritabanı: Supabase (edu_shared tablosu, DDL yok).
 - Testler: node --test tests/*.test.mjs.
-- Son durum: 378/378 test geçiyor, production READY.
+- Son durum: 1027/1027 unit test geçiyor (112 unit + 27 tarayıcı test dosyası), production READY.

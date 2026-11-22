@@ -31,6 +31,15 @@ const ROWS = {
   features: { rowId: 'site-features' },
 };
 
+// Kanal yazımı kendi owner/editor kurallarını aşağıda uygular. Diğer yazma
+// rotaları (shortlink, legacy section sync, feature announcement) buradan geçer.
+async function requireEduWriter(req, res, adminOnly = false) {
+  const user = await requestUser(req);
+  if (!user) { res.status(401).json({ ok: false, error: 'unauthorized' }); return null; }
+  if (adminOnly && !user.admin) { res.status(403).json({ ok: false, error: 'forbidden' }); return null; }
+  return user;
+}
+
 const sbHeaders = (key) => ({
   apikey: key,
   ...(String(key).startsWith('sb_secret_') ? {} : { Authorization: 'Bearer ' + key }),
@@ -175,8 +184,9 @@ function emptyChannels() { return { traders: {}, order: [] }; }
 
 // Alfa Edu: eski içerikler ücretsizdir (access alanı yoksa/free). Yeni videolar
 // access:'paid' ve opsiyonel plans:[] taşır. edu_shared herkese açık olduğu için
-// ücretli içerğin URL/not/fotoğrafı sunucuda çıkarılır; yalnızca admin/ref veya
-// ilgili paketi onaylanmış üye tam veriyi alır.
+// Ücretli içeriğin URL/not/fotoğrafı sunucuda çıkarılır; yalnızca admin/ref veya
+// ilgili paketi onaylanmış üye tam veriyi alır. locked alanı her ücretli öğede
+// sunucu tarafından yazılır; istemci içerik boşluğundan kilit tahmin etmez.
 const PAID_PLAN_IDS = new Set(EDU_PLANS.map(p => p.id));
 const isPaidItem = v => !!(v && String(v.access || '').toLowerCase() === 'paid');
 function itemPlans(v) {
@@ -215,14 +225,14 @@ function projectChannels(base, viewer) {
     const canEdit = channelEditor(t, viewer.user);
     if (!canEdit) { delete t.owner; delete t.editors; }
     t.canEdit = canEdit;
-    if (viewer.privileged || canEdit) return;
     const secs = (t && t.sections) || {};
     Object.keys(secs).forEach(sid => {
       (Array.isArray(secs[sid]) ? secs[sid] : []).forEach(topic => {
         (Array.isArray(topic && topic.videos) ? topic.videos : []).forEach(v => {
           if (!isPaidItem(v)) return;
+          if (viewer.privileged || canEdit) { v.locked = false; return; }
           const plans = itemPlans(v);
-          if (plans.some(p => viewer.plans.has(p))) return;
+          if (plans.some(p => viewer.plans.has(p))) { v.locked = false; return; }
           v.url = ''; v.body = ''; v.photos = []; v.vids = [];
           v.tricks = '';
           v.locked = true; v.plans = plans;
@@ -340,6 +350,7 @@ async function siteFeatures(req, res) {
     });
   }
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
+  if (!await requireEduWriter(req, res, true)) return;
 
   const token = (process.env.TG_BOT_TOKEN || '').trim();
   const target = websiteNotifyTarget();
@@ -449,6 +460,7 @@ export default async function handler(req, res) {
     try { body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
 
     if (isShort) {
+      if (!await requireEduWriter(req, res)) return;
       const tgt = body && body.target;
       if (!tgt || !tgt.ch) return res.status(400).json({ error: 'target.ch gerekli' });
       const cleanT = {
@@ -522,6 +534,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, trader: ch });
     }
 
+    if (!await requireEduWriter(req, res, true)) return;
     if (!body || !body.sections) return res.status(400).json({ error: 'Missing sections in body' });
     const clean = { sections: body.sections || {}, sel: body.sel || {}, selVid: body.selVid || {} };
     const r = await store(clean);

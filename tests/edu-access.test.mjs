@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 import { memberPurchaseId, sealRecord } from '../lib/education-crm.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
@@ -68,6 +69,14 @@ function videos(res) {
   return res.body.data.traders.t1.sections.s1[0].videos;
 }
 
+function lockedHelper() {
+  const match = html.match(/function chItemLocked\(v\)[^\n]*/);
+  assert.ok(match, 'chItemLocked bulunamadı');
+  const ctx = {};
+  vm.runInNewContext(match[0] + '\nthis.chItemLocked = chItemLocked;', ctx);
+  return ctx.chItemLocked;
+}
+
 function verifiedRecord(userId, plan) {
   const id = memberPurchaseId(userId, plan, 'cash');
   return { id, data: sealRecord(id, { memberId: userId, plan, stage: 'verified' }) };
@@ -82,6 +91,17 @@ test('Edu sayfası herkese açık; ücretli içerik kilidi istemcide değil sunu
   assert.ok(api.includes('projectChannels(base, { privileged, plans, user })'));
   assert.ok(api.includes("v.url = ''; v.body = ''; v.photos = []; v.vids = [];"));
   assert.ok(api.includes("res.setHeader('Cache-Control', 'private, no-store')"));
+  assert.ok(api.includes('if (!await requireEduWriter(req, res, true)) return;'), 'legacy/feature yazımları admin JWT ile korunmalı');
+  assert.ok(api.includes('if (!await requireEduWriter(req, res)) return;'), 'shortlink yazımı oturum gerektirmeli');
+  assert.ok(api.includes('v.locked = false; return;'), 'sunucu erişilebilir ücretli öğeyi açıkça unlocked bildirmeli');
+});
+
+test('kilit kararı sunucu locked alanından okunur, içerik boşluğundan tahmin edilmez', () => {
+  const locked = lockedHelper();
+  assert.equal(locked({ locked: true, access: 'paid', url: 'https://youtu.be/secret' }), true);
+  assert.equal(locked({ locked: false, access: 'paid', url: '', body: '', photos: [], vids: [] }), false);
+  assert.equal(locked({ access: 'paid', url: '' }), false, 'locked alanı yoksa içerik boşluğu kilit sayılmaz');
+  assert.equal(locked(null), false);
 });
 
 test('eski dersler ücretsiz kalır; ücretli video adresi anonim okuyucuda çıkarılır', async () => {
@@ -100,14 +120,14 @@ test('eski dersler ücretsiz kalır; ücretli video adresi anonim okuyucuda çı
 test('admin ve referanslı üye tüm derslere erişir', async () => {
   const admin = await channelGet({ user: { id: 'admin1', email: 'admin@test.dev', admin: true } });
   assert.equal(videos(admin)[1].url, 'https://youtu.be/live-secret');
-  assert.ok(!videos(admin)[1].locked);
+  assert.equal(videos(admin)[1].locked, false, 'erişilebilir ücretli öğe unlocked bildirilmeli');
 
   const ref = await channelGet({
     user: { id: 'u2', email: 'ref@test.dev', admin: false },
     tierRows: [{ status: 'verified' }],
   });
   assert.equal(videos(ref)[2].url, 'https://youtu.be/video-secret');
-  assert.ok(!videos(ref)[2].locked);
+  assert.equal(videos(ref)[2].locked, false);
 });
 
 test('onaylanmış CRM paketi yalnızca kendi derslerini açar', async () => {

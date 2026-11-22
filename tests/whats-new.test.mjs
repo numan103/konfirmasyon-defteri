@@ -37,7 +37,7 @@ function makeEl(id = '') {
 function load(options = {}) {
   const {
     seen = null, activeIds = registry.activeIds(), features = registry.FEATURES,
-    badges = [], page = 'home', fetchCalls = [],
+    badges = [], page = 'home', fetchCalls = [], token = 'unit-token',
     syncIds = features.map(f => f.id),
   } = options;
   const store = {};
@@ -62,6 +62,7 @@ function load(options = {}) {
     activeIds: () => activeIds,
     activeFeatures: () => features.filter(f => activeIds.includes(f.id)),
   };
+  const mockFetch = async (url, opts) => { fetchCalls.push({ url, opts }); return { ok: true }; };
   const sandbox = {
     localStorage: {
       getItem: k => store[k] ?? null,
@@ -77,8 +78,10 @@ function load(options = {}) {
       location: { href: '' },
       ALFA_SITE_FEATURES: sf,
       AlfaMorningCheckin: { maybeShow() { this.opened = true; } },
+      siteAccessToken: async () => token,
+      siteFetch: (url, opts) => mockFetch(url, opts),
     },
-    fetch: async (url, opts) => { fetchCalls.push({ url, opts }); return { ok: true }; },
+    fetch: mockFetch,
     MutationObserver: class { observe() {} },
     console,
   };
@@ -96,7 +99,7 @@ test('üst rozet kayıt defterinden beslenir, sabit içerik değildir', () => {
   assert.ok(appNav.includes('id="whats-new-btn-app"'));
   assert.ok(!/class="new-badge"/.test(landing));
   assert.ok(html.includes('/assets/site-features.mjs?v=3'));
-  assert.ok(html.includes('/assets/site-new.mjs?v=3'));
+  assert.ok(html.includes('/assets/site-new.mjs?v=4'));
   assert.ok(html.includes('id="wn-list"') && html.includes('id="wn-sub"'));
   assert.ok(!html.includes('Sabah Kartı</b>'), 'panel sabit satır içermemeli');
   assert.ok(html.includes('<span class="wn-count"></span>'));
@@ -185,16 +188,24 @@ test('Escape / dış tıklama kapatır, Sabah Kartı aksiyonu doğru yere götü
   assert.equal(away.win.location.href, '?page=home');
 });
 
-test('yeni özellik listesi değişince sunucuya tek bildirim gider', async () => {
+test('yeni özellik listesi değişince oturumla sunucuya tek bildirim gider', async () => {
   const calls = [];
   load({ fetchCalls: calls, syncIds: null });
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, '/api/edu-shared?kind=site-features');
   assert.equal(calls[0].opts.method, 'POST');
+  assert.equal(calls[0].opts.headers.Authorization, 'Bearer unit-token');
 
   const cached = load({ fetchCalls: [] });
   assert.deepEqual(cached.fetchCalls, [], 'aynı liste tekrar gönderilmez');
+});
+
+test('oturum yoksa özellik bildirimi isteği atılmaz', async () => {
+  const calls = [];
+  load({ fetchCalls: calls, syncIds: null, token: '' });
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.deepEqual(calls, []);
 });
 
 test('tüm rozet ve köşe etiketleri kayıt defterindeki bir kimliğe bağlı', () => {

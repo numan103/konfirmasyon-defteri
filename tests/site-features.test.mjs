@@ -24,13 +24,19 @@ async function loadHandler() {
   process.env.TG_THREAD = '4'; // public charts — website bildirimleri buraya gitmemeli
   delete process.env.WEBSITE_NOTIFY_THREAD;
   delete process.env.WEBSITE_NOTIFY_CHAT_ID;
+  process.env.SITE_ADMIN_EMAILS = 'admin@test.dev';
   const mod = await import('../api/edu-shared.mjs?site-features-test=' + Math.random());
   return mod.default;
 }
 
-async function withFetch(impl, fn) {
+const ADMIN_HEADERS = { authorization: 'Bearer unit-admin-token' };
+
+async function withFetch(impl, fn, user = { id: 'admin1', email: 'admin@test.dev' }) {
   const original = globalThis.fetch;
-  globalThis.fetch = impl;
+  globalThis.fetch = async (url, opts) => {
+    if (String(url).includes('/auth/v1/user')) return Response.json(user);
+    return impl(url, opts);
+  };
   try { return await fn(); } finally { globalThis.fetch = original; }
 }
 
@@ -90,7 +96,7 @@ test('siteye yeni özellik eklenince Telegrama tek mesaj gider', async () => {
     return { ok: true, status: 200, json: async () => [{ data: { announced } }] };
   }, async () => {
     const out = response();
-    await handler({ method: 'POST', query: { kind: 'site-features' }, body: { features: FEATURES.map(f => f.id) } }, out);
+    await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: { features: FEATURES.map(f => f.id) } }, out);
     return out;
   });
 
@@ -119,7 +125,7 @@ test('aynı özellik ikinci kez bildirilmez', async () => {
     return { ok: true, status: 200, json: async () => [{ data: { announced: activeIds() } }] };
   }, async () => {
     const r = response();
-    await handler({ method: 'POST', query: { kind: 'site-features' }, body: {} }, r);
+    await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: {} }, r);
     assert.equal(r.body.sent, 0);
   });
   assert.equal(calls, 0);
@@ -131,7 +137,7 @@ test('Telegram ayarı yoksa sessizce atlanır, gönderim hatasında kayıt yazı
   delete process.env.TG_BOT_TOKEN;
   await withFetch(async () => { throw new Error('fetch çağrılmamalı'); }, async () => {
     const r = response();
-    await handler({ method: 'POST', query: { kind: 'site-features' }, body: {} }, r);
+    await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: {} }, r);
     assert.equal(r.body.skipped, true);
   });
   process.env.TG_BOT_TOKEN = token;
@@ -143,10 +149,28 @@ test('Telegram ayarı yoksa sessizce atlanır, gönderim hatasında kayıt yazı
     return { ok: true, status: 200, json: async () => [{ data: { announced: [] } }] };
   }, async () => {
     const r = response();
-    await handler({ method: 'POST', query: { kind: 'site-features' }, body: {} }, r);
+    await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: {} }, r);
     assert.equal(r.body.ok, false);
     assert.equal(r.body.error, 'telegram_send_failed');
   });
+});
+
+test('site-features POST yalnız yönetici JWT ile çalışır', async () => {
+  const handler = await loadHandler();
+
+  await withFetch(async () => { throw new Error('fetch çağrılmamalı'); }, async () => {
+    const r = response();
+    await handler({ method: 'POST', query: { kind: 'site-features' }, body: {} }, r);
+    assert.equal(r.code, 401);
+    assert.equal(r.body.error, 'unauthorized');
+  });
+
+  await withFetch(async () => { throw new Error('fetch çağrılmamalı'); }, async () => {
+    const r = response();
+    await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: {} }, r);
+    assert.equal(r.code, 403);
+    assert.equal(r.body.error, 'forbidden');
+  }, { id: 'student1', email: 'student@test.dev' });
 });
 
 test('GET aktif özellikleri döndürür', async () => {

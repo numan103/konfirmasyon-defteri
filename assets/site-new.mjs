@@ -118,10 +118,14 @@ async function announce() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch { /* gizli mod */ }
   if (Array.isArray(saved) && saved.join(',') === ids.join(',')) return;
+  // Özellik duyurusu yönetici işlemidir; oturum yoksa istek bile atma.
+  const token = typeof window.siteAccessToken === 'function' ? await window.siteAccessToken() : '';
+  if (!token) return;
+  const request = typeof window.siteFetch === 'function' ? window.siteFetch : fetch;
   try {
-    const res = await fetch('/api/edu-shared?kind=site-features', {
+    const res = await request('/api/edu-shared?kind=site-features', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({ features: ids }),
     });
     if (res && res.ok) localStorage.setItem(SYNC_KEY, JSON.stringify(ids));

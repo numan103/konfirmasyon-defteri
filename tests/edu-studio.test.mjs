@@ -50,6 +50,26 @@ test('anonymous/forged writes, wrong routes, non-admin creation and deletion are
   assert.equal((await f.request({ trader: f.channel }, { kind: 'shared' })).code, 400);
   assert.equal(f.writes.length, 0);
 });
+test('anonymous shortlink and legacy section writes are rejected', async t => {
+  const f = fixture(t);
+  assert.equal((await f.request({ sections: {} }, { kind: 'shared', auth: false })).code, 401);
+  assert.equal((await f.request({ target: { ch: 'teacher' } }, { kind: 'short', auth: false })).code, 401);
+  assert.equal(f.writes.length, 0);
+});
+test('shortlink accepts any signed-in user while legacy section sync stays admin-only', async t => {
+  const f = fixture(t, { email: 'student@test.dev' });
+  assert.equal((await f.request({ sections: {} }, { kind: 'shared' })).code, 403);
+  const short = await f.request({ target: { ch: 'teacher' } }, { kind: 'short' });
+  assert.equal(short.code, 200);
+  assert.ok(short.body.code, 'kısa bağlantı kodu üretilmeli');
+  assert.equal(f.writes.length, 1, 'oturumlu shortlink yazımı korunmalı');
+});
+test('admin legacy section sync still works with JWT', async t => {
+  const f = fixture(t);
+  const result = await f.request({ sections: {} }, { kind: 'shared' });
+  assert.equal(result.code, 200);
+  assert.equal(f.writes.length, 1);
+});
 test('admin save keeps video notes/photos/tricks/extra videos and paid defaults encrypted', async t => {
   const f = fixture(t);
   f.channel.secMeta[0].kind = 'journal';
