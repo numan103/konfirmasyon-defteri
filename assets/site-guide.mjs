@@ -31,6 +31,10 @@ const GLOBAL = [
   c('#tab-ek', 'Diğer modüllere giden kısayol kartları.', 'left'),
   c('#tab-erisim', 'Borsa bağlama, UID doğrulama ve premium durumu.', 'left'),
   c('#tab-analitik', 'Ziyaretçi ve ürün metrikleri; yöneticiye açıktır.', 'left'),
+  c('.edu-partners button', 'Partner akışının otomatik geçişini duraklatır/sürdürür.', 'block'),
+  c('.edu-partner-logo.okx', 'OKX referans linkiyle kayıt olur.', 'block'),
+  c('.edu-partner-logo.bybit', 'Bybit referans linkiyle kayıt olur.', 'block'),
+  c('.edu-partner-logo.breakout', 'Breakout’a ALFA partner koduyla gider.', 'block'),
   c('[data-mnav="home"]', 'Ana menüye döner.', 'block')
 ];
 
@@ -68,8 +72,7 @@ const PAGES = {
       c('.eduplan[data-plan]', 'Paket kartı; seviye, süre ve içerik detayını gösterir.'),
       c('[data-edu-apply][data-edu-route]', 'Seçilen katılım yoluna göre ödeme/başvuru adımına geçer.'),
       c('.eduplans-code button', 'ALFA partner kodunu panoya kopyalar.'),
-      c('.eduplans-faq-title', 'Sık sorulan soru yanıtını açıp kapatır.'),
-      c('.edu-partners button', 'Partner akışının otomatik geçişini duraklatır/sürdürür.')
+      c('.eduplans-faq-title', 'Sık sorulan soru yanıtını açıp kapatır.')
     ]),
   home: p('Ana Menü',
     'Günlük kontrol panelin. Sabah kartı, haberler, haftalık dergi, görevler, paylaşılan portföy özeti ve hızlı arama tek ekranda toplanır.',

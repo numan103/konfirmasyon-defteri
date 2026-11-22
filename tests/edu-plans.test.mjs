@@ -33,9 +33,10 @@ test('applications specify first purchase and keep the 100K upgrade inside Perso
   assert.equal(eduApplicationURL('video', 'invalid'), null);
   assert.match(new URL(eduApplicationURL('personal', 'cash', 'en')).searchParams.get('text'), /\$250/);
 });
-test('partner assets are local, inert and the marquee supports accessible motion controls', () => {
+test('partner assets are local, inert and the shared marquee supports accessible motion controls', () => {
   const client = fs.readFileSync(new URL('../assets/edu-plans.mjs', import.meta.url), 'utf8');
-  const css = fs.readFileSync(new URL('../assets/edu-plans.css', import.meta.url), 'utf8');
+  const partners = fs.readFileSync(new URL('../assets/site-partners.mjs', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../assets/site-partners.css', import.meta.url), 'utf8');
   for (const name of ['okx', 'bybit', 'breakout']) {
     const svg = fs.readFileSync(new URL('../assets/partners/' + name + '.svg', import.meta.url), 'utf8');
     assert.match(svg, /<svg/);
@@ -43,10 +44,11 @@ test('partner assets are local, inert and the marquee supports accessible motion
   }
   assert.ok(fs.statSync(new URL('../assets/partners/breakout-trader-ahmet.jpg', import.meta.url)).size > 10000);
   assert.match(client, /await navigator.clipboard.writeText\('ALFA'\)/);
-  assert.match(client, /aria-hidden/);
-  assert.match(client, /aria-pressed/);
-  assert.match(client, /https:\/\/www.okx.com\/join\/CRYPTOAHMET/);
-  assert.match(client, /https:\/\/partner.bybit.com\/b\/cryptoahmet/);
+  assert.doesNotMatch(client, /aria-hidden/, 'ortak şerit eğitim sayfasında tekrar üretilmemeli');
+  assert.match(partners, /aria-hidden/);
+  assert.match(partners, /aria-pressed/);
+  assert.match(partners, /https:\/\/www.okx.com\/join\/CRYPTOAHMET/);
+  assert.match(partners, /https:\/\/partner.bybit.com\/b\/cryptoahmet/);
   assert.match(css, /translateX\(-50%\)/);
   assert.match(css, /prefers-reduced-motion:reduce/);
   assert.match(css, /focus-within/);
@@ -71,7 +73,7 @@ test('eğitim paketleri hero posteri sağda, dikey ve kırpılmadan gösterilir'
   assert.doesNotMatch(css, /\.eduplans-art img \{[^}]*object-fit: cover/);
   assert.doesNotMatch(css, /\.eduplans-art img \{ aspect-ratio: (4\/3|16\/9)/);
   assert.match(html, /\/assets\/edu-plans\.css\?v=5/);
-  assert.match(html, /\/assets\/edu-plans\.mjs\?v=8/);
+  assert.match(html, /\/assets\/edu-plans\.mjs\?v=9/);
 });
 test('public package offer is separate from existing course access and has clear continuation conditions', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');

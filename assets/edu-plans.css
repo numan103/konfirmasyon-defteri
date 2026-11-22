@@ -46,22 +46,7 @@
 .eduplans-partnership .btn { color: #fff; border-color: #6174ae; background: #19244b; }
 .eduplans-partnership .btn.solid { background: #304ee5; border-color: #5471ff; }
 .eduplans-copy-status { font-size: 11px; color: #c8d4ff; min-height: 16px; }
-.edu-partners { margin-top: 28px; padding: 22px 0; border-top: 1px solid var(--border); }
-.edu-partners-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-.edu-partners h2 { margin: 0; font-size: 19px; }
-.edu-partners > p { font-size: 10px; color: var(--text-3); margin-top: 14px; }
-.edu-partners-viewport { overflow: hidden; border-radius: 14px; background: #101523; direction: ltr; }
-.edu-partners-track { display: flex; width: max-content; animation: edu-partners-left 32s linear infinite; }
-.edu-partners-group { display: flex; flex: none; gap: 20px; padding: 20px 10px; }
-.edu-partner-logo { display: flex; align-items: center; justify-content: center; flex: 0 0 180px; height: 76px; border-radius: 10px; background: #192030; }
-.edu-partner-logo img { width: 140px; height: 42px; object-fit: contain; }
-.edu-partner-logo.okx { background: white; }
-.edu-partner-logo.bybit { background: white; }
-.edu-partner-logo.breakout img { width: 155px; }
-.edu-partners:hover .edu-partners-track, .edu-partners:focus-within .edu-partners-track, .edu-partners.is-paused .edu-partners-track { animation-play-state: paused; }
-.edu-partner-logo:focus-visible { outline: 3px solid #8ea3ff; outline-offset: -3px; }
-@keyframes edu-partners-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@media(prefers-reduced-motion:reduce) { .edu-partners-track { animation: none; width: 100%; } .edu-partners-group { width: 100%; box-sizing: border-box; justify-content: space-around; flex-wrap: wrap; gap: 12px; } .edu-partners-group:nth-child(2), .edu-partners-group > [aria-hidden="true"] { display: none; } .edu-partner-logo { flex-basis: 150px; } .edu-partners-head button { display: none; } }
+/* Partner şeridi artık assets/site-partners.css içinde ve tüm sayfalarda ortak. */
 @media(max-width:800px) { .eduplans-partnership { grid-template-columns: 1fr; } .eduplans-partnership > img { height: auto; aspect-ratio: 16/9; } .eduplans-partnership-copy { padding: 22px; } }
 @media(max-width:1000px) { .eduplans-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:600px) { .eduplans-hero { grid-template-columns: 1fr; padding: 22px 18px; gap: 18px; } .eduplans-grid,.eduplans-terms { grid-template-columns: 1fr; } }

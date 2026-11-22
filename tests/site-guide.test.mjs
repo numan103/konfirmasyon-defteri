@@ -32,7 +32,7 @@ const sourceText = html + collectSources('assets') + collectSources('ayna');
 
 test('eski üst menü turu kaldırıldı, yeni rehber varlıkları bağlandı', () => {
   assert.ok(html.includes('/assets/site-guide.css?v=5'));
-  assert.ok(html.includes('/assets/site-guide.mjs?v=5'));
+  assert.ok(html.includes('/assets/site-guide.mjs?v=6'));
   assert.ok(!html.includes('platform-tour'));
   assert.ok(!html.includes('pt-restart'));
   assert.ok(!html.includes('platform-tour-welcome'));
@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği yeni rehber için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v144-site-guide'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b205-site-guide'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v145-site-partners'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b206-site-partners'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 

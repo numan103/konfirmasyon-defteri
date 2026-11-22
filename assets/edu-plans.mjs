@@ -131,39 +131,8 @@ if (root) {
     ];
     notes.forEach(([title, body]) => { const note = el('details', undefined, 'eduplans-term'); note.append(el('summary', title), el('p', body)); terms.appendChild(note); });
     root.append(terms, el('p', text('10K / 25K / 50K / 100K hesap büyüklüğüdür, hesap satın alma ücreti değildir. Eğitim ücretleri ile Breakout hesap ücretleri ayrı seçeneklerdir. Referanslı satın alımlardan komisyon kazanabiliriz. Prop değerlendirme ve ödeme kuralları ilgili firmaya aittir. Başvuru düğmeleri ödeme almaz veya otomatik erişim açmaz.', '10K / 25K / 50K / 100K describe account sizes, not purchase prices. Education fees and Breakout account fees are alternative routes. We may earn referral commissions. Prop evaluation and payout rules belong to the provider. Application buttons do not collect payment or automatically unlock access.'), 'eduplans-disclosure'));
-    const partners = el('section', undefined, 'edu-partners');
-    partners.setAttribute('aria-label', text('Partnerler', 'Partners'));
-    const partnerHead = el('div', undefined, 'edu-partners-head');
-    const pause = el('button', text('Akışı duraklat', 'Pause animation'), 'btn');
-    pause.type = 'button'; pause.setAttribute('aria-pressed', 'false');
-    pause.onclick = () => {
-      const paused = partners.classList.toggle('is-paused');
-      pause.setAttribute('aria-pressed', String(paused));
-      pause.textContent = paused ? text('Akışı sürdür', 'Resume animation') : text('Akışı duraklat', 'Pause animation');
-    };
-    partnerHead.append(el('h2', text('Partnerler', 'Partners')), pause);
-    const viewport = el('div', undefined, 'edu-partners-viewport'), track = el('div', undefined, 'edu-partners-track');
-    const brands = [
-      ['OKX', 'okx.svg', 'https://www.okx.com/join/CRYPTOAHMET', 'okx'],
-      ['Bybit', 'bybit.svg', 'https://partner.bybit.com/b/cryptoahmet', 'bybit'],
-      ['Breakout', 'breakout.svg', 'https://www.breakoutprop.com/', 'breakout'],
-    ];
-    for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
-      const group = el('div', undefined, 'edu-partners-group');
-      if (groupIndex) group.setAttribute('aria-hidden', 'true');
-      for (let repeat = 0; repeat < 2; repeat++) brands.forEach(([name, asset, url, brand]) => {
-        const accessible = groupIndex === 0 && repeat === 0;
-        const item = accessible ? link('', url, 'edu-partner-logo ' + brand) : el('span', undefined, 'edu-partner-logo ' + brand);
-        if (!accessible) item.setAttribute('aria-hidden', 'true');
-        const logo = el('img'); logo.src = '/assets/partners/' + asset; logo.alt = accessible ? name : '';
-        logo.width = 150; logo.height = 48; logo.loading = 'lazy';
-        item.appendChild(logo); group.appendChild(item);
-      });
-      track.appendChild(group);
-    }
-    viewport.appendChild(track); partners.append(partnerHead, viewport,
-      el('p', text('Partner bağlantıları referans içerir; uygun işlemlerden komisyon kazanabiliriz.', 'Partner links include referrals; we may earn commissions from qualifying activity.')));
-    root.appendChild(partners);
+    // Partner şeridi bu sayfadan kaldırıldı; assets/site-partners.mjs onu
+    // artık tüm sayfaların en altına ortak olarak ekliyor.
   }
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   render();
