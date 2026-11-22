@@ -14649,9 +14649,12 @@ function bindHomeMagazine() {
     pubBtn.textContent = 'Gönderiliyor…';
     pubBtn.disabled = true;
     try {
+      const headers = (typeof siteAuthHeaders === 'function')
+        ? await siteAuthHeaders({ 'Content-Type': 'application/json' })
+        : { 'Content-Type': 'application/json' };
       const r = await fetch('/api/tg?notify=1', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'same-origin',
         body: JSON.stringify({ kind: 'magazine_publish' })
       });
