@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği yeni rehber için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v145-site-partners'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b206-site-partners'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v146-partner-clicks'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b207-partner-clicks'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 

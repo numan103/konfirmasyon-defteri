@@ -53,7 +53,7 @@ function syncLang() {
     'Partner bağlantıları referans içerir; uygun işlemlerden komisyon kazanabiliriz.',
     'Partner links include referrals; we may earn commissions from qualifying activity.'
   );
-  for (const anchor of created.links || []) {
+  for (const anchor of created.accessibleLinks || []) {
     const brand = anchor.dataset.partner;
     anchor.setAttribute('aria-label', brand === 'breakout'
       ? text('Breakout — ALFA partner kodu', 'Breakout — ALFA partner code')
@@ -83,20 +83,26 @@ function build() {
   const viewport = el('div', undefined, 'edu-partners-viewport');
   const track = el('div', undefined, 'edu-partners-track');
   created.links = [];
+  created.accessibleLinks = [];
   for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
     const group = el('div', undefined, 'edu-partners-group');
     if (groupIndex) group.setAttribute('aria-hidden', 'true');
     for (let repeat = 0; repeat < 2; repeat++) {
       BRANDS.forEach(([name, asset, brand, key]) => {
         const accessible = groupIndex === 0 && repeat === 0;
-        const item = accessible ? el('a', '', 'edu-partner-logo ' + brand) : el('span', undefined, 'edu-partner-logo ' + brand);
+        // Kopyalar da gerçek bağlantı: akış kaydığında görünen logo tıklanabilir kalsın.
+        // Yalnızca ilk 3'ü erişilebilir ağaçta; kopyalar ekran okuyucu ve klavyeden gizli.
+        const item = el('a', '', 'edu-partner-logo ' + brand);
         item.target = '_blank';
         item.rel = 'noopener noreferrer';
+        item.dataset.partner = key;
+        created.links.push(item);
         if (accessible) {
-          item.dataset.partner = key;
-          created.links.push(item);
+          created.accessibleLinks.push(item);
         } else {
           item.setAttribute('aria-hidden', 'true');
+          item.setAttribute('tabindex', '-1');
+          item.dataset.clone = '1';
         }
         const logo = el('img');
         logo.src = '/assets/partners/' + asset;

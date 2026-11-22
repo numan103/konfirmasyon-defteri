@@ -24,7 +24,7 @@ try {
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('denied'); } } }));
   await page.getByRole('button', { name: 'Kodu kopyala', exact: true }).click();
   assert.match(await page.locator('.eduplans-copy-status').innerText(), /Kopyalanamadı/);
-  assert.equal(await page.locator('.edu-partners a').count(), 3);
+  assert.equal(await page.locator('.edu-partners a:not([aria-hidden])').count(), 3);
   await page.locator('.edu-partners').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => [...document.querySelectorAll('.edu-partners img')].every(img => img.complete && img.naturalWidth > 0));
   assert.equal(await page.locator('.edu-partners a').first().getAttribute('href'), 'https://www.okx.com/join/CRYPTOAHMET');
@@ -32,7 +32,7 @@ try {
   assert.equal(await page.locator('.edu-partners').evaluate(node => getComputedStyle(node.querySelector('.edu-partners-track')).animationPlayState), 'paused');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await page.locator('.edu-partners-track').evaluate(node => getComputedStyle(node).animationName), 'none');
-  assert.equal(await page.locator('.edu-partners a:visible').count(), 3);
+  assert.equal(await page.locator('.edu-partners a:not([aria-hidden]):visible').count(), 3);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   assert.match(await page.locator('.eduplans-offer-note').innerText(), /ilk hesap alımına özeldir/);
   assert.equal(await page.locator('.eduplan[data-plan="video"] .eduplan-price').textContent(), '$50');

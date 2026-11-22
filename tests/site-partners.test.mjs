@@ -104,19 +104,20 @@ function walk(node, fn) {
 }
 
 test('partner şeridi eğitim sayfasından alınıp ortak alt alana bağlandı', () => {
-  assert.ok(html.includes('/assets/site-partners.css?v=1'));
-  assert.ok(html.includes('/assets/site-partners.mjs?v=1'));
+  assert.ok(html.includes('/assets/site-partners.css?v=2'));
+  assert.ok(html.includes('/assets/site-partners.mjs?v=2'));
   assert.ok(html.includes('/assets/edu-plans.mjs?v=9'));
   assert.ok(html.includes("new CustomEvent('alfa:site-access')"), 'referans linkleri sunucu ayarından yenilenmeli');
   assert.ok(html.includes('window.SITE = SITE;'), 'modüller sunucu linklerini window.SITE üzerinden okuyabilmeli');
   assert.ok(moduleSrc.includes("okx: 'https://www.okx.com/join/CRYPTOAHMET'"));
   assert.ok(moduleSrc.includes("bybit: 'https://partner.bybit.com/b/cryptoahmet'"));
   assert.ok(css.includes('.site-partners-footer'));
+  assert.ok(css.includes('body.landed .site-partners-footer'), 'landing açılırken şerit önce görünmemeli');
   assert.ok(!eduCss.includes('.edu-partners {'), 'partner CSS ortak dosyaya taşınmalı');
   assert.ok(!eduPlans.includes("const partners = el('section', undefined, 'edu-partners')"), 'eğitim sayfası şeridi tekrar üretmemeli');
 });
 
-test('ortak şerit 3 partner linki ve referans adresleriyle eklenir', async () => {
+test('ortak şeritteki tüm logolar tıklanabilir, ilk 3 erişilebilir', async () => {
   const dom = fakeDom();
   await import('../assets/site-partners.mjs?partners=' + Date.now());
   const api = global.window.AlfaSitePartners;
@@ -126,20 +127,26 @@ test('ortak şerit 3 partner linki ve referans adresleriyle eklenir', async () =
 
   const anchors = [];
   walk(footer, node => { if (node.tagName === 'A') anchors.push(node); });
-  assert.deepEqual(anchors.map(a => [a.dataset.partner, a.href]), [
+  const expected = [
     ['okx', 'https://www.okx.com/join/CRYPTOAHMET'],
     ['bybit', 'https://partner.bybit.com/b/cryptoahmet'],
     ['breakout', 'https://www.breakoutprop.com/']
-  ]);
+  ];
+  assert.equal(anchors.length, 12, 'akış kopyaları da gerçek bağlantı olmalı');
+  assert.deepEqual(anchors.slice(0, 3).map(a => [a.dataset.partner, a.href]), expected);
   for (const a of anchors) {
     assert.equal(a.target, '_blank');
     assert.equal(a.rel, 'noopener noreferrer');
   }
 
-  const clones = [];
-  walk(footer, node => { if (node.tagName === 'SPAN' && node.className.includes('edu-partner-logo')) clones.push(node); });
-  assert.equal(clones.length, 9, 'akış için 3 kopya daha, erişilebilir olmayan span olarak eklenmeli');
-  assert.ok(clones.every(n => n.getAttribute('aria-hidden') === 'true'));
+  const accessible = anchors.filter(a => !a.dataset.clone);
+  const clones = anchors.filter(a => a.dataset.clone);
+  assert.equal(accessible.length, 3);
+  assert.equal(clones.length, 9);
+  assert.ok(clones.every(n => n.getAttribute('aria-hidden') === 'true' && n.getAttribute('tabindex') === '-1'));
+  for (const [brand, href] of expected) {
+    assert.ok(clones.filter(a => a.dataset.partner === brand).every(a => a.href === href));
+  }
 });
 
 test('sunucudan gelen referans linkleri şeride uygulanır', async () => {
@@ -157,9 +164,9 @@ test('sunucudan gelen referans linkleri şeride uygulanır', async () => {
   };
   dom.emitAccess();
 
-  assert.equal(anchors.find(a => a.dataset.partner === 'okx').href, 'https://www.okx.com/join/MYLINK');
-  assert.equal(anchors.find(a => a.dataset.partner === 'bybit').href, 'https://partner.bybit.com/b/mylink');
-  assert.equal(anchors.find(a => a.dataset.partner === 'breakout').href, 'https://www.breakoutprop.com/');
+  assert.ok(anchors.filter(a => a.dataset.partner === 'okx').every(a => a.href === 'https://www.okx.com/join/MYLINK'));
+  assert.ok(anchors.filter(a => a.dataset.partner === 'bybit').every(a => a.href === 'https://partner.bybit.com/b/mylink'));
+  assert.ok(anchors.filter(a => a.dataset.partner === 'breakout').every(a => a.href === 'https://www.breakoutprop.com/'));
   assert.equal(api.links().okx, 'https://www.okx.com/join/MYLINK');
 });
 
