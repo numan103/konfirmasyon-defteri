@@ -683,13 +683,35 @@
   .ht-chart-wrap canvas { width: 100%; height: 120px; display: block; }
   .ht-list { padding: 4px 0; }
   .ht-cta { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 12.5px; color: var(--text-2); }
-  .home-edu { max-width: 980px; margin: 0 auto 22px; display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid var(--border); border-radius: 16px; background: linear-gradient(135deg, rgba(123,120,245,.08), transparent); }
-  .he-ico { font-size: 28px; }
-  .he-body { flex: 1; }
-  .he-body h3 { font-size: 14px; font-weight: 800; margin: 0 0 3px; }
-  .he-body p { font-size: 12.5px; color: var(--text-2); margin: 0; line-height: 1.45; }
-  .he-link { background: var(--pc); color: #fff; border: none; border-radius: 999px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
-  .he-link:hover { background: #4c4cc4; color: #fff; }
+  .home-edu { max-width: 980px; margin: 0 auto 22px; padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+  .home-edu-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .home-edu-head h2 { margin:0; font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .home-edu-head p { margin:4px 0 0; font-size:12.5px; color:var(--text-2); }
+  .home-edu-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .home-edu-actions a, .home-edu-actions button { border:1px solid var(--border); background:var(--bg2); color:var(--text); border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; text-decoration:none; }
+  .home-edu-actions .primary { background:var(--pc); border-color:var(--pc); color:#fff; }
+  .home-edu-grid { display:grid; grid-template-columns: 1.3fr 1fr; gap:14px; }
+  @media (max-width: 860px) { .home-edu-grid { grid-template-columns: 1fr; } }
+  .home-edu-player { border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--bg2); min-height:220px; }
+  .home-edu-player .embed { aspect-ratio:16/9; background:#000; }
+  .home-edu-player iframe { width:100%; height:100%; border:0; display:block; }
+  .home-edu-player .meta { padding:12px 14px; }
+  .home-edu-player .kicker { font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--pc); }
+  .home-edu-player .title { font-size:15px; font-weight:800; margin:4px 0; }
+  .home-edu-player .sub { font-size:12px; color:var(--text-2); margin:0; }
+  .home-edu-empty { padding:28px 18px; text-align:center; color:var(--text-2); font-size:13px; }
+  .home-edu-list { display:flex; flex-direction:column; gap:8px; max-height:420px; overflow:auto; }
+  .home-edu-item { width:100%; text-align:left; border:1px solid var(--border); background:var(--bg2); color:var(--text); border-radius:12px; padding:10px 12px; cursor:pointer; display:flex; gap:10px; align-items:flex-start; }
+  .home-edu-item:hover { border-color:var(--pc); }
+  .home-edu-item.on { border-color:var(--pc); box-shadow: inset 3px 0 0 var(--pc); background:var(--pc-soft, rgba(123,120,245,.08)); }
+  .home-edu-item .idx { width:24px; height:24px; border-radius:7px; background:var(--card); border:1px solid var(--border); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:var(--text-3); flex:none; }
+  .home-edu-item .t { font-size:13px; font-weight:700; line-height:1.35; }
+  .home-edu-item .s { font-size:11px; color:var(--text-3); margin-top:2px; }
+  .home-edu-item .tag { margin-left:auto; font-size:10px; font-weight:800; color:var(--pc); white-space:nowrap; }
+  .home-edu-continue { margin-bottom:12px; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:linear-gradient(135deg, rgba(123,120,245,.08), transparent); display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .home-edu-continue .k { font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--pc); }
+  .home-edu-continue .v { font-size:13px; font-weight:700; }
+  .home-edu-continue button { border:none; background:var(--pc); color:#fff; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; }
   /* --- Trade Günlüğü pano düzeni --- */
   .data-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 900px) {
@@ -6508,6 +6530,25 @@
           <div id="home-results-list"></div>
         </div>
       </div>
+<div class="home-edu" id="home-edu-section">
+  <div class="home-edu-head">
+    <div>
+      <h2>🎓 Alfa Edu</h2>
+      <p id="home-edu-sub">Ücretsiz derslerle başla, kaldığın yerden devam et.</p>
+    </div>
+    <div class="home-edu-actions">
+      <a href="?page=egitim" data-nav class="primary">Tüm eğitimler</a>
+      <a href="?page=eduplans" data-nav>Eğitim paketleri</a>
+    </div>
+  </div>
+  <div id="home-edu-continue"></div>
+  <div class="home-edu-grid">
+    <div class="home-edu-player" id="home-edu-player">
+      <div class="home-edu-empty">Eğitimler yükleniyor…</div>
+    </div>
+    <div class="home-edu-list" id="home-edu-list"></div>
+  </div>
+</div>
 <div class="home-section" id="home-sec-premium">
   <div class="home-section-head">Premium Araçlar</div>
   <div class="home-grid">
@@ -15633,6 +15674,7 @@ async function submitAccess() {
   try { renderHomeDash(); } catch (e) {} try { initHomeExtras(); } catch (e) {}
   try { renderHomeTeaser(); } catch (e) {}
   try { renderHomeChannel(); } catch (e) {}
+  try { renderHomeEdu(); } catch (e) {}
 
   if (outcome.status === 'verified') {
     const M = SITE.mentor || {};
@@ -16033,7 +16075,7 @@ function showPage(name, skipAnim) {
   const shown = document.getElementById('page-' + name);
   if (shown && !skipAnim) { shown.classList.remove('page-anim'); void shown.offsetWidth; shown.classList.add('page-anim'); }
   try { localStorage.setItem('df-last-page', name); } catch (e) {}
-  if (name === 'home') { try { renderHomeDash(); } catch (e) {} try { initHomeExtras(); } catch (e) {} try { renderHomeTeaser(); } catch (e) {} try { renderHomeChannel(); } catch (e) {} try { loadHomeMagazine(); } catch (e) {} try { chLoadHomeDaily(); } catch (e) {} }
+  if (name === 'home') { try { renderHomeDash(); } catch (e) {} try { initHomeExtras(); } catch (e) {} try { renderHomeTeaser(); } catch (e) {} try { renderHomeChannel(); } catch (e) {} try { loadHomeMagazine(); } catch (e) {} try { chLoadHomeDaily(); } catch (e) {} try { renderHomeEdu(); } catch (e) {} }
   document.getElementById('home-ticker').style.display = name === 'home' ? '' : 'none';
   const tvBar = document.querySelector('.tv-bar');
   if (tvBar) tvBar.style.display = name === 'home' ? '' : 'none';
@@ -25434,6 +25476,120 @@ function renderEduCatalog() {
     if (target) cont.textContent = (target.done ? eduT('edu.continue', 'Kaldığın yerden devam et') : eduT('edu.start', 'Başla'));
   }
 }
+
+let homeEduSelected = null;
+async function renderHomeEdu() {
+  const section = document.getElementById('home-edu-section');
+  if (!section) return;
+  const sub = document.getElementById('home-edu-sub');
+  const cont = document.getElementById('home-edu-continue');
+  const player = document.getElementById('home-edu-player');
+  const list = document.getElementById('home-edu-list');
+  if (!player || !list) return;
+
+  const premium = !!(typeof refUnlocked === 'function' && refUnlocked());
+  if (sub) sub.textContent = premium
+    ? 'Kaldığın yerden devam et, bugünün dersini izle.'
+    : 'Ücretsiz derslerle başla; ref onayıyla tüm eğitimler açılır.';
+
+  if (!channelsLoaded) {
+    if (cont) cont.replaceChildren();
+    list.replaceChildren();
+    player.innerHTML = '<div class="home-edu-empty">Eğitimler yükleniyor…</div>';
+    try { await loadChannels(); } catch (e) {}
+    if (currentPage !== 'home') return;
+  }
+
+  const courses = (typeof eduCourses === 'function' ? eduCourses() : []).filter(c => c.openTotal > 0);
+  const openItems = [];
+  courses.forEach(c => (c.items || []).forEach(it => {
+    if (chItemLocked(it.video)) return;
+    openItems.push({ c, lesson: it.lesson, video: it.video, done: chIsDone(c.t.id, c.sec.id, it.lesson.id, it.video.id) });
+  }));
+
+  if (cont) cont.replaceChildren();
+  if (!openItems.length) {
+    list.replaceChildren();
+    player.innerHTML = '<div class="home-edu-empty">' + (channelsError ? esc(channelsError) : 'Şu anda gösterilecek ücretsiz ders yok.') + '</div>';
+    return;
+  }
+
+  const last = (typeof eduLast === 'function') ? eduLast() : null;
+  let continueItem = null;
+  if (last) continueItem = openItems.find(x => x.c.t.id === last.ch && x.c.sec.id === last.sec && !x.done) || openItems.find(x => x.c.t.id === last.ch && x.c.sec.id === last.sec);
+  if (!continueItem) continueItem = openItems.find(x => !x.done) || openItems[0];
+
+  const dayIdx = Math.floor(Date.now() / 86400000);
+  const daily = openItems[dayIdx % openItems.length];
+  const selectedKey = homeEduSelected || chProgKey(continueItem.c.t.id, continueItem.c.sec.id, continueItem.lesson.id, continueItem.video.id);
+  const selected = openItems.find(x => chProgKey(x.c.t.id, x.c.sec.id, x.lesson.id, x.video.id) === selectedKey) || continueItem;
+  homeEduSelected = chProgKey(selected.c.t.id, selected.c.sec.id, selected.lesson.id, selected.video.id);
+
+  if (cont) {
+    const box = document.createElement('div'); box.className = 'home-edu-continue';
+    const left = document.createElement('div');
+    const k = document.createElement('div'); k.className = 'k'; k.textContent = continueItem.done ? 'Tekrar izle' : 'Kaldığın yerden devam et';
+    const v = document.createElement('div'); v.className = 'v'; v.textContent = (continueItem.c.sec.title || 'Eğitim') + ' · ' + (continueItem.video.title || 'Ders');
+    left.append(k, v);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = continueItem.done ? 'Aç' : 'Devam et';
+    btn.addEventListener('click', () => { homeEduSelected = chProgKey(continueItem.c.t.id, continueItem.c.sec.id, continueItem.lesson.id, continueItem.video.id); renderHomeEdu(); });
+    box.append(left, btn);
+    cont.appendChild(box);
+  }
+
+  const src = (typeof egEmbedSrc === 'function') ? egEmbedSrc(selected.video) : '';
+  player.replaceChildren();
+  if (src) {
+    const embed = document.createElement('div'); embed.className = 'embed';
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.title = selected.video.title || 'Eğitim videosu';
+    iframe.loading = 'lazy';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true;
+    embed.appendChild(iframe);
+    player.appendChild(embed);
+  } else {
+    const empty = document.createElement('div'); empty.className = 'home-edu-empty'; empty.textContent = 'Bu içerik metin/not olarak açılıyor.';
+    player.appendChild(empty);
+  }
+  const meta = document.createElement('div'); meta.className = 'meta';
+  const kicker = document.createElement('div'); kicker.className = 'kicker'; kicker.textContent = selected.c.sec.title || 'Alfa Edu';
+  const title = document.createElement('div'); title.className = 'title'; title.textContent = selected.video.title || 'Ders';
+  const s = document.createElement('p'); s.className = 'sub';
+  const dailyTag = chProgKey(daily.c.t.id, daily.c.sec.id, daily.lesson.id, daily.video.id) === homeEduSelected ? ' · Günün dersi' : '';
+  s.textContent = (selected.c.t.name || 'Alfa Edu') + ' · ' + (selected.lesson.title || 'Ders') + dailyTag;
+  meta.append(kicker, title, s);
+  const actions = document.createElement('div'); actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;';
+  const watchBtn = document.createElement('button'); watchBtn.type = 'button'; watchBtn.className = 'btn'; watchBtn.style.cssText = 'padding:7px 12px;font-size:12px;';
+  const done = chIsDone(selected.c.t.id, selected.c.sec.id, selected.lesson.id, selected.video.id);
+  watchBtn.textContent = done ? '✓ İzlendi' : 'İzlendi olarak işaretle';
+  watchBtn.addEventListener('click', () => { chProgSet(selected.c.t.id, selected.c.sec.id, selected.lesson.id, selected.video.id, !done); renderHomeEdu(); });
+  const openBtn = document.createElement('button'); openBtn.type = 'button'; openBtn.className = 'btn ghost'; openBtn.style.cssText = 'padding:7px 12px;font-size:12px;';
+  openBtn.textContent = 'Eğitimde aç';
+  openBtn.addEventListener('click', () => { openCourse(selected.c.t.id, selected.c.sec.id); chTopic = selected.lesson.id; chVid = selected.video.id; renderChannelView(); showPage('egitim'); });
+  actions.append(watchBtn, openBtn);
+  meta.appendChild(actions);
+  player.appendChild(meta);
+
+  list.replaceChildren();
+  openItems.slice(0, 12).forEach((item, i) => {
+    const key = chProgKey(item.c.t.id, item.c.sec.id, item.lesson.id, item.video.id);
+    const row = document.createElement('button'); row.type = 'button'; row.className = 'home-edu-item' + (key === homeEduSelected ? ' on' : '');
+    const idx = document.createElement('span'); idx.className = 'idx'; idx.textContent = item.done ? '✓' : String(i + 1);
+    const body = document.createElement('div');
+    const t = document.createElement('div'); t.className = 't'; t.textContent = item.video.title || 'Ders';
+    const ss = document.createElement('div'); ss.className = 's'; ss.textContent = (item.c.sec.title || 'Alfa Edu') + ' · ' + (item.lesson.title || '');
+    body.append(t, ss);
+    const tag = document.createElement('span'); tag.className = 'tag';
+    const isDaily = key === chProgKey(daily.c.t.id, daily.c.sec.id, daily.lesson.id, daily.video.id);
+    tag.textContent = item.done ? 'Tamam' : (isDaily ? 'Günün dersi' : (key === chProgKey(continueItem.c.t.id, continueItem.c.sec.id, continueItem.lesson.id, continueItem.video.id) ? 'Devam' : ''));
+    row.append(idx, body, tag);
+    row.addEventListener('click', () => { homeEduSelected = key; try { localStorage.setItem('alfa-edu-last', JSON.stringify({ ch: item.c.t.id, sec: item.c.sec.id })); } catch (e) {} renderHomeEdu(); });
+    list.appendChild(row);
+  });
+}
+
 function refreshEduDynamic() {
   if (typeof currentPage === 'undefined' || currentPage !== 'egitim') return;
   const view = document.getElementById('ch-view');
@@ -29939,6 +30095,7 @@ async function onAuthed(user) {
   try { renderHomeDash(); } catch (e) {} try { initHomeExtras(); } catch (e) {}
   try { renderHomeTeaser(); } catch (e) {}
   try { renderHomeChannel(); } catch (e) {}
+  try { renderHomeEdu(); } catch (e) {}
   hideGate();
   hideLanding();
   const wrap = document.querySelector('.wrap');
