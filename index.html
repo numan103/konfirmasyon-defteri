@@ -25057,7 +25057,7 @@ function chIsAdmin() { return !window.ALFA_PREVIEW_CONFIG && !!(AUTH && AUTH.use
 function refreshEduLearningRewards() {
   if (!window.EduLearningRewards) return;
   const courses = eduCourses().filter(c => c.openTotal > 0);
-  const next = courses.flatMap(c => c.items.map(item => ({ c, ...item }))).find(item => !chItemLocked(item.video) && !chIsDone(c.t.id, c.sec.id, item.lesson.id, item.video.id));
+  const next = courses.flatMap(c => c.items.map(item => ({ c, ...item }))).find(item => !chItemLocked(item.video) && !chIsDone(item.c.t.id, item.c.sec.id, item.lesson.id, item.video.id));
   const certs = (window.EduProgress && typeof window.EduProgress.certificates === 'function') ? window.EduProgress.certificates() : [];
   window.EduLearningRewards.draw(document.getElementById('edu-learning-rewards'), {
     account: AUTH.user?.id || '', admin: chIsAdmin(), preview: !!window.ALFA_PREVIEW_CONFIG, page: currentPage,
