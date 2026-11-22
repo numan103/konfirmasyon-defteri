@@ -104,7 +104,7 @@ function walk(node, fn) {
 }
 
 test('partner şeridi eğitim sayfasından alınıp ortak alt alana bağlandı', () => {
-  assert.ok(html.includes('/assets/site-partners.css?v=2'));
+  assert.ok(html.includes('/assets/site-partners.css?v=3'));
   assert.ok(html.includes('/assets/site-partners.mjs?v=2'));
   assert.ok(html.includes('/assets/edu-plans.mjs?v=9'));
   assert.ok(html.includes("new CustomEvent('alfa:site-access')"), 'referans linkleri sunucu ayarından yenilenmeli');

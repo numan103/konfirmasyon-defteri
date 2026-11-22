@@ -36,7 +36,7 @@
 <link rel="stylesheet" href="/assets/member-video.css?v=2">
 <script type="module" src="/assets/member-video.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/edu-plans.css?v=5">
-<link rel="stylesheet" href="/assets/site-partners.css?v=2">
+<link rel="stylesheet" href="/assets/site-partners.css?v=3">
 <script type="module" src="/assets/site-partners.mjs?v=2"></script>
 <link rel="stylesheet" href="/assets/admin-preview.css?v=3">
 <script type="module" src="/assets/admin-preview.mjs?v=4"></script>
@@ -650,7 +650,7 @@
   .hm-body .hint { font-size:11.5px; color:var(--text-3); line-height:1.4; }
   .hm-arrow { margin-left:auto; color:var(--pc); font-size:18px; font-weight:800; }
   /* Ana sayfa gömülü Alfa Dergi — gerçek flipbook, salt okunur */
-  .home-mag-reader { max-width:1180px; margin:32px auto 22px; padding:16px 18px 14px; border:1px solid var(--border); border-radius:16px; background:var(--card); box-shadow:var(--shadow); }
+  .home-mag-reader { max-width:1180px; margin:56px auto 28px; padding:18px 20px 16px; border:1px solid var(--border); border-radius:16px; background:var(--card); box-shadow:var(--shadow); }
   .hmr-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
   .hmr-kicker { display:block; color:var(--pc); font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
   .hmr-head h2 { margin:0; font-size:16px; font-weight:800; }
@@ -659,7 +659,7 @@
   .home-magazine:hover { border-color:var(--pc); color:var(--pc); }
   .hm-arrow { color:var(--pc); font-size:14px; }
   .hmr-book { max-width:100%; margin:0 auto; }
-  .hmr-book .mag-viewport { max-height:min(72vh, 760px); aspect-ratio:16 / 10; }
+  .hmr-book .mag-viewport { max-height:min(82vh, 880px); aspect-ratio:16 / 10.5; }
   .hmr-book .mag-nav.prev { left:10px; }
   .hmr-book .mag-nav.next { right:10px; }
   .hmr-book .mag-foot { margin-top:12px; }
@@ -6545,20 +6545,7 @@
     <div class="home-edu-list" id="home-edu-list"></div>
   </div>
 </div>
-<div class="home-section" id="home-sec-admin" style="display:none">
-  <div class="home-section-head">Yönetim</div>
-  <div class="home-grid">
-        <button type="button" class="home-card" data-macro-open style="text-align:left;font:inherit"><div class="hc-body"><h2>🌐 Alfa Makro Analist</h2><p>09.00 raporu, hedef kontrolü, önizleme ve onaylı test gönderimi.</p></div></button>
-        <a href="?page=analitik" class="home-card" data-nav>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvAn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity=".16"/><stop offset="1" stop-color="#38bdf8" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvAn)"/><g stroke="#38bdf8" stroke-width="3" stroke-linecap="round" opacity=".85"><path d="M40 88V64"/><path d="M72 88V44"/><path d="M104 88V56"/><path d="M136 88V32"/><path d="M168 88V48"/><path d="M200 88V38"/><path d="M232 88V58"/><path d="M264 88V28"/></g><path d="M40 70 72 52 104 60 136 40 168 54 200 44 232 62 264 36" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="264" cy="28" r="5" fill="#38bdf8"/></svg></div>
-          <div class="hc-body"><h2>📊 Ziyaretçi Analitiği</h2><p>Kim geldi, ne kadar kaldı, hangi sayfalarla ilgilendi.</p></div>
-        </a>
-        <a href="?page=basvuru" class="home-card" data-nav id="home-basvuru-card" style="display:none">
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv9)"/><circle cx="114" cy="50" r="19" fill="var(--pc)" stroke="var(--card)" stroke-width="4"/><circle cx="150" cy="50" r="19" fill="#7c3aed" stroke="var(--card)" stroke-width="4"/><circle cx="186" cy="50" r="19" fill="var(--green)" stroke="var(--card)" stroke-width="4"/><rect x="122" y="78" width="56" height="22" rx="11" fill="var(--green)"/><text x="150" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">+52R</text></svg></div>
-          <div class="hc-body"><h2>🤝 Alfa Ol</h2><p>Topluluk akışı, PnL performansı, referansla katıl.</p></div>
-        </a>
-      </div>
-  </div>
+
   <div id="home-results-bottom"></div>
   <button type="button" class="home-top" id="home-top" aria-label="Yukarı çık" title="Yukarı çık">↑</button>
     
@@ -15255,8 +15242,7 @@ function applyTierUi() {
     else if (ref) homeStatus.innerHTML = '<span class="hs-badge premium">Premium</span><button class="hs-link" type="button" onclick="showPage(\'portfoy\')">Portföyü aç →</button>';
     else homeStatus.innerHTML = '<span class="hs-badge free">Ücretsiz</span><button class="hs-link" type="button" onclick="showPage(\'erisim\')">Premium\'a geç →</button>';
   }
-  const secAdmin = document.getElementById('home-sec-admin');
-  if (secAdmin) secAdmin.style.display = isAdmin ? '' : 'none';
+
   bindAccessForm();
 }
 
@@ -30144,10 +30130,8 @@ async function onAuthed(user) {
   // Alfa Ol: sadece admin görebilir
   const bsTab = document.getElementById('tab-basvuru');
   const bsMob = document.getElementById('mnav-basvuru');
-  const bsHome = document.getElementById('home-basvuru-card');
   if (bsTab) bsTab.style.display = isAdmin ? '' : 'none';
   if (bsMob) bsMob.style.display = isAdmin ? '' : 'none';
-  if (bsHome) bsHome.style.display = isAdmin ? '' : 'none';
   // Sosyalmetre: sadece admin hesabında
   const smTab = document.getElementById('tab-sosyalmetre');
   const smMob = document.getElementById('mnav-sosyalmetre');

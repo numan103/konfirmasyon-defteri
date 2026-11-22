@@ -14,7 +14,7 @@ body[data-page="pano"] .site-partners-footer { max-width: none; }
 .edu-partners h2 { margin: 0; font-size: 19px; }
 .edu-partners > p { font-size: 10px; color: var(--text-3); margin-top: 14px; }
 .edu-partners-viewport { overflow: hidden; border-radius: 14px; background: #101523; direction: ltr; }
-.edu-partners-track { display: flex; width: max-content; animation: edu-partners-left 32s linear infinite; }
+.edu-partners-track { display: flex; width: max-content; animation: edu-partners-left 55s linear infinite; }
 .edu-partners-group { display: flex; flex: none; gap: 20px; padding: 20px 10px; }
 .edu-partner-logo { display: flex; align-items: center; justify-content: center; flex: 0 0 180px; height: 76px; border-radius: 10px; background: #192030; text-decoration: none; cursor: pointer; }
 .edu-partner-logo img { width: 140px; height: 42px; object-fit: contain; }
