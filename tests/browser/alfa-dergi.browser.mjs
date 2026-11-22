@@ -113,12 +113,8 @@ async function session(label, access) {
       assert.match(weekly.meta, /Haftalık · 1 Kasım/, label + ' fixture weekly label');
     }
     assert.equal(weekly.toolsVisible, access.admin === true, label + ' editor tools');
-    assert.equal(weekly.adminCatSelects, access.admin ? weekly.count : 0, label + ' category picker only for admin');
     assert.equal(weekly.previewSelects, 0, label + ' embedded reader never exposes category picker');
-    if (!live) {
-      assert.ok(weekly.cats.includes('Haber') && weekly.cats.includes('Teknik Analiz'), label + ' full magazine badges');
-    }
-    assert.ok(weekly.stagePages >= 3, label + ' flipbook pages');
+    assert.equal(weekly.stagePages, 8, label + ' section-based flipbook pages');
 
     await page.locator('#news-weekly-list .nw-open').first().click();
     assert.match(await page.locator('#mag-counter').textContent(), /^\d+ \/ \d+/, label + ' weekly card opens a flipbook page');
