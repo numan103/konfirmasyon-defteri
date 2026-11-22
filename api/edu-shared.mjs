@@ -15,10 +15,10 @@ import { sendTelegram } from '../lib/telegram.mjs';
 import { websiteNotifyTarget } from '../lib/website-notify.mjs';
 import { FEATURES, isNew } from '../assets/site-features.mjs';
 import { bearer, requestUser, requestTier } from '../lib/auth.mjs';
-import { openRecord } from '../lib/education-crm.mjs';
-import { EDU_PLANS } from '../assets/edu-plans-model.mjs';
 import { sealChannels, openChannels } from '../lib/edu-channel-storage.mjs';
+import { PAID_PLAN_IDS, isPaidItem, itemPlans, verifiedEduPlans, projectChannels, channelEditor } from '../lib/edu-access.mjs';
 import eduTelegramInbox from '../lib/edu-telegram-inbox.mjs';
+import eduProgress from '../lib/edu-progress.mjs';
 import { readMagazineSnapshot } from '../lib/telegram-magazine-source.mjs';
 import { groupMagazineArticles } from '../assets/magazine-articles.mjs';
 import { cleanPDF } from '../lib/edu-pdf.mjs';
@@ -182,73 +182,8 @@ async function writeJournal(journalUid, data) {
 
 function emptyChannels() { return { traders: {}, order: [] }; }
 
-// Alfa Edu: eski içerikler ücretsizdir (access alanı yoksa/free). Yeni videolar
-// access:'paid' ve opsiyonel plans:[] taşır. edu_shared herkese açık olduğu için
-// Ücretli içeriğin URL/not/fotoğrafı sunucuda çıkarılır; yalnızca admin/ref veya
-// ilgili paketi onaylanmış üye tam veriyi alır. locked alanı her ücretli öğede
-// sunucu tarafından yazılır; istemci içerik boşluğundan kilit tahmin etmez.
-const PAID_PLAN_IDS = new Set(EDU_PLANS.map(p => p.id));
-const isPaidItem = v => !!(v && String(v.access || '').toLowerCase() === 'paid');
-function itemPlans(v) {
-  const raw = Array.isArray(v && v.plans) ? v.plans.map(x => String(x || '').toLowerCase().slice(0, 20)) : [];
-  const list = raw.filter(x => PAID_PLAN_IDS.has(x));
-  return list.length ? Array.from(new Set(list)).slice(0, 3) : ['video'];
-}
+// Erişim/gating yardımcıları: lib/edu-access.mjs
 
-// Onaylanmış CRM kayıtları şifreli tutulur. memberId + stage alanlarına göre
-// üyenin hangi paketleri aldığını çıkarır; sırada yalnızca paket kimlikleri döner.
-async function verifiedEduPlans(user) {
-  const plans = new Set();
-  const key = String(process.env.SUPABASE_SERVICE_ROLE || '').trim();
-  if (!user || !user.id || !key) return plans;
-  try {
-    const headers = { apikey: key, ...(key.startsWith('sb_secret_') ? {} : { Authorization: 'Bearer ' + key }) };
-    const url = SUPABASE_URL + '/rest/v1/edu_shared?id=like.' + encodeURIComponent('educrm_%') + '&select=id,data&limit=1000';
-    const r = await fetch(url, { headers, signal: AbortSignal.timeout(6000) });
-    if (!r.ok) return plans;
-    const rows = await r.json();
-    if (!Array.isArray(rows)) return plans;
-    rows.forEach(row => {
-      try {
-        const rec = openRecord(row.id, row.data);
-        if (rec && rec.memberId === user.id && rec.stage === 'verified' && PAID_PLAN_IDS.has(rec.plan)) plans.add(rec.plan);
-      } catch (e) { /* başka kayıt tipi */ }
-    });
-  } catch (e) { /* CRM okunamadıysa kilitli kalır */ }
-  return plans;
-}
-
-function projectChannels(base, viewer) {
-  if (!base || !base.traders || typeof base.traders !== 'object') return base;
-  const out = JSON.parse(JSON.stringify(base));
-  Object.values(out.traders).forEach(t => {
-    const canEdit = channelEditor(t, viewer.user);
-    if (!canEdit) { delete t.owner; delete t.editors; }
-    t.canEdit = canEdit;
-    const secs = (t && t.sections) || {};
-    Object.keys(secs).forEach(sid => {
-      (Array.isArray(secs[sid]) ? secs[sid] : []).forEach(topic => {
-        (Array.isArray(topic && topic.videos) ? topic.videos : []).forEach(v => {
-          if (!isPaidItem(v)) return;
-          if (viewer.privileged || canEdit) { v.locked = false; return; }
-          const plans = itemPlans(v);
-          if (plans.some(p => viewer.plans.has(p))) { v.locked = false; return; }
-          v.url = ''; v.body = ''; v.photos = []; v.vids = [];
-          v.tricks = '';
-          v.locked = true; v.plans = plans;
-        });
-      });
-    });
-  });
-  return out;
-}
-
-function channelEditor(channel, user) {
-  if (!user) return false;
-  const email = String(user.email || '').toLowerCase();
-  return !!(user.admin || (email && (String(channel?.owner || '').toLowerCase() === email ||
-    (Array.isArray(channel?.editors) && channel.editors.some(value => String(value).toLowerCase() === email)))));
-}
 function channelCapacityError(c) {
   if (!c || typeof c !== 'object') return '';
   if ((c.secMeta?.length || 0) > 50 || Object.keys(c.sections || {}).length > 50) return 'En fazla 50 bölüm saklanabilir.';
@@ -403,6 +338,7 @@ export default async function handler(req, res) {
   if (req.query?.kind === 'youtube') return youtubeLatest(req, res);
   if (req.query?.kind === 'news') return alfaNews(req, res);
   if (req.query?.kind === 'site-features') return siteFeatures(req, res);
+  if (req.query?.kind === 'progress') return eduProgress(req, res);
 
   const isChannel = String(req.query && req.query.kind) === 'channel';
   if (isChannel) { res.setHeader('Cache-Control', 'private, no-store'); res.setHeader('Vary', 'Authorization'); }

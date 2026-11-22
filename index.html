@@ -66,6 +66,9 @@
 <link rel="stylesheet" href="/assets/daily-note-social.css?v=1">
 <script type="module" src="/assets/daily-note-social.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/edu-learning-rewards.css?v=1">
+<link rel="stylesheet" href="/assets/edu-certificate.css?v=1">
+<script type="module" src="/assets/edu-progress.mjs?v=1"></script>
+<script type="module" src="/assets/edu-certificate.mjs?v=1"></script>
 <script type="module" src="/assets/edu-learning-rewards.mjs?v=1"></script>
 <link rel="stylesheet" href="/assets/magazine-reading.css?v=1">
 <script type="module" src="/assets/magazine-reading.mjs?v=3"></script>
@@ -25010,39 +25013,68 @@ let chDelArmed = null;    // bölüm silme onayı (secId)
 let chProfMode = null;    // 'new' | 'edit'
 let chProfTarget = null;  // edit edilen kanal id
 let chDeep = null;        // derin bağlantı (?ch=&sec=&t=&v=) bekliyorsa burada
-let chProg = null;        // kullanıcıya özel "okudum/izledim" tik haritası (yerel)
+let chProg = null;        // legacy shim; gerçek ilerleme EduProgress/guest cache içindedir
 let eduFilter = 'all';    // katalog bölüm filtresi
 let eduAccessView = 'mine'; // 'mine' = sana açık, 'package' = pakete özel
 
 function chUid() { return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function chUserEmail() { return (AUTH && AUTH.user && AUTH.user.email) ? String(AUTH.user.email).toLowerCase() : ''; }
-function chProgLoad() {
-  if (chProg) return chProg;
-  try { const raw = localStorage.getItem('alfa-chprog-v1'); chProg = raw ? JSON.parse(raw) : {}; } catch (e) { chProg = {}; }
-  if (!chProg || typeof chProg !== 'object') chProg = {};
-  return chProg;
+function chProgKey(chId, secId, topicId, videoId) {
+  const parts = [chId, secId, topicId, videoId].map(v => String(v == null ? '' : v));
+  if (parts.some(p => !p)) return '';
+  return parts.map(encodeURIComponent).join(':');
 }
-function chProgUser() { return chUserEmail() || 'guest'; }
-function chProgKey(t, v) { return t.id + ':' + v.id; }
-function chIsDone(t, v) { const m = chProgLoad()[chProgUser()]; return !!(m && m[chProgKey(t, v)]); }
-function chProgSet(t, v, on) {
-  const m = chProgLoad();
-  const u = chProgUser();
-  if (!m[u]) m[u] = {};
-  if (on) m[u][chProgKey(t, v)] = 1; else delete m[u][chProgKey(t, v)];
-  try { localStorage.setItem('alfa-chprog-v1', JSON.stringify(m)); } catch (e) {}
+function chProgLegacyKey(chId, videoId) { return String(chId || '') + ':' + String(videoId || ''); }
+function chIsDone(chId, secId, topicId, videoId) {
+  const key = chProgKey(chId, secId, topicId, videoId);
+  if (window.EduProgress && typeof window.EduProgress.get === 'function') return !!(key && window.EduProgress.get(key));
+  try {
+    const raw = localStorage.getItem('alfa-chprog-v1');
+    const all = raw ? JSON.parse(raw) : {};
+    const u = chUserEmail() || 'guest';
+    const m = all[u] && typeof all[u] === 'object' ? all[u] : {};
+    return !!(m[key] || m[chProgLegacyKey(chId, videoId)]);
+  } catch (e) { return false; }
+}
+function chProgSet(chId, secId, topicId, videoId, on) {
+  const key = chProgKey(chId, secId, topicId, videoId);
+  if (!key) return;
+  if (typeof window !== 'undefined' && window.EduProgress && typeof window.EduProgress.set === 'function') {
+    window.EduProgress.set(key, !!on);
+    return;
+  }
+  try {
+    const raw = localStorage.getItem('alfa-chprog-v1');
+    const all = raw ? JSON.parse(raw) : {};
+    const u = chUserEmail() || 'guest';
+    if (!all[u] || typeof all[u] !== 'object') all[u] = {};
+    if (on) all[u][key] = 1; else delete all[u][key];
+    localStorage.setItem('alfa-chprog-v1', JSON.stringify(all));
+  } catch (e) {}
   if (typeof refreshEduLearningRewards === 'function') refreshEduLearningRewards();
 }
 function chIsAdmin() { return !window.ALFA_PREVIEW_CONFIG && !!(AUTH && AUTH.user && siteIsAdmin()); }
 function refreshEduLearningRewards() {
   if (!window.EduLearningRewards) return;
   const courses = eduCourses().filter(c => c.openTotal > 0);
-  const next = courses.flatMap(c => c.items.map(item => ({ c, ...item }))).find(item => !chItemLocked(item.video) && !chIsDone(item.c.t, item.video));
+  const next = courses.flatMap(c => c.items.map(item => ({ c, ...item }))).find(item => !chItemLocked(item.video) && !chIsDone(c.t.id, c.sec.id, item.lesson.id, item.video.id));
+  const certs = (window.EduProgress && typeof window.EduProgress.certificates === 'function') ? window.EduProgress.certificates() : [];
   window.EduLearningRewards.draw(document.getElementById('edu-learning-rewards'), {
     account: AUTH.user?.id || '', admin: chIsAdmin(), preview: !!window.ALFA_PREVIEW_CONFIG, page: currentPage,
-    courses: courses.map(c => ({ id: c.t.id + ':' + c.sec.id, title: c.sec.title, items: c.items.map(item => ({
-      id: c.t.id + ':' + item.video.id, done: chIsDone(c.t, item.video), locked: chItemLocked(item.video)
+    courses: courses.map(c => ({ id: chProgKey(c.t.id, c.sec.id, '_course', '_'), title: c.sec.title, items: c.items.map(item => ({
+      id: chProgKey(c.t.id, c.sec.id, item.lesson.id, item.video.id), done: chIsDone(c.t.id, c.sec.id, item.lesson.id, item.video.id), locked: chItemLocked(item.video)
     })) })),
+    certificates: certs,
+    onIssueCertificate: async (c) => {
+      try {
+        if (typeof window === 'undefined' || !window.EduProgress) return;
+        const cert = await window.EduProgress.issueCertificate(c.course);
+        if (window.EduCertificate && typeof window.EduCertificate.show === 'function') window.EduCertificate.show(cert);
+        refreshEduLearningRewards();
+      } catch (e) {
+        if (window.chToast) window.chToast('Belge oluşturulamadı: ' + (e && e.message || 'hata'));
+      }
+    },
     continue: next ? () => { openCourse(next.c.t.id, next.c.sec.id); chTopic = next.lesson.id; chVid = next.video.id; renderChannelView(); document.getElementById('ch-study')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } : null
   });
 }
@@ -25087,6 +25119,12 @@ async function chFetchChannels() {
         channelsData = j.data;
         channelsLoaded = true;
         channelsError = '';
+        if (typeof window !== 'undefined' && window.EduProgress && typeof window.EduProgress.boot === 'function') {
+          const uid = AUTH?.user?.id || '';
+          window.EduProgress.boot(uid, chWorkspaceEpoch).then(() => {
+            if (uid && currentPage === 'egitim' && typeof window.EduProgress.maybeMigrate === 'function') return window.EduProgress.maybeMigrate(uid, channelsData);
+          }).then(() => { if (currentPage === 'egitim') { refreshEduLearningRewards(); renderChannelView(); } }).catch(e => console.warn('[EduProgress]', e));
+        }
         return;
       }
     }
@@ -25223,7 +25261,7 @@ function eduCourses() {
       const lessons = (t.sections && Array.isArray(t.sections[sec.id])) ? t.sections[sec.id] : [];
       const items = lessons.reduce((all, lesson) => all.concat((lesson.videos || []).map(v => ({ lesson, video: v }))), []);
       const openItems = items.filter(x => !chItemLocked(x.video));
-      const done = openItems.filter(x => chIsDone(t, x.video)).length;
+      const done = openItems.filter(x => chIsDone(t.id, sec.id, x.lesson.id, x.video.id)).length;
       out.push({ t, sec, lessons, items, done, total: items.length, openTotal: openItems.length, lockedTotal: items.length - openItems.length, order: oi * 100 + si });
     });
   });
@@ -25539,10 +25577,11 @@ function mountEduFeedback(trader, topic, lesson) {
   if (!window.EduFeedback) return;
   if (chIsAdmin() || currentPage === 'edustudio') { window.EduFeedback.clear(); return; }
   if (!trader || !topic) { window.EduFeedback.clear(); return; }
-  const lessons = Object.values(trader.sections || {}).flatMap(topics => (topics || []).flatMap(item => item.videos || []));
+  const allVids = [];
+  Object.entries(trader.sections || {}).forEach(([secId, topics]) => (topics || []).forEach(topic => (topic.videos || []).forEach(v => allVids.push({ secId, topicId: topic.id, v }))));
   window.EduFeedback.mount({
     channel: trader.id, title: trader.name || 'Alfa Edu',
-    done: lessons.filter(v => chIsDone(trader, v)).length, total: lessons.length,
+    done: allVids.filter(x => chIsDone(trader.id, x.secId, x.topicId, x.v.id)).length, total: allVids.length,
     account: AUTH.user ? AUTH.user.id : '', admin: siteIsAdmin()
   });
 }
@@ -25560,7 +25599,7 @@ function renderChannelView() {
   const secTitle = sec.title || 'Alfa Edu';
   const lessons = (t.sections && Array.isArray(t.sections[sec.id])) ? t.sections[sec.id] : [];
   const items = lessons.reduce((all, lesson) => all.concat(lesson.videos || []), []);
-  const doneCount = items.filter(v => chIsDone(t, v)).length;
+  const doneCount = lessons.reduce((n, lesson) => n + (lesson.videos || []).filter(v => chIsDone(t.id, sec.id, lesson.id, v.id)).length, 0);
   // kurs başlığı
   const ava = document.getElementById('ch-view-ava');
   if (ava) {
@@ -25659,7 +25698,7 @@ function renderChannelView() {
     row.appendChild(tt);
     const cnt = document.createElement('span'); cnt.className = 'eg-count';
     const tVids = topic.videos || [];
-    const tDone = tVids.filter(v => chIsDone(t, v)).length;
+    const tDone = tVids.filter(v => chIsDone(t.id, sec.id, topic.id, v.id)).length;
     cnt.textContent = tDone + '/' + tVids.length;
     cnt.title = 'Okunan/izlenen içerik sayısı';
     if (tVids.length && tDone === tVids.length) cnt.classList.add('done');
@@ -25767,9 +25806,9 @@ function renderChannelView() {
     foot.classList.remove('hidden');
     foot.innerHTML = '';
     const db = document.createElement('button'); db.type = 'button';
-    db.className = 'eg-done-btn' + (chIsDone(t, curVid) ? ' on' : '');
-    db.textContent = (chIsDone(t, curVid) ? '✓ ' : '') + (src ? 'İzledim' : 'Okudum');
-    db.addEventListener('click', () => { chProgSet(t, curVid, !chIsDone(t, curVid)); renderChannelView(); });
+    db.className = 'eg-done-btn' + (chIsDone(t.id, sec.id, cur.id, curVid.id) ? ' on' : '');
+    db.textContent = (chIsDone(t.id, sec.id, cur.id, curVid.id) ? '✓ ' : '') + (src ? 'İzledim' : 'Okudum');
+    db.addEventListener('click', () => { chProgSet(t.id, sec.id, cur.id, curVid.id, !chIsDone(t.id, sec.id, cur.id, curVid.id)); renderChannelView(); });
     foot.appendChild(db);
   } else {
     foot.classList.add('hidden');
@@ -25793,7 +25832,7 @@ function renderChannelView() {
     const itemLocked = chItemLocked(v);
     const vtype = (v.url && egEmbedSrc(v)) ? 'video' : 'not';
     const kind = egKind(v);
-    const done = chIsDone(t, v);
+    const done = chIsDone(t.id, sec.id, cur.id, v.id);
     const row = document.createElement('div');
     row.className = 'eg-vid-row' + (curVid && v.id === curVid.id ? ' on' : '') + (done ? ' done' : '');
     row.style.cursor = 'pointer';
@@ -25808,7 +25847,7 @@ function renderChannelView() {
     if (!itemLocked) {
       const chk = document.createElement('button'); chk.className = 'eg-check' + (done ? ' on' : ''); chk.type = 'button'; chk.textContent = '✓';
       chk.title = done ? (vtype === 'not' ? 'Okundu — geri al' : 'İzlendi — geri al') : (vtype === 'not' ? 'Okundu olarak işaretle' : 'İzlendi olarak işaretle');
-      chk.addEventListener('click', (e) => { e.stopPropagation(); chProgSet(t, v, !chIsDone(t, v)); renderChannelView(); });
+      chk.addEventListener('click', (e) => { e.stopPropagation(); chProgSet(t.id, sec.id, cur.id, v.id, !chIsDone(t.id, sec.id, cur.id, v.id)); renderChannelView(); });
       row.appendChild(chk);
     }
     if (canEdit) {
@@ -30067,6 +30106,7 @@ function bootAuth() {
       chDraftAccount = ''; chDraftId = null; chDraftPersisted = ''; chStudioRestoredFor = '';
       chDraftMemory.clear();
       chStudioWorkspace = null;
+      chProg = null;
       chClearAuthorWorkspace();
       const drafts = document.getElementById('edu-author-draft-list'); if (drafts) drafts.replaceChildren();
       const notes = document.getElementById('ch-note-box'); if (notes) notes.replaceChildren();
@@ -30074,6 +30114,16 @@ function bootAuth() {
       const source = document.getElementById('ch-now-link'); if (source) { source.removeAttribute('href'); source.style.display = 'none'; }
       const studyTools = document.getElementById('ch-study-tools'); if (studyTools) studyTools.classList.add('hidden');
       try { localStorage.removeItem('alfa-channels-v1'); } catch (e) {}
+    }
+    if (typeof window !== 'undefined' && window.EduProgress && typeof window.EduProgress.boot === 'function') {
+      const uid = session?.user?.id || '';
+      window.EduProgress.boot(uid, chWorkspaceEpoch).then(() => {
+        if (uid && channelsLoaded && currentPage === 'egitim' && typeof window.EduProgress.maybeMigrate === 'function') {
+          (typeof window !== 'undefined' && window.EduProgress ? window.EduProgress.maybeMigrate(uid, channelsData) : Promise.resolve()).catch(e => console.warn('[EduProgress] migrate', e));
+        }
+        if (typeof refreshEduLearningRewards === 'function') refreshEduLearningRewards();
+        if (currentPage === 'egitim' && typeof renderChannelView === 'function') renderChannelView();
+      }).catch(() => {});
     }
     if (event === 'PASSWORD_RECOVERY') {
       recovering = true;

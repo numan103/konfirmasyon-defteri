@@ -29,10 +29,11 @@ test('real education completion and catalog rendering feed the student-only rewa
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.ok(html.includes('id="edu-learning-rewards"'));
   const progress = html.slice(html.indexOf('function chProgSet('), html.indexOf('function chIsAdmin()'));
-  assert.ok(progress.includes('refreshEduLearningRewards()'));
+  assert.ok(progress.includes('EduProgress') || progress.includes('refreshEduLearningRewards()'));
   const renderer = html.slice(html.indexOf('function refreshEduLearningRewards()'), html.indexOf('function chCanEdit('));
   assert.ok(renderer.includes("account: AUTH.user?.id || ''"));
-  assert.ok(renderer.includes('done: chIsDone(c.t, item.video)'));
+  assert.ok(renderer.includes('chIsDone(c.t.id, c.sec.id, item.lesson.id, item.video.id)'));
   assert.ok(renderer.includes('locked: chItemLocked(item.video)'));
   assert.ok(renderer.includes('admin: chIsAdmin()'));
+  assert.ok(renderer.includes('onIssueCertificate'));
 });

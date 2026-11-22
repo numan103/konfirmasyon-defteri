@@ -48,10 +48,26 @@ function draw(root, context) {
   root.append(badges);
   const next = reward.badges.find(b => !b.earned);
   root.append(node('p', next ? 'Sıradaki rozet: ' + next.title + ' — ' + (next.target - next.value) + ' ' + next.unit + ' daha tamamla.' : 'Tüm rozetleri kazandın! Öğrendiklerini uygulamaya devam et.', 'elr-next'));
+  const certs = Array.isArray(context.certificates) ? context.certificates.filter(c => c && c.eligible) : [];
+  if (certs.length && typeof context.onIssueCertificate === 'function' && !context.preview) {
+    const certBox = node('div', null, 'elr-cert-box');
+    certBox.append(node('div', 'Tamamlama Belgesi', 'elr-cert-title'));
+    certBox.append(node('p', 'Tamamladığın bölümler için hesabına bağlı katılım/tamamlama belgesi oluşturabilirsin.', 'elr-cert-sub'));
+    for (const c of certs) {
+      const row = node('div', null, 'elr-cert-row');
+      row.append(node('span', c.title || 'Bölüm', 'elr-cert-name'));
+      const btn = node('button', c.serial ? 'Belgeyi Gör' : 'Belge Oluştur', 'btn ghost elr-cert-btn');
+      btn.type = 'button';
+      btn.addEventListener('click', () => context.onIssueCertificate(c));
+      row.append(btn);
+      certBox.append(row);
+    }
+    root.append(certBox);
+  }
   if (context.continue && !context.preview) {
     const button = node('button', 'Sıradaki derse devam et →', 'btn solid'); button.type = 'button'; button.onclick = context.continue; root.append(button);
   }
-  root.append(node('p', 'Puan ve rozetler, bu tarayıcıda kendi hesabınla işaretlediğin tamamlamalara göre hesaplanır. Sembolik öğrenme ödülleridir; ücretli erişim veya sertifika vermez.', 'elr-disclaimer'));
+  root.append(node('p', 'Puan, rozet ve tamamlamalar hesabına bağlı olarak sunucuda saklanır. Sembolik öğrenme ödülleridir; yatırım tavsiyesi veya resmi akreditasyon değildir.', 'elr-disclaimer'));
 }
 if (typeof window !== 'undefined') {
   window.EduLearningRewards = { draw };

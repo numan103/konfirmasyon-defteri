@@ -143,7 +143,7 @@ Not: `site_access` tablosu yokken kapı bilinçli olarak kapalıdır (herkes `re
 |---|---|
 | `/api/ai` | Girişsiz (misafir asistanı + landing). Kötüye kullanımda Groq kotası tükenebilir; gerekirse hız sınırı eklenmeli. |
 | `/api/ai-checklist` | Girişsiz. Aynı risk. |
-| `/api/edu-shared` | GET herkese açık; POST JWT gerektirir (legacy bölüm eşitlemesi ve özellik duyurusu admin-only, shortlink oturumlu kullanıcıya açık). |
+| `/api/edu-shared` | Kanal/legacy GET herkese açık; legacy/feature/short POST JWT kuralları korunur. `?kind=progress` GET/POST oturum JWT ister, `private, no-store` döner; ilerleme/belge satırları `edu_shared` içinde şifreli `eduprog_*` olarak tutulur. |
 | `/api/eco-cal` | Herkese açık (ekonomik takvim, 5 dk cache). |
 
 

@@ -1,0 +1,26 @@
+#edu-certificate-host{position:fixed;inset:0;z-index:10050}
+.ec-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px}
+.ec-dialog{width:min(920px,100%);background:var(--bg-1,#121212);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
+.ec-actions{display:flex;justify-content:flex-end;gap:10px;margin-bottom:12px}
+.ec-sheet{background:#fff;color:#1a1a1a;border-radius:12px;padding:42px 36px;max-width:800px;margin:0 auto;font-family:Georgia,"Times New Roman",serif;text-align:center}
+.ec-brand{font:700 14px/1.2 Arial,sans-serif;letter-spacing:.28em;color:#8a6a2f;margin-bottom:10px}
+.ec-type{font-size:30px;line-height:1.2;margin-bottom:18px;color:#1f2937}
+.ec-name{font-size:36px;line-height:1.2;color:#111827;margin-bottom:10px}
+.ec-text{font:14px/1.6 Arial,sans-serif;color:#4b5563;margin-bottom:14px}
+.ec-course{font-size:24px;line-height:1.3;color:#8a6a2f;margin-bottom:24px}
+.ec-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 20px;text-align:left}
+.ec-meta div{padding:12px 14px;background:#f8f5ef;border-radius:10px}
+.ec-meta span{display:block;font:12px/1.3 Arial,sans-serif;color:#6b7280;margin-bottom:4px}
+.ec-meta strong{font:600 15px/1.4 Arial,sans-serif;color:#111827}
+.ec-serial{font:12px/1.4 Arial,sans-serif;color:#6b7280;margin-bottom:10px;word-break:break-word}
+.ec-foot{font:12px/1.6 Arial,sans-serif;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:14px}
+@media(max-width:640px){.ec-sheet{padding:28px 18px}.ec-type{font-size:24px}.ec-name{font-size:28px}.ec-meta{grid-template-columns:1fr}}
+@media print{
+  body *{visibility:hidden !important}
+  #edu-certificate-host,#edu-certificate-host *{visibility:visible !important}
+  #edu-certificate-host{position:static !important;inset:auto !important}
+  .ec-backdrop{position:static !important;background:none !important;padding:0 !important;overflow:visible !important}
+  .ec-dialog{border:none !important;padding:0 !important;background:none !important;width:100% !important}
+  .no-print{display:none !important}
+  .ec-sheet{box-shadow:none !important;max-width:100% !important}
+}

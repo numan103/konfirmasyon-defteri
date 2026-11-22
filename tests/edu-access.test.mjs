@@ -6,6 +6,7 @@ import { memberPurchaseId, sealRecord } from '../lib/education-crm.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const api = fs.readFileSync(new URL('../api/edu-shared.mjs', import.meta.url), 'utf8');
+const accessLib = fs.readFileSync(new URL('../lib/edu-access.mjs', import.meta.url), 'utf8');
 
 function channels() {
   return {
@@ -89,11 +90,14 @@ test('Edu sayfası herkese açık; ücretli içerik kilidi istemcide değil sunu
   assert.match(html, /function chItemLocked\(v\)/);
   assert.match(html, /className = 'ch-lock'/);
   assert.ok(api.includes('projectChannels(base, { privileged, plans, user })'));
-  assert.ok(api.includes("v.url = ''; v.body = ''; v.photos = []; v.vids = [];"));
+  assert.ok(accessLib.includes("v.url = ''; v.body = ''; v.photos = []; v.vids = [];"));
   assert.ok(api.includes("res.setHeader('Cache-Control', 'private, no-store')"));
   assert.ok(api.includes('if (!await requireEduWriter(req, res, true)) return;'), 'legacy/feature yazımları admin JWT ile korunmalı');
   assert.ok(api.includes('if (!await requireEduWriter(req, res)) return;'), 'shortlink yazımı oturum gerektirmeli');
-  assert.ok(api.includes('v.locked = false; return;'), 'sunucu erişilebilir ücretli öğeyi açıkça unlocked bildirmeli');
+  const progressDispatch = api.indexOf("req.query?.kind === 'progress'");
+  const adminGate = api.indexOf('if (!await requireEduWriter(req, res, true)) return;', progressDispatch + 1);
+  assert.ok(progressDispatch > -1 && adminGate > progressDispatch, 'progress dispatch admin gate önünde olmalı');
+  assert.ok(accessLib.includes('v.locked = false; return;'), 'sunucu erişilebilir ücretli öğeyi açıkça unlocked bildirmeli');
 });
 
 test('kilit kararı sunucu locked alanından okunur, içerik boşluğundan tahmin edilmez', () => {
