@@ -368,3 +368,28 @@ test('short unrelated Telegram messages stay as separate daily notes', async t =
   assert.equal(feed.body.items.length, 2);
   assert.deepEqual(new Set(feed.body.items.map(item => item.id)), new Set([eduTelegramRowId(-10042, 90), eduTelegramRowId(-10042, 91)]));
 });
+test('pre-existing split notes are merged on the next public feed read', async t => {
+  const f = fixture(t);
+  const first = 'E'.repeat(3100), second = 'eski ikinci parça', publishedAt = 1795180700000;
+  const ids = [eduTelegramRowId(-10042, 100), eduTelegramRowId(-10042, 101)];
+  const texts = [first, second];
+  ids.forEach((id, n) => {
+    f.rows.set(id, { id, updated_at: new Date().toISOString(), data: sealChannels({
+      title: texts[n].split('\n')[0].slice(0, 140), body: texts[n], photos: [], photoMissing: false,
+      url: 'https://t.me/alfakasim/' + (100 + n) + '?thread=4', publishedAt, modifiedAt: publishedAt,
+      source: 'telegram', sourceRevision: 1795180700 + n, publication: 'daily', journalDate: '2026-11-22',
+    }, 'telegram-inbox:' + id.slice(6)) });
+  });
+  const indexId = 'edudaily_index', indexScope = 'telegram-inbox:' + createHash('sha256').update(indexId).digest('hex');
+  f.rows.set(indexId, { id: indexId, updated_at: new Date().toISOString(), data: sealChannels({ items: ids.map((id, n) => ({
+    id, title: texts[n].slice(0, 140), excerpt: texts[n].slice(0, 260), publishedAt, modifiedAt: publishedAt,
+    photoCount: 0, source: 'telegram', photoUrl: '', pdf: null,
+  })), stamps: {} }, indexScope) });
+  const feed = await f.request({ authenticated: false, query: { view: 'daily-notes' } });
+  assert.equal(feed.body.items.length, 1);
+  assert.equal(feed.body.items[0].id, ids[0]);
+  const full = await f.request({ authenticated: false, query: { view: 'daily-notes', note: ids[0] } });
+  assert.ok(full.body.item.body.includes(first + '\n' + second));
+  assert.equal(stored(f, ids[1]).publication, 'hidden');
+  assert.equal(stored(f, ids[1]).absorbedBy, ids[0]);
+});
