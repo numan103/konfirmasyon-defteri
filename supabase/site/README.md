@@ -218,6 +218,7 @@ Yönetici tarafı:
 - Grup içinde `/grupid` yazınca chat id döner (yalnızca yönetici).
 - `/bekleyen` ile bekleyen başvurular ve Onayla/Reddet butonları listelenir.
 - Üye mentorluk grubuna katılınca `chat_member` güncellemesiyle `mentor_status='joined'` işaretlenir.
+- **Duyurular karşılaması:** hedef grubun General konusuna (`/1`) yeni üye katılırsa tek bir karşılama mesajı gönderilir; aynı anda gelen üyeler birleştirilir, botlar ve diğer sistem mesajları yok sayılır. Önceki karşılama ile katılım servis mesajını silebilmek için botun grupta **"Mesajları sil"** yönetici yetkisi olmalıdır. Karşılama geçmişi `edu_shared` içinde şifreli tutulur.
 - **Onaysız katılım koruması:** `status='verified'` olmayan biri gruba girerse bot onu
   banlar ve yöneticiye bildirir. Onay sonrası davet üretilirken ban otomatik kaldırılır.
   Botun grupta **"Üyeleri banla"** yetkisi olmalıdır.

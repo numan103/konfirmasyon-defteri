@@ -67,6 +67,29 @@ test('duyurular konusundaki mesaja bot cevap vermez', async t => {
   assert.equal(sends(calls).length, 0);
 });
 
+test('duyurular guard yalnızca gerçek yeni üye servis mesajına açılır', async t => {
+  const calls = setup(t);
+  const join = {
+    update_id: 9020,
+    message: {
+      message_id: 9020, date: 1795190000, message_thread_id: DUYURU_THREAD,
+      chat: { id: -100123, type: 'supergroup', username: 'alfatraderspublic' },
+      from: { id: 88, is_bot: false },
+      new_chat_members: [{ id: 88, first_name: 'Yeni', last_name: 'Üye' }],
+    },
+  };
+  const r = await post(join);
+  assert.equal(r.code, 200);
+  assert.equal(r.body.ok, true);
+  assert.notEqual(r.body.skipped, 'announcements');
+  assert.equal(sends(calls).length, 1);
+  assert.equal(sends(calls)[0].body.message_thread_id, DUYURU_THREAD);
+
+  const ordinary = await post(message(9021, DUYURU_THREAD, 'Duyuru metni'));
+  assert.equal(ordinary.body.skipped, 'announcements');
+  assert.equal(sends(calls).length, 1);
+});
+
 test('duyurular konusunda komut, mention ve fotoğraf da sessize alınır', async t => {
   const calls = setup(t);
   for (const [id, update] of [
