@@ -14,6 +14,18 @@ let contentObserver = null;
 let renderQueued = false;
 let rendering = false;
 
+// Sağdaki detay kartı tek bir düğümdür; hover/focus olaylarında DOM yeniden
+// çizilmez, sadece kartın metni güncellenir (scroll anchoring bozulmasın).
+let detailCard = null;
+let activeTarget = null;
+let detailPinned = false;
+let showTimer = null;
+let expandTimer = null;
+let hideTimer = null;
+let touchTimer = null;
+let touchStart = null;
+let tipSeq = 0;
+
 /* Kısa tanımlar: c(selector, tip, side) ve p(title, intro, points, foot, controls). */
 function c(selector, tip, side = 'right') { return { selector, tip, side }; }
 function p(title, intro, points, foot, controls) { return { title, intro, points, foot, controls }; }
@@ -24,6 +36,8 @@ const GLOBAL = [
   c('#whats-new-btn-app', 'Son eklenen özelliklerin listesini açar.', 'left'),
   c('#lang-btn-app', 'Site dilini Türkçe / İngilizce arasında değiştirir.', 'left'),
   c('#nav-live', 'Şu an sitede kaç kişi olduğunu gösterir.', 'right'),
+  c('#economic-news-trigger', 'Ekonomik takvim ve yüksek etkili haberleri açar.', 'right'),
+  c('#home-magazine-link', 'Haftalık derginin tamamını yeni sayfada açar.', 'right'),
   c('#tab-portfoy', 'Portföy menüsünü açar: Alfa Portföy ve kendi Portföyüm.', 'left'),
   c('#tab-defter', 'İşlem öncesi kontrol listesi ve işlem kayıtları.', 'left'),
   c('#tab-review', 'Haftalık performans ve retrospektif değerlendirme.', 'left'),
@@ -64,15 +78,17 @@ const PAGES = {
     ['Paket kartları seviye ve içerik farkını gösterir.',
      'Partner kodu kopyalanarak kayıtta kullanılabilir.',
      'SSS ve canlı buluşma bilgileri aşağıda yer alır.'],
-    'Yönetici bu sayfayı görmez; İçerik Stüdyosu yönlendirmesi yapılır.',
+    'Ücretsiz üyelere açıktır. Başvuru düğmeleri ödeme almaz; onay işlemi manuel yapılır.',
     [
       c('#eduplans-root', 'Paket kartlarının ve açıklamaların üretildiği alan.'),
-      c('.eduplans-actions button', 'Seçilen paket için başvuru veya soru akışını başlatır.'),
-      c('.eduplans-actions a', 'Mevcut derslere ve eğitim alanına götürür.'),
-      c('.eduplan[data-plan]', 'Paket kartı; seviye, süre ve içerik detayını gösterir.'),
-      c('[data-edu-apply][data-edu-route]', 'Seçilen katılım yoluna göre ödeme/başvuru adımına geçer.'),
+      c('.eduplans-actions button', 'Paket kartlarına kaydırarak karşılaştırmaya başlar.'),
+      c('.eduplans-actions a', 'Onaylı eğitimin varsa Alfa Edu derslerine götürür.'),
+      c('.eduplan[data-plan]', 'Paket kartı; seviye, fiyat ve içerik hakkını gösterir.'),
+      c('.eduplan-live-details summary', 'Canlı derste işlenen konuları açıp kapatır.'),
+      c('[data-edu-apply][data-edu-route]', 'Seçilen katılım yoluna göre bilgi formunu açar.'),
       c('.eduplans-code button', 'ALFA partner kodunu panoya kopyalar.'),
-      c('.eduplans-faq-title', 'Sık sorulan soru yanıtını açıp kapatır.')
+      c('.eduplans-term summary', 'Sık sorulan sorunun kısa cevabını açıp kapatır.'),
+      c('.eduplans-faq-title', 'Sık sorulan sorular bölümünün başlığıdır.')
     ]),
   home: p('Ana Menü',
     'Günlük kontrol panelin. Sabah kartı, haberler, haftalık dergi, görevler, paylaşılan portföy özeti ve hızlı arama tek ekranda toplanır.',
@@ -86,15 +102,19 @@ const PAGES = {
       c('#mc-edit', 'Sabah kartındaki soruları düzenler.'),
       c('#mc-chip', 'Küçük sabah kartını tekrar gösterir.'),
       c('#hf-news', 'Günün haber ve özetlerini popover içinde açar.'),
+      c('#hf-cta', 'Erişim durumuna göre portföyü veya borsa bağlamayı açar.'),
+      c('#hmr-collapse', 'Haftalık dergi okuyucusunu daraltır veya genişletir.'),
       c('#hmr-prev', 'Haftalık dergide önceki haftaya geçer.'),
       c('#hmr-next', 'Haftalık dergide sonraki haftaya geçer.'),
       c('#home-daily-refresh', 'Günlük notları yeniden yükler.'),
-      c('#daily-tasks-panel', 'Günlük görev listesini açar.'),
+      c('#daily-tasks-panel', 'Günlük görevleri, XP ve seri durumunu gösterir.'),
       c('#dt-remind', 'Görev hatırlatıcısını ayarlar.'),
+      c('#dt-add', 'Kendi görevine yeni bir satır ekler.'),
       c('#home-find', 'Sayfa ve konu aramasını açar.'),
       c('#home-quick', 'Hızlı erişim kartlarını gösterir.'),
-      c('#economic-news-trigger', 'Ekonomik takvim ve yüksek etkili haberleri açar.'),
-      c('#home-guide', '4 adımlı başlangıç rehberini gösterir.'),
+      c('#ht-cta', 'Portföy özetinden ilgili detay sayfasına geçer.'),
+      c('#home-guide', '4 adımlı başlangıç kontrol listesini gösterir.'),
+      c('#hg-steps .hg-step', 'Başlangıç adımını açar veya ilgili sayfaya götürür.'),
       c('#home-top', 'Sayfanın en üstüne döner.')
     ]),
   influencer: p('Alfa Influencer',
@@ -125,15 +145,27 @@ const PAGES = {
       c('#bd-prev', 'Önceki aya geçer.'),
       c('#bd-next', 'Sonraki aya geçer.'),
       c('#bd-today', 'Bugünün ayına döner.'),
+      c('#bd-typeseg button', 'Tümü, gelir veya gider filtresini seçer.'),
+      c('#bd-catf', 'Seçili kategoriye göre listeyi süzler.'),
+      c('#bd-q', 'Kayıt açıklamalarında arama yapar.'),
       c('#bd-import-btn', 'Ekstre/PDF içe aktarma panelini açar.'),
       c('#bd-import-parse', 'Yüklenen metni kayıtlara ayırır.'),
       c('#bd-import-commit', 'Ayrıştırılan kayıtları onaylar.'),
+      c('#bd-quick-type button', 'Hızlı kaydı gelir veya gider olarak işaretler.'),
       c('#bd-quick-amount', 'Hızlı kayıt tutarını girer.'),
+      c('#bd-quick-cat', 'Hızlı kaydın kategorisini seçer.'),
+      c('#bd-quick-note', 'Hızlı kayda kısa açıklama ekler.'),
       c('#bd-quick-save', 'Hızlı kaydı listeye ekler.'),
+      c('#bd-list', 'Ayın işlem kayıtlarını listeler.'),
+      c('[data-bedit]', 'Satırı düzenlemek için detaylı formu açar.'),
+      c('[data-bdel]', 'Satırı siler; onay penceresi çıkar.'),
+      c('#bd-form-date', 'Kaydın hangi aya sayılacağını belirler.'),
+      c('#bd-form-amount', 'Detaylı kayıt tutarını girer.'),
+      c('#bd-form-cat', 'Detaylı kayıt için kategori seçer.'),
+      c('#bd-newcat-add', 'Yeni kategori oluşturur ve seçer.'),
       c('#bd-save', 'Detaylı gelir/gider formunu kaydeder.'),
-      c('#bd-pf-refresh', 'Portföy pozisyonlarını yeniler.'),
-      c('#bd-pf-add', 'Yeni yatırım pozisyonu ekler.'),
-      c('#bd-pl-sync', 'Uzun vadeli planı güncel verilerle eşitler.')
+      c('#bd-cancel', 'Detaylı formu kaydetmeden kapatır.'),
+      c('#bd-clear-cat', 'Kategori filtresini temizler.')
     ]),
   sosyalmetre: p('Sosyalmetre',
     'Sosyal medya performansını, koşulları ve işlem notlarını birlikte değerlendiren karar aracı.',
@@ -372,9 +404,14 @@ const PAGES = {
       c('#edu-continue', 'Kaldığın derslere döner.'),
       c('#edu-studio', 'İçerik stüdyosuna gider.'),
       c('#edu-access-tabs [data-access]', 'Erişim seviyesine göre içerik filtreler.'),
+      c('#edu-search', 'Kurs ve konu arar.'),
+      c('#edu-grid', 'Kurs kartlarının üretildiği alan.'),
+      c('.edu-card[data-course]', 'Kurs kartı; eğitmeni ve seviyeyi gösterir.'),
+      c('.edu-play', 'Kursu açıp dersleri oynatır.'),
+      c('#edu-empty', 'Aramaya uygun kurs bulunamadığında görünür.'),
+      c('#edu-manage-toggle', 'Yönetici içerik araçlarını açıp kapatır.'),
       c('#edu-daily-refresh', 'Günlük notları yeniler.'),
       c('#edu-daily-more', 'Daha eski günlük notları gösterir.'),
-      c('#edu-search', 'Kurs ve konu arar.'),
       c('#eg-add-topic', 'Derse yeni konu ekler.'),
       c('#eg-done', 'Konuyu tamamlandı olarak işaretler.'),
       c('#ch-add-topic', 'Kanal konusu ekler.'),
@@ -606,6 +643,222 @@ const PAGES = {
     ])
 };
 
+/* Zengin açıklamalar: kısa ipucunun altına adım adım anlatım ekler.
+   Burada tanımlanmayan kontroller için sayfa rehberinin intro/maddeleri
+   kullanılır; böylece 35 sayfanın tamamında kart çalışır. */
+const DETAILS = {};
+function d(selector, title, body, steps) { DETAILS[selector] = { title, body, steps: steps || [] }; }
+
+/* Ortak kontroller */
+d('#nav-home', 'Ana menüye dön', 'Günlük kontrol panelini açar. Sabah kartı, haberler, görevler ve hızlı kartlar buradadır.', [
+  'Başka bir sayfadayken bile bu düğme ana ekrana döndürür.',
+  'Ana sayfadaki adımları tamamlayarak siteyi tanımaya devam et.'
+]);
+d('#whats-new-btn-app', 'Yeni özellikler', 'Siteye eklenen son değişikliklerin listesini gösterir; okundu bilgisi saklanır.', [
+  'Düğmeye bas, listedeki yenilikleri oku.',
+  'Kapatınca rozet söner; yeni bir özellik eklenince tekrar yanar.'
+]);
+d('#lang-btn-app', 'Dil değiştir', 'Arayüzü Türkçe ve İngilizce arasında değiştirir; tercihin sonraki ziyaretlerde korunur.', []);
+d('#nav-live', 'Canlı kullanıcı sayısı', 'Şu anda sitede bulunan kişi sayısını gösterir. İşlem sinyali değildir.', []);
+d('.edu-partners button', 'Partner akışını duraklat', 'Logolar otomatik kayar. İncelemek için akışı duraklat, tekrar başlatmak için aynı düğmeye bas.', []);
+d('.edu-partner-logo.okx', 'OKX referans linki', 'OKX’e referans kodunla gider. Kayıt olmadan önce kodun doğrulandığından emin ol.', []);
+d('.edu-partner-logo.bybit', 'Bybit referans linki', 'Bybit’e referans kodunla gider. Partner koşulları ilgili borsaya aittir.', []);
+d('.edu-partner-logo.breakout', 'Breakout partner linki', 'Breakout resmî sitesine ALFA partner koduyla gider; hesap uygunluğu ayrıca incelenir.', []);
+
+/* Ana sayfa */
+d('#mc-card', 'Sabah kartı', 'Günlük ruh halini ve işlem öncesi kriterlerini kaydeder. Seri ve günlük puan buradan beslenir.', [
+  'Sabah kartını aç.',
+  'Ruh halini ve hazır olup olmadığını işaretle.',
+  'Kaydettiğinde günlük seriye ve karneye işlenir.'
+]);
+d('#mc-edit', 'Sabah kartını düzenle', 'Karttaki soruları ve seçenekleri değiştirir; varsayılan akışı bozmak istemiyorsan dokunma.', []);
+d('#mc-chip', 'Küçük kartı geri getir', 'Sabah kartını kapattıysan küçük hatırlatıcıyı tekrar gösterir.', []);
+d('#hf-news', 'Günün haberi', 'Ekonomik gündemin kısa özetini popover içinde açar; ekonomik takvim tetikleyicisiyle aynı veriyi kullanır.', []);
+d('#hf-cta', 'Odak kartının aksiyonu', 'Erişim durumuna göre portföyü açar veya borsa bağlama sayfasına yönlendirir.', []);
+d('#hmr-prev', 'Önceki hafta', 'Haftalık dergide bir önceki haftanın yazılarına geçer.', []);
+d('#hmr-next', 'Sonraki hafta', 'Haftalık dergide bir sonraki haftanın yazılarına geçer.', []);
+d('#home-daily-refresh', 'Günlük notları yenile', 'Telegram’dan gelen eğitsel notları yeniden çeker; yeni not varsa listeye ekler.', []);
+d('#daily-tasks-panel', 'Günlük görevler', 'Gün içi alışkanlıkları takip eder. Bitirdikçe XP ve seri kazanırsın; veri bu cihazda tutulur.', [
+  'Bugünün görevlerini oku.',
+  'Tamamladıklarını işaretle.',
+  'İstersen hatırlatıcıyı aç; XP ve seviye otomatik güncellenir.'
+]);
+d('#dt-remind', 'Görev hatırlatıcısı', 'Günlük görevler için saatli hatırlatıcıyı açar veya kapatır.', []);
+d('#home-find', 'Hızlı arama', 'Sayfa, konu ve eğitim arar. Yazmaya başla, sonuçlardan birini seç.', []);
+d('#home-quick', 'Hızlı erişim kartları', 'En çok kullanılan modüllere kısayol içerir; kartlara dokunarak ilgili sayfaya git.', []);
+d('#economic-news-trigger', 'Ekonomik takvim', 'Yüksek etkili makro olayları ve açıklanan sonuçları gösterir.', []);
+d('#home-guide', 'Başlangıç rehberi', 'Siteyi kullanmaya başlamak için dört adımlı kontrol listesi. Adımlar tamamlandıkça çubuk dolar.', [
+  'Giriş yap veya erişim kodunu doğrula.',
+  'Günlük notlardan birini oku.',
+  'Hızlı kartlardan bir modüle git.',
+  'Adımlar tamamlandıkça sayacın 4 / 4 olduğunu gör.'
+]);
+d('#hg-steps .hg-step', 'Başlangıç adımı', 'Adıma dokunduğunda ilgili yere gider: giriş, borsa bağlama, günlük notlar veya hızlı kartlar.', []);
+d('#home-top', 'Yukarı çık', 'Uzun sayfalarda başa dönmek için kullanılır.', []);
+
+/* Gelir / Gider */
+d('#bd-eye', 'Tutarları gizle/göster', 'Ekrandaki tutarları gizler; yanındaki insanlar varsa kullan. Veriler silinmez.', []);
+d('#bd-prev', 'Önceki ay', 'Bir önceki ayın gelir/gider kayıtlarına geçer.', []);
+d('#bd-next', 'Sonraki ay', 'Bir sonraki ayın kayıtlarına geçer.', []);
+d('#bd-today', 'Bugünün ayı', 'Filtreleri temizleyip içinde bulunulan aya döner.', []);
+d('#bd-quick-type button', 'Gelir / gider türü', 'Hızlı kaydın türünü seçer. Gelir artı, gider eksi olarak hesaplanır.', [
+  'Gelir veya Gider düğmesine bas.',
+  'Tutarı yaz, kategoriyi seç.',
+  'Enter’a bas veya ＋ Ekle’ye dokun.'
+]);
+d('#bd-quick-amount', 'Hızlı kayıt tutarı', 'Kayıt tutarını girer. Ondalık için virgül veya nokta kullanılabilir.', [
+  'Tutarı yaz (örn. 249,90).',
+  'Kategoriyi seçip Enter’a bas.',
+  'Kayıt hemen aşağıdaki İşlemler listesine düşer.'
+]);
+d('#bd-quick-cat', 'Hızlı kayıt kategorisi', 'Harcamanın hangi kalemde görüneceğini belirler; pasta grafiği buna göre güncellenir.', []);
+d('#bd-quick-note', 'Hızlı kayıt açıklaması', 'İsteğe bağlı kısa not. Sonradan listede arama yaparken işine yarar.', []);
+d('#bd-quick-save', 'Hızlı kaydı ekle', 'Tutar, tür ve kategori geçerliyse kaydı listeye ekler; alanları temizler.', [
+  'Türü seç.',
+  'Tutarı yaz ve kategoriyi belirle.',
+  '＋ Ekle’ye bas; onay mesajını gör.'
+]);
+d('#bd-typeseg button', 'Kayıt türü filtresi', 'Listede sadece gelirleri veya sadece giderleri gösterir.', []);
+d('#bd-catf', 'Kategori filtresi', 'Seçtiğin kategoriye ait kayıtları listeler; grafiğe tıklayarak da aynı filtre uygulanır.', []);
+d('#bd-q', 'Kayıtlarda ara', 'Açıklama veya kategori içinde arama yapar.', []);
+d('#bd-clear-cat', 'Filtreyi temizle', 'Kategori filtresini kaldırır ve tüm kayıtları gösterir.', []);
+d('#bd-list', 'İşlem listesi', 'Ayın kayıtlarını gösterir. Satırdaki ✎ düzenler, ✕ siler.', [
+  'Yeni kayıt için yukarıdaki Hızlı Kayıt alanını kullan.',
+  'Düzenlemek için satırdaki kalem simgesine bas.',
+  'Silmek için ✕ simgesine bas ve onayla.'
+]);
+d('[data-bedit]', 'Kaydı düzenle', 'Detaylı formu seçili kayıtla açar; tutar, tarih, kategori ve notu değiştirebilirsin.', [
+  'Kalem simgesine bas.',
+  'Formdaki alanları güncelle.',
+  'Kaydet’e bas; liste ve grafik yenilenir.'
+]);
+d('[data-bdel]', 'Kaydı sil', 'Seçili gelir/gider kaydını siler. Onay penceresi çıkar; veri geri alınamaz.', [
+  'Satırdaki ✕ simgesine bas.',
+  'Onay penceresinde eminsen Tamam de.',
+  'Kayıt listeden ve grafikten kalkar.'
+]);
+d('#bd-save', 'Detaylı formu kaydet', 'Tutar, kategori ve tarih doluysa kaydı oluşturur veya açık kaydı günceller.', [
+  'Türü, tarihi, kategoriyi ve tutarı doldur.',
+  'İstersen açıklama ekle.',
+  'Kaydet’e bas.'
+]);
+d('#bd-form-date', 'Kayıt tarihi', 'Kaydın hangi aya sayılacağını belirler. Farklı bir aya kaydederse takvim otomatik oraya geçer.', []);
+d('#bd-form-amount', 'Detaylı tutar', 'Kayıt tutarını girer. Sıfırdan büyük olmalı; aksi hâlde uyarı gösterilir.', []);
+d('#bd-form-cat', 'Detaylı kategori', 'Kayıt için kategori seçer. Yeni kategori eklemek için altındaki alayı kullan.', []);
+d('#bd-newcat-add', 'Yeni kategori ekle', 'Listede olmayan bir harcama kalemi oluşturur ve hemen seçer.', []);
+d('#bd-cancel', 'Formdan vazgeç', 'Detaylı formu kapatır; yaptığın değişiklikler kaydedilmez.', []);
+d('#bd-import-btn', 'Ekstre içe aktar', 'CSV, banka metni, PDF veya fotoğraftan toplu kayıt çıkarma panelini açar.', [
+  'İçe Aktar’a bas.',
+  'CSV metnini yapıştır veya dosya seç.',
+  'Önizle ile kontrol et, sonra Onayla ve Ekle’ye bas.'
+]);
+d('#bd-import-parse', 'İçe aktarma önizlemesi', 'Metni kayıtlara ayırır ve eklemeden önce listeler; hatalı satırları burada görürsün.', []);
+d('#bd-import-commit', 'İçe aktarmayı onayla', 'Önizlenen kayıtları listeye ekler. Önizleme yapmadan düğme etkin değildir.', []);
+d('#bd-pf-refresh', 'Portföyü yenile', 'Yatırım pozisyonlarının güncel fiyatlarını çeker.', []);
+d('#bd-pf-add', 'Pozisyon ekle', 'Yeni yatırım pozisyonu formunu açar.', []);
+d('#bd-pl-sync', 'Uzun vadeli planı eşitle', 'Plan rakamlarını güncel portföy ve kayıtlarla hizalar.', []);
+
+/* Eğitim paketleri */
+d('#eduplans-root', 'Eğitim paketleri sayfası', 'Video, canlı ve birebir paketleri karşılaştırır; katılım yolu ve onay akışını anlatır.', [
+  'Önce paket kartlarını oku; üst paket önceki hakları da içerir.',
+  'USDT/TRC20 veya Breakout yolundan birini seç.',
+  'Bilgilerini gönder; ödeme alınmaz, erişim manuel onaylanır.',
+  'Onaydan sonra Mevcut derslerime git bağlantısıyla eğitime geç.'
+]);
+d('.eduplans-actions button', 'Paket seçmeye git', 'Sayfayı paket kartlarına kaydırır; karşılaştırmayı oradan yap.', []);
+d('.eduplans-actions a', 'Mevcut dersler', 'Eğitim paketin zaten onaylıysa Alfa Edu derslerine götürür.', [
+  'Eğitim Paketleri sayfasındaki Mevcut derslerime git bağlantısına dokun.',
+  'Açılan Alfa Edu sayfasından kaldığın derse devam et.'
+]);
+d('.eduplan[data-plan]', 'Paket kartı', 'Seviyeyi, fiyatı ve hakları gösterir. “Canlıda neler var?” bağlantısı detayı açar.', [
+  'Karttaki hakları oku.',
+  'Canlı veya birebir ders detayını aç.',
+  'Uygunsan altındaki katılım düğmelerinden birini seç.'
+]);
+d('.eduplan-live-details summary', 'Canlı eğitim detayı', 'Canlı derste işlenen konuları, market analizi ve soru-cevap akışını açıklar.', []);
+d('[data-edu-apply][data-edu-route]', 'Katılım yolunu seç', 'Seçilen paket için USDT, Breakout veya 100K bildirim akışını başlatır.', [
+  'Paket kartındaki katılım düğmesine bas.',
+  'Açılan formda istenen bilgileri gönder.',
+  'Onay sonucunu siteden takip et; form göndermek erişim açmaz.'
+]);
+d('.eduplans-code button', 'ALFA kodunu kopyala', 'Breakout kaydında kullanılacak partner kodunu panoya kopyalar.', []);
+d('.eduplans-term summary', 'Sık sorulan soru', 'Video hakkı, grup devamı, özel ders ve onay akışı hakkında kısa cevabı açar.', []);
+
+/* Eğitim alanı */
+d('#edu-browse', 'Kurs kataloğu', 'Tüm kursları ve konu başlıklarını listeler; seviye filtreleriyle daraltabilirsin.', [
+  'Kataloğu aç.',
+  'Arama veya erişim filtresiyle kursu bul.',
+  'Kursu açıp konuları sırayla ilerlet.'
+]);
+d('#edu-continue', 'Kaldığın dersler', 'Yarım kalan konulara hızlı dönüş sağlar.', []);
+d('#edu-access-tabs [data-access]', 'Erişim filtresi', 'Ücretsiz, referans veya premium gibi seviyelere göre içerik gösterir.', []);
+d('#edu-search', 'Eğitimde ara', 'Kurs, konu ve günlük not içeriklerinde arar.', []);
+d('#edu-daily-more', 'Eski günlük notlar', 'Daha önceki eğitsel paylaşımları listeler.', []);
+d('#eg-done', 'Konuyu tamamla', 'Açık konuyu tamamlandı olarak işaretler; ilerleme takibine eklenir.', []);
+
+/* Defter */
+d('#btn-long', 'Long yönü', 'İşlem yönünü uzun olarak seçer; skor ve senaryo buna göre hesaplanır.', []);
+d('#btn-short', 'Short yönü', 'İşlem yönünü kısa olarak seçer; skor ve senaryo buna göre hesaplanır.', []);
+d('#pair-confirm', 'Pariteyi onayla', 'Seçilen enstrümanı plana bağlar; onaylamadan kayıt anlamlı olmaz.', []);
+d('#mood-range', 'Duygu durumu', 'İşlem öncesi ruh halini işaretler; disiplin skoruna yansır.', []);
+d('#d-save', 'Günlük planı kaydet', 'Kriterler, yön ve duygu durumuyla birlikte planı deftere yazar.', [
+  'Parite ve yönü seç.',
+  'Kriterleri puanla, duygu durumunu işaretle.',
+  'Kaydet’e bas; karar skorunu gör.'
+]);
+d('#btn-logtrade', 'Planı işleme çevir', 'Kaydedilmiş planı işlem kaydına dönüştürür; giriş/çıkış ve sonuç alanlarını doldur.', []);
+d('#btn-ghost-save', 'İşlem yapmadım', 'Planı tuttuğunu ama işlem açmadığını kaydeder; disiplin serisi korunur.', []);
+d('#btn-reset', 'Formu sıfırla', 'Formdaki seçimleri temizler; kayıtlı planları silmez.', []);
+d('#btn-export', 'Kayıtları dışa aktar', 'İşlem kayıtlarını dosya olarak indirir; yedekleme için kullan.', []);
+d('#ls-btn-add', 'Ders ekle', 'Ders defterine yeni bir öğrenme notu ekler.', []);
+
+/* Erişim */
+d('#acc-link-okx', 'OKX’e git', 'Referans bağlantısıyla OKX kayıt sayfasını açar; UID doğrulaması için önce kayıt gerekir.', []);
+d('#acc-link-bybit', 'Bybit’e git', 'Referans bağlantısıyla Bybit kayıt sayfasını açar.', []);
+d('#acc-exchange', 'Borsa seç', 'Doğrulama yapılacak borsayı seçer; sonraki alanlar buna göre güncellenir.', []);
+d('#acc-uid', 'Borsa UID', 'Kayıt olduğun borsadaki kullanıcı numaranı girer. Yanlış UID onayı geciktirir.', []);
+d('#acc-submit', 'UID doğrulat', 'Borsa ve UID bilgisini onaya gönderir; durum buradan takip edilir.', [
+  'Borsaya referans linkinden kayıt ol.',
+  'UID’ni kopyala ve alana yapıştır.',
+  'Gönder’e bas; onay panelinde durumu izle.'
+]);
+d('#acc-ref-confirm', 'Referans kodunu onayla', 'Kullandığın referans kodunu doğrular; eşleşmezse erişim açılmaz.', []);
+d('#acc-go', 'Hedef sayfaya dön', 'Doğrulama tamamlandıktan sonra kaldığın sayfaya döndürür.', []);
+d('#acc-benefits', 'Açılacak özellikler', 'Onay sonrası erişeceğin modülleri listeler.', []);
+
+/* Risk hesaplayıcı */
+d('#accountBalance', 'Hesap bakiyesi', 'Risk yüzdesinin hangi tutar üzerinden hesaplanacağını belirler.', []);
+d('#riskType', 'Risk tipi', 'Riski yüzde veya sabit tutar olarak vermeni sağlar.', []);
+d('#riskValue', 'Risk değeri', 'Yüzde ya da para tutarı olarak max riski girer.', []);
+d('#instrument', 'Enstrüman', 'FX, kripto veya altın seçimine göre pip ve lot hesabı değişir.', []);
+d('#entryPrice', 'Giriş fiyatı', 'Pozisyonun açılacağı seviyeyi girer.', []);
+d('#slPrice', 'Stop fiyatı', 'Stop seviyesini girer; girişle arasındaki mesafe riski belirler.', []);
+d('#leverage', 'Kaldıraç', 'Marj ve nominal tutar hesabında kullanılır; riski değiştirmez.', []);
+d('#resStandardLot', 'Standart lot', 'Girdiğin riske göre hesaplanan lot büyüklüğünü gösterir.', []);
+d('#resPipValue', 'Pip değeri', 'Seçili enstrümanda bir pip’in parasal karşılığını gösterir.', []);
+
+/* Portföy */
+d('#ap2-tab-alpha', 'Alfa Portföy', 'Paylaşılan örnek portföyün özetini açar; pozisyon detayı premium kapısının arkasındadır.', []);
+d('#ap2-tab-mine', 'Portföyüm', 'Yalnızca bu cihazda saklanan kişisel portföyünü açar.', []);
+d('#ap2-add', 'Enstrüman ekle', 'Takip edilecek yeni enstrümanı portföye ekler.', []);
+d('#ap2-gate-verify', 'Premium kodu doğrula', 'Alfa Portföy detayını açan erişim kodunu kontrol eder.', []);
+d('#mp-new', 'Yeni portföy', 'Kişisel portföylerinden bir yenisini oluşturur.', []);
+d('#mp-add', 'Pozisyon ekle', 'Seçili kişisel portföye yeni pozisyon ekler.', []);
+d('#mp-delete', 'Portföyü sil', 'Seçili kişisel portföyü cihazdan kaldırır; onay ister.', []);
+d('#home-magazine-link', 'Derginin tamamı', 'Haftalık dergiyi okumak için ayrı sayfaya götürür.', []);
+d('#hmr-collapse', 'Dergi okuyucusunu katla', 'Önizleme alanını daraltıp genişletir; sayfada daha az yer kaplar.', []);
+d('#dt-add', 'Görev ekle', 'Kendi günlük görevini listeye ekler; tamamlayınca XP kazanırsın.', []);
+d('#ht-cta', 'Portföy özeti', 'Ana sayfadaki kısa portföy kartından ilgili detay sayfasına geçer.', []);
+d('.edu-card[data-course]', 'Kurs kartı', 'Eğitmen, seviye ve açılış durumunu gösterir; oynat düğmesiyle derse girilir.', [
+  'Kartı bul ve açıklamasını oku.',
+  'Oynat düğmesine bas.',
+  'Konuları sırayla ilerlet, tamamlananları işaretle.'
+]);
+d('.edu-play', 'Dersi oynat', 'Kursu açar ve video/konu akışına geçer.', []);
+d('#edu-grid', 'Kurs listesi', 'Filtrelere uyan kurs kartlarını gösterir.', []);
+d('#edu-empty', 'Kurs bulunamadı', 'Arama veya filtre sonucu boşsa görünür; farklı bir kelime dene.', []);
+d('#edu-manage-toggle', 'Yönetici araçları', 'İçerik düzenleme kontrollerini gösterir; yönetici erişimi gerekir.', []);
+
 function readPref() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -657,7 +910,8 @@ function addTip(target, entry) {
   if (!target || !entry || !entry.tip) return;
   const tip = document.createElement('span');
   tip.className = 'sg-tip';
-  tip.setAttribute('role', 'note');
+  tip.id = 'sg-tip-' + (++tipSeq);
+  tip.setAttribute('role', 'tooltip');
   tip.setAttribute('aria-label', entry.tip);
   tip.dataset.sgSide = entry.side || 'right';
   tip.textContent = entry.tip;
@@ -665,7 +919,10 @@ function addTip(target, entry) {
     if (tip.dataset.sgSide === 'left') target.parentNode.insertBefore(tip, target);
     else target.parentNode.insertBefore(tip, target.nextSibling);
     target.dataset.sgTipped = '1';
-    tipNodes.push({ tip, target });
+    target.dataset.sgKey = entry.selector;
+    target.dataset.sgTip = entry.tip;
+    target.setAttribute('aria-describedby', tip.id);
+    tipNodes.push({ tip, target, tipId: tip.id });
   } catch (e) {}
 }
 
@@ -714,13 +971,262 @@ function buildIntro(def) {
   return box;
 }
 
-function clear() {
-  for (const item of tipNodes) {
-    try {
-      if (item.tip.parentNode) item.tip.parentNode.removeChild(item.tip);
-    } catch (e) {}
-    try { delete item.target.dataset.sgTipped; } catch (e) {}
+/* --- Sağdaki detay kartı ------------------------------------------------ */
+function node(tag, cls, content) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (content !== undefined) n.textContent = content;
+  return n;
+}
+
+function ensureCard() {
+  if (detailCard && detailCard.parentNode) return detailCard;
+  const card = node('div', 'sg-detail');
+  card.setAttribute('role', 'note');
+  card.setAttribute('aria-live', 'polite');
+  card.setAttribute('aria-label', 'Rehber detayı');
+
+  const head = node('div', 'sg-detail-head');
+  head.appendChild(node('span', 'sg-detail-kicker', 'Rehber · Detay'));
+  const pin = node('button', 'sg-detail-pin', '☆');
+  pin.type = 'button';
+  pin.title = 'Kartı sabitle';
+  pin.setAttribute('aria-label', 'Kartı sabitle');
+  pin.setAttribute('aria-pressed', 'false');
+  pin.onclick = () => {
+    detailPinned = !detailPinned;
+    pin.textContent = detailPinned ? '★' : '☆';
+    pin.title = detailPinned ? 'Sabitlemeyi kaldır' : 'Kartı sabitle';
+    pin.setAttribute('aria-label', pin.title);
+    pin.setAttribute('aria-pressed', String(detailPinned));
+    card.classList.toggle('is-pinned', detailPinned);
+    if (detailPinned) clearTimeout(hideTimer);
+    else scheduleHide();
+  };
+  const close = node('button', 'sg-detail-close', '✕');
+  close.type = 'button';
+  close.title = 'Detay kartını kapat';
+  close.setAttribute('aria-label', 'Detay kartını kapat');
+  close.onclick = () => { detailPinned = false; hideDetail(true); };
+  head.appendChild(pin);
+  head.appendChild(close);
+  card.appendChild(head);
+
+  card.appendChild(node('div', 'sg-detail-page'));
+  card.appendChild(node('h3', 'sg-detail-title'));
+  card.appendChild(node('p', 'sg-detail-short'));
+  card.appendChild(node('p', 'sg-detail-body'));
+  card.appendChild(node('ol', 'sg-detail-steps'));
+  card.appendChild(node('p', 'sg-detail-foot',
+    'Kısa bakış için üzerine gel; uzunca durursan adımlar açılır. Klavyede odaklanabilir, mobilde basılı tutabilirsin.'));
+
+  card.addEventListener('pointerenter', () => clearTimeout(hideTimer));
+  card.addEventListener('pointerleave', () => { if (!detailPinned) scheduleHide(180); });
+  try { document.body.appendChild(card); detailCard = card; } catch (e) { detailCard = null; }
+  return detailCard;
+}
+
+function setCardText(cls, value) {
+  if (!detailCard) return;
+  const target = detailCard.querySelector(cls);
+  if (target) target.textContent = value || '';
+}
+
+function labelFor(target) {
+  if (!target) return 'Bu öğe';
+  const raw = target.getAttribute && (target.getAttribute('aria-label') || target.getAttribute('title') || target.getAttribute('placeholder'))
+    || target.textContent || target.id || '';
+  return String(raw).replace(/\s+/g, ' ').trim().slice(0, 70) || 'Bu öğe';
+}
+
+function collectData(target) {
+  const def = PAGES[pageName()];
+  const key = target && target.dataset ? target.dataset.sgKey : '';
+  const rich = DETAILS[key];
+  if (rich) {
+    return {
+      page: def ? def.title : 'Site rehberi',
+      title: rich.title || labelFor(target),
+      short: (target && target.dataset && target.dataset.sgTip) || '',
+      body: rich.body,
+      steps: rich.steps || []
+    };
   }
+  return {
+    page: def ? def.title : 'Site rehberi',
+    title: labelFor(target) || (def ? def.title : 'Bu öğe'),
+    short: (target && target.dataset && target.dataset.sgTip) || '',
+    body: def ? def.intro : 'Bu öğe hakkında ek açıklama yok.',
+    steps: def ? def.points || [] : []
+  };
+}
+
+function fillCard(data, expanded) {
+  const card = ensureCard();
+  if (!card) return;
+  setCardText('.sg-detail-page', data.page ? 'Rehber · ' + data.page : 'Rehber · Bu öğe');
+  setCardText('.sg-detail-title', data.title);
+  setCardText('.sg-detail-short', data.short || data.body);
+  setCardText('.sg-detail-body', data.short ? data.body : '');
+  const list = card.querySelector('.sg-detail-steps');
+  if (list) {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    for (const step of data.steps || []) list.appendChild(node('li', undefined, step));
+    list.className = 'sg-detail-steps' + (data.steps && data.steps.length ? '' : ' is-empty');
+  }
+  card.classList.add('is-open');
+  card.classList.toggle('is-expanded', !!expanded);
+}
+
+function showPageOverview() {
+  if (!enabled) return;
+  const def = PAGES[pageName()];
+  if (!def) return;
+  activeTarget = null;
+  fillCard({
+    page: def.title,
+    title: 'Bu sayfayı nasıl kullanırım?',
+    short: 'Bir butona gel, klavyeyle odaklan veya mobilde basılı tut; bu kart o öğeyi anlatır.',
+    body: def.intro,
+    steps: def.points || []
+  }, true);
+}
+
+function showDetail(target, expanded) {
+  if (!target || !enabled) return;
+  activeTarget = target;
+  fillCard(collectData(target), expanded);
+}
+
+function scheduleHide(delay = 240) {
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => hideDetail(false), delay);
+}
+
+function hideDetail(force) {
+  if (!force && detailPinned) return;
+  clearTimeout(hideTimer);
+  if (detailCard) detailCard.classList.remove('is-open', 'is-expanded');
+  activeTarget = null;
+}
+
+function resetDetail() {
+  clearTimeout(showTimer);
+  clearTimeout(expandTimer);
+  clearTimeout(hideTimer);
+  clearTimeout(touchTimer);
+  touchStart = null;
+  detailPinned = false;
+  activeTarget = null;
+  if (detailCard && detailCard.parentNode) {
+    try { detailCard.parentNode.removeChild(detailCard); } catch (e) {}
+  }
+  detailCard = null;
+}
+
+function guideTarget(from) {
+  let current = from;
+  while (current && current !== document.body && current !== document) {
+    if (current.dataset && current.dataset.sgKey) return current;
+    current = current.parentNode;
+  }
+  return null;
+}
+
+function inside(nodeToCheck, parent) {
+  let current = nodeToCheck;
+  while (current) {
+    if (current === parent) return true;
+    current = current.parentNode;
+  }
+  return false;
+}
+
+function clearHoverTimers() {
+  clearTimeout(showTimer);
+  clearTimeout(expandTimer);
+  clearTimeout(hideTimer);
+}
+
+function onPointerOver(event) {
+  if (!enabled || (event.pointerType && event.pointerType === 'touch')) return;
+  const target = guideTarget(event.target);
+  if (!target || target === activeTarget) return;
+  clearHoverTimers();
+  const current = target;
+  showTimer = setTimeout(() => showDetail(current, false), 180);
+  expandTimer = setTimeout(() => { if (activeTarget === current) showDetail(current, true); }, 900);
+}
+
+function onPointerOut(event) {
+  if (!enabled || (event.pointerType && event.pointerType === 'touch')) return;
+  const target = guideTarget(event.target);
+  if (!target) return;
+  if (event.relatedTarget && (inside(event.relatedTarget, target) || inside(event.relatedTarget, detailCard))) return;
+  clearTimeout(showTimer);
+  clearTimeout(expandTimer);
+  scheduleHide(220);
+}
+
+function onFocusIn(event) {
+  if (!enabled) return;
+  const target = guideTarget(event.target);
+  if (!target) return;
+  clearHoverTimers();
+  showDetail(target, true);
+}
+
+function onFocusOut(event) {
+  if (!enabled) return;
+  if (!guideTarget(event.target)) return;
+  clearTimeout(showTimer);
+  clearTimeout(expandTimer);
+  scheduleHide(220);
+}
+
+function onTouchStart(event) {
+  if (!enabled || !event.touches || event.touches.length !== 1) return;
+  const target = guideTarget(event.target);
+  if (!target) return;
+  const touch = event.touches[0];
+  touchStart = { x: touch.clientX, y: touch.clientY };
+  clearTimeout(touchTimer);
+  touchTimer = setTimeout(() => { touchStart = null; showDetail(target, true); }, 550);
+}
+
+function onTouchMove(event) {
+  if (!touchStart || !event.touches || !event.touches[0]) return;
+  const touch = event.touches[0];
+  const dx = touch.clientX - touchStart.x;
+  const dy = touch.clientY - touchStart.y;
+  if (dx * dx + dy * dy > 144) {
+    clearTimeout(touchTimer);
+    touchStart = null;
+  }
+}
+
+function onTouchEnd() {
+  clearTimeout(touchTimer);
+  touchStart = null;
+}
+
+function onKeyDown(event) {
+  if (event.key !== 'Escape' || !detailCard) return;
+  detailPinned = false;
+  hideDetail(true);
+}
+
+function cleanTip(item) {
+  try { if (item.tip.parentNode) item.tip.parentNode.removeChild(item.tip); } catch (e) {}
+  try { delete item.target.dataset.sgTipped; } catch (e) {}
+  try { delete item.target.dataset.sgKey; } catch (e) {}
+  try { delete item.target.dataset.sgTip; } catch (e) {}
+  try { item.target.removeAttribute('aria-describedby'); } catch (e) {}
+}
+
+function clear() {
+  for (const item of tipNodes) cleanTip(item);
+  resetDetail();
   tipNodes = [];
   if (introNode && introNode.parentNode) {
     try { introNode.parentNode.removeChild(introNode); } catch (e) {}
@@ -732,10 +1238,7 @@ function pruneStaleTips() {
   for (let i = tipNodes.length - 1; i >= 0; i--) {
     const item = tipNodes[i];
     if (item.tip.parentNode && item.target.parentNode && item.target.dataset.sgTipped === '1') continue;
-    try {
-      if (item.tip.parentNode) item.tip.parentNode.removeChild(item.tip);
-    } catch (e) {}
-    try { delete item.target.dataset.sgTipped; } catch (e) {}
+    cleanTip(item);
     tipNodes.splice(i, 1);
   }
 }
@@ -776,6 +1279,7 @@ function render(force = false) {
       if (def && container) decorate(def.controls, container);
     }
     syncToggles();
+    if (full && enabled) showPageOverview();
   } finally {
     rendering = false;
     if (wasObserving && enabled) observe();
@@ -835,12 +1339,18 @@ function observe() {
         for (const m of mutations) {
           const target = m.target;
           if (target && target.closest && target.closest('.sg-tip, .sg-intro')) continue;
+          // Sınıf değişimi bir öğeyi görünür yaptığında (örn. sabah kartının
+          // .hidden sınıfının kalkması) eksik ipuçlarını tamamlamak için
+          // yeniden çizim gerekir. Zaten ipucu almış öğelerde tekrar gerekmez.
+          if (m.type === 'attributes' && target && target.dataset && target.dataset.sgKey) continue;
           queueRender();
           return;
         }
       });
       const container = document.getElementById('page-' + pageName());
-      if (container) contentObserver.observe(container, { childList: true, subtree: true });
+      if (container) contentObserver.observe(container, {
+        childList: true, attributes: true, attributeFilter: ['class', 'hidden'], subtree: true
+      });
     }
   } catch (e) {}
 }
@@ -890,6 +1400,15 @@ function bind() {
     document.querySelectorAll('.sg-toggle').forEach(btn => {
       btn.addEventListener('click', () => setEnabled(!enabled));
     });
+    document.addEventListener('pointerover', onPointerOver, true);
+    document.addEventListener('pointerout', onPointerOut, true);
+    document.addEventListener('focusin', onFocusIn, true);
+    document.addEventListener('focusout', onFocusOut, true);
+    document.addEventListener('touchstart', onTouchStart, { passive: true, capture: true });
+    document.addEventListener('touchmove', onTouchMove, { passive: true, capture: true });
+    document.addEventListener('touchend', onTouchEnd, true);
+    document.addEventListener('touchcancel', onTouchEnd, true);
+    document.addEventListener('keydown', onKeyDown, true);
     window.addEventListener('popstate', queueRender);
     window.addEventListener('hashchange', queueRender);
   } catch (e) {}
@@ -903,9 +1422,12 @@ window.AlfaSiteGuide = Object.freeze({
   renderedPage: () => renderedPage,
   pageIds: Object.keys(PAGES),
   pages: PAGES,
+  detailData: DETAILS,
   globalControls: GLOBAL,
   render: queueRender,
   addTipForTest: addTip,
+  showDetailForTest: showDetail,
+  detailCardForTest: () => detailCard,
   visibleForTest: isVisible
 });
 

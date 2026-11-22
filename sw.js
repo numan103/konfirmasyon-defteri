@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v146-partner-clicks';
-const BUILD_ID = 'b207-partner-clicks';
+﻿const CACHE = 'alfa-v147-guide-details';
+const BUILD_ID = 'b208-guide-details';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

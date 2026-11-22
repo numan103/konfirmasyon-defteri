@@ -31,8 +31,8 @@ function collectSources(dir) {
 const sourceText = html + collectSources('assets') + collectSources('ayna');
 
 test('eski üst menü turu kaldırıldı, yeni rehber varlıkları bağlandı', () => {
-  assert.ok(html.includes('/assets/site-guide.css?v=5'));
-  assert.ok(html.includes('/assets/site-guide.mjs?v=6'));
+  assert.ok(html.includes('/assets/site-guide.css?v=6'));
+  assert.ok(html.includes('/assets/site-guide.mjs?v=7'));
   assert.ok(!html.includes('platform-tour'));
   assert.ok(!html.includes('pt-restart'));
   assert.ok(!html.includes('platform-tour-welcome'));
@@ -95,9 +95,29 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği yeni rehber için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v146-partner-clicks'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b207-partner-clicks'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v147-guide-details'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b208-guide-details'"));
   assert.ok(!sw.includes('platform-tour'));
+});
+
+test('detay kartı verisi 35 sayfayı ve kritik akışları kapsıyor', () => {
+  const details = [...moduleSrc.matchAll(/\bd\('([^']+)',\s*'([^']+)'/g)];
+  assert.ok(details.length >= 60, 'beklenenden az detay tanımı: ' + details.length);
+  for (const selector of [
+    '#mc-card', '#hg-steps .hg-step', '#bd-quick-save', '[data-bedit]', '[data-bdel]',
+    '#bd-import-commit', '#eduplans-root', '.eduplan[data-plan]',
+    '[data-edu-apply][data-edu-route]', '.eduplans-term summary',
+    '.edu-card[data-course]', '#d-save', '#btn-logtrade', '#acc-submit',
+    '#accountBalance', '#resPipValue', '#mp-delete'
+  ]) {
+    assert.ok(moduleSrc.includes("d('" + selector + "'"), selector + ' için detay yok');
+  }
+  assert.ok(guideCss.includes('.sg-detail.is-open'), 'kart açılma durumu stillenmeli');
+  assert.ok(guideCss.includes('.sg-detail.is-expanded'), 'uzun bakış detayı stillenmeli');
+  assert.ok(guideCss.includes('.sg-detail-pin'), 'sabitleme düğmesi stillenmeli');
+  assert.ok(guideCss.includes('bottom: 76px'), 'mobil kart sohbet balonunu kapatmamalı');
+  assert.ok(moduleSrc.includes("'role', 'tooltip'"), 'satır ipuçları tooltip rolü almalı');
+  assert.ok(moduleSrc.includes("'aria-describedby'"), 'ipuçları hedefe bağlanmalı');
 });
 
 /* --- Gerçek modülü minimal DOM stub ile çalıştır --- */
@@ -115,11 +135,17 @@ class FakeNode {
     this.classList = {
       add: name => classes.add(name),
       remove: name => classes.delete(name),
-      contains: name => classes.has(name)
+      contains: name => classes.has(name),
+      toggle: (name, force) => {
+        const on = force === undefined ? !classes.has(name) : !!force;
+        if (on) classes.add(name); else classes.delete(name);
+        return on;
+      }
     };
   }
   setAttribute(k, v) { this.attributes[k] = String(v); }
   getAttribute(k) { return this.attributes[k]; }
+  removeAttribute(k) { delete this.attributes[k]; }
   appendChild(node) { node.parentNode = this; this.children.push(node); return node; }
   insertBefore(node, ref) {
     node.parentNode = this;
@@ -138,7 +164,15 @@ class FakeNode {
   querySelectorAll(sel) { return this._find(sel); }
   _find(sel) {
     const needle = sel.replace(/^\./, '');
-    return this.children.filter(n => n.className.split(/\s+/).includes(needle));
+    const out = [];
+    const walk = parent => {
+      for (const child of parent.children) {
+        if (String(child.className).split(/\s+/).includes(needle)) out.push(child);
+        walk(child);
+      }
+    };
+    walk(this);
+    return out;
   }
   closest() { return null; }
   getBoundingClientRect() { return { width: 100, height: 24 }; }
@@ -291,4 +325,48 @@ test('görünmeyen butonlar ipucu almaz', async () => {
   hidden.getBoundingClientRect = () => ({ width: 0, height: 0 });
   assert.equal(api.visibleForTest(hidden), false);
   assert.equal(api.visibleForTest(dom.navHome), true);
+});
+
+test('rehber açılınca sağdaki detay kartı sayfayı anlatır', async () => {
+  const dom = fakeDom();
+  await import('../assets/site-guide.mjs?card=' + Date.now());
+  const api = global.window.AlfaSiteGuide;
+  api.setEnabled(true);
+
+  const card = api.detailCardForTest();
+  assert.ok(card, 'detay kartı oluşturulmalı');
+  assert.equal(card.classList.contains('is-open'), true);
+  assert.equal(card.getAttribute('role'), 'note');
+  assert.equal(card.querySelector('.sg-detail-title').textContent, 'Bu sayfayı nasıl kullanırım?');
+  assert.ok(card.querySelector('.sg-detail-steps').children.length >= 1, 'sayfa maddeleri kartta olmalı');
+});
+
+test('buton detayı, adımlar, sabitleme ve kapatma çalışıyor', async () => {
+  const dom = fakeDom();
+  await import('../assets/site-guide.mjs?detail=' + Date.now());
+  const api = global.window.AlfaSiteGuide;
+  api.setEnabled(true);
+
+  assert.equal(dom.navHome.getAttribute('aria-describedby'), 'sg-tip-1');
+  assert.equal(dom.navHome.dataset.sgKey, '#nav-home');
+
+  api.showDetailForTest(dom.navHome, true);
+  const card = api.detailCardForTest();
+  assert.equal(card.querySelector('.sg-detail-title').textContent, 'Ana menüye dön');
+  assert.ok(card.querySelector('.sg-detail-short').textContent.includes('Ana menüye döner'));
+  assert.ok(card.querySelector('.sg-detail-steps').children.length >= 2, 'kritik akışta adım olmalı');
+  assert.equal(card.classList.contains('is-expanded'), true);
+
+  const pin = card.querySelector('.sg-detail-pin');
+  pin.onclick();
+  assert.equal(card.classList.contains('is-pinned'), true);
+  assert.equal(pin.getAttribute('aria-pressed'), 'true');
+
+  const close = card.querySelector('.sg-detail-close');
+  close.onclick();
+  assert.equal(card.classList.contains('is-open'), false);
+
+  api.setEnabled(false);
+  assert.equal(api.detailCardForTest(), null, 'rehber kapanınca kart DOM’dan kalkmalı');
+  assert.equal(dom.navHome.getAttribute('aria-describedby'), undefined);
 });
