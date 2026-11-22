@@ -7,6 +7,7 @@
 import { requestUser, requestTier, throttle } from '../lib/auth.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 import { magazinePublicPhoto } from '../lib/telegram-magazine-source.mjs';
+import { websiteNotifyTarget } from '../lib/website-notify.mjs';
 
 const CHANNEL = process.env.TG_CHANNEL || 'alfatraderspublic';
 const MAX_POSTS = Number(process.env.TG_MAX_POSTS || 12);
@@ -122,12 +123,15 @@ async function handleNotify(req, res) {
   // Herkese acik kanal yalnizca genel/davet edici metni alir. Ayrintili metin
   // (miktar, fiyat, kâr/zarar) sadece premium kanalina gider. publicMessage
   // gelmezse guvenli tarafta kalip genel metni yollariz; ayrinti asla sizmaz.
+  const websiteTarget = kind === 'magazine_publish' ? websiteNotifyTarget() : null;
+  const targetChat = (websiteTarget && websiteTarget.chat) || TG_CHAT;
+  const targetThread = websiteTarget ? websiteTarget.thread : TG_THREAD;
   const publicButton = kind === 'magazine_publish' ? MAGAZINE_PUBLIC_BUTTON : PUBLIC_BUTTON;
-  const publicOut = await sendTelegram(teaser || PUBLIC_FALLBACK, TG_CHAT, TG_THREAD, publicButton);
+  const publicOut = await sendTelegram(teaser || PUBLIC_FALLBACK, targetChat, targetThread, publicButton);
   const result = {
     ok: !!publicOut.ok,
     kind: kind || undefined,
-    link: publicOut.ok ? 'https://t.me/' + CHANNEL + '/' + (publicOut.result && publicOut.result.message_id) + (TG_THREAD ? '?thread=' + TG_THREAD : '') : undefined,
+    link: publicOut.ok ? 'https://t.me/' + CHANNEL + '/' + (publicOut.result && publicOut.result.message_id) + (targetThread ? '?thread=' + targetThread : '') : undefined,
   };
   if (TG_PREMIUM_CHAT && message && tier === 'admin') {
     const premiumOut = await sendTelegram(message, TG_PREMIUM_CHAT, TG_PREMIUM_THREAD);
