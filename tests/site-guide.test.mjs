@@ -31,8 +31,8 @@ function collectSources(dir) {
 const sourceText = html + collectSources('assets') + collectSources('ayna');
 
 test('eski üst menü turu kaldırıldı, yeni rehber varlıkları bağlandı', () => {
-  assert.ok(html.includes('/assets/site-guide.css?v=4'));
-  assert.ok(html.includes('/assets/site-guide.mjs?v=4'));
+  assert.ok(html.includes('/assets/site-guide.css?v=5'));
+  assert.ok(html.includes('/assets/site-guide.mjs?v=5'));
   assert.ok(!html.includes('platform-tour'));
   assert.ok(!html.includes('pt-restart'));
   assert.ok(!html.includes('platform-tour-welcome'));
@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği yeni rehber için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v143-site-guide'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b204-site-guide'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v144-site-guide'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b205-site-guide'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 
@@ -258,6 +258,29 @@ test('mobil menüde rehber açılınca çekmece kapanır', async () => {
   assert.equal(dom.mnav.classList.contains('open'), false, 'mobil çekmece açık kalmamalı');
   assert.equal(dom.backdrop.classList.contains('open'), false, 'karartma perdesi açık kalmamalı');
   assert.equal(dom.menuBtn.getAttribute('aria-expanded'), 'false');
+});
+
+test('aynı sayfada tekrar render düğümleri yerinden oynatmaz (wheel takılmasın)', async () => {
+  const dom = fakeDom();
+  await import('../assets/site-guide.mjs?stable=' + Date.now());
+  const api = global.window.AlfaSiteGuide;
+  api.setEnabled(true);
+
+  const introBefore = dom.pageHome.children.find(n => n.className === 'sg-intro');
+  const tipBefore = dom.navHomeParent.children.find(n => n.className === 'sg-tip');
+  assert.ok(introBefore, 'tanıtım paneli eklenmeli');
+  assert.ok(tipBefore, 'ipucu eklenmeli');
+
+  // Scroll sırasında nav sınıfı değişir ve render tetiklenir; aynı sayfada
+  // düğümler korunmalı, yoksa scroll anchoring tekerleği geri çeker.
+  dom.body.classList.add('nav-scrolled');
+  api.render();
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  assert.equal(dom.pageHome.children.find(n => n.className === 'sg-intro'), introBefore, 'panel aynı düğüm olmalı');
+  assert.equal(dom.navHomeParent.children.find(n => n.className === 'sg-tip'), tipBefore, 'ipucu aynı düğüm olmalı');
+  assert.equal(dom.navHomeParent.children.filter(n => n.className === 'sg-tip').length, 1, 'ipucu çoğalmamalı');
+  assert.equal(api.renderedPage(), 'home');
 });
 
 test('görünmeyen butonlar ipucu almaz', async () => {

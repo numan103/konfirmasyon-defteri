@@ -725,28 +725,52 @@ function clear() {
   introNode = null;
 }
 
-function render() {
+function pruneStaleTips() {
+  for (let i = tipNodes.length - 1; i >= 0; i--) {
+    const item = tipNodes[i];
+    if (item.tip.parentNode && item.target.parentNode && item.target.dataset.sgTipped === '1') continue;
+    try {
+      if (item.tip.parentNode) item.tip.parentNode.removeChild(item.tip);
+    } catch (e) {}
+    try { delete item.target.dataset.sgTipped; } catch (e) {}
+    tipNodes.splice(i, 1);
+  }
+}
+
+function render(force = false) {
   if (rendering) return;
   rendering = true;
+  const page = pageName();
+  // Aynı sayfada tekrar çizim yapmak mouse wheel'i takar: düğümler sökülüp
+  // takıldıkça tarayıcı scroll anchoring ile konumu geri çeker. Yalnızca
+  // sayfa veya açık/kapalı durumu değiştiğinde tam yeniden çizim yap; aksi
+  // halde eksik ipuçlarını ekle, DOM'dan çıkanları temizle.
+  const full = force || !enabled || page !== renderedPage || !introNode || !introNode.parentNode;
   // Kendi DOM eklemelerimiz gözlemciyi yeniden tetiklemesin; aksi halde
   // her çizim bir sonraki çizimi kuyruğa alır ve ipuçları kaybolur.
   const wasObserving = !!(pageObserver || contentObserver);
   if (wasObserving) unobserve();
   try {
-    clear();
-    const page = pageName();
-    renderedPage = page;
-    if (!enabled) return;
+    if (full) {
+      clear();
+      renderedPage = page;
+      if (!enabled) return;
+      try { document.body.classList.add('sg-active'); } catch (e) {}
+      decorate(GLOBAL, document);
 
-    try { document.body.classList.add('sg-active'); } catch (e) {}
-    decorate(GLOBAL, document);
-
-    const def = PAGES[page];
-    const container = document.getElementById('page-' + page);
-    if (def && container) {
-      introNode = buildIntro(def);
-      container.insertBefore(introNode, container.firstChild);
-      decorate(def.controls, container);
+      const def = PAGES[page];
+      const container = document.getElementById('page-' + page);
+      if (def && container) {
+        introNode = buildIntro(def);
+        container.insertBefore(introNode, container.firstChild);
+        decorate(def.controls, container);
+      }
+    } else {
+      pruneStaleTips();
+      decorate(GLOBAL, document);
+      const def = PAGES[page];
+      const container = document.getElementById('page-' + page);
+      if (def && container) decorate(def.controls, container);
     }
     syncToggles();
   } finally {
@@ -776,10 +800,31 @@ function syncToggles() {
 function observe() {
   try {
     if (!pageObserver && window.MutationObserver && document.body) {
-      pageObserver = new MutationObserver(queueRender);
+      pageObserver = new MutationObserver(mutations => {
+        for (const m of mutations) {
+          if (m.attributeName === 'data-page') { queueRender(); return; }
+          if (m.attributeName === 'class') {
+            // nav-autohide her scroll'da body class'ını değiştirir. Bunu
+            // yeniden çizim sayarsak her tekerlek hareketinde DOM sökülüp
+            // takılır ve sayfa kaydırması takılır. Sadece gerçek görünürlük
+            // değişimlerini (landing, tema, gating) dikkate al.
+            const meaningful = s => (s || '').split(/\s+/)
+              .filter(c => c && c !== 'nav-scrolled' && c !== 'nav-peek')
+              .sort().join(' ');
+            if (meaningful(m.oldValue) !== meaningful(document.body.className)) {
+              queueRender();
+              return;
+            }
+          }
+        }
+      });
       // class değişimi (landing kapanması, tema, gating) de görünürlüğü
-      // değiştirdiği için yeniden çizim tetiklemeli.
-      pageObserver.observe(document.body, { attributes: true, attributeFilter: ['data-page', 'class'] });
+      // değiştirdiği için izlenir; scroll kaynaklı nav sınıfları yoksayılır.
+      pageObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['data-page', 'class'],
+        attributeOldValue: true
+      });
     }
     if (!contentObserver && window.MutationObserver) {
       contentObserver = new MutationObserver(mutations => {
@@ -806,7 +851,7 @@ function unobserve() {
 
 function apply() {
   if (enabled) {
-    render();
+    render(true);
     observe();
   } else {
     unobserve();
