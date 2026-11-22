@@ -59,6 +59,7 @@ export function renderMentorEvaluation(host, records, opts = {}) {
   const curve = el('div', undefined, 'mentor-eval-curve');
   renderMentorCurve(curve, summary);
   curve.querySelector('.mentor-trades-kicker')?.remove();
+  curve.querySelector('.mentor-curve-headline')?.remove();
   host.appendChild(curve);
   const byDay = new Map();
   for (const record of picked) {

@@ -12,10 +12,9 @@ test('influencer sayfası herkese açık bir sayfa olarak kayıtlı', () => {
   assert.ok(html.includes('<div id="page-influencer" class="hidden">'));
 });
 
-test('influencer masaüstü ve mobil menüde, ayrıca ana sayfa kartında', () => {
+test('influencer masaüstü ve mobil menüde görünür', () => {
   assert.match(html, /href="\?page=influencer" class="nav-link" id="tab-influencer" data-nav/);
   assert.match(html, /data-mnav="influencer" id="mnav-influencer"/);
-  assert.match(html, /href="\?page=influencer" class="home-card" data-nav/);
 });
 
 test('sayfa açılırken kontrol listesi çizilir', () => {

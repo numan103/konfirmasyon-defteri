@@ -153,59 +153,55 @@ test('saving stores mood values together with their labels for Ayna', () => {
   assert.equal(app.events.length, 1);
   assert.equal(app.events[0].type, 'moodCheckin');
   assert.deepEqual([...app.events[0].detail.labels], record.labels);
-  assert.equal(app.els['mc-card'].classes.has('hidden'), true);
-  assert.equal(app.els['mc-chip'].classes.has('hidden'), false);
-  assert.match(app.els['mc-chip-label'].textContent, /Ruh hali: 2 tik/);
+  assert.equal(app.els['morning-checkin'].classes.has('hidden'), true);
 
   const again = load(store);
-  assert.equal(again.els['mc-card'].classes.has('hidden'), true);
-  assert.equal(again.els['mc-chip'].classes.has('hidden'), false);
+  assert.equal(again.els['morning-checkin'].classes.has('hidden'), true);
 });
 
-test('later, reset, chip reopen, Escape and stale records behave correctly', () => {
+test('later, submit, reset, Escape and stale records behave correctly', () => {
   const store = {};
   const app = load(store);
   app.els['mc-later'].fire('click');
   assert.equal(JSON.parse(store[KEY]).dismissed, true);
-  assert.equal(app.els['mc-chip'].classes.has('hidden'), false);
-  app.els['mc-chip'].fire('click');
-  assert.equal(app.els['mc-card'].classes.has('hidden'), false);
+  assert.equal(app.els['morning-checkin'].classes.has('hidden'), true);
 
-  app.checkboxes.push({ value: 'tired', checked: true });
-  app.els['mc-form'].fire('submit', { preventDefault() {} });
-  assert.deepEqual(JSON.parse(store[KEY]).values, ['tired']);
-  app.els['mc-reset'].fire('click');
+  // reload same day stays hidden
+  const again = load(store);
+  assert.equal(again.els['morning-checkin'].classes.has('hidden'), true);
+
+  // reset brings it back
+  again.els['mc-reset'].fire('click');
   assert.equal(store[KEY], undefined);
-  assert.equal(app.els['mc-card'].classes.has('hidden'), false);
+  assert.equal(again.els['mc-card'].classes.has('hidden'), false);
 
-  app.els['mc-edit'].fire('click');
-  assert.equal(app.els['mc-editor'].classes.has('hidden'), false);
-  app.document.fire('keydown', { key: 'Escape' });
-  assert.equal(app.els['mc-editor'].classes.has('hidden'), true);
-  assert.equal(app.els['mc-card'].classes.has('hidden'), false);
-  app.document.fire('keydown', { key: 'Escape' });
-  assert.equal(app.els['mc-card'].classes.has('hidden'), true);
-  assert.equal(app.els['mc-chip'].classes.has('hidden'), false);
+  // edit escape closes editor, card escape dismisses for day
+  again.els['mc-edit'].fire('click');
+  assert.equal(again.els['mc-editor'].classes.has('hidden'), false);
+  again.document.fire('keydown', { key: 'Escape' });
+  assert.equal(again.els['mc-editor'].classes.has('hidden'), true);
+  assert.equal(again.els['mc-card'].classes.has('hidden'), false);
+  again.document.fire('keydown', { key: 'Escape' });
+  assert.equal(again.els['morning-checkin'].classes.has('hidden'), true);
 
+  // stale record from previous day shows again
   store[KEY] = JSON.stringify({ date: '1999-01-01', done: true, values: ['angry'] });
   delete store['alfa-morning-checkin-seen-v1'];
   assert.equal(load(store).els['mc-card'].classes.has('hidden'), false);
 });
 
-test('shown once per day even without answering; close, reload and navigation leave the manual chip', () => {
+test('shown once per day; close or reload keeps it hidden for the rest of the day', () => {
   const store = {};
   const first = load(store);
   assert.equal(first.els['mc-card'].classes.has('hidden'), false);
   assert.ok(store['alfa-morning-checkin-seen-v1']);
   first.els['mc-close'].fire('click');
-  assert.equal(first.els['mc-chip'].classes.has('hidden'), false);
+  assert.equal(first.els['morning-checkin'].classes.has('hidden'), true);
   const second = load(store);
-  assert.equal(second.els['mc-card'].classes.has('hidden'), true);
-  second.els['mc-chip'].fire('click');
-  assert.equal(second.els['mc-card'].classes.has('hidden'), false);
+  assert.equal(second.els['morning-checkin'].classes.has('hidden'), true);
   second.document.body.dataset.page = 'defter'; second.observerCb();
   second.document.body.dataset.page = 'home'; second.observerCb();
-  assert.equal(second.els['mc-card'].classes.has('hidden'), true);
+  assert.equal(second.els['morning-checkin'].classes.has('hidden'), true);
 });
 
 test('card stays closed outside home and follows data-page changes', () => {

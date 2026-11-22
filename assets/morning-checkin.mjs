@@ -132,14 +132,14 @@ if (root) {
     }
     const record = read();
     const today = localDate();
-    if (seenToday !== today && (!record || record.date !== today || (!record.done && !record.dismissed))) {
+    const doneOrDismissed = !!(record && record.date === today && (record.done || record.dismissed));
+    if (seenToday !== today && !doneOrDismissed) {
       root.classList.remove('hidden');
       showCard();
       return;
     }
-    root.classList.remove('hidden');
-    syncChip(record);
-    showChip();
+    root.classList.add('hidden');
+    hideAll();
   }
 
   renderItems();
@@ -150,15 +150,17 @@ if (root) {
     const labels = values.map(id => config.find(i => i.id === id)?.label || '').filter(Boolean);
     const record = { date: localDate(), at: new Date().toISOString(), values, labels, done: true };
     write(record);
+    markSeen();
     try { window.dispatchEvent(new CustomEvent('moodCheckin', { detail: record })); } catch { /* olay desteklenmiyor */ }
-    syncChip(record);
-    showChip();
+    root.classList.add('hidden');
+    hideAll();
   });
 
   laterBtn?.addEventListener('click', () => {
     write({ date: localDate(), dismissed: true });
-    syncChip(null);
-    showChip();
+    markSeen();
+    root.classList.add('hidden');
+    hideAll();
   });
 
   resetBtn?.addEventListener('click', () => {
@@ -215,12 +217,22 @@ if (root) {
     renderEditor();
   });
 
-   closeBtn?.addEventListener('click', showChip);
+  closeBtn?.addEventListener('click', () => {
+    write({ date: localDate(), dismissed: true });
+    markSeen();
+    root.classList.add('hidden');
+    hideAll();
+  });
   chip?.addEventListener('click', showCard);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
       if (editor && !editor.classList.contains('hidden')) closeEditor();
-      else if (!card.classList.contains('hidden')) showChip();
+      else if (!card.classList.contains('hidden')) {
+        write({ date: localDate(), dismissed: true });
+        markSeen();
+        root.classList.add('hidden');
+        hideAll();
+      }
     }
   });
 

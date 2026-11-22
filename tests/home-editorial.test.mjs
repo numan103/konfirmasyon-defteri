@@ -6,10 +6,11 @@ const api = fs.readFileSync(new URL('../api/edu-shared.mjs', import.meta.url), '
 
 test('removed home promotions and old channel previews are absent from markup', () => {
   const home = html.slice(html.indexOf('id="page-home"'), html.indexOf('id="page-trading"'));
-  for (const text of ['Borsanı bağla, tüm avantajları aç', 'Kart yok · Aidat yok', 'Öne çıkan ders: Risk Yönetimi', 'İşlem Kanalı — Son Güncellemeler', 'id="hc2-list"']) assert.ok(!home.includes(text), text);
-  const basic = home.slice(home.indexOf('id="home-sec-basic"'), home.indexOf('id="home-sec-admin"'));
-  assert.equal((basic.match(/class="home-card"/g) || []).length, 6);
-  assert.ok(basic.includes('home-tools-path'));
+  for (const text of ['Borsanı başla, tüm avantajları aç', 'Kart yok · Aidat yok', 'Öne çıkan ders: Risk Yönetimi', 'İşlem Kanalı — Son Güncellemeler', 'id="hc2-list"', 'home-sec-premium', 'home-sec-basic', 'home-finder', 'home-quick', 'id="home-find"']) {
+    assert.ok(!home.includes(text), text);
+  }
+  assert.ok(home.includes('id="home-edu-section"'));
+  assert.ok(home.includes('id="daily-tasks-panel"'));
 });
 
 test('new cover and journal illustration are local assets; reader filters never overwrite raw editor history', () => {

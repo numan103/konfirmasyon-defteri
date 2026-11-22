@@ -210,7 +210,7 @@ test('oturum yoksa özellik bildirimi isteği atılmaz', async () => {
 
 test('tüm rozet ve köşe etiketleri kayıt defterindeki bir kimliğe bağlı', () => {
   const tags = [...html.matchAll(/data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(tags.length, 19);
+  assert.equal(tags.length, 16);
   for (const id of tags) {
     const clean = id.includes('c.page') ? 'review' : id;
     assert.ok(registry.findFeature(clean), 'kimlik kayıtlı olmalı: ' + id);

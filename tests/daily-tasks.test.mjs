@@ -58,18 +58,18 @@ test('görev tamamlama XP, rozet ve günlük bonus verir', () => {
   assert.equal(api.state().xp, 20);
   assert.equal(api.state().done.calendar > 0, true);
   assert.ok(api.state().badges.includes('first'));
-  ['checkin', 'risk', 'note', 'portfolio', 'dergi'].forEach(id => api.toggle(id));
-  assert.equal(api.state().xp, 190, '140 görev XP + 50 tamamlama bonusu');
+  ['checkin', 'note', 'lesson', 'dergi'].forEach(id => api.toggle(id));
+  assert.equal(api.state().xp, 175, '125 görev XP + 50 tamamlama bonusu');
   assert.ok(api.state().badges.includes('all'));
   api.toggle('calendar');
   assert.equal(api.state().done.calendar, undefined);
-  assert.equal(api.state().xp, 120, 'bonus geri alınır, yanlış XP birikmez');
+  assert.equal(api.state().xp, 105, 'bonus geri alınır, yanlış XP birikmez');
 });
 
 test('gün değişince görevler sıfırlanır, seri korunur', () => {
   const store = new Map([
     ['alfa_daily_tasks_u2', JSON.stringify({ day: shift(-1), lastDay: shift(-1), streak: 2,
-      done: { calendar: 1, risk: 1 }, custom: [], xp: 40, bonus: shift(-1), badges: [], reminder: false })]
+      done: { calendar: 1, note: 1 }, custom: [], xp: 45, bonus: shift(-1), badges: [], reminder: false })]
   ]);
   const { api } = boot('u2', store);
   const s = api.state();
@@ -77,11 +77,11 @@ test('gün değişince görevler sıfırlanır, seri korunur', () => {
   assert.deepEqual(s.done, {});
   assert.equal(s.streak, 3);
   assert.equal(s.bonus, '');
-  assert.equal(s.xp, 40, 'toplam XP kalıcı');
+  assert.equal(s.xp, 45, 'toplam XP kalıcı');
   assert.equal(s.badges.includes('streak3'), true);
 });
 
-test('üye verileri birbirinden ayrı, hatırlatıcı opt-in', () => {
+test('üye verileri birbirinden ayrılır, hatırlatıcı opt-in', () => {
   const store = new Map();
   const a = boot('u3', store).api;
   const b = boot('u4', store).api;

@@ -56,6 +56,48 @@ function saveGuestMark(key, on) {
   writeLegacy(all);
 }
 
+function dailyStoreId() {
+  if (state.mode === 'user' && state.userId) return 'u:' + state.userId;
+  return 'g:' + guestBucketId();
+}
+function dailyDayKey(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+function readDaily() {
+  try {
+    const raw = localStorage.getItem('alfa-edu-daily-v1:' + dailyStoreId());
+    const obj = raw ? JSON.parse(raw) : {};
+    return obj && typeof obj === 'object' ? obj : {};
+  } catch { return {}; }
+}
+function writeDaily(obj) {
+  try { localStorage.setItem('alfa-edu-daily-v1:' + dailyStoreId(), JSON.stringify(obj)); } catch {}
+}
+function recordDailyDone() {
+  const day = dailyDayKey();
+  const obj = readDaily();
+  obj[day] = (Number(obj[day]) || 0) + 1;
+  // keep last 120 days
+  const keys = Object.keys(obj).sort();
+  while (keys.length > 120) { delete obj[keys.shift()]; }
+  writeDaily(obj);
+}
+export function dailyStats(today = new Date()) {
+  const obj = readDaily();
+  const day = dailyDayKey(today);
+  const todayCount = Number(obj[day]) || 0;
+  let streak = 0;
+  const cur = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  // count streak including today if done, else allow continuing streak from yesterday
+  const hasToday = (Number(obj[dailyDayKey(cur)]) || 0) > 0;
+  if (!hasToday) cur.setDate(cur.getDate() - 1);
+  while ((Number(obj[dailyDayKey(cur)]) || 0) > 0) { streak++; cur.setDate(cur.getDate() - 1); if (streak > 365) break; }
+  return { todayCount, goal: 1, goalDone: todayCount >= 1, streak, hasToday };
+}
+
 async function api(path, opts) {
   const fn = typeof window !== 'undefined' && typeof window.siteFetch === 'function' ? window.siteFetch : fetch;
   return fn(path, opts);
@@ -209,14 +251,16 @@ function set(key, on) {
   if (!key) return;
   const want = !!on;
   if (state.mode !== 'user') {
-    if (want) state.marks[key] = 1; else delete state.marks[key];
+    const prev = !!state.marks[key];
+    if (prev === want) return;
+    if (want) { state.marks[key] = 1; recordDailyDone(); } else delete state.marks[key];
     saveGuestMark(key, want);
     emit();
     return;
   }
   const prev = !!state.marks[key];
   if (prev === want) return;
-  if (want) state.marks[key] = 1; else delete state.marks[key];
+  if (want) { state.marks[key] = 1; recordDailyDone(); } else delete state.marks[key];
   state.dirty.set(key, { k: key, d: want ? 1 : 0, t: Date.now(), src: 'user' });
   emit();
   scheduleFlush();
@@ -240,7 +284,7 @@ async function issueCertificate(course) {
 function eligibleCourses() { return (state.certificates || []).filter(c => c.eligible); }
 function certificates() { return (state.certificates || []).slice(); }
 
-const apiObj = { boot, snapshot, get, set, issueCertificate, eligibleCourses, certificates, canonicalKey, courseKey, maybeMigrate, flush, _state: () => state };
+const apiObj = { boot, snapshot, get, set, issueCertificate, eligibleCourses, certificates, canonicalKey, courseKey, maybeMigrate, flush, dailyStats, _state: () => state };
 if (typeof window !== 'undefined') {
   window.EduProgress = apiObj;
   // Guest boot by default; auth flow will re-boot with user id.

@@ -5,12 +5,11 @@ const XP_PER_LEVEL = 150;
 const ALL_DONE_BONUS = 50;
 
 const BASE_TASKS = [
-  { id: 'calendar', icon: '📅', label: 'Piyasa takvimini kontrol et', meta: 'Bugün piyasayı ne etkiliyor?', time: '08:30', xp: 20, href: '?page=calendar' },
-  { id: 'checkin', icon: '☀️', label: 'Sabah check-in yap', meta: 'Bugün nasıl hissediyorsun?', time: '09:00', xp: 25, href: '#morning-checkin' },
-  { id: 'risk', icon: '🧮', label: 'Riskini hesapla', meta: 'İşlemden önce stop ve boyut', time: '10:00', xp: 20, href: '?page=calc' },
-  { id: 'note', icon: '✍️', label: 'Günün notunu oku', meta: 'Alfa Edu’dan bir yazı', time: '12:30', xp: 25, href: '?page=egitim' },
-  { id: 'portfolio', icon: '💼', label: 'Portföyünü güncelle', meta: 'Açık pozisyonları gözden geçir', time: '18:00', xp: 30, href: '?page=portfoy&portfoyTab=mine' },
-  { id: 'dergi', icon: '🗞️', label: 'Alfa Dergi’ye göz at', meta: 'Haftanın piyasa özeti', time: '20:30', xp: 20, href: '?page=news' }
+  { id: 'calendar', icon: '📅', label: 'Piyasa takvimini kontrol et', meta: 'Bugün önemli veri ve haber var mı?', time: '08:30', xp: 20, href: '?page=calendar' },
+  { id: 'checkin', icon: '☀️', label: 'Sabah check-in yap', meta: 'Zihnini ve odağını 1 dakikada ayarla', time: '09:00', xp: 25, href: '#morning-checkin' },
+  { id: 'note', icon: '✍️', label: 'Günün notunu oku', meta: 'Alfa Edu’dan günün kısa dersini al', time: '12:30', xp: 25, href: '?page=egitim' },
+  { id: 'lesson', icon: '🎓', label: '1 ders tamamla', meta: 'Alfa Edu’da bir dersi bitirip ilerlemeni kaydet', time: '18:00', xp: 35, href: '?page=egitim' },
+  { id: 'dergi', icon: '🗞️', label: 'Alfa Dergi’yi incele', meta: 'Haftanın piyasa özeti ve önemli başlıklar', time: '20:30', xp: 20, href: '?page=news' }
 ];
 const BADGES = [
   { id: 'first', icon: '🌱', title: 'İlk Adım' },
@@ -60,7 +59,7 @@ function load() {
 function save() { try { localStorage.setItem(key(), JSON.stringify(data)); } catch (e) {} }
 function newId() { return 'dt_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
 function tasks() {
-  return BASE_TASKS.concat(data.custom.map(c => ({ id: c.id, icon: '📌', label: c.label, meta: 'Kendi görevin' + (c.time ? ' · ' + c.time : ''), time: c.time, xp: c.xp, href: '', custom: true })));
+  return BASE_TASKS.concat(data.custom.map(c => ({ id: c.id, icon: '📝', label: c.label, meta: 'Kendi görevin' + (c.time ? ' · ' + c.time : ''), time: c.time, xp: c.xp, href: '', custom: true })));
 }
 
 let data = load();
@@ -101,7 +100,7 @@ function toggleTask(id) {
     if (all && data.bonus !== data.day) {
       data.xp += ALL_DONE_BONUS; data.bonus = data.day;
       toast('🎉 Bugünün tüm görevleri tamam! +' + ALL_DONE_BONUS + ' bonus XP');
-    } else if (!all) toast('+' + task.xp + ' XP · güzel gidiyorsun kanka!');
+    } else if (!all) toast('+' + task.xp + ' XP · güzel gidiyorsun!');
   }
   syncRewards(); save(); render();
 }
@@ -132,7 +131,7 @@ function render() {
       else link.addEventListener('click', e => {
         e.preventDefault(); const target = $(task.href.slice(1));
         if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.querySelector('button')?.focus(); }
-        else toast('Check-in bugün zaten göründü, birazdan tekrar dene.');
+        else toast('Check-in bugün zaten tamamlandı veya daha sonra görünecek.');
       });
       row.appendChild(link);
     } else if (task.custom) {
@@ -176,7 +175,7 @@ async function toggleReminder() {
   save(); render();
   toast(data.reminder
     ? '🔔 Hatırlatıcı açık — görev saatlerinde haber vereceğim.'
-    : 'Hatırlatıcı kapatıldı. Görevler yine burada duruyor.');
+    : 'Hatırlatıcı kapatıldı. Görevler burada duruyor.');
   if (data.reminder) remindNow(true);
 }
 
@@ -230,7 +229,7 @@ function bind() {
   }, 30000);
 }
 
-syncRewards(); // gün başladığında/seri değiştiğinde rozetler yansısın
+syncRewards();
 bind();
 render();
 window.AlfaDailyTasks = {

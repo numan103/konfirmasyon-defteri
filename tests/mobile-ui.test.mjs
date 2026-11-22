@@ -19,8 +19,6 @@ test('free members see the shared summary without premium-only detail cards', ()
   assert.ok(html.includes('id="home-teaser"'));
   assert.ok(html.includes('Açık pozisyonlar, emirler ve işlem detayları için'));
   assert.ok(!html.includes('Tüm portföy, açık pozisyonlar ve detaylar için'));
-  assert.ok(html.includes('<a href="?page=butce" class="home-card" data-nav data-ref-only>'));
-  assert.ok(html.includes('<a href="?page=butce" data-nav data-ref-only>💰 Gelir/Gider</a>'));
   const gate = html.slice(html.indexOf('function ap2ShowGate()'), html.indexOf('function ap2RenderPublicTeaser()'));
   assert.ok(gate.includes("target.classList.add('ap2-summary-only')"));
   assert.ok(gate.includes('premium erişimini aç'));

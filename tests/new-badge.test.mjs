@@ -16,7 +16,7 @@ test('YENİ rozeti marka adında değil, yeni özellik girişlerinde gösterilir
   assert.ok(!mobileHead.includes('new-badge'), 'mobil menü başlığında marka yanında rozet olmamalı');
 });
 
-test('üç yeni özellik bağlantısı masaüstü, mobil ve hızlı erişimde rozet taşır', () => {
+test('üç yeni özellik bağlantısı masaüstü ve mobilde rozet taşır', () => {
   for (const id of ['tab-defter', 'tab-review', 'tab-pano']) {
     const link = new RegExp('<a [^>]*id="' + id + '"[^>]*>[\\s\\S]*?</a>').exec(html);
     assert.ok(link, id + ' bağlantısı bulunmalı');
@@ -29,8 +29,6 @@ test('üç yeni özellik bağlantısı masaüstü, mobil ve hızlı erişimde ro
     assert.match(link[0], /<span data-i18n="[^"]+">/, id + ' etiketi çevrilebilir span içinde olmalı');
     assert.match(link[0], /class="new-badge"[^>]*>YENİ<\/i>/, id + ' rozet taşımalı');
   }
-  const quick = html.slice(html.indexOf('<div class="home-quick"'), html.indexOf('</div>', html.indexOf('<div class="home-quick"')));
-  assert.equal((quick.match(/class="new-badge"/g) || []).length, 3, 'hızlı erişimde üç rozet olmalı');
 });
 
 test('yeni özellik sayfa başlıkları ve ek kartları rozet taşır', () => {
@@ -44,7 +42,7 @@ test('yeni özellik sayfa başlıkları ve ek kartları rozet taşır', () => {
 
 test('her YENİ rozeti özellik kayıt defterindeki bir kimliğe bağlı', () => {
   const tags = [...html.matchAll(/<i class="new-badge" data-new-feature="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(tags.length, 15);
+  assert.equal(tags.length, 12);
   assert.deepEqual([...new Set(tags)], ['defter', 'review', 'pano', 'portfoy-clone', "' + c.page + '"]);
   assert.ok(html.includes('/assets/site-features.mjs'), '1 haftalık ömür kayıt defteri yüklenmeli');
   const corners = [...html.matchAll(/<span class="new-corner[^"]*" data-new-feature="([^"]+)"/g)].map(m => m[1]);

@@ -11,14 +11,17 @@ export function learningRewards(courses) {
   }
   const done = completed.size, finished = completedCourses.size, xp = done * 25 + finished * 100;
   const level = Math.floor(xp / 250) + 1;
+  const daily = (typeof window !== 'undefined' && window.EduProgress && typeof window.EduProgress.dailyStats === 'function') ? window.EduProgress.dailyStats() : { todayCount: 0, goal: 1, goalDone: false, streak: 0 };
   const badges = [
     { id: 'first', icon: '🌱', title: 'İlk Adım', target: 1, value: done, unit: 'ders' },
     { id: 'five', icon: '📚', title: 'Öğrenme Ritmi', target: 5, value: done, unit: 'ders' },
     { id: 'ten', icon: '🎯', title: 'Kararlı Öğrenci', target: 10, value: done, unit: 'ders' },
     { id: 'course', icon: '🏅', title: 'Bölüm Ustası', target: 1, value: finished, unit: 'tam bölüm' },
     { id: 'three', icon: '🏆', title: 'Bilgi Yolcusu', target: 3, value: finished, unit: 'tam bölüm' },
+    { id: 'streak3', icon: '⚡', title: '3 Gün Seri', target: 3, value: daily.streak || 0, unit: 'gün' },
+    { id: 'streak7', icon: '🌟', title: '7 Gün Seri', target: 7, value: daily.streak || 0, unit: 'gün' },
   ].map(b => ({ ...b, earned: b.value >= b.target }));
-  return { done, total: accessible.size, finished, xp, level, levelXP: xp % 250, nextLevelXP: 250 - xp % 250, badges };
+  return { done, total: accessible.size, finished, xp, level, levelXP: xp % 250, nextLevelXP: 250 - xp % 250, badges, daily };
 }
 function draw(root, context) {
   if (!root) return;
@@ -38,6 +41,10 @@ function draw(root, context) {
   root.append(stats);
   const bar = document.createElement('progress'); bar.max = 250; bar.value = reward.levelXP; bar.setAttribute('aria-label', 'Bir sonraki seviyeye ilerleme');
   root.append(bar, node('p', 'Bir sonraki seviyeye ' + reward.nextLevelXP + ' XP kaldı. Her tamamlanan içerik +25 XP, eksiksiz bölüm +100 XP.', 'hint'));
+  const daily = reward.daily || { todayCount: 0, goal: 1, goalDone: false, streak: 0 };
+  const dailyBox = node('div', null, 'elr-daily');
+  dailyBox.append(node('b', daily.goalDone ? 'Günlük görev tamamlandı' : 'Günlük görev: 1 ders izle'), node('span', 'Bugün ' + (daily.todayCount || 0) + ' ders · ' + (daily.streak || 0) + ' gün seri'));
+  root.append(dailyBox);
   const badges = node('div', null, 'elr-badges');
   for (const badge of reward.badges) {
     const box = node('div', null, 'elr-badge' + (badge.earned ? ' earned' : ''));

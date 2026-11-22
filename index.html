@@ -307,7 +307,6 @@
   .nav-drop .drop-menu .nav-link.has-new { display: flex; align-items: center; gap: 6px; }
   .nav-link.has-new .new-badge, .mnav-link .new-badge { margin-left: 0; }
   .eg-brand .new-badge { margin-left: -6px; }
-  .home-quick .new-badge { margin-left: 0; }
   a.nav-link { text-decoration: none; color: var(--text-2); }
   .logo-mark { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(140deg, #7b78f5, #4f45d8 70%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(79,69,216,0.28); overflow: hidden; }
   .logo-mark svg { width: 62%; height: 62%; display: block; }
@@ -563,17 +562,11 @@
   .hg-dot { width:20px; height:20px; flex:none; border-radius:50%; display:grid; place-items:center; font-size:10px; font-weight:800; background:var(--card); border:1px solid var(--border); color:var(--text-3); }
   .hg-step.done .hg-dot { background:var(--green); border-color:var(--green); color:#fff; }
   .hg-step.done { color:var(--text); }
-  .home-finder { max-width:980px; margin:0 auto 10px; display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:var(--card); }
-  .home-finder svg { flex:none; color:var(--text-3); }
-  .home-finder input { flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--text); font:600 12.5px 'Inter',sans-serif; }
-  .home-finder kbd { font:700 9.5px 'Inter',sans-serif; color:var(--text-3); border:1px solid var(--border); border-radius:5px; padding:2px 5px; white-space:nowrap; }
-  .home-empty { max-width:980px; margin:0 auto 18px; padding:14px; text-align:center; color:var(--text-3); font-size:12px; border:1px dashed var(--border); border-radius:12px; }
   .home-top { position:fixed; right:18px; bottom:18px; z-index:60; width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--card); color:var(--text-2); box-shadow:var(--shadow); cursor:pointer; font-size:16px; display:none; }
   .home-top.on { display:block; }
   .home-mag-reader.collapsed .hmr-book { display:none; }
   .hmr-collapse { border:1px solid var(--border); background:var(--bg2); color:var(--text-2); border-radius:999px; padding:7px 11px; font:700 11px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
   .hmr-collapse:hover { border-color:var(--pc); color:var(--pc); }
-  .home-section-title { max-width: 980px; margin: 0 auto 12px; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
   .home-section { max-width: 980px; margin: 0 auto 22px; }
   .home-section-head { font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   .home-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 12px; margin-bottom: 32px; }
@@ -631,9 +624,6 @@
   .hd-empty { padding: 14px; text-align: center; color: var(--text-3); font-size: 12px; }
   .hd-skel { height: 64px; border-radius: 12px; background: linear-gradient(90deg, var(--bg2), var(--card), var(--bg2)); background-size: 200% 100%; animation: hdShine 1.2s infinite linear; }
   @keyframes hdShine { to { background-position: -200% 0; } }
-  .home-quick { display: flex; flex-wrap: wrap; gap: 8px; max-width: 980px; margin: 0 auto 22px; }
-  .home-quick a { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-2); text-decoration: none; transition: all .12s; }
-  .home-quick a:hover { border-color: var(--pc); color: var(--pc); }
   .home-channel { max-width: 980px; margin: 0 auto 18px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
   .hc2-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
   .hc2-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
@@ -6458,7 +6448,7 @@
           </div>
         </div>
         <div class="dt-progress">
-          <span id="dt-count">0 / 6 tamamlandı</span>
+          <span id="dt-count">0 / 5 tamamlandı</span>
           <div class="dt-progress-track"><i id="dt-progress-fill"></i></div>
           <span id="dt-streak">🔥 0 gün</span>
         </div>
@@ -6505,24 +6495,6 @@
           </div>
         </div>
       </div>
-      <div class="home-finder">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input type="search" id="home-find" data-i18n-ph="home.find.ph" placeholder="Araç, sayfa veya konu ara…" aria-label="Ana sayfada ara" autocomplete="off">
-        <kbd>/</kbd>
-      </div>
-      <div class="home-section-title">Hızlı erişim</div>
-      <div class="home-quick" id="home-quick">
-        <a href="?page=calc" data-nav>🧮 Calculator</a>
-        <a href="?page=calendar" data-nav>📅 Takvim</a>
-        <a href="?page=defter" data-nav data-ref-only>✅ Check List <i class="new-badge" data-new-feature="defter" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-        <a href="?page=review" data-nav data-ref-only>📊 Haftalık Değerlendirme <i class="new-badge" data-new-feature="review" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-        <a href="?page=pano" data-nav data-ref-only>🛠️ Çalışma Panosu <i class="new-badge" data-new-feature="pano" data-i18n="ui.new" data-i18n-title="ui.newTitle" title="Yeni: Kişisel Çalışma Panosu ve Haftalık Değerlendirme premium üyelere açıldı">YENİ</i></a>
-        <a href="?page=butce" data-nav data-ref-only>💰 Gelir/Gider</a>
-        <a href="?page=onchain" data-nav data-ref-only>⛓️ Onchain</a>
-        <a href="?page=egitim" data-nav data-ref-only>🎓 Alfa Edu</a>
-        <a href="?page=portfoy" data-nav>💼 Portföy</a>
-      </div>
-      <div class="home-empty" id="home-find-empty" hidden data-i18n="home.find.empty">Eşleşen araç bulunamadı. Farklı bir kelime dene.</div>
        <div id="home-results-slot">
         <div class="panel" id="home-results-panel" style="margin:0 0 12px;">
           <h2><span>Sonuçlar</span><span class="n" id="home-results-count">—</span></h2>
@@ -6547,54 +6519,6 @@
       <div class="home-edu-empty">Eğitimler yükleniyor…</div>
     </div>
     <div class="home-edu-list" id="home-edu-list"></div>
-  </div>
-</div>
-<div class="home-section" id="home-sec-premium">
-  <div class="home-section-head">Premium Araçlar</div>
-  <div class="home-grid">
-        <a href="?page=portfoy" class="home-card" data-nav data-ref-only>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvPf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".14"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvPf)"/><rect x="40" y="30" width="60" height="56" rx="8" fill="var(--pc)" opacity=".2"/><rect x="110" y="44" width="60" height="42" rx="8" fill="var(--pc)" opacity=".35"/><rect x="180" y="20" width="60" height="66" rx="8" fill="var(--pc)" opacity=".5"/><rect x="250" y="50" width="20" height="36" rx="4" fill="var(--green)" opacity=".7"/></svg></div>
-          <div class="hc-body"><h2>💼 Portföy Yönetimi</h2><p>Pozisyonlarını takip et, ay ay birikim planı kur, performansını gör.</p></div>
-        </a>
-        <a href="?page=alfatrading" class="home-card" data-nav data-ref-only>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvAt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvAt)"/><rect x="30" y="30" width="100" height="56" rx="8" fill="var(--pc)" opacity=".18"/><rect x="40" y="40" width="80" height="8" rx="4" fill="var(--pc)" opacity=".5"/><rect x="40" y="56" width="60" height="8" rx="4" fill="var(--border)"/><rect x="150" y="20" width="120" height="76" rx="8" fill="var(--card)" stroke="var(--border)"/><rect x="160" y="30" width="100" height="8" rx="4" fill="var(--pc)" opacity=".4"/><rect x="160" y="46" width="80" height="8" rx="4" fill="var(--border)"/><rect x="160" y="62" width="90" height="8" rx="4" fill="var(--border)"/></svg></div>
-          <div class="hc-body"><h2>📡 İşlem Kanalı</h2><p>Canlı işlem paylaşımları, giriş/çıkış ve gerekçe.</p></div>
-        </a>
-        <a href="?page=butce" class="home-card" data-nav data-ref-only>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".13"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvB)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-dasharray="126 170" transform="rotate(-90 105 54)"/><circle cx="105" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-dasharray="44 170" transform="rotate(60 105 54)" opacity=".85"/><text x="105" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">60%</text><text x="105" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">ELİMDE</text><circle cx="195" cy="54" r="27" fill="none" stroke="var(--border)" stroke-width="11"/><circle cx="195" cy="54" r="27" fill="none" stroke="var(--pc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="152 170" transform="rotate(-90 195 54)"/><circle cx="195" cy="54" r="27" fill="none" stroke="#f5a623" stroke-width="11" stroke-dasharray="64 170" transform="rotate(-20 195 54)"/><text x="195" y="51" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text)">35%</text><text x="195" y="63" text-anchor="middle" font-size="6" font-weight="700" fill="var(--text-3)">AYLIK</text></svg></div>
-          <div class="hc-body"><h2>💼 Gelir/Gider · Portföy &amp; Plan</h2><p>Araçlarınla portföyünü takip et, ay ay birikim planı kur, hedefleri gör.</p></div>
-        </a>
-        <a href="?page=egitim" class="home-card" data-nav data-ref-only>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv4)"/><rect x="30" y="26" width="112" height="64" rx="10" fill="var(--pc)" opacity=".16"/><circle cx="86" cy="58" r="19" fill="var(--pc)"/><path d="M80 49 l13 9 -13 9 z" fill="#fff"/><rect x="162" y="38" width="98" height="10" rx="5" fill="var(--pc)" opacity=".55"/><rect x="162" y="56" width="78" height="10" rx="5" fill="var(--border)"/><rect x="162" y="74" width="90" height="10" rx="5" fill="var(--border)"/></svg></div>
-          <div class="hc-body"><h2>🎓 Alfa Edu</h2><p>Teknikten psikolojiye, bölüm → konu → video eğitim.</p></div>
-        </a>
-        <a href="?page=onchain" class="home-card" data-nav data-ref-only>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".12"/><stop offset="1" stop-color="var(--green)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv6)"/><line x1="20" y1="58" x2="280" y2="58" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="3 3"/><rect x="40" y="34" width="15" height="24" rx="2" fill="var(--green)"/><rect x="66" y="58" width="15" height="16" rx="2" fill="#f2555a"/><rect x="92" y="42" width="15" height="16" rx="2" fill="var(--green)"/><rect x="118" y="58" width="15" height="22" rx="2" fill="#f2555a"/><rect x="144" y="28" width="15" height="30" rx="2" fill="var(--green)"/><rect x="170" y="58" width="15" height="12" rx="2" fill="#f2555a"/><rect x="196" y="38" width="15" height="20" rx="2" fill="var(--green)"/><rect x="222" y="58" width="15" height="18" rx="2" fill="#f2555a"/><rect x="248" y="30" width="15" height="28" rx="2" fill="var(--green)"/></svg></div>
-          <div class="hc-body"><h2>⛓️ Onchain Verileri</h2><p>Coinglass funding, CVD ve open interest tek ekranda.</p></div>
-        </a>
-  </div>
-</div>
-<div class="home-section" id="home-sec-basic">
-  <div class="home-section-head">Temel Araçlar</div>
-  <p class="home-tools-intro">Daha çok işlem değil, daha net bir süreç. Önce riskini hesapla, takvimini kontrol et, sonra öğrenmeye devam et.</p>
-  <div class="home-grid">
-    <a href="?page=calc" class="home-card" data-nav><div class="hc-body"><span class="daily-kicker">01 · İşlemden önce</span><h2>🧮 Risk Hesaplayıcı</h2><p>Giriş ve stop seviyene göre pozisyon büyüklüğünü hesapla. Riskini işleme girmeden bil.</p><strong>Riskimi hesapla →</strong></div></a>
-    <a href="?page=egitim" class="home-card" data-nav><div class="hc-body"><span class="daily-kicker">02 · Her gün bir adım</span><h2>✍️ Alfa Edu &amp; Günlük Notlar</h2><p>Herkese açık günlük yazıları oku; sana açık derslerle bilgi ve disiplinini geliştir.</p><strong>Öğrenmeye devam et →</strong></div></a>
-    <a href="?page=news" class="home-card" data-nav><div class="hc-body"><span class="daily-kicker">03 · Haftanın resmi</span><h2>🗞️ Alfa Dergi</h2><p>Bu hafta dergi kanalında paylaşılan piyasa bilgilerini ve görsellerini tek yerde oku.</p><strong>Haftayı incele →</strong></div></a>
-    <a href="?page=eduplans" class="home-card" data-nav><div class="hc-body"><span class="daily-kicker">04 · Kendi yolunu seç</span><h2>🎓 Eğitim Rehberi</h2><p>Eğitim paketlerini karşılaştır, ihtiyaçlarına uygun öğrenme yolunu keşfet.</p><strong>Eğitimleri keşfet →</strong></div></a>
-        <a href="?page=calendar" class="home-card" data-nav>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hv8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".10"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hv8)"/><rect x="96" y="24" width="108" height="72" rx="9" fill="var(--card)" stroke="var(--border)"/><rect x="96" y="24" width="108" height="18" rx="9" fill="var(--pc)" opacity=".8"/><g fill="var(--border)"><rect x="106" y="50" width="14" height="10" rx="2"/><rect x="126" y="50" width="14" height="10" rx="2"/><rect x="146" y="50" width="14" height="10" rx="2"/><rect x="166" y="50" width="14" height="10" rx="2"/><rect x="106" y="66" width="14" height="10" rx="2"/><rect x="146" y="66" width="14" height="10" rx="2"/><rect x="166" y="66" width="14" height="10" rx="2"/></g><rect x="126" y="66" width="14" height="10" rx="2" fill="#f5a623"/><path d="M150 80 l2 4 5 .6 -3.5 3.4 .8 5 -4.3 -2.3 -4.3 2.3 .8 -5 -3.5 -3.4 5 -.6 z" fill="#f5a623"/></svg></div>
-          <div class="hc-body"><h2>📅 Ekonomik Takvim</h2><p>3 yıldızlı yüksek etkili makro haberleri kaçırma.</p></div>
-        </a>
-        <a href="?page=influencer" class="home-card" data-nav>
-          <div class="hc-visual"><svg viewBox="0 0 300 116" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hvInf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pc)" stop-opacity=".12"/><stop offset="1" stop-color="var(--pc)" stop-opacity=".02"/></linearGradient></defs><rect width="300" height="116" fill="url(#hvInf)"/><circle cx="150" cy="54" r="26" fill="var(--card)" stroke="var(--pc)" stroke-width="2"/><path d="M139 58l11-11 11 11-11 11z" fill="none" stroke="var(--pc)" stroke-width="2.4" stroke-linejoin="round"/><circle cx="150" cy="58" r="3.4" fill="var(--pc)"/><path d="M82 92h136" stroke="var(--pc)" stroke-width="2" stroke-linecap="round" opacity=".55"/><circle cx="104" cy="47" r="3" fill="var(--pc)" opacity=".7"/><circle cx="196" cy="47" r="3" fill="var(--pc)" opacity=".7"/></svg></div>
-          <div class="hc-body"><h2 data-i18n="app.influencer">🚀 Alfa Influencer</h2><p data-i18n="pg.influencer.hc">Hesap büyümesi, güçlü tweetler, networking ve topluluk.</p></div>
-        </a>
-  </div>
-  <div class="home-tools-path" aria-label="Günlük çalışma rotası">
-    <a href="?page=calendar" data-nav><span class="daily-kicker">Hazırlan</span><b>Bugün piyasayı ne etkiliyor?</b><small>Takvimle başla; önemli veri saatlerini işlem planına dahil et. →</small></a>
-    <a href="?page=calc" data-nav><span class="daily-kicker">Planla</span><b>Ne kadar risk alıyorsun?</b><small>Olası kaybını önceden hesapla; kararını sayıların üzerine kur. →</small></a>
-    <a href="?page=egitim" data-nav><span class="daily-kicker">Geliş</span><b>Bugün tek bir şey öğren.</b><small>Bir günlük not veya bir ders: küçük ama düzenli adımlar at. →</small></a>
   </div>
 </div>
 <div class="home-section" id="home-sec-admin" style="display:none">
@@ -15119,7 +15043,7 @@ function applyTierUi() {
   const premiumBand = document.querySelector('.home-premium');
   if (premiumBand) premiumBand.style.display = (ref || isAdmin) ? 'none' : '';
   // Ana sayfa modul kartlari ve kilitli kisayollar: ref olmayan kullaniciya gizle
-  document.querySelectorAll('#page-home .home-card[data-ref-only], #home-quick [data-ref-only], #home-channel [data-ref-only]').forEach(function (a) { a.style.display = ref ? '' : 'none'; });
+  document.querySelectorAll('#page-home .home-card[data-ref-only], #home-channel [data-ref-only]').forEach(function (a) { a.style.display = ref ? '' : 'none'; });
   // Tamami gizlenen acilir menuleri kapat
   document.querySelectorAll('.nav-drop').forEach(function (d) {
     const links = d.querySelectorAll('.drop-menu .nav-link');
@@ -15155,8 +15079,6 @@ function applyTierUi() {
     else if (ref) homeStatus.innerHTML = '<span class="hs-badge premium">Premium</span><button class="hs-link" type="button" onclick="showPage(\'portfoy\')">Portföyü aç →</button>';
     else homeStatus.innerHTML = '<span class="hs-badge free">Ücretsiz</span><button class="hs-link" type="button" onclick="showPage(\'erisim\')">Premium\'a geç →</button>';
   }
-  const secPremium = document.getElementById('home-sec-premium');
-  if (secPremium) secPremium.style.display = (ref || isAdmin) ? '' : 'none';
   const secAdmin = document.getElementById('home-sec-admin');
   if (secAdmin) secAdmin.style.display = isAdmin ? '' : 'none';
   bindAccessForm();
@@ -20615,38 +20537,8 @@ function homeFocusRender() {
     const fill = document.getElementById('hg-fill'); if (fill) fill.style.width = (done / items.length * 100) + '%';
   }
 }
-function homeFinderApply() {
-  const input = document.getElementById('home-find');
-  if (!input) return;
-  const loc = window.LANG === 'en' ? 'en-US' : 'tr-TR';
-  const q = (input.value || '').trim().toLocaleLowerCase(loc);
-  const ref = typeof refUnlocked === 'function' && refUnlocked();
-  let shown = 0;
-  document.querySelectorAll('#home-quick a, .home-grid .home-card').forEach(function (el) {
-    const gated = el.hasAttribute('data-ref-only') && !ref;
-    const text = (el.textContent || '').toLocaleLowerCase(loc);
-    const match = !q || text.indexOf(q) !== -1;
-    el.style.display = (!match || gated) ? 'none' : '';
-    if (match && !gated) shown++;
-  });
-  const empty = document.getElementById('home-find-empty');
-  if (empty) empty.hidden = !q || shown > 0;
-}
 function initHomeExtras() {
   if (!_homeExtrasBound) {
-    const input = document.getElementById('home-find');
-    if (input) {
-      input.addEventListener('input', homeFinderApply);
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { input.value = ''; homeFinderApply(); input.blur(); }
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key !== '/' || document.activeElement === input) return;
-        if (typeof currentPage !== 'undefined' && currentPage !== 'home') return;
-        if (/input|textarea|select/i.test(document.activeElement.tagName)) return;
-        e.preventDefault(); input.focus();
-      });
-    }
     const magBtn = document.getElementById('hmr-collapse');
     const magBox = document.getElementById('home-mag-reader');
     if (magBtn && magBox) magBtn.addEventListener('click', function () {
@@ -20665,7 +20557,6 @@ function initHomeExtras() {
     _homeExtrasBound = true;
   }
   homeFocusRender();
-  homeFinderApply();
   const top = document.getElementById('home-top');
   if (top) top.classList.toggle('on', window.scrollY > 420);
 }
@@ -20677,8 +20568,7 @@ async function renderHomeDash() {
   if (!dash) return;
   const ref = refUnlocked();
   dash.hidden = !ref;
-  document.querySelectorAll('#home-quick [data-ref-only]').forEach(function (a) { a.style.display = ref ? '' : 'none'; });
-  if (!ref) return;
+    if (!ref) return;
   const kpis = document.getElementById('hd-kpis');
   const posBox = document.getElementById('hd-pos-list');
   const sellBox = document.getElementById('hd-sell-list');
@@ -25535,6 +25425,23 @@ async function renderHomeEdu() {
     btn.addEventListener('click', () => { homeEduSelected = chProgKey(continueItem.c.t.id, continueItem.c.sec.id, continueItem.lesson.id, continueItem.video.id); renderHomeEdu(); });
     box.append(left, btn);
     cont.appendChild(box);
+
+    const ds = (window.EduProgress && typeof window.EduProgress.dailyStats === 'function') ? window.EduProgress.dailyStats() : { todayCount: 0, goal: 1, goalDone: false, streak: 0 };
+    const mission = document.createElement('div'); mission.className = 'home-edu-continue';
+    const mLeft = document.createElement('div');
+    const mk = document.createElement('div'); mk.className = 'k'; mk.textContent = premium ? 'Günlük görev · Premium' : 'Günlük görev';
+    const mv = document.createElement('div'); mv.className = 'v';
+    mv.textContent = ds.goalDone ? ('Bugün tamamlandı · ' + ds.todayCount + ' ders') : 'Bugün 1 ders izle';
+    const ms = document.createElement('div'); ms.style.cssText = 'font-size:11px;color:var(--text-3);margin-top:2px;';
+    ms.textContent = 'Seri: ' + (ds.streak || 0) + ' gün' + (premium && !ds.goalDone ? ' · Kısa bir dersle serini koru.' : '');
+    mLeft.append(mk, mv, ms);
+    const mBtn = document.createElement('button'); mBtn.type = 'button';
+    mBtn.textContent = ds.goalDone ? '✓ Tamam' : 'Başla';
+    mBtn.disabled = !!ds.goalDone;
+    mBtn.style.opacity = ds.goalDone ? '.65' : '';
+    mBtn.addEventListener('click', () => { homeEduSelected = chProgKey(daily.c.t.id, daily.c.sec.id, daily.lesson.id, daily.video.id); renderHomeEdu(); });
+    mission.append(mLeft, mBtn);
+    cont.appendChild(mission);
   }
 
   const src = (typeof egEmbedSrc === 'function') ? egEmbedSrc(selected.video) : '';
@@ -26648,7 +26555,7 @@ function chDailyCard(item) {
   else { const visual = document.createElement('img'); visual.src = '/assets/daily-notes-cover.svg?v=1'; visual.alt = 'Günlük notlar için defter illüstrasyonu'; visual.loading = 'lazy'; card.appendChild(visual); }
   const excerpt = document.createElement('p'); excerpt.textContent = item.excerpt;
   const open = document.createElement('button'); open.type = 'button'; open.className = 'btn'; open.textContent = item.pdf ? 'PDF ve notu aç →' : 'Notu aç →'; open.onclick = () => chOpenDailyReader(item.id);
-  card.append(time, title, excerpt, open, chDailySocialBlock(item.id)); return card;
+  card.append(time, title, excerpt, open); return card;
 }
 function chDailyFeature(item) {
   const box = document.createElement('article'); box.className = 'daily-feature-card'; box.dataset.dailyId = item.id;
@@ -26667,21 +26574,33 @@ function chDailyFeature(item) {
   const foot = document.createElement('div'); foot.className = 'daily-feature-foot';
   const open = document.createElement('button'); open.type = 'button'; open.className = 'btn solid'; open.textContent = item.pdf ? 'PDF ve yazıyı aç →' : 'Yazıyı oku →'; open.onclick = () => chOpenDailyReader(item.id);
   const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = item.photoCount ? item.photoCount + ' görsel · herkese açık' : 'Herkese açık';
-  foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body, chDailySocialBlock(item.id)); return box;
+  foot.append(open, hint); body.append(kicker, title, excerpt, foot); box.append(media, body); return box;
 }
+function chDailyUnlocked() { try { return localStorage.getItem('alfa-daily-notes-unlocked') === '1'; } catch { return false; } }
 function chRenderDaily(scope, items, more, hasMore) {
   const list = document.getElementById(scope + '-daily-list'), feature = document.getElementById(scope + '-daily-feature'), status = document.getElementById(scope + '-daily-status');
   if (!list) return;
+  const homeLocked = scope === 'home' && !chDailyUnlocked();
   if (!more) {
     list.replaceChildren(); feature?.replaceChildren();
     if (items.length && feature) feature.appendChild(chDailyFeature(items[0]));
-    items.slice(feature ? 1 : 0).forEach(item => list.appendChild(chDailyCard(item)));
-  } else {
+    if (!homeLocked) items.slice(feature ? 1 : 0).forEach(item => list.appendChild(chDailyCard(item)));
+  } else if (!homeLocked) {
     const existing = new Set(Array.from(list.children, card => card.dataset.dailyId));
     items.forEach(item => { if (!existing.has(item.id)) { existing.add(item.id); list.appendChild(chDailyCard(item)); } });
   }
-  if (status) status.textContent = !list.children.length && !feature?.children.length ? 'Günlük notlar burada görünecek.' : '';
-  if (scope === 'home') document.getElementById('home-daily-more')?.classList.toggle('hidden', !hasMore);
+  if (status) {
+    if (!items.length && !feature?.children.length) status.textContent = 'Günlük notlar burada görünecek.';
+    else if (homeLocked && items.length > 1) status.textContent = 'Bugünün notu hazır. Önceki notları okumak için önce bugünün notunu aç.';
+    else status.textContent = '';
+  }
+  if (scope === 'home') {
+    const moreBtn = document.getElementById('home-daily-more');
+    if (moreBtn) {
+      moreBtn.textContent = homeLocked ? 'Önceki notlar' : 'Önceki notları göster';
+      moreBtn.classList.toggle('hidden', homeLocked ? items.length <= 1 : !hasMore);
+    }
+  }
   if (scope === 'edu') { chEduDailyHasMore = !!hasMore; document.getElementById('edu-daily-more')?.classList.toggle('hidden', !hasMore); }
 }
 async function chFetchDaily(offset, force) {
@@ -26771,6 +26690,7 @@ async function chOpenDailyReader(id) {
     reader.append(head);
     if (window.AlfaArticleSpeech) reader.appendChild(window.AlfaArticleSpeech.controls([item.body, item.tricks].filter(Boolean).join('\n\n'), item.title));
     reader.append(body, chDailySocialBlock(item.id));
+    try { localStorage.setItem('alfa-daily-notes-unlocked','1'); } catch {}
   } catch {
     if (sequence !== chDailyReaderEpoch) return;
     reader.replaceChildren();
@@ -27340,7 +27260,7 @@ async function chDelProf() {
 function bindChannelsPage() {
   const g = id => document.getElementById(id);
   g('home-daily-refresh')?.addEventListener('click', () => chLoadHomeDaily(false, true));
-  g('home-daily-more')?.addEventListener('click', () => chLoadHomeDaily(true));
+  g('home-daily-more')?.addEventListener('click', () => { if (!chDailyUnlocked()) { try { localStorage.setItem('alfa-daily-notes-unlocked','1'); } catch {} chLoadHomeDaily(false, true); } else { chLoadHomeDaily(true); } });
   g('edu-daily-refresh')?.addEventListener('click', () => { chCloseDailyReader(); chLoadEduDaily(false, true); });
   g('edu-daily-more')?.addEventListener('click', () => chLoadEduDaily(true));
   g('edu-rename-btn')?.addEventListener('click', () => chRenameSection(g('edu-rename-section')?.value));
