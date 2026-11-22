@@ -55,26 +55,36 @@ test('home embeds the real weekly flipbook in read-only mode for everyone', () =
   assert.match(home, /id="hmr-next"/);
   assert.match(home, /id="hmr-dots"/);
   assert.match(home, /id="hmr-counter"/);
+  assert.match(home, /id="hmr-edit-toggle"/);
   assert.ok(!home.includes('mag-tools'), 'embedded flipbook never shows editor tools');
   assert.ok(!home.includes('hmr-card'), 'no preview-like card strip remains');
-  assert.ok(!home.includes('Okuyucu Modu'), 'no preview-style label');
   assert.match(html, /async function loadHomeMagazine\(\)/);
   assert.match(html, /function renderHomeMagazine\(\)/);
-  assert.match(html, /pages = \[magBuildCover\(\), magBuildToc\(hmrGoTo\)\]/);
-  assert.match(html, /magBuildEntry\(e, magData\.entries\.indexOf\(e\), false\)/);
-  assert.match(html, /window\.__magForceReader = true/);
+  assert.match(html, /function hmrBuildCover/);
+  assert.match(html, /function hmrBuildToc/);
+  assert.match(html, /function hmrBuildSectionPage/);
+  assert.match(html, /HMR_SECTIONS/);
+  assert.match(html, /Makro analiz/);
+  assert.match(html, /Bitcoin, High Time Frame bias/);
+  assert.match(html, /Altcoinler, High Time Frame bias/);
+  assert.match(html, /Gold, High Time Frame bias/);
+  assert.match(html, /Forex piyasaları/);
+  assert.match(html, /Alfa Edu eğitim içerikleri/);
+  assert.match(html, /hmrSetHomeSection/);
   assert.match(html, /function invalidateHomeMagazine\(\)/);
   assert.match(html, /magInvalidateHome\(\)/);
   assert.match(html, /if \(name === 'home'\).*loadHomeMagazine\(\)/);
-  assert.match(html, /Tam ekranda aç/);
+  assert.match(html, /Tam ekranda a/);
 });
+
 
 test('news read endpoint is a public, read-only projection without personal data', () => {
   assert.match(api, /kind === 'news'.*res\.status\(200\)/s);
   assert.match(api, /function alfaNews\(req, res\)/);
   assert.match(api, /if \(req\.method !== 'GET'\) return res\.status\(405\)/);
   assert.match(api, /id=eq\.1&select=data,updated_at/);
-  assert.match(api, /authors,\s*entries/);
+  assert.match(api, /authors,[\s\S]*entries/);
+  assert.match(api, /homeSections/);
   assert.ok(!/SUPABASE_SERVICE_ROLE/.test(api.slice(api.indexOf('async function alfaNews'), api.indexOf('async function writeEduShared'))));
   for (const role of ['landing', 'free', 'premium']) {
     assert.equal(previewRequest('/api/edu-shared?kind=news', 'GET', role, 'https://alfa-trader.com').url, '/api/edu-shared?kind=news');

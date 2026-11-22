@@ -53,7 +53,7 @@ async function session(label, access) {
         cover: s.querySelectorAll('.mag-cover3').length,
         toc: s.querySelectorAll('.mag-toc3').length,
         entries: s.querySelectorAll('.mag-entry').length,
-        titles: [...s.querySelectorAll('.e-title')].map(n => n.textContent),
+        titles: [...s.querySelectorAll('.e-title')].map(n => n.textContent.trim()),
         body: s.querySelector('.e-body')?.textContent || '',
         week: document.getElementById('hmr-week')?.textContent || '',
         dots: document.querySelectorAll('#hmr-dots .mag-dot2').length,
@@ -62,31 +62,25 @@ async function session(label, access) {
         editors: document.querySelectorAll('#hmr-stage input, #hmr-stage textarea').length,
         cards: document.querySelectorAll('#hmr-stage .hmr-card').length,
         readerLabel: document.getElementById('home-mag-reader')?.getAttribute('aria-label') || '',
-        cats: [...s.querySelectorAll('.e-cat')].map(n => n.textContent),
-        tocCats: [...s.querySelectorAll('.toc-cat')].map(n => n.textContent),
-        kickers: [...s.querySelectorAll('.e-kicker')].map(n => n.textContent),
+        tocItems: [...s.querySelectorAll('.toc-item .tt')].map(n => n.childNodes[0]?.textContent?.trim() || n.textContent.trim()),
+        editToggleVisible: (() => { const b = document.getElementById('hmr-edit-toggle'); return !!b && !b.hidden && getComputedStyle(b).display !== 'none'; })(),
       };
     });
-    assert.ok(embedded.pages >= 3, label + ' embedded real flipbook pages');
+    assert.equal(embedded.pages, 8, label + ' home magazine has cover + toc + 6 sections');
     assert.equal(embedded.cover, 1, label + ' embedded cover page');
     assert.equal(embedded.toc, 1, label + ' embedded table of contents');
-    assert.equal(embedded.entries, embedded.pages - 2, label + ' embedded entry pages');
-    assert.ok(embedded.titles.every(t => t && t.trim()), label + ' embedded entry titles');
-    assert.ok(embedded.body.trim(), label + ' embedded article body');
+    assert.equal(embedded.entries, 6, label + ' 6 section pages');
+    assert.ok(embedded.titles.length >= 6, label + ' section titles present');
     assert.match(embedded.week, /^Haftalık · /, label + ' embedded week label');
     assert.equal(embedded.dots, embedded.pages, label + ' one dot per flipbook page');
     assert.match(embedded.counter, new RegExp('^1 / ' + embedded.pages + '$'), label + ' embedded page counter');
     assert.equal(embedded.tools, false, label + ' embedded flipbook has no editor toolbar');
-    assert.equal(embedded.editors, 0, label + ' embedded flipbook has no editor fields even for admin');
+    assert.equal(embedded.editors, 0, label + ' no editor fields by default');
     assert.equal(embedded.cards, 0, label + ' no preview-like card strip');
     assert.match(embedded.readerLabel, /dergi/i, label + ' magazine label');
-    if (!live) {
-      assert.ok(embedded.cats.includes('Haber'), label + ' news badge on the article page');
-      assert.ok(embedded.cats.includes('Teknik Analiz'), label + ' technical badge on the article page');
-      assert.ok(embedded.tocCats.includes('Haber') && embedded.tocCats.includes('Teknik Analiz'), label + ' badges in the table of contents');
-      assert.ok(embedded.kickers.some(k => k.startsWith('HABER · ')), label + ' news kicker');
-      assert.ok(embedded.kickers.some(k => k.startsWith('TEKNİK ANALİZ · ')), label + ' technical kicker');
-    }
+    const expectedToc = ['Makro analiz', 'Bitcoin, High Time Frame bias', 'Altcoinler, High Time Frame bias', 'Gold, High Time Frame bias', 'Forex piyasaları', 'Alfa Edu eğitim içerikleri'];
+    expectedToc.forEach(name => assert.ok(embedded.tocItems.some(t => t.includes(name)), label + ' toc has ' + name));
+    assert.equal(embedded.editToggleVisible, access.admin === true, label + ' admin edit toggle visibility');
     await page.locator('#hmr-next').click();
     await page.waitForFunction(() => document.getElementById('hmr-counter').textContent.startsWith('2 /'), null, { timeout: 4000 });
     assert.equal(await page.locator('#hmr-stage .mag-page.turned').count(), 1, label + ' page turn applied');

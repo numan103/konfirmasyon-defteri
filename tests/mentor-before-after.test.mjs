@@ -8,8 +8,8 @@ const module = fs.readFileSync(new URL('../assets/mentor-before-after.mjs', impo
 const css = fs.readFileSync(new URL('../assets/mentor-before-after.css', import.meta.url), 'utf8');
 
 test('registered members see safe before/after trade results without a Telegram exit', () => {
-  assert.ok(html.includes('/assets/mentor-results-preview.mjs?v=3'));
-  assert.ok(html.includes('/assets/mentor-before-after.mjs?v=1'));
+  assert.ok(html.includes('/assets/mentor-results-preview.mjs?v=4'));
+  assert.ok(html.includes('/assets/mentor-before-after.mjs?v=2'));
   assert.ok(html.includes('/assets/mentor-before-after.css?v=1'));
   assert.match(preview, /renderMentorBeforeAfter\(results, records\)/);
   assert.match(preview, /renderMentorBeforeAfter\(home, records\)/);

@@ -36,8 +36,8 @@ function boot(user, store = new Map()) {
 }
 
 test('günlük görev paneli ana sayfada, yerel ve hesaba özel kurulu', () => {
-  assert.ok(html.includes('/assets/daily-tasks.css?v=1'));
-  assert.ok(html.includes('/assets/daily-tasks.mjs?v=1'));
+  assert.ok(html.includes('/assets/daily-tasks.css?v=2'));
+  assert.ok(html.includes('/assets/daily-tasks.mjs?v=2'));
   assert.ok(html.includes('id="daily-tasks-panel"'));
   for (const id of ['dt-remind', 'dt-list', 'dt-count', 'dt-streak', 'dt-new', 'dt-time', 'dt-add', 'dt-badges', 'dt-toast']) {
     assert.ok(html.includes('id="' + id + '"'), id + ' eksik');

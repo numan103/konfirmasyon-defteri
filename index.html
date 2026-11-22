@@ -650,7 +650,7 @@
   .hm-body .hint { font-size:11.5px; color:var(--text-3); line-height:1.4; }
   .hm-arrow { margin-left:auto; color:var(--pc); font-size:18px; font-weight:800; }
   /* Ana sayfa gömülü Alfa Dergi — gerçek flipbook, salt okunur */
-  .home-mag-reader { max-width:980px; margin:12px auto 18px; padding:16px 18px 14px; border:1px solid var(--border); border-radius:16px; background:var(--card); box-shadow:var(--shadow); }
+  .home-mag-reader { max-width:1180px; margin:12px auto 18px; padding:16px 18px 14px; border:1px solid var(--border); border-radius:16px; background:var(--card); box-shadow:var(--shadow); }
   .hmr-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
   .hmr-kicker { display:block; color:var(--pc); font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
   .hmr-head h2 { margin:0; font-size:16px; font-weight:800; }
@@ -658,13 +658,34 @@
   .home-magazine { display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:var(--bg2); color:var(--text); font-size:11.5px; font-weight:800; text-decoration:none; }
   .home-magazine:hover { border-color:var(--pc); color:var(--pc); }
   .hm-arrow { color:var(--pc); font-size:14px; }
-  .hmr-book { max-width:480px; margin:0 auto; }
-  .hmr-book .mag-viewport { max-height:620px; aspect-ratio:1 / 1.5; }
-  .hmr-book .mag-nav.prev { left:-52px; }
-  .hmr-book .mag-nav.next { right:-52px; }
+  .hmr-book { max-width:100%; margin:0 auto; }
+  .hmr-book .mag-viewport { max-height:min(72vh, 760px); aspect-ratio:16 / 10; }
+  .hmr-book .mag-nav.prev { left:10px; }
+  .hmr-book .mag-nav.next { right:10px; }
   .hmr-book .mag-foot { margin-top:12px; }
+  .hmr-book .mag-page { box-shadow:0 18px 50px rgba(23,25,35,.24); }
+  .hmr-book .mag-page.turned { box-shadow:-8px 0 24px rgba(23,25,35,.12); }
   .hmr-empty { margin:0; padding:48px 20px; text-align:center; color:var(--text-3); font-size:12.5px; }
-  @media (max-width:600px) { .home-mag-reader { padding:13px 12px; } .hmr-book { max-width:100%; } .hmr-book .mag-viewport { max-height:none; } .hmr-book .mag-nav.prev { left:4px; } .hmr-book .mag-nav.next { right:4px; } .hmr-book .mag-pad { padding:20px 20px 28px; } }
+  .hmr-edit-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:var(--bg2); color:var(--text); font-size:11.5px; font-weight:800; cursor:pointer; }
+  .hmr-edit-btn:hover,.hmr-edit-btn.on { border-color:var(--pc); color:var(--pc); }
+  .hmr-section-editor { display:none; margin-top:14px; padding:14px; border:1px dashed var(--border); border-radius:12px; background:var(--bg2); }
+  .hmr-section-editor.on { display:block; }
+  .hmr-section-editor h4 { margin:0 0 8px; font-size:12px; font-weight:800; color:var(--text); }
+  .hmr-section-editor textarea { width:100%; min-height:120px; border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:var(--card); color:var(--text); font:inherit; font-size:13px; line-height:1.6; resize:vertical; }
+  .hmr-section-editor .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .hmr-section-editor .btn { padding:8px 12px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--card); color:var(--text); }
+  .hmr-section-editor .btn.primary { background:var(--pc); border-color:var(--pc); color:#fff; }
+  .hmr-sec-body { font-size:14px; line-height:1.75; color:var(--text); white-space:pre-wrap; word-break:break-word; }
+  .hmr-sec-body p { margin:0 0 12px; }
+  .hmr-sec-empty { font-size:13px; color:var(--text-3); padding:18px 0; }
+  .hmr-sec-flow { display:flex; flex-direction:column; gap:14px; }
+  .hmr-sec-item { padding:0 0 14px; border-bottom:1px solid var(--border); }
+  .hmr-sec-item:last-child { border-bottom:none; padding-bottom:0; }
+  .hmr-sec-item .meta { font-size:11px; color:var(--text-3); margin-bottom:6px; font-weight:600; }
+  .hmr-sec-item .body { font-size:14px; line-height:1.75; color:var(--text); white-space:pre-wrap; word-break:break-word; }
+  .hmr-sec-item img { max-width:100%; border-radius:10px; margin-top:8px; display:block; }
+  @media (max-width:900px) { .hmr-book .mag-viewport { aspect-ratio:4 / 5; max-height:74vh; } }
+  @media (max-width:600px) { .home-mag-reader { padding:13px 12px; } .hmr-book .mag-viewport { max-height:none; aspect-ratio:3 / 4.3; } .hmr-book .mag-nav.prev { left:4px; } .hmr-book .mag-nav.next { right:4px; } .hmr-book .mag-pad { padding:20px 20px 28px; } }
   .home-teaser { max-width: 980px; margin: 0 auto 18px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
   .ht-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
   .ht-head h2 { font-size: 16px; font-weight: 800; margin: 0; }
@@ -3655,7 +3676,9 @@
   .mag-book { position: relative; }
   .mag-viewport { position: relative; width: 100%; aspect-ratio: 1 / 1.5; max-height: 88vh; margin: 0 auto; perspective: 2600px; touch-action: pan-y; }
   .mag-stage { position: absolute; inset: 0; transform-style: preserve-3d; }
-  .mag-page { position: absolute; inset: 0; transform-origin: left center; transition: transform .62s cubic-bezier(.3,.1,.2,1); backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 8px; overflow: hidden; box-shadow: 0 14px 44px rgba(23,25,35,.30); background: var(--card); }
+  .mag-page { position: absolute; inset: 0; transform-origin: left center; transition: transform .45s cubic-bezier(.22,.61,.36,1); backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 8px; overflow: hidden; box-shadow: 0 14px 44px rgba(23,25,35,.30); background: var(--card); }
+  .mag-page::before { content:''; position:absolute; top:0; bottom:0; left:0; width:28px; background:linear-gradient(90deg, rgba(0,0,0,.08), transparent); pointer-events:none; z-index:2; opacity:.55; }
+  .mag-page.turned::before { opacity:0; }
   .mag-page.turned { transform: rotateY(-180deg); }
   @media (prefers-reduced-motion: reduce) { .mag-page { transition: none; } }
   .mag-inner { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -6410,6 +6433,7 @@
               <p class="hmr-week" id="hmr-week">Haftanın içerikleri hazırlanıyor…</p>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="hmr-edit-btn" id="hmr-edit-toggle" hidden>Düzenle</button>
               <button type="button" class="hmr-collapse" id="hmr-collapse" aria-expanded="true" aria-controls="hmr-book" data-i18n="home.mag.less">Daralt</button>
               <a id="home-magazine-link" href="?page=news" data-nav class="home-magazine">Tam ekranda aç <span class="hm-arrow" aria-hidden="true">→</span></a>
             </div>
@@ -13898,9 +13922,9 @@ function magMainNeighbor(i, dir) {
   return (j >= 0 && j < magData.entries.length) ? j : -1;
 }
 function magWeek() {
-  const { start: mon, end: sun } = magWeekBounds(new Date());
+  const { start, end } = magWeekBounds(new Date());
   const f = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', timeZone: 'Europe/Istanbul' });
-  return f(mon) + ' – ' + f(sun);
+  return f(start) + ' – ' + f(end);
 }
 function magPostDate(value) {
   if (!value || typeof value !== 'string') return null;
@@ -13909,10 +13933,16 @@ function magPostDate(value) {
 }
 function magWeekBounds(now) {
   const t = now instanceof Date ? now : new Date();
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Istanbul', year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(t).filter(p => p.type !== 'literal').map(p => [p.type, Number(p.value)]));
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Istanbul', year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', hourCycle: 'h23'
+  }).formatToParts(t).filter(p => p.type !== 'literal').map(p => [p.type, Number(p.value)]));
+  // Haftalık pencere: Pazar 00:00 TRT - sonraki Pazar 22:00 TRT
   const day = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
-  const start = new Date(day.getTime() - ((day.getUTCDay() + 6) % 7) * 86400000 - 3 * 3600000);
-  const end = new Date(start.getTime() + 7 * 86400000 - 1);
+  const daysSinceSun = day.getUTCDay(); // 0=Pazar
+  let start = new Date(day.getTime() - daysSinceSun * 86400000 - 3 * 3600000); // Pazar 00:00 TRT
+  let end = new Date(start.getTime() + 7 * 86400000 + 22 * 3600000); // sonraki Pazar 22:00 TRT
+  if (t > end) { start = new Date(start.getTime() + 7 * 86400000); end = new Date(end.getTime() + 7 * 86400000); }
   return { start, end };
 }
 function magIsoWeek(d) {
@@ -13951,7 +13981,9 @@ function magApplyWeek(data, now) {
     data.weekLabel = magWeekLabelFromDates(dates);
     data.issueNo = magIsoWeek(dates[0]);
   } else {
-    data.weekLabel = magWeek();
+    const { start, end } = magWeekBounds(now);
+    const f = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', timeZone: 'Europe/Istanbul' });
+    data.weekLabel = f(start) + ' – ' + f(end);
   }
   return data;
 }
@@ -14516,6 +14548,14 @@ function renderNewsWeekly() {
   });
 }
 // Ana sayfa gömülü dergi — aynı haftalık kaynaktan gerçek flipbook, salt okunur.
+const HMR_SECTIONS = [
+  { id: 'macro',  title: 'Makro analiz' },
+  { id: 'btc',    title: 'Bitcoin, High Time Frame bias' },
+  { id: 'alt',    title: 'Altcoinler, High Time Frame bias' },
+  { id: 'gold',   title: 'Gold, High Time Frame bias' },
+  { id: 'forex',  title: 'Forex piyasaları' },
+  { id: 'edu',    title: 'Alfa Edu eğitim içerikleri' }
+];
 let homeMagData = null;
 let homeMagFetchedAt = 0;
 let homeMagLoading = null;
@@ -14523,6 +14563,41 @@ let hmrIndex = 0;
 let hmrPages = 0;
 let hmrBound = false;
 let hmrRenderedSignature = '';
+let hmrEditMode = false;
+function hmrNorm(v) { return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i'); }
+function hmrSectionForEntry(en) {
+  const cat = String(en?.category || '');
+  const txt = hmrNorm((en?.title || '') + ' ' + (en?.body || ''));
+  const edu = !!(en?.education || (typeof isEducationArticle === 'function' && isEducationArticle(en)) || /^\s*#?\s*(alfa[\s_-]*edu|egitim|eğitim)\b/i.test(String(en?.body || en?.title || '')));
+  if (edu || /alfa\s*edu|egitim|eğitim/.test(txt)) return 'edu';
+  if (/\b(xau|gold|altin|ons)\b/.test(txt)) return 'gold';
+  if (/\b(forex|eurusd|gbpusd|usdjpy|usdtry|eurtry|dxy|parite|fx)\b/.test(txt)) return 'forex';
+  if (/\b(btc|bitcoin)\b/.test(txt) || cat === 'BTC Bias') return 'btc';
+  if (/\b(altcoin|alt coin|alts|ethereum|eth|solana|sol|xrp|avax|link|ada|dot|bnb)\b/.test(txt)) return 'alt';
+  if (cat === 'Makro' || /\b(makro|macro|fed|faiz|enflasyon|cpi|nfp|tahvil|bond|dxy|likidite|liquidity)\b/.test(txt)) return 'macro';
+  if (cat === 'Teknik Analiz') return 'alt';
+  return 'macro';
+}
+function hmrSectionContent(data) {
+  const entries = (data && Array.isArray(data.entries) ? data.entries : []).filter(e => e && !magIsUpd(e));
+  const map = {}; HMR_SECTIONS.forEach(s => { map[s.id] = []; });
+  entries.forEach(en => { const id = hmrSectionForEntry(en); (map[id] || map.macro).push(en); });
+  return map;
+}
+function hmrHomeSectionsData() {
+  const src = (magIsAdmin() && magData && typeof magData === 'object') ? magData : homeMagData;
+  return (src && src.homeSections && typeof src.homeSections === 'object') ? src.homeSections : {};
+}
+function hmrSetHomeSection(id, patch) {
+  if (!magIsAdmin()) return;
+  if (!magData || typeof magData !== 'object') magData = homeMagData ? JSON.parse(JSON.stringify(homeMagData)) : { issueNo: 1, entries: [], authors: [] };
+  if (!magData.homeSections || typeof magData.homeSections !== 'object') magData.homeSections = {};
+  magData.homeSections[id] = { ...(magData.homeSections[id] || {}), ...patch };
+  homeMagData = magApplyWeek({ ...magData, entries: Array.isArray(magData.entries) ? magData.entries.slice() : [] });
+  hmrRenderedSignature = '';
+  renderHomeMagazine();
+  magSaveT();
+}
 async function loadHomeMagazine() {
   bindHomeMagazine();
   if (homeMagData && Date.now() - homeMagFetchedAt < 60000) { renderHomeMagazine(); return homeMagData; }
@@ -14564,10 +14639,22 @@ function bindHomeMagazine() {
   const next = document.getElementById('hmr-next');
   if (prev) prev.addEventListener('click', hmrPrev);
   if (next) next.addEventListener('click', hmrNext);
+  const editBtn = document.getElementById('hmr-edit-toggle');
+  if (editBtn) editBtn.addEventListener('click', async () => {
+    if (!magIsAdmin()) return;
+    hmrEditMode = !hmrEditMode;
+    editBtn.classList.toggle('on', hmrEditMode);
+    editBtn.textContent = hmrEditMode ? 'Düzenlemeyi bitir' : 'Düzenle';
+    if (hmrEditMode && (!magData || !Array.isArray(magData.entries))) {
+      try { await loadNews(); } catch (e) {}
+    }
+    hmrRenderedSignature = '';
+    renderHomeMagazine();
+  });
   const vp = document.getElementById('hmr-viewport');
   if (vp) {
     let sx = null;
-    vp.addEventListener('pointerdown', e => { if (e.target.closest && e.target.closest('button,a,label,input,textarea,.e-img')) { sx = null; return; } sx = e.clientX; });
+    vp.addEventListener('pointerdown', e => { if (e.target.closest && e.target.closest('button,a,label,input,textarea,.e-img,.hmr-section-editor')) { sx = null; return; } sx = e.clientX; });
     vp.addEventListener('pointerup', e => { if (sx === null) return; const dx = e.clientX - sx; sx = null; if (Math.abs(dx) > 45) { if (dx < 0) hmrNext(); else hmrPrev(); } });
     vp.addEventListener('pointercancel', () => { sx = null; });
   }
@@ -14578,37 +14665,115 @@ function bindHomeMagazine() {
     else if (e.key === 'ArrowLeft') { e.preventDefault(); hmrPrev(); }
   });
 }
+function hmrBuildCover(data) {
+  const issue = magApplyWeek({ ...(data || {}), entries: Array.isArray(data?.entries) ? data.entries.slice() : [] });
+  const page = document.createElement('div'); page.className = 'mag-page mag-cover3';
+  const inner = document.createElement('div'); inner.className = 'mag-inner';
+  const coverBg = '/assets/alfa-dergi-cover.svg?v=1';
+  const bg = document.createElement('div'); bg.className = 'cv-bg'; bg.style.backgroundImage = 'url("' + coverBg + '")'; inner.appendChild(bg);
+  const pad = document.createElement('div'); pad.className = 'mag-pad';
+  const cats = HMR_SECTIONS.map(sec => '<span>' + magEsc(sec.title) + '</span>').join('');
+  pad.innerHTML =
+    '<div class="cv-top"><span class="cv-oa">ALFA TRADERS</span><span class="cv-issue">Haftalık Sayı</span></div>' +
+    '<div class="cv-logo"><svg viewBox="0 0 32 32" fill="none"><path d="M8.5 26 16 6.5 23.5 26" stroke="#fff" stroke-width="2.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 18.6h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M9.6 22.8 14.9 17.5l4.7-4.9" stroke="#c5c1ff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.9 17.5l1.8-1.9" stroke="#c5c1ff" stroke-width="2.3" stroke-linecap="round"/></svg></div>' +
+    '<h1 class="cv-title">ALFA<br>DERGİ</h1>' +
+    '<div class="cv-sub">Haftalık Piyasa Dergisi</div>' +
+    '<div class="cv-cats">' + cats + '</div>' +
+    '<div class="cv-foot"><div class="cv-date">' + magEsc(issue.weekLabel || magWeek()) + '</div><div class="cv-turn">Oku →</div></div>';
+  inner.appendChild(pad);
+  page.appendChild(inner); return page;
+}
+function hmrBuildToc(go, data) {
+  const page = document.createElement('div'); page.className = 'mag-page mag-toc3';
+  const inner = document.createElement('div'); inner.className = 'mag-inner';
+  const pad = document.createElement('div'); pad.className = 'mag-pad';
+  const h = document.createElement('div'); h.className = 'toc-kicker'; h.textContent = 'Bu Sayıda'; pad.appendChild(h);
+  const h2 = document.createElement('h2'); h2.className = 'toc-h'; h2.textContent = 'İçindekiler'; pad.appendChild(h2);
+  const secData = hmrHomeSectionsData();
+  const bySec = hmrSectionContent(data);
+  HMR_SECTIONS.forEach((sec, idx) => {
+    const row = document.createElement('div'); row.className = 'toc-row';
+    const it = document.createElement('button'); it.className = 'toc-item'; it.type = 'button';
+    const title = (secData[sec.id] && secData[sec.id].title) ? secData[sec.id].title : sec.title;
+    const count = ((bySec[sec.id] || []).length);
+    it.innerHTML = '<b>' + String(idx + 1).padStart(2, '0') + '</b><span class="tt">' + magEsc(title) + (count ? '<small>' + count + ' içerik</small>' : '<small>İçerik bekleniyor</small>') + '</span><span class="pg">sf ' + (idx + 3) + '</span>';
+    it.addEventListener('click', () => (typeof go === 'function' ? go : hmrGoTo)(idx + 2));
+    row.appendChild(it); pad.appendChild(row);
+  });
+  inner.appendChild(pad); page.appendChild(inner); return page;
+}
+function hmrBuildSectionPage(sec, entries, data, pageNo) {
+  const page = document.createElement('div'); page.className = 'mag-page mag-entry hmr-section-page';
+  const inner = document.createElement('div'); inner.className = 'mag-inner';
+  const pad = document.createElement('div'); pad.className = 'mag-pad';
+  const secData = hmrHomeSectionsData();
+  const ov = secData[sec.id] || {};
+  const title = ov.title || sec.title;
+  const head = document.createElement('div'); head.className = 'e-head';
+  const left = document.createElement('span'); left.className = 'e-head-left';
+  const kick = document.createElement('span'); kick.className = 'e-kicker'; kick.textContent = 'BÖLÜM · sf ' + pageNo; left.appendChild(kick);
+  const badge = document.createElement('span'); badge.className = 'e-cat tech'; badge.textContent = 'Haftalık'; left.appendChild(badge);
+  head.appendChild(left); pad.appendChild(head);
+  const h2 = document.createElement('h2'); h2.className = 'e-title'; h2.textContent = title; pad.appendChild(h2);
+
+  const flow = document.createElement('div'); flow.className = 'hmr-sec-flow';
+  if (ov.note && String(ov.note).trim()) {
+    const note = document.createElement('div'); note.className = 'hmr-sec-item';
+    const body = document.createElement('div'); body.className = 'body e-body'; body.textContent = String(ov.note); note.appendChild(body); flow.appendChild(note);
+  }
+  if (!entries.length && !(ov.note && String(ov.note).trim())) {
+    const empty = document.createElement('div'); empty.className = 'hmr-sec-empty'; empty.textContent = 'Bu bölüm için bu hafta içerik bekleniyor.'; flow.appendChild(empty);
+  }
+  entries.forEach(en => {
+    const item = document.createElement('div'); item.className = 'hmr-sec-item';
+    const bodyText = String(en.body || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || String(en.body || '').trim();
+    const imgs = Array.isArray(en.images) ? en.images.filter(Boolean) : [];
+    if (bodyText) { const body = document.createElement('div'); body.className = 'body e-body'; body.textContent = String(en.body || '').trim(); item.appendChild(body); }
+    imgs.slice(0, 4).forEach(url => { const img = document.createElement('img'); img.loading = 'lazy'; img.alt = title; img.src = url; img.addEventListener('error', () => img.remove()); item.appendChild(img); });
+    if (!bodyText && !imgs.length) { const body = document.createElement('div'); body.className = 'body e-body'; body.textContent = 'İçerik metni bekleniyor.'; item.appendChild(body); }
+    flow.appendChild(item);
+  });
+  pad.appendChild(flow);
+
+  if (hmrEditMode && magIsAdmin()) {
+    const ed = document.createElement('div'); ed.className = 'hmr-section-editor on';
+    const h4 = document.createElement('h4'); h4.textContent = 'Bölümü düzenle'; ed.appendChild(h4);
+    const tLabel = document.createElement('div'); tLabel.style.cssText='font-size:11px;color:var(--text-3);margin-bottom:4px;font-weight:700;'; tLabel.textContent='Bölüm adı'; ed.appendChild(tLabel);
+    const tInp = document.createElement('input'); tInp.type='text'; tInp.value = title; tInp.style.cssText='width:100%;margin-bottom:8px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--card);color:var(--text);font:inherit;';
+    ed.appendChild(tInp);
+    const nLabel = document.createElement('div'); nLabel.style.cssText='font-size:11px;color:var(--text-3);margin-bottom:4px;font-weight:700;'; nLabel.textContent='Ek not / düzeltme (içeriğe eklenir)'; ed.appendChild(nLabel);
+    const ta = document.createElement('textarea'); ta.value = String(ov.note || ''); ta.placeholder = 'Eksik içerik, düzeltme veya ek not yaz...'; ed.appendChild(ta);
+    const row = document.createElement('div'); row.className = 'row';
+    const save = document.createElement('button'); save.type='button'; save.className='btn primary'; save.textContent='Kaydet';
+    save.addEventListener('click', async () => {
+      if (!magIsAdmin()) return;
+      if (!magData || !Array.isArray(magData.entries)) { try { await loadNews(); } catch (e) {} }
+      hmrSetHomeSection(sec.id, { title: tInp.value.trim() || sec.title, note: ta.value });
+      if (typeof magToast === 'function') magToast('Bölüm kaydedildi');
+    });
+    const cancel = document.createElement('button'); cancel.type='button'; cancel.className='btn'; cancel.textContent='Vazgeç';
+    cancel.addEventListener('click', () => { hmrEditMode = false; const b=document.getElementById('hmr-edit-toggle'); if(b){b.classList.remove('on'); b.textContent='Düzenle';} hmrRenderedSignature=''; renderHomeMagazine(); });
+    row.append(save, cancel); ed.appendChild(row); pad.appendChild(ed);
+  }
+
+  inner.appendChild(pad); page.appendChild(inner); return page;
+}
 function renderHomeMagazine() {
   const stage = document.getElementById('hmr-stage'); if (!stage) return;
-  const signature = JSON.stringify(homeMagData);
-  if (homeMagData && signature === hmrRenderedSignature && stage.children.length) return;
+  const editBtn = document.getElementById('hmr-edit-toggle');
+  if (editBtn) { editBtn.hidden = !magIsAdmin(); editBtn.classList.toggle('on', hmrEditMode); editBtn.textContent = hmrEditMode ? 'Düzenlemeyi bitir' : 'Düzenle'; }
+  const secData = hmrHomeSectionsData();
+  const signature = JSON.stringify({ d: homeMagData, e: hmrEditMode, s: secData, a: magIsAdmin() });
+  if (signature === hmrRenderedSignature && stage.children.length) return;
   hmrRenderedSignature = signature;
   const dots = document.getElementById('hmr-dots'); if (dots) dots.innerHTML = '';
   const weekEl = document.getElementById('hmr-week');
   const week = (homeMagData && homeMagData.weekLabel) || magWeek();
   if (weekEl) weekEl.textContent = 'Haftalık · ' + week + ' — sayfaları çevirerek oku';
-  if (!homeMagData || !Array.isArray(homeMagData.entries) || !homeMagData.entries.length) {
-    stage.innerHTML = '';
-    const empty = document.createElement('p'); empty.className = 'hmr-empty';
-    empty.textContent = 'Bu hafta için dergi yazısı bekleniyor.';
-    stage.appendChild(empty);
-    hmrPages = 0; hmrIndex = 0;
-    const counter = document.getElementById('hmr-counter'); if (counter) counter.textContent = '0 / 0';
-    ['hmr-prev', 'hmr-next'].forEach(id => { const button = document.getElementById(id); if (button) button.disabled = true; });
-    return;
-  }
-  // Gerçek dergi sayfaları, admin editörünün kullandığı aynı üreticilerle oluşturulur.
-  const _data = magData, _preview = magPreview, _index = magIndex, _force = window.__magForceReader;
-  magData = homeMagData; magPreview = true; window.__magForceReader = true;
-  let pages;
-  try {
-    pages = [magBuildCover(), magBuildToc(hmrGoTo)];
-    magMainList().forEach(e => pages.push(magBuildEntry(e, magData.entries.indexOf(e), false)));
-  } finally {
-    magData = _data; magPreview = _preview; magIndex = _index; window.__magForceReader = _force;
-  }
-  // Paylaşım / dergi içi geçiş bağlantıları tam dergiye ait olduğundan gömülü okuyucuda gösterilmez.
-  pages.forEach(p => p.querySelectorAll('.e-share, .e-goto').forEach(n => n.remove()));
+  const data = homeMagData || { issueNo: 1, weekLabel: week, entries: [], authors: [] };
+  const bySec = hmrSectionContent(data);
+  const pages = [hmrBuildCover(data), hmrBuildToc(hmrGoTo, data)];
+  HMR_SECTIONS.forEach((sec, i) => pages.push(hmrBuildSectionPage(sec, bySec[sec.id] || [], data, i + 3)));
   stage.innerHTML = '';
   hmrPages = pages.length;
   pages.forEach((el, i) => { el.style.zIndex = String(hmrPages - i); stage.appendChild(el); });
@@ -14621,6 +14786,7 @@ function renderHomeMagazine() {
   }
   hmrApply();
 }
+
 function renderNews() {
   const stage = document.getElementById('mag-stage'); if (!stage) return;
   if (!magData || !Array.isArray(magData.entries)) magData = { issueNo: 1, entries: [], authors: [] };
@@ -14998,6 +15164,7 @@ function applyTierUi() {
   if (typeof currentPage !== 'undefined' && currentPage === 'influencer') renderInfluencer();
   if (window.AlfaEducationCRM) window.AlfaEducationCRM.refreshContext();
   if (window.AlfaMentorTrades) window.AlfaMentorTrades.refreshContext();
+  try { if (typeof renderHomeMagazine === 'function' && currentPage === 'home') renderHomeMagazine(); } catch (e) {}
   if (window.AlfaMentorPreview) window.AlfaMentorPreview.refresh();
   if (window.AlfaEduCheckout) window.AlfaEduCheckout.refreshContext();
   if (window.AlfaMyPortfolio) window.AlfaMyPortfolio.refresh();

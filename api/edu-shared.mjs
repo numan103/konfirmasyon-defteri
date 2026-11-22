@@ -128,6 +128,14 @@ async function alfaNews(req, res) {
       photo: media(a && a.photo),
     })) : [];
     if (!authors.some(a => a.id === 'traderahmetd')) authors.push({ id: 'traderahmetd', name: 'Trader Ahmet', specialty: 'Piyasa analizi', photo: '' });
+        const homeSections = {};
+    const hs = raw.homeSections && typeof raw.homeSections === 'object' ? raw.homeSections : {};
+    ['macro','btc','alt','gold','forex','edu'].forEach(id => {
+      const v = hs[id] && typeof hs[id] === 'object' ? hs[id] : {};
+      const title = text(v.title, 120);
+      const note = text(v.note, 4000);
+      if (title || note) homeSections[id] = { ...(title ? { title } : {}), ...(note ? { note } : {}) };
+    });
     return res.status(200).json({ ok: true, updatedAt: rows[0].updated_at || null, data: {
       issueNo: Number.isFinite(raw.issueNo) ? raw.issueNo : 1,
       weekLabel: text(raw.weekLabel, 120),
@@ -138,6 +146,7 @@ async function alfaNews(req, res) {
       rosterVer: 2,
       authorsSeeded: true,
       authors,
+      homeSections,
       entries: groupMagazineArticles(entries).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).slice(0, 60),
     } });
   } catch (error) {

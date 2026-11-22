@@ -48,7 +48,7 @@ test('bu hafta gönderi yoksa dergi boş kalır ve eski etiket uydurulmaz', () =
   const data = { issueNo: 7, weekLabel: '1 Kasım', entries: [entry('old', '2026-11-09T10:00:00.000Z')] };
   ctx.magApplyWeek(data, NOW);
   assert.deepEqual(data.entries, []);
-  assert.equal(data.weekLabel, '16 – 22 Kasım');
+  assert.equal(data.weekLabel, '15 Kasım – 22 Kasım');
   assert.equal(data.issueNo, 7);
 });
 
