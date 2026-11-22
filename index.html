@@ -14797,12 +14797,13 @@ function hmrBuildOutro(data) {
     '<div style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:24px 10px;">' +
       '<div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--pc);">Alfa Dergi</div>' +
       '<h2 style="margin:0;font-size:clamp(28px,4vw,44px);line-height:1.08;font-weight:900;letter-spacing:-.03em;">Okuduğunuz için<br>teşekkürler.</h2>' +
-      '<p style="margin:0;max-width:520px;color:var(--text-2);font-size:14px;line-height:1.75;">Bu haftanın Alfa Dergi sayısını okudunuz. Piyasa notları, eğitim içerikleri ve topluluk için hazırlanan yeni sayılarda görüşmek üzere.</p>' +
+      '<p style="margin:0;max-width:560px;color:var(--text-2);font-size:14px;line-height:1.75;">Alfa Trader’da sadece dergi değil; eğitim içerikleri, uygun fiyatlı paketler ve Premium erişimle piyasayı daha sistemli takip edebileceğin araçlar seni bekliyor.</p>' +
       '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:6px;">' +
-        '<a href="https://alfa-trader.com" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;background:var(--pc);color:#fff;text-decoration:none;font-size:12px;font-weight:800;">alfa-trader.com</a>' +
-        '<a href="https://t.me/alfatradersweb" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--text);text-decoration:none;font-size:12px;font-weight:800;">Telegram topluluğu</a>' +
+        '<a href="?page=eduplans" data-nav style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;background:var(--pc);color:#fff;text-decoration:none;font-size:12px;font-weight:800;">🎓 Eğitim Paketleri</a>' +
+        '<a href="?page=egitim" data-nav style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--text);text-decoration:none;font-size:12px;font-weight:800;">Tüm Eğitimler</a>' +
+        '<a href="?page=erisim" data-nav style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);color:var(--text);text-decoration:none;font-size:12px;font-weight:800;">Premium\'a Geç</a>' +
       '</div>' +
-      '<div style="margin-top:auto;padding-top:18px;font-size:11px;color:var(--text-3);">ALFA TRADERS · ' + magEsc(issue.weekLabel || magWeek()) + '</div>' +
+      '<div style="margin-top:auto;padding-top:18px;font-size:11px;color:var(--text-3);">ALFA TRADER · ' + magEsc(issue.weekLabel || magWeek()) + '</div>' +
     '</div>';
   inner.appendChild(pad); page.appendChild(inner); return page;
 }
