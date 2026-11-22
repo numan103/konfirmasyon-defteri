@@ -178,3 +178,30 @@ test('repeated image URLs keep captions and inline photo indexes instead of dedu
   assert.equal(item.photos.length, 2);
   assert.equal(item.photos[1].caption, 'Teyit bölgesi'); assert.match(item.body, /\{\{foto:2\}\}/);
 });
+test('studio tree shows explicit course → section → topic hierarchy', () => {
+  const treeCode = html.slice(html.indexOf('function renderEduStudioTree()'), html.indexOf('function chOpenForm('));
+  assert.match(treeCode, /1 · Eğitim \(kanal\)/);
+  assert.match(treeCode, /2 · Bölüm/);
+  assert.match(treeCode, /3 · Konu/);
+  assert.match(treeCode, /Örn\. Range/);
+  assert.match(treeCode, /Örn\. Swing Dip ve Tepelerde Range/);
+  for (const label of ['+ Yeni eğitim', '+ Yeni bölüm', '+ Yeni konu']) {
+    assert.ok(treeCode.includes("button('" + label + "'"), label + ' button is missing');
+  }
+  assert.match(treeCode, /Konuyu oluşturduktan sonra.+?\+ Not.+?\+ Video/s);
+});
+test('studio tree permits deleting the last section and handles an empty section list', () => {
+  const treeCode = html.slice(html.indexOf('function renderEduStudioTree()'), html.indexOf('function chOpenForm('));
+  assert.doesNotMatch(treeCode, /Son bölüm silinemez/);
+  assert.match(treeCode, /Henüz bölüm yok/);
+  assert.match(treeCode, /chSecMeta\(chCurTrader\(\)\)\[0\]\?\.id/);
+  assert.match(treeCode, /pendingJournal \|\| !hasSection/);
+});
+test('explicit empty section metadata is preserved while legacy metadata still gets defaults', () => {
+  const code = html.slice(html.indexOf('function chSecMeta(t)'), html.indexOf('function chDefaultSecMeta()'));
+  const ctx = vm.createContext({ chDefaultSecMeta: () => [{ id: 'legacy', title: 'Legacy' }] });
+  vm.runInContext(code, ctx);
+  assert.equal(JSON.stringify(vm.runInContext('chSecMeta({ secMeta: [] })', ctx)), '[]');
+  assert.equal(JSON.stringify(vm.runInContext('chSecMeta({})', ctx)), JSON.stringify([{ id: 'legacy', title: 'Legacy' }]));
+  assert.equal(JSON.stringify(vm.runInContext('chSecMeta({ secMeta: null })', ctx)), JSON.stringify([{ id: 'legacy', title: 'Legacy' }]));
+});

@@ -3055,6 +3055,11 @@
   #edu-author-tree { max-height:82vh; overflow:auto; }
   #edu-author-tree select { width:100%; margin:6px 0 12px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:10px; }
   .edu-author-actions { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+  .edu-author-levels { display:grid; gap:6px; margin:2px 0 10px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); list-style:none; }
+  .edu-author-level { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; font-size:12px; }
+  .edu-author-level strong { color:var(--text); font-size:12px; }
+  .edu-author-level small { color:var(--text-3); }
+  .edu-author-hint { margin:0 0 10px; color:var(--text-3); font-size:12px; line-height:1.55; }
   .edu-author-topic { border-top:1px solid var(--border); margin-top:14px; padding-top:12px; }
   .edu-author-topic h3 { font-size:15px; margin:0 0 8px; overflow-wrap:anywhere; }
   .edu-author-item { display:flex; align-items:center; gap:6px; margin:8px 0; }
@@ -7269,7 +7274,7 @@
   <div id="page-edustudio" class="hidden">
     <header class="edu-author-head">
       <div><div class="edu-kicker">ALFA EDU · İÇERİK YÖNETİMİ</div><h1>İçerik Stüdyosu</h1>
-      <p>Konu, video ve notlarını buradan yönet. Yazdıkların hesabına özel cihaz taslağı olarak korunur; “Kaydet” ile sunucuya kaydedilir.</p></div>
+      <p>Eğitim → bölüm → konu → not/video sırasını buradan yönet. Örn. “Range” bir bölüm, “Swing Dip ve Tepelerde Range” onun içindeki bir konudur; açıklama ve videoyu konunun içine ekle. Yazdıkların hesabına özel cihaz taslağı olarak korunur; “Kaydet” ile sunucuya kaydedilir.</p></div>
       <div class="edu-author-actions">
         <button type="button" class="btn" id="edu-author-preview">İçeriği önizle</button>
         <button type="button" class="btn" id="edu-author-student">Yayındaki öğrenci görünümü ↗</button>
@@ -24992,7 +24997,7 @@ function chAvatarHtml(t) {
 }
 function chSecMeta(t) {
   const m = t && t.secMeta;
-  if (m && Array.isArray(m) && m.length) return m;
+  if (Array.isArray(m)) return m;
   return chDefaultSecMeta();
 }
 function chDefaultSecMeta() { return Object.keys(EG_SECTIONS).map(id => ({ id, title: EG_SECTIONS[id] })); }
@@ -26753,34 +26758,46 @@ function renderEduStudioTree() {
   tree.replaceChildren();
   const el = (tag, text) => { const n = document.createElement(tag); if (text) n.textContent = text; return n; };
   const button = (text, action, parent = tree) => { const b = el('button', text); b.type = 'button'; b.className = 'btn'; b.addEventListener('click', action); parent.appendChild(b); return b; };
-  const channel = el('select'); channel.setAttribute('aria-label', 'Düzenlenecek kanal');
+  const levels = el('ol'); levels.className = 'edu-author-levels'; levels.setAttribute('aria-label', 'İçerik hiyerarşisi');
+  [['1 · Eğitim (kanal)', 'Örn. Ücretli Teknik Eğitim'], ['2 · Bölüm', 'Örn. Range'], ['3 · Konu', 'Örn. Swing Dip ve Tepelerde Range']].forEach(([label, example]) => {
+    const li = el('li'); li.className = 'edu-author-level';
+    li.appendChild(el('strong', label)); li.appendChild(el('small', example)); levels.appendChild(li);
+  });
+  tree.appendChild(levels);
+  tree.appendChild(el('p', 'Konuyu oluşturduktan sonra içindeki “+ Not” / “+ Video” ile açıklama ve video ekle.')).className = 'edu-author-hint';
+  const channel = el('select'); channel.setAttribute('aria-label', '1 · Eğitim (kanal) seç');
   Object.values(channelsData.traders).filter(chCanEdit).forEach(t => { const o = el('option', t.name); o.value = t.id; o.selected = t.id === channelOpen; channel.appendChild(o); });
   channel.addEventListener('change', () => { if (chMediaPending || chStudioBusy) { channel.value = channelOpen; return; } chCloseForm(); channelOpen = channel.value; chSec = chSecMeta(chCurTrader())[0]?.id; document.getElementById('edu-author-search').value = ''; renderEduStudioTree(); });
   tree.appendChild(channel);
-  button('+ Kanal', () => { chCloseForm(); chOpenNew(); });
+  button('+ Yeni eğitim', () => { chCloseForm(); chOpenNew(); });
   const trader = chCurTrader(); if (!trader) return;
-  button('Kanal profili', () => chOpenProf(trader.id));
-  const pendingJournal = chForm.channelId === trader.id && chForm.journalSetup?.sectionId === chSec && !chSecMeta(trader).some(s => s.id === chSec);
-  const sections = el('select'); sections.setAttribute('aria-label', 'Düzenlenecek bölüm');
-  chSecMeta(trader).forEach(s => { const o = el('option', (s.access === 'paid' ? '🔒 ' : '') + s.title); o.value = s.id; o.selected = s.id === chSec; sections.appendChild(o); });
+  button('Eğitim profili', () => chOpenProf(trader.id));
+  const meta = chSecMeta(trader);
+  const pendingJournal = chForm.channelId === trader.id && chForm.journalSetup?.sectionId === chSec && !meta.some(s => s.id === chSec);
+  const sections = el('select'); sections.setAttribute('aria-label', '2 · Bölüm seç');
+  meta.forEach(s => { const o = el('option', (s.access === 'paid' ? '🔒 ' : '') + s.title); o.value = s.id; o.selected = s.id === chSec; sections.appendChild(o); });
   if (pendingJournal) { const option = el('option', '📝 ' + chForm.journalSetup.title + ' · henüz kaydedilmedi'); option.value = chSec; option.selected = true; sections.appendChild(option); }
-  sections.addEventListener('change', () => { if (chMediaPending || chStudioBusy) { sections.value = chSec; return; } chCloseForm(); chSec = sections.value; chTopic = null; chVid = null; document.getElementById('edu-author-search').value = ''; renderEduStudioTree(); });
+  if (!sections.options.length) {
+    const emptyOption = el('option', 'Henüz bölüm yok · “+ Yeni bölüm” ile ekle');
+    emptyOption.value = ''; emptyOption.disabled = true; emptyOption.selected = true; sections.appendChild(emptyOption);
+  }
+  sections.addEventListener('change', () => { if (chMediaPending || chStudioBusy) { sections.value = chSec || ''; return; } chCloseForm(); chSec = sections.value; chTopic = null; chVid = null; document.getElementById('edu-author-search').value = ''; renderEduStudioTree(); });
   tree.appendChild(sections);
   const actions = el('div'); actions.className = 'edu-author-actions'; tree.appendChild(actions);
-  button('+ Bölüm', () => chOpenForm('sec-add', null, { access: 'paid', plans: ['video'] }), actions);
-  button('Bölümü düzenle', () => chOpenForm('sec-edit', null, chSecMeta(trader).find(s => s.id === chSec)), actions).disabled = pendingJournal;
+  button('+ Yeni bölüm', () => chOpenForm('sec-add', null, { access: 'paid', plans: ['video'] }), actions);
+  const hasSection = meta.some(s => s.id === chSec) || pendingJournal;
+  button('Bölümü düzenle', () => chOpenForm('sec-edit', null, meta.find(s => s.id === chSec)), actions).disabled = pendingJournal || !hasSection;
   const deleteSection = button('Bölümü sil', async () => {
-    if (chSecMeta(trader).length < 2) { chStudioNotice('Son bölüm silinemez; önce başka bir bölüm oluştur.'); return; }
     if (!confirm('Bu bölüm ve içindeki tüm konu/içerikler silinsin mi?')) return;
     const sid = chSec;
-    if (await chStudioMutate(t => { t.secMeta = chSecMeta(t).filter(s => s.id !== sid); delete t.sections[sid]; }, 'Bölüm silindi.')) { chCloseForm(); chSec = chSecMeta(chCurTrader())[0].id; renderEduStudioTree(); }
+    if (await chStudioMutate(t => { t.secMeta = chSecMeta(t).filter(s => s.id !== sid); delete t.sections[sid]; }, 'Bölüm silindi.')) { chCloseForm(); chSec = chSecMeta(chCurTrader())[0]?.id; renderEduStudioTree(); }
   }, actions);
-  deleteSection.disabled = pendingJournal;
-  button('+ Konu', () => chOpenForm('topic-add', null, null)).disabled = pendingJournal;
+  deleteSection.disabled = pendingJournal || !hasSection;
+  button('+ Yeni konu', () => chOpenForm('topic-add', null, null)).disabled = pendingJournal || !hasSection;
   const query = (document.getElementById('edu-author-search')?.value || '').toLocaleLowerCase('tr').trim();
   const matches = value => String(value || '').toLocaleLowerCase('tr').includes(query);
   const topics = (trader.sections?.[chSec] || []).filter(topic => !query || matches(topic.title) || topic.videos?.some(v => matches(v.title) || matches(v.body) || matches(v.tricks)));
-  if (!topics.length) tree.appendChild(el('p', pendingJournal ? 'Günlük bölümü ve gün başlığı ilk notu Kaydet dediğinde oluşacak. Açık notun taslak olarak korunuyor.' : 'Henüz konu yok. “+ Konu” ile başla.'));
+  if (!topics.length) tree.appendChild(el('p', pendingJournal ? 'Günlük bölümü ve gün başlığı ilk notu Kaydet dediğinde oluşacak. Açık notun taslak olarak korunuyor.' : (hasSection ? 'Henüz konu yok. “+ Yeni konu” ile başla.' : 'Henüz bölüm yok. Önce “+ Yeni bölüm” ile bir bölüm oluştur.')));
   topics.forEach(topic => {
     const group = el('div'); group.className = 'edu-author-topic'; tree.appendChild(group);
     group.appendChild(el('h3', topic.title));
@@ -26856,10 +26873,13 @@ function chOpenForm(mode, ids, prefill) {
   const titles = { 'daily-add': 'Ana sayfaya yeni günlük not', 'daily-edit': 'Günlük notu düzenle', 'topic-add': 'Yeni konu', 'topic-edit': 'Konu adını düzenle', 'video-add': 'Yeni içerik / not', 'video-edit': 'İçeriği düzenle', 'sec-add': 'Yeni bölüm', 'sec-edit': 'Bölümü düzenle' };
   g('ch-form-title').textContent = titles[mode] || 'Düzenle';
   const trader = chCurTrader(), topic = trader?.sections?.[chSec]?.find(t => t.id === chForm.topicId);
-  g('ch-editor-context').textContent = daily ? 'HERKESE AÇIK · Ana Sayfa / Günlük Notlar · Ücretli derslerden bağımsız' : [trader?.name, sec?.title, topic?.title].filter(Boolean).join(' / ');
+  const contextParts = [trader?.name && '1 · Eğitim: ' + trader.name];
+  if (mode !== 'sec-add' && sec) contextParts.push('2 · Bölüm: ' + sec.title);
+  if (topic) contextParts.push('3 · Konu: ' + topic.title);
+  g('ch-editor-context').textContent = daily ? 'HERKESE AÇIK · Ana Sayfa / Günlük Notlar · Ücretli derslerden bağımsız' : contextParts.filter(Boolean).join(' / ');
   g('ch-in-save').textContent = daily ? 'Ana sayfaya kaydet' : 'Kaydet';
   g('edu-author-student').textContent = daily ? 'Yayındaki notu aç ↗' : 'Yayındaki öğrenci görünümü ↗';
-  g('ch-in-title').setAttribute('placeholder', isVideo ? 'Başlık (ör. Market Yapısı -1)' : isSec ? 'Bölüm başlığı (ör. Onchain Analizi)' : 'Konu başlığı (ör. Market Yapısı)');
+  g('ch-in-title').setAttribute('placeholder', isVideo ? 'Başlık (ör. Swing Dip ve Tepelerde Range - 1)' : isSec ? 'Bölüm başlığı (ör. Range)' : 'Konu başlığı (ör. Swing Dip ve Tepelerde Range)');
   g('ch-form').classList.remove('hidden');
   chDraftId = chUid(); chDraftAccount = AUTH.user.id;
   chDraftBaseline = JSON.stringify(chDraftFields()); chDraftPersisted = '';
@@ -26994,7 +27014,7 @@ function chOpenNew() {
   if (del) del.classList.add('hidden');
   const ed = g('ch-prof-editors');
   if (ed) ed.style.display = '';
-  g('ch-prof-title').textContent = 'Yeni Kanal';
+  g('ch-prof-title').textContent = 'Yeni Eğitim';
   g('ch-prof-form').classList.remove('hidden');
   g('ch-prof-name').focus();
 }
@@ -27014,7 +27034,7 @@ function chOpenProf(traderId) {
   if (del) del.classList.toggle('hidden', !chIsAdmin());
   const ed = g('ch-prof-editors');
   if (ed) ed.style.display = chIsAdmin() ? '' : 'none';
-  g('ch-prof-title').textContent = 'Kanal Profili';
+  g('ch-prof-title').textContent = 'Eğitim Profili';
   g('ch-prof-form').classList.remove('hidden');
   g('ch-prof-name').focus();
 }
@@ -27022,7 +27042,7 @@ async function chSaveProf() {
   const g = id => document.getElementById(id);
   const name = g('ch-prof-name').value.trim();
   const bio = g('ch-prof-bio').value.trim();
-  if (!name) { g('ch-prof-err').textContent = 'Kanal adı boş olamaz.'; return; }
+  if (!name) { g('ch-prof-err').textContent = 'Eğitim adı boş olamaz.'; return; }
   const editors = (g('ch-prof-editors').value || '')
     .split(/[,;\n]+/).map(e => e.trim().toLowerCase()).filter(Boolean).slice(0, 20);
   if (chProfMode === 'new') {
