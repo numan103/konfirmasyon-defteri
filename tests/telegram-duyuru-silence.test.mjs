@@ -46,6 +46,9 @@ function message(id, thread, text, extra = {}) {
     },
   };
 }
+function channelPost(id, text = 'Duyuru') {
+  return { message_id: id, date: 1795190000, chat: { id: -100123, type: 'channel', username: 'alfatraderspublic' }, text };
+}
 async function post(update) {
   const r = res();
   await telegramWebhook({ method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'unit-secret' }, body: update }, r);
@@ -94,4 +97,29 @@ test('QA katmanı da duyurular konusunda cevap üretmez (ikinci savunma)', async
   assert.equal(await handleTelegramUpdate({ message: announce }), null);
   const normal = await handleTelegramUpdate({ message: message(9008, 4, '/start').message });
   assert.ok(normal && /Alfa Traders piyasa asistanı/.test(normal.reply));
+});
+test('duyuru kanalının kanal gönderileri, callback ve komutları da sessize alınır', async t => {
+  const calls = setup(t);
+  const updates = [
+    { update_id: 9010, channel_post: channelPost(9010) },
+    { update_id: 9011, edited_channel_post: channelPost(9011, 'Düzenlenen duyuru') },
+    { update_id: 9012, callback_query: { id: 'cb-1', message: message(9012, DUYURU_THREAD, '/data').message, data: 'noop' } },
+    message(9013, '1', '/ask BTC'),
+    message(9014, DUYURU_THREAD, '/grafik BTC'),
+    message(9015, DUYURU_THREAD, '/data'),
+  ];
+  for (const update of updates) {
+    const r = await post(update);
+    assert.equal(r.code, 200);
+    assert.equal(r.body.skipped, 'announcements');
+  }
+  assert.equal(sends(calls).length, 0);
+});
+test('QA katmanı kanal duyurularında da cevap üretmez', async t => {
+  setup(t);
+  const announce = channelPost(9016);
+  assert.equal(await handleTelegramUpdate({ channel_post: announce }), null);
+  assert.equal(await handleTelegramUpdate({ edited_channel_post: announce }), null);
+  const normal = await handleTelegramUpdate({ message: message(9017, 4, 'BTC ne durumda?').message });
+  assert.ok(normal && normal.reply);
 });

@@ -135,8 +135,9 @@ Kaynak belge ve tarihsel fixture/grafikler `.vercelignore` ile public deploy dos
 
 ## 7. Duyurular konusu sessize alındı
 
-`https://t.me/alfatraderspublic/1` (Duyurular) konusuna yazılan mesajlara bot artık cevap vermez. `lib/telegram-topics.mjs` içindeki `DUYURU_THREAD = 1` sabiti webhook ve Q&A katmanında ortak kullanılır:
+`https://t.me/alfatraderspublic/1` (Duyurular) konusuna yazılan mesajlara bot artık cevap vermez. `lib/telegram-topics.mjs` içindeki `DUYURU_THREAD = 1` sabiti ve `isAnnouncementUpdate()` helper'ı webhook ve Q&A katmanında ortak kullanılır:
 
-- `lib/telegram-webhook.mjs`: `message` / `edited_message` içinde `message_thread_id: 1` ise hiçbir komut, mention, fotoğraf veya Q&A akışına girilmeden `200` döner.
+- `lib/telegram-webhook.mjs`: update parse edildikten hemen sonra duyuru algılanırsa ingestion, dedupe, komut, mention, fotoğraf ve Q&A akışlarına hiç girilmeden `200` döner.
+- `message`, `edited_message`, `channel_post`, `edited_channel_post` ve `callback_query.message` kapsanır; `message_thread_id` sayı veya metin (`1`) olabilir, thread'siz duyuru kanalı da sessize alınır.
 - `lib/telegram-qa.mjs`: ikinci savunma olarak aynı konuda cevap üretmez (başka bir çağrı yolu oluşursa da sessiz kalır).
 - Diğer konular (`/4` public charts, Q&A konuları, DM) ve ingestion akışları (Edu `/4`, mentor `/6`, dergi `/977`) etkilenmez. Yeni env var veya Telegram ayarı gerekmez.

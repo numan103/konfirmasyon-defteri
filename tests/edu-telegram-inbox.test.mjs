@@ -10,6 +10,7 @@ const message = (extra = {}) => ({ update_id: 1, message: {
   chat: { id: -10042, type: 'supergroup', username: 'alfakasim' },
   from: { id: 123, is_bot: false }, text: 'Günlük not\nBoyun çizgisi teyidini bekle.', ...extra,
 } });
+const stored = (f, id) => openChannels(f.rows.get(id).data, 'telegram-inbox:' + id.slice(6));
 function fixture(t, { admin = true, authorStatus = 'administrator', fail = false, failIndexOnce = false, hookUrl = 'https://alfa-trader.com/api/ai?telegram-webhook=1' } = {}) {
   for (const [key, value] of Object.entries({ TG_BOT_TOKEN: 'unit-bot', TELEGRAM_WEBHOOK_SECRET: 'unit-webhook', SUPABASE_SERVICE_ROLE: 'unit-service', EDU_CHANNEL_SECRET: 'unit-key', SITE_ADMIN_EMAILS: 'admin@test.dev', TG_EDU_SOURCE_CHAT: '@alfakasim', TG_EDU_SOURCE_THREAD: '4', TG_EDU_AUTHOR_IDS: '' })) {
     const old = process.env[key]; process.env[key] = value;
@@ -23,8 +24,14 @@ function fixture(t, { admin = true, authorStatus = 'administrator', fail = false
     if (u.endsWith('/getWebhookInfo')) return Response.json({ ok: true, result: { url: hookUrl, allowed_updates: ['message', 'edited_message'] } });
     if (u.endsWith('/getChat')) return Response.json({ ok: true, result: { id: -10042 } });
     if (u.endsWith('/getChatMember')) return Response.json({ ok: true, result: { status: authorStatus } });
-    if (u.endsWith('/getFile')) return Response.json({ ok: true, result: { file_path: 'photos/unit.jpg' } });
-    if (u.includes('/file/bot')) return new Response(Buffer.from([255, 216, 255, 0, 1, 2]), { headers: { 'Content-Type': 'image/jpeg' } });
+    if (u.endsWith('/getFile')) {
+      const fileId = String(JSON.parse(options.body || '{}').file_id || 'unit').replace(/[^a-zA-Z0-9_-]/g, '');
+      return Response.json({ ok: true, result: { file_path: 'photos/' + fileId + '.jpg' } });
+    }
+    if (u.includes('/file/bot')) {
+      const label = String(u.split('/').pop() || 'unit').replace(/\.jpg$/, '');
+      return new Response(Buffer.concat([Buffer.from([255, 216, 255]), Buffer.from(label)]), { headers: { 'Content-Type': 'image/jpeg' } });
+    }
     if (u.includes('/rest/v1/edu_shared')) {
       const query = new URL(u).searchParams;
       if (fail && ['POST', 'PATCH'].includes(options.method)) return Response.json({}, { status: 503 });
@@ -291,4 +298,73 @@ test('trusted legacy source records synchronize automatically without approval, 
 test('invalid source configuration fails closed rather than importing arbitrary unnamed groups', t => {
   fixture(t); process.env.TG_EDU_SOURCE_CHAT = '@';
   assert.equal(isEduTelegramUpdate(message({ chat: { id: -10042, type: 'supergroup' } })), false);
+});
+test('two consecutive long Telegram messages merge into one daily note', async t => {
+  const f = fixture(t);
+  const first = 'A'.repeat(3100), second = 'devamı burada başlıyor ve aynı notun ikinci parçası.';
+  await ingestEduTelegramUpdate(message({ message_id: 70, date: 1795180100, text: first }));
+  await ingestEduTelegramUpdate(message({ message_id: 71, date: 1795180101, text: second }));
+  const feed = await f.request({ authenticated: false, query: { view: 'daily-notes' } });
+  assert.equal(feed.body.items.length, 1);
+  const id = eduTelegramRowId(-10042, 70);
+  assert.equal(feed.body.items[0].id, id);
+  const full = await f.request({ authenticated: false, query: { view: 'daily-notes', note: id } });
+  assert.ok(full.body.item.body.includes(first + '\n' + second));
+  assert.equal(stored(f, id).sourceParts.length, 2);
+  assert.equal(stored(f, eduTelegramRowId(-10042, 71)).publication, 'hidden');
+  assert.equal(stored(f, eduTelegramRowId(-10042, 71)).absorbedBy, id);
+});
+test('editing an absorbed part updates the merged note and a stale edit cannot revert it', async t => {
+  const f = fixture(t);
+  const first = 'B'.repeat(3100), second = 'ikinci parça';
+  await ingestEduTelegramUpdate(message({ message_id: 72, date: 1795180200, text: first }));
+  await ingestEduTelegramUpdate(message({ message_id: 73, date: 1795180201, text: second }));
+  const id = eduTelegramRowId(-10042, 72);
+  await ingestEduTelegramUpdate({ edited_message: message({ message_id: 73, date: 1795180201, text: 'DÜZELTİLMİŞ İKİNCİ PARÇA', edit_date: 1795180300 }).message });
+  let full = await f.request({ authenticated: false, query: { view: 'daily-notes', note: id } });
+  assert.ok(full.body.item.body.includes('DÜZELTİLMİŞ İKİNCİ PARÇA'));
+  await ingestEduTelegramUpdate({ edited_message: message({ message_id: 73, date: 1795180201, text: 'ESKİ İKİNCİ PARÇA', edit_date: 1795180290 }).message });
+  full = await f.request({ authenticated: false, query: { view: 'daily-notes', note: id } });
+  assert.ok(!full.body.item.body.includes('ESKİ İKİNCİ PARÇA'));
+  assert.equal((await f.request({ authenticated: false, query: { view: 'daily-notes' } })).body.items.length, 1);
+});
+test('manually edited or hidden notes are never absorbed into a following part', async t => {
+  const f = fixture(t);
+  const first = 'C'.repeat(3100), second = 'devam parçası';
+  await ingestEduTelegramUpdate(message({ message_id: 74, date: 1795180400, text: first }));
+  const manualId = eduTelegramRowId(-10042, 74);
+  const saved = await f.request({ method: 'POST', query: { view: 'daily-notes' }, body: { action: 'save', id: manualId, fields: { title: 'Manuel', body: 'Manuel metin', photos: [] } } });
+  assert.equal(saved.code, 200);
+  await ingestEduTelegramUpdate(message({ message_id: 75, date: 1795180401, text: second }));
+  const hiddenId = eduTelegramRowId(-10042, 75);
+  assert.equal((await f.request({ method: 'POST', query: { view: 'daily-notes' }, body: { action: 'remove', id: hiddenId } })).code, 200);
+  await ingestEduTelegramUpdate(message({ message_id: 76, date: 1795180402, text: 'üçüncü parça' }));
+  const feed = await f.request({ authenticated: false, query: { view: 'daily-notes' } });
+  assert.equal(feed.body.items.length, 2);
+  assert.deepEqual(new Set(feed.body.items.map(item => item.id)), new Set([manualId, eduTelegramRowId(-10042, 76)]));
+  assert.equal(stored(f, manualId).body, 'Manuel metin');
+  assert.equal(stored(f, hiddenId).absorbedBy, undefined);
+});
+test('Telegram album parts merge into one note with all distinct photos', async t => {
+  const f = fixture(t);
+  await ingestEduTelegramUpdate(message({ message_id: 80, date: 1795180500, text: undefined, caption: 'Albüm açıklaması', photo: [{ file_id: 'album-a', file_size: 1000 }], media_group_id: 'grp-1' }));
+  await ingestEduTelegramUpdate(message({ message_id: 81, date: 1795180501, text: undefined, caption: 'İkinci görsel', photo: [{ file_id: 'album-b', file_size: 1000 }], media_group_id: 'grp-1' }));
+  const feed = await f.request({ authenticated: false, query: { view: 'daily-notes' } });
+  assert.equal(feed.body.items.length, 1);
+  const id = eduTelegramRowId(-10042, 80);
+  assert.equal(feed.body.items[0].id, id);
+  const full = await f.request({ authenticated: false, query: { view: 'daily-notes', note: id } });
+  assert.equal(full.body.item.body, 'Albüm açıklaması\nİkinci görsel');
+  assert.equal(full.body.item.photos.length, 2);
+  assert.notEqual(full.body.item.photos[0].url, full.body.item.photos[1].url);
+  assert.equal(stored(f, id).sourceParts.length, 2);
+  assert.equal(stored(f, id).mediaGroupId, 'grp-1');
+});
+test('short unrelated Telegram messages stay as separate daily notes', async t => {
+  const f = fixture(t);
+  await ingestEduTelegramUpdate(message({ message_id: 90, date: 1795180600, text: 'Kısa bir not' }));
+  await ingestEduTelegramUpdate(message({ message_id: 91, date: 1795180601, text: 'devam gibi görünen kısa mesaj' }));
+  const feed = await f.request({ authenticated: false, query: { view: 'daily-notes' } });
+  assert.equal(feed.body.items.length, 2);
+  assert.deepEqual(new Set(feed.body.items.map(item => item.id)), new Set([eduTelegramRowId(-10042, 90), eduTelegramRowId(-10042, 91)]));
 });
