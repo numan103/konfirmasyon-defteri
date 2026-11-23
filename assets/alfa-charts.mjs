@@ -1,6 +1,6 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
-import { DrawingEngine } from './alfa-drawings.mjs?v=3';
+import { DrawingEngine } from './alfa-drawings.mjs?v=4';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
@@ -740,6 +740,27 @@ $('fullscreen').addEventListener('click', async () => {
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? 'Küçült' : 'Tam ekran'; });
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+try {
+  const magOn = localStorage.getItem('alfa-magnet:v1') === '1';
+  drawings.setMagnet(magOn);
+  const mb = $('magnet-toggle'); if (mb) mb.setAttribute('aria-pressed', String(magOn));
+  const vis = localStorage.getItem('alfa-drawings-visible:v1') !== '0';
+  drawings.setDrawingsVisible(vis);
+  const vb = $('drawings-toggle'); if (vb) { vb.setAttribute('aria-pressed', String(vis)); vb.textContent = vis ? '👁 Çizimler' : '👁‍🗨 Gizli'; }
+} catch {}
+$('magnet-toggle').addEventListener('click', () => {
+  const on = !drawings.magnet;
+  drawings.setMagnet(on);
+  $('magnet-toggle').setAttribute('aria-pressed', String(on));
+  try { localStorage.setItem('alfa-magnet:v1', on ? '1' : '0'); } catch {}
+});
+$('drawings-toggle').addEventListener('click', () => {
+  const on = !drawings.drawingsVisible;
+  drawings.setDrawingsVisible(on);
+  const vb = $('drawings-toggle');
+  vb.setAttribute('aria-pressed', String(on));
+  vb.textContent = on ? '👁 Çizimler' : '👁‍🗨 Gizli';
+});
 const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });

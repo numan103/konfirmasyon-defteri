@@ -8,6 +8,7 @@ export class DrawingEngine {
   constructor({ chart, series, host, getBars, getInterval }) {
     Object.assign(this, { chart, series, host, getBars, getInterval });
     this.market = 'BTCUSDT'; this.tool = 'cursor'; this.selected = null; this.history = new DrawingHistory();
+    this.magnet = false; this.drawingsVisible = true;
     this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map();
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.svg.classList.add('drawing-overlay'); this.svg.setAttribute('aria-label', 'Fiyat ve zaman koordinatlı çizimler');
@@ -65,6 +66,27 @@ export class DrawingEngine {
     const r = this.host.getBoundingClientRect(), { width, height } = this.dimensions();
     return e.clientX >= r.left && e.clientX <= r.left + width && e.clientY >= r.top && e.clientY <= r.top + height;
   }
+  setMagnet(on) { this.magnet = !!on; }
+  setDrawingsVisible(on) {
+    this.drawingsVisible = !!on;
+    this.svg.style.display = on ? '' : 'none';
+    try { localStorage.setItem('alfa-drawings-visible:v1', on ? '1' : '0'); } catch {}
+  }
+  snapPoint(point) {
+    if (!this.magnet || !point) return point;
+    const bars = this.getBars();
+    if (!bars.length) return point;
+    let best = null, bestDt = Infinity;
+    for (const b of bars) {
+      const dt = Math.abs(b.time - point.time);
+      if (dt < bestDt) { bestDt = dt; best = b; }
+    }
+    if (!best) return point;
+    const ohlc = [best.open, best.high, best.low, best.close];
+    let price = point.price, bestDp = Infinity;
+    for (const v of ohlc) { const dp = Math.abs(v - point.price); if (dp < bestDp) { bestDp = dp; price = v; } }
+    return { time: best.time, price };
+  }
   unproject(e, clamp = false) {
     if (!this.getBars().length || (!clamp && !this.inPlot(e))) return null;
     const r = this.host.getBoundingClientRect();
@@ -72,7 +94,7 @@ export class DrawingEngine {
     const price = this.series.coordinateToPrice(e.clientY - r.top);
     if (logical == null || price == null || price <= 0) return null;
     const time = logicalToTime(logical, this.getBars(), this.step());
-    return time > 0 ? { time, price } : null;
+    return time > 0 ? this.snapPoint({ time, price }) : null;
   }
   async openMarket(symbol, force = false) {
     if (this.disposed) return;
