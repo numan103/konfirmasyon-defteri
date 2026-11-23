@@ -3,7 +3,7 @@ import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKlin
 import { DrawingEngine } from './alfa-drawings.mjs?v=7';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
-import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=1';
+import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=2';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=2';

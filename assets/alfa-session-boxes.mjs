@@ -19,11 +19,14 @@ export class SessionBoxesManager {
     this.observer = new ResizeObserver(() => this.render());
     this.observer.observe(host);
     this.tick = () => {
-      const ts = chart.timeScale(), bars = getBars();
-      const signature = [ts.logicalToCoordinate(0), ts.logicalToCoordinate(1), series.priceToCoordinate(1),
-        series.priceToCoordinate(100), ts.width(), ts.height(), bars.length, bars.at(-1)?.time,
-        JSON.stringify(this.config)].join(':');
-      if (signature !== this.signature) { this.signature = signature; this.render(); }
+      // Transient errors during data/scale swaps must never kill the loop.
+      try {
+        const ts = chart.timeScale(), bars = getBars();
+        const signature = [ts.logicalToCoordinate(0), ts.logicalToCoordinate(1), series.priceToCoordinate(1),
+          series.priceToCoordinate(100), ts.width(), ts.height(), bars.length, bars.at(-1)?.time,
+          JSON.stringify(this.config)].join(':');
+        if (signature !== this.signature) { this.render(); this.signature = signature; }
+      } catch {}
       this.frame = requestAnimationFrame(this.tick);
     };
     this.tick();
