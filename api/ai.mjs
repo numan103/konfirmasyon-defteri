@@ -213,7 +213,7 @@ export async function influencerHandler(req, res) {
     const user = await auth.json();
     if (!user.id) return influencerReply(res, 401, { ok: false, error: 'login_required' });
     const configuredAdmins = [process.env.SITE_ADMIN_EMAILS, process.env.SITE_ADMIN_EMAIL, process.env.SITE_ADMIN_EMAILS_EXTRA].filter(Boolean).join(',');
-    const admins = (configuredAdmins.includes('@') ? configuredAdmins : 'ahmetnuman20@gmail.com,fjortrades@gmail.com').split(',').map(s => s.trim().toLowerCase());
+    const admins = (configuredAdmins.includes('@') ? configuredAdmins : 'ahmetnuman20@gmail.com,fjortrades@gmail.com,fjortrading@gmail.com').split(',').map(s => s.trim().toLowerCase());
     const admin = admins.includes(String(user.email || '').toLowerCase());
     if (req.method === 'GET') {
       // No storage prerequisite for the admin's private outline.

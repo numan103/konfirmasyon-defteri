@@ -84,6 +84,19 @@ test('Charts tester sees only the granted product; permissions cannot cross acco
   ctx.AUTH.user = null;
   assert.equal(ctx.siteCanOpen('alfacharts'), false);
 });
+test('site admin list covers the requested and live Fjor accounts', () => {
+  const ctx = client();
+  for (const email of ['admin@example.test', 'fjortrades@gmail.com', 'fjortrading@gmail.com']) {
+    ctx.AUTH.user = { id: 'admin-id', email };
+    assert.equal(ctx.siteIsAdminEmail(), true, email);
+    ctx.SITE.admin = false;
+    ctx.siteApplyAccess({ user_id: ctx.AUTH.user.id, tier: 'free', features: {} });
+    assert.equal(ctx.SITE.admin, true, email);
+    assert.equal(ctx.siteCanOpen('alfacharts'), true, email);
+  }
+  ctx.AUTH.user = { id: 'other-id', email: 'other@example.test' };
+  assert.equal(ctx.siteIsAdminEmail(), false);
+});
 test('no session or failed access lookup clears the cached scoped grant', async () => {
   const ctx = client();
   const grant = { user_id: member.id, features: { alfacharts: true } };

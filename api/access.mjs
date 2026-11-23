@@ -36,7 +36,7 @@ import { isFreeMarketRef } from '../assets/alfa-charts-data.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 
-const FALLBACK_ADMINS = 'ahmetnuman20@gmail.com,fjortrades@gmail.com';
+const FALLBACK_ADMINS = 'ahmetnuman20@gmail.com,fjortrades@gmail.com,fjortrading@gmail.com';
 const COOLDOWN_MS = 20000;
 const MAX_ATTEMPTS = 10;
 const MENTOR_REFRESH_MS = 30000;
