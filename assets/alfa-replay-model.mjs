@@ -60,6 +60,25 @@ export class ReplayEngine {
     return this.snapshot();
   }
   snapshot() { return this.#full.slice(0, this.index).map(b => ({ ...b })); }
+  get length() { return this.#full.length; }
+  timeAt(index) {
+    const i = clampIndex(index, this.#full.length);
+    if (i <= 0) return null;
+    return this.#full[i - 1]?.time ?? null;
+  }
+  seek(index) {
+    const target = clampIndex(index, this.#full.length);
+    const bounded = Math.max(this.startIndex, target);
+    // Validate holes on the traversed range, matching step() semantics.
+    const from = Math.min(this.index, bounded), to = Math.max(this.index, bounded);
+    for (let i = Math.max(1, from); i < to; i++) {
+      if (this.#full[i].time !== candleCloseTime(this.#full[i - 1].time, this.timeframe)) {
+        throw new Error('Missing replay candle');
+      }
+    }
+    this.index = Math.max(1, bounded);
+    return this.snapshot();
+  }
   get clock() {
     const b = this.#full[this.index - 1];
     return b ? candleCloseTime(b.time, this.timeframe) : null;

@@ -381,6 +381,12 @@ function applyReplaySlice() {
   quote();
   const info = $('replay-info');
   paper.update();
+  const timeline = $('replay-timeline');
+  if (timeline && replayEngine) {
+    timeline.min = String(replayEngine.startIndex);
+    timeline.max = String(replayEngine.length);
+    timeline.value = String(replayIndex);
+  }
   if (info) info.textContent = new Date(replayEngine.clock * 1000).toISOString() + ' · Confirmed';
   connection('REPLAY · yalnızca kapanmış mumlar', 'replay');
 }
@@ -1334,6 +1340,13 @@ $('replay-play').addEventListener('click', playReplay);
 $('replay-pause').addEventListener('click', pauseReplay);
 $('replay-prev').addEventListener('click', () => stepReplay(-1));
 $('replay-next').addEventListener('click', () => stepReplay(1));
+$('replay-timeline')?.addEventListener('input', () => {
+  if (!replayMode || !replayEngine) return;
+  pauseReplay();
+  try { replayEngine.seek(Number($('replay-timeline').value)); } catch {}
+  applyReplaySlice();
+  withSyncApply(() => chart.timeScale().setVisibleLogicalRange({from:Math.max(0,replayIndex-100),to:replayIndex+8}));
+});
 $('replay-restart').addEventListener('click', restartReplay);
 $('replay-stop').addEventListener('click', exitReplay);
 $('paper-toggle').addEventListener('click',()=>paper.toggle());
