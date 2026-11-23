@@ -76,8 +76,8 @@ export function parseMarketRef(raw) {
   }
   if (venue === 'CRYPTOCAP') {
     const label = TV_ONLY[ref];
-    if (!label) throw new Error('Desteklenmeyen TradingView endeksi');
-    return descriptor(ref, 'tv', ref, venue, 'index', label + ' · TradingView', ref, '', false);
+    if (!label) throw new Error('Desteklenmeyen kripto endeksi');
+    return descriptor(ref, 'tv', ref, venue, 'index', label + ' · Kripto Endeksi', ref, '', false);
   }
   if (YAHOO[ref]) {
     const [feedSymbol, label, quote, marketType] = YAHOO[ref];

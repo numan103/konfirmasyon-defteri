@@ -232,6 +232,7 @@ test('chart workspace has TradingView-style context actions without vendor brand
   assert.doesNotMatch(html, /Binance mum verileri yükleniyor|Piyasa verileri yükleniyor/);
   assert.match(script, /attributionLogo:\s*false/);
   assert.doesNotMatch(script, /ALFA CHARTS ·|alfa-charts-\$\{String\(symbol\)/);
+  assert.doesNotMatch(read('assets/alfa-charts-data.mjs'), /' · TradingView'/);
   for (const action of [
     'Grafik görünümü sıfırla', 'Grafik ayarları…', 'Görünümü sığdır', 'Son muma dön',
     'Tam ekran', 'Sade mod', 'Logaritmik fiyat ölçeği', 'Ekran görüntüsü indir', 'Bağlantıyı kopyala'
