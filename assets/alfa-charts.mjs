@@ -17,7 +17,8 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=1';
-import { initMultiChart } from './alfa-multichart.mjs?v=1';
+import { initMultiChart } from './alfa-multichart.mjs?v=2';
+import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
@@ -26,8 +27,24 @@ import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
 const host = $('chart');
-const isEmbed = new URLSearchParams(location.search).has('embed');
+const search = new URLSearchParams(location.search);
+const isEmbed = search.has('embed');
 if (isEmbed) document.body.classList.add('embed-chart');
+// Multi-chart panes are same-origin embedded charts. The parent is the only
+// hub; panes never message each other directly.
+const syncSession = search.get('mcid') || '';
+const syncPaneId = Math.max(0, Math.min(1000000, Number(search.get('pane')) || 0));
+const syncInstance = (() => {
+  let token;
+  try { token = crypto?.randomUUID?.(); } catch {}
+  return `pane-${syncPaneId}-${token || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
+})();
+let syncApplyDepth = 0, syncReady = false, lastParentSeq = 0, parentInstance = '', lastAppliedSync = null, syncSuppressUntil = 0;
+const syncTimers = new Map(), syncPending = new Map();
+const syncGate = syncSession ? createMessageGate({
+  session: syncSession, instance: syncInstance, paneId: syncPaneId,
+  post: envelope => { try { window.parent.postMessage(envelope, location.origin); } catch {} }
+}) : null;
 hydrateIcons();
 let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, pricePrecisionKey = '';
 const alarmPriceTracker = createPriceTracker();
@@ -35,6 +52,7 @@ function setActiveSymbol(next) {
   if (!next || next === symbol) return false;
   alarmPriceTracker.reset(next);
   symbol = next;
+  if (syncGate && syncReady && !syncApplyDepth) syncGate.send('symbol', { symbol: next });
   loadMarket();
   return true;
 }
@@ -168,8 +186,118 @@ const observer = new ResizeObserver(([entry]) => {
   chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
 });
 observer.observe(host);
+
+function withSyncApply(fn) { syncApplyDepth++; try { return fn(); } finally { syncApplyDepth--; } }
+function visibleTimeRange() {
+  try {
+    const range = chart.timeScale().getVisibleRange();
+    if (!range) return null;
+    const from = Number(range.from), to = Number(range.to);
+    return Number.isFinite(from) && Number.isFinite(to) ? { from, to } : null;
+  } catch { return null; }
+}
+function applyRangePayload(payload) {
+  if (!payload) return;
+  const ts = chart.timeScale();
+  try {
+    if (payload.time) ts.setVisibleRange(payload.time);
+    else if (payload.logical) ts.setVisibleLogicalRange(payload.logical);
+  } catch {}
+}
+function applyCrosshairPayload(payload) {
+  if (!payload) return;
+  if (!payload.visible) { chart.clearCrosshairPosition(); return; }
+  const ts = chart.timeScale();
+  let x = null;
+  try { if (payload.time != null) x = ts.timeToCoordinate(payload.time); } catch {}
+  if (x == null) { try { if (payload.logical != null) x = ts.logicalToCoordinate(payload.logical); } catch {} }
+  // Remote crosshairs carry chart-local pixels; only the time/logical anchor is
+  // portable. Ignore anchors outside this pane and clamp the vertical position.
+  if (x == null || x < 0 || x > host.clientWidth) { chart.clearCrosshairPosition(); return; }
+  const rawY = Number.isFinite(payload.point?.y) ? payload.point.y : host.clientHeight / 2;
+  const y = Math.max(0, Math.min(host.clientHeight, rawY));
+  try { chart.setCrosshairPosition(x, y, activePriceSeries()); } catch {}
+}
+function clearSyncTimers() {
+  for (const timer of syncTimers.values()) clearTimeout(timer);
+  syncTimers.clear(); syncPending.clear();
+}
+function queueSync(type, payload, delay = 32) {
+  if (!syncGate || !syncReady || syncApplyDepth || Date.now() < syncSuppressUntil) return;
+  syncPending.set(type, payload);
+  if (syncTimers.has(type)) return;
+  syncTimers.set(type, setTimeout(() => {
+    syncTimers.delete(type);
+    if (syncApplyDepth || Date.now() < syncSuppressUntil) return;
+    const next = syncPending.get(type); syncPending.delete(type);
+    if (next) syncGate.send(type, next);
+  }, delay));
+}
+function notifyMainSync(type, payload) {
+  if (disposed || syncApplyDepth || !payload) return;
+  try { multiChart?.syncFromMain?.(type, payload); } catch {}
+}
+function getMainSyncState() { return { range: visibleTimeRange() }; }
+function reapplyLastSync() {
+  if (!syncReady || !lastAppliedSync || replayMode) return;
+  const { type, payload } = lastAppliedSync;
+  withSyncApply(() => {
+    if (type === 'range') applyRangePayload(payload);
+    if (type === 'state') { applyRangePayload(payload.range); applyCrosshairPayload(payload.crosshair); }
+    if (type === 'crosshair') applyCrosshairPayload(payload);
+  });
+}
+function applyMainSync({ type, payload } = {}) {
+  withSyncApply(() => {
+    if (type === 'range') applyRangePayload(payload);
+    if (type === 'crosshair') applyCrosshairPayload(payload);
+  });
+}
+function onSyncMessage(event) {
+  if (!syncGate || event.source !== window.parent || event.origin !== location.origin) return;
+  const message = readEnvelope(event.data, {
+    origin: event.origin, expectedOrigin: location.origin,
+    allowedSources: new Set([window.parent]), source: event.source, session: syncSession
+  });
+  // Parent commands carry source paneId 0; pane-originated messages are never
+  // routed directly to another pane.
+  if (!message || (message.paneId !== 0 && message.paneId !== syncPaneId) || message.instance === syncInstance) return;
+  if (message.instance !== parentInstance) { parentInstance = message.instance; lastParentSeq = 0; }
+  if (message.seq <= lastParentSeq) return;
+  lastParentSeq = message.seq;
+  withSyncApply(() => {
+    if (message.type === 'state' || message.type === 'symbol') {
+      const raw = message.payload.symbol;
+      if (raw && isMarketSymbol(raw)) {
+        try {
+          const ref = parseMarketRef(String(raw).toUpperCase()).key;
+          if (ref !== symbol) setActiveSymbol(ref);
+        } catch {}
+      }
+    }
+    if (message.type === 'state' || message.type === 'range') {
+      applyRangePayload(message.type === 'range' ? message.payload : message.payload.range);
+    }
+    if (message.type === 'state' || message.type === 'crosshair') {
+      applyCrosshairPayload(message.type === 'crosshair' ? message.payload : message.payload.crosshair);
+    }
+    lastAppliedSync = { type: message.type, payload: message.payload, at: Date.now() };
+  });
+  if (message.type === 'state') {
+    syncReady = true;
+    syncSuppressUntil = Date.now() + 150;
+    syncPending.clear();
+  }
+}
+window.addEventListener('message', onSyncMessage);
+
 chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-  if (range && range.from < 40 && !loadingOlder && history.length >= 900) loadOlderHistory();
+  if (range && range.from < 40 && !loadingOlder && history.length >= 900 && !syncApplyDepth) loadOlderHistory();
+  if (!syncApplyDepth && !replayMode && history.length && range) {
+    const rangePayload = { logical: { from: quantize(range.from), to: quantize(range.to) }, time: visibleTimeRange() };
+    notifyMainSync('range', rangePayload);
+    queueSync('range', rangePayload, 48);
+  }
 });
 
 function connection(text, state = 'waiting') {
@@ -224,7 +352,7 @@ async function loadOlderHistory() {
     seriesBars = deduped;
     rememberHistory(symbol, interval, history);
     syncSeriesData(history);
-    if (range) chart.timeScale().setVisibleLogicalRange({ from: range.from + added, to: range.to + added });
+    if (range) withSyncApply(() => chart.timeScale().setVisibleLogicalRange({ from: range.from + added, to: range.to + added }));
     try { indicators.updateAll(history); } catch {}
     try { sessionLevels.render(); } catch {}
     try { marketStructure.render(); } catch {}
@@ -347,7 +475,7 @@ async function enterReplay({target,session=null,researchPacket=null}={}) {
   if (bar) bar.hidden = false;
   try { $('live').disabled = true; } catch {}
   applyReplaySlice();
-  chart.timeScale().setVisibleLogicalRange({from:Math.max(0,replayIndex-100),to:replayIndex+8});
+  withSyncApply(() => chart.timeScale().setVisibleLogicalRange({from:Math.max(0,replayIndex-100),to:replayIndex+8}));
   drawings.refresh();
   if(aligned!==target)connection('REPLAY · en yakın mum açılışı '+new Date(aligned*1000).toISOString(),'replay');
 }
@@ -449,8 +577,11 @@ function setData(data, resetView) {
   if (isChartableRef(symbol)) rememberHistory(symbol, interval, history);
   syncSeriesData(history);
   if (resetView) {
-    chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, history.length - 130), to: history.length + 8 });
+    withSyncApply(() => chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, history.length - 130), to: history.length + 8 }));
   }
+  // A pane can receive parent state before its first candles arrive. Restore the
+  // last accepted remote view after the data is in place so sync survives boot.
+  reapplyLastSync();
   quote();
   if (pendingIndicators) { try { indicators.fromJSON(pendingIndicators); } catch {} pendingIndicators = null; }
   else { try { indicators.updateAll(history); } catch {} }
@@ -461,8 +592,22 @@ function setData(data, resetView) {
 }
 chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(activePriceSeries());
-  if (!bar || !param.time) { showCandle(history.at(-1)); return; }
+  if (!bar || !param.time) {
+    showCandle(history.at(-1));
+    queueSync('crosshair', { visible: false });
+    notifyMainSync('crosshair', { visible: false });
+    return;
+  }
   showCandle(history.find(c => c.time === param.time));
+  const time = Number(param.time);
+  if (!Number.isFinite(time)) return;
+  const payload = {
+    visible: true, time,
+    logical: Number.isFinite(param.logical) ? quantize(param.logical) : null,
+    point: param.point ? { x: Math.round(param.point.x), y: Math.round(param.point.y) } : null
+  };
+  queueSync('crosshair', payload, 24);
+  notifyMainSync('crosshair', payload);
 });
 host.addEventListener('keydown', event => {
   const range = chart.timeScale().getVisibleLogicalRange();
@@ -1130,6 +1275,7 @@ function dispose() {
   pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation;
   closeTransport(); clearTimeout(cloudSaveTimer); cloudSettings.dispose();
   try { publicStudies?.dispose(); } catch {}
+  clearSyncTimers(); window.removeEventListener('message', onSyncMessage);
   drawings.dispose(); watchlist.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove();
 }
 window.addEventListener('pagehide', dispose, { once: true });
@@ -1141,6 +1287,10 @@ if (new URLSearchParams(location.search).has('debug')) {
   window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, publicStudies, paper, research,
     get multiChart() { return multiChart; },
     get multiState() { return structuredClone(multiChart?.state || {}); },
+    get sync() { return { session: syncSession, paneId: syncPaneId, instance: syncInstance, ready: syncReady, seq: syncGate?.seq || 0, lastAppliedSync }; },
+    get mainSync() { return multiChart?.syncState || null; },
+    sendSync: (type, payload) => syncGate?.send(type, payload, { force: true }) || null,
+    applyMainSync, getMainSyncState,
     get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; },
     get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
     resetChartView, openChartSettingsModal, handleChartAction,
@@ -1565,7 +1715,9 @@ applyViewConfig();
 if (!isEmbed) {
   try {
     multiChart = initMultiChart({ getSymbol: () => symbol, getInterval: () => interval,
-      setSymbol: next => setActiveSymbol(next), onStatus: connection });
+      setSymbol: next => setActiveSymbol(next), onStatus: connection,
+      applyMainSync, getMainSyncState });
   } catch {}
 }
+if (syncGate) syncGate.send('hello', { symbol, interval }, { force: true });
 loadMarket();

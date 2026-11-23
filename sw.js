@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v148-leverage-hedge';
-const BUILD_ID = 'b209-leverage-hedge';
+﻿const CACHE = 'alfa-v149-multichart-sync';
+const BUILD_ID = 'b210-multichart-sync';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

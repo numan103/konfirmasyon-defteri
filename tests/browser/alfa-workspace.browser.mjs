@@ -351,6 +351,199 @@ try {
       assert.equal(await state(() => window.__alfaDebug.multiState.panes.length), 1);
     } finally { await page.unroute(embedRoute, handler); }
   });
+  await test('multi-chart crosshair, time axis and symbol sync run without message loops', async () => {
+    const embedRoute = /\/alfa-charts\.html\?embed=1/;
+    const stub = `<!doctype html><html><body><script>
+      const q = new URLSearchParams(location.search);
+      const session = q.get('mcid'), pane = Number(q.get('pane'));
+      window.__paneLog = [];
+      window.addEventListener('message', e => {
+        if (e.origin !== location.origin || e.source !== parent) return;
+        window.__paneLog.push(e.data);
+      });
+      let seq = 0;
+      window.__paneSend = (type, payload, replyTo = 0) => {
+        const envelope = { channel: 'alfa-multichart:sync:v1', session, instance: 'stub-' + pane,
+          paneId: pane, seq: ++seq, type, payload, replyTo };
+        parent.postMessage(envelope, location.origin);
+        return envelope.seq;
+      };
+      window.__paneSend('hello', { symbol: q.get('symbol'), interval: q.get('interval') });
+    <\/script></body></html>`;
+    const handler = route => route.fulfill({ contentType: 'text/html', body: stub });
+    await page.route(embedRoute, handler);
+    try {
+      await page.evaluate(() => {
+        const m = window.__alfaDebug.multiChart;
+        m.setOpen(false);
+        for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
+        m.state.panes[0].symbol = 'BTCUSDT';
+        m.state.layout = 2;
+      });
+      await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(true));
+      await page.evaluate(() => window.__alfaDebug.multiChart.addPane('SOLUSDT'));
+      await page.waitForFunction(() => document.querySelectorAll('#multi-grid iframe').length === 2);
+      await page.waitForFunction(() => [...document.querySelectorAll('#multi-grid iframe')].every(f => {
+        try { return f.contentWindow.location.href === f.src; } catch { return false; }
+      }));
+      const session = await state(() => window.__alfaDebug.mainSync.session);
+      const panes = await state(() => [...document.querySelectorAll('#multi-grid iframe')].map(f => {
+        const url = new URL(f.src);
+        return { id: Number(url.searchParams.get('pane')), symbol: url.searchParams.get('symbol'), mcid: url.searchParams.get('mcid') };
+      }));
+      assert.equal(panes.length, 2);
+      assert.ok(panes.every(p => p.mcid === session));
+      assert.deepEqual(panes.map(p => p.symbol), ['BTCUSDT', 'SOLUSDT']);
+      const frameOf = id => page.frames().find(f => {
+        try {
+          const u = new URL(f.url());
+          return u.searchParams.get('pane') === String(id) && u.searchParams.get('mcid') === session;
+        } catch { return false; }
+      });
+      const first = panes[0], second = panes[1];
+      let f1 = frameOf(first.id), f2 = frameOf(second.id);
+      assert.ok(f1 && f2);
+      await f1.waitForFunction(() => window.__paneLog?.some(m => m.type === 'state'));
+      await f2.waitForFunction(() => window.__paneLog?.some(m => m.type === 'state'));
+      assert.equal(await f1.evaluate(() => window.__paneLog.find(m => m.type === 'state').payload.symbol), 'BTCUSDT');
+      assert.equal(await f2.evaluate(() => window.__paneLog.find(m => m.type === 'state').payload.symbol), 'SOLUSDT');
+
+      // Parent main chart -> both panes.
+      const lastTime = await state(() => window.__alfaDebug.history.at(-1).time);
+      await page.evaluate(t => window.__alfaDebug.multiChart.syncFromMain('crosshair',
+        { visible: true, time: t, logical: 100, point: { x: 12, y: 34 } }), lastTime);
+      await f1.waitForFunction(t => window.__paneLog.some(m => m.type === 'crosshair' && m.payload.time === t), lastTime);
+      await f2.waitForFunction(t => window.__paneLog.some(m => m.type === 'crosshair' && m.payload.time === t), lastTime);
+
+      // Pane -> parent -> peers only; the source pane never receives its own event back.
+      const crosshairSeq = await f1.evaluate(t => window.__paneSend('crosshair',
+        { visible: true, time: t + 1, logical: 101, point: { x: 13, y: 35 } }), lastTime);
+      await f2.waitForFunction(s => window.__paneLog.some(m => m.type === 'crosshair' && m.replyTo === s), crosshairSeq);
+      assert.equal(await state(() => window.__alfaDebug.mainSync.lastAppliedFromPane.type), 'crosshair');
+      await page.waitForTimeout(250);
+      assert.equal(await f1.evaluate(() => window.__paneLog.filter(m => m.type === 'crosshair').length), 1);
+      assert.equal(await f2.evaluate(() => window.__paneLog.filter(m => m.type === 'crosshair').length), 2);
+
+      const rangeSeq = await f1.evaluate(() => window.__paneSend('range',
+        { logical: { from: 100.0000001, to: 200 }, time: { from: 1700000000, to: 1700100000 } }));
+      await f2.waitForFunction(s => window.__paneLog.some(m => m.type === 'range' && m.replyTo === s), rangeSeq);
+      assert.equal(await f2.evaluate(() => window.__paneLog.find(m => m.type === 'range').payload.logical.from), 100);
+      await page.waitForTimeout(250);
+      assert.equal(await f1.evaluate(() => window.__paneLog.filter(m => m.type === 'range').length), 0);
+      assert.equal(await f2.evaluate(() => window.__paneLog.filter(m => m.type === 'range').length), 1);
+
+      // Pane symbol changes update its own pane and the main chart without a rebuild storm.
+      await page.evaluate(() => document.querySelectorAll('#multi-grid iframe').forEach(f => {
+        f.__syncProbe = Number(new URL(f.src).searchParams.get('pane'));
+      }));
+      await f1.evaluate(() => window.__paneSend('symbol', { symbol: 'ETHUSDT' }));
+      await page.waitForFunction(id => window.__alfaDebug.multiState.panes.some(p => p.id === id && p.symbol === 'ETHUSDT'), first.id);
+      await ready();
+      assert.equal(await state(() => document.getElementById('symbol').value), 'ETHUSDT');
+      assert.equal(await state(() => window.__alfaDebug.multiState.active), first.id);
+      await page.waitForFunction(id => {
+        const f = [...document.querySelectorAll('#multi-grid iframe')]
+          .find(el => Number(new URL(el.src).searchParams.get('pane')) === id);
+        return f && f.contentWindow?.__paneLog?.some(m => m.type === 'state' && m.payload.symbol === 'ETHUSDT');
+      }, first.id);
+      const finalPanes = await state(() => [...document.querySelectorAll('#multi-grid iframe')].map(f => {
+        const url = new URL(f.src);
+        return { id: Number(url.searchParams.get('pane')), symbol: url.searchParams.get('symbol'), probe: f.__syncProbe };
+      }));
+      const changed = finalPanes.find(p => p.id === first.id), untouched = finalPanes.find(p => p.id === second.id);
+      assert.equal(changed.symbol, 'ETHUSDT');
+      assert.equal(changed.probe, first.id);
+      assert.equal(untouched.symbol, 'SOLUSDT');
+      assert.equal(untouched.probe, second.id);
+      f2 = frameOf(second.id);
+      await page.waitForTimeout(250);
+      assert.equal(await f2.evaluate(() => window.__paneLog.filter(m => m.type === 'symbol').length), 0);
+      const syncState = await state(() => window.__alfaDebug.mainSync);
+      assert.ok(syncState.frames.every(f => f.lastSeq < 20), JSON.stringify(syncState));
+
+      // Restore the suite's single-pane BTC context.
+      await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
+      await page.evaluate(() => {
+        const m = window.__alfaDebug.multiChart;
+        for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
+        m.state.panes[0].symbol = 'BTCUSDT';
+        m.state.layout = 1;
+      });
+      await page.selectOption('#symbol', 'BTCUSDT');
+      await ready();
+    } finally { await page.unroute(embedRoute, handler); }
+  });
+  await test('real embedded panes exchange crosshair and time scale with the parent', async () => {
+    await page.evaluate(() => {
+      const m = window.__alfaDebug.multiChart;
+      m.setOpen(false);
+      for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
+      m.state.panes[0].symbol = 'BTCUSDT';
+      m.state.layout = 2;
+    });
+    await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(true));
+    await page.evaluate(() => window.__alfaDebug.multiChart.addPane('ETHUSDT'));
+    await page.waitForFunction(() => document.querySelectorAll('#multi-grid iframe').length === 2);
+    await page.waitForFunction(() => [...document.querySelectorAll('#multi-grid iframe')]
+      .every(f => f.contentWindow?.__alfaDebug?.ready), null, { timeout: 45000 });
+    const paneIds = await state(() => [...document.querySelectorAll('#multi-grid iframe')]
+      .map(f => Number(new URL(f.src).searchParams.get('pane'))));
+    const session = await state(() => window.__alfaDebug.mainSync.session);
+    const frameOf = id => page.frames().find(f => {
+      try {
+        const u = new URL(f.url());
+        return u.searchParams.get('pane') === String(id) && u.searchParams.get('mcid') === session;
+      } catch { return false; }
+    });
+    const f1 = frameOf(paneIds[0]), f2 = frameOf(paneIds[1]);
+    assert.ok(f1 && f2);
+    await f1.waitForFunction(() => window.__alfaDebug.sync.ready === true);
+    await f2.waitForFunction(() => window.__alfaDebug.sync.ready === true);
+    // The handshake seeds a short echo window; real user-like events start after it.
+    await page.waitForTimeout(250);
+
+    await page.evaluate(() => window.__alfaDebug.multiChart.syncFromMain('range',
+      { logical: { from: 700, to: 820 } }));
+    await f1.waitForFunction(() => {
+      const d = window.__alfaDebug;
+      const range = d.chart.timeScale().getVisibleLogicalRange();
+      return d.sync.lastAppliedSync?.type === 'range'
+        && d.sync.lastAppliedSync.payload?.logical?.from === 700
+        && range && Math.abs(range.from - 700) < 6;
+    });
+    const childRange = await f1.evaluate(() => window.__alfaDebug.chart.timeScale().getVisibleLogicalRange());
+    assert.ok(childRange && Math.abs(childRange.from - 700) < 6, JSON.stringify(childRange));
+
+    // A real mouse move over the pane fires Lightweight Charts' native
+    // crosshair subscription; setCrosshairPosition() does not emit it.
+    const targetTime = await f1.evaluate(mid => {
+      const d = window.__alfaDebug;
+      const index = Math.max(1, Math.min(d.history.length - 1, Math.round(mid)));
+      return d.history[index].time;
+    }, (childRange.from + childRange.to) / 2);
+    const targetX = await f1.evaluate(t => window.__alfaDebug.chart.timeScale().timeToCoordinate(t), targetTime);
+    assert.ok(targetX != null && targetX >= 0, JSON.stringify({ targetX, targetTime, childRange }));
+    const chartBox = await f1.locator('#chart').boundingBox();
+    assert.ok(chartBox);
+    await page.mouse.move(chartBox.x + targetX, chartBox.y + 120);
+    await page.waitForFunction(time => window.__alfaDebug.mainSync.lastAppliedFromPane?.type === 'crosshair'
+      && window.__alfaDebug.mainSync.lastAppliedFromPane.payload?.time === time, targetTime, { timeout: 10000 });
+    await f2.waitForFunction(time => window.__alfaDebug.sync.lastAppliedSync?.type === 'crosshair'
+      && window.__alfaDebug.sync.lastAppliedSync.payload?.time === time, targetTime);
+
+    await f2.evaluate(() => window.__alfaDebug.chart.timeScale().setVisibleLogicalRange({ from: 640, to: 760 }));
+    await page.waitForFunction(() => window.__alfaDebug.mainSync.lastAppliedFromPane?.type === 'range'
+      && window.__alfaDebug.mainSync.lastAppliedFromPane.payload?.logical?.from === 640, null, { timeout: 10000 });
+
+    await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
+    await page.evaluate(() => {
+      const m = window.__alfaDebug.multiChart;
+      for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
+      m.state.panes[0].symbol = 'BTCUSDT';
+      m.state.layout = 1;
+    });
+    await ready();
+  });
   await test('object tree: Ctrl multi-select, grouping, bulk delete, undo and rename', async () => {
     await page.evaluate(() => { const d = window.__alfaDebug.drawings; d.history.commit({ ...d.history.doc, drawings: [] }); });
     const plot = await state(() => { const d = window.__alfaDebug.drawings, r = d.host.getBoundingClientRect(); return { x: r.x, y: r.y, ...d.dimensions() }; });

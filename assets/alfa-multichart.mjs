@@ -1,5 +1,6 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
 import { isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=10';
+import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const CAPACITY = { 1: 1, 2: 2, 4: 4, 6: 6 };
@@ -10,6 +11,12 @@ try {
   owner = JSON.parse(raw || 'null')?.user?.id || 'guest';
 } catch {}
 const STORE = 'alfa-chart-tabs:v1:' + owner;
+
+function localId(prefix) {
+  let token;
+  try { token = crypto?.randomUUID?.(); } catch {}
+  return `${prefix}-${token || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
+}
 
 function loadState() {
   try {
@@ -32,14 +39,166 @@ function watchlistSymbols() {
   } catch { return []; }
 }
 
-export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } = {}) {
+export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, applyMainSync, getMainSyncState } = {}) {
   const state = loadState();
-  const debug = new URLSearchParams(location.search).has('debug') ? '&debug=1' : '';
+  const params = new URLSearchParams(location.search);
+  const debug = params.has('debug') ? '&debug=1' : '';
+  const session = localId('mc');
+  const parentInstance = localId('parent');
+  const frames = new Map();
+  const recentCommands = new Map();
+  const mainEchoes = createEchoLedger({ windowMs: 1500 });
+  const mainEchoUntil = new Map();
   let renderedKey = '', lastInterval = getInterval(), nextId = Math.max(0, ...state.panes.map(p => p.id)) + 1;
+  let suppressNotify = 0, lastMainRange = null, lastMainCrosshair = null, lastAppliedFromPane = null;
+  let targetOverride = null, excludePane = null;
+
   if (!state.panes.length) state.panes.push({ id: nextId++, symbol: getSymbol() });
   const capacity = () => CAPACITY[state.layout] || 1;
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {} };
   const activePane = () => state.panes.find(p => p.id === state.active) || state.panes[0];
+  const paneKey = () => state.panes.map(p => `${p.id}:${p.symbol}`).join('|') + '|' + state.layout + '|' + getInterval();
+
+  function postToPane(id, envelope) {
+    const rec = frames.get(id);
+    if (!rec?.win) return;
+    try {
+      rec.win.postMessage(envelope, location.origin);
+      rec.synced = true;
+      rememberCommand(recentCommands, id, envelope.type, envelope.payload);
+    } catch {}
+  }
+
+  const gate = createMessageGate({
+    session, instance: parentInstance, paneId: 0,
+    post: envelope => {
+      if (targetOverride != null) { postToPane(targetOverride, envelope); return; }
+      for (const [id] of frames) if (id !== excludePane) postToPane(id, envelope);
+    }
+  });
+
+  function currentStatePayload(paneId = null) {
+    let seed = {};
+    try { seed = getMainSyncState?.() || {}; } catch {}
+    const pane = paneId == null ? null : state.panes.find(p => p.id === paneId);
+    const payload = { symbol: pane?.symbol || getSymbol(), interval: getInterval() };
+    const range = lastMainRange || seed.range;
+    const crosshair = lastMainCrosshair || seed.crosshair;
+    if (range) payload.range = range;
+    if (crosshair) payload.crosshair = crosshair;
+    return payload;
+  }
+
+  function sendStateToPane(id, replyTo = 0) {
+    targetOverride = id;
+    try { return gate.send('state', currentStatePayload(id), { replyTo, force: true }); }
+    finally { targetOverride = null; }
+  }
+
+  function broadcast(type, payload, { exclude = null, replyTo = 0 } = {}) {
+    excludePane = exclude;
+    try { return gate.send(type, payload, { replyTo }); }
+    finally { excludePane = null; }
+  }
+
+  // Called by the parent chart's native crosshair/visible-range subscriptions.
+  function syncFromMain(type, payload) {
+    // Applying a remote value to the main chart can fire a native LRC callback
+    // with chart-adjusted geometry. Suppress that specific type briefly; the
+    // semantic ledger below catches later echoes of the original payload.
+    if ((mainEchoUntil.get(type) || 0) > Date.now()) return;
+    const clean = normalizePayload(type, payload);
+    if (!clean) return;
+    // A value just applied from a pane may surface later as a native LRC
+    // callback. Suppress by semantic fingerprint, not by a fragile timer.
+    if (mainEchoes.matches(type, clean)) return;
+    if (type === 'range') lastMainRange = clean;
+    if (type === 'crosshair') lastMainCrosshair = clean;
+    if (state.open) broadcast(type, clean);
+  }
+
+  function applyPaneSymbol(paneId, rawSymbol) {
+    let key;
+    try { key = parseMarketRef(String(rawSymbol).toUpperCase()).key; } catch { return; }
+    const pane = state.panes.find(p => p.id === paneId);
+    if (!pane) return;
+    if (pane.symbol !== key) {
+      pane.symbol = key;
+      // Update only the reporting pane. A full renderMulti(true) would destroy
+      // the iframe that just sent the symbol and start a reload loop.
+      const cell = document.querySelector(`#multi-grid .multi-cell[data-pane-id="${paneId}"]`);
+      if (cell) {
+        const label = cell.querySelector('.multi-cell-head span');
+        if (label) label.textContent = key;
+        const frame = cell.querySelector('iframe');
+        const next = iframeURL(pane);
+        if (frame && frame.getAttribute('src') !== next) frame.setAttribute('src', next);
+      }
+      renderedKey = paneKey();
+      save();
+    }
+    if (state.active !== paneId) { state.active = paneId; save(); }
+    renderTabs();
+    gridActiveClasses();
+    suppressNotify++;
+    try { setSymbol?.(key); } finally { suppressNotify--; }
+    lastAppliedFromPane = { type: 'symbol', paneId, payload: { symbol: key }, at: Date.now() };
+  }
+
+  function applyFromPane(message) {
+    lastAppliedFromPane = { type: message.type, paneId: message.paneId, payload: message.payload, at: Date.now() };
+    if (message.type === 'crosshair' || message.type === 'range') {
+      mainEchoes.remember(message.type, message.payload);
+      mainEchoUntil.set(message.type, Date.now() + 150);
+      try { applyMainSync?.({ type: message.type, payload: message.payload }); } catch {}
+      broadcast(message.type, message.payload, { exclude: message.paneId, replyTo: message.seq });
+    } else if (message.type === 'symbol') {
+      applyPaneSymbol(message.paneId, message.payload.symbol);
+    }
+  }
+
+  function frameWindow(paneId) {
+    return document.querySelector(`#multi-grid .multi-cell[data-pane-id="${paneId}"] iframe`)?.contentWindow || null;
+  }
+  function findFrameRecord(source) {
+    for (const item of frames.values()) if (item.win === source) return item;
+    // Navigating an iframe can replace its contentWindow object before the
+    // load event arrives; re-bind by the pane's current iframe element.
+    for (const item of frames.values()) {
+      if (frameWindow(item.paneId) === source) { item.win = source; return item; }
+    }
+    return null;
+  }
+  function onPaneMessage(event) {
+    const rec = findFrameRecord(event.source);
+    const allowed = new Set([...frames.values()].map(item => frameWindow(item.paneId) || item.win));
+    const message = readEnvelope(event.data, {
+      origin: event.origin, expectedOrigin: location.origin,
+      allowedSources: allowed, source: event.source, session
+    });
+    if (!message || !rec || message.paneId !== rec.paneId) return;
+    if (gate.isReply(message) || isRecentEcho(message, recentCommands)) return;
+    if (message.seq === 1) {
+      // seq 1 always marks a freshly booted pane document, even if the pane
+      // reuses an instance label after its iframe was navigated.
+      rec.instance = message.instance;
+      rec.lastSeq = 1;
+    } else {
+      if (rec.instance && message.instance !== rec.instance) return;
+      if (message.seq <= rec.lastSeq) return;
+      rec.instance = message.instance;
+      rec.lastSeq = message.seq;
+    }
+    if (message.type === 'hello') {
+      rec.ready = true;
+      sendStateToPane(rec.paneId, message.seq);
+      return;
+    }
+    // The state command is the real handshake acknowledgement. A late iframe
+    // load event can reset `ready` after an early hello, so do not gate on it.
+    if (!rec.synced) return;
+    applyFromPane(message);
+  }
 
   function renderTabs() {
     const host = $('chart-tabs');
@@ -62,13 +221,19 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
   }
 
   function iframeURL(pane) {
-    return `/alfa-charts.html?embed=1&symbol=${encodeURIComponent(pane.symbol)}&interval=${encodeURIComponent(getInterval())}${debug}`;
+    return `/alfa-charts.html?embed=1&symbol=${encodeURIComponent(pane.symbol)}&interval=${encodeURIComponent(getInterval())}${debug}&mcid=${encodeURIComponent(session)}&pane=${pane.id}`;
+  }
+
+  function gridActiveClasses() {
+    const grid = $('multi-grid');
+    if (!grid) return;
+    grid.querySelectorAll('.multi-cell').forEach(cell => cell.classList.toggle('active', Number(cell.dataset.paneId) === state.active));
   }
 
   function renderMulti(force = false) {
     const grid = $('multi-grid'), tabs = $('multi-tabs');
     if (!grid || !tabs) return;
-    const key = state.panes.map(p => `${p.id}:${p.symbol}`).join('|') + '|' + state.layout + '|' + getInterval();
+    const key = paneKey();
     tabs.innerHTML = state.panes.map((p, i) =>
       `<button type="button" class="chart-tab${p.id === state.active ? ' active' : ''}" data-pane-id="${p.id}"><small>${i + 1}</small>${esc(p.symbol)}<span class="chart-tab-x" data-close-pane="${p.id}" aria-label="${esc(p.symbol)} grafiğini kapat">×</span></button>`
     ).join('');
@@ -85,10 +250,11 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
     });
     grid.dataset.layout = String(state.layout);
     if (!force && key === renderedKey) {
-      grid.querySelectorAll('.multi-cell').forEach(cell => cell.classList.toggle('active', Number(cell.dataset.paneId) === state.active));
+      gridActiveClasses();
       return;
     }
     renderedKey = key;
+    frames.clear();
     const cells = [];
     for (let i = 0; i < capacity(); i++) {
       const pane = state.panes[i];
@@ -102,6 +268,20 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
       </div>`);
     }
     grid.innerHTML = cells.join('');
+    grid.querySelectorAll('.multi-cell[data-pane-id] iframe').forEach(el => {
+      const paneId = Number(el.closest('.multi-cell').dataset.paneId);
+      frames.set(paneId, { paneId, win: el.contentWindow, instance: '', lastSeq: 0, ready: false, synced: false });
+      el.addEventListener('load', () => {
+        const rec = frames.get(paneId);
+        if (!rec) return;
+        rec.win = el.contentWindow;
+        // Every load is a fresh pane document (initial boot or iframe
+        // navigation after a symbol change). Reset handshake state so a stale
+        // seq ledger cannot silence its hello, then seed it with current state.
+        rec.instance = ''; rec.lastSeq = 0; rec.ready = false; rec.synced = false;
+        sendStateToPane(paneId);
+      });
+    });
     grid.querySelectorAll('[data-focus-pane]').forEach(b => b.onclick = () => activate(Number(b.dataset.focusPane)));
     grid.querySelectorAll('[data-add-cell]').forEach(b => b.onclick = () => openAddDialog());
     grid.querySelectorAll('.multi-cell[data-pane-id]').forEach(cell => cell.onclick = () => activate(Number(cell.dataset.paneId)));
@@ -114,6 +294,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
   }
 
   function removePane(id) {
+    frames.delete(Number(id));
     if (state.panes.length === 1) {
       state.panes = [{ id: state.panes[0].id, symbol: getSymbol() }];
       state.active = state.panes[0].id;
@@ -180,7 +361,10 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
   function notifySymbol(symbol, interval) {
     const intervalChanged = interval != null && interval !== lastInterval;
     if (intervalChanged) lastInterval = interval;
-    const ref = state.panes.find(p => p.symbol === symbol);
+    if (suppressNotify) return;
+    let key;
+    try { key = parseMarketRef(String(symbol).toUpperCase()).key; } catch { return; }
+    const ref = state.panes.find(p => p.symbol === key);
     if (ref) {
       if (ref.id !== state.active) { state.active = ref.id; save(); renderTabs(); }
       if (intervalChanged) renderMulti(true);
@@ -188,7 +372,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
       return;
     }
     if (!isMarketSymbol(String(symbol || ''))) return;
-    const pane = { id: nextId++, symbol };
+    const pane = { id: nextId++, symbol: key };
     if (state.panes.length >= 6) state.panes.shift();
     state.panes.push(pane); state.active = pane.id; save(); renderTabs(); renderMulti(true);
   }
@@ -200,7 +384,18 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
   $('multi-toggle')?.addEventListener('click', () => setOpen(!state.open));
   $('multi-exit')?.addEventListener('click', () => setOpen(false));
   $('multi-add')?.addEventListener('click', () => openAddDialog());
+  window.addEventListener('message', onPaneMessage);
   setOpen(state.open);
   renderTabs();
-  return { addPane, removePane, activate, notifySymbol, setOpen, get state() { return state; } };
+  return {
+    addPane, removePane, activate, notifySymbol, setOpen, syncFromMain,
+    get state() { return state; },
+    get syncState() {
+      return {
+        session, parentInstance,
+        frames: [...frames.entries()].map(([id, rec]) => ({ id, ready: rec.ready, synced: rec.synced, instance: rec.instance, lastSeq: rec.lastSeq })),
+        lastAppliedFromPane
+      };
+    }
+  };
 }
