@@ -66,6 +66,26 @@ export function shouldFire(a, price, previousPrice, now = Date.now()) {
     default: return false;
   }
 }
+// Previous price must be scoped per market. A single global value lets the
+// first tick of a newly selected symbol compare against another symbol's
+// price, producing false cross alerts.
+export function createPriceTracker(limit = 64) {
+  const prices = new Map();
+  return {
+    update(symbol, price) {
+      const key = String(symbol || '');
+      if (!key || !Number.isFinite(price)) { prices.delete(key); return null; }
+      const previous = prices.has(key) ? prices.get(key) : null;
+      prices.set(key, price);
+      if (prices.size > limit) prices.delete(prices.keys().next().value);
+      return previous;
+    },
+    reset(symbol) {
+      if (symbol == null) prices.clear();
+      else prices.delete(String(symbol));
+    }
+  };
+}
 export function markAlarmFired(a, price, now = Date.now()) {
   a.triggered = true; a.triggerPrice = price; a.triggeredAt = now;
   a.count = (a.count || 0) + 1; a.lastAt = now;

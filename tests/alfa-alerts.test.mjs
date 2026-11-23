@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   ALARM_SOUNDS, DEFAULT_ALARM_SETTINGS, normalizeAlarmSettings, normalizeAlarm,
   alarmLevel, alarmConditionLabel, shouldFire, markAlarmFired, alarmMessage, alarmPayload,
-  playAlarmSound, soundDuration, postAlarmWebhook
+  playAlarmSound, soundDuration, postAlarmWebhook, createPriceTracker
 } from '../assets/alfa-alerts.mjs';
 
 const base = { id: 'a1', symbol: 'BTCUSDT', price: 100, cond: 'above', basePrice: 100, pct: 1, note: 'test' };
@@ -64,6 +64,24 @@ test('messages and payloads carry the complete alarm context', () => {
   assert.match(payload.at, /^\d{4}-\d\d-\d\dT/);
   assert.throws(() => normalizeAlarm({}, 'BTCUSDT', 100), /Geçersiz alarm/);
   assert.equal(normalizeAlarm({ price: 100, cond: 'bogus' }, 'BTCUSDT', 100).cond, 'above');
+});
+
+test('previous alarm price is tracked per symbol and reset on market switch', () => {
+  const tracker = createPriceTracker(2);
+  assert.equal(tracker.update('BTCUSDT', 100), null);
+  assert.equal(tracker.update('BTCUSDT', 101), 100);
+  assert.equal(shouldFire(alarm({ cond: 'crossAbove' }), 101, tracker.update('BTCUSDT', 101)), false);
+  // A first tick of another market must not inherit BTCUSDT's previous price.
+  assert.equal(tracker.update('ETHUSDT', 3999), null);
+  assert.equal(shouldFire(alarm({ symbol: 'ETHUSDT', cond: 'crossAbove', price: 4000 }), 3999, tracker.update('ETHUSDT', 3999)), false);
+  assert.equal(shouldFire(alarm({ symbol: 'ETHUSDT', cond: 'crossAbove', price: 4000 }), 4001, tracker.update('ETHUSDT', 4001)), true);
+  tracker.reset('ETHUSDT');
+  assert.equal(tracker.update('ETHUSDT', 4002), null);
+  tracker.update('SOLUSDT', 200);
+  // Bounded map keeps long sessions from retaining every visited market.
+  assert.equal(tracker.update('BNBUSDT', 600), null);
+  assert.equal(tracker.update('BTCUSDT', 102), null);
+  assert.equal(tracker.update('BTCUSDT', 103), 102);
 });
 
 test('sound presets schedule oscillator notes and never depend on media files', () => {

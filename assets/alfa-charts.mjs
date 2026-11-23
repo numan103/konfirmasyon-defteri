@@ -1,7 +1,8 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=10';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
-  shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook } from './alfa-alerts.mjs?v=1';
+  shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook,
+  createPriceTracker } from './alfa-alerts.mjs?v=2';
 import { DrawingEngine } from './alfa-drawings.mjs?v=11';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
@@ -29,8 +30,10 @@ const isEmbed = new URLSearchParams(location.search).has('embed');
 if (isEmbed) document.body.classList.add('embed-chart');
 hydrateIcons();
 let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, pricePrecisionKey = '';
+const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
   if (!next || next === symbol) return false;
+  alarmPriceTracker.reset(next);
   symbol = next;
   loadMarket();
   return true;
@@ -984,7 +987,7 @@ function saveAlarmSettings(settings) {
   try { localStorage.setItem(ALARM_SETTINGS_KEY(), JSON.stringify(next)); } catch {}
   return next;
 }
-let alarms = null, lastAlarmPrice = null;
+let alarms = null;
 function ensureAlarms() { if (!alarms) alarms = loadAlarms(); return alarms; }
 async function sendAlarmTelegram(chatId, message) {
   const token = await marketAccessToken();
@@ -1007,8 +1010,7 @@ async function fireAlarm(a, price) {
   if (a.telegramChat) void sendAlarmTelegram(a.telegramChat, msg);
 }
 function checkAlarms(price) {
-  const previous = lastAlarmPrice;
-  lastAlarmPrice = Number.isFinite(price) ? price : null;
+  const previous = alarmPriceTracker.update(symbol, price);
   if (!Number.isFinite(price)) return;
   for (const a of ensureAlarms()) if (a.symbol === symbol && shouldFire(a, price, previous)) void fireAlarm(a, price);
 }
