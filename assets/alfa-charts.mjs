@@ -65,9 +65,20 @@ function connection(text, state = 'waiting') {
   $('connection').textContent = text; $('connection').dataset.state = state;
 }
 function showMessage(text) { $('message').textContent = text; $('message').hidden = !text; }
+function fmtVol(v) {
+  const n = Number(v) || 0;
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+  return n.toFixed(2);
+}
 function showCandle(c) {
   if (!c) return;
-  $('ohlc').textContent = `O ${priceFormat.format(c.open)}  H ${priceFormat.format(c.high)}  L ${priceFormat.format(c.low)}  C ${priceFormat.format(c.close)}`;
+  const ch = c.open ? ((c.close - c.open) / c.open) * 100 : 0;
+  const sign = ch > 0 ? '+' : '';
+  const ohlc = $('ohlc');
+  ohlc.textContent = `O ${priceFormat.format(c.open)}  H ${priceFormat.format(c.high)}  L ${priceFormat.format(c.low)}  C ${priceFormat.format(c.close)}  ${sign}${ch.toFixed(2)}%  V ${fmtVol(c.volume)}`;
+  ohlc.style.color = ch >= 0 ? '#26c89c' : '#ef6677';
 }
 async function loadOlderHistory() {
   if (replayMode) return;
@@ -375,7 +386,7 @@ async function loadMarket() {
   closeTransport(); attempts = 0; history = []; seriesBars = [];
   candles.setData([]); line.setData([]); volume.setData([]);
   $('last-price').textContent = '—'; $('price-time').textContent = 'Henüz veri yok';
-  $('ohlc').textContent = 'Gerçek piyasa verisi bekleniyor';
+  const ohlc = $('ohlc'); ohlc.textContent = 'Gerçek piyasa verisi bekleniyor'; ohlc.style.color = '';
   updateUI();
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
