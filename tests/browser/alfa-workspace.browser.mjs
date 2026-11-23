@@ -136,7 +136,7 @@ try {
     await page.reload(); await ready();
     assert.equal(await page.locator('#drawing-favs>[data-tool]').count(), 1);
   });
-  await test('searchable Spot picker, bounded TXT import and scoped watchlist persistence', async () => {
+  await test('searchable venue picker, bounded TXT import and scoped watchlist persistence', async () => {
     await page.evaluate(() => {
       const w = window.__alfaDebug.watchlist;
       w.markets = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ETHBTC'].map(symbol => ({ symbol,
@@ -148,22 +148,30 @@ try {
     assert.equal(await page.locator('[data-open-symbol="XRPUSDT"]').count(), 1);
     assert.equal(await page.locator('[data-add-symbol="DOGEUSDT"]').count(), 0);
     await page.click('[data-add-symbol="XRPUSDT"]');
+    await page.fill('#symbol-query', '');
+    await page.selectOption('#symbol-venue', 'OKX');
+    assert.equal(await page.locator('[data-open-symbol="OKX:ETHUSDT.P"]').count(), 1);
+    assert.match(await page.locator('[data-open-symbol="OKX:ETHUSDT.P"] .venue-badge').textContent(), /OKX · PERP/);
     await close();
     assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('XRPUSDT')), true);
     await page.click('#watch-import');
-    await page.fill('#watchlist-source', 'BINANCE:BTCUSDT,BINANCE:DOGEUSDT,BYBIT:BTCUSDT,BINANCE:BTCUSDT.P,<img onerror=alert(1)>');
+    await page.fill('#watchlist-source', 'BINANCE:BTCUSDT,BINANCE:DOGEUSDT,BYBIT:BTCUSDT,BINANCE:BTCUSDT.P,OKX:XAUTUSDT,CBOE:VIX,CRYPTOCAP:TOTAL,OANDA:EURUSD,<img onerror=alert(1)>');
     await page.click('#watchlist-preview');
     await page.waitForFunction(() => document.querySelector('#import-result strong'));
     const preview = await page.locator('#import-result').textContent();
-    assert.match(preview, /DOGEUSDT/);
-    assert.match(preview, /4 kayıt atlandı/);
-    assert.match(preview, /Farklı borsa/);
-    assert.match(preview, /Vadeli/);
+    assert.match(preview, /sembol/);
+    assert.match(preview, /2 kayıt atlandı/);
+    assert.match(preview, /BYBIT:BTCUSDT/);
+    assert.match(preview, /BINANCE:BTCUSDT\.P/);
+    assert.match(preview, /CRYPTOCAP:TOTAL/);
+    assert.doesNotMatch(preview, /Farklı borsa/);
+    assert.doesNotMatch(preview, /Vadeli/);
     await page.click('#watchlist-apply');
-    await page.waitForFunction(() => window.__alfaDebug.watchlist.symbols.includes('DOGEUSDT'));
-    assert.equal(await page.locator('[data-watch-price="DOGEUSDT"]').count(), 1);
+    await page.waitForFunction(() => window.__alfaDebug.watchlist.symbols.includes('BYBIT:BTCUSDT'));
+    assert.equal(await page.locator('[data-watch-price="BYBIT:BTCUSDT"]').count(), 1);
+    assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('BINANCE:BTCUSDT.P')), true);
     await page.reload(); await ready();
-    assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('DOGEUSDT')), true);
+    assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('BYBIT:BTCUSDT')), true);
     await shot('watchlist-import');
   });
   await test('object tree: Ctrl multi-select, grouping, bulk delete, undo and rename', async () => {

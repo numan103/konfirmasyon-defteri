@@ -306,6 +306,8 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 .symbol-result strong{font-size:12px;font-weight:500}
 .symbol-result strong small{color:#899dbd}
 .symbol-result>button>small{font-size:9px;letter-spacing:.5px;color:#647b9f}
+.symbol-result .venue-badge{color:#9fb3d6;background:#202c42;border:1px solid #35476a;border-radius:4px;padding:2px 5px;line-height:1.3;white-space:nowrap}
+.symbol-result>button:hover .venue-badge{background:#2a3a5b;color:#d6e3ff}
 .symbol-result>[data-add-symbol]{width:30px;height:30px;padding:6px;border:0;background:transparent;color:#a1bdf4}
 .symbol-result>[data-add-symbol] .ui-icon{width:17px;height:17px}
 .watchlist-import-dialog{width:min(650px,calc(100vw - 24px))}

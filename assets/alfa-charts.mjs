@@ -1,7 +1,7 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=5';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=6';
 import { DrawingEngine } from './alfa-drawings.mjs?v=9';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=1';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=2';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
@@ -23,6 +23,13 @@ const workspace = document.querySelector('.workspace');
 const host = $('chart');
 hydrateIcons();
 let studiesUI = null, watchlist = null, pricePrecisionKey = '';
+async function marketAccessToken() {
+  try {
+    const session = await cloudSettings.client?.auth.getSession();
+    return session?.data?.session?.access_token || '';
+  } catch { return ''; }
+}
+setMarketTokenProvider(marketAccessToken);
 const priceFormat = { format: value => formatMarketPrice(value, watchlist?.info(symbol).precision) };
 const chart = createChart(host, {
   layout: { background: { type: ColorType.Solid, color: '#10141c' }, textColor: '#8e9eb6', attributionLogo: true },
@@ -113,7 +120,7 @@ function applyChartType(next) {
   if (sel && sel.value !== type) sel.value = type;
 }
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
-let history = [], seriesBars = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
+let history = [], seriesBars = [], socket, aborter, retryTimer, pollTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false, pendingIndicators = null, loadingOlder = false;
 let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, replaySpeed = 1;
 let olderController = null;
@@ -378,16 +385,20 @@ function quote() {
   const c = history.at(-1);
   if (!c) return;
   $('last-price').textContent = priceFormat.format(c.close);
-  const info = watchlist?.info(symbol);
+  let market = null;
+  try { market = parseMarketRef(symbol); } catch {}
+  const info = watchlist?.info(symbol) || market;
   $('quote-symbol').textContent = info?.quote ? info.base + ' / ' + info.quote : symbol;
+  $('quote-symbol').title = market?.label || info?.label || symbol;
   const precision = info?.precision ?? (c.close < 1 ? Math.min(10, Math.max(4, -Math.floor(Math.log10(c.close)) + 3)) : 2);
   const precisionKey = symbol + ':' + precision;
   if (pricePrecisionKey !== precisionKey) {
     for (const s of [candles, bars, heikin, line, area]) s.applyOptions({ priceFormat: { type: 'price', precision, minMove: 10 ** -precision } });
     pricePrecisionKey = precisionKey;
   }
-  const change = c.open ? (c.close - c.open) / c.open * 100 : 0;
-  $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · son mum`;
+  const live = market && !market.chartable ? watchlist?.quotes.get(symbol) : null;
+  const change = live && Number.isFinite(live.change) ? live.change : c.open ? (c.close - c.open) / c.open * 100 : 0;
+  $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · ${live ? 'canlı değer' : 'son mum'}`;
   $('quote-change').style.color = change >= 0 ? '#26c89c' : '#ef6677';
   if (!replayMode) watchlist?.updateQuote(symbol, c.close);
   $('price-time').textContent = `Mum: ${new Date(c.time * 1000).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
@@ -430,14 +441,19 @@ host.addEventListener('keydown', event => {
 });
 function closeTransport() {
   olderController?.abort(); olderController = null; loadingOlder = false;
-  clearTimeout(retryTimer); clearInterval(watchdog);
+  clearTimeout(retryTimer); clearInterval(pollTimer); clearInterval(watchdog);
+  pollTimer = null;
   aborter?.abort();
   if (socket) { socket.onclose = socket.onmessage = socket.onopen = socket.onerror = null; socket.close(); socket = null; }
 }
 function updateUI() {
   $('symbol').value = symbol;
   const label = Object.keys(TIMEFRAMES).find(key => TIMEFRAMES[key] === interval);
-  $('market-title').textContent = `${symbol} · ${label}`;
+  let market = null;
+  try { market = parseMarketRef(symbol); } catch {}
+  const name = market && market.venue === 'BINANCE' && market.marketType === 'spot' && market.key === symbol ? symbol : market?.label || symbol;
+  $('market-title').textContent = `${name} · ${label}`;
+  $('market-title').title = market?.label || symbol;
   document.querySelectorAll('#timeframes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
   try {
@@ -473,12 +489,71 @@ async function loadMarket() {
     const layout=JSON.parse(localStorage.getItem(layoutKey())||'null');
     pendingIndicators=layout?.indicators ?? JSON.parse(localStorage.getItem('alfa-ind:v1:'+symbol)||'null');
   } catch { pendingIndicators = null; }
-  showMessage('Binance mum verileri yükleniyor…');
+  showMessage('Piyasa verileri yükleniyor…');
   connection('Geçmiş mumlar yükleniyor');
   connect(id, true);
 }
+function connectPolling(id, resetView, ref) {
+  const controller = new AbortController(); aborter = controller;
+  const quoteOnly = !ref.chartable;
+  let ready = false, ended = false;
+  lastReceipt = Date.now();
+  const requestSignal = () => AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]);
+  connection(quoteOnly ? 'TradingView canlı değer · mum geçmişi yok' : `${ref.venue} verisi bekleniyor`, 'waiting');
+  showMessage(quoteOnly ? 'Bu sembol için mum geçmişi yok; yalnızca canlı değer gösterilir.' : `${ref.venue} verisi yükleniyor…`);
+  async function tick() {
+    if (ended || id !== generation || disposed || replayMode || controller.signal.aborted) return;
+    try {
+      const data = await fetchHistory(symbol, interval, requestSignal());
+      if (ended || id !== generation || disposed || replayMode || controller.signal.aborted) return;
+      if (!data.length) throw new Error('Piyasa verisi boş');
+      let quoteData = null;
+      if (quoteOnly) {
+        const quotes = await fetchMarketQuotes([symbol], requestSignal());
+        quoteData = quotes[symbol];
+        if (quoteData && watchlist) watchlist.quotes.set(symbol, quoteData);
+      }
+      if (!ready) {
+        setData(data, resetView);
+        ready = true;
+      } else {
+        history = mergeCandles(history, data, Infinity);
+        seriesBars = history;
+        syncSeriesData(history);
+        quote();
+        try { indicators.updateAll(seriesBars); } catch {}
+        try { sessionLevels.render(); } catch {}
+        try { marketStructure.render(); } catch {}
+        try { fvg.render(); } catch {}
+      }
+      attempts = 0;
+      lastReceipt = Date.now();
+      showMessage(quoteOnly ? 'Mum geçmişi yok · yalnızca canlı değer gösterilir.' : '');
+      connection(`Canlı · ${new Date(lastReceipt).toLocaleTimeString('tr-TR')} · ${quoteOnly ? 'canlı değer · mum geçmişi yok' : ref.venue}`, 'live');
+      if (quoteData && Number.isFinite(quoteData.price)) {
+        $('last-price').textContent = priceFormat.format(quoteData.price);
+        const change = Number(quoteData.change) || 0;
+        $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · canlı değer`;
+        $('quote-change').style.color = change >= 0 ? '#26c89c' : '#ef6677';
+      }
+      try { checkAlarms(history.at(-1)?.close); } catch {}
+    } catch (error) {
+      if (ended || id !== generation || disposed || controller.signal.aborted) return;
+      attempts++;
+      connection(`${error.message || 'Veri alınamadı'} · yeniden denenecek`, 'error');
+      if (!history.length) showMessage(quoteOnly ? 'Canlı değer alınamadı. Otomatik yeniden denenecek.' :
+        `${ref.venue} verisine erişilemiyor. Otomatik yeniden denenecek; fiyat üretilmez.`);
+    }
+  }
+  tick();
+  pollTimer = setInterval(tick, quoteOnly ? 30000 : 15000);
+}
 function connect(id, resetView = false) {
   if (id !== generation || disposed) return;
+  let ref;
+  try { ref = parseMarketRef(symbol); }
+  catch (error) { connection(error.message || 'Geçersiz sembol', 'error'); return; }
+  if (ref.feed !== 'binance') return connectPolling(id, resetView, ref);
   const controller = new AbortController(); aborter = controller;
   const timeout = setTimeout(() => controller.abort(), 15000);
   let buffered = [], ready = false, ended = false;
@@ -542,7 +617,7 @@ function connect(id, resetView = false) {
     const p = new URLSearchParams(location.search);
     const s = String(p.get('symbol') || '').toUpperCase();
     const tf = String(p.get('interval') || p.get('tf') || '').toLowerCase();
-    if (isMarketSymbol(s)) symbol = s;
+    if (isMarketSymbol(s)) symbol = parseMarketRef(s).key;
     if (Object.values(TIMEFRAMES).includes(tf)) interval = tf;
   } catch {}
 })();
@@ -596,7 +671,7 @@ function openTfPicker() {
 renderTimeframes();
 watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => symbol,
   onSelect: next => { if (symbol !== next) { symbol = next; loadMarket(); } },
-  getAccessToken: async () => { const session = await cloudSettings.client?.auth.getSession(); return session?.data?.session?.access_token || ''; },
+  getAccessToken: marketAccessToken,
   onStatus: connection });
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;

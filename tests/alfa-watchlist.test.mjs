@@ -1,13 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, WATCHLIST_LIMIT } from '../assets/alfa-watchlist-model.mjs';
+import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT } from '../assets/alfa-watchlist-model.mjs';
 import { formatMarketPrice } from '../assets/alfa-watchlist.mjs';
-import { isMarketSymbol, validateMarket } from '../assets/alfa-charts-data.mjs';
+import { isMarketSymbol, isSpotSymbol, parseMarketRef, validateMarket } from '../assets/alfa-charts-data.mjs';
 import { publicWatchlistURL, publicWatchlistData, fetchPublicWatchlist, allowWatchlistImport } from '../lib/chart-watchlist-import.mjs';
 import handler from '../api/access.mjs';
 const market = (symbol, base, quote, patch = {}) => ({ symbol, baseAsset: base, quoteAsset: quote, status: 'TRADING', isSpotTradingAllowed: true, permissions: ['SPOT'],
   filters: [{ filterType: 'PRICE_FILTER', tickSize: '.00001000' }], ...patch });
 const markets = spotMarkets({ symbols: [market('BTCUSDT', 'BTC', 'USDT'), market('XRPUSDT', 'XRP', 'USDT'), market('ETHBTC', 'ETH', 'BTC')] });
+const SKIPPED_REFS = [
+  'CME:BTC1!', 'OKX:USDTTRY', 'CBOE:VIX', 'FX_IDC:XAUTRYG', 'OKX:XAUTUSDT', 'BIST:XU100',
+  'CRYPTOCAP:TOTAL', 'CRYPTOCAP:TOTAL2', 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:USDT.D',
+  'BINANCE:BTCUSDT.P', 'BINANCE:ETHUSDT', 'BINANCE:BTCUSDT', 'OKX:ETHUSDT.P', 'TVC:GOLD',
+  'BYBIT:BTCUSDT.P', 'BYBIT:ETHUSDT.P', 'FX:XAUUSD', 'FPMARKETS:US100', 'OKX:SOLUSDT',
+  'OKX:PEPEUSDT.P', 'OKX:BNBUSDT.P', 'OKX:DOGEUSDT', 'OKX:AVAXUSDT.P', 'OKX:LTCUSDT.P',
+  'OKX:XRPUSDT.P', 'OKX:SUIUSDT.P', 'OKX:LINKUSDT.P', 'OKX:NEARUSDT.P', 'OKX:INJUSDT',
+  'OKX:AAVEUSDT.P', 'OKX:PYTHUSDT', 'OKX:HYPEUSDT.P', 'OKX:ZECUSDT.P', 'TVC:DXY',
+  'OANDA:EURUSD', 'OANDA:NZDUSD', 'OANDA:USDJPY', 'FX_IDC:GBPAUD', 'OANDA:AUDUSD',
+  'FOREXCOM:XAUUSD', 'FX:GBPUSD', 'OANDA:XAGUSD', 'FX:USDCHF', 'OANDA:USDCAD',
+  'FX:NZDCAD', 'FX:AUDCHF', 'FX:AUDCAD'
+];
 test('Spot catalogue contains only trading spot pairs and retains exact quote/precision', () => {
   const data = spotMarkets({ symbols: [market('ETHBTC', 'ETH', 'BTC'), market('XRPUSDT', 'XRP', 'USDT'),
     market('PAUSEDUSDT', 'PAUSED', 'USDT', { status: 'BREAK' }), market('FUTUREUSDT', 'FUTURE', 'USDT', { isSpotTradingAllowed: false }),
@@ -17,16 +29,35 @@ test('Spot catalogue contains only trading spot pairs and retains exact quote/pr
   assert.throws(() => spotMarkets({ symbols: [] }));
   assert.equal(validateMarket('XRPUSDT', '1h'), undefined);
   assert.equal(isMarketSymbol('1INCHUSDT'), true);
+  assert.equal(isMarketSymbol('BINANCE:BTCUSDT.P'), true);
   for (const bad of ['BTCUSDT.P', 'btc', 'BTC-USDT', 'XRPUSDT&x=1', 'AAA\nBB']) assert.equal(isMarketSymbol(bad), false);
 });
-test('TradingView TXT/CSV preview preserves venue and market type, deduplicates and reports skips', () => {
-  const parsed = parseWatchlistText('\uFEFF###Crypto,BINANCE:BTCUSDT,BINANCE:XRPUSDT\n"BINANCE:ETHBTC",BINANCE:XRPUSDT\nBYBIT:BTCUSDT,BINANCE:BTCUSDT.P,OANDA:EURUSD,<img onerror=x>');
+test('TradingView TXT/CSV preview keeps every venue and market type, deduplicates and explains real skips', () => {
+  const parsed = parseWatchlistText('\uFEFF###Crypto,' + SKIPPED_REFS.join(',') + ',<img onerror=x>');
   const preview = importPreview(parsed, markets, ['BTCUSDT']);
-  assert.deepEqual(preview.added, ['XRPUSDT', 'ETHBTC']);
-  assert.equal(preview.skipped.length, 6);
-  assert.ok(preview.skipped.some(x => x.reason.includes('Farklı borsa')));
-  assert.ok(preview.skipped.some(x => x.reason.includes('Vadeli')));
+  assert.equal(preview.added.length, SKIPPED_REFS.length - 2);
+  for (const ref of ['BINANCE:BTCUSDT.P', 'OKX:ETHUSDT.P', 'BYBIT:ETHUSDT.P', 'CRYPTOCAP:TOTAL', 'FX:XAUUSD', 'CBOE:VIX', 'FX_IDC:XAUTRYG']) {
+    assert.ok(preview.added.includes(ref), ref);
+  }
+  assert.equal(preview.skipped.length, 3);
+  assert.ok(preview.skipped.some(x => x.reason === 'Listede zaten var'));
+  assert.ok(preview.skipped.some(x => x.reason.includes('Spot kataloğunda yok')));
+  assert.ok(preview.skipped.some(x => x.reason === 'Geçersiz sembol'));
+  assert.ok(!preview.skipped.some(x => x.reason.includes('Farklı borsa')));
+  assert.ok(!preview.skipped.some(x => x.reason.includes('Vadeli')));
   assert.deepEqual(importPreview(parseWatchlistText('BTC/USDT;XRPUSDT'), markets).added, ['BTCUSDT', 'XRPUSDT']);
+  assert.deepEqual(cleanWatchlist(['BINANCE:BTCUSDT.P', 'OKX:USDTTRY', '<script>']), ['BINANCE:BTCUSDT.P', 'OKX:USDTTRY']);
+  assert.ok(foreignMarkets().some(m => m.key === 'CRYPTOCAP:TOTAL' && m.chartable === false));
+  assert.ok(foreignMarkets().some(m => m.key === 'OKX:BTCUSDT.P' && m.marketType === 'perp'));
+  assert.ok(!foreignMarkets().some(m => m.key === 'XRPUSDT'), 'Binance Spot refs must not be duplicated in the foreign picker');
+});
+test('every skipped reference is reachable from the venue picker or the Spot catalogue', () => {
+  const foreign = new Set(foreignMarkets().map(m => m.key));
+  for (const ref of SKIPPED_REFS) {
+    const market = parseMarketRef(ref);
+    if (market.feed === 'binance' && market.marketType === 'spot') assert.ok(isSpotSymbol(market.key), ref);
+    else assert.ok(foreign.has(market.key), ref);
+  }
 });
 test('list/import limits are bounded, empty lists persist, and original lists are not changed by previews', () => {
   const saved = ['BTCUSDT']; importPreview(parseWatchlistText('XRPUSDT'), markets, saved);

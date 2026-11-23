@@ -1,5 +1,5 @@
-import { SYMBOLS, REST_ORIGINS, isMarketSymbol } from './alfa-charts-data.mjs?v=5';
-import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, WATCHLIST_LIMIT, IMPORT_BYTES } from './alfa-watchlist-model.mjs?v=1';
+import { SYMBOLS, REST_ORIGINS, isSpotSymbol, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=6';
+import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES } from './alfa-watchlist-model.mjs?v=5';
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
 const $ = id => document.getElementById(id);
 const CATALOG_KEY = 'alfa-spot-catalog:v1';
@@ -43,15 +43,21 @@ export class ChartWatchlist {
     catch { this.onStatus('Liste kaydedilemedi; tarayıcı depolama alanını kontrol edin.', 'error'); return false; }
     return true;
   }
-  info(symbol) {
-    return this.markets.find(m => m.symbol === symbol) || { symbol, base: symbol, quote: '', precision: undefined };
+  info(ref) {
+    const spot = this.markets.find(m => m.symbol === ref);
+    if (spot) return { ...spot, venue: 'BINANCE', marketType: 'spot', label: `${spot.base}/${spot.quote} · Binance Spot`, chartable: true };
+    try {
+      const market = parseMarketRef(ref);
+      return { symbol: ref, base: market.base, quote: market.quote, venue: market.venue, marketType: market.marketType,
+        label: market.label, chartable: market.chartable, precision: undefined };
+    } catch { return { symbol: ref, base: ref, quote: '', venue: '?', marketType: '', label: ref, chartable: false, precision: undefined }; }
   }
   async start() {
     await this.loadCatalog();
     if (this.abort.signal.aborted) return;
     this.render(); this.refreshQuotes();
     const shared = new URL(location.href).searchParams.get('watchlist');
-    if (shared && shared.length <= 7000) this.openImport(shared);
+    if (shared && shared.length <= 50000) this.openImport(shared);
   }
   async loadCatalog(force = false) {
     if (this.catalogPromise && !force) return this.catalogPromise;
@@ -78,36 +84,38 @@ export class ChartWatchlist {
     await this.catalogPromise;
     this.renderPicker?.();
   }
-  select(symbol) {
-    if (!isMarketSymbol(symbol) || this.catalogState === 'ready' && !this.markets.some(m => m.symbol === symbol)) {
-      this.onStatus('Bu parite işleme açık Binance Spot kataloğunda yok.', 'error'); return;
+  valid(ref) {
+    try { parseMarketRef(ref); } catch (e) { this.onStatus(e.message || 'Desteklenmeyen sembol', 'error'); return false; }
+    if (isSpotSymbol(ref) && this.catalogState === 'ready' && !this.markets.some(m => m.symbol === ref)) {
+      this.onStatus('Bu parite işleme açık Binance Spot kataloğunda yok.', 'error'); return false;
     }
-    this.onSelect(symbol); this.render();
+    return true;
   }
-  add(symbol) {
-    if (this.symbols.includes(symbol)) return;
-    if (this.symbols.length >= WATCHLIST_LIMIT) { this.onStatus('İzleme listesi en fazla 200 parite içerebilir.', 'error'); return; }
-    if (!this.markets.some(m => m.symbol === symbol)) return;
-    this.symbols.push(symbol); this.save(); this.render(); this.renderPicker?.(); this.refreshQuotes();
+  select(ref) { if (this.valid(ref)) { this.onSelect(ref); this.render(); } }
+  add(ref) {
+    if (this.symbols.includes(ref)) return;
+    if (this.symbols.length >= WATCHLIST_LIMIT) { this.onStatus('İzleme listesi en fazla 200 sembol içerebilir.', 'error'); return; }
+    if (!this.valid(ref)) return;
+    this.symbols.push(ref); this.save(); this.render(); this.renderPicker?.(); this.refreshQuotes();
   }
   remove(symbol) { this.symbols = this.symbols.filter(s => s !== symbol); this.save(); this.render(); }
   render() {
     const selected = this.getSelected();
     const select = $('symbol'); select.replaceChildren();
-    for (const symbol of [...new Set([selected, ...this.symbols])]) {
-      if (!isMarketSymbol(symbol)) continue;
-      const o = document.createElement('option'); o.value = o.textContent = symbol; select.append(o);
+    for (const ref of [...new Set([selected, ...this.symbols])]) {
+      try { parseMarketRef(ref); } catch { continue; }
+      const o = document.createElement('option'); o.value = o.textContent = ref; select.append(o);
     }
     select.value = selected;
     $('watchlist-title').textContent = this.name;
     $('watch-count').textContent = this.symbols.length;
-    $('watch-rows').innerHTML = this.symbols.map(symbol => {
-      const info = this.info(symbol);
-      return `<div class="watch-item"><button type="button" class="watch-row" data-symbol="${symbol}" aria-label="${symbol}" aria-pressed="${symbol === selected}">
-        <span class="coin-icon">${info.base === 'BTC' ? '₿' : esc(info.base.slice(0, 1))}</span><span><strong>${esc(info.base)}</strong><small>${esc(info.quote)} · SPOT</small></span>
-        <span class="watch-quote"><span class="watch-price" data-watch-price="${symbol}">—</span><small data-watch-change="${symbol}">—</small></span></button>
-        <button type="button" class="watch-remove" data-remove-symbol="${symbol}" aria-label="${symbol} listeden çıkar" title="Listeden çıkar">${icon('close')}</button></div>`;
-    }).join('') || '<p class="watch-empty">Listen boş.<br>+ ile parite ekle veya liste içe aktar.</p>';
+    $('watch-rows').innerHTML = this.symbols.map(ref => {
+      const info = this.info(ref), venue = esc(info.venue), kind = esc((info.marketType || '').toUpperCase() || 'Spot');
+      return `<div class="watch-item"><button type="button" class="watch-row" data-symbol="${esc(ref)}" aria-label="${esc(info.label)}" aria-pressed="${ref === selected}">
+        <span class="coin-icon">${info.base === 'BTC' ? '₿' : esc(String(info.base || ref).slice(0, 1))}</span><span><strong>${esc(info.base || ref)}</strong><small>${esc(info.quote || info.marketType || '')} · ${venue}</small></span>
+        <span class="watch-quote"><span class="watch-price" data-watch-price="${esc(ref)}">—</span><small data-watch-change="${esc(ref)}">—</small></span></button>
+        <button type="button" class="watch-remove" data-remove-symbol="${esc(ref)}" aria-label="${esc(ref)} listeden çıkar" title="Listeden çıkar · ${kind}">${icon('close')}</button></div>`;
+    }).join('') || '<p class="watch-empty">Listen boş.<br>+ ile sembol ekle veya liste içe aktar.</p>';
     $('watch-rows').querySelectorAll('[data-symbol]').forEach(b => b.onclick = () => this.select(b.dataset.symbol));
     $('watch-rows').querySelectorAll('[data-remove-symbol]').forEach(b => b.onclick = () => this.remove(b.dataset.removeSymbol));
     this.paintQuotes();
@@ -128,37 +136,64 @@ export class ChartWatchlist {
     this.quoteController?.abort();
     if (!this.symbols.length || this.abort.signal.aborted) return;
     const owner = this.owner, symbols = [...this.symbols]; this.quoteController = new AbortController();
-    for (const origin of REST_ORIGINS) try {
-      const r = await fetch(origin + '/api/v3/ticker/24hr?symbols=' + encodeURIComponent(JSON.stringify(symbols)), {
-        cache: 'no-store', signal: AbortSignal.any([this.abort.signal, this.quoteController.signal, AbortSignal.timeout(10000)]) });
+    const signal = AbortSignal.any([this.abort.signal, this.quoteController.signal, AbortSignal.timeout(12000)]);
+    const spot = symbols.filter(isSpotSymbol), others = symbols.filter(s => !isSpotSymbol(s));
+    if (spot.length) for (const origin of REST_ORIGINS) try {
+      const r = await fetch(origin + '/api/v3/ticker/24hr?symbols=' + encodeURIComponent(JSON.stringify(spot)), { cache: 'no-store', signal });
       if (!r.ok) continue;
       const rows = await r.json(); if (!Array.isArray(rows) || owner !== this.owner) return;
-      for (const row of rows) if (symbols.includes(row.symbol) && Number.isFinite(Number(row.lastPrice)) && Number(row.lastPrice) > 0 && Number.isFinite(Number(row.priceChangePercent))) {
+      for (const row of rows) if (spot.includes(row.symbol) && Number.isFinite(Number(row.lastPrice)) && Number(row.lastPrice) > 0 && Number.isFinite(Number(row.priceChangePercent))) {
         this.quotes.set(row.symbol, { price: Number(row.lastPrice), change: Number(row.priceChangePercent), at: Math.min(Date.now(), Number(row.closeTime) || 0) });
       }
-      this.paintQuotes(); return;
-    } catch { if (this.quoteController.signal.aborted || this.abort.signal.aborted) return; }
+      this.paintQuotes(); break;
+    } catch { if (signal.aborted) return; }
+    if (!others.length || owner !== this.owner || signal.aborted) return;
+    try {
+      const token = await this.getAccessToken();
+      if (!token) return;
+      for (let i = 0; i < others.length; i += 60) {
+        const quotes = await fetchMarketQuotes(others.slice(i, i + 60), signal, fetch, token);
+        if (owner !== this.owner || signal.aborted) return;
+        for (const [ref, quote] of Object.entries(quotes)) this.quotes.set(ref, quote);
+        this.paintQuotes();
+      }
+    } catch { /* One failed venue never clears prices already on screen. */ }
   }
   openPicker() {
     this.modal?.close();
-    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Sembol ekle</h3><p>Binance Spot · İşleme açık pariteler</p></div><button id="symbols-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
-      <label class="study-search">${icon('search')}<input id="symbol-query" placeholder="BTC, XRP, DOGE, ETHBTC…" aria-label="Parite ara"></label>
-      <div class="symbol-filters"><label>Karşılık <select id="symbol-quote"><option value="">Tümü</option><option>USDT</option><option>USDC</option><option>BTC</option><option>ETH</option><option>BNB</option><option>TRY</option><option>EUR</option></select></label><small id="catalog-status"></small><button id="catalog-retry" type="button">Yenile</button></div>
-      <div id="symbol-results" class="symbol-results"></div><p class="menu-note">Listen bu cihazda, hesabına özel kaydedilir. Vadeli, forex ve farklı borsa fiyatları Spot ile değiştirilmez.</p>`, 'symbol-dialog');
+    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Sembol ekle</h3><p>Binance Spot · borsa, vadeli, forex, endeks ve kripto endeksleri</p></div><button id="symbols-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+      <label class="study-search">${icon('search')}<input id="symbol-query" placeholder="BTC, OKX:ETHUSDT.P, XAUUSD, CRYPTOCAP:TOTAL…" aria-label="Sembol ara"></label>
+      <div class="symbol-filters"><label>Borsa <select id="symbol-venue"><option value="">Tümü</option>${['BINANCE', 'OKX', 'BYBIT', 'CME', 'CBOE', 'BIST', 'TVC', 'FX', 'FX_IDC', 'OANDA', 'FOREXCOM', 'FPMARKETS', 'CRYPTOCAP'].map(v => `<option>${v}</option>`).join('')}</select></label>
+        <label>Karşılık <select id="symbol-quote"><option value="">Tümü</option><option>USDT</option><option>USDC</option><option>BTC</option><option>ETH</option><option>BNB</option><option>TRY</option><option>EUR</option></select></label><small id="catalog-status"></small><button id="catalog-retry" type="button">Yenile</button></div>
+      <div id="symbol-results" class="symbol-results"></div><p class="menu-note">Farklı borsa ve vadeli semboller Spot ile değiştirilmez; kendi borsası ve piyasa türüyle listeye eklenir. Liste yalnızca bu cihazda, hesabına özel saklanır.</p>`, 'symbol-dialog');
     modal.overlay.setAttribute('aria-label', 'Sembol arama');
     modal.box.querySelector('#symbols-close').onclick = modal.close;
     this.renderPicker = () => {
       if (!modal.overlay.open) return;
-      const q = modal.box.querySelector('#symbol-query').value.toUpperCase().replace(/[ /]/g, ''), quote = modal.box.querySelector('#symbol-quote').value;
-      const results = this.markets.filter(m => (!quote || m.quote === quote) && (!q || m.symbol.includes(q)));
-      modal.box.querySelector('#catalog-status').textContent = this.catalogState === 'loading' ? 'Katalog yükleniyor…' : this.catalogState === 'error' ? 'Kataloğa ulaşılamadı; yeniden deneyin.' : results.length + ' parite';
-      modal.box.querySelector('#symbol-results').innerHTML = results.slice(0, 60).map(m => `<div class="symbol-result"><button data-open-symbol="${m.symbol}"><strong>${esc(m.base)} <small>/ ${esc(m.quote)}</small></strong><small>BINANCE · SPOT</small></button>
-        <button data-add-symbol="${m.symbol}" aria-label="${m.symbol} listeye ekle" ${this.symbols.includes(m.symbol) ? 'disabled' : ''}>${icon(this.symbols.includes(m.symbol) ? 'check' : 'plus')}</button></div>`).join('') || '<p class="study-empty">Eşleşen Spot parite yok.</p>';
+      const q = modal.box.querySelector('#symbol-query').value.toUpperCase().replace(/[ /]/g, '').replace(/^BINANCE:/, '');
+      const quote = modal.box.querySelector('#symbol-quote').value, venue = modal.box.querySelector('#symbol-venue').value;
+      const spots = (!venue || venue === 'BINANCE') ? this.markets
+        .filter(m => (!quote || m.quote === quote) && (!q || m.symbol.includes(q)))
+        .map(m => ({ ref: m.symbol, base: m.base, quote: m.quote, venue: 'BINANCE', marketType: 'SPOT', chartable: true })) : [];
+      const foreign = foreignMarkets().filter(m => (!venue || m.venue === venue) && (!quote || m.quote === quote) &&
+        (!q || m.key.includes(q) || m.feedSymbol.toUpperCase().includes(q) || m.label.toUpperCase().includes(q)))
+        .map(m => ({ ref: m.key, base: m.base, quote: m.quote, venue: m.venue, marketType: (m.marketType || '').toUpperCase(), chartable: m.chartable }));
+      const results = [...spots, ...foreign].slice(0, 80);
+      const status = modal.box.querySelector('#catalog-status');
+      status.textContent = this.catalogState === 'loading' ? 'Binance kataloğu yükleniyor…' :
+        this.catalogState === 'error' ? 'Binance kataloğuna ulaşılamadı; diğer borsalar yine eklenebilir.' : results.length + ' sembol';
+      modal.box.querySelector('#symbol-results').innerHTML = results.map(m => {
+        const ref = esc(m.ref), added = this.symbols.includes(m.ref);
+        return `<div class="symbol-result"><button data-open-symbol="${ref}"><strong>${esc(m.base)} <small>${m.quote ? '/ ' + esc(m.quote) : ''}</small></strong>
+          <small class="venue-badge">${esc(m.venue)} · ${esc(m.marketType || 'SPOT')}${m.chartable === false ? ' · CANLI' : ''}</small></button>
+          <button data-add-symbol="${ref}" aria-label="${ref} listeye ekle" ${added ? 'disabled' : ''}>${icon(added ? 'check' : 'plus')}</button></div>`;
+      }).join('') || '<p class="study-empty">Eşleşen sembol yok.</p>';
       modal.box.querySelectorAll('[data-add-symbol]').forEach(b => b.onclick = () => this.add(b.dataset.addSymbol));
       modal.box.querySelectorAll('[data-open-symbol]').forEach(b => b.onclick = () => { this.add(b.dataset.openSymbol); this.select(b.dataset.openSymbol); modal.close(); });
     };
     modal.box.querySelector('#symbol-query').oninput = this.renderPicker;
     modal.box.querySelector('#symbol-quote').onchange = this.renderPicker;
+    modal.box.querySelector('#symbol-venue').onchange = this.renderPicker;
     modal.box.querySelector('#catalog-retry').onclick = async () => { this.catalogState = 'loading'; this.renderPicker(); await this.loadCatalog(true); this.renderPicker(); };
     this.renderPicker(); modal.box.querySelector('#symbol-query').focus();
   }
@@ -167,8 +202,8 @@ export class ChartWatchlist {
     const owner = this.owner;
     const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>İzleme listesi içe aktar</h3><p>TradingView TXT / CSV, semboller veya herkese açık liste linki</p></div><button id="import-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
       <label class="import-file">TXT / CSV dosyası seç<input id="watchlist-file" type="file" accept=".txt,.csv,text/plain,text/csv"></label>
-      <label class="import-source-label" for="watchlist-source">Semboller veya link</label><textarea id="watchlist-source" rows="4" placeholder="BINANCE:BTCUSDT,BINANCE:XRPUSDT&#10;https://www.tradingview.com/watchlists/…/" spellcheck="false"></textarea>
-      <p class="menu-note">Özel TradingView listesi için TXT dışa aktar. Linkle alma, Alfa Charts izni olan hesabınla giriş yapmanı gerektirir. Şifre veya TradingView çerezi istenmez.</p>
+      <label class="import-source-label" for="watchlist-source">Semboller veya link</label><textarea id="watchlist-source" rows="4" placeholder="BINANCE:BTCUSDT,OKX:XAUTUSDT,CBOE:VIX,CRYPTOCAP:TOTAL&#10;https://www.tradingview.com/watchlists/…/" spellcheck="false"></textarea>
+      <p class="menu-note">Binance Spot, OKX/Bybit vadeli, forex, endeks ve kripto endeksleri kendi borsasıyla eklenir. Özel TradingView listesi için TXT dışa aktar. Linkle alma, Alfa Charts izni olan hesabınla giriş yapmanı gerektirir. Şifre veya TradingView çerezi istenmez.</p>
       <div class="import-options"><label><input id="import-replace" type="checkbox"> Mevcut listeyi değiştir</label><button id="watchlist-preview" type="button">Önizle</button></div>
       <div id="import-result" class="import-result" role="status"></div><div class="settings-actions"><button id="watchlist-apply" class="apply" type="button" disabled>Listeye ekle</button></div>`, 'watchlist-import-dialog');
     modal.overlay.setAttribute('aria-label', 'TradingView izleme listesi içe aktar');
@@ -179,7 +214,7 @@ export class ChartWatchlist {
     const paint = () => {
       preview = entries && importPreview(entries, this.markets, replace.checked ? [] : this.symbols);
       apply.disabled = !preview?.added.length; apply.textContent = replace.checked ? 'Listeyi değiştir' : 'Listeye ekle';
-      if (preview) result.innerHTML = `<strong>${preview.added.length} parite ${replace.checked ? 'yeni listeye' : 'listene'} alınacak</strong><p>${preview.added.map(esc).join(', ') || 'Eklenebilir yeni parite yok.'}</p>
+      if (preview) result.innerHTML = `<strong>${preview.added.length} sembol ${replace.checked ? 'yeni listeye' : 'listene'} alınacak</strong><p>${preview.added.map(esc).join(', ') || 'Eklenebilir yeni sembol yok.'}</p>
         ${preview.skipped.length ? `<details><summary>${preview.skipped.length} kayıt atlandı · nedenlerini göster</summary>${preview.skipped.slice(0, 100).map(s => `<div>${esc(s.raw)} — ${esc(s.reason)}</div>`).join('')}</details>` : ''}`;
     };
     replace.onchange = paint;
@@ -192,8 +227,6 @@ export class ChartWatchlist {
     modal.box.querySelector('#watchlist-preview').onclick = async e => {
       e.currentTarget.disabled = true; apply.disabled = true; result.textContent = 'Liste kontrol ediliyor…';
       try {
-        await this.loadCatalog();
-        if (this.catalogState !== 'ready') throw new Error('Önce Binance sembol kataloğunun yüklenmesi gerekiyor. Sembol arama panelinden Yenile’yi deneyin.');
         let text = source.value.trim();
         if (/^https?:\/\//i.test(text)) {
           const single = tradingViewSymbolURL(text);
@@ -212,27 +245,42 @@ export class ChartWatchlist {
           }
         }
         if (owner !== this.getOwner() || !modal.overlay.open) return;
-        entries = parseWatchlistText(text); paint();
+        entries = parseWatchlistText(text);
+        // Non-Binance venues are valid even when the Binance catalogue is down.
+        if (entries.some(e => !e.reason && isSpotSymbol(e.ref))) {
+          await this.loadCatalog();
+          if (this.catalogState !== 'ready') throw new Error('Binance Spot pariteleri için katalog gerekli. Sembol arama panelinden Yenile’yi deneyin.');
+        }
+        paint();
       } catch (err) { entries = preview = null; result.textContent = err.message; }
       finally { if (modal.overlay.open) modal.box.querySelector('#watchlist-preview').disabled = false; }
     };
     apply.onclick = () => {
       if (owner !== this.getOwner() || !preview?.added.length) return;
       const next = replace.checked ? preview.added : [...this.symbols, ...preview.added];
-      if (replace.checked && !confirm('Mevcut izleme listesi önizlemedeki paritelerle değiştirilsin mi? Çizimler silinmez.')) return;
+      if (replace.checked && !confirm('Mevcut izleme listesi önizlemedeki sembollerle değiştirilsin mi? Çizimler silinmez.')) return;
       this.symbols = cleanWatchlist(next); this.save(); this.render(); this.refreshQuotes(); modal.close();
-      this.onStatus(preview.added.length + ' Spot parite içe aktarıldı', 'ok');
+      this.onStatus(preview.added.length + ' sembol içe aktarıldı', 'ok');
     };
     source.focus();
   }
   export() {
-    const blob = new Blob([this.symbols.map(s => 'BINANCE:' + s).join(',')], { type: 'text/plain;charset=utf-8' });
+    const refs = [...new Set(this.symbols.map(s => isSpotSymbol(s) ? 'BINANCE:' + s : s))];
+    const blob = new Blob([refs.join(',')], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'alfa-watchlist.txt'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  async share() {
+  sharedURL(refs) {
     const url = new URL('/alfa-charts.html', location.origin);
-    url.searchParams.set('symbol', this.getSelected()); url.searchParams.set('watchlist', this.symbols.join(','));
-    try { await navigator.clipboard.writeText(url.toString()); this.onStatus('Liste bağlantısı kopyalandı; açan kişi önizleyip kendi listesine ekleyebilir.', 'ok'); }
+    url.searchParams.set('symbol', this.getSelected()); url.searchParams.set('watchlist', refs.join(','));
+    return url.toString();
+  }
+  async share() {
+    let refs = [...this.symbols], note = 'Liste bağlantısı kopyalandı; açan kişi önizleyip kendi listesine ekleyebilir.';
+    if (this.sharedURL(refs).length > 50000) {
+      while (refs.length > 1 && this.sharedURL(refs).length > 50000) refs = refs.slice(0, -1);
+      note = `${refs.length}/${this.symbols.length} sembol bağlantıya sığdı; uzun liste için TXT dışa aktar.`;
+    }
+    try { await navigator.clipboard.writeText(this.sharedURL(refs)); this.onStatus(note, 'ok'); }
     catch { this.onStatus('Bağlantı kopyalanamadı; listeyi TXT olarak dışa aktarabilirsin.', 'error'); }
   }
   dispose() { this.abort.abort(); this.importController?.abort(); this.quoteController?.abort(); clearInterval(this.timer); this.modal?.close(); }

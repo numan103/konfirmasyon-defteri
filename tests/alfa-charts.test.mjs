@@ -5,26 +5,63 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   TIMEFRAMES, SYMBOLS, REST_ORIGINS, STREAM_ORIGINS, validateMarket, restURL, streamURL,
-  candle, parseHistory, parseKline, mergeCandles, fetchHistory
+  candle, parseHistory, parseKline, mergeCandles, fetchHistory,
+  parseMarketRef, isMarketRef, isSpotSymbol, fetchMarketQuotes, setMarketTokenProvider
 } from '../assets/alfa-charts-data.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const SKIPPED_REFS = [
+  'CME:BTC1!', 'OKX:USDTTRY', 'CBOE:VIX', 'FX_IDC:XAUTRYG', 'OKX:XAUTUSDT', 'BIST:XU100',
+  'CRYPTOCAP:TOTAL', 'CRYPTOCAP:TOTAL2', 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:USDT.D',
+  'BINANCE:BTCUSDT.P', 'BINANCE:ETHUSDT', 'BINANCE:BTCUSDT', 'OKX:ETHUSDT.P', 'TVC:GOLD',
+  'BYBIT:BTCUSDT.P', 'BYBIT:ETHUSDT.P', 'FX:XAUUSD', 'FPMARKETS:US100', 'OKX:SOLUSDT',
+  'OKX:PEPEUSDT.P', 'OKX:BNBUSDT.P', 'OKX:DOGEUSDT', 'OKX:AVAXUSDT.P', 'OKX:LTCUSDT.P',
+  'OKX:XRPUSDT.P', 'OKX:SUIUSDT.P', 'OKX:LINKUSDT.P', 'OKX:NEARUSDT.P', 'OKX:INJUSDT',
+  'OKX:AAVEUSDT.P', 'OKX:PYTHUSDT', 'OKX:HYPEUSDT.P', 'OKX:ZECUSDT.P', 'TVC:DXY',
+  'OANDA:EURUSD', 'OANDA:NZDUSD', 'OANDA:USDJPY', 'FX_IDC:GBPAUD', 'OANDA:AUDUSD',
+  'FOREXCOM:XAUUSD', 'FX:GBPUSD', 'OANDA:XAGUSD', 'FX:USDCHF', 'OANDA:USDCAD',
+  'FX:NZDCAD', 'FX:AUDCHF', 'FX:AUDCAD'
+];
 
 test('alfa charts supports the requested timeframes and extended presets', () => {
   assert.deepEqual(Object.keys(TIMEFRAMES), ['1M', '3M', '5M', '15M', '30M', '1H', '2H', '4H', '6H', '12H', '1D', '3D', '1W']);
   assert.deepEqual(Object.values(TIMEFRAMES), ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '3d', '1w']);
 });
 
-test('market validation blocks free-form symbols and intervals', () => {
+test('market validation accepts venue-qualified symbols and blocks free-form symbols', () => {
   assert.equal(validateMarket('BTCUSDT', '1h'), undefined);
   assert.equal(validateMarket('ETHUSDT', '1w'), undefined);
   assert.equal(validateMarket('BTCUSDT', '2h'), undefined);
+  assert.equal(validateMarket('OKX:BTCUSDT.P', '1h'), undefined);
+  assert.equal(validateMarket('CBOE:VIX', '1d'), undefined);
+  assert.throws(() => validateMarket('CRYPTOCAP:TOTAL', '1h'), /mum geçmişi/);
   for (const bad of [['BTCUSDT;DROP', '1h'], ['BTCUSDT', '7h'], ['', '1h'], ['BTCUSDT', '1H'], [null, null]]) {
     assert.throws(() => validateMarket(...bad));
   }
-  for (const bad of ['btcusdt', 'BTCUSDT.P', 'BTC-USDT']) assert.throws(() => validateMarket(bad, '1m'));
+  for (const bad of ['btcusdt', 'BTCUSDT.P', 'BTC-USDT', 'BINANCE:']) assert.equal(isMarketRef(bad), false);
+  assert.equal(isSpotSymbol('BTCUSDT'), true);
+  assert.equal(isSpotSymbol('BINANCE:BTCUSDT'), false);
   assert.ok(!SYMBOLS.includes('BTCUSDT.P'));
+});
+
+test('every skipped TradingView reference keeps its own venue and market type', () => {
+  for (const ref of SKIPPED_REFS) {
+    const market = parseMarketRef(ref);
+    assert.equal(market.key, ref.startsWith('BINANCE:') && market.marketType === 'spot' ? ref.slice(8) : ref, ref);
+    assert.ok(market.feed && market.venue && market.label, ref);
+  }
+  assert.equal(parseMarketRef('BINANCE:BTCUSDT').key, 'BTCUSDT');
+  assert.equal(parseMarketRef('BINANCE:BTCUSDT.P').feed, 'binance-perp');
+  assert.equal(parseMarketRef('OKX:BTCUSDT.P').feedSymbol, 'BTC-USDT-SWAP');
+  assert.equal(parseMarketRef('OKX:USDTTRY').feedSymbol, 'USDT-TRY');
+  assert.equal(parseMarketRef('BYBIT:ETHUSDT.P').feedSymbol, 'ETHUSDT');
+  assert.equal(parseMarketRef('CBOE:VIX').feedSymbol, '^VIX');
+  assert.equal(parseMarketRef('CME:BTC1!').feedSymbol, 'BTC=F');
+  assert.equal(parseMarketRef('BIST:XU100').feedSymbol, 'XU100.IS');
+  assert.equal(parseMarketRef('OANDA:EURUSD').feedSymbol, 'EURUSD=X');
+  assert.equal(parseMarketRef('FX_IDC:XAUTRYG').feed, 'derived');
+  assert.equal(parseMarketRef('CRYPTOCAP:TOTAL').chartable, false);
 });
 
 test('request URLs stay inside Binance spot endpoints', () => {
@@ -94,6 +131,37 @@ test('history fetch falls back to the second origin and never invents candles', 
   await assert.rejects(() => fetchHistory('BTCUSDT', '1h', undefined, async () => { throw new Error('offline'); }));
 });
 
+test('non-spot history and quotes reuse the existing access API with the original ref', async () => {
+  const calls = [];
+  const bars = await fetchHistory('OKX:BTCUSDT.P', '1h', undefined, async (url, opts) => {
+    calls.push({ url, opts });
+    return { ok: true, json: async () => ({ ok: true, candles: [{ time: 1794751200000, open: 10, high: 12, low: 9, close: 11, volume: 5 }] }) };
+  });
+  assert.equal(calls[0].url, '/api/access');
+  const body = JSON.parse(calls[0].opts.body);
+  assert.equal(body.op, 'chart-market-data');
+  assert.equal(body.ref, 'OKX:BTCUSDT.P');
+  assert.equal(body.interval, '1h');
+  assert.equal(bars[0].close, 11);
+
+  const quoteOnly = await fetchHistory('CRYPTOCAP:TOTAL', '1h', undefined, async () => ({
+    ok: true, json: async () => ({ ok: true, chartable: false, quote: { price: 2500, change: 1.5 } })
+  }));
+  assert.equal(quoteOnly.length, 1);
+  assert.equal(quoteOnly[0].close, 2500);
+
+  setMarketTokenProvider(async () => 'fixture-token');
+  const quoteCalls = [];
+  const quotes = await fetchMarketQuotes(['CBOE:VIX'], undefined, async (url, opts) => {
+    quoteCalls.push({ url, opts });
+    return { ok: true, json: async () => ({ ok: true, quotes: { 'CBOE:VIX': { price: 19, change: 2, at: 1 } } }) };
+  });
+  assert.equal(quoteCalls[0].opts.headers.Authorization, 'Bearer fixture-token');
+  assert.equal(JSON.parse(quoteCalls[0].opts.body).op, 'chart-market-quotes');
+  assert.equal(quotes['CBOE:VIX'].price, 19);
+  setMarketTokenProvider(async () => '');
+});
+
 test('chart page uses the vendored open-source library and no TradingView iframe', () => {
   const html = read('alfa-charts.html');
   const script = read('assets/alfa-charts.mjs');
@@ -103,6 +171,8 @@ test('chart page uses the vendored open-source library and no TradingView iframe
   assert.doesNotMatch(html, /tradingview\.com\/.*widget|embed-widget/i);
   assert.doesNotMatch(script, /embed-widget|tradingview\.com/i);
   assert.match(script, /vendor\/lightweight-charts-5\.0\.9\/lightweight-charts\.standalone\.production\.mjs/);
+  assert.match(script, /connectPolling/);
+  assert.match(script, /mum geçmişi yok/);
   assert.ok(fs.existsSync(path.join(root, 'assets/vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs')));
   assert.ok(fs.existsSync(path.join(root, 'assets/vendor/lightweight-charts-5.0.9/LICENSE.txt')));
   assert.match(read('assets/vendor/lightweight-charts-5.0.9/LICENSE.txt'), /Apache License/);
