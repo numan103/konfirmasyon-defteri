@@ -19,10 +19,15 @@ export function confirmedBars(bars, index, rightBars = 0) {
   return bars.slice(0, Math.max(0, n - rightBars));
 }
 
-// UTC exchange boundaries. Weekly bars start Monday, not Unix-epoch Thursday.
+// UTC exchange boundaries. Every chart timeframe must be replayable; keeping
+// this map in sync with TIMEFRAMES is covered by tests/alfa-replay.test.mjs.
+const TIMEFRAME_SECONDS = Object.freeze({
+  '1m': 60, '3m': 180, '5m': 300, '15m': 900, '30m': 1800,
+  '1h': 3600, '2h': 7200, '4h': 14400, '6h': 21600, '12h': 43200,
+  '1d': 86400, '3d': 259200, '1w': 604800
+});
 export function candleCloseTime(time, timeframe) {
-  const seconds = { '1m':60, '5m':300, '15m':900, '30m':1800,
-    '1h':3600, '4h':14400, '1d':86400, '1w':604800 }[timeframe];
+  const seconds = TIMEFRAME_SECONDS[timeframe];
   if (!seconds) throw new Error('Unsupported timeframe');
   return time + seconds;
 }

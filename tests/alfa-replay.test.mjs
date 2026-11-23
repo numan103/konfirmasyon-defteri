@@ -7,6 +7,7 @@ import { strictSessionLevels } from '../assets/alfa-session-levels-model.mjs';
 import { computeFvg } from '../assets/alfa-fvg-model.mjs';
 import { computeMarketStructure, findSwings } from '../assets/alfa-market-structure-model.mjs';
 import { ema } from '../assets/alfa-indicators-model.mjs';
+import { TIMEFRAMES } from '../assets/alfa-charts-data.mjs';
 
 const bars = [{ time: 1 }, { time: 2 }, { time: 3 }, { time: 4 }];
 
@@ -73,6 +74,20 @@ test('repeat runs, rewind and restart produce identical snapshots', () => {
   };
   assert.deepEqual(run(),run());
   assert.equal(candleCloseTime(0,'1h'),3600);
+});
+
+test('every chart timeframe has a replay close boundary', () => {
+  const expected = {
+    '1m': 60, '3m': 180, '5m': 300, '15m': 900, '30m': 1800,
+    '1h': 3600, '2h': 7200, '4h': 14400, '6h': 21600, '12h': 43200,
+    '1d': 86400, '3d': 259200, '1w': 604800
+  };
+  assert.deepEqual(Object.values(TIMEFRAMES).sort(), Object.keys(expected).sort());
+  for (const [timeframe, seconds] of Object.entries(expected)) {
+    assert.equal(candleCloseTime(1000, timeframe), 1000 + seconds, timeframe);
+    assert.doesNotThrow(() => new ReplayEngine({ symbol: 'BTCUSDT', timeframe }), timeframe);
+  }
+  assert.throws(() => candleCloseTime(0, '7h'), /Unsupported timeframe/);
 });
 
 test('save/restore uses exact start, current candle and warm-up seed', () => {
