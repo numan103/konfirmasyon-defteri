@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=10">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=11">
 </head>
 <body>
   <main class="workspace">
@@ -46,7 +46,14 @@
         <button id="fit" type="button" title="Yüklü tüm mumları göster">Sığdır</button>
         <button id="live" type="button" title="En son muma dön">Son mum</button>
         <button id="list-toggle" type="button" aria-pressed="true" aria-controls="watchlist">Liste</button>
-        <button id="screenshot" type="button" title="Grafiği PNG olarak indir">📷 Fotoğraf</button>
+        <div class="shot-wrap">
+          <button id="screenshot" type="button" title="Grafik görüntüsü">📷 Fotoğraf</button>
+          <div id="shot-menu" class="shot-menu" hidden>
+            <button type="button" data-shot="download">Görüntüyü indir</button>
+            <button type="button" data-shot="copy-image">Görüntüyü kopyala</button>
+            <button type="button" data-shot="copy-link">Bağlantıyı kopyala</button>
+          </div>
+        </div>
         <button id="fullscreen" type="button">Tam ekran</button>
       </div>
     </header>

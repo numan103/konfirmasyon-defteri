@@ -125,3 +125,9 @@ footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border
 #drawing-export{margin:14px 0;display:block}
 button:disabled{opacity:.4;cursor:not-allowed}
 @media(max-width:600px){.workarea,.no-list .workarea{grid-template-columns:36px minmax(0,1fr)}.actions{flex-wrap:wrap;gap:4px}.actions button{padding:6px}#drawing-manager{top:155px;right:5px;bottom:65px}.legend{min-height:58px}#drawing-status{max-width:100%;font-size:9px}}
+.shot-wrap{position:relative}
+.shot-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:190px;background:#171f2e;border:1px solid #43516d;border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:2px;z-index:20;box-shadow:0 10px 30px #0008}
+.shot-menu[hidden]{display:none}
+.shot-menu button{width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:6px;font-size:12px}
+.shot-menu button:hover{background:#263047}
+#connection[data-state=ok]{color:#39c99a}

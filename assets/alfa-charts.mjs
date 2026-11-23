@@ -333,6 +333,12 @@ function updateUI() {
   $('market-title').textContent = `${symbol} · ${label}`;
   document.querySelectorAll('#timeframes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
+  try {
+    const url = new URL(location.href);
+    url.searchParams.set('symbol', symbol);
+    url.searchParams.set('interval', interval);
+    window.history.replaceState(null, '', url);
+  } catch {}
 }
 async function loadMarket() {
   if(replayMode&&!paper.canLeave()){
@@ -423,6 +429,15 @@ function connect(id, resetView = false) {
   ws.onerror = () => reconnect('WebSocket erişilemiyor');
   watchdog = setInterval(() => { if (Date.now() - lastReceipt > 30000) reconnect('Canlı veri gecikti'); }, 5000);
 }
+(() => {
+  try {
+    const p = new URLSearchParams(location.search);
+    const s = String(p.get('symbol') || '').toUpperCase();
+    const tf = String(p.get('interval') || p.get('tf') || '').toLowerCase();
+    if (SYMBOLS.includes(s)) symbol = s;
+    if (Object.values(TIMEFRAMES).includes(tf)) interval = tf;
+  } catch {}
+})();
 for (const [label, value] of Object.entries(TIMEFRAMES)) {
   const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
   b.dataset.interval = value; b.title = label.endsWith('M') ? `${parseInt(label)} dakika` : label;
@@ -442,81 +457,132 @@ $('chart-type').addEventListener('change', e => {
   candles.applyOptions({ visible: type === 'candles' });
   line.applyOptions({ visible: type === 'line' });
 });
+async function buildChartScreenshotCanvas() {
+  const src = chart.takeScreenshot();
+  if (!src) throw new Error('no-screenshot');
+  const canvas = document.createElement('canvas');
+  canvas.width = src.width;
+  canvas.height = src.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(src, 0, 0);
+
+  const svg = host.querySelector('svg.drawing-overlay');
+  if (svg) {
+    const rect = svg.getBoundingClientRect();
+    const cssW = rect.width || host.clientWidth || src.width;
+    const cssH = rect.height || host.clientHeight || src.height;
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    clone.setAttribute('width', String(src.width));
+    clone.setAttribute('height', String(src.height));
+    if (!clone.getAttribute('viewBox')) {
+      clone.setAttribute('viewBox', `0 0 ${cssW} ${cssH}`);
+      clone.setAttribute('preserveAspectRatio', 'none');
+    }
+    const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = url;
+      });
+      ctx.drawImage(img, 0, 0, src.width, src.height);
+    } catch {}
+    finally { URL.revokeObjectURL(url); }
+  }
+
+  const pad = Math.max(12, Math.round(canvas.width * 0.012));
+  ctx.save();
+  ctx.font = `600 ${Math.max(12, Math.round(canvas.width * 0.013))}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = 'rgba(215,224,238,0.78)';
+  ctx.textBaseline = 'top';
+  const stampLabel = new Date().toLocaleString('tr-TR');
+  ctx.fillText(`ALFA CHARTS · ${symbol} · ${String(interval).toUpperCase()} · ${stampLabel}`, pad, pad);
+  ctx.restore();
+  return canvas;
+}
+
+function chartScreenshotName() {
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+  return `alfa-charts-${String(symbol).toLowerCase()}-${String(interval).toLowerCase()}-${stamp}.png`;
+}
+
 async function downloadChartScreenshot() {
-  const btn = $('screenshot');
-  if (btn) btn.disabled = true;
-  try {
-    const src = chart.takeScreenshot();
-    if (!src) { connection('Grafik görüntüsü alınamadı', 'error'); return; }
-    const canvas = document.createElement('canvas');
-    canvas.width = src.width;
-    canvas.height = src.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(src, 0, 0);
-
-    const svg = host.querySelector('svg.drawing-overlay');
-    if (svg) {
-      const rect = svg.getBoundingClientRect();
-      const cssW = rect.width || host.clientWidth || src.width;
-      const cssH = rect.height || host.clientHeight || src.height;
-      const clone = svg.cloneNode(true);
-      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-      clone.setAttribute('width', String(src.width));
-      clone.setAttribute('height', String(src.height));
-      if (!clone.getAttribute('viewBox')) {
-        clone.setAttribute('viewBox', `0 0 ${cssW} ${cssH}`);
-        clone.setAttribute('preserveAspectRatio', 'none');
-      }
-      const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' });
+  const canvas = await buildChartScreenshotCanvas();
+  const name = chartScreenshotName();
+  const link = document.createElement('a');
+  link.download = name;
+  if (canvas.toBlob) {
+    await new Promise(resolve => canvas.toBlob(blob => {
+      if (!blob) { link.href = canvas.toDataURL('image/png'); link.click(); resolve(); return; }
       const url = URL.createObjectURL(blob);
-      try {
-        const img = await new Promise((resolve, reject) => {
-          const i = new Image();
-          i.onload = () => resolve(i);
-          i.onerror = reject;
-          i.src = url;
-        });
-        ctx.drawImage(img, 0, 0, src.width, src.height);
-      } catch {}
-      finally { URL.revokeObjectURL(url); }
-    }
+      link.href = url; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      resolve();
+    }, 'image/png'));
+  } else {
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+  connection('Grafik görüntüsü indirildi', 'ok');
+}
 
-    const pad = Math.max(12, Math.round(canvas.width * 0.012));
-    ctx.save();
-    ctx.font = `600 ${Math.max(12, Math.round(canvas.width * 0.013))}px system-ui, -apple-system, sans-serif`;
-    ctx.fillStyle = 'rgba(215,224,238,0.78)';
-    ctx.textBaseline = 'top';
-    const stampLabel = new Date().toLocaleString('tr-TR');
-    ctx.fillText(`ALFA CHARTS · ${symbol} · ${String(interval).toUpperCase()} · ${stampLabel}`, pad, pad);
-    ctx.restore();
+async function copyChartScreenshot() {
+  const canvas = await buildChartScreenshotCanvas();
+  const blob = await new Promise(resolve => canvas.toBlob ? canvas.toBlob(resolve, 'image/png') : resolve(null));
+  if (!blob) throw new Error('no-blob');
+  if (navigator.clipboard && window.ClipboardItem) {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    connection('Grafik görüntüsü kopyalandı', 'ok');
+    return;
+  }
+  // fallback: copy data url as text not ideal; inform user
+  throw new Error('clipboard-image-unavailable');
+}
 
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
-    const name = `alfa-charts-${String(symbol).toLowerCase()}-${String(interval).toLowerCase()}-${stamp}.png`;
-    const link = document.createElement('a');
-    link.download = name;
-    if (canvas.toBlob) {
-      await new Promise(resolve => canvas.toBlob(blob => {
-        if (!blob) { link.href = canvas.toDataURL('image/png'); link.click(); resolve(); return; }
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        resolve();
-      }, 'image/png'));
-    } else {
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    }
-    connection('Grafik fotoğrafı indirildi', 'ok');
+async function copyChartLink() {
+  const url = new URL('/alfa-charts.html', location.origin);
+  url.searchParams.set('symbol', symbol);
+  url.searchParams.set('interval', interval);
+  const text = url.toString();
+  if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+  else {
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  connection('Grafik bağlantısı kopyalandı', 'ok');
+}
+
+function closeShotMenu() { const m = $('shot-menu'); if (m) m.hidden = true; }
+function toggleShotMenu() { const m = $('shot-menu'); if (m) m.hidden = !m.hidden; }
+
+$('screenshot').addEventListener('click', e => { e.stopPropagation(); toggleShotMenu(); });
+$('shot-menu').addEventListener('click', async e => {
+  const btn = e.target.closest('[data-shot]');
+  if (!btn) return;
+  e.stopPropagation();
+  closeShotMenu();
+  const action = btn.dataset.shot;
+  const shotBtn = $('screenshot');
+  if (shotBtn) shotBtn.disabled = true;
+  try {
+    if (action === 'download') await downloadChartScreenshot();
+    else if (action === 'copy-image') await copyChartScreenshot();
+    else if (action === 'copy-link') await copyChartLink();
   } catch (err) {
     console.error(err);
-    connection('Grafik fotoğrafı alınamadı', 'error');
+    if (action === 'copy-image') connection('Görüntü kopyalanamadı (tarayıcı izin vermiyor olabilir)', 'error');
+    else if (action === 'copy-link') connection('Bağlantı kopyalanamadı', 'error');
+    else connection('Grafik görüntüsü alınamadı', 'error');
   } finally {
-    if (btn) btn.disabled = false;
+    if (shotBtn) shotBtn.disabled = false;
   }
-}
-$('screenshot').addEventListener('click', downloadChartScreenshot);
+});
+document.addEventListener('click', e => { if (!e.target.closest('.shot-wrap')) closeShotMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeShotMenu(); });
 $('fit').addEventListener('click', () => chart.timeScale().fitContent());
 $('live').addEventListener('click', () => chart.timeScale().scrollToRealTime());
 function toggleList(show) {
