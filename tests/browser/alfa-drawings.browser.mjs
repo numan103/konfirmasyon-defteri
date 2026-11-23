@@ -119,6 +119,27 @@ try {
     assert.notEqual(moved.points[0].time, before.points[0].time);
     assert.ok(Math.abs((moved.points[0].price - before.points[0].price) - (moved.points[1].price - before.points[1].price)) < 1e-7);
   });
+  await test('Fibonacci .886 and extension levels render correct prices and toggle cleanly', async () => {
+    const start = await lastDrawing();
+    const full = [0, .236, .382, .5, .618, .705, .786, .886, 1, 1.272, 1.618, 2.618];
+    assert.deepEqual(start.levels, full);
+    await page.locator('#drawing-manage').click();
+    assert.match(await page.locator('#fib-advanced-toggle').textContent(), /kaldır/);
+    const labels = await page.locator(`[data-id="${start.id}"] text`).allTextContents();
+    for (const level of [.886, 1.272, 1.618, 2.618]) {
+      const label = labels.find(s => s.startsWith(`${level}  (`));
+      assert.ok(label, `${level} label rendered`);
+      const expected = start.points[1].price + (start.points[0].price - start.points[1].price) * level;
+      const rendered = Number(label.match(/\((.+)\)/)[1].replaceAll('.', '').replace(',', '.'));
+      assert.ok(Math.abs(rendered - expected) <= .0001, `${level}: ${rendered} vs ${expected}`);
+    }
+    await page.locator('#fib-advanced-toggle').click();
+    assert.deepEqual((await lastDrawing()).levels, [0, .236, .382, .5, .618, .705, .786, 1]);
+    assert.match(await page.locator('#fib-advanced-toggle').textContent(), /ekle/);
+    await page.locator('#fib-advanced-toggle').click();
+    assert.deepEqual((await lastDrawing()).levels, full);
+    await page.locator('#drawing-close').click();
+  });
   await test('Fibonacci settings add/remove levels, reverse, style and persist a template', async () => {
     await page.locator('#drawing-manage').click();
     await page.locator('#fib-levels').fill('0, 0.382, 0.618, 0.705, 1, 1.618');

@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği aktif sürüm için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v149-multichart-sync'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b210-multichart-sync'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v152-fib-extension'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b213-fib-extension'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 

@@ -1,4 +1,4 @@
-import { fibPrice, positionStats, normalizeStyle } from './alfa-drawings-model.mjs?v=7';
+import { fibPrice, positionStats, normalizeStyle, isExtensionLevel } from './alfa-drawings-model.mjs?v=9';
 const NS = 'http://www.w3.org/2000/svg';
 const fmt = n => Number(n).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
 function el(tag, attrs, text) {
@@ -21,11 +21,12 @@ export function renderDrawing(d, project, width, height, selected, draft = false
         lossPhase: stats.phase === 'loss' || stats.phase === 'stop', profitPhase: stats.phase === 'profit' || stats.phase === 'target' }
     : { loss: '#ef6677', profit: '#26c89c', lossPhase: false, profitPhase: false };
   const append = node => { g.append(node); return node; };
-  function line(x1, y1, x2, y2, c = color, handle) {
+  function line(x1, y1, x2, y2, c = color, handle, dashOverride) {
+    const useDash = dashOverride === undefined ? dash : dashOverride;
     append(el('line', { x1, y1, x2, y2, stroke: c, 'stroke-width': Math.max(12, stroke), 'stroke-opacity': 0,
       ...(handle ? { 'data-handle': handle } : {}), class: 'drawing-hit' }));
     append(el('line', { x1, y1, x2, y2, stroke: c, 'stroke-width': stroke, 'pointer-events': 'none',
-      ...(dash ? { 'stroke-dasharray': dash, 'stroke-linecap': style.lineStyle === 'dotted' ? 'round' : 'butt' } : {}) }));
+      ...(useDash ? { 'stroke-dasharray': useDash, 'stroke-linecap': style.lineStyle === 'dotted' ? 'round' : 'butt' } : {}) }));
   }
   function label(x, y, text, c = color, size = 11) {
     if (!style.showLabels) return;
@@ -56,8 +57,13 @@ export function renderDrawing(d, project, width, height, selected, draft = false
       const price = fibPrice(d.points[0].price, d.points[1].price, level, d.reversed);
       const pos = project({ time: d.points[0].time, price });
       if (!pos) continue;
-      line(left, pos.y, right, pos.y);
-      label(left + 5, pos.y - 5, `${level}${d.showPrices ? '  (' + fmt(price) + ')' : ''}`);
+      // Extensions beyond the swing are visually distinct but use the same
+      // numeric label format as the original retracement levels.
+      const extension = isExtensionLevel(level);
+      const deep = level === .886;
+      const levelColor = extension ? '#c792ea' : deep ? '#7fd1c1' : color;
+      line(left, pos.y, right, pos.y, levelColor, null, extension ? '8 4' : deep ? '2 4' : undefined);
+      label(left + 5, pos.y - 5, `${level}${d.showPrices ? '  (' + fmt(price) + ')' : ''}`, levelColor);
     }
     append(el('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: color, 'stroke-dasharray': '4 4', 'pointer-events': 'none' }));
   }

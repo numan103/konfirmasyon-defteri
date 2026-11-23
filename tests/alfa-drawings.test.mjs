@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { LEVELS, TOOLS, fibPrice, positionStats, makeDrawing, validDrawing, validateDocument, DrawingHistory,
+import { LEVELS, EXTENSION_LEVELS, FIB_LEVELS, isExtensionLevel, TOOLS, fibPrice, positionStats, makeDrawing, validDrawing, validateDocument, DrawingHistory,
   emptyDocument, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, clone } from '../assets/alfa-drawings-model.mjs';
 import { DrawingStore } from '../assets/alfa-drawings-store.mjs';
 const a = { time: 1700000000, price: 60000 }, b = { time: 1700036000, price: 65000 };
@@ -13,6 +13,33 @@ test('Fibonacci retraces from second anchor, including exact 0.382 mathematics i
   assert.equal(fibPrice(60000, 65000, .382, true), 61910);
   assert.equal(fibPrice(60000, 65000, 0), 65000);
   assert.equal(fibPrice(60000, 65000, 1), 60000);
+});
+test('Fibonacci extensions extend the swing without changing saved retracement levels', () => {
+  assert.deepEqual(LEVELS, [0, .236, .382, .5, .618, .705, .786, 1]);
+  assert.deepEqual(EXTENSION_LEVELS, [.886, 1.272, 1.618, 2.618]);
+  assert.equal(FIB_LEVELS.length, LEVELS.length + EXTENSION_LEVELS.length);
+  assert.deepEqual(FIB_LEVELS, [...LEVELS, ...EXTENSION_LEVELS].sort((a, b) => a - b));
+  assert.equal(Object.isFrozen(LEVELS), true);
+  assert.equal(Object.isFrozen(EXTENSION_LEVELS), true);
+  assert.equal(isExtensionLevel(1.272), true);
+  assert.equal(isExtensionLevel(.886), false);
+  assert.equal(isExtensionLevel(undefined), false);
+
+  const fresh = makeDrawing('fibonacci', [a, b]);
+  assert.deepEqual(fresh.levels, FIB_LEVELS);
+  assert.equal(validDrawing(fresh), true);
+  assert.equal(fibPrice(60000, 65000, 1.272), 58640);
+  assert.equal(fibPrice(60000, 65000, 1.618), 56910);
+  assert.equal(fibPrice(60000, 65000, 2.618), 51910);
+  assert.equal(fibPrice(60000, 65000, .886), 60570);
+  assert.equal(fibPrice(60000, 65000, 1.272, true), 66360);
+
+  // A document saved before extensions existed must load byte-for-byte unchanged.
+  const legacy = makeDrawing('fibonacci', [a, b]);
+  legacy.levels = [...LEVELS];
+  const loaded = validateDocument(JSON.parse(JSON.stringify(docWith(legacy))));
+  assert.deepEqual(loaded.drawings[0].levels, LEVELS);
+  assert.equal(loaded.version, 1);
 });
 test('all drawing types create valid timestamp/price data without pixels', () => {
   for (const type of Object.keys(TOOLS).filter(t => !['cursor', 'delete'].includes(t))) {

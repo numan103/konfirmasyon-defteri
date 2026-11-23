@@ -1,5 +1,11 @@
 // Drawing documents contain only UTC epoch seconds and market prices, never pixels.
+// LEVELS is the original retracement set and stays frozen for old documents.
 export const LEVELS = Object.freeze([0, .236, .382, .5, .618, .705, .786, 1]);
+// Deep retracement and extension levels are appended only to new drawings so
+// previously saved documents keep their exact level list and rendering.
+export const EXTENSION_LEVELS = Object.freeze([.886, 1.272, 1.618, 2.618]);
+export const FIB_LEVELS = Object.freeze([...LEVELS, ...EXTENSION_LEVELS].sort((a, b) => a - b));
+export const isExtensionLevel = level => Number.isFinite(level) && level > 1;
 export const TOOLS = Object.freeze({
   cursor: ['⌖', 'İmleç / Crosshair'], horizontal: ['━', 'Horizontal Line'],
   vertical: ['┃', 'Vertical Line'], trend: ['╱', 'Trend Line'], ray: ['↗', 'Ray'],
@@ -46,7 +52,7 @@ export function positionStats(d, currentPrice) {
 export function makeDrawing(type, points, template) {
   if (!TYPES.includes(type)) throw new Error('Geçersiz araç');
   const d = { id: crypto.randomUUID(), type, points: clone(points), ...STYLE_DEFAULTS, hidden: false, locked: false };
-  if (type === 'fibonacci') Object.assign(d, { levels: [...LEVELS], reversed: false, showPrices: true }, clone(template || {}));
+  if (type === 'fibonacci') Object.assign(d, { levels: [...FIB_LEVELS], reversed: false, showPrices: true }, clone(template || {}));
   if (type === 'text' || type === 'label') { d.text = type === 'label' ? 'Etiket' : 'Metin'; d.fontSize = 14; }
   if (type === 'long' || type === 'short') {
     const entry = points[0].price;

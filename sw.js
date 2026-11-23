@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v149-multichart-sync';
-const BUILD_ID = 'b210-multichart-sync';
+﻿const CACHE = 'alfa-v152-fib-extension';
+const BUILD_ID = 'b213-fib-extension';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

@@ -1,5 +1,5 @@
-import { TOOLS, STYLE_FIELDS, normalizeStyle, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=7';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=8';
+import { TOOLS, STYLE_FIELDS, EXTENSION_LEVELS, normalizeStyle, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=9';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=9';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=4';
 import { icon, chartDialog } from './alfa-chart-ui.mjs?v=2';
 import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=1';
@@ -148,6 +148,7 @@ export class DrawingEngine {
     $('drawing-close').onclick = () => { this.manager.hidden = true; };
     $('drawing-settings').addEventListener('submit', e => { e.preventDefault(); this.applySettings(); });
     for (const action of ['hide', 'lock', 'copy', 'remove']) $('drawing-' + action).onclick = () => this.action(action);
+    $('fib-advanced-toggle').onclick = () => this.toggleAdvancedFibLevels();
     $('fib-template-save').onclick = () => this.saveTemplate();
     $('fib-template-load').onclick = () => this.loadTemplate();
     $('drawing-cloud-retry').onclick = () => this.store.retry(this.context);
@@ -624,6 +625,8 @@ export class DrawingEngine {
     $('drawing-position-fields').hidden = !isPosition(d);
     if (d.type === 'fibonacci') {
       $('fib-levels').value = d.levels.join(', '); $('fib-reverse').checked = d.reversed; $('fib-prices').checked = d.showPrices;
+      const hasAdvanced = EXTENSION_LEVELS.every(n => d.levels.includes(n));
+      $('fib-advanced-toggle').textContent = hasAdvanced ? 'Gelişmiş seviyeleri kaldır' : 'Gelişmiş seviyeleri ekle';
       $('fib-templates').replaceChildren();
       this.history.doc.templates.forEach((t, i) => {
         const option = document.createElement('option'); option.value = i; option.textContent = t.name; $('fib-templates').append(option);
@@ -662,6 +665,19 @@ export class DrawingEngine {
       d.dynamicColors = $('drawing-dynamic-colors').checked; d.profitColor = $('drawing-profit-color').value; d.lossColor = $('drawing-loss-color').value;
     }
     this.commit(next);
+  }
+  toggleAdvancedFibLevels() {
+    const input = $('fib-levels'), d = this.current();
+    if (d?.type !== 'fibonacci' || d.locked) return;
+    const tokens = input.value.split(',').map(s => s.trim()).filter(Boolean);
+    if (tokens.some(s => !Number.isFinite(Number(s)))) { this.status.textContent = 'Seviyeleri noktalı ondalık ve virgül ile ayırın'; return; }
+    const levels = [...new Set(tokens.map(Number))];
+    const hasAdvanced = EXTENSION_LEVELS.every(n => levels.includes(n));
+    const next = (hasAdvanced ? levels.filter(n => !EXTENSION_LEVELS.includes(n)) : [...new Set([...levels, ...EXTENSION_LEVELS])]).sort((a, b) => a - b);
+    if (!next.length) { this.status.textContent = 'En az bir seviye gerekli'; return; }
+    input.value = next.join(', ');
+    $('fib-advanced-toggle').textContent = hasAdvanced ? 'Gelişmiş seviyeleri ekle' : 'Gelişmiş seviyeleri kaldır';
+    this.applySettings();
   }
   saveTemplate() {
     const d = this.current(); if (d?.type !== 'fibonacci' || d.locked) return;
