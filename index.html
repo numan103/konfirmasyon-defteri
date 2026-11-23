@@ -14616,6 +14616,7 @@ function hmrApply() {
   const p = document.getElementById('hmr-prev'), nx = document.getElementById('hmr-next');
   if (p) p.disabled = hmrIndex <= 0; if (nx) nx.disabled = hmrIndex >= hmrPages - 1;
   const cur = stage.children[hmrIndex]; if (cur) { const inr = cur.querySelector('.mag-inner'); if (inr) inr.scrollTop = 0; }
+  try { if (typeof anaMagView === 'function') anaMagView(hmrIndex); } catch (e) {}
 }
 function hmrGoTo(i) { if (!hmrPages) return; i = Math.max(0, Math.min(hmrPages - 1, i)); if (i === hmrIndex) return; if (window.AlfaArticleSpeech) window.AlfaArticleSpeech.stop(); hmrIndex = i; hmrApply(); }
 function hmrNext() { hmrGoTo(hmrIndex + 1); }
@@ -14875,6 +14876,7 @@ function magApply() {
   const p = document.getElementById('mag-prev'), nx = document.getElementById('mag-next');
   if (p) p.disabled = magIndex <= 0; if (nx) nx.disabled = magIndex >= n - 1;
   const cur = stage.children[magIndex]; if (cur) { const inr = cur.querySelector('.mag-inner'); if (inr) inr.scrollTop = 0; }
+  try { if (typeof anaMagView === 'function') anaMagView(magIndex); } catch (e) {}
 }
 function magGoTo(i) { const n = magCount(); i = Math.max(0, Math.min(n - 1, i)); if (i === magIndex) return; magIndex = i; magApply(); }
 function magNext() { magGoTo(magIndex + 1); }
@@ -30657,6 +30659,7 @@ var anaTrack = {
   pages: {},
   days: {},
   clicks: [],
+  mag: { opens: 0, pages: {} },
   curPage: null,
   lastPageView: null,
   scroll: 0,
@@ -30721,13 +30724,44 @@ function anaPageEntry(name) {
   if (!anaTrack.pages[name]) anaTrack.pages[name] = { v: 0, ms: 0, s: 0 };
   return anaTrack.pages[name];
 }
+function anaMagKey(index) {
+  if (index === 0) return 'cover';
+  if (index === 1) return 'toc';
+  var si = index - 2;
+  if (si >= 0 && typeof HMR_SECTIONS !== 'undefined' && si < HMR_SECTIONS.length) return HMR_SECTIONS[si].id;
+  return 'outro';
+}
+function anaMagCurrentKey() {
+  if (typeof currentPage !== 'undefined' && currentPage === 'news' && typeof magIndex === 'number') return anaMagKey(magIndex);
+  if (typeof currentPage !== 'undefined' && currentPage === 'home' && typeof hmrIndex === 'number') return anaMagKey(hmrIndex);
+  return '';
+}
+function anaMagEntry(key) {
+  if (!anaTrack.mag || typeof anaTrack.mag !== 'object') anaTrack.mag = { opens: 0, pages: {} };
+  if (!anaTrack.mag.pages || typeof anaTrack.mag.pages !== 'object') anaTrack.mag.pages = {};
+  if (!anaTrack.mag.pages[key]) anaTrack.mag.pages[key] = { v: 0, ms: 0 };
+  return anaTrack.mag.pages[key];
+}
+function anaMagView(index) {
+  var key = anaMagKey(index);
+  if (!key) return;
+  if (anaTrack._magLastView === key) return;
+  anaTrack._magLastView = key;
+  var e = anaMagEntry(key);
+  e.v += 1;
+  anaTrack.mag.last = key;
+  if (!anaTrack.mag.opens) anaTrack.mag.opens = 0;
+  if (!anaTrack._magOpenCounted) { anaTrack.mag.opens += 1; anaTrack._magOpenCounted = true; }
+  anaSaveState();
+}
 
 function anaSaveState() {
   try {
     sessionStorage.setItem(ANA_STATE_KEY, JSON.stringify({
       activeMs: Math.round(anaTrack.activeMs),
       pages: anaTrack.pages,
-      days: anaTrack.days
+      days: anaTrack.days,
+      mag: anaTrack.mag
     }));
   } catch (e) {}
 }
@@ -30741,6 +30775,9 @@ function anaRestoreState() {
       anaTrack.activeMs = Math.max(0, Math.min(ANA_MAX_ACTIVE_MS, Number(s.activeMs) || 0));
       if (s.pages && typeof s.pages === 'object') anaTrack.pages = s.pages;
       if (s.days && typeof s.days === 'object') anaTrack.days = s.days;
+      if (s.mag && typeof s.mag === 'object') {
+        anaTrack.mag = { opens: Math.max(0, Number(s.mag.opens) || 0), pages: (s.mag.pages && typeof s.mag.pages === 'object') ? s.mag.pages : {} };
+      }
     }
   } catch (e) {}
 }
@@ -30754,6 +30791,11 @@ function anaTick() {
   if (anaTrack.curPage) {
     var p = anaPageEntry(anaTrack.curPage);
     p.ms = Math.min(ANA_MAX_ACTIVE_MS, p.ms + dt);
+  }
+  var mk = anaMagCurrentKey();
+  if (mk) {
+    var me = anaMagEntry(mk);
+    me.ms = Math.min(ANA_MAX_ACTIVE_MS, (Number(me.ms) || 0) + dt);
   }
   var dk = anaDayKey();
   var day = anaTrack.days[dk] || { ms: 0, pv: 0 };
@@ -30841,6 +30883,7 @@ async function anaFlush(beacon) {
     pages: anaTrack.pages,
     days: anaTrack.days,
     clicks: anaTrack.clicks.slice(-60),
+    mag: anaTrack.mag,
     scroll: maxScroll
   };
   anaSaveState();
@@ -31075,6 +31118,29 @@ function anaDetailMarkup(s) {
       '<span>' + esc(anaDur(p.ms)) + ' · %' + (p.scroll || 0) + '</span></div>';
   }).join('') : '<div class="ana-empty">Sayfa kaydı yok.</div>';
 
+  var MAG_LABELS = { cover: 'Kapak', toc: 'İçindekiler', macro: 'Makro analiz', btc: 'Bitcoin, High Time Frame bias', alt: 'Altcoinler, High Time Frame bias', gold: 'Gold, High Time Frame bias', forex: 'Forex piyasaları', edu: 'Alfa Edu eğitim içerikleri', outro: 'Kapanış' };
+  var magOrder = ['cover','toc','macro','btc','alt','gold','forex','edu','outro'];
+  var magData = s.mag && typeof s.mag === 'object' ? s.mag : null;
+  var magPagesArr = [];
+  if (magData && magData.pages && typeof magData.pages === 'object') {
+    magOrder.forEach(function (k) {
+      var p = magData.pages[k];
+      if (!p) return;
+      var v = Number(p.v) || 0;
+      var ms = Number(p.ms) || 0;
+      if (!v && !ms) return;
+      magPagesArr.push({ key: k, label: MAG_LABELS[k] || k, v: v, ms: ms });
+    });
+  }
+  var magMax = 1;
+  magPagesArr.forEach(function (p) { magMax = Math.max(magMax, p.ms || 0); });
+  var magTimeline = magPagesArr.length ? magPagesArr.map(function (p) {
+    var pct = Math.max(3, Math.round(((Number(p.ms) || 0) / magMax) * 100));
+    return '<div class="ana-tlrow"><span>' + esc(p.label) + '</span>' +
+      '<span class="ana-tltrack"><i style="width:' + pct + '%"></i></span>' +
+      '<span>' + esc(anaDur(p.ms)) + ' · ' + p.v + ' görüntüleme</span></div>';
+  }).join('') : '';
+
   var clickRows = (s.clicks || []).slice().reverse().map(function (c) {
     var kind = c.kind === 'affiliate' ? 'borsa' : (c.kind === 'telegram' ? 'telegram' : (c.kind === 'cta' ? 'buton' : c.kind));
     return '<div class="ana-click"><em>' + esc(kind) + '</em><span>' + esc(c.label || c.url || '—') + '</span>' +
@@ -31088,6 +31154,7 @@ function anaDetailMarkup(s) {
     }).join('') + '</div>' +
     '<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:0 0 8px;">Sayfa zaman çizelgesi</div>' +
     '<div class="ana-timeline">' + timeline + '</div>' +
+    (magTimeline ? '<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:14px 0 8px;">Alfa Dergi okuma</div><div class="ana-timeline">' + magTimeline + '</div>' : '') +
     (clickRows ? '<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);margin:14px 0 8px;">Tıklamalar</div><div class="ana-clicks">' + clickRows + '</div>' : '') +
     '</div>';
 }
@@ -31173,6 +31240,23 @@ function anaRender() {
     anaCard('Sayfa görüntüleme', t.pageviews || 0, scope) +
     anaCard('Ortalama süre', anaDur(t.avgActiveMs), 'aktif süre') +
     anaCard('Üye / Anonim', (t.memberSessions || 0) + ' / ' + (t.anonymousSessions || 0), 'giriş yapan / yapmayan') +
+    '</div>');
+
+  var mag = d.magazine || {};
+  var magPages = Array.isArray(mag.pages) ? mag.pages : [];
+  var magReadRate = (mag.readRate != null ? mag.readRate : (t.magReadRate != null ? t.magReadRate : 0));
+  var magReaders = (mag.readers != null ? mag.readers : (t.magReaders || 0));
+  var magRows = magPages.map(function (p) {
+    return '<tr><td><b>' + esc(p.label || p.key || '—') + '</b></td><td>' + (Number(p.views) || 0) + '</td><td>' + (Number(p.readers) || 0) + '</td><td>' + esc(anaDur(p.totalMs)) + '</td><td>' + esc(anaDur(p.avgMs)) + '</td></tr>';
+  }).join('');
+  html.push('<div class="ana-section"><h2>📰 Alfa Dergi <em>' + esc(scope) + '</em></h2>' +
+    '<div class="ana-cards" style="margin-bottom:12px;">' +
+      anaCard('Okunma oranı', '%' + magReadRate, magReaders + ' oturum / ' + (t.sessions || 0) + ' oturum') +
+      anaCard('Dergi okuyucu', magReaders || 0, (Number(mag.visitorReaders) || 0) + ' tekil ziyaretçi') +
+    '</div>' +
+    (magRows
+      ? '<div class="ana-tablewrap"><table class="ana-table"><thead><tr><th>Sayfa / Bölüm</th><th>Görüntüleme</th><th>Okuyucu</th><th>Toplam süre</th><th>Ort. süre</th></tr></thead><tbody>' + magRows + '</tbody></table></div>'
+      : '<div class="ana-empty">Henüz dergi okuma verisi yok.</div>') +
     '</div>');
 
   if (visual.length) {

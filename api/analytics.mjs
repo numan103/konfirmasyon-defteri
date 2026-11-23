@@ -32,6 +32,9 @@ const MAX_ACTIVE_MS = 12 * 60 * 60 * 1000;
 const MAX_BODY_CHARS = 24000;
 const MAX_PAGES = 80;
 const MAX_CLICKS = 60;
+const MAX_MAG_PAGES = 12;
+const MAG_KEYS = ['cover', 'toc', 'macro', 'btc', 'alt', 'gold', 'forex', 'edu', 'outro'];
+const MAG_KEY_SET = new Set(MAG_KEYS);
 const MAX_ROWS = 5000;
 const PAGE_SIZE = 1000;
 // 1-2 saniyelik kazara ziyaretler paneli doldurmasin. Uye veya huni tiklamasi
@@ -280,6 +283,24 @@ export function sanitizePayload(body, now) {
     clicks.push(item);
   });
 
+  const magSrc = b.mag && typeof b.mag === 'object' ? b.mag : null;
+  let mag = null;
+  if (magSrc) {
+    const magPages = {};
+    const srcMagPages = magSrc.pages && typeof magSrc.pages === 'object' ? magSrc.pages : {};
+    Object.keys(srcMagPages).slice(0, MAX_MAG_PAGES).forEach(function (k) {
+      const key = str(k, 20).toLowerCase();
+      if (!MAG_KEY_SET.has(key)) return;
+      const p = srcMagPages[k] || {};
+      const v = Math.round(num(p.v, 1000000));
+      const ms = Math.round(num(p.ms, MAX_ACTIVE_MS));
+      if (!v && !ms) return;
+      magPages[key] = { v: v, ms: ms };
+    });
+    const opens = Math.round(num(magSrc.opens, 1000000));
+    if (opens > 0 || Object.keys(magPages).length) mag = { opens: opens, pages: magPages };
+  }
+
   let scroll = Math.round(num(b.scroll, 100));
   const first = clampDate(b.first, now);
   return {
@@ -300,6 +321,7 @@ export function sanitizePayload(body, now) {
     pages: pages,
     days: days,
     clicks: clicks,
+    mag: mag,
   };
 }
 
@@ -353,6 +375,39 @@ export function mergeVisit(existing, incoming, ctx) {
   mergeDays(old.days);
   mergeDays(inc.days);
 
+  const mergeMag = function (src) {
+    if (!src || typeof src !== 'object') return null;
+    const pages = src.pages && typeof src.pages === 'object' ? src.pages : {};
+    const out = { opens: Math.max(0, Math.round(num(src.opens, 1000000))), pages: {} };
+    Object.keys(pages).slice(0, MAX_MAG_PAGES).forEach(function (k) {
+      const key = str(k, 20).toLowerCase();
+      if (!MAG_KEY_SET.has(key)) return;
+      const p = pages[k] || {};
+      const v = Math.round(num(p.v, 1000000));
+      const ms = Math.round(num(p.ms, MAX_ACTIVE_MS));
+      if (!v && !ms) return;
+      out.pages[key] = { v: v, ms: ms };
+    });
+    return (out.opens > 0 || Object.keys(out.pages).length) ? out : null;
+  };
+  const oldMag = mergeMag(old.mag);
+  const incMag = mergeMag(inc.mag);
+  let mag = null;
+  if (oldMag || incMag) {
+    mag = { opens: Math.max(oldMag ? oldMag.opens : 0, incMag ? incMag.opens : 0), pages: {} };
+    [oldMag, incMag].forEach(function (m) {
+      if (!m || !m.pages) return;
+      Object.keys(m.pages).forEach(function (k) {
+        const p = m.pages[k] || {};
+        const cur = mag.pages[k] || { v: 0, ms: 0 };
+        cur.v = Math.max(cur.v, Math.round(num(p.v, 1000000)));
+        cur.ms = Math.max(cur.ms, Math.round(num(p.ms, MAX_ACTIVE_MS)));
+        mag.pages[k] = cur;
+      });
+    });
+    if (!mag.opens && !Object.keys(mag.pages).length) mag = null;
+  }
+
   const firstCandidates = [old.first, inc.first, new Date(now).toISOString()].filter(Boolean).map(Date.parse).filter(Number.isFinite);
   const lastCandidates = [old.last, inc.last, new Date(now).toISOString()].filter(Boolean).map(Date.parse).filter(Number.isFinite);
 
@@ -378,6 +433,7 @@ export function mergeVisit(existing, incoming, ctx) {
     pages: pages,
     days: days,
     clicks: mergeClicks(old.clicks, inc.clicks),
+    mag: mag,
     country: str(c.country, 2).toUpperCase() || str(old.country, 2).toUpperCase() || '',
     device: c.device || old.device || 'Bilinmiyor',
     browser: c.browser || old.browser || 'Diğer',
@@ -418,6 +474,24 @@ function normalizeSession(row) {
   let pageviews = 0;
   Object.keys(pages).forEach(function (k) { pageviews += pages[k].v; });
 
+  const magSrc = d.mag && typeof d.mag === 'object' ? d.mag : null;
+  let mag = null;
+  if (magSrc) {
+    const magPages = {};
+    const srcMagPages = magSrc.pages && typeof magSrc.pages === 'object' ? magSrc.pages : {};
+    Object.keys(srcMagPages).slice(0, MAX_MAG_PAGES).forEach(function (k) {
+      const key = str(k, 20).toLowerCase();
+      if (!MAG_KEY_SET.has(key)) return;
+      const p = srcMagPages[k] || {};
+      const v = Math.round(num(p.v, 1000000));
+      const ms = Math.round(num(p.ms, MAX_ACTIVE_MS));
+      if (!v && !ms) return;
+      magPages[key] = { v: v, ms: ms };
+    });
+    const opens = Math.round(num(magSrc.opens, 1000000));
+    if (opens > 0 || Object.keys(magPages).length) mag = { opens: opens, pages: magPages };
+  }
+
   const member = d.member && d.member.id
     ? { id: str(d.member.id, 64), name: str(d.member.name, 80) }
     : null;
@@ -432,6 +506,7 @@ function normalizeSession(row) {
     days: days,
     pageviews: pageviews,
     clicks: Array.isArray(d.clicks) ? d.clicks.slice(-MAX_CLICKS) : [],
+    mag: mag,
     page: PAGE_RE.test(str(d.page, 40)) ? str(d.page, 40) : '',
     entry: str(d.entry, 300),
     ref: str(d.ref, 500),
@@ -495,6 +570,12 @@ export function summarizeSessions(rows, opts) {
     dayMap.set(k, { date: k, sessions: 0, visitors: 0, pageviews: 0, ms: 0, _s: new Set(), _v: new Set() });
   }
 
+  const magPageMap = new Map();
+  MAG_KEYS.forEach(function (k) { magPageMap.set(k, { key: k, views: 0, ms: 0, readers: 0, _s: new Set() }); });
+  const magReaders = new Set();
+  const magVisitorReaders = new Set();
+  let magOpenSessions = 0;
+
   const list = [];
 
   (Array.isArray(rows) ? rows : []).forEach(function (row) {
@@ -516,6 +597,29 @@ export function summarizeSessions(rows, opts) {
     if (now - Date.parse(s.last) <= ONLINE_MS) online.add(vKey);
 
     if (s.activeMs > 0) { activeSum += s.activeMs; activeCount++; }
+
+    const smag = s.mag && typeof s.mag === 'object' ? s.mag : null;
+    if (smag) {
+      const smagPages = smag.pages && typeof smag.pages === 'object' ? smag.pages : {};
+      let hasMagRead = Math.round(num(smag.opens, 1000000)) > 0;
+      MAG_KEYS.forEach(function (k) {
+        const p = smagPages[k];
+        if (!p) return;
+        const v = Math.round(num(p.v, 1000000));
+        const ms = Math.round(num(p.ms, MAX_ACTIVE_MS));
+        if (!v && !ms) return;
+        hasMagRead = true;
+        const e = magPageMap.get(k);
+        e.views += v;
+        e.ms += ms;
+        e._s.add(s.sid);
+      });
+      if (hasMagRead) {
+        magOpenSessions++;
+        magReaders.add(s.sid);
+        magVisitorReaders.add(vKey);
+      }
+    }
 
     Object.keys(s.pages).forEach(function (page) {
       const p = s.pages[page];
@@ -611,6 +715,7 @@ export function summarizeSessions(rows, opts) {
       browser: s.browser,
       os: s.os,
       live: now - Date.parse(s.last) <= ONLINE_MS,
+      mag: s.mag || null,
     });
   });
 
@@ -653,6 +758,33 @@ export function summarizeSessions(rows, opts) {
     };
   });
 
+  const MAG_LABELS = {
+    cover: 'Kapak',
+    toc: 'İçindekiler',
+    macro: 'Makro analiz',
+    btc: 'Bitcoin, High Time Frame bias',
+    alt: 'Altcoinler, High Time Frame bias',
+    gold: 'Gold, High Time Frame bias',
+    forex: 'Forex piyasaları',
+    edu: 'Alfa Edu eğitim içerikleri',
+    outro: 'Kapanış',
+  };
+  const magPages = MAG_KEYS.map(function (k) {
+    const e = magPageMap.get(k) || { views: 0, ms: 0, _s: new Set() };
+    const readers = e._s ? e._s.size : 0;
+    return {
+      key: k,
+      label: MAG_LABELS[k] || k,
+      views: e.views || 0,
+      readers: readers,
+      totalMs: e.ms || 0,
+      avgMs: readers ? Math.round((e.ms || 0) / readers) : 0,
+    };
+  });
+  totals.magReaders = magReaders.size;
+  totals.magVisitorReaders = magVisitorReaders.size;
+  totals.magReadRate = totals.sessions ? Math.round((magReaders.size / totals.sessions) * 1000) / 10 : 0;
+
   return {
     range: { days: days, since: new Date(since).toISOString() },
     totals: totals,
@@ -664,6 +796,13 @@ export function summarizeSessions(rows, opts) {
     os: collapse(osMap),
     countries: collapse(countryMap).slice(0, 20),
     daily: daily,
+    magazine: {
+      readers: magReaders.size,
+      visitorReaders: magVisitorReaders.size,
+      readRate: totals.magReadRate,
+      openSessions: magOpenSessions,
+      pages: magPages,
+    },
     sessions: list.slice(0, 500),
   };
 }
