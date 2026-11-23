@@ -222,3 +222,24 @@ test('alfa charts is reachable from the existing site navigation', () => {
   assert.match(html, /href="\/alfa-charts\.html"[^>]*data-i18n="tv\.alfaCharts"/);
   assert.match(html, /'tv\.alfaCharts': \{ tr: '📈 ALFA CHARTS', en: '📈 ALFA CHARTS' \}/);
 });
+
+test('chart workspace has TradingView-style context actions without vendor branding or screenshot stamp', () => {
+  const html = read('alfa-charts.html');
+  const script = read('assets/alfa-charts.mjs');
+  const drawings = read('assets/alfa-drawings.mjs');
+  const css = read('assets/alfa-charts.css');
+  assert.doesNotMatch(html, /Lightweight Charts|tradingview\.com/i);
+  assert.doesNotMatch(html, /Binance mum verileri yükleniyor|Piyasa verileri yükleniyor/);
+  assert.match(script, /attributionLogo:\s*false/);
+  assert.doesNotMatch(script, /ALFA CHARTS ·|alfa-charts-\$\{String\(symbol\)/);
+  for (const action of [
+    'Grafik görünümü sıfırla', 'Grafik ayarları…', 'Görünümü sığdır', 'Son muma dön',
+    'Tam ekran', 'Sade mod', 'Logaritmik fiyat ölçeği', 'Ekran görüntüsü indir', 'Bağlantıyı kopyala'
+  ]) assert.ok(drawings.includes(action), action);
+  assert.match(drawings, /onChartAction/);
+  assert.match(script, /function resetChartView/);
+  assert.match(script, /function openChartSettingsModal/);
+  assert.match(script, /marketHistoryCache/);
+  assert.match(script, /prefetchMarket/);
+  assert.match(css, /#message\{position:absolute;right:12px;bottom:44px/);
+});

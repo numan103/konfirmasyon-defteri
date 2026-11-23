@@ -10,8 +10,8 @@ export function formatMarketPrice(value, precision) {
   return n.toLocaleString('tr-TR', { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits });
 }
 export class ChartWatchlist {
-  constructor({ getOwner, getSelected, onSelect, getAccessToken, onStatus }) {
-    Object.assign(this, { getOwner, getSelected, onSelect, getAccessToken, onStatus });
+  constructor({ getOwner, getSelected, onSelect, onHover, getAccessToken, onStatus }) {
+    Object.assign(this, { getOwner, getSelected, onSelect, onHover, getAccessToken, onStatus });
     this.abort = new AbortController(); this.quotes = new Map();
     this.markets = SYMBOLS.map(symbol => ({ symbol, base: symbol.replace('USDT', ''), quote: 'USDT', precision: 2 }));
     this.catalogState = 'loading'; this.account();
@@ -116,7 +116,11 @@ export class ChartWatchlist {
         <span class="watch-quote"><span class="watch-price" data-watch-price="${esc(ref)}">—</span><small data-watch-change="${esc(ref)}">—</small></span></button>
         <button type="button" class="watch-remove" data-remove-symbol="${esc(ref)}" aria-label="${esc(ref)} listeden çıkar" title="Listeden çıkar · ${kind}">${icon('close')}</button></div>`;
     }).join('') || '<p class="watch-empty">Listen boş.<br>+ ile sembol ekle veya liste içe aktar.</p>';
-    $('watch-rows').querySelectorAll('[data-symbol]').forEach(b => b.onclick = () => this.select(b.dataset.symbol));
+    $('watch-rows').querySelectorAll('[data-symbol]').forEach(b => {
+      b.onclick = () => this.select(b.dataset.symbol);
+      b.addEventListener('pointerenter', () => this.onHover?.(b.dataset.symbol));
+      b.addEventListener('focus', () => this.onHover?.(b.dataset.symbol));
+    });
     $('watch-rows').querySelectorAll('[data-remove-symbol]').forEach(b => b.onclick = () => this.remove(b.dataset.removeSymbol));
     this.paintQuotes();
   }
@@ -189,7 +193,11 @@ export class ChartWatchlist {
           <button data-add-symbol="${ref}" aria-label="${ref} listeye ekle" ${added ? 'disabled' : ''}>${icon(added ? 'check' : 'plus')}</button></div>`;
       }).join('') || '<p class="study-empty">Eşleşen sembol yok.</p>';
       modal.box.querySelectorAll('[data-add-symbol]').forEach(b => b.onclick = () => this.add(b.dataset.addSymbol));
-      modal.box.querySelectorAll('[data-open-symbol]').forEach(b => b.onclick = () => { this.add(b.dataset.openSymbol); this.select(b.dataset.openSymbol); modal.close(); });
+      modal.box.querySelectorAll('[data-open-symbol]').forEach(b => {
+      b.onclick = () => { this.add(b.dataset.openSymbol); this.select(b.dataset.openSymbol); modal.close(); };
+      b.addEventListener('pointerenter', () => this.onHover?.(b.dataset.openSymbol));
+      b.addEventListener('focus', () => this.onHover?.(b.dataset.openSymbol));
+    });
     };
     modal.box.querySelector('#symbol-query').oninput = this.renderPicker;
     modal.box.querySelector('#symbol-quote').onchange = this.renderPicker;

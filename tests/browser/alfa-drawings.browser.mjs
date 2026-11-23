@@ -299,6 +299,28 @@ try {
     await page.mouse.move(r.x + r.width * .5, r.y + r.height * .8);
     assert.match(await page.locator('#connection').textContent(), /Canlı/);
   });
+  await test('Right-click chart actions coexist with drawings and reset stays non-destructive', async () => {
+    await page.setViewportSize({ width: 1440, height: 950 });
+    await page.waitForFunction(() => document.getElementById('chart').clientWidth > 600);
+    const before = await debug(() => ({
+      drawings: window.__alfaDebug.drawings.history.doc.drawings.length,
+      indicators: window.__alfaDebug.indicators.items.length,
+    }));
+    assert.ok(before.drawings > 0);
+    const r = await plot();
+    await page.mouse.click(r.x + r.width * .5, r.y + r.height * .5, { button: 'right' });
+    const labels = await page.locator('.chart-context-menu button').allTextContents();
+    assert.match(labels[0], /Alarm/);
+    for (const expected of ['Grafik görünümü sıfırla', 'Görünümü sığdır', 'Son muma dön', 'Sade mod', 'Ekran görüntüsü indir']) {
+      assert.ok(labels.some(text => text.includes(expected)), expected);
+    }
+    await page.locator('.chart-context-menu button').filter({ hasText: 'Grafik görünümü sıfırla' }).click();
+    assert.equal(await page.locator('.chart-context-menu').count(), 0);
+    assert.deepEqual(await debug(() => ({
+      drawings: window.__alfaDebug.drawings.history.doc.drawings.length,
+      indicators: window.__alfaDebug.indicators.items.length,
+    })), before);
+  });
   await test('Touchscreen taps create a horizontal line and two-point trend', async () => {
     const touchContext = await browser.newContext({ viewport: { width: 430, height: 900 }, hasTouch: true, isMobile: true });
     const touch = await touchContext.newPage();

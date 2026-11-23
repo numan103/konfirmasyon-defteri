@@ -1,7 +1,7 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=9';
-import { DrawingEngine } from './alfa-drawings.mjs?v=9';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=5';
+import { DrawingEngine } from './alfa-drawings.mjs?v=10';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
@@ -32,7 +32,7 @@ async function marketAccessToken() {
 setMarketTokenProvider(marketAccessToken);
 const priceFormat = { format: value => formatMarketPrice(value, watchlist?.info(symbol).precision) };
 const chart = createChart(host, {
-  layout: { background: { type: ColorType.Solid, color: '#10141c' }, textColor: '#8e9eb6', attributionLogo: true },
+  layout: { background: { type: ColorType.Solid, color: '#10141c' }, textColor: '#8e9eb6', attributionLogo: false },
   grid: { vertLines: { color: '#1c243022' }, horzLines: { color: '#28334655' } },
   crosshair: { mode: CrosshairMode.Normal },
   rightPriceScale: { borderColor: '#30394b', scaleMargins: { top: 0.12, bottom: 0.22 } },
@@ -126,6 +126,29 @@ let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, re
 let olderController = null;
 let replayEngine = null, replayStartIndex = 0, liveDrawingState = null, replayMtfEnabled = false;
 let replayRequest=null, replayBusy=false, replayPicking=false, replaySessionId=null;
+// Reopened markets paint from a small in-memory cache while the live transport reconnects.
+const marketHistoryCache = new Map();
+const prefetchInFlight = new Set();
+const HISTORY_CACHE_LIMIT = 16;
+function historyCacheKey(cacheSymbol, cacheInterval) { return cacheSymbol + '|' + cacheInterval; }
+function rememberHistory(cacheSymbol, cacheInterval, bars) {
+  if (!bars?.length) return;
+  const key = historyCacheKey(cacheSymbol, cacheInterval);
+  marketHistoryCache.delete(key);
+  marketHistoryCache.set(key, { at: Date.now(), bars: bars.slice(-1000) });
+  while (marketHistoryCache.size > HISTORY_CACHE_LIMIT) marketHistoryCache.delete(marketHistoryCache.keys().next().value);
+}
+function cachedHistory(cacheSymbol, cacheInterval) { return marketHistoryCache.get(historyCacheKey(cacheSymbol, cacheInterval))?.bars || null; }
+function isChartableRef(ref) { try { return parseMarketRef(ref).chartable; } catch { return false; } }
+function prefetchMarket(ref, tf) {
+  if (!isChartableRef(ref)) return;
+  const key = historyCacheKey(ref, tf);
+  if (marketHistoryCache.has(key) || prefetchInFlight.has(key)) return;
+  prefetchInFlight.add(key);
+  fetchHistory(ref, tf, AbortSignal.timeout(8000)).then(bars => {
+    if (bars?.length) rememberHistory(ref, tf, bars);
+  }).catch(() => {}).finally(() => prefetchInFlight.delete(key));
+}
 const observer = new ResizeObserver(([entry]) => {
   chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
 });
@@ -184,6 +207,7 @@ async function loadOlderHistory() {
     const range = chart.timeScale().getVisibleLogicalRange();
     history = deduped;
     seriesBars = deduped;
+    rememberHistory(symbol, interval, history);
     syncSeriesData(history);
     if (range) chart.timeScale().setVisibleLogicalRange({ from: range.from + added, to: range.to + added });
     try { indicators.updateAll(history); } catch {}
@@ -407,6 +431,7 @@ function quote() {
 function setData(data, resetView) {
   history = data;
   seriesBars = data;
+  if (isChartableRef(symbol)) rememberHistory(symbol, interval, history);
   syncSeriesData(history);
   if (resetView) {
     chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, history.length - 130), to: history.length + 8 });
@@ -454,6 +479,8 @@ function updateUI() {
   const name = market && market.venue === 'BINANCE' && market.marketType === 'spot' && market.key === symbol ? symbol : market?.label || symbol;
   $('market-title').textContent = `${name} · ${label}`;
   $('market-title').title = market?.label || symbol;
+  const dataInfo = $('data-info');
+  if (dataInfo) dataInfo.textContent = `Kaynak: ${market?.venue || 'BINANCE'} · ${market?.marketType === 'perp' ? 'Vadeli' : market?.marketType === 'index' ? 'Endeks' : 'Spot'} · Zaman: UTC`;
   document.querySelectorAll('#timeframes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
   try {
@@ -477,10 +504,15 @@ async function loadMarket() {
     if(liveDrawingState){Object.assign(drawings,liveDrawingState);liveDrawingState=null;}
   }
   const id = ++generation;
-  closeTransport(); attempts = 0; history = []; seriesBars = [];
-  syncSeriesData([]);
-  $('last-price').textContent = '—'; $('price-time').textContent = 'Henüz veri yok';
-  const ohlc = $('ohlc'); ohlc.textContent = 'Gerçek piyasa verisi bekleniyor'; ohlc.style.color = '';
+  if (isChartableRef(symbol)) rememberHistory(symbol, interval, history);
+  closeTransport(); attempts = 0;
+  const cached = cachedHistory(symbol, interval);
+  history = []; seriesBars = [];
+  if (!cached) {
+    // Keep the previous chart painted until the first new candle arrives.
+    $('last-price').textContent = '—'; $('price-time').textContent = 'Henüz veri yok';
+    const ohlc = $('ohlc'); ohlc.textContent = 'Gerçek piyasa verisi bekleniyor'; ohlc.style.color = '';
+  }
   updateUI();
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
@@ -489,9 +521,14 @@ async function loadMarket() {
     const layout=JSON.parse(localStorage.getItem(layoutKey())||'null');
     pendingIndicators=layout?.indicators ?? JSON.parse(localStorage.getItem('alfa-ind:v1:'+symbol)||'null');
   } catch { pendingIndicators = null; }
-  showMessage('Piyasa verileri yükleniyor…');
-  connection('Geçmiş mumlar yükleniyor');
-  connect(id, true);
+  showMessage('');
+  if (cached) {
+    setData(cached.map(c => ({ ...c })), true);
+    connection('Önbellekten açıldı · canlı veri yenileniyor', 'waiting');
+  } else {
+    connection('Piyasa bağlantısı kuruluyor', 'waiting');
+  }
+  connect(id, !cached);
 }
 function connectPolling(id, resetView, ref) {
   const controller = new AbortController(); aborter = controller;
@@ -499,8 +536,8 @@ function connectPolling(id, resetView, ref) {
   let ready = false, ended = false;
   lastReceipt = Date.now();
   const requestSignal = () => AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]);
-  connection(quoteOnly ? 'TradingView canlı değer · mum geçmişi yok' : `${ref.venue} verisi bekleniyor`, 'waiting');
-  showMessage(quoteOnly ? 'Bu sembol için mum geçmişi yok; yalnızca canlı değer gösterilir.' : `${ref.venue} verisi yükleniyor…`);
+  connection(quoteOnly ? 'Canlı değer · mum geçmişi yok' : `${ref.venue} bağlantısı kuruluyor`, 'waiting');
+  showMessage('');
   async function tick() {
     if (ended || id !== generation || disposed || replayMode || controller.signal.aborted) return;
     try {
@@ -519,6 +556,7 @@ function connectPolling(id, resetView, ref) {
       } else {
         history = mergeCandles(history, data, Infinity);
         seriesBars = history;
+        if (isChartableRef(symbol)) rememberHistory(symbol, interval, history);
         syncSeriesData(history);
         quote();
         try { indicators.updateAll(seriesBars); } catch {}
@@ -541,8 +579,7 @@ function connectPolling(id, resetView, ref) {
       if (ended || id !== generation || disposed || controller.signal.aborted) return;
       attempts++;
       connection(`${error.message || 'Veri alınamadı'} · yeniden denenecek`, 'error');
-      if (!history.length) showMessage(quoteOnly ? 'Canlı değer alınamadı. Otomatik yeniden denenecek.' :
-        `${ref.venue} verisine erişilemiyor. Otomatik yeniden denenecek; fiyat üretilmez.`);
+      if (quoteOnly && !history.length) showMessage('Canlı değer alınamadı · yeniden deneniyor');
     }
   }
   tick();
@@ -567,7 +604,6 @@ function connect(id, resetView = false) {
     ws.onclose = ws.onmessage = ws.onerror = ws.onopen = null; ws.close();
     attempts++;
     connection(`${reason} · yeniden bağlanılıyor`, 'error');
-    if (!history.length) showMessage('Binance verisine erişilemiyor. Otomatik yeniden denenecek; fiyat üretilmez.');
     retryTimer = setTimeout(() => connect(id, !history.length), Math.min(30000, 1000 * 2 ** Math.min(attempts, 5)));
   }
   ws.onopen = async () => {
@@ -582,7 +618,7 @@ function connect(id, resetView = false) {
       setData(mergeCandles(history, [...data, ...buffered], Infinity), resetView);
       buffered = []; ready = true;
       showMessage('');
-      connection('Geçmiş yüklendi · ilk canlı mum bekleniyor');
+      connection('Canlı · geçmiş eşitlendi', 'live');
     } catch (error) {
       if (id === generation && !ended) reconnect('Geçmiş veri alınamadı');
     }
@@ -598,6 +634,7 @@ function connect(id, resetView = false) {
       if (c.time < history.at(-1).time) return;
       history = mergeCandles(history, [c], Infinity);
       seriesBars = history;
+      rememberHistory(symbol, interval, history);
       syncSeriesUpdate(c, history);
       quote(); attempts = 0;
       try { checkAlarms(c.close); } catch {}
@@ -671,21 +708,30 @@ function openTfPicker() {
 renderTimeframes();
 watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => symbol,
   onSelect: next => { if (symbol !== next) { symbol = next; loadMarket(); } },
+  onHover: ref => prefetchMarket(ref, interval),
   getAccessToken: marketAccessToken,
   onStatus: connection });
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;
-$('log-scale').addEventListener('click', () => {
-  logScale = !logScale;
+const DEFAULT_VIEW_CONFIG = { grid: true, axisLabels: false, clean: false };
+let viewConfig = { ...DEFAULT_VIEW_CONFIG };
+try {
+  const raw = JSON.parse(localStorage.getItem('alfa-chart-view:v1') || 'null');
+  for (const k of Object.keys(viewConfig)) if (typeof raw?.[k] === 'boolean') viewConfig[k] = raw[k];
+} catch {}
+function setLogScale(next, persist = true) {
+  logScale = !!next;
   chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });
-  $('log-scale').setAttribute('aria-pressed', String(logScale));
-  $('log-scale').textContent = logScale ? 'Log✓' : 'Log';
-  saveLayout();
-});
-$('auto-scale').addEventListener('click', () => {
+  const button = $('log-scale');
+  if (button) { button.setAttribute('aria-pressed', String(logScale)); button.textContent = logScale ? 'Log✓' : 'Log'; }
+  if (persist) saveLayout();
+}
+function setAutoScale() {
   chart.priceScale('right').applyOptions({ autoScale: true });
   $('auto-scale').setAttribute('aria-pressed', 'true');
-});
+}
+$('log-scale').addEventListener('click', () => setLogScale(!logScale));
+$('auto-scale').addEventListener('click', setAutoScale);
 async function buildChartScreenshotCanvas() {
   const src = chart.takeScreenshot();
   if (!src) throw new Error('no-screenshot');
@@ -723,20 +769,12 @@ async function buildChartScreenshotCanvas() {
     finally { URL.revokeObjectURL(url); }
   }
 
-  const pad = Math.max(12, Math.round(canvas.width * 0.012));
-  ctx.save();
-  ctx.font = `600 ${Math.max(12, Math.round(canvas.width * 0.013))}px system-ui, -apple-system, sans-serif`;
-  ctx.fillStyle = 'rgba(215,224,238,0.78)';
-  ctx.textBaseline = 'top';
-  const stampLabel = new Date().toLocaleString('tr-TR');
-  ctx.fillText(`ALFA CHARTS · ${symbol} · ${String(interval).toUpperCase()} · ${stampLabel}`, pad, pad);
-  ctx.restore();
   return canvas;
 }
 
 function chartScreenshotName() {
   const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
-  return `alfa-charts-${String(symbol).toLowerCase()}-${String(interval).toLowerCase()}-${stamp}.png`;
+  return `chart-${String(symbol).toLowerCase()}-${String(interval).toLowerCase()}-${stamp}.png`;
 }
 
 async function downloadChartScreenshot() {
@@ -812,8 +850,10 @@ $('shot-menu').addEventListener('click', async e => {
 });
 document.addEventListener('click', e => { if (!e.target.closest('.shot-wrap')) closeShotMenu(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeShotMenu(); });
-$('fit').addEventListener('click', () => chart.timeScale().fitContent());
-$('live').addEventListener('click', () => chart.timeScale().scrollToRealTime());
+$('reset-view').addEventListener('click', () => handleChartAction('reset-view'));
+$('chart-settings').addEventListener('click', () => handleChartAction('settings'));
+$('fit').addEventListener('click', () => handleChartAction('fit'));
+$('live').addEventListener('click', () => handleChartAction('realtime'));
 function toggleList(show) {
   workspace.classList.toggle('no-list', !show);
   $('list-toggle').setAttribute('aria-pressed', String(show));
@@ -829,7 +869,10 @@ $('fullscreen').addEventListener('click', async () => {
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran'); });
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval,
-  onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager(), getStudies: () => studiesUI });
+  onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager(),
+  onChartAction: action => handleChartAction(action),
+  getChartMenuState: () => ({ ...viewConfig, logScale, fullscreen: !!document.fullscreenElement }),
+  getStudies: () => studiesUI });
 try {
   const magOn = localStorage.getItem('alfa-magnet:v1') === '1';
   drawings.setMagnet(magOn);
@@ -950,7 +993,11 @@ window.addEventListener('online', () => { if (!disposed&&!replayMode) loadMarket
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, paper, research,
+    get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; },
+    get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
+    resetChartView, openChartSettingsModal, handleChartAction,
+    get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }
@@ -1026,7 +1073,7 @@ let cloudRevision = 0;
 let cloudSaveTimer = null;
 function layoutSettings() {
   return structuredClone({
-    chartType: type, logScale, indicators: indicators.toJSON(), mtf: mtf.config,
+    chartType: type, logScale, view: { ...viewConfig }, indicators: indicators.toJSON(), mtf: mtf.config,
     sessionLevels: sessionLevels.config, sessionBoxes: sessionBoxes.config,
     marketStructure: marketStructure.config, fvg: fvg.config, studies: studiesUI.toJSON(),
   });
@@ -1054,11 +1101,8 @@ async function loadLayout() {
     const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
     if (raw) {
       if (typeof raw.chartType === 'string') applyChartType(raw.chartType);
-      if (typeof raw.logScale === 'boolean') {
-        logScale = raw.logScale;
-        chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });
-        const lb = $('log-scale'); if (lb) { lb.setAttribute('aria-pressed', String(logScale)); lb.textContent = logScale ? 'Log✓' : 'Log'; }
-      }
+      if (typeof raw.logScale === 'boolean') setLogScale(raw.logScale, false);
+      if (raw.view) applyViewSettings(raw.view);
       if (Array.isArray(raw.indicators)) indicators.fromJSON(raw.indicators);
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
@@ -1074,7 +1118,7 @@ async function loadLayout() {
     if (cloud && cloud.settings) {
       const s = cloud.settings;
       if (typeof s.chartType === 'string') applyChartType(s.chartType);
-      if (typeof s.logScale === 'boolean') { logScale = s.logScale; chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal }); const lb=$('log-scale'); if(lb){lb.setAttribute('aria-pressed',String(logScale)); lb.textContent=logScale?'Log✓':'Log';} }
+      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view);
       if (Array.isArray(s.indicators)) { indicators.fromJSON(s.indicators); pendingIndicators = null; }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
@@ -1113,7 +1157,7 @@ function scheduleCloudSave(settings = layoutSettings()) {
       if (cloud && cloud.settings) {
         const s = cloud.settings;
         if (typeof s.chartType === 'string') applyChartType(s.chartType);
-        if (typeof s.logScale === 'boolean') { logScale = s.logScale; chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal }); const lb=$('log-scale'); if(lb){lb.setAttribute('aria-pressed',String(logScale)); lb.textContent=logScale?'Log✓':'Log';} }
+        if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view);
         if (Array.isArray(s.indicators)) indicators.fromJSON(s.indicators);
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
@@ -1199,11 +1243,9 @@ document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click
   const count = Number(b.dataset.range) / candleCloseTime(0, interval);
   chart.timeScale().setVisibleLogicalRange({ from: history.length - Math.max(10, count), to: history.length + 3 });
 }));
-let viewConfig = { grid: true, axisLabels: false, clean: false };
-try {
-  const raw = JSON.parse(localStorage.getItem('alfa-chart-view:v1') || 'null');
-  for (const k of Object.keys(viewConfig)) if (typeof raw?.[k] === 'boolean') viewConfig[k] = raw[k];
-} catch {}
+function persistViewConfig() {
+  try { localStorage.setItem('alfa-chart-view:v1', JSON.stringify(viewConfig)); } catch {}
+}
 function applyViewConfig() {
   chart.applyOptions({ grid: { vertLines: { visible: viewConfig.grid }, horzLines: { visible: viewConfig.grid } } });
   if (indicators.axisLabels !== viewConfig.axisLabels) {
@@ -1217,11 +1259,99 @@ function applyViewConfig() {
   $('view-axis-labels').checked = viewConfig.axisLabels;
   $('view-clean').checked = viewConfig.clean;
 }
-for (const [id, key] of [['view-grid', 'grid'], ['view-axis-labels', 'axisLabels'], ['view-clean', 'clean']]) {
-  $(id).addEventListener('change', e => {
-    viewConfig[key] = e.target.checked; applyViewConfig();
-    try { localStorage.setItem('alfa-chart-view:v1', JSON.stringify(viewConfig)); } catch {}
+function applyViewSettings(settings) {
+  if (!settings || typeof settings !== 'object') return;
+  for (const key of Object.keys(viewConfig)) if (typeof settings[key] === 'boolean') viewConfig[key] = settings[key];
+  applyViewConfig();
+}
+function setViewOption(key, value, persist = true) {
+  if (!Object.hasOwn(viewConfig, key)) return;
+  viewConfig[key] = !!value;
+  applyViewConfig();
+  if (persist) { persistViewConfig(); saveLayout(); }
+}
+function resetChartView() {
+  if (history.length) chart.timeScale().fitContent();
+  chart.timeScale().scrollToRealTime();
+  setAutoScale();
+  setLogScale(false, false);
+  viewConfig = { ...DEFAULT_VIEW_CONFIG };
+  applyViewConfig(); persistViewConfig(); saveLayout();
+  connection('Grafik görünümü sıfırlandı', 'ok');
+}
+function openChartSettingsModal() {
+  const intervalOptions = Object.entries(TIMEFRAMES).map(([label, value]) =>
+    `<option value="${value}" ${value === interval ? 'selected' : ''}>${label} · ${value}</option>`).join('');
+  const typeOptions = [...$('chart-type').options].map(o =>
+    `<option value="${o.value}" ${o.value === type ? 'selected' : ''}>${o.textContent}</option>`).join('');
+  const modal = openModal(`<div class="dialog-header"><div><h3>Grafik ayarları</h3><p>Görünüm, ölçek ve piyasa ayarları</p></div><button id="chart-settings-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <form id="chart-settings-form" class="chart-settings-form">
+      <fieldset><legend>GRAFİK</legend><div class="setting-grid">
+        <label>Zaman dilimi<select name="interval">${intervalOptions}</select></label>
+        <label>Grafik türü<select name="type">${typeOptions}</select></label>
+      </div></fieldset>
+      <fieldset><legend>GÖRÜNÜM</legend>
+        <label><input type="checkbox" name="grid" ${viewConfig.grid ? 'checked' : ''}> Izgara çizgileri</label>
+        <label><input type="checkbox" name="axisLabels" ${viewConfig.axisLabels ? 'checked' : ''}> Fiyat ekseni etiketleri</label>
+        <label><input type="checkbox" name="clean" ${viewConfig.clean ? 'checked' : ''}> Sade mod · indikatörleri geçici gizle</label>
+      </fieldset>
+      <fieldset><legend>ÖLÇEK</legend>
+        <label><input type="checkbox" name="logScale" ${logScale ? 'checked' : ''}> Logaritmik fiyat ölçeği</label>
+        <label><input type="checkbox" name="autoScale" checked> Otomatik fiyat ölçeği</label>
+      </fieldset>
+      <div class="settings-actions"><button id="chart-settings-reset" type="button">Görünümü sıfırla</button><button id="chart-settings-cancel" type="button">Vazgeç</button><button class="apply" type="submit">Uygula</button></div>
+    </form>`);
+  const box = modal.box;
+  box.querySelector('#chart-settings-close').onclick = modal.close;
+  box.querySelector('#chart-settings-cancel').onclick = modal.close;
+  box.querySelector('#chart-settings-reset').onclick = () => { modal.close(); handleChartAction('reset-view'); };
+  box.querySelector('#chart-settings-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const nextInterval = String(data.get('interval'));
+    const intervalChanged = Object.values(TIMEFRAMES).includes(nextInterval) && nextInterval !== interval;
+    if (intervalChanged) interval = nextInterval;
+    applyChartType(String(data.get('type')));
+    setLogScale(data.has('logScale'), false);
+    applyViewSettings({ grid: data.has('grid'), axisLabels: data.has('axisLabels'), clean: data.has('clean') });
+    if (data.has('autoScale')) setAutoScale();
+    persistViewConfig(); saveLayout(); modal.close();
+    if (intervalChanged) loadMarket();
+    else { chart.timeScale().fitContent(); connection('Grafik ayarları uygulandı', 'ok'); }
   });
 }
+function handleChartAction(action) {
+  switch (action) {
+    case 'reset-view': resetChartView(); break;
+    case 'settings': openChartSettingsModal(); break;
+    case 'fit':
+      if (history.length) chart.timeScale().fitContent();
+      connection('Görünüm ekrana sığdırıldı', 'ok'); break;
+    case 'realtime':
+      chart.timeScale().scrollToRealTime(); connection('Son muma dönüldü', 'ok'); break;
+    case 'fullscreen': $('fullscreen').click(); break;
+    case 'grid': setViewOption('grid', !viewConfig.grid); break;
+    case 'axisLabels': setViewOption('axisLabels', !viewConfig.axisLabels); break;
+    case 'clean': setViewOption('clean', !viewConfig.clean); break;
+    case 'logScale': setLogScale(!logScale); break;
+    case 'autoScale': setAutoScale(); connection('Otomatik fiyat ölçeği açıldı', 'ok'); break;
+    case 'indicators': openIndicatorManager(); break;
+    case 'drawings': drawings.manager.hidden = false; drawings.updatePanel(); break;
+    case 'screenshot': downloadChartScreenshot().catch(() => connection('Grafik görüntüsü alınamadı', 'error')); break;
+    case 'copy-image': copyChartScreenshot().catch(() => connection('Görüntü kopyalanamadı', 'error')); break;
+    case 'copy-link': copyChartLink().catch(() => connection('Bağlantı kopyalanamadı', 'error')); break;
+    default: break;
+  }
+}
+for (const [id, key] of [['view-grid', 'grid'], ['view-axis-labels', 'axisLabels'], ['view-clean', 'clean']]) {
+  $(id).addEventListener('change', e => setViewOption(key, e.target.checked));
+}
+document.addEventListener('keydown', event => {
+  if (!event.altKey || event.target.closest('input,textarea,select,[contenteditable=true]') || document.querySelector('dialog[open]')) return;
+  const shortcuts = { r: 'reset-view', f: 'fit', l: 'realtime', s: 'settings' };
+  const action = shortcuts[event.key.toLowerCase()];
+  if (!action) return;
+  event.preventDefault(); handleChartAction(action);
+});
 applyViewConfig();
 loadMarket();

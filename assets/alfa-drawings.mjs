@@ -18,8 +18,8 @@ const toolNames = { cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yat
   ray: 'Işın', arrow: 'Ok', fibonacci: 'Fibonacci düzeltmesi', rectangle: 'Dikdörtgen', brush: 'Fırça',
   text: 'Metin', label: 'Etiket', long: 'Long pozisyon', short: 'Short pozisyon', ruler: 'Ölçüm cetveli', delete: 'Çizim sil' };
 export class DrawingEngine {
-  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, getStudies }) {
-    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, getStudies });
+  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, onChartAction, getChartMenuState, getStudies }) {
+    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, onChartAction, getChartMenuState, getStudies });
     this.market = 'BTCUSDT'; this.tool = 'cursor'; this.selected = null; this.history = new DrawingHistory();
     this.magnet = false; this.drawingsVisible = true; this.brushing = false;
     this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map();
@@ -261,32 +261,72 @@ export class DrawingEngine {
     if (id) { if (!this.selection.has(id)) this.selected = id; else this.primary = id; this.refresh(); }
     const d = id ? this.history.doc.drawings.find(x => x.id === id) : null;
     const menu = document.createElement('div'); menu.className = 'chart-context-menu';
-    menu.setAttribute('role', 'menu');
-    const item = (text, fn, disabled = false) => {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = text; b.disabled = disabled;
+    menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', 'Grafik menüsü');
+    const heading = text => {
+      const h = document.createElement('div'); h.className = 'menu-heading'; h.textContent = text;
+      menu.append(h);
+    };
+    const item = (text, fn, options = {}) => {
+      const b = document.createElement('button'); b.type = 'button'; b.disabled = !!options.disabled;
+      if (options.checked != null) {
+        const mark = document.createElement('span'); mark.className = 'context-mark'; mark.textContent = options.checked ? '✓' : '';
+        b.append(mark);
+      } else {
+        const mark = document.createElement('span'); mark.className = 'context-mark'; mark.textContent = options.symbol || '';
+        b.append(mark);
+      }
+      const label = document.createElement('span'); label.className = 'context-label'; label.textContent = text;
+      b.append(label);
+      if (options.shortcut) {
+        const key = document.createElement('span'); key.className = 'context-shortcut'; key.textContent = options.shortcut;
+        b.append(key);
+      }
       b.addEventListener('click', () => { this.closeContextMenu(); fn(); });
       menu.append(b);
     };
+    const chartState = this.getChartMenuState?.() || {};
+    const chartItem = (text, action, options = {}) => item(text, () => this.onChartAction?.(action), options);
     const fmtPrice = p => Number(p).toLocaleString('tr-TR', { maximumFractionDigits: 6 });
     if (point && this.onAlarm) {
-      item(`🔔 Alarm: fiyat ≥ ${fmtPrice(point.price)}`, () => this.onAlarm(point.price, 'above'));
-      item(`🔔 Alarm: fiyat ≤ ${fmtPrice(point.price)}`, () => this.onAlarm(point.price, 'below'));
+      heading('ALARM');
+      item(`Alarm: fiyat ≥ ${fmtPrice(point.price)}`, () => this.onAlarm(point.price, 'above'), { symbol: '🔔' });
+      item(`Alarm: fiyat ≤ ${fmtPrice(point.price)}`, () => this.onAlarm(point.price, 'below'), { symbol: '🔔' });
     }
-    if (this.onAlarmManager) item('🔔 Alarm yönetimi…', () => this.onAlarmManager());
+    if (this.onAlarmManager) item('Alarm yönetimi…', () => this.onAlarmManager(), { symbol: '🔔' });
     if (d) {
-      menu.append(document.createElement('hr'));
-      if (d.locked) item('🔒 Kilidi aç', () => { this.selected = d.id; this.action('lock'); });
+      heading('ÇİZİM');
+      if (d.locked) item('Kilidi aç', () => { this.selected = d.id; this.action('lock'); }, { symbol: '🔒' });
       else {
-        item(this.selection.size > 1 ? `🗑 ${this.selection.size} seçili çizimi sil` : '🗑 Çizimi sil', () => this.action('remove'));
-        item('📋 Seçimi kopyala', () => this.action('copy'));
+        item(this.selection.size > 1 ? `${this.selection.size} seçili çizimi sil` : 'Çizimi sil', () => this.action('remove'), { symbol: '🗑' });
+        item('Seçimi kopyala', () => this.action('copy'), { symbol: '📋' });
       }
-      item(d.hidden ? '👁 Göster' : '👁 Gizle', () => this.action('hide'));
+      item(d.hidden ? 'Göster' : 'Gizle', () => this.action('hide'), { symbol: '👁' });
       item('Öne getir', () => this.action('front'));
       item('Arkaya gönder', () => this.action('back'));
       if (this.selection.size > 1) item('Klasörde grupla…', () => this.groupSelection());
-      item('⚙ Ayarlar…', () => { this.selected = d.id; this.manager.hidden = false; this.updatePanel(); });
+      item('Çizim ayarları…', () => { this.selected = d.id; this.manager.hidden = false; this.updatePanel(); }, { symbol: '⚙' });
     }
-    if (!menu.children.length) return;
+    if (this.onChartAction) {
+      heading('GRAFİK');
+      chartItem('Grafik görünümü sıfırla', 'reset-view', { symbol: '⟲', shortcut: 'Alt+R' });
+      chartItem('Görünümü sığdır', 'fit', { symbol: '⊞', shortcut: 'Alt+F' });
+      chartItem('Son muma dön', 'realtime', { symbol: '▶', shortcut: 'Alt+L' });
+      chartItem('Tam ekran', 'fullscreen', { symbol: '⛶' });
+      chartItem('Grafik ayarları…', 'settings', { symbol: '⚙', shortcut: 'Alt+S' });
+      heading('GÖRÜNÜM');
+      chartItem('Izgara çizgileri', 'grid', { checked: chartState.grid });
+      chartItem('Fiyat ekseni etiketleri', 'axisLabels', { checked: chartState.axisLabels });
+      chartItem('Sade mod', 'clean', { checked: chartState.clean });
+      chartItem('Logaritmik fiyat ölçeği', 'logScale', { checked: chartState.logScale });
+      chartItem('Otomatik fiyat ölçeği', 'autoScale');
+      heading('GÖSTERGELER · PAYLAŞIM');
+      chartItem('Gösterge ekle / yönet…', 'indicators', { symbol: '📊', shortcut: 'Alt+I' });
+      chartItem('Nesne ağacı…', 'drawings', { symbol: '🗂' });
+      chartItem('Ekran görüntüsü indir', 'screenshot', { symbol: '📷' });
+      chartItem('Görüntüyü kopyala', 'copy-image', { symbol: '📋' });
+      chartItem('Bağlantıyı kopyala', 'copy-link', { symbol: '🔗' });
+    }
+    if (!menu.querySelector('button')) return;
     (document.fullscreenElement || document.body).append(menu);
     const mw = menu.offsetWidth, mh = menu.offsetHeight;
     menu.style.left = Math.max(4, Math.min(e.clientX, window.innerWidth - mw - 4)) + 'px';

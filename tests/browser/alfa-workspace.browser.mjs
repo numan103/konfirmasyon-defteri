@@ -28,6 +28,10 @@ try {
     assert.equal(await state(() => window.__alfaDebug.sessionLevels.lines.length), 0);
     const geometry = await state(() => ({ toolbar: document.querySelector('.toolbar').getBoundingClientRect().height, chart: document.querySelector('#chart').clientHeight, overflow: document.documentElement.scrollWidth > innerWidth }));
     assert.equal(geometry.toolbar, 54); assert.ok(geometry.chart > 700); assert.equal(geometry.overflow, false);
+    assert.equal(await page.locator('#message').isHidden(), true);
+    assert.equal((await page.locator('#message').textContent()).trim(), '');
+    assert.doesNotMatch(await page.locator('body').innerText(), /Lightweight Charts|by TradingView/i);
+    assert.equal(await state(() => document.querySelectorAll('a[href*="tradingview.com"]').length), 0);
     await shot('workspace-desktop');
   });
   await test('all indicators, FVG, sessions and MTF share one searchable, favoritable catalogue', async () => {
@@ -107,15 +111,47 @@ try {
     await page.keyboard.press('Control+z');
     assert.equal(await state(() => window.__alfaDebug.drawings.history.doc.drawings.length), 1);
   });
-  await test('right click adds price alarm; test tools have a separate menu', async () => {
+  await test('right click adds price alarm and opens the full TradingView-style chart menu', async () => {
     const r = await page.locator('#chart').boundingBox();
     await page.mouse.click(r.x + 200, r.y + 180, { button: 'right' });
+    const labels = await page.locator('.chart-context-menu button').allTextContents();
+    assert.match(labels[0], /Alarm: fiyat/);
+    assert.match(labels[1], /Alarm: fiyat/);
+    for (const expected of ['Grafik görünümü sıfırla', 'Grafik ayarları…', 'Görünümü sığdır', 'Son muma dön',
+      'Tam ekran', 'Izgara çizgileri', 'Sade mod', 'Logaritmik fiyat ölçeği', 'Gösterge ekle / yönet…',
+      'Ekran görüntüsü indir', 'Bağlantıyı kopyala']) {
+      assert.ok(labels.some(text => text.includes(expected)), expected);
+    }
+    assert.equal(await page.locator('.chart-context-menu .context-shortcut', { hasText: 'Alt+R' }).count(), 1);
     await page.locator('.chart-context-menu button').first().click();
     assert.equal(await state(() => JSON.parse(localStorage.getItem('alfa-alarms:v1:guest')).length), 1);
     await page.click('#lab-menu summary');
     assert.equal(await page.locator('#lab-menu #replay-toggle').isVisible(), true);
     assert.equal(await page.locator('#lab-menu [data-add=fvg]').count(), 0);
     await page.click('#tester-open'); assert.match(await page.locator('dialog').textContent(), /Strateji testleri/); await close();
+  });
+  await test('chart settings apply and view reset is non-destructive', async () => {
+    const before = await state(() => ({
+      drawings: window.__alfaDebug.drawings.history.doc.drawings.length,
+      indicators: window.__alfaDebug.indicators.items.length,
+    }));
+    assert.ok(before.drawings > 0);
+    await page.click('#view-menu summary'); await page.click('#chart-settings');
+    await page.waitForFunction(() => !!document.querySelector('#chart-settings-form'));
+    await page.uncheck('#chart-settings-form input[name=grid]');
+    await page.check('#chart-settings-form input[name=logScale]');
+    await page.click('#chart-settings-form button[type=submit]');
+    await page.waitForFunction(() => !document.querySelector('#chart-settings-form'));
+    assert.equal(await state(() => window.__alfaDebug.viewConfig.grid), false);
+    assert.equal(await state(() => window.__alfaDebug.chart.priceScale('right').options().mode), 1);
+    await page.keyboard.press('Alt+r');
+    assert.equal(await state(() => window.__alfaDebug.viewConfig.grid), true);
+    assert.equal(await state(() => window.__alfaDebug.chart.priceScale('right').options().mode), 0);
+    assert.deepEqual(await state(() => ({
+      drawings: window.__alfaDebug.drawings.history.doc.drawings.length,
+      indicators: window.__alfaDebug.indicators.items.length,
+    })), before);
+    assert.match(await page.locator('#connection').textContent(), /sıfırlandı/);
   });
   await test('layout, hidden states and UTC overrides survive reload', async () => {
     const ema = await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'ema').id);
@@ -173,6 +209,23 @@ try {
     await page.reload(); await ready();
     assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('BYBIT:BTCUSDT')), true);
     await shot('watchlist-import');
+  });
+  await test('switching back to a cached market paints instantly without loading overlays', async () => {
+    assert.ok(await state(() => [...window.__alfaDebug.historyCache.keys()].some(k => k.startsWith('BTCUSDT|'))));
+    await page.click('[data-symbol="BYBIT:BTCUSDT"]');
+    await page.waitForFunction(() => document.getElementById('symbol').value === 'BYBIT:BTCUSDT' && window.__alfaDebug.ready, null, { timeout: 45000 });
+    assert.ok(await state(() => window.__alfaDebug.historyCache.has('BYBIT:BTCUSDT|1h')));
+    await page.click('[data-symbol="BTCUSDT"]');
+    const immediate = await state(() => ({
+      hidden: document.getElementById('message').hidden,
+      text: document.getElementById('message').textContent.trim(),
+      bars: window.__alfaDebug.history.length,
+    }));
+    assert.equal(immediate.hidden, true);
+    assert.equal(immediate.text, '');
+    assert.ok(immediate.bars > 0);
+    await ready();
+    assert.equal(await state(() => document.getElementById('symbol').value), 'BTCUSDT');
   });
   await test('object tree: Ctrl multi-select, grouping, bulk delete, undo and rename', async () => {
     await page.evaluate(() => { const d = window.__alfaDebug.drawings; d.history.commit({ ...d.history.doc, drawings: [] }); });
