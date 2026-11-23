@@ -2,8 +2,8 @@
 
 **Tarih:** 2026-11-23  
 **Hedef:** https://alfa-trader.com/alfa-charts.html  
-**Kod tabanı:** `c23567e Fix admin grant for live Fjor account`  
-**Üretim paketleri:** `/assets/alfa-charts.mjs?v=48`, `/assets/alfa-charts.css?v=18`  
+**Kod tabanı:** Denetim `c23567e Fix admin grant for live Fjor account` üzerinde yapıldı; P0 düzeltmeleri yerel olarak `61db14b` üzerine eklendi.<br>
+**Üretim paketleri:** `/assets/alfa-charts.mjs?v=48`, `/assets/alfa-charts.css?v=18` (P0 düzeltmeleri henüz dağıtılmadı).<br>
 **Teşhis URL’si:** `https://alfa-trader.com/alfa-charts.html?debug=1` → `window.__alfaDebug.ready === true`
 
 ---
@@ -355,4 +355,25 @@ node tests/browser/charts-feature-nav.browser.mjs --playwright=$pw --url=http://
 
 ## 9. Düzeltme günlüğü
 
-Bu bölüm P0 commit’leri tamamlandıktan sonra commit ID’leri ve test sonuçlarıyla güncellenecektir.
+Tüm P0 maddeleri küçük, bağımsız commit’lerle yerel olarak düzeltildi. Üretime dağıtım yapılmadı.
+
+| Commit | Kapsam | Doğrulama |
+|---|---|---|
+| `f7afd2c` | Denetim raporunun eklenmesi | Belge commit’i; kod değişikliği yok |
+| `7d2cc41` | P0-1 — Replay tüm chart timeframe’lerini destekliyor (`alfa-replay-model.mjs`, yeni sınır testi) | `node --test tests/alfa-replay.test.mjs` → 18/18; `node tests/browser/alfa-replay.browser.mjs` → `passed: true`, 4000 gerçek Binance mumu, `errors: []` |
+| `7cb527a` | P0-2 — `#auto-scale` gerçek aç/kapat toggle’u; `aria-pressed`, `priceScale.autoScale`, ayar dialog’u, layout persistence ve “grafik görünümü sıfırla” tutarlı | `node --test tests/*.test.mjs` → 1093/1093; `node tests/browser/alfa-workspace.browser.mjs` → yeni `auto scale is a real on/off toggle` dahil tüm vakalar geçti |
+| `7de0103` | P0-3 — Görünüm menüsündeki `[data-layout]` butonları çoklu grafiğe geçiriyor; `#multi-grid` yanlış selector’dan çıkarıldı | `node --test tests/*.test.mjs` → 1093/1093; workspace browser suite → yeni `view-menu layout buttons open multi-chart view` dahil 22/22 vaka geçti |
+| `61db14b` | P0-4 — Alarm önceki fiyatı artık sembol bazlı (`createPriceTracker`), sembol değişiminde sıfırlanıyor, sınırlı boyutta | `node --test tests/alfa-alerts.test.mjs` → 7/7; `node --test tests/*.test.mjs` → **1094/1094**; workspace + replay + drawings browser suite’leri geçti, `pageErrors: []` |
+
+### Son doğrulama özeti
+
+- `node --test tests/*.test.mjs`: **1094 test, 1094 geçti, 0 hata**.
+- `tests/browser/alfa-workspace.browser.mjs`: 22/22 gerçek tarayıcı vakası geçti (gerçek Binance verisi, yeni auto-scale ve layout kontrolleri dahil).
+- `tests/browser/alfa-replay.browser.mjs`: `passed: true`, 4000 mum, `futureHidden`, `nextPrevious`, `ema200Warmup`, `goToDate`, `returnedToLive` doğrulandı.
+- `tests/browser/alfa-drawings.browser.mjs`: 16/16 vaka geçti, çizim/Fibonacci/position/touch/undo regression’ları korundu.
+- `git diff --check`: temiz. `git status --short`: temiz (commit sonrası değişiklik yok).
+- Üretim hâlâ eski paketleri sunuyor; P0 commit’leri **deploy edilmedi**. Dağıtım için açık kullanıcı onayı gerekiyor.
+
+### Korunan davranışlar (regression kontrolü)
+
+Bare `BTCUSDT` = Binance Spot; qualified ref’ler korunuyor; guest doğrudan Binance Spot kotasyonu alıyor; free non-Spot ref’ler Alfa Charts session olmadan açılıyor; non-allowlisted ref’ler için JWT zorunluluğu sürüyor; `private, no-store` ve `Vary: Authorization` başlıkları korundu; vendor branding eklenmedi; “Grafik görünümü sıfırla” çizim/indikatörleri silmiyor; `zgrc25@gmail.com` admin değil.
