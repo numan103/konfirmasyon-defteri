@@ -149,6 +149,23 @@ test('imported refs use the free public data path while keeping the original ref
   assert.equal(body.interval, '1h');
   assert.equal(bars[0].close, 11);
 
+  const serverSeconds = await fetchHistory('OKX:BTCUSDT.P', '1h', undefined, async () => ({
+    ok: true, json: async () => ({ ok: true, candles: [{ time: 1794751200, open: 10, high: 12, low: 9, close: 11, volume: 5 }] })
+  }));
+  assert.deepEqual(serverSeconds, [{ time: 1794751200, open: 10, high: 12, low: 9, close: 11, volume: 5 }]);
+
+  const directCalls = [];
+  const directBars = await fetchHistory('OKX:BTCUSDT.P', '1h', undefined, async (url, opts) => {
+    directCalls.push({ url, opts });
+    if (url === '/api/access') return { ok: false, status: 502, json: async () => ({ ok: false, error: 'market_unavailable' }) };
+    return { ok: true, json: async () => ({ code: '0', data: [['1794751200000', '10', '12', '9', '11', '5']] }) };
+  });
+  assert.match(directCalls[1].url, /^https:\/\/www\.okx\.com\/api\/v5\/market\/candles\?/);
+  assert.deepEqual(directBars, [{ time: 1794751200, open: 10, high: 12, low: 9, close: 11, volume: 5 }]);
+  await assert.rejects(() => fetchHistory('FX:XAUUSD', '1h', undefined, async () => ({
+    ok: false, status: 502, json: async () => ({ ok: false, error: 'market_unavailable' })
+  })), /market_unavailable/);
+
   const quoteOnly = await fetchHistory('CRYPTOCAP:TOTAL', '1h', undefined, async () => ({
     ok: true, json: async () => ({ ok: true, chartable: false, quote: { price: 2500, change: 1.5 } })
   }));

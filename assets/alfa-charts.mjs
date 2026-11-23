@@ -1,7 +1,7 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=7';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=9';
 import { DrawingEngine } from './alfa-drawings.mjs?v=9';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=3';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=5';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';

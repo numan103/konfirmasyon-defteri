@@ -3,7 +3,7 @@ import { ReplayEngine,candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { validateDocument } from './alfa-drawings-model.mjs?v=6';
 import { validateAnalytics,mergeAnalytics } from './alfa-strategy-model.mjs?v=1';
 import { validateLab,mergeLab } from './alfa-lab-model.mjs?v=1';
-import { isMarketSymbol,TIMEFRAMES } from './alfa-charts-data.mjs?v=7';
+import { isMarketSymbol,TIMEFRAMES } from './alfa-charts-data.mjs?v=9';
 export const RESEARCH_FORMAT='alfa-research';
 export const canonical=value=>JSON.stringify(normalize(value));
 function normalize(v){return Array.isArray(v)?v.map(normalize):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,normalize(v[k])])):v;}

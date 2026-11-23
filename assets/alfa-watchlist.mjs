@@ -1,5 +1,5 @@
-import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=7';
-import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES } from './alfa-watchlist-model.mjs?v=6';
+import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=9';
+import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES } from './alfa-watchlist-model.mjs?v=8';
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
 const $ = id => document.getElementById(id);
 const CATALOG_KEY = 'alfa-spot-catalog:v1';

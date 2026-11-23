@@ -118,6 +118,63 @@ const FREE_MARKET_REFS = new Set(FREE_REF_SEEDS.map(ref => {
 }).filter(Boolean));
 export const isFreeMarketRef = value => { try { return FREE_MARKET_REFS.has(parseMarketRef(value).key); } catch { return false; } };
 
+// The server proxy is required for feeds without CORS (Yahoo, derived gold).
+// These public feeds also allow the browser directly, which keeps the imported
+// perpetual futures open when a serverless region cannot reach their exchange.
+const DIRECT_BAR = { '1m': '1m', '3m': '3m', '5m': '5m', '15m': '15m', '30m': '30m', '1h': '1H', '2h': '2H', '4h': '4H', '6h': '6H', '12h': '12H', '1d': '1D', '3d': '3D', '1w': '1W' };
+const DIRECT_BYBIT = { '1m': '1', '3m': '3', '5m': '5', '15m': '15', '30m': '30', '1h': '60', '2h': '120', '4h': '240', '6h': '360', '12h': '720', '1d': 'D', '3d': '3D', '1w': 'W' };
+function directHistoryURL(ref, interval, endTime, startTime) {
+  const ms = value => value == null ? null : Math.floor(Number(value) > 1e12 ? Number(value) : Number(value) * 1000);
+  const end = ms(endTime), start = ms(startTime);
+  if (ref.feed === 'binance-perp') {
+    const params = new URLSearchParams({ symbol: ref.feedSymbol, interval, limit: '1000' });
+    if (end != null) params.set('endTime', String(end));
+    if (start != null) params.set('startTime', String(start));
+    return 'https://fapi.binance.com/fapi/v1/klines?' + params;
+  }
+  if (ref.feed === 'okx') {
+    const params = new URLSearchParams({ instId: ref.feedSymbol, bar: DIRECT_BAR[interval], limit: '300' });
+    if (end != null) params.set('after', String(end));
+    if (start != null) params.set('before', String(start));
+    return 'https://www.okx.com/api/v5/market/candles?' + params;
+  }
+  if (ref.feed === 'bybit') {
+    const params = new URLSearchParams({ category: ref.marketType === 'perp' ? 'linear' : 'spot', symbol: ref.feedSymbol, interval: DIRECT_BYBIT[interval], limit: '1000' });
+    if (end != null) params.set('end', String(end));
+    if (start != null) params.set('start', String(start));
+    return 'https://api.bybit.com/v5/market/kline?' + params;
+  }
+  return null;
+}
+function parseDirectRows(rows, feed) {
+  const unique = new Map();
+  for (const row of rows || []) {
+    try {
+      const c = candle(row[0], row[1], row[2], row[3], row[4], row[5] ?? 0);
+      unique.set(c.time, c);
+    } catch { /* Skip malformed ticks from a third party. */ }
+  }
+  const result = [...unique.values()].sort((a, b) => a.time - b.time).slice(-1000);
+  if (!result.length) throw new Error('Geçersiz mum verisi');
+  return result;
+}
+async function directHistory(ref, interval, endTime, startTime, signal, fetcher) {
+  const url = directHistoryURL(ref, interval, endTime, startTime);
+  if (!url) return null;
+  const response = await fetcher(url, { signal, cache: 'no-store' });
+  if (!response.ok) throw new Error('upstream_http_' + response.status);
+  const json = await response.json();
+  if (ref.feed === 'okx') {
+    if (json?.code !== '0') throw new Error('upstream_empty');
+    return parseDirectRows(json.data, 'okx');
+  }
+  if (ref.feed === 'bybit') {
+    if (json?.retCode !== 0) throw new Error('upstream_empty');
+    return parseDirectRows(json.result?.list, 'bybit');
+  }
+  return parseHistory(json);
+}
+
 export function validateMarket(symbol, interval) {
   if (!Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen zaman dilimi');
   const ref = parseMarketRef(symbol);
@@ -205,8 +262,20 @@ export async function fetchHistory(symbol, interval, signal, fetcher = fetch, en
   if (!Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen zaman dilimi');
   const ref = parseMarketRef(symbol);
   if (ref.feed !== 'binance') {
-    const op = isFreeMarketRef(symbol) ? MARKET_DATA_FREE_OP : MARKET_DATA_OP;
-    const data = await proxyRequest(op, { ref: symbol, interval, end: endTime, start: startTime }, signal, fetcher, options.token);
+    const free = isFreeMarketRef(symbol);
+    const op = free ? MARKET_DATA_FREE_OP : MARKET_DATA_OP;
+    let data;
+    try {
+      data = await proxyRequest(op, { ref: symbol, interval, end: endTime, start: startTime }, signal, fetcher, options.token);
+    } catch (error) {
+      if (free) {
+        try {
+          const direct = await directHistory(ref, interval, endTime, startTime, signal, fetcher);
+          if (direct) return direct;
+        } catch { /* Fall back to the original proxy error below. */ }
+      }
+      throw error;
+    }
     if (data.chartable === false) {
       const quote = data.quote || {};
       const price = Number(quote.price);
@@ -214,7 +283,9 @@ export async function fetchHistory(symbol, interval, signal, fetcher = fetch, en
       return [{ time: Math.floor(Date.now() / 1000 / 60) * 60, open: price, high: price, low: price, close: price, volume: 0 }];
     }
     if (!Array.isArray(data.candles)) throw new Error('Geçersiz mum yanıtı');
-    return data.candles.map(c => candle(c.time, c.open, c.high, c.low, c.close, c.volume));
+    // The server adapter already normalizes upstream timestamps to seconds;
+    // keep accepting milliseconds so both the API and legacy fixtures validate.
+    return data.candles.map(c => candle(Number(c.time) > 1e12 ? c.time : Number(c.time) * 1000, c.open, c.high, c.low, c.close, c.volume));
   }
   let lastError;
   for (const origin of REST_ORIGINS) {
