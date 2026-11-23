@@ -15,6 +15,8 @@ const CRYPTO_QUOTES = ['USDT', 'USDC', 'FDUSD', 'TUSD', 'BTC', 'ETH', 'BNB', 'TR
 const FX_VENUES = new Set(['FX', 'FX_IDC', 'OANDA', 'FOREXCOM', 'FPMARKETS']);
 const MARKET_DATA_OP = 'chart-market-data';
 const QUOTE_OP = 'chart-market-quotes';
+const MARKET_DATA_FREE_OP = 'chart-market-data-free';
+const QUOTE_FREE_OP = 'chart-market-quotes-free';
 
 const YAHOO = {
   'CME:BTC1!': ['BTC=F', 'CME BTC', 'USD', 'Vadeli'],
@@ -92,6 +94,30 @@ export const isSpotSymbol = symbol => typeof symbol === 'string' && BARE.test(sy
 export const isMarketRef = value => { try { parseMarketRef(value); return true; } catch { return false; } };
 // Backward-compatible name used by research/drawing validation.
 export const isMarketSymbol = isMarketRef;
+
+// These are the references that failed to open because they needed a Charts
+// session. They keep their original venue/market type but use a public,
+// rate-limited data path, so the whole imported list opens without a login.
+// Bare Binance Spot pairs stay on the direct Binance feed and are excluded.
+const FREE_REF_SEEDS = [
+  'CME:BTC1!', 'OKX:USDTTRY', 'CBOE:VIX', 'FX_IDC:XAUTRYG', 'OKX:XAUTUSDT', 'BIST:XU100',
+  'CRYPTOCAP:TOTAL', 'CRYPTOCAP:TOTAL2', 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:USDT.D',
+  'BINANCE:BTCUSDT.P', 'BINANCE:ETHUSDT.P', 'OKX:ETHUSDT.P', 'TVC:GOLD', 'BYBIT:BTCUSDT.P', 'BYBIT:ETHUSDT.P',
+  'FX:XAUUSD', 'FPMARKETS:US100', 'OKX:SOLUSDT', 'OKX:PEPEUSDT.P', 'OKX:BNBUSDT.P',
+  'BYBIT:BTCUSDT', 'BYBIT:SOLUSDT.P', 'OKX:AVAXUSDT', 'OKX:BTCUSDT', 'OKX:BTCUSDT.P',
+  'OKX:ETHUSDT', 'OKX:XRPUSDT',
+  'OKX:DOGEUSDT', 'OKX:AVAXUSDT.P', 'OKX:LTCUSDT.P', 'OKX:XRPUSDT.P', 'OKX:SUIUSDT.P',
+  'OKX:LINKUSDT.P', 'OKX:NEARUSDT.P', 'OKX:INJUSDT', 'OKX:AAVEUSDT.P', 'OKX:PYTHUSDT',
+  'OKX:HYPEUSDT.P', 'OKX:ZECUSDT.P', 'TVC:DXY', 'OANDA:EURUSD', 'OANDA:NZDUSD',
+  'OANDA:USDJPY', 'FX_IDC:GBPAUD', 'OANDA:AUDUSD', 'FOREXCOM:XAUUSD', 'FX:GBPUSD',
+  'OANDA:XAGUSD', 'FX:USDCHF', 'OANDA:USDCAD', 'FX:NZDCAD', 'FX:AUDCHF', 'FX:AUDCAD'
+];
+const FREE_MARKET_REFS = new Set(FREE_REF_SEEDS.map(ref => {
+  try { return parseMarketRef(ref).feed === 'binance' ? null : parseMarketRef(ref).key; }
+  catch { return null; }
+}).filter(Boolean));
+export const isFreeMarketRef = value => { try { return FREE_MARKET_REFS.has(parseMarketRef(value).key); } catch { return false; } };
+
 export function validateMarket(symbol, interval) {
   if (!Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen zaman dilimi');
   const ref = parseMarketRef(symbol);
@@ -163,14 +189,24 @@ async function proxyRequest(op, body, signal, fetcher, providedToken) {
 export async function fetchMarketQuotes(refs, signal, fetcher = fetch, providedToken) {
   const unique = [...new Set(refs.filter(isMarketRef))].slice(0, 60);
   if (!unique.length) return {};
-  const data = await proxyRequest(QUOTE_OP, { refs: unique }, signal, fetcher, providedToken);
-  return data.quotes || {};
+  const free = unique.filter(isFreeMarketRef), gated = unique.filter(ref => !isFreeMarketRef(ref));
+  const quotes = {};
+  let firstError = null;
+  if (free.length) try {
+    Object.assign(quotes, (await proxyRequest(QUOTE_FREE_OP, { refs: free }, signal, fetcher, providedToken)).quotes || {});
+  } catch (error) { firstError = error; }
+  if (gated.length) try {
+    Object.assign(quotes, (await proxyRequest(QUOTE_OP, { refs: gated }, signal, fetcher, providedToken)).quotes || {});
+  } catch (error) { if (!Object.keys(quotes).length) firstError = error; }
+  if (!Object.keys(quotes).length && firstError) throw firstError;
+  return quotes;
 }
 export async function fetchHistory(symbol, interval, signal, fetcher = fetch, endTime = null, startTime = null, options = {}) {
   if (!Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen zaman dilimi');
   const ref = parseMarketRef(symbol);
   if (ref.feed !== 'binance') {
-    const data = await proxyRequest(MARKET_DATA_OP, { ref: symbol, interval, end: endTime, start: startTime }, signal, fetcher, options.token);
+    const op = isFreeMarketRef(symbol) ? MARKET_DATA_FREE_OP : MARKET_DATA_OP;
+    const data = await proxyRequest(op, { ref: symbol, interval, end: endTime, start: startTime }, signal, fetcher, options.token);
     if (data.chartable === false) {
       const quote = data.quote || {};
       const price = Number(quote.price);

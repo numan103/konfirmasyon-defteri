@@ -30,7 +30,8 @@ import {
 import { sendTelegram } from '../lib/telegram.mjs';
 import { adminNotifyChatId } from '../lib/admin-notify.mjs';
 import { publicWatchlistURL, fetchPublicWatchlist, allowWatchlistImport } from '../lib/chart-watchlist-import.mjs';
-import { marketHistory, marketQuotes, allowMarketData } from '../lib/chart-market-data.mjs';
+import { marketHistory, marketQuotes, allowMarketData, allowPublicMarketData } from '../lib/chart-market-data.mjs';
+import { isFreeMarketRef } from '../assets/alfa-charts-data.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -818,12 +819,15 @@ export default async function handler(req, res) {
     return res.end();
   }
 
+  const body = req.method === 'POST' && req.body && typeof req.body === 'object' ? req.body : {};
+  const op = body.op || 'status';
+  const freeOp = req.method === 'POST' && (op === 'chart-market-data-free' || op === 'chart-market-quotes-free');
   const authHeader = req.headers.authorization || '';
   const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
-  if (!jwt) return fail(res, 401, 'unauthorized');
+  if (!jwt && !freeOp) return fail(res, 401, 'unauthorized');
 
-  const user = await getUser(jwt);
-  if (!user) return fail(res, 401, 'unauthorized');
+  const user = jwt ? await getUser(jwt) : null;
+  if (jwt && !user) return fail(res, 401, 'unauthorized');
 
   if (req.method === 'GET') {
     if (req.query && req.query.op === 'list') return listHandler(req, res, user);
@@ -831,8 +835,23 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const body = req.body && typeof req.body === 'object' ? req.body : {};
-    const op = body.op || 'status';
+    // Public, allowlisted market data for the imported symbols that previously
+    // required a Charts session. No database access, no caller-supplied URL.
+    if (freeOp) {
+      const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim().slice(0, 64);
+      if (!allowPublicMarketData(ip)) return fail(res, 429, 'market_rate_limit');
+      try {
+        if (op === 'chart-market-quotes-free') {
+          if (!Array.isArray(body.refs) || body.refs.length > 60 || body.refs.some(r => typeof r !== 'string' || r.length > 100 || !isFreeMarketRef(r))) return fail(res, 400, 'bad_market_ref');
+          return send(res, 200, { ok: true, quotes: await marketQuotes(body.refs) });
+        }
+        if (typeof body.ref !== 'string' || body.ref.length > 100 || !isFreeMarketRef(body.ref) || body.interval == null) return fail(res, 400, 'bad_market_ref');
+        return send(res, 200, { ok: true, ...await marketHistory(body.ref, body.interval, body.end, body.start) });
+      } catch (e) {
+        return fail(res, e.message === 'bad_interval' ? 400 : 502,
+          e.message === 'bad_interval' ? 'bad_interval' : 'market_unavailable');
+      }
+    }
     if (op === 'chart-watchlist-import') {
       if (!featureAccess(user).features.alfacharts) return fail(res, 403, 'charts_access_required');
       try { publicWatchlistURL(body.url); } catch { return fail(res, 400, 'bad_watchlist_url'); }

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   TIMEFRAMES, SYMBOLS, REST_ORIGINS, STREAM_ORIGINS, validateMarket, restURL, streamURL,
   candle, parseHistory, parseKline, mergeCandles, fetchHistory,
-  parseMarketRef, isMarketRef, isSpotSymbol, fetchMarketQuotes, setMarketTokenProvider
+  parseMarketRef, isMarketRef, isSpotSymbol, isFreeMarketRef, fetchMarketQuotes, setMarketTokenProvider
 } from '../assets/alfa-charts-data.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
@@ -16,7 +16,7 @@ const SKIPPED_REFS = [
   'CRYPTOCAP:TOTAL', 'CRYPTOCAP:TOTAL2', 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:USDT.D',
   'BINANCE:BTCUSDT.P', 'BINANCE:ETHUSDT', 'BINANCE:BTCUSDT', 'OKX:ETHUSDT.P', 'TVC:GOLD',
   'BYBIT:BTCUSDT.P', 'BYBIT:ETHUSDT.P', 'FX:XAUUSD', 'FPMARKETS:US100', 'OKX:SOLUSDT',
-  'OKX:PEPEUSDT.P', 'OKX:BNBUSDT.P', 'OKX:DOGEUSDT', 'OKX:AVAXUSDT.P', 'OKX:LTCUSDT.P',
+  'OKX:PEPEUSDT.P', 'OKX:BNBUSDT.P', 'OKX:ADAUSDT', 'OKX:AVAXUSDT.P', 'OKX:LTCUSDT.P',
   'OKX:XRPUSDT.P', 'OKX:SUIUSDT.P', 'OKX:LINKUSDT.P', 'OKX:NEARUSDT.P', 'OKX:INJUSDT',
   'OKX:AAVEUSDT.P', 'OKX:PYTHUSDT', 'OKX:HYPEUSDT.P', 'OKX:ZECUSDT.P', 'TVC:DXY',
   'OANDA:EURUSD', 'OANDA:NZDUSD', 'OANDA:USDJPY', 'FX_IDC:GBPAUD', 'OANDA:AUDUSD',
@@ -131,7 +131,12 @@ test('history fetch falls back to the second origin and never invents candles', 
   await assert.rejects(() => fetchHistory('BTCUSDT', '1h', undefined, async () => { throw new Error('offline'); }));
 });
 
-test('non-spot history and quotes reuse the existing access API with the original ref', async () => {
+test('imported refs use the free public data path while keeping the original ref', async () => {
+  assert.equal(isFreeMarketRef('OKX:BTCUSDT.P'), true);
+  assert.equal(isFreeMarketRef('CRYPTOCAP:TOTAL'), true);
+  assert.equal(isFreeMarketRef('BINANCE:BTCUSDT'), false);
+  assert.equal(isFreeMarketRef('OKX:ADAUSDT'), false);
+
   const calls = [];
   const bars = await fetchHistory('OKX:BTCUSDT.P', '1h', undefined, async (url, opts) => {
     calls.push({ url, opts });
@@ -139,7 +144,7 @@ test('non-spot history and quotes reuse the existing access API with the origina
   });
   assert.equal(calls[0].url, '/api/access');
   const body = JSON.parse(calls[0].opts.body);
-  assert.equal(body.op, 'chart-market-data');
+  assert.equal(body.op, 'chart-market-data-free');
   assert.equal(body.ref, 'OKX:BTCUSDT.P');
   assert.equal(body.interval, '1h');
   assert.equal(bars[0].close, 11);
@@ -150,15 +155,32 @@ test('non-spot history and quotes reuse the existing access API with the origina
   assert.equal(quoteOnly.length, 1);
   assert.equal(quoteOnly[0].close, 2500);
 
+  const gatedCalls = [];
+  await fetchHistory('OKX:ADAUSDT', '1h', undefined, async (url, opts) => {
+    gatedCalls.push({ url, opts });
+    return { ok: true, json: async () => ({ ok: true, candles: [] }) };
+  });
+  assert.equal(JSON.parse(gatedCalls[0].opts.body).op, 'chart-market-data');
+
   setMarketTokenProvider(async () => 'fixture-token');
   const quoteCalls = [];
-  const quotes = await fetchMarketQuotes(['CBOE:VIX'], undefined, async (url, opts) => {
+  const quotes = await fetchMarketQuotes(['CBOE:VIX', 'OKX:ADAUSDT'], undefined, async (url, opts) => {
     quoteCalls.push({ url, opts });
-    return { ok: true, json: async () => ({ ok: true, quotes: { 'CBOE:VIX': { price: 19, change: 2, at: 1 } } }) };
+    const request = JSON.parse(opts.body);
+    if (request.op === 'chart-market-quotes-free') return { ok: true, json: async () => ({ ok: true, quotes: { 'CBOE:VIX': { price: 19, change: 2, at: 1 } } }) };
+    return { ok: true, json: async () => ({ ok: true, quotes: { 'OKX:ADAUSDT': { price: 7, change: 1, at: 1 } } }) };
   });
-  assert.equal(quoteCalls[0].opts.headers.Authorization, 'Bearer fixture-token');
-  assert.equal(JSON.parse(quoteCalls[0].opts.body).op, 'chart-market-quotes');
+  assert.deepEqual(quoteCalls.map(c => JSON.parse(c.opts.body).op), ['chart-market-quotes-free', 'chart-market-quotes']);
   assert.equal(quotes['CBOE:VIX'].price, 19);
+  assert.equal(quotes['OKX:ADAUSDT'].price, 7);
+
+  const partial = await fetchMarketQuotes(['CRYPTOCAP:TOTAL', 'OKX:ADAUSDT'], undefined, async (url, opts) => {
+    const request = JSON.parse(opts.body);
+    if (request.op === 'chart-market-quotes-free') return { ok: true, json: async () => ({ ok: true, quotes: { 'CRYPTOCAP:TOTAL': { price: 100, change: 1, at: 1 } } }) };
+    return { ok: false, status: 401, json: async () => ({ ok: false, error: 'unauthorized' }) };
+  });
+  assert.equal(partial['CRYPTOCAP:TOTAL'].price, 100);
+  assert.equal(partial['OKX:ADAUSDT'], undefined);
   setMarketTokenProvider(async () => '');
 });
 

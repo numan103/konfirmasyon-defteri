@@ -1,4 +1,4 @@
-import { fetchHistory } from './alfa-charts-data.mjs?v=6';
+import { fetchHistory } from './alfa-charts-data.mjs?v=7';
 import { findSwings, classifyStructure } from './alfa-market-structure-model.mjs?v=1';
 import { computeMarketStructure } from './alfa-market-structure-model.mjs?v=1';
 import { computeFvg } from './alfa-fvg-model.mjs?v=1';

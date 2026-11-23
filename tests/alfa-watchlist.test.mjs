@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT } from '../assets/alfa-watchlist-model.mjs';
 import { formatMarketPrice } from '../assets/alfa-watchlist.mjs';
-import { isMarketSymbol, isSpotSymbol, parseMarketRef, validateMarket } from '../assets/alfa-charts-data.mjs';
+import { isMarketSymbol, isSpotSymbol, isFreeMarketRef, parseMarketRef, validateMarket } from '../assets/alfa-charts-data.mjs';
 import { publicWatchlistURL, publicWatchlistData, fetchPublicWatchlist, allowWatchlistImport } from '../lib/chart-watchlist-import.mjs';
 import handler from '../api/access.mjs';
 const market = (symbol, base, quote, patch = {}) => ({ symbol, baseAsset: base, quoteAsset: quote, status: 'TRADING', isSpotTradingAllowed: true, permissions: ['SPOT'],
@@ -55,9 +55,20 @@ test('every skipped reference is reachable from the venue picker or the Spot cat
   const foreign = new Set(foreignMarkets().map(m => m.key));
   for (const ref of SKIPPED_REFS) {
     const market = parseMarketRef(ref);
-    if (market.feed === 'binance' && market.marketType === 'spot') assert.ok(isSpotSymbol(market.key), ref);
-    else assert.ok(foreign.has(market.key), ref);
+    if (market.feed === 'binance' && market.marketType === 'spot') {
+      assert.ok(isSpotSymbol(market.key), ref);
+      assert.equal(isFreeMarketRef(ref), false, ref);
+    } else {
+      assert.ok(foreign.has(market.key), ref);
+      assert.equal(isFreeMarketRef(ref), true, ref);
+    }
   }
+  for (const m of foreignMarkets()) {
+    if (parseMarketRef(m.key).feed === 'binance') continue;
+    assert.equal(isFreeMarketRef(m.key), true, m.key);
+  }
+  assert.equal(isFreeMarketRef('OKX:UNLISTED'), false);
+  assert.equal(isFreeMarketRef('BTCUSDT'), false);
 });
 test('list/import limits are bounded, empty lists persist, and original lists are not changed by previews', () => {
   const saved = ['BTCUSDT']; importPreview(parseWatchlistText('XRPUSDT'), markets, saved);

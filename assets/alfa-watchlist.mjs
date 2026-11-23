@@ -1,5 +1,5 @@
-import { SYMBOLS, REST_ORIGINS, isSpotSymbol, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=6';
-import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES } from './alfa-watchlist-model.mjs?v=5';
+import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=7';
+import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES } from './alfa-watchlist-model.mjs?v=6';
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
 const $ = id => document.getElementById(id);
 const CATALOG_KEY = 'alfa-spot-catalog:v1';
@@ -149,8 +149,8 @@ export class ChartWatchlist {
     } catch { if (signal.aborted) return; }
     if (!others.length || owner !== this.owner || signal.aborted) return;
     try {
-      const token = await this.getAccessToken();
-      if (!token) return;
+      const needsAuth = others.some(ref => !isFreeMarketRef(ref));
+      const token = needsAuth ? await this.getAccessToken() : '';
       for (let i = 0; i < others.length; i += 60) {
         const quotes = await fetchMarketQuotes(others.slice(i, i + 60), signal, fetch, token);
         if (owner !== this.owner || signal.aborted) return;
@@ -165,7 +165,7 @@ export class ChartWatchlist {
       <label class="study-search">${icon('search')}<input id="symbol-query" placeholder="BTC, OKX:ETHUSDT.P, XAUUSD, CRYPTOCAP:TOTAL…" aria-label="Sembol ara"></label>
       <div class="symbol-filters"><label>Borsa <select id="symbol-venue"><option value="">Tümü</option>${['BINANCE', 'OKX', 'BYBIT', 'CME', 'CBOE', 'BIST', 'TVC', 'FX', 'FX_IDC', 'OANDA', 'FOREXCOM', 'FPMARKETS', 'CRYPTOCAP'].map(v => `<option>${v}</option>`).join('')}</select></label>
         <label>Karşılık <select id="symbol-quote"><option value="">Tümü</option><option>USDT</option><option>USDC</option><option>BTC</option><option>ETH</option><option>BNB</option><option>TRY</option><option>EUR</option></select></label><small id="catalog-status"></small><button id="catalog-retry" type="button">Yenile</button></div>
-      <div id="symbol-results" class="symbol-results"></div><p class="menu-note">Farklı borsa ve vadeli semboller Spot ile değiştirilmez; kendi borsası ve piyasa türüyle listeye eklenir. Liste yalnızca bu cihazda, hesabına özel saklanır.</p>`, 'symbol-dialog');
+      <div id="symbol-results" class="symbol-results"></div><p class="menu-note">Farklı borsa ve vadeli semboller Spot ile değiştirilmez; kendi borsası ve piyasa türüyle listeye eklenir. ÜCRETSİZ etiketliler giriş yapmadan açılır; liste yalnızca bu cihazda, hesabına özel saklanır.</p>`, 'symbol-dialog');
     modal.overlay.setAttribute('aria-label', 'Sembol arama');
     modal.box.querySelector('#symbols-close').onclick = modal.close;
     this.renderPicker = () => {
@@ -177,7 +177,7 @@ export class ChartWatchlist {
         .map(m => ({ ref: m.symbol, base: m.base, quote: m.quote, venue: 'BINANCE', marketType: 'SPOT', chartable: true })) : [];
       const foreign = foreignMarkets().filter(m => (!venue || m.venue === venue) && (!quote || m.quote === quote) &&
         (!q || m.key.includes(q) || m.feedSymbol.toUpperCase().includes(q) || m.label.toUpperCase().includes(q)))
-        .map(m => ({ ref: m.key, base: m.base, quote: m.quote, venue: m.venue, marketType: (m.marketType || '').toUpperCase(), chartable: m.chartable }));
+        .map(m => ({ ref: m.key, base: m.base, quote: m.quote, venue: m.venue, marketType: (m.marketType || '').toUpperCase(), chartable: m.chartable, free: isFreeMarketRef(m.ref) }));
       const results = [...spots, ...foreign].slice(0, 80);
       const status = modal.box.querySelector('#catalog-status');
       status.textContent = this.catalogState === 'loading' ? 'Binance kataloğu yükleniyor…' :
@@ -185,7 +185,7 @@ export class ChartWatchlist {
       modal.box.querySelector('#symbol-results').innerHTML = results.map(m => {
         const ref = esc(m.ref), added = this.symbols.includes(m.ref);
         return `<div class="symbol-result"><button data-open-symbol="${ref}"><strong>${esc(m.base)} <small>${m.quote ? '/ ' + esc(m.quote) : ''}</small></strong>
-          <small class="venue-badge">${esc(m.venue)} · ${esc(m.marketType || 'SPOT')}${m.chartable === false ? ' · CANLI' : ''}</small></button>
+          <small class="venue-badge">${esc(m.venue)} · ${esc(m.marketType || 'SPOT')}${m.chartable === false ? ' · CANLI' : ''}${m.free ? ' · ÜCRETSİZ' : ''}</small></button>
           <button data-add-symbol="${ref}" aria-label="${ref} listeye ekle" ${added ? 'disabled' : ''}>${icon(added ? 'check' : 'plus')}</button></div>`;
       }).join('') || '<p class="study-empty">Eşleşen sembol yok.</p>';
       modal.box.querySelectorAll('[data-add-symbol]').forEach(b => b.onclick = () => this.add(b.dataset.addSymbol));
@@ -203,7 +203,7 @@ export class ChartWatchlist {
     const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>İzleme listesi içe aktar</h3><p>TradingView TXT / CSV, semboller veya herkese açık liste linki</p></div><button id="import-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
       <label class="import-file">TXT / CSV dosyası seç<input id="watchlist-file" type="file" accept=".txt,.csv,text/plain,text/csv"></label>
       <label class="import-source-label" for="watchlist-source">Semboller veya link</label><textarea id="watchlist-source" rows="4" placeholder="BINANCE:BTCUSDT,OKX:XAUTUSDT,CBOE:VIX,CRYPTOCAP:TOTAL&#10;https://www.tradingview.com/watchlists/…/" spellcheck="false"></textarea>
-      <p class="menu-note">Binance Spot, OKX/Bybit vadeli, forex, endeks ve kripto endeksleri kendi borsasıyla eklenir. Özel TradingView listesi için TXT dışa aktar. Linkle alma, Alfa Charts izni olan hesabınla giriş yapmanı gerektirir. Şifre veya TradingView çerezi istenmez.</p>
+      <p class="menu-note">Binance Spot, OKX/Bybit vadeli, forex, endeks ve kripto endeksleri kendi borsasıyla eklenir; atlanan listelerdeki semboller ücretsiz veriyle açılır. Özel TradingView listesi için TXT dışa aktar. Linkle alma, Alfa Charts izni olan hesabınla giriş yapmanı gerektirir. Şifre veya TradingView çerezi istenmez.</p>
       <div class="import-options"><label><input id="import-replace" type="checkbox"> Mevcut listeyi değiştir</label><button id="watchlist-preview" type="button">Önizle</button></div>
       <div id="import-result" class="import-result" role="status"></div><div class="settings-actions"><button id="watchlist-apply" class="apply" type="button" disabled>Listeye ekle</button></div>`, 'watchlist-import-dialog');
     modal.overlay.setAttribute('aria-label', 'TradingView izleme listesi içe aktar');

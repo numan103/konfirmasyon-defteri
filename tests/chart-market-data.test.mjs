@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { marketHistory, marketQuotes, allowMarketData } from '../lib/chart-market-data.mjs';
+import { marketHistory, marketQuotes, allowMarketData, allowPublicMarketData } from '../lib/chart-market-data.mjs';
 import handler from '../api/access.mjs';
 
 const bar = (ms, open, high, low, close, volume = 5) => [ms, String(open), String(high), String(low), String(close), String(volume)];
@@ -94,5 +94,48 @@ test('existing access API gates market ops by Charts grant and keeps responses p
     assert.equal(quotes.headers['Cache-Control'], 'private, no-store');
     assert.equal(quotes.headers.Vary, 'Authorization');
     assert.ok(calls.every(c => !c.url.includes('/rest/v1/') && (c.opts.method || 'GET') === 'GET'), 'no database writes');
+  } finally { globalThis.fetch = saved; }
+});
+
+test('anonymous free market ops are allowlisted, private/no-store and rate limited per IP', async () => {
+  const saved = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url, opts });
+    if (url.includes('scanner.tradingview.com')) return response({ close: 100, change: 1 });
+    if (url.includes('/api/v5/market/candles')) return response({ code: '0', data: [bar(1794751200000, 10, 12, 9, 11)] });
+    throw new Error('unexpected upstream ' + url);
+  };
+  const invoke = async (op, body, ip) => {
+    const res = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end(text) { this.body = JSON.parse(text); } };
+    await handler({ method: 'POST', headers: ip ? { 'x-forwarded-for': ip } : {}, body: { op, ...body } }, res);
+    return res;
+  };
+  const tag = `free-op-test-${Date.now()}`;
+  try {
+    assert.equal((await invoke('chart-market-data', { ref: 'CRYPTOCAP:TOTAL2', interval: '1h' }, `${tag}-gated`)).statusCode, 401);
+    assert.equal((await invoke('chart-market-data-free', { ref: 'OKX:ADAUSDT', interval: '1h' }, `${tag}-bad`)).statusCode, 400);
+    assert.equal((await invoke('chart-market-data-free', { ref: 'UNKNOWN:X', interval: '1h' }, `${tag}-bad2`)).statusCode, 400);
+    assert.equal((await invoke('chart-market-quotes-free', { refs: ['CRYPTOCAP:TOTAL2', 'UNKNOWN:X'] }, `${tag}-bad3`)).statusCode, 400);
+
+    const history = await invoke('chart-market-data-free', { ref: 'OKX:BTCUSDT.P', interval: '1h' }, `${tag}-history`);
+    assert.equal(history.statusCode, 200);
+    assert.equal(history.body.candles[0].close, 11);
+    assert.equal(history.headers['Cache-Control'], 'private, no-store');
+    assert.equal(history.headers.Vary, 'Authorization');
+
+    const quotes = await invoke('chart-market-quotes-free', { refs: ['CRYPTOCAP:TOTAL2'] }, `${tag}-quotes`);
+    assert.equal(quotes.statusCode, 200);
+    assert.equal(quotes.body.quotes['CRYPTOCAP:TOTAL2'].price, 100);
+    assert.equal(quotes.headers['Cache-Control'], 'private, no-store');
+    assert.equal(quotes.headers.Vary, 'Authorization');
+
+    const rateIp = `${tag}-rate`;
+    for (let i = 0; i < 60; i++) assert.equal((await invoke('chart-market-quotes-free', { refs: ['CRYPTOCAP:TOTAL2'] }, rateIp)).statusCode, 200);
+    assert.equal((await invoke('chart-market-quotes-free', { refs: ['CRYPTOCAP:TOTAL2'] }, rateIp)).statusCode, 429);
+
+    const resetAt = Date.now() + 60001;
+    assert.equal(allowPublicMarketData(`${tag}-direct`, resetAt), true);
+    assert.ok(calls.every(c => !c.url.includes('/rest/v1/') && c.opts.method === 'GET'), 'free ops do not access the database');
   } finally { globalThis.fetch = saved; }
 });
