@@ -1,4 +1,4 @@
-import { TOOLS, STYLE_FIELDS, EXTENSION_LEVELS, normalizeStyle, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=9';
+import { TOOLS, STYLE_FIELDS, EXTENSION_LEVELS, normalizeStyle, clone, emptyDocument, makeDrawing, validDrawing, positionStats, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=9';
 import { renderDrawing } from './alfa-drawings-render.mjs?v=9';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=4';
 import { icon, chartDialog } from './alfa-chart-ui.mjs?v=2';
@@ -635,6 +635,9 @@ export class DrawingEngine {
     }
     if (isPosition(d)) {
       $('position-entry').value = d.points[0].price; $('position-stop').value = d.points[1].price; $('position-target').value = d.target;
+      $('position-risk-amount').value = d.riskAmount ?? '';
+      $('position-size').value = d.positionSize ?? '';
+      $('position-account-risk').value = d.accountRiskPercent ?? '';
       this.showLiveStats(d);
     }
     form.querySelectorAll('[data-edit]').forEach(el => { el.disabled = d.locked; });
@@ -643,8 +646,11 @@ export class DrawingEngine {
     $('drawing-remove').disabled = d.locked;
   }
   showLiveStats(d) {
-    const entry = d.points[0].price, risk = Math.abs(entry - d.points[1].price), gain = Math.abs(d.target - entry);
-    $('position-stats').textContent = `RR 1:${(gain / risk).toFixed(4)} · Risk %${(risk / entry * 100).toFixed(4)} · Kazanç %${(gain / entry * 100).toFixed(4)}`;
+    const stats = positionStats(d);
+    const parts = [`RR 1:${stats.rr.toFixed(4)}`, `Risk %${stats.riskPercent.toFixed(4)}`, `Kazanç %${stats.gainPercent.toFixed(4)}`];
+    if (Number.isFinite(stats.positionSize)) parts.push(`Büyüklük ${stats.positionSize.toFixed(4)}`);
+    if (Number.isFinite(stats.riskAmount)) parts.push(`Risk tutarı ${stats.riskAmount.toFixed(4)}`);
+    $('position-stats').textContent = parts.join(' · ');
   }
   applySettings() {
     const next = clone(this.history.doc), d = next.drawings.find(x => x.id === this.selected); if (!d || d.locked) return;
@@ -661,7 +667,19 @@ export class DrawingEngine {
       d.levels = [...new Set(tokens.map(Number))]; d.reversed = $('fib-reverse').checked; d.showPrices = $('fib-prices').checked;
     }
     if (isPosition(d)) {
-      d.points[0].price = Number($('position-entry').value); d.points[1].price = Number($('position-stop').value); d.target = Number($('position-target').value);
+      const entry = Number($('position-entry').value), stop = Number($('position-stop').value), target = Number($('position-target').value);
+      const sign = d.type === 'long' ? 1 : -1;
+      if (!(sign > 0 ? stop < entry && target > entry : stop > entry && target < entry)) {
+        this.status.textContent = 'Stop Loss ve Take Profit entry fiyatının doğru tarafında olmalı';
+        return;
+      }
+      d.points[0].price = entry; d.points[1].price = stop; d.target = target;
+      const riskAmount = Number($('position-risk-amount').value);
+      const positionSize = Number($('position-size').value);
+      const accountRisk = Number($('position-account-risk').value);
+      d.riskAmount = Number.isFinite(riskAmount) && riskAmount >= 0 ? riskAmount : undefined;
+      d.positionSize = Number.isFinite(positionSize) && positionSize >= 0 ? positionSize : undefined;
+      d.accountRiskPercent = Number.isFinite(accountRisk) && accountRisk >= 0 ? accountRisk : undefined;
       d.dynamicColors = $('drawing-dynamic-colors').checked; d.profitColor = $('drawing-profit-color').value; d.lossColor = $('drawing-loss-color').value;
     }
     this.commit(next);

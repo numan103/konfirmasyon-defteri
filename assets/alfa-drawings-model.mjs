@@ -38,6 +38,19 @@ export function positionStats(d, currentPrice) {
   const risk = (entry - stop) * sign, reward = (target - entry) * sign;
   const stats = { entry, stop, target, risk, reward, rr: reward / risk, riskPercent: risk / entry * 100, gainPercent: reward / entry * 100,
     valid: [entry, stop, target, risk, reward].every(Number.isFinite) && risk > 0 && reward > 0 && Math.min(entry, stop, target) > 0 };
+  // Advanced risk fields are optional. Derive the missing side of the
+  // risk/position-size pair so a user can plan from either input.
+  if (Number.isFinite(d.riskAmount) && d.riskAmount >= 0 && Math.abs(risk) > 0) {
+    stats.riskAmount = d.riskAmount;
+    stats.positionSize = d.riskAmount / Math.abs(risk);
+  }
+  if (Number.isFinite(d.positionSize) && d.positionSize >= 0) {
+    stats.positionSize = d.positionSize;
+    stats.riskAmount = d.positionSize * Math.abs(risk);
+  }
+  if (Number.isFinite(d.accountRiskPercent) && d.accountRiskPercent >= 0) {
+    stats.accountRiskPercent = d.accountRiskPercent;
+  }
   if (Number.isFinite(currentPrice)) {
     stats.current = currentPrice;
     stats.pl = (currentPrice - entry) * sign;
@@ -57,9 +70,12 @@ export function makeDrawing(type, points, template) {
   if (type === 'long' || type === 'short') {
     const entry = points[0].price;
     const sign = type === 'long' ? 1 : -1;
-    const risk = Math.max(Math.abs(entry - points[1].price), entry * .001);
-    d.points[1].price = entry - sign * Math.min(risk, entry * .2);
-    d.target = entry + sign * Math.min(risk, entry * .2) * 2.5;
+    // Keep the user's stop distance instead of silently clamping it. A tiny
+    // floor only avoids a zero-width risk band on coincident anchors.
+    const rawRisk = Math.abs(entry - points[1].price);
+    const risk = rawRisk > 0 ? rawRisk : entry * .001;
+    d.points[1].price = entry - sign * risk;
+    d.target = entry + sign * risk * 2.5;
   }
   return d;
 }
@@ -81,7 +97,17 @@ export function validDrawing(d) {
     !Number.isFinite(d.fontSize ?? 14) || (d.fontSize ?? 14) < 8 || (d.fontSize ?? 14) > 48)) return false;
   if (d.type === 'fibonacci' && (!Array.isArray(d.levels) || !d.levels.length || d.levels.length > 30 ||
     !d.levels.every(n => Number.isFinite(n) && Math.abs(n) <= 20) || typeof d.reversed !== 'boolean' || typeof d.showPrices !== 'boolean')) return false;
-  if (['long', 'short'].includes(d.type) && !positionStats(d).valid) return false;
+  if (['long', 'short'].includes(d.type)) {
+    if (!positionStats(d).valid) return false;
+    const sign = d.type === 'long' ? 1 : -1;
+    const entry = d.points[0].price, stop = d.points[1].price, target = d.target;
+    // Explicitly reject wrong-side or coincident stop/target levels.
+    if (sign > 0 && !(stop < entry && target > entry)) return false;
+    if (sign < 0 && !(stop > entry && target < entry)) return false;
+    for (const key of ['riskAmount', 'positionSize', 'accountRiskPercent']) {
+      if (d[key] != null && (!Number.isFinite(d[key]) || d[key] < 0)) return false;
+    }
+  }
   return true;
 }
 export function validateDocument(doc) {

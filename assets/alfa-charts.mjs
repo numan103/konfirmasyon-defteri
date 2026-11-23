@@ -3,7 +3,7 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook,
   createPriceTracker } from './alfa-alerts.mjs?v=2';
-import { DrawingEngine } from './alfa-drawings.mjs?v=13';
+import { DrawingEngine } from './alfa-drawings.mjs?v=14';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';

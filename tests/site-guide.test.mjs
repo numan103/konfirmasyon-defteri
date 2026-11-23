@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği aktif sürüm için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v152-fib-extension'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b213-fib-extension'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v153-position-risk'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b214-position-risk'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 

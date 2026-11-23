@@ -132,6 +132,22 @@ test('malformed drawings, invalid levels, duplicate IDs and oversized text are r
   const position = makeDrawing('long', [a, b]);
   position.target = Infinity; assert.equal(validDrawing(position), false);
   position.target = NaN; assert.equal(validDrawing(position), false);
+  // Wrong-side SL/TP must be rejected explicitly.
+  const wrongLong = makeDrawing('long', [a, { ...b, price: 59000 }]);
+  wrongLong.points[1].price = 61000; assert.equal(validDrawing(wrongLong), false);
+  wrongLong.points[1].price = 59000; wrongLong.target = 59500; assert.equal(validDrawing(wrongLong), false);
+  const wrongShort = makeDrawing('short', [a, { ...b, price: 61000 }]);
+  wrongShort.points[1].price = 59000; assert.equal(validDrawing(wrongShort), false);
+  wrongShort.points[1].price = 61000; wrongShort.target = 60500; assert.equal(validDrawing(wrongShort), false);
+  // Advanced risk fields are optional but validated when present.
+  const adv = makeDrawing('long', [a, { ...b, price: 59000 }]);
+  adv.riskAmount = 100; adv.positionSize = 2; adv.accountRiskPercent = 1.5; assert.equal(validDrawing(adv), true);
+  adv.riskAmount = -1; assert.equal(validDrawing(adv), false);
+  adv.riskAmount = 100; adv.positionSize = Infinity; assert.equal(validDrawing(adv), false);
+  // No silent clamp: a far stop keeps its distance.
+  const far = makeDrawing('long', [a, { ...b, price: a.price * 0.5 }]);
+  assert.equal(far.points[1].price, a.price * 0.5);
+  assert.ok(Math.abs((far.target - a.price) / (a.price - far.points[1].price) - 2.5) < 1e-8);
   const malformed = clone(fib); malformed.points[0] = null;
   assert.equal(validDrawing(malformed), false);
   const badTemplate = docWith(fib); badTemplate.templates.push({ name: 'bad', style: { type: 'text', text: 'override' } });
