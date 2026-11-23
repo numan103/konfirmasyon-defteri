@@ -15086,7 +15086,8 @@ let accessNextPage = '';
 let accessBound = false;
 
 function siteIsAdminEmail() {
-  return !!(typeof AUTH !== 'undefined' && AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL);
+  const mail = (typeof AUTH !== 'undefined' && AUTH.user ? (AUTH.user.email || '') : '').toLowerCase();
+  return !!mail && [ADMIN_EMAIL, 'fjortrades@gmail.com'].indexOf(mail) >= 0;
 }
 
 function siteIsAdmin() {
@@ -24705,7 +24706,7 @@ async function loadEgitim() {
     const r = await fetch('/api/edu-shared');
     if (r.ok) sharedData = await r.json();
   } catch (e) { /* */ }
-  const isAdmin = AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL;
+  const isAdmin = !!(AUTH.user && [ADMIN_EMAIL, 'fjortrades@gmail.com'].indexOf((AUTH.user.email || '').toLowerCase()) >= 0);
   // Eski namespace'siz localStorage verisini de dene (admin giriş yapınca kayboluyor)
   let rawLocal = await store.get(EGITIM_KEY);
   if (!rawLocal) { try { rawLocal = localStorage.getItem(EGITIM_KEY); } catch (e) {} }
@@ -24774,7 +24775,7 @@ async function loadEgitim() {
 async function saveEgitim() {
   await store.set(EGITIM_KEY, JSON.stringify(egitimData));
   // Sadece admin shared'a yazsın, herkes okusun
-  if (AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL) {
+  if (AUTH.user && [ADMIN_EMAIL, 'fjortrades@gmail.com'].indexOf((AUTH.user.email || '').toLowerCase()) >= 0) {
     try {
       const payload = { sections: {}, secMeta: egSecMeta().map(s => ({ id: s.id, title: s.title })) };
       let topicCount = 0, videoCount = 0;
@@ -29343,7 +29344,7 @@ function bindDesignerPage() {
 }
 
 /* ===== Alfa Trading — topluluk işlem/analiz akışı ===== */
-const ALFA_ADMIN_EMAILS = [ADMIN_EMAIL]; // buraya yeni admin e-postaları eklenebilir
+const ALFA_ADMIN_EMAILS = [ADMIN_EMAIL, 'fjortrades@gmail.com']; // buraya yeni admin e-postaları eklenebilir
 let alfaPosts = [];
 let alfaFilter = 'all';
 let alfaCoinQ = '';
@@ -30185,7 +30186,7 @@ async function onAuthed(user) {
   const nlAppBtn = document.getElementById('nav-login-app');
   if (nlAppBtn) nlAppBtn.style.display = 'none';
   // Admin kontrolü: sadece admin görebilir
-  const isAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL;
+  const isAdmin = [ADMIN_EMAIL, 'fjortrades@gmail.com'].indexOf((user.email || '').toLowerCase()) >= 0;
   const adminTab = document.getElementById('tab-chat-admin');
   if (adminTab) adminTab.style.display = isAdmin ? '' : 'none';
   // Alfa Man: sadece admin hesabında
@@ -31396,7 +31397,7 @@ function mtAllowed() {
   try {
     if (!AUTH || !AUTH.user) return false;
     const em = (AUTH.user.email || '').toLowerCase();
-    return em === ADMIN_EMAIL || MENTOR_EMAILS.indexOf(em) >= 0;
+    return [ADMIN_EMAIL, 'fjortrades@gmail.com'].indexOf(em) >= 0 || MENTOR_EMAILS.indexOf(em) >= 0;
   } catch (e) { return false; }
 }
 function mtTopic(id) { return mtData.topics.find(t => t.id === id) || null; }
@@ -32652,7 +32653,7 @@ function submitJuniorForm() {
 // ============ Başvurular (Supabase) ============
 const APPLY_TABLE = 'applications';
 function appsAllowed() {
-  return !!(typeof AUTH !== 'undefined' && AUTH.user && (AUTH.user.email || '').toLowerCase() === ADMIN_EMAIL);
+  return !!(typeof AUTH !== 'undefined' && AUTH.user && [ADMIN_EMAIL, 'fjortrades@gmail.com'].indexOf((AUTH.user.email || '').toLowerCase()) >= 0);
 }
 async function saveApplication(payload, type) {
   try {
