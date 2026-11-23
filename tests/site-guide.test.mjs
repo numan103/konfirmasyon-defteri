@@ -95,8 +95,8 @@ test('tüm buton seçicileri gerçek kaynakta geçiyor', () => {
 });
 
 test('cache/build kimliği aktif sürüm için güncellendi', () => {
-  assert.ok(sw.includes("const CACHE = 'alfa-v154-replay-timeline'"));
-  assert.ok(sw.includes("const BUILD_ID = 'b215-replay-timeline'"));
+  assert.ok(sw.includes("const CACHE = 'alfa-v156-alarm-edit'"));
+  assert.ok(sw.includes("const BUILD_ID = 'b217-alarm-edit'"));
   assert.ok(!sw.includes('platform-tour'));
 });
 

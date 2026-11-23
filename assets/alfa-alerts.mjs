@@ -34,9 +34,9 @@ export function normalizeAlarm(raw, symbol, currentPrice) {
     basePrice: Number.isFinite(basePrice) && basePrice > 0 ? basePrice : price,
     pct: Number.isFinite(pct) ? Math.min(100, Math.max(0.01, pct)) : 1,
     note: String(raw?.note || '').slice(0, 120), ...s,
-    triggered: !!raw?.triggered, count: Number(raw?.count) || 0,
+    enabled: raw?.enabled !== false, triggered: !!raw?.triggered, count: Number(raw?.count) || 0,
     triggeredAt: Number(raw?.triggeredAt) || 0, triggerPrice: Number(raw?.triggerPrice) || 0,
-    createdAt: Number(raw?.createdAt) || Date.now()
+    lastAt: Number(raw?.lastAt) || 0, createdAt: Number(raw?.createdAt) || Date.now()
   };
 }
 export function alarmLevel(a) {
@@ -51,6 +51,7 @@ export function alarmConditionLabel(a) {
   return `${ALARM_CONDITIONS[a.cond] || 'Fiyat'} ${fmt(level)}`;
 }
 export function shouldFire(a, price, previousPrice, now = Date.now()) {
+  if (!a || a.enabled === false) return false;
   if (!Number.isFinite(price) || price <= 0) return false;
   if (a.repeat === 'once' && a.triggered) return false;
   if (a.repeat === 'three' && (a.count || 0) >= 3) return false;
@@ -91,6 +92,26 @@ export function markAlarmFired(a, price, now = Date.now()) {
   a.count = (a.count || 0) + 1; a.lastAt = now;
   if (a.repeat === 'always') a.triggered = false;
   return a;
+}
+export const ALARM_HISTORY_LIMIT = 100;
+export function isAlarmMuted(mutedIds, id) {
+  return Array.isArray(mutedIds) && mutedIds.includes(String(id));
+}
+export function muteAlarmIds(mutedIds, id) {
+  const list = Array.isArray(mutedIds) ? [...mutedIds] : [];
+  const key = String(id);
+  if (!list.includes(key)) list.push(key);
+  return list;
+}
+export function unmuteAlarmIds(mutedIds, id) {
+  const key = String(id);
+  return (Array.isArray(mutedIds) ? mutedIds : []).filter(x => String(x) !== key);
+}
+export function recordAlarmTrigger(history, entry, limit = ALARM_HISTORY_LIMIT) {
+  const list = Array.isArray(history) ? [...history] : [];
+  list.unshift(entry);
+  if (list.length > limit) list.length = limit;
+  return list;
 }
 export function alarmMessage(a, price, formatPrice = value => String(value)) {
   return `${a.symbol} ${alarmConditionLabel(a)} · şu an ${formatPrice(price)}${a.note ? ' · ' + a.note : ''}`;

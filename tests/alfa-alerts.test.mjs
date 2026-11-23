@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   ALARM_SOUNDS, DEFAULT_ALARM_SETTINGS, normalizeAlarmSettings, normalizeAlarm,
   alarmLevel, alarmConditionLabel, shouldFire, markAlarmFired, alarmMessage, alarmPayload,
-  playAlarmSound, soundDuration, postAlarmWebhook, createPriceTracker
+  playAlarmSound, soundDuration, postAlarmWebhook, createPriceTracker,
+  ALARM_HISTORY_LIMIT, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger
 } from '../assets/alfa-alerts.mjs';
 
 const base = { id: 'a1', symbol: 'BTCUSDT', price: 100, cond: 'above', basePrice: 100, pct: 1, note: 'test' };
@@ -62,6 +63,12 @@ test('messages and payloads carry the complete alarm context', () => {
   assert.equal(payload.level, 100);
   assert.equal(payload.price, 102);
   assert.match(payload.at, /^\d{4}-\d\d-\d\dT/);
+  // lastAt is preserved through normalization (byte-compatible history).
+  const withLast = normalizeAlarm({ ...base, lastAt: 12345 }, 'BTCUSDT', 100);
+  assert.equal(withLast.lastAt, 12345);
+  // Disabled alarms never fire.
+  assert.equal(shouldFire(alarm({ enabled: false }), 101), false);
+  assert.equal(shouldFire(alarm({ enabled: true }), 101), true);
   assert.throws(() => normalizeAlarm({}, 'BTCUSDT', 100), /Geçersiz alarm/);
   assert.equal(normalizeAlarm({ price: 100, cond: 'bogus' }, 'BTCUSDT', 100).cond, 'above');
 });
@@ -107,4 +114,24 @@ test('webhook delivery is https-only and reports upstream failures', async () =>
   assert.equal(JSON.parse(calls[0].opts.body).a, 1);
   await assert.rejects(() => postAlarmWebhook('http://example.com/hook', {}, fetcher), /bad_webhook/);
   await assert.rejects(() => postAlarmWebhook('https://example.com/hook', {}, async () => ({ ok: false, status: 500 })), /webhook_500/);
+});
+
+test('mute IDs and bounded trigger history keep alarm storage byte-compatible', () => {
+  assert.equal(ALARM_HISTORY_LIMIT, 100);
+  let muted = [];
+  muted = muteAlarmIds(muted, 'a1');
+  assert.deepEqual(muted, ['a1']);
+  assert.equal(isAlarmMuted(muted, 'a1'), true);
+  assert.equal(isAlarmMuted(muted, 'a2'), false);
+  muted = muteAlarmIds(muted, 'a1');
+  assert.deepEqual(muted, ['a1']);
+  muted = unmuteAlarmIds(muted, 'a1');
+  assert.deepEqual(muted, []);
+  assert.equal(isAlarmMuted(muted, 'a1'), false);
+
+  let history = [];
+  for (let i = 0; i < 105; i++) history = recordAlarmTrigger(history, { id: `a${i}`, at: i });
+  assert.equal(history.length, 100);
+  assert.equal(history[0].id, 'a104');
+  assert.equal(history[99].id, 'a5');
 });

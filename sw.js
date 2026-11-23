@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v154-replay-timeline';
-const BUILD_ID = 'b215-replay-timeline';
+﻿const CACHE = 'alfa-v156-alarm-edit';
+const BUILD_ID = 'b217-alarm-edit';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
