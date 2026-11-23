@@ -728,6 +728,7 @@ watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => sy
   onStatus: connection });
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;
+let autoScale = true;
 const DEFAULT_VIEW_CONFIG = { grid: true, axisLabels: false, clean: false };
 let viewConfig = { ...DEFAULT_VIEW_CONFIG };
 try {
@@ -789,12 +790,18 @@ function setLogScale(next, persist = true) {
   if (button) { button.setAttribute('aria-pressed', String(logScale)); button.textContent = logScale ? 'Log✓' : 'Log'; }
   if (persist) saveLayout();
 }
-function setAutoScale() {
-  chart.priceScale('right').applyOptions({ autoScale: true });
-  $('auto-scale').setAttribute('aria-pressed', 'true');
+function setAutoScale(next = true, persist = true) {
+  autoScale = !!next;
+  chart.priceScale('right').applyOptions({ autoScale });
+  const button = $('auto-scale');
+  if (button) {
+    button.setAttribute('aria-pressed', String(autoScale));
+    button.textContent = autoScale ? 'Oto✓' : 'Oto';
+  }
+  if (persist) saveLayout();
 }
 $('log-scale').addEventListener('click', () => setLogScale(!logScale));
-$('auto-scale').addEventListener('click', setAutoScale);
+$('auto-scale').addEventListener('click', () => setAutoScale(!autoScale));
 async function buildChartScreenshotCanvas() {
   const src = chart.takeScreenshot();
   if (!src) throw new Error('no-screenshot');
@@ -1211,7 +1218,7 @@ let cloudRevision = 0;
 let cloudSaveTimer = null;
 function layoutSettings() {
   return structuredClone({
-    chartType: type, logScale, view: { ...viewConfig }, palette: { ...palette }, indicators: indicators.toJSON(), mtf: mtf.config,
+    chartType: type, logScale, autoScale, view: { ...viewConfig }, palette: { ...palette }, indicators: indicators.toJSON(), mtf: mtf.config,
     sessionLevels: sessionLevels.config, sessionBoxes: sessionBoxes.config,
     marketStructure: marketStructure.config, fvg: fvg.config, publicStudies: publicStudies.toJSON(), studies: studiesUI.toJSON(),
   });
@@ -1247,6 +1254,7 @@ async function loadLayout() {
     if (raw) {
       if (typeof raw.chartType === 'string') applyChartType(raw.chartType);
       if (typeof raw.logScale === 'boolean') setLogScale(raw.logScale, false);
+      if (typeof raw.autoScale === 'boolean') setAutoScale(raw.autoScale, false);
       if (raw.view) applyViewSettings(raw.view);
       if (raw.palette) applyPaletteSettings(raw.palette);
       if (Array.isArray(raw.indicators)) indicators.fromJSON(raw.indicators);
@@ -1265,7 +1273,7 @@ async function loadLayout() {
     if (cloud && cloud.settings) {
       const s = cloud.settings;
       if (typeof s.chartType === 'string') applyChartType(s.chartType);
-      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
+      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
       if (Array.isArray(s.indicators)) { indicators.fromJSON(s.indicators); pendingIndicators = null; }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
@@ -1305,7 +1313,7 @@ function scheduleCloudSave(settings = layoutSettings()) {
       if (cloud && cloud.settings) {
         const s = cloud.settings;
         if (typeof s.chartType === 'string') applyChartType(s.chartType);
-        if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
+        if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
         if (Array.isArray(s.indicators)) indicators.fromJSON(s.indicators);
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
@@ -1422,7 +1430,7 @@ function setViewOption(key, value, persist = true) {
 function resetChartView() {
   if (history.length) chart.timeScale().fitContent();
   chart.timeScale().scrollToRealTime();
-  setAutoScale();
+  setAutoScale(true, false);
   setLogScale(false, false);
   viewConfig = { ...DEFAULT_VIEW_CONFIG };
   applyViewConfig(); persistViewConfig(); saveLayout();
@@ -1449,7 +1457,7 @@ function openChartSettingsModal() {
       </fieldset>
       <fieldset><legend>ÖLÇEK</legend>
         <label><input type="checkbox" name="logScale" ${logScale ? 'checked' : ''}> Logaritmik fiyat ölçeği</label>
-        <label><input type="checkbox" name="autoScale" checked> Otomatik fiyat ölçeği</label>
+        <label><input type="checkbox" name="autoScale" ${autoScale ? 'checked' : ''}> Otomatik fiyat ölçeği</label>
       </fieldset>
       <div class="settings-actions"><button id="chart-settings-reset" type="button">Görünümü sıfırla</button><button id="chart-settings-cancel" type="button">Vazgeç</button><button class="apply" type="submit">Uygula</button></div>
     </form>`);
@@ -1467,7 +1475,7 @@ function openChartSettingsModal() {
     setLogScale(data.has('logScale'), false);
     applyViewSettings({ grid: data.has('grid'), axisLabels: data.has('axisLabels'), clean: data.has('clean') });
     applyPaletteForm(data);
-    if (data.has('autoScale')) setAutoScale();
+    setAutoScale(data.has('autoScale'), false);
     persistViewConfig(); saveLayout(); modal.close();
     if (intervalChanged) loadMarket();
     else { chart.timeScale().fitContent(); connection('Grafik ayarları uygulandı', 'ok'); }
@@ -1503,7 +1511,10 @@ function handleChartAction(action) {
     case 'axisLabels': setViewOption('axisLabels', !viewConfig.axisLabels); break;
     case 'clean': setViewOption('clean', !viewConfig.clean); break;
     case 'logScale': setLogScale(!logScale); break;
-    case 'autoScale': setAutoScale(); connection('Otomatik fiyat ölçeği açıldı', 'ok'); break;
+    case 'autoScale':
+      setAutoScale(!autoScale);
+      connection(autoScale ? 'Otomatik fiyat ölçeği açıldı' : 'Otomatik fiyat ölçeği kapatıldı', 'ok');
+      break;
     case 'indicators': openIndicatorManager(); break;
     case 'drawings': drawings.manager.hidden = false; drawings.updatePanel(); break;
     case 'screenshot': downloadChartScreenshot().catch(() => connection('Grafik görüntüsü alınamadı', 'error')); break;

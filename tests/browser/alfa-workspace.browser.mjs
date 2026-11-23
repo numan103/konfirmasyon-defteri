@@ -100,6 +100,17 @@ try {
     assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 2);
     await page.keyboard.press('Escape');
   });
+  await test('auto scale is a real on/off toggle', async () => {
+    const scaleAuto = () => state(() => window.__alfaDebug.chart.priceScale('right').options().autoScale);
+    assert.equal(await scaleAuto(), true);
+    assert.equal(await page.locator('#auto-scale').getAttribute('aria-pressed'), 'true');
+    await page.click('#auto-scale');
+    assert.equal(await scaleAuto(), false);
+    assert.equal(await page.locator('#auto-scale').getAttribute('aria-pressed'), 'false');
+    await page.click('#auto-scale');
+    assert.equal(await scaleAuto(), true);
+    assert.equal(await page.locator('#auto-scale').getAttribute('aria-pressed'), 'true');
+  });
   await test('grouped tools, real brush selection, visible delete button and undo', async () => {
     await page.click('#drawing-tools [data-group=shapes]');
     await page.click('.tool-flyout [data-tool=brush]');
