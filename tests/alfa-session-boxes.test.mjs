@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { computeSessionBoxes, SESSION_BOX_DEFS } from '../assets/alfa-session-boxes-model.mjs';
+import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM } from '../assets/alfa-session-boxes-model.mjs';
 
 const DAY = 86400;
 // Three full days of 1m bars ending Monday 2026-01-05 23:59 UTC.
@@ -65,4 +65,37 @@ test('before session open the previous window is used, not a future one', () => 
   const boxes = computeSessionBoxes(bars, {}, 1);
   const asia = boxes.find(b => b.id === 'asia');
   assert.ok(asia.endTs <= end);
+});
+
+test('parseHM accepts valid HH:MM and rejects invalid values', () => {
+  assert.deepEqual(parseHM('08:30'), { h: 8, m: 30 });
+  assert.deepEqual(parseHM('0:00'), { h: 0, m: 0 });
+  assert.deepEqual(parseHM('23:59'), { h: 23, m: 59 });
+  for (const bad of ['24:00', '12:60', '8:5', 'abc', '', null, undefined, '-1:00']) {
+    assert.equal(parseHM(bad), null, String(bad));
+  }
+});
+
+test('UTC overrides pin session windows to exact UTC hours', () => {
+  const boxes = computeSessionBoxes(bars, {}, 1, { asia: { start: '01:00', end: '05:00' } });
+  const asia = boxes.find(b => b.id === 'asia');
+  assert.equal(asia.startTs, Date.UTC(2026, 0, 5, 1, 0) / 1000);
+  assert.equal(asia.endTs, Date.UTC(2026, 0, 5, 5, 0) / 1000);
+  // Other sessions keep their exchange-local defaults.
+  const london = boxes.find(b => b.id === 'london');
+  assert.equal(london.startTs, Date.UTC(2026, 0, 5, 8, 0) / 1000);
+});
+
+test('invalid UTC overrides fall back to exchange-local schedule', () => {
+  const boxes = computeSessionBoxes(bars, {}, 1, { asia: { start: '25:00', end: '99:99' } });
+  const asia = boxes.find(b => b.id === 'asia');
+  assert.equal(asia.startTs, Date.UTC(2026, 0, 5, 0, 0) / 1000);
+});
+
+test('overnight UTC windows are supported', () => {
+  const boxes = computeSessionBoxes(bars, {}, 1, { ny: { start: '22:00', end: '02:00' } });
+  const ny = boxes.find(b => b.id === 'ny');
+  assert.equal(ny.startTs, Date.UTC(2026, 0, 5, 22, 0) / 1000);
+  assert.equal(ny.endTs, Date.UTC(2026, 0, 6, 2, 0) / 1000);
+  assert.ok(ny.high >= ny.low);
 });

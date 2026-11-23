@@ -1,8 +1,10 @@
-import { computeSessionBoxes, SESSION_BOX_DEFS } from './alfa-session-boxes-model.mjs?v=1';
+import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM } from './alfa-session-boxes-model.mjs?v=2';
+import { sessionWindowTs } from './alfa-session-levels-model.mjs?v=4';
 import { timeToLogical, logicalToPixel } from './alfa-drawings-model.mjs?v=5';
 
 const NS = 'http://www.w3.org/2000/svg';
 const CONFIG_KEY = 'alfa-sb:v1';
+const fmtHM = ts => new Date(ts * 1000).toISOString().slice(11, 16);
 
 // TradingView-style session range boxes (Asia / London / New York),
 // toggleable per session from the left toolbar.
@@ -31,11 +33,11 @@ export class SessionBoxesManager {
     };
     this.tick();
   }
-  defaultConfig() { return { enabled: { asia: true, london: true, ny: true }, days: 5 }; }
+  defaultConfig() { return { enabled: { asia: true, london: true, ny: true }, days: 5, utc: {} }; }
   loadConfig() {
     try {
       const raw = JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null');
-      if (raw && typeof raw === 'object') return { ...this.defaultConfig(), ...raw, enabled: { ...this.defaultConfig().enabled, ...(raw.enabled || {}) } };
+      if (raw && typeof raw === 'object') return { ...this.defaultConfig(), ...raw, enabled: { ...this.defaultConfig().enabled, ...(raw.enabled || {}) }, utc: { ...(raw.utc || {}) } };
     } catch {}
     return this.defaultConfig();
   }
@@ -47,20 +49,75 @@ export class SessionBoxesManager {
     const m = /^(\d+)([mhdw])$/.exec(this.getInterval() || '');
     return m ? Number(m[1]) * { m: 60, h: 3600, d: 86400, w: 604800 }[m[2]] : 3600;
   }
+  utcWindow(def) {
+    const ov = this.config.utc?.[def.id];
+    const s = ov && parseHM(ov.start), e = ov && parseHM(ov.end);
+    if (s && e) return { start: ov.start, end: ov.end, pinned: true };
+    const win = sessionWindowTs(Math.floor(Date.now() / 1000), def.tz, def.start, def.end);
+    return { start: fmtHM(win.startTs), end: fmtHM(win.endTs), pinned: false };
+  }
   buildUI() {
     const wrap = document.getElementById('session-boxes-tools');
     if (!wrap) return;
     wrap.replaceChildren();
     for (const def of SESSION_BOX_DEFS) {
+      const win = this.utcWindow(def);
       const b = document.createElement('button'); b.type = 'button';
       b.textContent = def.icon; b.dataset.session = def.id;
-      b.title = `${def.name} seans kutuları · tıkla: ekle/kaldır`;
+      b.title = `${def.name} · ${win.start}–${win.end} UTC${win.pinned ? ' (sabit)' : ''} · tıkla: ekle/kaldır`;
       b.setAttribute('aria-label', `${def.name} seans kutuları`);
       b.setAttribute('aria-pressed', String(this.config.enabled[def.id] !== false));
       b.style.color = this.config.enabled[def.id] !== false ? def.color : '';
       b.addEventListener('click', () => this.toggle(def.id));
       wrap.append(b);
     }
+    const gear = document.getElementById('session-boxes-settings');
+    if (gear) gear.onclick = () => this.openSettings();
+  }
+  openSettings() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#151b26;border:1px solid #30394b;border-radius:12px;padding:16px;max-width:480px;width:100%;max-height:80vh;overflow:auto;color:#d7e0ee;';
+    const rows = SESSION_BOX_DEFS.map(def => {
+      const win = this.utcWindow(def);
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #242f42;flex-wrap:wrap;">
+        <span style="min-width:90px;font-weight:600;color:${def.color}">${def.icon} ${def.name}</span>
+        <label style="display:flex;align-items:center;gap:4px;">Başlangıç <input type="time" data-sb-start="${def.id}" value="${win.start}" style="padding:5px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>
+        <label style="display:flex;align-items:center;gap:4px;">Bitiş <input type="time" data-sb-end="${def.id}" value="${win.end}" style="padding:5px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>
+        <small style="color:#8e9eb6">${win.pinned ? 'UTC sabit' : 'borsa saati → UTC'}</small>
+      </div>`;
+    }).join('');
+    box.innerHTML = `<h3 style="margin:0 0 8px;">Seans Saatleri · UTC</h3>
+      <div style="color:#8e9eb6;font-size:12px;margin-bottom:10px;">Saatler UTC'ye göre ayarlanır. Değiştirmediğin seanslar borsa yerel saatini izlemeye devam eder (yaz saati dahil). Gece yarısını aşan aralık desteklenir (ör. 22:00–02:00).</div>
+      ${rows}
+      <label style="display:flex;align-items:center;gap:8px;margin:12px 0;">Gösterilecek gün sayısı <input id="sb-days" type="number" min="1" max="30" value="${this.config.days}" style="width:70px;padding:5px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>
+      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+        <button id="sb-reset" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Varsayılana dön</button>
+        <button id="sb-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button>
+        <button id="sb-apply" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#2962ff;color:#fff;">Uygula</button>
+      </div>`;
+    overlay.append(box);
+    document.body.append(overlay);
+    const close = () => overlay.remove();
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    box.querySelector('#sb-close').addEventListener('click', close);
+    box.querySelector('#sb-reset').addEventListener('click', () => {
+      this.config.utc = {}; this.saveConfig(); this.buildUI(); this.render(); close();
+    });
+    box.querySelector('#sb-apply').addEventListener('click', () => {
+      const utc = {};
+      for (const def of SESSION_BOX_DEFS) {
+        const start = box.querySelector(`[data-sb-start="${def.id}"]`).value;
+        const end = box.querySelector(`[data-sb-end="${def.id}"]`).value;
+        if (!parseHM(start) || !parseHM(end) || start === end) continue;
+        utc[def.id] = { start, end };
+      }
+      const days = Number(box.querySelector('#sb-days').value);
+      this.config.utc = utc;
+      if (Number.isFinite(days)) this.config.days = Math.max(1, Math.min(30, Math.floor(days)));
+      this.saveConfig(); this.buildUI(); this.render(); close();
+    });
   }
   toggle(id) {
     this.config.enabled[id] = this.config.enabled[id] === false;
@@ -79,7 +136,7 @@ export class SessionBoxesManager {
         const logical = timeToLogical(ts, bars, step);
         return logical == null ? null : logicalToPixel(logical, i => this.chart.timeScale().logicalToCoordinate(i));
       };
-      for (const box of computeSessionBoxes(bars, this.config.enabled, this.config.days)) {
+      for (const box of computeSessionBoxes(bars, this.config.enabled, this.config.days, this.config.utc)) {
         const x1 = xOf(box.startTs), x2 = xOf(box.endTs);
         const yHigh = this.series.priceToCoordinate(box.high), yLow = this.series.priceToCoordinate(box.low);
         if (x1 == null || x2 == null || yHigh == null || yLow == null) continue;

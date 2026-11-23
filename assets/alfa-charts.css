@@ -112,6 +112,7 @@ footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border
 #session-boxes-tools{display:flex;flex-direction:column;gap:4px;width:100%}
 #session-boxes-tools button{width:100%;min-height:30px;padding:4px 0;font-size:14px;border-color:transparent;background:transparent}
 #session-boxes-tools button[aria-pressed=true]{border-color:#536ba9;background:#263354}
+#session-boxes-settings{width:100%;min-height:26px;padding:2px 0;font-size:13px;border-color:transparent;background:transparent}
 .session-boxes-overlay{position:absolute;left:0;top:0;z-index:1;overflow:hidden;pointer-events:none}
 .chart-context-menu{position:fixed;z-index:80;min-width:210px;background:#171f2e;border:1px solid #43516d;border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 10px 30px #000a}
 .chart-context-menu button{width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:6px;font-size:12px}
