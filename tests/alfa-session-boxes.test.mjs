@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM } from '../assets/alfa-session-boxes-model.mjs';
+import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM, sessionBoxWindowTs } from '../assets/alfa-session-boxes-model.mjs';
 
 const DAY = 86400;
 // Three full days of 1m bars ending Monday 2026-01-05 23:59 UTC.
@@ -98,4 +98,17 @@ test('overnight UTC windows are supported', () => {
   assert.equal(ny.startTs, Date.UTC(2026, 0, 5, 22, 0) / 1000);
   assert.equal(ny.endTs, Date.UTC(2026, 0, 6, 2, 0) / 1000);
   assert.ok(ny.high >= ny.low);
+});
+test('before-open lookback still returns the full number of distinct days', () => {
+  const boxes = computeSessionBoxes(bars, { london: false, ny: false }, 3);
+  assert.equal(boxes.length, 3);
+  assert.equal(new Set(boxes.map(b => b.startTs)).size, 3);
+});
+test('exchange windows honor the post-transition offset on DST change days', () => {
+  const ny = sessionBoxWindowTs(Date.UTC(2026, 2, 8, 20) / 1000, 'America/New_York', { h: 8, m: 0 }, { h: 17, m: 0 });
+  assert.equal(ny.startTs, Date.UTC(2026, 2, 8, 12) / 1000);
+  assert.equal(ny.endTs, Date.UTC(2026, 2, 8, 21) / 1000);
+  const london = sessionBoxWindowTs(Date.UTC(2026, 2, 29, 20) / 1000, 'Europe/London', { h: 8, m: 0 }, { h: 16, m: 30 });
+  assert.equal(london.startTs, Date.UTC(2026, 2, 29, 7) / 1000);
+  assert.equal(london.endTs, Date.UTC(2026, 2, 29, 15, 30) / 1000);
 });

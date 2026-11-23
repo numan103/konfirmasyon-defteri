@@ -1,6 +1,6 @@
-import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM } from './alfa-session-boxes-model.mjs?v=2';
-import { sessionWindowTs } from './alfa-session-levels-model.mjs?v=4';
+import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM, sessionBoxWindowTs } from './alfa-session-boxes-model.mjs?v=3';
 import { timeToLogical, logicalToPixel } from './alfa-drawings-model.mjs?v=5';
+import { chartDialog } from './alfa-chart-ui.mjs?v=1';
 
 const NS = 'http://www.w3.org/2000/svg';
 const CONFIG_KEY = 'alfa-sb:v1';
@@ -12,6 +12,7 @@ export class SessionBoxesManager {
   constructor({ chart, series, host, getBars, getInterval, onChange }) {
     Object.assign(this, { chart, series, host, getBars, getInterval, onChange });
     this.config = this.loadConfig();
+    this.enabled = false;
     this.svg = document.createElementNS(NS, 'svg');
     this.svg.classList.add('session-boxes-overlay');
     this.svg.setAttribute('aria-hidden', 'true');
@@ -25,7 +26,7 @@ export class SessionBoxesManager {
       try {
         const ts = chart.timeScale(), bars = getBars();
         const signature = [ts.logicalToCoordinate(0), ts.logicalToCoordinate(1), series.priceToCoordinate(1),
-          series.priceToCoordinate(100), ts.width(), ts.height(), bars.length, bars.at(-1)?.time,
+          series.priceToCoordinate(100), ts.width(), this.series.getPane().getHeight(), bars.length, bars.at(-1)?.time, bars.at(-1)?.high, bars.at(-1)?.low, this.enabled,
           JSON.stringify(this.config)].join(':');
         if (signature !== this.signature) { this.render(); this.signature = signature; }
       } catch {}
@@ -53,7 +54,7 @@ export class SessionBoxesManager {
     const ov = this.config.utc?.[def.id];
     const s = ov && parseHM(ov.start), e = ov && parseHM(ov.end);
     if (s && e) return { start: ov.start, end: ov.end, pinned: true };
-    const win = sessionWindowTs(Math.floor(Date.now() / 1000), def.tz, def.start, def.end);
+    const win = sessionBoxWindowTs(Math.floor(Date.now() / 1000), def.tz, def.start, def.end);
     return { start: fmtHM(win.startTs), end: fmtHM(win.endTs), pinned: false };
   }
   buildUI() {
@@ -63,26 +64,23 @@ export class SessionBoxesManager {
     for (const def of SESSION_BOX_DEFS) {
       const win = this.utcWindow(def);
       const b = document.createElement('button'); b.type = 'button';
-      b.textContent = def.icon; b.dataset.session = def.id;
+      b.innerHTML = `<span>${def.name}</span><small>${win.start}–${win.end} UTC</small>`; b.dataset.session = def.id;
       b.title = `${def.name} · ${win.start}–${win.end} UTC${win.pinned ? ' (sabit)' : ''} · tıkla: ekle/kaldır`;
       b.setAttribute('aria-label', `${def.name} seans kutuları`);
-      b.setAttribute('aria-pressed', String(this.config.enabled[def.id] !== false));
+      b.setAttribute('aria-pressed', String(this.enabled && this.config.enabled[def.id] !== false));
       b.style.color = this.config.enabled[def.id] !== false ? def.color : '';
       b.addEventListener('click', () => this.toggle(def.id));
       wrap.append(b);
     }
     const gear = document.getElementById('session-boxes-settings');
-    if (gear) gear.onclick = () => this.openSettings();
+    if (gear) gear.onclick = () => this.onSettings ? this.onSettings() : this.openSettings();
   }
   openSettings() {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;';
-    const box = document.createElement('div');
-    box.style.cssText = 'background:#151b26;border:1px solid #30394b;border-radius:12px;padding:16px;max-width:480px;width:100%;max-height:80vh;overflow:auto;color:#d7e0ee;';
+    const { box, close } = chartDialog('');
     const rows = SESSION_BOX_DEFS.map(def => {
       const win = this.utcWindow(def);
       return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #242f42;flex-wrap:wrap;">
-        <span style="min-width:90px;font-weight:600;color:${def.color}">${def.icon} ${def.name}</span>
+        <span style="min-width:90px;font-weight:600;color:${def.color}">${def.name}</span>
         <label style="display:flex;align-items:center;gap:4px;">Başlangıç <input type="time" data-sb-start="${def.id}" value="${win.start}" style="padding:5px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>
         <label style="display:flex;align-items:center;gap:4px;">Bitiş <input type="time" data-sb-end="${def.id}" value="${win.end}" style="padding:5px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>
         <small style="color:#8e9eb6">${win.pinned ? 'UTC sabit' : 'borsa saati → UTC'}</small>
@@ -97,21 +95,18 @@ export class SessionBoxesManager {
         <button id="sb-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button>
         <button id="sb-apply" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#2962ff;color:#fff;">Uygula</button>
       </div>`;
-    overlay.append(box);
-    document.body.append(overlay);
-    const close = () => overlay.remove();
-    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     box.querySelector('#sb-close').addEventListener('click', close);
     box.querySelector('#sb-reset').addEventListener('click', () => {
       this.config.utc = {}; this.saveConfig(); this.buildUI(); this.render(); close();
     });
     box.querySelector('#sb-apply').addEventListener('click', () => {
-      const utc = {};
+      const utc = { ...this.config.utc };
       for (const def of SESSION_BOX_DEFS) {
         const start = box.querySelector(`[data-sb-start="${def.id}"]`).value;
         const end = box.querySelector(`[data-sb-end="${def.id}"]`).value;
-        if (!parseHM(start) || !parseHM(end) || start === end) continue;
-        utc[def.id] = { start, end };
+        if (!parseHM(start) || !parseHM(end) || start === end) { box.querySelector('#sb-apply').textContent = 'Geçerli bir saat aralığı girin'; return; }
+        const initial = this.utcWindow(def);
+        if (initial.pinned || initial.start !== start || initial.end !== end) utc[def.id] = { start, end };
       }
       const days = Number(box.querySelector('#sb-days').value);
       this.config.utc = utc;
@@ -120,17 +115,19 @@ export class SessionBoxesManager {
     });
   }
   toggle(id) {
+    if (!this.enabled && this.onToggle) { this.config.enabled[id] = true; this.onToggle(id); this.buildUI(); return; }
     this.config.enabled[id] = this.config.enabled[id] === false;
     this.saveConfig(); this.buildUI(); this.render();
   }
+  setEnabled(value) { this.enabled = !!value; this.buildUI(); this.render(); }
   render() {
     if (!this.svg) return;
     const bars = this.getBars();
     const width = this.chart.timeScale().width();
-    const height = this.host.clientHeight - this.chart.timeScale().height();
+    const height = this.series.getPane().getHeight();
     this.svg.setAttribute('width', Math.max(0, width)); this.svg.setAttribute('height', Math.max(0, height));
     const fragment = document.createDocumentFragment();
-    if (bars.length && Object.values(this.config.enabled).some(Boolean)) {
+    if (this.enabled && bars.length && Object.values(this.config.enabled).some(Boolean)) {
       const step = this.step();
       const xOf = ts => {
         const logical = timeToLogical(ts, bars, step);

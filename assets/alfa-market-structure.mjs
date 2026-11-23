@@ -1,11 +1,12 @@
 import { computeMarketStructure } from './alfa-market-structure-model.mjs?v=1';
+import { createSeriesMarkers } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 
 export class MarketStructureManager {
   constructor({ series, getBars }) {
     this.series = series;
     this.getBars = getBars;
     this.config = this.loadConfig();
-    this.enabled = true;
+    this.enabled = false;
     this.markers = [];
     this.priceLines = [];
   }
@@ -15,12 +16,12 @@ export class MarketStructureManager {
   }
   defaultConfig() {
     return { left: 3, right: 3, mode: 'close', displacement: true, dispMin: 0.6,
-      equalTol: 0, showSwings: true, showHHHL: true, showBOS: true, showCHoCH: true,
-      showProtected: true, showEqual: false, internal: false };
+      equalTol: 0, showSwings: false, showHHHL: false, showBOS: true, showCHoCH: true,
+      showProtected: true, maxProtected: 2, showEqual: false, internal: false };
   }
   saveConfig() { try { localStorage.setItem('alfa-ms:v1', JSON.stringify(this.config)); } catch {} }
   clear() {
-    try { this.series.setMarkers([]); } catch {}
+    this.markerApi?.setMarkers([]);
     for (const pl of this.priceLines) { try { this.series.removePriceLine(pl); } catch {} }
     this.priceLines = [];
   }
@@ -56,11 +57,23 @@ export class MarketStructureManager {
     }
     if (markers.length) {
       markers.sort((a, b) => a.time - b.time);
-      try { this.series.setMarkers(markers); } catch {}
+      if (!this.markerApi) this.markerApi = createSeriesMarkers(this.series, []);
+      this.markerApi.setMarkers(markers.slice(-80));
     }
     if (this.config.showProtected) {
-      for (const pl of ms.protected) {
-        const pline = this.series.createPriceLine({ price: pl.price, color: pl.type === 'high' ? '#ef5350' : '#26a69a', lineWidth: 1, lineStyle: 1, title: pl.type === 'high' ? 'Protected High' : 'Protected Low' });
+      const latest = ms.protected.filter(p => p.brokenAt == null).reverse();
+      const protectedLevels = [];
+      const max = Math.max(2, Math.min(20, this.config.maxProtected || 2));
+      // With the default limit keep the most recent high AND low, not two highs.
+      for (const type of ['high', 'low']) {
+        const level = latest.find(p => p.type === type); if (level) protectedLevels.push(level);
+      }
+      for (const level of latest) {
+        if (protectedLevels.length >= max) break;
+        if (!protectedLevels.includes(level)) protectedLevels.push(level);
+      }
+      for (const pl of protectedLevels) {
+        const pline = this.series.createPriceLine({ price: pl.price, color: pl.type === 'high' ? '#ef667788' : '#26c89c88', axisLabelVisible: this.axisLabels === true, lineWidth: 1, lineStyle: 2, title: pl.type === 'high' ? 'Protected High' : 'Protected Low' });
         this.priceLines.push(pline);
       }
     }

@@ -6,14 +6,14 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=13">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=14">
 </head>
 <body>
   <main class="workspace">
     <header class="toolbar">
-      <a class="back" href="/?page=home" aria-label="Alfa Traders ana sayfasına dön">← Site</a>
-      <h1>ALFA <span>CHARTS</span></h1>
-      <label class="symbol-label">Binance Spot
+      <a class="brand" href="/?page=home" aria-label="Alfa Traders ana sayfasına dön"><span class="brand-mark">A</span><h1>ALFA <span>CHARTS</span></h1></a>
+      <div class="market-controls">
+      <label class="symbol-label"><span class="sr-only">Binance Spot</span>
         <select id="symbol" aria-label="Sembol">
           <option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option>
         </select>
@@ -26,71 +26,93 @@
         <option value="area">Alan</option>
         <option value="heikin">Heikin Ashi</option>
       </select>
-      <button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button>
-      <button id="auto-scale" type="button" aria-pressed="true" title="Otomatik ölçek">Oto</button>
+      </div>
       <div class="actions">
-        <button id="replay-toggle" type="button">Replay</button>
-        <button id="research-toggle" type="button">Research DB</button>
-        <input id="goto-date" type="datetime-local" style="padding:4px 6px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;" title="Tarihe git">
-        <button id="goto-date-btn" type="button" style="padding:6px 10px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">Git</button>
-        <button id="indicators-manage" type="button" title="İndikatör yönetimi" style="padding:6px 10px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">İndikatörler</button>
-        <button id="mtf-toggle" type="button" title="Multi-Timeframe" style="padding:6px 10px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">MTF</button>
-        <button id="fvg-toggle" type="button" title="FVG / IFVG" style="padding:6px 10px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">FVG</button>
-        <button id="market-structure-toggle" type="button" title="Market Structure" style="padding:6px 10px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">Yapı</button>
-        <button id="session-levels-toggle" type="button" title="Session Levels" style="padding:6px 10px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">Seviyeler</button>
-        <select id="indicator-add" aria-label="İndikatör ekle" title="İndikatör ekle" style="padding:6px 8px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;font-size:12px;">
-          <option value="">+ İndikatör</option>
-          <option value="sma">SMA</option><option value="ema">EMA</option><option value="wma">WMA</option>
-          <option value="vwma">VWMA</option><option value="vwap">VWAP</option><option value="bollinger">Bollinger Bands</option>
-          <option value="supertrend">Supertrend</option><option value="rsi">RSI</option><option value="macd">MACD</option>
-          <option value="stochastic">Stochastic</option><option value="stochrsi">Stochastic RSI</option>
-          <option value="atr">ATR</option><option value="adx">ADX</option><option value="obv">OBV</option>
-        </select>
-        <button id="drawing-undo" type="button" title="Undo (Ctrl+Z)" disabled>↶</button>
-        <button id="drawing-redo" type="button" title="Redo (Ctrl+Shift+Z)" disabled>↷</button>
-        <button id="drawing-manage" type="button">Çizimler / Ayarlar</button>
-        <button id="magnet-toggle" type="button" aria-pressed="false" title="Magnet / OHLC snap">🧲 Magnet</button>
-        <button id="drawings-toggle" type="button" aria-pressed="true" title="Tüm çizimleri göster/gizle">👁 Çizimler</button>
-        <button id="alarm-toggle" type="button" title="Fiyat alarmları">🔔 Alarm</button>
-        <button id="fit" type="button" title="Yüklü tüm mumları göster">Sığdır</button>
-        <button id="live" type="button" title="En son muma dön">Son mum</button>
-        <button id="list-toggle" type="button" aria-pressed="true" aria-controls="watchlist">Liste</button>
+        <button id="indicators-manage" class="primary-tool" type="button" title="Tüm indikatörler ve analiz katmanları" aria-label="İndikatörler"><span data-icon="indicators"></span><span class="button-label">İndikatörler</span><span id="study-count" class="count-badge">1</span></button>
+        <button id="alarm-toggle" type="button" title="Fiyat alarmları" aria-label="Fiyat alarmları"><span data-icon="bell"></span><span class="button-label">Alarm</span></button>
+        <details class="workspace-menu" id="lab-menu">
+          <summary title="Replay, strateji testleri ve araştırma"><span data-icon="lab"></span><span class="button-label">Testler</span><span data-icon="down"></span></summary>
+          <div class="workspace-popover lab-popover">
+            <div class="menu-heading">TESTLER &amp; LABORATUVAR</div>
+            <button id="replay-toggle" type="button"><span data-icon="replay"></span><span><strong>Bar Replay</strong><small>Geçmişi mum mum yeniden oynat</small></span></button>
+            <button id="tester-open" type="button"><span data-icon="indicators"></span><span><strong>Strateji testleri</strong><small>Replay içinde performans ve işlemler</small></span></button>
+            <button id="research-toggle" type="button"><span data-icon="layers"></span><span><strong>Araştırma arşivi</strong><small>Kaydedilmiş oturumlar ve veri setleri</small></span></button>
+            <div class="menu-date"><label for="goto-date">Tarihten replay başlat · UTC</label><div><input id="goto-date" type="datetime-local"><button id="goto-date-btn" type="button">Başlat</button></div></div>
+            <p class="menu-note">Simülasyon ve analiz araçlarıdır. Gerçek emir iletilmez.</p>
+          </div>
+        </details>
+        <div class="toolbar-divider"></div>
+        <button id="drawing-undo" class="icon-button history-control" type="button" title="Geri al (Ctrl+Z)" aria-label="Geri al" disabled><span data-icon="undo"></span></button>
+        <button id="drawing-redo" class="icon-button history-control" type="button" title="Yinele (Ctrl+Shift+Z)" aria-label="Yinele" disabled><span data-icon="redo"></span></button>
+        <details class="workspace-menu" id="view-menu">
+          <summary title="Görünüm ayarları" aria-label="Görünüm ayarları"><span data-icon="settings"></span></summary>
+          <div class="workspace-popover view-popover">
+            <div class="menu-heading">GRAFİK GÖRÜNÜMÜ</div>
+            <label><input id="view-grid" type="checkbox" checked> Izgara çizgileri</label>
+            <label><input id="view-axis-labels" type="checkbox"> İndikatör fiyat etiketleri</label>
+            <label><input id="view-clean" type="checkbox"> Sade mod <small>İndikatörleri geçici gizle</small></label>
+            <hr>
+            <button id="fit" type="button"><span data-icon="fit"></span>Yüklü veriyi sığdır</button>
+            <button id="live" type="button"><span data-icon="live"></span>Son muma dön</button>
+            <button id="fullscreen" type="button"><span data-icon="fullscreen"></span>Tam ekran</button>
+          </div>
+        </details>
         <div class="shot-wrap">
-          <button id="screenshot" type="button" title="Grafik görüntüsü">📷 Fotoğraf</button>
+          <button id="screenshot" class="icon-button" type="button" title="Grafik görüntüsü" aria-label="Grafik görüntüsü"><span data-icon="camera"></span></button>
           <div id="shot-menu" class="shot-menu" hidden>
             <button type="button" data-shot="download">Görüntüyü indir</button>
             <button type="button" data-shot="copy-image">Görüntüyü kopyala</button>
             <button type="button" data-shot="copy-link">Bağlantıyı kopyala</button>
           </div>
         </div>
-        <button id="fullscreen" type="button">Tam ekran</button>
+        <button id="list-toggle" class="icon-button" type="button" aria-label="İzleme listesini aç/kapat" title="İzleme listesi" aria-pressed="true" aria-controls="watchlist"><span data-icon="list"></span></button>
       </div>
     </header>
     <div class="workarea">
       <aside class="drawing-space" aria-label="Çizim araçları">
-        <nav id="drawing-favs" aria-label="Favori çizim araçları"></nav>
         <nav id="drawing-tools" aria-label="Çizim aracı seç"></nav>
-        <div class="session-boxes-side">
-          <small>SEANS</small>
-          <nav id="session-boxes-tools" aria-label="Seans kutuları"></nav>
-          <button id="session-boxes-settings" type="button" title="Seans saatlerini UTC olarak ayarla" aria-label="Seans saatleri ayarları">⚙</button>
+        <div class="rail-actions">
+          <button id="drawing-favorites-edit" class="icon-button" type="button" title="Favori çizim araçlarını düzenle" aria-label="Favori çizim araçlarını düzenle"><span data-icon="star"></span></button>
+          <button id="magnet-toggle" class="icon-button" type="button" aria-label="Mıknatıs: OHLC'ye yakala" aria-pressed="false" title="OHLC'ye yakala"><span data-icon="magnet"></span></button>
+          <button id="drawings-toggle" class="icon-button" type="button" aria-label="Tüm çizimleri göster/gizle" aria-pressed="true" title="Çizimleri göster/gizle"><span data-icon="eye"></span></button>
+          <button id="drawing-manage" class="icon-button" type="button" title="Çizim nesneleri ve ayarlar" aria-label="Çizim nesneleri ve ayarlar"><span data-icon="layers"></span></button>
         </div>
+        <details class="session-boxes-side workspace-menu">
+          <summary title="Seansları hızlı ekle/kaldır" aria-label="Seansları hızlı ekle/kaldır"><span data-icon="clock"></span></summary>
+          <div class="workspace-popover session-popover">
+          <div class="menu-heading">SEANS KUTULARI</div>
+          <nav id="session-boxes-tools" aria-label="Seans kutuları"></nav>
+          <button id="session-boxes-settings" type="button" title="Seans saatlerini UTC olarak ayarla" aria-label="Seans saatleri ayarları"><span data-icon="settings"></span>Saatler · UTC</button>
+          </div>
+        </details>
       </aside>
       <section class="chart-panel" aria-label="Fiyat grafiği">
         <div class="legend">
+          <div class="market-legend">
           <strong id="market-title">BTCUSDT · 1H</strong>
+          <span class="venue-tag">BINANCE <span class="live-dot"></span></span>
           <span id="ohlc">Gerçek piyasa verisi bekleniyor</span>
-          <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
+          </div>
+          <div id="study-legend" aria-label="Grafikteki indikatörler"></div>
         </div>
-        <div id="chart" tabindex="0" aria-label="Binance canlı fiyat grafiği. Sürükle veya tekerlekle gezin; artı/eksi ile yakınlaştır, ok tuşlarıyla kaydır."></div>
+        <div id="chart" tabindex="0" aria-label="Binance canlı fiyat grafiği. Sürükle veya tekerlekle gezin; artı/eksi ile yakınlaştır, ok tuşlarıyla kaydır.">
+          <nav id="drawing-favs" aria-label="Favori çizim araçları"></nav>
+          <div id="drawing-selection" class="selection-toolbar" aria-label="Seçili çizim işlemleri" hidden></div>
+        </div>
+        <div class="chart-navigation">
+          <div class="range-presets" aria-label="Görünür tarih aralığı"><button data-range="86400" type="button">1G</button><button data-range="432000" type="button">5G</button><button data-range="2592000" type="button">1A</button><button data-range="7776000" type="button">3A</button><button data-range="all" type="button">Tümü</button></div>
+          <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
+          <div class="scale-controls"><span>UTC</span><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
+        </div>
         <div id="message" role="status">Binance mum verileri yükleniyor…</div>
       </section>
       <aside id="watchlist" aria-label="İzleme listesi">
-        <div class="watch-head"><h2>İzleme listesi</h2><span>BINANCE · SPOT</span></div>
-        <p class="watch-caption">Sembol seçerek grafiği aç</p>
+        <div class="watch-head"><h2>İzleme listesi</h2><span class="venue-tag">SPOT</span></div>
+        <div class="watch-columns"><span>Sembol</span><span>Son fiyat</span></div>
         <div id="watch-rows"></div>
-        <div class="quote"><span>Seçili sembol · son mum fiyatı</span><strong id="last-price">—</strong><small id="price-time">Henüz veri yok</small></div>
-        <p class="scope">FAZ 2 · ÇİZİM ANALİZİ<br>Yalnızca Binance Spot. Pozisyon çizimleri emir açmaz. Forex, vadeli işlemler ve emir iletimi yoktur.</p>
+        <div class="quote"><span id="quote-symbol">BTC / USDT</span><strong id="last-price">—</strong><span id="quote-change">Son mum değişimi</span><small id="price-time">Henüz veri yok</small></div>
+        <div class="workspace-tip"><span data-icon="cursor"></span><strong>Senin çalışma alanın</strong><p>Çiz, karşılaştır, analiz et.<br>Sağ tıkla fiyata alarm ekle.</p></div>
+        <p class="scope"><span class="live-dot"></span> Binance Spot · Canlı veri<br>Yalnızca analiz. Emir iletimi yapılmaz.</p>
       </aside>
     </div>
     <aside id="drawing-manager" aria-label="Çizim yönetimi" hidden>
@@ -160,6 +182,6 @@
       <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Lightweight Charts™ by TradingView</a>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=37"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=38"></script>
 </body>
 </html>

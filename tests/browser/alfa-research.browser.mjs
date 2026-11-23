@@ -20,7 +20,7 @@ try{
   await page.goto((arg('url')||'http://127.0.0.1:4173')+'/alfa-charts.html?debug=1');
   await page.waitForFunction(()=>window.__alfaDebug?.ready&&window.__alfaDebug.drawings.ready,null,{timeout:45000});
   assert.equal(await page.locator('#research-panel').isVisible(),false);
-  await page.click('#research-toggle');
+  await page.click('#lab-menu summary'); await page.click('#research-toggle');
   assert.equal(await page.locator('#research-panel').isVisible(),true);
   assert.match(await status(),/Misafir/);
   assert.match(await page.locator('#research-last-sync').textContent(),/henüz yok/);
@@ -28,7 +28,7 @@ try{
   await page.locator('[data-interval="15m"]').click();
   await page.waitForFunction(()=>window.__alfaDebug.ready&&document.getElementById('market-title').textContent.includes('15M'));
   const time=await page.evaluate(()=>window.__alfaDebug.history[600].time);
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.fill('#replay-date',new Date(time*1000).toISOString().slice(0,16));
   await page.click('#replay-date-start');
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
@@ -121,7 +121,7 @@ try{
   const before=await page.evaluate(()=>window.__alfaDebug.paper.serialize());
   await page.click('#replay-stop');
   await page.waitForFunction(()=>!document.body.classList.contains('replay-mode'));
-  if(!(await page.locator('#research-panel').isVisible()))await page.click('#research-toggle');
+  if(!(await page.locator('#research-panel').isVisible())) { await page.click('#lab-menu summary'); await page.click('#research-toggle'); }
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('#research-records [data-research="open"]').first().click();
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'),null,{timeout:30000});

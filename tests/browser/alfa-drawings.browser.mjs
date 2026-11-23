@@ -49,9 +49,18 @@ const plot = () => debug(() => {
 const clickAt = async (fx, fy) => {
   const r = await plot(); await page.mouse.click(r.x + r.width * fx, r.y + r.height * fy);
 };
+async function selectTool(type, target = page, touch = false) {
+  const groups = { trend: 'lines', horizontal: 'lines', vertical: 'lines', ray: 'lines', arrow: 'lines',
+    fibonacci: 'fib', rectangle: 'shapes', brush: 'shapes', text: 'notes', label: 'notes', long: 'positions', short: 'positions' };
+  const click = loc => touch ? loc.tap() : loc.click();
+  if (groups[type]) {
+    await click(target.locator(`#drawing-tools [data-group="${groups[type]}"]`));
+    await click(target.locator(`.tool-flyout [data-tool="${type}"]`));
+  } else await click(target.locator(`#drawing-tools [data-tool="${type}"]`));
+}
 async function create(type, points) {
   const before = await count();
-  await page.locator(`#drawing-tools [data-tool="${type}"]`).click();
+  await selectTool(type);
   for (const [x, y] of points) await clickAt(x, y);
   await page.waitForFunction(n => window.__alfaDebug.drawings.history.doc.drawings.length === n, before + 1);
   assert.equal(await page.locator('#drawing-tools [data-tool=cursor]').getAttribute('aria-pressed'), 'true');
@@ -67,8 +76,8 @@ const test = async (name, fn) => { await fn(); results.push({ name, passed: true
 try {
   await page.goto(origin + '/alfa-charts.html?debug=1');
   await waitMarket('BTCUSDT', '1H');
-  await test('BTCUSDT 1H loads real Binance and 15 drawing toolbar controls', async () => {
-    assert.equal(await page.locator('#drawing-tools button').count(), 15);
+  await test('BTCUSDT 1H loads real Binance and 8 grouped drawing controls', async () => {
+    assert.equal(await page.locator('#drawing-tools button').count(), 8);
     assert.equal(await debug(() => window.__alfaDebug.history.length), 1000);
     assert.match(await page.locator('#drawing-status').textContent(), /Misafir/);
   });
@@ -161,7 +170,7 @@ try {
       const range = window.__alfaDebug.chart.timeScale().getVisibleLogicalRange();
       return Math.abs(range.to - range.from - span) > 1;
     }, before.to - before.from);
-    await page.locator('#drawing-tools [data-tool=trend]').click();
+    await selectTool('trend');
     const r = await plot(), old = await debug(() => window.__alfaDebug.chart.timeScale().getVisibleLogicalRange());
     await page.mouse.move(r.x + r.width * .9, r.y + r.height * .9); await page.mouse.wheel(0, 150);
     await page.waitForFunction(span => {
@@ -196,7 +205,7 @@ try {
     });
     assert.ok(checks.every(Boolean));
     // Restore enough recent history for following pointer tests.
-    await page.locator('#live').click();
+    await page.locator('#view-menu summary').click(); await page.locator('#live').click();
   });
   await test('Timeframe, resize and reload preserve coordinates and Fibonacci template', async () => {
     const before = await documentState();
@@ -207,7 +216,8 @@ try {
     await page.waitForFunction(() => document.querySelector('.drawing-overlay').getAttribute('width') === String(window.__alfaDebug.chart.timeScale().width()));
     await assertNativeProjection();
     assert.deepEqual(await documentState(), before);
-    await page.reload(); await waitMarket('BTCUSDT', '1H');
+    await page.reload(); await waitMarket('BTCUSDT', '4H');
+    await page.locator('#timeframes button').filter({ hasText: /^1H$/ }).click(); await waitMarket('BTCUSDT', '1H');
     assert.deepEqual(await documentState(), before);
     await assertNativeProjection();
   });
@@ -266,7 +276,7 @@ try {
     await page.locator('#drawing-undo').click(); assert.equal(await count(), before + 1);
     await page.locator('#drawing-redo').click(); assert.equal(await count(), before);
     await page.locator('#drawing-close').click();
-    await page.locator('#drawing-tools [data-tool=trend]').click(); await clickAt(.3, .6); await page.keyboard.press('Escape');
+    await selectTool('trend'); await clickAt(.3, .6); await page.keyboard.press('Escape');
     assert.equal(await count(), before); assert.equal(await page.locator('#drawing-tools [data-tool=cursor]').getAttribute('aria-pressed'), 'true');
     const textPoint = await debug(() => {
       const e = window.__alfaDebug.drawings, d = e.history.doc.drawings.find(d => d.type === 'text'), p = e.project(d.points[0]), r = e.host.getBoundingClientRect();
@@ -298,10 +308,10 @@ try {
       const r = await touch.evaluate(() => {
         const e = window.__alfaDebug.drawings, b = e.host.getBoundingClientRect(); return { x: b.x, y: b.y, ...e.dimensions() };
       });
-      await touch.locator('#drawing-tools [data-tool=horizontal]').tap();
+      await selectTool('horizontal', touch, true);
       await touch.touchscreen.tap(r.x + r.width * .3, r.y + r.height * .5);
       assert.equal(await touch.evaluate(() => window.__alfaDebug.drawings.history.doc.drawings.length), 1);
-      await touch.locator('#drawing-tools [data-tool=trend]').tap();
+      await selectTool('trend', touch, true);
       await touch.touchscreen.tap(r.x + r.width * .2, r.y + r.height * .65);
       await touch.touchscreen.tap(r.x + r.width * .7, r.y + r.height * .35);
       assert.equal(await touch.evaluate(() => window.__alfaDebug.drawings.history.doc.drawings.length), 2);

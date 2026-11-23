@@ -1,5 +1,5 @@
 // Pure helpers for ALFA CHARTS session boxes (TradingView-style session ranges).
-import { sessionWindowTs } from './alfa-session-levels-model.mjs?v=4';
+import { tzParts } from './alfa-session-levels-model.mjs?v=4';
 
 export const SESSION_BOX_DEFS = Object.freeze([
   { id: 'asia', name: 'Asya', icon: '🌏', tz: 'Asia/Tokyo', start: { h: 9, m: 0 }, end: { h: 17, m: 0 }, color: '#f5a623' },
@@ -14,6 +14,31 @@ export function parseHM(value) {
   const h = Number(m[1]), min = Number(m[2]);
   if (h > 23 || min > 59) return null;
   return { h, m: min };
+}
+
+function wallTime(year, month, day, hour, minute, tz) {
+  const wanted = Date.UTC(year, month - 1, day, hour, minute) / 1000;
+  let candidate = wanted;
+  for (let i = 0; i < 6; i++) {
+    const p = tzParts(candidate, tz);
+    const actual = Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute, p.second) / 1000;
+    if (actual === wanted) return candidate;
+    candidate += wanted - actual;
+  }
+  return null;
+}
+function windowForDate(date, tz, start, end) {
+  const startTs = wallTime(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), start.h, start.m, tz);
+  const next = new Date(date);
+  if (end.h * 60 + end.m <= start.h * 60 + start.m) next.setUTCDate(next.getUTCDate() + 1);
+  const endTs = wallTime(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate(), end.h, end.m, tz);
+  return { startTs, endTs };
+}
+// Resolve both boundaries independently: adding hours to a UTC midnight gives
+// incorrect exchange hours on a daylight-saving transition day.
+export function sessionBoxWindowTs(ts, tz, start, end) {
+  const p = tzParts(ts, tz);
+  return windowForDate(new Date(Date.UTC(p.year, p.month - 1, p.day)), tz, start, end);
 }
 
 // Returns [{id, name, color, startTs, endTs, high, low}] for the last `days`
@@ -32,16 +57,13 @@ export function computeSessionBoxes(bars, enabled, days = 5, utcOverrides = null
     const pinned = !!(ovStart && ovEnd);
     const tz = pinned ? 'UTC' : def.tz;
     const start = pinned ? ovStart : def.start, end = pinned ? ovEnd : def.end;
-    const seen = new Set();
+    const local = tzParts(lastTs, tz);
+    const latestDate = new Date(Date.UTC(local.year, local.month - 1, local.day));
+    if (windowForDate(latestDate, tz, start, end).startTs > lastTs) latestDate.setUTCDate(latestDate.getUTCDate() - 1);
     for (let offset = 0; offset < span; offset++) {
-      const anchor = lastTs - offset * 86400;
-      let win = sessionWindowTs(anchor, tz, start, end);
-      // Before the session opens, the "current" window points at a future day;
-      // fall back to the previous day's window instead.
-      if (win.startTs > lastTs) win = sessionWindowTs(anchor - 86400, tz, start, end);
-      const { startTs, endTs } = win;
-      if (seen.has(startTs)) continue;
-      seen.add(startTs);
+      const date = new Date(latestDate); date.setUTCDate(date.getUTCDate() - offset);
+      const { startTs, endTs } = windowForDate(date, tz, start, end);
+      if (startTs == null || endTs == null) continue;
       let high = -Infinity, low = Infinity, count = 0;
       for (const b of bars) {
         if (b.time >= startTs && b.time < endTs) {

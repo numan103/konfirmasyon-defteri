@@ -28,13 +28,14 @@ try {
   assert.equal(new Set(history.map(b=>b.time)).size,history.length);
   assert.ok(history.every((b,i)=>i===0||b.time>history[i-1].time));
   assert.ok(history[0].time<start);
-  await page.selectOption('#indicator-add','ema');
   await page.click('#indicators-manage');
-  await page.locator('#ind-active [data-edit]').first().click();
+  await page.click('[data-add=ema]');
+  await page.click('[data-cat=active]');
+  await page.locator('[data-active-study] [data-study-settings]').first().click();
   await page.locator('[data-k="period"]').fill('200');
   await page.click('#is-apply');
   await page.click('#ind-close');
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.click('#replay-pick');
   const selection=await page.evaluate(()=>{
     const api=window.__alfaDebug,rect=document.getElementById('chart').getBoundingClientRect();
@@ -55,12 +56,13 @@ try {
   await page.click('#replay-prev');
   assert.equal(await page.evaluate(()=>window.__alfaDebug.history.length),at);
   assert.equal(await page.evaluate(()=>window.__alfaDebug.drawings.context.remote),false);
-  await page.click('#mtf-toggle');
+  await page.click('#indicators-manage'); await page.click('[data-add=mtf]');
+  await page.locator('.studies-dialog [data-study-settings=mtf]').click();
   await page.locator('[data-htf="1h"]').check();
   await page.locator('[data-htf="4h"]').check();
-  for(const id of ['#mtf-swings','#mtf-fvg','#mtf-bos','#mtf-choch','#mtf-protected','#mtf-ifvg'])
-    await page.locator(id).check();
-  await page.click('#mtf-apply');
+  for(const key of ['showSwings','showFvg','showBOS','showCHoCH','showProtected','showIFVG'])
+    await page.locator(`[data-k="${key}"]`).check();
+  await page.click('#is-apply'); await page.click('#ind-close');
   await page.waitForFunction(()=>!window.__alfaDebug.mtf.loading);
   const bounded=await page.evaluate(()=>({
     clock:window.__alfaDebug.replayClock,
@@ -71,7 +73,8 @@ try {
     assert.ok(count>0);assert.ok(last+(tf==='1h'?3600:14400)<=bounded.clock);
   }
   for (const tool of ['fibonacci','long']) {
-    await page.locator(`#drawing-tools [data-tool="${tool}"]`).click();
+    await page.locator(`#drawing-tools [data-group="${tool === 'fibonacci' ? 'fib' : 'positions'}"]`).click();
+    await page.locator(`.tool-flyout [data-tool="${tool}"]`).click();
     const plot=await page.evaluate(()=>{
       const d=window.__alfaDebug.drawings,rect=d.host.getBoundingClientRect();
       return {x:rect.x,y:rect.y,...d.dimensions()};
@@ -90,7 +93,7 @@ try {
   const current=saved[0].currentTime;
   await page.reload();
   await page.waitForFunction(()=>window.__alfaDebug?.drawings.ready);
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.locator('#replay-saved button').first().click();
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
   assert.equal(await page.evaluate(()=>window.__alfaDebug.history.at(-1).time),current);
@@ -101,7 +104,7 @@ try {
   await page.waitForFunction(()=>!document.body.classList.contains('replay-mode'));
   await page.waitForFunction(()=>window.__alfaDebug.history.length>=900,{timeout:45000});
   const date=new Date((current-9000)*1000).toISOString().slice(0,16);
-  await page.fill('#goto-date',date);
+  await page.click('#lab-menu summary'); await page.fill('#goto-date',date);
   await page.click('#goto-date-btn');
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
   assert.equal(await page.evaluate(()=>window.__alfaDebug.history.at(-1).time),current-9000);

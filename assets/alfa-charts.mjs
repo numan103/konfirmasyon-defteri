@@ -1,11 +1,13 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
-import { DrawingEngine } from './alfa-drawings.mjs?v=7';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
-import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
-import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=3';
-import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
-import { FvgManager } from './alfa-fvg.mjs?v=1';
+import { DrawingEngine } from './alfa-drawings.mjs?v=8';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
+import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
+import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
+import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
+import { FvgManager } from './alfa-fvg.mjs?v=2';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=1';
+import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=2';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=1';
@@ -18,10 +20,12 @@ import { packetBars,validatePacket } from './alfa-research-model.mjs?v=1';
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
 const host = $('chart');
+hydrateIcons();
+let studiesUI = null;
 const priceFormat = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const chart = createChart(host, {
   layout: { background: { type: ColorType.Solid, color: '#10141c' }, textColor: '#8e9eb6', attributionLogo: true },
-  grid: { vertLines: { color: '#1b2433' }, horzLines: { color: '#1b2433' } },
+  grid: { vertLines: { color: '#1c243022' }, horzLines: { color: '#28334655' } },
   crosshair: { mode: CrosshairMode.Normal },
   rightPriceScale: { borderColor: '#30394b', scaleMargins: { top: 0.12, bottom: 0.22 } },
   timeScale: { borderColor: '#30394b', timeVisible: true, secondsVisible: false, rightOffset: 8 },
@@ -372,7 +376,13 @@ function restartReplay() {
 function quote() {
   const c = history.at(-1);
   if (!c) return;
-  $('last-price').textContent = priceFormat.format(c.close) + ' USDT';
+  $('last-price').textContent = priceFormat.format(c.close);
+  $('quote-symbol').textContent = symbol.replace('USDT', ' / USDT');
+  const change = c.open ? (c.close - c.open) / c.open * 100 : 0;
+  $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · son mum`;
+  $('quote-change').style.color = change >= 0 ? '#26c89c' : '#ef6677';
+  const watchPrice = document.querySelector(`[data-watch-price="${symbol}"]`);
+  if (watchPrice) { watchPrice.textContent = priceFormat.format(c.close); watchPrice.title = 'Bu sekmede en son alınan fiyat'; }
   $('price-time').textContent = `Mum: ${new Date(c.time * 1000).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
   showCandle(c);
 }
@@ -550,7 +560,7 @@ function renderTimeframes() {
     b.title = 'Sağ tık: favorilerden çıkar/ekle';
     wrap.append(b);
   }
-  const more = document.createElement('button'); more.type = 'button'; more.textContent = 'TF+'; more.title = 'Zaman dilimi favorileri ve özel periyotlar';
+   const more = document.createElement('button'); more.type = 'button'; more.innerHTML = icon('down'); more.title = 'Zaman dilimleri ve favoriler'; more.setAttribute('aria-label', 'Zaman dilimleri ve favoriler');
   more.addEventListener('click', openTfPicker);
   wrap.append(more);
 }
@@ -579,9 +589,10 @@ function openTfPicker() {
 renderTimeframes();
 for (const item of SYMBOLS) {
   const b = document.createElement('button'); b.type = 'button'; b.className = 'watch-row'; b.dataset.symbol = item;
-  const name = document.createElement('strong'); name.textContent = item;
-  const venue = document.createElement('small'); venue.textContent = 'SPOT';
-  b.append(name, venue); b.addEventListener('click', () => { if (symbol !== item) { symbol = item; loadMarket(); } });
+  const base = item.replace('USDT', '');
+  b.innerHTML = `<span class="coin-icon">${base === 'BTC' ? '₿' : base.slice(0, 1)}</span><span><strong>${base}</strong><small>USDT · SPOT</small></span><span class="watch-price" data-watch-price="${item}">—</span>`;
+  b.setAttribute('aria-label', item);
+  b.addEventListener('click', () => { if (symbol !== item) { symbol = item; loadMarket(); } });
   $('watch-rows').append(b);
 }
 $('symbol').addEventListener('change', e => { symbol = e.target.value; loadMarket(); });
@@ -596,7 +607,6 @@ $('log-scale').addEventListener('click', () => {
 });
 $('auto-scale').addEventListener('click', () => {
   chart.priceScale('right').applyOptions({ autoScale: true });
-  chart.timeScale().fitContent();
   $('auto-scale').setAttribute('aria-pressed', 'true');
 });
 async function buildChartScreenshotCanvas() {
@@ -740,7 +750,7 @@ $('fullscreen').addEventListener('click', async () => {
     else await workspace.requestFullscreen();
   } catch { connection('Tarayıcı tam ekran isteğini reddetti', 'error'); }
 });
-document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? 'Küçült' : 'Tam ekran'; });
+document.addEventListener('fullscreenchange', () => { $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran'); });
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval,
   onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager() });
 try {
@@ -749,7 +759,7 @@ try {
   const mb = $('magnet-toggle'); if (mb) mb.setAttribute('aria-pressed', String(magOn));
   const vis = localStorage.getItem('alfa-drawings-visible:v1') !== '0';
   drawings.setDrawingsVisible(vis);
-  const vb = $('drawings-toggle'); if (vb) { vb.setAttribute('aria-pressed', String(vis)); vb.textContent = vis ? '👁 Çizimler' : '👁‍🗨 Gizli'; }
+  const vb = $('drawings-toggle'); if (vb) { vb.setAttribute('aria-pressed', String(vis)); vb.innerHTML = icon(vis ? 'eye' : 'eyeOff'); }
 } catch {}
 $('magnet-toggle').addEventListener('click', () => {
   const on = !drawings.magnet;
@@ -762,7 +772,8 @@ $('drawings-toggle').addEventListener('click', () => {
   drawings.setDrawingsVisible(on);
   const vb = $('drawings-toggle');
   vb.setAttribute('aria-pressed', String(on));
-  vb.textContent = on ? '👁 Çizimler' : '👁‍🗨 Gizli';
+  vb.innerHTML = icon(on ? 'eye' : 'eyeOff');
+  drawings.refresh();
 });
 // ---------- Price alarms (local-first) ----------
 const ALARM_KEY = () => 'alfa-alarms:v1:' + currentUserKey();
@@ -794,7 +805,7 @@ function addQuickAlarm(price, cond) {
 }
 function openAlarmManager() {
   const mine = ensureAlarms().filter(a => a.symbol === symbol);
-  const rows = mine.length ? mine.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;"><span style="flex:1">${a.cond === 'above' ? '≥' : '≤'} ${a.price} ${a.triggered ? '· ✅ tetiklendi' : ''}${a.note ? ' · ' + a.note : ''}</span><button data-del-alarm="${a.id}" style="padding:4px 8px;border-radius:6px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Sil</button></div>`).join('') : '<p style="color:#8e9eb6">Bu sembolde alarm yok.</p>';
+  const rows = mine.length ? mine.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;"><span style="flex:1">${a.cond === 'above' ? '≥' : '≤'} ${escapeHTML(a.price)} ${a.triggered ? '· tetiklendi' : ''}${a.note ? ' · ' + escapeHTML(a.note) : ''}</span><button data-del-alarm="${escapeHTML(a.id)}">Sil</button></div>`).join('') : '<p style="color:#8e9eb6">Bu sembolde alarm yok.</p>';
   const m = openModal(`<h3 style="margin:0 0 8px;">🔔 Fiyat Alarmları · ${symbol}</h3>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
       <select id="alarm-cond" style="padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"><option value="above">Fiyat ≥</option><option value="below">Fiyat ≤</option></select>
@@ -821,12 +832,16 @@ function openAlarmManager() {
 }
 $('alarm-toggle').addEventListener('click', openAlarmManager);
 
-const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
+const indicators = new IndicatorManager({ chart, getBars: () => seriesBars, onChange: () => studiesUI?.sync() });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
-const sessionBoxes = new SessionBoxesManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval, onChange: () => saveLayout() });
+const sessionBoxes = new SessionBoxesManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval, onChange: () => { studiesUI?.sync(); saveLayout(); } });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+studiesUI = new ChartStudies({ indicators, catalog: INDICATOR_CATALOG, managers: {
+  sessions: sessionBoxes, levels: sessionLevels, structure: marketStructure, fvg, mtf,
+  volume: { enabled: true, setEnabled(value) { this.enabled = value; volume.applyOptions({ visible: value }); } },
+}, onChange: () => saveLayout() });
 const paper = new PaperTradingPanel({
   series:candles,owner:currentUserKey,pause:pauseReplay,
   getReplay:()=>replayMode&&replayEngine?{bars:history,clock:replayEngine.clock}:null,
@@ -846,14 +861,18 @@ const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').
   try { mtf.render(); } catch {}
 });
 cloudSettings.start();
-function dispose() { pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation; closeTransport(); drawings.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove(); }
+function dispose() {
+  pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation;
+  closeTransport(); clearTimeout(cloudSaveTimer); cloudSettings.dispose();
+  drawings.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove();
+}
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 window.addEventListener('online', () => { if (!disposed&&!replayMode) loadMarket(); });
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, sessionBoxes, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }
@@ -909,41 +928,11 @@ $('replay-save').addEventListener('click',()=>{
     connection('Replay oturumu yerelde kaydedildi','replay');
   }catch{connection('Replay oturumu kaydedilemedi','error');}
 });
-$('indicator-add').addEventListener('change', e => {
-  const type = e.target.value;
-  if (!type) return;
-  try { indicators.add(type); localStorage.setItem('alfa-ind:v1:' + symbol, JSON.stringify(indicators.toJSON())); } catch {}
-  e.target.value = '';
-});
 $('goto-date-btn').addEventListener('click', async () => {
   const v = $('goto-date').value;
   if (!v) return;
   if(replayMode){connection('Önce mevcut replay oturumunu durdurun','error');return;}
   await enterReplay({target:Date.parse(v+'Z')/1000});
-});
-$('session-levels-toggle').addEventListener('click', () => {
-  const on = $('session-levels-toggle').dataset.on !== '1';
-  $('session-levels-toggle').dataset.on = on ? '1' : '0';
-  $('session-levels-toggle').style.background = on ? '#2962ff' : '#151b26';
-  sessionLevels.setEnabled(on);
-});
-$('market-structure-toggle').addEventListener('click', () => {
-  const on = $('market-structure-toggle').dataset.on !== '1';
-  $('market-structure-toggle').dataset.on = on ? '1' : '0';
-  $('market-structure-toggle').style.background = on ? '#2962ff' : '#151b26';
-  marketStructure.setEnabled(on);
-});
-$('fvg-toggle').addEventListener('click', () => {
-  const on = $('fvg-toggle').dataset.on !== '1';
-  $('fvg-toggle').dataset.on = on ? '1' : '0';
-  $('fvg-toggle').style.background = on ? '#2962ff' : '#151b26';
-  fvg.setEnabled(on);
-});
-$('mtf-toggle').addEventListener('click', () => {
-  const on = $('mtf-toggle').dataset.on !== '1';
-  $('mtf-toggle').dataset.on = on ? '1' : '0';
-  $('mtf-toggle').style.background = on ? '#2962ff' : '#151b26';
-  mtf.setEnabled(on);
 });
 
 // ---------- UI: indicator manager, settings, MTF settings, persistence ----------
@@ -957,20 +946,20 @@ function currentUserKey() {
 function layoutKey() { return 'alfa-chart-layout:v1:' + currentUserKey() + ':' + symbol + ':' + interval; }
 let cloudRevision = 0;
 let cloudSaveTimer = null;
+function layoutSettings() {
+  return structuredClone({
+    chartType: type, logScale, indicators: indicators.toJSON(), mtf: mtf.config,
+    sessionLevels: sessionLevels.config, sessionBoxes: sessionBoxes.config,
+    marketStructure: marketStructure.config, fvg: fvg.config, studies: studiesUI.toJSON(),
+  });
+}
 function saveLayout() {
+  if (replayMode) return; // Replay has its own session; never overwrite the live layout.
+  const settings = layoutSettings();
   try {
-    localStorage.setItem(layoutKey(), JSON.stringify({
-      chartType: type,
-      logScale,
-      indicators: indicators.toJSON(),
-      mtf: mtf.config,
-      sessionLevels: sessionLevels.config,
-      sessionBoxes: sessionBoxes.config,
-      marketStructure: marketStructure.config,
-      fvg: fvg.config,
-    }));
+    localStorage.setItem(layoutKey(), JSON.stringify(settings));
   } catch {}
-  scheduleCloudSave();
+  scheduleCloudSave(settings);
 }
 function applySessionBoxesConfig(cfg) {
   if (!cfg || typeof cfg !== 'object') return;
@@ -979,6 +968,10 @@ function applySessionBoxesConfig(cfg) {
 }
 async function loadLayout() {
   if(replayMode)return;
+  const requestGeneration = generation;
+  const requestOwner = currentUserKey();
+  cloudRevision = 0;
+  let appliedStudies = false;
   try {
     const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
     if (raw) {
@@ -988,63 +981,68 @@ async function loadLayout() {
         chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });
         const lb = $('log-scale'); if (lb) { lb.setAttribute('aria-pressed', String(logScale)); lb.textContent = logScale ? 'Log✓' : 'Log'; }
       }
-      if (Array.isArray(raw.indicators)) { indicators.clear(); for (const e of raw.indicators) indicators.add(e.type, e.params); }
+      if (Array.isArray(raw.indicators)) indicators.fromJSON(raw.indicators);
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
       if (raw.sessionBoxes) applySessionBoxesConfig(raw.sessionBoxes);
       if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
       if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
+      if (raw.studies) { studiesUI.apply(raw.studies); appliedStudies = true; }
     }
   } catch {}
   if (cloudSettings.isAuthed()) {
     const cloud = await cloudSettings.load(symbol, interval);
-    if(replayMode)return;
+    if(replayMode || requestGeneration !== generation || requestOwner !== currentUserKey())return;
     if (cloud && cloud.settings) {
       const s = cloud.settings;
       if (typeof s.chartType === 'string') applyChartType(s.chartType);
       if (typeof s.logScale === 'boolean') { logScale = s.logScale; chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal }); const lb=$('log-scale'); if(lb){lb.setAttribute('aria-pressed',String(logScale)); lb.textContent=logScale?'Log✓':'Log';} }
-      if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
+      if (Array.isArray(s.indicators)) { indicators.fromJSON(s.indicators); pendingIndicators = null; }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
       if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
       if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
       if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
+      if (s.studies) { studiesUI.apply(s.studies); appliedStudies = true; }
       cloudRevision = cloud.revision || 0;
       try { $('drawing-status').textContent = 'Bulut: yüklendi'; } catch {}
     }
   }
+  if (!appliedStudies) {
+    const initial = defaultStudyState();
+    // Existing session preferences remain available, without auto-enabling the
+    // old, very noisy market-structure and price-line layers.
+    try { initial.sessions.added = !!localStorage.getItem('alfa-sb:v1') && Object.values(sessionBoxes.config.enabled).some(Boolean); } catch {}
+    studiesUI.apply(initial);
+  }
+  studiesUI.sync();
 }
-function scheduleCloudSave() {
+function scheduleCloudSave(settings = layoutSettings()) {
   if(replayMode)return;
   if (!cloudSettings.isAuthed()) return;
+  const requestSymbol = symbol, requestInterval = interval, requestOwner = currentUserKey(), requestGeneration = generation;
+  const revision = cloudRevision;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(async () => {
-    if(replayMode)return;
-    const settings = {
-      chartType: type,
-      logScale,
-      indicators: indicators.toJSON(),
-      mtf: mtf.config,
-      sessionLevels: sessionLevels.config,
-      sessionBoxes: sessionBoxes.config,
-      marketStructure: marketStructure.config,
-      fvg: fvg.config,
-    };
-    const res = await cloudSettings.save(symbol, interval, settings, cloudRevision);
+    if(replayMode || cloudSettings.user?.id !== requestOwner)return;
+    const res = await cloudSettings.save(requestSymbol, requestInterval, settings, revision);
+    if (requestGeneration !== generation || requestOwner !== currentUserKey()) return;
     if (res.ok) { cloudRevision = res.revision || cloudRevision; try { $('drawing-status').textContent = 'Bulut: kaydedildi'; } catch {} }
     else if (res.error && /conflict|unique/i.test(res.error)) {
       // reload cloud and apply
-      const cloud = await cloudSettings.load(symbol, interval);
+      const cloud = await cloudSettings.load(requestSymbol, requestInterval);
+      if (requestGeneration !== generation || requestOwner !== currentUserKey() || replayMode) return;
       if (cloud && cloud.settings) {
         const s = cloud.settings;
         if (typeof s.chartType === 'string') applyChartType(s.chartType);
         if (typeof s.logScale === 'boolean') { logScale = s.logScale; chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal }); const lb=$('log-scale'); if(lb){lb.setAttribute('aria-pressed',String(logScale)); lb.textContent=logScale?'Log✓':'Log';} }
-        if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
+        if (Array.isArray(s.indicators)) indicators.fromJSON(s.indicators);
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
         if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
         if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
         if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
+        if (s.studies) studiesUI.apply(s.studies);
         cloudRevision = cloud.revision || cloudRevision;
         try { $('drawing-status').textContent = 'Çakışma çözüldü · bulut sürümü uygulandı'; } catch {}
       }
@@ -1055,176 +1053,32 @@ function scheduleCloudSave() {
 }
 
 function openModal(html) {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;';
-  const box = document.createElement('div');
-  box.style.cssText = 'background:#151b26;border:1px solid #30394b;border-radius:12px;padding:16px;max-width:720px;width:100%;max-height:80vh;overflow:auto;color:#d7e0ee;';
-  box.innerHTML = html;
-  overlay.append(box);
-  document.body.append(overlay);
-  const close = () => overlay.remove();
-  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-  return { overlay, box, close };
+  return chartDialog(html);
 }
 
 function openIndicatorManager() {
-  const favs = JSON.parse(localStorage.getItem('alfa-ind-fav:v1') || '[]');
-  const recent = JSON.parse(localStorage.getItem('alfa-ind-recent:v1') || '[]');
-  const cats = ['Trend', 'Momentum', 'Volatility', 'Volume'];
-  const list = INDICATOR_CATALOG;
-  const modal = openModal(`
-    <h3 style="margin:0 0 10px;">İndikatörler</h3>
-    <input id="ind-search" placeholder="Ara (ema, rsi, macd...)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;margin-bottom:10px;">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-      <button data-cat="all" class="ind-cat">Tümü</button>
-      ${cats.map(c => `<button data-cat="${c}" class="ind-cat">${c}</button>`).join('')}
-      <button data-cat="fav" class="ind-cat">Favoriler</button>
-      <button data-cat="recent" class="ind-cat">Son kullanılan</button>
-    </div>
-    <div id="ind-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;"></div>
-    <h4 style="margin:12px 0 6px;">Aktif indikatörler</h4>
-    <div id="ind-active"></div>
-    <div style="margin-top:12px;text-align:right;"><button id="ind-close">Kapat</button></div>
-  `);
-  const search = modal.box.querySelector('#ind-search');
-  const listEl = modal.box.querySelector('#ind-list');
-  const activeEl = modal.box.querySelector('#ind-active');
-  let cat = 'all';
-  function renderList() {
-    const q = search.value.trim().toLowerCase();
-    let items = list;
-    if (cat === 'fav') items = list.filter(i => favs.includes(i.id));
-    else if (cat === 'recent') items = list.filter(i => recent.includes(i.id));
-    else if (cat !== 'all') items = list.filter(i => i.category === cat);
-    if (q) items = items.filter(i => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
-    listEl.innerHTML = items.map(i => `<button data-add="${i.id}" style="padding:8px;border-radius:8px;border:1px solid #30394b;background:#1a2230;color:#d7e0ee;text-align:left;">${i.name}<br><small style="color:#8e9eb6;">${i.category}</small></button>`).join('');
-    listEl.querySelectorAll('[data-add]').forEach(b => {
-      b.onclick = () => {
-        indicators.add(b.dataset.add);
-        if (!recent.includes(b.dataset.add)) { recent.unshift(b.dataset.add); recent.splice(10); localStorage.setItem('alfa-ind-recent:v1', JSON.stringify(recent)); }
-        saveLayout();
-        renderActive();
-      };
-    });
-  }
-  function renderActive() {
-    activeEl.innerHTML = indicators.list().map(i => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #2a3444;">
-        <span>${i.type.toUpperCase()} ${JSON.stringify(i.params).slice(0,40)}</span>
-        <span>
-          <button data-edit="${i.id}">⚙</button>
-          <button data-dup="${i.id}">⧉</button>
-          <button data-del="${i.id}">✕</button>
-        </span>
-      </div>`).join('') || '<small style="color:#8e9eb6;">Aktif indikatör yok.</small>';
-    activeEl.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { indicators.remove(b.dataset.del); saveLayout(); renderActive(); });
-    activeEl.querySelectorAll('[data-dup]').forEach(b => b.onclick = () => {
-      const it = indicators.items.find(x => x.id === b.dataset.dup);
-      if (it) { indicators.add(it.type, { ...it.params }); saveLayout(); renderActive(); }
-    });
-    activeEl.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => { const it = indicators.items.find(x => x.id === b.dataset.edit); if (it) openIndicatorSettings(it); });
-  }
-  search.addEventListener('input', renderList);
-  modal.box.querySelectorAll('.ind-cat').forEach(b => b.onclick = () => { cat = b.dataset.cat; renderList(); });
-  modal.box.querySelector('#ind-close').onclick = modal.close;
-  renderList(); renderActive();
+  studiesUI.open();
 }
 
 function openIndicatorSettings(item) {
-  const params = item.params;
-  const inputs = Object.keys(params).map(k => {
-    const v = params[k];
-    if (k === 'source') {
-      const opts = ['open','high','low','close','hl2','hlc3','ohlc4'].map(x => `<option value="${x}" ${v===x?'selected':''}>${x.toUpperCase()}</option>`).join('');
-      return `<label style="display:block;margin:6px 0;">${k} <select data-k="${k}" style="padding:4px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;">${opts}</select></label>`;
-    }
-    if (typeof v === 'boolean') return `<label style="display:block;margin:6px 0;"><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> ${k}</label>`;
-    if (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) return `<label style="display:block;margin:6px 0;">${k} <input type="color" data-k="${k}" value="${v}"></label>`;
-    return `<label style="display:block;margin:6px 0;">${k} <input type="number" step="any" data-k="${k}" value="${v}" style="padding:4px;border-radius:6px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"></label>`;
-  }).join('');
-  const modal = openModal(`
-    <h3 style="margin:0 0 10px;">${item.type.toUpperCase()} Ayarları</h3>
-    ${inputs}
-    <div style="margin-top:12px;text-align:right;">
-      <button id="is-cancel">İptal</button>
-      <button id="is-apply">Uygula</button>
-    </div>
-  `);
-  modal.box.querySelector('#is-cancel').onclick = modal.close;
-  modal.box.querySelector('#is-apply').onclick = () => {
-    modal.box.querySelectorAll('[data-k]').forEach(inp => {
-      const k = inp.dataset.k;
-      if (inp.type === 'checkbox') params[k] = inp.checked;
-      else if (inp.type === 'color') params[k] = inp.value;
-      else if (inp.tagName === 'SELECT') params[k] = inp.value;
-      else params[k] = Number(inp.value);
-    });
-    indicators.remove(item.id);
-    indicators.add(item.type, { ...params });
-    saveLayout();
-    modal.close();
-  };
+  studiesUI.openSettings(item.id);
 }
 
 function openMtfSettings() {
-  const cfg = mtf.config;
-  const htfOpts = ['15m','30m','1h','4h','1d','1w'];
-  const modal = openModal(`
-    <h3 style="margin:0 0 10px;">Multi-Timeframe Ayarları</h3>
-    <label>HTF seçimi (çoklu):</label>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px;">
-      ${htfOpts.map(t => `<label style="padding:4px 8px;border:1px solid #30394b;border-radius:6px;"><input type="checkbox" data-htf="${t}" ${cfg.htf.includes(t)?'checked':''}> ${t.toUpperCase()}</label>`).join('')}
-    </div>
-    <label><input type="checkbox" id="mtf-swings" ${cfg.showSwings?'checked':''}> Swing göster</label><br>
-    <label><input type="checkbox" id="mtf-fvg" ${cfg.showFvg?'checked':''}> FVG göster</label><br>
-    <label><input type="checkbox" id="mtf-ms" ${cfg.showMS?'checked':''}> Market Structure göster</label><br>
-    <label><input type="checkbox" id="mtf-protected" ${cfg.showProtected?'checked':''}> Protected Levels</label><br>
-    <label><input type="checkbox" id="mtf-bos" ${cfg.showBOS?'checked':''}> BOS</label><br>
-    <label><input type="checkbox" id="mtf-choch" ${cfg.showCHoCH?'checked':''}> CHoCH</label><br>
-    <label><input type="checkbox" id="mtf-ifvg" ${cfg.showIFVG?'checked':''}> IFVG</label><br>
-    <label><input type="checkbox" id="mtf-confirmed" ${cfg.confirmedOnly?'checked':''}> Yalnızca onaylanmış (confirmed)</label><br>
-    <label><input type="checkbox" id="mtf-extend" ${cfg.extend?'checked':''}> Bölgeyi sağa uzat</label>
-    <div style="margin-top:12px;text-align:right;">
-      <button id="mtf-cancel">İptal</button>
-      <button id="mtf-apply">Uygula</button>
-    </div>
-  `);
-  modal.box.querySelector('#mtf-cancel').onclick = modal.close;
-  modal.box.querySelector('#mtf-apply').onclick = () => {
-    const htf = [...modal.box.querySelectorAll('[data-htf]')].filter(x => x.checked).map(x => x.dataset.htf);
-    mtf.updateConfig({
-      htf: htf.length ? htf : ['1h'],
-      showSwings: modal.box.querySelector('#mtf-swings').checked,
-      showFvg: modal.box.querySelector('#mtf-fvg').checked,
-      showMS: modal.box.querySelector('#mtf-ms').checked,
-      showProtected: modal.box.querySelector('#mtf-protected').checked,
-      showBOS: modal.box.querySelector('#mtf-bos').checked,
-      showCHoCH: modal.box.querySelector('#mtf-choch').checked,
-      showIFVG: modal.box.querySelector('#mtf-ifvg').checked,
-      confirmedOnly: modal.box.querySelector('#mtf-confirmed').checked,
-      extend: modal.box.querySelector('#mtf-extend').checked,
-    });
-    saveLayout();
-    modal.close();
-  };
+  studiesUI.openSettings('mtf');
 }
 
 // wire buttons
-$('indicators-manage').addEventListener('click', () => { console.log('INDICATORS BUTTON CLICKED'); openIndicatorManager(); });
-// replace MTF toggle behavior: open settings instead of just toggle
-const mtfBtn = $('mtf-toggle');
-mtfBtn.onclick = () => openMtfSettings();
+$('indicators-manage').addEventListener('click', openIndicatorManager);
 
-// load layout after first data load: hook into setData by wrapping? We'll load in loadMarket before fetch.
-const _origLoadMarket = loadMarket;
-// patch: load layout when symbol changes
-const _origOpenMarket = drawings.openMarket.bind(drawings);
-drawings.openMarket = async (symbol, force) => {
+// Restore this market's layout only while its drawing/account context is current.
+const originalOpenMarket = drawings.openMarket.bind(drawings);
+drawings.openMarket = async (nextSymbol, force) => {
   if(replayMode)exitReplay();
   if(replayMode)return;
-  await _origOpenMarket(symbol, force);
+  await originalOpenMarket(nextSymbol, force);
+  if (disposed || replayMode || drawings.market !== nextSymbol || symbol !== nextSymbol) return;
   await loadLayout();
-  cloudRevision = 0;
   try { indicators.updateAll(seriesBars); } catch {}
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
@@ -1238,4 +1092,58 @@ window.openIndicatorManager = openIndicatorManager;
 window.openIndicatorSettings = openIndicatorSettings;
 window.openMtfSettings = openMtfSettings;
 
+// Keep laboratory actions out of the indicator catalogue.
+document.addEventListener('pointerdown', e => {
+  document.querySelectorAll('.workspace-menu[open]').forEach(menu => {
+    if (!menu.contains(e.target)) menu.open = false;
+  });
+});
+document.querySelectorAll('.workspace-menu').forEach(menu => menu.addEventListener('click', e => {
+  if (e.target.closest('button') && !e.target.closest('#session-boxes-tools')) menu.open = false;
+}));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.workspace-menu[open]').forEach(menu => { menu.open = false; menu.querySelector('summary').focus(); });
+  if (e.target.closest('input,textarea,select,[contenteditable=true]') || document.querySelector('dialog[open]')) return;
+  if (e.altKey && e.key.toLowerCase() === 'i') { e.preventDefault(); openIndicatorManager(); }
+});
+$('tester-open').addEventListener('click', () => {
+  if (replayMode) { paper.filter = 'tester'; paper.root.hidden = false; paper.update(); return; }
+  const modal = openModal(`<div class="dialog-header"><div><h3>Strateji testleri</h3><p>Geçmiş veride, geleceği görmeden test et.</p></div><button id="tester-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <p style="line-height:1.8;color:#99aac5">İşlem günlüğü, performans ölçümleri ve strateji laboratuvarı Replay oturumunda kullanılır. Önce grafikte bir başlangıç mumu seç.</p>
+    <div class="settings-actions"><button id="tester-replay" class="apply">Replay başlat</button></div>`);
+  modal.box.querySelector('#tester-close').onclick = modal.close;
+  modal.box.querySelector('#tester-replay').onclick = () => { modal.close(); $('replay-toggle').click(); };
+});
+document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', () => {
+  if (!history.length) return;
+  document.querySelectorAll('[data-range]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  if (b.dataset.range === 'all') { chart.timeScale().fitContent(); return; }
+  const count = Number(b.dataset.range) / candleCloseTime(0, interval);
+  chart.timeScale().setVisibleLogicalRange({ from: history.length - Math.max(10, count), to: history.length + 3 });
+}));
+let viewConfig = { grid: true, axisLabels: false, clean: false };
+try {
+  const raw = JSON.parse(localStorage.getItem('alfa-chart-view:v1') || 'null');
+  for (const k of Object.keys(viewConfig)) if (typeof raw?.[k] === 'boolean') viewConfig[k] = raw[k];
+} catch {}
+function applyViewConfig() {
+  chart.applyOptions({ grid: { vertLines: { visible: viewConfig.grid }, horzLines: { visible: viewConfig.grid } } });
+  if (indicators.axisLabels !== viewConfig.axisLabels) {
+    indicators.axisLabels = viewConfig.axisLabels; indicators.renderAll();
+  }
+  for (const manager of [sessionLevels, marketStructure]) {
+    manager.axisLabels = viewConfig.axisLabels; manager.render();
+  }
+  studiesUI.setClean(viewConfig.clean);
+  $('view-grid').checked = viewConfig.grid;
+  $('view-axis-labels').checked = viewConfig.axisLabels;
+  $('view-clean').checked = viewConfig.clean;
+}
+for (const [id, key] of [['view-grid', 'grid'], ['view-axis-labels', 'axisLabels'], ['view-clean', 'clean']]) {
+  $(id).addEventListener('change', e => {
+    viewConfig[key] = e.target.checked; applyViewConfig();
+    try { localStorage.setItem('alfa-chart-view:v1', JSON.stringify(viewConfig)); } catch {}
+  });
+}
+applyViewConfig();
 loadMarket();

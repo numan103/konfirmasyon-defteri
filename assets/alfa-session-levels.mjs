@@ -6,7 +6,7 @@ export class SessionLevelsManager {
     this.getBars = getBars;
     this.lines = []; // {id, priceLine}
     this.config = this.loadConfig();
-    this.enabled = true;
+    this.enabled = false;
   }
   loadConfig() {
     try { return JSON.parse(localStorage.getItem('alfa-sl:v1') || 'null') || this.defaultConfig(); }
@@ -42,7 +42,7 @@ export class SessionLevelsManager {
     for (const lv of levels) {
       if (this.config.show?.[lv.id.replace(/_H|_L|_O$/, '')] === false) continue;
       // session toggles checked by id prefix
-      const priceLine = this.series.createPriceLine({ price: lv.price, color: this.colorFor(lv), lineWidth: 1, lineStyle: 2, title: lv.label + (lv.approximate ? ' (yaklaşık)' : '') });
+      const priceLine = this.series.createPriceLine({ price: lv.price, color: this.colorFor(lv) + '88', axisLabelVisible: this.axisLabels === true, lineWidth: 1, lineStyle: 2, title: lv.label + (lv.approximate ? ' (yaklaşık)' : '') });
       this.lines.push({ id: lv.id, priceLine });
     }
   }

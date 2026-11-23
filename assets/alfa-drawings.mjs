@@ -1,9 +1,20 @@
 import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=5';
 import { renderDrawing } from './alfa-drawings-render.mjs?v=6';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=3';
+import { icon } from './alfa-chart-ui.mjs?v=1';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
 const isPosition = d => ['long', 'short'].includes(d.type);
+export const TOOL_GROUPS = [
+  { id: 'lines', name: 'Çizgiler ve oklar', tools: ['trend', 'horizontal', 'vertical', 'ray', 'arrow'] },
+  { id: 'fib', name: 'Fibonacci', tools: ['fibonacci'] },
+  { id: 'shapes', name: 'Şekiller ve fırça', tools: ['rectangle', 'brush'] },
+  { id: 'notes', name: 'Metin ve notlar', tools: ['text', 'label'] },
+  { id: 'positions', name: 'Pozisyon ve risk', tools: ['long', 'short'] },
+];
+const toolNames = { cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yatay çizgi', vertical: 'Dikey çizgi',
+  ray: 'Işın', arrow: 'Ok', fibonacci: 'Fibonacci düzeltmesi', rectangle: 'Dikdörtgen', brush: 'Fırça',
+  text: 'Metin', label: 'Etiket', long: 'Long pozisyon', short: 'Short pozisyon', ruler: 'Ölçüm cetveli', delete: 'Çizim sil' };
 export class DrawingEngine {
   constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager }) {
     Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager });
@@ -28,9 +39,11 @@ export class DrawingEngine {
     host.addEventListener('pointercancel', () => this.cancel(), options);
     // Suppress only chart dragging initiated on a drawing, not wheel zoom/pan.
     host.addEventListener('mousedown', e => {
+      if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
       if (this.drag || (this.tool !== 'cursor' && this.inPlot(e))) { e.preventDefault(); e.stopImmediatePropagation(); }
     }, options);
     host.addEventListener('touchstart', e => {
+      if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
       if (this.drag || this.tool !== 'cursor') { e.preventDefault(); e.stopImmediatePropagation(); }
     }, { ...options, passive: false });
     this.svg.addEventListener('wheel', e => {
@@ -46,15 +59,18 @@ export class DrawingEngine {
     host.addEventListener('contextmenu', e => this.contextMenu(e), options);
     document.addEventListener('pointerdown', e => {
       if (this.menu && !this.menu.contains(e.target)) this.closeContextMenu();
+      if (this.flyout && !this.flyout.contains(e.target) && !this.toolbar.contains(e.target)) this.closeToolMenu();
     }, { signal: this.abort.signal, capture: true });
     document.addEventListener('keydown', e => this.keydown(e), { signal: this.abort.signal });
     this.observer = new ResizeObserver(() => this.render());
     this.observer.observe(host);
     this.tick = () => {
-      const ts = chart.timeScale(), bars = getBars();
-      const signature = [ts.logicalToCoordinate(0), ts.logicalToCoordinate(1), series.priceToCoordinate(1),
-        series.priceToCoordinate(100), ts.width(), ts.height(), bars.length, bars.at(-1)?.time].join(':');
-      if (signature !== this.signature) { this.signature = signature; this.render(); }
+      try {
+        const ts = chart.timeScale(), bars = getBars();
+        const signature = [ts.logicalToCoordinate(0), ts.logicalToCoordinate(1), this.series.priceToCoordinate(1),
+          this.series.priceToCoordinate(100), ts.width(), this.dimensions().height, bars.length, bars.at(-1)?.time].join(':');
+        if (signature !== this.signature) { this.render(); this.signature = signature; }
+      } catch {}
       this.frame = requestAnimationFrame(this.tick);
     };
     this.tick();
@@ -69,7 +85,7 @@ export class DrawingEngine {
     const x = logicalToPixel(logical, i => this.chart.timeScale().logicalToCoordinate(i)), y = this.series.priceToCoordinate(point.price);
     return x == null || y == null ? null : { x, y };
   }
-  dimensions() { return { width: this.chart.timeScale().width(), height: this.host.clientHeight - this.chart.timeScale().height() }; }
+  dimensions() { return { width: this.chart.timeScale().width(), height: this.series.getPane?.().getHeight() ?? this.host.clientHeight - this.chart.timeScale().height() }; }
   inPlot(e) {
     const r = this.host.getBoundingClientRect(), { width, height } = this.dimensions();
     return e.clientX >= r.left && e.clientX <= r.left + width && e.clientY >= r.top && e.clientY <= r.top + height;
@@ -78,6 +94,7 @@ export class DrawingEngine {
   setDrawingsVisible(on) {
     this.drawingsVisible = !!on;
     this.svg.style.display = on ? '' : 'none';
+    if ($('drawing-selection')) $('drawing-selection').hidden = !on || !this.current();
     try { localStorage.setItem('alfa-drawings-visible:v1', on ? '1' : '0'); } catch {}
   }
   snapPoint(point) {
@@ -120,6 +137,7 @@ export class DrawingEngine {
   }
   buildUI() {
     this.renderToolbars();
+    $('drawing-favorites-edit').onclick = e => this.openToolMenu(Object.keys(TOOLS).filter(t => !['cursor', 'delete'].includes(t)), 'Favori araçlar', e.currentTarget);
     $('drawing-undo').onclick = () => { this.cancel(); if (this.ready && this.history.undo()) this.changed(); };
     $('drawing-redo').onclick = () => { this.cancel(); if (this.ready && this.history.redo()) this.changed(); };
     $('drawing-manage').onclick = () => { this.manager.hidden = !this.manager.hidden; this.updatePanel(); };
@@ -145,9 +163,9 @@ export class DrawingEngine {
   loadFavs() {
     try {
       const v = JSON.parse(localStorage.getItem('alfa-draw-fav:v1') || 'null');
-      if (Array.isArray(v) && v.length) return v.filter(t => TOOLS[t]);
+      if (Array.isArray(v)) return [...new Set(v.filter(t => Object.hasOwn(TOOLS, t)))];
     } catch {}
-    return ['cursor', 'trend', 'horizontal', 'fibonacci', 'rectangle', 'brush', 'text'];
+    return ['trend', 'horizontal', 'fibonacci', 'brush'];
   }
   saveFavs() { try { localStorage.setItem('alfa-draw-fav:v1', JSON.stringify(this.favs)); } catch {} }
   toggleFav(tool) {
@@ -155,27 +173,78 @@ export class DrawingEngine {
     else this.favs.push(tool);
     this.favs = Object.keys(TOOLS).filter(t => this.favs.includes(t));
     this.saveFavs(); this.renderToolbars();
+    this.flyout?.querySelectorAll('[data-favorite]').forEach(b => b.setAttribute('aria-pressed', String(this.favs.includes(b.dataset.favorite))));
     this.status.textContent = this.favs.includes(tool) ? `${TOOLS[tool][1]} favorilere eklendi` : `${TOOLS[tool][1]} favorilerden çıkarıldı`;
   }
-  toolButtons() { return [...(this.favbar?.querySelectorAll('[data-tool]') || []), ...this.toolbar.querySelectorAll('[data-tool]')]; }
+  toolButtons() { return [...(this.favbar?.querySelectorAll('[data-tool]') || []), ...this.toolbar.querySelectorAll('[data-tool]'), ...(this.flyout?.querySelectorAll('[data-tool]') || [])]; }
   renderToolbars() {
     const make = (tool, starred) => {
-      const [icon, label] = TOOLS[tool];
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = icon;
+      const label = toolNames[tool] || TOOLS[tool][1];
+      const b = document.createElement('button'); b.type = 'button'; b.innerHTML = icon(tool);
       b.title = `${label} · sağ tık: ${starred ? 'favorilerden çıkar' : 'favorilere ekle'}`;
       b.setAttribute('aria-label', label); b.dataset.tool = tool;
       b.setAttribute('aria-pressed', String(tool === this.tool));
+      b.disabled = !this.ready;
       b.addEventListener('click', () => this.setTool(tool));
       b.addEventListener('contextmenu', e => { e.preventDefault(); this.toggleFav(tool); });
       return b;
     };
     if (this.favbar) {
       this.favbar.replaceChildren();
+      const marker = document.createElement('span'); marker.className = 'fav-marker'; marker.innerHTML = icon('star'); marker.title = 'Favori çizim araçları';
+      this.favbar.append(marker);
       for (const tool of this.favs) this.favbar.append(make(tool, true));
       this.favbar.hidden = !this.favs.length;
     }
     this.toolbar.replaceChildren();
-    for (const tool of Object.keys(TOOLS)) this.toolbar.append(make(tool, false));
+    this.toolbar.append(make('cursor', false));
+    for (const group of TOOL_GROUPS) {
+      const tool = group.tools.includes(this.tool) ? this.tool : group.tools[0];
+      const groupButton = document.createElement('button'); groupButton.type = 'button'; groupButton.className = 'tool-group';
+      groupButton.innerHTML = icon(tool); groupButton.dataset.tool = tool; groupButton.dataset.group = group.id;
+      groupButton.disabled = !this.ready; groupButton.title = group.name;
+      groupButton.setAttribute('aria-label', group.name); groupButton.setAttribute('aria-haspopup', 'dialog');
+      groupButton.setAttribute('aria-pressed', String(group.tools.includes(this.tool)));
+      groupButton.addEventListener('click', () => this.openToolMenu(group.tools, group.name, groupButton));
+      this.toolbar.append(groupButton);
+    }
+    this.toolbar.append(make('ruler', false), make('delete', false));
+  }
+  openToolMenu(tools, title, anchor) {
+    if (!this.ready) return;
+    this.closeToolMenu();
+    const menu = document.createElement('div'); menu.className = 'tool-flyout';
+    menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-label', title);
+    const heading = document.createElement('div'); heading.className = 'menu-heading'; heading.textContent = title;
+    menu.append(heading);
+    for (const tool of tools) {
+      const row = document.createElement('div'); row.className = 'tool-row';
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.tool = tool;
+      b.innerHTML = icon(tool) + `<span>${toolNames[tool]}</span>`;
+      b.setAttribute('aria-pressed', String(tool === this.tool));
+      b.addEventListener('click', () => this.setTool(tool));
+      const star = document.createElement('button'); star.type = 'button'; star.dataset.favorite = tool;
+      star.setAttribute('aria-label', `${toolNames[tool]} favori`); star.setAttribute('aria-pressed', String(this.favs.includes(tool)));
+      star.innerHTML = icon('star'); star.onclick = () => this.toggleFav(tool);
+      row.append(b, star); menu.append(row);
+    }
+    (document.fullscreenElement || document.body).append(menu);
+    const r = anchor.getBoundingClientRect();
+    menu.style.top = Math.max(8, Math.min(r.top, innerHeight - menu.offsetHeight - 10)) + 'px';
+    this.flyout = menu;
+    menu.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation(); this.closeToolMenu(); anchor.focus();
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const buttons = [...menu.querySelectorAll('button')], index = buttons.indexOf(document.activeElement);
+        buttons[(index + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length].focus();
+      }
+    });
+    menu.querySelector('button')?.focus();
+  }
+  closeToolMenu() {
+    this.flyout?.remove(); this.flyout = null;
   }
   contextMenu(e) {
     if (!this.ready || !this.inPlot(e)) return;
@@ -209,16 +278,29 @@ export class DrawingEngine {
       item('⚙ Ayarlar…', () => { this.selected = d.id; this.manager.hidden = false; this.updatePanel(); });
     }
     if (!menu.children.length) return;
-    document.body.append(menu);
+    (document.fullscreenElement || document.body).append(menu);
     const mw = menu.offsetWidth, mh = menu.offsetHeight;
     menu.style.left = Math.max(4, Math.min(e.clientX, window.innerWidth - mw - 4)) + 'px';
     menu.style.top = Math.max(4, Math.min(e.clientY, window.innerHeight - mh - 4)) + 'px';
     this.menu = menu;
+    menu.addEventListener('keydown', e => {
+      const buttons = [...menu.querySelectorAll('button:not(:disabled)')];
+      if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation(); this.closeContextMenu(); this.host.focus();
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const index = buttons.indexOf(document.activeElement);
+        buttons[(index + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length]?.focus();
+      }
+    });
+    menu.querySelector('button')?.focus();
   }
   closeContextMenu() { if (this.menu) { this.menu.remove(); this.menu = null; } }
   setTool(tool) {
     if (!this.ready) return;
     this.cancel(); this.tool = tool;
+    this.renderToolbars();
+    this.host.focus({ preventScroll: true });
     this.host.dataset.drawingTool = tool;
     this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === tool)));
     $('drawing-help').textContent = tool === 'cursor' ? 'Çizimi seçin/sürükleyin · çift tık: ayarlar · Delete: sil'
@@ -229,6 +311,7 @@ export class DrawingEngine {
   }
   cancel() {
     this.closeContextMenu();
+    this.closeToolMenu();
     this.draft = null; this.drag = null; this.pending = null; this.brushing = false; this.tool = 'cursor';
     this.host.dataset.drawingTool = 'cursor';
     this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === 'cursor')));
@@ -237,6 +320,7 @@ export class DrawingEngine {
   }
   current() { return this.history.doc.drawings.find(d => d.id === this.selected); }
   down(e) {
+    if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
     if (!this.ready || e.button !== 0 || !this.inPlot(e)) return;
     const point = this.unproject(e); if (!point) return;
     const hit = e.target.closest?.('[data-id]'), id = hit?.getAttribute('data-id');
@@ -349,6 +433,7 @@ export class DrawingEngine {
     this.commit(next);
   }
   keydown(e) {
+    if (document.querySelector('dialog[open]')) return;
     if (e.key === 'Escape') { this.closeContextMenu(); this.cancel(); e.preventDefault(); return; }
     if (e.target.closest?.('input,textarea,select,[contenteditable=true]')) return;
     if ((e.ctrlKey || e.metaKey) && ['z', 'y'].includes(e.key.toLowerCase())) {
@@ -378,6 +463,20 @@ export class DrawingEngine {
     $('drawing-redo').disabled = !this.ready || !this.history.future.length;
     $('drawing-cloud-retry').disabled = !this.ready || !this.context?.remote;
     this.render(); this.updatePanel();
+    const selection = $('drawing-selection'), d = this.current();
+    if (selection) {
+      selection.hidden = !d || d.hidden || !this.drawingsVisible;
+      selection.replaceChildren();
+      if (d) {
+        const name = document.createElement('small'); name.textContent = toolNames[d.type]; selection.append(name);
+        for (const [action, glyph, label] of [['settings', 'settings', 'Çizim ayarları'], ['copy', 'layers', 'Çizimi kopyala'], ['remove', 'delete', 'Seçili çizimi sil']]) {
+          const b = document.createElement('button'); b.type = 'button'; b.innerHTML = icon(glyph); b.title = label; b.setAttribute('aria-label', label);
+          b.disabled = action === 'remove' && d.locked;
+          b.onclick = () => { if (action === 'settings') { this.manager.hidden = false; this.updatePanel(); } else this.action(action); };
+          selection.append(b);
+        }
+      }
+    }
   }
   updatePanel() {
     const list = $('drawing-objects'); list.replaceChildren();
@@ -386,7 +485,11 @@ export class DrawingEngine {
       const b = document.createElement('button'); b.type = 'button';
       b.textContent = `${TOOLS[d.type][1]}${d.hidden ? ' · gizli' : ''}${d.locked ? ' · kilitli' : ''}`;
       b.setAttribute('aria-pressed', String(d.id === this.selected));
-      b.onclick = () => { this.cancel(); this.selected = d.id; this.refresh(); }; row.append(b); list.append(row);
+      b.onclick = () => { this.cancel(); this.selected = d.id; this.refresh(); }; row.append(b);
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'object-remove'; remove.innerHTML = icon('delete');
+      remove.setAttribute('aria-label', `${toolNames[d.type]} sil`); remove.disabled = d.locked;
+      remove.onclick = () => { this.selected = d.id; this.action('remove'); };
+      row.append(remove); list.append(row);
     }
     $('drawing-empty').hidden = !!this.history.doc.drawings.length;
     const d = this.current(), form = $('drawing-settings');
@@ -453,6 +556,7 @@ export class DrawingEngine {
     this.disposed = true;
     ++this.epoch; this.abort.abort(); cancelAnimationFrame(this.frame);
     this.closeContextMenu();
+    this.closeToolMenu();
     this.observer.disconnect(); this.store.dispose(); this.svg.remove();
   }
 }

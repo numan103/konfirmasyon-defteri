@@ -38,7 +38,7 @@ try{
   await page.locator('[data-interval="15m"]').click();
   await page.waitForFunction(()=>window.__alfaDebug.ready&&document.getElementById('market-title').textContent.includes('15M'));
   const time=await page.evaluate(()=>window.__alfaDebug.history[600].time);
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.fill('#replay-date',new Date(time*1000).toISOString().slice(0,16));
   await page.click('#replay-date-start');
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
@@ -95,7 +95,7 @@ try{
   const before=await report();saved=await doc();
   await page.click('#replay-save');await page.reload();
   await page.waitForFunction(()=>window.__alfaDebug?.drawings.ready);
-  await page.click('#replay-toggle');await page.locator('#replay-saved button').first().click();
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');await page.locator('#replay-saved button').first().click();
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
   await page.click('#paper-toggle');await tester();
   assert.deepEqual(await doc(),saved);assert.deepEqual(await report(),before);

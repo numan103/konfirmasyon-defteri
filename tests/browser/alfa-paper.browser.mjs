@@ -34,7 +34,7 @@ try {
   await page.locator('[data-interval="15m"]').click();
   await page.waitForFunction(()=>window.__alfaDebug.ready&&document.getElementById('market-title').textContent.includes('15M'));
   const time=await page.evaluate(()=>window.__alfaDebug.history[600].time);
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.fill('#replay-date',new Date(time*1000).toISOString().slice(0,16));
   await page.click('#replay-date-start');
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
@@ -75,7 +75,7 @@ try {
   const before=await state();
   await page.reload();
   await page.waitForFunction(()=>window.__alfaDebug?.drawings.ready);
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.locator('#replay-saved button').first().click();
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
   assert.deepEqual(await state(),before);
@@ -107,7 +107,7 @@ try {
   await page.waitForFunction(()=>window.__alfaDebug.ready&&document.getElementById('market-title').textContent.includes('ETHUSDT'));
   assert.equal(await page.evaluate(()=>window.__alfaDebug.paper.engine),null);
   const ethTime=await page.evaluate(()=>window.__alfaDebug.history[600].time);
-  await page.click('#replay-toggle');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
   await page.fill('#replay-date',new Date(ethTime*1000).toISOString().slice(0,16));
   await page.click('#replay-date-start');
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));

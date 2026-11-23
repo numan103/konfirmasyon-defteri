@@ -1,4 +1,3 @@
-import { createChart } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { sma, ema, wma, vwma, rsi, macd, atr, bollinger, vwap, stochastic, stochRsi, adx, supertrend, obv } from './alfa-indicators-model.mjs?v=2';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
@@ -40,28 +39,50 @@ const DEFAULTS = {
 function uid() { return 'ind-' + Math.random().toString(36).slice(2, 9); }
 
 export class IndicatorManager {
-  constructor({ chart, getBars }) {
+  constructor({ chart, getBars, onChange }) {
     this.chart = chart;
     this.getBars = getBars;
     this.items = []; // {id,type,params,series:[],pane}
+    this.onChange = onChange;
+    this.suppressed = false;
+    this.axisLabels = false;
     this.storageKey = 'alfa-indicators:v1';
   }
-  list() { return this.items.map(i => ({ id: i.id, type: i.type, params: i.params })); }
-  add(type, params = {}) {
+  list() { return this.items.map(i => ({ id: i.id, type: i.type, params: i.params, visible: i.visible })); }
+  add(type, params = {}, visible = true) {
     const def = INDICATOR_CATALOG.find(d => d.id === type);
     if (!def) return null;
-    const item = { id: uid(), type, params: { ...DEFAULTS[type], ...params }, series: [], pane: null, def };
+    if (this.items.length >= 24) throw new Error('En fazla 24 indikatör ekleyebilirsiniz.');
+    const item = { id: uid(), type, params: { ...DEFAULTS[type], ...params }, visible: visible !== false, series: [], pane: null, def };
     this.items.push(item);
     this.render(item);
+    this.onChange?.();
     return item;
   }
   remove(id) {
     const idx = this.items.findIndex(i => i.id === id);
     if (idx < 0) return;
     const item = this.items[idx];
-    for (const s of item.series) { try { if (item.pane) item.pane.removeSeries(s); else this.chart.removeSeries(s); } catch {} }
-    if (item.pane) { try { this.chart.removePane(item.pane); } catch {} }
+    this.detach(item);
     this.items.splice(idx, 1);
+    this.onChange?.();
+  }
+  detach(item) {
+    for (const s of item.series) this.chart.removeSeries(s);
+    // Empty panes are removed by Lightweight Charts when their last series leaves.
+    item.series = []; item.pane = null;
+  }
+  setVisible(id, visible) {
+    const item = this.items.find(i => i.id === id); if (!item) return;
+    item.visible = !!visible; this.render(item); this.onChange?.();
+  }
+  setSuppressed(value) {
+    if (this.suppressed === !!value) return;
+    this.suppressed = !!value; this.renderAll();
+  }
+  updateParams(id, params) {
+    const item = this.items.find(i => i.id === id); if (!item) return;
+    item.params = { ...item.params, ...params }; this.render(item); this.onChange?.();
   }
   clear() { for (const i of [...this.items]) this.remove(i.id); }
   renderAll() { for (const i of this.items) this.render(i); }
@@ -115,18 +136,29 @@ export class IndicatorManager {
     }
   }
   render(item) {
+    this.detach(item);
+    if (!item.visible || this.suppressed) return;
     const bars = this.getBars();
     const lines = this.compute(item, bars);
     const isOsc = item.def.pane === 'oscillator';
-    if (isOsc && !item.pane) item.pane = this.chart.addPane();
-    const target = isOsc ? item.pane : this.chart;
+    const paneIndex = isOsc ? this.chart.panes().length : 0;
     const colors = ['#2962ff', '#ff6d00', '#00c853', '#aa00ff', '#ff1744'];
     for (const [idx, line] of lines.entries()) {
-      const opts = { color: idx === 0 ? item.params.color : colors[idx % colors.length], lineWidth: 2, title: item.def.name };
-      const series = target.addSeries(LWC.LineSeries, opts);
-      const clean = line.data.filter(Boolean);
+      const histogram = line.key === 'hist';
+      const opts = { color: idx === 0 ? item.params.color : colors[idx % colors.length], lineWidth: 1,
+        title: item.def.name, priceLineVisible: false, lastValueVisible: this.axisLabels,
+        crosshairMarkerRadius: 3 };
+      if (isOsc) opts.priceFormat = { type: 'price', precision: 2, minMove: .01 };
+      const series = this.chart.addSeries(histogram ? LWC.HistogramSeries : LWC.LineSeries, opts, paneIndex);
+      const clean = line.data.filter(Boolean).map(p => histogram ? { ...p, color: p.value >= 0 ? '#26c89c88' : '#ef667788' } : p);
       series.setData(clean);
       item.series.push(series);
+    }
+    if (isOsc) {
+      item.pane = item.series[0].getPane();
+      item.pane.setHeight(Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+      const guides = item.type === 'rsi' ? [30, 70] : ['stochastic', 'stochrsi'].includes(item.type) ? [20, 80] : item.type === 'macd' ? [0] : [];
+      for (const price of guides) item.series[0].createPriceLine({ price, color: '#53617a66', lineWidth: 1, lineStyle: 2, axisLabelVisible: false, title: '' });
     }
   }
   updateAll(bars) {
@@ -134,13 +166,13 @@ export class IndicatorManager {
       const lines = this.compute(item, bars);
       for (const [idx, line] of lines.entries()) {
         const s = item.series[idx];
-        if (s) s.setData(line.data.filter(Boolean));
+        if (s) s.setData(line.data.filter(Boolean).map(p => line.key === 'hist' ? { ...p, color: p.value >= 0 ? '#26c89c88' : '#ef667788' } : p));
       }
     }
   }
-  toJSON() { return this.items.map(i => ({ type: i.type, params: i.params })); }
+  toJSON() { return this.items.map(i => ({ type: i.type, params: i.params, visible: i.visible })); }
   fromJSON(arr) {
     this.clear();
-    for (const e of arr || []) this.add(e.type, e.params);
+    for (const e of arr || []) this.add(e.type, e.params, e.visible);
   }
 }
