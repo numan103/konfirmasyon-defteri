@@ -51,10 +51,10 @@ const clickAt = async (fx, fy) => {
 };
 async function create(type, points) {
   const before = await count();
-  await page.locator(`[data-tool="${type}"]`).click();
+  await page.locator(`#drawing-tools [data-tool="${type}"]`).click();
   for (const [x, y] of points) await clickAt(x, y);
   await page.waitForFunction(n => window.__alfaDebug.drawings.history.doc.drawings.length === n, before + 1);
-  assert.equal(await page.locator('[data-tool=cursor]').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('#drawing-tools [data-tool=cursor]').getAttribute('aria-pressed'), 'true');
   return lastDrawing();
 }
 async function handleDrag(id, handle, dx, dy) {
@@ -67,8 +67,8 @@ const test = async (name, fn) => { await fn(); results.push({ name, passed: true
 try {
   await page.goto(origin + '/alfa-charts.html?debug=1');
   await waitMarket('BTCUSDT', '1H');
-  await test('BTCUSDT 1H loads real Binance and 12 drawing toolbar controls', async () => {
-    assert.equal(await page.locator('#drawing-tools button').count(), 12);
+  await test('BTCUSDT 1H loads real Binance and 15 drawing toolbar controls', async () => {
+    assert.equal(await page.locator('#drawing-tools button').count(), 15);
     assert.equal(await debug(() => window.__alfaDebug.history.length), 1000);
     assert.match(await page.locator('#drawing-status').textContent(), /Misafir/);
   });
@@ -161,7 +161,7 @@ try {
       const range = window.__alfaDebug.chart.timeScale().getVisibleLogicalRange();
       return Math.abs(range.to - range.from - span) > 1;
     }, before.to - before.from);
-    await page.locator('[data-tool=trend]').click();
+    await page.locator('#drawing-tools [data-tool=trend]').click();
     const r = await plot(), old = await debug(() => window.__alfaDebug.chart.timeScale().getVisibleLogicalRange());
     await page.mouse.move(r.x + r.width * .9, r.y + r.height * .9); await page.mouse.wheel(0, 150);
     await page.waitForFunction(span => {
@@ -266,13 +266,13 @@ try {
     await page.locator('#drawing-undo').click(); assert.equal(await count(), before + 1);
     await page.locator('#drawing-redo').click(); assert.equal(await count(), before);
     await page.locator('#drawing-close').click();
-    await page.locator('[data-tool=trend]').click(); await clickAt(.3, .6); await page.keyboard.press('Escape');
-    assert.equal(await count(), before); assert.equal(await page.locator('[data-tool=cursor]').getAttribute('aria-pressed'), 'true');
+    await page.locator('#drawing-tools [data-tool=trend]').click(); await clickAt(.3, .6); await page.keyboard.press('Escape');
+    assert.equal(await count(), before); assert.equal(await page.locator('#drawing-tools [data-tool=cursor]').getAttribute('aria-pressed'), 'true');
     const textPoint = await debug(() => {
       const e = window.__alfaDebug.drawings, d = e.history.doc.drawings.find(d => d.type === 'text'), p = e.project(d.points[0]), r = e.host.getBoundingClientRect();
       return { x: r.x + p.x + 30, y: r.y + p.y - 3 };
     });
-    await page.locator('[data-tool=delete]').click(); await page.mouse.click(textPoint.x, textPoint.y);
+    await page.locator('#drawing-tools [data-tool=delete]').click(); await page.mouse.click(textPoint.x, textPoint.y);
     assert.equal(await count(), before - 1);
     await page.keyboard.press('Control+z'); assert.equal(await count(), before);
     await page.keyboard.press('Control+Shift+z'); assert.equal(await count(), before - 1);
@@ -298,10 +298,10 @@ try {
       const r = await touch.evaluate(() => {
         const e = window.__alfaDebug.drawings, b = e.host.getBoundingClientRect(); return { x: b.x, y: b.y, ...e.dimensions() };
       });
-      await touch.locator('[data-tool=horizontal]').tap();
+      await touch.locator('#drawing-tools [data-tool=horizontal]').tap();
       await touch.touchscreen.tap(r.x + r.width * .3, r.y + r.height * .5);
       assert.equal(await touch.evaluate(() => window.__alfaDebug.drawings.history.doc.drawings.length), 1);
-      await touch.locator('[data-tool=trend]').tap();
+      await touch.locator('#drawing-tools [data-tool=trend]').tap();
       await touch.touchscreen.tap(r.x + r.width * .2, r.y + r.height * .65);
       await touch.touchscreen.tap(r.x + r.width * .7, r.y + r.height * .35);
       assert.equal(await touch.evaluate(() => window.__alfaDebug.drawings.history.doc.drawings.length), 2);

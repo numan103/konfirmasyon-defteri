@@ -71,7 +71,7 @@ try {
     assert.ok(count>0);assert.ok(last+(tf==='1h'?3600:14400)<=bounded.clock);
   }
   for (const tool of ['fibonacci','long']) {
-    await page.locator(`[data-tool="${tool}"]`).click();
+    await page.locator(`#drawing-tools [data-tool="${tool}"]`).click();
     const plot=await page.evaluate(()=>{
       const d=window.__alfaDebug.drawings,rect=d.host.getBoundingClientRect();
       return {x:rect.x,y:rect.y,...d.dimensions()};

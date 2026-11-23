@@ -1,4 +1,4 @@
-import { fibPrice, positionStats } from './alfa-drawings-model.mjs?v=2';
+import { fibPrice, positionStats } from './alfa-drawings-model.mjs?v=5';
 const NS = 'http://www.w3.org/2000/svg';
 const fmt = n => Number(n).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
 function el(tag, attrs, text) {
@@ -86,7 +86,10 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     const pts = d.points.map(project).filter(Boolean);
     if (pts.length >= 2) {
       const path = pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' ');
-      append(el('path', { d: path, fill: 'none', stroke: color, 'stroke-width': d.width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      // Wide invisible hit path so freehand strokes can be click-selected and deleted.
+      append(el('path', { d: path, fill: 'none', stroke: color, 'stroke-width': Math.max(14, stroke), 'stroke-opacity': 0,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: 'drawing-hit' }));
+      append(el('path', { d: path, fill: 'none', stroke: color, 'stroke-width': d.width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'pointer-events': 'none' }));
     }
   }
   if (d.type === 'ruler') {
@@ -101,7 +104,8 @@ export function renderDrawing(d, project, width, height, selected, draft = false
       append(el('circle', { cx: x, cy: y, r: 6, fill: '#10141c', stroke: '#c3d0ff', 'stroke-width': 2, 'data-handle': name,
         role: 'img', 'aria-label': 'Çizim tutamacı ' + name, class: 'drawing-handle' }));
     }
-    p.forEach((point, i) => handle(point.x, point.y, 'p' + i));
+    if (d.type === 'brush') { handle(a.x, a.y, 'p0'); handle(p[p.length - 1].x, p[p.length - 1].y, 'p' + (p.length - 1)); }
+    else p.forEach((point, i) => handle(point.x, point.y, 'p' + i));
     if (['long', 'short'].includes(d.type)) {
       const x = (a.x + b.x) / 2;
       handle(x, a.y, 'entry'); handle(x, b.y, 'stop');

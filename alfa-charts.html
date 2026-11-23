@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=11">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=12">
 </head>
 <body>
   <main class="workspace">
@@ -68,7 +68,12 @@
     </header>
     <div class="workarea">
       <aside class="drawing-space" aria-label="Çizim araçları">
+        <nav id="drawing-favs" aria-label="Favori çizim araçları"></nav>
         <nav id="drawing-tools" aria-label="Çizim aracı seç"></nav>
+        <div class="session-boxes-side">
+          <small>SEANS</small>
+          <nav id="session-boxes-tools" aria-label="Seans kutuları"></nav>
+        </div>
       </aside>
       <section class="chart-panel" aria-label="Fiyat grafiği">
         <div class="legend">
@@ -154,6 +159,6 @@
       <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Lightweight Charts™ by TradingView</a>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=34"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=35"></script>
 </body>
 </html>

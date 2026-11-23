@@ -1,19 +1,20 @@
 import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=5';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=5';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=6';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=3';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
 const isPosition = d => ['long', 'short'].includes(d.type);
 export class DrawingEngine {
-  constructor({ chart, series, host, getBars, getInterval }) {
-    Object.assign(this, { chart, series, host, getBars, getInterval });
+  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager }) {
+    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager });
     this.market = 'BTCUSDT'; this.tool = 'cursor'; this.selected = null; this.history = new DrawingHistory();
     this.magnet = false; this.drawingsVisible = true; this.brushing = false;
     this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map();
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.svg.classList.add('drawing-overlay'); this.svg.setAttribute('aria-label', 'Fiyat ve zaman koordinatlı çizimler');
     host.append(this.svg);
-    this.toolbar = $('drawing-tools'); this.manager = $('drawing-manager'); this.status = $('drawing-status');
+    this.toolbar = $('drawing-tools'); this.favbar = $('drawing-favs'); this.manager = $('drawing-manager'); this.status = $('drawing-status');
+    this.favs = this.loadFavs();
     this.buildUI();
     this.store = new DrawingStore(() => this.openMarket(this.market, true), (ctx, text) => {
       if (!ctx || (ctx.symbol === this.market && ctx.owner === (this.store.user?.id || 'guest'))) this.status.textContent = text;
@@ -42,6 +43,10 @@ export class DrawingEngine {
     host.addEventListener('dblclick', e => {
       if (e.target.closest?.('[data-id]')) { e.stopImmediatePropagation(); this.manager.hidden = false; this.updatePanel(); }
     }, options);
+    host.addEventListener('contextmenu', e => this.contextMenu(e), options);
+    document.addEventListener('pointerdown', e => {
+      if (this.menu && !this.menu.contains(e.target)) this.closeContextMenu();
+    }, { signal: this.abort.signal, capture: true });
     document.addEventListener('keydown', e => this.keydown(e), { signal: this.abort.signal });
     this.observer = new ResizeObserver(() => this.render());
     this.observer.observe(host);
@@ -54,7 +59,10 @@ export class DrawingEngine {
     };
     this.tick();
   }
-  step() { return { '1m': 60, '5m': 300, '15m': 900, '30m': 1800, '1h': 3600, '4h': 14400, '1d': 86400, '1w': 604800 }[this.getInterval()]; }
+  step() {
+    const m = /^(\d+)([mhdw])$/.exec(this.getInterval() || '');
+    return m ? Number(m[1]) * { m: 60, h: 3600, d: 86400, w: 604800 }[m[2]] : 3600;
+  }
   project(point) {
     const logical = timeToLogical(point.time, this.getBars(), this.step());
     if (logical == null) return null;
@@ -111,11 +119,7 @@ export class DrawingEngine {
     this.ready = true; this.refresh();
   }
   buildUI() {
-    for (const [tool, [icon, label]] of Object.entries(TOOLS)) {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = icon;
-      b.title = label; b.setAttribute('aria-label', label); b.dataset.tool = tool;
-      b.addEventListener('click', () => this.setTool(tool)); this.toolbar.append(b);
-    }
+    this.renderToolbars();
     $('drawing-undo').onclick = () => { this.cancel(); if (this.ready && this.history.undo()) this.changed(); };
     $('drawing-redo').onclick = () => { this.cancel(); if (this.ready && this.history.redo()) this.changed(); };
     $('drawing-manage').onclick = () => { this.manager.hidden = !this.manager.hidden; this.updatePanel(); };
@@ -138,11 +142,85 @@ export class DrawingEngine {
     };
     this.refresh();
   }
+  loadFavs() {
+    try {
+      const v = JSON.parse(localStorage.getItem('alfa-draw-fav:v1') || 'null');
+      if (Array.isArray(v) && v.length) return v.filter(t => TOOLS[t]);
+    } catch {}
+    return ['cursor', 'trend', 'horizontal', 'fibonacci', 'rectangle', 'brush', 'text'];
+  }
+  saveFavs() { try { localStorage.setItem('alfa-draw-fav:v1', JSON.stringify(this.favs)); } catch {} }
+  toggleFav(tool) {
+    if (this.favs.includes(tool)) this.favs = this.favs.filter(t => t !== tool);
+    else this.favs.push(tool);
+    this.favs = Object.keys(TOOLS).filter(t => this.favs.includes(t));
+    this.saveFavs(); this.renderToolbars();
+    this.status.textContent = this.favs.includes(tool) ? `${TOOLS[tool][1]} favorilere eklendi` : `${TOOLS[tool][1]} favorilerden çıkarıldı`;
+  }
+  toolButtons() { return [...(this.favbar?.querySelectorAll('[data-tool]') || []), ...this.toolbar.querySelectorAll('[data-tool]')]; }
+  renderToolbars() {
+    const make = (tool, starred) => {
+      const [icon, label] = TOOLS[tool];
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = icon;
+      b.title = `${label} · sağ tık: ${starred ? 'favorilerden çıkar' : 'favorilere ekle'}`;
+      b.setAttribute('aria-label', label); b.dataset.tool = tool;
+      b.setAttribute('aria-pressed', String(tool === this.tool));
+      b.addEventListener('click', () => this.setTool(tool));
+      b.addEventListener('contextmenu', e => { e.preventDefault(); this.toggleFav(tool); });
+      return b;
+    };
+    if (this.favbar) {
+      this.favbar.replaceChildren();
+      for (const tool of this.favs) this.favbar.append(make(tool, true));
+      this.favbar.hidden = !this.favs.length;
+    }
+    this.toolbar.replaceChildren();
+    for (const tool of Object.keys(TOOLS)) this.toolbar.append(make(tool, false));
+  }
+  contextMenu(e) {
+    if (!this.ready || !this.inPlot(e)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    this.closeContextMenu();
+    const point = this.unproject(e);
+    const id = e.target.closest?.('[data-id]')?.getAttribute('data-id');
+    if (id) { this.selected = id; this.refresh(); }
+    const d = id ? this.history.doc.drawings.find(x => x.id === id) : null;
+    const menu = document.createElement('div'); menu.className = 'chart-context-menu';
+    menu.setAttribute('role', 'menu');
+    const item = (text, fn, disabled = false) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = text; b.disabled = disabled;
+      b.addEventListener('click', () => { this.closeContextMenu(); fn(); });
+      menu.append(b);
+    };
+    const fmtPrice = p => Number(p).toLocaleString('tr-TR', { maximumFractionDigits: 6 });
+    if (point && this.onAlarm) {
+      item(`🔔 Alarm: fiyat ≥ ${fmtPrice(point.price)}`, () => this.onAlarm(point.price, 'above'));
+      item(`🔔 Alarm: fiyat ≤ ${fmtPrice(point.price)}`, () => this.onAlarm(point.price, 'below'));
+    }
+    if (this.onAlarmManager) item('🔔 Alarm yönetimi…', () => this.onAlarmManager());
+    if (d) {
+      menu.append(document.createElement('hr'));
+      if (d.locked) item('🔒 Kilidi aç', () => { this.selected = d.id; this.action('lock'); });
+      else {
+        item('🗑 Çizimi sil', () => { this.selected = d.id; this.action('remove'); });
+        item('📋 Kopyala', () => { this.selected = d.id; this.action('copy'); });
+      }
+      item(d.hidden ? '👁 Göster' : '👁 Gizle', () => { this.selected = d.id; this.action('hide'); });
+      item('⚙ Ayarlar…', () => { this.selected = d.id; this.manager.hidden = false; this.updatePanel(); });
+    }
+    if (!menu.children.length) return;
+    document.body.append(menu);
+    const mw = menu.offsetWidth, mh = menu.offsetHeight;
+    menu.style.left = Math.max(4, Math.min(e.clientX, window.innerWidth - mw - 4)) + 'px';
+    menu.style.top = Math.max(4, Math.min(e.clientY, window.innerHeight - mh - 4)) + 'px';
+    this.menu = menu;
+  }
+  closeContextMenu() { if (this.menu) { this.menu.remove(); this.menu = null; } }
   setTool(tool) {
     if (!this.ready) return;
     this.cancel(); this.tool = tool;
     this.host.dataset.drawingTool = tool;
-    this.toolbar.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === tool)));
+    this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === tool)));
     $('drawing-help').textContent = tool === 'cursor' ? 'Çizimi seçin/sürükleyin · çift tık: ayarlar · Delete: sil'
       : tool === 'delete' ? 'Silmek için kilitli olmayan bir çizime tıklayın · Escape: iptal'
       : tool === 'brush' ? 'Fırça · basılı tutup sürükleyin · Escape: iptal'
@@ -150,9 +228,10 @@ export class DrawingEngine {
     this.render();
   }
   cancel() {
+    this.closeContextMenu();
     this.draft = null; this.drag = null; this.pending = null; this.brushing = false; this.tool = 'cursor';
     this.host.dataset.drawingTool = 'cursor';
-    this.toolbar?.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === 'cursor')));
+    this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === 'cursor')));
     if ($('drawing-help')) $('drawing-help').textContent = 'Çizimi seçin/sürükleyin · çift tık: ayarlar';
     this.render();
   }
@@ -270,7 +349,7 @@ export class DrawingEngine {
     this.commit(next);
   }
   keydown(e) {
-    if (e.key === 'Escape') { this.cancel(); e.preventDefault(); return; }
+    if (e.key === 'Escape') { this.closeContextMenu(); this.cancel(); e.preventDefault(); return; }
     if (e.target.closest?.('input,textarea,select,[contenteditable=true]')) return;
     if ((e.ctrlKey || e.metaKey) && ['z', 'y'].includes(e.key.toLowerCase())) {
       e.preventDefault(); this.cancel();
@@ -294,7 +373,7 @@ export class DrawingEngine {
     this.svg.replaceChildren(fragment);
   }
   refresh() {
-    this.toolbar.querySelectorAll('button').forEach(b => { b.disabled = !this.ready; });
+    this.toolButtons().forEach(b => { b.disabled = !this.ready; });
     $('drawing-undo').disabled = !this.ready || !this.history.past.length;
     $('drawing-redo').disabled = !this.ready || !this.history.future.length;
     $('drawing-cloud-retry').disabled = !this.ready || !this.context?.remote;
@@ -373,6 +452,7 @@ export class DrawingEngine {
   dispose() {
     this.disposed = true;
     ++this.epoch; this.abort.abort(); cancelAnimationFrame(this.frame);
+    this.closeContextMenu();
     this.observer.disconnect(); this.store.dispose(); this.svg.remove();
   }
 }

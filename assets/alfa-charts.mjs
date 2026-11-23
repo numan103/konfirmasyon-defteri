@@ -1,8 +1,9 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
-import { DrawingEngine } from './alfa-drawings.mjs?v=6';
+import { DrawingEngine } from './alfa-drawings.mjs?v=7';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
+import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=1';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
 import { FvgManager } from './alfa-fvg.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=2';
@@ -740,7 +741,8 @@ $('fullscreen').addEventListener('click', async () => {
   } catch { connection('Tarayıcı tam ekran isteğini reddetti', 'error'); }
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? 'Küçült' : 'Tam ekran'; });
-const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval,
+  onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager() });
 try {
   const magOn = localStorage.getItem('alfa-magnet:v1') === '1';
   drawings.setMagnet(magOn);
@@ -783,6 +785,13 @@ function checkAlarms(price) {
     if ((a.cond === 'above' && price >= a.price) || (a.cond === 'below' && price <= a.price)) fireAlarm(a, price);
   }
 }
+function addQuickAlarm(price, cond) {
+  if (!Number.isFinite(price) || price <= 0) return;
+  ensureAlarms().push({ id: crypto.randomUUID(), symbol, price, cond, note: 'Grafik sağ tık', triggered: false, createdAt: Date.now() });
+  saveAlarms(alarms);
+  try { if (Notification.permission === 'default') Notification.requestPermission(); } catch {}
+  connection(`Alarm eklendi: ${symbol} ${cond === 'above' ? '≥' : '≤'} ${priceFormat.format(price)}`, 'ok');
+}
 function openAlarmManager() {
   const mine = ensureAlarms().filter(a => a.symbol === symbol);
   const rows = mine.length ? mine.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;"><span style="flex:1">${a.cond === 'above' ? '≥' : '≤'} ${a.price} ${a.triggered ? '· ✅ tetiklendi' : ''}${a.note ? ' · ' + a.note : ''}</span><button data-del-alarm="${a.id}" style="padding:4px 8px;border-radius:6px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Sil</button></div>`).join('') : '<p style="color:#8e9eb6">Bu sembolde alarm yok.</p>';
@@ -814,6 +823,7 @@ $('alarm-toggle').addEventListener('click', openAlarmManager);
 
 const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
+const sessionBoxes = new SessionBoxesManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval, onChange: () => saveLayout() });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
@@ -836,14 +846,14 @@ const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').
   try { mtf.render(); } catch {}
 });
 cloudSettings.start();
-function dispose() { pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation; closeTransport(); drawings.dispose(); observer.disconnect(); chart.remove(); }
+function dispose() { pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation; closeTransport(); drawings.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove(); }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 window.addEventListener('online', () => { if (!disposed&&!replayMode) loadMarket(); });
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, sessionBoxes, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }
@@ -955,11 +965,17 @@ function saveLayout() {
       indicators: indicators.toJSON(),
       mtf: mtf.config,
       sessionLevels: sessionLevels.config,
+      sessionBoxes: sessionBoxes.config,
       marketStructure: marketStructure.config,
       fvg: fvg.config,
     }));
   } catch {}
   scheduleCloudSave();
+}
+function applySessionBoxesConfig(cfg) {
+  if (!cfg || typeof cfg !== 'object') return;
+  sessionBoxes.config = { ...sessionBoxes.defaultConfig(), ...cfg, enabled: { ...sessionBoxes.defaultConfig().enabled, ...(cfg.enabled || {}) } };
+  sessionBoxes.buildUI(); sessionBoxes.render();
 }
 async function loadLayout() {
   if(replayMode)return;
@@ -975,6 +991,7 @@ async function loadLayout() {
       if (Array.isArray(raw.indicators)) { indicators.clear(); for (const e of raw.indicators) indicators.add(e.type, e.params); }
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
+      if (raw.sessionBoxes) applySessionBoxesConfig(raw.sessionBoxes);
       if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
       if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
     }
@@ -989,6 +1006,7 @@ async function loadLayout() {
       if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
+      if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
       if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
       if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
       cloudRevision = cloud.revision || 0;
@@ -1008,6 +1026,7 @@ function scheduleCloudSave() {
       indicators: indicators.toJSON(),
       mtf: mtf.config,
       sessionLevels: sessionLevels.config,
+      sessionBoxes: sessionBoxes.config,
       marketStructure: marketStructure.config,
       fvg: fvg.config,
     };
@@ -1023,6 +1042,7 @@ function scheduleCloudSave() {
         if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
+        if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
         if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
         if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
         cloudRevision = cloud.revision || cloudRevision;
