@@ -1,4 +1,4 @@
-import { fibPrice, positionStats } from './alfa-drawings-model.mjs?v=6';
+import { fibPrice, positionStats, normalizeStyle } from './alfa-drawings-model.mjs?v=7';
 const NS = 'http://www.w3.org/2000/svg';
 const fmt = n => Number(n).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
 function el(tag, attrs, text) {
@@ -7,24 +7,35 @@ function el(tag, attrs, text) {
   if (text != null) node.textContent = text;
   return node;
 }
-export function renderDrawing(d, project, width, height, selected, draft = false, showHandles = true) {
+export function renderDrawing(d, project, width, height, selected, draft = false, showHandles = true, currentPrice) {
   const p = d.points.map(project);
   if (p.some(v => !v || !Number.isFinite(v.x) || !Number.isFinite(v.y))) return null;
   const g = el('g', { 'data-id': d.id, role: 'group', 'aria-label': d.type + ' çizimi', class: 'drawing' + (selected ? ' selected' : ''), opacity: draft ? .65 : 1 });
-  const color = d.color, stroke = d.width;
+  const style = normalizeStyle(d);
+  const color = style.color, stroke = style.width;
+  const dash = style.lineStyle === 'dashed' ? '9 6' : style.lineStyle === 'dotted' ? '2 5' : null;
+  const stats = ['long', 'short'].includes(d.type) ? positionStats(d, currentPrice) : null;
+  const live = style.dynamicColors && stats?.current != null && stats.valid;
+  const palette = live
+    ? { loss: style.lossColor, profit: style.profitColor,
+        lossPhase: stats.phase === 'loss' || stats.phase === 'stop', profitPhase: stats.phase === 'profit' || stats.phase === 'target' }
+    : { loss: '#ef6677', profit: '#26c89c', lossPhase: false, profitPhase: false };
   const append = node => { g.append(node); return node; };
   function line(x1, y1, x2, y2, c = color, handle) {
     append(el('line', { x1, y1, x2, y2, stroke: c, 'stroke-width': Math.max(12, stroke), 'stroke-opacity': 0,
       ...(handle ? { 'data-handle': handle } : {}), class: 'drawing-hit' }));
-    append(el('line', { x1, y1, x2, y2, stroke: c, 'stroke-width': stroke, 'pointer-events': 'none' }));
+    append(el('line', { x1, y1, x2, y2, stroke: c, 'stroke-width': stroke, 'pointer-events': 'none',
+      ...(dash ? { 'stroke-dasharray': dash, 'stroke-linecap': style.lineStyle === 'dotted' ? 'round' : 'butt' } : {}) }));
   }
   function label(x, y, text, c = color, size = 11) {
+    if (!style.showLabels) return;
     append(el('text', { x: Math.max(4, Math.min(width - 12, x)), y: Math.max(14, Math.min(height - 4, y)), fill: c,
       'font-size': size, 'paint-order': 'stroke', stroke: '#10141c', 'stroke-width': 3, class: 'drawing-label' }, text));
   }
-  function rect(x, y, w, h, fill, opacity = .14) {
-    append(el('rect', { x, y, width: Math.max(1, w), height: Math.max(1, h), fill, 'fill-opacity': opacity, stroke: fill,
-      'stroke-width': 1, class: 'drawing-area' }));
+  function rect(x, y, w, h, fill = style.fillColor, opacity = style.fillOpacity, radius = style.cornerRadius, strokeColor = fill) {
+    const r = Math.max(0, Math.min(40, Number(radius) || 0));
+    append(el('rect', { x, y, width: Math.max(1, w), height: Math.max(1, h), fill, 'fill-opacity': opacity,
+      stroke: strokeColor, 'stroke-width': 1, rx: r, ry: r, class: 'drawing-area' }));
   }
   const a = p[0], b = p[1] || a;
   const left = Math.min(a.x, b.x), right = Math.max(a.x, b.x), top = Math.min(a.y, b.y), bottom = Math.max(a.y, b.y);
@@ -39,7 +50,7 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     }
     line(a.x, a.y, end.x, end.y);
   }
-  if (d.type === 'rectangle') rect(left, top, right - left, bottom - top, color);
+  if (d.type === 'rectangle') rect(left, top, right - left, bottom - top, style.fillColor, style.fillOpacity, style.cornerRadius, color);
   if (d.type === 'fibonacci') {
     for (const level of d.levels) {
       const price = fibPrice(d.points[0].price, d.points[1].price, level, d.reversed);
@@ -51,16 +62,25 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     append(el('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: color, 'stroke-dasharray': '4 4', 'pointer-events': 'none' }));
   }
   if (d.type === 'long' || d.type === 'short') {
-    const stats = positionStats(d);
+    const s = stats;
     const entryY = a.y, stopY = b.y, targetY = project({ time: d.points[0].time, price: d.target })?.y;
     if (targetY == null) return null;
-    rect(left, Math.min(entryY, stopY), right - left, Math.abs(entryY - stopY), '#ef6677', .2);
-    rect(left, Math.min(entryY, targetY), right - left, Math.abs(entryY - targetY), '#26c89c', .2);
-    line(left, entryY, right, entryY, color, 'entry'); line(left, stopY, right, stopY, '#ef6677', 'stop');
-    line(left, targetY, right, targetY, '#26c89c', 'target');
-    label(left + 4, entryY - 6, `Entry ${fmt(stats.entry)} · RR 1:${stats.rr.toFixed(2)}`);
-    label(left + 4, stopY + 16, `SL ${fmt(stats.stop)} · Risk %${stats.riskPercent.toFixed(2)}`, '#ef6677');
-    label(left + 4, targetY - 6, `TP ${fmt(stats.target)} · Kazanç %${stats.gainPercent.toFixed(2)}`, '#26c89c');
+    const baseOpacity = live ? .12 : .2;
+    rect(left, Math.min(entryY, stopY), right - left, Math.abs(entryY - stopY), palette.loss, baseOpacity, style.cornerRadius, palette.loss);
+    rect(left, Math.min(entryY, targetY), right - left, Math.abs(entryY - targetY), palette.profit, baseOpacity, style.cornerRadius, palette.profit);
+    const nowY = live ? project({ time: d.points[0].time, price: Math.min(Math.max(stats.current, Math.min(stats.stop, stats.target)), Math.max(stats.stop, stats.target)) })?.y : null;
+    if (nowY != null && Math.abs(nowY - entryY) > 1) {
+      const activeColor = palette.lossPhase ? palette.loss : palette.profitPhase ? palette.profit : color;
+      rect(left, Math.min(entryY, nowY), right - left, Math.abs(entryY - nowY), activeColor, .3, style.cornerRadius, activeColor);
+      line(left, nowY, right, nowY, activeColor);
+    }
+    line(left, entryY, right, entryY, color, 'entry'); line(left, stopY, right, stopY, palette.loss, 'stop');
+    line(left, targetY, right, targetY, palette.profit, 'target');
+    label(left + 4, entryY - 6, `Entry ${fmt(s.entry)} · RR 1:${s.rr.toFixed(2)}`);
+    label(left + 4, stopY + 16, `SL ${fmt(s.stop)} · Risk %${s.riskPercent.toFixed(2)}`, palette.loss);
+    label(left + 4, targetY - 6, `TP ${fmt(s.target)} · Kazanç %${s.gainPercent.toFixed(2)}`, palette.profit);
+    if (live) label(left + 4, entryY + 16, `Anlık ${fmt(s.current)} · ${s.pl >= 0 ? '+' : ''}${fmt(s.pl)} (${s.plPercent >= 0 ? '+' : ''}${s.plPercent.toFixed(2)}%) · ${s.phase === 'target' ? 'TP' : s.phase === 'stop' ? 'SL' : s.phase === 'profit' ? 'Kâr' : s.phase === 'loss' ? 'Zarar' : 'Entry'}`,
+      palette.lossPhase ? palette.loss : palette.profit);
     label(left + 4, Math.min(entryY, targetY) + 16, 'Yalnızca analiz · emir açılmaz', '#a3b0c5');
   }
   if (d.type === 'text') {
@@ -72,7 +92,7 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     const lines = d.text.split('\n');
     const w = Math.max(...lines.map(t => t.length)) * size * .62 + 12;
     const h = lines.length * (size + 3) + 8;
-    rect(a.x - 4, a.y - size - 2, w, h, color, .18);
+    rect(a.x - 4, a.y - size - 2, w, h, style.fillColor, .18, style.cornerRadius, color);
     lines.forEach((text, i) => label(a.x + 2, a.y + i * (size + 3), text, color, size));
   }
   if (d.type === 'arrow') {
@@ -93,7 +113,7 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     }
   }
   if (d.type === 'ruler') {
-    rect(left, top, right - left, bottom - top, color, .08);
+    rect(left, top, right - left, bottom - top, style.fillColor, .08, style.cornerRadius, color);
     line(a.x, a.y, b.x, b.y);
     const diff = d.points[1].price - d.points[0].price;
     const hours = Math.abs(d.points[1].time - d.points[0].time) / 3600;

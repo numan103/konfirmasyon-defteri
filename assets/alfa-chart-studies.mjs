@@ -8,6 +8,13 @@ export const OVERLAY_CATALOG = [
   { id: 'structure', name: 'Piyasa yapısı', category: 'Smart Money', description: 'Swing, HH/HL, BOS, CHoCH ve korunan seviyeler', color: '#71b9c0' },
   { id: 'fvg', name: 'FVG / IFVG', category: 'Smart Money', description: 'Fair Value Gap ve tersine dönen dengesizlik bölgeleri', color: '#7aafa0' },
   { id: 'mtf', name: 'Çoklu zaman dilimi · MTF', category: 'Smart Money', description: 'Üst periyot yapıları, swing ve FVG katmanları', color: '#86a9e1' },
+  { id: 'oi', name: 'Açık Pozisyon · Open Interest', category: 'Market Data', description: 'Binance Futures açık pozisyon ve açık pozisyon değeri · anahtarsız', color: '#8ea7ff' },
+  { id: 'longShort', name: 'Long / Short Oranı', category: 'Market Data', description: 'Binance Futures global hesap long/short oranı · anahtarsız', color: '#d5b16a' },
+  { id: 'cvdSpot', name: 'CVD · Spot', category: 'Market Data', description: 'Binance Spot kapanış verisinden taker alım-satım kümülatif deltası', color: '#26c89c' },
+  { id: 'cvdPerp', name: 'CVD · Perpetual', category: 'Market Data', description: 'Binance USD-M vadeli taker alım-satım kümülatif deltası', color: '#8ea7ff' },
+  { id: 'marketDelta', name: 'Market Delta', category: 'Market Data', description: 'Mum başına taker alım - satım hacmi · ücretsiz', color: '#71b9c0' },
+  { id: 'footprint', name: 'Footprint', category: 'Market Data', description: 'Mum başına alıcı/satıcı iniciyatifi ve toplam işlem hacmi', color: '#7aafa0' },
+  { id: 'heatmap', name: 'Order Book Likidite Isı Haritası', category: 'Market Data', description: 'Binance emir defteri alış/satış likiditesi · canlı anlık görüntü', color: '#b29bd6' },
 ];
 const descriptions = {
   sma: 'Basit hareketli ortalama', ema: 'Üssel hareketli ortalama', wma: 'Ağırlıklı hareketli ortalama',
@@ -16,7 +23,8 @@ const descriptions = {
   stochastic: 'Stokastik K / D osilatörü', stochrsi: 'Stokastik RSI', atr: 'Ortalama gerçek aralık', adx: 'Trend gücü endeksi', obv: 'Dengelenmiş hacim',
 };
 const categories = [['all', 'Tüm indikatörler'], ['fav', 'Favoriler'], ['active', 'Grafikte'], ['Trend', 'Trend'],
-  ['Momentum', 'Momentum'], ['Volatility', 'Volatilite'], ['Volume', 'Hacim'], ['Smart Money', 'Smart Money'], ['Sessions', 'Seanslar & seviyeler']];
+  ['Momentum', 'Momentum'], ['Volatility', 'Volatilite'], ['Volume', 'Hacim'], ['Smart Money', 'Smart Money'],
+  ['Market Data', 'Piyasa verisi'], ['Sessions', 'Seanslar & seviyeler']];
 const labels = { period: 'Periyot', source: 'Fiyat kaynağı', color: 'Çizgi rengi', mult: 'Çarpan', fast: 'Hızlı periyot', slow: 'Yavaş periyot',
   signal: 'Sinyal periyodu', k: '%K periyodu', d: '%D periyodu', smooth: 'Yumuşatma', rsiPeriod: 'RSI periyodu',
   stochPeriod: 'Stokastik periyodu', kSmooth: '%K yumuşatma', dSmooth: '%D yumuşatma', left: 'Sol swing mumları', right: 'Sağ swing mumları',
@@ -24,11 +32,22 @@ const labels = { period: 'Periyot', source: 'Fiyat kaynağı', color: 'Çizgi re
   showSwings: 'Swing işaretleri', showHHHL: 'HH / HL / LH / LL', showBOS: 'BOS kırılımları', showCHoCH: 'CHoCH dönüşleri',
   showProtected: 'Korunan seviyeler', maxProtected: 'Maksimum korunan seviye', minGap: 'Minimum fiyat boşluğu', atrFilter: 'ATR filtresi',
   maxRegions: 'Maksimum bölge', showBull: 'Yükseliş bölgeleri', showBear: 'Düşüş bölgeleri', showIfvg: 'IFVG bölgeleri', showMitigated: 'Dolmuş / geçersiz bölgeleri de göster', extend: 'Bölgeleri sağa uzat',
-  opacity: 'Dolgu opaklığı', showFvg: 'FVG bölgeleri', showMS: 'Piyasa yapısı', showIFVG: 'IFVG bölgeleri', confirmedOnly: 'Yalnızca kapanmış HTF mumları' };
+  opacity: 'Dolgu opaklığı', showFvg: 'FVG bölgeleri', showMS: 'Piyasa yapısı', showIFVG: 'IFVG bölgeleri', confirmedOnly: 'Yalnızca kapanmış HTF mumları',
+  period: 'Veri periyodu', market: 'Piyasa', levels: 'Emir defteri seviyesi', refresh: 'Yenileme (sn)',
+  bidColor: 'Alış likiditesi', askColor: 'Satış likiditesi' };
+const periodOptions = [['auto', 'Grafik zaman dilimi'], ['5m', '5 dk'], ['15m', '15 dk'], ['30m', '30 dk'], ['1h', '1 sa'], ['4h', '4 sa'], ['1d', '1 gün']];
+const marketOptions = [['auto', 'Grafikteki piyasa'], ['spot', 'Binance Spot'], ['perp', 'Binance Vadeli']];
 const schemas = {
   structure: ['left', 'right', 'mode', 'displacement', 'dispMin', 'showSwings', 'showHHHL', 'showBOS', 'showCHoCH', 'showProtected', 'maxProtected'],
   fvg: ['minGap', 'atrFilter', 'displacement', 'dispMin', 'mitigation', 'maxRegions', 'showBull', 'showBear', 'showIfvg', 'showMitigated', 'extend', 'opacity'],
   mtf: ['showSwings', 'showFvg', 'showBOS', 'showCHoCH', 'showProtected', 'showIFVG', 'confirmedOnly', 'extend'],
+  oi: ['period', 'color', 'refresh'],
+  longShort: ['period', 'color', 'refresh'],
+  cvdSpot: ['color', 'refresh'],
+  cvdPerp: ['color', 'refresh'],
+  marketDelta: ['market', 'color', 'refresh'],
+  footprint: ['market', 'color', 'refresh'],
+  heatmap: ['market', 'levels', 'bidColor', 'askColor', 'refresh'],
 };
 export function defaultStudyState() {
   return Object.fromEntries(OVERLAY_CATALOG.map(d => [d.id, { added: d.id === 'volume', visible: true }]));
@@ -189,10 +208,13 @@ export class ChartStudies {
     if (!def) return;
     const manager = this.managers[id], cfg = item ? { ...item.params } : structuredClone(manager.config || {});
     const fields = item ? Object.keys(item.params) : schemas[id] || [];
+    const periodOwner = item ? item.type : id;
     const input = key => {
       const value = cfg[key] ?? manager?.defaultConfig?.()[key];
       let control;
       if (key === 'source') control = `<select data-k="${key}">${['open', 'high', 'low', 'close', 'hl2', 'hlc3', 'ohlc4'].map(v => `<option ${value === v ? 'selected' : ''} value="${v}">${v.toUpperCase()}</option>`).join('')}</select>`;
+      else if (key === 'period' && this.state[periodOwner]) control = `<select data-k="${key}">${periodOptions.map(([v, n]) => `<option value="${v}" ${value === v ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
+      else if (key === 'market' && ['marketDelta', 'footprint', 'heatmap'].includes(periodOwner)) control = `<select data-k="${key}">${marketOptions.map(([v, n]) => `<option value="${v}" ${value === v ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
       else if (key === 'mode' || key === 'mitigation') {
         const opts = key === 'mode' ? [['close', 'Kapanış'], ['wick', 'Fitil']] : [['wick', 'Fitil'], ['body', 'Mum gövdesi'], ['half', 'Yarı dolum'], ['full', 'Tam dolum']];
         control = `<select data-k="${key}">${opts.map(([v, n]) => `<option value="${v}" ${value === v ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
@@ -202,6 +224,9 @@ export class ChartStudies {
       return `<label class="setting-row"><span>${esc(labels[key] || (key === 'mode' ? 'Kırılım onayı' : 'Bölge dolum ölçütü'))}</span>${control}</label>`;
     };
     let html = fields.map(input).join('');
+    if (schemas[id] && ['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint', 'heatmap'].includes(id)) {
+      html = '<p>Bu gösterge anahtarsız Binance verisi kullanır. Yalnızca Binance Spot / Vadeli sembollerde çalışır; diğer borsa referansları dönüştürülmez.</p>' + html;
+    }
     if (id === 'mtf') html = `<fieldset><legend>Üst zaman dilimleri</legend>${['15m', '30m', '1h', '4h', '1d', '1w'].map(tf => `<label><input type="checkbox" data-htf="${tf}" ${(cfg.htf || []).includes(tf) ? 'checked' : ''}> ${tf.toUpperCase()}</label>`).join(' ')}</fieldset>` + html;
     if (id === 'levels') {
       const names = { DO: 'Gün açılışı', WO: 'Hafta açılışı', MO: 'Ay açılışı', NYMO: 'New York gece yarısı', PDH: 'Önceki gün yüksek', PDL: 'Önceki gün düşük',

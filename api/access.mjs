@@ -40,6 +40,15 @@ const FALLBACK_ADMIN = 'ahmetnuman20@gmail.com';
 const COOLDOWN_MS = 20000;
 const MAX_ATTEMPTS = 10;
 const MENTOR_REFRESH_MS = 30000;
+const ALARM_NOTIFY_LIMIT = 12;
+const alarmNotifyBudget = new Map();
+function allowAlarmNotify(userId, now = Date.now()) {
+  const key = String(userId).slice(0, 80);
+  const hit = alarmNotifyBudget.get(key);
+  if (!hit || now - hit.at > 60000) { alarmNotifyBudget.set(key, { at: now, count: 1 }); return true; }
+  if (alarmNotifyBudget.size > 2000) alarmNotifyBudget.clear();
+  hit.count++; return hit.count <= ALARM_NOTIFY_LIMIT;
+}
 
 const BASE_COLS = ['exchange', 'exchange_uid', 'status', 'verified_at', 'verified_by', 'attempts', 'updated_at'];
 // 012_access_archive.sql kurulmadiysa bu kolon yok; sorgularda kosullu eklenir.
@@ -873,6 +882,21 @@ export default async function handler(req, res) {
         return fail(res, e.message === 'bad_interval' || e.message === 'Geçersiz sembol' ? 400 : 502,
           e.message === 'bad_interval' ? 'bad_interval' : e.message === 'Geçersiz sembol' ? 'bad_market_ref' : 'market_unavailable');
       }
+    }
+    // Chart alarms can optionally reach Telegram. The authenticated user owns
+    // the destination chat; nothing is stored server-side and no new table or
+    // function is involved.
+    if (op === 'chart-alarm-telegram') {
+      if (!featureAccess(user).features.alfacharts) return fail(res, 403, 'charts_access_required');
+      if (!allowAlarmNotify(user.id)) return fail(res, 429, 'alarm_rate_limit');
+      const chatId = String(body.chatId || '').trim();
+      const text = String(body.text || '').slice(0, 400);
+      if (!/^\d{5,15}$/.test(chatId) || !text.trim()) return fail(res, 400, 'bad_alarm_payload');
+      try {
+        const result = await sendTelegram(`🔔 ${text}`, chatId);
+        if (!result?.ok || result.http !== 200) return fail(res, 502, 'telegram_unavailable');
+        return send(res, 200, { ok: true });
+      } catch { return fail(res, 502, 'telegram_unavailable'); }
     }
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);

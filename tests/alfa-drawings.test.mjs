@@ -41,6 +41,25 @@ for (const type of ['long', 'short']) {
     assert.equal(validDrawing(d), false);
   });
 }
+test('optional drawing styles and live position phases work without breaking legacy documents', () => {
+  const longPos = makeDrawing('long', [a, { ...b, price: 59000 }]);
+  assert.equal(longPos.lineStyle, 'solid');
+  assert.equal(longPos.fillColor, '#8ea7ff');
+  assert.equal(longPos.cornerRadius, 0);
+  assert.equal(longPos.dynamicColors, false);
+  assert.equal(positionStats(longPos, 62000).phase, 'profit');
+  assert.equal(positionStats(longPos, 59500).phase, 'loss');
+  assert.equal(positionStats(longPos, 59000).phase, 'stop');
+  assert.equal(positionStats(longPos, 62500).phase, 'target');
+  assert.ok(positionStats(longPos, 62000).pl > 0);
+  assert.ok(positionStats(longPos, 59500).pl < 0);
+  const legacy = JSON.parse(JSON.stringify(docWith(longPos)));
+  for (const key of ['lineStyle', 'fillColor', 'fillOpacity', 'cornerRadius', 'dynamicColors', 'profitColor', 'lossColor', 'showLabels']) delete legacy.drawings[0][key];
+  assert.equal(validateDocument(legacy).drawings.length, 1);
+  const bad = clone(longPos); bad.fillOpacity = 4; assert.equal(validDrawing(bad), false);
+  bad.fillOpacity = .2; bad.cornerRadius = 99; assert.equal(validDrawing(bad), false);
+  bad.cornerRadius = 8; bad.lineStyle = 'striped'; assert.equal(validDrawing(bad), false);
+});
 test('time projection round trips through irregular bars and extrapolation without snapping anchor timestamps', () => {
   const bars = [{ time: 1000 }, { time: 1060 }, { time: 1300 }];
   for (const time of [900, 1000, 1033.25, 1100, 1300, 1500]) {

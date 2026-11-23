@@ -10,7 +10,7 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 950 
 const page = await context.newPage(), errors = [], results = [];
 page.on('pageerror', e => errors.push(e.message));
 const origin = arg('url') || 'http://localhost:4173';
-const debug = fn => page.evaluate(fn);
+const debug = (fn, arg) => page.evaluate(fn, arg);
 const waitMarket = async (symbol, tf) => {
   await page.waitForFunction(({ symbol, tf }) => window.__alfaDebug?.ready &&
     window.__alfaDebug.drawings.ready && document.getElementById('market-title').textContent === `${symbol} · ${tf}`, { symbol, tf }, { timeout: 40000 });
@@ -157,6 +157,49 @@ try {
     assert.equal(after.points[0].price, before.points[0].price);
     assert.equal(after.target, before.target);
     assert.notEqual(after.points[1].price, before.points[1].price);
+  });
+  await test('TradingView-style drawing settings and live position colors', async () => {
+    const d = await lastDrawing();
+    await page.locator('#drawing-manage').click();
+    await page.locator(`#drawing-objects [data-object-id="${d.id}"]`).click();
+    await page.locator('#drawing-line-style').selectOption('dashed');
+    await page.locator('#drawing-corner-radius').fill('12');
+    await page.locator('#drawing-fill-color').fill('#123456');
+    await page.locator('#drawing-fill-opacity').fill('0.5');
+    await page.locator('#drawing-dynamic-colors').check();
+    await page.locator('#drawing-profit-color').fill('#00ff00');
+    await page.locator('#drawing-loss-color').fill('#ff00ff');
+    await page.locator('#drawing-settings button[type=submit]').click();
+    const styled = await lastDrawing();
+    assert.equal(styled.lineStyle, 'dashed'); assert.equal(styled.cornerRadius, 12);
+    assert.equal(styled.fillColor, '#123456'); assert.equal(styled.fillOpacity, .5);
+    assert.equal(styled.dynamicColors, true); assert.equal(styled.profitColor, '#00ff00'); assert.equal(styled.lossColor, '#ff00ff');
+    const rendered = await debug(id => {
+      const g = document.querySelector(`[data-id="${id}"]`);
+      return { radius: g.querySelector('rect.drawing-area')?.getAttribute('rx'),
+        dash: g.querySelector('line[pointer-events=none]')?.getAttribute('stroke-dasharray') };
+    }, d.id);
+    assert.equal(rendered.radius, '12'); assert.equal(rendered.dash, '9 6');
+    const live = await debug(id => {
+      const e = window.__alfaDebug, d = e.drawings.history.doc.drawings.find(x => x.id === id), bars = e.drawings.getBars();
+      const original = bars.at(-1).close;
+      bars.at(-1).close = d.target * 2;
+      e.drawings.render();
+      const g = document.querySelector(`[data-id="${id}"]`);
+      const result = { fills: [...g.querySelectorAll('rect.drawing-area')].map(r => r.getAttribute('fill')), label: g.textContent };
+      bars.at(-1).close = original;
+      e.drawings.render();
+      return result;
+    }, d.id);
+    assert.ok(live.fills.includes('#ff00ff'), JSON.stringify(live.fills));
+    assert.ok(live.fills.includes('#00ff00'), JSON.stringify(live.fills));
+    assert.match(live.label, /TP/);
+    await page.locator('#drawing-line-style').selectOption('solid');
+    await page.locator('#drawing-corner-radius').fill('0');
+    await page.locator('#drawing-fill-opacity').fill('0.14');
+    await page.locator('#drawing-dynamic-colors').uncheck();
+    await page.locator('#drawing-settings button[type=submit]').click();
+    await page.locator('#drawing-close').click();
   });
   if (arg('desktop')) await page.screenshot({ path: arg('desktop') });
   await test('Wheel zoom over SVG drawings and in an active drawing tool still works', async () => {

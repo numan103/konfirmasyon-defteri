@@ -1,5 +1,5 @@
-import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=6';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=7';
+import { TOOLS, STYLE_FIELDS, normalizeStyle, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=7';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=8';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=4';
 import { icon, chartDialog } from './alfa-chart-ui.mjs?v=2';
 import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=1';
@@ -72,7 +72,7 @@ export class DrawingEngine {
       try {
         const ts = chart.timeScale(), bars = getBars();
         const signature = [ts.logicalToCoordinate(0), ts.logicalToCoordinate(1), this.series.priceToCoordinate(1),
-          this.series.priceToCoordinate(100), ts.width(), this.dimensions().height, bars.length, bars.at(-1)?.time].join(':');
+          this.series.priceToCoordinate(100), ts.width(), this.dimensions().height, bars.length, bars.at(-1)?.time, bars.at(-1)?.close].join(':');
         if (signature !== this.signature) { this.render(); this.signature = signature; }
       } catch {}
       this.frame = requestAnimationFrame(this.tick);
@@ -313,6 +313,7 @@ export class DrawingEngine {
       chartItem('Son muma dön', 'realtime', { symbol: '▶', shortcut: 'Alt+L' });
       chartItem('Tam ekran', 'fullscreen', { symbol: '⛶' });
       chartItem('Grafik ayarları…', 'settings', { symbol: '⚙', shortcut: 'Alt+S' });
+      chartItem('Mum ve zemin renkleri…', 'candle-settings', { symbol: '🎨' });
       heading('GÖRÜNÜM');
       chartItem('Izgara çizgileri', 'grid', { checked: chartState.grid });
       chartItem('Fiyat ekseni etiketleri', 'axisLabels', { checked: chartState.axisLabels });
@@ -568,13 +569,14 @@ export class DrawingEngine {
     const { width, height } = this.dimensions();
     this.svg.setAttribute('width', Math.max(0, width)); this.svg.setAttribute('height', Math.max(0, height));
     const fragment = document.createDocumentFragment();
+    const price = Number(this.getBars?.().at(-1)?.close);
     for (const d of (this.pending || this.history.doc).drawings) {
       if (d.hidden) continue;
-      const g = renderDrawing(d, p => this.project(p), width, height, this.selection.has(d.id), false, this.selection.size === 1);
+      const g = renderDrawing(d, p => this.project(p), width, height, this.selection.has(d.id), false, this.selection.size === 1, price);
       if (g) fragment.append(g);
     }
     if (this.draft) {
-      const g = renderDrawing(this.draft, p => this.project(p), width, height, false, true);
+      const g = renderDrawing(this.draft, p => this.project(p), width, height, false, true, true, price);
       if (g) fragment.append(g);
     }
     this.svg.replaceChildren(fragment);
@@ -609,7 +611,13 @@ export class DrawingEngine {
     form.hidden = !d || this.selection.size !== 1;
     $('drawing-selected-name').textContent = this.selection.size > 1 ? `${this.selection.size} seçili` : d ? d.name || toolNames[d.type] : '';
     if (!d || this.selection.size !== 1) return;
-    $('drawing-color').value = d.color; $('drawing-width').value = d.width;
+    const style = normalizeStyle(d);
+    $('drawing-color').value = style.color; $('drawing-width').value = style.width;
+    $('drawing-line-style').value = style.lineStyle; $('drawing-fill-color').value = style.fillColor;
+    $('drawing-fill-opacity').value = style.fillOpacity; $('drawing-corner-radius').value = style.cornerRadius;
+    $('drawing-show-labels').checked = style.showLabels; $('drawing-dynamic-colors').checked = style.dynamicColors;
+    $('drawing-profit-color').value = style.profitColor; $('drawing-loss-color').value = style.lossColor;
+    $('drawing-dynamic-fields').hidden = !isPosition(d);
     $('drawing-text-row').hidden = !['text', 'label'].includes(d.type); $('drawing-font-row').hidden = !['text', 'label'].includes(d.type);
     $('drawing-text').value = d.text || ''; $('drawing-font-size').value = d.fontSize || 14;
     $('drawing-fib-fields').hidden = d.type !== 'fibonacci';
@@ -638,6 +646,9 @@ export class DrawingEngine {
   applySettings() {
     const next = clone(this.history.doc), d = next.drawings.find(x => x.id === this.selected); if (!d || d.locked) return;
     d.color = $('drawing-color').value; d.width = Number($('drawing-width').value);
+    d.lineStyle = $('drawing-line-style').value; d.fillColor = $('drawing-fill-color').value;
+    d.fillOpacity = Number($('drawing-fill-opacity').value); d.cornerRadius = Number($('drawing-corner-radius').value);
+    d.showLabels = $('drawing-show-labels').checked;
     if (d.type === 'text' || d.type === 'label') {
       d.text = $('drawing-text').value.trim() || (d.type === 'label' ? 'Etiket' : 'Metin'); d.fontSize = Number($('drawing-font-size').value);
     }
@@ -648,6 +659,7 @@ export class DrawingEngine {
     }
     if (isPosition(d)) {
       d.points[0].price = Number($('position-entry').value); d.points[1].price = Number($('position-stop').value); d.target = Number($('position-target').value);
+      d.dynamicColors = $('drawing-dynamic-colors').checked; d.profitColor = $('drawing-profit-color').value; d.lossColor = $('drawing-loss-color').value;
     }
     this.commit(next);
   }
@@ -655,7 +667,7 @@ export class DrawingEngine {
     const d = this.current(); if (d?.type !== 'fibonacci' || d.locked) return;
     const name = $('fib-template-name').value.trim();
     if (!name) { this.status.textContent = 'Şablon adı girin'; return; }
-    const style = Object.fromEntries(['color', 'width', 'levels', 'reversed', 'showPrices'].map(key => [key, clone(d[key])]));
+    const style = Object.fromEntries([...STYLE_FIELDS, 'levels', 'reversed', 'showPrices'].filter(key => d[key] != null).map(key => [key, clone(d[key])]));
     const next = clone(this.history.doc), existing = next.templates.find(t => t.name === name);
     if (existing) existing.style = style; else next.templates.push({ name, style });
     this.commit(next);

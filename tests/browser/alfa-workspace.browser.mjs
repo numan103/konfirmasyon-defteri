@@ -37,6 +37,11 @@ try {
   await test('all indicators, FVG, sessions and MTF share one searchable, favoritable catalogue', async () => {
     await catalogue();
     for (const id of ['ema', 'rsi', 'macd', 'fvg', 'structure', 'sessions', 'levels', 'mtf']) assert.equal(await page.locator(`[data-add="${id}"]`).count(), 1, id);
+    await page.click('[data-cat="Market Data"]');
+    for (const id of ['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint', 'heatmap']) {
+      assert.equal(await page.locator(`[data-add="${id}"]`).count(), 1, id);
+    }
+    await page.click('[data-cat=all]');
     assert.equal(await page.locator('.studies-dialog #replay-toggle').count(), 0);
     await page.fill('#ind-search', 'FVG');
     assert.equal(await page.locator('[data-add=fvg]').count(), 1);
@@ -130,6 +135,27 @@ try {
     assert.equal(await page.locator('#lab-menu [data-add=fvg]').count(), 0);
     await page.click('#tester-open'); assert.match(await page.locator('dialog').textContent(), /Strateji testleri/); await close();
   });
+  await test('alarm manager exposes conditions, sound presets and delivery options', async () => {
+    await page.click('#alarm-toggle');
+    await page.waitForFunction(() => !!document.querySelector('#alarm-form'));
+    assert.equal(await page.locator('#alarm-cond option').count(), 6);
+    assert.equal(await page.locator('#alarm-sound option').count(), 7);
+    assert.equal(await page.locator('#alarm-repeat option').count(), 3);
+    assert.equal(await page.locator('#alarm-telegram').count(), 1);
+    assert.equal(await page.locator('#alarm-webhook').count(), 1);
+    await page.selectOption('#alarm-cond', 'pctUp');
+    await page.selectOption('#alarm-sound', 'chime');
+    await page.selectOption('#alarm-repeat', 'three');
+    await page.fill('#alarm-pct', '2');
+    await page.fill('#alarm-note', 'Browser alarm');
+    await page.click('#alarm-add');
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('alfa-alarms:v1:guest') || '[]').length === 2);
+    const alarm = await state(() => JSON.parse(localStorage.getItem('alfa-alarms:v1:guest')).at(-1));
+    assert.deepEqual({ cond: alarm.cond, sound: alarm.sound, repeat: alarm.repeat, note: alarm.note, pct: alarm.pct },
+      { cond: 'pctUp', sound: 'chime', repeat: 'three', note: 'Browser alarm', pct: 2 });
+    assert.ok(alarm.basePrice > 0 && alarm.price > 0);
+    await close();
+  });
   await test('chart settings apply and view reset is non-destructive', async () => {
     const before = await state(() => ({
       drawings: window.__alfaDebug.drawings.history.doc.drawings.length,
@@ -152,6 +178,41 @@ try {
       indicators: window.__alfaDebug.indicators.items.length,
     })), before);
     assert.match(await page.locator('#connection').textContent(), /sıfırlandı/);
+  });
+  await test('free public microstructure studies render from keyless Binance data', async () => {
+    const klineRow = [1700000000000, '0', '0', '0', '0', '10', '1700000300000', '0', 12, '7', '0', '0'];
+    const publicRoute = /^https:\/\/api\.binance\.com\/api\/v3\/klines/;
+    const handler = route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([klineRow]) });
+    await page.route(publicRoute, handler);
+    try {
+      await catalogue(); await add('marketDelta'); await close();
+      await page.waitForFunction(() => window.__alfaDebug.publicStudies.seriesById.marketDelta.length === 1, null, { timeout: 15000 });
+      assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 3);
+      assert.equal(await state(() => window.__alfaDebug.publicStudies.seriesById.marketDelta[0].data()[0].value), 4);
+      assert.equal(await state(() => window.__alfaDebug.publicStudies.facades.marketDelta.enabled), true);
+      await page.click('#study-legend [data-study-remove="marketDelta"]');
+      await page.waitForFunction(() => window.__alfaDebug.publicStudies.seriesById.marketDelta.length === 0);
+      assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 2);
+    } finally { await page.unroute(publicRoute, handler); }
+  });
+  await test('candle palette settings and numeric timeframe shortcuts', async () => {
+    const r = await page.locator('#chart').boundingBox();
+    await page.mouse.click(r.x + 200, r.y + 160, { button: 'right' });
+    await page.locator('.chart-context-menu button').filter({ hasText: 'Mum ve zemin renkleri' }).click();
+    await page.waitForFunction(() => !!document.querySelector('#candle-settings-form'));
+    await page.fill('#candle-settings-form input[name=up]', '#00ff88');
+    await page.fill('#candle-settings-form input[name=down]', '#ff3366');
+    await page.click('#candle-settings-form button[type=submit]');
+    await page.waitForFunction(() => !document.querySelector('#candle-settings-form'));
+    const saved = await state(() => JSON.parse(localStorage.getItem('alfa-chart-palette:v1') || '{}'));
+    assert.equal(saved.up, '#00ff88');
+    assert.equal(saved.down, '#ff3366');
+    assert.match(saved.gridVert, /^#[0-9a-f]{8}$/i, 'alpha grid colour survives palette apply');
+    assert.equal(await state(() => window.__alfaDebug.candles.options().upColor), '#00ff88');
+    await page.keyboard.press('1'); await page.keyboard.press('5');
+    await page.waitForFunction(() => document.getElementById('market-title').textContent.includes('15M'), null, { timeout: 45000 });
+    await page.keyboard.press('6'); await page.keyboard.press('0');
+    await page.waitForFunction(() => document.getElementById('market-title').textContent.includes('1H'), null, { timeout: 45000 });
   });
   await test('layout, hidden states and UTC overrides survive reload', async () => {
     const ema = await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'ema').id);
@@ -226,6 +287,46 @@ try {
     assert.ok(immediate.bars > 0);
     await ready();
     assert.equal(await state(() => document.getElementById('symbol').value), 'BTCUSDT');
+  });
+  await test('multi-chart tabs, layouts and embedded panes work without static iframes', async () => {
+    const embedRoute = /\/alfa-charts\.html\?embed=1/;
+    const handler = route => route.fulfill({ contentType: 'text/html', body: '<html><body>embed pane</body></html>' });
+    await page.route(embedRoute, handler);
+    try {
+      // Symbol switches in earlier tests naturally create tabs; start from one known pane.
+      await page.evaluate(() => {
+        const m = window.__alfaDebug.multiChart;
+        for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
+        m.state.active = m.state.panes[0].id;
+        document.querySelector('[data-layout="1"]').click();
+      });
+      await page.click('#multi-toggle');
+      await page.waitForFunction(() => document.body.classList.contains('multi-open') && !document.getElementById('multi-chart').hidden);
+      assert.equal(await page.locator('#chart-tabs .chart-tab').count(), 1);
+      assert.equal(await state(() => window.__alfaDebug.multiState.open), true);
+      await page.click('#view-menu summary'); await page.click('[data-layout="2"]'); await page.keyboard.press('Escape');
+      assert.equal(await state(() => document.getElementById('multi-grid').dataset.layout), '2');
+      assert.equal(await page.locator('#multi-grid .multi-cell').count(), 2);
+      await page.click('#multi-add');
+      await page.fill('#multi-add-symbol', 'ETHUSDT');
+      await page.click('#multi-add-form button[type=submit]');
+      await page.waitForFunction(() => window.__alfaDebug.multiState.panes.length === 2);
+      assert.equal(await page.locator('#multi-grid iframe').count(), 2, JSON.stringify(await state(() => window.__alfaDebug.multiState)));
+      assert.match(await page.locator('#multi-grid iframe').first().getAttribute('src'), /embed=1&symbol=BTCUSDT&interval=1h/);
+      assert.equal(await page.locator('#multi-tabs .chart-tab').count(), 2);
+      await page.click('#multi-tabs .chart-tab >> nth=1');
+      assert.equal(await state(() => window.__alfaDebug.multiState.active),
+        await state(() => window.__alfaDebug.multiState.panes.at(-1).id));
+      await page.click('#multi-exit');
+      assert.equal(await state(() => document.body.classList.contains('multi-open')), false);
+      assert.equal(await page.locator('#chart-panel-single').isVisible(), true);
+      await page.evaluate(() => {
+        const m = window.__alfaDebug.multiChart;
+        for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
+        document.querySelector('[data-layout="1"]').click();
+      });
+      assert.equal(await state(() => window.__alfaDebug.multiState.panes.length), 1);
+    } finally { await page.unroute(embedRoute, handler); }
   });
   await test('object tree: Ctrl multi-select, grouping, bulk delete, undo and rename', async () => {
     await page.evaluate(() => { const d = window.__alfaDebug.drawings; d.history.commit({ ...d.history.doc, drawings: [] }); });

@@ -6,13 +6,14 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=17">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=18">
 </head>
 <body>
   <main class="workspace">
     <header class="toolbar">
       <a class="brand" href="/?page=home" aria-label="Alfa Traders ana sayfasına dön"><span class="brand-mark">A</span><h1>ALFA <span>CHARTS</span></h1></a>
       <div class="market-controls">
+      <nav id="chart-tabs" role="tablist" aria-label="Açık grafik sekmeleri"></nav>
       <label class="symbol-label"><span class="sr-only">Binance Spot</span>
         <select id="symbol" aria-label="Sembol">
           <option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option>
@@ -51,6 +52,13 @@
             <div class="menu-heading">GRAFİK GÖRÜNÜMÜ</div>
             <button id="reset-view" type="button"><span data-icon="undo"></span>Grafik görünümü sıfırla</button>
             <button id="chart-settings" type="button"><span data-icon="settings"></span>Grafik ayarları…</button>
+            <div class="menu-heading">GRAFİK DÜZENİ</div>
+            <div class="layout-buttons" role="group" aria-label="Grafik düzeni">
+              <button type="button" data-layout="1" aria-pressed="true" title="Tek grafik">1</button>
+              <button type="button" data-layout="2" aria-pressed="false" title="İki grafik">2</button>
+              <button type="button" data-layout="4" aria-pressed="false" title="Dört grafik">4</button>
+              <button type="button" data-layout="6" aria-pressed="false" title="Altı grafik">6</button>
+            </div>
             <hr>
             <label><input id="view-grid" type="checkbox" checked> Izgara çizgileri</label>
             <label><input id="view-axis-labels" type="checkbox"> Fiyat ekseni etiketleri</label>
@@ -69,6 +77,7 @@
             <button type="button" data-shot="copy-link">Bağlantıyı kopyala</button>
           </div>
         </div>
+        <button id="multi-toggle" class="icon-button" type="button" aria-label="Çoklu grafik düzenine geç" title="Çoklu grafik (2/4/6)" aria-pressed="false"><span data-icon="layers"></span></button>
         <button id="list-toggle" class="icon-button" type="button" aria-label="İzleme listesini aç/kapat" title="İzleme listesi" aria-pressed="true" aria-controls="watchlist"><span data-icon="list"></span></button>
       </div>
     </header>
@@ -90,7 +99,7 @@
           </div>
         </details>
       </aside>
-      <section class="chart-panel" aria-label="Fiyat grafiği">
+      <section class="chart-panel" id="chart-panel-single" aria-label="Fiyat grafiği">
         <div class="legend">
           <div class="market-legend">
           <strong id="market-title">BTCUSDT · 1H</strong>
@@ -109,6 +118,16 @@
           <div class="scale-controls"><span>UTC</span><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
         </div>
         <div id="message" role="status" hidden></div>
+      </section>
+      <section id="multi-chart" class="multi-chart" aria-label="Çoklu grafik çalışma alanı" hidden>
+        <div class="multi-head">
+          <nav id="multi-tabs" aria-label="Çoklu grafik sekmeleri"></nav>
+          <div class="multi-head-actions">
+            <button id="multi-add" type="button">+ Grafik</button>
+            <button id="multi-exit" type="button">Tek grafiğe dön</button>
+          </div>
+        </div>
+        <div id="multi-grid" class="multi-grid" data-layout="1"></div>
       </section>
       <aside id="watchlist" aria-label="İzleme listesi">
         <div class="watch-head"><h2><span id="watchlist-title">İzleme listesi</span> <small id="watch-count">4</small></h2><button id="watch-add" class="icon-button" type="button" aria-label="Listeye parite ekle" title="Parite ekle"><span data-icon="plus"></span></button></div>
@@ -139,6 +158,20 @@
       <form id="drawing-settings" hidden>
         <label>Renk <input id="drawing-color" type="color" data-edit></label>
         <label>Çizgi kalınlığı <input id="drawing-width" type="number" min="1" max="6" step="1" data-edit></label>
+        <fieldset id="drawing-style-fields">
+          <legend>Stil · TradingView benzeri</legend>
+          <div class="style-grid">
+            <label>Çizgi tipi
+              <select id="drawing-line-style" data-edit>
+                <option value="solid">Düz</option><option value="dashed">Kesikli</option><option value="dotted">Noktalı</option>
+              </select>
+            </label>
+            <label>Köşe yuvarlaklığı <input id="drawing-corner-radius" type="number" min="0" max="40" step="1" data-edit></label>
+            <label>Dolgu rengi <input id="drawing-fill-color" type="color" data-edit></label>
+            <label>Dolgu opaklığı <input id="drawing-fill-opacity" type="range" min="0" max="1" step="0.01" data-edit></label>
+          </div>
+          <label><input id="drawing-show-labels" type="checkbox" data-edit> Fiyat / metin etiketlerini göster</label>
+        </fieldset>
         <label id="drawing-text-row" hidden>Metin <textarea id="drawing-text" maxlength="500" data-edit></textarea></label>
         <label id="drawing-font-row" hidden>Metin boyutu <input id="drawing-font-size" type="number" min="8" max="48" step="1" data-edit></label>
         <fieldset id="drawing-fib-fields" hidden>
@@ -161,6 +194,15 @@
           <label>Stop Loss <input id="position-stop" type="number" min="0" step="any" data-edit></label>
           <label>Take Profit <input id="position-target" type="number" min="0" step="any" data-edit></label>
           <output id="position-stats"></output>
+          <fieldset id="drawing-dynamic-fields">
+            <legend>Canlı fiyat renkleri</legend>
+            <label><input id="drawing-dynamic-colors" type="checkbox" data-edit> Fiyat hareket ettikçe alan rengini değiştir</label>
+            <div class="style-grid">
+              <label>Kâr / TP rengi <input id="drawing-profit-color" type="color" data-edit></label>
+              <label>Zarar / SL rengi <input id="drawing-loss-color" type="color" data-edit></label>
+            </div>
+            <small>Entry→TP bölgesi kâr, Entry→SL bölgesi zarar rengine döner; fiyat TP veya SL'ye ulaştığında tüm alan o renkle vurgulanır.</small>
+          </fieldset>
           <small>Risk yüzdesi fiyat mesafesidir; hesap bakiyesi riski değildir. Varsayılan hedef 2.5R. Stop/TP değişince RR serbest hesaplanır.</small>
         </fieldset>
         <button type="submit" data-edit>Ayarları uygula</button>
@@ -198,6 +240,6 @@
       <span id="data-info">Kaynak: seçili piyasa · Zaman: UTC · En fazla 1000 mum</span>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=45"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=48"></script>
 </body>
 </html>

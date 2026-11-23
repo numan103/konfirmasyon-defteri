@@ -14,16 +14,38 @@ export function fibPrice(a, b, level, reversed = false) {
   // 0 = second anchor, 1 = first anchor (retracement from the swing end).
   return reversed ? a + (b - a) * level : b + (a - b) * level;
 }
-export function positionStats(d) {
+// Optional style fields stay optional on disk so documents saved before this
+// release keep loading. normalizeStyle() supplies the visual defaults.
+export const STYLE_FIELDS = Object.freeze(['color', 'width', 'lineStyle', 'fillColor', 'fillOpacity', 'cornerRadius', 'dynamicColors', 'profitColor', 'lossColor', 'showLabels']);
+export const STYLE_DEFAULTS = Object.freeze({
+  color: '#8ea7ff', width: 2, lineStyle: 'solid', fillColor: '#8ea7ff', fillOpacity: 0.14,
+  cornerRadius: 0, dynamicColors: false, profitColor: '#26c89c', lossColor: '#ef6677', showLabels: true
+});
+export function normalizeStyle(d = {}) {
+  const out = { ...STYLE_DEFAULTS };
+  for (const key of STYLE_FIELDS) if (d[key] != null) out[key] = d[key];
+  return out;
+}
+export function positionStats(d, currentPrice) {
   const entry = d.points[0].price, stop = d.points[1].price, target = d.target;
   const sign = d.type === 'long' ? 1 : -1;
   const risk = (entry - stop) * sign, reward = (target - entry) * sign;
-  return { entry, stop, target, risk, reward, rr: reward / risk, riskPercent: risk / entry * 100, gainPercent: reward / entry * 100,
+  const stats = { entry, stop, target, risk, reward, rr: reward / risk, riskPercent: risk / entry * 100, gainPercent: reward / entry * 100,
     valid: [entry, stop, target, risk, reward].every(Number.isFinite) && risk > 0 && reward > 0 && Math.min(entry, stop, target) > 0 };
+  if (Number.isFinite(currentPrice)) {
+    stats.current = currentPrice;
+    stats.pl = (currentPrice - entry) * sign;
+    stats.plPercent = stats.pl / entry * 100;
+    stats.phase = currentPrice >= target && sign > 0 || currentPrice <= target && sign < 0 ? 'target'
+      : currentPrice <= stop && sign > 0 || currentPrice >= stop && sign < 0 ? 'stop'
+        : currentPrice > entry && sign > 0 || currentPrice < entry && sign < 0 ? 'profit'
+          : currentPrice < entry && sign > 0 || currentPrice > entry && sign < 0 ? 'loss' : 'entry';
+  }
+  return stats;
 }
 export function makeDrawing(type, points, template) {
   if (!TYPES.includes(type)) throw new Error('Geçersiz araç');
-  const d = { id: crypto.randomUUID(), type, points: clone(points), color: '#8ea7ff', width: 2, hidden: false, locked: false };
+  const d = { id: crypto.randomUUID(), type, points: clone(points), ...STYLE_DEFAULTS, hidden: false, locked: false };
   if (type === 'fibonacci') Object.assign(d, { levels: [...LEVELS], reversed: false, showPrices: true }, clone(template || {}));
   if (type === 'text' || type === 'label') { d.text = type === 'label' ? 'Etiket' : 'Metin'; d.fontSize = 14; }
   if (type === 'long' || type === 'short') {
@@ -41,6 +63,12 @@ export function validDrawing(d) {
       !d.points.every(p => p && Number.isFinite(p.time) && p.time > 0 && Number.isFinite(p.price) && p.price > 0) ||
       !/^#[0-9a-f]{6}$/i.test(d.color) || !Number.isFinite(d.width) || d.width < 1 || d.width > 6 ||
       typeof d.hidden !== 'boolean' || typeof d.locked !== 'boolean') return false;
+  const style = normalizeStyle(d);
+  if (!['solid', 'dashed', 'dotted'].includes(style.lineStyle) ||
+      !/^#[0-9a-f]{6}$/i.test(style.fillColor) || !/^#[0-9a-f]{6}$/i.test(style.profitColor) || !/^#[0-9a-f]{6}$/i.test(style.lossColor) ||
+      !Number.isFinite(style.fillOpacity) || style.fillOpacity < 0 || style.fillOpacity > 1 ||
+      !Number.isFinite(style.cornerRadius) || style.cornerRadius < 0 || style.cornerRadius > 40 ||
+      typeof style.dynamicColors !== 'boolean' || typeof style.showLabels !== 'boolean') return false;
   if (d.name != null && (typeof d.name !== 'string' || d.name.length > 80)) return false;
   if (d.group != null && (typeof d.group !== 'string' || !d.group.trim() || d.group.length > 60)) return false;
   if (['text', 'label'].includes(d.type) && (typeof d.text !== 'string' || d.text.length > 500 ||
@@ -56,7 +84,7 @@ export function validateDocument(doc) {
     !Array.isArray(doc.templates) || doc.templates.length > 30) throw new Error('Çizim belgesi doğrulanamadı');
   for (const t of doc.templates) {
     if (!t || typeof t.name !== 'string' || !t.name.trim() || t.name.length > 60 || !t.style || typeof t.style !== 'object' ||
-      Object.keys(t.style).some(k => !['color', 'width', 'levels', 'reversed', 'showPrices'].includes(k)) ||
+      Object.keys(t.style).some(k => ![...STYLE_FIELDS, 'levels', 'reversed', 'showPrices'].includes(k)) ||
       !validDrawing({ ...makeDrawing('fibonacci', [{ time: 1, price: 1 }, { time: 2, price: 2 }]), ...t.style })) {
       throw new Error('Geçersiz Fibonacci şablonu');
     }

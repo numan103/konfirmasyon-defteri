@@ -1,6 +1,8 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=10';
-import { DrawingEngine } from './alfa-drawings.mjs?v=10';
+import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
+  shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook } from './alfa-alerts.mjs?v=1';
+import { DrawingEngine } from './alfa-drawings.mjs?v=11';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
@@ -12,7 +14,9 @@ import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
-import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=6';
+import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=1';
+import { initMultiChart } from './alfa-multichart.mjs?v=1';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
@@ -21,8 +25,16 @@ import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
 const host = $('chart');
+const isEmbed = new URLSearchParams(location.search).has('embed');
+if (isEmbed) document.body.classList.add('embed-chart');
 hydrateIcons();
-let studiesUI = null, watchlist = null, pricePrecisionKey = '';
+let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, pricePrecisionKey = '';
+function setActiveSymbol(next) {
+  if (!next || next === symbol) return false;
+  symbol = next;
+  loadMarket();
+  return true;
+}
 async function marketAccessToken() {
   try {
     const session = await cloudSettings.client?.auth.getSession();
@@ -78,7 +90,7 @@ function volumeData(bars) {
   return (bars || []).map(c => ({
     time: c.time,
     value: Number(c.volume) || 0,
-    color: c.close >= c.open ? 'rgba(38,200,156,0.35)' : 'rgba(239,102,119,0.35)'
+    color: withAlpha(c.close >= c.open ? palette.up : palette.down, .35)
   }));
 }
 function lineData(barsArr) { return (barsArr || []).map(c => ({ time: c.time, value: c.close })); }
@@ -442,6 +454,7 @@ function setData(data, resetView) {
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
   try { fvg.render(); } catch {}
+  try { publicStudies?.updateBars(); } catch {}
 }
 chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(activePriceSeries());
@@ -514,6 +527,8 @@ async function loadMarket() {
     const ohlc = $('ohlc'); ohlc.textContent = 'Gerçek piyasa verisi bekleniyor'; ohlc.style.color = '';
   }
   updateUI();
+  try { multiChart?.notifySymbol(symbol, interval); } catch {}
+  try { publicStudies?.setContext(symbol, interval); } catch {}
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
   try { indicators.clear(); } catch {}
@@ -707,7 +722,7 @@ function openTfPicker() {
 }
 renderTimeframes();
 watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => symbol,
-  onSelect: next => { if (symbol !== next) { symbol = next; loadMarket(); } },
+  onSelect: next => setActiveSymbol(next),
   onHover: ref => prefetchMarket(ref, interval),
   getAccessToken: marketAccessToken,
   onStatus: connection });
@@ -719,6 +734,54 @@ try {
   const raw = JSON.parse(localStorage.getItem('alfa-chart-view:v1') || 'null');
   for (const k of Object.keys(viewConfig)) if (typeof raw?.[k] === 'boolean') viewConfig[k] = raw[k];
 } catch {}
+// Candle / grid / background colours are chart-level preferences, not drawings.
+const DEFAULT_PALETTE = Object.freeze({
+  up: '#26c89c', down: '#ef6677', wickUp: '#26c89c', wickDown: '#ef6677', border: '#ef6677',
+  borderVisible: false, background: '#10141c', text: '#8e9eb6', gridVert: '#1c243022', gridHorz: '#28334655'
+});
+const PALETTE_COLORS = Object.keys(DEFAULT_PALETTE).filter(k => k !== 'borderVisible');
+const HEX = /^#[0-9a-f]{6}([0-9a-f]{2})?$/i;
+let palette = { ...DEFAULT_PALETTE };
+try {
+  const raw = JSON.parse(localStorage.getItem('alfa-chart-palette:v1') || 'null');
+  for (const k of PALETTE_COLORS) if (HEX.test(raw?.[k])) palette[k] = raw[k];
+  if (typeof raw?.borderVisible === 'boolean') palette.borderVisible = raw.borderVisible;
+} catch {}
+function withAlpha(hex, alpha) {
+  const h = String(hex).replace('#', '');
+  if (h.length !== 6) return hex;
+  return `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${alpha})`;
+}
+function applyPalette() {
+  const seriesOptions = { upColor: palette.up, downColor: palette.down, wickUpColor: palette.wickUp,
+    wickDownColor: palette.wickDown, borderVisible: palette.borderVisible,
+    borderUpColor: palette.border, borderDownColor: palette.border, wickColor: palette.wickUp };
+  candles.applyOptions(seriesOptions); heikin.applyOptions(seriesOptions);
+  bars.applyOptions({ upColor: palette.up, downColor: palette.down });
+  chart.applyOptions({
+    layout: { background: { type: ColorType.Solid, color: palette.background }, textColor: palette.text },
+    grid: { vertLines: { color: palette.gridVert, visible: viewConfig.grid }, horzLines: { color: palette.gridHorz, visible: viewConfig.grid } }
+  });
+  host.style.background = palette.background;
+  if (history?.length) volume.setData(volumeData(history));
+}
+function persistPalette() { try { localStorage.setItem('alfa-chart-palette:v1', JSON.stringify(palette)); } catch {} }
+function paletteFields() {
+  const labels = { up: 'Yükselen mum', down: 'Düşen mum', wickUp: 'Yükselen fitil', wickDown: 'Düşen fitil', border: 'Mum kenarı',
+    background: 'Grafik zemini', text: 'Eksen metni', gridVert: 'Dikey ızgara', gridHorz: 'Yatay ızgara' };
+  return `<div class="setting-grid palette-grid">${Object.entries(labels).map(([key, label]) => {
+    // Native color inputs cannot hold an alpha channel; grid colours keep 8-digit hex.
+    const alpha = key === 'gridVert' || key === 'gridHorz';
+    return `<label>${label}<input type="${alpha ? 'text' : 'color'}" name="${key}" value="${escapeHTML(palette[key])}" ${alpha ? 'maxlength="9" pattern="#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?"' : ''}></label>`;
+  }).join('')}</div>
+    <label><input type="checkbox" name="borderVisible" ${palette.borderVisible ? 'checked' : ''}> Mum kenarlığını göster</label>`;
+}
+function applyPaletteForm(data) {
+  for (const key of PALETTE_COLORS) if (HEX.test(String(data.get(key) || ''))) palette[key] = String(data.get(key));
+  palette.borderVisible = data.has('borderVisible');
+  applyPalette(); persistPalette(); saveLayout();
+}
+function resetPalette() { palette = { ...DEFAULT_PALETTE }; applyPalette(); persistPalette(); }
 function setLogScale(next, persist = true) {
   logScale = !!next;
   chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });
@@ -895,60 +958,129 @@ $('drawings-toggle').addEventListener('click', () => {
   vb.innerHTML = icon(on ? 'eye' : 'eyeOff');
   drawings.refresh();
 });
-// ---------- Price alarms (local-first) ----------
+// ---------- Price alarms (local-first + optional browser/Telegram/webhook delivery) ----------
 const ALARM_KEY = () => 'alfa-alarms:v1:' + currentUserKey();
-function loadAlarms() { try { const v = JSON.parse(localStorage.getItem(ALARM_KEY()) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } }
+const ALARM_SETTINGS_KEY = () => 'alfa-alarm-settings:v1:' + currentUserKey();
+function loadAlarms() {
+  try {
+    const rows = JSON.parse(localStorage.getItem(ALARM_KEY()) || '[]');
+    return Array.isArray(rows) ? rows.map(r => normalizeAlarm(r, r?.symbol || symbol, r?.price)).filter(a => a.symbol) : [];
+  } catch { return []; }
+}
 function saveAlarms(list) { try { localStorage.setItem(ALARM_KEY(), JSON.stringify(list)); } catch {} }
-let alarms = null;
+function loadAlarmSettings() {
+  try { return normalizeAlarmSettings(JSON.parse(localStorage.getItem(ALARM_SETTINGS_KEY()) || 'null') || {}); }
+  catch { return normalizeAlarmSettings({}); }
+}
+function saveAlarmSettings(settings) {
+  const next = normalizeAlarmSettings(settings);
+  try { localStorage.setItem(ALARM_SETTINGS_KEY(), JSON.stringify(next)); } catch {}
+  return next;
+}
+let alarms = null, lastAlarmPrice = null;
 function ensureAlarms() { if (!alarms) alarms = loadAlarms(); return alarms; }
-function fireAlarm(a, price) {
-  a.triggered = true; a.triggeredAt = Date.now(); a.triggerPrice = price;
-  saveAlarms(alarms);
-  const msg = `${a.symbol} ${a.cond === 'above' ? '≥' : '≤'} ${a.price} · şu an ${priceFormat.format(price)}${a.note ? ' · ' + a.note : ''}`;
-  connection('🔔 Alarm: ' + msg, 'ok');
+async function sendAlarmTelegram(chatId, message) {
+  const token = await marketAccessToken();
+  if (!token) { connection('Telegram alarmı için giriş gerekli', 'error'); return; }
+  try {
+    const response = await fetch('/api/access', { method: 'POST', cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ op: 'chart-alarm-telegram', chatId, text: message }) });
+    if (!response.ok) connection('Telegram alarmı gönderilemedi', 'error');
+  } catch { connection('Telegram alarmına ulaşılamadı', 'error'); }
+}
+async function fireAlarm(a, price) {
+  markAlarmFired(a, price); saveAlarms(alarms);
+  const msg = alarmMessage(a, price, priceFormat.format);
+  connection(`🔔 ${a.repeat === 'once' ? '' : `#${a.count} `}Alarm: ${msg}`, 'ok');
   try { if (Notification.permission === 'granted') new Notification('ALFA Charts Alarm', { body: msg }); } catch {}
-  try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; g.gain.value = .08; o.start(); setTimeout(() => { o.stop(); ctx.close(); }, 250); } catch {}
+  playAlarmSound(a.sound, a.volume);
+  const payload = alarmPayload(a, price, msg);
+  if (a.webhook) postAlarmWebhook(a.webhook, payload).catch(() => connection('Alarm webhook’u gönderilemedi', 'error'));
+  if (a.telegramChat) void sendAlarmTelegram(a.telegramChat, msg);
 }
 function checkAlarms(price) {
+  const previous = lastAlarmPrice;
+  lastAlarmPrice = Number.isFinite(price) ? price : null;
   if (!Number.isFinite(price)) return;
-  for (const a of ensureAlarms()) {
-    if (a.triggered || a.symbol !== symbol) continue;
-    if ((a.cond === 'above' && price >= a.price) || (a.cond === 'below' && price <= a.price)) fireAlarm(a, price);
-  }
+  for (const a of ensureAlarms()) if (a.symbol === symbol && shouldFire(a, price, previous)) void fireAlarm(a, price);
 }
 function addQuickAlarm(price, cond) {
   if (!Number.isFinite(price) || price <= 0) return;
-  ensureAlarms().push({ id: crypto.randomUUID(), symbol, price, cond, note: 'Grafik sağ tık', triggered: false, createdAt: Date.now() });
+  const settings = loadAlarmSettings();
+  ensureAlarms().push(normalizeAlarm({ ...settings, symbol, price, basePrice: price, cond,
+    note: 'Grafik sağ tık' }, symbol, price));
   saveAlarms(alarms);
   try { if (Notification.permission === 'default') Notification.requestPermission(); } catch {}
-  connection(`Alarm eklendi: ${symbol} ${cond === 'above' ? '≥' : '≤'} ${priceFormat.format(price)}`, 'ok');
+  connection(`Alarm eklendi: ${symbol} ${ALARM_CONDITIONS[cond] || 'Fiyat'} ${priceFormat.format(price)}`, 'ok');
 }
 function openAlarmManager() {
   const mine = ensureAlarms().filter(a => a.symbol === symbol);
-  const rows = mine.length ? mine.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;"><span style="flex:1">${a.cond === 'above' ? '≥' : '≤'} ${escapeHTML(a.price)} ${a.triggered ? '· tetiklendi' : ''}${a.note ? ' · ' + escapeHTML(a.note) : ''}</span><button data-del-alarm="${escapeHTML(a.id)}">Sil</button></div>`).join('') : '<p style="color:#8e9eb6">Bu sembolde alarm yok.</p>';
-  const m = openModal(`<h3 style="margin:0 0 8px;">🔔 Fiyat Alarmları · ${symbol}</h3>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-      <select id="alarm-cond" style="padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"><option value="above">Fiyat ≥</option><option value="below">Fiyat ≤</option></select>
-      <input id="alarm-price" type="number" step="any" placeholder="Fiyat" style="flex:1;min-width:120px;padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;">
-      <input id="alarm-note" placeholder="Not (opsiyonel)" style="flex:1;min-width:120px;padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;">
-      <button id="alarm-add" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#2962ff;color:#fff;">Ekle</button>
-    </div>
+  const settings = loadAlarmSettings();
+  const opts = (map, selected) => Object.entries(map).map(([value, label]) =>
+    `<option value="${escapeHTML(value)}" ${value === selected ? 'selected' : ''}>${escapeHTML(label)}</option>`).join('');
+  const rows = mine.length ? mine.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;">
+    <span style="flex:1"><strong>${escapeHTML(alarmConditionLabel(a))}</strong>${a.triggered ? ' · tetiklendi' : a.count ? ` · ${a.count} kez` : ''}${a.note ? ' · ' + escapeHTML(a.note) : ''}<br><small>${escapeHTML(ALARM_SOUNDS[a.sound] || 'bip')} · ${escapeHTML(ALARM_REPEATS[a.repeat] || 'Bir kez')}${a.telegramChat ? ' · Telegram' : ''}${a.webhook ? ' · Webhook' : ''}</small></span>
+    <button data-test-alarm="${escapeHTML(a.id)}" title="Sesi dene">▶</button><button data-del-alarm="${escapeHTML(a.id)}">Sil</button></div>`).join('')
+    : '<p style="color:#8e9eb6">Bu sembolde alarm yok. Koşulları, sesi ve bildirim kanalını aşağıdan seçebilirsin.</p>';
+  const m = openModal(`<div class="dialog-header"><div><h3>🔔 Fiyat Alarmları · ${symbol}</h3><p>Tarayıcı bildirimi, özel ses, Telegram ve webhook</p></div><button id="alarm-close-x" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <form id="alarm-form" class="chart-settings-form">
+      <fieldset><legend>KOŞUL</legend><div class="setting-grid">
+        <label>Koşul<select id="alarm-cond">${opts(ALARM_CONDITIONS, 'above')}</select></label>
+        <label>Fiyat<input id="alarm-price" type="number" step="any" placeholder="Fiyat"></label>
+        <label>Yüzde (%)<input id="alarm-pct" type="number" min="0.01" max="100" step="0.01" value="1"></label>
+        <label>Not<input id="alarm-note" maxlength="120" placeholder="Not (opsiyonel)"></label>
+      </div></fieldset>
+      <fieldset><legend>BİLDİRİM</legend><div class="setting-grid">
+        <label>Ses<select id="alarm-sound">${opts(ALARM_SOUNDS, settings.sound)}</select></label>
+        <label>Tekrar<select id="alarm-repeat">${opts(ALARM_REPEATS, settings.repeat)}</select></label>
+        <label>Ses düzeyi<input id="alarm-volume" type="range" min="0" max="1" step="0.05" value="${settings.volume}"></label>
+        <label><button id="alarm-test-sound" type="button">Sesi dene ▶</button></label>
+        <label>Telegram sohbet ID<input id="alarm-telegram" inputmode="numeric" maxlength="15" placeholder="Örn. 123456789" value="${escapeHTML(settings.telegramChat)}"></label>
+        <label>Webhook (https)<input id="alarm-webhook" type="url" placeholder="https://…" value="${escapeHTML(settings.webhook)}"></label>
+      </div><small id="alarm-permission-hint">Tarayıcı bildirimi için izin gerekir. Telegram, Alfa Charts hesabınızla gönderilir ve sunucuda saklanmaz.</small></fieldset>
+      <div class="settings-actions"><button id="alarm-permission" type="button">Bildirim izni ver</button><button id="alarm-add" type="submit">Alarm ekle</button></div>
+    </form>
     <div id="alarm-list">${rows}</div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px;"><button id="alarm-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button></div>`);
-  m.box.querySelector('#alarm-add').addEventListener('click', async () => {
-    const price = Number(m.box.querySelector('#alarm-price').value);
-    if (!Number.isFinite(price) || price <= 0) { connection('Geçerli bir fiyat girin', 'error'); return; }
-    const cond = m.box.querySelector('#alarm-cond').value;
-    const note = m.box.querySelector('#alarm-note').value.trim().slice(0, 120);
-    try { if (Notification.permission === 'default') await Notification.requestPermission(); } catch {}
-    ensureAlarms().push({ id: crypto.randomUUID(), symbol, price, cond, note, triggered: false, createdAt: Date.now() });
+  const box = m.box;
+  const currentSettings = () => ({
+    sound: box.querySelector('#alarm-sound').value, repeat: box.querySelector('#alarm-repeat').value,
+    volume: Number(box.querySelector('#alarm-volume').value), telegramChat: box.querySelector('#alarm-telegram').value.trim(),
+    webhook: box.querySelector('#alarm-webhook').value.trim()
+  });
+  box.querySelector('#alarm-close').onclick = m.close;
+  box.querySelector('#alarm-close-x').onclick = m.close;
+  box.querySelector('#alarm-test-sound').onclick = () => { const s = currentSettings(); playAlarmSound(s.sound, s.volume); };
+  box.querySelector('#alarm-permission').onclick = async () => {
+    try {
+      const permission = await Notification.requestPermission();
+      box.querySelector('#alarm-permission-hint').textContent = permission === 'granted' ? 'Bildirim izni verildi.' : 'Bildirim izni verilmedi; ses ve Telegram çalışmaya devam eder.';
+    } catch { box.querySelector('#alarm-permission-hint').textContent = 'Bu tarayıcı bildirim izni desteklemiyor.'; }
+  };
+  box.querySelector('#alarm-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const price = Number(box.querySelector('#alarm-price').value);
+    const cond = box.querySelector('#alarm-cond').value;
+    const pctMode = cond === 'pctUp' || cond === 'pctDown';
+    if ((!pctMode && (!Number.isFinite(price) || price <= 0)) || (pctMode && !(Number(box.querySelector('#alarm-pct').value) > 0))) {
+      connection('Geçerli bir fiyat veya yüzde girin', 'error'); return;
+    }
+    const nextSettings = saveAlarmSettings(currentSettings());
+    const current = Number(history.at(-1)?.close) || price;
+    ensureAlarms().push(normalizeAlarm({ ...nextSettings, symbol, cond,
+      price: pctMode ? current : price, basePrice: current, pct: Number(box.querySelector('#alarm-pct').value),
+      note: box.querySelector('#alarm-note').value.trim() }, symbol, current));
     saveAlarms(alarms); m.close(); openAlarmManager();
     connection('Alarm eklendi', 'ok');
   });
-  m.box.querySelectorAll('[data-del-alarm]').forEach(b => b.addEventListener('click', () => {
+  box.querySelectorAll('[data-test-alarm]').forEach(b => b.onclick = () => {
+    const a = ensureAlarms().find(x => x.id === b.dataset.testAlarm);
+    if (a) playAlarmSound(a.sound, a.volume);
+  });
+  box.querySelectorAll('[data-del-alarm]').forEach(b => b.onclick = () => {
     alarms = ensureAlarms().filter(a => a.id !== b.dataset.delAlarm); saveAlarms(alarms); m.close(); openAlarmManager();
-  }));
-  m.box.querySelector('#alarm-close').addEventListener('click', m.close);
+  });
 }
 $('alarm-toggle').addEventListener('click', openAlarmManager);
 
@@ -958,8 +1090,11 @@ const sessionBoxes = new SessionBoxesManager({ chart, series: candles, host, get
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
+publicStudies = new PublicStudiesManager({ chart, series: candles, getBars: () => seriesBars,
+  getSymbol: () => symbol, getInterval: () => interval, onStatus: connection });
 studiesUI = new ChartStudies({ indicators, catalog: INDICATOR_CATALOG, managers: {
   sessions: sessionBoxes, levels: sessionLevels, structure: marketStructure, fvg, mtf,
+  ...publicStudies.facades,
   volume: { enabled: true, setEnabled(value) { this.enabled = value; volume.applyOptions({ visible: value }); } },
 }, onChange: () => { saveLayout(); drawings.updatePanel(); } });
 const paper = new PaperTradingPanel({
@@ -985,6 +1120,7 @@ cloudSettings.start();
 function dispose() {
   pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation;
   closeTransport(); clearTimeout(cloudSaveTimer); cloudSettings.dispose();
+  try { publicStudies?.dispose(); } catch {}
   drawings.dispose(); watchlist.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove();
 }
 window.addEventListener('pagehide', dispose, { once: true });
@@ -993,7 +1129,9 @@ window.addEventListener('online', () => { if (!disposed&&!replayMode) loadMarket
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, paper, research,
+  window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, publicStudies, paper, research,
+    get multiChart() { return multiChart; },
+    get multiState() { return structuredClone(multiChart?.state || {}); },
     get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; },
     get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
     resetChartView, openChartSettingsModal, handleChartAction,
@@ -1073,9 +1211,9 @@ let cloudRevision = 0;
 let cloudSaveTimer = null;
 function layoutSettings() {
   return structuredClone({
-    chartType: type, logScale, view: { ...viewConfig }, indicators: indicators.toJSON(), mtf: mtf.config,
+    chartType: type, logScale, view: { ...viewConfig }, palette: { ...palette }, indicators: indicators.toJSON(), mtf: mtf.config,
     sessionLevels: sessionLevels.config, sessionBoxes: sessionBoxes.config,
-    marketStructure: marketStructure.config, fvg: fvg.config, studies: studiesUI.toJSON(),
+    marketStructure: marketStructure.config, fvg: fvg.config, publicStudies: publicStudies.toJSON(), studies: studiesUI.toJSON(),
   });
 }
 function saveLayout() {
@@ -1086,6 +1224,13 @@ function saveLayout() {
   } catch {}
   scheduleCloudSave(settings);
 }
+function applyPaletteSettings(cfg) {
+  if (!cfg || typeof cfg !== 'object') return;
+  for (const key of PALETTE_COLORS) if (HEX.test(String(cfg[key] || ''))) palette[key] = String(cfg[key]);
+  if (typeof cfg.borderVisible === 'boolean') palette.borderVisible = cfg.borderVisible;
+  applyPalette();
+}
+function applyPublicStudiesConfig(cfg) { try { publicStudies.applyConfig(cfg); } catch {} }
 function applySessionBoxesConfig(cfg) {
   if (!cfg || typeof cfg !== 'object') return;
   sessionBoxes.config = { ...sessionBoxes.defaultConfig(), ...cfg, enabled: { ...sessionBoxes.defaultConfig().enabled, ...(cfg.enabled || {}) } };
@@ -1103,12 +1248,14 @@ async function loadLayout() {
       if (typeof raw.chartType === 'string') applyChartType(raw.chartType);
       if (typeof raw.logScale === 'boolean') setLogScale(raw.logScale, false);
       if (raw.view) applyViewSettings(raw.view);
+      if (raw.palette) applyPaletteSettings(raw.palette);
       if (Array.isArray(raw.indicators)) indicators.fromJSON(raw.indicators);
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
       if (raw.sessionBoxes) applySessionBoxesConfig(raw.sessionBoxes);
       if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
       if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
+      if (raw.publicStudies) applyPublicStudiesConfig(raw.publicStudies);
       if (raw.studies) { studiesUI.apply(raw.studies); appliedStudies = true; }
     }
   } catch {}
@@ -1118,13 +1265,14 @@ async function loadLayout() {
     if (cloud && cloud.settings) {
       const s = cloud.settings;
       if (typeof s.chartType === 'string') applyChartType(s.chartType);
-      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view);
+      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
       if (Array.isArray(s.indicators)) { indicators.fromJSON(s.indicators); pendingIndicators = null; }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
       if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
       if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
       if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
+      if (s.publicStudies) applyPublicStudiesConfig(s.publicStudies);
       if (s.studies) { studiesUI.apply(s.studies); appliedStudies = true; }
       cloudRevision = cloud.revision || 0;
       try { $('drawing-status').textContent = 'Bulut: yüklendi'; } catch {}
@@ -1157,13 +1305,14 @@ function scheduleCloudSave(settings = layoutSettings()) {
       if (cloud && cloud.settings) {
         const s = cloud.settings;
         if (typeof s.chartType === 'string') applyChartType(s.chartType);
-        if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view);
+        if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
         if (Array.isArray(s.indicators)) indicators.fromJSON(s.indicators);
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
         if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
         if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
         if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
+        if (s.publicStudies) applyPublicStudiesConfig(s.publicStudies);
         if (s.studies) studiesUI.apply(s.studies);
         cloudRevision = cloud.revision || cloudRevision;
         try { $('drawing-status').textContent = 'Çakışma çözüldü · bulut sürümü uygulandı'; } catch {}
@@ -1247,7 +1396,7 @@ function persistViewConfig() {
   try { localStorage.setItem('alfa-chart-view:v1', JSON.stringify(viewConfig)); } catch {}
 }
 function applyViewConfig() {
-  chart.applyOptions({ grid: { vertLines: { visible: viewConfig.grid }, horzLines: { visible: viewConfig.grid } } });
+  applyPalette();
   if (indicators.axisLabels !== viewConfig.axisLabels) {
     indicators.axisLabels = viewConfig.axisLabels; indicators.renderAll();
   }
@@ -1295,6 +1444,9 @@ function openChartSettingsModal() {
         <label><input type="checkbox" name="axisLabels" ${viewConfig.axisLabels ? 'checked' : ''}> Fiyat ekseni etiketleri</label>
         <label><input type="checkbox" name="clean" ${viewConfig.clean ? 'checked' : ''}> Sade mod · indikatörleri geçici gizle</label>
       </fieldset>
+      <fieldset><legend>MUM / RENKLER</legend>${paletteFields()}
+        <small>Sağ tık menüsündeki “Mum ve zemin renkleri…” ile aynı ayarlar.</small>
+      </fieldset>
       <fieldset><legend>ÖLÇEK</legend>
         <label><input type="checkbox" name="logScale" ${logScale ? 'checked' : ''}> Logaritmik fiyat ölçeği</label>
         <label><input type="checkbox" name="autoScale" checked> Otomatik fiyat ölçeği</label>
@@ -1314,15 +1466,32 @@ function openChartSettingsModal() {
     applyChartType(String(data.get('type')));
     setLogScale(data.has('logScale'), false);
     applyViewSettings({ grid: data.has('grid'), axisLabels: data.has('axisLabels'), clean: data.has('clean') });
+    applyPaletteForm(data);
     if (data.has('autoScale')) setAutoScale();
     persistViewConfig(); saveLayout(); modal.close();
     if (intervalChanged) loadMarket();
     else { chart.timeScale().fitContent(); connection('Grafik ayarları uygulandı', 'ok'); }
   });
 }
+function openCandleSettingsModal() {
+  const modal = openModal(`<div class="dialog-header"><div><h3>Mum ve zemin renkleri</h3><p>TradingView tarzı görünüm ayarları · yerel olarak saklanır</p></div><button id="candle-settings-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <form id="candle-settings-form" class="chart-settings-form">
+      <fieldset><legend>RENKLER</legend>${paletteFields()}</fieldset>
+      <div class="settings-actions"><button id="candle-settings-reset" type="button">Varsayılan renkler</button><button id="candle-settings-cancel" type="button">Vazgeç</button><button class="apply" type="submit">Uygula</button></div>
+    </form>`);
+  const box = modal.box;
+  box.querySelector('#candle-settings-close').onclick = modal.close;
+  box.querySelector('#candle-settings-cancel').onclick = modal.close;
+  box.querySelector('#candle-settings-reset').onclick = () => { resetPalette(); modal.close(); connection('Renkler varsayılana döndü', 'ok'); };
+  box.querySelector('#candle-settings-form').addEventListener('submit', event => {
+    event.preventDefault(); applyPaletteForm(new FormData(event.currentTarget)); modal.close();
+    connection('Mum renkleri uygulandı', 'ok');
+  });
+}
 function handleChartAction(action) {
   switch (action) {
     case 'reset-view': resetChartView(); break;
+    case 'candle-settings': openCandleSettingsModal(); break;
     case 'settings': openChartSettingsModal(); break;
     case 'fit':
       if (history.length) chart.timeScale().fitContent();
@@ -1353,5 +1522,37 @@ document.addEventListener('keydown', event => {
   if (!action) return;
   event.preventDefault(); handleChartAction(action);
 });
+// TradingView numeric timeframe shortcuts: 1/5/15/30 => minutes, 60/120/240/360/720 => hours, D/3D/W => day/week.
+const TF_SHORTCUTS = Object.freeze({ 1: '1m', 3: '3m', 5: '5m', 15: '15m', 30: '30m', 60: '1h', 120: '2h', 240: '4h', 360: '6h', 720: '12h', d: '1d', '3d': '3d', w: '1w' });
+let tfDigitBuffer = '', tfDigitTimer = null;
+function setTimeframeFromShortcut(value) {
+  tfDigitBuffer = '';
+  if (!Object.values(TIMEFRAMES).includes(value) || value === interval) return;
+  interval = value; loadMarket(); saveLayout();
+}
+document.addEventListener('keydown', event => {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input,textarea,select,[contenteditable=true]') || document.querySelector('dialog[open]')) return;
+  const key = event.key.toLowerCase();
+  if (/^[0-9]$/.test(key)) {
+    event.preventDefault(); tfDigitBuffer = (tfDigitBuffer + key).slice(-3);
+    clearTimeout(tfDigitTimer);
+    if (TF_SHORTCUTS[tfDigitBuffer] && tfDigitBuffer.length >= 2) { setTimeframeFromShortcut(TF_SHORTCUTS[tfDigitBuffer]); return; }
+    tfDigitTimer = setTimeout(() => {
+      const value = TF_SHORTCUTS[tfDigitBuffer]; tfDigitBuffer = '';
+      if (value) setTimeframeFromShortcut(value);
+    }, 400);
+    return;
+  }
+  if (key === 'd' || key === 'w') {
+    event.preventDefault(); clearTimeout(tfDigitTimer);
+    setTimeframeFromShortcut(TF_SHORTCUTS[key === 'd' && tfDigitBuffer === '3' ? '3d' : key]);
+  }
+});
 applyViewConfig();
+if (!isEmbed) {
+  try {
+    multiChart = initMultiChart({ getSymbol: () => symbol, getInterval: () => interval,
+      setSymbol: next => setActiveSymbol(next), onStatus: connection });
+  } catch {}
+}
 loadMarket();
