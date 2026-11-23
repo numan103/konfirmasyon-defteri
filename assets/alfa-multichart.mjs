@@ -193,8 +193,9 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus } =
     state.panes.push(pane); state.active = pane.id; save(); renderTabs(); renderMulti(true);
   }
 
-  document.querySelectorAll('[data-layout]').forEach(b => b.onclick = () => {
-    state.layout = Number(b.dataset.layout) || 1; save(); renderMulti(true);
+  document.querySelectorAll('.layout-buttons [data-layout]').forEach(b => b.onclick = () => {
+    state.layout = Number(b.dataset.layout) || 1;
+    setOpen(true);
   });
   $('multi-toggle')?.addEventListener('click', () => setOpen(!state.open));
   $('multi-exit')?.addEventListener('click', () => setOpen(false));

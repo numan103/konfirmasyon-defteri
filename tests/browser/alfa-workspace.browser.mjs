@@ -299,6 +299,18 @@ try {
     await ready();
     assert.equal(await state(() => document.getElementById('symbol').value), 'BTCUSDT');
   });
+  await test('view-menu layout buttons open multi-chart view', async () => {
+    await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
+    assert.equal(await state(() => window.__alfaDebug.multiState.open), false);
+    await page.click('#view-menu summary');
+    await page.click('.layout-buttons button[data-layout="4"]');
+    await page.keyboard.press('Escape');
+    assert.equal(await state(() => window.__alfaDebug.multiState.layout), 4);
+    assert.equal(await state(() => window.__alfaDebug.multiState.open), true);
+    assert.equal(await state(() => document.getElementById('multi-chart').hidden), false);
+    assert.equal(await state(() => document.body.classList.contains('multi-open')), true);
+    await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
+  });
   await test('multi-chart tabs, layouts and embedded panes work without static iframes', async () => {
     const embedRoute = /\/alfa-charts\.html\?embed=1/;
     const handler = route => route.fulfill({ contentType: 'text/html', body: '<html><body>embed pane</body></html>' });
@@ -309,7 +321,7 @@ try {
         const m = window.__alfaDebug.multiChart;
         for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
         m.state.active = m.state.panes[0].id;
-        document.querySelector('[data-layout="1"]').click();
+        m.state.layout = 1;
       });
       await page.click('#multi-toggle');
       await page.waitForFunction(() => document.body.classList.contains('multi-open') && !document.getElementById('multi-chart').hidden);
@@ -334,7 +346,7 @@ try {
       await page.evaluate(() => {
         const m = window.__alfaDebug.multiChart;
         for (const p of [...m.state.panes].slice(1)) m.removePane(p.id);
-        document.querySelector('[data-layout="1"]').click();
+        m.state.layout = 1;
       });
       assert.equal(await state(() => window.__alfaDebug.multiState.panes.length), 1);
     } finally { await page.unroute(embedRoute, handler); }
