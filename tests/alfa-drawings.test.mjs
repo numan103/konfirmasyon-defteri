@@ -16,7 +16,7 @@ test('Fibonacci retraces from second anchor, including exact 0.382 mathematics i
 });
 test('all drawing types create valid timestamp/price data without pixels', () => {
   for (const type of Object.keys(TOOLS).filter(t => !['cursor', 'delete'].includes(t))) {
-    const d = makeDrawing(type, ['text', 'horizontal', 'vertical'].includes(type) ? [a] : [a, b]);
+    const d = makeDrawing(type, ['text', 'label', 'horizontal', 'vertical'].includes(type) ? [a] : [a, b]);
     assert.equal(validDrawing(d), true, type);
     assert.deepEqual(Object.keys(d.points[0]).sort(), ['price', 'time']);
     assert.equal(validateDocument(docWith(d)).drawings.length, 1);

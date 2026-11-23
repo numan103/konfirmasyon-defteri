@@ -1,8 +1,8 @@
-import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=3';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=3';
+import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=4';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=4';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=3';
 const $ = id => document.getElementById(id);
-const onePoint = type => ['horizontal', 'vertical', 'text'].includes(type);
+const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
 const isPosition = d => ['long', 'short'].includes(d.type);
 export class DrawingEngine {
   constructor({ chart, series, host, getBars, getInterval }) {
@@ -215,7 +215,7 @@ export class DrawingEngine {
       Math.abs(d.points[0].price - d.points[1].price) < .000001) return;
     const next = clone(this.history.doc); next.drawings.push(d);
     this.selected = d.id; this.cancel(); this.commit(next);
-    if (d.type === 'text') { this.manager.hidden = false; this.updatePanel(); $('drawing-text').focus(); }
+    if (d.type === 'text' || d.type === 'label') { this.manager.hidden = false; this.updatePanel(); $('drawing-text').focus(); }
   }
   commit(next) {
     try { if (this.history.commit(next)) this.changed(); }
@@ -286,7 +286,7 @@ export class DrawingEngine {
     $('drawing-selected-name').textContent = d ? TOOLS[d.type][1] : '';
     if (!d) return;
     $('drawing-color').value = d.color; $('drawing-width').value = d.width;
-    $('drawing-text-row').hidden = d.type !== 'text'; $('drawing-font-row').hidden = d.type !== 'text';
+    $('drawing-text-row').hidden = !['text', 'label'].includes(d.type); $('drawing-font-row').hidden = !['text', 'label'].includes(d.type);
     $('drawing-text').value = d.text || ''; $('drawing-font-size').value = d.fontSize || 14;
     $('drawing-fib-fields').hidden = d.type !== 'fibonacci';
     $('drawing-position-fields').hidden = !isPosition(d);
@@ -314,8 +314,8 @@ export class DrawingEngine {
   applySettings() {
     const next = clone(this.history.doc), d = next.drawings.find(x => x.id === this.selected); if (!d || d.locked) return;
     d.color = $('drawing-color').value; d.width = Number($('drawing-width').value);
-    if (d.type === 'text') {
-      d.text = $('drawing-text').value.trim() || 'Metin'; d.fontSize = Number($('drawing-font-size').value);
+    if (d.type === 'text' || d.type === 'label') {
+      d.text = $('drawing-text').value.trim() || (d.type === 'label' ? 'Etiket' : 'Metin'); d.fontSize = Number($('drawing-font-size').value);
     }
     if (d.type === 'fibonacci') {
       const tokens = $('fib-levels').value.split(',').map(s => s.trim());

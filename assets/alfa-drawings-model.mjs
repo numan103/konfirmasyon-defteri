@@ -5,7 +5,7 @@ export const TOOLS = Object.freeze({
   vertical: ['┃', 'Vertical Line'], trend: ['╱', 'Trend Line'], ray: ['↗', 'Ray'],
   rectangle: ['▭', 'Rectangle'], fibonacci: ['≋', 'Fibonacci Retracement'],
   long: ['L', 'Long Position'], short: ['S', 'Short Position'],
-  text: ['T', 'Text'], ruler: ['↔', 'Ruler / Price Range'], delete: ['⌫', 'Delete Drawing']
+  text: ['T', 'Text'], label: ['🏷', 'Label'], arrow: ['➤', 'Arrow'], ruler: ['↔', 'Ruler / Price Range'], delete: ['⌫', 'Delete Drawing']
 });
 const TYPES = Object.keys(TOOLS).filter(t => !['cursor', 'delete'].includes(t));
 export const clone = value => structuredClone(value);
@@ -25,7 +25,7 @@ export function makeDrawing(type, points, template) {
   if (!TYPES.includes(type)) throw new Error('Geçersiz araç');
   const d = { id: crypto.randomUUID(), type, points: clone(points), color: '#8ea7ff', width: 2, hidden: false, locked: false };
   if (type === 'fibonacci') Object.assign(d, { levels: [...LEVELS], reversed: false, showPrices: true }, clone(template || {}));
-  if (type === 'text') { d.text = 'Metin'; d.fontSize = 14; }
+  if (type === 'text' || type === 'label') { d.text = type === 'label' ? 'Etiket' : 'Metin'; d.fontSize = 14; }
   if (type === 'long' || type === 'short') {
     const entry = points[0].price;
     const sign = type === 'long' ? 1 : -1;
@@ -37,11 +37,11 @@ export function makeDrawing(type, points, template) {
 }
 export function validDrawing(d) {
   if (!d || typeof d.id !== 'string' || d.id.length > 100 || !TYPES.includes(d.type) ||
-      !Array.isArray(d.points) || d.points.length !== (['horizontal', 'vertical', 'text'].includes(d.type) ? 1 : 2) ||
+      !Array.isArray(d.points) || d.points.length !== (['horizontal', 'vertical', 'text', 'label'].includes(d.type) ? 1 : 2) ||
       !d.points.every(p => p && Number.isFinite(p.time) && p.time > 0 && Number.isFinite(p.price) && p.price > 0) ||
       !/^#[0-9a-f]{6}$/i.test(d.color) || !Number.isFinite(d.width) || d.width < 1 || d.width > 6 ||
       typeof d.hidden !== 'boolean' || typeof d.locked !== 'boolean') return false;
-  if (d.type === 'text' && (typeof d.text !== 'string' || d.text.length > 500 ||
+  if (['text', 'label'].includes(d.type) && (typeof d.text !== 'string' || d.text.length > 500 ||
     !Number.isFinite(d.fontSize ?? 14) || (d.fontSize ?? 14) < 8 || (d.fontSize ?? 14) > 48)) return false;
   if (d.type === 'fibonacci' && (!Array.isArray(d.levels) || !d.levels.length || d.levels.length > 30 ||
     !d.levels.every(n => Number.isFinite(n) && Math.abs(n) <= 20) || typeof d.reversed !== 'boolean' || typeof d.showPrices !== 'boolean')) return false;

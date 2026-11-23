@@ -67,6 +67,21 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     const size = d.fontSize || 14;
     d.text.split('\n').forEach((text, i) => label(a.x, a.y + i * (size + 3), text, color, size));
   }
+  if (d.type === 'label') {
+    const size = d.fontSize || 14;
+    const lines = d.text.split('\n');
+    const w = Math.max(...lines.map(t => t.length)) * size * .62 + 12;
+    const h = lines.length * (size + 3) + 8;
+    rect(a.x - 4, a.y - size - 2, w, h, color, .18);
+    lines.forEach((text, i) => label(a.x + 2, a.y + i * (size + 3), text, color, size));
+  }
+  if (d.type === 'arrow') {
+    line(a.x, a.y, b.x, b.y);
+    const ang = Math.atan2(b.y - a.y, b.x - a.x), sz = 10 + d.width * 2;
+    const p1 = { x: b.x - sz * Math.cos(ang - .45), y: b.y - sz * Math.sin(ang - .45) };
+    const p2 = { x: b.x - sz * Math.cos(ang + .45), y: b.y - sz * Math.sin(ang + .45) };
+    append(el('polygon', { points: `${b.x},${b.y} ${p1.x},${p1.y} ${p2.x},${p2.y}`, fill: color, 'pointer-events': 'none' }));
+  }
   if (d.type === 'ruler') {
     rect(left, top, right - left, bottom - top, color, .08);
     line(a.x, a.y, b.x, b.y);

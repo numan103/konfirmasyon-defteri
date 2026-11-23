@@ -1,6 +1,6 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
-import { DrawingEngine } from './alfa-drawings.mjs?v=4';
+import { DrawingEngine } from './alfa-drawings.mjs?v=5';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
@@ -8,7 +8,7 @@ import { FvgManager } from './alfa-fvg.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=2';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=1';
-import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=2';
+import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=4';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=4';
 import { ResearchPanel } from './alfa-research.mjs?v=3';
