@@ -1,7 +1,9 @@
-import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=5';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=6';
-import { DrawingStore } from './alfa-drawings-store.mjs?v=3';
-import { icon } from './alfa-chart-ui.mjs?v=1';
+import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=6';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=7';
+import { DrawingStore } from './alfa-drawings-store.mjs?v=4';
+import { icon, chartDialog } from './alfa-chart-ui.mjs?v=2';
+import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=1';
+import { ObjectTree } from './alfa-object-tree.mjs?v=1';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
 const isPosition = d => ['long', 'short'].includes(d.type);
@@ -16,8 +18,8 @@ const toolNames = { cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yat
   ray: 'Işın', arrow: 'Ok', fibonacci: 'Fibonacci düzeltmesi', rectangle: 'Dikdörtgen', brush: 'Fırça',
   text: 'Metin', label: 'Etiket', long: 'Long pozisyon', short: 'Short pozisyon', ruler: 'Ölçüm cetveli', delete: 'Çizim sil' };
 export class DrawingEngine {
-  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager }) {
-    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager });
+  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, getStudies }) {
+    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, getStudies });
     this.market = 'BTCUSDT'; this.tool = 'cursor'; this.selected = null; this.history = new DrawingHistory();
     this.magnet = false; this.drawingsVisible = true; this.brushing = false;
     this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map();
@@ -27,6 +29,8 @@ export class DrawingEngine {
     this.toolbar = $('drawing-tools'); this.favbar = $('drawing-favs'); this.manager = $('drawing-manager'); this.status = $('drawing-status');
     this.favs = this.loadFavs();
     this.buildUI();
+    this.tree = new ObjectTree(this, toolNames);
+    this.floating = new FloatingToolbar({ element: this.favbar, host, getBounds: () => this.dimensions(), key: 'alfa-drawing-favs-position:v1' });
     this.store = new DrawingStore(() => this.openMarket(this.market, true), (ctx, text) => {
       if (!ctx || (ctx.symbol === this.market && ctx.owner === (this.store.user?.id || 'guest'))) this.status.textContent = text;
     });
@@ -61,7 +65,7 @@ export class DrawingEngine {
       if (this.menu && !this.menu.contains(e.target)) this.closeContextMenu();
       if (this.flyout && !this.flyout.contains(e.target) && !this.toolbar.contains(e.target)) this.closeToolMenu();
     }, { signal: this.abort.signal, capture: true });
-    document.addEventListener('keydown', e => this.keydown(e), { signal: this.abort.signal });
+    document.addEventListener('keydown', e => this.keydown(e), { signal: this.abort.signal, capture: true });
     this.observer = new ResizeObserver(() => this.render());
     this.observer.observe(host);
     this.tick = () => {
@@ -191,10 +195,12 @@ export class DrawingEngine {
     };
     if (this.favbar) {
       this.favbar.replaceChildren();
-      const marker = document.createElement('span'); marker.className = 'fav-marker'; marker.innerHTML = icon('star'); marker.title = 'Favori çizim araçları';
-      this.favbar.append(marker);
+      const grip = document.createElement('button'); grip.type = 'button'; grip.className = 'fav-grip'; grip.dataset.toolbarGrip = '';
+      grip.innerHTML = icon('grip'); grip.title = 'Tut ve taşı · ok tuşları: taşı · çift tık / Home: sıfırla'; grip.setAttribute('aria-label', 'Favori araç çubuğunu taşı');
+      this.favbar.append(grip);
       for (const tool of this.favs) this.favbar.append(make(tool, true));
       this.favbar.hidden = !this.favs.length;
+      this.floating?.apply();
     }
     this.toolbar.replaceChildren();
     this.toolbar.append(make('cursor', false));
@@ -252,7 +258,7 @@ export class DrawingEngine {
     this.closeContextMenu();
     const point = this.unproject(e);
     const id = e.target.closest?.('[data-id]')?.getAttribute('data-id');
-    if (id) { this.selected = id; this.refresh(); }
+    if (id) { if (!this.selection.has(id)) this.selected = id; else this.primary = id; this.refresh(); }
     const d = id ? this.history.doc.drawings.find(x => x.id === id) : null;
     const menu = document.createElement('div'); menu.className = 'chart-context-menu';
     menu.setAttribute('role', 'menu');
@@ -271,10 +277,13 @@ export class DrawingEngine {
       menu.append(document.createElement('hr'));
       if (d.locked) item('🔒 Kilidi aç', () => { this.selected = d.id; this.action('lock'); });
       else {
-        item('🗑 Çizimi sil', () => { this.selected = d.id; this.action('remove'); });
-        item('📋 Kopyala', () => { this.selected = d.id; this.action('copy'); });
+        item(this.selection.size > 1 ? `🗑 ${this.selection.size} seçili çizimi sil` : '🗑 Çizimi sil', () => this.action('remove'));
+        item('📋 Seçimi kopyala', () => this.action('copy'));
       }
-      item(d.hidden ? '👁 Göster' : '👁 Gizle', () => { this.selected = d.id; this.action('hide'); });
+      item(d.hidden ? '👁 Göster' : '👁 Gizle', () => this.action('hide'));
+      item('Öne getir', () => this.action('front'));
+      item('Arkaya gönder', () => this.action('back'));
+      if (this.selection.size > 1) item('Klasörde grupla…', () => this.groupSelection());
       item('⚙ Ayarlar…', () => { this.selected = d.id; this.manager.hidden = false; this.updatePanel(); });
     }
     if (!menu.children.length) return;
@@ -318,18 +327,32 @@ export class DrawingEngine {
     if ($('drawing-help')) $('drawing-help').textContent = 'Çizimi seçin/sürükleyin · çift tık: ayarlar';
     this.render();
   }
+  get selected() { return this.primary || null; }
+  set selected(id) { this.primary = id || null; this.selection = new Set(id ? [id] : []); }
   current() { return this.history.doc.drawings.find(d => d.id === this.selected); }
+  selectObjects(ids, { toggle = false } = {}) {
+    const valid = ids.filter(id => this.history.doc.drawings.some(d => d.id === id));
+    if (!toggle) this.selection = new Set(valid);
+    else {
+      const remove = valid.every(id => this.selection.has(id));
+      for (const id of valid) remove ? this.selection.delete(id) : this.selection.add(id);
+    }
+    this.primary = valid.findLast(id => this.selection.has(id)) || [...this.selection].at(-1) || null;
+    this.refresh();
+  }
+  selectAll() { this.cancel(); this.selectObjects(this.history.doc.drawings.map(d => d.id)); }
   down(e) {
     if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
     if (!this.ready || e.button !== 0 || !this.inPlot(e)) return;
     const point = this.unproject(e); if (!point) return;
     const hit = e.target.closest?.('[data-id]'), id = hit?.getAttribute('data-id');
-    if (this.tool === 'cursor' && !id) { this.selected = null; this.refresh(); return; }
+    if (this.tool === 'cursor' && !id) { if (!e.ctrlKey && !e.metaKey) this.selected = null; this.refresh(); return; }
     e.preventDefault(); e.stopImmediatePropagation(); this.host.focus({ preventScroll: true });
     if (this.tool === 'delete') {
       if (id) { this.selected = id; this.action('remove'); this.setTool('cursor'); }
       return;
     }
+    if (this.tool === 'cursor' && (e.ctrlKey || e.metaKey)) { this.selectObjects([id], { toggle: true }); return; }
     if (this.tool !== 'cursor') {
       if (this.tool === 'brush') {
         this.draft = makeDrawing('brush', [point]);
@@ -346,12 +369,15 @@ export class DrawingEngine {
       }
       this.render(); return;
     }
-    this.selected = id; const d = this.current(); this.refresh();
+    if (!this.selection.has(id)) this.selected = id; else this.primary = id;
+    const d = this.current(); this.refresh();
     if (!d || d.locked) return;
-    this.drag = { id, start: point, original: clone(d), handle: e.target.getAttribute('data-handle'), pointer: e.pointerId };
+    this.drag = { id, start: point, original: clone(d), doc: clone(this.history.doc), ids: [...this.selection],
+      handle: this.selection.size === 1 ? e.target.getAttribute('data-handle') : null, pointer: e.pointerId };
     this.pending = clone(this.history.doc); this.host.setPointerCapture(e.pointerId);
   }
   move(e) {
+    if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
     const point = this.unproject(e, !!this.drag || !!this.brushing); if (!point) return;
     if (this.brushing && this.draft?.type === 'brush') {
       const last = this.draft.points.at(-1);
@@ -370,6 +396,10 @@ export class DrawingEngine {
     if (!this.drag) return;
     e.preventDefault(); e.stopImmediatePropagation();
     const { original, start, handle } = this.drag, d = clone(original);
+    if (this.drag.ids.length > 1) {
+      try { this.pending = translateSelection(this.drag.doc, this.drag.ids, point.time - start.time, point.price - start.price); this.render(); } catch {}
+      return;
+    }
     if (!handle) {
       const dt = point.time - start.time, dp = point.price - start.price;
       d.points = d.points.map(p => ({ time: p.time + dt, price: p.price + dp }));
@@ -414,28 +444,80 @@ export class DrawingEngine {
     catch { this.status.textContent = 'Çizim kaydedilemedi · geçersiz değer veya çizim sınırı (300)'; this.refresh(); }
   }
   changed() {
-    if (!this.history.doc.drawings.some(d => d.id === this.selected)) this.selected = null;
+    const ids = new Set(this.history.doc.drawings.map(d => d.id));
+    this.selection = new Set([...this.selection].filter(id => ids.has(id)));
+    if (!this.selection.has(this.primary)) this.primary = [...this.selection].at(-1) || null;
     if (this.context) this.store.save(this.context, this.history.doc);
     this.refresh();
   }
-  action(action) {
+  action(action, ids = [...this.selection]) {
     if (!this.ready) return;
     this.cancel();
-    const next = clone(this.history.doc), d = next.drawings.find(x => x.id === this.selected); if (!d) return;
-    if (action === 'lock') d.locked = !d.locked;
-    if (action === 'hide') d.hidden = !d.hidden;
-    if (action === 'remove' && !d.locked) next.drawings = next.drawings.filter(x => x.id !== d.id);
+    const next = clone(this.history.doc), selected = next.drawings.filter(d => ids.includes(d.id)); if (!selected.length) return;
+    if (action === 'lock') { const value = selected.some(d => !d.locked); for (const d of selected) d.locked = value; }
+    if (action === 'hide') { const value = selected.some(d => !d.hidden); for (const d of selected) d.hidden = value; }
+    if (action === 'remove') next.drawings = next.drawings.filter(d => !ids.includes(d.id) || d.locked);
     if (action === 'copy') {
-      const copy = clone(d); copy.id = crypto.randomUUID(); copy.locked = false; copy.hidden = false;
-      copy.points.forEach(p => { p.time += this.step() * 3; });
-      next.drawings.push(copy); this.selected = copy.id;
+      const copies = selected.map(d => {
+        const copy = clone(d); copy.id = crypto.randomUUID(); copy.locked = false; copy.hidden = false;
+        copy.points.forEach(p => { p.time += this.step() * 3; }); return copy;
+      });
+      next.drawings.push(...copies); this.selection = new Set(copies.map(d => d.id)); this.primary = copies.at(-1).id;
     }
+    if (action === 'front' || action === 'back') {
+      const chosen = selected.filter(d => !d.locked), chosenIds = new Set(chosen.map(d => d.id));
+      const rest = next.drawings.filter(d => !chosenIds.has(d.id));
+      next.drawings = action === 'front' ? [...rest, ...chosen] : [...chosen, ...rest];
+    }
+    if (action === 'ungroup') for (const d of selected) if (!d.locked) delete d.group;
     this.commit(next);
+  }
+  groupSelection() {
+    if (!this.ready || !this.selection.size) return;
+    const ids = [...this.selection], context = this.context;
+    const modal = chartDialog(`<div class="dialog-header"><h3>Seçimi klasörde grupla</h3><button class="icon-button" data-close aria-label="Kapat">${icon('close')}</button></div>
+      <form><label>Klasör adı <input name="group" maxlength="60" required autocomplete="off"></label><div class="settings-actions"><button class="apply">Grupla</button></div></form>`);
+    modal.box.querySelector('[data-close]').onclick = modal.close;
+    modal.box.querySelector('form').onsubmit = e => {
+      e.preventDefault(); if (this.context !== context) { modal.close(); return; }
+      const name = modal.box.querySelector('input').value.trim(); if (!name) return;
+      const next = clone(this.history.doc);
+      for (const d of next.drawings) if (ids.includes(d.id) && !d.locked) d.group = name;
+      this.commit(next); modal.close();
+    };
+    modal.box.querySelector('input').focus();
+  }
+  rename(id) {
+    const drawing = this.history.doc.drawings.find(d => d.id === id); if (!drawing || drawing.locked) return;
+    const context = this.context;
+    const modal = chartDialog(`<div class="dialog-header"><h3>Nesne adı</h3><button class="icon-button" data-close aria-label="Kapat">${icon('close')}</button></div><form><input name="name" aria-label="Nesne adı" maxlength="80" required><div class="settings-actions"><button class="apply">Kaydet</button></div></form>`);
+    modal.box.querySelector('input').value = drawing.name || toolNames[drawing.type];
+    modal.box.querySelector('[data-close]').onclick = modal.close;
+    modal.box.querySelector('form').onsubmit = e => {
+      e.preventDefault(); if (this.context !== context) { modal.close(); return; }
+      const next = clone(this.history.doc), d = next.drawings.find(d => d.id === id);
+      if (d && !d.locked) { d.name = modal.box.querySelector('input').value.trim(); this.commit(next); }
+      modal.close();
+    };
+    modal.box.querySelector('input').select();
   }
   keydown(e) {
     if (document.querySelector('dialog[open]')) return;
     if (e.key === 'Escape') { this.closeContextMenu(); this.cancel(); e.preventDefault(); return; }
     if (e.target.closest?.('input,textarea,select,[contenteditable=true]')) return;
+    const chartFocus = this.host.contains(e.target) || e.target.closest?.('#drawing-objects') || e.target === document.body;
+    if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'a') { e.preventDefault(); e.stopImmediatePropagation(); this.selectAll(); return; }
+    if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'g') { e.preventDefault(); e.stopImmediatePropagation(); e.shiftKey ? this.action('ungroup') : this.groupSelection(); return; }
+    if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'd' && this.selection.size) { e.preventDefault(); e.stopImmediatePropagation(); this.action('copy'); return; }
+    if (this.selection.size && this.host.contains(e.target) && !e.target.closest?.('#drawing-favs') && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      e.preventDefault(); e.stopImmediatePropagation();
+      const multiplier = e.shiftKey ? 10 : 1, current = this.current();
+      const y = this.series.priceToCoordinate(current.points[0].price), p = y == null ? null : this.series.coordinateToPrice(y - 1);
+      const dp = p == null ? 0 : p - current.points[0].price;
+      try { this.commit(translateSelection(this.history.doc, this.selection, (e.key === 'ArrowRight' ? this.step() : e.key === 'ArrowLeft' ? -this.step() : 0) * multiplier,
+        (e.key === 'ArrowUp' ? dp : e.key === 'ArrowDown' ? -dp : 0) * multiplier)); } catch {}
+      return;
+    }
     if ((e.ctrlKey || e.metaKey) && ['z', 'y'].includes(e.key.toLowerCase())) {
       e.preventDefault(); this.cancel();
       if (this.ready && ((e.shiftKey || e.key.toLowerCase() === 'y') ? this.history.redo() : this.history.undo())) this.changed();
@@ -448,7 +530,7 @@ export class DrawingEngine {
     const fragment = document.createDocumentFragment();
     for (const d of (this.pending || this.history.doc).drawings) {
       if (d.hidden) continue;
-      const g = renderDrawing(d, p => this.project(p), width, height, d.id === this.selected);
+      const g = renderDrawing(d, p => this.project(p), width, height, this.selection.has(d.id), false, this.selection.size === 1);
       if (g) fragment.append(g);
     }
     if (this.draft) {
@@ -468,34 +550,25 @@ export class DrawingEngine {
       selection.hidden = !d || d.hidden || !this.drawingsVisible;
       selection.replaceChildren();
       if (d) {
-        const name = document.createElement('small'); name.textContent = toolNames[d.type]; selection.append(name);
-        for (const [action, glyph, label] of [['settings', 'settings', 'Çizim ayarları'], ['copy', 'layers', 'Çizimi kopyala'], ['remove', 'delete', 'Seçili çizimi sil']]) {
+        const name = document.createElement('small'); name.textContent = this.selection.size > 1 ? `${this.selection.size} seçili` : d.name || toolNames[d.type]; selection.append(name);
+        const actions = this.selection.size > 1 ? [['group', 'folder', 'Seçimi grupla'], ['copy', 'layers', 'Seçimi kopyala'], ['lock', 'lock', 'Seçimi kilitle/aç'], ['remove', 'delete', 'Seçili çizimleri sil']] :
+          [['settings', 'settings', 'Çizim ayarları'], ['copy', 'layers', 'Çizimi kopyala'], ['remove', 'delete', 'Seçili çizimi sil']];
+        for (const [action, glyph, label] of actions) {
           const b = document.createElement('button'); b.type = 'button'; b.innerHTML = icon(glyph); b.title = label; b.setAttribute('aria-label', label);
-          b.disabled = action === 'remove' && d.locked;
-          b.onclick = () => { if (action === 'settings') { this.manager.hidden = false; this.updatePanel(); } else this.action(action); };
+          b.disabled = action === 'remove' && this.history.doc.drawings.filter(d => this.selection.has(d.id)).every(d => d.locked);
+          b.onclick = () => { if (action === 'settings') { this.manager.hidden = false; this.updatePanel(); } else if (action === 'group') this.groupSelection(); else this.action(action); };
           selection.append(b);
         }
       }
     }
   }
   updatePanel() {
-    const list = $('drawing-objects'); list.replaceChildren();
-    for (const d of this.history.doc.drawings) {
-      const row = document.createElement('div'); row.className = 'drawing-object';
-      const b = document.createElement('button'); b.type = 'button';
-      b.textContent = `${TOOLS[d.type][1]}${d.hidden ? ' · gizli' : ''}${d.locked ? ' · kilitli' : ''}`;
-      b.setAttribute('aria-pressed', String(d.id === this.selected));
-      b.onclick = () => { this.cancel(); this.selected = d.id; this.refresh(); }; row.append(b);
-      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'object-remove'; remove.innerHTML = icon('delete');
-      remove.setAttribute('aria-label', `${toolNames[d.type]} sil`); remove.disabled = d.locked;
-      remove.onclick = () => { this.selected = d.id; this.action('remove'); };
-      row.append(remove); list.append(row);
-    }
+    this.tree?.render();
     $('drawing-empty').hidden = !!this.history.doc.drawings.length;
     const d = this.current(), form = $('drawing-settings');
-    form.hidden = !d;
-    $('drawing-selected-name').textContent = d ? TOOLS[d.type][1] : '';
-    if (!d) return;
+    form.hidden = !d || this.selection.size !== 1;
+    $('drawing-selected-name').textContent = this.selection.size > 1 ? `${this.selection.size} seçili` : d ? d.name || toolNames[d.type] : '';
+    if (!d || this.selection.size !== 1) return;
     $('drawing-color').value = d.color; $('drawing-width').value = d.width;
     $('drawing-text-row').hidden = !['text', 'label'].includes(d.type); $('drawing-font-row').hidden = !['text', 'label'].includes(d.type);
     $('drawing-text').value = d.text || ''; $('drawing-font-size').value = d.fontSize || 14;
@@ -557,6 +630,7 @@ export class DrawingEngine {
     ++this.epoch; this.abort.abort(); cancelAnimationFrame(this.frame);
     this.closeContextMenu();
     this.closeToolMenu();
+    this.floating.dispose(); this.tree.dispose();
     this.observer.disconnect(); this.store.dispose(); this.svg.remove();
   }
 }

@@ -1,4 +1,4 @@
-import { emptyDocument, validateDocument, clone } from './alfa-drawings-model.mjs?v=2';
+import { emptyDocument, validateDocument, clone } from './alfa-drawings-model.mjs?v=6';
 const URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const KEY = 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
 const AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';

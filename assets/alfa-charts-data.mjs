@@ -4,10 +4,13 @@ export const TIMEFRAMES = Object.freeze({
   '1D': '1d', '3D': '3d', '1W': '1w'
 });
 export const SYMBOLS = Object.freeze(['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']);
+// Syntax is bounded here; the symbol picker/importer additionally checks the
+// live Binance Spot exchangeInfo catalogue. Nonexistent symbols never get data.
+export const isMarketSymbol = symbol => typeof symbol === 'string' && /^[A-Z0-9]{5,32}$/.test(symbol);
 export const REST_ORIGINS = ['https://data-api.binance.vision', 'https://api.binance.com'];
 export const STREAM_ORIGINS = ['wss://data-stream.binance.vision', 'wss://stream.binance.com:9443'];
 export function validateMarket(symbol, interval) {
-  if (!SYMBOLS.includes(symbol) || !Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen piyasa');
+  if (!isMarketSymbol(symbol) || !Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen piyasa');
 }
 export function restURL(origin, symbol, interval) {
   validateMarket(symbol, interval);

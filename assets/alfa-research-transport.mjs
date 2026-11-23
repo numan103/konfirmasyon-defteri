@@ -1,4 +1,4 @@
-import { validatePacket,packetMetadata,candleDelta,canonical } from './alfa-research-model.mjs?v=1';
+import { validatePacket,packetMetadata,candleDelta,canonical } from './alfa-research-model.mjs?v=2';
 export class SupabaseResearchTransport{
   constructor(client,owner){this.client=client;this.owner=owner;}
   async guard(){

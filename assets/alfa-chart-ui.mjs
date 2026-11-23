@@ -39,6 +39,16 @@ const paths = {
   fit: '<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 12h8m-4-4v8"/>',
   live: '<path d="m9 5 7 7-7 7M20 4v16"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
+  grip: '<circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/>',
+  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>',
+  unlock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7-3m-3 11v2"/>',
+  folder: '<path d="M3 6h6l2 3h10v11H3z"/>',
+  front: '<rect x="3" y="3" width="12" height="12" rx="1"/><path d="M18 9h3v12H9v-3"/>',
+  back: '<rect x="9" y="9" width="12" height="12" rx="1"/><path d="M6 15H3V3h12v3"/>',
+  upload: '<path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/>',
+  download: '<path d="M12 3v13m-5-5 5 5 5-5M4 16v5h16v-5"/>',
+  link: '<path d="m9 15 6-6m-5-3 2-2a5 5 0 0 1 7 7l-2 2m-3 5-2 2a5 5 0 0 1-7-7l2-2"/>',
+  edit: '<path d="m4 16 12-12 4 4L8 20H4zM14 6l4 4"/>',
 };
 export function icon(name, cls = '') {
   return `<svg class="ui-icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.indicators}</svg>`;

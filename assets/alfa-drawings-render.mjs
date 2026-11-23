@@ -1,4 +1,4 @@
-import { fibPrice, positionStats } from './alfa-drawings-model.mjs?v=5';
+import { fibPrice, positionStats } from './alfa-drawings-model.mjs?v=6';
 const NS = 'http://www.w3.org/2000/svg';
 const fmt = n => Number(n).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
 function el(tag, attrs, text) {
@@ -7,7 +7,7 @@ function el(tag, attrs, text) {
   if (text != null) node.textContent = text;
   return node;
 }
-export function renderDrawing(d, project, width, height, selected, draft = false) {
+export function renderDrawing(d, project, width, height, selected, draft = false, showHandles = true) {
   const p = d.points.map(project);
   if (p.some(v => !v || !Number.isFinite(v.x) || !Number.isFinite(v.y))) return null;
   const g = el('g', { 'data-id': d.id, role: 'group', 'aria-label': d.type + ' çizimi', class: 'drawing' + (selected ? ' selected' : ''), opacity: draft ? .65 : 1 });
@@ -99,7 +99,7 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     const hours = Math.abs(d.points[1].time - d.points[0].time) / 3600;
     label(left + 5, top - 8, `${diff >= 0 ? '+' : ''}${fmt(diff)} (${(diff / d.points[0].price * 100).toFixed(2)}%) · ${hours.toFixed(2)} saat`);
   }
-  if (selected && !d.locked && !draft) {
+  if (selected && !d.locked && !draft && showHandles) {
     function handle(x, y, name) {
       append(el('circle', { cx: x, cy: y, r: 6, fill: '#10141c', stroke: '#c3d0ff', 'stroke-width': 2, 'data-handle': name,
         role: 'img', 'aria-label': 'Çizim tutamacı ' + name, class: 'drawing-handle' }));

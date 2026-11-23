@@ -3,7 +3,7 @@ import { savedLabSources } from './alfa-lab-store.mjs?v=1';
 import { rrScenario,RR_TARGETS } from './alfa-lab-scenarios.mjs?v=1';
 import { analyzeTrades,validateAnalytics } from './alfa-strategy-model.mjs?v=1';
 import { fmt,el,option,svgNode,lineChart,barChart } from './alfa-strategy.mjs?v=2';
-import { ExcursionAnalysis } from './alfa-excursions.mjs?v=1';
+import { ExcursionAnalysis } from './alfa-excursions.mjs?v=2';
 const pf=m=>m.profitFactorStatus==='no-losses'?'∞ (kayıp yok)':fmt(m.profitFactor);
 const labels={strategyId:'Strategy',symbol:'Symbol',timeframe:'Timeframe',direction:'Direction',
   ...Object.fromEntries(LAB_FIELDS),replaySessionId:'Replay Session',knowledge:'Etiket zamanı'};

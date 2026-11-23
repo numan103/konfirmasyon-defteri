@@ -1,28 +1,29 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
-import { DrawingEngine } from './alfa-drawings.mjs?v=8';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=5';
+import { DrawingEngine } from './alfa-drawings.mjs?v=9';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=1';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
 import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=1';
-import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=1';
-import { MtfManager } from './alfa-mtf.mjs?v=2';
+import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=2';
+import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
-import { replayRange } from './alfa-replay-data.mjs?v=1';
-import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=5';
+import { replayRange } from './alfa-replay-data.mjs?v=2';
+import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=6';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
-import { PaperTradingPanel } from './alfa-paper.mjs?v=4';
-import { ResearchPanel } from './alfa-research.mjs?v=3';
-import { packetBars,validatePacket } from './alfa-research-model.mjs?v=1';
+import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
+import { ResearchPanel } from './alfa-research.mjs?v=4';
+import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 
 const $ = id => document.getElementById(id);
 const workspace = document.querySelector('.workspace');
 const host = $('chart');
 hydrateIcons();
-let studiesUI = null;
-const priceFormat = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+let studiesUI = null, watchlist = null, pricePrecisionKey = '';
+const priceFormat = { format: value => formatMarketPrice(value, watchlist?.info(symbol).precision) };
 const chart = createChart(host, {
   layout: { background: { type: ColorType.Solid, color: '#10141c' }, textColor: '#8e9eb6', attributionLogo: true },
   grid: { vertLines: { color: '#1c243022' }, horzLines: { color: '#28334655' } },
@@ -213,7 +214,7 @@ async function enterReplay({target,session=null,researchPacket=null}={}) {
   if (replayMode) return;
   if(replayBusy || !drawings.ready)return;
   if(session) {
-    if(!SYMBOLS.includes(session.symbol) || !Object.values(TIMEFRAMES).includes(session.timeframe)){
+    if(!isMarketSymbol(session.symbol) || !Object.values(TIMEFRAMES).includes(session.timeframe)){
       connection('Geçersiz kayıtlı replay','error');return;
     }
     symbol=session.symbol;interval=session.timeframe; target=session.startTime;
@@ -377,12 +378,18 @@ function quote() {
   const c = history.at(-1);
   if (!c) return;
   $('last-price').textContent = priceFormat.format(c.close);
-  $('quote-symbol').textContent = symbol.replace('USDT', ' / USDT');
+  const info = watchlist?.info(symbol);
+  $('quote-symbol').textContent = info?.quote ? info.base + ' / ' + info.quote : symbol;
+  const precision = info?.precision ?? (c.close < 1 ? Math.min(10, Math.max(4, -Math.floor(Math.log10(c.close)) + 3)) : 2);
+  const precisionKey = symbol + ':' + precision;
+  if (pricePrecisionKey !== precisionKey) {
+    for (const s of [candles, bars, heikin, line, area]) s.applyOptions({ priceFormat: { type: 'price', precision, minMove: 10 ** -precision } });
+    pricePrecisionKey = precisionKey;
+  }
   const change = c.open ? (c.close - c.open) / c.open * 100 : 0;
   $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · son mum`;
   $('quote-change').style.color = change >= 0 ? '#26c89c' : '#ef6677';
-  const watchPrice = document.querySelector(`[data-watch-price="${symbol}"]`);
-  if (watchPrice) { watchPrice.textContent = priceFormat.format(c.close); watchPrice.title = 'Bu sekmede en son alınan fiyat'; }
+  if (!replayMode) watchlist?.updateQuote(symbol, c.close);
   $('price-time').textContent = `Mum: ${new Date(c.time * 1000).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
   showCandle(c);
 }
@@ -535,7 +542,7 @@ function connect(id, resetView = false) {
     const p = new URLSearchParams(location.search);
     const s = String(p.get('symbol') || '').toUpperCase();
     const tf = String(p.get('interval') || p.get('tf') || '').toLowerCase();
-    if (SYMBOLS.includes(s)) symbol = s;
+    if (isMarketSymbol(s)) symbol = s;
     if (Object.values(TIMEFRAMES).includes(tf)) interval = tf;
   } catch {}
 })();
@@ -587,15 +594,10 @@ function openTfPicker() {
   m.box.querySelector('#tf-close').addEventListener('click', m.close);
 }
 renderTimeframes();
-for (const item of SYMBOLS) {
-  const b = document.createElement('button'); b.type = 'button'; b.className = 'watch-row'; b.dataset.symbol = item;
-  const base = item.replace('USDT', '');
-  b.innerHTML = `<span class="coin-icon">${base === 'BTC' ? '₿' : base.slice(0, 1)}</span><span><strong>${base}</strong><small>USDT · SPOT</small></span><span class="watch-price" data-watch-price="${item}">—</span>`;
-  b.setAttribute('aria-label', item);
-  b.addEventListener('click', () => { if (symbol !== item) { symbol = item; loadMarket(); } });
-  $('watch-rows').append(b);
-}
-$('symbol').addEventListener('change', e => { symbol = e.target.value; loadMarket(); });
+watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => symbol,
+  onSelect: next => { if (symbol !== next) { symbol = next; loadMarket(); } },
+  getAccessToken: async () => { const session = await cloudSettings.client?.auth.getSession(); return session?.data?.session?.access_token || ''; },
+  onStatus: connection });
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;
 $('log-scale').addEventListener('click', () => {
@@ -752,7 +754,7 @@ $('fullscreen').addEventListener('click', async () => {
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran'); });
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval,
-  onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager() });
+  onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager(), getStudies: () => studiesUI });
 try {
   const magOn = localStorage.getItem('alfa-magnet:v1') === '1';
   drawings.setMagnet(magOn);
@@ -832,7 +834,7 @@ function openAlarmManager() {
 }
 $('alarm-toggle').addEventListener('click', openAlarmManager);
 
-const indicators = new IndicatorManager({ chart, getBars: () => seriesBars, onChange: () => studiesUI?.sync() });
+const indicators = new IndicatorManager({ chart, getBars: () => seriesBars, onChange: () => { studiesUI?.sync(); drawings.updatePanel(); } });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
 const sessionBoxes = new SessionBoxesManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval, onChange: () => { studiesUI?.sync(); saveLayout(); } });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
@@ -841,7 +843,7 @@ const mtf = new MtfManager({ chart, series: candles, host, getBars: () => series
 studiesUI = new ChartStudies({ indicators, catalog: INDICATOR_CATALOG, managers: {
   sessions: sessionBoxes, levels: sessionLevels, structure: marketStructure, fvg, mtf,
   volume: { enabled: true, setEnabled(value) { this.enabled = value; volume.applyOptions({ visible: value }); } },
-}, onChange: () => saveLayout() });
+}, onChange: () => { saveLayout(); drawings.updatePanel(); } });
 const paper = new PaperTradingPanel({
   series:candles,owner:currentUserKey,pause:pauseReplay,
   getReplay:()=>replayMode&&replayEngine?{bars:history,clock:replayEngine.clock}:null,
@@ -851,6 +853,7 @@ const research = new ResearchPanel({getOwner:currentUserKey,isReplayActive:()=>r
   onOpen:packet=>enterReplay({session:packet.replay,researchPacket:packet})});
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+  watchlist.account();
   research.account(user,cloudSettings.client);
   if(paper.engine&&paper.owner()!==paper.ownerId){pauseReplay();paper.stop();}
   try { loadLayout(); } catch {}
@@ -864,7 +867,7 @@ cloudSettings.start();
 function dispose() {
   pauseReplay(); research.dispose(); paper.stop(); disposed = true; ++generation;
   closeTransport(); clearTimeout(cloudSaveTimer); cloudSettings.dispose();
-  drawings.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove();
+  drawings.dispose(); watchlist.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove();
 }
 window.addEventListener('pagehide', dispose, { once: true });
 window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -872,7 +875,7 @@ window.addEventListener('online', () => { if (!disposed&&!replayMode) loadMarket
 window.addEventListener('offline', () => { connection('İnternet bağlantısı yok · fiyat güncel değil', 'error'); });
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__alfaDebug = { chart, candles, line, drawings, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
+  window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, paper, research, get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; }, get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }

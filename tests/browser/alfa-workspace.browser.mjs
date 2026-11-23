@@ -23,7 +23,7 @@ try {
   await page.goto(origin + '/alfa-charts.html?debug=1'); await ready();
   await test('clean entry, compact toolbar, grouped drawing rail, no unsolicited overlays', async () => {
     assert.equal(await page.locator('#drawing-tools>button').count(), 8);
-    assert.equal(await page.locator('#drawing-favs>button').count(), 4);
+    assert.equal(await page.locator('#drawing-favs>[data-tool]').count(), 4);
     assert.equal(await state(() => window.__alfaDebug.marketStructure.priceLines.length), 0);
     assert.equal(await state(() => window.__alfaDebug.sessionLevels.lines.length), 0);
     const geometry = await state(() => ({ toolbar: document.querySelector('.toolbar').getBoundingClientRect().height, chart: document.querySelector('#chart').clientHeight, overflow: document.documentElement.scrollWidth > innerWidth }));
@@ -134,7 +134,84 @@ try {
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#drawing-favs [data-tool=trend]').count(), 1);
     await page.reload(); await ready();
-    assert.equal(await page.locator('#drawing-favs>button').count(), 1);
+    assert.equal(await page.locator('#drawing-favs>[data-tool]').count(), 1);
+  });
+  await test('searchable Spot picker, bounded TXT import and scoped watchlist persistence', async () => {
+    await page.evaluate(() => {
+      const w = window.__alfaDebug.watchlist;
+      w.markets = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ETHBTC'].map(symbol => ({ symbol,
+        base: symbol.replace(/(USDT|BTC)$/, ''), quote: symbol.endsWith('BTC') ? 'BTC' : 'USDT', precision: 5 }));
+      w.catalogState = 'ready';
+    });
+    await page.click('#symbol-search');
+    await page.fill('#symbol-query', 'XRP');
+    assert.equal(await page.locator('[data-open-symbol="XRPUSDT"]').count(), 1);
+    assert.equal(await page.locator('[data-add-symbol="DOGEUSDT"]').count(), 0);
+    await page.click('[data-add-symbol="XRPUSDT"]');
+    await close();
+    assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('XRPUSDT')), true);
+    await page.click('#watch-import');
+    await page.fill('#watchlist-source', 'BINANCE:BTCUSDT,BINANCE:DOGEUSDT,BYBIT:BTCUSDT,BINANCE:BTCUSDT.P,<img onerror=alert(1)>');
+    await page.click('#watchlist-preview');
+    await page.waitForFunction(() => document.querySelector('#import-result strong'));
+    const preview = await page.locator('#import-result').textContent();
+    assert.match(preview, /DOGEUSDT/);
+    assert.match(preview, /4 kayıt atlandı/);
+    assert.match(preview, /Farklı borsa/);
+    assert.match(preview, /Vadeli/);
+    await page.click('#watchlist-apply');
+    await page.waitForFunction(() => window.__alfaDebug.watchlist.symbols.includes('DOGEUSDT'));
+    assert.equal(await page.locator('[data-watch-price="DOGEUSDT"]').count(), 1);
+    await page.reload(); await ready();
+    assert.equal(await state(() => window.__alfaDebug.watchlist.symbols.includes('DOGEUSDT')), true);
+    await shot('watchlist-import');
+  });
+  await test('object tree: Ctrl multi-select, grouping, bulk delete, undo and rename', async () => {
+    await page.evaluate(() => { const d = window.__alfaDebug.drawings; d.history.commit({ ...d.history.doc, drawings: [] }); });
+    const plot = await state(() => { const d = window.__alfaDebug.drawings, r = d.host.getBoundingClientRect(); return { x: r.x, y: r.y, ...d.dimensions() }; });
+    for (const [index, offset] of [.3, .6].entries()) {
+      await page.click('#drawing-tools [data-group=lines]');
+      await page.click('.tool-flyout [data-tool=trend]');
+      const x = plot.x + plot.width * offset, y = plot.y + plot.height * .5;
+      await page.mouse.click(x, y);
+      await page.mouse.click(x + 80, y - 45);
+      await page.waitForFunction(count => window.__alfaDebug.drawings.history.doc.drawings.length === count, index + 1);
+    }
+    await page.click('#drawing-manage');
+    assert.equal(await page.locator('#drawing-objects [data-object-id]').count(), 2);
+    await page.click('#drawing-objects [data-object-id] >> nth=0');
+    await page.click('#drawing-objects [data-object-id] >> nth=1', { modifiers: ['Control'] });
+    assert.equal(await state(() => window.__alfaDebug.drawings.selection.size), 2);
+    assert.match(await page.locator('#tree-selection-status').textContent(), /2 seçili/);
+    await page.click('#tree-group');
+    await page.fill('.chart-dialog input[name=group]', 'Destekler');
+    await page.click('.chart-dialog .apply');
+    assert.equal(await state(() => window.__alfaDebug.drawings.history.doc.drawings.every(d => d.group === 'Destekler')), true);
+    assert.equal(await page.locator('.object-folder-label').count(), 1);
+    await page.locator('#drawing-objects [data-object-id] >> nth=0 >> [data-object-action=select]').dblclick();
+    await page.fill('.chart-dialog input[name=name]', 'Ana trend');
+    await page.click('.chart-dialog .apply');
+    assert.match(await page.locator('#drawing-objects').textContent(), /Ana trend/);
+    await page.click('#drawing-objects [data-object-id] >> nth=0');
+    await page.click('#drawing-objects [data-object-id] >> nth=1', { modifiers: ['Control'] });
+    assert.equal(await state(() => window.__alfaDebug.drawings.selection.size), 2);
+    await page.click('#tree-remove');
+    assert.equal(await state(() => window.__alfaDebug.drawings.history.doc.drawings.length), 0);
+    await page.keyboard.press('Control+z');
+    assert.equal(await state(() => window.__alfaDebug.drawings.history.doc.drawings.length), 2);
+    await shot('object-tree');
+  });
+  await test('favorite toolbar grip drags within the plot and survives reload', async () => {
+    const before = await state(() => window.__alfaDebug.drawings.floating.position);
+    const grip = await page.locator('#drawing-favs [data-toolbar-grip]').boundingBox();
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(grip.x + 130, grip.y + 70, { steps: 8 });
+    await page.mouse.up();
+    const after = await state(() => window.__alfaDebug.drawings.floating.position);
+    assert.notDeepEqual(after, before);
+    await page.reload(); await ready();
+    assert.deepEqual(await state(() => window.__alfaDebug.drawings.floating.position), after);
   });
   await test('mobile/tablet layouts and catalogue fit 320, 390 and 768 px viewports', async () => {
     for (const width of [320, 390, 768]) {

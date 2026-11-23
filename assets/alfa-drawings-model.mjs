@@ -41,6 +41,8 @@ export function validDrawing(d) {
       !d.points.every(p => p && Number.isFinite(p.time) && p.time > 0 && Number.isFinite(p.price) && p.price > 0) ||
       !/^#[0-9a-f]{6}$/i.test(d.color) || !Number.isFinite(d.width) || d.width < 1 || d.width > 6 ||
       typeof d.hidden !== 'boolean' || typeof d.locked !== 'boolean') return false;
+  if (d.name != null && (typeof d.name !== 'string' || d.name.length > 80)) return false;
+  if (d.group != null && (typeof d.group !== 'string' || !d.group.trim() || d.group.length > 60)) return false;
   if (['text', 'label'].includes(d.type) && (typeof d.text !== 'string' || d.text.length > 500 ||
     !Number.isFinite(d.fontSize ?? 14) || (d.fontSize ?? 14) < 8 || (d.fontSize ?? 14) > 48)) return false;
   if (d.type === 'fibonacci' && (!Array.isArray(d.levels) || !d.levels.length || d.levels.length > 30 ||
@@ -87,6 +89,16 @@ export function logicalToPixel(logical, coordinateOfInteger) {
 export function pixelToLogical(x, coordinateOfInteger) {
   const a = coordinateOfInteger(0), b = coordinateOfInteger(1);
   return a == null || b == null || a === b ? null : (x - a) / (b - a);
+}
+export function translateSelection(doc, ids, dt, dp) {
+  if (!Number.isFinite(dt) || !Number.isFinite(dp)) throw new Error('Geçersiz taşıma');
+  const selected = new Set(ids), next = clone(doc);
+  for (const d of next.drawings) if (selected.has(d.id) && !d.locked) {
+    d.points = d.points.map(p => ({ time: p.time + dt, price: p.price + dp }));
+    if (['long', 'short'].includes(d.type)) d.target += dp;
+    if (!validDrawing(d)) throw new Error('Seçim grafik sınırlarının dışına taşınamaz');
+  }
+  return next;
 }
 export class DrawingHistory {
   constructor(doc = emptyDocument()) { this.reset(doc); }

@@ -29,6 +29,7 @@ import {
 } from '../lib/mentorship.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 import { adminNotifyChatId } from '../lib/admin-notify.mjs';
+import { publicWatchlistURL, fetchPublicWatchlist, allowWatchlistImport } from '../lib/chart-watchlist-import.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
@@ -831,6 +832,13 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const op = body.op || 'status';
+    if (op === 'chart-watchlist-import') {
+      if (!featureAccess(user).features.alfacharts) return fail(res, 403, 'charts_access_required');
+      try { publicWatchlistURL(body.url); } catch { return fail(res, 400, 'bad_watchlist_url'); }
+      if (!allowWatchlistImport(user.id)) return fail(res, 429, 'watchlist_rate_limit');
+      try { return send(res, 200, { ok: true, ...await fetchPublicWatchlist(body.url) }); }
+      catch (e) { return fail(res, e.message === 'watchlist_too_large' ? 413 : 502, e.message === 'watchlist_too_large' ? e.message : 'public_watchlist_unavailable'); }
+    }
     if (op === 'status') return statusHandler(res, user, jwt);
     if (op === 'submit') return submitHandler(res, user, jwt, body);
     if (op === 'mentor') return mentorOpHandler(res, user, jwt);

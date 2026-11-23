@@ -275,3 +275,83 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 @media(max-width:900px){.button-label{display:none}.count-badge{display:none}.toolbar{padding:0 8px;gap:6px}.actions>button{padding:6px}.actions{gap:1px}.workspace-menu>summary{padding:6px}.market-controls{gap:3px}#timeframes{padding:0 4px}#timeframes button{padding:7px 6px}.market-legend{gap:8px}.market-legend>.venue-tag{display:none}#drawing-help{display:none}.selection-toolbar small{display:none}.workspace-popover{position:fixed;top:52px;right:8px;max-width:calc(100vw - 20px)}.session-popover{top:auto;bottom:48px;left:54px;right:auto}.shot-menu{position:fixed;right:8px;top:52px}}
 @media(max-width:600px){.toolbar{height:auto;min-height:86px;flex-wrap:wrap;padding:5px 8px;gap:3px 8px}.brand{height:31px}.brand h1{display:block;font-size:10px}.brand-mark{width:24px;height:25px;font-size:18px}.actions{margin-left:auto}.actions .history-control{display:none}.actions>button,.actions>details>summary{min-height:30px;height:30px}.actions .ui-icon{width:17px;height:17px}#screenshot{display:none}.market-controls{order:3;flex:1 1 100%;height:32px}.symbol-label select{font-size:11px;width:100px}#timeframes button{font-size:10px;padding:6px}.workarea,.no-list .workarea{grid-template-columns:42px minmax(0,1fr)}.drawing-space{padding:5px 3px}#drawing-tools>button,.rail-actions>button,.session-boxes-side>summary{width:34px;height:32px;padding:7px}.rail-actions{gap:1px}.legend{padding:9px 10px 5px;min-height:60px}.market-legend{flex-wrap:wrap;gap:5px}#market-title{font-size:12px}#ohlc{font-size:9px;width:100%;line-height:1.6}#study-legend{margin-top:2px}.study-chip .study-chip-action{opacity:1}.chart-panel{grid-template-rows:auto minmax(0,1fr) 30px}.range-presets button{padding:4px 5px;font-size:9px}.scale-controls{gap:0}.scale-controls>span{margin-right:2px}.chart-navigation{padding:0 4px;gap:3px}#watchlist{position:absolute;right:0;top:0;bottom:0;width:min(248px,calc(100vw - 70px));z-index:25;box-shadow:-15px 0 35px #0007}#drawing-favs{left:7px;top:8px;max-width:calc(100% - 65px)}#drawing-favs>button{width:27px;height:27px}.selection-toolbar{top:49px;right:70px}.workspace-popover,.shot-menu{top:44px}.session-popover{top:auto;bottom:42px;left:46px}.tool-flyout{left:47px;max-width:calc(100vw - 55px)}#drawing-manager{right:5px;top:94px;bottom:60px;padding:12px}footer{min-height:21px;padding:3px 8px;gap:8px;font-size:8px}#data-info,footer>a{display:none}#drawing-status{margin-left:auto;max-width:38%}.study-browser{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:60dvh}.study-categories{flex-direction:row;overflow-x:auto;padding:7px;border-right:0;border-bottom:1px solid var(--line)}.study-categories button{white-space:nowrap;padding:8px 10px;font-size:10px}.studies-dialog .dialog-header{padding:18px 16px 14px}.study-search{margin:0 16px 14px}.study-results{padding:4px 12px}.study-row{gap:6px}.study-row-info strong{font-size:11px}.study-row-info small{font-size:9px}.study-footer{padding:10px 14px}.study-footer small{font-size:9px}.study-footer button{font-size:10px}.study-settings{padding:18px}.study-settings .session-time-row{grid-template-columns:1fr 83px 83px;gap:6px}.chart-dialog{max-height:90dvh;width:calc(100vw - 16px)}.dialog-content{padding:18px}}
 @media(prefers-reduced-motion:reduce){button,summary{transition:none}}
+.watch-head{padding:14px 12px 6px;gap:6px}
+.watch-head h2{min-width:0;display:flex;gap:6px;align-items:center}
+#watchlist-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#watch-count{font-size:9px;color:#8192b1;font-weight:400}
+.watch-actions{display:flex;align-items:center;gap:4px;padding:0 12px 10px}
+.watch-actions>button{display:flex;align-items:center;gap:6px;font-size:10px;border:0;background:transparent;padding:5px 6px;height:28px}
+.watch-actions>button .ui-icon{width:14px;height:14px}
+.watch-actions #watch-import{margin-right:auto}
+.watch-item{position:relative}
+.watch-item .watch-row{padding-right:29px}
+.watch-quote{display:flex;flex-direction:column;gap:4px;margin-left:auto;text-align:right;min-width:0}
+.watch-quote .watch-price{font-size:10px;white-space:nowrap;margin:0}
+.watch-quote small{font-size:9px}
+.watch-remove{position:absolute;right:3px;top:20px;padding:3px;width:20px;height:20px;border:0;background:transparent;color:#647591;opacity:0}
+.watch-item:hover .watch-remove,.watch-item:focus-within .watch-remove{opacity:1}
+.watch-remove .ui-icon{width:13px;height:13px}
+.watch-empty{padding:20px;color:#8195b6;font-size:11px;line-height:1.8}
+#watch-rows{flex-shrink:0}
+.symbol-dialog{width:min(620px,calc(100vw - 24px))}
+.symbol-dialog .study-search{margin:0 0 12px}
+.symbol-filters{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.symbol-filters label{display:flex;align-items:center;gap:8px;font-size:11px}
+.symbol-filters select{font-size:11px;min-height:30px!important}
+.symbol-filters small{color:#8497b7;font-size:10px;flex:1;min-width:70px}
+.symbol-filters button{font-size:10px;padding:5px 8px}
+.symbol-results{max-height:min(400px,48dvh);overflow:auto;border-top:1px solid var(--line);margin-bottom:12px}
+.symbol-result{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:3px 0}
+.symbol-result>button:first-child{flex:1;min-width:0;text-align:left;display:flex;flex-direction:column;gap:5px;background:transparent;border:0;padding:10px 5px}
+.symbol-result strong{font-size:12px;font-weight:500}
+.symbol-result strong small{color:#899dbd}
+.symbol-result>button>small{font-size:9px;letter-spacing:.5px;color:#647b9f}
+.symbol-result>[data-add-symbol]{width:30px;height:30px;padding:6px;border:0;background:transparent;color:#a1bdf4}
+.symbol-result>[data-add-symbol] .ui-icon{width:17px;height:17px}
+.watchlist-import-dialog{width:min(650px,calc(100vw - 24px))}
+.import-file{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px dashed #3e5276;border-radius:7px;padding:12px;margin:12px 0;font-size:11px}
+.import-file input{max-width:65%;font-size:10px;background:transparent;border:0;padding:0}
+.import-source-label{display:block;margin:14px 0 6px;color:#a9b7cc;font-size:11px}
+#watchlist-source{width:100%;resize:vertical;font-size:11px;min-height:85px;line-height:1.7}
+.import-options{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0}
+.import-options label{font-size:11px}
+.import-options button{font-size:11px}
+.import-result{font-size:11px;color:#9baece;line-height:1.8;overflow-wrap:anywhere;max-height:30dvh;overflow:auto}
+.import-result strong{color:#b2cbff;font-weight:500}
+.import-result details{font-size:10px;color:#ad9e86}
+.import-result details>div{padding:5px 0;border-bottom:1px solid var(--line)}
+#drawing-favs>.fav-grip{width:19px;cursor:grab;color:#687d9e;border-right:1px solid #334057;border-radius:0;margin-right:2px;touch-action:none}
+#drawing-favs>.fav-grip .ui-icon{width:14px;height:19px}
+#drawing-favs.toolbar-dragging{border-color:#7a9de9;box-shadow:0 8px 28px #0008}
+#drawing-favs.toolbar-dragging .fav-grip{cursor:grabbing}
+#drawing-manager{width:330px}
+.drawing-manager-head>strong{display:flex;gap:8px;align-items:center}
+#drawing-manager #drawing-tree-count{display:inline;color:#758aae;font-size:10px}
+#drawing-manager .tree-search{margin:8px 0}
+.tree-search input{width:100%;font-size:11px;padding:8px}
+.object-tree-tools{display:flex;gap:4px;align-items:center;padding:3px 0 7px;border-bottom:1px solid var(--line)}
+.object-tree-tools>button{width:28px;height:28px;padding:5px;border:0;background:transparent;color:#8ca5ce}
+.object-tree-tools>button .ui-icon{width:16px;height:16px}
+#tree-remove{margin-left:auto;color:#df8c95}
+#tree-selection-status{font-size:10px;line-height:1.6;color:#7890b5;margin:8px 0}
+#drawing-objects{max-height:38dvh;min-height:28px;margin:8px 0;overflow:auto}
+.object-tree-row{display:flex;align-items:center;gap:2px;min-height:34px;border:1px solid transparent;border-radius:5px;padding:1px 2px;user-select:none}
+.object-tree-row[aria-selected=true],.object-folder-head[aria-selected=true]{border-color:#3d5480;background:#24344f}
+.object-tree-row.object-hidden .object-label{opacity:.5}
+.object-tree-row>button:not(.object-label),.object-folder-head>button:not(.object-folder-label){width:24px;height:26px;padding:5px;border:0;background:transparent;color:#7f94b5;flex-shrink:0}
+.object-tree-row>button:not(.object-label) .ui-icon,.object-folder-head .ui-icon{width:13px;height:13px}
+.object-tree-row>.object-label{display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:7px 4px;text-align:left;border:0;background:transparent;font-size:11px;color:#b1bfd7}
+.object-label>.ui-icon{width:14px;height:14px;color:#849dcc}
+.object-label>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.object-folder-head{display:flex;align-items:center;gap:2px;min-height:34px;border:1px solid transparent;border-radius:5px}
+.object-folder-label{display:flex;align-items:center;gap:7px;flex:1;min-width:0;background:transparent;border:0;text-align:left;font-size:11px;padding:7px 2px;color:#a6bddf}
+.object-folder-label>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.object-folder-head .folder-collapsed .ui-icon{transform:rotate(-90deg)}
+.object-folder>[role=group]{padding-left:13px;border-left:1px solid #2d3a51;margin-left:11px}
+.tree-indicators{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;margin:10px 0}
+.tree-indicators>summary{font-size:11px;color:#8da3c6;cursor:pointer}
+.tree-indicators summary>span{font-size:9px;margin-left:6px;color:#64799a}
+.study-tree-row>.object-label{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drawing-current-title{font-size:11px;color:#b4c9ed;padding:7px 0;overflow-wrap:anywhere}
+.object-tree-row:focus-visible{outline-offset:-2px}
+@media(max-width:600px){#symbol-search{width:26px;height:27px;padding:4px}#symbol-search .ui-icon{width:15px}.watch-remove{opacity:1}#drawing-favs{max-width:calc(100% - 65px)}.selection-toolbar{max-width:calc(100% - 80px);overflow-x:auto;left:8px;right:auto;white-space:nowrap}.selection-toolbar>button{flex-shrink:0}#drawing-manager{width:310px}.object-tree-row>.object-label{font-size:10px}.import-file{flex-direction:column;align-items:flex-start}.import-file input{max-width:100%}.symbol-filters{gap:5px}.symbol-filters label{font-size:10px}.watchlist-import-dialog .dialog-content{padding:16px}.import-options{gap:5px}.import-options label{font-size:10px}}
