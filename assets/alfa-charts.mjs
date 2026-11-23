@@ -442,6 +442,81 @@ $('chart-type').addEventListener('change', e => {
   candles.applyOptions({ visible: type === 'candles' });
   line.applyOptions({ visible: type === 'line' });
 });
+async function downloadChartScreenshot() {
+  const btn = $('screenshot');
+  if (btn) btn.disabled = true;
+  try {
+    const src = chart.takeScreenshot();
+    if (!src) { connection('Grafik görüntüsü alınamadı', 'error'); return; }
+    const canvas = document.createElement('canvas');
+    canvas.width = src.width;
+    canvas.height = src.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(src, 0, 0);
+
+    const svg = host.querySelector('svg.drawing-overlay');
+    if (svg) {
+      const rect = svg.getBoundingClientRect();
+      const cssW = rect.width || host.clientWidth || src.width;
+      const cssH = rect.height || host.clientHeight || src.height;
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+      clone.setAttribute('width', String(src.width));
+      clone.setAttribute('height', String(src.height));
+      if (!clone.getAttribute('viewBox')) {
+        clone.setAttribute('viewBox', `0 0 ${cssW} ${cssH}`);
+        clone.setAttribute('preserveAspectRatio', 'none');
+      }
+      const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const i = new Image();
+          i.onload = () => resolve(i);
+          i.onerror = reject;
+          i.src = url;
+        });
+        ctx.drawImage(img, 0, 0, src.width, src.height);
+      } catch {}
+      finally { URL.revokeObjectURL(url); }
+    }
+
+    const pad = Math.max(12, Math.round(canvas.width * 0.012));
+    ctx.save();
+    ctx.font = `600 ${Math.max(12, Math.round(canvas.width * 0.013))}px system-ui, -apple-system, sans-serif`;
+    ctx.fillStyle = 'rgba(215,224,238,0.78)';
+    ctx.textBaseline = 'top';
+    const stampLabel = new Date().toLocaleString('tr-TR');
+    ctx.fillText(`ALFA CHARTS · ${symbol} · ${String(interval).toUpperCase()} · ${stampLabel}`, pad, pad);
+    ctx.restore();
+
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+    const name = `alfa-charts-${String(symbol).toLowerCase()}-${String(interval).toLowerCase()}-${stamp}.png`;
+    const link = document.createElement('a');
+    link.download = name;
+    if (canvas.toBlob) {
+      await new Promise(resolve => canvas.toBlob(blob => {
+        if (!blob) { link.href = canvas.toDataURL('image/png'); link.click(); resolve(); return; }
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        resolve();
+      }, 'image/png'));
+    } else {
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    connection('Grafik fotoğrafı indirildi', 'ok');
+  } catch (err) {
+    console.error(err);
+    connection('Grafik fotoğrafı alınamadı', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+$('screenshot').addEventListener('click', downloadChartScreenshot);
 $('fit').addEventListener('click', () => chart.timeScale().fitContent());
 $('live').addEventListener('click', () => chart.timeScale().scrollToRealTime());
 function toggleList(show) {
