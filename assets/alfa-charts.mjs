@@ -1,5 +1,5 @@
-import { createChart, CandlestickSeries, LineSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=2';
+import { createChart, CandlestickSeries, LineSeries, HistogramSeries, ColorType, CrosshairMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
+import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=3';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
@@ -22,7 +22,7 @@ const chart = createChart(host, {
   layout: { background: { type: ColorType.Solid, color: '#10141c' }, textColor: '#8e9eb6', attributionLogo: true },
   grid: { vertLines: { color: '#1b2433' }, horzLines: { color: '#1b2433' } },
   crosshair: { mode: CrosshairMode.Normal },
-  rightPriceScale: { borderColor: '#30394b', scaleMargins: { top: 0.12, bottom: 0.1 } },
+  rightPriceScale: { borderColor: '#30394b', scaleMargins: { top: 0.12, bottom: 0.22 } },
   timeScale: { borderColor: '#30394b', timeVisible: true, secondsVisible: false, rightOffset: 8 },
   handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
   handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
@@ -32,6 +32,20 @@ const candles = chart.addSeries(CandlestickSeries, {
   upColor: '#26c89c', downColor: '#ef6677', borderVisible: false, wickUpColor: '#26c89c', wickDownColor: '#ef6677'
 });
 const line = chart.addSeries(LineSeries, { color: '#8ea7ff', lineWidth: 2, visible: false });
+const volume = chart.addSeries(HistogramSeries, {
+  priceFormat: { type: 'volume' },
+  priceScaleId: 'vol',
+  priceLineVisible: false,
+  lastValueVisible: false,
+});
+chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+function volumeData(bars) {
+  return (bars || []).map(c => ({
+    time: c.time,
+    value: Number(c.volume) || 0,
+    color: c.close >= c.open ? 'rgba(38,200,156,0.35)' : 'rgba(239,102,119,0.35)'
+  }));
+}
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
 let history = [], seriesBars = [], socket, aborter, retryTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false, pendingIndicators = null, loadingOlder = false;
@@ -81,6 +95,7 @@ async function loadOlderHistory() {
     seriesBars = deduped;
     candles.setData(history);
     line.setData(history.map(c => ({ time: c.time, value: c.close })));
+    volume.setData(volumeData(history));
     if (range) chart.timeScale().setVisibleLogicalRange({ from: range.from + added, to: range.to + added });
     try { indicators.updateAll(history); } catch {}
     try { sessionLevels.render(); } catch {}
@@ -102,6 +117,7 @@ function applyReplaySlice() {
   sessionLevels.replayBoundary={clock:replayEngine.clock,step:candleCloseTime(0,interval)};
   candles.setData(history);
   line.setData(history.map(c => ({ time: c.time, value: c.close })));
+  volume.setData(volumeData(history));
   try { indicators.updateAll(history); } catch {}
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
@@ -224,6 +240,7 @@ function exitReplay() {
   seriesBars = replayFull;
   candles.setData(history);
   line.setData(history.map(c => ({ time: c.time, value: c.close })));
+  volume.setData(volumeData(history));
   try { indicators.updateAll(history); } catch {}
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
@@ -290,6 +307,7 @@ function setData(data, resetView) {
   seriesBars = data;
   candles.setData(history);
   line.setData(history.map(c => ({ time: c.time, value: c.close })));
+  volume.setData(volumeData(history));
   if (resetView) {
     chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, history.length - 130), to: history.length + 8 });
   }
@@ -355,7 +373,7 @@ async function loadMarket() {
   }
   const id = ++generation;
   closeTransport(); attempts = 0; history = []; seriesBars = [];
-  candles.setData([]); line.setData([]);
+  candles.setData([]); line.setData([]); volume.setData([]);
   $('last-price').textContent = '—'; $('price-time').textContent = 'Henüz veri yok';
   $('ohlc').textContent = 'Gerçek piyasa verisi bekleniyor';
   updateUI();
@@ -414,7 +432,7 @@ function connect(id, resetView = false) {
       lastReceipt = Date.now();
       if (!ready) { buffered.push(c); if (buffered.length > 2000) buffered.shift(); return; }
       if (c.time < history.at(-1).time) return;
-      candles.update(c); line.update({ time: c.time, value: c.close });
+      candles.update(c); line.update({ time: c.time, value: c.close }); volume.update(volumeData([c])[0]);
       history = mergeCandles(history, [c], Infinity);
       seriesBars = history;
       quote(); attempts = 0;

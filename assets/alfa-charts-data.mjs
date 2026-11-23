@@ -16,10 +16,15 @@ export function streamURL(origin, symbol, interval) {
   validateMarket(symbol, interval);
   return `${origin}/ws/${symbol.toLowerCase()}@kline_${interval}`;
 }
-export function candle(time, open, high, low, close) {
-  const result = { time: Number(time) / 1000, open: Number(open), high: Number(high), low: Number(low), close: Number(close) };
-  if (!Object.values(result).every(Number.isFinite) || !Number.isInteger(result.time) || result.time <= 0 ||
-      Math.min(result.open, result.high, result.low, result.close) <= 0 ||
+export function candle(time, open, high, low, close, volume = 0) {
+  const result = {
+    time: Number(time) / 1000,
+    open: Number(open), high: Number(high), low: Number(low), close: Number(close),
+    volume: Math.max(0, Number(volume) || 0)
+  };
+  const ohlc = [result.open, result.high, result.low, result.close];
+  if (![result.time, ...ohlc, result.volume].every(Number.isFinite) || !Number.isInteger(result.time) || result.time <= 0 ||
+      Math.min(...ohlc) <= 0 ||
       result.high < Math.max(result.open, result.close, result.low) || result.low > Math.min(result.open, result.close)) {
     throw new Error('Geçersiz Binance mum verisi');
   }
@@ -30,14 +35,14 @@ export function parseHistory(rows) {
   const unique = new Map();
   for (const row of rows) {
     if (!Array.isArray(row) || row.length < 5) throw new Error('Geçersiz Binance yanıtı');
-    const c = candle(...row.slice(0, 5)); unique.set(c.time, c);
+    const c = candle(row[0], row[1], row[2], row[3], row[4], row[5] ?? 0); unique.set(c.time, c);
   }
   return [...unique.values()].sort((a, b) => a.time - b.time);
 }
 export function parseKline(raw, symbol, interval) {
   const message = typeof raw === 'string' ? JSON.parse(raw) : raw;
   if (message.e !== 'kline' || message.s !== symbol || message.k?.s !== symbol || message.k?.i !== interval) return null;
-  return candle(message.k.t, message.k.o, message.k.h, message.k.l, message.k.c);
+  return candle(message.k.t, message.k.o, message.k.h, message.k.l, message.k.c, message.k.v);
 }
 export function mergeCandles(history, updates, limit = 1000) {
   const merged = new Map(history.map(c => [c.time, c]));

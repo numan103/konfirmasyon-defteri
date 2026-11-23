@@ -54,9 +54,9 @@ test('real Binance rows are parsed, sorted, deduplicated and validated', () => {
 });
 
 test('websocket messages are validated against the selected market', () => {
-  const payload = { e: 'kline', s: 'BTCUSDT', k: { s: 'BTCUSDT', i: '1h', t: 1794751200000, o: '65509.24', h: '65700.00', l: '65400.00', c: '65650.10' } };
+  const payload = { e: 'kline', s: 'BTCUSDT', k: { s: 'BTCUSDT', i: '1h', t: 1794751200000, o: '65509.24', h: '65700.00', l: '65400.00', c: '65650.10', v: '123.45' } };
   assert.deepEqual(parseKline(JSON.stringify(payload), 'BTCUSDT', '1h'), {
-    time: 1794751200, open: 65509.24, high: 65700, low: 65400, close: 65650.1
+    time: 1794751200, open: 65509.24, high: 65700, low: 65400, close: 65650.1, volume: 123.45
   });
   assert.equal(parseKline(payload, 'ETHUSDT', '1h'), null);
   assert.equal(parseKline(payload, 'BTCUSDT', '4h'), null);

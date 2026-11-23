@@ -1,5 +1,5 @@
 import { candleCloseTime } from './alfa-replay-model.mjs?v=3';
-import { fetchHistory } from './alfa-charts-data.mjs?v=2';
+import { fetchHistory } from './alfa-charts-data.mjs?v=3';
 
 // Sequential pages; no future dataset is passed to an analysis/render consumer.
 export async function replayRange({symbol,timeframe,start,end,signal,fetcher=fetch,maxBars=50000}) {
