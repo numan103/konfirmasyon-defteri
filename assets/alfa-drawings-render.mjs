@@ -82,6 +82,13 @@ export function renderDrawing(d, project, width, height, selected, draft = false
     const p2 = { x: b.x - sz * Math.cos(ang + .45), y: b.y - sz * Math.sin(ang + .45) };
     append(el('polygon', { points: `${b.x},${b.y} ${p1.x},${p1.y} ${p2.x},${p2.y}`, fill: color, 'pointer-events': 'none' }));
   }
+  if (d.type === 'brush') {
+    const pts = d.points.map(project).filter(Boolean);
+    if (pts.length >= 2) {
+      const path = pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' ');
+      append(el('path', { d: path, fill: 'none', stroke: color, 'stroke-width': d.width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    }
+  }
   if (d.type === 'ruler') {
     rect(left, top, right - left, bottom - top, color, .08);
     line(a.x, a.y, b.x, b.y);

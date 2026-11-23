@@ -1,5 +1,5 @@
-import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=4';
-import { renderDrawing } from './alfa-drawings-render.mjs?v=4';
+import { TOOLS, clone, emptyDocument, makeDrawing, validDrawing, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical } from './alfa-drawings-model.mjs?v=5';
+import { renderDrawing } from './alfa-drawings-render.mjs?v=5';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=3';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
@@ -8,7 +8,7 @@ export class DrawingEngine {
   constructor({ chart, series, host, getBars, getInterval }) {
     Object.assign(this, { chart, series, host, getBars, getInterval });
     this.market = 'BTCUSDT'; this.tool = 'cursor'; this.selected = null; this.history = new DrawingHistory();
-    this.magnet = false; this.drawingsVisible = true;
+    this.magnet = false; this.drawingsVisible = true; this.brushing = false;
     this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map();
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.svg.classList.add('drawing-overlay'); this.svg.setAttribute('aria-label', 'Fiyat ve zaman koordinatlı çizimler');
@@ -125,6 +125,12 @@ export class DrawingEngine {
     $('fib-template-save').onclick = () => this.saveTemplate();
     $('fib-template-load').onclick = () => this.loadTemplate();
     $('drawing-cloud-retry').onclick = () => this.store.retry(this.context);
+    $('drawing-clear-all').onclick = () => {
+      if (!this.ready || !this.history.doc.drawings.length) return;
+      if (!confirm('Bu semboldeki tüm çizimler silinsin mi? (Ctrl+Z ile geri alabilirsiniz)')) return;
+      const next = clone(this.history.doc); next.drawings = [];
+      this.selected = null; this.commit(next);
+    };
     $('drawing-export').onclick = () => {
       const blob = new Blob([JSON.stringify({ symbol: this.market, ...this.history.doc }, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob), a = document.createElement('a');
@@ -137,13 +143,14 @@ export class DrawingEngine {
     this.cancel(); this.tool = tool;
     this.host.dataset.drawingTool = tool;
     this.toolbar.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === tool)));
-    $('drawing-help').textContent = tool === 'cursor' ? 'Çizimi seçin/sürükleyin · çift tık: ayarlar'
+    $('drawing-help').textContent = tool === 'cursor' ? 'Çizimi seçin/sürükleyin · çift tık: ayarlar · Delete: sil'
       : tool === 'delete' ? 'Silmek için kilitli olmayan bir çizime tıklayın · Escape: iptal'
+      : tool === 'brush' ? 'Fırça · basılı tutup sürükleyin · Escape: iptal'
       : `${TOOLS[tool][1]} · ${onePoint(tool) ? 'bir' : 'iki'} nokta seçin · Escape: iptal`;
     this.render();
   }
   cancel() {
-    this.draft = null; this.drag = null; this.pending = null; this.tool = 'cursor';
+    this.draft = null; this.drag = null; this.pending = null; this.brushing = false; this.tool = 'cursor';
     this.host.dataset.drawingTool = 'cursor';
     this.toolbar?.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === 'cursor')));
     if ($('drawing-help')) $('drawing-help').textContent = 'Çizimi seçin/sürükleyin · çift tık: ayarlar';
@@ -161,6 +168,12 @@ export class DrawingEngine {
       return;
     }
     if (this.tool !== 'cursor') {
+      if (this.tool === 'brush') {
+        this.draft = makeDrawing('brush', [point]);
+        this.brushing = true;
+        this.host.setPointerCapture(e.pointerId);
+        this.render(); return;
+      }
       if (!this.draft) {
         this.draft = makeDrawing(this.tool, onePoint(this.tool) ? [point] : [point, point]);
         if (onePoint(this.tool)) this.finish();
@@ -176,8 +189,17 @@ export class DrawingEngine {
     this.pending = clone(this.history.doc); this.host.setPointerCapture(e.pointerId);
   }
   move(e) {
-    const point = this.unproject(e, !!this.drag); if (!point) return;
-    if (this.draft && !onePoint(this.draft.type)) {
+    const point = this.unproject(e, !!this.drag || !!this.brushing); if (!point) return;
+    if (this.brushing && this.draft?.type === 'brush') {
+      const last = this.draft.points.at(-1);
+      if (!last || Math.abs(point.time - last.time) > 0 || Math.abs(point.price - last.price) > 0) {
+        this.draft.points.push(point);
+        if (this.draft.points.length > 2000) this.draft.points.shift();
+        this.render();
+      }
+      return;
+    }
+    if (this.draft && !onePoint(this.draft.type) && this.draft.type !== 'brush') {
       const id = this.draft.id;
       this.draft = makeDrawing(this.draft.type, [this.draft.points[0], point]); this.draft.id = id;
       this.render();
@@ -203,6 +225,12 @@ export class DrawingEngine {
     }
   }
   up(e) {
+    if (this.brushing) {
+      this.brushing = false;
+      if (this.host.hasPointerCapture(e.pointerId)) this.host.releasePointerCapture(e.pointerId);
+      this.finish();
+      return;
+    }
     if (!this.drag) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if (this.host.hasPointerCapture(e.pointerId)) this.host.releasePointerCapture(e.pointerId);
@@ -211,7 +239,8 @@ export class DrawingEngine {
   }
   finish() {
     const d = this.draft; if (!d || !validDrawing(d)) return;
-    if (!onePoint(d.type) && Math.abs(d.points[0].time - d.points[1].time) < .001 &&
+    if (d.type === 'brush') { if (d.points.length < 2) { this.cancel(); return; } }
+    else if (!onePoint(d.type) && Math.abs(d.points[0].time - d.points[1].time) < .001 &&
       Math.abs(d.points[0].price - d.points[1].price) < .000001) return;
     const next = clone(this.history.doc); next.drawings.push(d);
     this.selected = d.id; this.cancel(); this.commit(next);

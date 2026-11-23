@@ -1,6 +1,6 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
-import { DrawingEngine } from './alfa-drawings.mjs?v=5';
+import { DrawingEngine } from './alfa-drawings.mjs?v=6';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=1';
@@ -8,7 +8,7 @@ import { FvgManager } from './alfa-fvg.mjs?v=1';
 import { MtfManager } from './alfa-mtf.mjs?v=2';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=1';
-import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=4';
+import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=5';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=4';
 import { ResearchPanel } from './alfa-research.mjs?v=3';
@@ -507,6 +507,7 @@ function connect(id, resetView = false) {
       seriesBars = history;
       syncSeriesUpdate(c, history);
       quote(); attempts = 0;
+      try { checkAlarms(c.close); } catch {}
       try { indicators.updateAll(seriesBars); } catch {}
       try { sessionLevels.render(); } catch {}
       try { marketStructure.render(); } catch {}
@@ -761,6 +762,56 @@ $('drawings-toggle').addEventListener('click', () => {
   vb.setAttribute('aria-pressed', String(on));
   vb.textContent = on ? '👁 Çizimler' : '👁‍🗨 Gizli';
 });
+// ---------- Price alarms (local-first) ----------
+const ALARM_KEY = () => 'alfa-alarms:v1:' + currentUserKey();
+function loadAlarms() { try { const v = JSON.parse(localStorage.getItem(ALARM_KEY()) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } }
+function saveAlarms(list) { try { localStorage.setItem(ALARM_KEY(), JSON.stringify(list)); } catch {} }
+let alarms = null;
+function ensureAlarms() { if (!alarms) alarms = loadAlarms(); return alarms; }
+function fireAlarm(a, price) {
+  a.triggered = true; a.triggeredAt = Date.now(); a.triggerPrice = price;
+  saveAlarms(alarms);
+  const msg = `${a.symbol} ${a.cond === 'above' ? '≥' : '≤'} ${a.price} · şu an ${priceFormat.format(price)}${a.note ? ' · ' + a.note : ''}`;
+  connection('🔔 Alarm: ' + msg, 'ok');
+  try { if (Notification.permission === 'granted') new Notification('ALFA Charts Alarm', { body: msg }); } catch {}
+  try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; g.gain.value = .08; o.start(); setTimeout(() => { o.stop(); ctx.close(); }, 250); } catch {}
+}
+function checkAlarms(price) {
+  if (!Number.isFinite(price)) return;
+  for (const a of ensureAlarms()) {
+    if (a.triggered || a.symbol !== symbol) continue;
+    if ((a.cond === 'above' && price >= a.price) || (a.cond === 'below' && price <= a.price)) fireAlarm(a, price);
+  }
+}
+function openAlarmManager() {
+  const mine = ensureAlarms().filter(a => a.symbol === symbol);
+  const rows = mine.length ? mine.map(a => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;"><span style="flex:1">${a.cond === 'above' ? '≥' : '≤'} ${a.price} ${a.triggered ? '· ✅ tetiklendi' : ''}${a.note ? ' · ' + a.note : ''}</span><button data-del-alarm="${a.id}" style="padding:4px 8px;border-radius:6px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Sil</button></div>`).join('') : '<p style="color:#8e9eb6">Bu sembolde alarm yok.</p>';
+  const m = openModal(`<h3 style="margin:0 0 8px;">🔔 Fiyat Alarmları · ${symbol}</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+      <select id="alarm-cond" style="padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;"><option value="above">Fiyat ≥</option><option value="below">Fiyat ≤</option></select>
+      <input id="alarm-price" type="number" step="any" placeholder="Fiyat" style="flex:1;min-width:120px;padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;">
+      <input id="alarm-note" placeholder="Not (opsiyonel)" style="flex:1;min-width:120px;padding:8px;border-radius:8px;border:1px solid #30394b;background:#0b1018;color:#d7e0ee;">
+      <button id="alarm-add" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#2962ff;color:#fff;">Ekle</button>
+    </div>
+    <div id="alarm-list">${rows}</div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;"><button id="alarm-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button></div>`);
+  m.box.querySelector('#alarm-add').addEventListener('click', async () => {
+    const price = Number(m.box.querySelector('#alarm-price').value);
+    if (!Number.isFinite(price) || price <= 0) { connection('Geçerli bir fiyat girin', 'error'); return; }
+    const cond = m.box.querySelector('#alarm-cond').value;
+    const note = m.box.querySelector('#alarm-note').value.trim().slice(0, 120);
+    try { if (Notification.permission === 'default') await Notification.requestPermission(); } catch {}
+    ensureAlarms().push({ id: crypto.randomUUID(), symbol, price, cond, note, triggered: false, createdAt: Date.now() });
+    saveAlarms(alarms); m.close(); openAlarmManager();
+    connection('Alarm eklendi', 'ok');
+  });
+  m.box.querySelectorAll('[data-del-alarm]').forEach(b => b.addEventListener('click', () => {
+    alarms = ensureAlarms().filter(a => a.id !== b.dataset.delAlarm); saveAlarms(alarms); m.close(); openAlarmManager();
+  }));
+  m.box.querySelector('#alarm-close').addEventListener('click', m.close);
+}
+$('alarm-toggle').addEventListener('click', openAlarmManager);
+
 const indicators = new IndicatorManager({ chart, getBars: () => seriesBars });
 const sessionLevels = new SessionLevelsManager({ series: candles, getBars: () => seriesBars });
 const marketStructure = new MarketStructureManager({ series: candles, getBars: () => seriesBars });
