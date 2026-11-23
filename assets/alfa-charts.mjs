@@ -1,5 +1,5 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=3';
+import { TIMEFRAMES, SYMBOLS, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles } from './alfa-charts-data.mjs?v=4';
 import { DrawingEngine } from './alfa-drawings.mjs?v=3';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=2';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=4';
@@ -149,16 +149,18 @@ async function loadOlderHistory() {
   if (replayMode) return;
   if (loadingOlder || disposed || history.length === 0) return;
   loadingOlder = true;
+  const prevConn = $('connection').textContent;
+  connection('Eski mumlar yükleniyor…', 'waiting');
   const requestGeneration = generation, requestSymbol = symbol, requestInterval = interval;
   const firstTime = history[0].time;
   const controller = new AbortController(); olderController = controller;
   try {
     const older = await fetchHistory(requestSymbol, requestInterval, controller.signal, fetch, firstTime * 1000 - 1);
     if (requestGeneration !== generation || replayMode || disposed) return;
-    if (!older.length) { loadingOlder = false; return; }
+    if (!older.length) { loadingOlder = false; connection(prevConn || 'Canlı', 'live'); return; }
     const seen = new Set(history.map(c => c.time));
     const newBars = older.filter(c => !seen.has(c.time));
-    if (!newBars.length) { loadingOlder = false; return; }
+    if (!newBars.length) { loadingOlder = false; connection(prevConn || 'Canlı', 'live'); return; }
     const before = history.length;
     const merged = [...newBars, ...history];
     const deduped = [];
@@ -177,8 +179,9 @@ async function loadOlderHistory() {
     try { fvg.render(); } catch {}
     try { mtf.render(); } catch {}
     quote();
+    connection(prevConn || 'Canlı', $('connection').dataset.state === 'waiting' ? 'live' : $('connection').dataset.state);
   } catch (e) {
-    if (e && e.name !== 'AbortError') console.error('older history failed', e);
+    if (e && e.name !== 'AbortError') { console.error('older history failed', e); connection(prevConn || 'Canlı', 'live'); }
   } finally {
     if (olderController === controller) { loadingOlder = false; olderController = null; }
   }
@@ -524,12 +527,54 @@ function connect(id, resetView = false) {
     if (Object.values(TIMEFRAMES).includes(tf)) interval = tf;
   } catch {}
 })();
-for (const [label, value] of Object.entries(TIMEFRAMES)) {
-  const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
-  b.dataset.interval = value; b.title = label.endsWith('M') ? `${parseInt(label)} dakika` : label;
-  b.addEventListener('click', () => { if (interval !== value) { interval = value; loadMarket(); } });
-  $('timeframes').append(b);
+const TF_FAV_KEY = 'alfa-tf-fav:v1';
+const DEFAULT_TF_FAVS = ['1m','5m','15m','30m','1h','4h','1d','1w'];
+function loadTfFavs() {
+  try { const v = JSON.parse(localStorage.getItem(TF_FAV_KEY) || 'null'); if (Array.isArray(v) && v.length) return v.filter(x => Object.values(TIMEFRAMES).includes(x)); } catch {}
+  return [...DEFAULT_TF_FAVS];
 }
+function saveTfFavs(favs) { try { localStorage.setItem(TF_FAV_KEY, JSON.stringify(favs)); } catch {} }
+let tfFavs = loadTfFavs();
+function tfLabel(value) { return Object.keys(TIMEFRAMES).find(k => TIMEFRAMES[k] === value) || value.toUpperCase(); }
+function renderTimeframes() {
+  const wrap = $('timeframes'); wrap.innerHTML = '';
+  const all = Object.values(TIMEFRAMES);
+  const show = all.filter(v => tfFavs.includes(v));
+  for (const v of show) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = tfLabel(v);
+    b.dataset.interval = v; b.setAttribute('aria-pressed', String(v === interval));
+    b.addEventListener('click', () => { if (interval !== v) { interval = v; loadMarket(); } });
+    b.addEventListener('contextmenu', e => { e.preventDefault(); toggleTfFav(v); });
+    b.title = 'Sağ tık: favorilerden çıkar/ekle';
+    wrap.append(b);
+  }
+  const more = document.createElement('button'); more.type = 'button'; more.textContent = 'TF+'; more.title = 'Zaman dilimi favorileri ve özel periyotlar';
+  more.addEventListener('click', openTfPicker);
+  wrap.append(more);
+}
+function toggleTfFav(value) {
+  if (tfFavs.includes(value)) { if (tfFavs.length > 1) tfFavs = tfFavs.filter(v => v !== value); }
+  else tfFavs.push(value);
+  tfFavs = Object.values(TIMEFRAMES).filter(v => tfFavs.includes(v));
+  saveTfFavs(tfFavs); renderTimeframes();
+}
+function openTfPicker() {
+  const all = Object.entries(TIMEFRAMES);
+  const rows = all.map(([label, value]) => {
+    const on = tfFavs.includes(value);
+    return `<label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #242f42;"><input type="checkbox" data-tf="${value}" ${on?'checked':''}> <span style="min-width:48px;font-weight:600">${label}</span><span style="color:#8e9eb6">${value}</span></label>`;
+  }).join('');
+  const m = openModal(`<h3 style="margin:0 0 8px;">Zaman Dilimleri</h3><div style="color:#8e9eb6;font-size:12px;margin-bottom:10px;">Favorilere eklediklerin araç çubuğunda görünür. Sağ tıkla da hızlı çıkar/ekle.</div><div>${rows}</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;"><button id="tf-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button></div>`);
+  m.box.querySelectorAll('input[data-tf]').forEach(cb => cb.addEventListener('change', () => {
+    const v = cb.dataset.tf;
+    if (cb.checked) { if (!tfFavs.includes(v)) tfFavs.push(v); }
+    else if (tfFavs.length > 1) tfFavs = tfFavs.filter(x => x !== v);
+    tfFavs = Object.values(TIMEFRAMES).filter(x => tfFavs.includes(x));
+    saveTfFavs(tfFavs); renderTimeframes(); updateUI();
+  }));
+  m.box.querySelector('#tf-close').addEventListener('click', m.close);
+}
+renderTimeframes();
 for (const item of SYMBOLS) {
   const b = document.createElement('button'); b.type = 'button'; b.className = 'watch-row'; b.dataset.symbol = item;
   const name = document.createElement('strong'); name.textContent = item;
@@ -538,13 +583,14 @@ for (const item of SYMBOLS) {
   $('watch-rows').append(b);
 }
 $('symbol').addEventListener('change', e => { symbol = e.target.value; loadMarket(); });
-$('chart-type').addEventListener('change', e => { applyChartType(e.target.value); });
+$('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;
 $('log-scale').addEventListener('click', () => {
   logScale = !logScale;
   chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });
   $('log-scale').setAttribute('aria-pressed', String(logScale));
   $('log-scale').textContent = logScale ? 'Log✓' : 'Log';
+  saveLayout();
 });
 $('auto-scale').addEventListener('click', () => {
   chart.priceScale('right').applyOptions({ autoScale: true });
@@ -832,6 +878,8 @@ let cloudSaveTimer = null;
 function saveLayout() {
   try {
     localStorage.setItem(layoutKey(), JSON.stringify({
+      chartType: type,
+      logScale,
       indicators: indicators.toJSON(),
       mtf: mtf.config,
       sessionLevels: sessionLevels.config,
@@ -846,6 +894,12 @@ async function loadLayout() {
   try {
     const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
     if (raw) {
+      if (typeof raw.chartType === 'string') applyChartType(raw.chartType);
+      if (typeof raw.logScale === 'boolean') {
+        logScale = raw.logScale;
+        chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });
+        const lb = $('log-scale'); if (lb) { lb.setAttribute('aria-pressed', String(logScale)); lb.textContent = logScale ? 'Log✓' : 'Log'; }
+      }
       if (Array.isArray(raw.indicators)) { indicators.clear(); for (const e of raw.indicators) indicators.add(e.type, e.params); }
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
@@ -858,6 +912,8 @@ async function loadLayout() {
     if(replayMode)return;
     if (cloud && cloud.settings) {
       const s = cloud.settings;
+      if (typeof s.chartType === 'string') applyChartType(s.chartType);
+      if (typeof s.logScale === 'boolean') { logScale = s.logScale; chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal }); const lb=$('log-scale'); if(lb){lb.setAttribute('aria-pressed',String(logScale)); lb.textContent=logScale?'Log✓':'Log';} }
       if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
@@ -875,6 +931,8 @@ function scheduleCloudSave() {
   cloudSaveTimer = setTimeout(async () => {
     if(replayMode)return;
     const settings = {
+      chartType: type,
+      logScale,
       indicators: indicators.toJSON(),
       mtf: mtf.config,
       sessionLevels: sessionLevels.config,
@@ -888,6 +946,8 @@ function scheduleCloudSave() {
       const cloud = await cloudSettings.load(symbol, interval);
       if (cloud && cloud.settings) {
         const s = cloud.settings;
+        if (typeof s.chartType === 'string') applyChartType(s.chartType);
+        if (typeof s.logScale === 'boolean') { logScale = s.logScale; chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal }); const lb=$('log-scale'); if(lb){lb.setAttribute('aria-pressed',String(logScale)); lb.textContent=logScale?'Log✓':'Log';} }
         if (Array.isArray(s.indicators)) { indicators.clear(); for (const e of s.indicators) indicators.add(e.type, e.params); }
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };

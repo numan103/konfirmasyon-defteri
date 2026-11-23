@@ -1,6 +1,7 @@
 export const TIMEFRAMES = Object.freeze({
-  '1M': '1m', '5M': '5m', '15M': '15m', '30M': '30m',
-  '1H': '1h', '4H': '4h', '1D': '1d', '1W': '1w'
+  '1M': '1m', '3M': '3m', '5M': '5m', '15M': '15m', '30M': '30m',
+  '1H': '1h', '2H': '2h', '4H': '4h', '6H': '6h', '12H': '12h',
+  '1D': '1d', '3D': '3d', '1W': '1w'
 });
 export const SYMBOLS = Object.freeze(['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']);
 export const REST_ORIGINS = ['https://data-api.binance.vision', 'https://api.binance.com'];

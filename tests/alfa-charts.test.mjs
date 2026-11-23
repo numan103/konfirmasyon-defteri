@@ -11,15 +11,16 @@ import {
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('alfa charts supports exactly the requested timeframes', () => {
-  assert.deepEqual(Object.keys(TIMEFRAMES), ['1M', '5M', '15M', '30M', '1H', '4H', '1D', '1W']);
-  assert.deepEqual(Object.values(TIMEFRAMES), ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w']);
+test('alfa charts supports the requested timeframes and extended presets', () => {
+  assert.deepEqual(Object.keys(TIMEFRAMES), ['1M', '3M', '5M', '15M', '30M', '1H', '2H', '4H', '6H', '12H', '1D', '3D', '1W']);
+  assert.deepEqual(Object.values(TIMEFRAMES), ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '3d', '1w']);
 });
 
 test('market validation blocks free-form symbols and intervals', () => {
   assert.equal(validateMarket('BTCUSDT', '1h'), undefined);
   assert.equal(validateMarket('ETHUSDT', '1w'), undefined);
-  for (const bad of [['BTCUSDT;DROP', '1h'], ['BTCUSDT', '2h'], ['', '1h'], ['BTCUSDT', '1H'], [null, null]]) {
+  assert.equal(validateMarket('BTCUSDT', '2h'), undefined);
+  for (const bad of [['BTCUSDT;DROP', '1h'], ['BTCUSDT', '7h'], ['', '1h'], ['BTCUSDT', '1H'], [null, null]]) {
     assert.throws(() => validateMarket(...bad));
   }
   for (const bad of ['btcusdt', 'BTCUSDT.P', 'BTC-USDT']) assert.throws(() => validateMarket(bad, '1m'));

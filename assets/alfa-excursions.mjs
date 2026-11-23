@@ -1,7 +1,7 @@
 import { measureExcursion,excursionReport } from './alfa-excursion-model.mjs?v=1';
 import { sourceKey } from './alfa-lab-model.mjs?v=1';
 import { candleCloseTime } from './alfa-replay-model.mjs?v=3';
-import { fetchHistory } from './alfa-charts-data.mjs?v=3';
+import { fetchHistory } from './alfa-charts-data.mjs?v=4';
 import { el,option,svgNode,fmt,barChart } from './alfa-strategy.mjs?v=2';
 const LOWER={'5m':'1m','15m':'1m','30m':'5m','1h':'5m','4h':'15m','1d':'1h','1w':'4h'};
 const interval=(r,suffix='')=>r?.lower!=null?(r.lower===r.upper?fmt(r.lower):`${fmt(r.lower)}–${fmt(r.upper)}`)+suffix:'Sonuç yok';
