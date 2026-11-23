@@ -58,7 +58,8 @@ function cors(res) {
 function send(res, code, obj) {
   res.statusCode = code;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.setHeader('Vary', 'Authorization');
   res.end(JSON.stringify(obj));
 }
 
@@ -74,6 +75,15 @@ function adminEmails() {
 function isAdminUser(user) {
   const mail = String((user && user.email) || '').toLowerCase();
   return !!mail && adminEmails().indexOf(mail) >= 0;
+}
+
+// Scoped product grants are service-managed auth metadata, never user_metadata.
+// They do not upgrade a member to ref/admin or unlock another product.
+export function featureAccess(user) {
+  return {
+    user_id: user?.id || null,
+    features: { alfacharts: isAdminUser(user) || (!!user?.id && !!user.email_confirmed_at && user.app_metadata?.alfa_charts === true) }
+  };
 }
 
 // Varsayilan referans linkleri (site sahibinin hesaplari). Env ile ezilebilir.
@@ -666,6 +676,7 @@ async function statusHandler(res, user, jwt) {
 
   return send(res, 200, {
     ok: true,
+    ...featureAccess(user),
     tier,
     admin,
     gate_active: !missing,
@@ -700,6 +711,7 @@ async function submitHandler(res, user, jwt, body) {
   if (isAdminUser(user)) {
     return send(res, 200, {
       ok: true, tier: 'admin', status: 'verified', verified: true,
+      ...featureAccess(user),
       mentor: { enabled: false, status: 'none', invite: null }
     });
   }
@@ -720,6 +732,7 @@ async function submitHandler(res, user, jwt, body) {
     const got = await ensureMentorInvite(user.id, existing, caps);
     return send(res, 200, {
       ok: true, tier: 'ref', status: 'verified', verified: true,
+      ...featureAccess(user),
       mentor: mentorView(caps, got.row)
     });
   }
@@ -786,6 +799,7 @@ async function submitHandler(res, user, jwt, body) {
 
   return send(res, 200, {
     ok: true,
+    ...featureAccess(user),
     tier: tierOf(user, status),
     status,
     verified: v.verified,

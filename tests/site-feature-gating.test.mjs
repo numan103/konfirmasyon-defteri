@@ -5,7 +5,7 @@ import fs from 'node:fs';
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const tierUi = html.slice(html.indexOf('function applyTierUi()'), html.indexOf('function accessErrText('));
 
-test('trading terminal and Alfa Charts are admin-only page tiers', () => {
+test('trading terminal and Alfa Charts default to admin-only page tiers', () => {
   const tiers = html.slice(html.indexOf('const PAGE_TIER = {'), html.indexOf('// Referans linkleri'));
   assert.match(tiers, /trading:\s*'admin'/);
   assert.match(tiers, /alfacharts:\s*'admin'/);

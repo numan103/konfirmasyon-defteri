@@ -15042,7 +15042,7 @@ const PAGE_TIER = {
   home: 'free', calc: 'free', calendar: 'free', erisim: 'free', influencer: 'free',
   alfatrading: 'free',
   trading: 'admin',          // Trading terminali yalnızca yöneticiye görünür
-  alfacharts: 'admin',       // Alfa Charts bağlantısı yalnızca yöneticiye görünür
+  alfacharts: 'admin',       // Varsayılan: yönetici; sunucu hesap bazında Charts izni de verebilir
   egitim: 'free', strategies: 'admin', analiz: 'admin', indicators: 'admin', designer: 'admin',
   pano: 'ref', onchain: 'ref', portfoy: 'ref', butce: 'ref',
   defter: 'ref', review: 'ref',
@@ -15064,6 +15064,8 @@ const SITE = {
   loaded: false,
   tier: 'free',           // free | ref | admin
   admin: false,           // sunucunun onayladigi yonetici
+  features: { alfacharts: false },
+  feature_user_id: null,  // İzin, API'nin doğruladığı hesaba bağlıdır.
   status: 'none',         // none | pending | verified | rejected
   note: null,             // reddetme sebebi (üyeye gösterilir)
   archived_at: null,      // red/iptal kaydi arsivde
@@ -15099,6 +15101,9 @@ function refUnlocked() { return siteIsAdmin() || SITE.tier === 'ref'; }
 function sitePageTier(page) { return PAGE_TIER[page] || 'free'; }
 
 function siteCanOpen(page) {
+  if (page === 'alfacharts') {
+    return siteIsAdmin() || !!(AUTH.user && SITE.feature_user_id === AUTH.user.id && SITE.features.alfacharts === true);
+  }
   if (page === 'portfoy') return true; // Summary is free; position data stays server-gated.
   if (page === 'mentoring') {
     try { return mtAllowed(); } catch (e) { return siteIsAdmin(); }
@@ -15168,6 +15173,8 @@ function siteApplyAccess(j) {
   if (!j) return;
   SITE.admin = !!j.admin || siteIsAdminEmail();
   SITE.tier = SITE.admin ? 'admin' : (j.tier || 'free');
+  SITE.feature_user_id = j.user_id || null;
+  SITE.features = { alfacharts: !!(AUTH.user && j.user_id === AUTH.user.id && j.features?.alfacharts === true) };
   SITE.status = j.status || 'none';
   SITE.note = j.note || null;
   SITE.archived_at = j.archived_at || null;
@@ -15189,8 +15196,11 @@ function siteApplyAccess(j) {
 }
 
 async function loadSiteAccess() {
+  const requestUserId = AUTH.user && AUTH.user.id;
   const token = await siteAccessToken();
+  if ((AUTH.user && AUTH.user.id) !== requestUserId) return SITE;
   if (!token) {
+    SITE.features = { alfacharts: false }; SITE.feature_user_id = null;
     SITE.admin = false;
     SITE.tier = siteIsAdmin() ? 'admin' : 'free';
     SITE.note = null;
@@ -15200,11 +15210,14 @@ async function loadSiteAccess() {
   try {
     const r = await fetch('/api/access', { headers: { Authorization: 'Bearer ' + token } });
     const j = await r.json().catch(function () { return null; });
+    if ((AUTH.user && AUTH.user.id) !== requestUserId) return SITE;
     if (r.ok && j && j.ok) siteApplyAccess(j);
-    else { SITE.admin = false; SITE.tier = siteIsAdmin() ? 'admin' : 'free'; SITE.note = null; }
+    else { SITE.features = { alfacharts: false }; SITE.feature_user_id = null; SITE.admin = false; SITE.tier = siteIsAdmin() ? 'admin' : 'free'; SITE.note = null; }
   } catch (e) {
+    if ((AUTH.user && AUTH.user.id) !== requestUserId) return SITE;
     // Uc erisilemezse kimse "yanlislikla" dogrulanmis sayilmaz.
     SITE.admin = false;
+    SITE.features = { alfacharts: false }; SITE.feature_user_id = null;
     SITE.tier = siteIsAdmin() ? 'admin' : 'free';
     SITE.note = null;
   }
@@ -15233,6 +15246,7 @@ function applyTierUi() {
     let ok;
     if (p === 'portfoy') ok = true;
     else if (p === 'mentoring') ok = siteCanOpen('mentoring');
+    else if (p === 'alfacharts') ok = siteCanOpen('alfacharts');
     else {
       const need = PAGE_TIER[p];
       ok = need === 'free' || (need === 'ref' ? ref : isAdmin);
@@ -15247,7 +15261,7 @@ function applyTierUi() {
       el.style.display = ok ? '' : 'none';
     });
   });
-  // Trading terminali artık yalnızca Ek sayfasında; Alfa Charts PAGE_TIER ile yöneticiye özel.
+  // Trading terminali Ek'te kalır; Charts için yalnızca sunucu onaylı hesap izni istisnadır.
   // Uyelige gore portfoy adi: yonetici disindakiler paylasilan ozeti gorur.
   const pfName = (AUTH.user || ref || isAdmin) ? '💼 Portföy Yönetimi' : '💼 Paylaşılan Portföy';
   ['portfoy-label', 'mnav-portfoy-label'].forEach(function (id) {
@@ -15276,7 +15290,7 @@ function applyTierUi() {
     links.forEach(function (a) { if (a.style.display !== 'none') any = true; });
     const label = d.querySelector('.drop-btn');
     const privateMenu = label && label.getAttribute('data-i18n') === 'app.trader';
-    if (links.length) d.style.display = (!ref && privateMenu) ? 'none' : (any ? '' : 'none');
+    if (links.length) d.style.display = (!ref && privateMenu && !siteCanOpen('alfacharts')) ? 'none' : (any ? '' : 'none');
   });
   // Admin-only sayfalarin ana sayfa kartlarini non-admin'de gizle
   ['data', 'karne', 'ek', 'strategies', 'analiz', 'indicators', 'designer'].forEach(function (p) {
