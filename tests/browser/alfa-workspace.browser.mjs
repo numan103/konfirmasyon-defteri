@@ -199,6 +199,13 @@ try {
     await page.waitForFunction(() => !document.querySelector('#chart-settings-form'));
     assert.equal(await state(() => window.__alfaDebug.viewConfig.grid), false);
     assert.equal(await state(() => window.__alfaDebug.chart.priceScale('right').options().mode), 1);
+    await page.evaluate(() => {
+      window.__resetStatuses = [];
+      window.__resetStatusObserver = new MutationObserver(() => {
+        window.__resetStatuses.push(document.getElementById('connection').textContent);
+      });
+      window.__resetStatusObserver.observe(document.getElementById('connection'), { childList: true, subtree: true, characterData: true });
+    });
     await page.keyboard.press('Alt+r');
     assert.equal(await state(() => window.__alfaDebug.viewConfig.grid), true);
     assert.equal(await state(() => window.__alfaDebug.chart.priceScale('right').options().mode), 0);
@@ -206,7 +213,8 @@ try {
       drawings: window.__alfaDebug.drawings.history.doc.drawings.length,
       indicators: window.__alfaDebug.indicators.items.length,
     })), before);
-    assert.match(await page.locator('#connection').textContent(), /sıfırlandı/);
+    assert.ok(await state(() => window.__resetStatuses.some(message => /sıfırlandı/.test(message))));
+    await page.evaluate(() => window.__resetStatusObserver.disconnect());
   });
   await test('free public microstructure studies render from keyless Binance data', async () => {
     const klineRow = [1700000000000, '0', '0', '0', '0', '10', '1700000300000', '0', 12, '7', '0', '0'];

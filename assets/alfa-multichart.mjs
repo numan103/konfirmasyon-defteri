@@ -2,6 +2,7 @@ import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
 import { TIMEFRAMES, isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=12';
 import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=2';
 import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=10';
+import { WorkspacePersistence } from './alfa-workspace-persistence.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const CAPACITY = { 1: 1, 2: 2, 4: 4, 6: 6 };
@@ -10,13 +11,25 @@ const validInterval = value => Object.values(TIMEFRAMES).includes(value);
 const syncDefaults = { symbol: false, crosshair: true, range: true, interval: false };
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
 const LEGACY_AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
-let owner = 'guest';
-try {
+function initialOwner() { try {
   const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
     || localStorage.getItem(LEGACY_AUTH_KEY) || sessionStorage.getItem(LEGACY_AUTH_KEY);
-  owner = JSON.parse(raw || 'null')?.user?.id || 'guest';
-} catch {}
-const STORE = 'alfa-chart-tabs:v1:' + owner;
+  return JSON.parse(raw || 'null')?.user?.id || 'guest';
+} catch { return 'guest'; } }
+
+export function normalizeWorkspace(raw) {
+  if (!raw || !CAPACITY[raw.layout] || !Array.isArray(raw.panes) || !raw.panes.length || raw.panes.length > 6) return null;
+  const ids = new Set(), panes = [];
+  for (const pane of raw.panes) {
+    if (!Number.isSafeInteger(pane?.id) || pane.id < 1 || pane.id > 1000000 || ids.has(pane.id) || !validInterval(pane.interval)) return null;
+    try {
+      panes.push({ id: pane.id, symbol: parseMarketRef(pane.symbol).key, interval: pane.interval });
+      ids.add(pane.id);
+    } catch { return null; }
+  }
+  return { panes, active: ids.has(raw.active) ? raw.active : panes[0].id, layout: Number(raw.layout), open: !!raw.open,
+    sync: Object.fromEntries(Object.entries(syncDefaults).map(([key, fallback]) => [key, typeof raw.sync?.[key] === 'boolean' ? raw.sync[key] : fallback])) };
+}
 
 function localId(prefix) {
   let token;
@@ -24,7 +37,7 @@ function localId(prefix) {
   return `${prefix}-${token || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
 }
 
-function loadState() {
+function loadState(STORE) {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) || 'null');
     const panes = Array.isArray(raw?.panes) ? raw.panes.filter(p => p && isMarketSymbol(String(p.symbol || '')).valueOf() === true)
@@ -41,7 +54,7 @@ function loadState() {
   } catch { return { panes: [], active: 1, layout: 1, open: false, sync: { ...syncDefaults } }; }
 }
 
-function watchlistSymbols() {
+function watchlistSymbols(owner) {
   const refs = new Set();
   try {
     const raw = JSON.parse(localStorage.getItem('alfa-watchlist:v1:' + owner) || 'null');
@@ -61,8 +74,13 @@ function watchlistSymbols() {
   }).slice(0, 200);
 }
 
-export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, applyMainSync, getMainSyncState } = {}) {
-  const state = loadState();
+export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, applyMainSync, getMainSyncState, getOwner = initialOwner, cloudStore, onWorkspaceStatus = onStatus } = {}) {
+  let owner = getOwner(), STORE = 'alfa-chart-tabs:v1:' + owner;
+  const hasStored = () => { try { return !!localStorage.getItem(STORE); } catch { return false; } };
+  const hadLocal = hasStored();
+  let contextHadLocal = hadLocal;
+  const state = loadState(STORE);
+  let persistence = null, applyingWorkspace = false;
   const params = new URLSearchParams(location.search);
   const debug = params.has('debug') ? '&debug=1' : '';
   const session = localId('mc');
@@ -78,7 +96,11 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   if (!state.panes.length) state.panes.push({ id: nextId++, symbol: getSymbol() });
   for (const pane of state.panes) pane.interval ||= getInterval();
   const capacity = () => CAPACITY[state.layout] || 1;
-  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {} };
+  const save = () => {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); }
+    catch { onStatus?.('Grafik düzeni yerelde kaydedilemedi', 'error'); return; }
+    if (!applyingWorkspace && persistence) { contextHadLocal = true; persistence.changed(state); }
+  };
   const activePane = () => state.panes.find(p => p.id === state.active) || state.panes[0];
   const paneKey = () => state.panes.map(p => `${p.id}:${p.symbol}:${p.interval}`).join('|') + '|' + state.layout;
 
@@ -358,7 +380,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   }
 
   function openAddDialog() {
-    const symbols = [...new Set([getSymbol(), ...watchlistSymbols()])].slice(0, 60);
+    const symbols = [...new Set([getSymbol(), ...watchlistSymbols(owner)])].slice(0, 60);
     const modal = chartDialog(`<div class="dialog-header"><div><h3>Yeni grafik</h3><p>Aynı çalışma alanında yan yana veya ızgara düzeninde açılır</p></div><button id="multi-add-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
       <form id="multi-add-form" class="multi-add-form">
         <label>Sembol <input id="multi-add-symbol" name="symbol" list="multi-symbols" maxlength="100" autocomplete="off" required></label>
@@ -470,6 +492,37 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     return true;
   }
 
+  function applyWorkspace(workspace) {
+    const clean = normalizeWorkspace(workspace);
+    if (!clean) throw Error('Geçersiz grafik düzeni');
+    // Fail before mutating the current UI if a remote restore cannot be saved.
+    localStorage.setItem(STORE, JSON.stringify(clean));
+    applyingWorkspace = true;
+    try {
+      Object.assign(state, clean);
+      nextId = Math.max(...state.panes.map(p => p.id)) + 1;
+      renderedKey = '';
+      setOpen(state.open); renderTabs();
+      document.querySelectorAll('[data-multi-sync]').forEach(input => { input.checked = state.sync[input.dataset.multiSync]; });
+    } finally { applyingWorkspace = false; }
+  }
+  function startPersistence(hasLocal) {
+    persistence?.start(owner, state, hasLocal).catch(() => onWorkspaceStatus?.('Bulut düzeni okunamadı · yerel kayıt korundu', 'error'));
+  }
+  function account() {
+    const next = getOwner();
+    if (next !== owner) {
+      persistence?.dispose();
+      owner = next; STORE = 'alfa-chart-tabs:v1:' + owner;
+      const hasLocal = hasStored(), restored = loadState(STORE);
+      contextHadLocal = hasLocal;
+      if (!restored.panes.length) restored.panes.push({ id: 1, symbol: getSymbol(), interval: getInterval() });
+      for (const pane of restored.panes) pane.interval ||= getInterval();
+      applyWorkspace(restored);
+      startPersistence(hasLocal);
+    } else if (persistence && !persistence.ready) startPersistence(contextHadLocal);
+  }
+
   document.querySelectorAll('.layout-buttons [data-layout]').forEach(b => b.onclick = () => {
     state.layout = Number(b.dataset.layout) || 1;
     setOpen(true);
@@ -490,8 +543,20 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   });
   setOpen(state.open);
   renderTabs();
+  if (cloudStore) {
+    persistence = new WorkspacePersistence({
+      store: cloudStore, normalize: normalizeWorkspace, apply: applyWorkspace, onStatus: onWorkspaceStatus,
+      onConflict: blocked => { const button = $('workspace-conflict'); if (button) button.hidden = !blocked; }
+    });
+    $('workspace-conflict')?.addEventListener('click', () => persistence.resolve());
+    window.addEventListener('online', () => {
+      if (persistence.ready) persistence.flush(); else startPersistence(contextHadLocal);
+    });
+    window.addEventListener('pagehide', () => persistence.dispose(), { once: true });
+    startPersistence(hadLocal);
+  }
   return {
-    addPane, removePane, activate, notifySymbol, setOpen, syncFromMain, setPaneInterval, setSync,
+    addPane, removePane, activate, notifySymbol, setOpen, syncFromMain, setPaneInterval, setSync, account,
     get state() { return state; },
     get syncState() {
       return {

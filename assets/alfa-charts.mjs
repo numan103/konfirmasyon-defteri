@@ -17,9 +17,9 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
-import { initMultiChart } from './alfa-multichart.mjs?v=5';
+import { initMultiChart } from './alfa-multichart.mjs?v=6';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
-import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=3';
+import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
 import { openCloudConflict } from './alfa-cloud-conflict.mjs?v=1';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
@@ -1392,6 +1392,7 @@ const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').
   rememberStudies(); studyContext = null;
   applyChartTimeZone(readChartTimeZone(currentUserKey()));
   watchlist.account();
+  multiChart?.account();
   research.account(user,cloudSettings.client);
   if(paper.engine&&paper.owner()!==paper.ownerId){pauseReplay();paper.stop();}
   try { loadLayout(); } catch {}
@@ -1529,7 +1530,7 @@ async function navigateHistory({ target = null, duration = null, all = false } =
     else {
       const index = history.findIndex(bar => bar.time >= target);
       const range = chart.timeScale().getVisibleLogicalRange();
-      const half = Math.max(5, ((range?.to || 100) - (range?.from || 0)) / 2);
+      const half = Math.max(5, ((range?.to ?? 100) - (range?.from ?? 0)) / 2);
       chart.timeScale().setVisibleLogicalRange({ from: index - half, to: index + half });
     }
   });
@@ -1787,7 +1788,17 @@ function scheduleCloudSave(settings = layoutSettings()) {
   cloudSaveTimer = setTimeout(async () => {
     if(replayMode || cloudSettings.user?.id !== requestOwner || cloudConflicts.has(context))return;
     const res = await cloudSettings.save(requestSymbol, requestInterval, settings, revision);
-    if (requestGeneration !== generation || requestOwner !== currentUserKey()) return;
+    if (requestGeneration !== generation || requestOwner !== currentUserKey()) {
+      // A late conflict still belongs to its original context, not the newly
+      // selected market/account. Preserve that context for its next visit.
+      if (res.error && /conflict|unique/i.test(res.error)) {
+        cloudConflicts.add(context);
+        let kept = settings;
+        try { kept = JSON.parse(localStorage.getItem(`alfa-chart-layout:v1:${requestOwner}:${requestSymbol}:${requestInterval}`) || 'null') || settings; } catch {}
+        preserveSettingsConflict(localStorage, requestOwner, requestSymbol, requestInterval, kept);
+      }
+      return;
+    }
     if (res.ok) { cloudRevision = res.revision || cloudRevision; try { $('drawing-status').textContent = 'Bulut: kaydedildi'; } catch {} }
     else if (res.error && /conflict|unique/i.test(res.error)) {
       cloudConflicts.add(context);
@@ -2043,7 +2054,8 @@ if (!isEmbed) {
   try {
     multiChart = initMultiChart({ getSymbol: () => symbol, getInterval: () => interval,
       setSymbol: next => setActiveSymbol(next), onStatus: connection,
-      applyMainSync, getMainSyncState });
+      applyMainSync, getMainSyncState, getOwner: currentUserKey, cloudStore: cloudSettings,
+      onWorkspaceStatus: msg => { $('drawing-status').textContent = msg; } });
   } catch {}
 }
 if (syncGate) syncGate.send('hello', { symbol, interval }, { force: true });

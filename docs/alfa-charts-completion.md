@@ -50,7 +50,7 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - **Test:** Üç yeni unit testi ve gerçek mouse hareketiyle legend/crosshair Playwright testi. Tam unit suite 1203/1203. Workspace suite 25 PASS; bir koşuda mevcut gerçek-iframe crosshair testi timeout verdi, tam yeniden koşuda geçti. Ayrı Watchlist TV suite 7 PASS; önceki eski sunucu kaynaklı `allSymbols` hatası doğru çalışma klasöründe tekrarlanmadı.
 - **Sınır:** Native indikatör serileri kapsamındadır; seans/FVG gibi tek sayısal serisi olmayan overlay'lere yapay değer eklenmedi.
 
-## Açık kalan kapsam
+## İlk teslimde açık kalan kapsam (aşağıdaki devam bölümlerinde kapatıldı)
 
 - Normal grafikte tarihe atlama ve preset için çok sayfalı backfill.
 - Bulut çakışmalarında iki kopyayı karşılaştırıp açık kullanıcı tercihiyle uzlaştırma.
@@ -71,3 +71,24 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - Yereli Koru güncel bulut revision'ıyla CAS yazar; Bulutu Kullan yerelin ayrı yedeğini aldıktan sonra seçilen bulutu uygular. Her iki yol da bulutu tekrar okuyup içerik ve revision doğrular.
 - Yedekleme hatası, eşzamanlı yerel düzenleme, hesap/sembol değişimi, yeniden çakışma veya doğrulanamayan yazma senkronizasyonu kapalı tutar. Çakışma işareti yalnız doğrulanmış çözümde kaldırılır; yedekler silinmez.
 - Test: 3 yeni unit ve önceki 4 çakışma testi geçti. Gerçek modal düğmeleriyle Playwright akışı export, başarısız doğrulama, yeniden Yereli Koru ve Bulutu Kullan/yedek korumasını doğruladı.
+- Commit: `7c4fea3`. Ek tam-grafik akışı da gerçek footer düğmesini, dışa aktarmayı, başarısız doğrulama sonrası reload korumasını ve açık Bulutu Kullan seçimini doğrular.
+
+## Devam — Multi-chart Persistence
+
+- Hesap kapsamlı yerel `alfa-chart-tabs:v1:<owner>` anahtarları korundu. Eski timeframe'siz paneller mevcut periyotla okunur; guest ve hesaplar birbirinin düzenini devralmaz.
+- Panel sayısı/kimlikleri, sembol (venue/spot/perpetual dahil), bağımsız timeframe, aktif panel, 1/2/4/6 layout, açık/kapalı durum ve dört sync tercihi hesaba bağlı tek workspace belgesinde saklanır.
+- Yeni cihazda bulut düzeni yüklenir. Temiz baseline başka cihazdaki güncellemeyi takip eder; çevrimdışı kirli veya legacy yerel kopya bulutla farklıysa sessizce ezilmez. Aynı doğrulanmış Yereli Koru / Bulutu Kullan / Dışa Aktar akışı kullanılır.
+- Başarısız bulut okuması boş kayıt sayılmaz ve üzerine ilk yazım yapılmaz. Hesap değişiminden sonra eski istekler yeni UI'ya uygulanmaz. Yazımlar revision eşitlik filtresiyle CAS'tır.
+- Yeni **eklemeli** schema: `supabase/site/040_chart_workspaces.sql`. Tablo sahibi RLS SELECT/INSERT/UPDATE; anonim erişim veya istemci DELETE yetkisi yok. Mevcut çizim/ayar/watchlist tablolarına müdahale yok.
+- Migration yalnız dosya olarak hazırlandı, production'da çalıştırılmadı. Cihazlar arası kayıt hedef ortamda bu migration uygulanınca etkin olur; tablo yoksa yerel kayıt korunur ve hata bildirilir.
+- Test: 9 yeni persistence/transport unit testi + geciken auth ile yeni cihaz geri yükleme regresyonu; iki ayrı browser context (iki cihaz) ile gerçek panel ekleme/periyot/sync kontrolleri, ikinci cihazda restore/reload, offline düzenleme/çakışma seçimi ve hesap izolasyonu geçti. HTTP veritabanı fixture'ı kullanıldı; production hesabına yazılmadı.
+
+## Devam görevi — son doğrulama
+
+- Tam unit suite: **1219/1219**, hata/skip yok.
+- Alfa Charts kapsamındaki **18 Playwright script'i** çalıştırıldı ve son koşu/yeniden koşularda geçti: chart-scope, chart-time, cloud-resolution, cloud-settings-flow, drawings, excursions, history-navigation, indicator-pane, lab, multichart, open-interest, paper, replay, research, strategy, watchlist-tv, workspace-persistence, workspace.
+- Yeni akışlar deterministik market/auth/HTTP veritabanı fixture'larıyla gerçek Chromium arayüzünü kullanır. Canlı Supabase hesabı veya production verisi değiştirilmedi; migration'ın canlı veritabanında çalıştırıldığı iddia edilmez.
+- Geniş koşuda drawings/excursions/lab/paper testlerinin eski bare-Spot liste varsayımı eksik seçenek yüzünden takıldı. Bu testlerin kendi izole fixture listeleri sabitlendi; tüm davranış assertion'ları korundu ve dördü yeniden geçti.
+- Chart-time ilk koşuda hazır olma timeout'u verdi, yeniden koşuda geçti. Workspace reset durum metni canlı WebSocket güncellemesiyle yarışıyordu; mesajın gerçekten yayınlandığını MutationObserver ile kontrol ederek, veri/ayar koruma assertion'larını değiştirmeden test stabilize edildi. Son workspace koşusu **25 PASS**.
+- Replay tarih testi yeni normal “Git Tarihe” kontrolünü yanlış amaçla kullanmıyor; mevcut Replay dialog'undaki tarih başlangıcını test ediyor.
+- Önceki dört düzeltme korundu. Mobile worktree'ye dokunulmadı. Production deploy ve production migration **yapılmadı**.

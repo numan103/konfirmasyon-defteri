@@ -99,5 +99,27 @@ export class ChartSettingsStore {
       return { ok: false, error: e?.message || 'save_failed' };
     }
   }
+  async loadWorkspace(owner) {
+    if (!owner || this.user?.id !== owner) return { ok: false };
+    try {
+      const { data, error } = await this.client.from('chart_workspaces').select('workspace,revision')
+        .eq('user_id', owner).eq('name', 'default').maybeSingle();
+      if (error || this.user?.id !== owner) return { ok: false };
+      return { ok: true, workspace: data?.workspace || null, revision: data?.revision || 0 };
+    } catch { return { ok: false }; }
+  }
+  async saveWorkspace(owner, workspace, revision = 0) {
+    if (!owner || this.user?.id !== owner) return { ok: false };
+    try {
+      const row = { user_id: owner, name: 'default', workspace, revision: revision + 1, updated_at: new Date().toISOString() };
+      const query = revision
+        ? this.client.from('chart_workspaces').update(row).eq('user_id', owner).eq('name', 'default').eq('revision', revision)
+        : this.client.from('chart_workspaces').insert(row);
+      const { data, error } = await query.select('revision').maybeSingle();
+      if (this.user?.id !== owner) return { ok: false };
+      if (error || !data) return { ok: false, conflict: !error || error.code === '23505' };
+      return { ok: true, revision: data.revision };
+    } catch { return { ok: false }; }
+  }
   dispose() { this.subscription?.unsubscribe(); }
 }

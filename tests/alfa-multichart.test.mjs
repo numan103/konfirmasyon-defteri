@@ -65,3 +65,21 @@ test('legacy workspace retains panes, layout and active id while adopting a safe
   assert.equal(m.state.layout, 4);
   assert.deepEqual(m.state.sync, { symbol: false, crosshair: true, range: true, interval: false });
 });
+
+test('late auth on a fresh device still restores remote workspace, not a boot-created local default', async () => {
+  storage.clear();
+  const remote = { panes: [{ id: 8, symbol: 'ETHUSDT', interval: '15m' }], active: 8, layout: 1, open: false,
+    sync: { symbol: true, crosshair: false, range: false, interval: false } };
+  const store = {
+    user: null,
+    loadWorkspace: async () => ({ ok: true, workspace: remote, revision: 5 }),
+    saveWorkspace: async () => { throw Error('fresh device must not upload boot defaults'); }
+  };
+  const m = initMultiChart({ getSymbol: () => 'BTCUSDT', getInterval: () => '1h', getOwner: () => 'alice', cloudStore: store });
+  store.user = { id: 'alice' };
+  m.account();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(m.state, remote);
+  assert.ok(storage.has('alfa-chart-tabs:v1:alice'));
+  assert.equal(storage.has('alfa-chart-tabs:v1:guest'), false);
+});

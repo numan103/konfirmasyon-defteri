@@ -104,8 +104,9 @@ try {
   await page.waitForFunction(()=>!document.body.classList.contains('replay-mode'));
   await page.waitForFunction(()=>window.__alfaDebug.history.length>=900,{timeout:45000});
   const date=new Date((current-9000)*1000).toISOString().slice(0,16);
-  await page.click('#lab-menu summary'); await page.fill('#goto-date',date);
-  await page.click('#goto-date-btn');
+  await page.click('#lab-menu summary'); await page.click('#replay-toggle');
+  await page.fill('#replay-date',date);
+  await page.click('#replay-date-start');
   await page.waitForFunction(()=>document.body.classList.contains('replay-mode'));
   assert.equal(await page.evaluate(()=>window.__alfaDebug.history.at(-1).time),current-9000);
   assert.ok(await page.evaluate(()=>window.__alfaDebug.history.length>=301));

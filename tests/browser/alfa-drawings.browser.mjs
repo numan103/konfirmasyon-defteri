@@ -3,11 +3,13 @@
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
+import { seedBareWatchlist } from './alfa-bare-watchlist-fixture.mjs';
 const arg = key => process.argv.find(s => s.startsWith(`--${key}=`))?.split('=').slice(1).join('=');
 const { chromium } = await import(pathToFileURL(path.resolve(arg('playwright') || 'node_modules/playwright/index.mjs')));
 const browser = await chromium.launch({ executablePath: arg('chrome') || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 950 } });
 const page = await context.newPage(), errors = [], results = [];
+await seedBareWatchlist(page);
 page.on('pageerror', e => errors.push(e.message));
 const origin = arg('url') || 'http://localhost:4173';
 const debug = (fn, arg) => page.evaluate(fn, arg);

@@ -39,6 +39,10 @@ export function openCloudConflict(options) {
   const result = modal.box.querySelector('#conflict-result');
   modal.box.querySelector('#conflict-close').onclick = modal.close;
   modal.box.querySelector('#conflict-export').onclick = () => {
+    if (options.valid && !options.valid()) {
+      result.textContent = 'Hesap veya bağlam değişti; çakışma penceresini yeniden açın';
+      return;
+    }
     const blob = new Blob([JSON.stringify({ scope: options.scope, settings: options.readLocal() }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob), a = document.createElement('a');
     a.href = url; a.download = 'alfa-chart-conflict.json'; a.click();

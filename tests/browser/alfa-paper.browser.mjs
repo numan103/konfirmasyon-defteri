@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
+import { seedBareWatchlist } from './alfa-bare-watchlist-fixture.mjs';
 const arg=k=>process.argv.find(a=>a.startsWith('--'+k+'='))?.slice(k.length+3);
 const {chromium}=await import(pathToFileURL(arg('playwright')));
 const browser=await chromium.launch({executablePath:'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],orderRequests=[];
+await seedBareWatchlist(page);
 page.on('pageerror',e=>errors.push(e.message));
 page.on('request',r=>{if(/\/(order|orders|trade)(\?|$)/.test(new URL(r.url()).pathname))orderRequests.push(r.url());});
 const state=()=>page.evaluate(()=>window.__alfaDebug.paper.state);

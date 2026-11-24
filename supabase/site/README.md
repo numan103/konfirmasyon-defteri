@@ -247,3 +247,13 @@ yönetici JWT'siyle `GET /api/ai?telegram-webhook=1` çağır.
 > Bot, grupta **yönetici** değilse davet linki üretemez. Bu durumda kullanıcı yine
 > doğrulanır, davet adımı "hazırlanıyor" kalır ve yönetici uyarılır.
 
+# Alfa Charts workspace persistence
+
+`040_chart_workspaces.sql`, hesap başına varsayılan çoklu grafik düzenini tutan
+ayrı, RLS korumalı `chart_workspaces` tablosunu ekler. Mevcut chart settings,
+çizim ve watchlist belgelerine dokunmaz. İstemci revision filtresiyle CAS
+yazar; bulut okunamazsa yerel düzeni yükleyip üzerine bulut yazımı yapmaz.
+
+Bu dosyanın repoda bulunması migration'ın uygulanmış olduğu anlamına gelmez.
+Hedef ortamda yetkili migration sürecinde uygulanmalıdır. Bu geliştirme
+görevinde production migration/deploy yapılmamıştır.
