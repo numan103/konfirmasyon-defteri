@@ -31,3 +31,12 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - **Fayda:** Çatışma iki sürümden birini sessizce seçmiyor. Çizim/watchlist kayıtları ve bulut revision kontrolü değiştirilmedi.
 - **Test:** Dört hedefli test: hesap/piyasa/periyot izolasyonu, depolama hatası, gerçek save handler ve gerçek layout loader. Tam unit suite 1196/1196; workspace Playwright 24 PASS.
 - **Sınır:** Bu koruyucu adım çakışmalı bağlamı yerel modda tutar; iki sürümü karşılaştırıp kullanıcı kararıyla uzlaştıran arayüz henüz tamamlanmadı. Normal, çakışmasız bulut akışı değişmedi.
+- **Commit:** `17be5c4`.
+
+## Üçüncü düzeltme: kısa history de sola kaydırınca büyüyebiliyor
+
+- **Önceki sorun:** Scroll backfill koşulu en az 900 mum istiyordu; kısa/aggregate history eski veri isteyemiyordu. Bitiş noktasında boş/overlap yanıtları tekrar istenebiliyordu.
+- **Düzeltme:** Mum sayısı eşiği kaldırıldı. Gerçekten daha eski barlar ekleniyor, duplicate barlar ayıklanıyor ve görünür logical range sadece eklenen eski bar sayısı kadar kaydırılıyor. Boş bitiş noktaları oturum içinde sınırlı bir kümede tutuluyor; ağ hataları yeniden denenebiliyor.
+- **Fayda:** İstek beklerken mevcut mumlar ve görünüm korunuyor; yeni markete geçildiyse eski yanıt uygulanmıyor.
+- **Test:** Dört hedefli test kısa veri, sıralama/duplicate/overlap, anchor kayması, pending/stale yanıt ve retry davranışlarını doğruluyor.
+- **Sınır:** Veri sağlayıcının seans/tatil boşlukları sentetik mumlarla doldurulmaz. Tarih menüsündeki mevcut kontrol açıkça Replay başlatır; normal grafikte tarihe atlama ve preset için çok sayfalı backfill henüz tamamlanmadı.

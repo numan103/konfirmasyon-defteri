@@ -167,6 +167,7 @@ let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
 let chartTimeZone = 'UTC', chartTimeFormats = createChartTimeFormatters('UTC');
 let history = [], seriesBars = [], socket, aborter, retryTimer, pollTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false, loadingOlder = false;
+const exhaustedHistoryEdges = new Set();
 let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, replaySpeed = 1;
 let olderController = null;
 let replayEngine = null, replayStartIndex = 0, liveDrawingState = null, replayMtfEnabled = false;
@@ -311,7 +312,7 @@ function onSyncMessage(event) {
 window.addEventListener('message', onSyncMessage);
 
 chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-  if (range && range.from < 40 && !loadingOlder && history.length >= 900 && !syncApplyDepth) loadOlderHistory();
+  if (range && range.from < 40 && !loadingOlder && history.length && !syncApplyDepth) loadOlderHistory();
   if (!syncApplyDepth && !replayMode && history.length && range) {
     const rangePayload = { logical: { from: quantize(range.from), to: quantize(range.to) }, time: visibleTimeRange() };
     notifyMainSync('range', rangePayload);
@@ -346,6 +347,8 @@ function showCandle(c) {
 async function loadOlderHistory() {
   if (replayMode) return;
   if (loadingOlder || disposed || history.length === 0) return;
+  const edge = `${symbol}|${interval}|${history[0].time}`;
+  if (exhaustedHistoryEdges.has(edge)) return;
   loadingOlder = true;
   const prevConn = $('connection').textContent;
   connection('Eski mumlar yükleniyor…', 'waiting');
@@ -355,10 +358,14 @@ async function loadOlderHistory() {
   try {
     const older = await fetchHistory(requestSymbol, requestInterval, controller.signal, fetch, firstTime * 1000 - 1);
     if (requestGeneration !== generation || replayMode || disposed) return;
-    if (!older.length) { loadingOlder = false; connection(prevConn || 'Canlı', 'live'); return; }
-    const seen = new Set(history.map(c => c.time));
-    const newBars = older.filter(c => !seen.has(c.time));
-    if (!newBars.length) { loadingOlder = false; connection(prevConn || 'Canlı', 'live'); return; }
+    // Only strictly older bars may shift logical anchors. Overlapping/current
+    // bars from an upstream page must not move the visible window.
+    const newBars = older.filter(c => c.time < firstTime);
+    if (!newBars.length) {
+      exhaustedHistoryEdges.add(edge);
+      if (exhaustedHistoryEdges.size > 200) exhaustedHistoryEdges.delete(exhaustedHistoryEdges.values().next().value);
+      connection(prevConn || 'Canlı', 'live'); return;
+    }
     const before = history.length;
     const merged = [...newBars, ...history];
     const deduped = [];
