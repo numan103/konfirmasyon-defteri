@@ -1,3 +1,7 @@
 .vercel
 node_modules/
 .env*
+scripts/migration/
+scripts/db-inspect.mjs
+scripts/test-db.mjs
+supabase/.temp/

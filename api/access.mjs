@@ -33,8 +33,8 @@ import { publicWatchlistURL, fetchPublicWatchlist, allowWatchlistImport } from '
 import { marketHistory, marketQuotes, allowMarketData, allowPublicMarketData } from '../lib/chart-market-data.mjs';
 import { isFreeMarketRef } from '../assets/alfa-charts-data.mjs';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 
 const FALLBACK_ADMINS = 'ahmetnuman20@gmail.com,fjortrades@gmail.com,fjortrading@gmail.com';
 const COOLDOWN_MS = 20000;

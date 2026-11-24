@@ -1,7 +1,18 @@
 import { emptyDocument } from './alfa-drawings-model.mjs?v=2';
-const URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const KEY = 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
-const AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
+const URL = 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const KEY = 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
+const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
+const LEGACY_AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
+function migrateLegacyAuth() {
+  for (const storage of [sessionStorage, localStorage]) {
+    try {
+      if (!storage.getItem(AUTH_KEY)) {
+        const legacy = storage.getItem(LEGACY_AUTH_KEY);
+        if (legacy) storage.setItem(AUTH_KEY, legacy);
+      }
+    } catch {}
+  }
+}
 
 export class ChartSettingsStore {
   constructor(onStatus, onAccount) { this.onStatus = onStatus; this.onAccount = onAccount || (() => {}); this.user = null; this.client = null; this.pending = new Map(); this.timer = null; }
@@ -12,8 +23,9 @@ export class ChartSettingsStore {
         script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
         script.onload = resolve; script.onerror = reject; document.head.append(script);
       });
+      migrateLegacyAuth();
       const storage = sessionStorage.getItem(AUTH_KEY) ? sessionStorage : localStorage;
-      this.client = window.supabase.createClient(URL, KEY, { auth: { storage, detectSessionInUrl: false } });
+      this.client = window.supabase.createClient(URL, KEY, { auth: { storage, storageKey: AUTH_KEY, detectSessionInUrl: false } });
       this.subscription = this.client.auth.onAuthStateChange((_e, session) => {
         queueMicrotask(() => this.account(session?.user || null));
       }).data.subscription;

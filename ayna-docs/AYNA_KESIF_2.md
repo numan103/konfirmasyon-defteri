@@ -76,7 +76,7 @@ Atandığı değişken: `AUTH.client` (`AUTH` nesnesinin `client` özelliği).
 
 `SUPABASE_URL` ve `SUPABASE_ANON_KEY` sabitleri satır 8208-8209'da tanımlıdır:
 ```js
-const SUPABASE_URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+const SUPABASE_URL = 'https://fssrtlpjqbavzomynwmg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_***';
 ```
 

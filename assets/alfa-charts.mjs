@@ -25,6 +25,8 @@ import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 
 const $ = id => document.getElementById(id);
+const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
+const LEGACY_AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
 const workspace = document.querySelector('.workspace');
 const host = $('chart');
 const search = new URLSearchParams(location.search);
@@ -1447,7 +1449,8 @@ $('goto-date-btn').addEventListener('click', async () => {
 // ---------- UI: indicator manager, settings, MTF settings, persistence ----------
 function currentUserKey() {
   try {
-    const raw = sessionStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token') || localStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token');
+    const raw = sessionStorage.getItem(AUTH_KEY) || localStorage.getItem(AUTH_KEY)
+      || sessionStorage.getItem(LEGACY_AUTH_KEY) || localStorage.getItem(LEGACY_AUTH_KEY);
     const j = raw ? JSON.parse(raw) : null;
     return (j && j.user && j.user.id) || 'guest';
   } catch { return 'guest'; }

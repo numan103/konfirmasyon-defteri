@@ -4,8 +4,8 @@ import { requestUser, requestTier } from '../lib/auth.mjs';
 import { sendTelegram } from '../lib/telegram.mjs';
 import { createRevisionCache } from '../lib/revision-cache.mjs';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 const ROW_CONTRIB = 'contribs';
 const ROW_PANO = 'panos';
 // Calisma panosu uye basina ayri satirda tutulur: pano_member_<uuid>.

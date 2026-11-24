@@ -311,7 +311,7 @@ Harcama dışında saklanan tüm veriler ve yapıları:
 ### Kimlik Doğrulama Sistemi
 
 - **Sağlayıcı:** Supabase Auth (v2 istemci SDK'sı CDN'den yüklenir)
-- **Supabase URL:** `https://zvnjslmptwmnuhftgqsr.supabase.co`
+- **Supabase URL:** `https://fssrtlpjqbavzomynwmg.supabase.co`
 - **İstemci başlatma:** `window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)`
 
 ### AUTH Nesnesi (satır ~8211)

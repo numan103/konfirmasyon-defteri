@@ -5,9 +5,12 @@ import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, re
 const $ = id => document.getElementById(id);
 const CAPACITY = { 1: 1, 2: 2, 4: 4, 6: 6 };
 const LAYOUTS = [1, 2, 4, 6];
+const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
+const LEGACY_AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
 let owner = 'guest';
 try {
-  const raw = localStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token') || sessionStorage.getItem('sb-zvnjslmptwmnuhftgqsr-auth-token');
+  const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
+    || localStorage.getItem(LEGACY_AUTH_KEY) || sessionStorage.getItem(LEGACY_AUTH_KEY);
   owner = JSON.parse(raw || 'null')?.user?.id || 'guest';
 } catch {}
 const STORE = 'alfa-chart-tabs:v1:' + owner;

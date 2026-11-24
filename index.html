@@ -28,7 +28,7 @@
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://zvnjslmptwmnuhftgqsr.supabase.co" crossorigin>
+<link rel="preconnect" href="https://fssrtlpjqbavzomynwmg.supabase.co" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="/assets/macro-admin.css?v=184">
 <link rel="stylesheet" href="/assets/terminal.css?v=12">
@@ -10069,8 +10069,22 @@ const CATS = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duy
 // ============ Kimlik + Bulut Yapılandırması (Supabase) ============
 // Aşağıdaki iki değeri kendi Supabase projenden alıp yapıştır.
 // Boş bırakılırsa uygulama eskisi gibi YALNIZCA bu cihazda (yerel) çalışır — hiçbir şey bozulmaz.
-const SUPABASE_URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_URL = 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
+const AUTH_STORAGE_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
+const LEGACY_AUTH_STORAGE_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
+// Eski projeden taşınan oturumları yeni proje anahtarına sessizce devral; kullanıcı yeniden giriş yapmasın.
+function migrateLegacyAuthStorage() {
+  for (const storage of [window.sessionStorage, window.localStorage]) {
+    try {
+      if (!storage.getItem(AUTH_STORAGE_KEY)) {
+        const legacy = storage.getItem(LEGACY_AUTH_STORAGE_KEY);
+        if (legacy) storage.setItem(AUTH_STORAGE_KEY, legacy);
+      }
+    } catch (e) {}
+  }
+}
+migrateLegacyAuthStorage();
 
 const AUTH = {
   client: null,
@@ -30292,7 +30306,8 @@ function authError(err) {
 
 function bootAuth() {
   const callbackError = new URLSearchParams(window.location.hash.replace(/^#/, '')).has('error') || new URLSearchParams(window.location.search).has('error');
-  AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  migrateLegacyAuthStorage();
+  AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storageKey: AUTH_STORAGE_KEY, autoRefreshToken: true, detectSessionInUrl: false } });
   const $ = id => document.getElementById(id);
   let mode = 'login';
   let submitting = false;
@@ -30489,7 +30504,7 @@ function bootAuth() {
         const drop = remember ? window.sessionStorage : window.localStorage;
         try { Object.keys(drop).filter(k => k.indexOf('sb-') === 0).forEach(k => drop.removeItem(k)); } catch (e3) {}
         if (!remember) {
-          AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: keep, autoRefreshToken: true, detectSessionInUrl: false } });
+          AUTH.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: keep, storageKey: AUTH_STORAGE_KEY, autoRefreshToken: true, detectSessionInUrl: false } });
         }
         const { data, error } = await AUTH.client.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;

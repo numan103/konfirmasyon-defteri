@@ -469,7 +469,7 @@ test('middleware gecersiz env anahtarinda dogrulanmis yayin anahtariyla tekrar o
   const html = await response.text();
   assert.match(html, /Fallback/);
   assert.equal(seenKeys[0], 'sb_invalid_env_key');
-  assert.equal(seenKeys[1], 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X');
+  assert.equal(seenKeys[1], 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-');
 });
 
 test('varsayilan Telegram gonderiminde link onizlemesi kapali kalir', async () => {

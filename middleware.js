@@ -5,12 +5,12 @@
 // Not: Vercel, Next.js olmayan projelerde standart Request/Response API'sini kullanır
 // (next/server import'u desteklenmez).
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
 // Yayın (publishable) anahtarı zorunlu: satır okuması anon yetkisiyle yapılır.
 // Üretimde env tanımlı değilse bu doğrulanmış anahtar kullanılır; env'deki
 // anahtar 401 dönerse tek seferlik bu anahtarla tekrar denenir.
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
-const SUPABASE_FALLBACK_KEY = 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
+const SUPABASE_FALLBACK_KEY = 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 const IMG = '/alfa-traders-share-v2.png';
 
 const BOT_RE = /(telegrambot|twitterbot|facebookexternalhit|facebookcatalog|linkedinbot|slackbot|discordbot|whatsapp|viber|line-preview|linespider|tumblr|redditbot|snapchat|skypeuripreview|microblog|embedly|ia_archiver|bingbot|googlebot|google-inspectiontool|duckduckbot|petalbot|yandex|baiduspider|curl|wget|python-requests|urllib)/i;

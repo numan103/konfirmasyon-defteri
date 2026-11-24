@@ -22,8 +22,8 @@ import eduProgress from '../lib/edu-progress.mjs';
 import { readMagazineSnapshot } from '../lib/telegram-magazine-source.mjs';
 import { groupMagazineArticles } from '../assets/magazine-articles.mjs';
 import { cleanPDF } from '../lib/edu-pdf.mjs';
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 const ROWS = {
   shared: { rowId: 'v1', journalUid: '00000000-0000-0000-0000-00000000e000' },
   channel: { rowId: 'channels', journalUid: '00000000-0000-0000-0000-00000000e002' },

@@ -22,8 +22,8 @@ import { requestUser } from '../lib/auth.mjs';
 import { createWindowRowsCache } from '../lib/window-rows-cache.mjs';
 import educationCRM, { educationInterest } from '../lib/education-crm.mjs';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 
 const VISIT_PREFIX = 'visit_';
 const ONLINE_MS = 90 * 1000;

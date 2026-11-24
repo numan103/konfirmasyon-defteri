@@ -1,6 +1,6 @@
 // Match the site's existing project defaults when optional Vercel vars are absent.
-const BASE = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const BASE = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 
 function authHeaders(auth) {
   if (auth && auth.service) {

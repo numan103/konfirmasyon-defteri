@@ -38,7 +38,7 @@ function sniffImageType(buf) {
 async function magPhotoAllowed(fileId) {
   const hit = magPhotoAllow.get(fileId);
   if (hit && hit > Date.now()) return true;
-  const base = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+  const base = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
   const key = (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_PUBLISHABLE || '').trim();
   if (!key) return false;
   const res = await fetch(`${base}/rest/v1/alfanews?id=eq.1&select=data`, {

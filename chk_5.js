@@ -122,7 +122,7 @@ const CATS = { veri: 'Veri', teknik: 'Teknik', pozisyon: 'Pozisyon', duygu: 'Duy
 // ============ Kimlik + Bulut Yapılandırması (Supabase) ============
 // Aşağıdaki iki değeri kendi Supabase projenden alıp yapıştır.
 // Boş bırakılırsa uygulama eskisi gibi YALNIZCA bu cihazda (yerel) çalışır — hiçbir şey bozulmaz.
-const SUPABASE_URL = 'https://zvnjslmptwmnuhftgqsr.supabase.co';
+const SUPABASE_URL = 'https://fssrtlpjqbavzomynwmg.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_3esU1e0mIeUaSrmqPxsEfQ_Lcv11GLa';
 
 const AUTH = {

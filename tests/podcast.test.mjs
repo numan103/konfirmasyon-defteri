@@ -10,7 +10,7 @@ test('audio URLs are direct HTTPS audio, never HTML embeds, inline data, credent
   assert.equal(audioURL('https://media.example.com/audio.m4a?sig=abc'),'https://media.example.com/audio.m4a?sig=abc');
   for(const url of ['http://example.com/a.mp3','javascript:alert(1)','data:audio/mp3;base64,aA==','https://user:pass@example.com/a.mp3',
     'https://open.spotify.com/episode/123','https://youtube.com/watch?v=123','https://localhost/a.mp3','https://127.0.0.1/a.mp3',
-    'https://zvnjslmptwmnuhftgqsr.supabase.co/storage/v1/object/public/audio/a.mp3'])assert.equal(audioURL(url),null,url);
+    'https://fssrtlpjqbavzomynwmg.supabase.co/storage/v1/object/public/audio/a.mp3'])assert.equal(audioURL(url),null,url);
 });
 test('episode sanitization bounds metadata, dates, formats and durations',()=>{
   const cleaned=cleanEpisode({...episode(),title:'  Deneme  ',extra:'not stored'},NOW);

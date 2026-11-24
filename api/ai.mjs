@@ -145,8 +145,8 @@ async function cronHandler(req, res) {
 }
 
 // Influencer purchases share this function to stay within the Hobby function limit.
-const INF_SUPABASE_URL = process.env.SUPABASE_URL || 'https://zvnjslmptwmnuhftgqsr.supabase.co';
-const INF_PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_bReG5UKaWcQkU0Z9GnGiJQ_0T4_Qm9X';
+const INF_SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
+const INF_PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 const INF_PACKAGES = { video: 'Video eğitim — 50 USDT', guided: 'Eğitim + bireysel soru-cevap — 90 USDT', growth: '1-1 büyüme desteği — 175 USDT' };
 export const INF_PACKAGE_PRICES = { video: 50, guided: 90, growth: 175 };
 let infFxCache = null;
