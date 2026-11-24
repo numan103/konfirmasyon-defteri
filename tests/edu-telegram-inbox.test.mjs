@@ -163,11 +163,15 @@ test('existing webhook verifies its secret before inbox ingestion and never send
   assert.equal(accepted.code, 200); assert.equal(accepted.body.eduInbox, 1);
   assert.equal(f.notes().length, 1);
   assert.ok(!f.calls.some(c => /sendMessage|sendPhoto|api\.groq/.test(c.url)));
+  const duplicate = response();
+  await telegramWebhook({ method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'unit-webhook' }, body: message() }, duplicate);
+  assert.equal(duplicate.code, 200); assert.equal(duplicate.body.skipped, 'duplicate');
+  assert.equal(f.notes().length, 1, 'a redelivered update must not import the note twice');
 });
 test('existing webhook returns a retriable response if the durable inbox write fails', async t => {
   fixture(t, { fail: true });
   const res = { code: 0, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } };
-  await telegramWebhook({ method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'unit-webhook' }, body: message() }, res);
+  await telegramWebhook({ method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'unit-webhook' }, body: { ...message(), update_id: 2 } }, res);
   assert.equal(res.code, 503); assert.equal(res.body.error, 'edu_inbox_retry');
 });
 test('connection probe verifies the actual bot membership and webhook without changing Telegram or database state', async t => {
