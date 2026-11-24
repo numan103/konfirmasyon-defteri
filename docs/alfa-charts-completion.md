@@ -55,3 +55,11 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - Normal grafikte tarihe atlama ve preset için çok sayfalı backfill.
 - Bulut çakışmalarında iki kopyayı karşılaştırıp açık kullanıcı tercihiyle uzlaştırma.
 - Panel workspace'inin cihazlar arası bulut senkronu; mevcut yerel kayıt kapsamı korundu.
+
+## Devam — Historical Navigation
+
+- Git Tarihe artık Görünüm menüsünde normal grafiği seçilen UTC tarihe taşır; Replay başlatmaz.
+- Mevcut backfill üzerinden sayfalar yüklenir. Tarih/preset tamamlanmadan görünüm değiştirilmez; her eklemede mevcut logical anchor korunur, çizim dokümanına yazılmaz.
+- 1G/5G/1A/3A son mevcut mumdan geriye gerçek zaman aralığını yükler. Tümü ancak sağlayıcının boş/overlap bitiş yanıtı doğrulanınca uygulanır.
+- Ağ hatası, hesap/sembol değişimi, bulunamayan tarih veya 512 sayfalık güvenlik sınırında eksik veri “Tümü” diye gösterilmez; mevcut görünüm korunur ve durum açıklanır.
+- Test: 3 yeni unit + mevcut 4 backfill testi geçti. Deterministik sağlayıcı fixture'lı gerçek Playwright akışında toolbar ile çizim, eski tarihe Git, beş preset ve bulunamayan tarihte görünüm/çizim koruması geçti.

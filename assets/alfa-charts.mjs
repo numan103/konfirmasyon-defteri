@@ -168,6 +168,11 @@ let chartTimeZone = 'UTC', chartTimeFormats = createChartTimeFormatters('UTC');
 let history = [], seriesBars = [], socket, aborter, retryTimer, pollTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false, loadingOlder = false;
 const exhaustedHistoryEdges = new Set();
+let olderRequest = null, historyNavigation = 0;
+function requestOlderHistory() {
+  if (!olderRequest) olderRequest = loadOlderHistory().finally(() => { olderRequest = null; });
+  return olderRequest;
+}
 let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, replaySpeed = 1;
 let olderController = null;
 let replayEngine = null, replayStartIndex = 0, liveDrawingState = null, replayMtfEnabled = false;
@@ -312,7 +317,7 @@ function onSyncMessage(event) {
 window.addEventListener('message', onSyncMessage);
 
 chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-  if (range && range.from < 40 && !loadingOlder && history.length && !syncApplyDepth) loadOlderHistory();
+  if (range && range.from < 40 && !loadingOlder && history.length && !syncApplyDepth) requestOlderHistory();
   if (!syncApplyDepth && !replayMode && history.length && range) {
     const rangePayload = { logical: { from: quantize(range.from), to: quantize(range.to) }, time: visibleTimeRange() };
     notifyMainSync('range', rangePayload);
@@ -1488,8 +1493,48 @@ $('goto-date-btn').addEventListener('click', async () => {
   const v = $('goto-date').value;
   if (!v) return;
   if(replayMode){connection('Önce mevcut replay oturumunu durdurun','error');return;}
-  await enterReplay({target:Date.parse(v+'Z')/1000});
+  await navigateHistory({ target: Date.parse(v + 'Z') / 1000 });
 });
+
+async function navigateHistory({ target = null, duration = null, all = false } = {}) {
+  if (replayMode || !history.length || (target != null && !Number.isFinite(target))) return false;
+  const ticket = ++historyNavigation, stamp = generation, owner = currentUserKey();
+  const valid = () => ticket === historyNavigation && stamp === generation && owner === currentUserKey() && !replayMode && !disposed;
+  const end = history.at(-1).time;
+  if (duration != null) target = end - duration;
+  if (target != null && target > end) { connection('Seçilen tarih son mumdan ileride', 'error'); return false; }
+  // Bound each user action. A partial provider response is never labelled "all".
+  let complete = false;
+  for (let page = 0; page < 512 && valid(); page++) {
+    if (!all && history[0].time <= target) { complete = true; break; }
+    const first = history[0].time;
+    const edge = `${symbol}|${interval}|${first}`;
+    if (exhaustedHistoryEdges.has(edge)) { complete = all; break; }
+    await requestOlderHistory();
+    if (!valid()) return false;
+    if (history[0].time === first) {
+      complete = all && exhaustedHistoryEdges.has(edge);
+      break;
+    }
+  }
+  if (!valid()) return false;
+  if (!complete) {
+    connection('İstenen geçmiş aralığı tamamlanamadı · görünüm korundu; yeniden deneyebilirsiniz', 'error');
+    return false;
+  }
+  withSyncApply(() => {
+    if (all) chart.timeScale().fitContent();
+    else if (duration != null) chart.timeScale().setVisibleRange({ from: target, to: end });
+    else {
+      const index = history.findIndex(bar => bar.time >= target);
+      const range = chart.timeScale().getVisibleLogicalRange();
+      const half = Math.max(5, ((range?.to || 100) - (range?.from || 0)) / 2);
+      chart.timeScale().setVisibleLogicalRange({ from: index - half, to: index + half });
+    }
+  });
+  connection(all ? 'Tümü · sağlayıcının mevcut geçmişi yüklendi' : 'Tarih aralığı yüklendi', 'live');
+  return true;
+}
 
 // ---------- UI: indicator manager, settings, MTF settings, persistence ----------
 function currentUserKey() {
@@ -1770,12 +1815,10 @@ $('tester-open').addEventListener('click', () => {
   modal.box.querySelector('#tester-close').onclick = modal.close;
   modal.box.querySelector('#tester-replay').onclick = () => { modal.close(); $('replay-toggle').click(); };
 });
-document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', async () => {
   if (!history.length) return;
-  document.querySelectorAll('[data-range]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  if (b.dataset.range === 'all') { chart.timeScale().fitContent(); return; }
-  const count = Number(b.dataset.range) / candleCloseTime(0, interval);
-  chart.timeScale().setVisibleLogicalRange({ from: history.length - Math.max(10, count), to: history.length + 3 });
+  const ok = await navigateHistory(b.dataset.range === 'all' ? { all: true } : { duration: Number(b.dataset.range) });
+  if (ok) document.querySelectorAll('[data-range]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
 }));
 function persistViewConfig() {
   try { localStorage.setItem('alfa-chart-view:v1', JSON.stringify(viewConfig)); } catch {}
