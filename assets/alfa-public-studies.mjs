@@ -5,14 +5,14 @@ import { parseMarketRef } from './alfa-charts-data.mjs?v=10';
 import {
   fetchOpenInterest, fetchLongShortRatio, fetchKlineFlow, fetchDepthHeatmap,
   cvdFromFlow, deltaFromFlow, footprintFromFlow, intervalToPeriod,
-  PUBLIC_MARKET_SOURCES, PUBLIC_STUDY_DETAILS
-} from './alfa-market-data-public.mjs?v=2';
+  PUBLIC_MARKET_SOURCES, PUBLIC_STUDY_DETAILS, FUTURES_STAT_PERIODS
+} from './alfa-market-data-public.mjs?v=3';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 const HEX = /^#[0-9a-f]{6}$/i;
 export const PUBLIC_STUDY_IDS = Object.freeze(['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint', 'heatmap']);
 export const PUBLIC_STUDY_NAMES = Object.freeze({
-  oi: 'Açık Pozisyon', longShort: 'Long / Short Oranı', cvdSpot: 'CVD · Spot',
+  oi: PUBLIC_STUDY_DETAILS.oi.name, longShort: 'Long / Short Oranı', cvdSpot: 'CVD · Spot',
   cvdPerp: 'CVD · Perpetual', marketDelta: 'Market Delta', footprint: PUBLIC_STUDY_DETAILS.footprint.name,
   heatmap: PUBLIC_STUDY_DETAILS.heatmap.name
 });
@@ -25,7 +25,7 @@ const DEFAULTS = Object.freeze({
   footprint: { market: 'auto', color: '#7aafa0', refresh: 300 },
   heatmap: { market: 'auto', levels: 40, refresh: 300, bidColor: '#26c89c', askColor: '#ef6677' }
 });
-const PERIODS = ['auto', '5m', '15m', '30m', '1h', '4h', '1d'];
+const PERIODS = ['auto', ...FUTURES_STAT_PERIODS];
 const MARKETS = ['auto', 'spot', 'perp'];
 
 export function normalizePublicStudyConfig(id, raw = {}) {
@@ -59,15 +59,17 @@ export function publicStudyMarket(ref, requested = 'auto') {
 }
 
 export class PublicStudiesManager {
-  constructor({ chart, series, getBars, getSymbol, getInterval, onStatus } = {}) {
+  constructor({ chart, series, getBars, getSymbol, getInterval, onStatus, onStudyStatus } = {}) {
     this.chart = chart;
     this.series = series;
     this.getBars = getBars || (() => []);
     this.getSymbol = getSymbol || (() => 'BTCUSDT');
     this.getInterval = getInterval || (() => '1h');
     this.onStatus = onStatus || (() => {});
+    this.onStudyStatus = onStudyStatus || (() => {});
     this.configs = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, { ...DEFAULTS[id] }]));
     this.enabled = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, false]));
+    this.statusById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, { state: 'idle', message: '' }]));
     this.seriesById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, []]));
     this.priceLines = [];
     this.controllers = new Map();
@@ -80,6 +82,8 @@ export class PublicStudiesManager {
       get enabled() { return self.enabled[id]; },
       setEnabled(value) { self.setEnabled(id, value); },
       get config() { return self.configs[id]; },
+      get status() { return { ...self.statusById[id] }; },
+      retry() { return self.refresh(id, true, true); },
       defaultConfig() { return { ...DEFAULTS[id] }; },
       updateConfig(cfg) { self.updateConfig(id, cfg); }
     }]));
@@ -97,6 +101,7 @@ export class PublicStudiesManager {
     this.enabled[id] = next;
     this.detach(id);
     if (next) this.refresh(id, true);
+    else this.setStatus(id, 'idle', '');
   }
   updateConfig(id, raw) {
     if (!PUBLIC_STUDY_IDS.includes(id)) return;
@@ -125,12 +130,16 @@ export class PublicStudiesManager {
   }
   detach(id) {
     this.abort(id);
+    this.clearSeries(id);
+  }
+  clearSeries(id) {
     for (const s of this.seriesById[id] || []) {
       try { this.chart.removeSeries(s); } catch {}
     }
     this.seriesById[id] = [];
     if (id === 'heatmap') this.clearPriceLines();
   }
+  hasSeries(id) { return id === 'heatmap' ? this.priceLines.length > 0 : this.seriesById[id].length > 0; }
   clearPriceLines() {
     for (const line of this.priceLines) {
       try { this.series?.removePriceLine(line); } catch {}
@@ -141,6 +150,10 @@ export class PublicStudiesManager {
     for (const id of PUBLIC_STUDY_IDS) this.detach(id);
     this.cache.clear();
   }
+  setStatus(id, state, message) {
+    this.statusById[id] = { state, message };
+    this.onStudyStatus(id, this.statusById[id]);
+  }
   resolve(id) {
     const cfg = this.configs[id];
     const requested = ['marketDelta', 'footprint', 'heatmap'].includes(id) ? cfg.market : 'auto';
@@ -149,7 +162,8 @@ export class PublicStudiesManager {
       this.onStatus(`${PUBLIC_STUDY_NAMES[id]}: yalnızca Binance Spot / Vadeli sembollerde kullanılabilir`, 'error');
       return null;
     }
-    return found;
+    // Statistics are from USD-M futures even when the price chart is Spot.
+    return found && ['oi', 'longShort'].includes(id) ? { ...found, market: 'perp' } : found;
   }
   cacheKey(id, market, cfg) {
     const shape = { id, symbol: market.symbol, market: market.market, interval: this.context.interval };
@@ -163,28 +177,51 @@ export class PublicStudiesManager {
     this.controllers.set(id, controller);
     const cfg = this.configs[id];
     const market = this.resolve(id);
-    if (!market) return;
+    if (!market) {
+      this.setStatus(id, 'unsupported', 'Bu borsa için desteklenmiyor · yalnızca Binance');
+      this.controllers.delete(id);
+      return;
+    }
     const key = this.cacheKey(id, market, cfg);
     const ttl = id === 'heatmap' ? 20000 : 90000;
     const cached = this.cache.get(id);
     let data = !force && cached?.key === key && Date.now() - cached.at < ttl ? cached.data : null;
+    const fromCache = !!data;
+    this.setStatus(id, 'loading', 'Veri alınıyor…');
+    let rendering = false;
     try {
       if (!data) {
         if (notify) this.onStatus(`${PUBLIC_STUDY_NAMES[id]} verisi alınıyor…`, 'waiting');
-        data = await this.load(id, market, cfg, controller.signal);
+        data = await this.load(id, market, cfg, AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]));
         if (controller.signal.aborted) return;
-        this.cache.set(id, { key, at: Date.now(), data });
       }
-      this.detach(id);
-      this.render(id, data, cfg);
-      this.schedule(id);
+      const hasData = id === 'heatmap' ? data?.bids?.length || data?.asks?.length : Array.isArray(data) && data.length;
+      if (!hasData) {
+        this.setStatus(id, 'empty', 'Bu sembol/periyot için veri yok' + (this.hasSeries(id) ? ' · son veri korunuyor' : ''));
+        return;
+      }
+      // Do not abort our own request before rendering: that used to hide render
+      // failures as cancellations. Network failures keep previously drawn data.
+      rendering = true;
+      this.clearSeries(id);
+      if (!this.render(id, data, cfg)) throw new Error('study-render-empty');
+      if (!fromCache) this.cache.set(id, { key, at: Date.now(), data });
+      const period = cfg.period === 'auto' ? intervalToPeriod(this.context.interval) : cfg.period;
+      this.setStatus(id, 'ready', `${PUBLIC_MARKET_SOURCES[id]}${period ? ' · ' + period : ''}`);
       if (notify) this.onStatus(`${PUBLIC_STUDY_NAMES[id]} hazır · ${PUBLIC_MARKET_SOURCES[id]}`, 'ok');
     } catch (error) {
-      if (controller.signal.aborted || error?.name === 'AbortError') return;
-      this.detach(id);
+      if (controller.signal.aborted) return;
+      if (rendering) this.clearSeries(id);
+      this.cache.delete(id);
+      const http = String(error?.message || '').match(/^public-market-(\d{3})$/)?.[1];
+      const detail = http ? ` (HTTP ${http})` : error?.name === 'TimeoutError' ? ' · zaman aşımı' : '';
+      this.setStatus(id, 'error', 'Veri alınamadı' + detail + (this.hasSeries(id) ? ' · son veri korunuyor' : ''));
       if (notify) this.onStatus(`${PUBLIC_STUDY_NAMES[id]} verisi alınamadı`, 'error');
     } finally {
-      if (this.controllers.get(id) === controller) this.controllers.delete(id);
+      if (this.controllers.get(id) === controller) {
+        this.controllers.delete(id);
+        if (this.enabled[id]) this.schedule(id);
+      }
     }
   }
   schedule(id) {
@@ -205,9 +242,9 @@ export class PublicStudiesManager {
     return fetchKlineFlow({ symbol: market.symbol, market: flowMarket, interval: this.context.interval, limit: 500, signal });
   }
   render(id, data, cfg) {
-    if (id === 'heatmap') { this.renderHeatmap(data, cfg); return; }
+    if (id === 'heatmap') { this.renderHeatmap(data, cfg); return this.priceLines.length; }
     const lines = this.lines(id, data, cfg);
-    if (!lines.length || !lines.some(l => l.values.length)) return;
+    if (!lines.length || !lines.some(l => l.values.length)) return 0;
     const paneIndex = this.chart.panes().length;
     for (const line of lines) {
       const histogram = line.type === 'histogram';
@@ -218,14 +255,23 @@ export class PublicStudiesManager {
       };
       if (histogram) { opts.base = 0; opts.color = line.color; }
       const series = this.chart.addSeries(histogram ? LWC.HistogramSeries : LWC.LineSeries, opts, paneIndex);
+      this.seriesById[id].push(series);
       const values = line.values.map(p => histogram
         ? { ...p, color: p.value >= 0 ? withAlpha(line.color, .55) : withAlpha('#ef6677', .55) }
         : p);
       series.setData(values);
-      this.seriesById[id].push(series);
     }
     const firstPane = this.seriesById[id][0]?.getPane?.();
-    try { firstPane?.setHeight(Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22))); } catch {}
+    try {
+      const mainStretch = this.chart.panes()[0]?.getStretchFactor?.();
+      // New native panes have no measured height until the next frame.
+      // setHeight() at that point can collapse an earlier concurrently-created
+      // study pane. A relative factor is stable before layout and on resize.
+      if (firstPane?.setStretchFactor && Number.isFinite(mainStretch) && mainStretch > 0) {
+        firstPane.setStretchFactor(mainStretch * .25);
+      } else firstPane?.setHeight(Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+    } catch {}
+    return this.seriesById[id].length;
   }
   lines(id, data, cfg) {
     if (id === 'oi') return [{ values: data.map(p => ({ time: p.time, value: p.value })), color: cfg.color, precision: 0 }];

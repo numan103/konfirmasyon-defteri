@@ -1,6 +1,6 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=1';
 import { parseHM, SESSION_BOX_DEFS } from './alfa-session-boxes-model.mjs?v=3';
-import { PUBLIC_STUDY_DETAILS } from './alfa-market-data-public.mjs?v=2';
+import { PUBLIC_STUDY_DETAILS } from './alfa-market-data-public.mjs?v=3';
 
 export const OVERLAY_CATALOG = [
   { id: 'volume', name: 'Hacim', category: 'Volume', description: 'Mumlara eşlik eden işlem hacmi', color: '#6fa8b0' },
@@ -9,7 +9,7 @@ export const OVERLAY_CATALOG = [
   { id: 'structure', name: 'Piyasa yapısı', category: 'Smart Money', description: 'Swing, HH/HL, BOS, CHoCH ve korunan seviyeler', color: '#71b9c0' },
   { id: 'fvg', name: 'FVG / IFVG', category: 'Smart Money', description: 'Fair Value Gap ve tersine dönen dengesizlik bölgeleri', color: '#7aafa0' },
   { id: 'mtf', name: 'Çoklu zaman dilimi · MTF', category: 'Smart Money', description: 'Üst periyot yapıları, swing ve FVG katmanları', color: '#86a9e1' },
-  { id: 'oi', name: 'Açık Pozisyon · Open Interest', category: 'Market Data', description: 'Binance Futures açık pozisyon ve açık pozisyon değeri · anahtarsız', color: '#8ea7ff' },
+  { id: 'oi', ...PUBLIC_STUDY_DETAILS.oi, category: 'Market Data', color: '#8ea7ff' },
   { id: 'longShort', name: 'Long / Short Oranı', category: 'Market Data', description: 'Binance Futures global hesap long/short oranı · anahtarsız', color: '#d5b16a' },
   { id: 'cvdSpot', name: 'CVD · Spot', category: 'Market Data', description: 'Binance Spot kapanış verisinden taker alım-satım kümülatif deltası', color: '#26c89c' },
   { id: 'cvdPerp', name: 'CVD · Perpetual', category: 'Market Data', description: 'Binance USD-M vadeli taker alım-satım kümülatif deltası', color: '#8ea7ff' },
@@ -36,7 +36,8 @@ const labels = { period: 'Periyot', source: 'Fiyat kaynağı', color: 'Çizgi re
   opacity: 'Dolgu opaklığı', showFvg: 'FVG bölgeleri', showMS: 'Piyasa yapısı', showIFVG: 'IFVG bölgeleri', confirmedOnly: 'Yalnızca kapanmış HTF mumları',
   period: 'Veri periyodu', market: 'Piyasa', levels: 'Emir defteri seviyesi', refresh: 'Yenileme (sn)',
   bidColor: 'Alış likiditesi', askColor: 'Satış likiditesi' };
-const periodOptions = [['auto', 'Grafik zaman dilimi'], ['5m', '5 dk'], ['15m', '15 dk'], ['30m', '30 dk'], ['1h', '1 sa'], ['4h', '4 sa'], ['1d', '1 gün']];
+const periodOptions = [['auto', 'Otomatik · grafiğe uygun'], ['5m', '5 dk'], ['15m', '15 dk'], ['30m', '30 dk'],
+  ['1h', '1 sa'], ['2h', '2 sa'], ['4h', '4 sa'], ['6h', '6 sa'], ['12h', '12 sa'], ['1d', '1 gün']];
 const marketOptions = [['auto', 'Grafikteki piyasa'], ['spot', 'Binance Spot'], ['perp', 'Binance Vadeli']];
 const schemas = {
   structure: ['left', 'right', 'mode', 'displacement', 'dispMin', 'showSwings', 'showHHHL', 'showBOS', 'showCHoCH', 'showProtected', 'maxProtected'],
@@ -96,7 +97,9 @@ export class ChartStudies {
       ...this.indicators.items.map(item => ({ id: item.id, type: item.type, name: item.def.name,
         subtitle: item.params.period ? `${item.params.period} · ${(item.params.source || 'close').toUpperCase()}` : descriptions[item.type],
         visible: item.visible, color: item.params.color, item })),
-      ...OVERLAY_CATALOG.filter(d => this.state[d.id].added).map(d => ({ ...d, subtitle: d.description, visible: this.state[d.id].visible })),
+      ...OVERLAY_CATALOG.filter(d => this.state[d.id].added).map(d => ({
+        ...d, subtitle: d.description, visible: this.state[d.id].visible, status: this.managers[d.id].status
+      })),
     ];
   }
   add(type) {
@@ -127,6 +130,7 @@ export class ChartStudies {
       legend.innerHTML = active.map(d => `<div class="study-chip ${!d.visible || this.clean ? 'is-hidden' : ''}" data-study-chip="${esc(d.id)}">
         <span class="study-dot" style="background:${esc(d.color)}"></span>
         <span>${esc(d.name)}${d.item?.params.period ? ' ' + esc(d.item.params.period) : ''}</span>
+        ${this.statusHTML(d)}
         <button data-study-eye="${esc(d.id)}" title="${esc(d.name)} göster/gizle" aria-label="${esc(d.name)} göster/gizle">${icon(d.visible ? 'eye' : 'eyeOff')}</button>
         ${d.id === 'volume' ? '' : `<button class="study-chip-action" data-study-settings="${esc(d.id)}" title="${esc(d.name)} ayarları" aria-label="${esc(d.name)} ayarları">${icon('settings')}</button>`}
         <button class="study-chip-action" data-study-remove="${esc(d.id)}" title="${esc(d.name)} kaldır" aria-label="${esc(d.name)} kaldır">${icon('close')}</button>
@@ -140,6 +144,13 @@ export class ChartStudies {
     root.querySelectorAll('[data-study-eye]').forEach(b => b.onclick = () => this.toggle(b.dataset.studyEye));
     root.querySelectorAll('[data-study-remove]').forEach(b => b.onclick = () => this.remove(b.dataset.studyRemove));
     root.querySelectorAll('[data-study-settings]').forEach(b => b.onclick = () => this.openSettings(b.dataset.studySettings));
+    root.querySelectorAll('[data-study-retry]').forEach(b => b.onclick = () => this.managers[b.dataset.studyRetry]?.retry?.());
+  }
+  statusHTML(d) {
+    if (!d.status?.message || !d.visible || this.clean) return '';
+    const retry = ['error', 'empty'].includes(d.status.state);
+    return `<small class="study-data-status" data-study-status="${esc(d.id)}" data-state="${esc(d.status.state)}" role="status" title="${esc(d.status.message)}">${esc(d.status.message)}</small>
+      ${retry ? `<button data-study-retry="${esc(d.id)}" aria-label="${esc(d.name)} verisini yeniden dene" title="Veriyi yeniden dene">↻</button>` : ''}`;
   }
   announce(text) {
     const el = this.modal?.box.querySelector('#study-announcement'); if (el) el.textContent = text;
@@ -179,7 +190,7 @@ export class ChartStudies {
     if (this.category === 'active') {
       const rows = this.active().filter(matches);
       list.innerHTML = '<div class="study-table-heading">GRAFİKTEKİ GÖSTERGELER</div>' + (rows.map(d => `<article class="study-row" data-active-study="${esc(d.id)}">
-        <span class="study-dot" style="background:${esc(d.color)}"></span><div class="study-row-info"><strong>${esc(d.name)}${!d.visible ? ' · gizli' : ''}</strong><small>${esc(d.subtitle)}</small></div>
+        <span class="study-dot" style="background:${esc(d.color)}"></span><div class="study-row-info"><strong>${esc(d.name)}${!d.visible ? ' · gizli' : ''}</strong><small>${esc(d.subtitle)}</small>${this.statusHTML(d)}</div>
         <div class="study-row-actions"><button data-study-eye="${esc(d.id)}" aria-label="${esc(d.name)} göster/gizle" title="Göster/gizle">${icon(d.visible ? 'eye' : 'eyeOff')}</button>
         ${d.id === 'volume' ? '' : `<button data-study-settings="${esc(d.id)}" aria-label="${esc(d.name)} ayarları" title="Ayarlar">${icon('settings')}</button>`}
         <button data-study-remove="${esc(d.id)}" aria-label="${esc(d.name)} kaldır" title="Kaldır">${icon('close')}</button></div></article>`).join('') || '<div class="study-empty">Grafikte indikatör yok.<br>Tüm indikatörler sekmesinden ekleyebilirsin.</div>');

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   fetchOpenInterest, fetchLongShortRatio, fetchAggTrades, cvdSeries,
   marketDeltaSeries, footprintSeries, fetchDepthHeatmap, intervalToPeriod,
-  fetchKlineFlow, cvdFromFlow, deltaFromFlow, footprintFromFlow
+  fetchKlineFlow, cvdFromFlow, deltaFromFlow, footprintFromFlow, FUTURES_STAT_PERIODS
 } from '../assets/alfa-market-data-public.mjs';
 
 const jsonResponse = data => ({ ok: true, status: 200, json: async () => data });
@@ -30,6 +30,31 @@ test('public open interest and long/short adapters normalize upstream rows', asy
   ]);
   assert.match(calls[0], /fapi\.binance\.com\/futures\/data\/openInterestHist\?symbol=BTCUSDT&period=5m&limit=500/);
   assert.match(calls[1], /globalLongShortAccountRatio/);
+});
+
+test('every chart interval maps to a supported futures statistics period, never 60m', () => {
+  const expected = {
+    '1m': '5m', '3m': '5m', '5m': '5m', '15m': '15m', '30m': '30m',
+    '1h': '1h', '2h': '2h', '4h': '4h', '6h': '6h', '12h': '12h',
+    '1d': '1d', '3d': '1d', '1w': '1d'
+  };
+  for (const [interval, period] of Object.entries(expected)) {
+    assert.equal(intervalToPeriod(interval), period, interval);
+    assert.ok(FUTURES_STAT_PERIODS.includes(period), interval);
+  }
+  assert.equal(intervalToPeriod('1H'), '1h');
+  assert.equal(intervalToPeriod('unknown'), '1h');
+});
+
+test('unsupported explicit statistics periods fail before making an upstream request', async () => {
+  let calls = 0;
+  const fetcher = async () => { calls++; return jsonResponse([]); };
+  for (const fetchStats of [fetchOpenInterest, fetchLongShortRatio]) {
+    for (const period of ['60m', '1m', '3m', '1w']) {
+      await assert.rejects(() => fetchStats('BTCUSDT', period, 500, undefined, fetcher), /Futures veri periyodu/);
+    }
+  }
+  assert.equal(calls, 0);
 });
 
 test('compressed trade pagination is bounded and preserves taker side', async () => {
@@ -94,5 +119,5 @@ test('depth heatmap normalizes both sides without inventing liquidity', async ()
   assert.equal(heat.asks.at(-1).weight, 1);
   assert.equal(heat.bids.at(-1).weight, 99 / 408);
   assert.equal(intervalToPeriod('15m'), '15m');
-  assert.equal(intervalToPeriod('4h'), '1h');
+  assert.equal(intervalToPeriod('4h'), '4h');
 });

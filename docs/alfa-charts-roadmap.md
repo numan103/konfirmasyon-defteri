@@ -146,6 +146,34 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
 - `alfa-workspace`, `alfa-chart-time`, `alfa-drawings`, `alfa-replay` regresyonları
   da geçti. Bu modül 7/24 alarm veya gerçek footprint motoru eklemez.
 
+## Ara düzeltme — Open Interest görünürlüğü
+
+- **Sebep:** `1H` grafikte otomatik periyot `60m` üretiliyordu. Binance USD-M
+  Futures istatistik uç noktası `60m` değerini kabul etmiyor; canlı istek
+  `HTTP 400 / code -1130 · parameter 'period' is invalid` döndü. Arayüz
+  göstergeyi “eklendi” olarak işaretlediği için boş alt panel kalıyordu.
+- `intervalToPeriod` artık desteklenen `5m/15m/30m/1h/2h/4h/6h/12h/1d`
+  değerlerini koruyor; `1m/3m → 5m`, `3d/1w → 1d`, bilinmeyen değer `1h`.
+  Aynı eşleme Long/Short oranına da uygulanıyor ve desteklenmeyen açık
+  periyotlar istek atılmadan reddediliyor.
+- Spot grafik Spot kalıyor; OI aynı sembolün USD-M futures istatistiğinden
+  geliyor. Ayar açıklaması, katalog/legend adı ve durum satırı kaynağı ve
+  periyodu açıkça belirtiyor. Bare `BTCUSDT` ve venue referansları değişmedi.
+- Legend ve aktif liste artık kalıcı `loading/ready/empty/unsupported/error`
+  durumu gösteriyor; hata/boş durumda yeniden dene düğmesi var. Canlı fiyat
+  tick'i durumu silmiyor; ağ hatasında son çizilen seri korunuyor, render
+  hatası görünür oluyor, istek 15 sn'de zaman aşıyor ve yeniden boyama cache
+  süresini uzatmıyor.
+- Yeni alt panel, ölçülmemiş yükseklikle `setHeight()` çağrısı yaptığı için
+  eşzamanlı eklenen göstergelerde çöküyordu; görece `setStretchFactor()`
+  kullanıldı. 390/320 px'de OI paneli görünür kalıyor.
+- İlgili birim testleri **20/20**, tam suite **1169/1169** geçti. Yeni
+  `alfa-open-interest.browser.mjs` sentetik Binance taşımacılığıyla varsayılan
+  `1H → 1h`, manuel `4h`, `1m → 5m`, HTTP hatası/yeniden deneme, boş durum,
+  Long/Short, yeniden yükleme, mobil pane'ler ve çizim/alarm korunmasını
+  doğruluyor. `workspace`, `scope`, `time`, `drawings`, `replay` regresyonları
+  da geçti. Bu düzeltme API/veritabanı/JWT kapılarını değiştirmedi.
+
 ## Kaynaklar
 
 - [TradingView özellikleri](https://www.tradingview.com/features/) — grafik tipleri,

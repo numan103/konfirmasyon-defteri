@@ -14,6 +14,7 @@ const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const cleanSymbol = value => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 export const PUBLIC_MARKET_SOURCES = Object.freeze({
+  oi: 'Binance Futures · açık pozisyon',
   openInterest: 'Binance Futures · açık pozisyon',
   longShort: 'Binance Futures · hesap long/short',
   cvdSpot: 'Binance Spot · klines taker hacmi',
@@ -25,6 +26,11 @@ export const PUBLIC_MARKET_SOURCES = Object.freeze({
 // Display metadata only: retain the old study IDs so saved layouts/favorites
 // keep working. These summaries are not full price-level/history renderers.
 export const PUBLIC_STUDY_DETAILS = Object.freeze({
+  oi: Object.freeze({
+    name: 'Açık Pozisyon · Open Interest',
+    description: 'Binance USD-M vadeli toplam açık pozisyon miktarı · ayrı alt panel.',
+    scope: 'Spot piyasada açık pozisyon (Open Interest) yoktur. Binance Spot grafiğinde aynı sembolün USD-M vadeli açık pozisyon miktarı gösterilir; fiyat grafiği Spot kalır. Otomatik veri periyodu en az 5 dakika, en fazla 1 gündür. Binance yalnızca yakın dönem istatistik geçmişini sağlar; eski tarihlerde veri olmayabilir.'
+  }),
   footprint: Object.freeze({
     name: 'Mum deltası · Footprint özeti',
     description: 'Mum başına toplam taker alım-satım deltası; fiyat kademeli bid/ask footprint değildir.',
@@ -36,8 +42,13 @@ export const PUBLIC_STUDY_DETAILS = Object.freeze({
     scope: 'Son alınan emir defteri görüntüsü yatay fiyat çizgileriyle gösterilir ve seçilen yenileme aralığında güncellenir. Geçmiş likidite hareketleri kaydedilmez; tarihsel ısı haritası veya kesintisiz veri akışı değildir.'
   })
 });
+export const FUTURES_STAT_PERIODS = Object.freeze(['5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d']);
+function validateStatPeriod(period) {
+  if (!FUTURES_STAT_PERIODS.includes(period)) throw new Error('Desteklenmeyen Futures veri periyodu');
+}
 
 export async function fetchOpenInterest(symbol, period = '5m', limit = 500, signal, fetcher = fetch) {
+  validateStatPeriod(period);
   const url = `${FUTURES}/futures/data/openInterestHist?symbol=${encodeURIComponent(cleanSymbol(symbol))}&period=${encodeURIComponent(period)}&limit=${Math.min(500, Math.max(10, limit))}`;
   const rows = await getJSON(url, signal, fetcher);
   if (!Array.isArray(rows)) throw new Error('open-interest-format');
@@ -49,6 +60,7 @@ export async function fetchOpenInterest(symbol, period = '5m', limit = 500, sign
 }
 
 export async function fetchLongShortRatio(symbol, period = '5m', limit = 500, signal, fetcher = fetch) {
+  validateStatPeriod(period);
   const url = `${FUTURES}/futures/data/globalLongShortAccountRatio?symbol=${encodeURIComponent(cleanSymbol(symbol))}&period=${encodeURIComponent(period)}&limit=${Math.min(500, Math.max(10, limit))}`;
   const rows = await getJSON(url, signal, fetcher);
   if (!Array.isArray(rows)) throw new Error('long-short-format');
@@ -179,7 +191,9 @@ export function footprintFromFlow(flow) {
 }
 
 export function intervalToPeriod(interval) {
-  const minutes = { '1m': 1, '3m': 3, '5m': 5, '15m': 15, '30m': 30, '1h': 60, '2h': 120, '4h': 240, '6h': 360, '12h': 720, '1d': 1440 };
-  const m = minutes[String(interval).toLowerCase()];
-  return m && m <= 60 ? `${m}m` : '1h';
+  const value = String(interval).toLowerCase();
+  if (FUTURES_STAT_PERIODS.includes(value)) return value;
+  if (value === '1m' || value === '3m') return '5m';
+  if (value === '3d' || value === '1w') return '1d';
+  return '1h';
 }

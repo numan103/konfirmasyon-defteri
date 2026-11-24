@@ -10,13 +10,13 @@ import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=2';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=3';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=2';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
-import { PublicStudiesManager } from './alfa-public-studies.mjs?v=2';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
 import { initMultiChart } from './alfa-multichart.mjs?v=3';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
@@ -1339,7 +1339,8 @@ const marketStructure = new MarketStructureManager({ series: candles, getBars: (
 const fvg = new FvgManager({ chart, series: candles, host, getBars: () => seriesBars });
 const mtf = new MtfManager({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval });
 publicStudies = new PublicStudiesManager({ chart, series: candles, getBars: () => seriesBars,
-  getSymbol: () => symbol, getInterval: () => interval, onStatus: connection });
+  getSymbol: () => symbol, getInterval: () => interval, onStatus: connection,
+  onStudyStatus: () => studiesUI?.sync() });
 studiesUI = new ChartStudies({ indicators, catalog: INDICATOR_CATALOG, managers: {
   sessions: sessionBoxes, levels: sessionLevels, structure: marketStructure, fvg, mtf,
   ...publicStudies.facades,
