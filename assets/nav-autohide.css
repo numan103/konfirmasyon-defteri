@@ -7,6 +7,9 @@ body.nav-scrolled .navbar:focus-within,
 body.nav-scrolled.nav-peek .navbar { transform:translateY(0); }
 @media (hover:none), (max-width:680px) {
   body.nav-scrolled .nav-hover-zone { display:none; }
+  /* The reveal button and the chat bubble share the bottom-right corner.
+     Lift the bubble while the reveal is visible so neither swallows taps. */
+  body.nav-scrolled .chat-bubble { bottom:calc(80px + env(safe-area-inset-bottom)); }
   body.nav-scrolled .nav-reveal {
     display:inline-flex; align-items:center; justify-content:center;
     position:fixed; right:max(14px, env(safe-area-inset-right));
