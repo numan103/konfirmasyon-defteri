@@ -30,6 +30,7 @@ export async function onRequest(context) {
   let statusCode = 200;
   const responseHeaders = {};
   let responseBody = '';
+  let responseBytes = null;
 
   const res = {
     statusCode: 200,
@@ -41,10 +42,24 @@ export async function onRequest(context) {
       if (headers) Object.assign(responseHeaders, headers);
       return this;
     },
+    redirect(code, location) {
+      statusCode = code; this.statusCode = code;
+      responseHeaders['Location'] = location;
+      responseBody = ''; responseBytes = null;
+      return this;
+    },
     write(data) { responseBody += (typeof data === 'string' ? data : String(data)); },
     end(data) { if (data) responseBody += (typeof data === 'string' ? data : String(data)); },
     json(data) { responseBody = JSON.stringify(data); responseHeaders['Content-Type'] = 'application/json'; },
     send(data) {
+      const bytes = data instanceof ArrayBuffer ? new Uint8Array(data)
+        : ArrayBuffer.isView(data) ? new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+        : null;
+      if (bytes) {
+        responseBytes = bytes;
+        responseHeaders['Content-Type'] = responseHeaders['Content-Type'] || 'application/octet-stream';
+        return;
+      }
       if (typeof data === 'object' && data !== null) {
         responseBody = JSON.stringify(data);
         responseHeaders['Content-Type'] = 'application/json';
@@ -62,5 +77,5 @@ export async function onRequest(context) {
   }
 
   responseHeaders['Access-Control-Allow-Origin'] = responseHeaders['Access-Control-Allow-Origin'] || '*';
-  return new Response(responseBody, { status: res.statusCode || statusCode, headers: responseHeaders });
+  return new Response(responseBytes ?? responseBody, { status: res.statusCode || statusCode, headers: responseHeaders });
 }
