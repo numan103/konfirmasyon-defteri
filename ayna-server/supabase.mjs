@@ -1,4 +1,4 @@
-// Match the site's existing project defaults when optional Vercel vars are absent.
+// Match the site's existing project defaults when optional Cloudflare env vars are absent.
 const BASE = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 

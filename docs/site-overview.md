@@ -110,8 +110,8 @@ Bu üç özellik giriş sayfası, menü ve hızlı erişimde "YENİ" rozeti ile 
 
 ## 11. Teknik notlar
 
-- Tek sayfa uygulama (index.html), Vercel üzerinde.
-- 12 serverless fonksiyon limiti (Hobby): access, ai-checklist, ai, chat-admin, contrib, eco-cal, edu-shared, notion-callback, notion-sync, notion-trades, tg, analytics.
-- Veritabanı: Supabase (edu_shared tablosu, DDL yok).
-- Testler: node --test tests/*.test.mjs.
-- Son durum: 1027/1027 unit test geçiyor (112 unit + 27 tarayıcı test dosyası), production READY.
+- Tek sayfa uygulama (index.html), Cloudflare Pages üzerinde; özel alan `https://alfa-trader.com`.
+- 12 Cloudflare Pages Functions wrapper'ı (Hobby limiti): access, ai-checklist, ai, chat-admin, contrib, eco-cal, edu-shared, notion-callback, notion-sync, notion-trades, tg, analytics. Yeni özellikler mevcut rotalarda çoğullenir.
+- Veritabanı: yeni Supabase projesi (`fssrtlpjqbavzomynwmg`); eski kısıtlı proje fail-closed engelli.
+- Testler: `node --test tests/*.test.mjs`.
+- Geçiş, secret'lar ve zamanlayıcılar: `docs/vercel-to-cloudflare.md`.

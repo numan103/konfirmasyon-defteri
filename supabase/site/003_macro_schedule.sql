@@ -1,5 +1,5 @@
 -- Requires 002_macro.sql, pg_cron + pg_net, and a Vault secret named
--- alfa_macro_trigger containing the SAME value as MACRO_CRON_SECRET in Vercel.
+-- alfa_macro_trigger containing the SAME value as MACRO_CRON_SECRET in Cloudflare Pages.
 -- Enter the value in the Supabase Vault UI; never commit it to SQL or cron text.
 -- NO purchase is needed. Dormant provisioning is allowed while enabled=false.
 -- Activation still requires a successful test for the CURRENT target/topic.

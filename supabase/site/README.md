@@ -54,7 +54,7 @@ Migration uygulanmadan tarayıcı yerel IndexedDB kuyruğuna kaydetmeye devam ed
 panel hata durumunu gösterir ve hiçbir yerel kayıt silinmez. Service-role anahtarı
 frontend'e gönderilmez; bu akış tamamen publishable key + kullanıcı JWT'si ile çalışır.
 
-## 2. Ortam değişkenleri (Vercel → Settings → Environment Variables)
+## 2. Ortam değişkenleri (Cloudflare Pages → Settings → Environment Variables)
 
 Zaten mevcut olması gerekenler:
 
@@ -218,7 +218,7 @@ Komutlar: `/dogrula`, `/durum`, `/link` (yeni davet), `/destek`, `/iptal`, `/sil
 `/yardim`. Piyasa soruları aynı DM'de `/ask`, `/data`, `/ogren` ile çalışmaya devam eder;
 soru olduğu anlaşılan serbest metinler de doğrulama akışını başlatmadan Q&A'ya gider.
 
-Kısa/markalı linkler (`vercel.json` redirect):
+Kısa/markalı linkler (Cloudflare `_redirects`):
 - `https://alfa-trader.com/katil`
 - `https://alfa-trader.com/mentorluk`
 - `https://alfa-trader.com/premium`
