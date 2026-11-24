@@ -78,6 +78,22 @@ test('content is encrypted at rest with integrity protection', t => {
   assert.throws(() => openLibrary({ ...sealed, tag: Buffer.alloc(16).toString('base64') }));
   assert.throws(() => openLibrary(content()));
 });
+test('content key survives a database service key rotation', t => {
+  const oldSecret = process.env.INFLUENCER_CONTENT_SECRET;
+  const oldServiceRole = process.env.SUPABASE_SERVICE_ROLE;
+  process.env.INFLUENCER_CONTENT_SECRET = 'legacy-content-secret';
+  process.env.SUPABASE_SERVICE_ROLE = 'new-database-key';
+  t.after(() => {
+    if (oldSecret === undefined) delete process.env.INFLUENCER_CONTENT_SECRET;
+    else process.env.INFLUENCER_CONTENT_SECRET = oldSecret;
+    if (oldServiceRole === undefined) delete process.env.SUPABASE_SERVICE_ROLE;
+    else process.env.SUPABASE_SERVICE_ROLE = oldServiceRole;
+  });
+  const sealed = sealLibrary(content());
+  process.env.SUPABASE_SERVICE_ROLE = 'rotated-database-key';
+  assert.deepEqual(openLibrary(sealed), content());
+  assert.equal(JSON.stringify(sealed).includes('PRIVATE_CONTENT'), false);
+});
 test('only actual admins write; premium/free/anonymous cannot self-authorize', async t => {
   const f = fixture(t), body = { data: content(), revision: null, admin: true };
   assert.equal((await f.request('', body)).status, 401);

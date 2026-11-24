@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { memberPurchaseId, sealRecord } from '../lib/education-crm.mjs';
+import { sealChannels } from '../lib/edu-channel-storage.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const api = fs.readFileSync(new URL('../api/edu-shared.mjs', import.meta.url), 'utf8');
@@ -38,9 +39,10 @@ function response() {
 }
 
 async function channelGet(options = {}) {
-  const { user = null, tierRows = [], crmRows = [], data = channels() } = options;
+  const { user = null, tierRows = [], crmRows = [], data = channels(), channelSecret = 'unit-edu-secret' } = options;
   const original = globalThis.fetch;
   process.env.EDU_CRM_SECRET = 'unit-edu-secret';
+  process.env.EDU_CHANNEL_SECRET = channelSecret;
   process.env.SUPABASE_SERVICE_ROLE = 'unit-service-role';
   process.env.SITE_ADMIN_EMAILS = 'admin@test.dev';
   globalThis.fetch = async (url) => {
@@ -157,4 +159,21 @@ test('reddedilen veya başkasına ait CRM kaydı erişim açmaz', async () => {
     crmRows: [pending, other],
   });
   assert.equal(videos(res)[1].locked, true);
+});
+
+test('şifreli kanal belgesi ayrı secret ile açılır; DB anahtarı değişse de eğitim içeriği durur', async () => {
+  process.env.EDU_CHANNEL_SECRET = 'legacy-channel-secret';
+  const sealed = sealChannels(channels(), 'channels');
+  process.env.SUPABASE_SERVICE_ROLE = 'rotated-database-key';
+  const res = await channelGet({ data: sealed, channelSecret: 'legacy-channel-secret' });
+  assert.equal(res.code, 200);
+  assert.equal(res.body.data.traders.t1.name, 'Trader Ahmet');
+  assert.equal(videos(res)[0].url, 'https://youtu.be/old');
+});
+
+test('yanlış şifre anahtarı kanalı boş göstermez, fail-closed olur', async () => {
+  const sealed = sealChannels(channels(), 'channels');
+  const res = await channelGet({ data: sealed, channelSecret: 'wrong-channel-secret' });
+  assert.equal(res.code, 503);
+  assert.equal(res.body.error, 'channel_storage_unavailable');
 });
