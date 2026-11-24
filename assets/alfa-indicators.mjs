@@ -48,12 +48,12 @@ export class IndicatorManager {
     this.axisLabels = false;
     this.storageKey = 'alfa-indicators:v1';
   }
-  list() { return this.items.map(i => ({ id: i.id, type: i.type, params: i.params, visible: i.visible })); }
-  add(type, params = {}, visible = true) {
+  list() { return this.items.map(i => ({ id: i.id, type: i.type, params: i.params, visible: i.visible, collapsed: !!i.collapsed })); }
+  add(type, params = {}, visible = true, collapsed = false) {
     const def = INDICATOR_CATALOG.find(d => d.id === type);
     if (!def) return null;
     if (this.items.length >= 24) throw new Error('En fazla 24 indikatör ekleyebilirsiniz.');
-    const item = { id: uid(), type, params: { ...DEFAULTS[type], ...params }, visible: visible !== false, series: [], pane: null, def };
+    const item = { id: uid(), type, params: { ...DEFAULTS[type], ...params }, visible: visible !== false, collapsed: !!collapsed, series: [], pane: null, def };
     this.items.push(item);
     this.render(item);
     this.onChange?.();
@@ -75,6 +75,12 @@ export class IndicatorManager {
   setVisible(id, visible) {
     const item = this.items.find(i => i.id === id); if (!item) return;
     item.visible = !!visible; this.render(item); this.onChange?.();
+  }
+  setCollapsed(id, collapsed) {
+    const item = this.items.find(i => i.id === id); if (!item) return;
+    item.collapsed = !!collapsed;
+    if (item.pane?.setHeight) item.pane.setHeight(item.collapsed ? 30 : Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+    this.onChange?.();
   }
   setSuppressed(value) {
     if (this.suppressed === !!value) return;
@@ -156,7 +162,8 @@ export class IndicatorManager {
     }
     if (isOsc) {
       item.pane = item.series[0].getPane();
-      item.pane.setHeight(Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+      const height = item.collapsed ? 30 : Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22));
+      if (item.pane.setHeight) item.pane.setHeight(height);
       const guides = item.type === 'rsi' ? [30, 70] : ['stochastic', 'stochrsi'].includes(item.type) ? [20, 80] : item.type === 'macd' ? [0] : [];
       for (const price of guides) item.series[0].createPriceLine({ price, color: '#53617a66', lineWidth: 1, lineStyle: 2, axisLabelVisible: false, title: '' });
     }
@@ -170,9 +177,9 @@ export class IndicatorManager {
       }
     }
   }
-  toJSON() { return this.items.map(i => ({ type: i.type, params: i.params, visible: i.visible })); }
+  toJSON() { return this.items.map(i => ({ type: i.type, params: i.params, visible: i.visible, collapsed: !!i.collapsed })); }
   fromJSON(arr) {
     this.clear();
-    for (const e of arr || []) this.add(e.type, e.params, e.visible);
+    for (const e of arr || []) if (e && typeof e.type === 'string') this.add(e.type, e.params, e.visible, e.collapsed);
   }
 }

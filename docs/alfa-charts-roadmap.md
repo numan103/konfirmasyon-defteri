@@ -174,6 +174,29 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
   doğruluyor. `workspace`, `scope`, `time`, `drawings`, `replay` regresyonları
   da geçti. Bu düzeltme API/veritabanı/JWT kapılarını değiştirmedi.
 
+## Üçüncü modül — İndikatör kalıcılığı ve TV tarzı legend
+
+- **Sebep:** göstergeler `alfa-chart-layout:v1:<owner>:<symbol>:<interval>` içinde
+  saklanıyordu; `1H → 4H` geçişinde yeni periyot kaydı boş olduğu için indikatörler
+  kayboluyordu.
+- Yeni `alfa-studies:v1:<owner>:<ref>` paketi göstergeleri ve overlay durumlarını
+  sembol/pazar bazında tutuyor. Eski periyot layout'ları yalnızca migrasyon
+  kaynağı; var olan paket sessizce ezilmiyor, kasıtlı boş paket geri getirilmiyor.
+- Legend artık sol üstten aşağıya dikey kartlar: her kartta göster/gizle, ayarlar,
+  küçült/genişlet ve kaldır; altta toplu yönet/küçült/genişlet/kaldır. Osilatör
+  paneli küçültülünce 30 px'e iniyor; kimlik, parametre, görünürlük ve küçültme
+  durumu korunuyor.
+- Görünüm amaçlı saat dilimi değişimi göstergelere dokunmuyor; çizim/replay
+  epoch'ları UTC kalıyor. Eski `studies` kayıtları byte-uyumlu; `collapsed` yalnızca
+  yeni kayıtlarda yazılıyor.
+- `alarmLevel` eksik importu giderildi; alarm tetikleme geçmişi artık hata vermiyor.
+- Yeni birim testleriyle tam suite **1176/1176**. Yeni
+  `alfa-indicator-pane.browser.mjs` periyot/sembol/reload/saat dilimi ve üretim
+  API'sine yazılmadığını doğruluyor; `workspace`, `chart-time`, `open-interest` ve
+  `replay` tarayıcı regresyonları da geçti.
+- Çizim/alarm/research anahtarları, bare `BTCUSDT` = Binance Spot, JWT kapıları ve
+  bulut şeması değişmedi.
+
 ## Kaynaklar
 
 - [TradingView özellikleri](https://www.tradingview.com/features/) — grafik tipleri,

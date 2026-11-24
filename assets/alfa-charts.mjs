@@ -1,17 +1,17 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode, TickMarkType } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=10';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
-  shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook,
+  shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
 import { DrawingEngine } from './alfa-drawings.mjs?v=15';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=4';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=3';
-import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=2';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=4';
+import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
@@ -20,6 +20,7 @@ import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
 import { initMultiChart } from './alfa-multichart.mjs?v=3';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
+import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
@@ -50,9 +51,11 @@ const syncGate = syncSession ? createMessageGate({
 }) : null;
 hydrateIcons();
 let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, pricePrecisionKey = '';
+let pendingStudies = null, studyContext = null;
 const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
   if (!next || next === symbol) return false;
+  rememberStudies();
   alarmPriceTracker.reset(next);
   symbol = next;
   if (syncGate && syncReady && !syncApplyDepth) syncGate.send('symbol', { symbol: next });
@@ -158,7 +161,7 @@ function applyChartType(next) {
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
 let chartTimeZone = 'UTC', chartTimeFormats = createChartTimeFormatters('UTC');
 let history = [], seriesBars = [], socket, aborter, retryTimer, pollTimer, watchdog, generation = 0, attempts = 0;
-let lastReceipt = 0, disposed = false, pendingIndicators = null, loadingOlder = false;
+let lastReceipt = 0, disposed = false, loadingOlder = false;
 let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, replaySpeed = 1;
 let olderController = null;
 let replayEngine = null, replayStartIndex = 0, liveDrawingState = null, replayMtfEnabled = false;
@@ -597,7 +600,7 @@ function setData(data, resetView) {
   // last accepted remote view after the data is in place so sync survives boot.
   reapplyLastSync();
   quote();
-  if (pendingIndicators) { try { indicators.fromJSON(pendingIndicators); } catch {} pendingIndicators = null; }
+  if (pendingStudies) { try { applyStudiesBundle(pendingStudies, studyContext?.owner || currentUserKey(), symbol); } catch {} pendingStudies = null; }
   else { try { indicators.updateAll(history); } catch {} }
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
@@ -666,6 +669,7 @@ function updateUI() {
   } catch {}
 }
 async function loadMarket() {
+  rememberStudies();
   if(replayMode&&!paper.canLeave()){
     symbol=paper.context.symbol;interval=paper.context.timeframe;updateUI();return;
   }
@@ -694,10 +698,7 @@ async function loadMarket() {
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
   try { indicators.clear(); } catch {}
-  try {
-    const layout=JSON.parse(localStorage.getItem(layoutKey())||'null');
-    pendingIndicators=layout?.indicators ?? JSON.parse(localStorage.getItem('alfa-ind:v1:'+symbol)||'null');
-  } catch { pendingIndicators = null; }
+  try { pendingStudies = loadStudiesFor(currentUserKey(), symbol); } catch { pendingStudies = null; }
   showMessage('');
   if (cached) {
     setData(cached.map(c => ({ ...c })), true);
@@ -1355,6 +1356,7 @@ const research = new ResearchPanel({getOwner:currentUserKey,isReplayActive:()=>r
   onOpen:packet=>enterReplay({session:packet.replay,researchPacket:packet})});
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+  rememberStudies(); studyContext = null;
   applyChartTimeZone(readChartTimeZone(currentUserKey()));
   watchlist.account();
   research.account(user,cloudSettings.client);
@@ -1390,6 +1392,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     applyMainSync, getMainSyncState,
     get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; },
     get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
+    get studyContext() { return studyContext ? { ...studyContext } : null; }, rememberStudies, loadStudiesFor,
     resetChartView, openChartSettingsModal, handleChartAction,
     get ready() { return $('connection').dataset.state === 'live'; } };
 }
@@ -1480,6 +1483,52 @@ function layoutSettings() {
     marketStructure: marketStructure.config, fvg: fvg.config, publicStudies: publicStudies.toJSON(), studies: studiesUI.toJSON(),
   });
 }
+function allowedOverlayIds() { return new Set(Object.keys(studiesUI?.state || {})); }
+// Studies follow the market, not the candle period. Snapshot the current
+// context before switching symbol/interval/account so nothing is lost.
+function rememberStudies() {
+  if (replayMode || !studyContext?.loaded || !studiesUI) return;
+  writeStudyBundle(localStorage, studyContext.owner, studyContext.symbol, {
+    version: 1, indicators: indicators.toJSON(), overlays: studiesUI.toJSON()
+  });
+}
+function storedLayout(key) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || 'null');
+    if (Array.isArray(raw)) return { indicators: raw };
+    return raw && typeof raw === 'object' ? raw : null;
+  } catch { return null; }
+}
+function legacyLayoutsFor(ref, tf) {
+  const owner = currentUserKey(), prefix = `alfa-chart-layout:v1:${owner}:${ref}:`, current = prefix + tf, out = [];
+  const primary = storedLayout(current);
+  if (primary) out.push(primary);
+  try {
+    for (const key of Object.keys(localStorage)) if (key.startsWith(prefix) && key !== current) {
+      const layout = storedLayout(key);
+      if (layout) out.push(layout);
+    }
+  } catch {}
+  const oldIndicators = storedLayout('alfa-ind:v1:' + ref);
+  if (oldIndicators) out.push(oldIndicators);
+  return out;
+}
+function loadStudiesFor(owner, ref, layouts = legacyLayoutsFor(ref, interval)) {
+  const allowed = allowedOverlayIds(), initial = defaultStudyState();
+  try { initial.sessions.added = !!localStorage.getItem('alfa-sb:v1') && Object.values(sessionBoxes.config.enabled).some(Boolean); } catch {}
+  return resolveStudyBundle({
+    current: readStudyBundle(localStorage, owner, ref, allowed),
+    legacyLayouts: layouts,
+    defaults: { indicators: [], overlays: initial },
+    allowedOverlays: allowed
+  });
+}
+function applyStudiesBundle(bundle, owner, ref) {
+  indicators.fromJSON(bundle.indicators);
+  studiesUI.apply(bundle.overlays);
+  studiesUI.sync();
+  studyContext = { owner, symbol: ref, loaded: true };
+}
 function applyChartTimeZone(value, persist = false) {
   chartTimeZone = normalizeChartTimeZone(value);
   chartTimeFormats = createChartTimeFormatters(chartTimeZone);
@@ -1529,6 +1578,7 @@ function onChartTimeZoneStorage(event) {
 window.addEventListener('storage', onChartTimeZoneStorage);
 function saveLayout() {
   if (replayMode) return; // Replay has its own session; never overwrite the live layout.
+  rememberStudies();
   const settings = layoutSettings();
   try {
     localStorage.setItem(layoutKey(), JSON.stringify(settings));
@@ -1552,52 +1602,45 @@ async function loadLayout() {
   const requestGeneration = generation;
   const requestOwner = currentUserKey();
   cloudRevision = 0;
-  let appliedStudies = false;
+  let localLayout = null, cloudLayout = null;
   try {
-    const raw = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
-    if (raw) {
+    localLayout = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
+    const raw = localLayout;
+    if (raw && typeof raw === 'object') {
       if (typeof raw.chartType === 'string') applyChartType(raw.chartType);
       if (typeof raw.logScale === 'boolean') setLogScale(raw.logScale, false);
       if (typeof raw.autoScale === 'boolean') setAutoScale(raw.autoScale, false);
       if (raw.view) applyViewSettings(raw.view);
       if (raw.palette) applyPaletteSettings(raw.palette);
-      if (Array.isArray(raw.indicators)) indicators.fromJSON(raw.indicators);
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
       if (raw.sessionBoxes) applySessionBoxesConfig(raw.sessionBoxes);
       if (raw.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...raw.marketStructure };
       if (raw.fvg) fvg.config = { ...fvg.defaultConfig(), ...raw.fvg };
       if (raw.publicStudies) applyPublicStudiesConfig(raw.publicStudies);
-      if (raw.studies) { studiesUI.apply(raw.studies); appliedStudies = true; }
     }
   } catch {}
   if (cloudSettings.isAuthed()) {
     const cloud = await cloudSettings.load(symbol, interval);
     if(replayMode || requestGeneration !== generation || requestOwner !== currentUserKey())return;
     if (cloud && cloud.settings) {
-      const s = cloud.settings;
+      const s = cloud.settings; cloudLayout = s;
       if (typeof s.chartType === 'string') applyChartType(s.chartType);
       if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
-      if (Array.isArray(s.indicators)) { indicators.fromJSON(s.indicators); pendingIndicators = null; }
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
       if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
       if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
       if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
       if (s.publicStudies) applyPublicStudiesConfig(s.publicStudies);
-      if (s.studies) { studiesUI.apply(s.studies); appliedStudies = true; }
       cloudRevision = cloud.revision || 0;
       try { $('drawing-status').textContent = 'Bulut: yüklendi'; } catch {}
     }
   }
-  if (!appliedStudies) {
-    const initial = defaultStudyState();
-    // Existing session preferences remain available, without auto-enabling the
-    // old, very noisy market-structure and price-line layers.
-    try { initial.sessions.added = !!localStorage.getItem('alfa-sb:v1') && Object.values(sessionBoxes.config.enabled).some(Boolean); } catch {}
-    studiesUI.apply(initial);
-  }
-  studiesUI.sync();
+  // Shared owner + symbol studies win over stale per-interval snapshots. Old
+  // layouts are migration sources only; they are never silently overwritten.
+  const layouts = [localLayout, cloudLayout].filter(Boolean);
+  applyStudiesBundle(loadStudiesFor(requestOwner, symbol, layouts), requestOwner, symbol);
 }
 function scheduleCloudSave(settings = layoutSettings()) {
   if(replayMode)return;
@@ -1618,14 +1661,13 @@ function scheduleCloudSave(settings = layoutSettings()) {
         const s = cloud.settings;
         if (typeof s.chartType === 'string') applyChartType(s.chartType);
         if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
-        if (Array.isArray(s.indicators)) indicators.fromJSON(s.indicators);
         if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
         if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
         if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
         if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
         if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
         if (s.publicStudies) applyPublicStudiesConfig(s.publicStudies);
-        if (s.studies) studiesUI.apply(s.studies);
+        applyStudiesBundle(loadStudiesFor(requestOwner, requestSymbol, [s]), requestOwner, requestSymbol);
         cloudRevision = cloud.revision || cloudRevision;
         try { $('drawing-status').textContent = 'Çakışma çözüldü · bulut sürümü uygulandı'; } catch {}
       }

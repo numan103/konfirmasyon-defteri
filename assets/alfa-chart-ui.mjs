@@ -34,6 +34,8 @@ const paths = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   chevron: '<path d="m8 5 7 7-7 7"/>',
   down: '<path d="m6 9 6 6 6-6"/>',
+  minimize: '<path d="M5 12h14"/>',
+  expand: '<path d="M12 5v14M5 12h14"/>',
   search: '<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
   fit: '<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 12h8m-4-4v8"/>',
