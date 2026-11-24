@@ -80,6 +80,36 @@ test('inactive News/Mentoring sections do not query Supabase at boot', async () 
   assert.match(html, /if \(!beacon && document\.hidden\) return/);
   assert.match(html, /var ANA_FLUSH_MS = 60000/);
 });
+test('client polling stays above the free-plan egress floors', () => {
+  const html = read('index.html');
+  for (const pattern of [
+    /setInterval\(panoPoll, 15000\)/,
+    /setInterval\(statsHeartbeat, 60000\)/,
+    /setInterval\(statsRefresh, 60000\)/,
+    /setInterval\(statsFetchTotal, 120000\)/,
+    /function initAutoReload\(\)[\s\S]{0,1000}\},\s*120000\);/,
+  ]) assert.match(html, pattern);
+  for (const pattern of [
+    /setInterval\(panoPoll, 2500\)/,
+    /setInterval\(statsHeartbeat, 30000\)/,
+    /setInterval\(statsRefresh, 15000\)/,
+    /setInterval\(statsFetchTotal, 30000\)/,
+    /\}, 4000\);\s*\}\s*function startChatPoll/,
+    /\}, 5000\);\s*\}\s*\/\/ Kapalı sohbet/,
+  ]) assert.doesNotMatch(html, pattern);
+
+  const charts = read('assets/alfa-charts.mjs');
+  assert.match(charts, /setInterval\(tick, quoteOnly \? 60000 : 30000\)/);
+  assert.match(charts, /lastReceipt > 60000\) reconnect\([^)]*\); \}, 10000\)/);
+  const watchlist = read('assets/alfa-watchlist.mjs');
+  assert.match(watchlist, /setInterval\([^\n]+refreshQuotes\(\); \}, 60000\)/);
+  const studies = read('assets/alfa-public-studies.mjs');
+  assert.match(studies, /Math\.min\(600, Math\.max\(60,/);
+  const portfolio = read('assets/my-portfolio.mjs');
+  assert.match(portfolio, /const PRICE_TTL = 60000/);
+  const news = read('assets/economic-news.mjs');
+  assert.match(news, /\}, 120000\);/);
+});
 test('projection migration is additive, RLS-invoker, and never moves/deletes source rows', () => {
   const sql = read('supabase/site/008_egress_projections.sql');
   assert.equal((sql.match(/security_invoker = true/g) || []).length, 3);

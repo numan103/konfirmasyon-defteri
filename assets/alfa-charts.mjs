@@ -754,7 +754,7 @@ function connectPolling(id, resetView, ref) {
     }
   }
   tick();
-  pollTimer = setInterval(tick, quoteOnly ? 30000 : 15000);
+  pollTimer = setInterval(tick, quoteOnly ? 60000 : 30000);
 }
 function connect(id, resetView = false) {
   if (id !== generation || disposed) return;
@@ -818,7 +818,7 @@ function connect(id, resetView = false) {
   };
   ws.onclose = () => reconnect('WebSocket kesildi');
   ws.onerror = () => reconnect('WebSocket erişilemiyor');
-  watchdog = setInterval(() => { if (Date.now() - lastReceipt > 30000) reconnect('Canlı veri gecikti'); }, 5000);
+  watchdog = setInterval(() => { if (Date.now() - lastReceipt > 60000) reconnect('Canlı veri gecikti'); }, 10000);
 }
 (() => {
   try {

@@ -226,7 +226,7 @@ function bind() {
       const left = pending().length;
       if (left) { data.lastFired = localDate() + ' ' + minute; save(); fire('Bugün ' + left + ' görevin var. Küçük adımlar, büyük fark.', 'Alfa · Günlük Görevler'); }
     }
-  }, 30000);
+  }, 60000);
 }
 
 syncRewards();

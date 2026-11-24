@@ -34,7 +34,7 @@ export function connectFeed(symbol, interval, onCandle, onState) {
     socket.onopen=()=>{
       attempt=0;
       if (config.subscribe) socket.send(JSON.stringify(config.subscribe));
-      if (config.ping) heartbeat=setInterval(()=>{if(socket.readyState===1)socket.send(config.ping);},20000);
+      if (config.ping) heartbeat=setInterval(()=>{if(socket.readyState===1)socket.send(config.ping);},30000);
     };
     socket.onmessage=e=>{const candle=streamCandle(e.data,config.exchange);if(candle){onState('live');onCandle(candle);}};
     socket.onerror=()=>socket.close();

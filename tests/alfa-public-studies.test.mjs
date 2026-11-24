@@ -15,7 +15,7 @@ test('public studies keep each reference on its own venue and sanitize settings'
   assert.equal(publicStudyMarket('CRYPTOCAP:TOTAL', 'auto'), null);
   const cfg = normalizePublicStudyConfig('heatmap', { levels: 999, refresh: 1, bidColor: 'red', askColor: '#ef6677' });
   assert.equal(cfg.levels, 60);
-  assert.equal(cfg.refresh, 30);
+  assert.equal(cfg.refresh, 60);
   assert.equal(cfg.bidColor, '#26c89c');
   assert.equal(cfg.askColor, '#ef6677');
   assert.equal(normalizePublicStudyConfig('oi', { period: 'hack' }).period, 'auto');

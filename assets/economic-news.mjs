@@ -140,7 +140,7 @@ if (panel) {
   // No polling while collapsed, hidden, in another tab, or on the landing page.
   setInterval(() => {
     if (!popup.hidden && !document.hidden && panel.getClientRects().length) load();
-  }, 60000);
+  }, 120000);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && !popup.hidden && panel.getClientRects().length) load();
   });

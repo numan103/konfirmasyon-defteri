@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const COLORS = ['#7b78f5', '#34d399', '#fbbf24', '#f87171', '#38bdf8', '#c084fc', '#fb923c', '#a3e635'];
 // Canlı fiyatlar: sitede zaten kullanılan açık kaynaklar (yeni API/endpoint yok).
-const PRICE_TTL = 30000;
+const PRICE_TTL = 60000;
 const CG_IDS = {
   BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', SOL: 'solana', XRP: 'ripple', ADA: 'cardano',
   DOGE: 'dogecoin', AVAX: 'avalanche-2', LINK: 'chainlink', DOT: 'polkadot', MATIC: 'matic-network',

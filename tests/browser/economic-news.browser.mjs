@@ -16,7 +16,7 @@ try {
       localStorage.setItem('alfa-economic-news-open', '1'); // Old open preferences must be ignored.
       const interval = window.setInterval;
       window.setInterval = (fn, ms, ...args) => {
-        if (ms === 60000) (window.__newsIntervals ||= []).push(fn);
+        if (ms === 120000) (window.__newsIntervals ||= []).push(fn);
         return interval(fn, ms, ...args);
       };
     });

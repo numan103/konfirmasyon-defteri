@@ -23983,7 +23983,7 @@ function bindPortfoy() {
     }
   });
   setInterval(() => { if (bdTab === 'portfoy' && !document.hidden) pfLoadPrices(); }, 60000);
-  setInterval(() => { if (document.hidden) return; if (currentPage === 'portfoy') { if (ap2IsMember()) ap2LoadPrices(); else ap2ShowGate(); } else if (currentPage === 'home' && !refUnlocked()) renderHomeTeaser(); }, 15000);
+  setInterval(() => { if (document.hidden) return; if (currentPage === 'portfoy') { if (ap2IsMember()) ap2LoadPrices(); else ap2ShowGate(); } else if (currentPage === 'home' && !refUnlocked()) renderHomeTeaser(); }, 60000);
   pfPlanApplyInputs();
   pfPlanRender();
 }
@@ -28393,7 +28393,7 @@ function panoInit() {
   c.addEventListener('pointercancel', finish);
   c.addEventListener('pointerleave', () => { if (c.classList.contains('panning')) finish({}); });
 
-  setInterval(panoPoll, 2500);
+  setInterval(panoPoll, 15000);
 }
 
 function panoSetTool(t) {
@@ -30665,9 +30665,9 @@ function statsInit() {
   else statsCountTotal();
   statsFetchReg();
   statsHeartbeat();
-  setInterval(statsHeartbeat, 30000);
-  setInterval(statsRefresh, 15000);
-  setInterval(statsFetchTotal, 30000);
+  setInterval(statsHeartbeat, 60000);
+  setInterval(statsRefresh, 60000);
+  setInterval(statsFetchTotal, 120000);
 }
 
 // ============ Ziyaretçi analitiği (anonim ölçüm + admin paneli) ============
@@ -32314,7 +32314,7 @@ function initAutoReload() {
         location.reload();
       }
     } catch (e) { /* */ }
-  }, 40000);
+  }, 120000);
 }
 let sfxInsertAt = null;
 let sfxPasteOpen = false;
@@ -32981,7 +32981,7 @@ function startChatPoll() {
       });
       if (added) { saveChat(); renderChat(); }
     }).catch(() => {});
-  }, 4000);
+  }, 10000);
 }
 startChatPoll();
 function getAutoReply(t) {
@@ -33090,7 +33090,7 @@ function startAdminChatPoll() {
     const p = document.getElementById('page-chat-admin');
     if (!p || p.classList.contains('hidden')) return;
     renderAdminChat();
-  }, 5000);
+  }, 15000);
 }
 // Kapalı sohbet ekranında rozet için 30 sn; açık panel kendi 5 sn döngüsünü kullanır.
 setInterval(() => {
@@ -33100,7 +33100,7 @@ setInterval(() => {
     caAllMsgs = msgs || [];
     updateChatBadge();
   }).catch(() => {});
-}, 30000);
+}, 60000);
 // ============ Günün Sözü Ticker (Ders Defteri'nden) ============
 function showDailyQuote() {
   const el = document.getElementById('ticker-text');

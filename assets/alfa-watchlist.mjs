@@ -22,7 +22,7 @@ export class ChartWatchlist {
     $('watch-share').onclick = () => this.share();
     $('symbol').onchange = e => this.select(e.target.value);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.refreshQuotes(); }, { signal: this.abort.signal });
-    this.timer = setInterval(() => { if (!document.hidden) this.refreshQuotes(); }, 30000);
+    this.timer = setInterval(() => { if (!document.hidden) this.refreshQuotes(); }, 60000);
     this.start();
   }
   key() { return 'alfa-watchlist:v1:' + this.owner; }

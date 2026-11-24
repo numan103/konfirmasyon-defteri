@@ -380,4 +380,4 @@ function draw() {
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshRoutines(); });
 window.addEventListener('focus', refreshRoutines);
-setInterval(() => { if (!document.hidden) refreshRoutines(); }, 60000);
+setInterval(() => { if (!document.hidden) refreshRoutines(); }, 120000);

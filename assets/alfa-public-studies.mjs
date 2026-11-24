@@ -17,13 +17,13 @@ export const PUBLIC_STUDY_NAMES = Object.freeze({
   heatmap: 'Order Book Likidite Isı Haritası'
 });
 const DEFAULTS = Object.freeze({
-  oi: { period: 'auto', color: '#8ea7ff', refresh: 120 },
-  longShort: { period: 'auto', color: '#d5b16a', refresh: 120 },
-  cvdSpot: { color: '#26c89c', refresh: 120 },
-  cvdPerp: { color: '#8ea7ff', refresh: 120 },
-  marketDelta: { market: 'auto', color: '#71b9c0', refresh: 120 },
-  footprint: { market: 'auto', color: '#7aafa0', refresh: 120 },
-  heatmap: { market: 'auto', levels: 40, refresh: 30, bidColor: '#26c89c', askColor: '#ef6677' }
+  oi: { period: 'auto', color: '#8ea7ff', refresh: 300 },
+  longShort: { period: 'auto', color: '#d5b16a', refresh: 300 },
+  cvdSpot: { color: '#26c89c', refresh: 300 },
+  cvdPerp: { color: '#8ea7ff', refresh: 300 },
+  marketDelta: { market: 'auto', color: '#71b9c0', refresh: 300 },
+  footprint: { market: 'auto', color: '#7aafa0', refresh: 300 },
+  heatmap: { market: 'auto', levels: 40, refresh: 300, bidColor: '#26c89c', askColor: '#ef6677' }
 });
 const PERIODS = ['auto', '5m', '15m', '30m', '1h', '4h', '1d'];
 const MARKETS = ['auto', 'spot', 'perp'];
@@ -36,7 +36,7 @@ export function normalizePublicStudyConfig(id, raw = {}) {
   if ('bidColor' in out && HEX.test(String(raw.bidColor || ''))) out.bidColor = String(raw.bidColor);
   if ('askColor' in out && HEX.test(String(raw.askColor || ''))) out.askColor = String(raw.askColor);
   if ('levels' in out && Number.isFinite(Number(raw.levels))) out.levels = Math.min(60, Math.max(10, Math.round(Number(raw.levels))));
-  if ('refresh' in out && Number.isFinite(Number(raw.refresh))) out.refresh = Math.min(300, Math.max(30, Math.round(Number(raw.refresh))));
+  if ('refresh' in out && Number.isFinite(Number(raw.refresh))) out.refresh = Math.min(600, Math.max(60, Math.round(Number(raw.refresh))));
   return out;
 }
 
@@ -190,7 +190,7 @@ export class PublicStudiesManager {
   schedule(id) {
     const timer = this.timers.get(id);
     if (timer) clearInterval(timer);
-    const seconds = Math.min(300, Math.max(30, Number(this.configs[id].refresh) || 120));
+    const seconds = Math.min(600, Math.max(60, Number(this.configs[id].refresh) || 300));
     this.timers.set(id, setInterval(() => {
       if (!this.enabled[id]) return;
       if (typeof document !== 'undefined' && document.hidden) return;
