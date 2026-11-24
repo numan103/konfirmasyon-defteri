@@ -10,7 +10,7 @@ import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=5';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=6';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
@@ -380,6 +380,7 @@ async function loadOlderHistory() {
     syncSeriesData(history);
     if (range) withSyncApply(() => chart.timeScale().setVisibleLogicalRange({ from: range.from + added, to: range.to + added }));
     try { indicators.updateAll(history); } catch {}
+    studiesUI?.updateValues();
     try { sessionLevels.render(); } catch {}
     try { marketStructure.render(); } catch {}
     try { fvg.render(); } catch {}
@@ -400,6 +401,7 @@ function applyReplaySlice() {
   sessionLevels.replayBoundary={clock:replayEngine.clock,step:candleCloseTime(0,interval)};
   syncSeriesData(history);
   try { indicators.updateAll(history); } catch {}
+  studiesUI?.updateValues();
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
   try { fvg.render(); } catch {}
@@ -621,12 +623,14 @@ function setData(data, resetView) {
   quote();
   if (pendingStudies) { try { applyStudiesBundle(pendingStudies, studyContext?.owner || currentUserKey(), symbol); } catch {} pendingStudies = null; }
   else { try { indicators.updateAll(history); } catch {} }
+  studiesUI?.updateValues();
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
   try { fvg.render(); } catch {}
   try { publicStudies?.updateBars(); } catch {}
 }
 chart.subscribeCrosshairMove(param => {
+  studiesUI?.updateValues(param.time != null ? param : null);
   const bar = param.seriesData.get(activePriceSeries());
   if (!bar || !param.time) {
     showCandle(history.at(-1));
@@ -758,6 +762,7 @@ function connectPolling(id, resetView, ref) {
         syncSeriesData(history);
         quote();
         try { indicators.updateAll(seriesBars); } catch {}
+        studiesUI?.updateValues();
         try { sessionLevels.render(); } catch {}
         try { marketStructure.render(); } catch {}
         try { fvg.render(); } catch {}
@@ -837,6 +842,7 @@ function connect(id, resetView = false) {
       quote(); attempts = 0;
       try { checkAlarms(c.close); } catch {}
       try { indicators.updateAll(seriesBars); } catch {}
+      studiesUI?.updateValues();
       try { sessionLevels.render(); } catch {}
       try { marketStructure.render(); } catch {}
       try { fvg.render(); } catch {}

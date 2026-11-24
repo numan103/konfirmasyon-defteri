@@ -56,6 +56,24 @@ try {
     assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 3);
     assert.equal(await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'macd').series[2].seriesType()), 'Histogram');
   });
+  await test('indicator legend follows real crosshair values and falls back to last bar on exit', async () => {
+    const probe = await state(() => {
+      const d = window.__alfaDebug, ema = d.indicators.items.find(i => i.type === 'ema');
+      const bar = d.history.at(-30), rect = document.getElementById('chart').getBoundingClientRect();
+      const value = ema.series[0].data().find(row => row.time === bar.time).value;
+      const format = n => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(n);
+      return { id: ema.id, x: rect.x + d.chart.timeScale().timeToCoordinate(bar.time),
+        y: rect.y + d.candles.priceToCoordinate(bar.close), hover: format(value),
+        last: format(ema.series[0].data().at(-1).value) };
+    });
+    await page.mouse.move(probe.x, probe.y);
+    await page.waitForFunction(({ id, value }) => document.querySelector(`[data-study-values="${id}"]`)?.textContent === value,
+      { id: probe.id, value: probe.hover });
+    await page.mouse.move(10, 10);
+    await page.waitForFunction(({ id, value }) => document.querySelector(`[data-study-values="${id}"]`)?.textContent === value,
+      { id: probe.id, value: probe.last });
+    assert.match(await page.locator('[data-study-chip]').filter({ hasText: 'MACD' }).locator('.study-chip-params').textContent(), /fast=12.*slow=26.*signal=9/);
+  });
   await test('native settings keep identity; oscillator eye/removal collapses the correct pane', async () => {
     const ema = await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'ema').id);
     await page.locator(`#study-legend [data-study-settings="${ema}"]`).click();
@@ -550,6 +568,19 @@ try {
       const m = window.__alfaDebug.multiChart;
       m.setPaneInterval(m.state.active, '1h'); m.setSync('interval', false);
     });
+    // Actual watchlist click reaches all live panes, even when the hidden main
+    // chart already has ETH selected (setActiveSymbol's same-symbol branch).
+    await page.evaluate(() => {
+      const m = window.__alfaDebug.multiChart;
+      m.setSync('symbol', true); m.notifySymbol('BTCUSDT', '1h');
+    });
+    await f1.waitForFunction(() => new URL(location.href).searchParams.get('symbol') === 'BTCUSDT');
+    await f2.waitForFunction(() => new URL(location.href).searchParams.get('symbol') === 'BTCUSDT');
+    await page.click('#watch-rows [data-symbol="ETHUSDT"]');
+    await f1.waitForFunction(() => new URL(location.href).searchParams.get('symbol') === 'ETHUSDT');
+    await f2.waitForFunction(() => new URL(location.href).searchParams.get('symbol') === 'ETHUSDT');
+    assert.deepEqual(await state(() => window.__alfaDebug.multiState.panes.map(p => p.interval)), ['1h', '1h']);
+    await page.evaluate(() => window.__alfaDebug.multiChart.setSync('symbol', false));
 
     await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
     await page.evaluate(() => {

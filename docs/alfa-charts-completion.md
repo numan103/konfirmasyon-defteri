@@ -12,7 +12,7 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 | Watchlist → aktif panel | BROKEN | Yeni sembol sekme ekliyordu; iframe içindeki tıklama parent'a ulaşmıyordu. |
 | Watchlist kimlik/liste/arama | WORKING (workspace regresyonu) | Mevcut venue/spot/perpetual kimliği ve liste altyapısı yeniden yazılmadı. |
 | History | PARTIAL / inceleme sürüyor | Eski mum yükleme ve logical-range kaydırma mevcut; tarih kontrolleri ayrıca doğrulanacak. |
-| Indicator legend | WORKING (workspace regresyonu) | Mevcut motor, katalog, ayar/eye/removal ve pane davranışları geçiyor; imleç değerleri ayrıca incelenecek. |
+| Indicator legend | PARTIAL | Mevcut motor, katalog, ayar/eye/removal ve pane davranışları çalışıyor; native indikatörlerin sayısal değerleri eksikti. |
 | Workspace | PARTIAL | Panel interval kaydı eksikti. Cloud settings çatışması yereli otomatik eziyor; ayrı düzeltme gerekli. |
 
 ## İlk düzeltme: panel bağlamı ve watchlist yönlendirmesi
@@ -40,3 +40,18 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - **Fayda:** İstek beklerken mevcut mumlar ve görünüm korunuyor; yeni markete geçildiyse eski yanıt uygulanmıyor.
 - **Test:** Dört hedefli test kısa veri, sıralama/duplicate/overlap, anchor kayması, pending/stale yanıt ve retry davranışlarını doğruluyor.
 - **Sınır:** Veri sağlayıcının seans/tatil boşlukları sentetik mumlarla doldurulmaz. Tarih menüsündeki mevcut kontrol açıkça Replay başlatır; normal grafikte tarihe atlama ve preset için çok sayfalı backfill henüz tamamlanmadı.
+- **Commit:** `42c1044`.
+
+## Dördüncü düzeltme: native indikatör satırları gerçek seri değerlerini gösteriyor
+
+- **Önceki sorun:** Legend ad/kontrol içeriyordu ama sayısal değer göstermiyordu. MACD gibi göstergelerin fast/slow/signal parametreleri satırda görünmüyordu.
+- **Düzeltme:** Mevcut çizilmiş serilerin değerleri okunuyor; mouse grafikteyken crosshair barı, çıkınca son seri barı gösteriliyor. Warmup/eksik/gizli seri verisinde `—` gösteriliyor; son bardan değer uydurulmuyor. Sayısal parametreler ve fiyat kaynağı da satırda.
+- **Fayda:** Ayarlar penceresini açmadan periyot ve değer okunabiliyor. Yeni hesaplama motoru yok; mevcut eye/settings/remove kimlikleri korundu.
+- **Test:** Üç yeni unit testi ve gerçek mouse hareketiyle legend/crosshair Playwright testi. Tam unit suite 1203/1203. Workspace suite 25 PASS; bir koşuda mevcut gerçek-iframe crosshair testi timeout verdi, tam yeniden koşuda geçti. Ayrı Watchlist TV suite 7 PASS; önceki eski sunucu kaynaklı `allSymbols` hatası doğru çalışma klasöründe tekrarlanmadı.
+- **Sınır:** Native indikatör serileri kapsamındadır; seans/FVG gibi tek sayısal serisi olmayan overlay'lere yapay değer eklenmedi.
+
+## Açık kalan kapsam
+
+- Normal grafikte tarihe atlama ve preset için çok sayfalı backfill.
+- Bulut çakışmalarında iki kopyayı karşılaştırıp açık kullanıcı tercihiyle uzlaştırma.
+- Panel workspace'inin cihazlar arası bulut senkronu; mevcut yerel kayıt kapsamı korundu.

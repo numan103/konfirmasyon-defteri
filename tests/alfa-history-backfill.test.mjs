@@ -18,7 +18,7 @@ function harness(fetchHistory) {
       setVisibleLogicalRange: range => ranges.push(range)
     }) },
     rememberHistory() {}, syncSeriesData: bars => paints.push(bars),
-    withSyncApply: fn => fn(), indicators: { updateAll() {} }, sessionLevels: { render() {} },
+    withSyncApply: fn => fn(), indicators: { updateAll() {} }, studiesUI: null, sessionLevels: { render() {} },
     marketStructure: { render() {} }, fvg: { render() {} }, mtf: { render() {} }, quote() {}, console
   };
   vm.createContext(sandbox);

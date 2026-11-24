@@ -74,6 +74,20 @@ export function studyChipClass(d, clean = false) {
   return ['study-chip', (!d.visible || clean) ? 'is-hidden' : '', d.collapsed ? 'is-collapsed' : '',
     isPaneStudy(d) ? 'is-pane-study' : ''].filter(Boolean).join(' ');
 }
+export function studyLegendParams(params = {}) {
+  return Object.entries(params).filter(([key, value]) =>
+    (typeof value === 'number' && Number.isFinite(value)) || key === 'source')
+    .map(([key, value]) => `${key}=${value}`).join(', ');
+}
+export function studyLegendValues(series, cursor = null) {
+  return series.map(s => {
+    try {
+      const row = cursor ? cursor.seriesData?.get(s) : s.data().at(-1);
+      return typeof row?.value === 'number' && Number.isFinite(row.value)
+        ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(row.value) : '—';
+    } catch { return '—'; }
+  }).join(' · ') || '—';
+}
 const activeIds = studies => studies.active().map(d => d.id);
 function storedArray(key, fallback = []) {
   try { const v = JSON.parse(localStorage.getItem(key) || 'null'); if (Array.isArray(v)) return v.filter(x => typeof x === 'string'); } catch {}
@@ -151,7 +165,8 @@ export class ChartStudies {
         return `<div class="${studyChipClass(d, this.clean)}" data-study-chip="${esc(d.id)}"${hint}>
         <div class="study-chip-head">
           <span class="study-dot" style="background:${esc(d.color)}"></span>
-          <span class="study-chip-name">${esc(d.name)}${d.item?.params.period ? ' ' + esc(d.item.params.period) : ''}</span>
+          <span class="study-chip-name">${esc(d.name)}</span>
+          ${d.item ? `<small class="study-chip-params">${esc(studyLegendParams(d.item.params))}</small><span class="study-chip-values" data-study-values="${esc(d.id)}"></span>` : ''}
           ${d.subtitle ? `<small class="study-chip-meta">${esc(d.subtitle)}</small>` : ''}
           ${this.statusHTML(d)}
         </div>
@@ -171,9 +186,18 @@ export class ChartStudies {
       </div>` : '';
       legend.innerHTML = cards + actions || '<button class="study-chip" data-open-studies>+ İndikatör ekle</button>';
       this.wireActive(legend);
+      this.updateValues();
       legend.querySelector('[data-open-studies]')?.addEventListener('click', () => this.open());
     }
     if (this.modal?.box.querySelector('#ind-list')) this.renderList();
+  }
+  updateValues(cursor = this.legendCursor || null) {
+    this.legendCursor = cursor?.time != null ? cursor : null;
+    const items = new Map(this.indicators.items.map(item => [item.id, item]));
+    document.querySelectorAll('[data-study-values]').forEach(node => {
+      const item = items.get(node.dataset.studyValues);
+      node.textContent = item ? studyLegendValues(item.series, this.legendCursor) : '—';
+    });
   }
   wireActive(root) {
     root.querySelectorAll('[data-study-eye]').forEach(b => b.onclick = () => this.toggle(b.dataset.studyEye));
