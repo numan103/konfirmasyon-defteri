@@ -257,3 +257,31 @@ yazar; bulut okunamazsa yerel düzeni yükleyip üzerine bulut yazımı yapmaz.
 Bu dosyanın repoda bulunması migration'ın uygulanmış olduğu anlamına gelmez.
 Hedef ortamda yetkili migration sürecinde uygulanmalıdır. Bu geliştirme
 görevinde production migration/deploy yapılmamıştır.
+
+### 040 release güvenlik düzeltmesi
+
+Migration kendi `BEGIN`/`COMMIT` transaction'ını, lock/statement timeout'larını
+ve transaction advisory lock'unu içerir; ayrı bir transaction dışından çalıştırılır.
+İkinci çalıştırma aynı politikaları yeniden yaratmaz. Var olan tablo veya politika
+tanımı beklenenden farklıysa veri/politika silmeden rollback olur.
+
+PUBLIC/anon/authenticated tablo ve kolon yetkileri yalnız `chart_workspaces`
+üzerinde geri alınıp authenticated için SELECT/INSERT/UPDATE allowlist'i kurulur.
+DELETE API'si yoktur; TRUNCATE/REFERENCES/TRIGGER/MAINTAIN kapalıdır.
+Service role tablo yönetim yetkilerini korur. Global default ACL veya rol
+üyelikleri değiştirilmez: başka bir rol üzerinden tehlikeli etkin erişim
+kalıyorsa migration manuel inceleme isteyerek durur.
+
+SQL entegrasyon testleri gerçek embedded PostgreSQL (PGlite 0.6.0) kullanır:
+
+```powershell
+# PGlite test bağımlılığını repo dışında onaylı bir test klasörüne kurun.
+npm.cmd install --prefix <test-klasoru> --no-save --ignore-scripts --package-lock=false @electric-sql/pglite@0.6.0
+$env:ALFA_PGLITE_PATH='<test-klasoru>/node_modules/@electric-sql/pglite/dist/index.js'
+node --test tests/postgres/chart-workspaces.test.mjs
+```
+
+Bu testler production'a bağlanmaz; iki kez uygulama, eski v1 verileri, geniş
+default ACL/kolon grant'leri, rol üyeliği riskleri, RLS ve service-role erişimini
+sentetik hesaplarla sınar. Geçmeleri production katalog/yetki preflight'ının
+yerine geçmez. Yayın planı için `docs/alfa-charts-release-readiness.md` incelenmeli.

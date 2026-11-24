@@ -44,6 +44,7 @@ async function existingSnapshot(db) {
     drawings: (await db.query('select * from chart_drawings')).rows,
     watchlist: (await db.query('select * from watchlist_sentinel')).rows,
     policies: (await db.query("select * from pg_policies where tablename='chart_settings'")).rows,
+    tableGrants: (await db.query("select relname,relowner,relacl from pg_class where oid in ('public.chart_settings'::regclass,'public.chart_drawings'::regclass,'public.watchlist_sentinel'::regclass) order by relname")).rows,
     defaults: (await db.query('select * from pg_default_acl order by oid')).rows
   };
 }
@@ -149,6 +150,9 @@ test('RLS enforces SELECT/INSERT/UPDATE ownership; clients cannot delete either 
     await owner(db);
     await migrate(db); // removes the intentionally injected grant
     assert.equal((await db.query('select * from chart_workspaces')).rows.length, 2);
+    await asUser(db, '');
+    assert.equal((await db.query('select * from chart_workspaces')).rows.length, 0);
+    await denied(db, 'insert into chart_workspaces(user_id,workspace) values($1,$2)', [alice, workspace]);
     await asUser(db, '', 'anon');
     for (const statement of [
       'select * from chart_workspaces',
