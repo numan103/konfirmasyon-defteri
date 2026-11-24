@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "verify:supabase": "node scripts/verify-supabase-bootstrap.mjs"
+    "verify:supabase": "node scripts/verify-supabase-bootstrap.mjs",
+    "verify:influencer": "node scripts/verify-influencer-orders.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

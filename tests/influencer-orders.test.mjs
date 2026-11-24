@@ -103,3 +103,97 @@ test('storage failures do not falsely report payment success or notify admin', a
   assert.equal((await call({ method: 'POST', body: { op: 'submit', package: 'video', txid } })).status, 503);
   assert.equal(calls.filter(c => c.url.includes('api.telegram.org')).length, 0);
 });
+
+test('fixed price → pending purchase → admin approval → member history stays one flow', async t => {
+  const state = { orders: [] };
+  const calls = [];
+  const orderId = '00000000-0000-0000-0000-0000000000aa';
+  const user = token => token === 'admin'
+    ? { id: '00000000-0000-0000-0000-00000000000a', email: 'ahmetnuman20@gmail.com' }
+    : { id: '00000000-0000-0000-0000-00000000000b', email: 'member@example.com' };
+
+  t.mock.method(globalThis, 'fetch', async (url, opts = {}) => {
+    const u = new URL(String(url));
+    calls.push({ url: String(url), method: opts.method || 'GET', body: opts.body });
+    if (u.hostname === 'api.frankfurter.dev') return Response.json({}, { status: 503 });
+    if (u.pathname === '/auth/v1/user') {
+      const token = /^Bearer (.+)$/i.exec(opts.headers?.authorization || opts.headers?.Authorization || '')?.[1];
+      return token === 'admin' || token === 'member'
+        ? Response.json(user(token)) : Response.json({}, { status: 401 });
+    }
+    if (u.pathname === '/rest/v1/influencer_orders') {
+      if (opts.method === 'POST') {
+        const body = JSON.parse(opts.body);
+        const row = { id: orderId, user_id: body.user_id, email: body.email, package: body.package,
+          txid: body.txid, status: 'pending', created_at: new Date().toISOString() };
+        state.orders.push(row);
+        return Response.json([row]);
+      }
+      if (opts.method === 'PATCH') {
+        const id = String(u.searchParams.get('id') || '').replace(/^eq\./, '');
+        const expected = String(u.searchParams.get('status') || '').replace(/^eq\./, '');
+        const patch = JSON.parse(opts.body);
+        const matched = state.orders.filter(o => o.id === id && o.status === expected);
+        matched.forEach(o => Object.assign(o, patch));
+        return Response.json(matched);
+      }
+      const owner = String(u.searchParams.get('user_id') || '').replace(/^eq\./, '');
+      const rows = state.orders.filter(o => !owner || o.user_id === owner);
+      const select = String(u.searchParams.get('select') || '');
+      const projected = select === 'id,package,status,created_at'
+        ? rows.map(({ id, package: pkg, status, created_at }) => ({ id, package: pkg, status, created_at }))
+        : rows;
+      return Response.json(projected);
+    }
+    if (u.hostname === 'api.telegram.org') return Response.json({ ok: true, result: { message_id: 1 } });
+    throw new Error('unexpected fetch ' + url);
+  });
+  for (const [key, value] of Object.entries({
+    SUPABASE_SERVICE_ROLE: 'test', SITE_ADMIN_EMAILS: 'ahmetnuman20@gmail.com',
+    TG_BOT_TOKEN: 'test', TG_ADMIN_CHAT_ID: '12345',
+  })) {
+    const old = process.env[key];
+    process.env[key] = value;
+    t.after(() => { if (old === undefined) delete process.env[key]; else process.env[key] = old; });
+  }
+  const member = { authorization: 'Bearer member' };
+  const admin = { authorization: 'Bearer admin' };
+
+  const prices = await call({ headers: {}, query: { op: 'prices' } });
+  assert.equal(prices.body.prices.guided, INF_PACKAGE_PRICES.guided);
+  assert.equal(INF_PACKAGE_PRICES.guided, 90);
+
+  const before = await call({ headers: member });
+  assert.equal(before.body.unlocked, false);
+  assert.deepEqual(before.body.orders, []);
+
+  const submitted = await call({ method: 'POST', headers: member,
+    body: { op: 'submit', package: 'guided', txid, priceUsdt: 1, status: 'approved', user_id: 'attacker' } });
+  assert.equal(submitted.status, 200);
+  assert.equal(submitted.body.status, 'pending');
+  const insert = JSON.parse(calls.find(c => c.method === 'POST' && c.url.includes('/rest/v1/influencer_orders')).body);
+  assert.equal(insert.package, 'guided');
+  assert.equal(insert.user_id, user('member').id);
+  assert.ok(!insert.priceUsdt && !insert.status, 'client price/status must never be persisted');
+
+  const pending = await call({ headers: member });
+  assert.equal(pending.body.unlocked, false);
+  assert.equal(pending.body.orders[0].status, 'pending');
+  assert.equal(pending.body.orders[0].priceUsdt, 90, 'history must carry the fixed package price');
+
+  const list = await call({ headers: admin, query: { op: 'list' } });
+  assert.equal(list.body.orders[0].email, 'member@example.com');
+  assert.equal(list.body.orders[0].priceUsdt, 90);
+  const notice = JSON.parse(calls.find(c => c.url.includes('api.telegram.org')).body);
+  assert.match(notice.text, /90 USDT/);
+
+  const approved = await call({ method: 'POST', headers: admin, body: { op: 'approve', id: orderId } });
+  assert.equal(approved.status, 200);
+  assert.equal(approved.body.ok, true);
+
+  const after = await call({ headers: member });
+  assert.equal(after.body.unlocked, true);
+  assert.equal(after.body.orders[0].status, 'approved');
+  assert.equal(after.body.orders[0].priceUsdt, 90);
+  assert.ok(!after.body.orders[0].txid, 'member history projection stays minimal');
+});

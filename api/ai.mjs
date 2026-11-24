@@ -186,6 +186,13 @@ function influencerReply(res, status, body) {
   res.setHeader('Cache-Control', 'private, no-store');
   res.end(JSON.stringify(body));
 }
+// Geçmişte fiyat ayrı bir kolon tutulmaz; paket sabit fiyat kayıt defterine
+// bağlıdır. Yanıta fiyatı eklemek admin/member akışında aynı kaynağın
+// kullanılmasını sağlar, DB şemasına dokunmaz.
+const influencerHistory = rows => (Array.isArray(rows) ? rows : []).map(order => ({
+  ...order,
+  priceUsdt: Object.hasOwn(INF_PACKAGE_PRICES, order?.package) ? INF_PACKAGE_PRICES[order.package] : null,
+}));
 async function influencerDb(path, method = 'GET', body) {
   const key = process.env.SUPABASE_SERVICE_ROLE;
   if (!key) throw new Error('storage_unavailable');
@@ -220,9 +227,9 @@ export async function influencerHandler(req, res) {
       if (admin && req.query?.op === 'outline') return influencerReply(res, 200, { ok: true, outline: INF_OUTLINE });
       if (req.query?.op === 'outline' || req.query?.op === 'list') {
         if (!admin) return influencerReply(res, 403, { ok: false, error: 'admin_required' });
-        return influencerReply(res, 200, { ok: true, orders: await influencerDb('?select=*&order=created_at.desc&limit=100') });
+        return influencerReply(res, 200, { ok: true, orders: influencerHistory(await influencerDb('?select=*&order=created_at.desc&limit=100')) });
       }
-      const orders = await influencerDb('?select=id,package,status,created_at&user_id=eq.' + encodeURIComponent(user.id) + '&order=created_at.desc&limit=100');
+      const orders = influencerHistory(await influencerDb('?select=id,package,status,created_at&user_id=eq.' + encodeURIComponent(user.id) + '&order=created_at.desc&limit=100'));
       return influencerReply(res, 200, { ok: true, unlocked: admin || orders.some(o => o.status === 'approved'), orders });
     }
     let body = req.body;

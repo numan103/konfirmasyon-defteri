@@ -46,3 +46,20 @@
 - `POST /api/edu-shared?kind=influencer-content` revision ile CAS yapar.
   Çakışma 409 döner, otomatik üzerine yazılmaz. Başarısız kayıt “Kaydedildi” demez.
 - Ödeme, onay, Supabase RLS ve storage bucket ayarları değiştirilmez.
+
+## Sabit fiyat → satın alma → geçmiş
+
+- Paket fiyatları tek kayıt defterindedir (`INF_PACKAGE_PRICES`): video 50,
+  guided 90, growth 175 USDT. `/api/ai?influencer=1&op=prices` herkese açıktır
+  ve `private, no-store` döner; FX yalnızca TL karşılığı için eklenir, fiyatı
+  değiştirmez.
+- Ödeme bildiriminde istemci fiyat/status/user_id gönderemez; kayıt her zaman
+  `status=pending` ve oturumdaki kullanıcıyla oluşturulur.
+- Sipariş geçmişinde fiyat ayrı kolon tutulmaz; `priceUsdt` sabit kayıt
+  defterinden projeksiyon olarak eklenir. Şema değişikliği yoktur.
+- `influencer_orders` yalnızca service-role ile erişilebilir; publishable
+  anahtarla okuma 401/42501 döner.
+- Canlı ön kontrol: `node scripts/verify-influencer-orders.mjs`.
+  Satın alma → onay → geçmiş zinciri `tests/influencer-orders.test.mjs` içinde
+  durumlu takitle, gerçek sayfa üzerindeki akış da
+  `tests/browser/influencer-order-flow.browser.mjs` ile doğrulanır.
