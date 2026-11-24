@@ -1,5 +1,157 @@
 # ALFA Charts — production release readiness
 
+## FINAL RELEASE PREFLIGHT — 2026-11-25
+
+| Kontrol | Sonuç |
+| --- | --- |
+| Production katalog kontrolü | **BLOCKED** — yetkili DB/katalog bağlantısı sağlanmadı |
+| Staging egress | **BLOCKED** — uygun, gerçek API'li staging bulunamadı |
+| Yedek ve rollback planı | **READY** — aşağıdaki prosedür hazır; gerçek backup/restore kanıtı henüz yok |
+| Genel yayın kararı | **NO-GO** |
+
+Bu final preflight sırasında production migration/deploy yapılmadı. Mobile
+worktree okunmadı/değiştirilmedi; test kurulumu veya dosya yazımı yapılmadı.
+Uygulama ve migration kaynakları değiştirilmedi; yalnız bu rapor ve salt-okunur
+operatör SQL dosyası hazırlandı.
+
+### Production katalog kontrolü neden BLOCKED?
+
+Ortamdaki Supabase/DB bağlantısı/staging değişken adları kontrol edildi;
+yetkili bağlantı bilgisi yok. `.env*` ve `.dev.vars*` dosyası bulunmadı.
+Public API key, Cloudflare hesap erişimi veya REST `limit=0` sonucu; production
+`pg_policy`, tablo/kolon ACL, rol üyeliği ve `pg_default_acl` doğrulaması yerine
+geçmez. Eksik katalog çıktısı üretilmedi; önceki anonim metadata sonucu PASS'a
+çevrilmedi.
+
+**Operatörün çalıştıracağı dosya:**
+[`docs/sql/alfa-charts-production-preflight.sql`](sql/alfa-charts-production-preflight.sql).
+Bu **migration değildir**: READ ONLY transaction içinde yalnız katalog SELECT,
+session-local timeout ve ROLLBACK içerir; kullanıcı satırı okumaz. Yetkili
+production katalog okuyucusuyla, doğru proje ref'i dashboard/bağlantı üzerinden
+doğrulanarak çalıştırılmalıdır. Bağlantı parolası/token paylaşmadan tüm result
+set'leri (boş sonuçlar ve hatalar dahil) incelemeye verilmelidir.
+
+Hazırlanan sorgular:
+
+1. DB/session kimliği, PostgreSQL sürümü ve read-only durumu.
+2. `auth.users`, `auth.uid()` ve workspace/settings/drawings varlığı.
+3. Workspace ilişkileri, tablo sahipleri, RLS/FORCE RLS, kolon/default ve PK/FK/
+   check constraint tanımları.
+4. Mevcut RLS politika komutları/rolleri/USING/WITH CHECK ifadeleri.
+5. PUBLIC/anon/authenticated/service-role doğrudan tablo ve kolon ACL'leri.
+6. Tüm creator rollerinin global ve public-schema default privileges ayarları.
+7. Client/service/migration-reader rol özellikleri ve transitif üyelikleri.
+8. Etkin tablo/kolon hakları; TRUNCATE/REFERENCES/TRIGGER ve sürüme göre MAINTAIN,
+   grant-option hakları, schema USAGE ve auth.uid EXECUTE.
+9. Beklenmeyen kullanıcı trigger'ları.
+
+SQL, izole boş ve workspace tablosu bulunan embedded PostgreSQL üzerinde
+syntax/result-set kontrolünden geçti (18 result set). Bu **production sorguları
+çalıştırıldı** demek değildir.
+Production'da tablo eksikse effective-grant sorgularının boş dönmesi PASS
+sayılmaz; migration öncesi durum olarak kaydedilir. Tablo varsa migration'ın
+beklediği sözleşme/ACL/rol yapısıyla karşılaştırılmadan ilerlenmez.
+
+### Staging egress neden BLOCKED?
+
+- Ortamda onaylı staging URL/proje ref'i veya staging bağlantı bilgisi yok.
+- Salt-okunur Cloudflare preview listelemesi uygun bir aday ortam döndürmedi.
+  Yeni preview/staging deployment oluşturulmadı.
+- `tests/browser/egress.browser.mjs` gerçek landing API JSON'u, yayınlanmış
+  preview resmi ve özel API'lerin 401 sınırını test eder. Yerel statik server,
+  fixture veya mevcut eski production sürümü bu adayın gerçek API'li staging'i
+  olarak kabul edilmedi.
+- Bu final preflight'ta gerçek staging egress **çalıştırılamadı**; sonuç BLOCKED.
+  Önceki statik sunucu JSON hatası ürün regresyonu diye raporlanmıyor.
+
+Uygun API'li staging, izole staging Supabase projesi ve doğru aday SHA
+doğrulandığında:
+
+```powershell
+node tests/browser/egress.browser.mjs --playwright=<playwright-index.mjs> --url=<onayli-api-li-staging-origin>
+```
+
+Bu komut mevcut production'a otomatik yönlendirilmemeli; gerçek API yanıtsızlığı
+assertion kaldırılarak veya sahte başarılı JSON eklenerek gizlenmemeli.
+
+### Migration öncesi istemci davranışı ve kapsam doğrulaması
+
+- İncelenen release HEAD: `b68da37`; yedi uygulama geliştirmesi ve bağımsız
+  `afa2222`/`c1dc8ec` migration düzeltmeleri bu HEAD'in geçmişinde bulunuyor.
+- `b7406db..b68da37` değişiklikleri migration, test ve belgelerdir; önceki
+  uygulama kaynaklarını geri alan veya mobile kaynaklarını değiştiren commit yok.
+- `ChartSettingsStore.loadWorkspace()` tablo/izin/ağ hatasında `ok:false`
+  döndürüyor; hata “başarılı, boş bulut” olarak yorumlanmıyor.
+- `WorkspacePersistence.start()` başarısız okumada `ready=false` bırakıyor,
+  yerel düzeni uygulamaya devam ediyor. `changed()` yerel dirty durumunu
+  koruyor; `flush()` ready olmadan sunucuya ilk INSERT/UPDATE yapmıyor.
+- Kullanıcıya yerel düzenin korunduğu bildiriliyor. Tablo yokken cihazlar arası
+  workspace restore çalışmış sayılmaz. Bu güvenli fallback, uygulamayı
+  migration'dan önce yayınlama gerekçesi değildir.
+- Aynı HEAD'de bu final preflight sırasında **1219/1219 unit** ve **8/8 izole
+  PostgreSQL entegrasyon testi** yeniden geçti. Eksik tablo/başarısız okuma,
+  invalid remote belge, stale account ve CAS testleri release kapsamındadır.
+- Son browser kanıtı: önceki düzeltme görevinin aynı uygulama kaynakları üzerinde
+  18/18 Alfa Charts script'i, tüm repoda 45 PASS + 1 API ortam bağımlılığı.
+  Bu kanıt gerçek staging egress PASS yerine kullanılmıyor.
+
+### Yedek, rollback ve kurtarma prosedürü — READY (plan)
+
+**READY yalnız planın hazır olmasıdır.** Production backup alındığı, PITR'nin
+mevcut olduğu veya restore denemesinin geçtiği iddia edilmez. Aşağıdaki gerçek
+backup/restore kanıtları tamamlanmadan migration onayı verilmez.
+
+**Production işleminden önce yetkili operatör:**
+
+1. Proje ref'ini (`fssrtlpjqbavzomynwmg` bekleniyor), migration uygulayacak
+   rolü, aday artifact SHA'sını ve UTC işlem penceresini kaydeder.
+2. Salt-okunur katalog paketini alır. Workspace tablosu gerçekten yoksa bu
+   katalog durumunu kaydeder; yalnız REST cache sonucundan yokluk varsaymaz.
+3. Sağlayıcının mevcut DB backup/PITR olanaklarını doğrular; gerekli onayla yeni
+   yedek veya restore point hazırlar. Backup ID, UTC recovery point, saklama yeri,
+   yetkili operatör ve restore test sonucu release kaydına eklenir. Şema/owner/
+   RLS/ACL/default ACL metadata'sı ve varsa workspace satırları/revision'ları
+   kapsanmalıdır. Yedekler şifreli ve erişim kontrollü tutulur; içerikleri bu
+   repoya veya test loglarına yazılmaz.
+4. Yedeği önce izole staging'e geri yükleyip bütünlük ve kullanılabilirliği
+   doğrular. Gerçek sonuç olmadan RTO/RPO veya sıfır veri kaybı garantisi vermez.
+5. Önceki production artifact'ini rollback hedefi olarak kaydeder:
+   `783d6b1c-fed2-4058-bc97-8d30b9de724d`, kaynak `7ed093a`. Bu hedef
+   salt-okunur deployment listesinde final preflight'ta tekrar görüldü.
+
+**Hata halinde (ancak ayrıca onaylanan işlem sırasında):**
+
+- Migration kendi transaction'ını içerir; hata olursa ROLLBACK. Başka bir
+  transaction içine sarmalama, kör tekrar veya politika silme uygulanmaz.
+- Migration başarılı ama uygulama sorunluysa kayıtlı önceki Pages artifact'ine
+  geri dönülür; HTML/asset cache sürümleri kontrol edilir. Yeni workspace
+  tablosu **DROP/TRUNCATE edilmez**; kullanıcıların yeni kayıtları korunur.
+- Eski uygulama yeni tabloyu kullanmaz. İstemci localStorage/conflict backup
+  anahtarları veya auth bilgileri topluca silinmez.
+- Veri kurtarma gerekiyorsa önce DB yedeği izole ortama restore edilir; bulutun
+  güncel kopyası ve ilgili yerel JSON ayrı arşivlenir. Yalnız hedef hesap ve
+  `(user_id,name='default')` bağlamı kullanıcı/operatör onayı ve güncel revision
+  CAS kontrolüyle kurtarılır. Tüm production eski snapshot'ın üzerine yazılmaz.
+- İçerik/revision tekrar okuması doğrulanmadan otomatik sync yeniden açılmaz.
+  Yerel export yalnız uygulama verisi içermeli; auth token'ları dışa aktarılmamalı.
+
+### Doğrulanmış yayın sırası
+
+**Staging → production salt-okunur preflight/yedek → ayrıca işlem onayı →
+migration → uygulama → smoke test.**
+
+Staging: düzeltilmiş migration standalone iki kez, iki gerçek test hesabı,
+RLS/CAS/restore ve gerçek API egress. Production preflight ve geri yüklenebilir
+yedek tamamlanınca ancak ayrıca açık onayla migration uygulanır; schema-cache/
+RLS/ACL smoke başarılıysa sabitlenmiş uygulama artifact'i yayınlanır. Son smoke
+Git Tarihe/preset/çizim anchor'ları, farklı timeframe'lerle sync, legend, iki
+cihaz ve conflict çözümünü kapsar. Önceki artefact ve kullanıcı verisini
+koruyan rollback planı hazır tutulur.
+
+**Eksik yetki ve staging ortamı nedeniyle NO-GO değişmedi.**
+
+---
+
 ## Güncel durum — release blockers düzeltmesi (2026-11-24)
 
 **Yerel migration engelleri giderildi. Production yayın onayı hâlâ koşulludur.**
