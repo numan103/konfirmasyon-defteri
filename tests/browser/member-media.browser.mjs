@@ -42,6 +42,7 @@ try {
   assert.match(await page.locator('#home-member-video iframe').getAttribute('src'), /^https:\/\/www\.youtube-nocookie\.com\/embed\/g1z4tZUnEF8\?/);
   assert.equal(await page.locator('#home-member-video img').count(), 0, 'video title is rendered as text');
   await page.setViewportSize({ width: 320, height: 900 });
+  await page.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.evaluate(() => {
     AUTH.user = null; AlfaPodcast.refreshContext(); AlfaMemberVideo.refreshContext();

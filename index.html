@@ -380,6 +380,14 @@
     .soc-link { width: 28px; height: 28px; }
     body .theme-toggle { display: none; }
   }
+  @media (max-width: 360px) {
+    /* Keep the hamburger inside the viewport on narrow phones without
+       hiding language/news controls. */
+    .navbar { gap: 4px; }
+    .navbar .nav-lang { padding: 8px; }
+    .navbar .nav-login { padding: 8px 10px; font-size: 12.5px; }
+    .navbar .nav-mobile-btn { margin-left: 4px; }
+  }
   .navbar .user-badge { margin-left: 12px; }
   .navbar .nav-login { margin-left: 12px; flex: none; }
   @media (max-width: 1000px) { .nav-links { gap: 4px; } }

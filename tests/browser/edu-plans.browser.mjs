@@ -55,13 +55,15 @@ try {
   assert.equal(await page.getByRole('button', { name: 'Copy code', exact: true }).count(), 1);
   assert.match(await page.locator('.eduplan[data-plan="personal"] .eduplan-upgrade').innerText(), /increases from 2 to 4 total/);
   await page.setViewportSize({ width: 320, height: 900 });
+  await page.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.evaluate(() => showPage('home', true));
   assert.equal(await page.locator('#page-eduplans').isVisible(), false, 'SPA navigation must hide the offer');
   await page.evaluate(() => showPage('eduplans', true));
   assert.equal(await page.locator('#page-eduplans').isVisible(), true);
   await page.evaluate(() => showPage('egitim', true));
-  assert.equal(await page.evaluate(() => document.body.dataset.page), 'erisim', 'public offers must not unlock courses');
+  assert.equal(await page.evaluate(() => document.body.dataset.page), 'egitim', 'the Edu catalog is public');
+  assert.equal(await page.evaluate(() => siteCanOpen('alfacharts')), false, 'public offers must not unlock private tools');
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, publicOffer: true, packages: 3, firstPurchaseOnly: true, integrated100KUpgrade: true, privateLessons: [2, 4], bilingual: true, mobile: true, existingCourseGatePreserved: true, pageErrors: errors }));
 } finally { await browser.close(); }
