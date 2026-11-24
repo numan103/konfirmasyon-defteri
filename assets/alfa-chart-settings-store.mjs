@@ -43,6 +43,20 @@ export class ChartSettingsStore {
     this.onStatus(user ? 'Hesap senkronizasyonu hazır' : 'Misafir · yalnızca yerel kayıt');
   }
   isAuthed() { return !!this.user; }
+  // One-way read of the old terminal storage mirror. It never writes to
+  // journals and refuses any owner that does not match the signed-in user.
+  async legacyWatchlist(owner) {
+    if (!this.isAuthed()) return null;
+    if (owner && owner !== 'guest' && owner !== this.user.id) return null;
+    const keys = ['alfa-watchlist', `u:${this.user.id}:alfa-watchlist`, 'alfa-watchlist-favs', `u:${this.user.id}:alfa-watchlist-favs`];
+    try {
+      const { data, error } = await this.client.from('journals').select('data').eq('user_id', this.user.id).maybeSingle();
+      if (error || !data?.data || typeof data.data !== 'object') return null;
+      const out = {};
+      for (const key of keys) if (data.data[key] != null) out[key] = data.data[key];
+      return Object.keys(out).length ? out : null;
+    } catch { return null; }
+  }
   async load(symbol, timeframe) {
     if (!this.isAuthed()) return null;
     try {

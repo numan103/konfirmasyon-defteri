@@ -245,6 +245,12 @@ try {
     assert.equal(await page.locator('#drawing-favs>[data-tool]').count(), 1);
   });
   await test('searchable venue picker, bounded TXT import and scoped watchlist persistence', async () => {
+    // Pin the pre-migration shape so the import assertions stay deterministic.
+    await page.evaluate(() => {
+      localStorage.setItem('alfa-watchlist:v1:guest', JSON.stringify({ version: 1, name: 'İzleme listesi', symbols: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT'] }));
+      localStorage.setItem('alfa-watchlist:tv-migrated:v1:guest', '1');
+    });
+    await page.reload(); await ready();
     await page.evaluate(() => {
       const w = window.__alfaDebug.watchlist;
       w.markets = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ETHBTC'].map(symbol => ({ symbol,

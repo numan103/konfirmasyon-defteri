@@ -110,7 +110,11 @@ const FREE_REF_SEEDS = [
   'OKX:LINKUSDT.P', 'OKX:NEARUSDT.P', 'OKX:INJUSDT', 'OKX:AAVEUSDT.P', 'OKX:PYTHUSDT',
   'OKX:HYPEUSDT.P', 'OKX:ZECUSDT.P', 'TVC:DXY', 'OANDA:EURUSD', 'OANDA:NZDUSD',
   'OANDA:USDJPY', 'FX_IDC:GBPAUD', 'OANDA:AUDUSD', 'FOREXCOM:XAUUSD', 'FX:GBPUSD',
-  'OANDA:XAGUSD', 'FX:USDCHF', 'OANDA:USDCAD', 'FX:NZDCAD', 'FX:AUDCHF', 'FX:AUDCAD'
+  'OANDA:XAGUSD', 'FX:USDCHF', 'OANDA:USDCAD', 'FX:NZDCAD', 'FX:AUDCHF', 'FX:AUDCAD',
+  // Legacy 44-list venues that use the same allowlisted Yahoo/OKX adapters.
+  'FX:EURUSD', 'FX:USDJPY', 'FX:AUDUSD', 'FX:USDCAD', 'BYBIT:BTCUSDT', 'BYBIT:ETHUSDT', 'BYBIT:SOLUSDT',
+  'OKX:HBARUSDT.P', 'OKX:UNIUSDT.P', 'OKX:TRXUSDT.P', 'OKX:WIFUSDT', 'OKX:BONKUSDT',
+  'OKX:POPCATUSDT.P', 'OKX:RENDERUSDT'
 ];
 const FREE_MARKET_REFS = new Set(FREE_REF_SEEDS.map(ref => {
   try { return parseMarketRef(ref).feed === 'binance' ? null : parseMarketRef(ref).key; }
@@ -183,13 +187,20 @@ export function validateMarket(symbol, interval) {
 function validateSpot(symbol, interval) {
   if (!isSpotSymbol(symbol) || !Object.values(TIMEFRAMES).includes(interval)) throw new Error('Desteklenmeyen piyasa');
 }
+function binanceFeedSymbol(symbol, interval) {
+  const ref = parseMarketRef(symbol);
+  if (ref.feed !== 'binance') throw new Error('Desteklenmeyen piyasa');
+  const feedSymbol = ref.feedSymbol;
+  validateSpot(feedSymbol, interval);
+  return feedSymbol;
+}
 export function restURL(origin, symbol, interval) {
-  validateSpot(symbol, interval);
-  return `${origin}/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
+  const feedSymbol = binanceFeedSymbol(symbol, interval);
+  return `${origin}/api/v3/klines?symbol=${feedSymbol}&interval=${interval}&limit=1000`;
 }
 export function streamURL(origin, symbol, interval) {
-  validateSpot(symbol, interval);
-  return `${origin}/ws/${symbol.toLowerCase()}@kline_${interval}`;
+  const feedSymbol = binanceFeedSymbol(symbol, interval);
+  return `${origin}/ws/${feedSymbol.toLowerCase()}@kline_${interval}`;
 }
 export function candle(time, open, high, low, close, volume = 0) {
   const result = {
@@ -291,7 +302,9 @@ export async function fetchHistory(symbol, interval, signal, fetcher = fetch, en
   for (const origin of REST_ORIGINS) {
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     try {
-      let url = restURL(origin, symbol, interval);
+      // Venue-qualified Binance Spot refs keep their identity in storage/UI,
+      // but the Binance endpoint needs the underlying spot symbol.
+      let url = restURL(origin, ref.feedSymbol, interval);
       if (startTime) url += '&startTime=' + startTime;
       if (endTime) url += '&endTime=' + endTime;
       const response = await fetcher(url, { signal, cache: 'no-store' });

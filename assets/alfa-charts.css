@@ -358,6 +358,41 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 .watch-item:hover .watch-remove,.watch-item:focus-within .watch-remove{opacity:1}
 .watch-remove .ui-icon{width:13px;height:13px}
 .watch-empty{padding:20px;color:#8195b6;font-size:11px;line-height:1.8}
+.watch-head-actions{display:flex;align-items:center;gap:4px}
+.watch-head-actions>#watch-list-add{height:26px;padding:0 7px;border:1px solid #35435e;border-radius:6px;background:#182033;color:#a9bedf;font-size:9px}
+.watch-head-actions .ui-icon{width:15px;height:15px}
+.watch-lists{display:flex;gap:6px;padding:0 12px 10px;border-bottom:1px solid var(--line)}
+.watch-lists>select,.watch-filter{min-width:0;height:28px;border:1px solid #32405a;border-radius:6px;background:#131a26;color:#b6c6df;font-size:10px}
+.watch-lists>select{flex:0 1 48%;padding:0 5px}
+.watch-filter{flex:1;display:flex;align-items:center;gap:5px;padding:0 7px;color:#6d81a4}
+.watch-filter .ui-icon{width:13px;height:13px;flex:none}
+.watch-filter input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:inherit;font-size:10px}
+.watch-group-head{width:100%;display:flex;align-items:center;gap:7px;padding:8px 14px;border:0;border-bottom:1px solid var(--line);background:#151d2a;color:#9db1d2;text-align:left}
+.watch-group-head strong{font-size:10px;font-weight:600}
+.watch-group-head small{margin-left:auto;color:#6e829e;font-size:9px}
+.watch-group-head .ui-icon{width:12px;height:12px;transition:transform .15s ease}
+.watch-group.collapsed .watch-group-head .ui-icon{transform:rotate(-90deg)}
+.watch-item .watch-row{padding-right:64px}
+.watch-compact .watch-row{padding-top:7px;padding-bottom:7px}
+.watch-compact .coin-icon{width:22px;height:22px;font-size:10px}
+.watch-star,.watch-flag{position:absolute;top:5px;width:20px;height:20px;padding:3px;border:0;background:transparent;color:#647591}
+.watch-star{right:26px}
+.watch-flag{right:5px;color:var(--flag-color,#647591)}
+.watch-star.on{color:#e8a33d}
+.watch-star .ui-icon,.watch-flag .ui-icon{width:14px;height:14px}
+.watchlist-settings-dialog{width:min(680px,calc(100vw - 24px))}
+.watch-settings-section{border-top:1px solid var(--line);padding:14px 0 4px}
+.watch-settings-section h4{font-size:12px;font-weight:600;margin:0 0 10px;color:#b8c9e4}
+.watch-settings-row{display:flex;gap:10px;flex-wrap:wrap}
+.watch-settings-row label{flex:1;min-width:130px;display:flex;flex-direction:column;gap:5px;font-size:11px;color:#aabbd3}
+.watch-settings-row select,.watch-settings-row input:not([type=checkbox]):not([type=color]){width:100%;min-height:33px;padding:6px 8px;border:1px solid #35435e;border-radius:6px;background:#101620;color:#d6dce7;font-size:11px}
+.watch-settings-buttons{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 8px}
+.watch-settings-buttons button,.watch-restore,#ws-add-selected{font-size:11px;padding:7px 10px;border:1px solid #35435e;border-radius:6px;background:#182033;color:#b8c9e4}
+.watch-restore{color:#d5b16a}
+.watch-settings-flags{display:flex;gap:14px;flex-wrap:wrap;margin:12px 0}
+.watch-settings-flags label{display:flex;align-items:center;gap:6px;font-size:11px;color:#c1cde0}
+.watch-classification{font-size:11px;line-height:1.6;color:#8297b9;padding:8px 10px;border:1px solid #2f3c54;border-radius:6px;background:#121925}
+.watch-settings-status{min-height:16px;margin:12px 0 0;font-size:10px;color:#9bb2d8}
 #watch-rows{flex-shrink:0}
 .symbol-dialog{width:min(620px,calc(100vw - 24px))}
 .symbol-dialog .study-search{margin:0 0 12px}
@@ -423,3 +458,4 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 .drawing-current-title{font-size:11px;color:#b4c9ed;padding:7px 0;overflow-wrap:anywhere}
 .object-tree-row:focus-visible{outline-offset:-2px}
 @media(max-width:600px){#symbol-search{width:26px;height:27px;padding:4px}#symbol-search .ui-icon{width:15px}.watch-remove{opacity:1}#drawing-favs{max-width:calc(100% - 65px)}.selection-toolbar{max-width:calc(100% - 80px);overflow-x:auto;left:8px;right:auto;white-space:nowrap}.selection-toolbar>button{flex-shrink:0}#drawing-manager{width:310px}.object-tree-row>.object-label{font-size:10px}.import-file{flex-direction:column;align-items:flex-start}.import-file input{max-width:100%}.symbol-filters{gap:5px}.symbol-filters label{font-size:10px}.watchlist-import-dialog .dialog-content{padding:16px}.import-options{gap:5px}.import-options label{font-size:10px}}
+@media(max-width:600px){.watch-head{padding:14px 12px 10px}.watch-head-actions>#watch-list-add{font-size:8px;padding:0 5px}.watch-lists{padding:0 8px 8px}.watch-group-head{padding:7px 9px}.watchlist-settings-dialog .dialog-content{padding:16px}.watch-settings-row label{min-width:100%}.watch-settings-buttons button{flex:1 1 45%}}

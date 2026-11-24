@@ -42,6 +42,12 @@ try {
         }] }, dirty: false, revision: 0
       }));
       localStorage.setItem('alfa-alarms:v1:guest', '[]');
+      // Keep this display-only time-zone regression on bare Binance Spot refs;
+      // the legacy TV watchlist restore has its own dedicated browser suite.
+      localStorage.setItem('alfa-watchlist:v1:guest', JSON.stringify({
+        version: 2, name: 'İzleme listesi', symbols: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']
+      }));
+      localStorage.setItem('alfa-watchlist:tv-migrated:v1:guest', '1');
     }
   }, { last });
   await context.routeWebSocket(/wss:\/\//, () => {});

@@ -72,6 +72,12 @@ test('request URLs stay inside Binance spot endpoints', () => {
   assert.equal(streamURL(STREAM_ORIGINS[1], 'ETHUSDT', '1w'),
     'wss://stream.binance.com:9443/ws/ethusdt@kline_1w');
   assert.throws(() => restURL(REST_ORIGINS[0], 'BTCUSDT', '1M'));
+  // Restored TV refs keep their venue identity while Binance transport uses
+  // the underlying spot symbol, never another market.
+  assert.equal(restURL(REST_ORIGINS[0], 'BINANCE:BTCUSDT', '4h'),
+    'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=1000');
+  assert.equal(streamURL(STREAM_ORIGINS[0], 'BINANCE:ETHUSDT', '1m'),
+    'wss://data-stream.binance.vision/ws/ethusdt@kline_1m');
 });
 
 test('real Binance rows are parsed, sorted, deduplicated and validated', () => {

@@ -1,6 +1,7 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
-import { isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=10';
+import { isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=11';
 import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=1';
+import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=10';
 
 const $ = id => document.getElementById(id);
 const CAPACITY = { 1: 1, 2: 2, 4: 4, 6: 6 };
@@ -36,10 +37,23 @@ function loadState() {
 }
 
 function watchlistSymbols() {
+  const refs = new Set();
   try {
-    const rows = JSON.parse(localStorage.getItem('alfa-watchlist:v1:' + owner) || '[]');
-    return Array.isArray(rows) ? rows.map(r => typeof r === 'string' ? r : r?.symbol).filter(s => s && isMarketSymbol(String(s))) : [];
-  } catch { return []; }
+    const raw = JSON.parse(localStorage.getItem('alfa-watchlist:v1:' + owner) || 'null');
+    for (const ref of watchlistRefsFromDocument(raw)) refs.add(ref);
+  } catch {}
+  if (!refs.size) {
+    const legacyKeys = owner === 'guest' ? ['alfa-watchlist'] : [`u:${owner}:alfa-watchlist`, 'alfa-watchlist'];
+    for (const key of legacyKeys) {
+      try {
+        const rows = JSON.parse(localStorage.getItem(key) || '[]');
+        if (Array.isArray(rows)) for (const ref of rows) if (typeof ref === 'string') refs.add(ref);
+      } catch {}
+    }
+  }
+  return [...refs].filter(ref => {
+    try { parseMarketRef(ref); return true; } catch { return false; }
+  }).slice(0, 200);
 }
 
 export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, applyMainSync, getMainSyncState } = {}) {

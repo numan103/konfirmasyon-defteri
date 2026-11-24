@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=22">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=23">
 </head>
 <body>
   <main class="workspace">
@@ -130,7 +130,8 @@
         <div id="multi-grid" class="multi-grid" data-layout="1"></div>
       </section>
       <aside id="watchlist" aria-label="İzleme listesi">
-        <div class="watch-head"><h2><span id="watchlist-title">İzleme listesi</span> <small id="watch-count">4</small></h2><button id="watch-add" class="icon-button" type="button" aria-label="Listeye parite ekle" title="Parite ekle"><span data-icon="plus"></span></button></div>
+        <div class="watch-head"><h2><span id="watchlist-title">İzleme listesi</span> <small id="watch-count">4</small></h2><div class="watch-head-actions"><button id="watch-list-add" type="button" title="Yeni liste oluştur">+ Liste</button><button id="watch-settings" class="icon-button" type="button" aria-label="Liste ayarları" title="Liste ayarları ve sınıflandırma"><span data-icon="settings"></span></button><button id="watch-add" class="icon-button" type="button" aria-label="Listeye parite ekle" title="Parite ekle"><span data-icon="plus"></span></button></div></div>
+        <div class="watch-lists"><select id="watch-list" aria-label="İzleme listesi seç"></select><label class="watch-filter"><span data-icon="search"></span><input id="watch-filter" type="search" placeholder="Listede ara" aria-label="Listede ara" autocomplete="off"></label></div>
         <div class="watch-actions"><button id="watch-import" type="button" title="Sembol listesini içe aktar"><span data-icon="upload"></span>İçe aktar</button><button id="watch-export" class="icon-button" type="button" aria-label="Listeyi TXT olarak dışa aktar" title="TXT dışa aktar"><span data-icon="download"></span></button><button id="watch-share" class="icon-button" type="button" aria-label="Liste bağlantısını kopyala" title="Liste bağlantısı"><span data-icon="link"></span></button></div>
         <div class="watch-columns"><span>Sembol</span><span>Son fiyat</span></div>
         <div id="watch-rows"></div>
@@ -245,6 +246,6 @@
       <span id="data-info">Kaynak: seçili piyasa · Zaman: UTC · En fazla 1000 mum</span>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=61"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=62"></script>
 </body>
 </html>

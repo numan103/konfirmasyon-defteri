@@ -1,10 +1,10 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode, TickMarkType } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=10';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=11';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
 import { DrawingEngine } from './alfa-drawings.mjs?v=15';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=7';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=4';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
@@ -17,9 +17,9 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
-import { initMultiChart } from './alfa-multichart.mjs?v=3';
+import { initMultiChart } from './alfa-multichart.mjs?v=4';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
-import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
+import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=2';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
@@ -772,7 +772,7 @@ function connect(id, resetView = false) {
   const controller = new AbortController(); aborter = controller;
   const timeout = setTimeout(() => controller.abort(), 15000);
   let buffered = [], ready = false, ended = false;
-  const url = streamURL(STREAM_ORIGINS[attempts % STREAM_ORIGINS.length], symbol, interval);
+  const url = streamURL(STREAM_ORIGINS[attempts % STREAM_ORIGINS.length], ref.feedSymbol, interval);
   const ws = new WebSocket(url); socket = ws;
   lastReceipt = Date.now();
   function reconnect(reason) {
@@ -805,7 +805,7 @@ function connect(id, resetView = false) {
     if (replayMode) return;
     if (id !== generation || ended) return;
     try {
-      const c = parseKline(event.data, symbol, interval);
+      const c = parseKline(event.data, ref.feedSymbol, interval);
       if (!c) return;
       lastReceipt = Date.now();
       if (!ready) { buffered.push(c); if (buffered.length > 2000) buffered.shift(); return; }
@@ -888,6 +888,7 @@ watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => sy
   onSelect: next => setActiveSymbol(next),
   onHover: ref => prefetchMarket(ref, interval),
   getAccessToken: marketAccessToken,
+  getLegacyCloud: owner => { try { return cloudSettings?.legacyWatchlist(owner) || null; } catch { return null; } },
   onStatus: connection });
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;

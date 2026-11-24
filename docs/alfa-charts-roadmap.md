@@ -67,7 +67,7 @@ Kanıt: `assets/alfa-charts.mjs` (`checkAlarms`, `connectPolling`,
 | B3 | Replay'den bağımsız tarihe git | Mevcut tarih girişi replay başlatıyor. Normal grafikte tarih bulma, veri yoksa açık uyarı; replay durumunu değiştirmeme. | P1 / orta |
 | B4 | Fiyat ekseni seçenekleri | Yüzde, 100'e endeksleme, ters fiyat ölçeği; log/oto zaten var. | P1 / orta |
 | B5 | Çizim hassasiyeti | Zaman/fiyat koordinatlarını sayıyla düzenleme; devamlı çizim modu; güçlü/zayıf mıknatıs toleransı; kilitlileri koruyan toplu işlemler. Her biri ayrı modül. | P1 / orta |
-| B6 | İzleme listesi organizasyonu | Birden fazla isimli liste, klasör/bölüm, sıralama, renk bayrakları ve arama. Şimdiki owner-başına tek listeyi kayıpsız taşıma. | P1 / orta |
+| B6 | İzleme listesi organizasyonu — tamamlandı | Birden fazla isimli liste, TV tarzı sınıflandırma/gruplama, sıralama, renk bayrakları ve arama. Eski 44 referans ve mevcut listeler kayıpsız taşındı. | P1 / orta |
 | B7 | İsimli görünüm/gösterge şablonları | Mevcut otomatik kayda ek olarak şablon kaydet/yükle; göstergeleri farklı sembollere uygulama. Fibonacci şablonları zaten var. | P1 / orta |
 | B8 | Komut arama / kısayol rehberi | Aranabilir aksiyon menüsü; mevcut kısayolları görünür kılma; input ve modal odaklarını bozmama. | P2 / küçük |
 | B9 | Çoklu grafikte panel kontrolü | Bağımsız panel periyodu, seçilebilir sync kapsamı, çizim senkronizasyonu, panel boyutlandırma; mobilde aynı anda 2 grafik. Mevcut zaman/crosshair köprüsünü yeniden yazmama. | P1 / orta-büyük |
@@ -196,6 +196,48 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
   `replay` tarayıcı regresyonları da geçti.
 - Çizim/alarm/research anahtarları, bare `BTCUSDT` = Binance Spot, JWT kapıları ve
   bulut şeması değişmedi.
+
+## Dördüncü modül — B6 izleme listesi organizasyonu ve TV listesi
+
+- **Sebep:** yeni çalışma alanına geçişte eski 44 referanslık TradingView listesi
+  ve kullanıcının önceki liste/ayarları görünmüyordu; listede klasör/sıralama/
+  renk bayrağı ve TV tarzı sınıflandırma yoktu.
+- Yeni `alfa-watchlist:v1:<owner>` belgesi geriye uyumlu: `symbols` aktif listenin
+  görünümü olarak kalıyor; `lists`, `settings`, `flags` ek alanları adlandırılmış
+  liste, renk, sıralama, grup modu (`none|type|venue|quote`), yıldız ve renk
+  bayrağı taşıyor. Eski düz dizi ve v1 nesnesi aynı belgeye taşınıyor, mevcut
+  özel listeler kırpılmıyor veya ezilmiyor.
+- `alfa-watchlist:tv-migrated:v1:<owner>` işareti yalnızca başarılı kayıttan sonra
+  yazılıyor. Bulut okuma hatası yerel migrasyonu engellemiyor; oturum açıkken
+  eski `journals.data` kopyası tek yönlü ve sahip denetimli okunuyor, JWT kapıları
+  ve bulut şeması değişmiyor.
+- İlk açılışta/doc boşsa veya yalnızca dokunulmamış 4 varsayılan sembol varsa
+  `TradingView · FX & Kripto` listesi **tam 44 referansla** oluşturuluyor ve aktif
+  oluyor; üretilmiş varsayılan liste geride bırakılmıyor. Sonradan gelen eski
+  kaynaklar eksik referansları ekliyor, hiçbir listeyi silmiyor. Manuel “TV
+  listesini ekle” aynı birleştirmeyi kullanıyor.
+- Sınıflandırma yalnızca gösterim: `Kripto · Spot`, `Kripto · Vadeli`,
+  `Döviz / Emtia`, `Kripto endeksleri`, `Endeks / Vadeli`. Sembol kimlikleri
+  (`CME:BTC1!`, `FX_IDC:XAUTRYG`, `CRYPTOCAP:BTC.D`, `BINANCE:BTCUSDT.P`,
+  `BINANCE:BTCUSDT`, `OKX:XAUTUSDT` …) olduğu gibi saklanıyor; zorunlu coin
+  kategorisi veya borsa dönüşümü yok.
+- Ücretsiz FX/kripto referansları misafirde doğrudan, `BINANCE:BTCUSDT` gibi
+  gated referanslar oturumla birlikte çalışıyor. Bare `BTCUSDT` hâlâ Binance Spot.
+  Venue'lü Binance Spot referanslarında Binance REST/WS taşıması artık altındaki
+  spot sembolünü kullanıyor; grafik/storage kimliği değişmiyor.
+- Ayarlar penceresi listede ad/renk/silme, yeni liste, seçili sembolü ekleme,
+  sıralama/yön/gruplama, sıkışık satır, renk bayrağı ve fiyat görünümü
+  seçeneklerini kalıcı hale getiriyor. “Grafik görünümü sıfırla” çizim veya
+  indikatörleri etkilemiyor.
+- Çoklu grafik sembol seçici artık tüm listelerdeki referansları okuyor.
+- İlgili birim testleri ve tam suite **1184/1184** geçti. Yeni
+  `alfa-watchlist-tv.browser.mjs` 44 referansın birebir geri gelmesini, ücretsiz
+  FX/kripto fiyatlarını, mevcut listenin korunmasını, manuel geri yüklemeyi,
+  ayar kalıcılığını, çoklu grafiği ve 320/390/768 px düzenlerini doğruluyor.
+  `workspace`, `indicator-pane`, `chart-time`, `open-interest` ve `replay`
+  tarayıcı regresyonları da geçti.
+- Çizim/alarm/indikatör/research anahtarları, admin/JWT kapıları ve bulut
+  şeması değişmedi; yeni webhook, hesap veya veritabanı eklenmedi.
 
 ## Kaynaklar
 

@@ -24,6 +24,18 @@ const state = page => page.evaluate(() => {
 });
 try {
   await context.addInitScript(() => {
+    try {
+      if (sessionStorage.getItem('__alfaIndicatorSeed')) return;
+      // Keep this study regression focused on bare Binance Spot symbols; the
+      // legacy TV restore has its own dedicated browser suite.
+      localStorage.setItem('alfa-watchlist:v1:guest', JSON.stringify({
+        version: 2, name: 'İzleme listesi', symbols: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']
+      }));
+      localStorage.setItem('alfa-watchlist:tv-migrated:v1:guest', '1');
+      sessionStorage.setItem('__alfaIndicatorSeed', '1');
+    } catch {}
+  });
+  await context.addInitScript(() => {
     window.supabase = { createClient: () => ({ auth: {
       getSession: async () => ({ data: { session: null } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } })
