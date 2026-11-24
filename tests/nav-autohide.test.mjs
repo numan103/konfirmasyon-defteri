@@ -4,12 +4,14 @@ import fs from 'node:fs';
 
 const css = fs.readFileSync(new URL('../assets/nav-autohide.css', import.meta.url), 'utf8');
 const js = fs.readFileSync(new URL('../assets/nav-autohide.mjs', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 test('scrolled mobile navigation exposes a labelled reveal control', () => {
   assert.match(css, /body\.nav-scrolled \.navbar \{ transform:translateY\(calc\(-100% - 12px\)\)/);
   assert.match(css, /@media \(hover:none\), \(max-width:680px\)[\s\S]*body\.nav-scrolled \.nav-reveal \{/);
   assert.match(js, /reveal\.setAttribute\('aria-controls', nav\.id\)/);
   assert.match(js, /reveal\.setAttribute\('aria-label', '☰ Menü'\)/);
+  assert.match(html, /\/assets\/nav-autohide\.css\?v=3/);
 });
 
 test('chat bubble does not cover the mobile reveal button', () => {
