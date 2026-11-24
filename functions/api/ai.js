@@ -1,5 +1,3 @@
-import handler from '../../api/ai.mjs';
-
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -7,6 +5,8 @@ export async function onRequest(context) {
   for (const [k, v] of Object.entries(env || {})) {
     process.env[k] = v;
   }
+
+  const { default: handler } = await import('../../api/ai.mjs');
 
   let body = null;
   if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {

@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -13,9 +14,13 @@ test('every API handler has a Cloudflare Pages wrapper with the matching import'
     const wrapper = path.join(root, 'functions', 'api', name.replace(/\.mjs$/, '.js'));
     assert.ok(fs.existsSync(wrapper), `${name} eksik Cloudflare wrapper'ı: functions/api/${name.replace(/\.mjs$/, '.js')}`);
     const source = fs.readFileSync(wrapper, 'utf8');
-    assert.ok(new RegExp(`import\\s+handler\\s+from\\s+['"]\\.\\.\\/\\.\\.\\/api\\/${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(source),
-      `${name} wrapper'ı yanlış handler'ı import ediyor`);
+    assert.ok(source.includes(`await import('../../api/${name}')`),
+      `${name} wrapper'ı handler'ı context.env kopyalandıktan sonra import etmiyor`);
+    assert.ok(!/^import handler/m.test(source), `${name} wrapper'ı handler'ı hâlâ modül yüklenirken import ediyor`);
     assert.match(source, /export async function onRequest/);
+    const envCopy = source.indexOf('process.env[k] = v;');
+    assert.ok(envCopy > -1 && envCopy < source.indexOf(`await import('../../api/${name}')`),
+      `${name} wrapper'ında env kopyası import'tan önce gelmiyor`);
   }
 });
 
@@ -82,6 +87,33 @@ test('Cloudflare /api/ai serves mentorship trades as JSON, not the static HTML p
 
 test('Cloudflare /api/tg is a real function wrapper', async () => {
   const source = fs.readFileSync(path.join(root, 'functions', 'api', 'tg.js'), 'utf8');
-  assert.match(source, /from '\.\.\/\.\.\/api\/tg\.mjs'/);
+  assert.match(source, /await import\('\.\.\/\.\.\/api\/tg\.mjs'\)/);
   assert.match(source, /ArrayBuffer\.isView\(data\)/);
+});
+
+test('handler config is read from context.env only, before the module is imported', () => {
+  const wrapperUrl = pathToFileURL(path.join(root, 'functions', 'api', 'contrib.js')).href;
+  const script = `const captured = [];
+globalThis.fetch = async (url) => {
+  captured.push(String(url));
+  return new Response(JSON.stringify([{ updated_at: '2026-01-01T00:00:00+00:00', data: { posts: [] } }]), {
+    status: 200, headers: { 'Content-Type': 'application/json' },
+  });
+};
+const { onRequest } = await import(${JSON.stringify(wrapperUrl)});
+const response = await onRequest({
+  request: new Request('https://example.test/api/contrib?store=alfatrading'),
+  env: { SUPABASE_URL: 'https://env-only.supabase.co', SUPABASE_PUBLISHABLE: 'env-only-key' },
+});
+console.log(JSON.stringify({ status: response.status, urls: captured }));`;
+  const child = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: root, encoding: 'utf8',
+    env: { ...process.env, SUPABASE_URL: '', SUPABASE_PUBLISHABLE: '', SUPABASE_SERVICE_ROLE: '' },
+  });
+  assert.equal(child.status, 0, child.stderr);
+  const out = JSON.parse(child.stdout.trim().split('\n').at(-1));
+  assert.equal(out.status, 200);
+  assert.ok(out.urls.length > 0, 'the request must reach Supabase through the wrapper');
+  assert.ok(out.urls.every(url => url.startsWith('https://env-only.supabase.co/rest/v1/')),
+    'module-level Supabase config must come from context.env, not process startup: ' + JSON.stringify(out.urls));
 });
