@@ -7,10 +7,14 @@ const { chromium } = await import(pathToFileURL(path.resolve(arg('playwright')))
 const browser = await chromium.launch({ executablePath:'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless:true });
 const page = await browser.newPage(), errors=[];
 page.on('pageerror', e => errors.push(e.message));
+// Keep the weekly badge fixture inside the current week; a fixed 2026-11-16
+// date turns into "Son Bölüm" as soon as the calendar rolls over.
+const publishedAt = new Date().toISOString();
+const publishedLabel = new Intl.DateTimeFormat('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric', timeZone:'Europe/Istanbul' }).format(new Date(publishedAt));
 const originalEpisode = {
   id:'11111111-2222-3333-4444-555555555555', title:'Haftanın piyasa notları',
   description:'Faiz, dolares ve kripto görünümü', audioUrl:'https://media.example.com/bolum.wav',
-  cadence:'weekly', publishedAt:'2026-11-16T00:00:00Z', durationSeconds:3
+  cadence:'weekly', publishedAt, durationSeconds:3
 };
 let episode = originalEpisode;
 function wav(seconds=3, rate=8000) {
@@ -40,10 +44,10 @@ try {
   const landingCard = page.locator('#landing-podcast-slot .ap-podcast');
   await landingCard.waitFor({ state:'visible' });
   assert.match(await landingCard.locator('.ap-title').textContent(), /Haftanın piyasa notları/);
-  assert.match(await landingCard.locator('.ap-badge').textContent(), /Haftanın Podcast/);
+  assert.match(await landingCard.locator('.ap-badge').textContent(), /Haftanın Podcast’i/);
   assert.equal(await page.evaluate(() => document.getElementById('alfa-podcast-audio').paused), true, 'must not autoplay');
   assert.equal(await landingCard.locator('.ap-manage').isVisible(), false, 'free members never see publishing controls');
-  assert.equal(await landingCard.locator('.ap-description').textContent(), '16.11.2026 · Faiz, dolares ve kripto görünümü');
+  assert.equal(await landingCard.locator('.ap-description').textContent(), publishedLabel + ' · Faiz, dolares ve kripto görünümü');
 
   await landingCard.locator('.ap-play').click();
   await page.waitForFunction(() => {
