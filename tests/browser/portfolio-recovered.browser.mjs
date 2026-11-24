@@ -1,18 +1,23 @@
-// Render a supplied recovery snapshot in an isolated browser; never publish test data.
+// Render a recovery-shaped snapshot in an isolated browser; never publish test data.
+// The default fixture is synthetic; a real local snapshot can be supplied with
+// --snapshot=<local JSON> without committing or uploading it.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 const arg = key => process.argv.find(s => s.startsWith(`--${key}=`))?.slice(key.length + 3);
-if (!arg('snapshot') || !arg('playwright')) throw new Error('Pass --snapshot=<local JSON> and --playwright=<index.mjs>');
-const saved = JSON.parse(fs.readFileSync(arg('snapshot'), 'utf8')), data = saved.data || saved;
+const here = path.dirname(fileURLToPath(import.meta.url));
+const snapshotPath = arg('snapshot') || path.join(here, 'fixtures', 'portfolio-recovered.snapshot.json');
+if (!arg('playwright')) throw new Error('Pass --playwright=<index.mjs>');
+const saved = JSON.parse(fs.readFileSync(snapshotPath, 'utf8')), data = saved.data || saved;
 const { chromium } = await import(pathToFileURL(path.resolve(arg('playwright'))));
 const browser = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
 const page = await browser.newPage(), errors = [], writes = [];
 page.on('pageerror', error => errors.push(error.message));
 page.on('request', req => { if (req.method() === 'POST' && req.url().includes('kind=portfolio')) writes.push(req.url()); });
 try {
-  await page.goto((arg('url') || 'https://alfa-trader.com') + '/?page=home');
+  // Local static origin by default; passing --url allows another isolated build.
+  await page.goto((arg('url') || 'http://127.0.0.1:4173') + '/?page=home');
   await page.waitForFunction(() => typeof renderAlfaPortfoy2 === 'function' && typeof AUTH !== 'undefined' && AUTH.client);
   await page.evaluate(snapshot => {
     // Client-only fixture rendering. No JWT, account or server permission is changed.
@@ -44,6 +49,6 @@ try {
   assert.ok(Math.abs(observed.summary.realizedPnl - 268.576777025) < 1e-8);
   assert.deepEqual(writes, []);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, mode: 'isolated UI rendering of supplied recovery snapshot',
+  console.log(JSON.stringify({ passed: true, mode: 'isolated UI rendering of a recovery-shaped snapshot',
     goldCards: observed.goldCards, sales: observed.saleRows, realized: observed.realized, noPortfolioWrites: true }));
 } finally { await browser.close(); }

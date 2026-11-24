@@ -1,0 +1,57 @@
+{
+  "v": 2,
+  "note": "Synthetic recovery-shape fixture. No user or business data.",
+  "positions": [
+    {
+      "id": "gold_xau_fixture_1",
+      "symbol": "XAUUSD",
+      "type": "altin",
+      "side": "LONG",
+      "qty": 0.07674442,
+      "cost": 3910.5,
+      "price": 4010.25,
+      "date": "2026-11-12",
+      "filled": "2026-11-12",
+      "lim": true,
+      "note": "synthetic gold lot"
+    },
+    {
+      "id": "eth_fixture_1",
+      "symbol": "ETH",
+      "type": "kripto",
+      "side": "LONG",
+      "qty": 1.25,
+      "cost": 2800,
+      "price": 3050,
+      "date": "2026-11-05"
+    }
+  ],
+  "sells": [
+    {
+      "symbol": "ETH",
+      "qty": 0.5,
+      "cost": 540,
+      "amount": 670.576777025,
+      "pnl": 130.576777025,
+      "buyDate": "2026-10-01",
+      "date": "2026-10-15"
+    },
+    {
+      "symbol": "BTC",
+      "qty": 0.004,
+      "cost": 162,
+      "amount": 300,
+      "profit": 138,
+      "buyDate": "2026-10-20",
+      "date": "2026-11-02"
+    }
+  ],
+  "ideas": [],
+  "history": [
+    { "d": "2026-10-01", "v": 1000 },
+    { "d": "2026-11-02", "v": 1120 },
+    { "d": "2026-11-12", "v": 1180 }
+  ],
+  "cash": 168.58,
+  "startBalance": 1000
+}
