@@ -65,6 +65,15 @@ export function normalizeStudyState(raw) {
   }
   return out;
 }
+// Only native oscillator studies own a pane; their legend row is the TV-style
+// double-click target for tucking the pane back under the price chart.
+export function isPaneStudy(d) {
+  return d?.item?.def?.pane === 'oscillator' || d?.pane === 'oscillator';
+}
+export function studyChipClass(d, clean = false) {
+  return ['study-chip', (!d.visible || clean) ? 'is-hidden' : '', d.collapsed ? 'is-collapsed' : '',
+    isPaneStudy(d) ? 'is-pane-study' : ''].filter(Boolean).join(' ');
+}
 const activeIds = studies => studies.active().map(d => d.id);
 function storedArray(key, fallback = []) {
   try { const v = JSON.parse(localStorage.getItem(key) || 'null'); if (Array.isArray(v)) return v.filter(x => typeof x === 'string'); } catch {}
@@ -100,7 +109,7 @@ export class ChartStudies {
     return [
       ...this.indicators.items.map(item => ({ id: item.id, type: item.type, name: item.def.name,
         subtitle: item.params.period ? `${item.params.period} · ${(item.params.source || 'close').toUpperCase()}` : descriptions[item.type],
-        visible: item.visible, collapsed: !!item.collapsed, color: item.params.color, item })),
+        visible: item.visible, collapsed: !!item.collapsed, color: item.params.color, pane: item.def.pane, item })),
       ...OVERLAY_CATALOG.filter(d => this.state[d.id].added).map(d => ({
         ...d, subtitle: d.description, visible: this.state[d.id].visible, collapsed: !!this.state[d.id].collapsed, status: this.managers[d.id].status
       })),
@@ -137,10 +146,13 @@ export class ChartStudies {
     const active = this.active(), legend = document.getElementById('study-legend');
     const count = document.getElementById('study-count'); if (count) count.textContent = active.length;
     if (legend) {
-      const cards = active.map(d => `<div class="study-chip ${!d.visible || this.clean ? 'is-hidden' : ''} ${d.collapsed ? 'is-collapsed' : ''}" data-study-chip="${esc(d.id)}">
+      const cards = active.map(d => {
+        const hint = isPaneStudy(d) ? ` title="${esc(d.name)} alt panelini çift tıkla: ${d.collapsed ? 'genişlet' : 'göm'}"` : '';
+        return `<div class="${studyChipClass(d, this.clean)}" data-study-chip="${esc(d.id)}"${hint}>
         <div class="study-chip-head">
           <span class="study-dot" style="background:${esc(d.color)}"></span>
           <span class="study-chip-name">${esc(d.name)}${d.item?.params.period ? ' ' + esc(d.item.params.period) : ''}</span>
+          ${d.subtitle ? `<small class="study-chip-meta">${esc(d.subtitle)}</small>` : ''}
           ${this.statusHTML(d)}
         </div>
         <div class="study-chip-foot">
@@ -149,7 +161,8 @@ export class ChartStudies {
           <button data-study-collapse="${esc(d.id)}" aria-pressed="${!!d.collapsed}" title="${d.collapsed ? 'Genişlet' : 'Küçült'}" aria-label="${esc(d.name)} ${d.collapsed ? 'genişlet' : 'küçült'}">${icon(d.collapsed ? 'expand' : 'minimize')}</button>
           <button data-study-remove="${esc(d.id)}" title="${esc(d.name)} kaldır" aria-label="${esc(d.name)} kaldır">${icon('close')}</button>
         </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
       const actions = active.length ? `<div class="study-legend-actions">
         <button data-study-manage type="button">${icon('settings')} İndikatörler</button>
         <button data-study-collapse-all type="button" title="Tümünü küçült">${icon('minimize')}</button>
@@ -167,6 +180,13 @@ export class ChartStudies {
     root.querySelectorAll('[data-study-remove]').forEach(b => b.onclick = () => this.remove(b.dataset.studyRemove));
     root.querySelectorAll('[data-study-settings]').forEach(b => b.onclick = () => this.openSettings(b.dataset.studySettings));
     root.querySelectorAll('[data-study-collapse]').forEach(b => b.onclick = () => this.setCollapsed(b.dataset.studyCollapse, !this.active().find(d => d.id === b.dataset.studyCollapse)?.collapsed));
+    // TradingView-style tuck-away: double-click the oscillator's legend row,
+    // not its buttons, to sink the pane into a thin ribbon at the chart bottom.
+    root.querySelectorAll('.study-chip.is-pane-study').forEach(chip => chip.addEventListener('dblclick', e => {
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      this.setCollapsed(chip.dataset.studyChip, !chip.classList.contains('is-collapsed'));
+    }));
     root.querySelectorAll('[data-study-retry]').forEach(b => b.onclick = () => this.managers[b.dataset.studyRetry]?.retry?.());
     root.querySelector('[data-study-manage]')?.addEventListener('click', () => this.open());
     root.querySelector('[data-study-collapse-all]')?.addEventListener('click', () => { for (const id of activeIds(this)) this.setCollapsed(id, true); });

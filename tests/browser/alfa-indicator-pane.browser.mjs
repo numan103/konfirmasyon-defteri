@@ -66,8 +66,32 @@ try {
   await page.goto(origin + '/alfa-charts.html?debug=1');
   await ready(page);
 
+  const chartHeightBefore = await page.locator('#chart').evaluate(el => Math.round(el.getBoundingClientRect().height));
   await page.locator('#indicators-manage').click();
-  for (const id of ['ema', 'rsi', 'macd', 'fvg']) await page.locator(`[data-add="${id}"]`).click();
+  for (const id of ['ema', 'fvg']) await page.locator(`[data-add="${id}"]`).click();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => document.querySelectorAll('#study-legend .study-chip[data-study-chip]').length === 3);
+  const compact = await page.evaluate(() => {
+    const chips = [...document.querySelectorAll('#study-legend .study-chip[data-study-chip]')];
+    const first = chips[0];
+    const head = first.querySelector('.study-chip-head').getBoundingClientRect();
+    const foot = first.querySelector('.study-chip-foot').getBoundingClientRect();
+    return {
+      flexDirection: getComputedStyle(first).flexDirection,
+      inlineActions: Math.abs(head.y - foot.y) <= 3,
+      heights: chips.map(el => Math.round(el.getBoundingClientRect().height)),
+      legendHeight: Math.round(document.getElementById('study-legend').getBoundingClientRect().height),
+      chartHeight: Math.round(document.getElementById('chart').getBoundingClientRect().height),
+    };
+  });
+  assert.equal(compact.flexDirection, 'row', 'TV-style single-line legend rows');
+  assert.equal(compact.inlineActions, true, 'legend controls share the compact row');
+  assert.ok(compact.heights.every(h => h <= 22), `legend rows stay one line: ${compact.heights.join(',')}`);
+  assert.ok(compact.legendHeight <= 112, `legend never becomes a page: ${compact.legendHeight}px`);
+  assert.ok(compact.chartHeight >= chartHeightBefore - 80, `added overlays barely shrink the chart: ${chartHeightBefore} -> ${compact.chartHeight}`);
+
+  await page.locator('#indicators-manage').click();
+  for (const id of ['rsi', 'macd']) await page.locator(`[data-add="${id}"]`).click();
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.querySelectorAll('#study-legend .study-chip[data-study-chip]').length === 5);
   const geometry = await page.evaluate(() => [...document.querySelectorAll('#study-legend .study-chip[data-study-chip]')]
@@ -92,7 +116,9 @@ try {
   await page.click('#is-apply');
   await page.keyboard.press('Escape');
   const rsiId = await page.evaluate(() => window.__alfaDebug.indicators.items.find(i => i.type === 'rsi').id);
-  await page.locator(`#study-legend [data-study-collapse="${rsiId}"]`).click();
+  const rsiRow = page.locator(`#study-legend [data-study-chip="${rsiId}"]`);
+  assert.match(await rsiRow.getAttribute('class'), /is-pane-study/, 'oscillator row is the double-click target');
+  await rsiRow.locator('.study-chip-name').dblclick();
   await page.waitForFunction(id => document.querySelector(`[data-study-chip="${id}"]`).classList.contains('is-collapsed'), rsiId);
   assert.equal(await page.evaluate(() => window.__alfaDebug.chart.panes()[1].getHeight()), 30);
   const before = await state(page);
@@ -123,6 +149,14 @@ try {
   await page.waitForFunction(() => document.querySelectorAll('#study-legend .study-chip[data-study-chip]').length === 5);
   assert.deepEqual((await state(page)).indicators, before.indicators, 'reload restores the shared study bundle');
 
+  const restoredRsiId = await page.evaluate(() => window.__alfaDebug.indicators.items.find(i => i.type === 'rsi').id);
+  const restoredRsiRow = page.locator(`#study-legend [data-study-chip="${restoredRsiId}"] .study-chip-name`);
+  await restoredRsiRow.dblclick();
+  await page.waitForFunction(() => window.__alfaDebug.chart.panes()[1]?.getHeight() >= 80);
+  await restoredRsiRow.dblclick();
+  await page.waitForFunction(() => window.__alfaDebug.chart.panes()[1]?.getHeight() === 30);
+  assert.deepEqual((await state(page)).indicators, before.indicators, 'double-click tuck keeps saved state');
+
   // Display-only time-zone changes are a separate axis and must not touch studies.
   await page.locator('#chart-timezone').click();
   await page.locator('#timezone-form select').selectOption('Asia/Tokyo');
@@ -132,6 +166,6 @@ try {
 
   assert.deepEqual(writes, [], 'study changes never write to production APIs');
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, verticalLegend: true, collapseAndFooter: true,
+  console.log(JSON.stringify({ passed: true, verticalLegend: true, compactRows: true, doubleClickTuck: true,
     periodChange: 'BTCUSDT 1H -> 4H', marketReturn: true, reload: true, timezone: true, productionWrites: false }));
 } finally { await browser.close(); }

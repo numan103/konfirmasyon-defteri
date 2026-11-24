@@ -239,6 +239,32 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
 - Çizim/alarm/indikatör/research anahtarları, admin/JWT kapıları ve bulut
   şeması değişmedi; yeni webhook, hesap veya veritabanı eklenmedi.
 
+## Beşinci modül — TV tarzı kompakt gösterge satırları ve alt panel gömme
+
+- **Sebep:** üstteki göstergeler iki satırlık kartlarla ayrı bir sayfa gibi
+  görünüp grafik alanını küçültüyordu; alttaki osilatör panelini gömmek için
+  yalnızca küçük bir düğme vardı.
+- `#study-legend` artık TV'deki gibi tek satırlık, sol üstten aşağı sıralanan
+  kompakt satırlar üretiyor. Ad/parametre/kısa açıklama aynı satırda; düğmeler
+  satırın içinde, hover/focus ve dokunmatik cihazlarda görünür. Legend yüksekliği
+  masaüstünde 112 px, mobilde 72 px ile sınırlı; beş gösterge eklemek grafiği
+  belirgin şekilde küçültmüyor.
+- Osilatörlerin (RSI, MACD, Stochastic, Stochastic RSI, ATR, ADX, OBV) legend
+  satırına çift tıklamak TV davranışıyla alt paneli grafiğin dibine ince bir
+  şeride gömüyor; ikinci çift tık paneli geri açıyor. Düğmelerde çift tıklama
+  panel durumunu değiştirmiyor. Panel yüksekliği açıkken 80–150 px aralığında,
+  kapalıyken 30 px; gösterge kimliği, parametreleri, `visible` ve `collapsed`
+  durumu `alfa-studies:v1:<owner>:<ref>` içinde aynen korunuyor.
+- Yeni `alfa-study-layout.test.mjs` satır sınıflarını ve panel yüksekliği
+  sınırlarını doğruluyor. Tam birim suite **1186/1186** geçti.
+  `alfa-indicator-pane.browser.mjs` kompakt satırları, çift tıkla gömmeyi ve
+  periyot/sembol/reload/saat dilimi regresyonlarını doğruluyor; `workspace`,
+  `chart-time`, `open-interest`, `watchlist-tv`, `replay` ve `chart-scope`
+  tarayıcı testleri de geçti. `chart-scope` testi ayrıca deterministik watchlist
+  seed'i ve `collapsed` alanıyla güncellendi.
+- Çizim/alarm/research anahtarları, bare `BTCUSDT` = Binance Spot, JWT kapıları
+  ve bulut şeması değişmedi; üretim API'sine yazılmadı.
+
 ## Kaynaklar
 
 - [TradingView özellikleri](https://www.tradingview.com/features/) — grafik tipleri,

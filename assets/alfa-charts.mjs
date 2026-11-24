@@ -5,12 +5,12 @@ import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, 
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
 import { DrawingEngine } from './alfa-drawings.mjs?v=15';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=7';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=4';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=5';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=4';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=5';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';

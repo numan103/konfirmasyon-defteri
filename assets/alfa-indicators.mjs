@@ -38,6 +38,13 @@ const DEFAULTS = {
 
 function uid() { return 'ind-' + Math.random().toString(36).slice(2, 9); }
 
+// Oscillator panes stay inside the chart; collapsing only shrinks them to a thin
+// ribbon instead of opening a separate page-like area above the candles.
+export function indicatorPaneHeight(chartHeight, collapsed) {
+  if (collapsed) return 30;
+  return Math.max(80, Math.min(150, chartHeight * .22));
+}
+
 export class IndicatorManager {
   constructor({ chart, getBars, onChange }) {
     this.chart = chart;
@@ -79,7 +86,7 @@ export class IndicatorManager {
   setCollapsed(id, collapsed) {
     const item = this.items.find(i => i.id === id); if (!item) return;
     item.collapsed = !!collapsed;
-    if (item.pane?.setHeight) item.pane.setHeight(item.collapsed ? 30 : Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+    if (item.pane?.setHeight) item.pane.setHeight(indicatorPaneHeight(this.chart.chartElement().clientHeight, item.collapsed));
     this.onChange?.();
   }
   setSuppressed(value) {
@@ -162,7 +169,7 @@ export class IndicatorManager {
     }
     if (isOsc) {
       item.pane = item.series[0].getPane();
-      const height = item.collapsed ? 30 : Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22));
+      const height = indicatorPaneHeight(this.chart.chartElement().clientHeight, item.collapsed);
       if (item.pane.setHeight) item.pane.setHeight(height);
       const guides = item.type === 'rsi' ? [30, 70] : ['stochastic', 'stochrsi'].includes(item.type) ? [20, 80] : item.type === 'macd' ? [0] : [];
       for (const price of guides) item.series[0].createPriceLine({ price, color: '#53617a66', lineWidth: 1, lineStyle: 2, axisLabelVisible: false, title: '' });

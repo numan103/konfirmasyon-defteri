@@ -31,6 +31,12 @@ try {
     } });
     if (!localStorage.getItem('scope-fixture-seeded')) {
       localStorage.setItem('scope-fixture-seeded', '1');
+      // Keep the symbol picker deterministic; the TV watchlist migration has
+      // its own dedicated browser suite and would otherwise replace options.
+      localStorage.setItem('alfa-watchlist:v1:guest', JSON.stringify({
+        version: 2, name: 'İzleme listesi', symbols: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']
+      }));
+      localStorage.setItem('alfa-watchlist:tv-migrated:v1:guest', '1');
       localStorage.setItem('alfa-alarms:v1:guest', alarmRaw);
       localStorage.setItem('alfa-ind-fav:v1', JSON.stringify(['footprint', 'heatmap']));
       localStorage.setItem('alfa-drawings:v1:guest:BTCUSDT', JSON.stringify({
@@ -103,7 +109,8 @@ try {
   assert.deepEqual(await page.evaluate(() => ({
     footprint: window.__alfaDebug.studiesUI.toJSON().footprint,
     heatmap: window.__alfaDebug.studiesUI.toJSON().heatmap
-  })), { footprint: { added: true, visible: true }, heatmap: { added: true, visible: true } });
+  })), { footprint: { added: true, visible: true, collapsed: false },
+    heatmap: { added: true, visible: true, collapsed: false } });
   await openCatalogue('');
   await page.locator('[data-cat=fav]').click();
   assert.equal(await page.locator('[data-add=footprint]').count(), 1);
