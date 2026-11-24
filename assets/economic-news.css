@@ -35,7 +35,7 @@
   .econ-news-list { max-height: 330px; }
 }
 @media (max-width: 680px) {
-  .econ-news { position: static; flex: none; }
+  .econ-news { position: relative; top: auto; right: auto; flex: none; }
   body .navbar { flex-wrap: nowrap; }
   body .navbar > .nav-brand { flex: 1 1 auto; min-width: 30px; overflow: hidden; }
   body .navbar > .nav-brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
