@@ -66,6 +66,34 @@ test('quotes isolate venue failures and market data is rate limited per account'
   assert.equal(allowMarketData('market-rate-unit', 160001), true);
 });
 
+test('Yahoo backfills use a long interval-scaled window and keep full candle depth', async () => {
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const daysBack = n => Array.from({ length: n }, (_, i) => {
+    const time = (nowSeconds - (n - 1 - i) * 86400) * 1000;
+    return [time, '1', '2', '0.5', '1.5', '3'];
+  });
+  const payloadFor = rows => ({
+    chart: { result: [{ timestamp: rows.map(r => r[0]), meta: { regularMarketPrice: 1.5 }, indicators: { quote: [{ open: rows.map(r => r[1]), high: rows.map(r => r[2]), low: rows.map(r => r[3]), close: rows.map(r => r[4]), volume: rows.map(r => r[5]) }] } }] }
+  });
+  const backfill = await marketHistory('FX:EURGBP', '1d', null, null, async url => {
+    const params = new URL(url).searchParams;
+    const period1 = Number(params.get('period1'));
+    assert.ok(period1 < nowSeconds - 3000 * 86400 && period1 > nowSeconds - 4000 * 86400, 'daily backfill looks back about a decade');
+    assert.equal(params.get('interval'), '1d');
+    return response(payloadFor(daysBack(1200)));
+  });
+  assert.equal(backfill.candles.length, 1200, 'backfilled history keeps full depth instead of a 1000-candle tail');
+  const live = await marketHistory('FX:EURUSD', '1d', nowSeconds - 60, null, async url => {
+    const params = new URL(url).searchParams;
+    const period2 = Number(params.get('period2'));
+    const period1 = Number(params.get('period1'));
+    assert.ok(period1 >= period2 - 1100 * 86400 && period1 <= period2, 'live polls keep a short window');
+    return response({ chart: { result: [{ timestamp: [period2], meta: { regularMarketPrice: 1.5 },
+      indicators: { quote: [{ open: [1.5], high: [2], low: [0.5], close: [1.5], volume: [3] }] } }] } });
+  });
+  assert.equal(live.candles.length, 1);
+});
+
 test('public market upstreams send a browser-compatible User-Agent', async () => {
   const calls = [];
   const history = await marketHistory('FX:EURUSD', '1d', null, null, async (url, opts = {}) => {

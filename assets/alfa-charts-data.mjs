@@ -156,9 +156,10 @@ function parseDirectRows(rows, feed) {
     try {
       const c = candle(row[0], row[1], row[2], row[3], row[4], row[5] ?? 0);
       unique.set(c.time, c);
-    } catch { /* Skip malformed ticks from a third party. */ }
+    } catch { /* Skip malformed ticks from a third party. */
+    }
   }
-  const result = [...unique.values()].sort((a, b) => a.time - b.time).slice(-1000);
+  const result = [...unique.values()].sort((a, b) => a.time - b.time);
   if (!result.length) throw new Error('Geçersiz mum verisi');
   return result;
 }

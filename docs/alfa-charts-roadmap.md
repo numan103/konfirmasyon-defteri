@@ -276,6 +276,12 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
   grafiğinde backtest/replay için yeterli tarihsel veri oluşuyor.
 - `tests/chart-market-data.test.mjs` upstream User-Agent başlığını doğruluyor.
   Tam birim suite **1187/1187** geçti.
+- Aynı modülde derinleşme düzeltmesi: `lib/chart-market-data.mjs` ve
+  `aggregate`/`rowsToCandles` son 1000 mum kısma mantığı kaldırıldı; Yahoo
+  geri sayım penceresi günlük+ için yaklaşık 10 yıl (intrday için kısa aralıklı)
+  ve istenen aralık (`start`) geldiğinde çağrıya izin veriliyor. Böylece
+  `FX:EURUSD` günlük backfill ~2600 mum (~2016 sonu-2026 sonu) derinliğine
+  ulaşıyor; tam birim suite **1188/1188** geçti.
 - Çizim/alarm/research anahtarları, bare `BTCUSDT` = Binance Spot, JWT kapıları
   ve bulut şeması değişmedi; yeni webhook, hesap veya veritabanı eklenmedi.
 

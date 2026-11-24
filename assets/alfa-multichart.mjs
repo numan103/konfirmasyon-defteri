@@ -1,5 +1,5 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
-import { isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=11';
+import { isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=12';
 import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=1';
 import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=10';
 

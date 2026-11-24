@@ -1,4 +1,4 @@
-import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=11';
+import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=12';
 import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES,
   LEGACY_TV_LIST, FLAG_COLORS, GROUP_MODES, SORT_MODES, activeList, allWatchlistRefs, classifyWatchlistRef, filteredWatchlistRefs,
   groupWatchlistRefs, legacyWatchlistKeys, mergeLegacyWatchlist, migrateWatchlistDocument, normalizeWatchlistDocument,

@@ -1,5 +1,5 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode, TickMarkType } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=11';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=12';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
@@ -175,7 +175,8 @@ function rememberHistory(cacheSymbol, cacheInterval, bars) {
   if (!bars?.length) return;
   const key = historyCacheKey(cacheSymbol, cacheInterval);
   marketHistoryCache.delete(key);
-  marketHistoryCache.set(key, { at: Date.now(), bars: bars.slice(-1000) });
+  // Keep the full backfilled tail so reopened markets restore deep history too.
+  marketHistoryCache.set(key, { at: Date.now(), bars });
   while (marketHistoryCache.size > HISTORY_CACHE_LIMIT) marketHistoryCache.delete(marketHistoryCache.keys().next().value);
 }
 function cachedHistory(cacheSymbol, cacheInterval) { return marketHistoryCache.get(historyCacheKey(cacheSymbol, cacheInterval))?.bars || null; }
