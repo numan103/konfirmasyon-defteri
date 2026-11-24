@@ -66,6 +66,25 @@ test('quotes isolate venue failures and market data is rate limited per account'
   assert.equal(allowMarketData('market-rate-unit', 160001), true);
 });
 
+test('public market upstreams send a browser-compatible User-Agent', async () => {
+  const calls = [];
+  const history = await marketHistory('FX:EURUSD', '1d', null, null, async (url, opts = {}) => {
+    calls.push(opts);
+    return response({ chart: { result: [{ timestamp: [1794751200], meta: { regularMarketPrice: 1.1 },
+      indicators: { quote: [{ open: [1.1], high: [1.1], low: [1.1], close: [1.1], volume: [0] }] } }] } });
+  });
+  assert.equal(calls[0].headers['User-Agent'], 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
+  assert.equal(history.chartable, true);
+  assert.equal(history.candles[0].close, 1.1);
+
+  const quotes = await marketQuotes(['FX:EURUSD'], async (url, opts = {}) => {
+    calls.push(opts);
+    return response({ chart: { result: [{ timestamp: [1794751200], meta: { regularMarketPrice: 1.1, chartPreviousClose: 1.0 }, indicators: { quote: [{ open: [1.1], high: [1.1], low: [1.1], close: [1.1], volume: [0] }] } }] } });
+  });
+  assert.equal(calls[1].headers['User-Agent'], 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
+  assert.equal(quotes['FX:EURUSD'].price, 1.1);
+});
+
 test('existing access API gates market ops by Charts grant and keeps responses private/no-store', async () => {
   const saved = globalThis.fetch;
   let granted = false;

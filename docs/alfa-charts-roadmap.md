@@ -265,6 +265,20 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
 - Çizim/alarm/research anahtarları, bare `BTCUSDT` = Binance Spot, JWT kapıları
   ve bulut şeması değişmedi; üretim API'sine yazılmadı.
 
+## Altıncı modül — FX/EUR mum geçmişi ve canlı fiyat düzeltmesi
+
+- **Sebep:** izleme listesindeki FX/EUR sembollerinde mum geçmişi ve canlı fiyat
+  alınamıyordu; Yahoo Finance döviz endpoint'i varsayılan/eksik User-Agent ile
+  429 döndürüyordu.
+- `lib/chart-market-data.mjs` tüm allowlisted upstream isteklerine tarayıcı
+  uyumlu `User-Agent` ekliyor. Böylece `FX:EURUSD`, `OANDA:EURUSD` ve diğer
+  FX/endeks referansları hem mum geçmişini hem canlı fiyatı alabiliyor; EUR
+  grafiğinde backtest/replay için yeterli tarihsel veri oluşuyor.
+- `tests/chart-market-data.test.mjs` upstream User-Agent başlığını doğruluyor.
+  Tam birim suite **1187/1187** geçti.
+- Çizim/alarm/research anahtarları, bare `BTCUSDT` = Binance Spot, JWT kapıları
+  ve bulut şeması değişmedi; yeni webhook, hesap veya veritabanı eklenmedi.
+
 ## Kaynaklar
 
 - [TradingView özellikleri](https://www.tradingview.com/features/) — grafik tipleri,
