@@ -34,7 +34,7 @@ test('actual cloud-save handler preserves current local settings and blocks auto
     cloudConflicts: new Set(), conflictContext: (...args) => JSON.stringify(args),
     localStorage: local, currentUserKey: () => 'alice',
     layoutSettings: () => ({ chartType: 'line', indicators: [{ type: 'ema', params: { period: 50 } }] }),
-    preserveSettingsConflict, $: () => status, clearTimeout() {}, setTimeout(fn) { timer = fn; },
+    preserveSettingsConflict, updateCloudConflictControl() {}, $: () => status, clearTimeout() {}, setTimeout(fn) { timer = fn; },
     cloudSettings: {
       user: { id: 'alice' }, isAuthed: () => true,
       async save() { saves++; return { ok: false, error: 'revision conflict' }; },

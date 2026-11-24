@@ -20,6 +20,7 @@ import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
 import { initMultiChart } from './alfa-multichart.mjs?v=5';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=3';
+import { openCloudConflict } from './alfa-cloud-conflict.mjs?v=1';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
@@ -1723,6 +1724,54 @@ async function loadLayout() {
   if (cloudConflicts.has(conflictContext(requestOwner, symbol, interval))) {
     $('drawing-status').textContent = 'Bulut çakışması · yerel kayıt korundu; bulut yazımı durduruldu';
   }
+  updateCloudConflictControl();
+}
+function updateCloudConflictControl() {
+  const button = $('cloud-conflict');
+  if (button) button.hidden = !cloudConflicts.has(conflictContext(currentUserKey(), symbol, interval));
+}
+function openSettingsConflict() {
+  const owner = currentUserKey(), ref = symbol, tf = interval, stamp = generation;
+  const context = conflictContext(owner, ref, tf);
+  if (!cloudConflicts.has(context)) return;
+  openCloudConflict({
+    scope: { owner, symbol: ref, timeframe: tf },
+    valid: () => cloudConflicts.has(context) && currentUserKey() === owner && generation === stamp && !replayMode && cloudSettings.user?.id === owner,
+    readLocal: layoutSettings,
+    load: () => cloudSettings.load(ref, tf),
+    save: (settings, revision) => cloudSettings.save(ref, tf, settings, revision),
+    archive: settings => {
+      try { localStorage.setItem(`alfa-chart-settings-backup:v1:${owner}:${ref}:${tf}:${Date.now()}`, JSON.stringify(settings)); return true; }
+      catch { return false; }
+    },
+    apply: settings => {
+      // Only this explicit user choice bypasses the symbol-scoped study preference.
+      localStorage.setItem(layoutKey(), JSON.stringify(settings));
+      if (!writeStudyBundle(localStorage, owner, ref, { version: 1, indicators: settings.indicators || [], overlays: settings.studies || defaultStudyState() })) {
+        throw Error('Yerel gösterge kaydı yapılamadı; çakışma korundu');
+      }
+      if (settings.chartType) applyChartType(settings.chartType);
+      if (typeof settings.logScale === 'boolean') setLogScale(settings.logScale, false);
+      if (typeof settings.autoScale === 'boolean') setAutoScale(settings.autoScale, false);
+      if (settings.view) applyViewSettings(settings.view);
+      if (settings.palette) applyPaletteSettings(settings.palette);
+      if (settings.mtf) mtf.config = { ...mtf.defaultConfig(), ...settings.mtf };
+      if (settings.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...settings.sessionLevels };
+      if (settings.sessionBoxes) applySessionBoxesConfig(settings.sessionBoxes);
+      if (settings.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...settings.marketStructure };
+      if (settings.fvg) fvg.config = { ...fvg.defaultConfig(), ...settings.fvg };
+      if (settings.publicStudies) applyPublicStudiesConfig(settings.publicStudies);
+      applyStudiesBundle({ indicators: settings.indicators || [], overlays: settings.studies || defaultStudyState() }, owner, ref);
+    },
+    finish: verified => {
+      localStorage.setItem(layoutKey(), JSON.stringify(verified.settings));
+      // Remove only the conflict marker; original settings and backups are retained.
+      localStorage.removeItem(`alfa-chart-settings-conflict:v1:${owner}:${ref}:${tf}`);
+      cloudConflicts.delete(context); cloudRevision = verified.revision;
+      updateCloudConflictControl();
+    },
+    onResolved: () => { $('drawing-status').textContent = 'Çakışma çözüldü · seçilen sürüm doğrulandı'; }
+  });
 }
 function scheduleCloudSave(settings = layoutSettings()) {
   if(replayMode)return;
@@ -1744,6 +1793,7 @@ function scheduleCloudSave(settings = layoutSettings()) {
       cloudConflicts.add(context);
       // Read the live local state, not the stale snapshot sent 800ms earlier.
       const kept = preserveSettingsConflict(localStorage, requestOwner, requestSymbol, requestInterval, layoutSettings());
+      updateCloudConflictControl();
       try { $('drawing-status').textContent = kept
         ? 'Bulut çakışması · yerel kayıt korundu; bulut yazımı durduruldu'
         : 'Bulut çakışması · bulut yazımı durduruldu; yerel yedek kaydedilemedi'; } catch {}
@@ -1997,4 +2047,5 @@ if (!isEmbed) {
   } catch {}
 }
 if (syncGate) syncGate.send('hello', { symbol, interval }, { force: true });
+$('cloud-conflict')?.addEventListener('click', openSettingsConflict);
 loadMarket();

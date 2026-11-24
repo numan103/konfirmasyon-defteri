@@ -63,3 +63,11 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - 1G/5G/1A/3A son mevcut mumdan geriye gerçek zaman aralığını yükler. Tümü ancak sağlayıcının boş/overlap bitiş yanıtı doğrulanınca uygulanır.
 - Ağ hatası, hesap/sembol değişimi, bulunamayan tarih veya 512 sayfalık güvenlik sınırında eksik veri “Tümü” diye gösterilmez; mevcut görünüm korunur ve durum açıklanır.
 - Test: 3 yeni unit + mevcut 4 backfill testi geçti. Deterministik sağlayıcı fixture'lı gerçek Playwright akışında toolbar ile çizim, eski tarihe Git, beş preset ve bulunamayan tarihte görünüm/çizim koruması geçti.
+- Commit: `35697cc`.
+
+## Devam — Cloud Conflict Resolution
+
+- Çakışmalı bağlamda “Bulut çakışmasını çöz” düğmesi Yereli Koru / Bulutu Kullan / Dışa Aktar seçeneklerini açar. Kapatma/dışa aktarma çakışmayı çözmez.
+- Yereli Koru güncel bulut revision'ıyla CAS yazar; Bulutu Kullan yerelin ayrı yedeğini aldıktan sonra seçilen bulutu uygular. Her iki yol da bulutu tekrar okuyup içerik ve revision doğrular.
+- Yedekleme hatası, eşzamanlı yerel düzenleme, hesap/sembol değişimi, yeniden çakışma veya doğrulanamayan yazma senkronizasyonu kapalı tutar. Çakışma işareti yalnız doğrulanmış çözümde kaldırılır; yedekler silinmez.
+- Test: 3 yeni unit ve önceki 4 çakışma testi geçti. Gerçek modal düğmeleriyle Playwright akışı export, başarısız doğrulama, yeniden Yereli Koru ve Bulutu Kullan/yedek korumasını doğruladı.
