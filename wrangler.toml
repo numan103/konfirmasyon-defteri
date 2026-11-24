@@ -1,5 +1,6 @@
 name = "alfa-traders"
 compatibility_date = "2026-11-24"
+compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "."
 
 # Statik site; build adimi yok. API rotalari functions/api altinda Cloudflare Pages Functions olarak calisir.

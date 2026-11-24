@@ -85,6 +85,12 @@ test('Cloudflare /api/ai serves mentorship trades as JSON, not the static HTML p
   assert.deepEqual(JSON.parse(await response.text()), { ok: false, error: 'unauthorized' });
 });
 
+test('Cloudflare config declares Node compatibility for crypto and binary API routes', () => {
+  const config = fs.readFileSync(path.join(root, 'wrangler.toml'), 'utf8');
+  assert.match(config, /^compatibility_date = "\d{4}-\d{2}-\d{2}"$/m);
+  assert.match(config, /^compatibility_flags = \["nodejs_compat"\]$/m);
+});
+
 test('Cloudflare /api/tg is a real function wrapper', async () => {
   const source = fs.readFileSync(path.join(root, 'functions', 'api', 'tg.js'), 'utf8');
   assert.match(source, /await import\('\.\.\/\.\.\/api\/tg\.mjs'\)/);
