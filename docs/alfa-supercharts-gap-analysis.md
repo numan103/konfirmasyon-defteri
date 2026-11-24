@@ -1,5 +1,14 @@
 # ALFA CHARTS — TradingView Supercharts Karşılaştırmalı Teknik ve İşlevsel Denetim
 
+> **24 Kasım 2026 güncellemesi:** Bu belge ilk denetimin tarihsel kaydıdır.
+> Aşağıdaki eski “yok/bozuk” maddelerinin bir bölümü sonradan giderildi:
+> tüm replay periyotları, oto ölçek, düzen butonları, sembol bazlı alarm takibi,
+> alarm düzenleme/sessize alma/geçmiş, ek Fibonacci seviyeleri, risk alanları,
+> replay zaman çizelgesi ve çoklu grafik senkronizasyonu artık kodda mevcut.
+> Güncel sınıflandırma ve küçük adımlı geliştirme sırası:
+> [Alfa Charts güncel yol haritası](alfa-charts-roadmap.md).
+> Eski dağıtım/test notları bugünkü üretim durumunu temsil etmez.
+
 **Tarih:** 2026-11-23  
 **Hedef:** https://alfa-trader.com/alfa-charts.html  
 **Kod tabanı:** Denetim `c23567e Fix admin grant for live Fjor account` üzerinde yapıldı; P0 düzeltmeleri yerel olarak `61db14b` üzerine eklendi.<br>
