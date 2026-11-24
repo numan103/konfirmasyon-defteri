@@ -21,6 +21,8 @@ try {
   await page.route('**/api/**', route => {
     const req = route.request(), url = new URL(req.url()), q = url.searchParams;
     requests.push({url:req.url(),method:req.method(),frame:req.frame() === page.mainFrame() ? 'parent' : 'preview'});
+    if (url.pathname === '/api/tg' && q.has('magPhoto'))
+      return route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF1sAAAAASUVORK5CYII=','base64')});
     if (q.get('mentorTrades') === '1') {
       if (q.has('image')) return route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF1sAAAAASUVORK5CYII=','base64')});
       if (q.get('summary') === '1') return route.fulfill({json:{ok:true,summary:{count:3,netR:1.8,wins:2,losses:1,flat:0,series:[
@@ -32,11 +34,15 @@ try {
       return route.fulfill({json:{ok:true,video:{id:'MOKNqsj6WfU',title:'Güvenli video önizlemesi',publishedAt:'2026-11-10T10:00:00Z'}}});
     if (url.pathname === '/api/edu-shared' && q.get('kind') === 'landing')
       return route.fulfill({json:{ok:true,channel:{trades:{latest:[{id:'channel-1',date:new Date().toISOString(),title:'GOLD +2.3R sonuç',coin:'GOLD'}]},biases:{latest:[]}},status:{channel:'ok'}}});
-    if (url.pathname === '/api/edu-shared' && q.get('kind') === 'news')
-      return route.fulfill({json:{ok:true,data:{issueNo:1,weekLabel:'1 Kasım',rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[
-        {id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',category:'Teknik Analiz',sourceLink:'https://t.me/alfakasim/6/946',publishedAt:'2026-11-19T09:00:00.000Z',images:['/api/tg?magPhoto=tech_chart_file_id_456'],photoIds:['tech_chart_file_id_456']},
-        {id:'n2',title:'Makro Analiz',body:'DXY ve altın tarafında risk iştahı zayıf.',type:'',relId:'',result:'',authorId:'a1',category:'Haber',sourceLink:'https://t.me/haberler/501',publishedAt:'2026-11-19T08:00:00.000Z',images:['/api/tg?magPhoto=news_photo_file_id_123'],photoIds:['news_photo_file_id_123']}
+    if (url.pathname === '/api/edu-shared' && q.get('kind') === 'news') {
+      // The weekly reader only accepts current-week posts from the mentorship
+      // magazine thread; old seed/general-channel entries must stay out.
+      const now = new Date().toISOString();
+      return route.fulfill({json:{ok:true,data:{issueNo:1,rosterVer:2,authorsSeeded:true,authors:[{id:'a1',name:'Trader Ahmet',specialty:'BTC & Gold',photo:''}],entries:[
+        {id:'n1',title:'Haftalık HTF Bias',body:'BTC için haftalık HTF bias bullish.',type:'',relId:'',result:'',authorId:'a1',category:'Teknik Analiz',sourceKind:'mentorship-magazine',sourceThread:977,sourceMessageId:946,sourceLink:'https://t.me/alfakasim/977/946',publishedAt:now,images:['/api/tg?magPhoto=tech_chart_file_id_456'],photoIds:['tech_chart_file_id_456']},
+        {id:'n2',title:'Makro Analiz',body:'DXY ve altın tarafında risk iştahı zayıf.',type:'',relId:'',result:'',authorId:'a1',category:'Haber',sourceKind:'mentorship-magazine',sourceThread:977,sourceMessageId:945,sourceLink:'https://t.me/alfakasim/977/945',publishedAt:now,images:['/api/tg?magPhoto=news_photo_file_id_123'],photoIds:['news_photo_file_id_123']}
       ]}}});
+    }
     if (url.pathname === '/api/edu-shared') return route.fulfill({json:{ok:true,data:null,episode:null,channels:{},status:{channel:'ok'},channel:{trades:{latest:[]},biases:{latest:[]}}}});
     return route.fulfill({json:{ok:true,rows:[],entries:[],applications:[]}});
   });
@@ -67,16 +73,19 @@ try {
   assert.match(evaluation,/GOLD/);
   assert.match(evaluation,/2,3R/);
   assert.doesNotMatch(evaluation,/ETH/,'October result stays out of the November cumulative view');
-  await preview.locator('.hc2-row .hc2-r.pos').first().waitFor();
+  // The old #hc2-list teaser was removed; the landing live card now carries
+  // the positive cumulative summary through the same mentor projection.
+  await preview.locator('#lp-live-trades .mentor-curve-headline strong.positive').waitFor({ state:'attached' });
+  assert.match(await preview.locator('#lp-live-trades .mentor-curve-headline strong.positive').innerText(), /\+1,8R/);
   // Actual navigation handlers, not static DOM swaps controlled by the parent.
-  await preview.locator('#home-quick a[href="?page=calc"]').click();
+  await preview.evaluate(() => document.getElementById('tab-calc').click());
   await preview.waitForFunction(() => document.body.dataset.page === 'calc');
   await preview.locator('#tab-alfatrading').click();
   await preview.locator('.mentor-trade h3').first().waitFor();
   assert.equal(await preview.locator('.mentor-trades').isVisible(),true,'new members still get the transaction flow');
   assert.doesNotMatch(await preview.locator('.mentor-trades').innerText(),/PRIVATE_DESCRIPTION/);
   assert.equal(await preview.locator('.mentor-trade img').count(),0);
-  assert.equal(await preview.evaluate(() => siteCanOpen('egitim')),false);
+  assert.equal(await preview.evaluate(() => siteCanOpen('egitim')),true,'Alfa Edu catalog is free for signed-in members');
   assert.equal(await preview.evaluate(() => siteCanOpen('alfacharts')),false);
   assert.equal(await preview.evaluate(() => siteCanOpen('news')),true);
   await preview.evaluate(() => showPage('home'));
@@ -89,14 +98,20 @@ try {
   await preview.locator('#news-weekly-list .nw-card').first().waitFor();
   assert.equal(await preview.locator('#mag-tools:visible').count(),0,'preview roles read the weekly magazine without editor tools');
   assert.equal(requests.some(r => /telesco|telegram\.org|telegram\.me/.test(r.url)),false,'magazine never hotlinks Telegram CDN');
-  const photoSrcs = await preview.evaluate(() => [...document.querySelectorAll('#hmr-stage .e-img')].map(img => img.getAttribute('src')));
+  // The embedded read-only flipbook uses plain <img> in section pages; the
+  // full magazine editor uses .e-img. Both must stay on the same-origin proxy.
+  const photoSrcs = await preview.evaluate(() => [...document.querySelectorAll('#hmr-stage .hmr-sec-item img, #mag-stage .e-img')].map(img => img.getAttribute('src')));
   assert.ok(photoSrcs.length >= 1 && photoSrcs.every(src => src.startsWith('/api/tg?magPhoto=')),'magazine photos use only the same-origin allowlisted proxy');
   await preview.evaluate(() => showPage('home'));
-  const start = requests.length;
+  // The parent page keeps loading its own allowlisted daily notes in the
+  // background; only preview-frame traffic is subject to the read-only broker.
+  const frameCount = () => requests.filter(r => r.frame === 'preview').length;
+  const trafficStart = requests.length;
+  const start = frameCount();
   assert.equal(await preview.evaluate(async () => (await fetch('/api/analytics?education=1',{method:'POST',body:'{}'})).status),403);
   assert.equal(await preview.evaluate(async () => (await fetch('/api/access?op=list')).status),403);
   assert.equal(await preview.evaluate(async () => (await fetch('/api/analytics?education=1&mine=1')).json()).then(x => x.applications.length),0);
-  assert.equal(requests.length,start,'writes and personal/admin reads never leave the broker');
+  assert.equal(frameCount(),start,'writes and personal/admin reads never leave the broker');
   await bar.getByRole('button',{name:'Premium üye',exact:true}).click();
   preview = await getFrame();
   await preview.waitForFunction(() => typeof SITE !== 'undefined' && SITE.tier === 'ref' && !!document.getElementById('user-name').textContent);
@@ -149,7 +164,7 @@ try {
   await bar.getByRole('button',{name:'Yönetici',exact:true}).click();
   assert.equal(await page.locator('#admin-preview-frame').count(),0);
   assert.equal(await page.evaluate(() => AUTH.user.id),'real-admin-fixture');
-  const apiReads = requests.slice(start);
+  const apiReads = requests.slice(trafficStart);
   assert.equal(apiReads.every(r => r.method === 'GET'),true);
   assert.equal(apiReads.filter(r => !r.url.includes('/api/tg?magPhoto=')).every(r => r.frame === 'parent'),true,'preview cannot send native API requests');
   assert.equal(apiReads.filter(r => r.url.includes('/api/tg?magPhoto=')).every(r => r.frame === 'preview'),true,'magazine proxy images are same-origin GETs');
