@@ -15,3 +15,15 @@
 
 /sw.js
   Cache-Control: public, max-age=0, must-revalidate
+
+/katil
+  Cache-Control: no-store
+
+/mentorluk
+  Cache-Control: no-store
+
+/premium
+  Cache-Control: no-store
+
+/durum
+  Cache-Control: no-store

@@ -11,7 +11,8 @@ test('legacy Vercel short links are mirrored by Cloudflare _redirects', () => {
   const legacy = JSON.parse(read('vercel.json'));
   const redirects = (legacy.redirects || []).filter(r => !r.permanent);
   assert.ok(redirects.length > 0);
-  const cloudflare = read('_redirects').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const cloudflare = read('_redirects').split(/\r?\n/)
+    .map(line => line.trim().replace(/(\d+)!$/, '$1')).filter(Boolean);
   for (const { source, destination } of redirects) {
     const expected = `${source} ${destination} 302`;
     assert.ok(cloudflare.includes(expected), `Cloudflare _redirects eksik: ${expected}`);

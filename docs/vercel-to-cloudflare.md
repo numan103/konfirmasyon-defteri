@@ -50,7 +50,9 @@ kullanılmalıdır.
 ## Kısa linkler ve zamanlayıcılar
 
 - Eski `vercel.json` redirect'leri Cloudflare `_redirects` dosyasına birebir
-  taşındı: `/katil`, `/mentorluk`, `/premium`, `/durum`.
+  taşındı: `/katil`, `/mentorluk`, `/premium`, `/durum`. `/durum` kuralı
+  eski edge cache kaydını da zorla geçmek için `302!` kullanır; kısa linklerin
+  hiçbirinde `Cache-Control: no-store` dışında kalıcı cache yoktur.
 - 15 dakikalık haber + ekonomik takvim tetiklemesi
   `.github/workflows/news-poll.yml` ile `https://alfa-trader.com/api/ai?...`
   adresine yapılır; GitHub OIDC token'i kullanılır, sunucuda cron secret saklanmaz.
