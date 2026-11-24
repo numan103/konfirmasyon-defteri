@@ -19,7 +19,7 @@ import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
 import { initMultiChart } from './alfa-multichart.mjs?v=5';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
-import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=2';
+import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=3';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
@@ -1489,6 +1489,8 @@ function currentUserKey() {
 }
 function layoutKey() { return 'alfa-chart-layout:v1:' + currentUserKey() + ':' + symbol + ':' + interval; }
 let cloudRevision = 0;
+const cloudConflicts = new Set();
+const conflictContext = (owner, ref, tf) => JSON.stringify([owner, ref, tf]);
 let cloudSaveTimer = null;
 function layoutSettings() {
   return structuredClone({
@@ -1619,6 +1621,11 @@ async function loadLayout() {
   let localLayout = null, cloudLayout = null;
   try {
     localLayout = JSON.parse(localStorage.getItem(layoutKey()) || 'null');
+    const recovery = readSettingsConflict(localStorage, requestOwner, symbol, interval);
+    if (recovery) {
+      cloudConflicts.add(conflictContext(requestOwner, symbol, interval));
+      localLayout = recovery.settings;
+    }
     const raw = localLayout;
     if (raw && typeof raw === 'object') {
       if (typeof raw.chartType === 'string') applyChartType(raw.chartType);
@@ -1634,7 +1641,7 @@ async function loadLayout() {
       if (raw.publicStudies) applyPublicStudiesConfig(raw.publicStudies);
     }
   } catch {}
-  if (cloudSettings.isAuthed()) {
+  if (cloudSettings.isAuthed() && !cloudConflicts.has(conflictContext(requestOwner, symbol, interval))) {
     const cloud = await cloudSettings.load(symbol, interval);
     if(replayMode || requestGeneration !== generation || requestOwner !== currentUserKey())return;
     if (cloud && cloud.settings) {
@@ -1655,36 +1662,33 @@ async function loadLayout() {
   // layouts are migration sources only; they are never silently overwritten.
   const layouts = [localLayout, cloudLayout].filter(Boolean);
   applyStudiesBundle(loadStudiesFor(requestOwner, symbol, layouts), requestOwner, symbol);
+  if (cloudConflicts.has(conflictContext(requestOwner, symbol, interval))) {
+    $('drawing-status').textContent = 'Bulut çakışması · yerel kayıt korundu; bulut yazımı durduruldu';
+  }
 }
 function scheduleCloudSave(settings = layoutSettings()) {
   if(replayMode)return;
   if (!cloudSettings.isAuthed()) return;
   const requestSymbol = symbol, requestInterval = interval, requestOwner = currentUserKey(), requestGeneration = generation;
+  const context = conflictContext(requestOwner, requestSymbol, requestInterval);
+  if (cloudConflicts.has(context)) {
+    preserveSettingsConflict(localStorage, requestOwner, requestSymbol, requestInterval, settings);
+    return;
+  }
   const revision = cloudRevision;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(async () => {
-    if(replayMode || cloudSettings.user?.id !== requestOwner)return;
+    if(replayMode || cloudSettings.user?.id !== requestOwner || cloudConflicts.has(context))return;
     const res = await cloudSettings.save(requestSymbol, requestInterval, settings, revision);
     if (requestGeneration !== generation || requestOwner !== currentUserKey()) return;
     if (res.ok) { cloudRevision = res.revision || cloudRevision; try { $('drawing-status').textContent = 'Bulut: kaydedildi'; } catch {} }
     else if (res.error && /conflict|unique/i.test(res.error)) {
-      // reload cloud and apply
-      const cloud = await cloudSettings.load(requestSymbol, requestInterval);
-      if (requestGeneration !== generation || requestOwner !== currentUserKey() || replayMode) return;
-      if (cloud && cloud.settings) {
-        const s = cloud.settings;
-        if (typeof s.chartType === 'string') applyChartType(s.chartType);
-        if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
-        if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
-        if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
-        if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);
-        if (s.marketStructure) marketStructure.config = { ...marketStructure.defaultConfig(), ...s.marketStructure };
-        if (s.fvg) fvg.config = { ...fvg.defaultConfig(), ...s.fvg };
-        if (s.publicStudies) applyPublicStudiesConfig(s.publicStudies);
-        applyStudiesBundle(loadStudiesFor(requestOwner, requestSymbol, [s]), requestOwner, requestSymbol);
-        cloudRevision = cloud.revision || cloudRevision;
-        try { $('drawing-status').textContent = 'Çakışma çözüldü · bulut sürümü uygulandı'; } catch {}
-      }
+      cloudConflicts.add(context);
+      // Read the live local state, not the stale snapshot sent 800ms earlier.
+      const kept = preserveSettingsConflict(localStorage, requestOwner, requestSymbol, requestInterval, layoutSettings());
+      try { $('drawing-status').textContent = kept
+        ? 'Bulut çakışması · yerel kayıt korundu; bulut yazımı durduruldu'
+        : 'Bulut çakışması · bulut yazımı durduruldu; yerel yedek kaydedilemedi'; } catch {}
     } else {
       try { $('drawing-status').textContent = res.offline ? 'Çevrimdışı · yerel kayıt' : 'Bulut hatası · yerel kayıt'; } catch {}
     }

@@ -3,6 +3,23 @@ const URL = 'https://fssrtlpjqbavzomynwmg.supabase.co';
 const KEY = 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
 const LEGACY_AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
+// A conflict is not permission to overwrite either copy. Keep an owner/context
+// scoped local recovery until the user explicitly reconciles the two versions.
+export function settingsConflictKey(owner, symbol, timeframe) {
+  return `alfa-chart-settings-conflict:v1:${owner}:${symbol}:${timeframe}`;
+}
+export function readSettingsConflict(storage, owner, symbol, timeframe) {
+  try {
+    const value = JSON.parse(storage.getItem(settingsConflictKey(owner, symbol, timeframe)) || 'null');
+    return value?.settings && typeof value.settings === 'object' ? value : null;
+  } catch { return null; }
+}
+export function preserveSettingsConflict(storage, owner, symbol, timeframe, settings) {
+  try {
+    storage.setItem(settingsConflictKey(owner, symbol, timeframe), JSON.stringify({ settings, savedAt: Date.now() }));
+    return true;
+  } catch { return false; }
+}
 function migrateLegacyAuth() {
   for (const storage of [sessionStorage, localStorage]) {
     try {

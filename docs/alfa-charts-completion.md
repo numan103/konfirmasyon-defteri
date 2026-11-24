@@ -22,3 +22,12 @@ Production deploy yapılmaz. Mobile worktree değiştirilmez.
 - **Fayda:** BTC 4H/1H/15M/5M → ETH seçiminde dört periyot korunuyor; spot/perpetual kimlikleri korunuyor. Eski kayıtlar silinmeden varsayılan periyotla okunuyor.
 - **Test:** Unit suite 1192/1192. Yeni izole Playwright testi: dört timeframe kabul senaryosu, iframe focus, active routing, sync-off izolasyonu, interval sync, iframe kimliği ve reload kalıcılığı geçti. Mevcut workspace suite 24 PASS; gerçek iframe native timeframe değişimi ve geri bildirim testi dahil; uncaught browser error yok.
 - **Sınır:** Panel kayıtları mevcut yerel workspace kapsamında; yeni cloud workspace servisi oluşturulmadı. Watchlist ve gösterge/çizim motorları yeniden yazılmadı.
+- **Commit:** `72635d1`.
+
+## İkinci düzeltme: bulut çakışması yerel ayarları ezmiyor
+
+- **Önceki sorun:** Revision conflict yanıtından sonra bulut sürümü otomatik yüklenip uygulanıyor, kullanıcının o anki yerel ayarları kayboluyordu.
+- **Düzeltme:** Çakışmada o anki ayarların hesap/sembol/periyot kapsamlı ayrı bir yerel kopyası korunuyor. Otomatik bulut yazımı duruyor; sonraki yerel değişiklikler bu kopyayı güncelliyor. Yeniden açılışta da çakışmalı bulut sürümü yereli ezmiyor.
+- **Fayda:** Çatışma iki sürümden birini sessizce seçmiyor. Çizim/watchlist kayıtları ve bulut revision kontrolü değiştirilmedi.
+- **Test:** Dört hedefli test: hesap/piyasa/periyot izolasyonu, depolama hatası, gerçek save handler ve gerçek layout loader. Tam unit suite 1196/1196; workspace Playwright 24 PASS.
+- **Sınır:** Bu koruyucu adım çakışmalı bağlamı yerel modda tutar; iki sürümü karşılaştırıp kullanıcı kararıyla uzlaştıran arayüz henüz tamamlanmadı. Normal, çakışmasız bulut akışı değişmedi.
