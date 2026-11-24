@@ -154,8 +154,11 @@ export class DrawingEngine {
     $('drawing-cloud-retry').onclick = () => this.store.retry(this.context);
     $('drawing-clear-all').onclick = () => {
       if (!this.ready || !this.history.doc.drawings.length) return;
-      if (!confirm('Bu semboldeki tüm çizimler silinsin mi? (Ctrl+Z ile geri alabilirsiniz)')) return;
-      const next = clone(this.history.doc); next.drawings = [];
+      const locked = this.history.doc.drawings.filter(d => d.locked);
+      if (locked.length) {
+        if (!confirm(`Kilitli ${locked.length} çizim korunacak; diğerleri silinsin mi?`)) return;
+      } else if (!confirm('Bu semboldeki tüm çizimler silinsin mi? (Ctrl+Z ile geri alabilirsiniz)')) return;
+      const next = clone(this.history.doc); next.drawings = locked;
       this.selected = null; this.commit(next);
     };
     $('drawing-export').onclick = () => {

@@ -353,7 +353,11 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     if (single) single.hidden = state.open;
     if (multi) multi.hidden = !state.open;
     const button = $('multi-toggle');
-    if (button) { button.setAttribute('aria-pressed', String(state.open)); button.textContent = state.open ? 'Tek grafik' : 'Çoklu grafik'; }
+    if (button) {
+      button.setAttribute('aria-pressed', String(state.open));
+      button.setAttribute('aria-label', state.open ? 'Tek grafik düzenine geç' : 'Çoklu grafik düzenine geç');
+      button.setAttribute('title', state.open ? 'Tek grafik (1)' : 'Çoklu grafik (2/4/6)');
+    }
     if (state.open) renderMulti(true);
     else setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
   }

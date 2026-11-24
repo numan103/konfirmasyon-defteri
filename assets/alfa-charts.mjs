@@ -3,7 +3,7 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine } from './alfa-drawings.mjs?v=14';
+import { DrawingEngine } from './alfa-drawings.mjs?v=15';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=6';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=3';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
@@ -17,7 +17,7 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=1';
-import { initMultiChart } from './alfa-multichart.mjs?v=2';
+import { initMultiChart } from './alfa-multichart.mjs?v=3';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
