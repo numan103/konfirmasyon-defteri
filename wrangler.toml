@@ -1,0 +1,6 @@
+name = "alfa-traders"
+compatibility_date = "2026-11-24"
+pages_build_output_dir = "."
+
+# Statik site; build adimi yok. API rotalari functions/api altinda Cloudflare Pages Functions olarak calisir.
+# Ortam degiskenleri (SUPABASE_URL, SUPABASE_SERVICE_ROLE, vb.) Cloudflare Dashboard > Pages > alfa-traders > Settings > Environment variables uzerinden yonetilir.

@@ -1,0 +1,17 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/api/*
+  Cache-Control: private, no-store
+  X-Content-Type-Options: nosniff
+
+/alfa-charts
+  Cache-Control: public, max-age=0, must-revalidate
+
+/alfa-charts.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
