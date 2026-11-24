@@ -1,7 +1,7 @@
 // Telegram kanalındaki son gönderileri t.me/s/ sayfasından parse edip JSON döndürür.
 // Kanal embed iframe'leri X-Frame-Options ile engellendiği için sunucu tarafı çözüm kullanıldı.
 // Ayrıca ?notify=1 (veya POST {message, publicMessage}) ile Alfa Portföy bildirimleri
-// Bot API'den gönderilir (Vercel Hobby 12 fonksiyon limiti nedeniyle ayrı endpoint açılmadı).
+// Bot API'den gönderilir (Cloudflare Pages Hobby 12 fonksiyon limiti nedeniyle ayrı endpoint açılmadı).
 // Herkese açık kanal (TG_CHAT_ID) yalnızca genel/davet edici metni alır; ayrıntılı metin
 // varsa ve TG_PREMIUM_CHAT_ID tanımlıysa sadece premium kanalına gider.
 import { requestUser, requestTier, throttle } from '../lib/auth.mjs';
@@ -89,7 +89,7 @@ async function handleMagPhoto(req, res) {
 
 async function handleNotify(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Vercel env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
+  if (!TG_TOKEN || !TG_CHAT) return res.status(503).json({ ok: false, error: 'Telegram için Cloudflare Pages env gerekli: TG_BOT_TOKEN ve TG_CHAT_ID.' });
 
   // Bu uç resmi Telegram kanalına mesaj atıyor: yalnızca referansı doğrulanmış
   // üye veya yönetici kullanabilir. Anonim spam'i burada kesiyoruz.
