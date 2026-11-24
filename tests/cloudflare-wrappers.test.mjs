@@ -1,5 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+test('every API handler has a Cloudflare Pages wrapper with the matching import', () => {
+  const handlers = fs.readdirSync(path.join(root, 'api')).filter(name => name.endsWith('.mjs')).sort();
+  assert.ok(handlers.length > 0);
+  for (const name of handlers) {
+    const wrapper = path.join(root, 'functions', 'api', name.replace(/\.mjs$/, '.js'));
+    assert.ok(fs.existsSync(wrapper), `${name} eksik Cloudflare wrapper'ı: functions/api/${name.replace(/\.mjs$/, '.js')}`);
+    const source = fs.readFileSync(wrapper, 'utf8');
+    assert.ok(new RegExp(`import\\s+handler\\s+from\\s+['"]\\.\\.\\/\\.\\.\\/api\\/${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(source),
+      `${name} wrapper'ı yanlış handler'ı import ediyor`);
+    assert.match(source, /export async function onRequest/);
+  }
+});
 
 test('Cloudflare Pages adapter returns Buffer image bytes as a real image response', async () => {
   const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
@@ -47,4 +65,23 @@ test('Cloudflare Pages adapter forwards res.redirect with its Location header', 
       if (saved[key] === undefined) delete process.env[key]; else process.env[key] = saved[key];
     }
   }
+});
+
+test('Cloudflare /api/ai serves mentorship trades as JSON, not the static HTML page', async () => {
+  const { onRequest } = await import('../functions/api/ai.js');
+  const response = await onRequest({
+    request: new Request('https://example.test/api/ai?mentorTrades=1'),
+    env: {},
+  });
+  assert.equal(response.status, 401);
+  assert.match(response.headers.get('content-type'), /application\/json/);
+  assert.equal(response.headers.get('cache-control'), 'private, no-store');
+  assert.match(response.headers.get('vary'), /Authorization/);
+  assert.deepEqual(JSON.parse(await response.text()), { ok: false, error: 'unauthorized' });
+});
+
+test('Cloudflare /api/tg is a real function wrapper', async () => {
+  const source = fs.readFileSync(path.join(root, 'functions', 'api', 'tg.js'), 'utf8');
+  assert.match(source, /from '\.\.\/\.\.\/api\/tg\.mjs'/);
+  assert.match(source, /ArrayBuffer\.isView\(data\)/);
 });
