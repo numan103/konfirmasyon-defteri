@@ -13870,6 +13870,17 @@ function magSafeBg(value) {
   } else if (!/^(https?:\/\/|\/api\/tg\?magPhoto=)/i.test(s)) return '';
   return s.replace(/["')]/g, '');
 }
+// Arşivlenmiş dergi mesajlarının süresi dolmuş Telegram CDN adreslerini
+// aynı kökenli publicmag proxy'sine çevirir; ham kaydı değiştirmez.
+function magRenderImage(url, messageId, index) {
+  const s = String(url || '');
+  if (/^https?:\/\/cdn\d*\.telesco\.\w+\//i.test(s)) {
+    const msg = Number(messageId);
+    if ([1195, 1205].indexOf(msg) < 0) return '';
+    return '/api/tg?magPhoto=publicmag_' + msg + '_' + (Number.isInteger(index) ? index : 0);
+  }
+  return s;
+}
 async function saveNews() {
   // Admin okuyucuda üretilen proxy URL'leri kalıcı photoIds'nin yanına yazma;
   // aksi halde public yüzde görsel iki kez görünür.
@@ -14261,7 +14272,10 @@ function magBuildEntry(en, i, admin) {
   }
   // görseller (normal analiz)
   const imgs = document.createElement('div'); imgs.className = 'e-imgs';
-  (en.images || []).forEach((url, k) => {
+  // Yönetici ham kaydında kalmış süresi dolmuş Telegram CDN adreslerini
+  // arşiv mesajıysa aynı kökenli proxy'ye çevir; ham veriyi değiştirme.
+  (en.images || []).map((raw, k) => magRenderImage(raw, en.sourceMessageId, k))
+    .filter(Boolean).forEach((url, k) => {
     const wrap = document.createElement('div'); wrap.className = 'e-imgwrap';
     const img = document.createElement('img'); img.className = 'e-img'; img.src = url; img.alt = 'Analiz görseli'; img.loading = k < 2 ? 'eager' : 'lazy';
     img.addEventListener('error', () => {
@@ -14770,7 +14784,12 @@ function hmrBuildSectionPage(sec, entries, data, pageNo, opts) {
     const bodyText = String(en.body || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || String(en.body || '').trim();
     const imgs = Array.isArray(en.images) ? en.images.filter(Boolean) : [];
     if (bodyText) { const body = document.createElement('div'); body.className = 'body e-body'; body.textContent = String(en.body || '').trim(); item.appendChild(body); }
-    imgs.slice(0, 4).forEach(url => { const img = document.createElement('img'); img.loading = 'lazy'; img.alt = title; img.src = url; img.addEventListener('error', () => img.remove()); item.appendChild(img); });
+    imgs.slice(0, 4).forEach((url, k) => {
+      const src = magRenderImage(url, en.sourceMessageId, k);
+      if (!src) return;
+      const img = document.createElement('img'); img.loading = 'lazy'; img.alt = title; img.src = src;
+      img.addEventListener('error', () => img.remove()); item.appendChild(img);
+    });
     if (!bodyText && !imgs.length) { const body = document.createElement('div'); body.className = 'body e-body'; body.textContent = 'İçerik metni bekleniyor.'; item.appendChild(body); }
     flow.appendChild(item);
   });

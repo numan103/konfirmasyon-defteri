@@ -119,10 +119,19 @@ test('Telegram entries share one stream with a category badge and safe same-orig
   assert.ok(!/\/api\/edu-shared[\s\S]{0,400}t\.me\//.test(api), 'no Telegram CDN hotlink in the public projection');
 });
 
+test('expired Telegram CDN photos are restored through the same-origin archive proxy', () => {
+  assert.ok(api.includes('cdn\\d*\\.telesco\\.pe'), 'public projection must recognize stale Telegram CDN links');
+  assert.ok(api.includes("'/api/tg?magPhoto=publicmag_' + msg + '_' + i"), 'archived message maps to its verified proxy index');
+  assert.ok(api.includes('LEGACY_MAGAZINE_MESSAGES.includes(msg)'), 'only allowlisted archive messages are restored');
+  assert.ok(html.includes('function magRenderImage('), 'shared renderer maps expired links without mutating stored data');
+  assert.ok(html.includes("'/api/tg?magPhoto=publicmag_' + msg + '_'"), 'shared renderer uses the same-origin archive proxy');
+  assert.match(html, /imgs\.slice\(0, 4\)\.forEach\(\(url, k\) => \{[\s\S]{0,260}magRenderImage\(url, en\.sourceMessageId, k\)/);
+});
+
 test('complete data URI media survives the public projection; truncated ones are dropped', () => {
   const projection = api.slice(api.indexOf('const media ='), api.indexOf('const entries ='));
   assert.match(projection, /payload\.length % 4 === 0/);
-  assert.match(api, /images\.slice\(0, 12\)\.map\(u => media\(u\)\)/);
+  assert.match(api, /images\.slice\(0, 12\)\s*\.map\(\(u, i\) => media\(u, 500000, legacy/);
   assert.match(api, /beforeImg: media\(e && e\.beforeImg\)/);
   assert.match(api, /afterImg: media\(e && e\.afterImg\)/);
   assert.match(api, /photo: media\(a && a\.photo\)/);

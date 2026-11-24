@@ -19,7 +19,7 @@ import { sealChannels, openChannels } from '../lib/edu-channel-storage.mjs';
 import { PAID_PLAN_IDS, isPaidItem, itemPlans, verifiedEduPlans, projectChannels, channelEditor } from '../lib/edu-access.mjs';
 import eduTelegramInbox from '../lib/edu-telegram-inbox.mjs';
 import eduProgress from '../lib/edu-progress.mjs';
-import { readMagazineSnapshot } from '../lib/telegram-magazine-source.mjs';
+import { readMagazineSnapshot, LEGACY_MAGAZINE_MESSAGES } from '../lib/telegram-magazine-source.mjs';
 import { groupMagazineArticles } from '../assets/magazine-articles.mjs';
 import { cleanPDF } from '../lib/edu-pdf.mjs';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
@@ -68,8 +68,14 @@ async function alfaNews(req, res) {
     const text = (value, max) => String(value == null ? '' : value).slice(0, max);
     // data:image URL'leri 600 karaktere kırpılırsa bozulur (ERR_INVALID_URL).
     // Yalnızca eksiksiz base64 veri URI'lerini koru, kırıkları boş kabul et.
-    const media = (value, max = 500000) => {
+    const media = (value, max = 500000, stalePhoto = '') => {
       const s = String(value == null ? '' : value);
+      // Telegram CDN hotlink'i zaten yasak; eski cdn*.telesco.pe adresleri
+      // süresi dolduğu için 404 verir. Yalnızca arşivlenmiş dergi mesajının
+      // doğrulanmış same-origin proxy adresine geçişe izin verilir.
+      if (/^https?:\/\/cdn\d*\.telesco\.pe\//i.test(s)) {
+        return /^\/api\/tg\?magPhoto=publicmag_\d+_\d+$/.test(stalePhoto) ? stalePhoto : '';
+      }
       if (/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(s)) {
         const payload = s.slice(s.indexOf(',') + 1);
         if (s.length <= max && /^[A-Za-z0-9+/]+={0,2}$/.test(payload) && payload.length % 4 === 0) return s;
@@ -101,7 +107,11 @@ async function alfaNews(req, res) {
       result: text(e && e.result, 200),
       authorId: text(e && e.authorId, 80),
       images: (function () {
-        const own = Array.isArray(e && e.images) ? e.images.slice(0, 12).map(u => media(u)).filter(Boolean) : [];
+        const msg = sourceMessageId(e);
+        const legacy = LEGACY_MAGAZINE_MESSAGES.includes(msg);
+        const own = Array.isArray(e && e.images) ? e.images.slice(0, 12)
+          .map((u, i) => media(u, 500000, legacy ? '/api/tg?magPhoto=publicmag_' + msg + '_' + i : ''))
+          .filter(Boolean) : [];
         const tg = Array.isArray(e && e.photoIds)
            ? (e.mediaGroupId ? e.photoIds.slice(0, 12) : e.photoIds.slice(-1)).map(id => text(id, 250)).filter(Boolean)
             .map(id => '/api/tg?magPhoto=' + encodeURIComponent(id))
