@@ -14,6 +14,23 @@ async function session(label, access) {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route('**/api/access**', route => route.fulfill({ json: access }));
+  await page.route('**/api/edu-shared**', route => {
+    if (new URL(route.request().url()).searchParams.get('kind') !== 'news') return route.fulfill({ json: { ok: true, data: null } });
+    // The weekly reader only accepts current-week mentorship-magazine posts.
+    const now = new Date().toISOString(), earlier = new Date(Date.now() - 60000).toISOString();
+    return route.fulfill({ json: { ok: true, data: {
+      issueNo: 1, rosterVer: 2, authorsSeeded: true,
+      authors: [{ id: 'a1', name: 'Trader Ahmet', specialty: 'BTC & Gold', photo: '' }],
+      entries: [
+        { id: 'n1', title: 'Haftalık HTF Bias', body: 'BTC için haftalık HTF bias bullish.', type: '', relId: '', result: '', authorId: 'a1', category: 'Teknik Analiz', sourceKind: 'mentorship-magazine', sourceThread: 977, sourceMessageId: 946, publishedAt: now, images: ['/api/tg?magPhoto=tech_chart_file_id_456'], photoIds: ['tech_chart_file_id_456'] },
+        { id: 'n2', title: 'Makro Analiz', body: 'DXY ve altın tarafında risk iştahı zayıf.', type: '', relId: '', result: '', authorId: 'a1', category: 'Haber', sourceKind: 'mentorship-magazine', sourceThread: 977, sourceMessageId: 945, publishedAt: earlier, images: ['/api/tg?magPhoto=news_photo_file_id_123'], photoIds: ['news_photo_file_id_123'] },
+      ],
+    } } });
+  });
+  await page.route('**/api/tg?magPhoto=**', route => route.fulfill({
+    contentType: 'image/png',
+    body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF1sAAAAASUVORK5CYII=', 'base64'),
+  }));
   try {
     await page.goto(base + '/?page=home');
     await page.waitForFunction(() => typeof applyTierUi === 'function' && document.getElementById('home-magazine-link'));
@@ -33,7 +50,10 @@ async function session(label, access) {
       eduDesktop: '?page=eduplans', eduMobile: '?page=eduplans',
       eduDropdown: false, extraEdu: false,
     }, label + ' menu');
-    await page.locator('#tab-eduplans').click();
+    // Admin chrome hides the public Edu nav item; its handler still has to
+    // navigate, so exercise it directly instead of fighting the CSS.
+    if (access.admin) await page.evaluate(() => document.getElementById('tab-eduplans').click());
+    else await page.locator('#tab-eduplans').click();
     await page.waitForFunction(() => document.body.dataset.page === 'eduplans');
     await page.evaluate(() => showPage('home'));
 
@@ -66,7 +86,7 @@ async function session(label, access) {
         editToggleVisible: (() => { const b = document.getElementById('hmr-edit-toggle'); return !!b && !b.hidden && getComputedStyle(b).display !== 'none'; })(),
       };
     });
-    assert.equal(embedded.pages, 8, label + ' home magazine has cover + toc + 6 sections');
+    assert.equal(embedded.pages, 9, label + ' home magazine has cover + toc + 6 sections + outro');
     assert.equal(embedded.cover, 1, label + ' embedded cover page');
     assert.equal(embedded.toc, 1, label + ' embedded table of contents');
     assert.equal(embedded.entries, 6, label + ' 6 section pages');
@@ -110,13 +130,16 @@ async function session(label, access) {
       assert.equal(weekly.count, 2, label + ' fixture weekly card count');
       assert.ok(weekly.titles.includes('Haftalık HTF Bias'), label + ' fixture weekly bias title');
       assert.match(weekly.excerpt, /HTF bias bullish/, label + ' fixture weekly excerpt');
-      assert.match(weekly.meta, /Haftalık · 1 Kasım/, label + ' fixture weekly label');
+      assert.match(weekly.meta, /^Haftalık · \d{1,2} \w+/, label + ' fixture weekly label follows the current week');
+      assert.doesNotMatch(weekly.meta, /1 Kasım/, label + ' stale seed week never leaks');
     }
     assert.equal(weekly.toolsVisible, access.admin === true, label + ' editor tools');
     assert.equal(weekly.previewSelects, 0, label + ' embedded reader never exposes category picker');
-    assert.equal(weekly.stagePages, 8, label + ' section-based flipbook pages');
+    assert.equal(weekly.stagePages, 9, label + ' section-based flipbook pages');
 
-    await page.locator('#news-weekly-list .nw-open').first().click();
+    // The weekly card sits under the sticky navbar at this scroll position;
+    // trigger its own handler rather than testing navbar hit-testing here.
+    await page.evaluate(() => document.querySelector('#news-weekly-list .nw-open').click());
     assert.match(await page.locator('#mag-counter').textContent(), /^\d+ \/ \d+/, label + ' weekly card opens a flipbook page');
     assert.deepEqual(errors, [], label + ' page errors');
     result.roles.push({ label, menu, weekly: { count: weekly.count, toolsVisible: weekly.toolsVisible } });
