@@ -25,6 +25,21 @@ Oluşan tablolar: `public.site_access` (site), `public.telegram_access` (bot).
 - Yazma sadece `/api/access` üzerinden, `SUPABASE_SERVICE_ROLE` ile.
 - Aynı borsa UID'si iki hesaba bağlanamaz (`site_access_uid_key`).
 
+## 1c. Bootstrap doğrulaması
+
+Yeni Supabase projesinin (`fssrtlpjqbavzomynwmg`) asgari kurulumunu ve eski
+kısıtlı projeye sessizce düşülmediğini doğrulamak için:
+
+```bash
+node scripts/verify-supabase-bootstrap.mjs
+```
+
+Kontrol edilenler: `edu_shared` seed satırları (`v1`, `channels`, `shortlinks`,
+`site-features`), `alfanews id=1`, anonim okumada özel satır sızıntısı olmaması,
+service-role ile beslenen `/api/edu-shared?kind=landing` ve herkese açık
+`/api/edu-shared?kind=news` yanıtları. Komut yalnızca publishable anahtar kullanır;
+service-role anahtarını yazdırmaz veya göndermez.
+
 ## 1b. Cloud Research Database (Faz 5 / Modül 2)
 
 ALFA CHARTS araştırma kayıtları için `014_cloud_research.sql` dosyasını SQL Editor'da

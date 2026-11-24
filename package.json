@@ -1,5 +1,8 @@
 {
   "private": true,
+  "scripts": {
+    "verify:supabase": "node scripts/verify-supabase-bootstrap.mjs"
+  },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@vercel/blob": "^2.6.0",
