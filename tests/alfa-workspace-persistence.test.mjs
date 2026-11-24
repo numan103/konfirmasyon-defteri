@@ -76,7 +76,10 @@ test('workspace migration is additive, owner-only RLS and grants no delete or an
   const sql = fs.readFileSync(new URL('../supabase/site/040_chart_workspaces.sql', import.meta.url), 'utf8');
   assert.match(sql, /enable row level security/i);
   assert.match(sql, /auth\.uid\(\) = user_id/);
-  assert.doesNotMatch(sql, /drop table|truncate|delete from|grant .*delete/i);
+  assert.doesNotMatch(sql, /\b(drop\s+table|truncate\s+(table\s+)?public\.|delete\s+from)\b/i);
+  assert.match(sql, /revoke all privileges on table public\.chart_workspaces from public, anon, authenticated/i);
+  assert.match(sql, /grant select, insert, update on public\.chart_workspaces to authenticated/i);
+  assert.doesNotMatch(sql, /grant [^\n;]*(delete|truncate|references|trigger)[^\n;]* to (anon|authenticated)/i);
 });
 test('workspace transport scopes reads and CAS updates to the authenticated owner', async () => {
   const calls = [];

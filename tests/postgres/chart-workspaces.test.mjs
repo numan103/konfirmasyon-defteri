@@ -87,3 +87,124 @@ test('same-name incompatible schema fails closed instead of changing an unrelate
     assert.equal((await db.query("select relrowsecurity from pg_class where oid='public.chart_workspaces'::regclass")).rows[0].relrowsecurity, false);
   } finally { await db.close(); }
 });
+
+async function asUser(db, user, role = 'authenticated') {
+  await db.exec(`reset role; set role ${role};`);
+  await db.query("select set_config('request.jwt.claim.sub',$1,false)", [user || '']);
+}
+async function denied(db, query, params = []) {
+  await assert.rejects(db.query(query, params), error => error.code === '42501');
+}
+async function owner(db) { await db.exec('reset role;'); }
+
+test('broad PUBLIC/anon/authenticated defaults and column grants are narrowed on both runs', async () => {
+  const db = await setup({ broad: true });
+  try {
+    const before = await existingSnapshot(db);
+    for (let run = 0; run < 2; run++) {
+      await migrate(db);
+      for (const role of ['anon', 'authenticated']) {
+        for (const privilege of ['DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) {
+          const result = await db.query('select has_table_privilege($1,$2,$3) as allowed', [role, 'public.chart_workspaces', privilege]);
+          assert.equal(result.rows[0].allowed, false, `${role} ${privilege}`);
+        }
+      }
+      assert.equal((await db.query("select has_any_column_privilege('anon','public.chart_workspaces','SELECT,INSERT,UPDATE,REFERENCES') as allowed")).rows[0].allowed, false);
+      assert.equal((await db.query("select has_any_column_privilege('authenticated','public.chart_workspaces','REFERENCES') as allowed")).rows[0].allowed, false);
+      assert.deepEqual(await existingSnapshot(db), before);
+      if (!run) await db.exec('grant select(workspace), references(user_id) on public.chart_workspaces to public,anon; grant references(user_id) on public.chart_workspaces to authenticated;');
+    }
+    // Existing default ACLs are untouched: subsequent unrelated tables retain
+    // their original grants, not a schema-wide change made by this migration.
+    await db.exec('create table public.unrelated_after_migration(id int);');
+    assert.equal((await db.query("select has_table_privilege('authenticated','public.unrelated_after_migration','TRUNCATE') as allowed")).rows[0].allowed, true);
+    await asUser(db, alice);
+    await denied(db, 'truncate public.chart_workspaces');
+  } finally { await db.close(); }
+});
+
+test('RLS enforces SELECT/INSERT/UPDATE ownership; clients cannot delete either account', async () => {
+  const db = await setup({ broad: true });
+  try {
+    await migrate(db);
+    await asUser(db, alice);
+    await db.query('insert into chart_workspaces(user_id,workspace) values($1,$2)', [alice, workspace]);
+    assert.equal((await db.query('select * from chart_workspaces')).rows.length, 1);
+    await asUser(db, bob);
+    assert.equal((await db.query('select * from chart_workspaces')).rows.length, 0);
+    assert.equal((await db.query('update chart_workspaces set revision=9 where user_id=$1 returning *', [alice])).rows.length, 0);
+    await denied(db, 'insert into chart_workspaces(user_id,workspace) values($1,$2)', [alice, workspace]);
+    await db.query('insert into chart_workspaces(user_id,workspace) values($1,$2)', [bob, workspace]);
+    await denied(db, 'update chart_workspaces set user_id=$1 where user_id=$2', [alice, bob]);
+    assert.equal((await db.query('update chart_workspaces set revision=revision+1 where user_id=$1 and revision=1 returning revision', [bob])).rows[0].revision, 2);
+    assert.equal((await db.query('update chart_workspaces set revision=3 where user_id=$1 and revision=1 returning revision', [bob])).rows.length, 0);
+    await denied(db, 'delete from chart_workspaces where user_id=$1', [bob]);
+    await denied(db, 'delete from chart_workspaces where user_id=$1', [alice]);
+    // Isolate the DELETE policy boundary too: even an accidental DELETE grant
+    // in this disposable DB cannot bypass the absence of a DELETE RLS policy.
+    await owner(db);
+    await db.exec('grant delete on public.chart_workspaces to authenticated;');
+    await asUser(db, bob);
+    assert.equal((await db.query('delete from chart_workspaces returning *')).rows.length, 0);
+    await owner(db);
+    await migrate(db); // removes the intentionally injected grant
+    assert.equal((await db.query('select * from chart_workspaces')).rows.length, 2);
+    await asUser(db, '', 'anon');
+    for (const statement of [
+      'select * from chart_workspaces',
+      `insert into chart_workspaces(user_id,workspace) values('${alice}','{}')`,
+      'update chart_workspaces set revision=9', 'delete from chart_workspaces',
+      'truncate public.chart_workspaces'
+    ]) await denied(db, statement);
+  } finally { await db.close(); }
+});
+
+test('service role and migration owner retain administrative access without changing shared roles', async () => {
+  const db = await setup({ broad: true });
+  try {
+    const before = (await db.query("select rolname,rolsuper,rolbypassrls,rolinherit from pg_roles where rolname in ('postgres','anon','authenticated','service_role') order by rolname")).rows;
+    await migrate(db); await migrate(db);
+    assert.deepEqual((await db.query("select rolname,rolsuper,rolbypassrls,rolinherit from pg_roles where rolname in ('postgres','anon','authenticated','service_role') order by rolname")).rows, before);
+    for (const id of [alice, bob]) await db.query('insert into chart_workspaces(user_id,workspace) values($1,$2)', [id, workspace]);
+    await asUser(db, '', 'service_role');
+    assert.equal((await db.query('select * from chart_workspaces')).rows.length, 2);
+    assert.equal((await db.query('update chart_workspaces set revision=revision+1 returning *')).rows.length, 2);
+    for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) {
+      assert.equal((await db.query('select has_table_privilege(current_user,$1,$2) as allowed', ['public.chart_workspaces', privilege])).rows[0].allowed, true);
+    }
+    await owner(db);
+    assert.equal((await db.query('select * from chart_workspaces')).rows.length, 2);
+  } finally { await db.close(); }
+});
+
+test('inherited unsafe grants or owner membership fail closed without changing shared roles or existing data', async () => {
+  for (const scenario of ['inherited', 'owner']) {
+    const db = await setup();
+    try {
+      await migrate(db);
+      await db.query('insert into chart_workspaces(user_id,workspace) values($1,$2)', [alice, workspace]);
+      if (scenario === 'inherited') await db.exec('create role extra_workspace_rights; grant truncate on public.chart_workspaces to extra_workspace_rights; grant extra_workspace_rights to authenticated;');
+      else await db.exec('grant postgres to authenticated;');
+      const membership = (await db.query('select roleid,member from pg_auth_members order by roleid,member')).rows;
+      await assert.rejects(migrate(db), /unexpected effective client privileges|unsafe client role/);
+      assert.deepEqual((await db.query('select roleid,member from pg_auth_members order by roleid,member')).rows, membership);
+      assert.equal((await db.query('select * from chart_workspaces')).rows.length, 1);
+    } finally { await db.close(); }
+  }
+});
+
+test('original v1 table with user data and explicit UPDATE WITH CHECK upgrades twice without replacing policies', async () => {
+  const db = await setup({ broad: true });
+  try {
+    await db.exec(await fs.readFile(new URL('./fixtures/chart-workspaces-v1.sql', import.meta.url), 'utf8'));
+    await db.query('insert into chart_workspaces(user_id,workspace,revision) values($1,$2,9),($3,$2,4)', [alice, workspace, bob]);
+    const before = await existingSnapshot(db);
+    const rows = (await db.query('select * from chart_workspaces order by user_id')).rows;
+    const policies = (await db.query("select * from pg_policy where polrelid='public.chart_workspaces'::regclass order by oid")).rows;
+    await migrate(db); await migrate(db);
+    assert.deepEqual((await db.query('select * from chart_workspaces order by user_id')).rows, rows);
+    assert.deepEqual((await db.query("select * from pg_policy where polrelid='public.chart_workspaces'::regclass order by oid")).rows, policies);
+    assert.deepEqual(await existingSnapshot(db), before);
+    assert.equal((await db.query("select has_table_privilege('authenticated','public.chart_workspaces','TRUNCATE') as allowed")).rows[0].allowed, false);
+  } finally { await db.close(); }
+});

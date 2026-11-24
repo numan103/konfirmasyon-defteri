@@ -104,7 +104,57 @@ end
 $workspace_policies$;
 
 alter table public.chart_workspaces enable row level security;
-revoke all on public.chart_workspaces from anon;
+
+-- Do not change global role attributes, memberships or schema-wide default
+-- privileges. Abort if those would bypass the intended owner-only boundary.
+do $workspace_roles$
+declare
+  table_owner oid;
+begin
+  select relowner into table_owner from pg_class where oid = 'public.chart_workspaces'::regclass;
+  if exists (select 1 from pg_roles where rolname in ('anon', 'authenticated') and (rolsuper or rolbypassrls))
+    or pg_has_role('anon', table_owner, 'MEMBER')
+    or pg_has_role('authenticated', table_owner, 'MEMBER') then
+    raise exception 'chart_workspaces unsafe client role/owner membership: manual review required';
+  end if;
+  if not exists (select 1 from pg_roles where rolname = 'service_role' and (rolbypassrls or rolsuper)) then
+    raise exception 'chart_workspaces expected Supabase service_role BYPASSRLS role is missing';
+  end if;
+end
+$workspace_roles$;
+
+-- GRANT is additive: first remove inherited-at-creation/default direct grants,
+-- including column ACLs, then establish this table's explicit allowlist.
+-- This closes DELETE/TRUNCATE/REFERENCES/TRIGGER (and future ALL privileges)
+-- without rewriting defaults or permissions for any other table.
+revoke all privileges on table public.chart_workspaces from public, anon, authenticated;
+revoke all privileges (user_id, name, workspace, revision, updated_at)
+  on table public.chart_workspaces from public, anon, authenticated;
 grant select, insert, update on public.chart_workspaces to authenticated;
+grant all privileges on table public.chart_workspaces to service_role;
+
+-- Direct REVOKE cannot safely edit grants held through unrelated role
+-- memberships. Verify effective privileges and roll back rather than weaken
+-- RLS or silently alter shared roles/service-role grants.
+do $workspace_permissions$
+declare
+  target oid := 'public.chart_workspaces'::regclass;
+begin
+  if has_table_privilege('anon', target, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')
+    or has_any_column_privilege('anon', target, 'SELECT,INSERT,UPDATE,REFERENCES')
+    or has_table_privilege('authenticated', target, 'DELETE,TRUNCATE,REFERENCES,TRIGGER')
+    or has_any_column_privilege('authenticated', target, 'REFERENCES')
+    or has_table_privilege('authenticated', target, 'SELECT WITH GRANT OPTION,INSERT WITH GRANT OPTION,UPDATE WITH GRANT OPTION') then
+    raise exception 'chart_workspaces unexpected effective client privileges: review inherited role grants';
+  end if;
+  if current_setting('server_version_num')::integer >= 170000 then
+    if has_table_privilege('anon', target, 'MAINTAIN')
+      or has_table_privilege('authenticated', target, 'MAINTAIN') then
+      raise exception 'chart_workspaces unexpected MAINTAIN privilege';
+    end if;
+  end if;
+end
+$workspace_permissions$;
+
 notify pgrst, 'reload schema';
 commit;
