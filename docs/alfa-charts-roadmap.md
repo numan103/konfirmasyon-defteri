@@ -62,7 +62,7 @@ Kanıt: `assets/alfa-charts.mjs` (`checkAlarms`, `connectPolling`,
 
 | ID | Eksik / kısmi yetenek | Küçük modül hedefi | Öncelik / boyut |
 |---|---|---|---|
-| B1 | Grafik saat dilimi | UTC, İstanbul, New York, Londra vb.; eksen/crosshair/son mum saati; yaz-kış saati. **Veri ve çizim epoch'ları değişmez.** | P1 / küçük |
+| B1 | Grafik saat dilimi — tamamlandı | UTC, İstanbul, New York, Londra ve Tokyo; eksen/crosshair/son mum saati; yaz-kış saati. **Veri ve çizim epoch'ları değişmez.** | P1 / küçük |
 | B2 | Mum kapanış geri sayımı | Periyoda göre sayaç; eski veri/replay durumunda yanıltıcı canlı sayaç göstermeme. | P1 / küçük |
 | B3 | Replay'den bağımsız tarihe git | Mevcut tarih girişi replay başlatıyor. Normal grafikte tarih bulma, veri yoksa açık uyarı; replay durumunu değiştirmeme. | P1 / orta |
 | B4 | Fiyat ekseni seçenekleri | Yüzde, 100'e endeksleme, ters fiyat ölçeği; log/oto zaten var. | P1 / orta |
@@ -96,7 +96,7 @@ Kanıt: `assets/alfa-charts.mjs` (`checkAlarms`, `connectPolling`,
 
 ## Küçük adımlı sıra ve kabul şartları
 
-1. **B1 — Saat dilimi**: ilk düşük riskli kullanım geliştirmesi.
+1. **B1 — Saat dilimi**: tamamlandı; ilk düşük riskli kullanım geliştirmesi.
 2. **A1 + A3 — Doğru kapsam açıklamaları**: yeni motor varmış izlenimi vermeden UI'ı netleştir.
 3. **A2 — Kaynak/durum rozeti**: birebir ve yaklaşık veriyi ayır.
 4. **A4 — Ayar çakışması**: yeni kayıt yüzeylerinden önce veri güvenliği.
@@ -112,6 +112,20 @@ Korunacaklar: bare `BTCUSDT` = Binance Spot; venue ref'leri, çizim/alarm/resear
 anahtarları ve JWT kapıları değişmez. Misafir veri erişimi korunur. Eski kısıtlı
 Supabase'e fallback yok. Mevcut çizim/veri silinmez, marka/watermark eklenmez.
 Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kalır.
+
+## İlk modül — B1 sonuçları
+
+- `assets/alfa-chart-time.mjs`: IANA/Intl tabanlı etiket formatları; UTC varsayılan,
+  bölgeye göre yaz/kış saati; tarih-only anahtarların takvim günü korunur.
+- Alt çubuktaki saat dilimi düğmesi ve Grafik ayarları seçicisi aynı tercihi kullanır.
+- Yeni `alfa-chart-timezone:v1:<owner>` tercihi yalnızca yerelde saklanır; eski
+  çizim/alarm/layout anahtarları, bulut şeması ve API yetkileri değişmez.
+  Aynı hesabın açık sekme/panellerine storage olayıyla uygulanır.
+- 10 yeni birim testi; tüm birim testleri **1156/1156**.
+- Yeni sentetik-verili Playwright testi: eksen/crosshair, görünüm/veri/çizim
+  korunması, iptal, yeniden yükleme, diğer sekme/panel, replay UTC ve 320/390 px.
+- Gerçek Binance verisiyle `alfa-workspace`, `alfa-drawings`, `alfa-replay`
+  tarayıcı regresyonları geçti. Bu modül için gerçek hesaplı bulut testi yapılmadı.
 
 ## Kaynaklar
 

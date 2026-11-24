@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=18">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=19">
 </head>
 <body>
   <main class="workspace">
@@ -115,7 +115,7 @@
         <div class="chart-navigation">
           <div class="range-presets" aria-label="Görünür tarih aralığı"><button data-range="86400" type="button">1G</button><button data-range="432000" type="button">5G</button><button data-range="2592000" type="button">1A</button><button data-range="7776000" type="button">3A</button><button data-range="all" type="button">Tümü</button></div>
           <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
-          <div class="scale-controls"><span>UTC</span><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
+          <div class="scale-controls"><button id="chart-timezone" type="button" aria-label="Grafik saat dilimi: UTC" title="Grafik saat dilimini değiştir">UTC</button><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
         </div>
         <div id="message" role="status" hidden></div>
       </section>
@@ -245,6 +245,6 @@
       <span id="data-info">Kaynak: seçili piyasa · Zaman: UTC · En fazla 1000 mum</span>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=57"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=58"></script>
 </body>
 </html>

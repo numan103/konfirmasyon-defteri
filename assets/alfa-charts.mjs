@@ -1,4 +1,4 @@
-import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
+import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode, TickMarkType } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
 import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=10';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, playAlarmSound, postAlarmWebhook,
@@ -23,6 +23,7 @@ import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
+import { CHART_TIME_ZONES, normalizeChartTimeZone, chartTimeZoneKey, readChartTimeZone, writeChartTimeZone, createChartTimeFormatters } from './alfa-chart-time.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
@@ -155,6 +156,7 @@ function applyChartType(next) {
   if (sel && sel.value !== type) sel.value = type;
 }
 let symbol = 'BTCUSDT', interval = '1h', type = 'candles';
+let chartTimeZone = 'UTC', chartTimeFormats = createChartTimeFormatters('UTC');
 let history = [], seriesBars = [], socket, aborter, retryTimer, pollTimer, watchdog, generation = 0, attempts = 0;
 let lastReceipt = 0, disposed = false, pendingIndicators = null, loadingOlder = false;
 let replayMode = false, replayFull = [], replayIndex = 0, replayTimer = null, replaySpeed = 1;
@@ -576,8 +578,12 @@ function quote() {
   $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · ${live ? 'canlı değer' : 'son mum'}`;
   $('quote-change').style.color = change >= 0 ? '#26c89c' : '#ef6677';
   if (!replayMode) watchlist?.updateQuote(symbol, c.close);
-  $('price-time').textContent = `Mum: ${new Date(c.time * 1000).toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+  updateQuoteTime();
   showCandle(c);
+}
+function updateQuoteTime() {
+  const c = history.at(-1);
+  if (c) $('price-time').textContent = `Mum: ${chartTimeFormats.dateTime(c.time)} · ${CHART_TIME_ZONES[chartTimeZone]}`;
 }
 function setData(data, resetView) {
   history = data;
@@ -649,7 +655,7 @@ function updateUI() {
   $('market-title').textContent = `${name} · ${label}`;
   $('market-title').title = market?.label || symbol;
   const dataInfo = $('data-info');
-  if (dataInfo) dataInfo.textContent = `Kaynak: ${market?.venue || 'BINANCE'} · ${market?.marketType === 'perp' ? 'Vadeli' : market?.marketType === 'index' ? 'Endeks' : 'Spot'} · Zaman: UTC`;
+  if (dataInfo) dataInfo.textContent = `Kaynak: ${market?.venue || 'BINANCE'} · ${market?.marketType === 'perp' ? 'Vadeli' : market?.marketType === 'index' ? 'Endeks' : 'Spot'} · Zaman: ${CHART_TIME_ZONES[chartTimeZone]}`;
   document.querySelectorAll('#timeframes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
   try {
@@ -1078,6 +1084,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.shot-wrap')) c
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeShotMenu(); });
 $('reset-view').addEventListener('click', () => handleChartAction('reset-view'));
 $('chart-settings').addEventListener('click', () => handleChartAction('settings'));
+$('chart-timezone').addEventListener('click', openChartTimeZone);
 $('fit').addEventListener('click', () => handleChartAction('fit'));
 $('live').addEventListener('click', () => handleChartAction('realtime'));
 function toggleList(show) {
@@ -1342,6 +1349,7 @@ const research = new ResearchPanel({getOwner:currentUserKey,isReplayActive:()=>r
   onOpen:packet=>enterReplay({session:packet.replay,researchPacket:packet})});
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
 const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+  applyChartTimeZone(readChartTimeZone(currentUserKey()));
   watchlist.account();
   research.account(user,cloudSettings.client);
   if(paper.engine&&paper.owner()!==paper.ownerId){pauseReplay();paper.stop();}
@@ -1358,6 +1366,7 @@ function dispose() {
   closeTransport(); clearTimeout(cloudSaveTimer); cloudSettings.dispose();
   try { publicStudies?.dispose(); } catch {}
   clearSyncTimers(); window.removeEventListener('message', onSyncMessage);
+  window.removeEventListener('storage', onChartTimeZoneStorage);
   drawings.dispose(); watchlist.dispose(); sessionBoxes.dispose(); observer.disconnect(); chart.remove();
 }
 window.addEventListener('pagehide', dispose, { once: true });
@@ -1465,6 +1474,53 @@ function layoutSettings() {
     marketStructure: marketStructure.config, fvg: fvg.config, publicStudies: publicStudies.toJSON(), studies: studiesUI.toJSON(),
   });
 }
+function applyChartTimeZone(value, persist = false) {
+  chartTimeZone = normalizeChartTimeZone(value);
+  chartTimeFormats = createChartTimeFormatters(chartTimeZone);
+  const kinds = {
+    [TickMarkType.Year]: 'year', [TickMarkType.Month]: 'month', [TickMarkType.DayOfMonth]: 'day',
+    [TickMarkType.Time]: 'time', [TickMarkType.TimeWithSeconds]: 'seconds'
+  };
+  // Only the library's label formatters change. Never offset series data or
+  // drawing epochs, refetch candles, fit the view or change replay/session time.
+  chart.applyOptions({
+    localization: { timeFormatter: time => chartTimeFormats.dateTime(time) },
+    timeScale: { tickMarkFormatter: (time, kind) => chartTimeFormats.tickMark(time, kinds[kind]) }
+  });
+  const label = CHART_TIME_ZONES[chartTimeZone], button = $('chart-timezone');
+  button.textContent = label; button.dataset.timezone = chartTimeZone;
+  button.setAttribute('aria-label', 'Grafik saat dilimi: ' + label);
+  button.title = `Grafik saat dilimi: ${label} (${chartTimeZone}) · değiştirmek için tıkla`;
+  updateQuoteTime(); updateUI();
+  const saved = !persist || writeChartTimeZone(currentUserKey(), chartTimeZone);
+  if (!saved) {
+    connection('Saat dilimi uygulandı; tarayıcı tercihi kaydedilemedi', 'error');
+  }
+  return saved;
+}
+function chartTimeZoneOptions() {
+  return Object.entries(CHART_TIME_ZONES).map(([value, name]) =>
+    `<option value="${value}" ${value === chartTimeZone ? 'selected' : ''}>${name}${value === 'UTC' ? '' : ' · ' + value}</option>`).join('');
+}
+function openChartTimeZone() {
+  const owner = currentUserKey();
+  const modal = chartDialog(`<div class="dialog-header"><div><h3>Grafik saat dilimi</h3><p>Yalnızca saat gösterimini değiştirir.</p></div><button id="timezone-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <form id="timezone-form" class="chart-settings-form"><label>Saat dilimi<select name="timezone">${chartTimeZoneOptions()}</select></label>
+      <p class="menu-note">Yaz/kış saati otomatik uygulanır. Mumlar, çizimler, seans hesapları ve replay tarih girişleri UTC kalır. Tercih bu cihazda hesabına özel saklanır.</p>
+      <div class="settings-actions"><button id="timezone-cancel" type="button">Vazgeç</button><button type="submit" class="apply">Uygula</button></div></form>`);
+  modal.overlay.setAttribute('aria-label', 'Grafik saat dilimi');
+  modal.box.querySelector('#timezone-close').onclick = modal.close;
+  modal.box.querySelector('#timezone-cancel').onclick = modal.close;
+  modal.box.querySelector('#timezone-form').onsubmit = event => {
+    event.preventDefault();
+    if (owner !== currentUserKey()) { modal.close(); connection('Hesap değişti; saat dilimini yeniden seçin', 'error'); return; }
+    applyChartTimeZone(new FormData(event.currentTarget).get('timezone'), true); modal.close();
+  };
+}
+function onChartTimeZoneStorage(event) {
+  if (event.key === chartTimeZoneKey(currentUserKey())) applyChartTimeZone(readChartTimeZone(currentUserKey()));
+}
+window.addEventListener('storage', onChartTimeZoneStorage);
 function saveLayout() {
   if (replayMode) return; // Replay has its own session; never overwrite the live layout.
   const settings = layoutSettings();
@@ -1679,6 +1735,7 @@ function resetChartView() {
   connection('Grafik görünümü sıfırlandı', 'ok');
 }
 function openChartSettingsModal() {
+  const owner = currentUserKey();
   const intervalOptions = Object.entries(TIMEFRAMES).map(([label, value]) =>
     `<option value="${value}" ${value === interval ? 'selected' : ''}>${label} · ${value}</option>`).join('');
   const typeOptions = [...$('chart-type').options].map(o =>
@@ -1688,7 +1745,8 @@ function openChartSettingsModal() {
       <fieldset><legend>GRAFİK</legend><div class="setting-grid">
         <label>Zaman dilimi<select name="interval">${intervalOptions}</select></label>
         <label>Grafik türü<select name="type">${typeOptions}</select></label>
-      </div></fieldset>
+        <label>Saat dilimi<select name="timezone">${chartTimeZoneOptions()}</select></label>
+      </div><small>Saat dilimi yalnızca gösterimi değiştirir; çizim koordinatları, seanslar ve replay tarih girişleri UTC kalır.</small></fieldset>
       <fieldset><legend>GÖRÜNÜM</legend>
         <label><input type="checkbox" name="grid" ${viewConfig.grid ? 'checked' : ''}> Izgara çizgileri</label>
         <label><input type="checkbox" name="axisLabels" ${viewConfig.axisLabels ? 'checked' : ''}> Fiyat ekseni etiketleri</label>
@@ -1709,6 +1767,8 @@ function openChartSettingsModal() {
   box.querySelector('#chart-settings-reset').onclick = () => { modal.close(); handleChartAction('reset-view'); };
   box.querySelector('#chart-settings-form').addEventListener('submit', event => {
     event.preventDefault();
+    if (owner !== currentUserKey()) { modal.close(); connection('Hesap değişti; grafik ayarlarını yeniden açın', 'error'); return; }
+    const beforeView = JSON.stringify({ type, logScale, autoScale, viewConfig, palette });
     const data = new FormData(event.currentTarget);
     const nextInterval = String(data.get('interval'));
     const intervalChanged = Object.values(TIMEFRAMES).includes(nextInterval) && nextInterval !== interval;
@@ -1718,9 +1778,13 @@ function openChartSettingsModal() {
     applyViewSettings({ grid: data.has('grid'), axisLabels: data.has('axisLabels'), clean: data.has('clean') });
     applyPaletteForm(data);
     setAutoScale(data.has('autoScale'), false);
+    const timeZoneSaved = applyChartTimeZone(data.get('timezone'), true);
     persistViewConfig(); saveLayout(); modal.close();
     if (intervalChanged) loadMarket();
-    else { chart.timeScale().fitContent(); connection('Grafik ayarları uygulandı', 'ok'); }
+    else {
+      if (beforeView !== JSON.stringify({ type, logScale, autoScale, viewConfig, palette })) chart.timeScale().fitContent();
+      if (timeZoneSaved) connection('Grafik ayarları uygulandı', 'ok');
+    }
   });
 }
 function openCandleSettingsModal() {
@@ -1802,6 +1866,7 @@ document.addEventListener('keydown', event => {
   }
 });
 applyViewConfig();
+applyChartTimeZone(readChartTimeZone(currentUserKey()));
 if (!isEmbed) {
   try {
     multiChart = initMultiChart({ getSymbol: () => symbol, getInterval: () => interval,
