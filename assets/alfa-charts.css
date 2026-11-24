@@ -322,6 +322,9 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 .chart-settings-form label:has(input[type=checkbox]){flex-direction:row;align-items:center;gap:8px;font-size:11px;color:#c1cde0}
 .chart-settings-form select{min-height:32px}
 .chart-settings-form .settings-actions{padding-top:0}
+.chart-scope-note{padding:10px 12px;margin:0 0 16px;border:1px solid #3f506d;border-left:3px solid #8da9ff;border-radius:7px;background:#1a2333;color:#b4c3db;font-size:11px;line-height:1.65;overflow-wrap:anywhere}
+.chart-scope-note>strong{font-size:11px;color:#cfddf5}
+.chart-scope-note p{margin:6px 0 0;color:#a4b5d0;font-size:11px;line-height:1.65}
 @media(min-width:1800px){.market-controls{flex:0 1 auto}.actions{margin-left:auto}}
 @media(max-width:1200px){.brand h1{display:none}.toolbar{gap:8px}.toolbar-divider{display:none}.workarea{grid-template-columns:48px minmax(0,1fr) 220px}.no-list .workarea{grid-template-columns:48px minmax(0,1fr)}.drawing-space{padding-left:4px;padding-right:4px}.quote strong{font-size:23px}#drawing-manager{right:230px}}
 @media(max-width:900px){.button-label{display:none}.count-badge{display:none}.toolbar{padding:0 8px;gap:6px}.actions>button{padding:6px}.actions{gap:1px}.workspace-menu>summary{padding:6px}.market-controls{gap:3px}#timeframes{padding:0 4px}#timeframes button{padding:7px 6px}.market-legend{gap:8px}.market-legend>.venue-tag{display:none}#drawing-help{display:none}.selection-toolbar small{display:none}.workspace-popover{position:fixed;top:52px;right:8px;max-width:calc(100vw - 20px)}.session-popover{top:auto;bottom:48px;left:54px;right:auto}.shot-menu{position:fixed;right:8px;top:52px}}

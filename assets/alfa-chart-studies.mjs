@@ -1,5 +1,6 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=1';
 import { parseHM, SESSION_BOX_DEFS } from './alfa-session-boxes-model.mjs?v=3';
+import { PUBLIC_STUDY_DETAILS } from './alfa-market-data-public.mjs?v=2';
 
 export const OVERLAY_CATALOG = [
   { id: 'volume', name: 'Hacim', category: 'Volume', description: 'Mumlara eşlik eden işlem hacmi', color: '#6fa8b0' },
@@ -13,8 +14,8 @@ export const OVERLAY_CATALOG = [
   { id: 'cvdSpot', name: 'CVD · Spot', category: 'Market Data', description: 'Binance Spot kapanış verisinden taker alım-satım kümülatif deltası', color: '#26c89c' },
   { id: 'cvdPerp', name: 'CVD · Perpetual', category: 'Market Data', description: 'Binance USD-M vadeli taker alım-satım kümülatif deltası', color: '#8ea7ff' },
   { id: 'marketDelta', name: 'Market Delta', category: 'Market Data', description: 'Mum başına taker alım - satım hacmi · ücretsiz', color: '#71b9c0' },
-  { id: 'footprint', name: 'Footprint', category: 'Market Data', description: 'Mum başına alıcı/satıcı iniciyatifi ve toplam işlem hacmi', color: '#7aafa0' },
-  { id: 'heatmap', name: 'Order Book Likidite Isı Haritası', category: 'Market Data', description: 'Binance emir defteri alış/satış likiditesi · canlı anlık görüntü', color: '#b29bd6' },
+  { id: 'footprint', ...PUBLIC_STUDY_DETAILS.footprint, category: 'Market Data', color: '#7aafa0' },
+  { id: 'heatmap', ...PUBLIC_STUDY_DETAILS.heatmap, category: 'Market Data', color: '#b29bd6' },
 ];
 const descriptions = {
   sma: 'Basit hareketli ortalama', ema: 'Üssel hareketli ortalama', wma: 'Ağırlıklı hareketli ortalama',
@@ -226,6 +227,9 @@ export class ChartStudies {
     let html = fields.map(input).join('');
     if (schemas[id] && ['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint', 'heatmap'].includes(id)) {
       html = '<p>Bu gösterge anahtarsız Binance verisi kullanır. Yalnızca Binance Spot / Vadeli sembollerde çalışır; diğer borsa referansları dönüştürülmez.</p>' + html;
+    }
+    if (PUBLIC_STUDY_DETAILS[id]) {
+      html = `<aside class="chart-scope-note" data-study-scope="${esc(id)}" role="note"><strong>Verinin kapsamı</strong><p>${esc(PUBLIC_STUDY_DETAILS[id].scope)}</p></aside>` + html;
     }
     if (id === 'mtf') html = `<fieldset><legend>Üst zaman dilimleri</legend>${['15m', '30m', '1h', '4h', '1d', '1w'].map(tf => `<label><input type="checkbox" data-htf="${tf}" ${(cfg.htf || []).includes(tf) ? 'checked' : ''}> ${tf.toUpperCase()}</label>`).join(' ')}</fieldset>` + html;
     if (id === 'levels') {

@@ -99,6 +99,6 @@ test('UI time zones use formatters, not shifted data or new layout/cloud fields'
   assert.doesNotMatch(layout, /chartTimeZone/);
   const html = fs.readFileSync(new URL('../alfa-charts.html', import.meta.url), 'utf8');
   assert.match(html, /id="chart-timezone"[^>]*aria-label="Grafik saat dilimi: UTC"/);
-  assert.match(html, /alfa-charts\.mjs\?v=58/);
-  assert.match(html, /alfa-charts\.css\?v=19/);
+  assert.ok(Number(html.match(/alfa-charts\.mjs\?v=(\d+)/)?.[1]) >= 58);
+  assert.ok(Number(html.match(/alfa-charts\.css\?v=(\d+)/)?.[1]) >= 19);
 });

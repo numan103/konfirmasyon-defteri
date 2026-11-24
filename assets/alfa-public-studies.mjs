@@ -5,16 +5,16 @@ import { parseMarketRef } from './alfa-charts-data.mjs?v=10';
 import {
   fetchOpenInterest, fetchLongShortRatio, fetchKlineFlow, fetchDepthHeatmap,
   cvdFromFlow, deltaFromFlow, footprintFromFlow, intervalToPeriod,
-  PUBLIC_MARKET_SOURCES
-} from './alfa-market-data-public.mjs?v=1';
+  PUBLIC_MARKET_SOURCES, PUBLIC_STUDY_DETAILS
+} from './alfa-market-data-public.mjs?v=2';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 const HEX = /^#[0-9a-f]{6}$/i;
 export const PUBLIC_STUDY_IDS = Object.freeze(['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint', 'heatmap']);
 export const PUBLIC_STUDY_NAMES = Object.freeze({
   oi: 'Açık Pozisyon', longShort: 'Long / Short Oranı', cvdSpot: 'CVD · Spot',
-  cvdPerp: 'CVD · Perpetual', marketDelta: 'Market Delta', footprint: 'Footprint',
-  heatmap: 'Order Book Likidite Isı Haritası'
+  cvdPerp: 'CVD · Perpetual', marketDelta: 'Market Delta', footprint: PUBLIC_STUDY_DETAILS.footprint.name,
+  heatmap: PUBLIC_STUDY_DETAILS.heatmap.name
 });
 const DEFAULTS = Object.freeze({
   oi: { period: 'auto', color: '#8ea7ff', refresh: 300 },

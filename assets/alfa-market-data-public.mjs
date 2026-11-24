@@ -16,11 +16,25 @@ const cleanSymbol = value => String(value || '').toUpperCase().replace(/[^A-Z0-9
 export const PUBLIC_MARKET_SOURCES = Object.freeze({
   openInterest: 'Binance Futures · açık pozisyon',
   longShort: 'Binance Futures · hesap long/short',
-  cvdSpot: 'Binance Spot · aggTrades',
-  cvdPerp: 'Binance Futures · aggTrades',
-  marketDelta: 'Binance · aggTrades',
-  footprint: 'Binance · aggTrades',
-  heatmap: 'Binance · order book depth'
+  cvdSpot: 'Binance Spot · klines taker hacmi',
+  cvdPerp: 'Binance Futures · klines taker hacmi',
+  marketDelta: 'Binance · klines taker hacmi',
+  footprint: 'Binance · klines taker hacmi',
+  heatmap: 'Binance · order book depth anlık görüntüsü'
+});
+// Display metadata only: retain the old study IDs so saved layouts/favorites
+// keep working. These summaries are not full price-level/history renderers.
+export const PUBLIC_STUDY_DETAILS = Object.freeze({
+  footprint: Object.freeze({
+    name: 'Mum deltası · Footprint özeti',
+    description: 'Mum başına toplam taker alım-satım deltası; fiyat kademeli bid/ask footprint değildir.',
+    scope: 'Binance mum verisindeki taker alım-satım hacminden delta histogramı gösterilir. Her fiyat kademesindeki bid/ask hacmi veya imbalance hücreleri gösterilmez.'
+  }),
+  heatmap: Object.freeze({
+    name: 'Likidite seviyeleri · anlık emir defteri',
+    description: 'Son alınan emir defterinden yatay likidite seviyeleri; tarihsel heatmap / ısı haritası değildir.',
+    scope: 'Son alınan emir defteri görüntüsü yatay fiyat çizgileriyle gösterilir ve seçilen yenileme aralığında güncellenir. Geçmiş likidite hareketleri kaydedilmez; tarihsel ısı haritası veya kesintisiz veri akışı değildir.'
+  })
 });
 
 export async function fetchOpenInterest(symbol, period = '5m', limit = 500, signal, fetcher = fetch) {

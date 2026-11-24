@@ -10,13 +10,13 @@ import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=1';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=2';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=2';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
-import { PublicStudiesManager } from './alfa-public-studies.mjs?v=1';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=2';
 import { initMultiChart } from './alfa-multichart.mjs?v=3';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=1';
@@ -1208,7 +1208,11 @@ function openAlarmManager(editingId = null) {
     <button data-del-alarm="${escapeHTML(a.id)}">Sil</button></div>`).join('')
     : '<p style="color:#8e9eb6">Bu sembolde alarm yok. Koşulları, sesi ve bildirim kanalını aşağıdan seçebilirsin.</p>';
   const m = openModal(`<div class="dialog-header"><div><h3>🔔 Fiyat Alarmları · ${symbol}</h3><p>Tarayıcı bildirimi, özel ses, Telegram ve webhook</p></div><button id="alarm-close-x" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
-    <form id="alarm-form" class="chart-settings-form">
+    <aside id="alarm-scope" class="chart-scope-note" role="note" aria-label="Alarmın çalışma kapsamı"><strong>Bu grafiğe bağlı yerel alarm · ${escapeHTML(symbol)}</strong>
+      <p>Bu grafik açık ve canlı veri alırken yalnızca seçili sembolün alarmları kontrol edilir. Sembolü değiştirince önceki sembol bu grafikte izlenmez.</p>
+      <p>Sekme/cihaz kapalıyken, bağlantı yokken veya Replay sırasında çalışmaz. Tarayıcı arka plandaki sekmeyi duraklatabilir. <strong>7/24 sunucu alarmı değildir.</strong></p>
+      <p>Telegram ve webhook yalnızca bu sayfanın tetiklediği alarmı iletir; kendi başına sürekli izleme yapmaz. Alarm kayıtları bu cihazda hesabınıza özel saklanır.</p></aside>
+    <form id="alarm-form" class="chart-settings-form" aria-describedby="alarm-scope">
       <fieldset><legend>KOŞUL</legend><div class="setting-grid">
         <label>Koşul<select id="alarm-cond">${opts(ALARM_CONDITIONS, 'above')}</select></label>
         <label>Fiyat<input id="alarm-price" type="number" step="any" placeholder="Fiyat"></label>
@@ -1222,7 +1226,7 @@ function openAlarmManager(editingId = null) {
         <label><button id="alarm-test-sound" type="button">Sesi dene ▶</button></label>
         <label>Telegram sohbet ID<input id="alarm-telegram" inputmode="numeric" maxlength="15" placeholder="Örn. 123456789" value="${escapeHTML(settings.telegramChat)}"></label>
         <label>Webhook (https)<input id="alarm-webhook" type="url" placeholder="https://…" value="${escapeHTML(settings.webhook)}"></label>
-      </div><small id="alarm-permission-hint">Tarayıcı bildirimi için izin gerekir. Telegram, Alfa Charts hesabınızla gönderilir ve sunucuda saklanmaz.</small></fieldset>
+      </div><small id="alarm-permission-hint">Tarayıcı bildirimi için izin, Telegram için Alfa Charts oturumu gerekir. Webhook hedefi tarayıcıdan gelen HTTPS isteğine izin vermelidir.</small></fieldset>
       <div class="settings-actions"><button id="alarm-permission" type="button">Bildirim izni ver</button><button id="alarm-add" type="submit">Alarm ekle</button></div>
     </form>
     <div id="alarm-list">${rows}</div>
@@ -1231,6 +1235,7 @@ function openAlarmManager(editingId = null) {
       <button id="alarm-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button>
     </div>`);
   const box = m.box;
+  m.overlay.setAttribute('aria-label', 'Fiyat alarmları');
   if (editingAlarmId) {
     const a = ensureAlarms().find(x => x.id === editingAlarmId);
     if (a) {
@@ -1257,7 +1262,7 @@ function openAlarmManager(editingId = null) {
   box.querySelector('#alarm-permission').onclick = async () => {
     try {
       const permission = await Notification.requestPermission();
-      box.querySelector('#alarm-permission-hint').textContent = permission === 'granted' ? 'Bildirim izni verildi.' : 'Bildirim izni verilmedi; ses ve Telegram çalışmaya devam eder.';
+      box.querySelector('#alarm-permission-hint').textContent = permission === 'granted' ? 'Bildirim izni verildi; alarmın çalışma kapsamı değişmez.' : 'Bildirim izni verilmedi. Diğer kanallar yalnızca kendi izinleri ve bağlantı koşulları uygunsa gönderim yapabilir.';
     } catch { box.querySelector('#alarm-permission-hint').textContent = 'Bu tarayıcı bildirim izni desteklemiyor.'; }
   };
   const submitBtn = box.querySelector('#alarm-add');

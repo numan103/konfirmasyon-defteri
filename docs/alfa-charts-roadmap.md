@@ -1,7 +1,7 @@
 # Alfa Charts — TradingView farkları ve geliştirme sırası
 
 **Denetim:** 24 Kasım 2026 · başlangıç commit'i `bf94707`.
-Canlı hedef: https://alfa-trader.com/alfa-charts (`alfa-charts.mjs?v=57`).
+Canlı hedef: https://alfa-trader.com/alfa-charts (denetim başlangıcında `alfa-charts.mjs?v=57`).
 
 ## Kapsam ve yöntem
 
@@ -48,9 +48,9 @@ ileri analiz; **P3** uzun vadeli/ayrı ürün. Boyutlar göreli iş kapsamıdır
 
 | ID | Fark | Alfa'daki mevcut sınır ve yapılacak iş | Öncelik / boyut |
 |---|---|---|---|
-| A1 | Alarmın çalışma kapsamı | `checkAlarms()` yalnızca seçili sembolün gelen fiyatını kontrol ediyor. Sekme/cihaz kapalıyken çalışan bulut alarmı yok. Önce panelde açıkça belirt; çoklu sembol ve 7/24 motoru ayrı projelendir. | P0 / açıklama küçük, motor büyük |
+| A1 | Alarmın çalışma kapsamı — açıklama tamamlandı | Panel seçili sembol, açık sekme, canlı bağlantı ve Replay sınırını açıkça belirtiyor. Sekme/cihaz kapalıyken çalışan bulut alarmı hâlâ yok; çoklu sembol ve 7/24 motoru ayrı iş. | P0 / açıklama tamam, motor büyük |
 | A2 | Veri kaynağı ve gecikme şeffaflığı | Binance Spot doğrudan WS; diğerleri polling/proxy. Forex/metallerin bazıları Yahoo veya vadeli yaklaşık veri; `CRYPTOCAP` yalnızca değer, mum geçmişi yok. İstenen referans, gerçek kaynak, yaklaşık/türetilmiş/gecikmiş durum birlikte gösterilmeli; broker feed'iyle aynı fiyat vaat edilmemeli. | P0 / orta |
-| A3 | “Footprint / heatmap” derinliği | Mevcut footprint mum başına taker alım-satım toplamı; fiyat seviyelerine ayrılmış bid/ask hücreleri değil. Heatmap anlık derinlik fiyat çizgileri; tarihsel likidite ısı haritası değil. Önce doğru isim/açıklama; gerçek sürümler C/D kapsamı. | P0 / açıklama küçük |
+| A3 | “Footprint / heatmap” derinliği — açıklama tamamlandı | Katalog/legend/ayar adları mum deltası özeti ve anlık emir defteri seviyeleri olarak düzeltildi; ayarlarda sınırlar görünür. Gerçek fiyat kademeli footprint ve tarihsel ısı haritası henüz yok, C/D kapsamı. | P0 / açıklama tamam |
 | A4 | Ayar çakışmasında yerel tercihi koruma | Çizim store'u çakışmayı blokluyor; chart-settings bazı revision çakışmalarında bulutu otomatik uyguluyor. Yerel kopyayı koruma + yerel/bulut seçimi + yedek akışı gerekli. | P0 / orta |
 
 Kanıt: `assets/alfa-charts.mjs` (`checkAlarms`, `connectPolling`,
@@ -97,7 +97,7 @@ Kanıt: `assets/alfa-charts.mjs` (`checkAlarms`, `connectPolling`,
 ## Küçük adımlı sıra ve kabul şartları
 
 1. **B1 — Saat dilimi**: tamamlandı; ilk düşük riskli kullanım geliştirmesi.
-2. **A1 + A3 — Doğru kapsam açıklamaları**: yeni motor varmış izlenimi vermeden UI'ı netleştir.
+2. **A1 + A3 — Doğru kapsam açıklamaları**: tamamlandı; yeni motor varmış izlenimi vermeden UI netleştirildi.
 3. **A2 — Kaynak/durum rozeti**: birebir ve yaklaşık veriyi ayır.
 4. **A4 — Ayar çakışması**: yeni kayıt yüzeylerinden önce veri güvenliği.
 5. **B2 — Mum sayacı**, **B3 — Tarihe git**, **B5 — Koordinat editörü**: ayrı commit/test.
@@ -126,6 +126,25 @@ Saat dilimi yalnızca gösterimdir; seans hesapları ve replay saatleri UTC kal�
   korunması, iptal, yeniden yükleme, diğer sekme/panel, replay UTC ve 320/390 px.
 - Gerçek Binance verisiyle `alfa-workspace`, `alfa-drawings`, `alfa-replay`
   tarayıcı regresyonları geçti. Bu modül için gerçek hesaplı bulut testi yapılmadı.
+
+## İkinci modül — A1/A3 açıklamaları
+
+- Alarm panelindeki kalıcı not; seçili sembol, açık/canlı sekme, kapalı cihaz,
+  arka plan duraklatması ve Replay sınırını belirtir. Bildirim izni yanıtı bu notu
+  kaldırmaz. Telegram/webhook bağımsız 7/24 izleme olarak sunulmaz.
+- `footprint` adı **Mum deltası · Footprint özeti**, `heatmap` adı
+  **Likidite seviyeleri · anlık emir defteri** oldu. Katalog, grafik legend'i,
+  çizgi/panel başlıkları ve ayar açıklamaları aynı metaveriyi kullanır.
+- Aktif CVD/delta/footprint kaynak etiketleri `aggTrades` yerine kullanılan
+  `klines` taker hacmini belirtir. Hesaplama, REST adresleri ve yenileme değişmedi.
+- Eski `footprint`/`heatmap` kimlikleri, ayar/favori/layout ve alarm anahtarları
+  korunur; veri taşıma veya sunucu/veritabanı değişikliği yoktur.
+- 4 yeni birim testi; ilgili 29 birim ve tam suite **1160/1160** geçti.
+- Yeni `alfa-chart-scope.browser.mjs`: kalıcı alarm notu, izin reddi, sembol
+  değişimi, isim/ayar tutarlılığı, aynı delta sonucu, eski kimlik/favoriler,
+  reload ve 320/390 px. Yalnızca izole test verisi; gerçek teslimat yok.
+- `alfa-workspace`, `alfa-chart-time`, `alfa-drawings`, `alfa-replay` regresyonları
+  da geçti. Bu modül 7/24 alarm veya gerçek footprint motoru eklemez.
 
 ## Kaynaklar
 
