@@ -447,17 +447,14 @@ try {
       await ready();
       assert.equal(await state(() => document.getElementById('symbol').value), 'ETHUSDT');
       assert.equal(await state(() => window.__alfaDebug.multiState.active), first.id);
-      await page.waitForFunction(id => {
-        const f = [...document.querySelectorAll('#multi-grid iframe')]
-          .find(el => Number(new URL(el.src).searchParams.get('pane')) === id);
-        return f && f.contentWindow?.__paneLog?.some(m => m.type === 'state' && m.payload.symbol === 'ETHUSDT');
-      }, first.id);
       const finalPanes = await state(() => [...document.querySelectorAll('#multi-grid iframe')].map(f => {
         const url = new URL(f.src);
         return { id: Number(url.searchParams.get('pane')), symbol: url.searchParams.get('symbol'), probe: f.__syncProbe };
       }));
       const changed = finalPanes.find(p => p.id === first.id), untouched = finalPanes.find(p => p.id === second.id);
-      assert.equal(changed.symbol, 'ETHUSDT');
+      // The source document already changed symbol: retain it, rather than navigate.
+      assert.equal(changed.symbol, 'BTCUSDT');
+      assert.equal(await page.locator(`.multi-cell[data-pane-id="${first.id}"] .multi-cell-head span`).textContent(), 'ETHUSDT');
       assert.equal(changed.probe, first.id);
       assert.equal(untouched.symbol, 'SOLUSDT');
       assert.equal(untouched.probe, second.id);
@@ -540,6 +537,19 @@ try {
     await f2.evaluate(() => window.__alfaDebug.chart.timeScale().setVisibleLogicalRange({ from: 640, to: 760 }));
     await page.waitForFunction(() => window.__alfaDebug.mainSync.lastAppliedFromPane?.type === 'range'
       && window.__alfaDebug.mainSync.lastAppliedFromPane.payload?.logical?.from === 640, null, { timeout: 10000 });
+
+    // Native iframe timeframe controls report back; parent commands load actual data.
+    await f2.evaluate(() => document.querySelector('#timeframes [data-interval="5m"]').click());
+    await page.waitForFunction(id => window.__alfaDebug.multiState.panes.find(p => p.id === id)?.interval === '5m', paneIds[1]);
+    assert.equal(await state(() => window.__alfaDebug.multiState.panes[0].interval), '1h');
+    await page.evaluate(() => window.__alfaDebug.multiChart.setSync('interval', true));
+    await page.selectOption(`[data-pane-interval="${paneIds[0]}"]`, '15m');
+    await f1.waitForFunction(() => new URL(location.href).searchParams.get('interval') === '15m' && window.__alfaDebug.ready);
+    await f2.waitForFunction(() => new URL(location.href).searchParams.get('interval') === '15m' && window.__alfaDebug.ready);
+    await page.evaluate(() => {
+      const m = window.__alfaDebug.multiChart;
+      m.setPaneInterval(m.state.active, '1h'); m.setSync('interval', false);
+    });
 
     await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
     await page.evaluate(() => {

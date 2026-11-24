@@ -2,7 +2,7 @@
 // the echo-suppression rules can be unit tested independently of the charts.
 export const SYNC_CHANNEL = 'alfa-multichart:sync:v1';
 
-const MESSAGE_TYPES = new Set(['hello', 'state', 'crosshair', 'range', 'symbol']);
+const MESSAGE_TYPES = new Set(['hello', 'state', 'crosshair', 'range', 'symbol', 'interval']);
 const MAX_PANE_ID = 1000000;
 const MAX_TEXT = 120;
 const SYMBOL_RE = /^[A-Z0-9:._+^=-]{1,120}$/;
@@ -60,6 +60,10 @@ export function normalizePayload(type, payload) {
   if (type === 'symbol') {
     const symbol = textOrNull(payload.symbol, SYMBOL_RE);
     return symbol ? { symbol } : null;
+  }
+  if (type === 'interval') {
+    const interval = textOrNull(payload.interval, INTERVAL_RE, 8);
+    return interval ? { interval } : null;
   }
   if (type === 'crosshair') return crosshairOrNull(payload);
   if (type === 'range') {

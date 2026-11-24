@@ -1,11 +1,13 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
-import { isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=12';
-import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=1';
+import { TIMEFRAMES, isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=12';
+import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=2';
 import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=10';
 
 const $ = id => document.getElementById(id);
 const CAPACITY = { 1: 1, 2: 2, 4: 4, 6: 6 };
 const LAYOUTS = [1, 2, 4, 6];
+const validInterval = value => Object.values(TIMEFRAMES).includes(value);
+const syncDefaults = { symbol: false, crosshair: true, range: true, interval: false };
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
 const LEGACY_AUTH_KEY = 'sb-zvnjslmptwmnuhftgqsr-auth-token';
 let owner = 'guest';
@@ -26,14 +28,17 @@ function loadState() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) || 'null');
     const panes = Array.isArray(raw?.panes) ? raw.panes.filter(p => p && isMarketSymbol(String(p.symbol || '')).valueOf() === true)
-      .map((p, i) => ({ id: Number(p.id) || i + 1, symbol: parseMarketRef(String(p.symbol).toUpperCase()).key })).slice(0, 6) : [];
+      .map((p, i) => ({ id: Number(p.id) || i + 1, symbol: parseMarketRef(String(p.symbol).toUpperCase()).key,
+        ...(validInterval(p.interval) ? { interval: p.interval } : {}) })).slice(0, 6) : [];
     return {
       panes: panes.length ? panes : [],
       active: Number(raw?.active) || panes[0]?.id || 1,
       layout: CAPACITY[raw?.layout] ? Number(raw.layout) : 1,
-      open: !!raw?.open
+      open: !!raw?.open,
+      sync: Object.fromEntries(Object.entries(syncDefaults).map(([key, fallback]) => [key,
+        typeof raw?.sync?.[key] === 'boolean' ? raw.sync[key] : fallback]))
     };
-  } catch { return { panes: [], active: 1, layout: 1, open: false }; }
+  } catch { return { panes: [], active: 1, layout: 1, open: false, sync: { ...syncDefaults } }; }
 }
 
 function watchlistSymbols() {
@@ -71,10 +76,11 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   let targetOverride = null, excludePane = null;
 
   if (!state.panes.length) state.panes.push({ id: nextId++, symbol: getSymbol() });
+  for (const pane of state.panes) pane.interval ||= getInterval();
   const capacity = () => CAPACITY[state.layout] || 1;
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {} };
   const activePane = () => state.panes.find(p => p.id === state.active) || state.panes[0];
-  const paneKey = () => state.panes.map(p => `${p.id}:${p.symbol}`).join('|') + '|' + state.layout + '|' + getInterval();
+  const paneKey = () => state.panes.map(p => `${p.id}:${p.symbol}:${p.interval}`).join('|') + '|' + state.layout;
 
   function postToPane(id, envelope) {
     const rec = frames.get(id);
@@ -98,11 +104,11 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     let seed = {};
     try { seed = getMainSyncState?.() || {}; } catch {}
     const pane = paneId == null ? null : state.panes.find(p => p.id === paneId);
-    const payload = { symbol: pane?.symbol || getSymbol(), interval: getInterval() };
+    const payload = { symbol: pane?.symbol || getSymbol(), interval: pane?.interval || getInterval() };
     const range = lastMainRange || seed.range;
     const crosshair = lastMainCrosshair || seed.crosshair;
-    if (range) payload.range = range;
-    if (crosshair) payload.crosshair = crosshair;
+    if (range && state.sync.range) payload.range = range;
+    if (crosshair && state.sync.crosshair) payload.crosshair = crosshair;
     return payload;
   }
 
@@ -131,7 +137,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     if (mainEchoes.matches(type, clean)) return;
     if (type === 'range') lastMainRange = clean;
     if (type === 'crosshair') lastMainCrosshair = clean;
-    if (state.open) broadcast(type, clean);
+    if (state.open && state.sync[type]) broadcast(type, clean);
   }
 
   function applyPaneSymbol(paneId, rawSymbol) {
@@ -139,6 +145,15 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     try { key = parseMarketRef(String(rawSymbol).toUpperCase()).key; } catch { return; }
     const pane = state.panes.find(p => p.id === paneId);
     if (!pane) return;
+    if (state.sync.symbol) {
+      for (const peer of state.panes) {
+        if (peer.id === paneId) continue;
+        peer.symbol = key;
+        targetOverride = peer.id;
+        try { gate.send('symbol', { symbol: key }, { force: true }); }
+        finally { targetOverride = null; }
+      }
+    }
     if (pane.symbol !== key) {
       pane.symbol = key;
       // Update only the reporting pane. A full renderMulti(true) would destroy
@@ -147,15 +162,13 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
       if (cell) {
         const label = cell.querySelector('.multi-cell-head span');
         if (label) label.textContent = key;
-        const frame = cell.querySelector('iframe');
-        const next = iframeURL(pane);
-        if (frame && frame.getAttribute('src') !== next) frame.setAttribute('src', next);
       }
       renderedKey = paneKey();
       save();
     }
     if (state.active !== paneId) { state.active = paneId; save(); }
-    renderTabs();
+    renderedKey = paneKey();
+    save(); renderTabs(); refreshPaneControls();
     gridActiveClasses();
     suppressNotify++;
     try { setSymbol?.(key); } finally { suppressNotify--; }
@@ -165,12 +178,15 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   function applyFromPane(message) {
     lastAppliedFromPane = { type: message.type, paneId: message.paneId, payload: message.payload, at: Date.now() };
     if (message.type === 'crosshair' || message.type === 'range') {
+      if (!state.sync[message.type]) return;
       mainEchoes.remember(message.type, message.payload);
       mainEchoUntil.set(message.type, Date.now() + 150);
       try { applyMainSync?.({ type: message.type, payload: message.payload }); } catch {}
       broadcast(message.type, message.payload, { exclude: message.paneId, replyTo: message.seq });
     } else if (message.type === 'symbol') {
       applyPaneSymbol(message.paneId, message.payload.symbol);
+    } else if (message.type === 'interval') {
+      setPaneInterval(message.paneId, message.payload.interval);
     }
   }
 
@@ -238,7 +254,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   }
 
   function iframeURL(pane) {
-    return `/alfa-charts.html?embed=1&symbol=${encodeURIComponent(pane.symbol)}&interval=${encodeURIComponent(getInterval())}${debug}&mcid=${encodeURIComponent(session)}&pane=${pane.id}`;
+    return `/alfa-charts.html?embed=1&symbol=${encodeURIComponent(pane.symbol)}&interval=${encodeURIComponent(pane.interval || getInterval())}${debug}&mcid=${encodeURIComponent(session)}&pane=${pane.id}`;
   }
 
   function gridActiveClasses() {
@@ -280,7 +296,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
         continue;
       }
       cells.push(`<div class="multi-cell${pane.id === state.active ? ' active' : ''}" data-pane-id="${pane.id}">
-        <div class="multi-cell-head"><span>${esc(pane.symbol)}</span><button type="button" data-focus-pane="${pane.id}" aria-label="Bu grafiğe geç">Odakla</button></div>
+        <div class="multi-cell-head"><span>${esc(pane.symbol)}</span><select data-pane-interval="${pane.id}" aria-label="${esc(pane.symbol)} zaman dilimi">${Object.entries(TIMEFRAMES).map(([label, value]) => `<option value="${value}"${value === pane.interval ? ' selected' : ''}>${label}</option>`).join('')}</select><button type="button" data-focus-pane="${pane.id}" aria-label="Bu grafiğe geç">Odakla</button></div>
         <iframe title="${esc(pane.symbol)} grafiği" src="${esc(iframeURL(pane))}" loading="lazy" referrerpolicy="no-referrer"></iframe>
       </div>`);
     }
@@ -300,6 +316,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
       });
     });
     grid.querySelectorAll('[data-focus-pane]').forEach(b => b.onclick = () => activate(Number(b.dataset.focusPane)));
+    grid.querySelectorAll('[data-pane-interval]').forEach(select => select.onchange = () => setPaneInterval(Number(select.dataset.paneInterval), select.value));
     grid.querySelectorAll('[data-add-cell]').forEach(b => b.onclick = () => openAddDialog());
     grid.querySelectorAll('.multi-cell[data-pane-id]').forEach(cell => cell.onclick = () => activate(Number(cell.dataset.paneId)));
   }
@@ -313,7 +330,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   function removePane(id) {
     frames.delete(Number(id));
     if (state.panes.length === 1) {
-      state.panes = [{ id: state.panes[0].id, symbol: getSymbol() }];
+      state.panes = [{ id: state.panes[0].id, symbol: getSymbol(), interval: getInterval() }];
       state.active = state.panes[0].id;
     } else {
       state.panes = state.panes.filter(p => p.id !== id);
@@ -323,17 +340,18 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     onStatus?.('Grafik sekmesi kapatıldı', 'ok');
   }
 
-  function addPane(symbol) {
+  function addPane(symbol, interval = getInterval()) {
+    if (!validInterval(interval)) return false;
     let ref;
     try { ref = parseMarketRef(String(symbol).toUpperCase()); } catch { return false; }
-    const existing = state.panes.find(p => p.symbol === ref.key);
+    const existing = state.panes.find(p => p.symbol === ref.key && p.interval === interval);
     if (existing) { activate(existing.id); return true; }
     if (state.panes.length >= capacity()) {
       const next = LAYOUTS.find(l => l > state.panes.length) || 6;
       if (next === state.layout) { onStatus?.('En fazla 6 grafik açılabilir', 'error'); return false; }
       state.layout = next;
     }
-    const pane = { id: nextId++, symbol: ref.key };
+    const pane = { id: nextId++, symbol: ref.key, interval };
     state.panes.push(pane); state.active = pane.id; save(); renderTabs(); renderMulti(true);
     onStatus?.(`${ref.key} grafiği eklendi`, 'ok');
     return true;
@@ -344,6 +362,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     const modal = chartDialog(`<div class="dialog-header"><div><h3>Yeni grafik</h3><p>Aynı çalışma alanında yan yana veya ızgara düzeninde açılır</p></div><button id="multi-add-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
       <form id="multi-add-form" class="multi-add-form">
         <label>Sembol <input id="multi-add-symbol" name="symbol" list="multi-symbols" maxlength="100" autocomplete="off" required></label>
+        <label>Zaman dilimi <select name="interval">${Object.entries(TIMEFRAMES).map(([label, value]) => `<option value="${value}"${value === getInterval() ? ' selected' : ''}>${label}</option>`).join('')}</select></label>
         <datalist id="multi-symbols">${symbols.map(s => `<option value="${esc(s)}"></option>`).join('')}</datalist>
         <div class="multi-add-quick">${symbols.slice(0, 12).map(s => `<button type="button" data-quick-symbol="${esc(s)}">${esc(s)}</button>`).join('')}</div>
         <p class="settings-error" id="multi-add-error" role="alert"></p>
@@ -357,7 +376,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     modal.box.querySelector('#multi-add-form').addEventListener('submit', event => {
       event.preventDefault();
       const raw = String(new FormData(event.currentTarget).get('symbol') || '').toUpperCase().trim();
-      if (addPane(raw)) modal.close();
+      if (addPane(raw, new FormData(event.currentTarget).get('interval'))) modal.close();
       else modal.box.querySelector('#multi-add-error').textContent = 'Geçerli bir piyasa sembolü gir (örn. ETHUSDT veya OKX:BTCUSDT.P).';
     });
     modal.box.querySelector('#multi-add-symbol').focus();
@@ -385,17 +404,70 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     if (suppressNotify) return;
     let key;
     try { key = parseMarketRef(String(symbol).toUpperCase()).key; } catch { return; }
+    if (state.open) {
+      const pane = activePane();
+      if (intervalChanged) setPaneInterval(pane.id, interval);
+      if (pane.symbol !== key || state.sync.symbol) {
+        const targets = state.sync.symbol ? state.panes : [pane];
+        for (const target of targets) {
+          target.symbol = key;
+          targetOverride = target.id;
+          try { gate.send('symbol', { symbol: key }, { force: true }); }
+          finally { targetOverride = null; }
+        }
+        save(); renderTabs();
+        // Keep live iframe documents, their views and drawing anchors intact.
+        renderedKey = paneKey();
+        renderMulti();
+        refreshPaneControls();
+      }
+      return;
+    }
     const ref = state.panes.find(p => p.symbol === key);
     if (ref) {
       if (ref.id !== state.active) { state.active = ref.id; save(); renderTabs(); }
-      if (intervalChanged) renderMulti(true);
+      if (intervalChanged) { ref.interval = interval; save(); renderMulti(true); }
       else renderMulti();
       return;
     }
     if (!isMarketSymbol(String(symbol || ''))) return;
-    const pane = { id: nextId++, symbol: key };
+    const pane = { id: nextId++, symbol: key, interval };
     if (state.panes.length >= 6) state.panes.shift();
     state.panes.push(pane); state.active = pane.id; save(); renderTabs(); renderMulti(true);
+  }
+
+  function refreshPaneControls() {
+    for (const pane of state.panes) {
+      const cell = document.querySelector(`#multi-grid .multi-cell[data-pane-id="${pane.id}"]`);
+      const label = cell?.querySelector('.multi-cell-head span');
+      if (label) label.textContent = pane.symbol;
+      const select = cell?.querySelector('[data-pane-interval]');
+      if (select) select.value = pane.interval;
+    }
+  }
+
+  function setPaneInterval(id, interval) {
+    if (!validInterval(interval)) return false;
+    const pane = state.panes.find(p => p.id === id);
+    if (!pane) return false;
+    const targets = state.sync.interval ? state.panes : [pane];
+    for (const target of targets) {
+      target.interval = interval;
+      targetOverride = target.id;
+      try { gate.send('interval', { interval }, { force: true }); }
+      finally { targetOverride = null; }
+    }
+    renderedKey = paneKey();
+    save(); refreshPaneControls();
+    return true;
+  }
+
+  function setSync(type, enabled) {
+    if (!(type in syncDefaults)) return false;
+    state.sync[type] = !!enabled;
+    save();
+    document.querySelectorAll('[data-multi-sync]').forEach(input => { input.checked = state.sync[input.dataset.multiSync]; });
+    return true;
   }
 
   document.querySelectorAll('.layout-buttons [data-layout]').forEach(b => b.onclick = () => {
@@ -406,10 +478,20 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
   $('multi-exit')?.addEventListener('click', () => setOpen(false));
   $('multi-add')?.addEventListener('click', () => openAddDialog());
   window.addEventListener('message', onPaneMessage);
+  // Clicks inside iframe documents do not bubble into the parent.
+  window.addEventListener('blur', () => setTimeout(() => {
+    const frame = document.activeElement;
+    const id = Number(frame?.closest?.('.multi-cell')?.dataset.paneId);
+    if (id && state.open) activate(id);
+  }, 0));
+  document.querySelectorAll('[data-multi-sync]').forEach(input => {
+    input.checked = state.sync[input.dataset.multiSync];
+    input.onchange = () => setSync(input.dataset.multiSync, input.checked);
+  });
   setOpen(state.open);
   renderTabs();
   return {
-    addPane, removePane, activate, notifySymbol, setOpen, syncFromMain,
+    addPane, removePane, activate, notifySymbol, setOpen, syncFromMain, setPaneInterval, setSync,
     get state() { return state; },
     get syncState() {
       return {

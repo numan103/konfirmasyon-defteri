@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10141c">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=24">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=25">
 </head>
 <body>
   <main class="workspace">
@@ -123,6 +123,12 @@
         <div class="multi-head">
           <nav id="multi-tabs" aria-label="Çoklu grafik sekmeleri"></nav>
           <div class="multi-head-actions">
+            <details><summary>Senkronizasyon</summary><div>
+              <label><input type="checkbox" data-multi-sync="symbol"> Sembol</label>
+              <label><input type="checkbox" data-multi-sync="crosshair"> İmleç</label>
+              <label><input type="checkbox" data-multi-sync="range"> Zaman ekseni</label>
+              <label><input type="checkbox" data-multi-sync="interval"> Zaman dilimi</label>
+            </div></details>
             <button id="multi-add" type="button">+ Grafik</button>
             <button id="multi-exit" type="button">Tek grafiğe dön</button>
           </div>
@@ -246,6 +252,6 @@
       <span id="data-info">Kaynak: seçili piyasa · Zaman: UTC · Otomatik derinlik</span>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=64"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=65"></script>
 </body>
 </html>

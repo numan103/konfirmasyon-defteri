@@ -17,8 +17,8 @@ import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
-import { initMultiChart } from './alfa-multichart.mjs?v=4';
-import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=1';
+import { initMultiChart } from './alfa-multichart.mjs?v=5';
+import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore } from './alfa-chart-settings-store.mjs?v=2';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
@@ -54,7 +54,12 @@ let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null,
 let pendingStudies = null, studyContext = null;
 const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
-  if (!next || next === symbol) return false;
+  if (!next) return false;
+  // A watchlist row can match the hidden main chart but differ from the active pane.
+  if (next === symbol) {
+    if (multiChart?.state.open) multiChart.notifySymbol(next, interval);
+    return false;
+  }
   rememberStudies();
   alarmPriceTracker.reset(next);
   symbol = next;
@@ -281,6 +286,12 @@ function onSyncMessage(event) {
           const ref = parseMarketRef(String(raw).toUpperCase()).key;
           if (ref !== symbol) setActiveSymbol(ref);
         } catch {}
+      }
+    }
+    if (message.type === 'state' || message.type === 'interval') {
+      const next = message.payload.interval;
+      if (Object.values(TIMEFRAMES).includes(next) && next !== interval) {
+        interval = next; loadMarket();
       }
     }
     if (message.type === 'state' || message.type === 'range') {
@@ -695,6 +706,7 @@ async function loadMarket() {
   }
   updateUI();
   try { multiChart?.notifySymbol(symbol, interval); } catch {}
+  if (syncGate && syncReady && !syncApplyDepth) syncGate.send('interval', { interval });
   try { publicStudies?.setContext(symbol, interval); } catch {}
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
