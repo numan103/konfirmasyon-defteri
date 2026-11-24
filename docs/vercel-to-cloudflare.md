@@ -50,9 +50,13 @@ kullanılmalıdır.
 ## Kısa linkler ve zamanlayıcılar
 
 - Eski `vercel.json` redirect'leri Cloudflare `_redirects` dosyasına birebir
-  taşındı: `/katil`, `/mentorluk`, `/premium`, `/durum`. `/durum` kuralı
-  eski edge cache kaydını da zorla geçmek için `302!` kullanır; kısa linklerin
-  hiçbirinde `Cache-Control: no-store` dışında kalıcı cache yoktur.
+  taşındı: `/katil`, `/mentorluk`, `/premium`, `/durum`; hepsi düz `302` kullanır.
+  Cloudflare `_redirects` sözdizimi üçüncü alanı sayı olarak bekler; Netlify tarzı
+  `302!` zorla soneki burada **desteklenmez** ve satırın tamamen yok sayılmasına
+  yol açar. Bu yüzden zorla sonek kullanılmaz.
+- Kısa linkler `_headers` içinde `Cache-Control: no-store` ile korunur. Eski
+  bir edge cache kaydı kalmışsa Cloudflare Dashboard → Caching → Configuration
+  → Custom Purge ile ilgili URL/prefix temizlenir; statik kural tekrar devreye girer.
 - 15 dakikalık haber + ekonomik takvim tetiklemesi
   `.github/workflows/news-poll.yml` ile `https://alfa-trader.com/api/ai?...`
   adresine yapılır; GitHub OIDC token'i kullanılır, sunucuda cron secret saklanmaz.

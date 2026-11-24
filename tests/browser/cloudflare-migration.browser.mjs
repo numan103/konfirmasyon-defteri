@@ -12,7 +12,8 @@ const root = fileURLToPath(new URL('../..', import.meta.url));
 const rules = fs.readFileSync(path.join(root, '_redirects'), 'utf8')
   .split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => {
     const [from, to, code] = line.split(/\s+/);
-    return { from, to, code: Number(code.replace('!', '')), forced: code.endsWith('!') };
+    assert.match(code, /^\d{3}$/, `Cloudflare _redirects kodu sayı olmalı: ${line}`);
+    return { from, to, code: Number(code) };
   });
 assert.ok(rules.length >= 4);
 

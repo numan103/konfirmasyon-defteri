@@ -11,12 +11,17 @@ test('legacy Vercel short links are mirrored by Cloudflare _redirects', () => {
   const legacy = JSON.parse(read('vercel.json'));
   const redirects = (legacy.redirects || []).filter(r => !r.permanent);
   assert.ok(redirects.length > 0);
-  const cloudflare = read('_redirects').split(/\r?\n/)
-    .map(line => line.trim().replace(/(\d+)!$/, '$1')).filter(Boolean);
+  const lines = read('_redirects').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const cloudflare = lines;
   for (const { source, destination } of redirects) {
     const expected = `${source} ${destination} 302`;
     assert.ok(cloudflare.includes(expected), `Cloudflare _redirects eksik: ${expected}`);
   }
+  // Cloudflare Pages ignores a Netlify-style force suffix; the status code
+  // field must stay a plain number or the whole line is discarded.
+  assert.ok(lines.every(line => /^[^ ]+ [^ ]+ \d{3}$/.test(line)),
+    'Cloudflare _redirects satırları "[source] [destination] [numeric code]" biçiminde olmalı');
+  assert.doesNotMatch(read('_redirects'), /!/, '302! gibi force sonekleri Cloudflare tarafından yok sayılır');
 });
 
 test('Cloudflare wrappers do not depend on Vercel runtime files', () => {
