@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=34">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=36">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -134,6 +134,9 @@
           </div>
           <div id="price-scale-grip" class="price-scale-grip" aria-hidden="true"></div>
         </div>
+        <div id="mobile-draw-hint" class="mobile-draw-hint" role="status" aria-live="polite" hidden></div>
+        <div id="mobile-draw-quick" class="mobile-draw-quick" aria-label="Hızlı çizim araçları"></div>
+        <div id="mobile-draw-actions" class="mobile-draw-actions" aria-label="Seçili çizim işlemleri" hidden></div>
         <div class="chart-navigation">
           <div class="range-presets" aria-label="Görünür tarih aralığı"><button data-range="86400" type="button">1G</button><button data-range="432000" type="button">5G</button><button data-range="2592000" type="button">1A</button><button data-range="7776000" type="button">3A</button><button data-range="all" type="button">Tümü</button></div>
           <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
@@ -348,6 +351,6 @@
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=77"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=79"></script>
 </body>
 </html>

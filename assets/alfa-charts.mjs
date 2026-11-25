@@ -68,6 +68,7 @@ let pendingStudies = null, studyContext = null;
 // Mobile-shell hooks. Desktop keeps the no-op defaults; the phone block assigns real painters.
 let syncMobileShell = () => {};
 let paintMobileMarket = () => {};
+let openMobileSheet = () => {};
 const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
   if (!next) return false;
@@ -130,6 +131,7 @@ if (isMobile) {
     if (className === 'tools-open') syncMobileTools();
     if (className === 'timeframes-open') renderMobileTimeframes();
   };
+  openMobileSheet = openSheet;
 
   const MOBILE_TOOL_LABELS = {
     cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yatay çizgi', vertical: 'Dikey çizgi',
@@ -1764,6 +1766,86 @@ $('fullscreen').addEventListener('click', async () => {
   } catch { connection('Tarayıcı tam ekran isteğini reddetti', 'error'); }
 });
 document.addEventListener('fullscreenchange', () => { $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran'); });
+
+// One-tap drawing UX for the phone shell. The engine stays untouched: this only
+// mirrors its existing tools/actions into compact, thumb-reachable overlays.
+function initDrawingQuickUX() {
+  const quick = $('mobile-draw-quick'), actions = $('mobile-draw-actions'), hint = $('mobile-draw-hint');
+  if (!quick || !actions || !hint) return;
+  const CORE = ['fibonacci', 'horizontal', 'trend', 'long', 'short'];
+  const LABELS = { fibonacci: 'Fib', horizontal: 'Yatay', trend: 'Trend', long: 'Long', short: 'Short',
+    brush: 'Fırça', rectangle: 'Kare', text: 'Metin', ruler: 'Ölç', ray: 'Işın', vertical: 'Dikey', arrow: 'Ok',
+    undo: 'Geri al', redo: 'Yinele', tools: 'Araçlar', settings: 'Ayarlar', lock: 'Kilitle',
+    unlock: 'Kilidi aç', hide: 'Gizle', show: 'Göster', remove: 'Sil' };
+  const GLYPHS = { hide: 'eyeOff', show: 'eye', remove: 'delete', tools: 'brush', settings: 'settings' };
+  const button = (key, label, onClick, options = {}) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.quick = key;
+    b.innerHTML = `${icon(GLYPHS[key] || key)}<span>${label}</span>`;
+    b.title = options.title || label; b.setAttribute('aria-label', options.title || label);
+    b.addEventListener('click', onClick);
+    if (options.contextmenu) b.addEventListener('contextmenu', event => { event.preventDefault(); options.contextmenu(); });
+    return b;
+  };
+  let quickKey = '', actionsKey = '';
+  const renderQuick = () => {
+    const tools = [...CORE];
+    for (const tool of drawings.favs || []) if (!tools.includes(tool) && !['cursor', 'delete'].includes(tool)) tools.push(tool);
+    quick.replaceChildren(
+      button('undo', LABELS.undo, () => $('drawing-undo')?.click(), { title: 'Geri al (Ctrl+Z)' }),
+      button('redo', LABELS.redo, () => $('drawing-redo')?.click(), { title: 'Yinele (Ctrl+Shift+Z)' })
+    );
+    for (const tool of tools) {
+      const label = LABELS[tool] || tool;
+      const b = button(tool, label, () => drawings.setTool(tool), {
+        title: `${label} · uzun bas: favorilere ekle/çıkar`,
+        contextmenu: () => drawings.toggleFav(tool)
+      });
+      b.dataset.tool = tool;
+      quick.append(b);
+    }
+    quick.append(button('tools', LABELS.tools, () => openMobileSheet(), { title: 'Tüm çizim araçları' }));
+  };
+  const renderActions = () => {
+    const d = drawings.current();
+    if (!d) { actions.hidden = true; return; }
+    const locked = !!d.locked, hidden = !!d.hidden;
+    actions.replaceChildren(
+      button('settings', LABELS.settings, () => { drawings.manager.hidden = false; drawings.updatePanel(); }),
+      button('undo', LABELS.undo, () => $('drawing-undo')?.click(), { title: 'Geri al (Ctrl+Z)' }),
+      button('redo', LABELS.redo, () => $('drawing-redo')?.click(), { title: 'Yinele (Ctrl+Shift+Z)' }),
+      button(locked ? 'unlock' : 'lock', locked ? LABELS.unlock : LABELS.lock, () => drawings.action('lock')),
+      button(hidden ? 'show' : 'hide', hidden ? LABELS.show : LABELS.hide, () => drawings.action('hide')),
+      button('remove', LABELS.remove, () => drawings.action('remove'), { title: 'Seçili çizimi sil (Delete)' }),
+      button('tools', LABELS.tools, () => openMobileSheet(), { title: 'Yeni çizim aracı seç' })
+    );
+    actions.hidden = false;
+  };
+  const sync = () => {
+    if (!drawings.ready) return;
+    const favKey = (drawings.favs || []).join(',');
+    if (favKey !== quickKey) { quickKey = favKey; renderQuick(); }
+    quick.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === drawings.tool)));
+    quick.querySelector('[data-quick="undo"]')?.toggleAttribute('disabled', !!$('drawing-undo')?.disabled);
+    quick.querySelector('[data-quick="redo"]')?.toggleAttribute('disabled', !!$('drawing-redo')?.disabled);
+    const d = drawings.current(), selected = !!d && drawings.drawingsVisible;
+    document.body.classList.toggle('drawing-selected', selected);
+    const key = selected ? `${d.id}|${!!d.locked}|${!!d.hidden}|${!!$('drawing-undo')?.disabled}|${!!$('drawing-redo')?.disabled}` : '';
+    if (key !== actionsKey) { actionsKey = key; renderActions(); }
+    let text = '';
+    if (drawings.tool && drawings.tool !== 'cursor') {
+      const label = LABELS[drawings.tool] || drawings.tool;
+      text = drawings.draft ? `${label} · ikinci noktayı seçin (sürükleyerek de ayarlanır)` : `${label} · başlangıç noktasını seçin`;
+    } else if (selected) {
+      text = `${d.name || LABELS[d.type] || d.type} seçildi · alttan düzenleyin`;
+    }
+    hint.textContent = text; hint.hidden = !text;
+  };
+  renderQuick();
+  setInterval(sync, 120);
+  sync();
+}
+
 const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () => seriesBars, getInterval: () => interval,
   onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager(),
   onChartAction: action => handleChartAction(action),
@@ -1791,6 +1873,7 @@ $('drawings-toggle').addEventListener('click', () => {
   vb.innerHTML = icon(on ? 'eye' : 'eyeOff');
   drawings.refresh();
 });
+initDrawingQuickUX();
 // ---------- Price alarms (local-first + optional browser/Telegram/webhook delivery) ----------
 const ALARM_KEY = () => 'alfa-alarms:v1:' + currentUserKey();
 const ALARM_MUTED_KEY = () => 'alfa-alarms:muted:v1:' + currentUserKey();
