@@ -134,9 +134,14 @@ gizlendi, aynı işlevler menüye taşındı. Mobil test ve egress PASS, sayfa h
 yok; staging dağıtımı `b6747adc-72b5-4834-8c09-fbbe3ba60a53`.
 
 Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs` ve
-`alfa-charts.html` içinde; yalnız staging’e dağıtıldı. `sw.js` sabit kaldı;
-önbellek kırılımı `?v=31` / `?v=74` sorgu dizeleriyle yapıldı. Production host’u,
-verisi ve deploy’u değişmedi.
+`alfa-charts.html` içinde. Önce staging’e dağıtıldı; kullanıcının canlı site
+isteği üzerine `2026-11-25T19:50:41Z` civarında aynı kaynak commit (`5e86afd`)
+`alfa-traders` projesine `main` dalından dağıtıldı. Production deployment
+`fa6cb389-65f4-409b-a19f-2d11d7a6af29`; canlı
+`https://alfa-trader.com/alfa-charts.html` HTTP 200, `?v=31` / `?v=74` ve gerçek
+Supabase Auth referansı doğrulandı, staging referansı bulunmadı. `sw.js` sabit
+kaldı; önbellek kırılımı sorgu dizeleriyle yapıldı. Veri/migration yapılmadı;
+secret, şifre veya kullanıcı verisi kopyalanmadı.
 
 ## Tekrar için scripts
 
