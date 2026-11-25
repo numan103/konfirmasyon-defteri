@@ -89,22 +89,75 @@ const chart = createChart(host, {
 });
 
 if (isMobile) {
+  const backdrop = $('mobile-sheet-backdrop');
   const toolsToggle = $('mobile-tools-toggle');
-  const closeTools = () => {
-    document.body.classList.remove('tools-open');
+  const settingsToggle = $('mobile-settings-toggle');
+  const closeSheets = () => {
+    document.body.classList.remove('tools-open', 'settings-open');
+    if (backdrop) backdrop.hidden = true;
     toolsToggle?.setAttribute('aria-expanded', 'false');
     toolsToggle?.setAttribute('aria-label', 'Çizim araçlarını aç');
+    settingsToggle?.setAttribute('aria-expanded', 'false');
   };
+  const openSheet = name => {
+    closeSheets();
+    if (backdrop) backdrop.hidden = false;
+    document.body.classList.add(name);
+    const toggle = name === 'tools-open' ? toolsToggle : settingsToggle;
+    toggle?.setAttribute('aria-expanded', 'true');
+  };
+  $('mobile-tools-slot')?.append($('drawing-tools'));
   toolsToggle?.addEventListener('click', () => {
-    const open = document.body.classList.toggle('tools-open');
-    toolsToggle.setAttribute('aria-expanded', String(open));
-    toolsToggle.setAttribute('aria-label', open ? 'Çizim araçlarını kapat' : 'Çizim araçlarını aç');
+    if (document.body.classList.contains('tools-open')) closeSheets();
+    else openSheet('tools-open');
+    toolsToggle.setAttribute('aria-label', document.body.classList.contains('tools-open') ? 'Çizim araçlarını kapat' : 'Çizim araçlarını aç');
   });
+  settingsToggle?.addEventListener('click', () => {
+    if (document.body.classList.contains('settings-open')) closeSheets();
+    else openSheet('settings-open');
+  });
+  backdrop?.addEventListener('click', closeSheets);
+  $('mobile-tools-close')?.addEventListener('click', closeSheets);
+  $('mobile-settings-close')?.addEventListener('click', closeSheets);
   document.addEventListener('pointerdown', event => {
-    if (!document.body.classList.contains('tools-open')) return;
-    if (event.target.closest('.drawing-space') || event.target.closest('#mobile-tools-toggle')) return;
-    closeTools();
+    if (!document.body.classList.contains('tools-open') && !document.body.classList.contains('settings-open')) return;
+    if (event.target.closest('.mobile-sheet') || event.target.closest('#mobile-tools-toggle') ||
+        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-sheet-backdrop')) return;
+    closeSheets();
   }, true);
+
+  const strip = $('mobile-market-strip');
+  const stripSymbols = () => {
+    const rows = [...document.querySelectorAll('.watch-row[data-symbol]')].map(el => el.dataset.symbol);
+    const options = [...($('symbol')?.options || [])].map(option => option.value);
+    return [...new Set([...rows, ...options, symbol].filter(Boolean))];
+  };
+  let stripDrag = null;
+  strip?.addEventListener('pointerdown', event => {
+    event.preventDefault();
+    strip.setPointerCapture?.(event.pointerId);
+    stripDrag = { y: event.clientY, symbols: stripSymbols() };
+  });
+  strip?.addEventListener('pointermove', event => {
+    if (!stripDrag) return;
+    event.preventDefault();
+    const delta = event.clientY - stripDrag.y;
+    if (Math.abs(delta) < 36) return;
+    if (replayMode && !paper.canLeave()) return;
+    const list = stripDrag.symbols;
+    const current = Math.max(0, list.indexOf(symbol));
+    const step = delta > 0 ? 1 : -1;
+    stripDrag.y = event.clientY;
+    const next = list[(current + step + list.length) % list.length];
+    if (watchlist?.valid?.(next)) watchlist.select(next);
+    else setActiveSymbol(next);
+  });
+  const endStripDrag = event => {
+    stripDrag = null;
+    strip?.releasePointerCapture?.(event.pointerId);
+  };
+  strip?.addEventListener('pointerup', endStripDrag);
+  strip?.addEventListener('pointercancel', endStripDrag);
 
   const grip = $('price-scale-grip');
   const rightScale = chart.priceScale('right');
@@ -652,6 +705,12 @@ function quote() {
   const c = history.at(-1);
   if (!c) return;
   $('last-price').textContent = priceFormat.format(c.close);
+  if (isMobile) {
+    const stripSymbol = $('mobile-market-symbol');
+    const stripPrice = $('mobile-market-price');
+    if (stripSymbol) stripSymbol.textContent = symbol;
+    if (stripPrice) stripPrice.textContent = priceFormat.format(c.close);
+  }
   let market = null;
   try { market = parseMarketRef(symbol); } catch {}
   const info = watchlist?.info(symbol) || market;
@@ -1039,6 +1098,66 @@ function applyPaletteForm(data) {
   applyPalette(); persistPalette(); saveLayout();
 }
 function resetPalette() { palette = { ...DEFAULT_PALETTE }; applyPalette(); persistPalette(); }
+
+if (isMobile) {
+  const THEMES = {
+    dark: { background: '#10141c', text: '#8e9eb6', gridVert: '#1c243022', gridHorz: '#28334655',
+      up: '#26c89c', down: '#ef6677', wickUp: '#26c89c', wickDown: '#ef6677', border: '#ef6677' },
+    light: { background: '#f7f9fc', text: '#334155', gridVert: '#dbe3ee88', gridHorz: '#cbd5e199',
+      up: '#0f9d76', down: '#e2566a', wickUp: '#0f9d76', wickDown: '#e2566a', border: '#0f9d76' }
+  };
+  const paletteControls = $('mobile-palette-controls');
+  let mobileTheme = localStorage.getItem('alfa-chart-mobile-theme:v1') ||
+    (palette.background.toLowerCase() === THEMES.light.background ? 'light' : 'dark');
+  if (!THEMES[mobileTheme]) mobileTheme = 'custom';
+  document.body.classList.toggle('mobile-light', mobileTheme === 'light');
+  document.getElementById('theme-color-meta')?.setAttribute('content', palette.background);
+  if (paletteControls && !$('mobile-palette-form')) {
+    paletteControls.innerHTML = `<form id="mobile-palette-form">${paletteFields()}</form>`;
+  }
+  const paletteForm = $('mobile-palette-form');
+  const syncThemeButtons = () => {
+    document.querySelectorAll('[data-mobile-theme]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.mobileTheme === mobileTheme));
+    });
+  };
+  const applyTheme = name => {
+    const preset = THEMES[name];
+    if (!preset) return;
+    Object.assign(palette, preset);
+    mobileTheme = name;
+    localStorage.setItem('alfa-chart-mobile-theme:v1', name);
+    document.body.classList.toggle('mobile-light', name === 'light');
+    applyPalette(); persistPalette(); saveLayout(); syncThemeButtons();
+    document.getElementById('theme-color-meta')?.setAttribute('content', preset.background);
+  };
+  paletteForm?.addEventListener('input', () => {
+    applyPaletteForm(new FormData(paletteForm));
+    const background = String(new FormData(paletteForm).get('background') || '').toLowerCase();
+    mobileTheme = background === THEMES.dark.background ? 'dark' : background === THEMES.light.background ? 'light' : 'custom';
+    localStorage.setItem('alfa-chart-mobile-theme:v1', mobileTheme);
+    document.body.classList.toggle('mobile-light', mobileTheme === 'light');
+    syncThemeButtons();
+  });
+  document.querySelectorAll('[data-mobile-theme]').forEach(button => {
+    button.addEventListener('click', () => applyTheme(button.dataset.mobileTheme));
+  });
+  $('mobile-settings-reset')?.addEventListener('click', () => {
+    resetPalette();
+    mobileTheme = 'dark';
+    localStorage.setItem('alfa-chart-mobile-theme:v1', 'dark');
+    document.body.classList.remove('mobile-light');
+    document.getElementById('theme-color-meta')?.setAttribute('content', THEMES.dark.background);
+    syncThemeButtons();
+    connection('Renkler varsayılana döndü', 'ok');
+  });
+  $('mobile-settings-done')?.addEventListener('click', () => {
+    document.body.classList.remove('settings-open');
+    $('mobile-sheet-backdrop').hidden = true;
+    $('mobile-settings-toggle')?.setAttribute('aria-expanded', 'false');
+  });
+  syncThemeButtons();
+}
 function setLogScale(next, persist = true) {
   logScale = !!next;
   chart.priceScale('right').applyOptions({ mode: logScale ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal });

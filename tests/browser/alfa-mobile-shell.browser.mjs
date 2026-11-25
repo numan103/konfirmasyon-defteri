@@ -25,6 +25,7 @@ try {
   await page.goto(origin + '/alfa-charts.html', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelectorAll('#timeframes button').length > 0, { timeout: 30000 });
   await page.waitForFunction(() => !!document.querySelector('#chart canvas'), { timeout: 30000 });
+  await page.waitForFunction(() => document.querySelectorAll('#drawing-tools button').length > 0, { timeout: 30000 });
 
   const read = () => page.evaluate(() => {
     const box = selector => {
@@ -38,14 +39,19 @@ try {
       doc: { w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight },
       toolbar: box('.toolbar'),
       chart: box('#chart'),
+      marketStrip: box('#mobile-market-strip'),
       tools: box('#drawing-tools'),
-      toggle: box('#mobile-tools-toggle'),
       grip: box('#price-scale-grip'),
       timeframeCount: document.querySelectorAll('#timeframes button').length,
+      studyChipCount: document.querySelectorAll('#study-legend .study-chip').length,
       brandDisplay: getComputedStyle(document.querySelector('.brand')).display,
       chartTouchAction: getComputedStyle(document.querySelector('#chart')).touchAction,
       toolsOpen: document.body.classList.contains('tools-open'),
-      toggleExpanded: document.querySelector('#mobile-tools-toggle')?.getAttribute('aria-expanded')
+      settingsOpen: document.body.classList.contains('settings-open'),
+      toolsInSheet: document.querySelector('#mobile-tools-sheet')?.contains(document.querySelector('#drawing-tools')),
+      toolButtonCount: document.querySelectorAll('#drawing-tools button').length,
+      paletteControls: document.querySelectorAll('#mobile-palette-form input').length,
+      marketSymbol: document.querySelector('#mobile-market-symbol')?.textContent || ''
     };
   });
 
@@ -58,22 +64,61 @@ try {
   assert.equal(before.doc.w, before.viewport.w, 'document must not scroll horizontally');
   assert.equal(before.chartTouchAction, 'none', 'chart touch gestures must stay inside the chart');
   assert.equal(before.toolsOpen, false);
+  assert.equal(before.toolsInSheet, true, 'drawing tools must live in the mobile sheet');
+  assert.ok(before.toolButtonCount > 4, 'drawing tool buttons must render in the sheet');
+  assert.ok(before.marketStrip && before.marketStrip.h >= 30, 'market swipe strip must be visible');
+  assert.ok(before.studyChipCount > 0, 'indicator chips must be embedded in the legend');
 
+  // Tools icon opens a centered bottom sheet, not a side rail.
   await page.click('#mobile-tools-toggle');
   await page.waitForFunction(() => {
     const el = document.querySelector('#drawing-tools');
-    if (!el) return false;
+    const sheet = document.querySelector('#mobile-tools-sheet');
+    if (!el || !sheet) return false;
     const r = el.getBoundingClientRect();
-    return r.y > innerHeight * 0.6 && r.y < innerHeight - 20;
+    return document.body.classList.contains('tools-open') && r.y > innerHeight * 0.25 && r.y < innerHeight - 20;
   }, { timeout: 5000 });
   const opened = await read();
-  assert.equal(opened.toolsOpen, true, 'tool dock must open');
-  assert.equal(opened.toggleExpanded, 'true');
-  assert.ok(opened.tools.w > 300, 'tool dock must be horizontal');
-  assert.ok(opened.tools.y < opened.viewport.h - 20 && opened.tools.y > opened.viewport.h * 0.6,
-    'tool dock must sit above the bottom navigation');
-  await page.click('#mobile-tools-toggle');
+  assert.equal(opened.toolsOpen, true);
+  assert.ok(opened.tools.w > 250, 'tool grid must be wide enough to tap');
+  await page.click('#mobile-tools-close');
+  await page.waitForFunction(() => !document.body.classList.contains('tools-open'));
 
+  // Settings sheet exposes live palette controls and day/night mode.
+  await page.click('#mobile-settings-toggle');
+  await page.waitForFunction(() => document.body.classList.contains('settings-open') &&
+    document.querySelectorAll('#mobile-palette-form input').length >= 8, { timeout: 5000 });
+  assert.ok((await read()).paletteControls >= 8);
+  await page.click('[data-mobile-theme="light"]');
+  await page.waitForFunction(() => document.body.classList.contains('mobile-light'));
+  const lightBackground = await page.evaluate(() => document.querySelector('#chart').style.background || getComputedStyle(document.querySelector('#chart')).backgroundColor);
+  assert.match(lightBackground, /247|f7f9fc/i, 'light theme must repaint the canvas');
+  await page.click('#mobile-settings-done');
+  await page.waitForFunction(() => !document.body.classList.contains('settings-open'));
+
+  // Indicator browser becomes a bottom sheet instead of a centered dialog.
+  await page.click('#indicators-manage');
+  await page.waitForFunction(() => !!document.querySelector('dialog.chart-dialog[open]'), { timeout: 5000 });
+  const dialogTop = await page.evaluate(() => document.querySelector('dialog.chart-dialog').getBoundingClientRect().top);
+  assert.ok(dialogTop > before.viewport.h * 0.15, 'indicator dialog must anchor to the bottom on phones');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('dialog.chart-dialog[open]'));
+
+  // Vertical swipe on the market strip cycles symbols.
+  const strip = await page.$('#mobile-market-strip');
+  const stripBox = await strip.boundingBox();
+  const sx = stripBox.x + stripBox.width / 2;
+  const sy = stripBox.y + stripBox.height / 2;
+  await page.mouse.move(sx, sy);
+  await page.mouse.down();
+  await page.mouse.move(sx, sy + 52, { steps: 6 });
+  await page.mouse.up();
+  await page.waitForFunction(initial => document.querySelector('#mobile-market-symbol')?.textContent !== initial,
+    before.marketSymbol, { timeout: 10000 });
+  const afterSwipe = await read();
+  assert.notEqual(afterSwipe.marketSymbol, before.marketSymbol, 'swipe must change the active symbol');
+
+  // Price scale grip still engages on vertical drag.
   const grip = await page.$('#price-scale-grip');
   assert.ok(grip, 'price scale grip must exist');
   const box = await grip.boundingBox();
@@ -91,7 +136,10 @@ try {
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, origin, viewport: before.viewport, document: before.doc,
     toolbarHeight: before.toolbar.h, chartHeight: before.chart.h, timeframeCount: before.timeframeCount,
-    toolsOpenChecked: true, priceScaleDragChecked: true, screenshot: shot, pageErrors: errors }, null, 2));
+    studyChipCount: before.studyChipCount, toolButtonCount: before.toolButtonCount,
+    marketSymbolBefore: before.marketSymbol, marketSymbolAfter: afterSwipe.marketSymbol,
+    toolsSheetChecked: true, settingsSheetChecked: true, indicatorSheetChecked: true,
+    marketSwipeChecked: true, priceScaleDragChecked: true, screenshot: shot, pageErrors: errors }, null, 2));
 } finally {
   await browser.close();
 }

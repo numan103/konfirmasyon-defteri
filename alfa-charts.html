@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#10141c">
+  <meta id="theme-color-meta" name="theme-color" content="#10141c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Alfa Charts">
@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=26">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=27">
 </head>
 <body>
   <main class="workspace">
@@ -36,7 +36,8 @@
       </select>
       </div>
       <div class="actions">
-        <button id="mobile-tools-toggle" class="icon-button mobile-tools-toggle" type="button" aria-label="Çizim araçlarını aç" aria-expanded="false" aria-controls="drawing-tools" title="Çizim araçları"><span data-icon="brush"></span></button>
+        <button id="mobile-tools-toggle" class="icon-button mobile-tools-toggle" type="button" aria-label="Çizim araçlarını aç" aria-expanded="false" aria-controls="mobile-tools-sheet" title="Çizim araçları"><span data-icon="brush"></span></button>
+        <button id="mobile-settings-toggle" class="icon-button mobile-settings-toggle" type="button" aria-label="Görünüm ve renk ayarları" aria-expanded="false" aria-controls="mobile-settings-sheet" title="Görünüm ve renkler"><span data-icon="settings"></span></button>
         <button id="indicators-manage" class="primary-tool" type="button" title="Tüm indikatörler ve analiz katmanları" aria-label="İndikatörler"><span data-icon="indicators"></span><span class="button-label">İndikatörler</span><span id="study-count" class="count-badge">1</span></button>
         <button id="alarm-toggle" type="button" title="Fiyat alarmları" aria-label="Fiyat alarmları"><span data-icon="bell"></span><span class="button-label">Alarm</span></button>
         <details class="workspace-menu" id="lab-menu">
@@ -124,6 +125,12 @@
           <div class="range-presets" aria-label="Görünür tarih aralığı"><button data-range="86400" type="button">1G</button><button data-range="432000" type="button">5G</button><button data-range="2592000" type="button">1A</button><button data-range="7776000" type="button">3A</button><button data-range="all" type="button">Tümü</button></div>
           <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
           <div class="scale-controls"><button id="chart-timezone" type="button" aria-label="Grafik saat dilimi: UTC" title="Grafik saat dilimini değiştir">UTC</button><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
+        </div>
+        <div class="mobile-market-strip" id="mobile-market-strip" aria-label="Parite gezgini — dikey kaydırarak değiştir">
+          <span class="market-strip-arrow" aria-hidden="true">▲</span>
+          <div class="market-strip-current"><strong id="mobile-market-symbol">BTCUSDT</strong><span id="mobile-market-price">—</span></div>
+          <span class="market-strip-arrow" aria-hidden="true">▼</span>
+          <small>Kaydır</small>
         </div>
         <div id="message" role="status" hidden></div>
       </section>
@@ -262,6 +269,26 @@
       <span id="data-info">Kaynak: seçili piyasa · Zaman: UTC · Otomatik derinlik</span>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=67"></script>
+  <div id="mobile-sheet-backdrop" class="mobile-sheet-backdrop" hidden></div>
+  <section id="mobile-tools-sheet" class="mobile-sheet" aria-label="Çizim araçları" aria-hidden="true">
+    <header class="sheet-head"><strong>Çizim araçları</strong><button id="mobile-tools-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <div id="mobile-tools-slot" class="sheet-tools"></div>
+  </section>
+  <section id="mobile-settings-sheet" class="mobile-sheet" aria-label="Görünüm ve renk ayarları" aria-hidden="true">
+    <header class="sheet-head"><strong>Görünüm &amp; renkler</strong><button id="mobile-settings-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <div class="sheet-group">
+      <strong>Tema</strong>
+      <div class="theme-buttons" role="group" aria-label="Tema">
+        <button type="button" data-mobile-theme="dark">Gece</button>
+        <button type="button" data-mobile-theme="light">Gündüz</button>
+      </div>
+    </div>
+    <div class="sheet-group" id="mobile-palette-controls"></div>
+    <div class="sheet-actions">
+      <button id="mobile-settings-reset" type="button">Varsayılana dön</button>
+      <button id="mobile-settings-done" type="button" class="apply">Tamam</button>
+    </div>
+  </section>
+  <script type="module" src="/assets/alfa-charts.mjs?v=69"></script>
 </body>
 </html>

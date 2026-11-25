@@ -1,5 +1,5 @@
-﻿const CACHE = 'alfa-v158-mobile-shell';
-const BUILD_ID = 'b218-mobile-shell';
+﻿const CACHE = 'alfa-v157-polish';
+const BUILD_ID = 'b218-polish';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(

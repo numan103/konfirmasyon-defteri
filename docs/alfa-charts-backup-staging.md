@@ -79,9 +79,16 @@ deploy’u ile birlikte gider; burada yalnız staging dağıtımı güncellendi.
 
 `alfa-charts.html` için telefon düzeni TradingView mantığıyla sıkıştırıldı:
 marka başlığı kaldırıldı; sembol ve zaman dilimleri tek satırda yatay kaydırılır;
-sol araç rayı kalkıp altta açılan yatay araç tepesine taşındı; grafik alanı
-ekran yüksekliğini dolduruyor ve sayfa `overscroll` yapmıyor; dikey temas
-sürüklemesi ve sağ fiyat ekseni tutamağı ile fiyat aralığı ayarlanabiliyor.
+grafik alanı ekran yüksekliğini dolduruyor ve sayfa `overscroll` yapmıyor;
+dikey temas sürüklemesi ve sağ fiyat ekseni tutamağı ile fiyat aralığı
+ayarlanabiliyor.
+
+İkinci turda indikatör çipleri grafik üstüne gömüldü, indikatör yöneticisi
+ve çizim araçları alttan açılan sheet'lere taşındı. Alttaki parite şeridi
+dikey kaydırmayla önceki/sonraki pariteye geçiyor. Görünüm sheet'inde
+gece/gündüz teması, kanvas/zemin, mum ve fitil renkleri, eksen metni ve ızgara
+renkleri canlı ayarlanıyor; mevcut `alfa-chart-palette:v1` anahtarında saklanıyor.
+Tüm chart dialog'ları telefonlarda alt sheet görünümünde açılıyor.
 
 Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs`,
 `alfa-charts.html` ve `sw.js` içinde; yalnız staging’e dağıtıldı. Production
