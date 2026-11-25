@@ -33,7 +33,14 @@ const state = () => page.evaluate(() => {
     const el = document.querySelector(selector);
     if (!el) return null;
     const r = el.getBoundingClientRect();
-    return { w: Math.round(r.width), h: Math.round(r.height), display: getComputedStyle(el).display };
+    return { w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), bottom: Math.round(r.bottom), display: getComputedStyle(el).display };
+  };
+  const hit = selector => {
+    const el = document.querySelector(selector);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const target = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return { inside: !!target && (el === target || el.contains(target)), tag: target?.id || target?.className || null };
   };
   const buttons = selector => [...document.querySelectorAll(`${selector} button`)].map(b => ({
     key: b.dataset.quick || null, tool: b.dataset.tool || null, pressed: b.getAttribute('aria-pressed'),
@@ -45,6 +52,9 @@ const state = () => page.evaluate(() => {
     quickButtons: buttons('#mobile-draw-quick'),
     actions: box('#mobile-draw-actions'),
     actionButtons: buttons('#mobile-draw-actions'),
+    strip: box('#mobile-market-strip'),
+    menuHit: hit('#mobile-menu-open'),
+    pairHit: hit('#mobile-market-pick'),
     hint: document.querySelector('#mobile-draw-hint')?.hidden ? '' : document.querySelector('#mobile-draw-hint')?.textContent.trim(),
     tool: document.querySelector('#chart')?.dataset.drawingTool,
     selectedClass: document.body.classList.contains('drawing-selected'),
@@ -75,6 +85,8 @@ try {
   }
   assert.equal(initial.actions.display, 'none', 'edit actions must stay hidden without a selection');
   assert.equal(initial.hint, '');
+  assert.ok(initial.quick.bottom <= initial.strip.top + 1, 'quick tools must not overlap the bottom pair strip');
+  assert.ok(initial.menuHit.inside && initial.pairHit.inside, 'menu and pair controls must stay tappable');
 
   // One tap arms a tool; long press toggles the persistent favorite list.
   await page.locator('#mobile-draw-quick [data-tool="long"]').dispatchEvent('contextmenu');
@@ -131,6 +143,8 @@ try {
     assert.ok(completed.actionButtons.some(b => b.key === key && b.w >= 44 && b.h >= 44), `missing edit action: ${key}`);
   }
   assert.match(completed.hint, /seçildi/i);
+  assert.ok(completed.actions.bottom <= completed.strip.top + 1, 'edit actions must not overlap the bottom pair strip');
+  assert.ok(completed.menuHit.inside && completed.pairHit.inside, 'menu and pair controls must stay tappable with a selected drawing');
   await page.screenshot({ path: path.join(shotDir, 'phase2-03-edit-actions.png'), fullPage: false });
 
   step = 'lock';

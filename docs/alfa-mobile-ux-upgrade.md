@@ -393,3 +393,10 @@ node tests/browser/alfa-capability-pwa.browser.mjs --url=http://127.0.0.1:8787 -
 - Service worker’ın gerçek çevrimdışı davranışı ve uzun vadeli önbellek senaryosu kapsam dışı; yalnızca grafik sayfasında kayıt oluştuğu doğrulandı. `sw.js`, `BUILD_ID` ve önbellek stratejisi değiştirilmedi.
 - Gerçek hesap/bulut/cross-device senaryoları FAZ 4’te olduğu gibi **UNVERIFIED**; staging Auth `401 Invalid JWT` veriyor.
 - Production deploy yapılmadı; tüm çalışma yerel statik sunucu ve yerel commit’lerle sınırlı.
+
+## FAZ 5 sonrası düzeltme: alt çizim çubuğu / parite şeridi çakışması
+
+- **Sorun:** Çizim seçiliyken `#mobile-draw-actions` (geri al / yinele / kilitle / gizle / sil) ve araç seçilmemişken `#mobile-draw-quick`, parite şeridinin (`#mobile-market-strip`) üst binmesini kapsıyordu; menü ve parite dokunmaları çubuğa gidiyordu.
+- **Düzeltme:** Çubuklar portrede `bottom: 56px → 84px`, yatayda `60px → 66px`; ipucu da sırasıyla `108px → 146px` ve `110px → 124px` yukarı taşındı. Şeridin üstünde 8 px boşluk kaldı; `sw.js` değişmedi, CSS sürümü `?v=40 → ?v=41` yapıldı.
+- **Regresyon:** `alfa-drawing-experience.browser.mjs` artık hızlı araç/aksiyon çubuğunun şeridi geçmediğini ve menü/parite düğmelerinin `elementFromPoint` ile hâlâ ulaşılabilir olduğunu doğruluyor. Yerel suite PASS; `alfa-trust-touch` ve `alfa-mobile-landscape` de PASS.
+- **Kapsam:** Yalnızca mobil yerleşim/CSS ve test; çizim motoru, masaüstü düzeni ve Supabase kodu değişmedi.
