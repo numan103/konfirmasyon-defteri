@@ -148,4 +148,82 @@ node tests/browser/alfa-drawing-experience.browser.mjs --url=http://127.0.0.1:87
 - Gerçek iPhone Safari, fiziksel çentik davranışı ve iOS PWA kurulumu: gerçek cihaz olmadan **UNVERIFIED**.
 - Bulut/hesap senkronizasyonu ve cross-device çizim senkronizasyonu: staging Auth `401 Invalid JWT` verdiği için **UNVERIFIED**; yerel kalıcılık doğrulandı.
 - `navigator.share` ve görüntü panosu desteği tarayıcı yeteneğine bağlı; FAZ 5'te alternatifler değerlendirilecek.
-- FAZ 3–5 henüz uygulanmadı.
+- FAZ 3–5 sonraki fazlarda ele alındı; bu fazın dışındaki değişiklik yapılmadı.
+
+---
+
+## FAZ 3 — Mobile Feature Discovery (P1)
+
+### Önceki UX problemi
+
+Denetim, masaüstünde çalışan gelişmiş araçların telefonda keşfedilemediğini kaydetti (390×844, gerçek tarayıcı ölçümü):
+
+| Ölçüm / davranış | Önce |
+|---|---|
+| Mobil menü girişi | 18 kısayol; Multi-chart, Strategy Tester ve Research yok |
+| `#multi-toggle` | `display:none` (gizli toolbar içinde) |
+| `#lab-menu`, `#tester-open`, `#research-toggle` | `display:none` / 0×0 |
+| Multi-chart düzeni | Telefonda 2/4/6 için dikey kaydırmalı tek kolon, 180 px satırlar |
+| Replay | Menüde vardı; Tester yalnızca Replay → Paper dolaylı yoluyla |
+| Açıklama | Gelişmiş araçların ne yaptığına dair mobil not yok |
+
+Kaynak: [`docs/upgrade-screenshots/phase3-00-before-menu.png`](upgrade-screenshots/phase3-00-before-menu.png) ve `docs/alfa-mobile-ux-audit.md` (öncelik #7/#8).
+
+### Yapılan değişiklik
+
+- `alfa-charts.html`: mobil menüye dört giriş eklendi: **Çoklu grafik**, **Strateji testi**, **Araştırma**, **Gelişmiş**. Menü altına “Test araçları simülasyondur; gerçek emir gönderilmez” notu ve Detaylar bağlantısı eklendi.
+- Yeni `#mobile-advanced-sheet` alt paneli: Çoklu grafik, Strateji testleri, Araştırma arşivi ve Replay/İndikatörler kartları; her kart mevcut akışa kısayol. Panel, yeni motor açmadığını ve 4/6 düzenin masaüstüne daha uygun olduğunu açıkça söylüyor.
+- `assets/alfa-charts.mjs`: yeni girişler **mevcut** kontrolleri çağırıyor:
+  - Multi-chart → mevcut `[data-layout="2"]` düğmesi (`initMultiChart` state’i ve `setOpen(true)` aynen korunuyor).
+  - Tester → mevcut `#tester-open` (Replay yoksa açıklayıcı dialog, varsa tester sekmesi).
+  - Research → mevcut `#research-toggle` / `research.toggle()`.
+  - Replay ve İndikatörler → mevcut `#replay-toggle` / `#indicators-manage`.
+  - Menü açıldığında ve `#multi-exit` kullanıldığında `aria-pressed` / etiket senkronize ediliyor.
+- `assets/alfa-charts.css`: mobil 2-grafik düzeni artık yan yana değil **dikey iki eşit pane** (kaydırma yerine `minmax(0,1fr)`), üstte 44 px’lik “Tek grafiğe dön” kontrolü; Research ve Paper/Tester panelleri alt strip ile çakışmayacak şekilde safe-area’ya göre konumlandırıldı.
+- `alfa-charts.html`: varlık sürümleri `alfa-charts.css?v=37`, `alfa-charts.mjs?v=80`; `sw.js` değiştirilmedi.
+- `tests/browser/alfa-feature-discovery.browser.mjs`: menü girişleri, 2-pane düzen, tester dialogu, Research paneli, gelişmiş alt paneli, yatay erişim ve masaüstü smoke için regresyon testi eklendi.
+
+### Kullanıcıya etkisi
+
+- Kullanıcı artık menüden tek dokunuşla iki grafik açabiliyor ve aynı “Tek grafiğe dön” kontrolüyle çıkabiliyor; 2 pane 375 px yükseklikte, yatayda 148 px.
+- Strateji testi ve Araştırma, gizli Laboratuvar popover’ına girmeden doğrudan menüde; Replay ve indikatörler de aynı akışta korunuyor.
+- Gelişmiş paneli, sığmayan 4/6 düzen ve hesap bağımlı özellikleri açıklıyor; simülasyon uyarısı kalıcı olarak görünür.
+- Masaüstü etkilenmedi: 1440×950’de toolbar `flex` (54 px), `#multi-toggle` görünür (34×34), grafik 1140×733, watchlist 248×872, `pageErrors: []`.
+
+### Test sonucu
+
+Komut:
+
+```powershell
+node tests/browser/alfa-feature-discovery.browser.mjs --url=http://127.0.0.1:8787 --playwright=C:\\Users\\Pc\\AppData\\Local\\Temp\\opencode\\alfa-chart-browser-tests\\node_modules\\playwright\\index.mjs --shots=docs/upgrade-screenshots
+```
+
+**Sonuç: PASS**, `pageErrors: []`.
+
+| Kontrol | Sonuç |
+|---|---|
+| Mobil menü | 22 giriş; yeni 4 giriş dikeyde 111×64 px, yatayda 198×48 px |
+| Çoklu grafik | `body.multi-open`, `data-layout=2`, tek chart gizli, 2 hücre 386×375 px |
+| Çıkış | `#multi-exit` 90×44 px; dönüşte `aria-pressed=false` |
+| Strateji testi | “Strateji testleri” dialogu ve “Replay başlat” eylemi açıldı |
+| Research | Panel 374×420 px, `Misafir · yalnızca yerel kayıt`, yatay taşma 0 |
+| Gelişmiş paneli | 374×574 px, 4 kart, simülasyon ve 1/2 düzen notu |
+| Yatay | Menü girişleri 48 px; 2 pane 840×148 px |
+| Regresyon | FAZ 1 ve FAZ 2 testleri yeniden **PASS**; masaüstü smoke **PASS** |
+
+**Ekran görüntüleri**
+
+- Önce (18 girişli menü): [`docs/upgrade-screenshots/phase3-00-before-menu.png`](upgrade-screenshots/phase3-00-before-menu.png)
+- Sonra (22 girişli menü): [`docs/upgrade-screenshots/phase3-01-menu-after.png`](upgrade-screenshots/phase3-01-menu-after.png)
+- İki grafik: [`docs/upgrade-screenshots/phase3-02-multi-two.png`](upgrade-screenshots/phase3-02-multi-two.png)
+- Research paneli: [`docs/upgrade-screenshots/phase3-03-research.png`](upgrade-screenshots/phase3-03-research.png)
+- Gelişmiş alt paneli: [`docs/upgrade-screenshots/phase3-04-advanced.png`](upgrade-screenshots/phase3-04-advanced.png)
+- Yatay iki grafik: [`docs/upgrade-screenshots/phase3-05-landscape-multi.png`](upgrade-screenshots/phase3-05-landscape-multi.png)
+
+**Commit:** `c87a34a` (`feat: surface advanced chart tools on mobile`)
+
+### Doğrulanamayan / kapsam dışı
+
+- Gerçek iPhone Safari, fiziksel çentik ve iOS PWA kurulumu: gerçek cihaz olmadan **UNVERIFIED**.
+- Research hesap özellikleri, bulut çakışma çözümü ve cross-device senaryoları: staging Auth `401 Invalid JWT` verdiği için **UNVERIFIED**; misafir/yerel panel doğrulandı.
+- 4/6 grafik düzeni telefonda kasıtlı olarak birincil değil; masaüstü davranışı korundu. Gerçek gerçek emir gönderimi kapsam dışı; Tester/Paper simülasyon olarak etiketlendi.
