@@ -227,3 +227,81 @@ node tests/browser/alfa-feature-discovery.browser.mjs --url=http://127.0.0.1:878
 - Gerçek iPhone Safari, fiziksel çentik ve iOS PWA kurulumu: gerçek cihaz olmadan **UNVERIFIED**.
 - Research hesap özellikleri, bulut çakışma çözümü ve cross-device senaryoları: staging Auth `401 Invalid JWT` verdiği için **UNVERIFIED**; misafir/yerel panel doğrulandı.
 - 4/6 grafik düzeni telefonda kasıtlı olarak birincil değil; masaüstü davranışı korundu. Gerçek gerçek emir gönderimi kapsam dışı; Tester/Paper simülasyon olarak etiketlendi.
+
+---
+
+## FAZ 4 — Trust, Status & Touch Targets (P0/P1)
+
+### Önceki UX problemi
+
+Denetim, mobil kabukta güven ve durum bilgisinin görünmediğini, alt şerit ile zaman aralığı satırlarının ise 44 px dokunma hedefinin altında kaldığını kaydetti (390×844 ve 844×390 gerçek tarayıcı ölçümü):
+
+| Ölçüm / davranış | Önce |
+|---|---|
+| Kayıt durumu | Yalnızca gizli footer’da (`footer{display:none}`); telefonda görünmüyordu |
+| Alarm kapsamı | Doğru metin yalnızca Alarm dialogunun içinde; ana menüde hatırlatma yok |
+| Paper simülasyonu | Başlıkta küçük «Paper Trading · SİMÜLASYON» metni vardı, kalıcı rozet yok |
+| Alt şerit (dikey) | Menü `34×34`, yıldız `28×34`, zaman `56×34` px |
+| Alt şerit (yatay) | `28 px` yükseklik, düğmeler `44×30` px |
+| Zaman aralığı satırı | `36 px` yükseklik (13 satır / 26 buton) |
+
+Kaynak: [`docs/upgrade-screenshots/phase4-00-portrait-strip.png`](upgrade-screenshots/phase4-00-portrait-strip.png), [`phase4-00-landscape-strip.png`](upgrade-screenshots/phase4-00-landscape-strip.png), [`phase4-00-timeframes.png`](upgrade-screenshots/phase4-00-timeframes.png) ve `docs/alfa-mobile-ux-audit.md` (öncelik #2/#3/#5/#9/#10/#17).
+
+### Yapılan değişiklik
+
+- `alfa-charts.html`: mobil menüye salt-okunur `#mobile-save-state` durumu ve kalıcı alarm kapsam notu eklendi. Not, mevcut `#alarm-scope` metnini **değiştirmeden** aynı gerçeği özetliyor: yerel alarm, yalnızca seçili sembol, sekme kapalıyken/Replay’de çalışmaz, 7/24 sunucu alarmı değildir.
+- `assets/alfa-charts.mjs`: `syncMobileStatus()` mevcut `#drawing-status`, `#cloud-conflict`, `#workspace-conflict`, research `data-state` ve `navigator.onLine` sinyallerini okuyup menüdeki durumu güncelliyor. Yeni auth çağrısı, `localStorage` yazımı, Supabase isteği veya izin istemi yok; `cloudSettings.start()` yeniden çağrılmıyor.
+- `assets/alfa-paper.mjs`: Paper panelinin sabit header’ına `GERÇEK EMİR YOK` rozeti eklendi. Header `update()` sırasında yeniden kurulmadığı için rozet sekme değişiminde ve liste yeniden çiziminde kalıcı.
+- `assets/alfa-charts.css`:
+  - Alt şerit düğmeleri dikeyde en az `44×44`, yatayda `44×44` olacak şekilde büyütüldü. Yatay şerit `28 → 48 px`, grafik `352 → 332 px` (hâlâ ekranı dolduruyor, test eşiği `>=300`).
+  - Odak modu, çizim hızlı çubuğu, sol dock, replay bar, research/paper panel ve swipe overlay konumları yeni şerit yüksekliğine göre kaydırıldı.
+  - Zaman aralığı satırları `36 → 46 px`, favori butonları `36×36 → 46×46`; dikey sheet için ek yükseklik ve `overscroll-behavior:contain` eklendi.
+  - Durum rozetleri için yerel/çevrimdışı/hata/çakışma/hesap renkleri tanımlandı; masaüstü düzeni etkilenmedi.
+- `alfa-charts.html`: varlık sürümleri `alfa-charts.css?v=38`, `alfa-charts.mjs?v=81`; paper modülü içe aktarımı `alfa-paper.mjs?v=6`. `sw.js` değiştirilmedi.
+- `tests/browser/alfa-trust-touch.browser.mjs`: durum notu, alarm kapsamı, Paper rozeti, dokunma hedefleri, zaman sheet’i, yatay yerleşim ve masaüstü smoke için regresyon testi eklendi. FAZ 1 testindeki yatay şerit eşiği, bilinçli 44 px hedefi nedeniyle `<=32 → 44..56` olarak güncellendi.
+
+### Kullanıcıya etkisi
+
+- Menü artık açıldığında kayıt durumunu açık söylüyor: misafirde «MİSAFİR · yalnızca yerel kayıt»; gerçek oturumda hesap/bulut durumları yalnızca mevcut sinyallerden yansıyor, doğrulanmamış senkronizasyon iddia edilmiyor.
+- Alarmın 7/24 olmadığı, yalnızca seçili sembol ve açık sekme ile sınırlı olduğu artık ana menüde de görünüyor; Alarm dialogunun korunan metni aynen kalıyor.
+- Paper Trading panelinde «GERÇEK EMİR YOK» rozeti her sekmede ve her yeniden çizimde görünür; gerçek emir isteği gönderilmedi (`realOrderRequests: 0`).
+- Menü, yıldız, zaman ve sembol dokunma hedefleri dikeyde 44 px; yatayda şerit 48 px ve düğmeler 44 px. Zaman aralığı seçim satırları 46 px.
+- Masaüstü etkilenmedi: 1440×950’de toolbar `flex` (54 px), grafik 1140×733, watchlist 248×872, `pageErrors: []`.
+
+### Test sonucu
+
+Komut:
+
+```powershell
+node tests/browser/alfa-trust-touch.browser.mjs --url=http://127.0.0.1:8787 --playwright=C:\Users\Pc\AppData\Local\Temp\opencode\alfa-chart-browser-tests\node_modules\playwright\index.mjs --shots=docs/upgrade-screenshots
+```
+
+**Sonuç: PASS**, `pageErrors: []`, `realOrderRequests: 0`.
+
+| Kontrol | Sonuç |
+|---|---|
+| Kayıt durumu | Menüde 348×34 px rozet; `MİSAFİR · yalnızca yerel kayıt` |
+| Alarm kapsamı | Menü notu + dialog; `Sekme kapalıyken … 7/24 sunucu alarmı değildir` |
+| Paper rozeti | `GERÇEK EMİR YOK`, 105×24 px; tester/all sekmelerinde kalıcı |
+| Dikey dokunma | Menü 44×44, yıldız 44×44, zaman 56×44, sembol 204×44 px |
+| Zaman aralığı | 26 buton / 13 satır, her biri 46 px; yatay taşma 0 |
+| Yatay | Şerit 48 px, düğmeler 44 px, grafik 332 px, taşma 0 |
+| Regresyon | FAZ 1, FAZ 2, FAZ 3 ve `alfa-paper` testleri **PASS**; masaüstü smoke **PASS** |
+
+**Ekran görüntüleri**
+
+- Önce (menü, alarm, Paper, zaman aralığı, yatay): [`phase4-00-portrait-strip.png`](upgrade-screenshots/phase4-00-portrait-strip.png), [`phase4-00-alarm.png`](upgrade-screenshots/phase4-00-alarm.png), [`phase4-00-paper.png`](upgrade-screenshots/phase4-00-paper.png), [`phase4-00-timeframes.png`](upgrade-screenshots/phase4-00-timeframes.png), [`phase4-00-landscape-strip.png`](upgrade-screenshots/phase4-00-landscape-strip.png)
+- Sonra (menü durumu): [`docs/upgrade-screenshots/phase4-02-menu-status.png`](upgrade-screenshots/phase4-02-menu-status.png)
+- Alarm dialogu: [`docs/upgrade-screenshots/phase4-03-alarm-dialog.png`](upgrade-screenshots/phase4-03-alarm-dialog.png)
+- Paper rozeti: [`docs/upgrade-screenshots/phase4-04-paper-badge.png`](upgrade-screenshots/phase4-04-paper-badge.png)
+- Zaman aralığı: [`docs/upgrade-screenshots/phase4-05-timeframes.png`](upgrade-screenshots/phase4-05-timeframes.png)
+- Yatay şerit: [`docs/upgrade-screenshots/phase4-06-landscape.png`](upgrade-screenshots/phase4-06-landscape.png)
+
+**Commit:** `1f16c12` (`feat: clarify mobile status and enlarge touch targets`)
+
+### Doğrulanamayan / kapsam dışı
+
+- Gerçek hesapta bulut kaydı, çakışma çözümü ve cihazlar arası senkronizasyon: staging Auth `401 Invalid JWT` verdiği için **UNVERIFIED**. Menü rozeti gerçek durumu yalnızca mevcut sinyallerden okur; yeni bir doğrulama iddiası üretmez.
+- 7/24 alarm teslimi, Telegram/webhook gönderimi ve gerçek iOS bildirim izni: gerçek hesap/cihaz olmadan **UNVERIFIED**; yerel kapsam metni doğrulandı.
+- Yatay şerit 28 px’den 48 px’e çıkarıldı; bu, 44 px dokunma hedefi için bilinçli bir değişikliktir ve FAZ 1’in tam ekran davranışı korundu (grafik 332 px).
+- Gerçek emir gönderimi kapsam dışı; Paper/tester yalnızca simülasyon olarak etiketlendi.
