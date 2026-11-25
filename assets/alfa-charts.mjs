@@ -47,6 +47,14 @@ syncMobileShellMode();
 mobileShellQuery.addEventListener('change', event => { isMobile = event.matches; syncMobileShellMode(); });
 matchMedia('(orientation:landscape)').addEventListener('change', syncMobileShellMode);
 if (isEmbed) document.body.classList.add('embed-chart');
+// FAZ 5: register the existing site service worker on the chart page too.
+// The SW source is untouched; this only makes offline shell/install support
+// available where the browser already permits it.
+if (window.isSecureContext && 'serviceWorker' in navigator) {
+  const registerChartWorker = () => navigator.serviceWorker.register('/sw.js').catch(() => {});
+  if (document.readyState === 'complete') registerChartWorker();
+  else window.addEventListener('load', registerChartWorker, { once: true });
+}
 // Multi-chart panes are same-origin embedded charts. The parent is the only
 // hub; panes never message each other directly.
 const syncSession = search.get('mcid') || '';
@@ -70,6 +78,7 @@ let syncMobileShell = () => {};
 let paintMobileMarket = () => {};
 let openMobileSheet = () => {};
 let syncMobileStatus = () => {};
+let syncShareCapabilities = () => {};
 const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
   if (!next) return false;
@@ -111,17 +120,54 @@ if (isMobile) {
   const menuToggle = $('mobile-menu-open');
   const tfToggle = $('mobile-timeframe');
   const SHEETS = [
-    { className: 'tools-open', toggle: toolsToggle },
-    { className: 'settings-open', toggle: settingsToggle },
-    { className: 'share-open', toggle: $('menu-share') },
-    { className: 'menu-open', toggle: menuToggle },
-    { className: 'advanced-open', toggle: $('menu-advanced') },
-    { className: 'timeframes-open', toggle: tfToggle }
+    { className: 'tools-open', toggle: toolsToggle, sheetId: 'mobile-tools-sheet' },
+    { className: 'settings-open', toggle: settingsToggle, sheetId: 'mobile-settings-sheet' },
+    { className: 'share-open', toggle: $('menu-share'), sheetId: 'mobile-share-sheet' },
+    { className: 'menu-open', toggle: menuToggle, sheetId: 'mobile-menu-sheet' },
+    { className: 'advanced-open', toggle: $('menu-advanced'), sheetId: 'mobile-advanced-sheet' },
+    { className: 'timeframes-open', toggle: tfToggle, sheetId: 'mobile-timeframes-sheet' }
   ];
+  const setShareOption = (id, { hidden = false, action = '', label, title } = {}) => {
+    const button = $(id);
+    if (!button) return;
+    button.hidden = hidden;
+    button.disabled = false;
+    button.dataset.shareAction = action;
+    if (label) button.textContent = label;
+    if (title) button.title = title;
+    else button.removeAttribute('title');
+  };
+  // Show only options that can actually work in this browser. Unsupported native
+  // capabilities are replaced by existing download/clipboard-text paths.
+  syncShareCapabilities = () => {
+    const caps = detectShareCapabilities();
+    setShareOption('mobile-share-image', { hidden: !caps.imageShare, action: 'share-image', label: 'Fotoğraf olarak paylaş' });
+    setShareOption('mobile-share-link', {
+      action: caps.share ? 'share-link' : 'copy-link',
+      label: caps.share ? 'Bağlantıyı paylaş' : 'Bağlantıyı kopyala'
+    });
+    setShareOption('mobile-share-copy', {
+      hidden: !caps.clipboardImage,
+      action: 'copy-image',
+      label: 'Görüntüyü kopyala',
+      title: caps.clipboardImage ? 'Görüntüyü panoya kopyala' : 'Bu tarayıcı görüntü panosunu desteklemiyor'
+    });
+    setShareOption('mobile-share-download', { action: 'download-image', label: 'Görüntüyü indir' });
+    const note = $('mobile-share-note');
+    if (note) {
+      note.textContent = caps.share
+        ? (caps.imageShare
+          ? 'Sistem paylaşımı kullanılabilir. Bu tarayıcıda desteklenmeyen seçenekler gizlenir.'
+          : 'Bağlantı paylaşımı kullanılabilir; görüntü için indirme seçeneği her zaman çalışır.')
+        : 'Bu tarayıcıda sistem paylaşımı yok. Görüntüyü indirerek veya bağlantıyı kopyalayarak paylaşabilirsiniz.';
+    }
+  };
+  syncShareCapabilities();
   const closeSheets = () => {
-    SHEETS.forEach(({ className, toggle }) => {
+    SHEETS.forEach(({ className, toggle, sheetId }) => {
       document.body.classList.remove(className);
       toggle?.setAttribute('aria-expanded', 'false');
+      $(sheetId)?.setAttribute('aria-hidden', 'true');
     });
     if (backdrop) backdrop.hidden = true;
   };
@@ -129,10 +175,13 @@ if (isMobile) {
     closeSheets();
     if (backdrop) backdrop.hidden = false;
     document.body.classList.add(className);
-    SHEETS.find(entry => entry.className === className)?.toggle?.setAttribute('aria-expanded', 'true');
+    const entry = SHEETS.find(item => item.className === className);
+    entry?.toggle?.setAttribute('aria-expanded', 'true');
+    $(entry?.sheetId)?.setAttribute('aria-hidden', 'false');
     if (className === 'tools-open') syncMobileTools();
     if (className === 'timeframes-open') renderMobileTimeframes();
     if (className === 'menu-open') { syncMobileStatus(); syncFeatureMenu(); }
+    if (className === 'share-open') syncShareCapabilities();
   };
   openMobileSheet = openSheet;
 
@@ -315,21 +364,32 @@ if (isMobile) {
   const runShareAction = async (button, action) => {
     if (!button) return;
     button.disabled = true;
+    showMessage('');
     try { await action(); closeSheets(); }
     catch (error) {
       console.error(error);
-      connection('Paylaşım işlemi tamamlanamadı', 'error');
+      const text = 'Paylaşım tamamlanamadı. Görüntüyü indirmeyi veya bağlantıyı kopyalamayı deneyin.';
+      connection(text, 'error');
+      showMessage(text);
+      syncShareCapabilities();
     } finally { button.disabled = false; }
   };
-  $('mobile-share-image')?.addEventListener('click', event => runShareAction(event.currentTarget, () => shareChartImage()));
-  $('mobile-share-link')?.addEventListener('click', event => runShareAction(event.currentTarget, () => shareChartLink()));
-  $('mobile-share-copy')?.addEventListener('click', event => runShareAction(event.currentTarget, () => copyChartScreenshot()));
-  $('mobile-share-download')?.addEventListener('click', event => runShareAction(event.currentTarget, () => downloadChartScreenshot()));
+  $('mobile-share-sheet')?.addEventListener('click', event => {
+    const button = event.target.closest('button[data-share-action]');
+    if (!button) return;
+    const action = SHARE_ACTIONS[button.dataset.shareAction];
+    if (action) runShareAction(button, action);
+  });
   backdrop?.addEventListener('click', closeSheets);
   $('mobile-tools-close')?.addEventListener('click', closeSheets);
   $('mobile-settings-close')?.addEventListener('click', closeSheets);
   $('mobile-share-close')?.addEventListener('click', closeSheets);
+  $('mobile-share-back')?.addEventListener('click', () => openSheet('menu-open'));
   $('mobile-tf-close')?.addEventListener('click', closeSheets);
+  $('mobile-tf-back')?.addEventListener('click', () => openSheet('menu-open'));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && SHEETS.some(({ className }) => document.body.classList.contains(className))) closeSheets();
+  });
   document.querySelectorAll('.sheet-grip').forEach(grip => {
     let startY = 0;
     grip.addEventListener('pointerdown', event => {
@@ -1743,6 +1803,31 @@ async function copyChartLink() {
   connection('Grafik bağlantısı kopyalandı', 'ok');
 }
 
+const SHARE_ACTIONS = {
+  'share-image': () => shareChartImage(),
+  'share-link': () => shareChartLink(),
+  'copy-image': () => copyChartScreenshot(),
+  'copy-link': () => copyChartLink(),
+  'download-image': () => downloadChartScreenshot()
+};
+
+function detectShareCapabilities() {
+  const share = typeof navigator.share === 'function';
+  let imageShare = false;
+  if (share && typeof navigator.canShare === 'function' && typeof File === 'function') {
+    try {
+      const probe = new File([new Uint8Array([137, 80, 78, 71])], 'capability.png', { type: 'image/png' });
+      imageShare = navigator.canShare({ files: [probe] }) === true;
+    } catch {}
+  }
+  return {
+    share,
+    imageShare,
+    clipboardImage: !!(navigator.clipboard?.write && typeof window.ClipboardItem === 'function'),
+    download: typeof document.createElement('a').download === 'string'
+  };
+}
+
 async function shareChartImage() {
   const canvas = await buildChartScreenshotCanvas();
   const blob = await new Promise(resolve => canvas.toBlob ? canvas.toBlob(resolve, 'image/png') : resolve(null));
@@ -1758,7 +1843,8 @@ async function shareChartImage() {
       throw error;
     }
   }
-  await copyChartScreenshot();
+  // Universal fallback: unsupported image sharing must still produce a file.
+  await downloadChartScreenshot();
 }
 
 async function shareChartLink() {
@@ -1797,9 +1883,11 @@ $('shot-menu').addEventListener('click', async e => {
     else if (action === 'copy-link') await copyChartLink();
   } catch (err) {
     console.error(err);
-    if (action === 'copy-image') connection('Görüntü kopyalanamadı (tarayıcı izin vermiyor olabilir)', 'error');
-    else if (action === 'copy-link') connection('Bağlantı kopyalanamadı', 'error');
-    else connection('Grafik görüntüsü alınamadı', 'error');
+    const text = action === 'copy-image'
+      ? 'Görüntü kopyalanamadı (tarayıcı izin vermiyor olabilir)'
+      : action === 'copy-link' ? 'Bağlantı kopyalanamadı' : 'Grafik görüntüsü alınamadı';
+    connection(text, 'error');
+    showMessage(text);
   } finally {
     if (shotBtn) shotBtn.disabled = false;
   }
@@ -2203,6 +2291,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
     get studyContext() { return studyContext ? { ...studyContext } : null; }, rememberStudies, loadStudiesFor,
     resetChartView, openChartSettingsModal, handleChartAction,
+    share: { capabilities: detectShareCapabilities, actions: SHARE_ACTIONS, sync: syncShareCapabilities },
     get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {

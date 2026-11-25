@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=38">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=40">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -329,6 +329,7 @@
       <article><strong>Replay ve indikatörler</strong><p>Geçmişi mum mum incelemek ve mevcut indikatör katmanlarını yönetmek için ana menüyü kullanın.</p><button id="advanced-replay" type="button">Replay başlat</button><button id="advanced-indicators" type="button">İndikatörler</button></article>
     </div>
     <p class="advanced-note">Bu panel mevcut araçlara kısayoldur; yeni bir grafik motoru veya işlem motoru açmaz.</p>
+    <p id="mobile-install-hint" class="advanced-note install-note" role="note">Ana ekrana ekleme yalnızca tarayıcı ve cihaz destekliyorsa kullanılabilir. iOS Safari kurulumu bu çalışmada doğrulanmadı.</p>
   </section>
   <section id="mobile-tools-sheet" class="mobile-sheet" aria-label="Çizim araçları" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
@@ -355,20 +356,21 @@
   </section>
   <section id="mobile-share-sheet" class="mobile-sheet" aria-label="Paylaşım seçenekleri" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
-    <header class="sheet-head"><strong>Paylaş</strong><button id="mobile-share-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <header class="sheet-head"><button id="mobile-share-back" class="sheet-back" type="button" aria-label="Önceki menü">←</button><strong>Paylaş</strong><button id="mobile-share-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
     <div class="sheet-group">
-      <button id="mobile-share-image" type="button">Fotoğraf olarak paylaş</button>
-      <button id="mobile-share-link" type="button">Bağlantıyı paylaş</button>
-      <button id="mobile-share-copy" type="button">Görüntüyü kopyala</button>
-      <button id="mobile-share-download" type="button">Görüntüyü indir</button>
+      <button id="mobile-share-image" type="button" data-share-action="share-image">Fotoğraf olarak paylaş</button>
+      <button id="mobile-share-link" type="button" data-share-action="share-link">Bağlantıyı paylaş</button>
+      <button id="mobile-share-copy" type="button" data-share-action="copy-image">Görüntüyü kopyala</button>
+      <button id="mobile-share-download" type="button" data-share-action="download-image">Görüntüyü indir</button>
     </div>
+    <p id="mobile-share-note" class="share-capability-note" role="status"></p>
   </section>
   <section id="mobile-timeframes-sheet" class="mobile-sheet" aria-label="Zaman dilimleri" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
-    <header class="sheet-head"><strong>Zaman dilimleri</strong><button id="mobile-tf-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <header class="sheet-head"><button id="mobile-tf-back" class="sheet-back" type="button" aria-label="Önceki menü">←</button><strong>Zaman dilimleri</strong><button id="mobile-tf-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=81"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=82"></script>
 </body>
 </html>
