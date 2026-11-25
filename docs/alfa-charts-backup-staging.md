@@ -160,6 +160,10 @@ secret, şifre veya kullanıcı verisi kopyalanmadı.
   site bağlantısı ve özel zemin rengi kaydını da doğruladı. Gerçek iPhone
   Safari sistem hareketleri ayrıca cihazda kontrol edilmeli.
 - Cache sürümleri: CSS `32`, JS `75`; `sw.js` değişmedi.
+- Canlı yayın: kaynak `65b2c38`, deployment
+  `https://a9442035.alfa-traders.pages.dev`. `alfa-trader.com/alfa-charts.html`
+  HTTP 200; CSS/JS sürümleri ve siteye dönüş bağlantısı doğrulandı,
+  staging referansı yok. Production veri/migration işlemi yapılmadı.
 
 ## Tekrar için scripts
 
