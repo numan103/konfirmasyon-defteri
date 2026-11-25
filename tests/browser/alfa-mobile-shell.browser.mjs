@@ -45,21 +45,27 @@ try {
       doc: { w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight },
       toolbar: box('.toolbar'),
       chart: box('#chart'),
+      legend: box('.legend'),
+      legendPosition: getComputedStyle(document.querySelector('.legend')).position,
+      chartTitle: document.querySelector('#market-title')?.textContent || '',
       marketStrip: box('#mobile-market-strip'),
-      tools: box('#drawing-tools'),
-      grip: box('#price-scale-grip'),
-      menu: box('#mobile-menu-sheet'),
       menuButton: box('#mobile-menu-open'),
       pairButton: box('#mobile-market-pick'),
+      tools: box('#drawing-tools'),
+      starButton: box('#mobile-tools-star'),
+      timeframeButton: box('#mobile-timeframe'),
+      grip: box('#price-scale-grip'),
+      menu: box('#mobile-menu-sheet'),
       toolbarDisplay: display('.toolbar'),
+      chartNavDisplay: display('.chart-navigation'),
       dataStateDisplay: display('#chart-data-state'),
-      legendDisplay: display('.legend'),
-      watchFilterDisplay: display('#watch-filter'),
       watchFilterHidden: (() => { const el = document.querySelector('#watch-filter'); return !el || el.getClientRects().length === 0; })(),
+      drawingSpaceDisplay: display('.drawing-space'),
       marketPrice: document.querySelector('#mobile-market-price') ? display('#mobile-market-price') : 'missing',
       stripHint: document.querySelector('#mobile-strip-hint') ? display('#mobile-strip-hint') : 'missing',
       stripArrows: document.querySelectorAll('.market-strip-arrow,[data-strip-step],.market-strip-commit').length,
       menuInStrip: document.querySelector('#mobile-market-strip')?.contains(document.querySelector('#mobile-menu-open')) === true,
+      focusButtonMissing: !document.querySelector('#menu-focus'),
       timeframeCount: document.querySelectorAll('#timeframes button').length,
       topTimeframesDisplay: display('#timeframes'),
       actionsDisplay: display('.actions'),
@@ -70,7 +76,8 @@ try {
       shareOpen: document.body.classList.contains('share-open'),
       menuOpen: document.body.classList.contains('menu-open'),
       timeframesOpen: document.body.classList.contains('timeframes-open'),
-      focusMode: document.body.classList.contains('focus-mode'),
+      toolsHidden: document.body.classList.contains('tools-hidden'),
+      starPressed: checked('#mobile-tools-star'),
       toolsInSheet: document.querySelector('#mobile-tools-sheet')?.contains(document.querySelector('#drawing-tools')),
       toolButtonCount: document.querySelectorAll('#drawing-tools button').length,
       allToolGroups: document.querySelectorAll('#mobile-all-tools [data-group]').length,
@@ -80,27 +87,37 @@ try {
       menuButtons: document.querySelectorAll('#mobile-menu-sheet .menu-grid button').length,
       paletteControls: document.querySelectorAll('#mobile-palette-form input').length,
       stripSymbol: document.querySelector('#mobile-market-symbol')?.textContent || '',
-      overlayActive: document.body.classList.contains('strip-preview') &&
-        document.querySelector('#mobile-swipe-overlay')?.classList.contains('mobile-swipe-overlay') === true,
-      overlaySymbol: document.querySelector('#mobile-swipe-symbol')?.textContent || '',
+      overlayActive: document.body.classList.contains('strip-preview'),
+      swipePrev: document.querySelector('#mobile-swipe-prev')?.textContent || '',
+      swipeCurrent: document.querySelector('#mobile-swipe-symbol')?.textContent || '',
+      swipeNext: document.querySelector('#mobile-swipe-next')?.textContent || '',
+      swipeCount: document.querySelector('#mobile-swipe-count')?.textContent || '',
       activeSymbol: document.querySelector('#symbol')?.value || '',
       mobileTimeframe: document.querySelector('#mobile-timeframe-label')?.textContent || '',
       tfRows: document.querySelectorAll('#mobile-tf-list [data-tf]').length,
       tfStars: document.querySelectorAll('#mobile-tf-list [data-tf-fav]').length,
       listVisible: document.querySelector('.workspace')?.classList.contains('no-list') === false,
-      watchPressed: checked('#menu-watchlist')
+      watchPressed: checked('#menu-watchlist'),
+      range1dPressed: checked('[data-range="86400"]')
     };
   });
 
   const before = await read();
   assert.equal(before.toolbarDisplay, 'none', 'top toolbar must be removed on phones');
+  assert.equal(before.chartNavDisplay, 'none', 'range/UTC/Log/Oto row must be hidden on phones');
   assert.equal(before.dataStateDisplay, 'none', 'data-state badge must be hidden on phones');
   assert.equal(before.watchFilterHidden, true, 'watchlist search must not cover the screen');
   assert.equal(before.marketPrice, 'missing', 'strip must not show a price next to the pair');
   assert.equal(before.stripHint, 'missing', 'strip must not show an extra hint');
   assert.equal(before.stripArrows, 0, 'strip must not show up/down arrows or commit chevron');
   assert.equal(before.menuInStrip, true, 'menu button must sit in the strip, left of the pair');
-  assert.ok(before.menuButton && before.pairButton && before.menuButton.x < before.pairButton.x);
+  assert.ok(before.menuButton && before.pairButton && before.starButton && before.timeframeButton);
+  assert.ok(before.menuButton.x < before.pairButton.x && before.pairButton.x < before.starButton.x &&
+    before.starButton.x < before.timeframeButton.x, 'strip order must be menu, pair, tools star, timeframe');
+  assert.equal(before.legendPosition, 'absolute', 'market title must be inside the chart, not a separate row');
+  assert.ok(before.legend && before.chart && before.legend.y >= before.chart.y - 2 && before.legend.y < before.chart.y + 40);
+  assert.ok(before.chartTitle.length > 0, 'in-chart title must show the active market');
+  assert.equal(before.focusButtonMissing, true, 'old focus-mode menu item must be removed');
   assert.ok(before.timeframeCount > 4, 'timeframes must still render for the app state');
   assert.equal(before.topTimeframesDisplay, 'none', 'top timeframe row must be hidden on phones');
   assert.equal(before.actionsDisplay, 'none', 'top action cluster must be hidden on phones');
@@ -119,13 +136,12 @@ try {
   assert.equal(before.allToolButtons, 3, 'utility tools must render alongside categories');
   assert.ok(before.mobileTimeframe.length > 0, 'bottom-right timeframe chip must show the active interval');
 
-  // Bottom-left menu opens a bottom sheet with every action, including focus mode.
   await page.click('#mobile-menu-open');
   await page.waitForFunction(() => document.body.classList.contains('menu-open') &&
-    document.querySelectorAll('#mobile-menu-sheet .menu-grid button').length >= 12, { timeout: 5000 });
+    document.querySelectorAll('#mobile-menu-sheet .menu-grid button').length >= 18, { timeout: 5000 });
   const menu = await read();
   assert.equal(menu.menuOpen, true);
-  assert.ok(menu.menuButtons >= 12, 'menu must expose tools, lists, photo and focus mode');
+  assert.ok(menu.menuButtons >= 18, 'menu must expose tools, lists, share and range/scale controls');
   assert.ok(menu.menu && menu.menu.y > before.viewport.h * 0.25, 'menu must anchor to the bottom of the screen');
 
   await page.click('#menu-tools');
@@ -167,7 +183,24 @@ try {
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => !document.querySelector('dialog.chart-dialog[open]'));
 
-  // Tapping the pair opens the compact pair list, not a commit step.
+  // Hidden range controls remain reachable from the menu.
+  await page.click('#mobile-menu-open');
+  await page.waitForFunction(() => document.body.classList.contains('menu-open'));
+  await page.click('#menu-range-1d');
+  await page.waitForFunction(() => document.querySelector('[data-range="86400"]')?.getAttribute('aria-pressed') === 'true', { timeout: 5000 });
+  assert.equal((await read()).range1dPressed, true);
+  assert.equal((await read()).chartNavDisplay, 'none');
+
+  // The star next to the timeframe only toggles the drawing tools.
+  await page.click('#mobile-tools-star');
+  await page.waitForFunction(() => document.body.classList.contains('tools-hidden'), { timeout: 5000 });
+  const hidden = await read();
+  assert.equal(hidden.starPressed, true);
+  assert.equal(hidden.drawingSpaceDisplay, 'none');
+  assert.equal(hidden.chartNavDisplay, 'none', 'tools star must not hide chart chrome');
+  await page.click('#mobile-tools-star');
+  await page.waitForFunction(() => !document.body.classList.contains('tools-hidden'));
+
   await page.click('#mobile-market-pick');
   await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false, { timeout: 5000 });
   assert.equal((await read()).watchPressed, true);
@@ -175,26 +208,39 @@ try {
   await page.click('#watch-mobile-close');
   await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === true, { timeout: 5000 });
 
-  // Swiping on the chart itself blurs the background and previews the next pair.
-  const beforeSwipe = await read();
-  const chartBox = beforeSwipe.chart;
-  const cx = chartBox.x + chartBox.w * 0.55;
-  const cy = chartBox.y + chartBox.h * 0.5;
-  await page.mouse.move(cx, cy);
+  // Swiping the middle of the chart is not a pair switcher.
+  const beforeMiddle = await read();
+  const chartBox = beforeMiddle.chart;
+  await page.mouse.move(chartBox.x + chartBox.w * 0.55, chartBox.y + chartBox.h * 0.5);
   await page.mouse.down();
-  await page.mouse.move(cx, cy + 56, { steps: 6 });
+  await page.mouse.move(chartBox.x + chartBox.w * 0.55, chartBox.y + chartBox.h * 0.5 + 60, { steps: 6 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+  const middle = await read();
+  assert.equal(middle.activeSymbol, beforeMiddle.activeSymbol, 'middle-screen swipe must not change pairs');
+  assert.equal(middle.overlayActive, false, 'middle-screen swipe must not show the pair carousel');
+
+  // Pair navigation lives in the bottom strip with a smooth prev/current/next carousel.
+  const strip = await page.$('#mobile-market-pick');
+  const stripBox = await strip.boundingBox();
+  const sx = stripBox.x + stripBox.width / 2;
+  const sy = stripBox.y + stripBox.height / 2;
+  await page.mouse.move(sx, sy);
+  await page.mouse.down();
+  await page.mouse.move(sx, sy + 56, { steps: 6 });
   await page.waitForFunction(() => document.body.classList.contains('strip-preview'), { timeout: 5000 });
   const swipePreview = await read();
-  assert.equal(swipePreview.activeSymbol, beforeSwipe.activeSymbol, 'swipe must not change the active pair immediately');
-  assert.ok(swipePreview.overlaySymbol.length > 0, 'blurred overlay must show the upcoming pair');
+  assert.equal(swipePreview.activeSymbol, beforeMiddle.activeSymbol, 'strip swipe must not change the active pair immediately');
+  assert.ok(swipePreview.swipeCurrent.length > 0, 'carousel must show the upcoming pair');
+  assert.ok(swipePreview.swipePrev.length > 0 && swipePreview.swipeNext.length > 0, 'carousel must show previous and next pairs');
+  assert.match(swipePreview.swipeCount, /\d+\s*\/\s*\d+/, 'carousel must show list position');
   await page.mouse.up();
-  assert.equal((await read()).activeSymbol, beforeSwipe.activeSymbol, 'pointer release must not commit immediately');
+  assert.equal((await read()).activeSymbol, beforeMiddle.activeSymbol, 'pointer release must not commit immediately');
   await page.waitForFunction(symbol => document.querySelector('#symbol')?.value !== symbol,
-    beforeSwipe.activeSymbol, { timeout: 6000 });
+    beforeMiddle.activeSymbol, { timeout: 6000 });
   const afterSwipe = await read();
-  assert.equal(afterSwipe.overlayActive, false, 'dwell commit must clear the overlay');
+  assert.equal(afterSwipe.overlayActive, false, 'dwell commit must clear the carousel');
 
-  // Timeframe chip scrolls favorites, tap opens the full list with filled-star favorites.
   const tfBefore = (await read()).mobileTimeframe;
   const tfChip = await page.$('#mobile-timeframe');
   const tfBox = await tfChip.boundingBox();
@@ -218,21 +264,6 @@ try {
   await page.waitForFunction(() => !document.body.classList.contains('timeframes-open') &&
     document.querySelector('#mobile-timeframe-label')?.textContent === '3D', { timeout: 5000 });
 
-  // Focus mode hides the legend/navigation chrome and gives the chart more room.
-  const beforeFocus = await read();
-  await page.click('#mobile-menu-open');
-  await page.waitForFunction(() => document.body.classList.contains('menu-open'));
-  await page.click('#menu-focus');
-  await page.waitForFunction(() => document.body.classList.contains('focus-mode'), { timeout: 5000 });
-  const focus = await read();
-  assert.equal(focus.legendDisplay, 'none', 'focus mode must hide chart legend');
-  assert.ok(focus.chart.h > beforeFocus.chart.h + 20, 'focus mode must enlarge the chart');
-  await page.click('#mobile-menu-open');
-  await page.waitForFunction(() => document.body.classList.contains('menu-open'));
-  await page.click('#menu-focus');
-  await page.waitForFunction(() => !document.body.classList.contains('focus-mode'));
-
-  // Bottom-left menu actions: drawings and photo/share.
   await page.click('#mobile-menu-open');
   await page.waitForFunction(() => document.body.classList.contains('menu-open'));
   await page.click('#menu-drawings');
@@ -251,7 +282,6 @@ try {
   await page.click('#mobile-share-close');
   await page.waitForFunction(() => !document.body.classList.contains('share-open'));
 
-  // Price scale grip still engages on vertical drag.
   const grip = await page.$('#price-scale-grip');
   assert.ok(grip, 'price scale grip must exist');
   const box = await grip.boundingBox();
@@ -268,18 +298,21 @@ try {
   await page.screenshot({ path: shot, fullPage: false });
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, origin, viewport: before.viewport, document: before.doc,
-    toolbarHidden: before.toolbarDisplay === 'none', chartHeight: before.chart.h, focusChartHeight: focus.chart.h,
+    toolbarHidden: before.toolbarDisplay === 'none', chartNavHidden: before.chartNavDisplay === 'none',
+    chartHeight: before.chart.h, inChartTitle: before.legendPosition === 'absolute', chartTitle: before.chartTitle,
     timeframeCount: before.timeframeCount, studyChipCount: before.studyChipCount,
     toolButtonCount: before.toolButtonCount, allToolGroups: before.allToolGroups, allToolButtons: before.allToolButtons,
     dataState: before.dataState, loadingOverlayCleared: before.chartLoadingHidden,
     menuInStrip: before.menuInStrip, menuButtons: menu.menuButtons, stripArrows: before.stripArrows,
     marketPriceHidden: before.marketPrice === 'missing', dataStateHidden: before.dataStateDisplay === 'none',
-    watchFilterHidden: before.watchFilterHidden, pairBefore: beforeSwipe.activeSymbol,
-    pairOverlay: swipePreview.overlaySymbol, pairAfter: afterSwipe.activeSymbol,
+    watchFilterHidden: before.watchFilterHidden, toolsStarChecked: true, rangeMenuChecked: true,
+    pairBefore: beforeMiddle.activeSymbol, carouselCurrent: swipePreview.swipeCurrent,
+    carouselPrev: swipePreview.swipePrev, carouselNext: swipePreview.swipeNext, carouselCount: swipePreview.swipeCount,
+    pairAfter: afterSwipe.activeSymbol, middleSwipeIgnored: middle.activeSymbol === beforeMiddle.activeSymbol,
     timeframeBefore: tfBefore, timeframeRows: tfSheet.tfRows, timeframeStars: tfSheet.tfStars,
     toolsChecked: true, settingsChecked: true, indicatorsChecked: true, pairListChecked: true,
-    chartSwipeOverlayChecked: true, dwellCommitChecked: true, timeframeFavoriteChecked: true,
-    focusModeChecked: true, drawingsChecked: true, shareChecked: true, priceScaleDragChecked: true,
+    carouselChecked: true, dwellCommitChecked: true, timeframeFavoriteChecked: true,
+    drawingsChecked: true, shareChecked: true, priceScaleDragChecked: true,
     screenshot: shot, pageErrors: errors }, null, 2));
 } finally {
   await browser.close();

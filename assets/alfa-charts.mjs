@@ -213,21 +213,31 @@ if (isMobile) {
   $('menu-fit')?.addEventListener('click', () => { closeSheets(); handleChartAction('fit'); });
   $('menu-live')?.addEventListener('click', () => { closeSheets(); handleChartAction('realtime'); });
   $('menu-fullscreen')?.addEventListener('click', () => { closeSheets(); handleChartAction('fullscreen'); });
-  const focusKey = 'alfa-mobile-focus:v1';
-  const setFocusMode = on => {
-    document.body.classList.toggle('focus-mode', on);
-    $('menu-focus')?.setAttribute('aria-pressed', String(on));
-    const labelEl = $('menu-focus-label');
-    if (labelEl) labelEl.textContent = on ? 'Araçları göster' : 'Araçları gizle';
-    try { localStorage.setItem(focusKey, on ? '1' : '0'); } catch {}
+  const toolsStar = $('mobile-tools-star');
+  const toolsHiddenKey = 'alfa-mobile-tools-hidden:v1';
+  const setToolsHidden = hidden => {
+    document.body.classList.toggle('tools-hidden', hidden);
+    toolsStar?.setAttribute('aria-pressed', String(hidden));
+    toolsStar?.setAttribute('aria-label', hidden ? 'Çizim araçlarını göster' : 'Çizim araçlarını gizle');
+    try { localStorage.setItem(toolsHiddenKey, hidden ? '1' : '0'); } catch {}
   };
-  let focusOn = false;
-  try { focusOn = localStorage.getItem(focusKey) === '1'; } catch {}
-  setFocusMode(focusOn);
-  $('menu-focus')?.addEventListener('click', () => {
-    setFocusMode(!document.body.classList.contains('focus-mode'));
-    closeSheets();
-  });
+  let toolsHidden = false;
+  try { toolsHidden = localStorage.getItem(toolsHiddenKey) === '1'; } catch {}
+  setToolsHidden(toolsHidden);
+  toolsStar?.addEventListener('click', () => setToolsHidden(!document.body.classList.contains('tools-hidden')));
+  for (const [id, range] of Object.entries({ 'menu-range-1d': '86400', 'menu-range-5d': '432000', 'menu-range-1m': '2592000', 'menu-range-all': 'all' })) {
+    $(id)?.addEventListener('click', () => { closeSheets(); document.querySelector(`[data-range="${range}"]`)?.click(); });
+  }
+  $('menu-timezone')?.addEventListener('click', () => { closeSheets(); $('chart-timezone')?.click(); queueMicrotask(syncMenuControls); });
+  $('menu-log')?.addEventListener('click', () => { closeSheets(); $('log-scale')?.click(); queueMicrotask(syncMenuControls); });
+  $('menu-auto')?.addEventListener('click', () => { closeSheets(); $('auto-scale')?.click(); queueMicrotask(syncMenuControls); });
+  const syncMenuControls = () => {
+    const zone = $('menu-timezone-label');
+    if (zone) zone.textContent = $('chart-timezone')?.textContent.trim() || 'UTC';
+    $('menu-log')?.setAttribute('aria-pressed', String($('log-scale')?.getAttribute('aria-pressed') === 'true'));
+    $('menu-auto')?.setAttribute('aria-pressed', String($('auto-scale')?.getAttribute('aria-pressed') === 'true'));
+  };
+  syncMenuControls();
   $('watch-mobile-close')?.addEventListener('click', () => toggleList(false));
   const runShareAction = async (button, action) => {
     if (!button) return;
@@ -287,6 +297,19 @@ if (isMobile) {
     return false;
   };
   let stripDir = 1;
+  const resetSwipeMotion = () => {
+    const overlay = $('mobile-swipe-overlay');
+    overlay?.style.setProperty('--swipe-opacity', '1');
+    overlay?.style.setProperty('--swipe-y', '0px');
+  };
+  const updateSwipeMotion = dy => {
+    const overlay = $('mobile-swipe-overlay');
+    if (!overlay) return;
+    const opacity = Math.min(1, Math.max(0.45, Math.abs(dy) / 44));
+    const shift = Math.max(-12, Math.min(12, dy * 0.16));
+    overlay.style.setProperty('--swipe-opacity', String(opacity));
+    overlay.style.setProperty('--swipe-y', `${shift}px`);
+  };
   const paintStrip = () => {
     const ref = stripPreview || symbol;
     const symbolEl = $('mobile-market-symbol');
@@ -294,12 +317,15 @@ if (isMobile) {
     const previewing = !!stripPreview && stripPreview !== symbol;
     strip?.classList.toggle('strip-preview', previewing);
     document.body.classList.toggle('strip-preview', previewing);
-    const overlay = $('mobile-swipe-overlay');
-    const overlaySymbol = $('mobile-swipe-symbol');
-    const overlayDir = $('mobile-swipe-direction');
-    if (overlaySymbol) overlaySymbol.textContent = previewing ? ref : '';
-    if (overlayDir) overlayDir.textContent = stripDir > 0 ? '↓' : '↑';
-    overlay?.setAttribute('aria-hidden', String(!previewing));
+    const symbols = stripSymbols();
+    const index = Math.max(0, symbols.indexOf(ref));
+    const set = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+    set('mobile-swipe-prev', symbols.length > 1 ? symbols[wrapIndex(index - 1, symbols.length)] : '');
+    set('mobile-swipe-symbol', ref);
+    set('mobile-swipe-next', symbols.length > 1 ? symbols[wrapIndex(index + 1, symbols.length)] : '');
+    set('mobile-swipe-count', symbols.length ? `${index + 1} / ${symbols.length}` : '');
+    $('mobile-swipe-overlay')?.setAttribute('aria-hidden', String(!previewing));
+    if (!previewing) resetSwipeMotion();
   };
   paintMobileMarket = paintStrip;
   const clearStripDwell = () => { if (stripDwell) clearTimeout(stripDwell); stripDwell = null; };
@@ -333,11 +359,11 @@ if (isMobile) {
   };
   const openPairList = () => { closeSheets(); toggleList(true); };
   strip?.addEventListener('click', event => {
-    if (event.target.closest('#mobile-menu-open, #mobile-timeframe')) return;
+    if (event.target.closest('#mobile-menu-open, #mobile-tools-star, #mobile-timeframe')) return;
     if (consumeStripClick()) openPairList();
   });
   strip?.addEventListener('pointerdown', event => {
-    if (event.target.closest('#mobile-menu-open, #mobile-timeframe')) return;
+    if (event.target.closest('#mobile-menu-open, #mobile-tools-star, #mobile-timeframe')) return;
     strip.setPointerCapture?.(event.pointerId);
     const symbols = stripSymbols();
     stripDrag = { y: event.clientY, symbols, startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, moved: false };
@@ -347,7 +373,9 @@ if (isMobile) {
     if (!stripDrag) return;
     event.preventDefault();
     if (replayMode && !paper.canLeave()) return;
-    const steps = Math.round((event.clientY - stripDrag.y) / 28);
+    const dy = event.clientY - stripDrag.y;
+    updateSwipeMotion(dy);
+    const steps = Math.round(dy / 28);
     if (steps === stripDrag.lastStep) return;
     const dir = steps - stripDrag.lastStep;
     stripDrag.lastStep = steps;
@@ -357,52 +385,16 @@ if (isMobile) {
   });
   const endStripDrag = event => {
     if (!stripDrag) return;
-    if (stripDrag.moved) suppressStripClickUntil = Date.now() + 250;
+    if (stripDrag.moved) {
+      suppressStripClickUntil = Date.now() + 250;
+      resetSwipeMotion();
+    }
     stripDrag = null;
     strip?.classList.remove('swiping');
     strip?.releasePointerCapture?.(event.pointerId);
   };
   strip?.addEventListener('pointerup', endStripDrag);
   strip?.addEventListener('pointercancel', endStripDrag);
-
-  // Vertical swipes on the chart itself use the same blurred preview card.
-  let chartNav = null;
-  host.addEventListener('pointerdown', event => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    if (event.target.closest('#drawing-favs, #drawing-selection, #price-scale-grip, .chart-loading, .chart-data-state, .mobile-swipe-overlay')) return;
-    const activeTool = host.dataset.drawingTool;
-    if (activeTool && activeTool !== 'cursor') return;
-    const symbols = stripSymbols();
-    chartNav = { id: event.pointerId, y: event.clientY, x: event.clientX, symbols,
-      startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, engaged: false };
-  }, true);
-  host.addEventListener('pointermove', event => {
-    if (!chartNav || event.pointerId !== chartNav.id) return;
-    const dy = event.clientY - chartNav.y;
-    const dx = event.clientX - chartNav.x;
-    if (!chartNav.engaged) {
-      if (Math.abs(dy) < 18 || Math.abs(dy) < Math.abs(dx) * 1.15) return;
-      chartNav.engaged = true;
-      host.setPointerCapture?.(event.pointerId);
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    const steps = Math.round(dy / 28);
-    if (steps === chartNav.lastStep) return;
-    const dir = steps - chartNav.lastStep;
-    chartNav.lastStep = steps;
-    previewStripSymbol(chartNav.symbols[wrapIndex(chartNav.startIndex + steps, chartNav.symbols.length)], dir);
-  }, { capture: true, passive: false });
-  const endChartNav = event => {
-    if (!chartNav || event.pointerId !== chartNav.id) return;
-    if (chartNav.engaged) {
-      suppressStripClickUntil = Date.now() + 250;
-      host.releasePointerCapture?.(event.pointerId);
-    }
-    chartNav = null;
-  };
-  host.addEventListener('pointerup', endChartNav, true);
-  host.addEventListener('pointercancel', endChartNav, true);
 
   let tfDrag = null;
   let suppressTfClickUntil = 0;

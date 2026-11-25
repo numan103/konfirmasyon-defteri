@@ -678,3 +678,24 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   body.mobile-light .mobile-strip-menu,body.mobile-light #watchlist{background:#f7f9fc;color:#263449}
   body.mobile-light .mobile-swipe-overlay strong{background:#f7f9fc;color:#263449}
 }
+
+/* Phone shell v6: title inside the chart, bottom carousel, tools star, menu-only controls. */
+@media(max-width:600px){
+  .chart-panel{position:relative;grid-template-rows:minmax(0,1fr) 42px}
+  .legend{position:absolute;top:0;left:0;right:0;z-index:7;pointer-events:none;min-height:0;padding:calc(6px + env(safe-area-inset-top)) 8px 4px;border:0;background:linear-gradient(180deg,#10141ce6,#10141c00)}
+  #ohlc,.chart-navigation{display:none!important}
+  .mobile-tools-star{display:flex;align-items:center;justify-content:center;flex:none;width:28px;height:34px;padding:0;border:1px solid #2e3d5a;border-radius:8px;background:#182133;color:#7f90ac;touch-action:manipulation}
+  .mobile-tools-star .ui-icon{width:15px;height:15px;fill:none}
+  .mobile-tools-star[aria-pressed=true]{color:#f5c451;border-color:#6b5a34;background:#2a271d}
+  .mobile-tools-star[aria-pressed=true] .ui-icon{fill:currentColor}
+  body.tools-hidden .drawing-space{display:none!important}
+  .mobile-swipe-overlay{position:fixed;inset:auto 8px calc(52px + env(safe-area-inset-bottom)) 8px;z-index:48;display:grid;gap:4px;padding:10px;border:1px solid #3a4a68;border-radius:16px;background:#0b1019e8;box-shadow:0 18px 50px #000b;transform:translateY(10px) scale(.98);opacity:0;transition:opacity .18s ease,transform .18s ease}
+  body.strip-preview .mobile-swipe-overlay{opacity:var(--swipe-opacity,1);transform:translateY(var(--swipe-y,0)) scale(1)}
+  .mobile-swipe-row{display:flex;align-items:center;justify-content:center;min-height:28px;border-radius:10px;font-size:11px;color:#9fb2cf;transition:opacity .18s ease,transform .18s ease,filter .18s ease}
+  .mobile-swipe-row.prev,.mobile-swipe-row.next{opacity:.5;transform:scale(.92);filter:blur(.4px)}
+  .mobile-swipe-row.current{min-height:44px;border:1px solid #4e6aa4;background:#182133;color:#e2ecff;font-size:15px;font-weight:700;letter-spacing:.3px}
+  .mobile-swipe-overlay small{font-size:9px;color:#8fa3c2;text-align:center}
+  body.mobile-light .legend{background:linear-gradient(180deg,#f7f9fce6,#f7f9fc00)}
+  body.mobile-light .mobile-swipe-overlay{background:#f7f9fce8}
+  body.mobile-light .mobile-swipe-row.current{background:#e8eef8;color:#263449;border-color:#a9bcd8}
+}

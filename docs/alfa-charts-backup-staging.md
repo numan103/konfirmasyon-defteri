@@ -122,10 +122,21 @@ ve-diğer yardımcı bloklar gizlendi. Menüye “Araçları gizle / göster” 
 eklendi; grafik yüksekliği 706 px’den 806 px’e çıkıyor. Testler PASS, sayfa
 hatası yok; staging dağıtımı `dc08c7ad-0d57-48bc-90b5-13ce0e674024`.
 
+Altıncı turda piyasa başlığı grafiğin içine alındı; ayrı panel/üst toolbar
+kalmadı. Alt şeritte yalnız menü, parite, araç yıldızı ve zaman dilimi var;
+oklar, fiyat ve ek ipuçları kaldırıldı. Pariteler arası geçiş artık yalnız bu
+şeritten yapılıyor: sürükleme sırasında bulanık arka plan üzerinde
+önceki/current/sonraki parite kartı ve `konum / toplam` sayacı görünüyor,
+geçiş 3 saniyelik beklemeyle onaylanıyor. Ekran ortasındaki dikey kaydırma
+parite değiştirmiyor. Zaman diliminin solundaki yıldız sadece çizim araçlarını
+gizleyip gösteriyor (kalıcı tercih); grafikteki 1G/5G/1A ve UTC/Log/Oto satırı
+gizlendi, aynı işlevler menüye taşındı. Mobil test ve egress PASS, sayfa hatası
+yok; staging dağıtımı `b6747adc-72b5-4834-8c09-fbbe3ba60a53`.
+
 Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs` ve
 `alfa-charts.html` içinde; yalnız staging’e dağıtıldı. `sw.js` sabit kaldı;
-önbellek kırılımı `?v=` sorgu dizeleriyle yapıldı. Production host’u, verisi ve
-deploy’u değişmedi.
+önbellek kırılımı `?v=31` / `?v=74` sorgu dizeleriyle yapıldı. Production host’u,
+verisi ve deploy’u değişmedi.
 
 ## Tekrar için scripts
 
