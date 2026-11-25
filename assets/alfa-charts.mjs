@@ -54,6 +54,9 @@ const syncGate = syncSession ? createMessageGate({
 hydrateIcons();
 let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, pricePrecisionKey = '';
 let pendingStudies = null, studyContext = null;
+// Mobile-shell hooks. Desktop keeps the no-op defaults; the phone block assigns real painters.
+let syncMobileShell = () => {};
+let paintMobileMarket = () => {};
 const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
   if (!next) return false;
@@ -92,11 +95,14 @@ if (isMobile) {
   const backdrop = $('mobile-sheet-backdrop');
   const toolsToggle = $('mobile-tools-toggle');
   const settingsToggle = $('mobile-settings-toggle');
-  const shareToggle = $('mobile-share-open');
+  const menuToggle = $('mobile-menu-open');
+  const tfToggle = $('mobile-timeframe');
   const SHEETS = [
     { className: 'tools-open', toggle: toolsToggle },
     { className: 'settings-open', toggle: settingsToggle },
-    { className: 'share-open', toggle: shareToggle }
+    { className: 'share-open', toggle: $('menu-share') },
+    { className: 'menu-open', toggle: menuToggle },
+    { className: 'timeframes-open', toggle: tfToggle }
   ];
   const closeSheets = () => {
     SHEETS.forEach(({ className, toggle }) => {
@@ -111,6 +117,7 @@ if (isMobile) {
     document.body.classList.add(className);
     SHEETS.find(entry => entry.className === className)?.toggle?.setAttribute('aria-expanded', 'true');
     if (className === 'tools-open') syncMobileTools();
+    if (className === 'timeframes-open') renderMobileTimeframes();
   };
 
   const MOBILE_TOOL_LABELS = {
@@ -187,18 +194,26 @@ if (isMobile) {
     if (document.body.classList.contains('settings-open')) closeSheets();
     else openSheet('settings-open');
   });
-  shareToggle?.addEventListener('click', () => {
-    if (document.body.classList.contains('share-open')) closeSheets();
-    else openSheet('share-open');
+  menuToggle?.addEventListener('click', () => {
+    if (document.body.classList.contains('menu-open')) closeSheets();
+    else openSheet('menu-open');
   });
-  $('mobile-drawings-open')?.addEventListener('click', () => {
-    closeSheets();
-    handleChartAction('drawings');
-  });
-  $('mobile-watchlist-open')?.addEventListener('click', () => {
+  $('mobile-menu-close')?.addEventListener('click', closeSheets);
+  $('menu-tools')?.addEventListener('click', () => openSheet('tools-open'));
+  $('menu-settings')?.addEventListener('click', () => openSheet('settings-open'));
+  $('menu-share')?.addEventListener('click', () => openSheet('share-open'));
+  $('menu-drawings')?.addEventListener('click', () => { closeSheets(); handleChartAction('drawings'); });
+  $('menu-watchlist')?.addEventListener('click', () => {
     closeSheets();
     toggleList(workspace.classList.contains('no-list'));
   });
+  $('menu-indicators')?.addEventListener('click', () => { closeSheets(); $('indicators-manage')?.click(); });
+  $('menu-alarm')?.addEventListener('click', () => { closeSheets(); $('alarm-toggle')?.click(); });
+  $('menu-replay')?.addEventListener('click', () => { closeSheets(); $('replay-toggle')?.click(); });
+  $('menu-fit')?.addEventListener('click', () => { closeSheets(); handleChartAction('fit'); });
+  $('menu-live')?.addEventListener('click', () => { closeSheets(); handleChartAction('realtime'); });
+  $('menu-fullscreen')?.addEventListener('click', () => { closeSheets(); handleChartAction('fullscreen'); });
+  $('watch-mobile-close')?.addEventListener('click', () => toggleList(false));
   const runShareAction = async (button, action) => {
     if (!button) return;
     button.disabled = true;
@@ -216,6 +231,7 @@ if (isMobile) {
   $('mobile-tools-close')?.addEventListener('click', closeSheets);
   $('mobile-settings-close')?.addEventListener('click', closeSheets);
   $('mobile-share-close')?.addEventListener('click', closeSheets);
+  $('mobile-tf-close')?.addEventListener('click', closeSheets);
   document.querySelectorAll('.sheet-grip').forEach(grip => {
     let startY = 0;
     grip.addEventListener('pointerdown', event => {
@@ -235,29 +251,94 @@ if (isMobile) {
     if (!open) return;
     if (event.target.closest('.mobile-sheet') || event.target.closest('#mobile-sheet-backdrop') ||
         event.target.closest('#mobile-left-dock') || event.target.closest('#mobile-tools-toggle') ||
-        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-share-open')) return;
+        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-menu-open')) return;
     closeSheets();
   }, true);
 
   const strip = $('mobile-market-strip');
+  const wrapIndex = (index, length) => length ? ((index % length) + length) % length : 0;
   const stripSymbols = () => {
     const rows = [...document.querySelectorAll('.watch-row[data-symbol]')].map(el => el.dataset.symbol);
     const options = [...($('symbol')?.options || [])].map(option => option.value);
     return [...new Set([...rows, ...options, symbol].filter(Boolean))];
   };
+  let stripPreview = null;
+  let stripDwell = null;
   let stripDrag = null;
+  let suppressStripClickUntil = 0;
+  const consumeStripClick = () => {
+    if (Date.now() > suppressStripClickUntil) return true;
+    suppressStripClickUntil = 0;
+    return false;
+  };
+  const previewPrice = ref => {
+    if (ref === symbol) {
+      const last = history.at(-1);
+      return Number.isFinite(last?.close) ? priceFormat.format(last.close) : '—';
+    }
+    const price = watchlist?.quotes.get(ref)?.price;
+    return Number.isFinite(price) ? priceFormat.format(price) : '—';
+  };
+  const paintStrip = () => {
+    const ref = stripPreview || symbol;
+    const symbolEl = $('mobile-market-symbol');
+    const priceEl = $('mobile-market-price');
+    const hintEl = $('mobile-strip-hint');
+    if (symbolEl && symbolEl.textContent !== ref) symbolEl.textContent = ref;
+    if (priceEl) priceEl.textContent = previewPrice(ref);
+    if (hintEl) hintEl.textContent = stripPreview && stripPreview !== symbol ? 'Dokun / 3 sn' : 'Kaydır';
+    strip?.classList.toggle('strip-preview', !!stripPreview && stripPreview !== symbol);
+  };
+  paintMobileMarket = paintStrip;
+  const clearStripDwell = () => { if (stripDwell) clearTimeout(stripDwell); stripDwell = null; };
   const selectStripSymbol = next => {
-    if (watchlist?.valid?.(next)) watchlist.select(next);
-    else setActiveSymbol(next);
+    if (!next || next === symbol) return false;
+    const changed = watchlist?.valid?.(next) ? (watchlist.select(next), true) : setActiveSymbol(next);
     strip?.classList.remove('strip-settling');
     void strip?.offsetWidth;
     strip?.classList.add('strip-settling');
+    return changed;
   };
+  const commitStripPreview = () => {
+    const next = stripPreview;
+    clearStripDwell();
+    if (!next || next === symbol) { stripPreview = null; paintStrip(); return false; }
+    stripPreview = null;
+    const changed = selectStripSymbol(next);
+    paintStrip();
+    return changed;
+  };
+  const previewStripSymbol = (next, dir = 1) => {
+    if (!next || next === stripPreview) return;
+    stripPreview = next;
+    strip?.removeAttribute('data-dir');
+    void strip?.offsetWidth;
+    strip?.setAttribute('data-dir', dir > 0 ? 'down' : 'up');
+    paintStrip();
+    clearStripDwell();
+    if (next !== symbol) stripDwell = setTimeout(() => commitStripPreview(), 3000);
+  };
+  const stepStrip = delta => {
+    const list = stripSymbols();
+    if (!list.length) return;
+    const base = Math.max(0, list.indexOf(stripPreview || symbol));
+    previewStripSymbol(list[wrapIndex(base + delta, list.length)], delta);
+  };
+  document.querySelectorAll('[data-strip-step]').forEach(button => button.addEventListener('click', () => {
+    if (!consumeStripClick()) return;
+    stepStrip(Number(button.dataset.stripStep) || 0);
+  }));
+  $('mobile-market-pick')?.addEventListener('click', () => { if (consumeStripClick()) commitStripPreview(); });
+  $('mobile-strip-commit')?.addEventListener('click', () => { if (consumeStripClick()) commitStripPreview(); });
+  strip?.addEventListener('click', event => {
+    if (event.target.closest('[data-strip-step], #mobile-strip-commit, #mobile-timeframe')) return;
+    if (consumeStripClick()) commitStripPreview();
+  });
   strip?.addEventListener('pointerdown', event => {
-    event.preventDefault();
+    if (event.target.closest('[data-strip-step], #mobile-strip-commit, #mobile-timeframe')) return;
     strip.setPointerCapture?.(event.pointerId);
     const symbols = stripSymbols();
-    stripDrag = { y: event.clientY, symbols, startIndex: Math.max(0, symbols.indexOf(symbol)), lastStep: 0 };
+    stripDrag = { y: event.clientY, symbols, startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, moved: false };
     strip.classList.add('swiping');
   });
   strip?.addEventListener('pointermove', event => {
@@ -266,18 +347,103 @@ if (isMobile) {
     if (replayMode && !paper.canLeave()) return;
     const steps = Math.round((event.clientY - stripDrag.y) / 28);
     if (steps === stripDrag.lastStep) return;
+    const dir = steps - stripDrag.lastStep;
     stripDrag.lastStep = steps;
+    stripDrag.moved = true;
     const list = stripDrag.symbols;
-    const next = list[(stripDrag.startIndex + steps + list.length * 2) % list.length];
-    selectStripSymbol(next);
+    previewStripSymbol(list[wrapIndex(stripDrag.startIndex + steps, list.length)], dir);
   });
   const endStripDrag = event => {
+    if (!stripDrag) return;
+    if (stripDrag.moved) suppressStripClickUntil = Date.now() + 250;
     stripDrag = null;
     strip?.classList.remove('swiping');
     strip?.releasePointerCapture?.(event.pointerId);
   };
   strip?.addEventListener('pointerup', endStripDrag);
   strip?.addEventListener('pointercancel', endStripDrag);
+
+  let tfDrag = null;
+  let suppressTfClickUntil = 0;
+  const tfOrder = () => {
+    const all = Object.values(TIMEFRAMES);
+    const favs = all.filter(value => tfFavs.includes(value));
+    return favs.length ? favs : all;
+  };
+  const paintMobileTimeframe = () => {
+    const label = $('mobile-timeframe-label');
+    if (label) label.textContent = tfLabel(interval);
+    tfToggle?.setAttribute('aria-label', `${tfLabel(interval)} · kaydırarak değiştir, dokunarak tümünü gör`);
+    document.querySelectorAll('#mobile-tf-list [data-tf]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tf === interval)));
+  };
+  function renderMobileTimeframes() {
+    const list = $('mobile-tf-list');
+    if (!list) return;
+    list.replaceChildren();
+    for (const [label, value] of Object.entries(TIMEFRAMES)) {
+      const row = document.createElement('div');
+      row.className = 'mobile-tf-row';
+      const pick = document.createElement('button');
+      pick.type = 'button';
+      pick.dataset.tf = value;
+      pick.setAttribute('aria-pressed', String(value === interval));
+      pick.innerHTML = `<span>${label}</span><small>${value}</small>`;
+      pick.addEventListener('click', () => { setMobileTimeframe(value); closeSheets(); });
+      const fav = document.createElement('button');
+      fav.type = 'button';
+      fav.dataset.tfFav = value;
+      fav.setAttribute('aria-pressed', String(tfFavs.includes(value)));
+      fav.setAttribute('aria-label', `${label} ${tfFavs.includes(value) ? 'favorilerden çıkar' : 'favorilere ekle'}`);
+      fav.innerHTML = icon('star');
+      fav.addEventListener('click', () => toggleTfFav(value));
+      row.append(pick, fav);
+      list.append(row);
+    }
+    paintMobileTimeframe();
+  }
+  syncMobileShell = () => {
+    paintMobileTimeframe();
+    if (document.body.classList.contains('timeframes-open')) renderMobileTimeframes();
+  };
+  const setMobileTimeframe = value => {
+    if (!Object.values(TIMEFRAMES).includes(value) || value === interval) return;
+    setTimeframeFromShortcut(value);
+    paintMobileTimeframe();
+  };
+  const stepTimeframe = delta => {
+    const list = tfOrder();
+    if (!list.length) return;
+    const next = list[wrapIndex(list.indexOf(interval) + delta, list.length)];
+    setMobileTimeframe(next);
+  };
+  tfToggle?.addEventListener('pointerdown', event => {
+    if (event.target.closest('[data-tf-fav]')) return;
+    tfToggle.setPointerCapture?.(event.pointerId);
+    tfDrag = { y: event.clientY, lastStep: 0, moved: false };
+  });
+  tfToggle?.addEventListener('pointermove', event => {
+    if (!tfDrag) return;
+    event.preventDefault();
+    const steps = Math.round((event.clientY - tfDrag.y) / 24);
+    if (steps === tfDrag.lastStep) return;
+    const dir = steps - tfDrag.lastStep;
+    tfDrag.lastStep = steps;
+    tfDrag.moved = true;
+    stepTimeframe(dir);
+  });
+  const endTfDrag = event => {
+    if (!tfDrag) return;
+    if (tfDrag.moved) suppressTfClickUntil = Date.now() + 250;
+    tfDrag = null;
+    tfToggle?.releasePointerCapture?.(event.pointerId);
+  };
+  tfToggle?.addEventListener('pointerup', endTfDrag);
+  tfToggle?.addEventListener('pointercancel', endTfDrag);
+  tfToggle?.addEventListener('click', () => {
+    if (Date.now() < suppressTfClickUntil) { suppressTfClickUntil = 0; return; }
+    if (document.body.classList.contains('timeframes-open')) closeSheets();
+    else openSheet('timeframes-open');
+  });
 
   const grip = $('price-scale-grip');
   const rightScale = chart.priceScale('right');
@@ -853,12 +1019,7 @@ function quote() {
   const c = history.at(-1);
   if (!c) return;
   $('last-price').textContent = priceFormat.format(c.close);
-  if (isMobile) {
-    const stripSymbol = $('mobile-market-symbol');
-    const stripPrice = $('mobile-market-price');
-    if (stripSymbol) stripSymbol.textContent = symbol;
-    if (stripPrice) stripPrice.textContent = priceFormat.format(c.close);
-  }
+  if (isMobile) paintMobileMarket();
   let market = null;
   try { market = parseMarketRef(symbol); } catch {}
   const info = watchlist?.info(symbol) || market;
@@ -959,6 +1120,7 @@ function updateUI() {
   if (dataInfo) dataInfo.textContent = `Kaynak: ${market?.venue || 'BINANCE'} · ${market?.marketType === 'perp' ? 'Vadeli' : market?.marketType === 'index' ? 'Endeks' : 'Spot'} · Zaman: ${CHART_TIME_ZONES[chartTimeZone]}`;
   document.querySelectorAll('#timeframes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
   document.querySelectorAll('.watch-row').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.symbol === symbol)));
+  syncMobileShell();
   try {
     const url = new URL(location.href);
     url.searchParams.set('symbol', symbol);
@@ -1170,7 +1332,7 @@ function toggleTfFav(value) {
   if (tfFavs.includes(value)) { if (tfFavs.length > 1) tfFavs = tfFavs.filter(v => v !== value); }
   else tfFavs.push(value);
   tfFavs = Object.values(TIMEFRAMES).filter(v => tfFavs.includes(v));
-  saveTfFavs(tfFavs); renderTimeframes();
+  saveTfFavs(tfFavs); renderTimeframes(); syncMobileShell();
 }
 function openTfPicker() {
   const all = Object.entries(TIMEFRAMES);
@@ -1184,7 +1346,7 @@ function openTfPicker() {
     if (cb.checked) { if (!tfFavs.includes(v)) tfFavs.push(v); }
     else if (tfFavs.length > 1) tfFavs = tfFavs.filter(x => x !== v);
     tfFavs = Object.values(TIMEFRAMES).filter(x => tfFavs.includes(x));
-    saveTfFavs(tfFavs); renderTimeframes(); updateUI();
+    saveTfFavs(tfFavs); renderTimeframes(); syncMobileShell(); updateUI();
   }));
   m.box.querySelector('#tf-close').addEventListener('click', m.close);
 }
@@ -1493,7 +1655,7 @@ $('live').addEventListener('click', () => handleChartAction('realtime'));
 function toggleList(show) {
   workspace.classList.toggle('no-list', !show);
   $('list-toggle').setAttribute('aria-pressed', String(show));
-  $('mobile-watchlist-open')?.setAttribute('aria-pressed', String(show));
+  $('menu-watchlist')?.setAttribute('aria-pressed', String(show));
 }
 $('list-toggle').addEventListener('click', () => toggleList(workspace.classList.contains('no-list')));
 toggleList(!matchMedia('(max-width:600px)').matches);

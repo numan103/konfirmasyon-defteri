@@ -100,6 +100,18 @@ yanıp sönüyor. Sol alt dock çizim yöneticisi, izleme listesi ve fotoğraf/b
 paylaşım panelini açıyor (Web Share desteklenmiyorsa kopyalama/indirme
 kullanılıyor).
 
+Dördüncü turda sol alt dock tek menü düğmesine indirgendi; menü sheet’inde
+çizimler, araçlar, indikatörler, görünüm, pariteler, fotoğraf/paylaşım, alarm,
+replay, sığdır, son mum ve tam ekran bulunuyor. Üstteki zaman dilimi satırı
+gizlendi; parite şeridiyle aynı hizada, sağda kaydırılabilen bir zaman dilimi
+çipi var. Parite geçişi artık iki aşamalı: ok/shift ile önizleme yapılır, grafik
+hemen değişmez; önizlemeye bir kez dokunmak ya da 3 saniye beklemek seçimi
+onaylar. Zaman dilimi çipi de kaydırmayla favoriler arasında geçer, dokununca
+13 zaman diliminin tamamı küçük doldurulabilir yıldızlarla açılır. İzleme
+listesi telefonlarda alttan açılan sheet görünümünde ve kapatma düğmesi var.
+Mobil kabuk testi bu akışların tamamı için PASS verdi (sayfa hatası yok);
+staging dağıtımı `4d734e13-8499-4e3c-a41c-fffc9610524e`.
+
 Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs` ve
 `alfa-charts.html` içinde; yalnız staging’e dağıtıldı. `sw.js` sabit kaldı;
 önbellek kırılımı `?v=` sorgu dizeleriyle yapıldı. Production host’u, verisi ve

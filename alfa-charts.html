@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=28">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=29">
 </head>
 <body>
   <main class="workspace">
@@ -132,11 +132,14 @@
           <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
           <div class="scale-controls"><button id="chart-timezone" type="button" aria-label="Grafik saat dilimi: UTC" title="Grafik saat dilimini değiştir">UTC</button><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
         </div>
-        <div class="mobile-market-strip" id="mobile-market-strip" aria-label="Parite gezgini — dikey kaydırarak değiştir">
-          <span class="market-strip-arrow" aria-hidden="true">▲</span>
-          <div class="market-strip-current"><strong id="mobile-market-symbol">BTCUSDT</strong><span id="mobile-market-price">—</span></div>
-          <span class="market-strip-arrow" aria-hidden="true">▼</span>
-          <small>Kaydır</small>
+        <div class="mobile-market-strip" id="mobile-market-strip" aria-label="Parite ve zaman dilimi seçici">
+          <button class="market-strip-arrow" type="button" data-strip-step="-1" aria-label="Önceki pariteyi önizle">▲</button>
+          <button id="mobile-market-pick" class="market-strip-current" type="button" aria-label="Bu pariteye geç">
+            <strong id="mobile-market-symbol">BTCUSDT</strong><span id="mobile-market-price">—</span><small id="mobile-strip-hint">Kaydır</small>
+          </button>
+          <button class="market-strip-arrow" type="button" data-strip-step="1" aria-label="Sonraki pariteyi önizle">▼</button>
+          <button id="mobile-strip-commit" class="market-strip-commit" type="button" aria-label="Seçili pariteye geç"><span data-icon="chevron"></span></button>
+          <button id="mobile-timeframe" class="mobile-timeframe" type="button" aria-label="Zaman dilimi. Kaydırarak değiştir, dokunarak tümünü gör" aria-expanded="false" aria-controls="mobile-timeframes-sheet"><strong id="mobile-timeframe-label">1H</strong><span data-icon="down"></span></button>
         </div>
         <div id="message" role="status" hidden></div>
       </section>
@@ -157,7 +160,7 @@
         <div id="multi-grid" class="multi-grid" data-layout="1"></div>
       </section>
       <aside id="watchlist" aria-label="İzleme listesi">
-        <div class="watch-head"><h2><span id="watchlist-title">İzleme listesi</span> <small id="watch-count">4</small></h2><div class="watch-head-actions"><button id="watch-list-add" type="button" title="Yeni liste oluştur">+ Liste</button><button id="watch-settings" class="icon-button" type="button" aria-label="Liste ayarları" title="Liste ayarları ve sınıflandırma"><span data-icon="settings"></span></button><button id="watch-add" class="icon-button" type="button" aria-label="Listeye parite ekle" title="Parite ekle"><span data-icon="plus"></span></button></div></div>
+        <div class="watch-head"><h2><span id="watchlist-title">İzleme listesi</span> <small id="watch-count">4</small></h2><div class="watch-head-actions"><button id="watch-mobile-close" class="icon-button" type="button" aria-label="Listeyi kapat" title="Kapat"><span data-icon="close"></span></button><button id="watch-list-add" type="button" title="Yeni liste oluştur">+ Liste</button><button id="watch-settings" class="icon-button" type="button" aria-label="Liste ayarları" title="Liste ayarları ve sınıflandırma"><span data-icon="settings"></span></button><button id="watch-add" class="icon-button" type="button" aria-label="Listeye parite ekle" title="Parite ekle"><span data-icon="plus"></span></button></div></div>
         <div class="watch-lists"><select id="watch-list" aria-label="İzleme listesi seç"></select><label class="watch-filter"><span data-icon="search"></span><input id="watch-filter" type="search" placeholder="Listede ara" aria-label="Listede ara" autocomplete="off"></label></div>
         <div class="watch-actions"><button id="watch-import" type="button" title="Sembol listesini içe aktar"><span data-icon="upload"></span>İçe aktar</button><button id="watch-export" class="icon-button" type="button" aria-label="Listeyi TXT olarak dışa aktar" title="TXT dışa aktar"><span data-icon="download"></span></button><button id="watch-share" class="icon-button" type="button" aria-label="Liste bağlantısını kopyala" title="Liste bağlantısı"><span data-icon="link"></span></button></div>
         <div class="watch-columns"><span>Sembol</span><span>Son fiyat</span></div>
@@ -276,11 +279,26 @@
     </footer>
   </main>
   <div id="mobile-sheet-backdrop" class="mobile-sheet-backdrop" hidden></div>
-  <nav id="mobile-left-dock" class="mobile-left-dock" aria-label="Grafik işlemleri">
-    <button id="mobile-drawings-open" type="button" aria-label="Çizimleri yönet" title="Çizimler"><span data-icon="layers"></span></button>
-    <button id="mobile-watchlist-open" type="button" aria-label="Pariteleri aç" title="Pariteler" aria-pressed="false" aria-controls="watchlist"><span data-icon="list"></span></button>
-    <button id="mobile-share-open" type="button" aria-label="Paylaşım seçenekleri" title="Paylaş" aria-expanded="false" aria-controls="mobile-share-sheet"><span data-icon="camera"></span></button>
+  <nav id="mobile-left-dock" class="mobile-left-dock" aria-label="Grafik menüsü">
+    <button id="mobile-menu-open" type="button" aria-label="Menüyü aç" title="Menü" aria-expanded="false" aria-controls="mobile-menu-sheet"><span data-icon="grip"></span></button>
   </nav>
+  <section id="mobile-menu-sheet" class="mobile-sheet" aria-label="Grafik menüsü" aria-hidden="true">
+    <span class="sheet-grip" aria-hidden="true"></span>
+    <header class="sheet-head"><strong>Menü</strong><button id="mobile-menu-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <div class="menu-grid">
+      <button id="menu-drawings" type="button"><span data-icon="layers"></span><span>Çizimler</span></button>
+      <button id="menu-tools" type="button"><span data-icon="brush"></span><span>Araçlar</span></button>
+      <button id="menu-indicators" type="button"><span data-icon="indicators"></span><span>İndikatörler</span></button>
+      <button id="menu-settings" type="button"><span data-icon="settings"></span><span>Görünüm</span></button>
+      <button id="menu-watchlist" type="button" aria-pressed="false"><span data-icon="list"></span><span>Pariteler</span></button>
+      <button id="menu-share" type="button"><span data-icon="camera"></span><span>Fotoğraf / Paylaş</span></button>
+      <button id="menu-alarm" type="button"><span data-icon="bell"></span><span>Alarm</span></button>
+      <button id="menu-replay" type="button"><span data-icon="replay"></span><span>Replay</span></button>
+      <button id="menu-fit" type="button"><span data-icon="fit"></span><span>Sığdır</span></button>
+      <button id="menu-live" type="button"><span data-icon="live"></span><span>Son mum</span></button>
+      <button id="menu-fullscreen" type="button"><span data-icon="fullscreen"></span><span>Tam ekran</span></button>
+    </div>
+  </section>
   <section id="mobile-tools-sheet" class="mobile-sheet" aria-label="Çizim araçları" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
     <header class="sheet-head"><button id="mobile-tools-back" class="sheet-back" type="button" aria-label="Önceki menü" hidden>←</button><strong id="mobile-tools-title">Çizim araçları</strong><button id="mobile-tools-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
@@ -314,6 +332,12 @@
       <button id="mobile-share-download" type="button">Görüntüyü indir</button>
     </div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=71"></script>
+  <section id="mobile-timeframes-sheet" class="mobile-sheet" aria-label="Zaman dilimleri" aria-hidden="true">
+    <span class="sheet-grip" aria-hidden="true"></span>
+    <header class="sheet-head"><strong>Zaman dilimleri</strong><button id="mobile-tf-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
+    <div id="mobile-tf-list" class="mobile-tf-list"></div>
+  </section>
+  <script type="module" src="/assets/alfa-charts.mjs?v=72"></script>
 </body>
 </html>
