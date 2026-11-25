@@ -34,7 +34,18 @@ const workspace = document.querySelector('.workspace');
 const host = $('chart');
 const search = new URLSearchParams(location.search);
 const isEmbed = search.has('embed');
-const isMobile = matchMedia('(max-width:600px)').matches;
+// Phones keep the mobile shell in both orientations. A short landscape viewport
+// (e.g. 844x390) must not fall back to the desktop toolbar.
+const MOBILE_SHELL_QUERY = '(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape)';
+const mobileShellQuery = matchMedia(MOBILE_SHELL_QUERY);
+let isMobile = mobileShellQuery.matches;
+const syncMobileShellMode = () => {
+  document.body.classList.toggle('mobile-shell', isMobile);
+  document.body.classList.toggle('mobile-landscape', isMobile && matchMedia('(orientation:landscape)').matches);
+};
+syncMobileShellMode();
+mobileShellQuery.addEventListener('change', event => { isMobile = event.matches; syncMobileShellMode(); });
+matchMedia('(orientation:landscape)').addEventListener('change', syncMobileShellMode);
 if (isEmbed) document.body.classList.add('embed-chart');
 // Multi-chart panes are same-origin embedded charts. The parent is the only
 // hub; panes never message each other directly.
@@ -665,8 +676,18 @@ function prefetchMarket(ref, tf) {
     if (bars?.length) rememberHistory(ref, tf, bars);
   }).catch(() => {}).finally(() => prefetchInFlight.delete(key));
 }
+let lastLandscape = matchMedia('(orientation:landscape)').matches;
 const observer = new ResizeObserver(([entry]) => {
-  chart.resize(Math.floor(entry.contentRect.width), Math.floor(entry.contentRect.height));
+  const width = Math.floor(entry.contentRect.width);
+  const height = Math.floor(entry.contentRect.height);
+  const landscape = matchMedia('(orientation:landscape)').matches;
+  const orientationChanged = landscape !== lastLandscape;
+  lastLandscape = landscape;
+  // Keep the same candles on screen when the phone rotates. Drawings keep their
+  // time/price coordinates; the engine only re-renders them on resize.
+  const range = orientationChanged ? chart.timeScale().getVisibleRange() : null;
+  chart.resize(width, height);
+  if (range) requestAnimationFrame(() => { try { chart.timeScale().setVisibleRange(range); } catch {} });
 });
 observer.observe(host);
 

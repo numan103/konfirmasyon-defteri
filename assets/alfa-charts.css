@@ -349,8 +349,8 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 @media(min-width:1800px){.market-controls{flex:0 1 auto}.actions{margin-left:auto}}
 @media(max-width:1200px){.brand h1{display:none}.toolbar{gap:8px}.toolbar-divider{display:none}.workarea{grid-template-columns:48px minmax(0,1fr) 220px}.no-list .workarea{grid-template-columns:48px minmax(0,1fr)}.drawing-space{padding-left:4px;padding-right:4px}.quote strong{font-size:23px}#drawing-manager{right:230px}}
 @media(max-width:900px){.button-label{display:none}.count-badge{display:none}.toolbar{padding:0 8px;gap:6px}.actions>button{padding:6px}.actions{gap:1px}.workspace-menu>summary{padding:6px}.market-controls{gap:3px}#timeframes{padding:0 4px}#timeframes button{padding:7px 6px}.market-legend{gap:8px}.market-legend>.venue-tag{display:none}#drawing-help{display:none}.selection-toolbar small{display:none}.workspace-popover{position:fixed;top:52px;right:8px;max-width:calc(100vw - 20px)}.session-popover{top:auto;bottom:48px;left:54px;right:auto}.shot-menu{position:fixed;right:8px;top:52px}}
-@media(max-width:600px){.toolbar{height:auto;min-height:86px;flex-wrap:wrap;padding:5px 8px;gap:3px 8px}.brand{height:31px}.brand h1{display:block;font-size:10px}.brand-mark{width:24px;height:25px;font-size:18px}.actions{margin-left:auto}.actions .history-control{display:none}.actions>button,.actions>details>summary{min-height:30px;height:30px}.actions .ui-icon{width:17px;height:17px}#screenshot{display:none}.market-controls{order:3;flex:1 1 100%;height:32px}.symbol-label select{font-size:11px;width:100px}#timeframes button{font-size:10px;padding:6px}.workarea,.no-list .workarea{grid-template-columns:42px minmax(0,1fr)}.drawing-space{padding:5px 3px}#drawing-tools>button,.rail-actions>button,.session-boxes-side>summary{width:34px;height:32px;padding:7px}.rail-actions{gap:1px}.legend{padding:7px 10px 4px;min-height:44px}.market-legend{flex-wrap:wrap;gap:5px}#market-title{font-size:12px}#ohlc{font-size:9px;width:100%;line-height:1.6}#study-legend{margin-top:2px;max-height:72px}.study-chip-foot{opacity:1}.chart-panel{grid-template-rows:auto minmax(0,1fr) 30px}.range-presets button{padding:4px 5px;font-size:9px}.scale-controls{gap:0}.scale-controls>span{margin-right:2px}.chart-navigation{padding:0 4px;gap:3px}#watchlist{position:absolute;right:0;top:0;bottom:0;width:min(248px,calc(100vw - 70px));z-index:25;box-shadow:-15px 0 35px #0007}#drawing-favs{left:7px;top:8px;max-width:calc(100% - 65px)}#drawing-favs>button{width:27px;height:27px}.selection-toolbar{top:49px;right:70px}.workspace-popover,.shot-menu{top:44px}.session-popover{top:auto;bottom:42px;left:46px}.tool-flyout{left:47px;max-width:calc(100vw - 55px)}#drawing-manager{right:5px;top:94px;bottom:60px;padding:12px}footer{min-height:21px;padding:3px 8px;gap:8px;font-size:8px}#data-info,footer>a{display:none}#drawing-status{margin-left:auto;max-width:38%}.study-browser{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:60dvh}.study-categories{flex-direction:row;overflow-x:auto;padding:7px;border-right:0;border-bottom:1px solid var(--line)}.study-categories button{white-space:nowrap;padding:8px 10px;font-size:10px}.studies-dialog .dialog-header{padding:18px 16px 14px}.study-search{margin:0 16px 14px}.study-results{padding:4px 12px}.study-row{gap:6px}.study-row-info strong{font-size:11px}.study-row-info small{font-size:9px}.study-footer{padding:10px 14px}.study-footer small{font-size:9px}.study-footer button{font-size:10px}.study-settings{padding:18px}.study-settings .session-time-row{grid-template-columns:1fr 83px 83px;gap:6px}.chart-dialog{max-height:90dvh;width:calc(100vw - 16px)}.dialog-content{padding:18px}}
-@media(max-width:600px){.chart-context-menu{left:4px!important;min-width:0;width:calc(100vw - 8px);max-width:calc(100vw - 8px);max-height:62dvh}.chart-settings-form .setting-grid{grid-template-columns:minmax(0,1fr)}.multi-chart{grid-column:1 / -1}.multi-grid[data-layout="2"],.multi-grid[data-layout="4"],.multi-grid[data-layout="6"]{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:minmax(180px,1fr);overflow:auto}#chart-tabs{max-width:120px}}
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){.toolbar{height:auto;min-height:86px;flex-wrap:wrap;padding:5px 8px;gap:3px 8px}.brand{height:31px}.brand h1{display:block;font-size:10px}.brand-mark{width:24px;height:25px;font-size:18px}.actions{margin-left:auto}.actions .history-control{display:none}.actions>button,.actions>details>summary{min-height:30px;height:30px}.actions .ui-icon{width:17px;height:17px}#screenshot{display:none}.market-controls{order:3;flex:1 1 100%;height:32px}.symbol-label select{font-size:11px;width:100px}#timeframes button{font-size:10px;padding:6px}.workarea,.no-list .workarea{grid-template-columns:42px minmax(0,1fr)}.drawing-space{padding:5px 3px}#drawing-tools>button,.rail-actions>button,.session-boxes-side>summary{width:34px;height:32px;padding:7px}.rail-actions{gap:1px}.legend{padding:7px 10px 4px;min-height:44px}.market-legend{flex-wrap:wrap;gap:5px}#market-title{font-size:12px}#ohlc{font-size:9px;width:100%;line-height:1.6}#study-legend{margin-top:2px;max-height:72px}.study-chip-foot{opacity:1}.chart-panel{grid-template-rows:auto minmax(0,1fr) 30px}.range-presets button{padding:4px 5px;font-size:9px}.scale-controls{gap:0}.scale-controls>span{margin-right:2px}.chart-navigation{padding:0 4px;gap:3px}#watchlist{position:absolute;right:0;top:0;bottom:0;width:min(248px,calc(100vw - 70px));z-index:25;box-shadow:-15px 0 35px #0007}#drawing-favs{left:7px;top:8px;max-width:calc(100% - 65px)}#drawing-favs>button{width:27px;height:27px}.selection-toolbar{top:49px;right:70px}.workspace-popover,.shot-menu{top:44px}.session-popover{top:auto;bottom:42px;left:46px}.tool-flyout{left:47px;max-width:calc(100vw - 55px)}#drawing-manager{right:5px;top:94px;bottom:60px;padding:12px}footer{min-height:21px;padding:3px 8px;gap:8px;font-size:8px}#data-info,footer>a{display:none}#drawing-status{margin-left:auto;max-width:38%}.study-browser{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:60dvh}.study-categories{flex-direction:row;overflow-x:auto;padding:7px;border-right:0;border-bottom:1px solid var(--line)}.study-categories button{white-space:nowrap;padding:8px 10px;font-size:10px}.studies-dialog .dialog-header{padding:18px 16px 14px}.study-search{margin:0 16px 14px}.study-results{padding:4px 12px}.study-row{gap:6px}.study-row-info strong{font-size:11px}.study-row-info small{font-size:9px}.study-footer{padding:10px 14px}.study-footer small{font-size:9px}.study-footer button{font-size:10px}.study-settings{padding:18px}.study-settings .session-time-row{grid-template-columns:1fr 83px 83px;gap:6px}.chart-dialog{max-height:90dvh;width:calc(100vw - 16px)}.dialog-content{padding:18px}}
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){.chart-context-menu{left:4px!important;min-width:0;width:calc(100vw - 8px);max-width:calc(100vw - 8px);max-height:62dvh}.chart-settings-form .setting-grid{grid-template-columns:minmax(0,1fr)}.multi-chart{grid-column:1 / -1}.multi-grid[data-layout="2"],.multi-grid[data-layout="4"],.multi-grid[data-layout="6"]{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:minmax(180px,1fr);overflow:auto}#chart-tabs{max-width:120px}}
 @media(prefers-reduced-motion:reduce){button,summary{transition:none}}
 .watch-head{padding:14px 12px 6px;gap:6px}
 .watch-head h2{min-width:0;display:flex;gap:6px;align-items:center}
@@ -469,11 +469,11 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 .study-tree-row>.object-label{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .drawing-current-title{font-size:11px;color:#b4c9ed;padding:7px 0;overflow-wrap:anywhere}
 .object-tree-row:focus-visible{outline-offset:-2px}
-@media(max-width:600px){#symbol-search{width:26px;height:27px;padding:4px}#symbol-search .ui-icon{width:15px}.watch-remove{opacity:1}#drawing-favs{max-width:calc(100% - 65px)}.selection-toolbar{max-width:calc(100% - 80px);overflow-x:auto;left:8px;right:auto;white-space:nowrap}.selection-toolbar>button{flex-shrink:0}#drawing-manager{width:310px}.object-tree-row>.object-label{font-size:10px}.import-file{flex-direction:column;align-items:flex-start}.import-file input{max-width:100%}.symbol-filters{gap:5px}.symbol-filters label{font-size:10px}.watchlist-import-dialog .dialog-content{padding:16px}.import-options{gap:5px}.import-options label{font-size:10px}}
-@media(max-width:600px){.watch-head{padding:14px 12px 10px}.watch-head-actions>#watch-list-add{font-size:8px;padding:0 5px}.watch-lists{padding:0 8px 8px}.watch-group-head{padding:7px 9px}.watchlist-settings-dialog .dialog-content{padding:16px}.watch-settings-row label{min-width:100%}.watch-settings-buttons button{flex:1 1 45%}}
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){#symbol-search{width:26px;height:27px;padding:4px}#symbol-search .ui-icon{width:15px}.watch-remove{opacity:1}#drawing-favs{max-width:calc(100% - 65px)}.selection-toolbar{max-width:calc(100% - 80px);overflow-x:auto;left:8px;right:auto;white-space:nowrap}.selection-toolbar>button{flex-shrink:0}#drawing-manager{width:310px}.object-tree-row>.object-label{font-size:10px}.import-file{flex-direction:column;align-items:flex-start}.import-file input{max-width:100%}.symbol-filters{gap:5px}.symbol-filters label{font-size:10px}.watchlist-import-dialog .dialog-content{padding:16px}.import-options{gap:5px}.import-options label{font-size:10px}}
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){.watch-head{padding:14px 12px 10px}.watch-head-actions>#watch-list-add{font-size:8px;padding:0 5px}.watch-lists{padding:0 8px 8px}.watch-group-head{padding:7px 9px}.watchlist-settings-dialog .dialog-content{padding:16px}.watch-settings-row label{min-width:100%}.watch-settings-buttons button{flex:1 1 45%}}
 
 /* TradingView-style phone shell: fixed viewport, compact top bar, dockable tools. */
-@media(max-width:600px){
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   .workspace{grid-template-rows:auto minmax(0,1fr);height:100dvh;overflow:hidden}
   .toolbar{height:auto;min-height:52px;flex-wrap:nowrap;gap:4px;padding:calc(4px + env(safe-area-inset-top)) 6px 4px;z-index:30}
@@ -532,7 +532,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 }
 
 /* Phone shell v2: embedded indicator chips, symbol swipe strip, sheet pickers. */
-@media(max-width:600px){
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .chart-panel{grid-template-rows:auto minmax(0,1fr) 30px 34px}
   .legend{padding:4px 8px 2px;min-height:30px}
   #study-legend{flex-direction:row;align-items:center;gap:4px;max-width:100%;max-height:none;height:22px;margin-top:1px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
@@ -605,7 +605,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 }
 
 /* Phone shell v4: bottom menu, dwell-to-commit pair picker and mobile timeframes. */
-@media(max-width:600px){
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .actions{display:none}
   #timeframes{display:none}
   .chart-panel{grid-template-rows:auto minmax(0,1fr) 30px 42px}
@@ -649,7 +649,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 }
 
 /* Phone shell v5: chart-first strip, blurred swipe transition and focus mode. */
-@media(max-width:600px){
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .toolbar{display:none!important}
   .workspace{grid-template-rows:minmax(0,1fr)}
   .chart-panel{grid-template-rows:auto minmax(0,1fr) 30px 42px}
@@ -681,7 +681,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 
 #chart-home{display:none}
 /* Phone shell v6: title inside the chart, bottom carousel, tools star, menu-only controls. */
-@media(max-width:600px){
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .chart-panel{position:relative;grid-template-rows:minmax(0,1fr) 42px}
   .legend{position:absolute;top:0;left:0;right:0;z-index:7;pointer-events:none;min-height:0;padding:calc(6px + env(safe-area-inset-top)) 8px 4px;border:0;background:linear-gradient(180deg,#10141ce6,#10141c00)}
   #ohlc,.chart-navigation{display:none!important}
@@ -702,7 +702,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 }
 
 /* Keep controls above iOS's reserved home-gesture area. */
-@media(max-width:600px){
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .chart-panel{grid-template-rows:minmax(0,1fr) 52px;padding-bottom:calc(24px + env(safe-area-inset-bottom));background:var(--chart-canvas,#10141c)}
   .mobile-market-strip{height:48px;margin:0 8px;border:1px solid #344158;border-radius:22px;background:#171c24eb;box-shadow:0 5px 20px #0004}
   #chart-home{position:fixed;display:flex;align-items:center;gap:5px;left:8px;top:calc(6px + env(safe-area-inset-top));z-index:20;min-height:36px;padding:0 11px;border:1px solid #46516680;border-radius:18px;background:#171c24db;backdrop-filter:blur(10px);color:#d7e0ed;font-size:12px;text-decoration:none}
@@ -714,4 +714,41 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   body.tools-hidden #drawing-favs{display:none!important}
   body.mobile-light #chart-home{background:#f7f9fce8;color:#263449}
   body.embed-chart #chart-home{display:none}
+}
+
+/* Phone landscape: keep the mobile shell, compact the dock, and give the chart the viewport. */
+@media(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  .workspace,.workarea,.no-list .workarea{height:100dvh;min-height:0;overflow:hidden}
+  .toolbar,.actions,.market-controls,#timeframes{display:none!important}
+  body.mobile-landscape .toolbar{display:none!important}
+  .chart-panel{height:100%;min-height:0;grid-template-rows:minmax(0,1fr) 32px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+  .mobile-market-strip{height:28px;margin:0 calc(8px + env(safe-area-inset-right)) 0 calc(8px + env(safe-area-inset-left));border-radius:14px}
+  .market-strip-current,.mobile-timeframe,.mobile-strip-menu,.mobile-tools-star{height:30px;min-height:30px}
+  .mobile-strip-menu,.mobile-timeframe,.mobile-tools-star{width:44px}
+  .legend{top:calc(3px + env(safe-area-inset-top));padding:3px 8px 2px}
+  #study-legend{height:18px}
+  .study-chip{height:17px;max-width:120px;font-size:8px}
+  #chart-home{top:calc(3px + env(safe-area-inset-top));left:calc(6px + env(safe-area-inset-left));min-height:30px;padding:0 8px}
+  #chart-home span{display:none}
+  .mobile-tools-toggle{bottom:calc(40px + env(safe-area-inset-bottom));right:calc(8px + env(safe-area-inset-right));width:44px;height:44px}
+  body.tools-open .mobile-tools-toggle{bottom:calc(40px + env(safe-area-inset-bottom))}
+  .mobile-left-dock{left:calc(6px + env(safe-area-inset-left));bottom:calc(40px + env(safe-area-inset-bottom))}
+  .mobile-left-dock button{width:44px;height:44px}
+  .mobile-sheet{left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(6px + env(safe-area-inset-bottom));max-height:calc(100dvh - 12px);border-radius:14px}
+  .mobile-sheet-backdrop{z-index:48}
+  .menu-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px}
+  .menu-grid button{min-height:48px;font-size:8px}
+  .mobile-tf-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:0 10px 8px}
+  .mobile-all-tools{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:4px 10px 8px}
+  .mobile-all-tools button{min-height:46px}
+  #drawing-tools>button{height:44px}
+  #watchlist,#drawing-manager,#replay-bar,#message{bottom:calc(38px + env(safe-area-inset-bottom))}
+  #watchlist{max-height:calc(100dvh - 46px)}
+  #drawing-manager{top:calc(36px + env(safe-area-inset-top));max-height:calc(100dvh - 48px)}
+  .mobile-swipe-overlay{bottom:calc(40px + env(safe-area-inset-bottom))}
+  .chart-dialog{max-height:88dvh!important}
+  .chart-dialog .dialog-content{max-height:88dvh!important}
+  .tool-flyout{bottom:calc(46px + env(safe-area-inset-bottom))!important;max-height:70dvh}
+  body.focus-mode .chart-panel{grid-template-rows:minmax(0,1fr) 32px}
 }
