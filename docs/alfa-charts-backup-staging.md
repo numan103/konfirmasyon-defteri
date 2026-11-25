@@ -75,6 +75,18 @@ Kullanım: Safari ile staging URL’sini aç → Paylaş/Share → **Add to Home
 → ana ekrandan uygulama gibi aç. Production sürümü için aynı dosyalar production
 deploy’u ile birlikte gider; burada yalnız staging dağıtımı güncellendi.
 
+## 4. Mobil grafik kabuğu — staging
+
+`alfa-charts.html` için telefon düzeni TradingView mantığıyla sıkıştırıldı:
+marka başlığı kaldırıldı; sembol ve zaman dilimleri tek satırda yatay kaydırılır;
+sol araç rayı kalkıp altta açılan yatay araç tepesine taşındı; grafik alanı
+ekran yüksekliğini dolduruyor ve sayfa `overscroll` yapmıyor; dikey temas
+sürüklemesi ve sağ fiyat ekseni tutamağı ile fiyat aralığı ayarlanabiliyor.
+
+Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs`,
+`alfa-charts.html` ve `sw.js` içinde; yalnız staging’e dağıtıldı. Production
+host’u, verisi ve deploy’u değişmedi.
+
 ## Tekrar için scripts
 
 - `scripts/backup-production-private.ps1`

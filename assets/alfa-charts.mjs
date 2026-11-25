@@ -34,6 +34,7 @@ const workspace = document.querySelector('.workspace');
 const host = $('chart');
 const search = new URLSearchParams(location.search);
 const isEmbed = search.has('embed');
+const isMobile = matchMedia('(max-width:600px)').matches;
 if (isEmbed) document.body.classList.add('embed-chart');
 // Multi-chart panes are same-origin embedded charts. The parent is the only
 // hub; panes never message each other directly.
@@ -82,10 +83,69 @@ const chart = createChart(host, {
   crosshair: { mode: CrosshairMode.Normal },
   rightPriceScale: { borderColor: '#30394b', scaleMargins: { top: 0.12, bottom: 0.22 } },
   timeScale: { borderColor: '#30394b', timeVisible: true, secondsVisible: false, rightOffset: 8 },
-  handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+  handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
   handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
   localization: { locale: 'tr-TR' }
 });
+
+if (isMobile) {
+  const toolsToggle = $('mobile-tools-toggle');
+  const closeTools = () => {
+    document.body.classList.remove('tools-open');
+    toolsToggle?.setAttribute('aria-expanded', 'false');
+    toolsToggle?.setAttribute('aria-label', 'Çizim araçlarını aç');
+  };
+  toolsToggle?.addEventListener('click', () => {
+    const open = document.body.classList.toggle('tools-open');
+    toolsToggle.setAttribute('aria-expanded', String(open));
+    toolsToggle.setAttribute('aria-label', open ? 'Çizim araçlarını kapat' : 'Çizim araçlarını aç');
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!document.body.classList.contains('tools-open')) return;
+    if (event.target.closest('.drawing-space') || event.target.closest('#mobile-tools-toggle')) return;
+    closeTools();
+  }, true);
+
+  const grip = $('price-scale-grip');
+  const rightScale = chart.priceScale('right');
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  let scaleDrag = null;
+  grip?.addEventListener('pointerdown', event => {
+    const activeTool = host.dataset.drawingTool;
+    if (activeTool && activeTool !== 'cursor') return;
+    event.preventDefault();
+    event.stopPropagation();
+    const options = rightScale.options();
+    const margins = options.scaleMargins || { top: 0.12, bottom: 0.22 };
+    scaleDrag = { y: event.clientY, top: margins.top, bottom: margins.bottom };
+    grip.setPointerCapture?.(event.pointerId);
+    document.body.classList.add('price-scaling');
+  });
+  grip?.addEventListener('pointermove', event => {
+    if (!scaleDrag) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const delta = (event.clientY - scaleDrag.y) / Math.max(1, host.clientHeight);
+    const top = clamp(scaleDrag.top + delta, 0.04, 0.82);
+    const bottom = clamp(scaleDrag.bottom - delta, 0.04, 0.82);
+    if (top + bottom > 0.9) return;
+    rightScale.applyOptions({ autoScale: false, scaleMargins: { top, bottom } });
+  });
+  const endScaleDrag = event => {
+    if (!scaleDrag) return;
+    scaleDrag = null;
+    grip.releasePointerCapture?.(event.pointerId);
+    document.body.classList.remove('price-scaling');
+  };
+  grip?.addEventListener('pointerup', endScaleDrag);
+  grip?.addEventListener('pointercancel', endScaleDrag);
+  grip?.addEventListener('dblclick', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    rightScale.applyOptions({ autoScale: true, scaleMargins: { top: 0.12, bottom: 0.22 } });
+  });
+}
+
 const candles = chart.addSeries(CandlestickSeries, {
   upColor: '#26c89c', downColor: '#ef6677', borderVisible: false, wickUpColor: '#26c89c', wickDownColor: '#ef6677'
 });

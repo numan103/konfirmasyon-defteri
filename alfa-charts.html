@@ -2,11 +2,17 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#10141c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Alfa Charts">
   <title>ALFA CHARTS — Grafik Analizi</title>
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=25">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/ios-pwa.css">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=26">
 </head>
 <body>
   <main class="workspace">
@@ -30,6 +36,7 @@
       </select>
       </div>
       <div class="actions">
+        <button id="mobile-tools-toggle" class="icon-button mobile-tools-toggle" type="button" aria-label="Çizim araçlarını aç" aria-expanded="false" aria-controls="drawing-tools" title="Çizim araçları"><span data-icon="brush"></span></button>
         <button id="indicators-manage" class="primary-tool" type="button" title="Tüm indikatörler ve analiz katmanları" aria-label="İndikatörler"><span data-icon="indicators"></span><span class="button-label">İndikatörler</span><span id="study-count" class="count-badge">1</span></button>
         <button id="alarm-toggle" type="button" title="Fiyat alarmları" aria-label="Fiyat alarmları"><span data-icon="bell"></span><span class="button-label">Alarm</span></button>
         <details class="workspace-menu" id="lab-menu">
@@ -111,6 +118,7 @@
         <div id="chart" tabindex="0" aria-label="Canlı fiyat grafiği. Sürükle veya tekerlekle gezin; sağ tıkla grafik menüsünü aç; artı/eksi ile yakınlaştır, ok tuşlarıyla kaydır.">
           <nav id="drawing-favs" aria-label="Favori çizim araçları"></nav>
           <div id="drawing-selection" class="selection-toolbar" aria-label="Seçili çizim işlemleri" hidden></div>
+          <div id="price-scale-grip" class="price-scale-grip" aria-hidden="true"></div>
         </div>
         <div class="chart-navigation">
           <div class="range-presets" aria-label="Görünür tarih aralığı"><button data-range="86400" type="button">1G</button><button data-range="432000" type="button">5G</button><button data-range="2592000" type="button">1A</button><button data-range="7776000" type="button">3A</button><button data-range="all" type="button">Tümü</button></div>
@@ -254,6 +262,6 @@
       <span id="data-info">Kaynak: seçili piyasa · Zaman: UTC · Otomatik derinlik</span>
     </footer>
   </main>
-  <script type="module" src="/assets/alfa-charts.mjs?v=66"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=67"></script>
 </body>
 </html>
