@@ -4,53 +4,52 @@
 
 | Kontrol | Sonuç |
 | --- | --- |
-| Production katalog kontrolü | **BLOCKED** — yetkili DB/katalog bağlantısı sağlanmadı |
+| Production katalog kontrolü | **PASS** — yetkili SQL Editor sorgusu 2026-11-25 14:30:23 UTC'de tamamlandı |
 | Staging egress | **BLOCKED** — uygun, gerçek API'li staging bulunamadı |
-| Yedek ve rollback planı | **READY** — aşağıdaki prosedür hazır; gerçek backup/restore kanıtı henüz yok |
+| Gerçek production yedeği ve restore kanıtı | **BLOCKED** — Free Plan'da hosted backup yok; doğrulanmış harici yedek/restore kanıtı verilmedi |
+| Migration'ın geniş default ACL altında daraltması | **PASS** — 8/8 izole PostgreSQL testi yeniden geçti |
+| Migration sonrası salt-okunur kontrolün hazırlanması | **PASS** — postflight SQL ve 4/4 PostgreSQL kontrol testi hazır |
 | Genel yayın kararı | **NO-GO** |
 
 Bu final preflight sırasında production migration/deploy yapılmadı. Mobile
 worktree okunmadı/değiştirilmedi; test kurulumu veya dosya yazımı yapılmadı.
-Uygulama ve migration kaynakları değiştirilmedi; yalnız bu rapor ve salt-okunur
-operatör SQL dosyası hazırlandı.
+Uygulama ve migration kaynakları değiştirilmedi. Katalog kanıtı işlendi,
+salt-okunur postflight SQL'i/testleri ve adım adım yayın checklist'i hazırlandı.
 
-### Production katalog kontrolü neden BLOCKED?
+### Production katalog kanıtı — PASS (migration öncesi)
 
-Ortamdaki Supabase/DB bağlantısı/staging değişken adları kontrol edildi;
-yetkili bağlantı bilgisi yok. `.env*` ve `.dev.vars*` dosyası bulunmadı.
-Public API key, Cloudflare hesap erişimi veya REST `limit=0` sonucu; production
-`pg_policy`, tablo/kolon ACL, rol üyeliği ve `pg_default_acl` doğrulaması yerine
-geçmez. Eksik katalog çıktısı üretilmedi; önceki anonim metadata sonucu PASS'a
-çevrilmedi.
+Kullanıcı oturum açtıktan sonra doğru Supabase projesi
+`fssrtlpjqbavzomynwmg / alfa-traders-live / main PRODUCTION` üzerinde yalnız
+[`040_chart_workspaces_preflight.sql`](../supabase/site/040_chart_workspaces_preflight.sql)
+çalıştırıldı. Tam metnin editöre yerleştirildiği ve seçili parça olmadığı
+doğrulandı. Migration dosyası çalıştırılmadı.
 
-**Operatörün çalıştıracağı dosya:**
-[`docs/sql/alfa-charts-production-preflight.sql`](sql/alfa-charts-production-preflight.sql).
-Bu **migration değildir**: READ ONLY transaction içinde yalnız katalog SELECT,
-session-local timeout ve ROLLBACK içerir; kullanıcı satırı okumaz. Yetkili
-production katalog okuyucusuyla, doğru proje ref'i dashboard/bağlantı üzerinden
-doğrulanarak çalıştırılmalıdır. Bağlantı parolası/token paylaşmadan tüm result
-set'leri (boş sonuçlar ve hatalar dahil) incelemeye verilmelidir.
+- Katalog sonucu UTC: **2026-11-25T14:30:23Z**.
+- DB/session rolü: `postgres`; PostgreSQL **17.12**.
+- `chart_workspaces`: **NOT_PRESENT**. İsim/şema tipi/index adı çakışması yok.
+- `chart_settings` ve `chart_drawings`: owner `postgres`, RLS etkin;
+  mevcut owner-only politikaları görüldü.
+- `auth.users.id`: UUID, NOT NULL, PK. `auth.uid()` mevcut.
+- `anon/authenticated`: superuser/BYPASSRLS değil. `service_role`: BYPASSRLS.
+- `postgres` ve `supabase_admin` creator rollerinin public-schema tablo default
+  ACL'leri, anon/authenticated için geniş; TRUNCATE/REFERENCES/TRIGGER/MAINTAIN
+  dahil. Bu artık yalnız simülasyon riski değil, **gerçek katalog bulgusudur**.
+- Workspace henüz bulunmadığından workspace RLS/kolon/tablo ACL listeleri boş;
+  TRUNCATE sonuçları `TABLE_NOT_PRESENT`, `allowed=null`. Bunlar mevcut bir
+  workspace tablosunun güvenli olduğuna dair PASS değildir. Migration sonrası
+  doğrulama henüz yapılmadı.
 
-Hazırlanan sorgular:
+Kanıt, Dashboard CSV export'undan alınan tam katalog JSON'udur:
+`C:/Users/Pc/AppData/Local/Temp/opencode/alfa-production-preflight-20261125.json`.
+SQL Editor sorgusu:
+`https://supabase.com/dashboard/project/fssrtlpjqbavzomynwmg/sql/9d076dfc-40e4-4c7a-b409-5da3649cc644`.
+Katalog JSON'u **veritabanı yedeği değildir**; kullanıcı satırlarını içermez.
 
-1. DB/session kimliği, PostgreSQL sürümü ve read-only durumu.
-2. `auth.users`, `auth.uid()` ve workspace/settings/drawings varlığı.
-3. Workspace ilişkileri, tablo sahipleri, RLS/FORCE RLS, kolon/default ve PK/FK/
-   check constraint tanımları.
-4. Mevcut RLS politika komutları/rolleri/USING/WITH CHECK ifadeleri.
-5. PUBLIC/anon/authenticated/service-role doğrudan tablo ve kolon ACL'leri.
-6. Tüm creator rollerinin global ve public-schema default privileges ayarları.
-7. Client/service/migration-reader rol özellikleri ve transitif üyelikleri.
-8. Etkin tablo/kolon hakları; TRUNCATE/REFERENCES/TRIGGER ve sürüme göre MAINTAIN,
-   grant-option hakları, schema USAGE ve auth.uid EXECUTE.
-9. Beklenmeyen kullanıcı trigger'ları.
-
-SQL, izole boş ve workspace tablosu bulunan embedded PostgreSQL üzerinde
-syntax/result-set kontrolünden geçti (18 result set). Bu **production sorguları
-çalıştırıldı** demek değildir.
-Production'da tablo eksikse effective-grant sorgularının boş dönmesi PASS
-sayılmaz; migration öncesi durum olarak kaydedilir. Tablo varsa migration'ın
-beklediği sözleşme/ACL/rol yapısıyla karşılaştırılmadan ilerlenmez.
+Yeni bilgiyle migration tekrar incelendi: hedef tablo üzerinde PUBLIC/anon/
+authenticated tablo ve kolon ACL'lerini geri alıp yalnız gereken yetkileri
+veriyor. Ortak default ACL'lere veya diğer tablolara dokunmuyor. Geniş global
+ve schema grant senaryolarını kapsayan **8/8 PostgreSQL testi yeniden geçti**;
+ilk/ikinci uygulama, eski veriler ve service-role koruması dahil.
 
 ### Staging egress neden BLOCKED?
 
@@ -95,11 +94,26 @@ assertion kaldırılarak veya sahte başarılı JSON eklenerek gizlenmemeli.
   18/18 Alfa Charts script'i, tüm repoda 45 PASS + 1 API ortam bağımlılığı.
   Bu kanıt gerçek staging egress PASS yerine kullanılmıyor.
 
-### Yedek, rollback ve kurtarma prosedürü — READY (plan)
+### Gerçek yedek ve geri yüklenebilirlik — BLOCKED
 
-**READY yalnız planın hazır olmasıdır.** Production backup alındığı, PITR'nin
-mevcut olduğu veya restore denemesinin geçtiği iddia edilmez. Aşağıdaki gerçek
-backup/restore kanıtları tamamlanmadan migration onayı verilmez.
+Yetkili Dashboard oturumuyla production projesinin iki ekranı salt-okunur
+incelendi:
+
+- `/database/backups/scheduled`: **“Free Plan does not include project backups.”**
+- `/database/backups/pitr`: **“Point in Time Recovery is a Pro Plan add-on.”**
+- Proje FREE planında. Kullanılabilir hosted backup ID/tarihi veya recovery
+  point doğrulanamadı. Upgrade/restore düğmelerine basılmadı, ödeme yapılmadı.
+- Harici manuel backup dosyası, checksum, güvenli saklama konumu ve izole
+  restore başarı kanıtı sunulmadı. Bu, “dünyanın hiçbir yerinde yedek yok”
+  iddiası değildir; **elde doğrulanmış, geri yüklenebilir yedek yok** demektir.
+
+Planın yazılı olması bu kontrolü geçirmez. Geçmesi için: doğru projeye ait
+gerçek yedek/restore point + metadata/checksum + production olmayan hedefte
+başarılı restore + şema/RLS/ACL ve veri bütünlüğü kontrolü gerekir. SQL Editor
+katalog export'u veya önceki Pages artifact'i DB backup yerine geçmez.
+
+Aşağıdaki prosedür hazırdır; gerçek backup/restore kanıtları tamamlanmadan
+migration onayı verilmez.
 
 **Production işleminden önce yetkili operatör:**
 
@@ -135,6 +149,30 @@ backup/restore kanıtları tamamlanmadan migration onayı verilmez.
 - İçerik/revision tekrar okuması doğrulanmadan otomatik sync yeniden açılmaz.
   Yerel export yalnız uygulama verisi içermeli; auth token'ları dışa aktarılmamalı.
 
+### Migration sonrası kontrol ve güvenli yayın checklist'i
+
+- Yeni dosya:
+  [`040_chart_workspaces_postflight.sql`](../supabase/site/040_chart_workspaces_postflight.sql).
+  Tek katalog SELECT'inden `postflight_json` döndürür; veri veya rol değiştirmez.
+- Tablo yoksa **BLOCKED**; RLS kapalıysa, ek/uyumsuz politika varsa, etkin
+  client TRUNCATE/kolon yetkisi fazla ise **FAIL** döner.
+- Beklenen üç owner-only politika, anon/authenticated effective table/column
+  allowlist'i, service role, client owner üyeliği/BYPASSRLS ve API önkoşulları
+  kontrol edilir. Default ACL'nin geniş kalması tek başına FAIL değildir;
+  **yeni tablodaki etkin erişim** daraltılmış olmalıdır.
+- `tests/postgres/chart-workspaces-postflight.test.mjs`: **4/4 PASS**. SQL
+  read-only transaction içinde denendi; tablo yokluğu, iki kez migration,
+  fazla tablo/kolon grant'i, RLS kapatılması ve beklenmeyen politika yakalandı.
+- Bu görevde birleşik SQL koşusu **12/12 PASS** (8 migration + 4 postflight);
+  tam unit suite de yeniden **1219/1219 PASS**. Üretim SQL dosyası hash'i
+  değişmedi; bu sonuçlar production migration'ın uygulandığı anlamına gelmez.
+- Bu dosya production'da henüz çalıştırılmadı. Katalog PASS'ı, iki gerçek
+  staging hesabıyla API/RLS izolasyonu testinin yerine geçmez.
+- Adım adım operasyon belgesi:
+  [`alfa-charts-production-release-checklist.md`](alfa-charts-production-release-checklist.md).
+  İlk aşamalar mevcut kanıtla işaretlidir; gerçek backup/staging ve production
+  işlemleri tamamlanmış gibi işaretlenmedi.
+
 ### Doğrulanmış yayın sırası
 
 **Staging → production salt-okunur preflight/yedek → ayrıca işlem onayı →
@@ -148,11 +186,11 @@ Git Tarihe/preset/çizim anchor'ları, farklı timeframe'lerle sync, legend, iki
 cihaz ve conflict çözümünü kapsar. Önceki artefact ve kullanıcı verisini
 koruyan rollback planı hazır tutulur.
 
-**Eksik yetki ve staging ortamı nedeniyle NO-GO değişmedi.**
+**Staging egress ve gerçek backup/restore kanıtı nedeniyle NO-GO değişmedi.**
 
 ---
 
-## Güncel durum — release blockers düzeltmesi (2026-11-24)
+## Arşiv — release blockers düzeltmesi (2026-11-24)
 
 **Yerel migration engelleri giderildi. Production yayın onayı hâlâ koşulludur.**
 Production migration/deploy yapılmadı; gerçek kullanıcı verisine yazılmadı.
