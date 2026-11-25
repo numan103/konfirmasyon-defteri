@@ -213,6 +213,21 @@ if (isMobile) {
   $('menu-fit')?.addEventListener('click', () => { closeSheets(); handleChartAction('fit'); });
   $('menu-live')?.addEventListener('click', () => { closeSheets(); handleChartAction('realtime'); });
   $('menu-fullscreen')?.addEventListener('click', () => { closeSheets(); handleChartAction('fullscreen'); });
+  const focusKey = 'alfa-mobile-focus:v1';
+  const setFocusMode = on => {
+    document.body.classList.toggle('focus-mode', on);
+    $('menu-focus')?.setAttribute('aria-pressed', String(on));
+    const labelEl = $('menu-focus-label');
+    if (labelEl) labelEl.textContent = on ? 'Araçları göster' : 'Araçları gizle';
+    try { localStorage.setItem(focusKey, on ? '1' : '0'); } catch {}
+  };
+  let focusOn = false;
+  try { focusOn = localStorage.getItem(focusKey) === '1'; } catch {}
+  setFocusMode(focusOn);
+  $('menu-focus')?.addEventListener('click', () => {
+    setFocusMode(!document.body.classList.contains('focus-mode'));
+    closeSheets();
+  });
   $('watch-mobile-close')?.addEventListener('click', () => toggleList(false));
   const runShareAction = async (button, action) => {
     if (!button) return;
@@ -250,7 +265,7 @@ if (isMobile) {
     const open = SHEETS.some(({ className }) => document.body.classList.contains(className));
     if (!open) return;
     if (event.target.closest('.mobile-sheet') || event.target.closest('#mobile-sheet-backdrop') ||
-        event.target.closest('#mobile-left-dock') || event.target.closest('#mobile-tools-toggle') ||
+        event.target.closest('#mobile-market-strip') || event.target.closest('#mobile-tools-toggle') ||
         event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-menu-open')) return;
     closeSheets();
   }, true);
@@ -271,23 +286,20 @@ if (isMobile) {
     suppressStripClickUntil = 0;
     return false;
   };
-  const previewPrice = ref => {
-    if (ref === symbol) {
-      const last = history.at(-1);
-      return Number.isFinite(last?.close) ? priceFormat.format(last.close) : '—';
-    }
-    const price = watchlist?.quotes.get(ref)?.price;
-    return Number.isFinite(price) ? priceFormat.format(price) : '—';
-  };
+  let stripDir = 1;
   const paintStrip = () => {
     const ref = stripPreview || symbol;
     const symbolEl = $('mobile-market-symbol');
-    const priceEl = $('mobile-market-price');
-    const hintEl = $('mobile-strip-hint');
     if (symbolEl && symbolEl.textContent !== ref) symbolEl.textContent = ref;
-    if (priceEl) priceEl.textContent = previewPrice(ref);
-    if (hintEl) hintEl.textContent = stripPreview && stripPreview !== symbol ? 'Dokun / 3 sn' : 'Kaydır';
-    strip?.classList.toggle('strip-preview', !!stripPreview && stripPreview !== symbol);
+    const previewing = !!stripPreview && stripPreview !== symbol;
+    strip?.classList.toggle('strip-preview', previewing);
+    document.body.classList.toggle('strip-preview', previewing);
+    const overlay = $('mobile-swipe-overlay');
+    const overlaySymbol = $('mobile-swipe-symbol');
+    const overlayDir = $('mobile-swipe-direction');
+    if (overlaySymbol) overlaySymbol.textContent = previewing ? ref : '';
+    if (overlayDir) overlayDir.textContent = stripDir > 0 ? '↓' : '↑';
+    overlay?.setAttribute('aria-hidden', String(!previewing));
   };
   paintMobileMarket = paintStrip;
   const clearStripDwell = () => { if (stripDwell) clearTimeout(stripDwell); stripDwell = null; };
@@ -310,32 +322,22 @@ if (isMobile) {
   };
   const previewStripSymbol = (next, dir = 1) => {
     if (!next || next === stripPreview) return;
+    stripDir = dir > 0 ? 1 : -1;
     stripPreview = next;
     strip?.removeAttribute('data-dir');
     void strip?.offsetWidth;
-    strip?.setAttribute('data-dir', dir > 0 ? 'down' : 'up');
+    strip?.setAttribute('data-dir', stripDir > 0 ? 'down' : 'up');
     paintStrip();
     clearStripDwell();
     if (next !== symbol) stripDwell = setTimeout(() => commitStripPreview(), 3000);
   };
-  const stepStrip = delta => {
-    const list = stripSymbols();
-    if (!list.length) return;
-    const base = Math.max(0, list.indexOf(stripPreview || symbol));
-    previewStripSymbol(list[wrapIndex(base + delta, list.length)], delta);
-  };
-  document.querySelectorAll('[data-strip-step]').forEach(button => button.addEventListener('click', () => {
-    if (!consumeStripClick()) return;
-    stepStrip(Number(button.dataset.stripStep) || 0);
-  }));
-  $('mobile-market-pick')?.addEventListener('click', () => { if (consumeStripClick()) commitStripPreview(); });
-  $('mobile-strip-commit')?.addEventListener('click', () => { if (consumeStripClick()) commitStripPreview(); });
+  const openPairList = () => { closeSheets(); toggleList(true); };
   strip?.addEventListener('click', event => {
-    if (event.target.closest('[data-strip-step], #mobile-strip-commit, #mobile-timeframe')) return;
-    if (consumeStripClick()) commitStripPreview();
+    if (event.target.closest('#mobile-menu-open, #mobile-timeframe')) return;
+    if (consumeStripClick()) openPairList();
   });
   strip?.addEventListener('pointerdown', event => {
-    if (event.target.closest('[data-strip-step], #mobile-strip-commit, #mobile-timeframe')) return;
+    if (event.target.closest('#mobile-menu-open, #mobile-timeframe')) return;
     strip.setPointerCapture?.(event.pointerId);
     const symbols = stripSymbols();
     stripDrag = { y: event.clientY, symbols, startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, moved: false };
@@ -362,6 +364,45 @@ if (isMobile) {
   };
   strip?.addEventListener('pointerup', endStripDrag);
   strip?.addEventListener('pointercancel', endStripDrag);
+
+  // Vertical swipes on the chart itself use the same blurred preview card.
+  let chartNav = null;
+  host.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (event.target.closest('#drawing-favs, #drawing-selection, #price-scale-grip, .chart-loading, .chart-data-state, .mobile-swipe-overlay')) return;
+    const activeTool = host.dataset.drawingTool;
+    if (activeTool && activeTool !== 'cursor') return;
+    const symbols = stripSymbols();
+    chartNav = { id: event.pointerId, y: event.clientY, x: event.clientX, symbols,
+      startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, engaged: false };
+  }, true);
+  host.addEventListener('pointermove', event => {
+    if (!chartNav || event.pointerId !== chartNav.id) return;
+    const dy = event.clientY - chartNav.y;
+    const dx = event.clientX - chartNav.x;
+    if (!chartNav.engaged) {
+      if (Math.abs(dy) < 18 || Math.abs(dy) < Math.abs(dx) * 1.15) return;
+      chartNav.engaged = true;
+      host.setPointerCapture?.(event.pointerId);
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    const steps = Math.round(dy / 28);
+    if (steps === chartNav.lastStep) return;
+    const dir = steps - chartNav.lastStep;
+    chartNav.lastStep = steps;
+    previewStripSymbol(chartNav.symbols[wrapIndex(chartNav.startIndex + steps, chartNav.symbols.length)], dir);
+  }, { capture: true, passive: false });
+  const endChartNav = event => {
+    if (!chartNav || event.pointerId !== chartNav.id) return;
+    if (chartNav.engaged) {
+      suppressStripClickUntil = Date.now() + 250;
+      host.releasePointerCapture?.(event.pointerId);
+    }
+    chartNav = null;
+  };
+  host.addEventListener('pointerup', endChartNav, true);
+  host.addEventListener('pointercancel', endChartNav, true);
 
   let tfDrag = null;
   let suppressTfClickUntil = 0;

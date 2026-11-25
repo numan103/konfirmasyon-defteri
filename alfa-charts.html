@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=29">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=30">
 </head>
 <body>
   <main class="workspace">
@@ -125,6 +125,7 @@
             <small id="chart-loading-detail">Canlı akış bağlanıyor</small>
           </div>
           <div id="chart-data-state" class="chart-data-state" role="status" hidden></div>
+          <div id="mobile-swipe-overlay" class="mobile-swipe-overlay" aria-hidden="true"><small id="mobile-swipe-direction">↓</small><strong id="mobile-swipe-symbol"></strong><span>3 sn · geçiş</span></div>
           <div id="price-scale-grip" class="price-scale-grip" aria-hidden="true"></div>
         </div>
         <div class="chart-navigation">
@@ -132,13 +133,11 @@
           <small id="drawing-help">Çizim motoru hazırlanıyor…</small>
           <div class="scale-controls"><button id="chart-timezone" type="button" aria-label="Grafik saat dilimi: UTC" title="Grafik saat dilimini değiştir">UTC</button><button id="log-scale" type="button" aria-pressed="false" title="Logaritmik/Lineer fiyat ölçeği">Log</button><button id="auto-scale" type="button" aria-pressed="true" title="Otomatik fiyat ölçeği">Oto</button></div>
         </div>
-        <div class="mobile-market-strip" id="mobile-market-strip" aria-label="Parite ve zaman dilimi seçici">
-          <button class="market-strip-arrow" type="button" data-strip-step="-1" aria-label="Önceki pariteyi önizle">▲</button>
-          <button id="mobile-market-pick" class="market-strip-current" type="button" aria-label="Bu pariteye geç">
-            <strong id="mobile-market-symbol">BTCUSDT</strong><span id="mobile-market-price">—</span><small id="mobile-strip-hint">Kaydır</small>
+        <div class="mobile-market-strip" id="mobile-market-strip" aria-label="Parite ve zaman dilimi">
+          <button id="mobile-menu-open" class="mobile-strip-menu" type="button" aria-label="Menüyü aç" title="Menü" aria-expanded="false" aria-controls="mobile-menu-sheet"><span data-icon="grip"></span></button>
+          <button id="mobile-market-pick" class="market-strip-current" type="button" aria-label="Parite listesini aç; kaydırarak paritelerde gez">
+            <strong id="mobile-market-symbol">BTCUSDT</strong>
           </button>
-          <button class="market-strip-arrow" type="button" data-strip-step="1" aria-label="Sonraki pariteyi önizle">▼</button>
-          <button id="mobile-strip-commit" class="market-strip-commit" type="button" aria-label="Seçili pariteye geç"><span data-icon="chevron"></span></button>
           <button id="mobile-timeframe" class="mobile-timeframe" type="button" aria-label="Zaman dilimi. Kaydırarak değiştir, dokunarak tümünü gör" aria-expanded="false" aria-controls="mobile-timeframes-sheet"><strong id="mobile-timeframe-label">1H</strong><span data-icon="down"></span></button>
         </div>
         <div id="message" role="status" hidden></div>
@@ -279,9 +278,6 @@
     </footer>
   </main>
   <div id="mobile-sheet-backdrop" class="mobile-sheet-backdrop" hidden></div>
-  <nav id="mobile-left-dock" class="mobile-left-dock" aria-label="Grafik menüsü">
-    <button id="mobile-menu-open" type="button" aria-label="Menüyü aç" title="Menü" aria-expanded="false" aria-controls="mobile-menu-sheet"><span data-icon="grip"></span></button>
-  </nav>
   <section id="mobile-menu-sheet" class="mobile-sheet" aria-label="Grafik menüsü" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
     <header class="sheet-head"><strong>Menü</strong><button id="mobile-menu-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
@@ -297,6 +293,7 @@
       <button id="menu-fit" type="button"><span data-icon="fit"></span><span>Sığdır</span></button>
       <button id="menu-live" type="button"><span data-icon="live"></span><span>Son mum</span></button>
       <button id="menu-fullscreen" type="button"><span data-icon="fullscreen"></span><span>Tam ekran</span></button>
+      <button id="menu-focus" type="button" aria-pressed="false"><span data-icon="eyeOff"></span><span id="menu-focus-label">Araçları gizle</span></button>
     </div>
   </section>
   <section id="mobile-tools-sheet" class="mobile-sheet" aria-label="Çizim araçları" aria-hidden="true">
@@ -338,6 +335,6 @@
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=72"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=73"></script>
 </body>
 </html>

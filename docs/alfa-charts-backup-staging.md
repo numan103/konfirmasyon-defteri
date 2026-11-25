@@ -112,6 +112,16 @@ listesi telefonlarda alttan açılan sheet görünümünde ve kapatma düğmesi 
 Mobil kabuk testi bu akışların tamamı için PASS verdi (sayfa hatası yok);
 staging dağıtımı `4d734e13-8499-4e3c-a41c-fffc9610524e`.
 
+Beşinci turda üst toolbar tamamen kaldırıldı; arama kutucuğu, sembol select’i
+ve fiyat/veri durumu etiketleri telefon ekranını kaplamıyor. Menü artık alt
+şeridin solunda, paritenin hemen yanında; oklar, fiyat ve onay düğmesi kaldırıldı.
+Pariteye dokunmak kompakt liste panelini açıyor. Grafik üzerinde dikey kaydırma
+da pariteler arasında geziniyor; arka plan bulanıklaşıp üstte gelecek parite
+kartı beliriyor, 3 saniyelik bekleme seçimi onaylıyor. İzleme listesinde arama
+ve-diğer yardımcı bloklar gizlendi. Menüye “Araçları gizle / göster” odak modu
+eklendi; grafik yüksekliği 706 px’den 806 px’e çıkıyor. Testler PASS, sayfa
+hatası yok; staging dağıtımı `dc08c7ad-0d57-48bc-90b5-13ce0e674024`.
+
 Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs` ve
 `alfa-charts.html` içinde; yalnız staging’e dağıtıldı. `sw.js` sabit kaldı;
 önbellek kırılımı `?v=` sorgu dizeleriyle yapıldı. Production host’u, verisi ve
