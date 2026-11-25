@@ -143,6 +143,24 @@ Supabase Auth referansı doğrulandı, staging referansı bulunmadı. `sw.js` sa
 kaldı; önbellek kırılımı sorgu dizeleriyle yapıldı. Veri/migration yapılmadı;
 secret, şifre veya kullanıcı verisi kopyalanmadı.
 
+## Mobil v7 — 25 Kasım 2026
+
+- Sol üstte `/?page=home` hedefine siteye dönüş bağlantısı eklendi.
+- Alt şerit yuvarlatıldı; altına `24px + safe-area-inset-bottom` boşluk bırakıldı.
+- Mobil dikey dokunma, görünür mumlara göre otomatik ölçekli ve sınırlı
+  marjlarla hareket ediyor. Yatay sürükleme ve pinch ayrı kalıyor.
+- 600 ms dokunup tutma mevcut grafik bağlam menüsünü açıyor; sıfırlama
+  tüm geçmişi sıkıştırmak yerine son 65 mumu ve varsayılan fiyat marjlarını açıyor.
+- Renk formu tema değişince güncelleniyor; özel canvas rengi, mum/fitil/ızgara
+  ayarları mevcut ortak palette/layout depolamasını kullanıyor. Aynı origin'deki
+  sekmeler palette storage olayını dinliyor; hesap senkronu mevcut layout
+  altyapısını kullanıyor (cihazlar arası gerçek hesap testi yapılmadı).
+- Staging `ae2e82af.alfa-charts-staging.pages.dev`: mobil ve egress PASS.
+  Mobil test, dokunup tutma/sıfırlama, sınırlı fiyat kaydırma, alt boşluk,
+  site bağlantısı ve özel zemin rengi kaydını da doğruladı. Gerçek iPhone
+  Safari sistem hareketleri ayrıca cihazda kontrol edilmeli.
+- Cache sürümleri: CSS `32`, JS `75`; `sw.js` değişmedi.
+
 ## Tekrar için scripts
 
 - `scripts/backup-production-private.ps1`

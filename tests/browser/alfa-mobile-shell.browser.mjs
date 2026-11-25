@@ -22,7 +22,7 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 try {
-  await page.goto(origin + '/alfa-charts.html', { waitUntil: 'domcontentloaded' });
+  await page.goto(origin + '/alfa-charts.html?debug=1', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelectorAll('#timeframes button').length > 0, { timeout: 30000 });
   await page.waitForFunction(() => !!document.querySelector('#chart canvas'), { timeout: 30000 });
   await page.waitForFunction(() => document.querySelectorAll('#drawing-tools button').length > 0, { timeout: 30000 });
@@ -115,7 +115,10 @@ try {
   assert.ok(before.menuButton.x < before.pairButton.x && before.pairButton.x < before.starButton.x &&
     before.starButton.x < before.timeframeButton.x, 'strip order must be menu, pair, tools star, timeframe');
   assert.equal(before.legendPosition, 'absolute', 'market title must be inside the chart, not a separate row');
-  assert.ok(before.legend && before.chart && before.legend.y >= before.chart.y - 2 && before.legend.y < before.chart.y + 40);
+  assert.ok(before.legend && before.chart && before.legend.y >= before.chart.y - 2 && before.legend.y < before.chart.y + 75);
+  assert.equal(await page.locator('#chart-home').getAttribute('href'), '/?page=home');
+  assert.equal(await page.locator('#chart-home').isVisible(), true);
+  assert.ok(before.viewport.h - before.marketStrip.y - before.marketStrip.h >= 24, 'strip must clear iOS home gestures');
   assert.ok(before.chartTitle.length > 0, 'in-chart title must show the active market');
   assert.equal(before.focusButtonMissing, true, 'old focus-mode menu item must be removed');
   assert.ok(before.timeframeCount > 4, 'timeframes must still render for the app state');
@@ -171,6 +174,16 @@ try {
   await page.waitForFunction(() => document.body.classList.contains('mobile-light'));
   const lightBackground = await page.evaluate(() => document.querySelector('#chart').style.background || getComputedStyle(document.querySelector('#chart')).backgroundColor);
   assert.match(lightBackground, /247|f7f9fc/i, 'light theme must repaint the canvas');
+  await page.evaluate(() => {
+    const input = document.querySelector('#mobile-palette-form [name="background"]');
+    input.value = '#123456';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('alfa-chart-palette:v1')).background), '#123456');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('#chart')).backgroundColor), 'rgb(18, 52, 86)');
+  await page.click('[data-mobile-theme="dark"]');
+  assert.equal(await page.inputValue('#mobile-palette-form [name="background"]'), '#10141c');
+  await page.click('[data-mobile-theme="light"]');
   await page.click('#mobile-settings-done');
   await page.waitForFunction(() => !document.body.classList.contains('settings-open'));
 
@@ -219,6 +232,32 @@ try {
   const middle = await read();
   assert.equal(middle.activeSymbol, beforeMiddle.activeSymbol, 'middle-screen swipe must not change pairs');
   assert.equal(middle.overlayActive, false, 'middle-screen swipe must not show the pair carousel');
+  const pricePan = await page.evaluate(() => {
+    const host = document.querySelector('#chart'), debug = window.__alfaDebug;
+    const r = host.getBoundingClientRect(), x = r.left + r.width * .5, y = r.top + r.height * .5;
+    host.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', pointerId: 81, clientX: x, clientY: y, bubbles: true }));
+    host.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'touch', pointerId: 81, clientX: x, clientY: y + 300, bubbles: true }));
+    host.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch', pointerId: 81, clientX: x, clientY: y + 300, bubbles: true }));
+    return debug.chart.priceScale('right').options();
+  });
+  assert.equal(pricePan.autoScale, true);
+  assert.ok(pricePan.scaleMargins.top <= .32 && pricePan.scaleMargins.bottom >= .06);
+  await page.evaluate(() => {
+    const debug = window.__alfaDebug;
+    debug.chart.timeScale().setVisibleLogicalRange({ from: 0, to: 30 });
+  });
+  // A touch hold opens the same context menu as right-click.
+  await page.dispatchEvent('#chart', 'pointerdown', { pointerType: 'touch', pointerId: 82, clientX: 180, clientY: 300 });
+  await page.waitForSelector('.chart-context-menu', { state: 'visible', timeout: 3000 });
+  await page.dispatchEvent('#chart', 'pointerup', { pointerType: 'touch', pointerId: 82, clientX: 180, clientY: 300 });
+  await page.locator('.chart-context-menu button').filter({ hasText: 'Grafik görünümü sıfırla' }).click();
+  const reset = await page.evaluate(() => {
+    const debug = window.__alfaDebug;
+    return { range: debug.chart.timeScale().getVisibleLogicalRange(), length: debug.history.length,
+      scale: debug.chart.priceScale('right').options() };
+  });
+  assert.ok(reset.range.to >= reset.length - 1 && reset.range.to - reset.range.from < 80, 'reset must show recent candles');
+  assert.equal(reset.scale.autoScale, true);
 
   // Pair navigation lives in the bottom strip with a smooth prev/current/next carousel.
   const strip = await page.$('#mobile-market-pick');
@@ -312,6 +351,8 @@ try {
     timeframeBefore: tfBefore, timeframeRows: tfSheet.tfRows, timeframeStars: tfSheet.tfStars,
     toolsChecked: true, settingsChecked: true, indicatorsChecked: true, pairListChecked: true,
     carouselChecked: true, dwellCommitChecked: true, timeframeFavoriteChecked: true,
+    homeLinkChecked: true, iosGestureClearanceChecked: true, proportionalPanChecked: true, touchHoldResetChecked: true,
+    customCanvasPaletteChecked: true,
     drawingsChecked: true, shareChecked: true, priceScaleDragChecked: true,
     screenshot: shot, pageErrors: errors }, null, 2));
 } finally {

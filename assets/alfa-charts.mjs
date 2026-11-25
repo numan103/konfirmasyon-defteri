@@ -86,7 +86,7 @@ const chart = createChart(host, {
   crosshair: { mode: CrosshairMode.Normal },
   rightPriceScale: { borderColor: '#30394b', scaleMargins: { top: 0.12, bottom: 0.22 } },
   timeScale: { borderColor: '#30394b', timeVisible: true, secondsVisible: false, rightOffset: 8 },
-  handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
+  handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: !isMobile },
   handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
   localization: { locale: 'tr-TR' }
 });
@@ -481,6 +481,38 @@ if (isMobile) {
   const grip = $('price-scale-grip');
   const rightScale = chart.priceScale('right');
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  // Bounded, price-relative touch panning keeps the candles in view.
+  let pricePan = null;
+  let holdTimer = null;
+  const cancelHold = () => { clearTimeout(holdTimer); holdTimer = null; };
+  const touches = new Set();
+  host.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'touch') return;
+    cancelHold();
+    touches.add(event.pointerId);
+    if (touches.size !== 1 || event.target.closest('#drawing-favs,#drawing-selection,#price-scale-grip') ||
+        (host.dataset.drawingTool && host.dataset.drawingTool !== 'cursor')) { pricePan = null; return; }
+    const margins = rightScale.options().scaleMargins;
+    pricePan = { id: event.pointerId, x: event.clientX, y: event.clientY, top: margins.top, bottom: margins.bottom };
+    const target = event.target, x = event.clientX, y = event.clientY;
+    holdTimer = setTimeout(() => {
+      pricePan = null;
+      target.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+    }, 600);
+  }, true);
+  host.addEventListener('pointermove', event => {
+    if (!pricePan || event.pointerId !== pricePan.id || touches.size !== 1) return;
+    const dy = event.clientY - pricePan.y, dx = event.clientX - pricePan.x;
+    if (Math.hypot(dx, dy) > 8) cancelHold();
+    if (Math.abs(dy) < 10 || Math.abs(dy) < Math.abs(dx) * 1.2) return;
+    const shift = clamp(dy / Math.max(1, host.clientHeight) * .35, -.12, .12);
+    rightScale.applyOptions({ autoScale: true, scaleMargins: {
+      top: clamp(pricePan.top + shift, .06, .32), bottom: clamp(pricePan.bottom - shift, .06, .32)
+    } });
+  }, true);
+  const endPricePan = event => { cancelHold(); touches.delete(event.pointerId); pricePan = null; };
+  host.addEventListener('pointerup', endPricePan, true);
+  host.addEventListener('pointercancel', endPricePan, true);
   let scaleDrag = null;
   grip?.addEventListener('pointerdown', event => {
     const activeTool = host.dataset.drawingTool;
@@ -501,7 +533,7 @@ if (isMobile) {
     const top = clamp(scaleDrag.top + delta, 0.04, 0.82);
     const bottom = clamp(scaleDrag.bottom - delta, 0.04, 0.82);
     if (top + bottom > 0.9) return;
-    rightScale.applyOptions({ autoScale: false, scaleMargins: { top, bottom } });
+    rightScale.applyOptions({ autoScale: true, scaleMargins: { top, bottom } });
   });
   const endScaleDrag = event => {
     if (!scaleDrag) return;
@@ -1428,6 +1460,14 @@ function applyPalette() {
     grid: { vertLines: { color: palette.gridVert, visible: viewConfig.grid }, horzLines: { color: palette.gridHorz, visible: viewConfig.grid } }
   });
   host.style.background = palette.background;
+  document.body.style.setProperty('--chart-canvas', palette.background);
+  document.getElementById('theme-color-meta')?.setAttribute('content', palette.background);
+  const form = $('mobile-palette-form');
+  for (const key of PALETTE_COLORS) {
+    const input = form?.elements.namedItem(key);
+    if (input && input !== document.activeElement) input.value = palette[key];
+  }
+  if (form?.elements.namedItem('borderVisible')) form.elements.namedItem('borderVisible').checked = palette.borderVisible;
   if (history?.length) volume.setData(volumeData(history));
 }
 function persistPalette() { try { localStorage.setItem('alfa-chart-palette:v1', JSON.stringify(palette)); } catch {} }
@@ -1446,7 +1486,11 @@ function applyPaletteForm(data) {
   palette.borderVisible = data.has('borderVisible');
   applyPalette(); persistPalette(); saveLayout();
 }
-function resetPalette() { palette = { ...DEFAULT_PALETTE }; applyPalette(); persistPalette(); }
+function resetPalette() { palette = { ...DEFAULT_PALETTE }; applyPalette(); persistPalette(); saveLayout(); }
+window.addEventListener('storage', event => {
+  if (event.key !== 'alfa-chart-palette:v1') return;
+  try { applyPaletteSettings(JSON.parse(event.newValue || 'null')); } catch {}
+});
 
 if (isMobile) {
   const THEMES = {
@@ -2230,7 +2274,7 @@ function applyPaletteSettings(cfg) {
   if (!cfg || typeof cfg !== 'object') return;
   for (const key of PALETTE_COLORS) if (HEX.test(String(cfg[key] || ''))) palette[key] = String(cfg[key]);
   if (typeof cfg.borderVisible === 'boolean') palette.borderVisible = cfg.borderVisible;
-  applyPalette();
+  applyPalette(); persistPalette();
 }
 function applyPublicStudiesConfig(cfg) { try { publicStudies.applyConfig(cfg); } catch {} }
 function applySessionBoxesConfig(cfg) {
@@ -2474,8 +2518,11 @@ function setViewOption(key, value, persist = true) {
   if (persist) { persistViewConfig(); saveLayout(); }
 }
 function resetChartView() {
-  if (history.length) chart.timeScale().fitContent();
-  chart.timeScale().scrollToRealTime();
+  chart.priceScale('right').applyOptions({ autoScale: true, scaleMargins: { top: .12, bottom: .22 } });
+  if (history.length) {
+    const count = isMobile ? 65 : 130;
+    chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, history.length - count), to: history.length + 5 });
+  }
   setAutoScale(true, false);
   setLogScale(false, false);
   viewConfig = { ...DEFAULT_VIEW_CONFIG };

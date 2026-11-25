@@ -679,6 +679,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   body.mobile-light .mobile-swipe-overlay strong{background:#f7f9fc;color:#263449}
 }
 
+#chart-home{display:none}
 /* Phone shell v6: title inside the chart, bottom carousel, tools star, menu-only controls. */
 @media(max-width:600px){
   .chart-panel{position:relative;grid-template-rows:minmax(0,1fr) 42px}
@@ -698,4 +699,19 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   body.mobile-light .legend{background:linear-gradient(180deg,#f7f9fce6,#f7f9fc00)}
   body.mobile-light .mobile-swipe-overlay{background:#f7f9fce8}
   body.mobile-light .mobile-swipe-row.current{background:#e8eef8;color:#263449;border-color:#a9bcd8}
+}
+
+/* Keep controls above iOS's reserved home-gesture area. */
+@media(max-width:600px){
+  .chart-panel{grid-template-rows:minmax(0,1fr) 52px;padding-bottom:calc(24px + env(safe-area-inset-bottom));background:var(--chart-canvas,#10141c)}
+  .mobile-market-strip{height:48px;margin:0 8px;border:1px solid #344158;border-radius:22px;background:#171c24eb;box-shadow:0 5px 20px #0004}
+  #chart-home{position:fixed;display:flex;align-items:center;gap:5px;left:8px;top:calc(6px + env(safe-area-inset-top));z-index:20;min-height:36px;padding:0 11px;border:1px solid #46516680;border-radius:18px;background:#171c24db;backdrop-filter:blur(10px);color:#d7e0ed;font-size:12px;text-decoration:none}
+  .legend{top:42px;background:linear-gradient(180deg,var(--chart-canvas,#10141c),transparent)}
+  .mobile-swipe-overlay{bottom:calc(88px + env(safe-area-inset-bottom))}
+  .mobile-sheet{bottom:calc(88px + env(safe-area-inset-bottom));border-radius:24px;background:#1c1e24f7}
+  .menu-grid{gap:8px;padding:12px}
+  .menu-grid button{min-height:64px;border-radius:16px;background:#2a2c33}
+  body.tools-hidden #drawing-favs{display:none!important}
+  body.mobile-light #chart-home{background:#f7f9fce8;color:#263449}
+  body.embed-chart #chart-home{display:none}
 }
