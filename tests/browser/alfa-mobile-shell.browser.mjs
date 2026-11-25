@@ -26,6 +26,11 @@ try {
   await page.waitForFunction(() => document.querySelectorAll('#timeframes button').length > 0, { timeout: 30000 });
   await page.waitForFunction(() => !!document.querySelector('#chart canvas'), { timeout: 30000 });
   await page.waitForFunction(() => document.querySelectorAll('#drawing-tools button').length > 0, { timeout: 30000 });
+  await page.waitForFunction(() => {
+    const badge = document.querySelector('#chart-data-state');
+    const overlay = document.querySelector('#chart-loading');
+    return badge && !badge.hidden && overlay?.hidden;
+  }, { timeout: 30000 });
 
   const read = () => page.evaluate(() => {
     const box = selector => {
@@ -48,8 +53,15 @@ try {
       chartTouchAction: getComputedStyle(document.querySelector('#chart')).touchAction,
       toolsOpen: document.body.classList.contains('tools-open'),
       settingsOpen: document.body.classList.contains('settings-open'),
+      shareOpen: document.body.classList.contains('share-open'),
       toolsInSheet: document.querySelector('#mobile-tools-sheet')?.contains(document.querySelector('#drawing-tools')),
       toolButtonCount: document.querySelectorAll('#drawing-tools button').length,
+      allToolGroups: document.querySelectorAll('#mobile-all-tools [data-group]').length,
+      allToolButtons: document.querySelectorAll('#mobile-all-tools [data-tool]').length,
+      chartLoadingHidden: document.querySelector('#chart-loading')?.hidden === true,
+      dataState: document.querySelector('#chart-data-state')?.dataset.state || '',
+      dataStateText: document.querySelector('#chart-data-state')?.textContent || '',
+      dockButtons: document.querySelectorAll('#mobile-left-dock button').length,
       paletteControls: document.querySelectorAll('#mobile-palette-form input').length,
       marketSymbol: document.querySelector('#mobile-market-symbol')?.textContent || ''
     };
@@ -68,6 +80,12 @@ try {
   assert.ok(before.toolButtonCount > 4, 'drawing tool buttons must render in the sheet');
   assert.ok(before.marketStrip && before.marketStrip.h >= 30, 'market swipe strip must be visible');
   assert.ok(before.studyChipCount > 0, 'indicator chips must be embedded in the legend');
+  assert.equal(before.chartLoadingHidden, true, 'loading overlay must clear after data arrives');
+  assert.ok(['live', 'ready'].includes(before.dataState), 'data badge must report a ready chart');
+  assert.match(before.dataStateText, /CANLI|VERİ HAZIR/, 'data badge must be legible');
+  assert.equal(before.dockButtons, 3, 'bottom-left action dock must render all three actions');
+  assert.equal(before.allToolGroups, 5, 'all drawing tool categories must render');
+  assert.equal(before.allToolButtons, 3, 'utility tools must render alongside categories');
 
   // Tools icon opens a centered bottom sheet, not a side rail.
   await page.click('#mobile-tools-toggle');
@@ -81,6 +99,16 @@ try {
   const opened = await read();
   assert.equal(opened.toolsOpen, true);
   assert.ok(opened.tools.w > 250, 'tool grid must be wide enough to tap');
+  await page.click('#mobile-all-tools [data-group]');
+  await page.waitForFunction(() => {
+    const back = document.querySelector('#mobile-tools-back');
+    return back && !back.hidden && document.querySelectorAll('#mobile-all-tools [data-tool]').length >= 2;
+  }, { timeout: 5000 });
+  const grouped = await read();
+  assert.ok(grouped.allToolButtons >= 2, 'group drill-down must expose its full tool list');
+  await page.click('#mobile-tools-back');
+  await page.waitForFunction(() => document.querySelector('#mobile-tools-back')?.hidden === true &&
+    document.querySelectorAll('#mobile-all-tools [data-group]').length === 5);
   await page.click('#mobile-tools-close');
   await page.waitForFunction(() => !document.body.classList.contains('tools-open'));
 
@@ -118,6 +146,26 @@ try {
   const afterSwipe = await read();
   assert.notEqual(afterSwipe.marketSymbol, before.marketSymbol, 'swipe must change the active symbol');
 
+  // Bottom-left dock opens drawings, pairs and share actions.
+  await page.click('#mobile-drawings-open');
+  await page.waitForFunction(() => {
+    const panel = document.querySelector('#drawing-manager');
+    return panel && !panel.hidden;
+  }, { timeout: 5000 });
+  await page.click('#drawing-close');
+  await page.waitForFunction(() => document.querySelector('#drawing-manager')?.hidden === true);
+  await page.click('#mobile-watchlist-open');
+  await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false, { timeout: 5000 });
+  assert.equal(await page.evaluate(() => document.querySelector('#mobile-watchlist-open')?.getAttribute('aria-pressed')), 'true');
+  await page.click('#mobile-watchlist-open');
+  await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === true);
+  await page.click('#mobile-share-open');
+  await page.waitForFunction(() => document.body.classList.contains('share-open') &&
+    document.querySelectorAll('#mobile-share-sheet button').length >= 5, { timeout: 5000 });
+  assert.equal((await read()).shareOpen, true);
+  await page.click('#mobile-share-close');
+  await page.waitForFunction(() => !document.body.classList.contains('share-open'));
+
   // Price scale grip still engages on vertical drag.
   const grip = await page.$('#price-scale-grip');
   assert.ok(grip, 'price scale grip must exist');
@@ -137,9 +185,12 @@ try {
   console.log(JSON.stringify({ passed: true, origin, viewport: before.viewport, document: before.doc,
     toolbarHeight: before.toolbar.h, chartHeight: before.chart.h, timeframeCount: before.timeframeCount,
     studyChipCount: before.studyChipCount, toolButtonCount: before.toolButtonCount,
-    marketSymbolBefore: before.marketSymbol, marketSymbolAfter: afterSwipe.marketSymbol,
-    toolsSheetChecked: true, settingsSheetChecked: true, indicatorSheetChecked: true,
-    marketSwipeChecked: true, priceScaleDragChecked: true, screenshot: shot, pageErrors: errors }, null, 2));
+    allToolGroups: before.allToolGroups, allToolButtons: before.allToolButtons,
+    dataState: before.dataState, dataStateText: before.dataStateText, loadingOverlayCleared: before.chartLoadingHidden,
+    dockButtons: before.dockButtons, marketSymbolBefore: before.marketSymbol, marketSymbolAfter: afterSwipe.marketSymbol,
+    toolsSheetChecked: true, toolGroupsChecked: true, settingsSheetChecked: true, indicatorSheetChecked: true,
+    marketSwipeChecked: true, dockChecked: true, shareSheetChecked: true, priceScaleDragChecked: true,
+    screenshot: shot, pageErrors: errors }, null, 2));
 } finally {
   await browser.close();
 }

@@ -90,9 +90,20 @@ gece/gündüz teması, kanvas/zemin, mum ve fitil renkleri, eksen metni ve ızga
 renkleri canlı ayarlanıyor; mevcut `alfa-chart-palette:v1` anahtarında saklanıyor.
 Tüm chart dialog'ları telefonlarda alt sheet görünümünde açılıyor.
 
-Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs`,
-`alfa-charts.html` ve `sw.js` içinde; yalnız staging’e dağıtıldı. Production
-host’u, verisi ve deploy’u değişmedi.
+Üçüncü turda araç sheet’i kategori/drill-down yapısına taşındı: beş grup ve
+imleç/ölçüm/sil araçları tam katalogdan üretiliyor; geri tuşu önceki menüyü
+açıyor, sheet tutamağı aşağı sürüklenince kapanıyor. Parite şeridi artık
+sürükleme sırasında 28 px adımlarla anlık geçiş yapıp bırakıldığında o paritede
+kilitleniyor. Grafik üstünde yükleme katmanı ve `CANLI / VERİ HAZIR / YENİDEN
+BAĞLANIYOR` durumu gösteriliyor; canlı tick’lerde fiyat ve durum nabız gibi
+yanıp sönüyor. Sol alt dock çizim yöneticisi, izleme listesi ve fotoğraf/bağlantı
+paylaşım panelini açıyor (Web Share desteklenmiyorsa kopyalama/indirme
+kullanılıyor).
+
+Bu değişiklikler `assets/alfa-charts.css`, `assets/alfa-charts.mjs` ve
+`alfa-charts.html` içinde; yalnız staging’e dağıtıldı. `sw.js` sabit kaldı;
+önbellek kırılımı `?v=` sorgu dizeleriyle yapıldı. Production host’u, verisi ve
+deploy’u değişmedi.
 
 ## Tekrar için scripts
 

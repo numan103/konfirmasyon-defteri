@@ -3,7 +3,7 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine } from './alfa-drawings.mjs?v=15';
+import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=16';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=7';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=5';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
@@ -15,7 +15,7 @@ import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
-import { DrawingHistory, emptyDocument } from './alfa-drawings-model.mjs?v=7';
+import { DrawingHistory, emptyDocument, TOOLS } from './alfa-drawings-model.mjs?v=8';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
 import { initMultiChart } from './alfa-multichart.mjs?v=6';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
@@ -92,20 +92,91 @@ if (isMobile) {
   const backdrop = $('mobile-sheet-backdrop');
   const toolsToggle = $('mobile-tools-toggle');
   const settingsToggle = $('mobile-settings-toggle');
+  const shareToggle = $('mobile-share-open');
+  const SHEETS = [
+    { className: 'tools-open', toggle: toolsToggle },
+    { className: 'settings-open', toggle: settingsToggle },
+    { className: 'share-open', toggle: shareToggle }
+  ];
   const closeSheets = () => {
-    document.body.classList.remove('tools-open', 'settings-open');
+    SHEETS.forEach(({ className, toggle }) => {
+      document.body.classList.remove(className);
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
     if (backdrop) backdrop.hidden = true;
-    toolsToggle?.setAttribute('aria-expanded', 'false');
-    toolsToggle?.setAttribute('aria-label', 'Çizim araçlarını aç');
-    settingsToggle?.setAttribute('aria-expanded', 'false');
   };
-  const openSheet = name => {
+  const openSheet = className => {
     closeSheets();
     if (backdrop) backdrop.hidden = false;
-    document.body.classList.add(name);
-    const toggle = name === 'tools-open' ? toolsToggle : settingsToggle;
-    toggle?.setAttribute('aria-expanded', 'true');
+    document.body.classList.add(className);
+    SHEETS.find(entry => entry.className === className)?.toggle?.setAttribute('aria-expanded', 'true');
+    if (className === 'tools-open') syncMobileTools();
   };
+
+  const MOBILE_TOOL_LABELS = {
+    cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yatay çizgi', vertical: 'Dikey çizgi',
+    ray: 'Işın', arrow: 'Ok', fibonacci: 'Fibonacci', rectangle: 'Dikdörtgen', brush: 'Fırça',
+    text: 'Metin', label: 'Etiket', long: 'Long', short: 'Short', ruler: 'Ölçüm', delete: 'Sil'
+  };
+  const toolLabel = tool => MOBILE_TOOL_LABELS[tool] || TOOLS[tool]?.[1] || tool;
+  const allTools = $('mobile-all-tools');
+  const toolsTitle = $('mobile-tools-title');
+  const toolsSectionTitle = $('mobile-tools-section-title');
+  const toolsCount = $('mobile-tools-count');
+  const toolsBack = $('mobile-tools-back');
+  let mobileToolsReady = false;
+  function syncMobileTools() {
+    if (!mobileToolsReady || !allTools) return;
+    let active = 'cursor', ready = false;
+    try { active = drawings.tool || 'cursor'; ready = !!drawings.ready; } catch {}
+    allTools.querySelectorAll('button[data-tool]').forEach(button => {
+      button.disabled = !ready;
+      button.setAttribute('aria-pressed', String(button.dataset.tool === active));
+    });
+  }
+  function makeMobileToolButton(tool) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.tool = tool;
+    button.disabled = true;
+    button.title = `${toolLabel(tool)} · favori için uzun bas`;
+    button.innerHTML = `${icon(tool)}<span>${toolLabel(tool)}</span>`;
+    button.addEventListener('click', () => {
+      drawings?.setTool(tool);
+      syncMobileTools();
+    });
+    button.addEventListener('contextmenu', event => {
+      event.preventDefault();
+      drawings?.toggleFav(tool);
+    });
+    return button;
+  }
+  function renderMobileTools(group = null) {
+    if (!allTools) return;
+    allTools.replaceChildren();
+    if (toolsBack) toolsBack.hidden = !group;
+    if (toolsTitle) toolsTitle.textContent = group ? group.name : 'Çizim araçları';
+    if (toolsSectionTitle) toolsSectionTitle.textContent = group ? 'Araçlar' : 'Kategoriler';
+    if (toolsCount) toolsCount.textContent = group ? `${group.tools.length} araç` : `${TOOL_GROUPS.length} kategori · ${Object.keys(TOOLS).length} araç`;
+    if (group) {
+      group.tools.forEach(tool => allTools.append(makeMobileToolButton(tool)));
+    } else {
+      TOOL_GROUPS.forEach(group => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.group = group.id;
+        button.innerHTML = `${icon(group.tools[0])}<span>${group.name}</span>`;
+        button.addEventListener('click', () => renderMobileTools(group));
+        allTools.append(button);
+      });
+      ['cursor', 'ruler', 'delete'].forEach(tool => allTools.append(makeMobileToolButton(tool)));
+    }
+    syncMobileTools();
+  }
+  renderMobileTools();
+  queueMicrotask(() => { mobileToolsReady = true; syncMobileTools(); });
+  toolsBack?.addEventListener('click', () => renderMobileTools());
+
   $('mobile-tools-slot')?.append($('drawing-tools'));
   toolsToggle?.addEventListener('click', () => {
     if (document.body.classList.contains('tools-open')) closeSheets();
@@ -116,13 +187,55 @@ if (isMobile) {
     if (document.body.classList.contains('settings-open')) closeSheets();
     else openSheet('settings-open');
   });
+  shareToggle?.addEventListener('click', () => {
+    if (document.body.classList.contains('share-open')) closeSheets();
+    else openSheet('share-open');
+  });
+  $('mobile-drawings-open')?.addEventListener('click', () => {
+    closeSheets();
+    handleChartAction('drawings');
+  });
+  $('mobile-watchlist-open')?.addEventListener('click', () => {
+    closeSheets();
+    toggleList(workspace.classList.contains('no-list'));
+  });
+  const runShareAction = async (button, action) => {
+    if (!button) return;
+    button.disabled = true;
+    try { await action(); closeSheets(); }
+    catch (error) {
+      console.error(error);
+      connection('Paylaşım işlemi tamamlanamadı', 'error');
+    } finally { button.disabled = false; }
+  };
+  $('mobile-share-image')?.addEventListener('click', event => runShareAction(event.currentTarget, () => shareChartImage()));
+  $('mobile-share-link')?.addEventListener('click', event => runShareAction(event.currentTarget, () => shareChartLink()));
+  $('mobile-share-copy')?.addEventListener('click', event => runShareAction(event.currentTarget, () => copyChartScreenshot()));
+  $('mobile-share-download')?.addEventListener('click', event => runShareAction(event.currentTarget, () => downloadChartScreenshot()));
   backdrop?.addEventListener('click', closeSheets);
   $('mobile-tools-close')?.addEventListener('click', closeSheets);
   $('mobile-settings-close')?.addEventListener('click', closeSheets);
+  $('mobile-share-close')?.addEventListener('click', closeSheets);
+  document.querySelectorAll('.sheet-grip').forEach(grip => {
+    let startY = 0;
+    grip.addEventListener('pointerdown', event => {
+      event.preventDefault();
+      startY = event.clientY;
+      grip.setPointerCapture?.(event.pointerId);
+    });
+    grip.addEventListener('pointerup', event => {
+      const delta = event.clientY - startY;
+      grip.releasePointerCapture?.(event.pointerId);
+      if (delta > 36) closeSheets();
+    });
+    grip.addEventListener('pointercancel', () => { startY = 0; });
+  });
   document.addEventListener('pointerdown', event => {
-    if (!document.body.classList.contains('tools-open') && !document.body.classList.contains('settings-open')) return;
-    if (event.target.closest('.mobile-sheet') || event.target.closest('#mobile-tools-toggle') ||
-        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-sheet-backdrop')) return;
+    const open = SHEETS.some(({ className }) => document.body.classList.contains(className));
+    if (!open) return;
+    if (event.target.closest('.mobile-sheet') || event.target.closest('#mobile-sheet-backdrop') ||
+        event.target.closest('#mobile-left-dock') || event.target.closest('#mobile-tools-toggle') ||
+        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-share-open')) return;
     closeSheets();
   }, true);
 
@@ -133,27 +246,34 @@ if (isMobile) {
     return [...new Set([...rows, ...options, symbol].filter(Boolean))];
   };
   let stripDrag = null;
+  const selectStripSymbol = next => {
+    if (watchlist?.valid?.(next)) watchlist.select(next);
+    else setActiveSymbol(next);
+    strip?.classList.remove('strip-settling');
+    void strip?.offsetWidth;
+    strip?.classList.add('strip-settling');
+  };
   strip?.addEventListener('pointerdown', event => {
     event.preventDefault();
     strip.setPointerCapture?.(event.pointerId);
-    stripDrag = { y: event.clientY, symbols: stripSymbols() };
+    const symbols = stripSymbols();
+    stripDrag = { y: event.clientY, symbols, startIndex: Math.max(0, symbols.indexOf(symbol)), lastStep: 0 };
+    strip.classList.add('swiping');
   });
   strip?.addEventListener('pointermove', event => {
     if (!stripDrag) return;
     event.preventDefault();
-    const delta = event.clientY - stripDrag.y;
-    if (Math.abs(delta) < 36) return;
     if (replayMode && !paper.canLeave()) return;
+    const steps = Math.round((event.clientY - stripDrag.y) / 28);
+    if (steps === stripDrag.lastStep) return;
+    stripDrag.lastStep = steps;
     const list = stripDrag.symbols;
-    const current = Math.max(0, list.indexOf(symbol));
-    const step = delta > 0 ? 1 : -1;
-    stripDrag.y = event.clientY;
-    const next = list[(current + step + list.length) % list.length];
-    if (watchlist?.valid?.(next)) watchlist.select(next);
-    else setActiveSymbol(next);
+    const next = list[(stripDrag.startIndex + steps + list.length * 2) % list.length];
+    selectStripSymbol(next);
   });
   const endStripDrag = event => {
     stripDrag = null;
+    strip?.classList.remove('swiping');
     strip?.releasePointerCapture?.(event.pointerId);
   };
   strip?.addEventListener('pointerup', endStripDrag);
@@ -439,8 +559,36 @@ chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
   }
 });
 
+function setChartLoading(active, text, detail) {
+  if (!isMobile) return;
+  const overlay = $('chart-loading');
+  if (!overlay) return;
+  overlay.hidden = !active;
+  if (text) $('chart-loading-text').textContent = text;
+  if (detail) $('chart-loading-detail').textContent = detail;
+}
+function setChartDataState(state, text) {
+  if (!isMobile) return;
+  const badge = $('chart-data-state');
+  if (!badge) return;
+  badge.hidden = false;
+  badge.dataset.state = state;
+  badge.textContent = text;
+}
 function connection(text, state = 'waiting') {
   $('connection').textContent = text; $('connection').dataset.state = state;
+  if (!isMobile) return;
+  const hasData = Array.isArray(history) && history.length > 0;
+  document.body.classList.toggle('live-ticks', state === 'live');
+  if (state === 'live') {
+    setChartLoading(false);
+    setChartDataState('live', hasData ? 'CANLI · veri hazır' : 'CANLI · veri bekleniyor');
+  } else if (state === 'error') {
+    if (!hasData) setChartLoading(true, 'Veri alınamadı', String(text || 'Yeniden deneniyor').slice(0, 90));
+    setChartDataState('error', hasData ? 'BAĞLANTI HATASI · yeniden denenecek' : 'YENİDEN BAĞLANIYOR');
+  } else if (state === 'waiting') {
+    setChartDataState(hasData ? 'ready' : 'waiting', hasData ? 'VERİ HAZIR · yenileniyor' : 'YÜKLENİYOR');
+  }
 }
 function showMessage(text) { $('message').textContent = text; $('message').hidden = !text; }
 function fmtVol(v) {
@@ -753,6 +901,8 @@ function setData(data, resetView) {
   try { marketStructure.render(); } catch {}
   try { fvg.render(); } catch {}
   try { publicStudies?.updateBars(); } catch {}
+  setChartLoading(false);
+  setChartDataState('ready', history.length ? 'VERİ HAZIR · canlı akış' : 'VERİ HAZIR');
 }
 chart.subscribeCrosshairMove(param => {
   studiesUI?.updateValues(param.time != null ? param : null);
@@ -839,6 +989,10 @@ async function loadMarket() {
     // Keep the previous chart painted until the first new candle arrives.
     $('last-price').textContent = '—'; $('price-time').textContent = 'Henüz veri yok';
     const ohlc = $('ohlc'); ohlc.textContent = 'Gerçek piyasa verisi bekleniyor'; ohlc.style.color = '';
+    setChartLoading(true, `${symbol} yükleniyor`, `${interval} · canlı akış bağlanıyor`);
+    setChartDataState('waiting', 'YÜKLENİYOR');
+  } else {
+    setChartLoading(false);
   }
   updateUI();
   try { multiChart?.notifySymbol(symbol, interval); } catch {}
@@ -1268,6 +1422,42 @@ async function copyChartLink() {
   connection('Grafik bağlantısı kopyalandı', 'ok');
 }
 
+async function shareChartImage() {
+  const canvas = await buildChartScreenshotCanvas();
+  const blob = await new Promise(resolve => canvas.toBlob ? canvas.toBlob(resolve, 'image/png') : resolve(null));
+  if (!blob) throw new Error('no-blob');
+  const file = new File([blob], chartScreenshotName(), { type: 'image/png' });
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'ALFA CHARTS', text: `${symbol} · ${interval}` });
+      connection('Grafik fotoğrafı paylaşıldı', 'ok');
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      throw error;
+    }
+  }
+  await copyChartScreenshot();
+}
+
+async function shareChartLink() {
+  const url = new URL('/alfa-charts.html', location.origin);
+  url.searchParams.set('symbol', symbol);
+  url.searchParams.set('interval', interval);
+  const shareData = { title: 'ALFA CHARTS', text: `${symbol} · ${interval}`, url: url.toString() };
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      connection('Grafik bağlantısı paylaşıldı', 'ok');
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      throw error;
+    }
+  }
+  await copyChartLink();
+}
+
 function closeShotMenu() { const m = $('shot-menu'); if (m) m.hidden = true; }
 function toggleShotMenu() { const m = $('shot-menu'); if (m) m.hidden = !m.hidden; }
 
@@ -1303,6 +1493,7 @@ $('live').addEventListener('click', () => handleChartAction('realtime'));
 function toggleList(show) {
   workspace.classList.toggle('no-list', !show);
   $('list-toggle').setAttribute('aria-pressed', String(show));
+  $('mobile-watchlist-open')?.setAttribute('aria-pressed', String(show));
 }
 $('list-toggle').addEventListener('click', () => toggleList(workspace.classList.contains('no-list')));
 toggleList(!matchMedia('(max-width:600px)').matches);
