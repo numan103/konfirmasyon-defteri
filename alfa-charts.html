@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=36">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=37">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -300,6 +300,10 @@
       <button id="menu-share" type="button"><span data-icon="camera"></span><span>Fotoğraf / Paylaş</span></button>
       <button id="menu-alarm" type="button"><span data-icon="bell"></span><span>Alarm</span></button>
       <button id="menu-replay" type="button"><span data-icon="replay"></span><span>Replay</span></button>
+      <button id="menu-multi" type="button" aria-pressed="false"><span data-icon="layers"></span><span id="menu-multi-label">Çoklu grafik</span></button>
+      <button id="menu-tester" type="button"><span data-icon="lab"></span><span>Strateji testi</span></button>
+      <button id="menu-research" type="button"><span data-icon="indicators"></span><span>Araştırma</span></button>
+      <button id="menu-advanced" type="button" aria-expanded="false"><span data-icon="settings"></span><span>Gelişmiş</span></button>
       <button id="menu-fit" type="button"><span data-icon="fit"></span><span>Sığdır</span></button>
       <button id="menu-live" type="button"><span data-icon="live"></span><span>Son mum</span></button>
       <button id="menu-fullscreen" type="button"><span data-icon="fullscreen"></span><span>Tam ekran</span></button>
@@ -311,6 +315,18 @@
       <button id="menu-log" type="button" aria-pressed="false">Log</button>
       <button id="menu-auto" type="button" aria-pressed="true">Oto</button>
     </div>
+    <p class="mobile-menu-note"><span data-icon="lab"></span><span>Test araçları simülasyondur; gerçek emir gönderilmez. Arşiv kayıtları incelemenizi sağlar.</span><button id="menu-advanced-note" type="button">Detaylar</button></p>
+  </section>
+  <section id="mobile-advanced-sheet" class="mobile-sheet" aria-label="Gelişmiş grafik araçları" aria-hidden="true">
+    <span class="sheet-grip" aria-hidden="true"></span>
+    <header class="sheet-head"><button id="mobile-advanced-back" class="sheet-back" type="button" aria-label="Önceki menü">←</button><strong>Gelişmiş araçlar</strong><button id="mobile-advanced-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
+    <div class="advanced-grid">
+      <article><strong>Çoklu grafik</strong><p>Telefonda 1/2 düzen desteklenir. 4/6 düzen ve panolar arası senkronizasyon masaüstünde daha kullanışlıdır.</p><button id="advanced-multi" type="button">2 grafik düzenini aç</button></article>
+      <article><strong>Strateji testleri</strong><p>Replay oturumundaki işlemlerin performansını gösterir. Gerçek emir iletilmez.</p><button id="advanced-tester" type="button">Testleri aç</button></article>
+      <article><strong>Araştırma arşivi</strong><p>Kaydedilen Replay oturumlarını ve veri paketlerini listeler. Hesap özellikleri giriş gerektirir.</p><button id="advanced-research" type="button">Arşivi aç</button></article>
+      <article><strong>Replay ve indikatörler</strong><p>Geçmişi mum mum incelemek ve mevcut indikatör katmanlarını yönetmek için ana menüyü kullanın.</p><button id="advanced-replay" type="button">Replay başlat</button><button id="advanced-indicators" type="button">İndikatörler</button></article>
+    </div>
+    <p class="advanced-note">Bu panel mevcut araçlara kısayoldur; yeni bir grafik motoru veya işlem motoru açmaz.</p>
   </section>
   <section id="mobile-tools-sheet" class="mobile-sheet" aria-label="Çizim araçları" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
@@ -351,6 +367,6 @@
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=79"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=80"></script>
 </body>
 </html>

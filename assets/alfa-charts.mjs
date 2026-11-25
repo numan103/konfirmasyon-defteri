@@ -114,6 +114,7 @@ if (isMobile) {
     { className: 'settings-open', toggle: settingsToggle },
     { className: 'share-open', toggle: $('menu-share') },
     { className: 'menu-open', toggle: menuToggle },
+    { className: 'advanced-open', toggle: $('menu-advanced') },
     { className: 'timeframes-open', toggle: tfToggle }
   ];
   const closeSheets = () => {
@@ -130,6 +131,7 @@ if (isMobile) {
     SHEETS.find(entry => entry.className === className)?.toggle?.setAttribute('aria-expanded', 'true');
     if (className === 'tools-open') syncMobileTools();
     if (className === 'timeframes-open') renderMobileTimeframes();
+    if (className === 'menu-open') syncFeatureMenu();
   };
   openMobileSheet = openSheet;
 
@@ -223,6 +225,43 @@ if (isMobile) {
   $('menu-indicators')?.addEventListener('click', () => { closeSheets(); $('indicators-manage')?.click(); });
   $('menu-alarm')?.addEventListener('click', () => { closeSheets(); $('alarm-toggle')?.click(); });
   $('menu-replay')?.addEventListener('click', () => { closeSheets(); $('replay-toggle')?.click(); });
+
+  // FAZ 3: existing advanced tools get direct phone entries. No engine is re-created;
+  // these proxy to the same desktop controls so state, sync and persistence stay shared.
+  const syncFeatureMenu = () => {
+    const multiOpen = document.body.classList.contains('multi-open');
+    $('menu-multi')?.setAttribute('aria-pressed', String(multiOpen));
+    const multiLabel = $('menu-multi-label');
+    if (multiLabel) multiLabel.textContent = multiOpen ? 'Tek grafik' : 'Çoklu grafik';
+    $('menu-replay')?.setAttribute('aria-pressed', String(document.body.classList.contains('replay-mode')));
+  };
+  const openMobileMulti = () => {
+    closeSheets();
+    // The desktop layout button owns layout state and calls setOpen(true) itself.
+    const layout2 = document.querySelector('.layout-buttons [data-layout="2"]');
+    if (layout2) layout2.click();
+    else if (multiChart) multiChart.setOpen(true);
+    else $('multi-toggle')?.click();
+    queueMicrotask(syncFeatureMenu);
+  };
+  const openMobileTester = () => { closeSheets(); $('tester-open')?.click(); };
+  const openMobileResearch = () => { closeSheets(); $('research-toggle')?.click(); };
+  $('menu-multi')?.addEventListener('click', openMobileMulti);
+  $('menu-tester')?.addEventListener('click', openMobileTester);
+  $('menu-research')?.addEventListener('click', openMobileResearch);
+  $('menu-advanced')?.addEventListener('click', () => openSheet('advanced-open'));
+  $('menu-advanced-note')?.addEventListener('click', () => openSheet('advanced-open'));
+  $('mobile-advanced-back')?.addEventListener('click', () => openSheet('menu-open'));
+  $('mobile-advanced-close')?.addEventListener('click', closeSheets);
+  $('advanced-multi')?.addEventListener('click', openMobileMulti);
+  $('advanced-tester')?.addEventListener('click', openMobileTester);
+  $('advanced-research')?.addEventListener('click', openMobileResearch);
+  $('advanced-replay')?.addEventListener('click', () => { closeSheets(); $('replay-toggle')?.click(); });
+  $('advanced-indicators')?.addEventListener('click', () => { closeSheets(); $('indicators-manage')?.click(); });
+  $('multi-exit')?.addEventListener('click', () => setTimeout(syncFeatureMenu, 0));
+  $('multi-toggle')?.addEventListener('click', () => setTimeout(syncFeatureMenu, 0));
+  syncFeatureMenu();
+
   $('menu-fit')?.addEventListener('click', () => { closeSheets(); handleChartAction('fit'); });
   $('menu-live')?.addEventListener('click', () => { closeSheets(); handleChartAction('realtime'); });
   $('menu-fullscreen')?.addEventListener('click', () => { closeSheets(); handleChartAction('fullscreen'); });
