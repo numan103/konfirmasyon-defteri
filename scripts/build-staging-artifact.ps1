@@ -7,7 +7,7 @@ $secrets = Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'ALFA\PrivateBa
 if (Test-Path -LiteralPath $artifact) { Remove-Item -LiteralPath $artifact -Recurse -Force }
 New-Item -ItemType Directory -Path $artifact -Force | Out-Null
 
-foreach ($dir in @('assets','api','functions','lib','ayna','ayna-server')) {
+foreach ($dir in @('assets','api','functions','lib','ayna','ayna-server','icons')) {
   Copy-Item -LiteralPath (Join-Path $repo $dir) -Destination (Join-Path $artifact $dir) -Recurse -Force
 }
 $skip = @('wrangler.toml','vercel.json','package.json','package-lock.json','.gitignore','.vercelignore',

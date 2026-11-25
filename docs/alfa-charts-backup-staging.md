@@ -59,6 +59,22 @@ feed okuması yok, özel endpoint'ler reddedildi, sayfa hatası yok.
 Ayrıntılar özel `staging-egress-evidence.json` dosyasında; production URL'si,
 production secret'ı veya kullanıcı verisi içermez.
 
+## 3. iOS’ta uygulama gibi açılış — PWA
+
+Gerçek App Store IPA’sı için macOS/Xcode ve Apple imza gereklidir; bu ortamda
+yapılamaz. Bunun yerine iOS Safari’de **Add to Home Screen** ile tam ekran,
+ikonalı, standalone uygulama deneyimi sağlandı:
+
+- `manifest.webmanifest`: `display: standalone`, `start_url: /?page=home`,
+  uygun 192/512/maskable ikonlar.
+- `index.html`: iOS apple-mobile-web-app meta etiketleri, `viewport-fit=cover`,
+  theme-color ve 180x180 `apple-touch-icon`.
+- `assets/ios-pwa.css`: safe-area ve standalone dokunmatik ayarları.
+
+Kullanım: Safari ile staging URL’sini aç → Paylaş/Share → **Add to Home Screen**
+→ ana ekrandan uygulama gibi aç. Production sürümü için aynı dosyalar production
+deploy’u ile birlikte gider; burada yalnız staging dağıtımı güncellendi.
+
 ## Tekrar için scripts
 
 - `scripts/backup-production-private.ps1`
