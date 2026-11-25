@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=37">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=38">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -315,6 +315,8 @@
       <button id="menu-log" type="button" aria-pressed="false">Log</button>
       <button id="menu-auto" type="button" aria-pressed="true">Oto</button>
     </div>
+    <div id="mobile-save-state" class="mobile-save-state" role="status" data-state="local">MİSAFİR · yalnızca yerel kayıt</div>
+    <p class="mobile-menu-note mobile-alarm-note"><span data-icon="bell"></span><span>Yerel alarm · yalnızca seçili sembol. Sekme kapalıyken veya Replay sırasında çalışmaz; 7/24 sunucu alarmı değildir.</span></p>
     <p class="mobile-menu-note"><span data-icon="lab"></span><span>Test araçları simülasyondur; gerçek emir gönderilmez. Arşiv kayıtları incelemenizi sağlar.</span><button id="menu-advanced-note" type="button">Detaylar</button></p>
   </section>
   <section id="mobile-advanced-sheet" class="mobile-sheet" aria-label="Gelişmiş grafik araçları" aria-hidden="true">
@@ -367,6 +369,6 @@
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=80"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=81"></script>
 </body>
 </html>

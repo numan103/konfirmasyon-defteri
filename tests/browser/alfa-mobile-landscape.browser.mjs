@@ -116,7 +116,7 @@ try {
   assert.equal(landscape.toolbar.display, 'none', 'landscape must not restore the desktop toolbar');
   assert.ok(landscape.chart.h >= 300, `landscape chart too small: ${landscape.chart.h}`);
   assert.ok(landscape.doc.h <= 400, `landscape page still scrolls: ${landscape.doc.h}`);
-  assert.ok(landscape.strip.h <= 32, `landscape strip not compact: ${landscape.strip.h}`);
+  assert.ok(landscape.strip.h >= 44 && landscape.strip.h <= 56, `landscape strip must keep 44px targets without eating the chart: ${landscape.strip.h}`);
   assert.equal(landscape.home.display, 'flex', 'landscape home icon should stay reachable');
   assert.equal(landscape.activeTool, 'fibonacci', 'active tool must survive rotation');
   assert.equal(landscape.drawingCount, 1);

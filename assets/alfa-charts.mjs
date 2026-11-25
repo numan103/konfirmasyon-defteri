@@ -22,7 +22,7 @@ import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-syn
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
 import { openCloudConflict } from './alfa-cloud-conflict.mjs?v=1';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
-import { PaperTradingPanel } from './alfa-paper.mjs?v=5';
+import { PaperTradingPanel } from './alfa-paper.mjs?v=6';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 import { CHART_TIME_ZONES, normalizeChartTimeZone, chartTimeZoneKey, readChartTimeZone, writeChartTimeZone, createChartTimeFormatters } from './alfa-chart-time.mjs?v=1';
@@ -69,6 +69,7 @@ let pendingStudies = null, studyContext = null;
 let syncMobileShell = () => {};
 let paintMobileMarket = () => {};
 let openMobileSheet = () => {};
+let syncMobileStatus = () => {};
 const alarmPriceTracker = createPriceTracker();
 function setActiveSymbol(next) {
   if (!next) return false;
@@ -131,7 +132,7 @@ if (isMobile) {
     SHEETS.find(entry => entry.className === className)?.toggle?.setAttribute('aria-expanded', 'true');
     if (className === 'tools-open') syncMobileTools();
     if (className === 'timeframes-open') renderMobileTimeframes();
-    if (className === 'menu-open') syncFeatureMenu();
+    if (className === 'menu-open') { syncMobileStatus(); syncFeatureMenu(); }
   };
   openMobileSheet = openSheet;
 
@@ -234,6 +235,26 @@ if (isMobile) {
     const multiLabel = $('menu-multi-label');
     if (multiLabel) multiLabel.textContent = multiOpen ? 'Tek grafik' : 'Çoklu grafik';
     $('menu-replay')?.setAttribute('aria-pressed', String(document.body.classList.contains('replay-mode')));
+  };
+  // Read-only projection of existing footer/cloud/research status. No auth, storage or cloud call.
+  syncMobileStatus = () => {
+    const pill = $('mobile-save-state');
+    if (!pill) return;
+    const status = ($('drawing-status')?.textContent || '').trim();
+    const researchState = $('research-panel')?.dataset.state || '';
+    const conflict = $('cloud-conflict')?.hidden === false || $('workspace-conflict')?.hidden === false || researchState === 'conflict';
+    const offline = navigator.onLine === false || /çevrimdışı/i.test(status) || researchState === 'offline';
+    const error = /hata|bağlanamadı/i.test(status) || researchState === 'error';
+    let authed = false;
+    try { authed = !!cloudSettings?.isAuthed?.(); } catch {}
+    let state = 'local', text = 'MİSAFİR · yalnızca yerel kayıt';
+    if (conflict) { state = 'conflict'; text = 'ÇAKIŞMA · yerel kayıt korunuyor'; }
+    else if (offline) { state = 'offline'; text = 'ÇEVRİMDIŞI · yerel kayıt'; }
+    else if (error) { state = 'error'; text = 'YEREL VERİ KORUNUYOR'; }
+    else if (authed && /kaydedildi|yüklendi/i.test(status)) { state = 'cloud'; text = 'BULUT · son işlem kaydedildi'; }
+    else if (authed) { state = 'account'; text = 'HESAP BAĞLI · oturum izleniyor'; }
+    pill.dataset.state = state;
+    pill.textContent = text;
   };
   const openMobileMulti = () => {
     closeSheets();
@@ -2139,7 +2160,10 @@ const paper = new PaperTradingPanel({
 const research = new ResearchPanel({getOwner:currentUserKey,isReplayActive:()=>replayMode,
   onOpen:packet=>enterReplay({session:packet.replay,researchPacket:packet})});
 mtf.onReplayError=(tf)=>{if(replayMode){pauseReplay();connection(tf+' replay verisi yüklenemedi · duraklatıldı','error');}};
-const cloudSettings = new ChartSettingsStore(msg => { try { $('drawing-status').textContent = msg; } catch {} }, user => {
+const cloudSettings = new ChartSettingsStore(msg => {
+  try { $('drawing-status').textContent = msg; } catch {}
+  try { syncMobileStatus(); } catch {}
+}, user => {
   rememberStudies(); studyContext = null;
   applyChartTimeZone(readChartTimeZone(currentUserKey()));
   watchlist.account();

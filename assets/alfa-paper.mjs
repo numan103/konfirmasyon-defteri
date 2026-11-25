@@ -14,7 +14,7 @@ export class PaperTradingPanel {
     });
     this.root=document.createElement('aside');this.root.id='paper-panel';this.root.hidden=true;
     this.root.setAttribute('aria-label','Paper Trading simülasyonu');
-    this.root.innerHTML=`<header><strong>Paper Trading · SİMÜLASYON</strong><button type="button" data-action="hide">Kapat</button></header>
+    this.root.innerHTML=`<header><strong>Paper Trading · SİMÜLASYON</strong><span class="paper-sim-badge" role="status">GERÇEK EMİR YOK</span><button type="button" data-action="hide">Kapat</button></header>
       <p>Gerçek emir gönderilmez. Market / manuel kapanış: sonraki mum açılışı.
       Limit: daha iyi açılış fiyatı, en kötü limit fiyatı. SL/TP aynı mumda: varsayılan SL-first.
       Intrabar limit fill sonrası aynı mumdaki belirsiz TP kâr sayılmaz.</p>
