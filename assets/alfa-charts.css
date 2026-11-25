@@ -505,7 +505,7 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   #ohlc{font-size:9px}
   #study-legend{max-height:34px}
   #chart{touch-action:none}
-  .price-scale-grip{display:block;position:absolute;right:0;top:0;bottom:0;width:14px;z-index:9;touch-action:none;cursor:ns-resize}
+  .price-scale-grip{display:block;position:absolute;right:0;top:0;bottom:28px;width:60px;z-index:9;touch-action:none;cursor:ns-resize}
   .chart-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:8;background:linear-gradient(180deg,#10141c22,#10141c88);color:#b8c7df;pointer-events:none;transition:opacity .2s ease}
   .chart-loading[hidden]{display:none}
   .chart-loading strong{font-size:11px;font-weight:600;letter-spacing:.2px}

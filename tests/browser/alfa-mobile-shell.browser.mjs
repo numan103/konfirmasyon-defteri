@@ -326,12 +326,23 @@ try {
   const box = await grip.boundingBox();
   const startX = box.x + box.width / 2;
   const startY = box.y + box.height / 2;
-  await page.mouse.move(startX, startY);
-  await page.mouse.down();
-  await page.mouse.move(startX, startY + 60, { steps: 6 });
+  const priceDistance = () => page.evaluate(async () => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const d = window.__alfaDebug, last = d.history.at(-1);
+    return Math.abs(d.candles.priceToCoordinate(last.close * 1.01) - d.candles.priceToCoordinate(last.close));
+  });
+  const distanceBefore = await priceDistance();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: startX, y: startY }] });
+  for (let step = 1; step <= 6; step++) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: startX, y: startY + step * 10 }] });
+  }
   const scaling = await page.evaluate(() => document.body.classList.contains('price-scaling'));
-  await page.mouse.up();
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
   assert.equal(scaling, true, 'vertical price-scale drag must engage');
+  const distanceAfter = await priceDistance();
+  assert.ok(Math.abs(distanceAfter - distanceBefore) > .5, 'touch axis drag must change actual price spacing, not just margins');
 
   const shot = 'C:/Users/Pc/AppData/Local/ALFA/PrivateBackups/alfa-mobile-shell.png';
   await page.screenshot({ path: shot, fullPage: false });
@@ -354,6 +365,7 @@ try {
     homeLinkChecked: true, iosGestureClearanceChecked: true, proportionalPanChecked: true, touchHoldResetChecked: true,
     customCanvasPaletteChecked: true,
     drawingsChecked: true, shareChecked: true, priceScaleDragChecked: true,
+    axisTouchSpacingBefore: distanceBefore, axisTouchSpacingAfter: distanceAfter,
     screenshot: shot, pageErrors: errors }, null, 2));
 } finally {
   await browser.close();

@@ -478,7 +478,6 @@ if (isMobile) {
     else openSheet('timeframes-open');
   });
 
-  const grip = $('price-scale-grip');
   const rightScale = chart.priceScale('right');
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   // Bounded, price-relative touch panning keeps the candles in view.
@@ -490,7 +489,8 @@ if (isMobile) {
     if (event.pointerType !== 'touch') return;
     cancelHold();
     touches.add(event.pointerId);
-    if (touches.size !== 1 || event.target.closest('#drawing-favs,#drawing-selection,#price-scale-grip') ||
+    const axisStart = event.clientX >= host.getBoundingClientRect().right - rightScale.width();
+    if (touches.size !== 1 || axisStart || event.target.closest('#drawing-favs,#drawing-selection,#price-scale-grip') ||
         (host.dataset.drawingTool && host.dataset.drawingTool !== 'cursor')) { pricePan = null; return; }
     const margins = rightScale.options().scaleMargins;
     pricePan = { id: event.pointerId, x: event.clientX, y: event.clientY, top: margins.top, bottom: margins.bottom };
@@ -513,40 +513,39 @@ if (isMobile) {
   const endPricePan = event => { cancelHold(); touches.delete(event.pointerId); pricePan = null; };
   host.addEventListener('pointerup', endPricePan, true);
   host.addEventListener('pointercancel', endPricePan, true);
+  // Scale the actual visible price range, not the padding around the candles.
+  const grip = $('price-scale-grip');
   let scaleDrag = null;
   grip?.addEventListener('pointerdown', event => {
-    const activeTool = host.dataset.drawingTool;
-    if (activeTool && activeTool !== 'cursor') return;
-    event.preventDefault();
-    event.stopPropagation();
-    const options = rightScale.options();
-    const margins = options.scaleMargins || { top: 0.12, bottom: 0.22 };
-    scaleDrag = { y: event.clientY, top: margins.top, bottom: margins.bottom };
-    grip.setPointerCapture?.(event.pointerId);
+    const range = rightScale.getVisibleRange();
+    if (!range || range.to <= range.from) return;
+    event.preventDefault(); event.stopPropagation();
+    scaleDrag = { id: event.pointerId, y: event.clientY, range };
+    grip.setPointerCapture(event.pointerId);
     document.body.classList.add('price-scaling');
   });
   grip?.addEventListener('pointermove', event => {
-    if (!scaleDrag) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const delta = (event.clientY - scaleDrag.y) / Math.max(1, host.clientHeight);
-    const top = clamp(scaleDrag.top + delta, 0.04, 0.82);
-    const bottom = clamp(scaleDrag.bottom - delta, 0.04, 0.82);
-    if (top + bottom > 0.9) return;
-    rightScale.applyOptions({ autoScale: true, scaleMargins: { top, bottom } });
+    if (!scaleDrag || scaleDrag.id !== event.pointerId) return;
+    event.preventDefault(); event.stopPropagation();
+    if (!scaleDrag.moved) { setAutoScale(false, false); scaleDrag.moved = true; }
+    const { from, to } = scaleDrag.range;
+    const factor = Math.exp(clamp((event.clientY - scaleDrag.y) / Math.max(120, host.clientHeight) * 3, -1.4, 1.4));
+    // Log-price interpolation also works for cheap coins and large-priced indices.
+    if (from > 0) {
+      const center = (Math.log(from) + Math.log(to)) / 2, half = (Math.log(to) - Math.log(from)) * factor / 2;
+      rightScale.setVisibleRange({ from: Math.exp(center - half), to: Math.exp(center + half) });
+    } else {
+      const center = (from + to) / 2, half = (to - from) * factor / 2;
+      rightScale.setVisibleRange({ from: center - half, to: center + half });
+    }
   });
-  const endScaleDrag = event => {
-    if (!scaleDrag) return;
-    scaleDrag = null;
-    grip.releasePointerCapture?.(event.pointerId);
-    document.body.classList.remove('price-scaling');
-  };
+  const endScaleDrag = () => { scaleDrag = null; document.body.classList.remove('price-scaling'); };
   grip?.addEventListener('pointerup', endScaleDrag);
   grip?.addEventListener('pointercancel', endScaleDrag);
-  grip?.addEventListener('dblclick', event => {
-    event.preventDefault();
-    event.stopPropagation();
-    rightScale.applyOptions({ autoScale: true, scaleMargins: { top: 0.12, bottom: 0.22 } });
+  grip?.addEventListener('lostpointercapture', endScaleDrag);
+  grip?.addEventListener('dblclick', () => {
+    setAutoScale(true, false);
+    rightScale.applyOptions({ scaleMargins: { top: .12, bottom: .22 } });
   });
 }
 
