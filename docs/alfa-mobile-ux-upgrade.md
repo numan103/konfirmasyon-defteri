@@ -305,3 +305,91 @@ node tests/browser/alfa-trust-touch.browser.mjs --url=http://127.0.0.1:8787 --pl
 - 7/24 alarm teslimi, Telegram/webhook gönderimi ve gerçek iOS bildirim izni: gerçek hesap/cihaz olmadan **UNVERIFIED**; yerel kapsam metni doğrulandı.
 - Yatay şerit 28 px’den 48 px’e çıkarıldı; bu, 44 px dokunma hedefi için bilinçli bir değişikliktir ve FAZ 1’in tam ekran davranışı korundu (grafik 332 px).
 - Gerçek emir gönderimi kapsam dışı; Paper/tester yalnızca simülasyon olarak etiketlendi.
+
+---
+
+## FAZ 5 — Paylaşım, ortak sheet davranışı ve PWA temeli (P0/P1)
+
+### Önceki UX problemi
+
+Denetim, paylaşım seçeneklerinin tarayıcı yeteneğine bakılmadan gösterildiğini ve hata mesajının telefonda görünmez footer’a yazıldığını kaydetti. Ayrıca grafik sayfasında service worker kaydı yoktu (`swRegistrations: 0`), install ipucu bulunmuyordu ve Paylaş/Zaman dilimi sayfalarında geri dönüş ile `Escape` kapatma yoktu.
+
+| Davranış / ölçüm | Önce |
+|---|---|
+| Paylaşım seçenekleri | 4 buton her tarayıcıda görünür; desteklenmeyenler tıklanabiliyordu |
+| Hata görünürlüğü | `connection(...)` → gizli footer / gizli `#chart-data-state`; ekranda mesaj yok |
+| Görüntü paylaşımı fallback’i | `navigator.share` yoksa görüntü panosuna düşüyordu; o da yoksa hata |
+| Service worker | Grafik sayfasında kayıt yok (`swRegistrations: 0`) |
+| Kurulum ipucu | Yok; iOS install iddiası/doğrulaması yok |
+| Paylaş / zaman sheet’i | Yalnızca Kapat; Escape ile kapanmıyordu |
+| Sheet geri/kapat butonları | 28×28 px |
+
+Kaynak: [`phase5-00-share.png`](upgrade-screenshots/phase5-00-share.png), [`phase5-00-timeframes.png`](upgrade-screenshots/phase5-00-timeframes.png), [`phase5-00-advanced.png`](upgrade-screenshots/phase5-00-advanced.png) ve `docs/alfa-mobile-ux-audit.md` (öncelik #6/#12/#16).
+
+### Yapılan değişiklik
+
+- `alfa-charts.html`:
+  - Paylaş ve Zaman dilimi sheet’lerine menüye dönen geri butonları eklendi; paylaşım butonlarına `data-share-action` ve görünür bir yetenek notu (`#mobile-share-note`) eklendi.
+  - Gelişmiş sheet’e, desteklenmeyen cihazlarda yanıltıcı olmayan kurulum notu eklendi: ana ekrana ekleme yalnızca tarayıcı/cihaz destekliyorsa kullanılabilir; **iOS Safari kurulumu bu çalışmada doğrulanmadı**.
+  - Varlık sürümleri `alfa-charts.css?v=40` ve `alfa-charts.mjs?v=82`’ye yükseltildi. `sw.js` değiştirilmedi.
+- `assets/alfa-charts.mjs`:
+  - `detectShareCapabilities()`: `navigator.share`, dosya desteği için `navigator.canShare()` (küçük `File` probu) ve görüntü panosu desteğini okur. Yeni auth, izin isteği veya ağ çağrısı yok.
+  - `syncShareCapabilities()` desteklenmeyen seçenekleri gizler; sistem paylaşımı yoksa «Bağlantıyı paylaş» butonunu mevcut `copyChartLink()` yoluna bağlayıp «Bağlantıyı kopyala» olarak etiketler. İndirme seçeneği her zaman kalır.
+  - `shareChartImage()` artık desteklenmeyen durumda görüntü panosuna düşmek yerine mevcut `downloadChartScreenshot()` yolunu kullanır.
+  - Paylaşım hataları `showMessage()` ile ekranda görünür; sheet açık kalır, böylece kullanıcı çalışan bir fallback seçebilir. Masaüstü screenshot menüsündeki hatalar da görünür mesaja yazılır.
+  - Tüm sheet’ler için `Escape` ile kapatma, açılış/kapanışta `aria-hidden` senkronizasyonu ve Paylaş/Zaman geri butonları eklendi.
+  - Mevcut `/sw.js` yalnızca kaydediliyor (secure context + `load` sonrası); service worker kaynak kodu, önbellek stratejisi veya `BUILD_ID` değişmedi.
+- `assets/alfa-charts.css`: sheet geri/kapat ve paylaşım butonları 44 px; yetenek notu ve kurulum notu stilleri eklendi.
+- `tests/browser/alfa-capability-pwa.browser.mjs`: gerçek Chrome/Playwright ile fallback, native yetenek simülasyonu, görünür hata, geri/Escape, service worker kaydı ve masaüstü smoke testi eklendi.
+- Yeni paket/framework, chart/drawing motoru değişikliği, gerçek kullanıcı verisi mutasyonu, production deploy veya credentials kullanılmadı.
+
+### Kullanıcıya etkisi
+
+- Desteklenmeyen tarayıcıda Paylaş sheet’i sadece çalışan seçenekleri gösterir: bağlantı kopyalama ve görüntü indirme. Yetenek yoksa kullanıcıya nedeni açıkça yazılır.
+- Sistem paylaşımı olan tarayıcıda fotoğraf/bağlantı paylaşımı ve görüntü panosu seçenekleri görünür; bir seçenek çalışmazsa hata ekranda gösterilir ve fallback’ler erişilebilir kalır.
+- Paylaşım ve Zaman dilimi sheet’leri artık menüye dönebilir; `Escape` ve backdrop/grip/kapat yolları ortak davranışı korur.
+- Grafik sayfası mevcut service worker’ı kaydeder; testte kayıt kapsamı doğrulandı. Bu, çevrimdışı çalışmanın veya iOS kurulumunun doğrulandığı anlamına gelmez.
+- Masaüstü workspace korundu: 1440×950’de toolbar `flex` (54 px), grafik 1140×733, watchlist 248×872, `pageErrors: []`.
+
+### Test sonucu
+
+Komut:
+
+```powershell
+node tests/browser/alfa-capability-pwa.browser.mjs --url=http://127.0.0.1:8787 --playwright=C:\Users\Pc\AppData\Local\Temp\opencode\alfa-chart-browser-tests\node_modules\playwright\index.mjs --shots=docs/upgrade-screenshots
+```
+
+**Sonuç: PASS**, `pageErrors: []`.
+
+| Kontrol | Sonuç |
+|---|---|
+| Service worker | `http://127.0.0.1:8787/` kapsamında 1 kayıt; `sw.js` değişmedi |
+| Fallback yetenekleri | `share=false`, `imageShare=false`, `clipboardImage=false`, `download=true` |
+| Fallback UI | Görüntü/pano seçenekleri gizli; bağlantı butonu `copy-link`, 348×44 px; indirme 348×44 px; not görünür |
+| Bağlantı fallback’i | `http://127.0.0.1:8787/alfa-charts.html?symbol=BTCUSDT&interval=1h` panoya kopyalandı |
+| İndirme fallback’i | `chart-btcusdt-1h-*.png` indirme olayı gerçekleşti |
+| Native yetenek simülasyonu | `share=true`, `imageShare=true`, `clipboardImage=true`; fotoğraf paylaşımı 1 dosya aldı |
+| Görünür hata | Pano hatası zorlandı; `#message` görünür, sheet açık kaldı |
+| Ortak kapatma | Paylaş/Zaman geri butonları menüye döndü; `Escape` tüm sheet’leri kapattı, `aria-hidden=true` |
+| Kurulum notu | Tarayıcı/cihaz desteği ve iOS doğrulanmadı ifadesi görünür |
+| Regresyon | FAZ 1, FAZ 2, FAZ 3, FAZ 4, `alfa-paper` ve masaüstü smoke **PASS**; birim testleri 22/22 |
+
+**Ekran görüntüleri**
+
+- Önce (paylaşım, zaman dilimi, gelişmiş): [`phase5-00-share.png`](upgrade-screenshots/phase5-00-share.png), [`phase5-00-timeframes.png`](upgrade-screenshots/phase5-00-timeframes.png), [`phase5-00-advanced.png`](upgrade-screenshots/phase5-00-advanced.png)
+- Sonra (fallback paylaşım): [`phase5-01-share-fallback.png`](upgrade-screenshots/phase5-01-share-fallback.png)
+- Sonra (zaman dilimi geri): [`phase5-06-timeframes-back.png`](upgrade-screenshots/phase5-06-timeframes-back.png)
+- Kurulum notu: [`phase5-02-install-hint.png`](upgrade-screenshots/phase5-02-install-hint.png)
+- Native yetenekler: [`phase5-03-share-native.png`](upgrade-screenshots/phase5-03-share-native.png)
+- Görünür hata: [`phase5-04-share-error.png`](upgrade-screenshots/phase5-04-share-error.png)
+- Masaüstü: [`phase5-05-desktop.png`](upgrade-screenshots/phase5-05-desktop.png)
+
+**Commit:** `a5c2ee1` (`feat: make mobile sharing capability-aware`)
+
+### Doğrulanamayan / kapsam dışı
+
+- Gerçek cihazlarda `navigator.share`, dosya paylaşımı, görüntü panosu ve Android/iOS PWA kurulumu: gerçek cihaz olmadan **UNVERIFIED**. Testte native yetenekler yalnızca kontrollü olarak simüle edildi; gerçek işletim sistemi paylaşım paneli açılmadı.
+- iOS Safari «Ana ekrana ekle» akışı ve `beforeinstallprompt` davranışı: **UNVERIFIED**; kurulum notu bilinçli olarak iddia içermez.
+- Service worker’ın gerçek çevrimdışı davranışı ve uzun vadeli önbellek senaryosu kapsam dışı; yalnızca grafik sayfasında kayıt oluştuğu doğrulandı. `sw.js`, `BUILD_ID` ve önbellek stratejisi değiştirilmedi.
+- Gerçek hesap/bulut/cross-device senaryoları FAZ 4’te olduğu gibi **UNVERIFIED**; staging Auth `401 Invalid JWT` veriyor.
+- Production deploy yapılmadı; tüm çalışma yerel statik sunucu ve yerel commit’lerle sınırlı.
