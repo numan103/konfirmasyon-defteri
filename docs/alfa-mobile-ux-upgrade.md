@@ -71,8 +71,81 @@ Doğrulanan ek koşullar: `mobile-shell: true`, `mobile-landscape: true`, çizim
 
 **Commit:** `602f823` (`feat: keep mobile shell in landscape`)
 
+---
+
+## FAZ 2 — Drawing Experience (P1)
+
+### Önceki UX problemi
+
+Denetimde çizim motoru `WORKING` idi; sorun motor değil mobil erişimdi (390×844, gerçek tarayıcı ölçümü):
+
+| Ölçüm / davranış | Önce |
+|---|---|
+| Favori araç düğmeleri | 27×27 px, grafik üstünde yüzen küçük bant |
+| Seçim sonrası işlem düğmeleri | 28×28 px, yalnızca ayarlar / kopyala / sil |
+| `#drawing-help` (ikinci nokta tarifı) | `display:none` (mobilde gizli) |
+| Hızlı Long / Short seçimi | Yok; iki seviyeli Araçlar sheet'i gerekiyordu |
+| Seçili araç göstergesi | Yalnızca kapalı Araçlar sheet'i içinde `aria-pressed` |
+| Undo / redo / lock / hide | Yalnızca gizli masaüstü toolbar / nesne panelinde |
+
+Kaynak: [`docs/upgrade-screenshots/phase2-00-before.png`](upgrade-screenshots/phase2-00-before.png).
+
+### Yapılan değişiklik
+
+- `assets/alfa-drawings.mjs` **değiştirilmedi**; çizim motoru, geçmiş/undo-redo, kalıcılık ve koordinat modeli korundu.
+- `alfa-charts.html`: grafiğin yanına (chart host dışında, böylece dokunuşlar çizim olarak algılanmıyor) üç hafif katman eklendi: `#mobile-draw-quick`, `#mobile-draw-hint`, `#mobile-draw-actions`.
+- `assets/alfa-charts.mjs`: `initDrawingQuickUX()` mevcut motor API'sini (`setTool`, `toggleFav`, `action`, `current`, `#drawing-undo/#drawing-redo`) yeni katmanlara bağlıyor:
+  - Geri al / yinele + Fib, Yatay, Trend, Long, Short + kullanıcı favorileri + Araçlar: tek dokunuşla 44×44 px düğmeler.
+  - Araç üzerinde uzun basma (`contextmenu`) favorilere ekle/çıkar; `alfa-draw-fav:v1` kalıcılığı korunuyor.
+  - Seçili araç `aria-pressed=true` ve vurgulu zeminle açıkça gösteriliyor; ipucu satırı ilk nokta / ikinci nokta / seçili çizim durumuna göre güncelleniyor.
+  - Çizim bitince hızlı çubuk yerine bağlamsal düzenleme çubuğu çıkıyor: Ayarlar, Geri al, Yinele, Kilitle/Kilidi aç, Gizle/Göster, Sil, Araçlar.
+  - Gizlenen çizim seçili kalıyor; böylece “Göster” ile geri getirilebiliyor.
+- `assets/alfa-charts.css`: yeni katmanlar yalnızca telefon kabuğunda (dikey + yatay) görünüyor; yatayda alt bant üstüne, dikeyde gesture alanı üstüne yerleşiyor. `body.focus-mode` ve `body.tools-hidden` davranışları korundu.
+- `alfa-charts.html`: varlık sürümleri `alfa-charts.css?v=36`, `alfa-charts.mjs?v=79`; `sw.js` yine değiştirilmedi.
+- `tests/browser/alfa-drawing-experience.browser.mjs`: favori kalıcılığı, kaydırma/çizim ayrımı, iki nokta yönlendirmesi, düzenleme eylemleri, undo/redo, reload kalıcılığı ve yatay erişim için regresyon testi eklendi.
+
+### Kullanıcıya etkisi
+
+- En sık kullanılan beş araç ve geri al/yinele artık tek dokunuşla, başparmak alanında; menüye girmeye gerek yok.
+- İlk dokunuştan sonra ekran açıkça “ikinci noktayı seçin (sürükleyerek de ayarlanır)” diyor; yanlış dokunuşta Escape/iptal yolu korunuyor.
+- Çizim tamamlanınca Kilitle/Gizle/Sil/Geri al/Yinele tek ekranda; araç çubuğu gereksiz yere yer kaplamıyor.
+- Grafik kaydırması (imleç aracıyla) çalışmaya devam ediyor; hızlı araç düğmesine dokunmak çizim oluşturmuyor.
+- Masaüstü etkilenmedi: 1440×950 smoke testinde toolbar `flex`, grafik 1140×733, yeni katmanlar `display:none`, `pageErrors: []`.
+
+### Test sonucu
+
+Komut:
+
+```powershell
+node tests/browser/alfa-drawing-experience.browser.mjs --url=http://127.0.0.1:8787 --playwright=C:\Users\Pc\AppData\Local\Temp\opencode\alfa-chart-browser-tests\node_modules\playwright\index.mjs --shots=docs/upgrade-screenshots
+```
+
+**Sonuç: PASS**, `pageErrors: []`.
+
+| Kontrol | Sonuç |
+|---|---|
+| Hızlı çubuk (390×844) | 374×54 px, 9 düğme, hepsi 44×44 px |
+| Yönlendirme | “Fib · başlangıç noktasını seçin” → “Fib · ikinci noktayı seçin …” |
+| Seçili araç | Fib `aria-pressed=true`, vurgulu görünüm |
+| Çizim sonrası | 374×54 px düzenleme çubuğu, 7 düğme, hepsi 44×44 px |
+| Lock / unlock / hide / show | Gerçek çizimde doğrulandı; gizli çizim hâlâ düzenlenebilir |
+| Undo / redo | Son düzenleme geri alındı ve yinelendi |
+| Kaydırma vs çizim | İmleçle sürükleme görünür aralığı değiştirdi; hızlı araç dokunuşu çizim eklemedi |
+| Kalıcılık | Fibonacci koordinatları ve `long` favorisi reload sonrası aynı |
+| Yatay (844×390) | Hızlı çubuk 828×50 px, düğmeler 44×44 px |
+
+**Ekran görüntüleri**
+
+- Önce: [`docs/upgrade-screenshots/phase2-00-before.png`](upgrade-screenshots/phase2-00-before.png)
+- Araç seçili / ilk nokta: [`docs/upgrade-screenshots/phase2-01-armed.png`](upgrade-screenshots/phase2-01-armed.png), [`phase2-02-second-point.png`](upgrade-screenshots/phase2-02-second-point.png)
+- Düzenleme eylemleri: [`docs/upgrade-screenshots/phase2-03-edit-actions.png`](upgrade-screenshots/phase2-03-edit-actions.png)
+- Yatay hızlı çubuk: [`docs/upgrade-screenshots/phase2-04-landscape.png`](upgrade-screenshots/phase2-04-landscape.png)
+
+**Commit:** `2e42417` (`feat: add one-tap mobile drawing UX`)
+
 ### Doğrulanamayan / kapsam dışı
 
 - Gerçek iPhone Safari, fiziksel çentik davranışı ve iOS PWA kurulumu: gerçek cihaz olmadan **UNVERIFIED**.
-- Bulut/hesap senkronizasyonu ve cross-device testi: staging Auth `401 Invalid JWT` verdiği için **UNVERIFIED**; yerel çizim verisi etkilenmedi.
-- FAZ 2–5 henüz uygulanmadı; bu fazda mevcut davranışları korumak dışında yeni özellik eklenmedi.
+- Bulut/hesap senkronizasyonu ve cross-device çizim senkronizasyonu: staging Auth `401 Invalid JWT` verdiği için **UNVERIFIED**; yerel kalıcılık doğrulandı.
+- `navigator.share` ve görüntü panosu desteği tarayıcı yeteneğine bağlı; FAZ 5'te alternatifler değerlendirilecek.
+- FAZ 3–5 henüz uygulanmadı.
