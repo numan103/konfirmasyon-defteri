@@ -32,6 +32,7 @@ $webSuites = @(
   'alfa-drawings',
   'alfa-multichart',
   'alfa-indicator-pane',
+  'alfa-desk-pane-density',
   'alfa-chart-time',
   'alfa-history-navigation',
   'alfa-open-interest',

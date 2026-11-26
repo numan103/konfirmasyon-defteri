@@ -10,13 +10,13 @@ import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=8';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=9';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument, TOOLS } from './alfa-drawings-model.mjs?v=8';
-import { PublicStudiesManager } from './alfa-public-studies.mjs?v=4';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=5';
 import { initMultiChart } from './alfa-multichart.mjs?v=6';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
@@ -2405,6 +2405,13 @@ studiesUI = new ChartStudies({ indicators, catalog: INDICATOR_CATALOG, managers:
   ...publicStudies.facades,
   volume: { enabled: true, setEnabled(value) { this.enabled = value; volume.applyOptions({ visible: value }); } },
 }, onChange: () => { saveLayout(); drawings.updatePanel(); } });
+// Double-clicking the plot itself tucks the lower data panes away so the price
+// chart fills the desktop viewport. Drawing objects, the price-scale grip and
+// legend controls keep their own double-click behavior.
+host.addEventListener('dblclick', event => {
+  if (isMobile || event.target.closest?.('#price-scale-grip, [data-id], button, .selection-toolbar, .study-chip')) return;
+  studiesUI.toggleLowerPanes();
+});
 const paper = new PaperTradingPanel({
   series:candles,owner:currentUserKey,pause:pauseReplay,
   getReplay:()=>replayMode&&replayEngine?{bars:history,clock:replayEngine.clock}:null,

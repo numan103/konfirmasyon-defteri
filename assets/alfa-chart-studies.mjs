@@ -119,6 +119,7 @@ export class ChartStudies {
       const enabled = this.state[def.id].added && this.state[def.id].visible && !this.clean;
       if (!!this.managers[def.id].enabled !== enabled) this.managers[def.id].setEnabled(enabled);
     }
+    for (const id of PUBLIC_PANE_IDS) this.managers[id]?.setCollapsed?.(!!this.state[id]?.collapsed);
   }
   setClean(value) { this.clean = !!value; this.applyVisibility(); this.sync(); }
   persist() { this.sync(); this.onChange?.(); }
@@ -157,8 +158,20 @@ export class ChartStudies {
   setCollapsed(id, collapsed) {
     const item = this.indicators.items.find(i => i.id === id);
     if (item) this.indicators.setCollapsed(id, collapsed);
-    else if (this.state[id]) this.state[id].collapsed = !!collapsed;
+    else if (this.state[id]) {
+      this.state[id].collapsed = !!collapsed;
+      this.managers[id]?.setCollapsed?.(!!collapsed);
+    }
     this.persist();
+  }
+  // Chart-level double-click tucks every lower pane; a second one restores
+  // them. Overlays on the price pane are deliberately left alone.
+  toggleLowerPanes(collapsed = null) {
+    const panes = this.active().filter(d => isPaneStudy(d) && d.visible);
+    if (!panes.length) return false;
+    const next = collapsed == null ? panes.some(d => !d.collapsed) : !!collapsed;
+    for (const d of panes) this.setCollapsed(d.id, next);
+    return next;
   }
   sync() {
     const active = this.active(), legend = document.getElementById('study-legend');

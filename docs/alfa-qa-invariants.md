@@ -34,6 +34,8 @@ These are the behaviors agents must protect. If a test contradicts this file, de
 - Overlay indicators appear under the symbol label without a visible `İndikatörler` heading.
 - Bulk `+/-` legend controls stay hidden in the compact legend.
 - Embedded panes (`isEmbed`) keep the compact shell; they must never receive desktop `chart-first`, which can create zero-height plots.
+- Desktop `chart-first` keeps the chart host at least 70% of viewport height even with CVD/OI/delta panes. Double-clicking the plot tucks every lower pane to at most 30px and gives the price pane at least 80% of the chart; a second double-click restores lower panes to at least 80px.
+- Double-clicking a pane-study legend row must resize its real pane, not only flip the stored `collapsed` flag.
 
 ## Ranges and explorer
 

@@ -28,6 +28,7 @@ const DEFAULTS = Object.freeze({
 });
 const PERIODS = ['auto', ...FUTURES_STAT_PERIODS];
 const MARKETS = ['auto', 'spot', 'perp'];
+const PANE_IDS = new Set(['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint']);
 
 export function normalizePublicStudyConfig(id, raw = {}) {
   const out = { ...(DEFAULTS[id] || {}) };
@@ -72,6 +73,8 @@ export class PublicStudiesManager {
     this.enabled = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, false]));
     this.statusById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, { state: 'idle', message: '' }]));
     this.seriesById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, []]));
+    this.collapsed = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, false]));
+    this.stretchById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, 0.25]));
     this.paneById = {};
     this.priceLines = [];
     this.controllers = new Map();
@@ -85,6 +88,7 @@ export class PublicStudiesManager {
       setEnabled(value) { self.setEnabled(id, value); },
       get config() { return self.configs[id]; },
       get status() { return { ...self.statusById[id] }; },
+      setCollapsed(value) { self.setCollapsed(id, value); },
       retry() { return self.refresh(id, true, true); },
       defaultConfig() { return { ...DEFAULTS[id] }; },
       updateConfig(cfg) { self.updateConfig(id, cfg); }
@@ -104,6 +108,20 @@ export class PublicStudiesManager {
     this.detach(id);
     if (next) this.refresh(id, true);
     else this.setStatus(id, 'idle', '');
+  }
+  // Legend/native-study tuck state must resize the real pane, not just toggle
+  // a CSS class. Store it too so async refreshes restore the same height.
+  setCollapsed(id, value) {
+    if (!PANE_IDS.has(id)) return;
+    const next = !!value;
+    this.collapsed[id] = next;
+    const pane = this.paneById[id];
+    if (!pane) return;
+    try {
+      const normal = this.stretchById[id] || .25;
+      if (next) pane.setStretchFactor?.(Math.max(.05, normal * .18));
+      else pane.setStretchFactor?.(normal);
+    } catch {}
   }
   updateConfig(id, raw) {
     if (!PUBLIC_STUDY_IDS.includes(id)) return;
@@ -273,11 +291,15 @@ export class PublicStudiesManager {
     try {
       const mainStretch = this.chart.panes()[0]?.getStretchFactor?.();
       // New native panes have no measured height until the next frame.
-      // setHeight() at that point can collapse an earlier concurrently-created
-      // study pane. A relative factor is stable before layout and on resize.
+      // A relative stretch factor is stable before layout, on resize, and
+      // when several panes are tucked at once.
       if (firstPane?.setStretchFactor && Number.isFinite(mainStretch) && mainStretch > 0) {
-        firstPane.setStretchFactor(mainStretch * .25);
-      } else firstPane?.setHeight(Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+        this.stretchById[id] = mainStretch * .25;
+        firstPane.setStretchFactor(this.collapsed[id] ? Math.max(.05, this.stretchById[id] * .18) : this.stretchById[id]);
+      } else {
+        this.stretchById[id] = .25;
+        firstPane?.setHeight?.(this.collapsed[id] ? 30 : Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));
+      }
     } catch {}
     return this.seriesById[id].length;
   }
