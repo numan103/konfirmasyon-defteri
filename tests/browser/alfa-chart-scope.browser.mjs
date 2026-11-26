@@ -117,13 +117,21 @@ try {
   assert.equal(await page.locator('[data-add=heatmap]').count(), 1);
   await close();
 
+  // Phone widths hide the desktop toolbar; enter both dialogs through the mobile menu.
+  const openMobileEntry = async button => {
+    await page.locator('#mobile-menu-open').click();
+    await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+    await page.locator(button).click();
+  };
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.locator('#alarm-toggle').click();
+    await page.reload(); await ready();
+    await openMobileEntry('#menu-alarm');
     assert.equal(await scope.isVisible(), true);
     assert.equal(await page.locator('dialog').evaluate(el => el.scrollWidth <= el.clientWidth), true, 'alarm scope wraps on mobile');
     await close();
-    await openCatalogue('heatmap');
+    await openMobileEntry('#menu-indicators');
+    await page.locator('#ind-search').fill('heatmap');
     await page.locator('.studies-dialog [data-study-settings=heatmap]').click();
     assert.equal(await page.locator('[data-study-scope=heatmap]').isVisible(), true);
     assert.equal(await page.locator('dialog').evaluate(el => el.scrollWidth <= el.clientWidth), true, 'study scope wraps on mobile');

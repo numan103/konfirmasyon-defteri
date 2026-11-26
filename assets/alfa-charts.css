@@ -857,6 +857,32 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   #watchlist .watch-row{padding-right:104px}
 }
 
+/* FAZ 9: prominent local-alarm scope card and thumb-sized alarm controls. */
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  .mobile-alarm-note{display:flex;align-items:flex-start;gap:8px;min-height:52px;margin:0 12px 8px;padding:10px 12px;border:1px solid #8a6b2f;border-left:4px solid #f0b76b;border-radius:12px;background:linear-gradient(180deg,#3a2a17,#241d13);color:#ffd58a;font-size:10px;font-weight:700;line-height:1.5;box-shadow:0 4px 14px #0004}
+  .mobile-alarm-note .ui-icon{width:18px;height:18px;color:#f0b76b}
+  .alarm-dialog{width:min(620px,calc(100vw - 16px));max-height:92dvh;overflow:auto}
+  .alarm-dialog .dialog-content{padding:14px}
+  .alarm-dialog .dialog-header{margin-bottom:10px}
+  .alarm-dialog .dialog-header button{width:44px;height:44px;min-width:44px;min-height:44px;padding:10px}
+  #alarm-scope{border-color:#8a6b2f;border-left-color:#f0b76b;background:#2b2418;color:#e9c489}
+  #alarm-scope>strong{color:#ffd58a}
+  #alarm-scope p{margin:6px 0 0;color:#c9b894;font-size:10px;line-height:1.55}
+  #alarm-scope .alarm-scope-quick{display:flex;align-items:center;min-height:44px;margin:0 0 8px;padding:8px 10px;border:1px solid #8a6b2f;border-radius:9px;background:#3a2a17;color:#ffd58a;font-size:11px;font-weight:800;line-height:1.4}
+  #alarm-form .setting-grid{gap:8px}
+  #alarm-form .setting-grid label{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:44px;font-size:11px}
+  #alarm-form .setting-grid input:not([type=range]),#alarm-form .setting-grid select{width:100%;min-height:44px;padding:8px 10px;font-size:12px}
+  #alarm-form .setting-grid input[type=range]{width:100%;height:44px;min-height:44px;margin:0}
+  #alarm-form small{display:block;font-size:10px;line-height:1.5}
+  #alarm-form .settings-actions{gap:8px;padding-top:10px}
+  #alarm-test-sound,#alarm-permission,#alarm-add{min-height:44px;padding:0 12px;font-size:12px}
+  #alarm-list{display:grid;gap:6px;margin-top:10px}
+  #alarm-list>div{flex-wrap:wrap;gap:6px;padding:10px 0}
+  #alarm-list>div>span{flex:1 1 100%}
+  #alarm-list button{min-width:44px;min-height:44px;padding:0 8px;font-size:11px}
+  #alarm-history,#alarm-close{min-width:44px;min-height:44px;padding:0 12px!important;font-size:12px}
+}
+
 /* Phone feature discovery: reachable advanced entries plus a usable 1/2-chart workspace. */
 @media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .multi-chart{height:100%;min-height:0}

@@ -2179,7 +2179,7 @@ function openAlarmManager(editingId = null) {
     <button data-del-alarm="${escapeHTML(a.id)}">Sil</button></div>`).join('')
     : '<p style="color:#8e9eb6">Bu sembolde alarm yok. Koşulları, sesi ve bildirim kanalını aşağıdan seçebilirsin.</p>';
   const m = openModal(`<div class="dialog-header"><div><h3>🔔 Fiyat Alarmları · ${symbol}</h3><p>Tarayıcı bildirimi, özel ses, Telegram ve webhook</p></div><button id="alarm-close-x" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
-    <aside id="alarm-scope" class="chart-scope-note" role="note" aria-label="Alarmın çalışma kapsamı"><strong>Bu grafiğe bağlı yerel alarm · ${escapeHTML(symbol)}</strong>
+    <aside id="alarm-scope" class="chart-scope-note" role="note" aria-label="Alarmın çalışma kapsamı"><p class="alarm-scope-quick">Yalnızca bu sekme açıkken · 7/24 sunucu alarmı değildir.</p><strong>Bu grafiğe bağlı yerel alarm · ${escapeHTML(symbol)}</strong>
       <p>Bu grafik açık ve canlı veri alırken yalnızca seçili sembolün alarmları kontrol edilir. Sembolü değiştirince önceki sembol bu grafikte izlenmez.</p>
       <p>Sekme/cihaz kapalıyken, bağlantı yokken veya Replay sırasında çalışmaz. Tarayıcı arka plandaki sekmeyi duraklatabilir. <strong>7/24 sunucu alarmı değildir.</strong></p>
       <p>Telegram ve webhook yalnızca bu sayfanın tetiklediği alarmı iletir; kendi başına sürekli izleme yapmaz. Alarm kayıtları bu cihazda hesabınıza özel saklanır.</p></aside>
@@ -2204,7 +2204,7 @@ function openAlarmManager(editingId = null) {
     <div style="display:flex;justify-content:space-between;margin-top:12px;gap:8px;flex-wrap:wrap;">
       <button id="alarm-history" type="button" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Tetikleme geçmişi (${loadAlarmHistory().length})</button>
       <button id="alarm-close" style="padding:8px 12px;border-radius:8px;border:1px solid #30394b;background:#151b26;color:#d7e0ee;">Kapat</button>
-    </div>`);
+    </div>`, 'alarm-dialog');
   const box = m.box;
   m.overlay.setAttribute('aria-label', 'Fiyat alarmları');
   if (editingAlarmId) {
@@ -2755,8 +2755,8 @@ function scheduleCloudSave(settings = layoutSettings()) {
   }, 800);
 }
 
-function openModal(html) {
-  return chartDialog(html);
+function openModal(html, className = '') {
+  return chartDialog(html, className);
 }
 
 function openIndicatorManager() {

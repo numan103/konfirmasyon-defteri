@@ -524,3 +524,41 @@ Gerçek boşluklar yalnızca telefon ergonomisiydi:
 - Özel TradingView listesi girişi, gerçek hesap/cross-device sync ve bulut çakışma senaryoları **UNVERIFIED**; yerel watchlist belgesi, migration ve quote akışı doğrulandı.
 - Telefonda list seçimi/filtresi görünmez kalır; arama sembol seçicisinde yapılır. Bu, önceki fazlardaki chart-first kompakt sheet kararının korunmasıdır.
 - Watchlist için dışarı dokunma/sheet-grip kapatma eklenmedi; mevcut kapat düğmesi, menu girişi ve Escape davranışı korundu. `sw.js` değişmediği için yeni sürüm sorguları service worker önbelleğini doğal olarak geçersiz kılar.
+
+---
+
+## FAZ 9 — Alarm kapsamı ve güven netliği
+
+### Önceki eksiklik / mevcut durum
+
+Denetimde kalan tek `P0` güven maddesi, alarm kapsamının ana ekranda yeterince görünür olmamasıydı (`docs/alfa-mobile-ux-audit.md:161`): “Alarm kapsamını ana ekranda da açıkça göster: ‘yalnızca bu sekme açıkken’.” FAZ 4’te doğru metin eklenmiş olsa da (`docs/alfa-mobile-ux-upgrade.md:252`, `:266`) telefon menüsünde düz bir paragraf, alarm dialogunda ise uzun bir not olarak kalıyordu (`alfa-charts.html:326`, `assets/alfa-charts.css:651-652`, `assets/alfa-charts.mjs:2182-2185`). Denetimdeki `P2` maddesi de aynı notun kısa ve görünür uyarı kartına dönüştürülmesini istiyordu (`docs/alfa-mobile-ux-audit.md:176`).
+
+Ayrıca alarm dialogunun input/select/button ve alarm satırı kontrolleri genel `min-height:33px` kuralına tabiydi (`assets/alfa-charts.css:293`); FAZ 8’in 44 px dokunma hedefi iyileştirmesi yalnızca watchlist dialoglarına uygulanmıştı. Alarm motoru, bildirim izni akışı, Telegram/webhook alanları, ses/repeat/volume ayarları ve `alfa-alarms:v1:{owner}` anahtarı zaten çalışıyordu; bunlar yeniden yazılmadı.
+
+### Uygulanan geliştirme
+
+- Telefon menüsündeki `.mobile-alarm-note` artık 52 px yüksekliğinde, kalın sol kenarlıklı, vurgulu arka planlı bir uyarı kartı. Metin korundu: yerel alarm, yalnızca seçili sembol, sekme kapalıyken/Replay sırasında çalışmaz, 7/24 sunucu alarmı değildir.
+- Alarm dialoguna `alarm-dialog` sınıfı verildi; `openModal(html, className = '')` artık mevcut `chartDialog` çağrısına yalnızca sınıf iletiyor. `#alarm-scope` içine, tam kapsam metnini değiştirmeden önce kısa bir `.alarm-scope-quick` satırı eklendi: “Yalnızca bu sekme açıkken · 7/24 sunucu alarmı değildir.” `role="note"`, `aria-describedby="alarm-scope"` ve regression-locked tüm ifadeler korundu (`tests/alfa-chart-scope.test.mjs:8-20`).
+- Telefon ve mobil yatay medya sorgularında alarm dialogu en fazla `92dvh` yükseklikte kaydırılabilir hale getirildi; başlık kapatma, form input/select/range, ses deneme/izni/ekleme, geçmiş/kapatma ve alarm satırı düzenle/aç-kapat/sessize-al/test/sil kontrolleri en az 44 px dokunma hedefi kazandı. Görsel tipografi ve mevcut davranış korundu.
+- Asset sürümleri CSS `?v=45 → ?v=46`, ana JS `?v=85 → ?v=86` yapıldı. `sw.js`, alarm motoru, bildirim izni akışı, Telegram/webhook, Replay, çizim/grafik motorları, indikatörler, watchlist, masaüstü düzeni ve tüm kalıcılık anahtarları değişmedi. Production deploy yapılmadı.
+- `alfa-chart-scope.browser.mjs` yalnızca test tarafında güncellendi: 390/320 px adımlarında gizli masaüstü `#alarm-toggle` yerine mobil menü girişleri kullanılıyor. Üretim kodu etkilenmedi.
+
+### Test sonucu
+
+- Yeni suite: `tests/browser/alfa-mobile-alarm-trust.browser.mjs` — **PASS**. 390×844 ve 844×390’ta uyarı kartı/kısa not, kapsam metninin form üstünde kalması, 44 px hedefler, `elementFromPoint` ile erişilebilirlik, yatay taşma olmaması, Escape davranışı, alarm ekleme sonrası satır hedefleri ve masaüstü smoke doğrulandı; sayfa hatası yok.
+- Regresyon: `alfa-trust-touch`, `alfa-mobile-shell`, `alfa-mobile-watchlist-pro`, `alfa-mobile-chart-interactions`, `alfa-mobile-landscape`, `alfa-drawing-experience`, `alfa-mobile-drawing-pro`, `alfa-capability-pwa`, `alfa-watchlist-tv`, `alfa-chart-scope`, `alfa-feature-discovery`, `alfa-replay`, `alfa-paper` — **PASS** (masaüstü smoke, watchlist kalıcılığı, gelişmiş girişler, Replay/Paper motorları ve alarm/indikatör kapsamı doğrulamaları dahil).
+- Birim testleri: `node --test tests/*.test.mjs` — **1219/1219 PASS**.
+
+**Ekran görüntüleri**
+
+- Önce: [`phase9-00-before-menu-note.png`](upgrade-screenshots/phase9-00-before-menu-note.png), [`phase9-01-before-alarm-dialog.png`](upgrade-screenshots/phase9-01-before-alarm-dialog.png), [`phase9-02-before-landscape.png`](upgrade-screenshots/phase9-02-before-landscape.png)
+- Sonra: [`phase9-10-after-menu-card.png`](upgrade-screenshots/phase9-10-after-menu-card.png), [`phase9-11-after-alarm-dialog.png`](upgrade-screenshots/phase9-11-after-alarm-dialog.png), [`phase9-12-after-alarm-list.png`](upgrade-screenshots/phase9-12-after-alarm-list.png), [`phase9-13-after-landscape.png`](upgrade-screenshots/phase9-13-after-landscape.png)
+
+**Commit:** `feat: improve FAZ 9 mobile alarm trust and controls` (tek FAZ 9 commit’i; kesin hash teslim notunda)
+
+### Kalan sınırlamalar
+
+- Bildirim izni gerçek kullanıcı tarafından verilmedi; testler izin reddini taklit etti. Gerçek bildirim teslimi, Telegram/webhook gönderimi, arka plan sekmesi davranışı ve 7/24 sunucu alarmı **UNVERIFIED**.
+- Gerçek iPhone/Android Safari dokunma hissi, native paylaşım ve PWA kurulumu **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP ile yapıldı.
+- Bulut hesabı/cross-device alarm senaryoları gerçek hesap olmadan **UNVERIFIED**; yalnızca anonim yerel alarm belgesi değişmediği doğrulandı.
+- Uyarı kartı kapsamı netleştirir; arka planda çalışan servis veya sunucu tarafı alarm eklemez. `sw.js` değişmediği için yeni sürüm sorguları service worker önbelleğini doğal olarak geçersiz kılar.
