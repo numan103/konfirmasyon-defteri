@@ -818,6 +818,45 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   #drawing-manager .anchor-row{gap:4px}
 }
 
+/* FAZ 8: thumb-sized watchlist sheet, symbol picker and import controls. */
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  #watchlist .watch-head-actions{gap:6px}
+  #watchlist .watch-head-actions button{min-width:44px;min-height:44px;padding:0 8px;border-radius:10px}
+  #watchlist .watch-head-actions>#watch-list-add{height:44px;font-size:10px}
+  #watchlist .watch-head-actions .ui-icon{width:18px;height:18px}
+  #watchlist .watch-actions{display:flex;gap:6px;padding:0 12px 8px}
+  #watchlist .watch-actions>button{min-width:44px;min-height:44px;height:44px;padding:0 10px;border-radius:10px;font-size:11px}
+  #watchlist .watch-actions>button .ui-icon{width:17px;height:17px}
+  #watchlist .watch-group-head{min-height:44px;padding:8px 12px}
+  #watchlist .watch-item{min-height:52px}
+  #watchlist .watch-row{min-height:52px;padding-right:104px}
+  #watchlist .watch-star,#watchlist .watch-flag,#watchlist .watch-remove{top:50%;transform:translateY(-50%);width:44px;height:44px;min-width:44px;min-height:44px;padding:10px;opacity:1}
+  #watchlist .watch-star{right:52px}
+  #watchlist .watch-flag{right:4px}
+  #watchlist .watch-remove{right:100px}
+  #watchlist .watch-star .ui-icon,#watchlist .watch-flag .ui-icon,#watchlist .watch-remove .ui-icon{width:18px;height:18px}
+  #watchlist #watch-rows{max-height:38dvh}
+  .symbol-dialog .study-search,.watchlist-import-dialog .study-search{min-height:44px}
+  .symbol-dialog .dialog-header button,.watchlist-import-dialog .dialog-header button,.watchlist-settings-dialog .dialog-header button{width:44px;height:44px;min-width:44px;min-height:44px;padding:10px}
+  .symbol-filters select{min-height:44px!important;font-size:12px}
+  .symbol-filters button{min-height:44px;padding:0 12px;font-size:11px}
+  .symbol-result{min-height:52px;padding:4px 0}
+  .symbol-result>button:first-child{min-height:52px;padding:8px 4px}
+  .symbol-result>[data-add-symbol]{width:44px;height:44px;min-width:44px;min-height:44px;padding:10px}
+  .symbol-result>[data-add-symbol] .ui-icon{width:18px;height:18px}
+  .watchlist-import-dialog #watchlist-file{height:44px;min-height:44px;font-size:12px}
+  .watchlist-import-dialog #watchlist-source{min-height:96px;font-size:12px}
+  .watchlist-import-dialog .import-options label{min-height:44px;display:flex;align-items:center;font-size:12px}
+  .watchlist-import-dialog .import-options button,.watchlist-import-dialog .settings-actions button{min-height:44px;padding:0 14px;font-size:12px}
+  .watchlist-settings-dialog .watch-settings-row select,.watchlist-settings-dialog .watch-settings-row input:not([type=checkbox]):not([type=color]){min-height:44px;font-size:12px}
+  .watchlist-settings-dialog .watch-settings-buttons button,.watchlist-settings-dialog .watch-restore,.watchlist-settings-dialog #ws-add-selected{min-height:44px;padding:0 12px;font-size:12px}
+}
+@media(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  #watchlist #watch-rows{max-height:40dvh}
+  #watchlist .watch-item,#watchlist .watch-row{min-height:48px}
+  #watchlist .watch-row{padding-right:104px}
+}
+
 /* Phone feature discovery: reachable advanced entries plus a usable 1/2-chart workspace. */
 @media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
   .multi-chart{height:100%;min-height:0}

@@ -389,7 +389,12 @@ if (isMobile) {
   $('mobile-tf-close')?.addEventListener('click', closeSheets);
   $('mobile-tf-back')?.addEventListener('click', () => openSheet('menu-open'));
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && SHEETS.some(({ className }) => document.body.classList.contains(className))) closeSheets();
+    if (event.key !== 'Escape') return;
+    // Native dialogs consume their own Escape; do not also dismiss the watchlist.
+    if (document.querySelector('dialog[open]')) return;
+    const watchlistOpen = !document.querySelector('.workspace')?.classList.contains('no-list');
+    if (SHEETS.some(({ className }) => document.body.classList.contains(className))) closeSheets();
+    else if (watchlistOpen) toggleList(false);
   });
   document.querySelectorAll('.sheet-grip').forEach(grip => {
     let startY = 0;

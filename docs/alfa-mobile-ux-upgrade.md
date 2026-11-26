@@ -480,3 +480,47 @@ Denetim, istenen yeteneklerin çoğunun zaten bulunduğunu gösterdi: Fibonacci 
 - Bulut hesabı/cross-device senaryoları gerçek hesap olmadan **UNVERIFIED**; yalnızca yerel belge/şablon kalıcılığı doğrulandı.
 - Koordinat editörü UTC epoch saniye ve fiyat kabul eder; ondalık zamanlar korunur ancak kullanıcı arayüzü takvim seçici değildir. Fırça ve pozisyon çizimleri kapsam dışıdır.
 - Çizim motoru ve render katmanı yeniden yazılmadı; yeni alanlar mevcut doğrulama/geçmiş/kayıt akışına eklendi. `sw.js` değişmediği için yeni sürüm sorguları service worker önbelleğini doğal olarak geçersiz kılar.
+
+---
+
+## FAZ 8 — İzleme listesi ve sembol akışı
+
+### Önceki eksiklik / mevcut durum
+
+Denetim, izleme listesinin çekirdek davranışının zaten tam olduğunu gösterdi: telefon girişi (`#mobile-market-pick`), `#watch-mobile-close` ile kapanma, sembol ekleme/çıkarma, listeler, favori/renk bayrağı, arama mantığı, TradingView TXT/CSV ve public-list import önizlemesi, 60 sn quote yenileme ve mevcut kalıcılık akışı çalışıyordu (`assets/alfa-watchlist.mjs:23-31`, `:146-183`, `:230-310`, `:311-377`; `assets/alfa-watchlist-model.mjs:12-14`, `:49-57`, `:108-143`). Parite şeridi, swipe/dwell sembol geçişi ve 44 px ana kontroller de FAZ 1–6’dan beri korunuyordu. Bu motorlar yeniden yazılmadı; anahtarlar ve gövde yapısı değiştirilmedi.
+
+Gerçek boşluklar yalnızca telefon ergonomisiydi:
+
+1. Telefon watchlist sheet’inde kapat, ekle, ayarlar, yeni liste, import/export/share ve satır favori/bayrak/silme kontrolleri 20–30 px aralığındaydı.
+2. Sembol seçicidialogunda kapatma, arama, borsa/karşılık filtreleri, yenileme, sonuç satırı ve ekleme düğmesi 30 px civarındaydı.
+3. Import dialogunda dosya seçici, textarea, seçenek satırı, önizleme ve uygula kontrolleri 33 px veya daha küçüktü; native dosya input’u genel `.dialog-content input` kuralından (`min-height:33px`) dolayı düşük hedefte kalıyordu.
+4. Watchlist, diğer mobil sheet’lerde olduğu gibi Escape ile kapanmıyordu; native dialog Escape’i aynı anda watchlist’i de kapatıyordu.
+5. `alfa-watchlist-tv` yerleşim testi, telefonlarda kapalı başlayan watchlist ve gizli `#list-toggle` nedeniyle güncel mobil girişi kullanmıyordu.
+
+### Uygulanan geliştirme
+
+- Telefon ve mobil yatay medya sorgularına yeni bir FAZ 8 bloğu eklendi: watchlist başlık/aksiyon/satır kontrolleri, listenin kaydırılabilir gövdesi, sembol seçici filtre/sonuç/ekleme düğmeleri ve import dialog kontrolleri en az 44 px dokunma hedefi kazandı. Native `#watchlist-file` için ID tabanlı `height/min-height:44px` kuralı, genel dialog input kuralını specificity ile geçti. Görsel ikonlar küçük kaldı; fiziksel hit alanı büyütüldü.
+- Escape davranışı mevcut sheet kapatıcısına eklendi: açık native `dialog[open]` varsa yalnızca dialog kapanır; dialog kapalıyken ikinci Escape varsa watchlist `toggleList(false)` ile kapanır. Backdrop/generic pointer capture ve `SHEETS` dizisi değiştirilmedi; parite şeridi, çizim çubukları ve masaüstü davranışı korundu.
+- `.watch-lists` (#watch-list / #watch-filter) telefonlarda bilinçli olarak gizli kaldı; compact chart-first sheet korundu. Sembol araması seçicideki `#symbol-query` üzerinden erişilebilir.
+- Asset sürümleri CSS `?v=43 → ?v=45`, ana JS `?v=84 → ?v=85` yapıldı. `alfa-watchlist.mjs`, `alfa-watchlist-model.mjs`, `sw.js`, çizim/grafik motorları, Replay, indikatörler, masaüstü düzeni ve tüm kalıcılık anahtarları değişmedi. Production deploy yapılmadı.
+- `alfa-watchlist-tv.browser.mjs` yalnızca test tarafında güncellendi: telefon genişliklerinde gizli `#list-toggle` yerine `#mobile-market-pick` kullanılıyor; 768 px’de masaüstü toggle korunuyor.
+
+### Test sonucu
+
+- Yeni suite: `tests/browser/alfa-mobile-watchlist-pro.browser.mjs` — **PASS**. Telefonda watchlist’in kapalı başlaması, sheet kontrollerinin 44 px olması ve `elementFromPoint` ile ulaşılabilirliği, sembol seçici hedefleri, dialog Escape önceliği, import dialog hedefleri ve yatay görünüm doğrulandı; yatay taşma ve sayfa hatası yok.
+- Regresyon: `alfa-drawing-experience`, `alfa-mobile-drawing-pro`, `alfa-mobile-chart-interactions`, `alfa-mobile-shell`, `alfa-mobile-landscape`, `alfa-trust-touch`, `alfa-capability-pwa`, `alfa-watchlist-tv` — **PASS** (masaüstü smoke ve watchlist kalıcılık/migrasyon akışları dahil).
+- Birim testleri: `node --test tests/*.test.mjs` — **1219/1219 PASS**.
+
+**Ekran görüntüleri**
+
+- Önce: [`phase8-00-before-strip.png`](upgrade-screenshots/phase8-00-before-strip.png), [`phase8-01-before-watchlist.png`](upgrade-screenshots/phase8-01-before-watchlist.png), [`phase8-02-before-landscape.png`](upgrade-screenshots/phase8-02-before-landscape.png)
+- Sonra: [`phase8-10-after-sheet.png`](upgrade-screenshots/phase8-10-after-sheet.png), [`phase8-11-after-picker.png`](upgrade-screenshots/phase8-11-after-picker.png), [`phase8-12-after-import.png`](upgrade-screenshots/phase8-12-after-import.png), [`phase8-13-after-landscape.png`](upgrade-screenshots/phase8-13-after-landscape.png)
+
+**Commit:** `feat: improve FAZ 8 mobile watchlist and symbol flow` (tek FAZ 8 commit’i; kesin hash teslim notunda)
+
+### Kalan sınırlamalar
+
+- Gerçek iPhone/Android Safari dokunma hissi, native paylaşım ve PWA kurulumu **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP ile yapıldı.
+- Özel TradingView listesi girişi, gerçek hesap/cross-device sync ve bulut çakışma senaryoları **UNVERIFIED**; yerel watchlist belgesi, migration ve quote akışı doğrulandı.
+- Telefonda list seçimi/filtresi görünmez kalır; arama sembol seçicisinde yapılır. Bu, önceki fazlardaki chart-first kompakt sheet kararının korunmasıdır.
+- Watchlist için dışarı dokunma/sheet-grip kapatma eklenmedi; mevcut kapat düğmesi, menu girişi ve Escape davranışı korundu. `sw.js` değişmediği için yeni sürüm sorguları service worker önbelleğini doğal olarak geçersiz kılar.

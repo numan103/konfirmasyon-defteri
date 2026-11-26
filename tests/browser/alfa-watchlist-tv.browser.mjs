@@ -218,7 +218,15 @@ try {
     for (const width of [320, 390, 768]) {
       await page.setViewportSize({ width, height: 844 });
       await page.reload(); await ready(page);
-      if (!(await page.locator('#watchlist').isVisible())) await page.click('#list-toggle');
+      if (!(await page.locator('#watchlist').isVisible())) {
+        // Phones start with the watchlist closed and hide the desktop toolbar toggle.
+        const toggle = page.locator('#list-toggle');
+        if (await toggle.isVisible()) await toggle.click();
+        else {
+          await page.click('#mobile-market-pick');
+          await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false);
+        }
+      }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}px overflow`);
       const box = await page.locator('#watch-settings').boundingBox();
       assert.ok(box && box.x >= 0 && box.x + box.width <= width, `${width}px settings button`);
