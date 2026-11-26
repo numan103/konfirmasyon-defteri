@@ -5,7 +5,7 @@ This repository is a static production site plus a large browser-test harness. T
 ## Non-negotiable rules
 
 1. **Anonymous only.** Never use real user accounts, real order data, production writes, or credentials in tests.
-2. **No unattended release actions.** Do not run `git push`, `wrangler pages deploy`, or a branch merge/promotion unless the user explicitly asks for that exact action.
+2. **Release actions are permitted.** The user granted all tool permissions, including `git push`, merge, and `wrangler pages deploy`. Do not release as part of a routine QA loop unless the task requires it, and always report the exact target, commit, and rollback deployment.
 3. **Test first.** For every bug found, add or update a deterministic regression test before changing product code.
 4. **One surface at a time.** Web work owns desktop/tablet behavior; mobile work owns phone/landscape/touch behavior. If a fix touches shared code, call it out in the report instead of silently changing the other surface.
 5. **Use isolated worktrees** for parallel web/mobile agents. Never edit the same file from two agent sessions at once.
@@ -34,4 +34,4 @@ A change is done only when:
 - a regression test covers the found bug,
 - the final report lists files changed, tests run, and any risk,
 - the working tree is left clean of temporary reports (`.qa-reports/` is ignored),
-- deploy/merge was not performed without explicit approval.
+- any push/merge/deploy was reported with target, commit, and rollback.

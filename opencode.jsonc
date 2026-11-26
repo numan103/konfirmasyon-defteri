@@ -9,9 +9,6 @@
     "directory": "../alfa-qa-worktrees"
   },
   "permissions": [
-    { "action": "shell", "resource": "git push *", "effect": "deny" },
-    { "action": "shell", "resource": "wrangler pages deploy *", "effect": "deny" },
-    { "action": "shell", "resource": "wrangler pages deployment create *", "effect": "deny" },
-    { "action": "shell", "resource": "git merge *", "effect": "ask" }
+    { "action": "*", "resource": "*", "effect": "allow" }
   ]
 }

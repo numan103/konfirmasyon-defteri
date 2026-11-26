@@ -9,6 +9,18 @@ const css = fs.readFileSync(new URL('../assets/site-new.css', import.meta.url), 
 const js = fs.readFileSync(new URL('../assets/site-new.mjs', import.meta.url), 'utf8');
 const landing = html.slice(html.indexOf('<div id="landing">'), html.indexOf('<div id="auth-gate"'));
 const appNav = html.slice(html.indexOf('<nav class="navbar">'), html.indexOf('<div class="nav-mobile-backdrop"'));
+// 7 günlük pencere gerçek takvimle ilerlediği için panel testleri sabit bir referans günü kullanır.
+const REFERENCE_NOW = new Date('2026-11-21T12:34:00Z');
+const REFERENCE_ACTIVE_IDS = registry.activeIds(REFERENCE_NOW);
+
+function decodeHtml(value) {
+  return String(value)
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
 
 function makeEl(id = '') {
   const classes = new Set(['hidden']);
@@ -36,7 +48,7 @@ function makeEl(id = '') {
 
 function load(options = {}) {
   const {
-    seen = null, activeIds = registry.activeIds(), features = registry.FEATURES,
+    seen = null, activeIds = REFERENCE_ACTIVE_IDS, features = registry.FEATURES,
     badges = [], page = 'home', fetchCalls = [], token = 'unit-token',
     syncIds = features.map(f => f.id),
   } = options;
@@ -61,6 +73,8 @@ function load(options = {}) {
     FEATURES: features,
     activeIds: () => activeIds,
     activeFeatures: () => features.filter(f => activeIds.includes(f.id)),
+    isNew: feature => !!feature && activeIds.includes(feature.id),
+    isNewId: id => activeIds.includes(id),
   };
   const mockFetch = async (url, opts) => { fetchCalls.push({ url, opts }); return { ok: true }; };
   const sandbox = {
@@ -114,13 +128,17 @@ test('üst rozet kayıt defterinden beslenir, sabit içerik değildir', () => {
 
 test('aktif özellikler panelde listelenir, rozet sayısı gösterilir', () => {
   const app = load();
+  const expected = registry.activeFeatures(REFERENCE_NOW);
+  assert.deepEqual(REFERENCE_ACTIVE_IDS, [
+    'morning-checkin', 'checkin-config', 'ayna-sync', 'portfoy-clone', 'daily-tasks',
+  ]);
   assert.equal(app.panel.classes.has('hidden'), true);
   assert.equal(app.list.innerHTML.length > 0, true);
-  for (const label of ['Sabah Kartı', 'Kendi kriterini ekle', 'Ayna', 'otomatik kayıt', 'Portföyüm', 'Günlük Görevler']) {
-    assert.ok(app.list.innerHTML.includes(label), label);
+  for (const feature of expected) {
+    assert.ok(decodeHtml(app.list.innerHTML).includes(feature.label), feature.label);
   }
   assert.doesNotMatch(app.list.innerHTML, /Check List/);
-  assert.equal(app.counts[0].textContent, '5');
+  assert.equal(app.counts[0].textContent, String(expected.length));
   assert.equal(app.buttons[0].hidden, false);
   assert.equal(app.buttons[0].classes.has('seen'), false);
   assert.match(app.sub.textContent, /Son 1 haftadaki yenilikler/);
@@ -137,7 +155,7 @@ test('süresi dolan rozetler gizlenir, yeni özellik rozeti kalır', () => {
   unknown.attrs['data-new-feature'] = 'bilinmeyen';
   unknown._closest = 'a';
 
-  load({ badges: [expired, fresh, unknown] });
+  load({ badges: [expired, fresh, unknown], activeIds: REFERENCE_ACTIVE_IDS });
   assert.equal(expired.hidden, true);
   assert.equal(fresh.hidden, false);
   assert.equal(unknown.hidden, true);
@@ -160,9 +178,9 @@ test('panel açılınca okundu işaretlenir, yeni özellik eklenince tekrar yana
   assert.equal(app.panel.classes.has('hidden'), false);
   assert.equal(app.buttons[0].attrs['aria-expanded'], 'true');
   assert.ok(app.buttons.every(b => b.classes.has('seen')));
-  assert.deepEqual(JSON.parse(app.store['alfa-whats-new-seen-v2']), registry.activeIds());
+  assert.deepEqual(JSON.parse(app.store['alfa-whats-new-seen-v2']), REFERENCE_ACTIVE_IDS);
 
-  const reopened = load({ seen: registry.activeIds() });
+  const reopened = load({ seen: REFERENCE_ACTIVE_IDS });
   assert.ok(reopened.buttons.every(b => b.classes.has('seen')));
   const newer = load({ seen: ['defter'] });
   assert.ok(newer.buttons.every(b => !b.classes.has('seen')));

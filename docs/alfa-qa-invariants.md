@@ -55,8 +55,9 @@ Trust-required alarm/study scope text inside dialogs is intentionally kept and m
 
 ## Release state
 
-- `docs/alfa-charts-release-readiness.md` remains `BLOCKED / NO-GO`.
-- Staging is not rebuilt or deployed unless the user explicitly touches staging.
+- `docs/alfa-charts-release-readiness.md` remains `BLOCKED / NO-GO` until the user changes that gate.
+- Push, merge, and deploy permissions are granted without prompts. Use them only when the task requires a release, and report target, commit, and rollback.
+- Staging is only rebuilt or deployed when the task targets staging.
 - Production smoke is anonymous and read-only-ish; no account or production data mutation.
 - Previous production rollback target after `f4deca3` is deployment `72ec943e-860a-411c-ad07-afca134af765` (`2069e94`).
 

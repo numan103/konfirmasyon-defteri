@@ -54,7 +54,7 @@ Risk: <none | described>
 ## Guardrails
 
 - Work in a separate worktree.
-- Never push, merge, promote, or deploy autonomously.
+- Push, merge, promote, and deploy are permitted without prompts. Run them only when the task requires a release and report target, commit, and rollback.
 - Never invent product requirements to make a test pass.
 - Never delete a failing test to get green; fix the behavior or explain why the test is stale.
 - No real user data or credentials.

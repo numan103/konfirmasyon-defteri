@@ -7,6 +7,23 @@ import {
 
 const DAY = 86400000;
 const launch = new Date('2026-11-20T12:34:00Z');
+// Bildirim testleri kayıt defterindeki 7 günlük pencereye göre sabit bir günde çalışır;
+// takvim ilerledikçe hard-coded "5 yeni özellik" beklentisi bayatlamasın.
+const featureNow = new Date('2026-11-21T12:34:00Z');
+
+async function withFixedDate(date, fn) {
+  const RealDate = globalThis.Date;
+  const stamp = new RealDate(date).getTime();
+  class FixedDate extends RealDate {
+    constructor(...args) {
+      if (args.length === 0) super(stamp);
+      else super(...args);
+    }
+    static now() { return stamp; }
+  }
+  globalThis.Date = FixedDate;
+  try { return await fn(); } finally { globalThis.Date = RealDate; }
+}
 
 function response() {
   return {
@@ -81,7 +98,7 @@ test('siteye yeni özellik eklenince Telegrama tek mesaj gider', async () => {
   const handler = await loadHandler();
   const calls = { tg: [], writes: [], reads: 0 };
   let announced = [];
-  const res = await withFetch(async (url, opts) => {
+  const res = await withFixedDate(featureNow, () => withFetch(async (url, opts) => {
     const u = String(url);
     if (u.includes('api.telegram.org')) {
       calls.tg.push({ url: u, body: JSON.parse(opts.body) });
@@ -98,7 +115,7 @@ test('siteye yeni özellik eklenince Telegrama tek mesaj gider', async () => {
     const out = response();
     await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: { features: FEATURES.map(f => f.id) } }, out);
     return out;
-  });
+  }));
 
   assert.equal(res.code, 200);
   assert.equal(res.body.ok, true);
@@ -118,16 +135,16 @@ test('siteye yeni özellik eklenince Telegrama tek mesaj gider', async () => {
 test('aynı özellik ikinci kez bildirilmez', async () => {
   const handler = await loadHandler();
   let calls = 0;
-  await withFetch(async (url, opts) => {
+  await withFixedDate(featureNow, () => withFetch(async (url, opts) => {
     const u = String(url);
     if (u.includes('api.telegram.org')) { calls++; return { ok: true, status: 200, json: async () => ({ ok: true }) }; }
     if (opts?.method === 'POST') return { ok: true, status: 201, json: async () => ({}) };
-    return { ok: true, status: 200, json: async () => [{ data: { announced: activeIds() } }] };
+    return { ok: true, status: 200, json: async () => [{ data: { announced: activeIds(featureNow) } }] };
   }, async () => {
     const r = response();
     await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: {} }, r);
     assert.equal(r.body.sent, 0);
-  });
+  }));
   assert.equal(calls, 0);
 });
 
@@ -175,10 +192,10 @@ test('site-features POST yalnız yönetici JWT ile çalışır', async () => {
 
 test('GET aktif özellikleri döndürür', async () => {
   const handler = await loadHandler();
-  await withFetch(async () => { throw new Error('fetch çağrılmamalı'); }, async () => {
+  await withFixedDate(featureNow, () => withFetch(async () => { throw new Error('fetch çağrılmamalı'); }, async () => {
     const r = response();
     await handler({ method: 'GET', query: { kind: 'site-features' } }, r);
     assert.equal(r.code, 200);
-    assert.deepEqual(r.body.features.map(f => f.id), activeIds());
-  });
+    assert.deepEqual(r.body.features.map(f => f.id), activeIds(featureNow));
+  }));
 });

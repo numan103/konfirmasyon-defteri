@@ -4,7 +4,8 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('../assets/my-portfolio.css', import.meta.url), 'utf8');
-const mod = fs.readFileSync(new URL('../assets/my-portfolio.mjs', import.meta.url), 'utf8');
+// Windows checkout'lar CRLF kullanabiliyor; regex/indexOf tabanlı iddialar LF'ye normalizasyon gerektirir.
+const mod = fs.readFileSync(new URL('../assets/my-portfolio.mjs', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
 test('portföy menüsü Trader gibi dropdown, içerik Alfa Portföy / Portföyüm sekmeleri', () => {
   assert.ok(html.includes('/assets/my-portfolio.css?v=6'));
