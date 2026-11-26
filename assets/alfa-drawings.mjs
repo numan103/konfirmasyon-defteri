@@ -608,13 +608,35 @@ export class DrawingEngine {
       }
     }
   }
+  renderCoordinateEditor(d) {
+    const fieldset = $('drawing-coordinate-fields'), host = $('drawing-anchors');
+    if (!fieldset || !host) return;
+    const supported = !['brush', 'long', 'short'].includes(d?.type) && d?.points?.length <= 20;
+    fieldset.hidden = !supported || this.selection.size !== 1;
+    if (fieldset.hidden) { host.replaceChildren(); return; }
+    host.replaceChildren(...d.points.map((point, index) => {
+      const row = document.createElement('div');
+      row.className = 'anchor-row'; row.dataset.anchor = String(index);
+      const timeLabel = document.createElement('label'); timeLabel.textContent = `${index + 1}. nokta · zaman (UTC sn)`;
+      const time = document.createElement('input'); time.type = 'number'; time.step = 'any'; time.value = String(point.time);
+      time.dataset.time = ''; time.disabled = !!d.locked;
+      timeLabel.append(time);
+      const priceLabel = document.createElement('label'); priceLabel.textContent = `${index + 1}. nokta · fiyat`;
+      const price = document.createElement('input'); price.type = 'number'; price.step = 'any'; price.min = '0'; price.value = String(point.price);
+      price.dataset.price = ''; price.disabled = !!d.locked;
+      priceLabel.append(price);
+      row.append(timeLabel, priceLabel);
+      return row;
+    }));
+  }
   updatePanel() {
     this.tree?.render();
     $('drawing-empty').hidden = !!this.history.doc.drawings.length;
     const d = this.current(), form = $('drawing-settings');
     form.hidden = !d || this.selection.size !== 1;
     $('drawing-selected-name').textContent = this.selection.size > 1 ? `${this.selection.size} seçili` : d ? d.name || toolNames[d.type] : '';
-    if (!d || this.selection.size !== 1) return;
+    if (!d || this.selection.size !== 1) { this.renderCoordinateEditor(null); return; }
+    this.renderCoordinateEditor(d);
     const style = normalizeStyle(d);
     $('drawing-color').value = style.color; $('drawing-width').value = style.width;
     $('drawing-line-style').value = style.lineStyle; $('drawing-fill-color').value = style.fillColor;
@@ -668,6 +690,18 @@ export class DrawingEngine {
       const tokens = $('fib-levels').value.split(',').map(s => s.trim());
       if (tokens.some(s => !s)) { this.status.textContent = 'Seviyeleri noktalı ondalık ve virgül ile ayırın'; return; }
       d.levels = [...new Set(tokens.map(Number))]; d.reversed = $('fib-reverse').checked; d.showPrices = $('fib-prices').checked;
+    }
+    if (!$('drawing-coordinate-fields').hidden) {
+      const rows = [...$('drawing-anchors').querySelectorAll('[data-anchor]')];
+      if (rows.length !== d.points.length) { this.status.textContent = 'Koordinat satırları eksik'; return; }
+      const points = rows.map(row => ({
+        time: Number(row.querySelector('[data-time]').value),
+        price: Number(row.querySelector('[data-price]').value)
+      }));
+      if (!points.every(p => Number.isFinite(p.time) && p.time > 0 && Number.isFinite(p.price) && p.price > 0)) {
+        this.status.textContent = 'Koordinatlar için geçerli UTC saniye ve fiyat girin'; return;
+      }
+      d.points = points;
     }
     if (isPosition(d)) {
       const entry = Number($('position-entry').value), stop = Number($('position-stop').value), target = Number($('position-target').value);

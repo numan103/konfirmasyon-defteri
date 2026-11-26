@@ -441,3 +441,42 @@ Kod denetimi, istenen davranışların büyük kısmının zaten mevcut olduğun
 - Gerçek iPhone/Android dokunma hissi ve Safari özel davranışları **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP dokunma olaylarıyla yapıldı.
 - Kalıcılık yalnızca mobil görünür logical aralığı kapsar; fiyat marjları ve çizim seçimi formu ayrıca saklanmaz. Çoklu grafik açıkken aralık geri yükleme/ kaydetme ana grafiğin senkronizasyonuna bırakılır.
 - Bulut hesabı/cross-device doğrulama gerçek hesap olmadan **UNVERIFIED**; FAZ 4 bulut çakışma mekanizmasına dokunulmadı.
+
+---
+
+## FAZ 7 — Çizim ve Fibonacci Pro
+
+### Önceki eksiklik / mevcut durum
+
+Denetim, istenen yeteneklerin çoğunun zaten bulunduğunu gösterdi: Fibonacci aracı mobil hızlı çubukta ve iki noktalı akışta çalışıyordu (`assets/alfa-charts.mjs:1994`, `alfa-drawing-experience` regresyonu); seviye/renk/stil alanları ve Fib şablonları mevcuttu (`alfa-charts.html:199-232`); favoriler, kilit/gizle/sil ve yerel/bulut çizim belgesi kalıcılığı da çalışıyordu (`alfa-drawings.mjs:171-185`, `alfa-drawings-store.mjs:16`, `:51-62`). Bu mekanizmalar yeniden yazılmadı. Gerçek boşluklar şunlardı:
+
+1. Mobil bağlam çubuğunda **kopyala** eylemi yoktu; kopyalama yalnızca masaüstü seçim çubuğu, sağ tık menüsü ve yönetim formundaydı.
+2. Fib şablonları ve stil alanları telefon `#drawing-manager` içinde masaüstü boyutlarında kalıyordu; bazı kontroller 44 px dokunma hedefinin altındaydı ve yönetim paneli aksiyon çubuğuna yaklaşabiliyordu.
+3. Seçili çizim için sayısal UTC zaman/fiyat koordinatı girişi yoktu; hassas ayar yalnızca sürükleme, uç nokta tutamaçları ve ok tuşlarıyla yapılabiliyordu.
+
+### Uygulanan geliştirme
+
+- Mobil seçim çubuğuna `copy` eylemi eklendi; mevcut `drawings.action('copy')` akışını kullanıyor, yeni bir kopyalama motoru oluşturmuyor. 44 px dokunma hedefi korundu.
+- `#drawing-manager` yalnızca telefon/yatay medya sorgularında tam genişlikte, kaydırılabilir bir sheet gibi davranıyor; input/select/textarea/button ve nesne ağacı satırları en az 44 px, Fib alanları ve şablon kontrolleri thumb-friendly. Panel alt sınırı mobil aksiyon çubuğunun üstünde kalıyor. Masaüstü yerleşimi değişmedi.
+- `#drawing-coordinate-fields` eklendi; seçili nokta tabanlı çizimler için her anchor için UTC epoch saniye ve fiyat alanları üretiliyor. `applySettings()` bu değerleri doğrulayıp mevcut `commit()` üzerinden belgeye yazıyor; kilitli çizimlerde alanlar devre dışı. Fırça, long/short pozisyonlar ve 20’den fazla noktalı çizimler bu editörden hariç tutuldu.
+- Asset sürümleri CSS `?v=42 → ?v=43`, ana JS `?v=83 → ?v=84`, çizim motoru importu `?v=16 → ?v=17` yapıldı. `sw.js`, favori anahtarı `alfa-draw-fav:v1`, çizim belgesi anahtarı `alfa-drawings:v1:{owner}:{symbol}`, çizim/grafik motorlarının mimarisi, Watchlist, Replay ve masaüstü davranışı değişmedi. Production deploy yapılmadı.
+
+### Test sonucu
+
+- Yeni suite: `tests/browser/alfa-mobile-drawing-pro.browser.mjs` — **PASS**. Fib oluşturma, mobil kopyalama, 44 px yönetim kontrolleri, şablon kaydetme/uygulama, hassas koordinat düzenleme, reload sonrası çizim/şablon kalıcılığı ve yatay görünüm doğrulandı; sayfa hatası yok.
+- Regresyon: `alfa-drawing-experience`, `alfa-mobile-chart-interactions` (FAZ 6), `alfa-mobile-shell`, `alfa-mobile-landscape`, `alfa-trust-touch`, `alfa-capability-pwa` — **PASS** (masaüstü smoke dahil).
+- Birim testleri: `node --test tests/*.test.mjs` — **1219/1219 PASS**.
+
+**Ekran görüntüleri**
+
+- Önce: [`phase7-00-before-actions.png`](upgrade-screenshots/phase7-00-before-actions.png), [`phase7-01-before-settings.png`](upgrade-screenshots/phase7-01-before-settings.png), [`phase7-02-before-landscape.png`](upgrade-screenshots/phase7-02-before-landscape.png)
+- Sonra: [`phase7-10-after-copy.png`](upgrade-screenshots/phase7-10-after-copy.png), [`phase7-11-after-template.png`](upgrade-screenshots/phase7-11-after-template.png), [`phase7-12-after-coordinates.png`](upgrade-screenshots/phase7-12-after-coordinates.png), [`phase7-13-after-landscape.png`](upgrade-screenshots/phase7-13-after-landscape.png)
+
+**Commit:** `feat: improve FAZ 7 mobile drawing and Fibonacci ergonomics` (tek FAZ 7 commit’i; kesin hash teslim notunda)
+
+### Kalan sınırlamalar
+
+- Gerçek iPhone/Android Safari dokunma hissi, native paylaşım ve PWA kurulumu **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP ile yapıldı.
+- Bulut hesabı/cross-device senaryoları gerçek hesap olmadan **UNVERIFIED**; yalnızca yerel belge/şablon kalıcılığı doğrulandı.
+- Koordinat editörü UTC epoch saniye ve fiyat kabul eder; ondalık zamanlar korunur ancak kullanıcı arayüzü takvim seçici değildir. Fırça ve pozisyon çizimleri kapsam dışıdır.
+- Çizim motoru ve render katmanı yeniden yazılmadı; yeni alanlar mevcut doğrulama/geçmiş/kayıt akışına eklendi. `sw.js` değişmediği için yeni sürüm sorguları service worker önbelleğini doğal olarak geçersiz kılar.

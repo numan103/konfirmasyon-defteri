@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=42">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=43">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -230,6 +230,11 @@
           <label>Kayıtlı şablon <select id="fib-templates" data-edit></select></label>
           <button id="fib-template-load" type="button">Şablonu uygula</button>
         </fieldset>
+        <fieldset id="drawing-coordinate-fields" hidden>
+          <legend>Koordinatlar · UTC saniye</legend>
+          <small>Zaman UTC epoch saniye olarak girilir; ondalık değerler korunur. Fiyat grafik ölçeğindedir. Kilitleme ve doğrulama kuralları geçerlidir.</small>
+          <div id="drawing-anchors"></div>
+        </fieldset>
         <fieldset id="drawing-position-fields" hidden>
           <legend>Pozisyon · yalnızca analiz</legend>
           <label>Entry <input id="position-entry" type="number" min="0" step="any" data-edit></label>
@@ -373,6 +378,6 @@
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=83"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=84"></script>
 </body>
 </html>

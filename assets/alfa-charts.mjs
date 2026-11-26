@@ -3,7 +3,7 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=16';
+import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=17';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=7';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=5';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
@@ -1995,8 +1995,8 @@ function initDrawingQuickUX() {
   const LABELS = { fibonacci: 'Fib', horizontal: 'Yatay', trend: 'Trend', long: 'Long', short: 'Short',
     brush: 'Fırça', rectangle: 'Kare', text: 'Metin', ruler: 'Ölç', ray: 'Işın', vertical: 'Dikey', arrow: 'Ok',
     undo: 'Geri al', redo: 'Yinele', tools: 'Araçlar', settings: 'Ayarlar', lock: 'Kilitle',
-    unlock: 'Kilidi aç', hide: 'Gizle', show: 'Göster', remove: 'Sil' };
-  const GLYPHS = { hide: 'eyeOff', show: 'eye', remove: 'delete', tools: 'brush', settings: 'settings' };
+    unlock: 'Kilidi aç', hide: 'Gizle', show: 'Göster', copy: 'Kopyala', remove: 'Sil' };
+  const GLYPHS = { hide: 'eyeOff', show: 'eye', remove: 'delete', copy: 'layers', tools: 'brush', settings: 'settings' };
   const button = (key, label, onClick, options = {}) => {
     const b = document.createElement('button');
     b.type = 'button'; b.dataset.quick = key;
@@ -2035,6 +2035,7 @@ function initDrawingQuickUX() {
       button('redo', LABELS.redo, () => $('drawing-redo')?.click(), { title: 'Yinele (Ctrl+Shift+Z)' }),
       button(locked ? 'unlock' : 'lock', locked ? LABELS.unlock : LABELS.lock, () => drawings.action('lock')),
       button(hidden ? 'show' : 'hide', hidden ? LABELS.show : LABELS.hide, () => drawings.action('hide')),
+      button('copy', LABELS.copy, () => drawings.action('copy'), { title: 'Seçili çizimi kopyala' }),
       button('remove', LABELS.remove, () => drawings.action('remove'), { title: 'Seçili çizimi sil (Delete)' }),
       button('tools', LABELS.tools, () => openMobileSheet(), { title: 'Yeni çizim aracı seç' })
     );
