@@ -2,7 +2,11 @@
   "private": true,
   "scripts": {
     "verify:supabase": "node scripts/verify-supabase-bootstrap.mjs",
-    "verify:influencer": "node scripts/verify-influencer-orders.mjs"
+    "verify:influencer": "node scripts/verify-influencer-orders.mjs",
+    "qa:web": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/alfa-qa-web.ps1",
+    "qa:mobile": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/alfa-qa-mobile.ps1",
+    "qa:all": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/alfa-qa-nightly.ps1",
+    "qa:smoke": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/alfa-qa-smoke.ps1"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

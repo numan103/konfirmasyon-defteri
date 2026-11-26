@@ -6,3 +6,4 @@ scripts/db-inspect.mjs
 scripts/test-db.mjs
 supabase/.temp/
 __pycache__/
+.qa-reports/
