@@ -562,3 +562,90 @@ Ayrıca alarm dialogunun input/select/button ve alarm satırı kontrolleri genel
 - Gerçek iPhone/Android Safari dokunma hissi, native paylaşım ve PWA kurulumu **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP ile yapıldı.
 - Bulut hesabı/cross-device alarm senaryoları gerçek hesap olmadan **UNVERIFIED**; yalnızca anonim yerel alarm belgesi değişmediği doğrulandı.
 - Uyarı kartı kapsamı netleştirir; arka planda çalışan servis veya sunucu tarafı alarm eklemez. `sw.js` değişmediği için yeni sürüm sorguları service worker önbelleğini doğal olarak geçersiz kılar.
+
+---
+
+## FAZ 10 — Final mobil regresyon ve handoff
+
+**Branch / HEAD:** `feat/mobile-ux-upgrade` / `dd6b7a2` → FAZ 10 commit’i
+
+**Deploy:** Yok. `https://alfa-trader.com/alfa-charts.html` adresine FAZ 6–10 sırasında deploy yapılmadı.
+
+**Yöntem:** Yerel `http://127.0.0.1:8787`, gerçek Chrome + Playwright/CDP; 390×844 portre, 844×390 yatay ve 1440×950 masaüstü smoke.
+
+### Önceki eksiklik / mevcut durum
+
+Denetim maddesi #16 (“ortak sheet kapatma/geri davranışı”) FAZ 5’te share ve zaman dilimi sheet’lerinde, FAZ 7’de araçlar sheet’inde tamamlanmıştı. Tek kalan in-repo boşluk Görünüm & renkler sheet’iydi: `alfa-charts.html:350` başlığında yalnızca kapatma düğmesi vardı; `assets/alfa-charts.mjs:386` da yalnızca `mobile-settings-close` bağlanmıştı. Oysa `.sheet-back` stili ve 44 px dokunma hedefi zaten mevcuttu (`assets/alfa-charts.css:561-565`) ve paylaşım/zaman dilimi sheet’leri `openSheet('menu-open')` ile menüye dönüyordu.
+
+Denetimde kalan diğer maddeler ya gerçek hesap/cihaz/sunucu gerektiriyordu (#3, #4, #13, #15) ya da üretim davranışını riske atabilecek daha geniş işlerdi (#14 access-gate metni, #18 shared legend formatter, #20 CI gate). Bunlar FAZ 10 kapsamına alınmadı.
+
+### Uygulanan geliştirme
+
+- `#mobile-settings-sheet` başlığına `#mobile-settings-back` düğmesi eklendi: `class="sheet-back"`, `aria-label="Önceki menü"`, görünür `←` simgesi. Mevcut kapatma düğmesi ve sheet başlığı korundu.
+- `assets/alfa-charts.mjs` içindeki mobil `if (isMobile)` bloğunda geri düğmesi `openSheet('menu-open')` olayına bağlandı; masaüstü kod yolu etkilenmedi. Escape ve backdrop kapatma davranışı korundu.
+- Ana JS sürümü `?v=86 → ?v=87` yapıldı. CSS değişmedi (`?v=46`). `sw.js`, `BUILD_ID`, çizim/grafik motorları, Replay, indikatörler, watchlist, alarm motoru, masaüstü düzeni ve tüm kalıcılık anahtarları (`alfa-watchlist:v1:{owner}`, `alfa-watchlist:tv-migrated:v1:{owner}`, `alfa-draw-fav:v1`, `alfa-drawings:v1:{owner}:{symbol}`, `alfa-mobile-tools-hidden:v1`, `alfa-alarms:v1:{owner}`) değişmedi.
+- `alfa-capability-pwa.browser.mjs` test tarafında genişletildi: geri düğmesinin görünürlüğü, 44×44 hedefi, `aria-label`, `elementFromPoint` erişilebilirliği ve menü→Görünüm→geri akışı doğrulandı; `phase10-10-settings-back.png` kaydedildi.
+- İlk final turda üç preservation suite’i hata verdi; üçü de temiz `dd6b7a2` temelinde yeniden üretildi ve FAZ 10 değişikliğiyle ilişkisiz, mevcut test varsayımları olarak doğrulandı. Düzeltmeler yalnızca test tarafında yapıldı:
+  - `alfa-drawings.browser.mjs`: telefonlarda gizli masaüstü `#drawing-tools` yerine mobil menü → Araçlar sheet’indeki gerçek araç düğmeleri kullanılıyor.
+  - `alfa-chart-time.browser.mjs`: telefonlarda gizli `#chart-timezone` yerine `#menu-timezone` girişi kullanılıyor; viewport değişiminden sonra mobil dinleyicilerin bağlanması için reload ekleniyor.
+  - `alfa-workspace.browser.mjs`: service worker önbelleğini izole etmek için `serviceWorkers: 'block'`, telefon genişliklerinde mobil menü kataloğu girişi ve gerçek crosshair legend ölçümünde sınırlı yeniden deneme eklendi.
+
+### Test sonucu
+
+**Final runner:** `powershell -NoProfile -ExecutionPolicy Bypass -File alfa-faz10-runner.ps1` — **30/30 PASS**, `fail=0`.
+
+**Birim testleri:** `node --test tests/*.test.mjs` — **1219/1219 PASS**, `fail=0`.
+
+| # | Suite | Sonuç | Kapsam |
+|---:|---|---|---|
+| 1 | `alfa-mobile-shell` | **PASS** | Portre kabuk, menü, sheet, taşma smoke |
+| 2 | `alfa-mobile-landscape` | **PASS** | 844×390 yatay grafik ve çizim koruma |
+| 3 | `alfa-drawing-experience` | **PASS** | Hızlı araç çubuğu, 44 px, çizim/konum |
+| 4 | `alfa-feature-discovery` | **PASS** | Multi-chart, Tester, Research, Replay girişleri |
+| 5 | `alfa-trust-touch` | **PASS** | Durum rozeti, alarm notu, Paper rozeti, dokunma hedefleri |
+| 6 | `alfa-capability-pwa` | **PASS** | Paylaşım fallback’leri, SW, Escape, yeni Görünüm geri akışı |
+| 7 | `alfa-mobile-chart-interactions` | **PASS** | Tap readout, reset, range kalıcılığı, çizim koruma |
+| 8 | `alfa-mobile-drawing-pro` | **PASS** | Kopyalama, Fib şablonları, koordinat düzenleme |
+| 9 | `alfa-mobile-watchlist-pro` | **PASS** | Watchlist/symbol/import 44 px ve dialog Escape |
+| 10 | `alfa-mobile-alarm-trust` | **PASS** | Alarm kapsamı kartı, kısa not, alarm dialog hedefleri |
+| 11 | `alfa-watchlist-tv` | **PASS** | TV migrasyonu, quote ve watchlist kalıcılığı |
+| 12 | `alfa-chart-scope` | **PASS** | Alarm/indikatör kapsam metni ve mobil girişler |
+| 13 | `alfa-drawings` | **PASS** | Çizim motoru, pointer/history, kalıcılık, dokunma akışı |
+| 14 | `alfa-multichart` | **PASS** | Multi-chart koordinatör/postMessage köprüsü |
+| 15 | `alfa-indicator-pane` | **PASS** | İndikatör legend, pane ve kalıcılık |
+| 16 | `alfa-chart-time` | **PASS** | Zaman dilimi, eksen/crosshair, saatlik veri koruma |
+| 17 | `alfa-history-navigation` | **PASS** | Range preset/backfill ve history gezinme |
+| 18 | `alfa-open-interest` | **PASS** | Sağlayıcı legend durumları: error/empty/retry |
+| 19 | `alfa-workspace` | **PASS** | Tam workspace, legend, live candle, masaüstü smoke |
+| 20 | `alfa-workspace-persistence` | **PASS** | İki context’li workspace kalıcılığı |
+| 21 | `alfa-cloud-settings-flow` | **PASS** | Mock auth/DB ile ayar akışı |
+| 22 | `alfa-cloud-resolution` | **PASS** | Bulut çakışma dialog akışı |
+| 23 | `alfa-replay` | **PASS** | Replay motoru ve canlı çizim koruma |
+| 24 | `alfa-paper` | **PASS** | Paper simülasyon, `realOrderRequests: 0` |
+| 25 | `alfa-strategy` | **PASS** | Strateji testi akışı |
+| 26 | `alfa-research` | **PASS** | Araştırma arşivi akışı |
+| 27 | `alfa-lab` | **PASS** | Lab/Tester bağımlılıkları |
+| 28 | `alfa-excursions` | **PASS** | Excursion/Paper arayüzü |
+| 29 | `site-feature-gating` | **PASS** | Anonim gezinme ve erişim kapısı davranışı |
+| 30 | `charts-feature-nav` | **PASS** | Grafik gezinme/hesap değiştirme koruma |
+
+**Ekran görüntüleri**
+
+- Önce: [`phase10-00-before-portrait.png`](upgrade-screenshots/phase10-00-before-portrait.png), [`phase10-01-before-landscape.png`](upgrade-screenshots/phase10-01-before-landscape.png)
+- Sonra: [`phase10-10-settings-back.png`](upgrade-screenshots/phase10-10-settings-back.png), [`phase10-11-after-landscape.png`](upgrade-screenshots/phase10-11-after-landscape.png)
+
+**Commit:** `feat: improve FAZ 10 mobile settings back and final regression` (tek FAZ 10 commit’i; kesin hash teslim notunda)
+
+### Genel durum
+
+- **LOCAL MOBILE REGRESSION: PASS** — 30/30 tarayıcı suite’i ve 1219/1219 birim testi geçti; portre/yatay akışlarda yatay taşma ve sayfa hatası gözlenmedi; masaüstü smoke koruma altında.
+- **PRODUCTION HANDOFF: CONDITIONAL / NO-GO** — Yerel mobil regresyon yeşil olsa da dış doğrulama kapları tamamlanmadan üretime geçiş için bağımsız GO verilmez.
+
+### Kalan sınırlamalar
+
+- Gerçek iPhone/Android Safari dokunma hissi, fiziksel çentik/güvenli alan, standalone PWA kurulumu ve native paylaşım **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP ile yapıldı.
+- Gerçek hesapla bulut kayıt/cross-device çizim, ayar, watchlist ve alarm senaryoları **UNVERIFIED**; staging kimlik doğrulaması önceden `401 Invalid JWT` ile BLOCKED idi.
+- 7/24 alarm teslimi, gerçek bildirim izni, Telegram/webhook gönderimi ve arka plan sekmesi davranışı **UNVERIFIED**; yerel kapsam metni bu sınırı açıkça belirtiyor.
+- Gerçek sağlayıcı geçmiş derinliği, sembol limitleri ve özel TV listesi **UNVERIFIED**.
+- Denetim #14 access-denied ekranı, #18 shared legend parametrelerinin insanlaştırılması ve #20 CI `?v=`/`sw.js` gate’i riskli/geniş kapsam nedeniyle ertelendi.
+- `docs/alfa-charts-release-readiness.md` durumları korunuyor: staging egress **BLOCKED**, backup/restore **BLOCKED**, genel **NO-GO**. FAZ 10 sırasında production deploy yapılmadı.

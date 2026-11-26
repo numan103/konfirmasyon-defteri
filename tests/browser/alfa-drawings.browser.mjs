@@ -55,6 +55,25 @@ async function selectTool(type, target = page, touch = false) {
   const groups = { trend: 'lines', horizontal: 'lines', vertical: 'lines', ray: 'lines', arrow: 'lines',
     fibonacci: 'fib', rectangle: 'shapes', brush: 'shapes', text: 'notes', label: 'notes', long: 'positions', short: 'positions' };
   const click = loc => touch ? loc.tap() : loc.click();
+  if (touch) {
+    // The quick bar can disappear as soon as a drawing is selected, so use
+    // the stable mobile menu -> tools sheet path for touch tool selection.
+    if (!(await target.evaluate(() => document.body.classList.contains('tools-open')))) {
+      await target.locator('#mobile-menu-open').tap();
+      await target.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+      await target.locator('#menu-tools').tap();
+      await target.waitForFunction(() => document.body.classList.contains('tools-open'), null, { timeout: 5000 });
+    }
+    const direct = target.locator(`#mobile-all-tools [data-tool="${type}"]`);
+    if (!(await direct.count())) {
+      await target.locator(`#mobile-all-tools [data-group="${groups[type]}"]`).tap();
+      await direct.waitFor({ state: 'visible' });
+    }
+    await direct.tap();
+    await target.locator('#mobile-tools-close').tap();
+    await target.waitForFunction(() => !document.body.classList.contains('tools-open'), null, { timeout: 5000 });
+    return;
+  }
   if (groups[type]) {
     await click(target.locator(`#drawing-tools [data-group="${groups[type]}"]`));
     await click(target.locator(`.tool-flyout [data-tool="${type}"]`));

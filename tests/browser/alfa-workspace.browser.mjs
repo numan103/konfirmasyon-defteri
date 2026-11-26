@@ -7,7 +7,7 @@ import path from 'node:path';
 const arg = key => process.argv.find(s => s.startsWith(`--${key}=`))?.slice(key.length + 3);
 const { chromium } = await import(pathToFileURL(arg('playwright')));
 const browser = await chromium.launch({ executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 950 } });
+const context = await browser.newContext({ viewport: { width: 1440, height: 950 }, serviceWorkers: 'block' });
 const page = await context.newPage(), errors = [];
 page.on('pageerror', e => errors.push(e.message));
 const origin = arg('url') || 'http://127.0.0.1:4181';
@@ -15,7 +15,17 @@ const output = arg('output');
 const test = async (name, fn) => { await fn(); console.log('PASS', name); };
 const ready = () => page.waitForFunction(() => window.__alfaDebug?.ready && window.__alfaDebug.drawings.ready, null, { timeout: 45000 });
 const state = fn => page.evaluate(fn);
-const catalogue = async () => { await page.click('#indicators-manage'); await page.fill('#ind-search', ''); await page.click('[data-cat=all]'); };
+const catalogue = async () => {
+  const desktop = page.locator('#indicators-manage');
+  if (await desktop.isVisible()) await desktop.click();
+  else {
+    // Phone widths hide the desktop toolbar; use the real mobile menu entry.
+    await page.click('#mobile-menu-open');
+    await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+    await page.click('#menu-indicators');
+  }
+  await page.fill('#ind-search', ''); await page.click('[data-cat=all]');
+};
 const add = async type => { await page.locator(`[data-add="${type}"]`).click(); };
 const close = async () => { await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.querySelector('dialog[open]')); };
 const shot = async name => { if (output) { await fs.mkdir(output, { recursive: true }); await page.screenshot({ path: path.join(output, name + '.png') }); } };
@@ -57,18 +67,28 @@ try {
     assert.equal(await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'macd').series[2].seriesType()), 'Histogram');
   });
   await test('indicator legend follows real crosshair values and falls back to last bar on exit', async () => {
-    const probe = await state(() => {
-      const d = window.__alfaDebug, ema = d.indicators.items.find(i => i.type === 'ema');
-      const bar = d.history.at(-30), rect = document.getElementById('chart').getBoundingClientRect();
-      const value = ema.series[0].data().find(row => row.time === bar.time).value;
-      const format = n => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(n);
-      return { id: ema.id, x: rect.x + d.chart.timeScale().timeToCoordinate(bar.time),
-        y: rect.y + d.candles.priceToCoordinate(bar.close), hover: format(value),
-        last: format(ema.series[0].data().at(-1).value) };
-    });
-    await page.mouse.move(probe.x, probe.y);
-    await page.waitForFunction(({ id, value }) => document.querySelector(`[data-study-values="${id}"]`)?.textContent === value,
-      { id: probe.id, value: probe.hover });
+    await page.waitForTimeout(500);
+    let probe;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      probe = await state(() => {
+        const d = window.__alfaDebug, ema = d.indicators.items.find(i => i.type === 'ema');
+        const bar = d.history.at(-30), rect = document.getElementById('chart').getBoundingClientRect();
+        const value = ema.series[0].data().find(row => row.time === bar.time).value;
+        const format = n => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 8 }).format(n);
+        return { id: ema.id, x: rect.x + d.chart.timeScale().timeToCoordinate(bar.time),
+          y: rect.y + d.candles.priceToCoordinate(bar.close), hover: format(value),
+          last: format(ema.series[0].data().at(-1).value) };
+      });
+      await page.mouse.move(probe.x, probe.y);
+      try {
+        await page.waitForFunction(({ id, value }) => document.querySelector(`[data-study-values="${id}"]`)?.textContent === value,
+          { id: probe.id, value: probe.hover }, { timeout: 5000 });
+        break;
+      } catch {
+        await page.mouse.move(10, 10);
+        await page.waitForTimeout(300);
+      }
+    }
     await page.mouse.move(10, 10);
     await page.waitForFunction(({ id, value }) => document.querySelector(`[data-study-values="${id}"]`)?.textContent === value,
       { id: probe.id, value: probe.last });

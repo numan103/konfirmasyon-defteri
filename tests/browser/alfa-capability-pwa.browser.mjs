@@ -133,6 +133,22 @@ try {
   await page.waitForFunction(() => document.body.classList.contains('menu-open') && !document.body.classList.contains('share-open'), null, { timeout: 4000 });
   await page.click('#menu-settings');
   await page.waitForFunction(() => document.body.classList.contains('settings-open'), null, { timeout: 4000 });
+  const settingsBack = await page.evaluate(() => {
+    const el = document.querySelector('#mobile-settings-back'), r = el?.getBoundingClientRect(), s = el && getComputedStyle(el);
+    return { display: s?.display || 'missing', w: r ? Math.round(r.width) : 0, h: r ? Math.round(r.height) : 0,
+      label: el?.getAttribute('aria-label') || '' };
+  });
+  assert.notEqual(settingsBack.display, 'missing', 'settings sheet needs a back control');
+  assert.notEqual(settingsBack.display, 'none', 'settings back control must be visible');
+  assert.ok(settingsBack.w >= 44 && settingsBack.h >= 44, `settings back target ${settingsBack.w}x${settingsBack.h}`);
+  assert.equal(settingsBack.label, 'Önceki menü');
+  await page.screenshot({ path: path.join(shotDir, 'phase10-10-settings-back.png') });
+  await page.click('#mobile-settings-back');
+  await page.waitForFunction(() => document.body.classList.contains('menu-open') && !document.body.classList.contains('settings-open'), null, { timeout: 4000 });
+  assert.equal(await page.getAttribute('#mobile-menu-sheet', 'aria-hidden'), 'false', 'back must restore the menu sheet');
+  assert.equal(await page.getAttribute('#mobile-settings-sheet', 'aria-hidden'), 'true', 'back must hide the settings sheet');
+  await page.click('#menu-settings');
+  await page.waitForFunction(() => document.body.classList.contains('settings-open'), null, { timeout: 4000 });
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => !document.body.classList.contains('settings-open'), null, { timeout: 4000 });
   assert.deepEqual(await openSheets(page), []);

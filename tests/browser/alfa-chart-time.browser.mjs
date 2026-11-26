@@ -12,8 +12,18 @@ const errors = [], writes = [];
 const last = Date.parse('2026-11-24T12:00:00Z') / 1000;
 const origin = arg('url') || 'http://127.0.0.1:4173';
 const ready = page => page.waitForFunction(() => window.__alfaDebug?.ready && window.__alfaDebug.drawings.ready);
+const openTimezone = async page => {
+  const desktop = page.locator('#chart-timezone');
+  if (await desktop.isVisible()) { await desktop.click(); return; }
+  // Phones hide the desktop toolbar and expose timezone through the menu.
+  if (!(await page.evaluate(() => document.body.classList.contains('menu-open')))) {
+    await page.click('#mobile-menu-open');
+    await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+  }
+  await page.click('#menu-timezone');
+};
 const choose = async (page, value) => {
-  await page.locator('#chart-timezone').click();
+  await openTimezone(page);
   await page.locator('#timezone-form select').selectOption(value);
   await page.locator('#timezone-form button[type=submit]').click();
   await page.waitForFunction(zone => document.getElementById('chart-timezone').dataset.timezone === zone, value);
@@ -154,10 +164,14 @@ try {
   await page.locator('#list-toggle').click();
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 900 });
+    // Mobile-only listeners bind at boot; reload so the resized shell is real.
+    await page.reload(); await ready(page);
     await page.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth);
-    const geometry = await page.locator('#chart-timezone').boundingBox();
-    assert.ok(geometry && geometry.x >= 0 && geometry.x + geometry.width <= width, 'mobile time-zone button stays on screen');
-    await page.locator('#chart-timezone').click();
+    await page.click('#mobile-menu-open');
+    await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+    const geometry = await page.locator('#menu-timezone').boundingBox();
+    assert.ok(geometry && geometry.x >= 0 && geometry.x + geometry.width <= width, 'mobile time-zone menu entry stays on screen');
+    await openTimezone(page);
     await page.locator('#timezone-form select').selectOption('America/New_York');
     await page.locator('#timezone-form button[type=submit]').click();
     await choose(page, 'Europe/Istanbul');

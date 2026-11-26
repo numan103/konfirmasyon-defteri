@@ -384,6 +384,7 @@ if (isMobile) {
   backdrop?.addEventListener('click', closeSheets);
   $('mobile-tools-close')?.addEventListener('click', closeSheets);
   $('mobile-settings-close')?.addEventListener('click', closeSheets);
+  $('mobile-settings-back')?.addEventListener('click', () => openSheet('menu-open'));
   $('mobile-share-close')?.addEventListener('click', closeSheets);
   $('mobile-share-back')?.addEventListener('click', () => openSheet('menu-open'));
   $('mobile-tf-close')?.addEventListener('click', closeSheets);
