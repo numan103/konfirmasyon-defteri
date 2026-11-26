@@ -902,3 +902,73 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   #research-panel,#paper-panel{bottom:calc(60px + env(safe-area-inset-bottom));max-height:calc(100dvh - 68px)}
   #paper-panel.tester-active{max-height:calc(100dvh - 68px)}
 }
+
+/* UX round: chart-first desktop workspace with a floating, draggable tool rail. */
+body.chart-first .workspace{height:100dvh;min-height:0;overflow:hidden;grid-template-rows:auto minmax(0,1fr)}
+body.chart-first .workarea{height:100%;min-height:0;overflow:hidden;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) 248px}
+body.chart-first .mobile-market-strip{display:none!important}
+body.chart-first.no-list .workarea{grid-template-columns:minmax(0,1fr)}
+body.chart-first .chart-panel{height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr)}
+body.chart-first .multi-chart{grid-column:1;grid-row:1}
+body.chart-first #watchlist{grid-column:2;grid-row:1}
+body.chart-first.no-list .multi-chart{grid-column:1}
+body.chart-first footer{position:absolute;left:0;right:0;bottom:0;z-index:30;min-height:0;padding:0;border:0;background:transparent}
+body.chart-first footer>span,body.chart-first footer>a,body.chart-first .chart-navigation #drawing-help,body.chart-first #watchlist .workspace-tip,body.chart-first #watchlist .scope{display:none!important}
+body.chart-first .chart-navigation{position:absolute;right:12px;top:12px;z-index:12;height:auto;min-height:0;gap:4px;padding:4px;border:1px solid #344158;border-radius:12px;background:#141c2acc;backdrop-filter:blur(8px)}
+body.chart-first .chart-navigation .range-presets{display:flex;gap:3px}
+body.chart-first .chart-navigation button{min-width:32px;padding:5px 7px;border-radius:7px}
+body.chart-first .drawing-space{position:absolute;left:0;top:0;bottom:auto;z-index:20;width:max-content;max-width:calc(100% - 280px);height:auto;min-height:0;padding:6px;border:1px solid #344158;border-radius:14px;background:#151b26f0;backdrop-filter:blur(10px);display:flex;align-items:center;gap:4px;overflow:visible;box-shadow:0 8px 28px #0008}
+body.chart-first .drawing-space.toolbar-dragging{opacity:.9;box-shadow:0 18px 44px #000b}
+body.chart-first .drawing-rail-grip{display:flex;align-items:center;justify-content:center;width:30px;height:34px;flex:none;padding:6px;border:0;border-right:1px solid #2c3a52;background:transparent;color:#8fa1bd;cursor:grab;touch-action:none}
+body.chart-first .drawing-rail-grip:active{cursor:grabbing}
+body.chart-first .drawing-rail-grip .ui-icon{width:15px;height:15px}
+body.chart-first #drawing-tools{flex-direction:row;gap:2px;overflow:visible}
+body.chart-first #drawing-tools>button{width:34px;height:34px;padding:7px}
+body.chart-first .rail-actions{flex-direction:row;border:0;padding:0;margin:0;gap:2px}
+body.chart-first .rail-actions>button{width:34px;height:34px;padding:7px}
+body.chart-first .session-boxes-side{display:none}
+body.chart-first #study-legend{position:absolute;right:12px;top:52px;z-index:11;align-items:flex-start;width:min(270px,30vw);max-height:calc(100% - 80px);padding:0;border:0;background:transparent;overflow:auto}
+body.chart-first .selection-toolbar{z-index:13}
+body.chart-first .study-chip{max-width:100%;padding:1px 5px;border:1px solid #2b3a55;border-radius:8px;background:#151d2cee}
+body.chart-first .study-legend-actions button[data-study-collapse-all],body.chart-first .study-legend-actions button[data-study-expand-all],body.chart-first .study-legend-actions button[data-study-remove-all]{display:none!important}
+body.chart-first #study-legend .study-chip-foot button[data-study-collapse],body.chart-first #study-legend .study-chip-foot button[data-study-remove]{opacity:.45}
+body.chart-first.chart-full #watchlist,body.chart-first.chart-full .toolbar{display:none!important}
+body.chart-first.chart-full .workspace{grid-template-rows:minmax(0,1fr)}
+body.chart-first.chart-full .workarea,body.chart-first.chart-full.no-list .workarea{grid-template-columns:minmax(0,1fr)}
+body.chart-first.chart-full .chart-panel{grid-template-rows:minmax(0,1fr)}
+body.chart-first.chart-full .legend{position:absolute;top:0;left:0;right:0;z-index:10;pointer-events:none;min-height:0;padding:8px 12px 4px;border:0;background:linear-gradient(180deg,#10141ce6,#10141c00)}
+
+/* Pair explorer: TradingView-like search with a dedicated exchange column. */
+.pair-explorer-dialog .dialog-content{min-height:50vh}
+.pair-explorer-head,.pair-explorer-row{display:grid;grid-template-columns:minmax(120px,1.5fr) minmax(80px,.9fr) minmax(80px,.9fr) auto;gap:10px;align-items:center}
+.pair-explorer-head{padding:8px 10px;border-bottom:1px solid var(--line);color:#8fa1bd;font-size:10px;letter-spacing:.6px;text-transform:uppercase}
+.pair-explorer-row{min-height:44px;padding:4px 10px;border-bottom:1px solid #1b2331}
+.pair-explorer-row:nth-child(even){background:#ffffff05}
+.pair-explorer-row strong{font-size:12px;color:#e3ebf9}
+.pair-explorer-row small{font-size:10px;color:#8fa1bd}
+.pair-explorer-row .pair-open{min-width:44px;min-height:36px;padding:4px 8px;border:1px solid #3c5c92;border-radius:8px;background:#1b2740;color:#bcd2ff;font-size:10px}
+.pair-suggestions{display:flex;flex-wrap:wrap;gap:5px;padding:6px 10px}
+.pair-suggestions button{min-height:30px;padding:3px 8px;border:1px solid #344464;border-radius:8px;background:#172033;color:#a7b7d1;font-size:10px}
+.pair-explorer-status{padding:4px 10px;color:#8fa1bd;font-size:10px}
+
+/* Watchlist right-click split / transfer menu. */
+.watch-context-menu{position:fixed;z-index:95;min-width:190px;padding:5px;border:1px solid #344158;border-radius:12px;background:#171e2af5;backdrop-filter:blur(10px);box-shadow:0 12px 36px #000a}
+.watch-context-menu strong{display:block;padding:6px 8px;color:#8fa1bd;font-size:10px;letter-spacing:.5px}
+.watch-context-menu button{display:block;width:100%;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#d7e0ee;font-size:12px;text-align:left}
+.watch-context-menu button:hover,.watch-context-menu button:focus{background:#263653;color:#eaf1ff}
+
+/* UX round: single mobile tool surface, TradingView-style date label, oval timeframe. */
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  #drawing-favs{display:none!important}
+  #mobile-date-label{position:absolute;left:50%;bottom:calc(146px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:23;padding:5px 12px;border:1px solid #4e6aa4;border-radius:999px;background:#101827f2;color:#dbe6f8;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;box-shadow:0 6px 18px #0008}
+  #mobile-date-label[hidden]{display:none}
+  .mobile-timeframe{min-width:64px;height:44px;padding:0 12px;border:1px solid transparent;border-radius:999px;background:linear-gradient(135deg,#344d7b,#1b2943);box-shadow:inset 0 0 0 1px #8db8ff33,0 3px 12px #0006;color:#eaf1ff;letter-spacing:.3px}
+  .mobile-timeframe strong{font-size:12px}
+  .mobile-menu-note,#mobile-save-state,#mobile-install-hint{display:none!important}
+  body.mobile-light #mobile-date-label{background:#e8eef8f2;color:#263449;border-color:#a9bcd8}
+  body.mobile-light .mobile-timeframe{background:linear-gradient(135deg,#dbe6f8,#eef3fb);color:#263449;box-shadow:inset 0 0 0 1px #a9bcd8,0 3px 12px #0002}
+}
+@media(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  #mobile-date-label{bottom:calc(120px + env(safe-area-inset-bottom));font-size:10px}
+  .mobile-timeframe{min-width:60px;width:auto}
+}

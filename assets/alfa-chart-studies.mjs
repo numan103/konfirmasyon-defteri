@@ -184,7 +184,7 @@ export class ChartStudies {
         <button data-study-expand-all type="button" title="Tümünü genişlet">${icon('expand')}</button>
         <button data-study-remove-all type="button" title="Tümünü kaldır">${icon('close')}</button>
       </div>` : '';
-      legend.innerHTML = cards + actions || '<button class="study-chip" data-open-studies>+ İndikatör ekle</button>';
+      legend.innerHTML = cards + actions || '<button class="study-chip" data-open-studies>İndikatörler</button>';
       this.wireActive(legend);
       this.updateValues();
       legend.querySelector('[data-open-studies]')?.addEventListener('click', () => this.open());

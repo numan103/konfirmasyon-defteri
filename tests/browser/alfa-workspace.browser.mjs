@@ -303,7 +303,7 @@ try {
         base: symbol.replace(/(USDT|BTC)$/, ''), quote: symbol.endsWith('BTC') ? 'BTC' : 'USDT', precision: 5 }));
       w.catalogState = 'ready';
     });
-    await page.click('#symbol-search');
+    await page.evaluate(() => window.__alfaDebug.watchlist.openPicker());
     await page.fill('#symbol-query', 'XRP');
     assert.equal(await page.locator('[data-open-symbol="XRPUSDT"]').count(), 1);
     assert.equal(await page.locator('[data-add-symbol="DOGEUSDT"]').count(), 0);

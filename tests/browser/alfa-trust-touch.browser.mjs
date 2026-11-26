@@ -71,9 +71,8 @@ try {
   await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 4000 });
   await page.waitForTimeout(350);
   const menu = await snapshot();
-  assert.ok(menu.save.box && menu.save.box.display !== 'none', 'save-state pill must be visible in the phone menu');
-  assert.match(menu.save.text, /YEREL|BULUT|HESAP|ÇAKIŞMA|ÇEVRİMDIŞI/i);
-  assert.match(menu.alarmNote.text, /sekme kapalıyken|cihaz kapalı/i);
+  assert.equal(menu.save.text, '', 'guest/save-state explanation must stay hidden');
+  assert.equal(menu.alarmNote.text, '', 'local-alarm explanation must stay hidden');
   await page.screenshot({ path: path.join(shotDir, 'phase4-02-menu-status.png') });
   await page.click('#menu-alarm');
   await page.waitForFunction(() => !!document.querySelector('dialog[open]'), null, { timeout: 4000 });

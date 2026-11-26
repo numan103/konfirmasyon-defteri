@@ -215,11 +215,17 @@ try {
   await page.waitForFunction(() => !document.body.classList.contains('tools-hidden'));
 
   await page.click('#mobile-market-pick');
-  await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false, { timeout: 5000 });
-  assert.equal((await read()).watchPressed, true);
-  assert.equal((await read()).watchFilterHidden, true);
-  await page.click('#watch-mobile-close');
-  await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === true, { timeout: 5000 });
+  await page.waitForFunction(() => !!document.querySelector('dialog[open].pair-explorer-dialog'), { timeout: 5000 });
+  const pairs = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#pair-results .pair-explorer-row').length,
+    head: document.querySelector('.pair-explorer-head')?.textContent.replace(/\s+/g, ' ').trim() || '',
+    suggestions: document.querySelectorAll('#pair-suggestion-chips button').length
+  }));
+  assert.ok(pairs.rows > 0, 'pair explorer must list all pairs');
+  assert.match(pairs.head, /Borsa/);
+  assert.ok(pairs.suggestions > 0, 'pair explorer must offer suggestions');
+  await page.click('#pair-close');
+  await page.waitForFunction(() => !document.querySelector('dialog[open]'));
 
   // Swiping the middle of the chart is not a pair switcher.
   const beforeMiddle = await read();

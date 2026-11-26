@@ -223,7 +223,11 @@ try {
         const toggle = page.locator('#list-toggle');
         if (await toggle.isVisible()) await toggle.click();
         else {
-          await page.click('#mobile-market-pick');
+          await page.click('#mobile-menu-open');
+          await page.waitForFunction(() => document.body.classList.contains('menu-open'));
+          if (await page.evaluate(() => document.querySelector('.workspace')?.classList.contains('no-list') === true)) {
+            await page.click('#menu-watchlist');
+          } else await page.keyboard.press('Escape');
           await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false);
         }
       }

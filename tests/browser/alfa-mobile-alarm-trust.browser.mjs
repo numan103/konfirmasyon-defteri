@@ -66,16 +66,10 @@ try {
   await page.click('#mobile-menu-open');
   await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
   const menuCard = await page.evaluate(() => {
-    const el = document.querySelector('.mobile-alarm-note'), s = el && getComputedStyle(el), r = el?.getBoundingClientRect();
-    return { display: s?.display, text: el?.textContent || '', h: r ? Math.round(r.height) : 0,
-      border: s?.borderLeftWidth, background: s?.backgroundImage };
+    const el = document.querySelector('.mobile-alarm-note');
+    return { exists: !!el, hidden: el?.hidden === true, text: (el?.textContent || '').replace(/\s+/g, ' ').trim() };
   });
-  assert.notEqual(menuCard.display, 'none');
-  assert.ok(menuCard.h >= 44, `menu warning card too short: ${menuCard.h}`);
-  assert.ok(Number.parseFloat(menuCard.border) >= 4, `menu warning card border: ${menuCard.border}`);
-  assert.notEqual(menuCard.background, 'none', 'menu warning card must have a highlighted background');
-  assert.match(menuCard.text, /sekme kapalıyken|cihaz kapalı/i);
-  assert.match(menuCard.text, /7\/24 sunucu alarmı değildir/);
+  assert.equal(menuCard.exists, false, 'local-alarm explanation must be removed from the menu');
   await page.screenshot({ path: path.join(shotDir, 'phase9-10-after-menu-card.png'), fullPage: false });
 
   step = 'dialog-card-and-targets';

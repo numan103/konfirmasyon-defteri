@@ -1,16 +1,16 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode, TickMarkType } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=12';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=13';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
 import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=17';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=7';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=8';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=5';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=6';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=7';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
@@ -26,6 +26,7 @@ import { PaperTradingPanel } from './alfa-paper.mjs?v=6';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 import { CHART_TIME_ZONES, normalizeChartTimeZone, chartTimeZoneKey, readChartTimeZone, writeChartTimeZone, createChartTimeFormatters } from './alfa-chart-time.mjs?v=1';
+import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=1';
 
 const $ = id => document.getElementById(id);
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
@@ -42,6 +43,11 @@ let isMobile = mobileShellQuery.matches;
 const syncMobileShellMode = () => {
   document.body.classList.toggle('mobile-shell', isMobile);
   document.body.classList.toggle('mobile-landscape', isMobile && matchMedia('(orientation:landscape)').matches);
+  // Desktop starts in chart-first mode: the plot fills the viewport instead of
+  // being squeezed by a bottom status/navigation strip.
+  // Embedded multi-chart panes keep their existing compact shell; chart-first
+  // is a desktop-only layout and would collapse a small pane's plot.
+  document.body.classList.toggle('chart-first', !isMobile && !isEmbed);
 };
 syncMobileShellMode();
 mobileShellQuery.addEventListener('change', event => { isMobile = event.matches; syncMobileShellMode(); });
@@ -296,7 +302,7 @@ if (isMobile) {
     const error = /hata|bağlanamadı/i.test(status) || researchState === 'error';
     let authed = false;
     try { authed = !!cloudSettings?.isAuthed?.(); } catch {}
-    let state = 'local', text = 'MİSAFİR · yalnızca yerel kayıt';
+    let state = 'local', text = '';
     if (conflict) { state = 'conflict'; text = 'ÇAKIŞMA · yerel kayıt korunuyor'; }
     else if (offline) { state = 'offline'; text = 'ÇEVRİMDIŞI · yerel kayıt'; }
     else if (error) { state = 'error'; text = 'YEREL VERİ KORUNUYOR'; }
@@ -497,7 +503,7 @@ if (isMobile) {
     clearStripDwell();
     if (next !== symbol) stripDwell = setTimeout(() => commitStripPreview(), 3000);
   };
-  const openPairList = () => { closeSheets(); toggleList(true); };
+  const openPairList = () => { closeSheets(); watchlist?.openExplorer(); };
   strip?.addEventListener('click', event => {
     if (event.target.closest('#mobile-menu-open, #mobile-tools-star, #mobile-timeframe')) return;
     if (consumeStripClick()) openPairList();
@@ -625,6 +631,15 @@ if (isMobile) {
   let holdTimer = null;
   const cancelHold = () => { clearTimeout(holdTimer); holdTimer = null; };
   const touches = new Set();
+  // TradingView-like date chip follows the crosshair during touch pan/hold.
+  const showDateAt = clientX => {
+    if (!isMobile || !history.length) return;
+    const time = chart.timeScale().coordinateToTime(clientX - host.getBoundingClientRect().left);
+    if (time == null) return;
+    const candle = history.find(c => c.time === time) ||
+      history.reduce((best, c) => Math.abs(c.time - time) < Math.abs(best.time - time) ? c : best, history[0]);
+    if (candle) showMobileDate(candle);
+  };
   host.addEventListener('pointerdown', event => {
     if (event.pointerType !== 'touch') return;
     cancelHold();
@@ -634,6 +649,7 @@ if (isMobile) {
         (host.dataset.drawingTool && host.dataset.drawingTool !== 'cursor')) { pricePan = null; return; }
     const margins = rightScale.options().scaleMargins;
     pricePan = { id: event.pointerId, x: event.clientX, y: event.clientY, top: margins.top, bottom: margins.bottom };
+    showDateAt(event.clientX);
     const target = event.target, x = event.clientX, y = event.clientY;
     holdTimer = setTimeout(() => {
       pricePan = null;
@@ -644,13 +660,14 @@ if (isMobile) {
     if (!pricePan || event.pointerId !== pricePan.id || touches.size !== 1) return;
     const dy = event.clientY - pricePan.y, dx = event.clientX - pricePan.x;
     if (Math.hypot(dx, dy) > 8) cancelHold();
+    showDateAt(event.clientX);
     if (Math.abs(dy) < 10 || Math.abs(dy) < Math.abs(dx) * 1.2) return;
     const shift = clamp(dy / Math.max(1, host.clientHeight) * .35, -.12, .12);
     rightScale.applyOptions({ autoScale: true, scaleMargins: {
       top: clamp(pricePan.top + shift, .06, .32), bottom: clamp(pricePan.bottom - shift, .06, .32)
     } });
   }, true);
-  const endPricePan = event => { cancelHold(); touches.delete(event.pointerId); pricePan = null; };
+  const endPricePan = event => { cancelHold(); touches.delete(event.pointerId); pricePan = null; hideMobileDate(1400); };
   host.addEventListener('pointerup', endPricePan, true);
   host.addEventListener('pointercancel', endPricePan, true);
   // Scale the actual visible price range, not the padding around the candles.
@@ -1042,10 +1059,25 @@ function showCandle(c) {
 }
 // FAZ 6: compact phone readout fed by the same crosshair subscription as #ohlc.
 // It never captures pointer events, so pan/pinch/drawing hit-testing stay intact.
+let mobileDateTimer = null;
+function showMobileDate(c) {
+  const node = $('mobile-date-label');
+  if (!node || !isMobile || !c?.time) return;
+  clearTimeout(mobileDateTimer);
+  node.textContent = chartTimeFormats.dateTime(c.time);
+  node.hidden = false;
+}
+function hideMobileDate(delay = 0) {
+  const node = $('mobile-date-label');
+  if (!node) return;
+  clearTimeout(mobileDateTimer);
+  if (delay) mobileDateTimer = setTimeout(() => { node.hidden = true; }, delay);
+  else node.hidden = true;
+}
 function showMobileCandle(c) {
   const node = $('mobile-candle-readout');
   if (!node || !isMobile) return;
-  if (!c) { node.hidden = true; return; }
+  if (!c) { node.hidden = true; hideMobileDate(); return; }
   let d = c;
   if (type === 'heikin') {
     const hd = heikinData(history);
@@ -1055,6 +1087,7 @@ function showMobileCandle(c) {
   node.textContent = `O ${priceFormat.format(d.open)} H ${priceFormat.format(d.high)} L ${priceFormat.format(d.low)} C ${priceFormat.format(d.close)} · ${ch >= 0 ? '+' : ''}${ch.toFixed(2)}% · V ${fmtVol(c.volume)} · ${chartTimeFormats.dateTime(c.time)}`;
   node.style.color = ch >= 0 ? '#26c89c' : '#ef6677';
   node.hidden = false;
+  showMobileDate(c);
 }
 async function loadOlderHistory() {
   if (replayMode) return;
@@ -1640,6 +1673,16 @@ watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => sy
   onHover: ref => prefetchMarket(ref, interval),
   getAccessToken: marketAccessToken,
   getLegacyCloud: owner => { try { return cloudSettings?.legacyWatchlist(owner) || null; } catch { return null; } },
+  onSplit: ref => {
+    if (!multiChart) { setActiveSymbol(ref); return; }
+    multiChart.setOpen(true);
+    if (!multiChart.addPane(ref, interval)) multiChart.notifySymbol(ref, interval);
+  },
+  onTransfer: ref => {
+    if (!multiChart) { setActiveSymbol(ref); return; }
+    multiChart.setOpen(true);
+    multiChart.notifySymbol(ref, interval);
+  },
   onStatus: connection });
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;
@@ -1990,7 +2033,10 @@ $('fullscreen').addEventListener('click', async () => {
     else await workspace.requestFullscreen();
   } catch { connection('Tarayıcı tam ekran isteğini reddetti', 'error'); }
 });
-document.addEventListener('fullscreenchange', () => { $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran'); });
+document.addEventListener('fullscreenchange', () => {
+  document.body.classList.toggle('chart-full', !!document.fullscreenElement);
+  $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran');
+});
 
 // One-tap drawing UX for the phone shell. The engine stays untouched: this only
 // mirrors its existing tools/actions into compact, thumb-reachable overlays.
@@ -2077,6 +2123,16 @@ const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () =
   onChartAction: action => handleChartAction(action),
   getChartMenuState: () => ({ ...viewConfig, logScale, fullscreen: !!document.fullscreenElement }),
   getStudies: () => studiesUI });
+// Desktop tool rail: horizontal, grip-draggable and position-persistent.
+if (!isMobile) {
+  const rail = document.querySelector('.drawing-space'), work = document.querySelector('.workarea');
+  const railKey = 'alfa-drawing-rail-position:v1';
+  if (rail && work) {
+    try { if (!localStorage.getItem(railKey)) localStorage.setItem(railKey, JSON.stringify({ x: 0, y: 0.88 })); } catch {}
+    new FloatingToolbar({ element: rail, host: work, key: railKey,
+      getBounds: () => ({ width: work.clientWidth, height: work.clientHeight }) });
+  }
+}
 try {
   const magOn = localStorage.getItem('alfa-magnet:v1') === '1';
   drawings.setMagnet(magOn);

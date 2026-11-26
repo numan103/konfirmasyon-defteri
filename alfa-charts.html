@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=46">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=56">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -92,6 +92,7 @@
     </header>
     <div class="workarea">
       <aside class="drawing-space" aria-label="Çizim araçları">
+        <button id="drawing-rail-grip" class="drawing-rail-grip" type="button" data-toolbar-grip aria-label="Araç çubuğunu sürükle" title="Tut ve sürükle · ok tuşlarıyla taşı · Home ile sıfırla"><span data-icon="grip"></span></button>
         <nav id="drawing-tools" aria-label="Çizim aracı seç"></nav>
         <div class="rail-actions">
           <button id="drawing-favorites-edit" class="icon-button" type="button" title="Favori çizim araçlarını düzenle" aria-label="Favori çizim araçlarını düzenle"><span data-icon="star"></span></button>
@@ -116,6 +117,7 @@
           <span id="ohlc">Gerçek piyasa verisi bekleniyor</span>
           </div>
           <div id="mobile-candle-readout" class="mobile-candle-readout" role="status" aria-live="polite" hidden></div>
+          <div id="mobile-date-label" class="mobile-date-label" role="status" aria-live="polite" hidden></div>
           <div id="study-legend" aria-label="Grafikteki indikatörler"></div>
         </div>
         <div id="chart" tabindex="0" aria-label="Canlı fiyat grafiği. Sürükle veya tekerlekle gezin; sağ tıkla grafik menüsünü aç; artı/eksi ile yakınlaştır, ok tuşlarıyla kaydır.">
@@ -322,9 +324,7 @@
       <button id="menu-log" type="button" aria-pressed="false">Log</button>
       <button id="menu-auto" type="button" aria-pressed="true">Oto</button>
     </div>
-    <div id="mobile-save-state" class="mobile-save-state" role="status" data-state="local">MİSAFİR · yalnızca yerel kayıt</div>
-    <p class="mobile-menu-note mobile-alarm-note"><span data-icon="bell"></span><span>Yerel alarm · yalnızca seçili sembol. Sekme kapalıyken veya Replay sırasında çalışmaz; 7/24 sunucu alarmı değildir.</span></p>
-    <p class="mobile-menu-note"><span data-icon="lab"></span><span>Test araçları simülasyondur; gerçek emir gönderilmez. Arşiv kayıtları incelemenizi sağlar.</span><button id="menu-advanced-note" type="button">Detaylar</button></p>
+    <div id="mobile-save-state" class="mobile-save-state" role="status" data-state="local" hidden></div>
   </section>
   <section id="mobile-advanced-sheet" class="mobile-sheet" aria-label="Gelişmiş grafik araçları" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
@@ -336,7 +336,7 @@
       <article><strong>Replay ve indikatörler</strong><p>Geçmişi mum mum incelemek ve mevcut indikatör katmanlarını yönetmek için ana menüyü kullanın.</p><button id="advanced-replay" type="button">Replay başlat</button><button id="advanced-indicators" type="button">İndikatörler</button></article>
     </div>
     <p class="advanced-note">Bu panel mevcut araçlara kısayoldur; yeni bir grafik motoru veya işlem motoru açmaz.</p>
-    <p id="mobile-install-hint" class="advanced-note install-note" role="note">Ana ekrana ekleme yalnızca tarayıcı ve cihaz destekliyorsa kullanılabilir. iOS Safari kurulumu bu çalışmada doğrulanmadı.</p>
+    <p id="mobile-install-hint" class="advanced-note install-note" role="note" hidden></p>
   </section>
   <section id="mobile-tools-sheet" class="mobile-sheet" aria-label="Çizim araçları" aria-hidden="true">
     <span class="sheet-grip" aria-hidden="true"></span>
@@ -378,6 +378,6 @@
     <div class="sheet-group"><small>Dokunarak seç · yıldızla favorilere ekle</small></div>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=87"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=90"></script>
 </body>
 </html>

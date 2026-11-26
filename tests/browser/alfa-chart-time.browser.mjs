@@ -95,7 +95,7 @@ try {
   await page.evaluate(() => window.__alfaDebug.chart.timeScale().setVisibleLogicalRange({ from: 80, to: 190 }));
   await page.waitForFunction(() => {
     const range = window.__alfaDebug.chart.timeScale().getVisibleLogicalRange();
-    return range?.from === 80 && range.to === 190;
+    return range && Math.abs(range.from - 80) < 1e-6 && Math.abs(range.to - 190) < 1e-6;
   });
   const before = await snapshot(page);
   assert.equal(before.doc.drawings.length, 1);

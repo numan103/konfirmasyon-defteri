@@ -63,7 +63,9 @@ try {
     'phone watchlist must start closed');
 
   step = 'watchlist-sheet';
-  await page.click('#mobile-market-pick');
+  await page.click('#mobile-menu-open');
+  await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+  await page.click('#menu-watchlist');
   await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false &&
     document.querySelectorAll('.watch-row[data-symbol]').length > 0, null, { timeout: 5000 });
   const sheetTargets = await boxes(watchTargets);
@@ -103,7 +105,9 @@ try {
   await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === true, null, { timeout: 5000 });
 
   step = 'import-dialog';
-  await page.click('#mobile-market-pick');
+  await page.click('#mobile-menu-open');
+  await page.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+  await page.click('#menu-watchlist');
   await page.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false, null, { timeout: 5000 });
   assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('#watch-import')).display), 'flex',
     'import must be reachable from the phone watchlist');
@@ -128,7 +132,11 @@ try {
   lp.on('pageerror', error => errors.push(`landscape: ${error.message}`));
   await lp.goto(origin + '/alfa-charts.html?debug=1', { waitUntil: 'domcontentloaded' });
   await lp.waitForFunction(() => window.__alfaDebug?.ready === true && document.querySelector('#chart-loading')?.hidden === true, null, { timeout: 30000 });
-  await lp.click('#mobile-market-pick');
+  await lp.click('#mobile-menu-open');
+  await lp.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
+  if (await lp.evaluate(() => document.querySelector('.workspace')?.classList.contains('no-list') === true)) {
+    await lp.click('#menu-watchlist');
+  } else await lp.keyboard.press('Escape');
   await lp.waitForFunction(() => document.querySelector('.workspace')?.classList.contains('no-list') === false &&
     document.querySelectorAll('.watch-row[data-symbol]').length > 0, null, { timeout: 5000 });
   const landscapeTargets = await lp.evaluate(list => list.map(selector => {

@@ -99,7 +99,7 @@ export const isMarketSymbol = isMarketRef;
 // session. They keep their original venue/market type but use a public,
 // rate-limited data path, so the whole imported list opens without a login.
 // Bare Binance Spot pairs stay on the direct Binance feed and are excluded.
-const FREE_REF_SEEDS = [
+export const FREE_REF_SEEDS = [
   'CME:BTC1!', 'OKX:USDTTRY', 'CBOE:VIX', 'FX_IDC:XAUTRYG', 'OKX:XAUTUSDT', 'BIST:XU100',
   'CRYPTOCAP:TOTAL', 'CRYPTOCAP:TOTAL2', 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:USDT.D',
   'BINANCE:BTCUSDT.P', 'BINANCE:ETHUSDT.P', 'OKX:ETHUSDT.P', 'TVC:GOLD', 'BYBIT:BTCUSDT.P', 'BYBIT:ETHUSDT.P',

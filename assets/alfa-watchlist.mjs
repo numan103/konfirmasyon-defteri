@@ -1,4 +1,4 @@
-import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes } from './alfa-charts-data.mjs?v=12';
+import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, fetchMarketQuotes, FREE_REF_SEEDS } from './alfa-charts-data.mjs?v=13';
 import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES,
   LEGACY_TV_LIST, FLAG_COLORS, GROUP_MODES, SORT_MODES, activeList, allWatchlistRefs, classifyWatchlistRef, filteredWatchlistRefs,
   groupWatchlistRefs, legacyWatchlistKeys, mergeLegacyWatchlist, migrateWatchlistDocument, normalizeWatchlistDocument,
@@ -14,13 +14,13 @@ export function formatMarketPrice(value, precision) {
   return n.toLocaleString('tr-TR', { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits });
 }
 export class ChartWatchlist {
-  constructor({ getOwner, getSelected, onSelect, onHover, getAccessToken, onStatus, getLegacyCloud }) {
-    Object.assign(this, { getOwner, getSelected, onSelect, onHover, getAccessToken, onStatus, getLegacyCloud });
+  constructor({ getOwner, getSelected, onSelect, onHover, getAccessToken, onStatus, getLegacyCloud, onSplit, onTransfer }) {
+    Object.assign(this, { getOwner, getSelected, onSelect, onHover, getAccessToken, onStatus, getLegacyCloud, onSplit, onTransfer });
     this.abort = new AbortController(); this.quotes = new Map();
     this.markets = SYMBOLS.map(symbol => ({ symbol, base: symbol.replace('USDT', ''), quote: 'USDT', precision: 2 }));
     this.doc = normalizeWatchlistDocument(null, SYMBOLS); this.owner = null; this.migrationGeneration = 0; this.search = '';
     this.catalogState = 'loading'; this.account();
-    $('symbol-search').onclick = () => this.openPicker();
+    $('symbol-search').onclick = () => this.openExplorer();
     $('watch-add').onclick = () => this.openPicker();
     $('watch-import').onclick = () => this.openImport();
     $('watch-export').onclick = () => this.export();
@@ -30,6 +30,12 @@ export class ChartWatchlist {
     $('watch-list').onchange = e => this.setActiveList(e.target.value);
     $('watch-filter').oninput = e => { this.search = e.target.value; this.render(); };
     $('symbol').onchange = e => this.select(e.target.value);
+    $('watch-rows').addEventListener('contextmenu', event => {
+      const row = event.target.closest?.('[data-symbol]');
+      if (!row) return;
+      event.preventDefault();
+      this.openRowMenu(row.dataset.symbol, event.clientX, event.clientY);
+    });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.refreshQuotes(); }, { signal: this.abort.signal });
     this.timer = setInterval(() => { if (!document.hidden) this.refreshQuotes(); }, 60000);
     this.start();
@@ -265,6 +271,84 @@ export class ChartWatchlist {
         this.paintQuotes();
       }
     } catch { /* One failed venue never clears prices already on screen. */ }
+  }
+  closeRowMenu() {
+    document.getElementById('watch-context-menu')?.remove();
+    this.rowMenu?.close();
+    this.rowMenu = null;
+  }
+  openRowMenu(ref, clientX, clientY) {
+    this.closeRowMenu();
+    const menu = document.createElement('div');
+    menu.id = 'watch-context-menu';
+    menu.className = 'watch-context-menu';
+    menu.setAttribute('role', 'menu');
+    menu.innerHTML = `<strong>${esc(ref)} · grafik</strong>
+      <button type="button" data-watch-action="open" role="menuitem">Bu grafikte aç</button>
+      <button type="button" data-watch-action="split" role="menuitem">Yeni panede böl</button>
+      <button type="button" data-watch-action="transfer" role="menuitem">Aktif pane aktar</button>`;
+    document.body.append(menu);
+    const x = Math.min(clientX, window.innerWidth - menu.offsetWidth - 8);
+    const y = Math.min(clientY, window.innerHeight - menu.offsetHeight - 8);
+    menu.style.left = Math.max(8, x) + 'px';
+    menu.style.top = Math.max(8, y) + 'px';
+    menu.querySelectorAll('[data-watch-action]').forEach(button => button.onclick = () => {
+      const action = button.dataset.watchAction;
+      this.closeRowMenu();
+      if (action === 'open') this.select(ref);
+      else if (action === 'split') this.onSplit?.(ref);
+      else if (action === 'transfer') this.onTransfer?.(ref);
+    });
+    const outside = event => { if (!menu.contains(event.target)) this.closeRowMenu(); };
+    const escape = event => { if (event.key === 'Escape') this.closeRowMenu(); };
+    document.addEventListener('pointerdown', outside, { signal: this.abort.signal });
+    document.addEventListener('keydown', escape, { signal: this.abort.signal });
+    this.rowMenu = { close: () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('keydown', escape);
+      menu.remove();
+    } };
+  }
+  openExplorer() {
+    this.modal?.close();
+    const toEntry = d => ({ ref: d.key, base: d.base, quote: d.quote, venue: d.venue,
+      marketType: (d.marketType || '').toUpperCase(), label: d.label, chartable: d.chartable !== false });
+    const spots = this.markets.map(m => ({ ref: m.symbol, base: m.base, quote: m.quote, venue: 'BINANCE',
+      marketType: 'SPOT', label: `${m.base}/${m.quote} · Binance Spot`, chartable: true }));
+    const foreign = foreignMarkets().map(m => toEntry(m));
+    const seeds = FREE_REF_SEEDS.map(ref => { try { return toEntry(parseMarketRef(ref)); } catch { return null; } }).filter(Boolean);
+    const all = [...new Map([...spots, ...foreign, ...seeds].map(item => [item.ref, item])).values()];
+    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Pariteler</h3><p>Tüm kripto ve Forex pariteleri · arama önerileri ve borsa sütunu</p></div><button id="pair-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+      <label class="study-search">${icon('search')}<input id="pair-query" list="pair-suggestions" placeholder="BTC, ETH, EURUSD, XAUUSD…" aria-label="Parite ara"></label>
+      <datalist id="pair-suggestions"></datalist>
+      <div id="pair-suggestion-chips" class="pair-suggestions"></div>
+      <p id="pair-status" class="pair-explorer-status" role="status"></p>
+      <div class="pair-explorer-head"><span>Parite</span><span>Borsa</span><span>Tür</span><span>İşlem</span></div>
+      <div id="pair-results"></div>`, 'pair-explorer-dialog');
+    modal.overlay.setAttribute('aria-label', 'Parite ara ve aç');
+    modal.box.querySelector('#pair-close').onclick = modal.close;
+    const input = modal.box.querySelector('#pair-query');
+    const render = () => {
+      if (!modal.overlay.open) return;
+      const q = input.value.toUpperCase().replace(/[ /]/g, '');
+      const matches = all.filter(m => !q || m.ref.includes(q) || m.label?.toUpperCase().includes(q) ||
+        `${m.base}${m.quote}`.includes(q)).slice(0, 120);
+      const suggestions = matches.slice(0, 12);
+      modal.box.querySelector('#pair-suggestions').innerHTML = suggestions.map(m => `<option value="${esc(m.ref)}"></option>`).join('');
+      modal.box.querySelector('#pair-suggestion-chips').innerHTML = suggestions.slice(0, 8).map(m =>
+        `<button type="button" data-pair-suggestion="${esc(m.ref)}">${esc(m.ref)}</button>`).join('');
+      modal.box.querySelector('#pair-status').textContent = `${matches.length} parite · kripto ve Forex`;
+      modal.box.querySelector('#pair-results').innerHTML = matches.map(m => `<div class="pair-explorer-row">
+        <strong>${esc(m.base)}<small>${m.quote ? '/' + esc(m.quote) : ''}</small></strong>
+        <small>${esc(m.venue)}</small><small>${esc(m.marketType || 'SPOT')}</small>
+        <button class="pair-open" type="button" data-open-symbol="${esc(m.ref)}">Aç</button></div>`).join('') || '<p class="study-empty">Eşleşen parite yok.</p>';
+      modal.box.querySelectorAll('[data-pair-suggestion]').forEach(b => b.onclick = () => { input.value = b.dataset.pairSuggestion; render(); });
+      modal.box.querySelectorAll('[data-open-symbol]').forEach(b => b.onclick = () => {
+        this.add(b.dataset.openSymbol); this.select(b.dataset.openSymbol); modal.close();
+      });
+    };
+    input.oninput = render;
+    render(); input.focus();
   }
   openPicker() {
     this.modal?.close();

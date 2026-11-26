@@ -126,7 +126,7 @@ try {
   await page.screenshot({ path: path.join(shotDir, 'phase3-04-advanced.png'), fullPage: false });
   await page.click('#mobile-advanced-back');
   await page.waitForFunction(() => document.body.classList.contains('menu-open') && !document.body.classList.contains('advanced-open'), null, { timeout: 4000 });
-  await page.click('#menu-advanced-note');
+  await page.click('#menu-advanced');
   await page.waitForFunction(() => document.body.classList.contains('advanced-open'), null, { timeout: 4000 });
   await page.waitForTimeout(300);
   await page.click('#advanced-tester');
