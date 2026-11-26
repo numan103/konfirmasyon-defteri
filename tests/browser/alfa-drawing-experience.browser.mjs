@@ -43,13 +43,18 @@ const state = () => page.evaluate(() => {
     return { inside: !!target && (el === target || el.contains(target)), tag: target?.id || target?.className || null };
   };
   const buttons = selector => [...document.querySelectorAll(`${selector} button`)].map(b => ({
-    key: b.dataset.quick || null, tool: b.dataset.tool || null, pressed: b.getAttribute('aria-pressed'),
+    key: b.dataset.quick || null, tool: b.dataset.tool || null, group: b.dataset.group || null,
+    pressed: b.getAttribute('aria-pressed'),
     disabled: b.disabled, w: Math.round(b.getBoundingClientRect().width), h: Math.round(b.getBoundingClientRect().height)
   }));
   const d = window.__alfaDebug?.drawings?.history?.doc?.drawings?.at(-1);
   return {
-    quick: box('#mobile-draw-quick'),
-    quickButtons: buttons('#mobile-draw-quick'),
+    duplicateRail: !!document.querySelector('#drawing-favs'),
+    quickRail: !!document.querySelector('#mobile-draw-quick'),
+    fab: box('#mobile-draw-fab'),
+    fabButtons: buttons('#mobile-draw-fab'),
+    toolsOpen: document.body.classList.contains('tools-open'),
+    toolGroups: buttons('#mobile-all-tools').filter(b => b.group),
     actions: box('#mobile-draw-actions'),
     actionButtons: buttons('#mobile-draw-actions'),
     strip: box('#mobile-market-strip'),
@@ -69,32 +74,54 @@ const chartBox = () => page.evaluate(() => {
   const r = document.querySelector('#chart').getBoundingClientRect();
   return { left: r.left, top: r.top, w: r.width, h: r.height };
 });
+const openTools = async () => {
+  await page.click('#mobile-draw-fab-button');
+  await page.waitForFunction(() => document.body.classList.contains('tools-open'), null, { timeout: 5000 });
+};
+const closeTools = async () => {
+  await page.click('#mobile-tools-close');
+  await page.waitForFunction(() => !document.body.classList.contains('tools-open'), null, { timeout: 5000 });
+};
 
 try {
   await page.goto(origin + '/alfa-charts.html?debug=1', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__alfaDebug?.ready === true && document.querySelector('#chart-loading')?.hidden === true, null, { timeout: 30000 });
-  await page.waitForFunction(() => document.querySelector('#mobile-draw-quick')?.querySelectorAll('button').length >= 5, null, { timeout: 10000 });
+  await page.waitForFunction(() => document.querySelector('#mobile-draw-fab-button') &&
+    document.querySelectorAll('#mobile-all-tools [data-group]').length >= 5, null, { timeout: 10000 });
 
   const initial = await state();
-  assert.equal(initial.quick.display, 'flex', 'quick tools must be visible on a phone');
-  for (const tool of ['fibonacci', 'horizontal', 'trend', 'long', 'short']) {
-    assert.ok(initial.quickButtons.some(b => b.tool === tool && b.w >= 44 && b.h >= 44), `missing 44px quick tool: ${tool}`);
-  }
-  for (const key of ['undo', 'redo', 'tools']) {
-    assert.ok(initial.quickButtons.some(b => b.key === key && b.w >= 44 && b.h >= 44), `missing quick action: ${key}`);
-  }
+  assert.equal(initial.duplicateRail, false, 'the duplicate favourites rail must stay removed');
+  assert.equal(initial.quickRail, false, 'the old quick bar must stay removed');
+  assert.equal(initial.fab.display, 'flex', 'the single pencil FAB must stay visible');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.drawing-space')).display), 'none',
+    'desktop tool rail must not leak into the phone shell');
+  assert.ok(initial.fabButtons.length >= 2, 'the FAB needs a tool button and a drag grip');
+  assert.ok(initial.fabButtons.every(b => b.w >= 44 && b.h >= 44), 'FAB controls must be thumb-sized');
   assert.equal(initial.actions.display, 'none', 'edit actions must stay hidden without a selection');
   assert.equal(initial.hint, '');
-  assert.ok(initial.quick.bottom <= initial.strip.top + 1, 'quick tools must not overlap the bottom pair strip');
+  assert.ok(initial.fab.bottom <= initial.strip.top + 1, 'the FAB must not overlap the bottom pair strip');
   assert.ok(initial.menuHit.inside && initial.pairHit.inside, 'menu and pair controls must stay tappable');
 
-  // One tap arms a tool; long press toggles the persistent favorite list.
-  await page.locator('#mobile-draw-quick [data-tool="long"]').dispatchEvent('contextmenu');
+  await openTools();
+  const groups = (await state()).toolGroups;
+  assert.equal(groups.length, 5, 'the FAB must expose all five tool categories');
+  assert.ok(groups.every(g => g.w >= 44 && g.h >= 44), 'tool categories must be thumb-sized');
+  await closeTools();
+
+  // One tap opens the full sheet; long press toggles the persistent favorite list.
+  step = 'favorite';
+  await openTools();
+  await page.click('#mobile-all-tools [data-group="positions"]');
+  await page.waitForFunction(() => !!document.querySelector('#mobile-all-tools [data-tool="long"]'), null, { timeout: 4000 });
+  await page.locator('#mobile-all-tools [data-tool="long"]').dispatchEvent('contextmenu');
   await page.waitForFunction(() => window.__alfaDebug.drawings.favs.includes('long'), null, { timeout: 4000 });
   const favorited = await state();
   assert.ok(favorited.favs.includes('long'));
   const storedFavs = await page.evaluate(() => JSON.parse(localStorage.getItem('alfa-draw-fav:v1') || '[]'));
   assert.ok(storedFavs.includes('long'), 'favorite must be persisted locally');
+  await page.click('#mobile-tools-back');
+  await page.waitForFunction(() => document.querySelectorAll('#mobile-all-tools [data-group]').length === 5);
+  await closeTools();
 
   // Chart panning must keep working while no tool is armed.
   step = 'pan';
@@ -108,15 +135,19 @@ try {
   const afterPan = (await state()).range.from;
   assert.ok(Math.abs(afterPan - beforePan) > 1, `chart did not pan with cursor tool: ${beforePan} -> ${afterPan}`);
 
-  // Tapping a quick button must arm the tool, not draw on the chart.
+  // Selecting a tool from the full sheet must arm it, not draw on the chart.
   const beforeArm = (await state()).count;
   step = 'arm';
-  await page.click('#mobile-draw-quick [data-tool="fibonacci"]');
+  await openTools();
+  await page.click('#mobile-all-tools [data-group="fib"]');
+  await page.click('#mobile-all-tools [data-tool="fibonacci"]');
+  await page.waitForFunction(() => document.querySelector('#mobile-all-tools [data-tool="fibonacci"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 4000 });
+  assert.equal(await page.getAttribute('#mobile-all-tools [data-tool="fibonacci"]', 'aria-pressed'), 'true', 'selected tool must be visibly pressed');
+  await closeTools();
   await page.waitForFunction(() => document.querySelector('#chart')?.dataset.drawingTool === 'fibonacci', null, { timeout: 5000 });
-  await page.waitForFunction(() => document.querySelector('#mobile-draw-quick [data-tool="fibonacci"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 4000 });
+  await page.waitForFunction(() => /başlangıç noktasını seçin/i.test(document.querySelector('#mobile-draw-hint')?.textContent || ''), null, { timeout: 4000 });
   const armed = await state();
-  assert.equal(armed.count, beforeArm, 'quick-tool tap must not create a drawing');
-  assert.equal(armed.quickButtons.find(b => b.tool === 'fibonacci')?.pressed, 'true', 'selected tool must be visibly pressed');
+  assert.equal(armed.count, beforeArm, 'tool selection must not create a drawing');
   assert.match(armed.hint, /başlangıç noktasını seçin/i, 'first-point guidance missing');
   await page.screenshot({ path: path.join(shotDir, 'phase2-01-armed.png'), fullPage: false });
 
@@ -138,12 +169,14 @@ try {
   assert.equal(completed.drawing.type, 'fibonacci');
   assert.equal(completed.tool, 'cursor', 'engine keeps returning to cursor after a completed drawing');
   assert.equal(completed.selectedClass, true);
-  assert.equal(completed.quick.display, 'none', 'quick tools yield to contextual edit actions');
-  for (const key of ['settings', 'undo', 'redo', 'lock', 'hide', 'remove', 'tools']) {
+  assert.equal(completed.actions.display, 'flex', 'contextual edit actions must take over from the tool sheet');
+  assert.equal(completed.fab.display, 'flex', 'the single FAB stays available with a selection');
+  for (const key of ['settings', 'undo', 'redo', 'lock', 'hide', 'remove']) {
     assert.ok(completed.actionButtons.some(b => b.key === key && b.w >= 44 && b.h >= 44), `missing edit action: ${key}`);
   }
   assert.match(completed.hint, /seçildi/i);
   assert.ok(completed.actions.bottom <= completed.strip.top + 1, 'edit actions must not overlap the bottom pair strip');
+  assert.ok(completed.fab.bottom <= completed.strip.top + 1, 'the FAB must not overlap the bottom pair strip');
   assert.ok(completed.menuHit.inside && completed.pairHit.inside, 'menu and pair controls must stay tappable with a selected drawing');
   await page.screenshot({ path: path.join(shotDir, 'phase2-03-edit-actions.png'), fullPage: false });
 
@@ -179,14 +212,17 @@ try {
   assert.deepEqual(afterReload.drawing, restored, 'drawing must survive reload with unchanged coordinates');
   assert.ok(afterReload.favs.includes('long'), 'favorite must survive reload');
 
-  // Landscape keeps the same one-tap tools reachable.
+  // Landscape keeps the same one-FAB tool surface reachable.
+  step = 'landscape';
   await page.setViewportSize({ width: 844, height: 390 });
   await page.waitForTimeout(500);
   const landscape = await state();
-  assert.equal(landscape.quick.display, 'flex', 'quick tools must stay reachable in landscape');
-  for (const tool of ['fibonacci', 'horizontal', 'trend', 'long', 'short']) {
-    assert.ok(landscape.quickButtons.some(b => b.tool === tool && b.w >= 44 && b.h >= 44), `landscape quick tool too small: ${tool}`);
-  }
+  assert.equal(landscape.fab.display, 'flex', 'the FAB must stay reachable in landscape');
+  await openTools();
+  const landscapeGroups = (await state()).toolGroups;
+  assert.equal(landscapeGroups.length, 5, 'landscape must expose every tool category');
+  assert.ok(landscapeGroups.every(g => g.w >= 44 && g.h >= 44), `landscape tool categories too small: ${JSON.stringify(landscapeGroups)}`);
+  await closeTools();
   await page.screenshot({ path: path.join(shotDir, 'phase2-04-landscape.png'), fullPage: false });
 
   assert.deepEqual(errors, [], 'page errors');

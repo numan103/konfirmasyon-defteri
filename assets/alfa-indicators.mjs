@@ -1,4 +1,5 @@
 import { sma, ema, wma, vwma, rsi, macd, atr, bollinger, vwap, stochastic, stochRsi, adx, supertrend, obv } from './alfa-indicators-model.mjs?v=2';
+import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=1';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 
@@ -75,6 +76,7 @@ export class IndicatorManager {
     this.onChange?.();
   }
   detach(item) {
+    clearPaneLabel(item.pane, item.id);
     for (const s of item.series) this.chart.removeSeries(s);
     // Empty panes are removed by Lightweight Charts when their last series leaves.
     item.series = []; item.pane = null;
@@ -171,6 +173,8 @@ export class IndicatorManager {
       item.pane = item.series[0].getPane();
       const height = indicatorPaneHeight(this.chart.chartElement().clientHeight, item.collapsed);
       if (item.pane.setHeight) item.pane.setHeight(height);
+      const period = item.params.period || item.params.fast || item.params.rsiPeriod || item.params.k || '';
+      setPaneLabel(item.pane, item.id, [item.def.name, period].filter(Boolean).join(' '), item.params.color);
       const guides = item.type === 'rsi' ? [30, 70] : ['stochastic', 'stochrsi'].includes(item.type) ? [20, 80] : item.type === 'macd' ? [0] : [];
       for (const price of guides) item.series[0].createPriceLine({ price, color: '#53617a66', lineWidth: 1, lineStyle: 2, axisLabelVisible: false, title: '' });
     }

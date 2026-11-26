@@ -160,12 +160,12 @@ try {
   await page.click('#mobile-menu-open');
   await page.click('#menu-advanced');
   await page.waitForFunction(() => document.body.classList.contains('advanced-open'), null, { timeout: 4000 });
-  const installHint = await page.evaluate(() => {
-    const el = document.getElementById('mobile-install-hint');
-    return { hidden: el?.hidden === true, text: (el?.textContent || '').replace(/\s+/g, ' ').trim() };
-  });
-  assert.equal(installHint.hidden, true, 'install caveat must stay hidden');
-  assert.equal(installHint.text, '');
+  const installHint = await page.evaluate(() => ({
+    present: !!document.getElementById('mobile-install-hint'),
+    body: document.body.innerText
+  }));
+  assert.equal(installHint.present, false, 'the install caveat panel must stay removed');
+  assert.equal(installHint.body.includes('iOS Safari kurulumu bu çalışmada doğrulanmadı'), false);
   await page.screenshot({ path: path.join(shotDir, 'phase5-02-install-hint.png') });
   await context.close();
 

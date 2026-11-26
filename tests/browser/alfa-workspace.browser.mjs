@@ -33,7 +33,8 @@ try {
   await page.goto(origin + '/alfa-charts.html?debug=1'); await ready();
   await test('clean entry, compact toolbar, grouped drawing rail, no unsolicited overlays', async () => {
     assert.equal(await page.locator('#drawing-tools>button').count(), 8);
-    assert.equal(await page.locator('#drawing-favs>[data-tool]').count(), 4);
+    assert.equal(await page.locator('#drawing-favs').count(), 0, 'the separate favorites strip is removed');
+    assert.equal(await page.locator('#drawing-favorites-edit').isVisible(), true, 'favorites stay editable from the rail');
     assert.equal(await state(() => window.__alfaDebug.marketStructure.priceLines.length), 0);
     assert.equal(await state(() => window.__alfaDebug.sessionLevels.lines.length), 0);
     const geometry = await state(() => ({ toolbar: document.querySelector('.toolbar').getBoundingClientRect().height, chart: document.querySelector('#chart').clientHeight, overflow: document.documentElement.scrollWidth > innerWidth }));
@@ -261,7 +262,7 @@ try {
     await page.fill('#candle-settings-form input[name=down]', '#ff3366');
     await page.click('#candle-settings-form button[type=submit]');
     await page.waitForFunction(() => !document.querySelector('#candle-settings-form'));
-    const saved = await state(() => JSON.parse(localStorage.getItem('alfa-chart-palette:v1') || '{}'));
+    const saved = await state(() => JSON.parse(localStorage.getItem('alfa-chart-palette:v2') || '{}'));
     assert.equal(saved.up, '#00ff88');
     assert.equal(saved.down, '#ff3366');
     assert.match(saved.gridVert, /^#[0-9a-f]{8}$/i, 'alpha grid colour survives palette apply');
@@ -282,13 +283,16 @@ try {
   await test('empty drawing favorites stay empty; star editor adds a persisted favorite', async () => {
     await page.evaluate(() => localStorage.setItem('alfa-draw-fav:v1', '[]'));
     await page.reload(); await ready();
-    assert.equal(await page.locator('#drawing-favs').isVisible(), false);
+    assert.equal(await page.locator('#drawing-favs').count(), 0);
     await page.click('#drawing-favorites-edit');
     await page.click('.tool-flyout [data-favorite=trend]');
+    assert.equal(await page.locator('.tool-flyout [data-favorite=trend]').getAttribute('aria-pressed'), 'true');
     await page.keyboard.press('Escape');
-    assert.equal(await page.locator('#drawing-favs [data-tool=trend]').count(), 1);
+    assert.deepEqual(await state(() => JSON.parse(localStorage.getItem('alfa-draw-fav:v1'))), ['trend']);
     await page.reload(); await ready();
-    assert.equal(await page.locator('#drawing-favs>[data-tool]').count(), 1);
+    await page.click('#drawing-favorites-edit');
+    assert.equal(await page.locator('.tool-flyout [data-favorite=trend]').getAttribute('aria-pressed'), 'true');
+    await page.keyboard.press('Escape');
   });
   await test('searchable venue picker, bounded TXT import and scoped watchlist persistence', async () => {
     // Pin the pre-migration shape so the import assertions stay deterministic.
@@ -654,17 +658,20 @@ try {
     assert.equal(await state(() => window.__alfaDebug.drawings.history.doc.drawings.length), 2);
     await shot('object-tree');
   });
-  await test('favorite toolbar grip drags within the plot and survives reload', async () => {
-    const before = await state(() => window.__alfaDebug.drawings.floating.position);
-    const grip = await page.locator('#drawing-favs [data-toolbar-grip]').boundingBox();
+  await test('mobile pencil FAB drags and its position survives reload', async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload(); await ready();
+    const position = () => state(() => JSON.parse(localStorage.getItem('alfa-mobile-draw-fab:v1')));
+    const before = await position();
+    const grip = await page.locator('#mobile-draw-fab [data-toolbar-grip]').boundingBox();
     await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
     await page.mouse.down();
-    await page.mouse.move(grip.x + 130, grip.y + 70, { steps: 8 });
+    await page.mouse.move(grip.x - 120, grip.y - 90, { steps: 8 });
     await page.mouse.up();
-    const after = await state(() => window.__alfaDebug.drawings.floating.position);
+    const after = await position();
     assert.notDeepEqual(after, before);
     await page.reload(); await ready();
-    assert.deepEqual(await state(() => window.__alfaDebug.drawings.floating.position), after);
+    assert.deepEqual(await position(), after);
   });
   await test('mobile/tablet layouts and catalogue fit 320, 390 and 768 px viewports', async () => {
     for (const width of [320, 390, 768]) {

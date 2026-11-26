@@ -51,12 +51,16 @@ try {
     const range = window.__alfaDebug.chart.timeScale().getVisibleRange();
     return range.from <= t && range.to >= t;
   }, target));
+  const chooseRange = async value => {
+    if (!await page.evaluate(() => document.getElementById('range-menu').open)) await page.click('#range-menu summary');
+    await page.click(`#range-menu [data-range="${value}"]`);
+    await page.waitForFunction(v => document.querySelector(`#range-menu [data-range="${v}"]`).getAttribute('aria-pressed') === 'true', value);
+  };
   for (const duration of [86400, 432000, 2592000, 7776000]) {
-    await page.click(`[data-range="${duration}"]`);
-    await page.waitForFunction(value => document.querySelector(`[data-range="${value}"]`).getAttribute('aria-pressed') === 'true', duration);
+    await chooseRange(duration);
     assert.ok(await page.evaluate(t => window.__alfaDebug.history[0].time <= t, end - duration));
   }
-  await page.click('[data-range="all"]');
+  await chooseRange('all');
   await page.waitForFunction(() => document.getElementById('connection').textContent.includes('sağlayıcının mevcut geçmişi'));
   assert.equal(await page.evaluate(() => window.__alfaDebug.history[0].time), first);
   assert.deepEqual(await page.evaluate(() => window.__alfaDebug.drawings.history.doc), drawing);

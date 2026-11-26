@@ -7,6 +7,7 @@ import {
   cvdFromFlow, deltaFromFlow, footprintFromFlow, intervalToPeriod,
   PUBLIC_MARKET_SOURCES, PUBLIC_STUDY_DETAILS, FUTURES_STAT_PERIODS
 } from './alfa-market-data-public.mjs?v=3';
+import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=1';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -71,6 +72,7 @@ export class PublicStudiesManager {
     this.enabled = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, false]));
     this.statusById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, { state: 'idle', message: '' }]));
     this.seriesById = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, []]));
+    this.paneById = {};
     this.priceLines = [];
     this.controllers = new Map();
     this.timers = new Map();
@@ -133,6 +135,8 @@ export class PublicStudiesManager {
     this.clearSeries(id);
   }
   clearSeries(id) {
+    clearPaneLabel(this.paneById[id], id);
+    delete this.paneById[id];
     for (const s of this.seriesById[id] || []) {
       try { this.chart.removeSeries(s); } catch {}
     }
@@ -262,6 +266,10 @@ export class PublicStudiesManager {
       series.setData(values);
     }
     const firstPane = this.seriesById[id][0]?.getPane?.();
+    if (firstPane) {
+      this.paneById[id] = firstPane;
+      setPaneLabel(firstPane, id, PUBLIC_STUDY_NAMES[id], lines[0].color);
+    }
     try {
       const mainStretch = this.chart.panes()[0]?.getStretchFactor?.();
       // New native panes have no measured height until the next frame.

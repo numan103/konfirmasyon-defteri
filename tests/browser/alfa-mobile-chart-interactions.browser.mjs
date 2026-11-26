@@ -107,7 +107,11 @@ try {
   await page.screenshot({ path: path.join(shotDir, 'phase6-11-after-persisted-viewport.png'), fullPage: false });
 
   step = 'drawing-pan-guard';
-  await page.click('#mobile-draw-quick [data-tool="fibonacci"]');
+  await page.click('#mobile-draw-fab-button');
+  await page.waitForFunction(() => document.body.classList.contains('tools-open'), null, { timeout: 5000 });
+  await page.click('#mobile-all-tools [data-group="fib"]');
+  await page.click('#mobile-all-tools [data-tool="fibonacci"]');
+  await page.click('#mobile-tools-close');
   await page.waitForFunction(() => document.querySelector('#chart')?.dataset.drawingTool === 'fibonacci', null, { timeout: 5000 });
   const box = await page.locator('#chart').boundingBox();
   await page.mouse.click(box.x + 80, box.y + box.height * 0.36);

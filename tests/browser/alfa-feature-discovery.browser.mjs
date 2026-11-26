@@ -119,10 +119,11 @@ try {
   await page.waitForTimeout(300);
   const advanced = await snapshot();
   assert.equal(advanced.advanced.cards, 4);
-  assert.match(advanced.advanced.note, /motoru|kısayol/i);
+  assert.equal(advanced.advanced.note, '', 'explanatory notes must stay removed');
+  assert.equal(await page.locator('#mobile-advanced-sheet .advanced-note').count(), 0);
   const advancedText = await page.locator('#mobile-advanced-sheet').innerText();
-  assert.match(advancedText, /1\/2 düzen/);
-  assert.match(advancedText, /gerçek emir/i);
+  assert.match(advancedText, /2 grafik düzenini aç/);
+  assert.equal(advancedText.toLowerCase().includes('gerçek emir'), false, 'simulation disclaimer must stay removed');
   await page.screenshot({ path: path.join(shotDir, 'phase3-04-advanced.png'), fullPage: false });
   await page.click('#mobile-advanced-back');
   await page.waitForFunction(() => document.body.classList.contains('menu-open') && !document.body.classList.contains('advanced-open'), null, { timeout: 4000 });

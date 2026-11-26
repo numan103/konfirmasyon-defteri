@@ -426,6 +426,25 @@ try {
       assert.ok(d.points[1].time > d.points[0].time);
     } finally { await touchContext.close(); }
   });
+  await test('Brush stays armed after a stroke and a single tap', async () => {
+    const before = await count();
+    await selectTool('brush');
+    const r = await plot();
+    await page.mouse.move(r.x + r.width * .18, r.y + r.height * .52);
+    await page.mouse.down();
+    await page.mouse.move(r.x + r.width * .42, r.y + r.height * .64, { steps: 12 });
+    await page.mouse.up();
+    await page.waitForFunction(n => window.__alfaDebug.drawings.history.doc.drawings.length === n, before + 1);
+    assert.equal(await debug(() => window.__alfaDebug.drawings.tool), 'brush');
+    assert.equal(await page.locator('#drawing-tools [data-tool=brush]').getAttribute('aria-pressed'), 'true');
+
+    // A single tap with the brush finishes the draft without adding a point.
+    await page.mouse.click(r.x + r.width * .55, r.y + r.height * .44);
+    await page.waitForTimeout(150);
+    assert.equal(await count(), before + 1, 'a single brush tap must not add a drawing');
+    assert.equal(await debug(() => window.__alfaDebug.drawings.tool), 'brush', 'brush must stay armed after a single tap');
+    await page.locator('#drawing-tools [data-tool=cursor]').click();
+  });
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: results.length, tests: results, pageErrors: errors, persistence: 'Guest/local only; authenticated live database NOT verified' }, null, 2));
   if (arg('screenshot')) await page.screenshot({ path: arg('screenshot') });

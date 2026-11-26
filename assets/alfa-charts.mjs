@@ -3,20 +3,20 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=17';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=8';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=5';
+import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=18';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=9';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=6';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=7';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=8';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument, TOOLS } from './alfa-drawings-model.mjs?v=8';
-import { PublicStudiesManager } from './alfa-public-studies.mjs?v=3';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=4';
 import { initMultiChart } from './alfa-multichart.mjs?v=6';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
@@ -83,6 +83,7 @@ let pendingStudies = null, studyContext = null;
 let syncMobileShell = () => {};
 let paintMobileMarket = () => {};
 let openMobileSheet = () => {};
+let closeMobileSheets = () => {};
 let syncMobileStatus = () => {};
 let syncShareCapabilities = () => {};
 const alarmPriceTracker = createPriceTracker();
@@ -190,6 +191,7 @@ if (isMobile) {
     if (className === 'share-open') syncShareCapabilities();
   };
   openMobileSheet = openSheet;
+  closeMobileSheets = closeSheets;
 
   const MOBILE_TOOL_LABELS = {
     cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yatay çizgi', vertical: 'Dikey çizgi',
@@ -354,9 +356,9 @@ if (isMobile) {
   try { toolsHidden = localStorage.getItem(toolsHiddenKey) === '1'; } catch {}
   setToolsHidden(toolsHidden);
   toolsStar?.addEventListener('click', () => setToolsHidden(!document.body.classList.contains('tools-hidden')));
-  for (const [id, range] of Object.entries({ 'menu-range-1d': '86400', 'menu-range-5d': '432000', 'menu-range-1m': '2592000', 'menu-range-all': 'all' })) {
-    $(id)?.addEventListener('click', () => { closeSheets(); document.querySelector(`[data-range="${range}"]`)?.click(); });
-  }
+  document.querySelectorAll('#mobile-menu-sheet [data-range]').forEach(button => {
+    button.addEventListener('click', closeSheets);
+  });
   $('menu-timezone')?.addEventListener('click', () => { closeSheets(); $('chart-timezone')?.click(); queueMicrotask(syncMenuControls); });
   $('menu-log')?.addEventListener('click', () => { closeSheets(); $('log-scale')?.click(); queueMicrotask(syncMenuControls); });
   $('menu-auto')?.addEventListener('click', () => { closeSheets(); $('auto-scale')?.click(); queueMicrotask(syncMenuControls); });
@@ -422,7 +424,8 @@ if (isMobile) {
     if (!open) return;
     if (event.target.closest('.mobile-sheet') || event.target.closest('#mobile-sheet-backdrop') ||
         event.target.closest('#mobile-market-strip') || event.target.closest('#mobile-tools-toggle') ||
-        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-menu-open')) return;
+        event.target.closest('#mobile-settings-toggle') || event.target.closest('#mobile-menu-open') ||
+        event.target.closest('#mobile-draw-fab')) return;
     closeSheets();
   }, true);
 
@@ -431,7 +434,10 @@ if (isMobile) {
   const stripSymbols = () => {
     const rows = [...document.querySelectorAll('.watch-row[data-symbol]')].map(el => el.dataset.symbol);
     const options = [...($('symbol')?.options || [])].map(option => option.value);
-    return [...new Set([...rows, ...options, symbol].filter(Boolean))];
+    // Five centred rows need five real, chartable refs even before the catalog
+    // finishes loading. These are ordinary Binance Spot pairs, not fake data.
+    const fallback = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT'];
+    return [...new Set([...rows, ...options, ...fallback, symbol].filter(Boolean))];
   };
   let stripPreview = null;
   let stripDwell = null;
@@ -465,11 +471,15 @@ if (isMobile) {
     document.body.classList.toggle('strip-preview', previewing);
     const symbols = stripSymbols();
     const index = Math.max(0, symbols.indexOf(ref));
-    const set = (id, value) => { const el = $(id); if (el) el.textContent = value; };
-    set('mobile-swipe-prev', symbols.length > 1 ? symbols[wrapIndex(index - 1, symbols.length)] : '');
-    set('mobile-swipe-symbol', ref);
-    set('mobile-swipe-next', symbols.length > 1 ? symbols[wrapIndex(index + 1, symbols.length)] : '');
-    set('mobile-swipe-count', symbols.length ? `${index + 1} / ${symbols.length}` : '');
+    const steps = { '-2': 'mobile-swipe-far-prev', '-1': 'mobile-swipe-prev', '0': 'mobile-swipe-symbol', '1': 'mobile-swipe-next', '2': 'mobile-swipe-far-next' };
+    for (const [step, id] of Object.entries(steps)) {
+      const el = $(id), next = symbols.length ? symbols[wrapIndex(index + Number(step), symbols.length)] : '';
+      if (!el) continue;
+      el.textContent = next;
+      el.dataset.symbol = next;
+      el.setAttribute('aria-label', step === '0' ? `${next} · parite listesini aç` : `${next} · seçmek için dokun`);
+    }
+    $('mobile-swipe-count').textContent = symbols.length ? `${index + 1} / ${symbols.length}` : '';
     $('mobile-swipe-overlay')?.setAttribute('aria-hidden', String(!previewing));
     if (!previewing) resetSwipeMotion();
   };
@@ -489,6 +499,14 @@ if (isMobile) {
     if (!next || next === symbol) { stripPreview = null; paintStrip(); return false; }
     stripPreview = null;
     const changed = selectStripSymbol(next);
+    // A dwell can fire in the middle of a drag. Rebase the gesture on the newly
+    // selected pair so continued movement previews the next neighbour, not the
+    // pair two or three steps away from the old origin.
+    if (stripDrag) {
+      stripDrag.startIndex = Math.max(0, stripSymbols().indexOf(symbol));
+      stripDrag.y = stripDrag.lastY ?? stripDrag.y;
+      stripDrag.lastStep = 0;
+    }
     paintStrip();
     return changed;
   };
@@ -501,9 +519,24 @@ if (isMobile) {
     strip?.setAttribute('data-dir', stripDir > 0 ? 'down' : 'up');
     paintStrip();
     clearStripDwell();
-    if (next !== symbol) stripDwell = setTimeout(() => commitStripPreview(), 3000);
+    if (next !== symbol) stripDwell = setTimeout(() => commitStripPreview(), 500);
   };
   const openPairList = () => { closeSheets(); watchlist?.openExplorer(); };
+  const swipeOverlay = $('mobile-swipe-overlay');
+  const swipeRow = target => target.closest?.('.mobile-swipe-row[data-swipe-step]');
+  swipeOverlay?.addEventListener('pointerover', event => {
+    const row = swipeRow(event.target), step = Number(row?.dataset.swipeStep);
+    if (row && step !== 0) previewStripSymbol(row.dataset.symbol, step);
+  });
+  swipeOverlay?.addEventListener('click', event => {
+    const row = swipeRow(event.target), step = Number(row?.dataset.swipeStep);
+    if (!row) return;
+    event.stopPropagation();
+    if (step === 0) { openPairList(); return; }
+    suppressStripClickUntil = Date.now() + 250;
+    stripPreview = row.dataset.symbol;
+    commitStripPreview();
+  });
   strip?.addEventListener('click', event => {
     if (event.target.closest('#mobile-menu-open, #mobile-tools-star, #mobile-timeframe')) return;
     if (consumeStripClick()) openPairList();
@@ -512,13 +545,15 @@ if (isMobile) {
     if (event.target.closest('#mobile-menu-open, #mobile-tools-star, #mobile-timeframe')) return;
     strip.setPointerCapture?.(event.pointerId);
     const symbols = stripSymbols();
-    stripDrag = { y: event.clientY, symbols, startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, moved: false };
+    stripDrag = { y: event.clientY, lastY: event.clientY, symbols,
+      startIndex: Math.max(0, symbols.indexOf(stripPreview || symbol)), lastStep: 0, moved: false };
     strip.classList.add('swiping');
   });
   strip?.addEventListener('pointermove', event => {
     if (!stripDrag) return;
     event.preventDefault();
     if (replayMode && !paper.canLeave()) return;
+    stripDrag.lastY = event.clientY;
     const dy = event.clientY - stripDrag.y;
     updateSwipeMotion(dy);
     const steps = Math.round(dy / 28);
@@ -531,13 +566,16 @@ if (isMobile) {
   });
   const endStripDrag = event => {
     if (!stripDrag) return;
-    if (stripDrag.moved) {
+    const moved = stripDrag.moved;
+    if (moved) {
       suppressStripClickUntil = Date.now() + 250;
       resetSwipeMotion();
     }
     stripDrag = null;
     strip?.classList.remove('swiping');
     strip?.releasePointerCapture?.(event.pointerId);
+    // A quick swipe must land on its previewed pair without waiting for dwell.
+    if (moved) commitStripPreview();
   };
   strip?.addEventListener('pointerup', endStripDrag);
   strip?.addEventListener('pointercancel', endStripDrag);
@@ -645,7 +683,7 @@ if (isMobile) {
     cancelHold();
     touches.add(event.pointerId);
     const axisStart = event.clientX >= host.getBoundingClientRect().right - rightScale.width();
-    if (touches.size !== 1 || axisStart || event.target.closest('#drawing-favs,#drawing-selection,.selection-toolbar,[data-id],#price-scale-grip') ||
+    if (touches.size !== 1 || axisStart || event.target.closest('#chart-watermark,.pane-study-label,#mobile-swipe-overlay,#drawing-selection,.selection-toolbar,[data-id],#price-scale-grip') ||
         (host.dataset.drawingTool && host.dataset.drawingTool !== 'cursor')) { pricePan = null; return; }
     const margins = rightScale.options().scaleMargins;
     pricePan = { id: event.pointerId, x: event.clientX, y: event.clientY, top: margins.top, bottom: margins.bottom };
@@ -1684,6 +1722,12 @@ watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => sy
     multiChart.notifySymbol(ref, interval);
   },
   onStatus: connection });
+// The legend symbol is the primary pair explorer entry on desktop and phone.
+$('market-title')?.addEventListener('click', () => watchlist?.openExplorer());
+$('market-title')?.addEventListener('keydown', event => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault(); watchlist?.openExplorer();
+});
 $('chart-type').addEventListener('change', e => { applyChartType(e.target.value); saveLayout(); });
 let logScale = false;
 let autoScale = true;
@@ -1695,16 +1739,20 @@ try {
 } catch {}
 // Candle / grid / background colours are chart-level preferences, not drawings.
 const DEFAULT_PALETTE = Object.freeze({
-  up: '#26c89c', down: '#ef6677', wickUp: '#26c89c', wickDown: '#ef6677', border: '#ef6677',
+  up: '#26a69a', down: '#ef5350', wickUp: '#26a69a', wickDown: '#ef5350', border: '#ef5350',
   borderVisible: false, background: '#10141c', text: '#8e9eb6', gridVert: '#1c243022', gridHorz: '#28334655'
 });
 const PALETTE_COLORS = Object.keys(DEFAULT_PALETTE).filter(k => k !== 'borderVisible');
 const HEX = /^#[0-9a-f]{6}([0-9a-f]{2})?$/i;
+const PALETTE_KEY = 'alfa-chart-palette:v2';
 let palette = { ...DEFAULT_PALETTE };
 try {
-  const raw = JSON.parse(localStorage.getItem('alfa-chart-palette:v1') || 'null');
+  // v2 is global: unlike the old per-timeframe layout snapshots these colours
+  // follow the user, never a symbol/interval, so 4h/1h/15m always match.
+  const raw = JSON.parse(localStorage.getItem(PALETTE_KEY) || 'null');
   for (const k of PALETTE_COLORS) if (HEX.test(raw?.[k])) palette[k] = raw[k];
   if (typeof raw?.borderVisible === 'boolean') palette.borderVisible = raw.borderVisible;
+  localStorage.setItem(PALETTE_KEY, JSON.stringify(palette));
 } catch {}
 function withAlpha(hex, alpha) {
   const h = String(hex).replace('#', '');
@@ -1732,7 +1780,7 @@ function applyPalette() {
   if (form?.elements.namedItem('borderVisible')) form.elements.namedItem('borderVisible').checked = palette.borderVisible;
   if (history?.length) volume.setData(volumeData(history));
 }
-function persistPalette() { try { localStorage.setItem('alfa-chart-palette:v1', JSON.stringify(palette)); } catch {} }
+function persistPalette() { try { localStorage.setItem(PALETTE_KEY, JSON.stringify(palette)); } catch {} }
 function paletteFields() {
   const labels = { up: 'Yükselen mum', down: 'Düşen mum', wickUp: 'Yükselen fitil', wickDown: 'Düşen fitil', border: 'Mum kenarı',
     background: 'Grafik zemini', text: 'Eksen metni', gridVert: 'Dikey ızgara', gridHorz: 'Yatay ızgara' };
@@ -1750,16 +1798,16 @@ function applyPaletteForm(data) {
 }
 function resetPalette() { palette = { ...DEFAULT_PALETTE }; applyPalette(); persistPalette(); saveLayout(); }
 window.addEventListener('storage', event => {
-  if (event.key !== 'alfa-chart-palette:v1') return;
+  if (event.key !== PALETTE_KEY) return;
   try { applyPaletteSettings(JSON.parse(event.newValue || 'null')); } catch {}
 });
 
 if (isMobile) {
   const THEMES = {
     dark: { background: '#10141c', text: '#8e9eb6', gridVert: '#1c243022', gridHorz: '#28334655',
-      up: '#26c89c', down: '#ef6677', wickUp: '#26c89c', wickDown: '#ef6677', border: '#ef6677' },
+      up: '#26a69a', down: '#ef5350', wickUp: '#26a69a', wickDown: '#ef5350', border: '#ef5350' },
     light: { background: '#f7f9fc', text: '#334155', gridVert: '#dbe3ee88', gridHorz: '#cbd5e199',
-      up: '#0f9d76', down: '#e2566a', wickUp: '#0f9d76', wickDown: '#e2566a', border: '#0f9d76' }
+      up: '#26a69a', down: '#ef5350', wickUp: '#26a69a', wickDown: '#ef5350', border: '#ef5350' }
   };
   const paletteControls = $('mobile-palette-controls');
   let mobileTheme = localStorage.getItem('alfa-chart-mobile-theme:v1') ||
@@ -2038,45 +2086,34 @@ document.addEventListener('fullscreenchange', () => {
   $('fullscreen').innerHTML = icon('fullscreen') + (document.fullscreenElement ? 'Tam ekrandan çık' : 'Tam ekran');
 });
 
-// One-tap drawing UX for the phone shell. The engine stays untouched: this only
-// mirrors its existing tools/actions into compact, thumb-reachable overlays.
+// One-tap drawing UX for the phone shell. The engine stays untouched: the only
+// tool entry is a draggable pencil FAB that opens the complete tool sheet.
 function initDrawingQuickUX() {
-  const quick = $('mobile-draw-quick'), actions = $('mobile-draw-actions'), hint = $('mobile-draw-hint');
-  if (!quick || !actions || !hint) return;
-  const CORE = ['fibonacci', 'horizontal', 'trend', 'long', 'short'];
-  const LABELS = { fibonacci: 'Fib', horizontal: 'Yatay', trend: 'Trend', long: 'Long', short: 'Short',
-    brush: 'Fırça', rectangle: 'Kare', text: 'Metin', ruler: 'Ölç', ray: 'Işın', vertical: 'Dikey', arrow: 'Ok',
-    undo: 'Geri al', redo: 'Yinele', tools: 'Araçlar', settings: 'Ayarlar', lock: 'Kilitle',
+  const fab = $('mobile-draw-fab'), fabButton = $('mobile-draw-fab-button');
+  const actions = $('mobile-draw-actions'), hint = $('mobile-draw-hint');
+  if (!fab || !fabButton || !actions || !hint) return;
+  const LABELS = { brush: 'Fırça', rectangle: 'Kare', text: 'Metin', ruler: 'Ölç', ray: 'Işın', vertical: 'Dikey', arrow: 'Ok',
+    horizontal: 'Yatay', trend: 'Trend', fibonacci: 'Fibonacci', long: 'Long', short: 'Short',
+    undo: 'Geri al', redo: 'Yinele', settings: 'Ayarlar', lock: 'Kilitle',
     unlock: 'Kilidi aç', hide: 'Gizle', show: 'Göster', copy: 'Kopyala', remove: 'Sil' };
-  const GLYPHS = { hide: 'eyeOff', show: 'eye', remove: 'delete', copy: 'layers', tools: 'brush', settings: 'settings' };
+  const GLYPHS = { hide: 'eyeOff', show: 'eye', remove: 'delete', copy: 'layers', settings: 'settings' };
   const button = (key, label, onClick, options = {}) => {
     const b = document.createElement('button');
     b.type = 'button'; b.dataset.quick = key;
     b.innerHTML = `${icon(GLYPHS[key] || key)}<span>${label}</span>`;
     b.title = options.title || label; b.setAttribute('aria-label', options.title || label);
     b.addEventListener('click', onClick);
-    if (options.contextmenu) b.addEventListener('contextmenu', event => { event.preventDefault(); options.contextmenu(); });
     return b;
   };
-  let quickKey = '', actionsKey = '';
-  const renderQuick = () => {
-    const tools = [...CORE];
-    for (const tool of drawings.favs || []) if (!tools.includes(tool) && !['cursor', 'delete'].includes(tool)) tools.push(tool);
-    quick.replaceChildren(
-      button('undo', LABELS.undo, () => $('drawing-undo')?.click(), { title: 'Geri al (Ctrl+Z)' }),
-      button('redo', LABELS.redo, () => $('drawing-redo')?.click(), { title: 'Yinele (Ctrl+Shift+Z)' })
-    );
-    for (const tool of tools) {
-      const label = LABELS[tool] || tool;
-      const b = button(tool, label, () => drawings.setTool(tool), {
-        title: `${label} · uzun bas: favorilere ekle/çıkar`,
-        contextmenu: () => drawings.toggleFav(tool)
-      });
-      b.dataset.tool = tool;
-      quick.append(b);
-    }
-    quick.append(button('tools', LABELS.tools, () => openMobileSheet(), { title: 'Tüm çizim araçları' }));
-  };
+  const panel = $('chart-panel-single'), fabKey = 'alfa-mobile-draw-fab:v1';
+  try { if (!localStorage.getItem(fabKey)) localStorage.setItem(fabKey, JSON.stringify({ x: .92, y: .8 })); } catch {}
+  if (panel) new FloatingToolbar({ element: fab, host: panel, key: fabKey,
+    getBounds: () => ({ width: panel.clientWidth, height: panel.clientHeight }) });
+  fabButton.addEventListener('click', () => {
+    if (document.body.classList.contains('tools-open')) closeMobileSheets();
+    else openMobileSheet('tools-open');
+  });
+  let actionsKey = '';
   const renderActions = () => {
     const d = drawings.current();
     if (!d) { actions.hidden = true; return; }
@@ -2088,32 +2125,26 @@ function initDrawingQuickUX() {
       button(locked ? 'unlock' : 'lock', locked ? LABELS.unlock : LABELS.lock, () => drawings.action('lock')),
       button(hidden ? 'show' : 'hide', hidden ? LABELS.show : LABELS.hide, () => drawings.action('hide')),
       button('copy', LABELS.copy, () => drawings.action('copy'), { title: 'Seçili çizimi kopyala' }),
-      button('remove', LABELS.remove, () => drawings.action('remove'), { title: 'Seçili çizimi sil (Delete)' }),
-      button('tools', LABELS.tools, () => openMobileSheet(), { title: 'Yeni çizim aracı seç' })
+      button('remove', LABELS.remove, () => drawings.action('remove'), { title: 'Seçili çizimi sil (Delete)' })
     );
     actions.hidden = false;
   };
   const sync = () => {
     if (!drawings.ready) return;
-    const favKey = (drawings.favs || []).join(',');
-    if (favKey !== quickKey) { quickKey = favKey; renderQuick(); }
-    quick.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === drawings.tool)));
-    quick.querySelector('[data-quick="undo"]')?.toggleAttribute('disabled', !!$('drawing-undo')?.disabled);
-    quick.querySelector('[data-quick="redo"]')?.toggleAttribute('disabled', !!$('drawing-redo')?.disabled);
     const d = drawings.current(), selected = !!d && drawings.drawingsVisible;
     document.body.classList.toggle('drawing-selected', selected);
     const key = selected ? `${d.id}|${!!d.locked}|${!!d.hidden}|${!!$('drawing-undo')?.disabled}|${!!$('drawing-redo')?.disabled}` : '';
     if (key !== actionsKey) { actionsKey = key; renderActions(); }
+    fabButton.setAttribute('aria-expanded', String(document.body.classList.contains('tools-open')));
     let text = '';
     if (drawings.tool && drawings.tool !== 'cursor') {
       const label = LABELS[drawings.tool] || drawings.tool;
-      text = drawings.draft ? `${label} · ikinci noktayı seçin (sürükleyerek de ayarlanır)` : `${label} · başlangıç noktasını seçin`;
+      text = drawings.draft ? `${label} · ikinci noktayı seçin` : `${label} · başlangıç noktasını seçin`;
     } else if (selected) {
-      text = `${d.name || LABELS[d.type] || d.type} seçildi · alttan düzenleyin`;
+      text = `${d.name || LABELS[d.type] || d.type} seçildi`;
     }
     hint.textContent = text; hint.hidden = !text;
   };
-  renderQuick();
   setInterval(sync, 120);
   sync();
 }
@@ -2552,7 +2583,7 @@ const conflictContext = (owner, ref, tf) => JSON.stringify([owner, ref, tf]);
 let cloudSaveTimer = null;
 function layoutSettings() {
   return structuredClone({
-    chartType: type, logScale, autoScale, view: { ...viewConfig }, palette: { ...palette }, indicators: indicators.toJSON(), mtf: mtf.config,
+    chartType: type, logScale, autoScale, view: { ...viewConfig }, indicators: indicators.toJSON(), mtf: mtf.config,
     sessionLevels: sessionLevels.config, sessionBoxes: sessionBoxes.config,
     marketStructure: marketStructure.config, fvg: fvg.config, publicStudies: publicStudies.toJSON(), studies: studiesUI.toJSON(),
   });
@@ -2690,7 +2721,6 @@ async function loadLayout() {
       if (typeof raw.logScale === 'boolean') setLogScale(raw.logScale, false);
       if (typeof raw.autoScale === 'boolean') setAutoScale(raw.autoScale, false);
       if (raw.view) applyViewSettings(raw.view);
-      if (raw.palette) applyPaletteSettings(raw.palette);
       if (raw.mtf) mtf.config = { ...mtf.defaultConfig(), ...raw.mtf };
       if (raw.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...raw.sessionLevels };
       if (raw.sessionBoxes) applySessionBoxesConfig(raw.sessionBoxes);
@@ -2705,7 +2735,7 @@ async function loadLayout() {
     if (cloud && cloud.settings) {
       const s = cloud.settings; cloudLayout = s;
       if (typeof s.chartType === 'string') applyChartType(s.chartType);
-      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view); if (s.palette) applyPaletteSettings(s.palette);
+      if (typeof s.logScale === 'boolean') setLogScale(s.logScale, false); if (typeof s.autoScale === 'boolean') setAutoScale(s.autoScale, false); if (s.view) applyViewSettings(s.view);
       if (s.mtf) mtf.config = { ...mtf.defaultConfig(), ...s.mtf };
       if (s.sessionLevels) sessionLevels.config = { ...sessionLevels.defaultConfig(), ...s.sessionLevels };
       if (s.sessionBoxes) applySessionBoxesConfig(s.sessionBoxes);

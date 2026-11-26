@@ -41,10 +41,15 @@ const doc = () => page.evaluate(() => {
 try {
   await page.goto(origin + '/alfa-charts.html?debug=1', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__alfaDebug?.ready === true && document.querySelector('#chart-loading')?.hidden === true, null, { timeout: 30000 });
-  await page.waitForFunction(() => document.querySelector('#mobile-draw-quick [data-tool="fibonacci"]'), null, { timeout: 10000 });
+  await page.waitForFunction(() => document.querySelector('#mobile-draw-fab-button') &&
+    document.querySelectorAll('#mobile-all-tools [data-group]').length >= 5, null, { timeout: 10000 });
 
   step = 'create-fib';
-  await page.click('#mobile-draw-quick [data-tool="fibonacci"]');
+  await page.click('#mobile-draw-fab-button');
+  await page.waitForFunction(() => document.body.classList.contains('tools-open'), null, { timeout: 5000 });
+  await page.click('#mobile-all-tools [data-group="fib"]');
+  await page.click('#mobile-all-tools [data-tool="fibonacci"]');
+  await page.click('#mobile-tools-close');
   await page.waitForFunction(() => document.querySelector('#chart')?.dataset.drawingTool === 'fibonacci', null, { timeout: 5000 });
   const chart = await page.locator('#chart').boundingBox();
   await page.mouse.click(chart.x + 80, chart.y + chart.height * 0.35);

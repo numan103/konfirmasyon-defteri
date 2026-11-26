@@ -311,19 +311,26 @@ export class ChartWatchlist {
   }
   openExplorer() {
     this.modal?.close();
-    const toEntry = d => ({ ref: d.key, base: d.base, quote: d.quote, venue: d.venue,
+    const toEntry = d => ({ ref: d.key || d.ref || d.symbol, base: d.base, quote: d.quote, venue: d.venue,
       marketType: (d.marketType || '').toUpperCase(), label: d.label, chartable: d.chartable !== false });
-    const spots = this.markets.map(m => ({ ref: m.symbol, base: m.base, quote: m.quote, venue: 'BINANCE',
-      marketType: 'SPOT', label: `${m.base}/${m.quote} · Binance Spot`, chartable: true }));
+    // A failed catalog fetch must not leave an empty explorer. These are the
+    // default Binance Spot pairs the chart itself already supports.
+    const fallbackSpots = SYMBOLS.map(ref => {
+      const quote = ['USDT', 'USDC', 'FDUSD', 'BTC', 'ETH'].find(q => ref.endsWith(q)) || 'USDT';
+      return { ref, base: ref.slice(0, -quote.length), quote, venue: 'BINANCE', marketType: 'SPOT',
+        label: `${ref.slice(0, -quote.length)}/${quote} · Binance Spot`, chartable: true };
+    });
+    const spots = (this.markets.length ? this.markets.map(m => ({ ref: m.symbol, base: m.base, quote: m.quote, venue: 'BINANCE',
+      marketType: 'SPOT', label: `${m.base}/${m.quote} · Binance Spot`, chartable: true })) : fallbackSpots);
     const foreign = foreignMarkets().map(m => toEntry(m));
     const seeds = FREE_REF_SEEDS.map(ref => { try { return toEntry(parseMarketRef(ref)); } catch { return null; } }).filter(Boolean);
-    const all = [...new Map([...spots, ...foreign, ...seeds].map(item => [item.ref, item])).values()];
-    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Pariteler</h3><p>Tüm kripto ve Forex pariteleri · arama önerileri ve borsa sütunu</p></div><button id="pair-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    const all = [...new Map([...spots, ...foreign, ...seeds].filter(m => m?.ref).map(item => [item.ref, item])).values()];
+    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Pariteler</h3><p>Tüm kripto ve Forex pariteleri · arama, ekleme ve favoriler</p></div><button id="pair-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
       <label class="study-search">${icon('search')}<input id="pair-query" list="pair-suggestions" placeholder="BTC, ETH, EURUSD, XAUUSD…" aria-label="Parite ara"></label>
       <datalist id="pair-suggestions"></datalist>
       <div id="pair-suggestion-chips" class="pair-suggestions"></div>
       <p id="pair-status" class="pair-explorer-status" role="status"></p>
-      <div class="pair-explorer-head"><span>Parite</span><span>Borsa</span><span>Tür</span><span>İşlem</span></div>
+      <div class="pair-explorer-head"><span>Parite</span><span>Borsa</span><span>Tür</span><span>Ekle</span><span>Favori</span><span>Aç</span></div>
       <div id="pair-results"></div>`, 'pair-explorer-dialog');
     modal.overlay.setAttribute('aria-label', 'Parite ara ve aç');
     modal.box.querySelector('#pair-close').onclick = modal.close;
@@ -331,18 +338,31 @@ export class ChartWatchlist {
     const render = () => {
       if (!modal.overlay.open) return;
       const q = input.value.toUpperCase().replace(/[ /]/g, '');
+      // Full catalog: search filters the list, it no longer truncates results.
       const matches = all.filter(m => !q || m.ref.includes(q) || m.label?.toUpperCase().includes(q) ||
-        `${m.base}${m.quote}`.includes(q)).slice(0, 120);
+        `${m.base}${m.quote}`.includes(q));
       const suggestions = matches.slice(0, 12);
       modal.box.querySelector('#pair-suggestions').innerHTML = suggestions.map(m => `<option value="${esc(m.ref)}"></option>`).join('');
       modal.box.querySelector('#pair-suggestion-chips').innerHTML = suggestions.slice(0, 8).map(m =>
         `<button type="button" data-pair-suggestion="${esc(m.ref)}">${esc(m.ref)}</button>`).join('');
       modal.box.querySelector('#pair-status').textContent = `${matches.length} parite · kripto ve Forex`;
-      modal.box.querySelector('#pair-results').innerHTML = matches.map(m => `<div class="pair-explorer-row">
-        <strong>${esc(m.base)}<small>${m.quote ? '/' + esc(m.quote) : ''}</small></strong>
-        <small>${esc(m.venue)}</small><small>${esc(m.marketType || 'SPOT')}</small>
-        <button class="pair-open" type="button" data-open-symbol="${esc(m.ref)}">Aç</button></div>`).join('') || '<p class="study-empty">Eşleşen parite yok.</p>';
+      modal.box.querySelector('#pair-results').innerHTML = matches.map(m => {
+        const ref = esc(m.ref), added = this.allSymbols().includes(m.ref), favorite = !!this.doc.flags?.[m.ref]?.starred;
+        return `<div class="pair-explorer-row" data-pair-row="${ref}">
+          <strong>${esc(m.base)}<small>${m.quote ? '/' + esc(m.quote) : ''}</small></strong>
+          <small>${esc(m.venue)}</small><small>${esc(m.marketType || 'SPOT')}</small>
+          <button class="pair-add" type="button" data-add-symbol="${ref}" ${added ? 'disabled' : ''} aria-label="${ref} listeye ekle">${added ? '✓' : '+'}</button>
+          <button class="pair-fav" type="button" data-fav-symbol="${ref}" aria-pressed="${favorite}" aria-label="${ref} favorisi">${icon('star')}</button>
+          <button class="pair-open" type="button" data-open-symbol="${ref}">Aç</button></div>`;
+      }).join('') || '<p class="study-empty">Eşleşen parite yok.</p>';
       modal.box.querySelectorAll('[data-pair-suggestion]').forEach(b => b.onclick = () => { input.value = b.dataset.pairSuggestion; render(); });
+      modal.box.querySelectorAll('[data-add-symbol]').forEach(b => b.onclick = () => {
+        if (b.disabled) return;
+        this.add(b.dataset.addSymbol); render();
+      });
+      modal.box.querySelectorAll('[data-fav-symbol]').forEach(b => b.onclick = () => {
+        this.toggleStar(b.dataset.favSymbol); render();
+      });
       modal.box.querySelectorAll('[data-open-symbol]').forEach(b => b.onclick = () => {
         this.add(b.dataset.openSymbol); this.select(b.dataset.openSymbol); modal.close();
       });

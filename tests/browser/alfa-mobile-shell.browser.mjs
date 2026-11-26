@@ -98,7 +98,7 @@ try {
       tfStars: document.querySelectorAll('#mobile-tf-list [data-tf-fav]').length,
       listVisible: document.querySelector('.workspace')?.classList.contains('no-list') === false,
       watchPressed: checked('#menu-watchlist'),
-      range1dPressed: checked('[data-range="86400"]')
+      range1dPressed: checked('#menu-range-1d')
     };
   });
 
@@ -179,7 +179,7 @@ try {
     input.value = '#123456';
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
-  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('alfa-chart-palette:v1')).background), '#123456');
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('alfa-chart-palette:v2')).background), '#123456');
   assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('#chart')).backgroundColor), 'rgb(18, 52, 86)');
   await page.click('[data-mobile-theme="dark"]');
   assert.equal(await page.inputValue('#mobile-palette-form [name="background"]'), '#10141c');
@@ -200,7 +200,7 @@ try {
   await page.click('#mobile-menu-open');
   await page.waitForFunction(() => document.body.classList.contains('menu-open'));
   await page.click('#menu-range-1d');
-  await page.waitForFunction(() => document.querySelector('[data-range="86400"]')?.getAttribute('aria-pressed') === 'true', { timeout: 5000 });
+  await page.waitForFunction(() => document.querySelector('#menu-range-1d')?.getAttribute('aria-pressed') === 'true', { timeout: 5000 });
   assert.equal((await read()).range1dPressed, true);
   assert.equal((await read()).chartNavDisplay, 'none');
 
@@ -275,16 +275,17 @@ try {
   await page.mouse.move(sx, sy + 56, { steps: 6 });
   await page.waitForFunction(() => document.body.classList.contains('strip-preview'), { timeout: 5000 });
   const swipePreview = await read();
-  assert.equal(swipePreview.activeSymbol, beforeMiddle.activeSymbol, 'strip swipe must not change the active pair immediately');
+  assert.equal(swipePreview.activeSymbol, beforeMiddle.activeSymbol, 'strip drag previews without changing the active pair');
   assert.ok(swipePreview.swipeCurrent.length > 0, 'carousel must show the upcoming pair');
   assert.ok(swipePreview.swipePrev.length > 0 && swipePreview.swipeNext.length > 0, 'carousel must show previous and next pairs');
   assert.match(swipePreview.swipeCount, /\d+\s*\/\s*\d+/, 'carousel must show list position');
   await page.mouse.up();
-  assert.equal((await read()).activeSymbol, beforeMiddle.activeSymbol, 'pointer release must not commit immediately');
-  await page.waitForFunction(symbol => document.querySelector('#symbol')?.value !== symbol,
-    beforeMiddle.activeSymbol, { timeout: 6000 });
+  // A quick swipe commits as soon as the finger lifts; only a stationary
+  // preview waits for the short dwell.
+  await page.waitForFunction(symbol => document.querySelector('#symbol')?.value === symbol,
+    swipePreview.swipeCurrent, { timeout: 6000 });
   const afterSwipe = await read();
-  assert.equal(afterSwipe.overlayActive, false, 'dwell commit must clear the carousel');
+  assert.equal(afterSwipe.overlayActive, false, 'commit must clear the carousel');
 
   const tfBefore = (await read()).mobileTimeframe;
   const tfChip = await page.$('#mobile-timeframe');

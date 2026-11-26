@@ -43,21 +43,25 @@ try {
 
   await run('Mobil tek araç yüzeyi ve sürükleme sırasında tarih etiketi', async () => {
     const surface = await mobile.evaluate(() => {
-      const quick = document.querySelector('#mobile-draw-quick');
-      const buttons = [...(quick?.querySelectorAll('button') || [])];
+      const fab = document.querySelector('#mobile-draw-fab');
+      const buttons = [...(fab?.querySelectorAll('button') || [])];
       return {
-        duplicateFavs: getComputedStyle(document.querySelector('#drawing-favs')).display,
+        duplicateFavs: !!document.querySelector('#drawing-favs'),
         desktopRail: getComputedStyle(document.querySelector('.drawing-space')).display,
-        quick: getComputedStyle(quick).display,
+        quick: !!document.querySelector('#mobile-draw-quick'),
+        fab: fab ? getComputedStyle(fab).display : 'missing',
         buttonCount: buttons.length,
-        minHeight: Math.min(...buttons.map(b => Math.round(b.getBoundingClientRect().height)))
+        minHeight: Math.min(...buttons.map(b => Math.round(b.getBoundingClientRect().height))),
+        groups: document.querySelectorAll('#mobile-all-tools [data-group]').length
       };
     });
-    assert.equal(surface.duplicateFavs, 'none', 'duplicate mobile favourite rail must stay hidden');
+    assert.equal(surface.duplicateFavs, false, 'duplicate favourites rail must stay removed');
     assert.equal(surface.desktopRail, 'none', 'desktop tool rail must not leak into the phone shell');
-    assert.equal(surface.quick, 'flex', 'single thumb-reachable tool rail must be visible');
-    assert.ok(surface.buttonCount >= 4, 'quick tool rail needs usable tools');
-    assert.ok(surface.minHeight >= 44, `quick tool targets too small: ${surface.minHeight}`);
+    assert.equal(surface.quick, false, 'the old quick bar must stay removed');
+    assert.equal(surface.fab, 'flex', 'the single thumb-reachable pencil FAB must be visible');
+    assert.ok(surface.buttonCount >= 2, 'the FAB needs a tool button and a drag grip');
+    assert.ok(surface.groups >= 5, 'the FAB must open every drawing category');
+    assert.ok(surface.minHeight >= 44, `FAB targets too small: ${surface.minHeight}`);
 
     const chart = await mobile.locator('#chart').boundingBox();
     const x = chart.x + chart.width * 0.45, y = chart.y + chart.height * 0.4;
@@ -87,28 +91,23 @@ try {
   await run('Açıklama panelleri gizli', async () => {
     await mobile.click('#mobile-menu-open');
     await mobile.waitForFunction(() => document.body.classList.contains('menu-open'), null, { timeout: 5000 });
-    const notes = await mobile.evaluate(() => {
-      const save = document.querySelector('#mobile-save-state'), install = document.querySelector('#mobile-install-hint');
-      return {
-        body: document.body.innerText,
-        saveHidden: !save || save.hidden === true || getComputedStyle(save).display === 'none',
-        saveText: save?.textContent || '',
-        alarmPresent: !!document.querySelector('.mobile-alarm-note'),
-        installHidden: !install || install.hidden === true || getComputedStyle(install).display === 'none',
-        installText: install?.textContent || ''
-      };
-    });
+    const notes = await mobile.evaluate(() => ({
+      body: document.body.innerText,
+      savePresent: !!document.querySelector('#mobile-save-state'),
+      alarmPresent: !!document.querySelector('.mobile-alarm-note'),
+      installPresent: !!document.querySelector('#mobile-install-hint'),
+      advancedNotes: document.querySelectorAll('#mobile-advanced-sheet .advanced-note').length
+    }));
     for (const phrase of [
       'MİSAFİR · yalnızca yerel kayıt',
       'Yerel alarm · yalnızca seçili sembol',
       'Test araçları simülasyondur; gerçek emir gönderilmez',
       'iOS Safari kurulumu bu çalışmada doğrulanmadı'
-    ]) assert.equal(notes.body.includes(phrase), false, `hidden explanation still visible: ${phrase}`);
-    assert.equal(notes.saveHidden, true);
-    assert.equal(notes.saveText, '');
+    ]) assert.equal(notes.body.includes(phrase), false, `removed explanation still visible: ${phrase}`);
+    assert.equal(notes.savePresent, false);
     assert.equal(notes.alarmPresent, false);
-    assert.equal(notes.installHidden, true);
-    assert.equal(notes.installText, '');
+    assert.equal(notes.installPresent, false);
+    assert.equal(notes.advancedNotes, 0);
     await mobile.screenshot({ path: path.join(shotDir, 'ux-02-mobile-menu-clean.png'), fullPage: false });
     await mobile.keyboard.press('Escape');
     await mobile.waitForFunction(() => !document.body.classList.contains('menu-open'));
@@ -160,28 +159,32 @@ try {
     await desktop.evaluate(() => document.body.classList.remove('chart-full'));
   });
 
-  await run('Web indikatör paneli grafik yanında ve sade', async () => {
+  await run('Web indikatör çipleri sembol altında ve sade', async () => {
     await desktop.click('#indicators-manage');
     await desktop.waitForSelector('[data-add="ema"]', { state: 'visible', timeout: 5000 });
     await desktop.click('[data-add="ema"]');
     await desktop.keyboard.press('Escape');
     await desktop.waitForFunction(() => document.querySelectorAll('#study-legend .study-chip[data-study-chip]').length >= 2, null, { timeout: 5000 });
     const panel = await desktop.evaluate(() => {
-      const legend = document.getElementById('study-legend'), chart = document.getElementById('chart');
-      const legendRect = legend.getBoundingClientRect(), chartRect = chart.getBoundingClientRect();
+      const legend = document.getElementById('study-legend'), chart = document.getElementById('chart'), title = document.getElementById('market-title');
+      const legendRect = legend.getBoundingClientRect(), chartRect = chart.getBoundingClientRect(), titleRect = title.getBoundingClientRect();
       const chips = [...legend.querySelectorAll('.study-chip[data-study-chip]')];
       const bulk = [...legend.querySelectorAll('[data-study-collapse-all],[data-study-expand-all],[data-study-remove-all]')]
         .filter(button => getComputedStyle(button).display !== 'none');
       return {
-        besideChart: legendRect.left > chartRect.left + chartRect.width * 0.6,
+        underSymbol: legendRect.top >= titleRect.bottom - 4 && legendRect.left >= titleRect.left - 4,
+        aboveChart: legendRect.bottom <= chartRect.top + 4 && legendRect.left >= chartRect.left - 4,
+        legendText: legend.textContent.trim(),
         heights: chips.map(chip => Math.round(chip.getBoundingClientRect().height)),
         bulkButtons: bulk.length,
         bodyText: document.body.innerText
       };
     });
-    assert.equal(panel.besideChart, true, 'indicator chips must sit beside the chart');
+    assert.equal(panel.underSymbol, true, 'overlay indicator chips must sit under the symbol label');
+    assert.equal(panel.aboveChart, true, 'the legend must stay directly above the plot');
+    assert.equal(panel.legendText.includes('İndikatörler'), false, 'the old legend heading must stay removed');
     assert.ok(panel.heights.length >= 2 && panel.heights.every(h => h <= 24), `indicator rows must stay compact: ${panel.heights}`);
-    assert.equal(panel.bulkButtons, 0, 'bulk +/- controls must stay hidden in the side panel');
+    assert.equal(panel.bulkButtons, 0, 'bulk +/- controls must stay hidden in the legend');
     assert.equal(panel.bodyText.includes('+ İndikatör ekle'), false, 'old + label must not reappear');
   });
 

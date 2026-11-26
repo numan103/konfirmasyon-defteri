@@ -17,6 +17,9 @@ export const OVERLAY_CATALOG = [
   { id: 'footprint', ...PUBLIC_STUDY_DETAILS.footprint, category: 'Market Data', color: '#7aafa0' },
   { id: 'heatmap', ...PUBLIC_STUDY_DETAILS.heatmap, category: 'Market Data', color: '#b29bd6' },
 ];
+// Public microstructure studies render in their own panes; the heatmap is an
+// overlay on the price pane and stays with the symbol legend instead.
+const PUBLIC_PANE_IDS = new Set(['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint']);
 const descriptions = {
   sma: 'Basit hareketli ortalama', ema: 'Üssel hareketli ortalama', wma: 'Ağırlıklı hareketli ortalama',
   vwma: 'Hacim ağırlıklı hareketli ortalama', vwap: 'Hacim ağırlıklı ortalama fiyat', bollinger: 'Ortalama ve standart sapma bantları',
@@ -125,7 +128,8 @@ export class ChartStudies {
         subtitle: item.params.period ? `${item.params.period} · ${(item.params.source || 'close').toUpperCase()}` : descriptions[item.type],
         visible: item.visible, collapsed: !!item.collapsed, color: item.params.color, pane: item.def.pane, item })),
       ...OVERLAY_CATALOG.filter(d => this.state[d.id].added).map(d => ({
-        ...d, subtitle: d.description, visible: this.state[d.id].visible, collapsed: !!this.state[d.id].collapsed, status: this.managers[d.id].status
+        ...d, subtitle: d.description, visible: this.state[d.id].visible, collapsed: !!this.state[d.id].collapsed,
+        pane: PUBLIC_PANE_IDS.has(d.id) ? 'oscillator' : 'main', status: this.managers[d.id].status
       })),
     ];
   }
@@ -179,15 +183,14 @@ export class ChartStudies {
         </div>`;
       }).join('');
       const actions = active.length ? `<div class="study-legend-actions">
-        <button data-study-manage type="button">${icon('settings')} İndikatörler</button>
+        <button data-study-manage type="button" title="İndikatörleri yönet" aria-label="İndikatörleri yönet">${icon('settings')}</button>
         <button data-study-collapse-all type="button" title="Tümünü küçült">${icon('minimize')}</button>
         <button data-study-expand-all type="button" title="Tümünü genişlet">${icon('expand')}</button>
         <button data-study-remove-all type="button" title="Tümünü kaldır">${icon('close')}</button>
       </div>` : '';
-      legend.innerHTML = cards + actions || '<button class="study-chip" data-open-studies>İndikatörler</button>';
+      legend.innerHTML = cards + actions;
       this.wireActive(legend);
       this.updateValues();
-      legend.querySelector('[data-open-studies]')?.addEventListener('click', () => this.open());
     }
     if (this.modal?.box.querySelector('#ind-list')) this.renderList();
   }

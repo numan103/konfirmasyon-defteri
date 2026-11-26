@@ -2,7 +2,6 @@ import { TOOLS, STYLE_FIELDS, EXTENSION_LEVELS, normalizeStyle, clone, emptyDocu
 import { renderDrawing } from './alfa-drawings-render.mjs?v=9';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=4';
 import { icon, chartDialog } from './alfa-chart-ui.mjs?v=2';
-import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=1';
 import { ObjectTree } from './alfa-object-tree.mjs?v=1';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
@@ -26,11 +25,10 @@ export class DrawingEngine {
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.svg.classList.add('drawing-overlay'); this.svg.setAttribute('aria-label', 'Fiyat ve zaman koordinatlı çizimler');
     host.append(this.svg);
-    this.toolbar = $('drawing-tools'); this.favbar = $('drawing-favs'); this.manager = $('drawing-manager'); this.status = $('drawing-status');
+    this.toolbar = $('drawing-tools'); this.manager = $('drawing-manager'); this.status = $('drawing-status');
     this.favs = this.loadFavs();
     this.buildUI();
     this.tree = new ObjectTree(this, toolNames);
-    this.floating = new FloatingToolbar({ element: this.favbar, host, getBounds: () => this.dimensions(), key: 'alfa-drawing-favs-position:v1' });
     this.store = new DrawingStore(() => this.openMarket(this.market, true), (ctx, text) => {
       if (!ctx || (ctx.symbol === this.market && ctx.owner === (this.store.user?.id || 'guest'))) this.status.textContent = text;
     });
@@ -43,11 +41,11 @@ export class DrawingEngine {
     host.addEventListener('pointercancel', () => this.cancel(), options);
     // Suppress only chart dragging initiated on a drawing, not wheel zoom/pan.
     host.addEventListener('mousedown', e => {
-      if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
+      if (e.target.closest?.('#chart-watermark,.pane-study-label,#mobile-swipe-overlay,.selection-toolbar')) return;
       if (this.drag || (this.tool !== 'cursor' && this.inPlot(e))) { e.preventDefault(); e.stopImmediatePropagation(); }
     }, options);
     host.addEventListener('touchstart', e => {
-      if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
+      if (e.target.closest?.('#chart-watermark,.pane-study-label,#mobile-swipe-overlay,.selection-toolbar')) return;
       if (this.drag || this.tool !== 'cursor') { e.preventDefault(); e.stopImmediatePropagation(); }
     }, { ...options, passive: false });
     this.svg.addEventListener('wheel', e => {
@@ -184,7 +182,8 @@ export class DrawingEngine {
     this.flyout?.querySelectorAll('[data-favorite]').forEach(b => b.setAttribute('aria-pressed', String(this.favs.includes(b.dataset.favorite))));
     this.status.textContent = this.favs.includes(tool) ? `${TOOLS[tool][1]} favorilere eklendi` : `${TOOLS[tool][1]} favorilerden çıkarıldı`;
   }
-  toolButtons() { return [...(this.favbar?.querySelectorAll('[data-tool]') || []), ...this.toolbar.querySelectorAll('[data-tool]'), ...(this.flyout?.querySelectorAll('[data-tool]') || [])]; }
+  toolButtons() { return [...this.toolbar.querySelectorAll('[data-tool]'), ...(this.flyout?.querySelectorAll('[data-tool]') || []),
+    ...document.querySelectorAll('#mobile-all-tools [data-tool]')]; }
   renderToolbars() {
     const make = (tool, starred) => {
       const label = toolNames[tool] || TOOLS[tool][1];
@@ -197,15 +196,6 @@ export class DrawingEngine {
       b.addEventListener('contextmenu', e => { e.preventDefault(); this.toggleFav(tool); });
       return b;
     };
-    if (this.favbar) {
-      this.favbar.replaceChildren();
-      const grip = document.createElement('button'); grip.type = 'button'; grip.className = 'fav-grip'; grip.dataset.toolbarGrip = '';
-      grip.innerHTML = icon('grip'); grip.title = 'Tut ve taşı · ok tuşları: taşı · çift tık / Home: sıfırla'; grip.setAttribute('aria-label', 'Favori araç çubuğunu taşı');
-      this.favbar.append(grip);
-      for (const tool of this.favs) this.favbar.append(make(tool, true));
-      this.favbar.hidden = !this.favs.length;
-      this.floating?.apply();
-    }
     this.toolbar.replaceChildren();
     this.toolbar.append(make('cursor', false));
     for (const group of TOOL_GROUPS) {
@@ -366,7 +356,7 @@ export class DrawingEngine {
   cancel() {
     this.closeContextMenu();
     this.closeToolMenu();
-    this.draft = null; this.drag = null; this.pending = null; this.brushing = false; this.tool = 'cursor';
+    this.draft = null; this.drag = null; this.pending = null; this.brushing = false; this.clickCandidate = null; this.tool = 'cursor';
     this.host.dataset.drawingTool = 'cursor';
     this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === 'cursor')));
     if ($('drawing-help')) $('drawing-help').textContent = 'Çizimi seçin/sürükleyin · çift tık: ayarlar';
@@ -387,7 +377,7 @@ export class DrawingEngine {
   }
   selectAll() { this.cancel(); this.selectObjects(this.history.doc.drawings.map(d => d.id)); }
   down(e) {
-    if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
+    if (e.target.closest?.('#chart-watermark,.pane-study-label,#mobile-swipe-overlay,.selection-toolbar')) return;
     if (!this.ready || e.button !== 0 || !this.inPlot(e)) return;
     const point = this.unproject(e); if (!point) return;
     const hit = e.target.closest?.('[data-id]'), id = hit?.getAttribute('data-id');
@@ -416,13 +406,17 @@ export class DrawingEngine {
     }
     if (!this.selection.has(id)) this.selected = id; else this.primary = id;
     const d = this.current(); this.refresh();
+    // An unmoved left click on a drawing opens the same menu as right-click.
+    this.clickCandidate = { id, target: e.target, x: e.clientX, y: e.clientY, pointer: e.pointerId };
     if (!d || d.locked) return;
     this.drag = { id, start: point, original: clone(d), doc: clone(this.history.doc), ids: [...this.selection],
       handle: this.selection.size === 1 ? e.target.getAttribute('data-handle') : null, pointer: e.pointerId };
     this.pending = clone(this.history.doc); this.host.setPointerCapture(e.pointerId);
   }
   move(e) {
-    if (e.target.closest?.('#drawing-favs,.selection-toolbar')) return;
+    if (e.target.closest?.('#chart-watermark,.pane-study-label,#mobile-swipe-overlay,.selection-toolbar')) return;
+    const c = this.clickCandidate;
+    if (c && c.pointer === e.pointerId && Math.hypot(e.clientX - c.x, e.clientY - c.y) > 4) this.clickCandidate = null;
     const point = this.unproject(e, !!this.drag || !!this.brushing); if (!point) return;
     if (this.brushing && this.draft?.type === 'brush') {
       const last = this.draft.points.at(-1);
@@ -469,19 +463,40 @@ export class DrawingEngine {
       this.finish();
       return;
     }
+    const candidate = this.clickCandidate;
+    if (candidate && candidate.pointer === e.pointerId) {
+      this.clickCandidate = null;
+      if (this.host.hasPointerCapture(e.pointerId)) this.host.releasePointerCapture(e.pointerId);
+      this.drag = null; this.pending = null;
+      this.contextMenu({ clientX: candidate.x, clientY: candidate.y, target: candidate.target,
+        preventDefault() {}, stopImmediatePropagation() {} });
+      return;
+    }
     if (!this.drag) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if (this.host.hasPointerCapture(e.pointerId)) this.host.releasePointerCapture(e.pointerId);
     const next = this.pending; this.drag = null; this.pending = null;
     if (next) this.commit(next);
   }
+  // Reset only the in-flight drawing. Unlike cancel(), the selected tool stays
+  // active so a brush stroke (or a single click) does not silently switch to cursor.
+  clearDraft() {
+    this.draft = null; this.pending = null; this.brushing = false;
+    this.host.dataset.drawingTool = this.tool;
+    this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === this.tool)));
+    this.render();
+  }
   finish() {
     const d = this.draft; if (!d || !validDrawing(d)) return;
-    if (d.type === 'brush') { if (d.points.length < 2) { this.cancel(); return; } }
-    else if (!onePoint(d.type) && Math.abs(d.points[0].time - d.points[1].time) < .001 &&
+    if (d.type === 'brush' && d.points.length < 2) { this.clearDraft(); return; }
+    if (!onePoint(d.type) && Math.abs(d.points[0].time - d.points[1].time) < .001 &&
       Math.abs(d.points[0].price - d.points[1].price) < .000001) return;
     const next = clone(this.history.doc); next.drawings.push(d);
-    this.selected = d.id; this.cancel(); this.commit(next);
+    this.selected = d.id;
+    // Brush stays armed for the next stroke; other tools return to cursor so a
+    // finished line can be resized or moved immediately.
+    if (d.type === 'brush') this.clearDraft(); else this.cancel();
+    this.commit(next);
     if (d.type === 'text' || d.type === 'label') { this.manager.hidden = false; this.updatePanel(); $('drawing-text').focus(); }
   }
   commit(next) {
@@ -554,7 +569,7 @@ export class DrawingEngine {
     if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'a') { e.preventDefault(); e.stopImmediatePropagation(); this.selectAll(); return; }
     if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'g') { e.preventDefault(); e.stopImmediatePropagation(); e.shiftKey ? this.action('ungroup') : this.groupSelection(); return; }
     if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'd' && this.selection.size) { e.preventDefault(); e.stopImmediatePropagation(); this.action('copy'); return; }
-    if (this.selection.size && this.host.contains(e.target) && !e.target.closest?.('#drawing-favs') && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+    if (this.selection.size && this.host.contains(e.target) && !e.target.closest?.('#chart-watermark,.pane-study-label,#mobile-swipe-overlay') && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
       e.preventDefault(); e.stopImmediatePropagation();
       const multiplier = e.shiftKey ? 10 : 1, current = this.current();
       const y = this.series.priceToCoordinate(current.points[0].price), p = y == null ? null : this.series.coordinateToPrice(y - 1);
@@ -753,7 +768,7 @@ export class DrawingEngine {
     ++this.epoch; this.abort.abort(); cancelAnimationFrame(this.frame);
     this.closeContextMenu();
     this.closeToolMenu();
-    this.floating.dispose(); this.tree.dispose();
+    this.tree.dispose();
     this.observer.disconnect(); this.store.dispose(); this.svg.remove();
   }
 }
