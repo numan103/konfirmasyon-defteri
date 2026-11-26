@@ -400,3 +400,44 @@ node tests/browser/alfa-capability-pwa.browser.mjs --url=http://127.0.0.1:8787 -
 - **Düzeltme:** Çubuklar portrede `bottom: 56px → 84px`, yatayda `60px → 66px`; ipucu da sırasıyla `108px → 146px` ve `110px → 124px` yukarı taşındı. Şeridin üstünde 8 px boşluk kaldı; `sw.js` değişmedi, CSS sürümü `?v=40 → ?v=41` yapıldı.
 - **Regresyon:** `alfa-drawing-experience.browser.mjs` artık hızlı araç/aksiyon çubuğunun şeridi geçmediğini ve menü/parite düğmelerinin `elementFromPoint` ile hâlâ ulaşılabilir olduğunu doğruluyor. Yerel suite PASS; `alfa-trust-touch` ve `alfa-mobile-landscape` de PASS.
 - **Kapsam:** Yalnızca mobil yerleşim/CSS ve test; çizim motoru, masaüstü düzeni ve Supabase kodu değişmedi.
+
+---
+
+## FAZ 6 — Grafik Etkileşimleri
+
+### Önceki eksiklik / mevcut durum
+
+Kod denetimi, istenen davranışların büyük kısmının zaten mevcut olduğunu gösterdi: `CrosshairMode.Normal` (`assets/alfa-charts.mjs:108`), `chart.subscribeCrosshairMove` (`assets/alfa-charts.mjs:1275`), pan/pinch ve fiyat ekseni grip (`assets/alfa-charts.mjs:111-112`, `:614-682`), uzun basma ile sıfırlama, eski mum gezinmesi ve çizim kalıcılığı çalışıyordu. Bunlar yeniden yazılmadı. Gerçek eksiklikler şunlardı:
+
+1. Mobil CSS `#ohlc` öğesini gizliyordu (`assets/alfa-charts.css:705`); dokunarak okunabilir fiyat/zaman balonu yoktu.
+2. “Son mum” ve “Sığdır” menüde vardı ama görünür bir “Görünümü sıfırla” eylemi yalnızca uzun basma/ayarlar içindeydi.
+3. Dokunmatik fiyat-pan dinleyicisi çizim hit hedeflerini hariç tutmuyordu; seçili çizim sürüklemesi fiyat marjlarını da değiştirebiliyordu.
+4. Görünür grafik aralığı (zoom/konum) sayfa yenilemesinde korunmuyordu; çizimler ve düzen ayrı olarak kalıcıydı.
+
+### Uygulanan geliştirme
+
+- `#mobile-candle-readout` eklendi; mevcut crosshair aboneliğinden besleniyor, O/H/L/C, değişim, hacim ve biçimlendirilmiş zamanı gösteriyor. `pointer-events` devraldığı için pan, pinch ve çizim dokunmalarını engellemiyor. Masaüstünde gizli.
+- Mobil menüye `menu-reset` eklendi ve mevcut `handleChartAction('reset-view')` akışına bağlandı. Sıfırlama ayrıca kaydedilmiş görünüm aralığını temizliyor.
+- Fiyat-pan dinleyicisine `[data-id]` ve `.selection-toolbar` hariç tutmaları eklendi; çizim seçimi/sürüklemesi artık fiyat eksenini kaydırmıyor.
+- Yalnızca mobil için sembol/zaman dilimi bazlı görünür logical aralık kalıcılığı eklendi. İlk veri gelince, aynı oturum ve aynı sembol/zaman dilimi için geri yükleniyor; sembol veya timeframe değişiminde sıfırlama davranışı korunuyor. `fit`, `son mum`, aralık seçimleri yeni aralığı kaydediyor; `sıfırla` kaydı siliyor.
+- Asset sürümleri CSS `?v=41 → ?v=42`, JS `?v=82 → ?v=83` yapıldı. `sw.js`, çizim motoru, grafik motoru, Watchlist, Replay, indikatörler ve masaüstü düzeni değişmedi. Production deploy yapılmadı.
+
+### Test sonucu
+
+- Yeni suite: `tests/browser/alfa-mobile-chart-interactions.browser.mjs` — **PASS**. Dokunma ile okuma balonu, menü sıfırlama, reload sonrası aralık geri yükleme, çizim sürüklemesinde fiyat marjlarının sabit kalması ve yatay görünüm kontrol edildi; sayfa hatası yok.
+- Regresyon: `alfa-mobile-shell`, `alfa-drawing-experience`, `alfa-mobile-landscape`, `alfa-trust-touch`, `alfa-capability-pwa` — **PASS** ( masaüstü smoke dahil ).
+- Birim testleri: `node --test tests/*.test.mjs` — **1219/1219 PASS**.
+- `alfa-mobile-shell.browser.mjs` yerel `http://` origin ile de çalışacak şekilde genişletildi; üretim kodu etkilenmedi.
+
+**Ekran görüntüleri**
+
+- Önce: [`phase6-00-before-portrait.png`](upgrade-screenshots/phase6-00-before-portrait.png), [`phase6-01-before-tap.png`](upgrade-screenshots/phase6-01-before-tap.png), [`phase6-02-before-landscape.png`](upgrade-screenshots/phase6-02-before-landscape.png)
+- Sonra: [`phase6-10-after-tap-readout.png`](upgrade-screenshots/phase6-10-after-tap-readout.png), [`phase6-11-after-persisted-viewport.png`](upgrade-screenshots/phase6-11-after-persisted-viewport.png), [`phase6-12-after-drawing-guard.png`](upgrade-screenshots/phase6-12-after-drawing-guard.png), [`phase6-13-after-landscape.png`](upgrade-screenshots/phase6-13-after-landscape.png)
+
+**Commit:** `feat: improve FAZ 6 mobile chart interactions` (tek FAZ 6 commit’i; kesin hash teslim notunda)
+
+### Kalan sınırlamalar
+
+- Gerçek iPhone/Android dokunma hissi ve Safari özel davranışları **UNVERIFIED**; testler gerçek Chrome’da Playwright/CDP dokunma olaylarıyla yapıldı.
+- Kalıcılık yalnızca mobil görünür logical aralığı kapsar; fiyat marjları ve çizim seçimi formu ayrıca saklanmaz. Çoklu grafik açıkken aralık geri yükleme/ kaydetme ana grafiğin senkronizasyonuna bırakılır.
+- Bulut hesabı/cross-device doğrulama gerçek hesap olmadan **UNVERIFIED**; FAZ 4 bulut çakışma mekanizmasına dokunulmadı.

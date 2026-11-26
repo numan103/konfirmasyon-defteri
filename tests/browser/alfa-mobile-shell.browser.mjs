@@ -1,11 +1,11 @@
 // Phone-shell smoke test for alfa-charts.html. Anonymous; no credentials or mutations.
-// node tests/browser/alfa-mobile-shell.browser.mjs --url=<staging-origin> --playwright=<path/to/playwright/index.mjs>
+// node tests/browser/alfa-mobile-shell.browser.mjs --url=http(s)://<origin> --playwright=<path/to/playwright/index.mjs>
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 const arg = key => process.argv.find(s => s.startsWith(`--${key}=`))?.split('=').slice(1).join('=');
 const origin = arg('url');
-assert.ok(origin && /^https:\/\//.test(origin), '--url=https://<staging-origin> is required');
+assert.ok(origin && /^https?:\/\//.test(origin), '--url=http(s)://<origin> is required');
 const { chromium, devices } = await import(pathToFileURL(path.resolve(arg('playwright') || 'node_modules/playwright/index.mjs')));
 const browser = await chromium.launch({
   executablePath: arg('chrome') || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',

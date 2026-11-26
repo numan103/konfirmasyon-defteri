@@ -334,6 +334,7 @@ if (isMobile) {
 
   $('menu-fit')?.addEventListener('click', () => { closeSheets(); handleChartAction('fit'); });
   $('menu-live')?.addEventListener('click', () => { closeSheets(); handleChartAction('realtime'); });
+  $('menu-reset')?.addEventListener('click', () => { closeSheets(); handleChartAction('reset-view'); });
   $('menu-fullscreen')?.addEventListener('click', () => { closeSheets(); handleChartAction('fullscreen'); });
   const toolsStar = $('mobile-tools-star');
   const toolsHiddenKey = 'alfa-mobile-tools-hidden:v1';
@@ -623,7 +624,7 @@ if (isMobile) {
     cancelHold();
     touches.add(event.pointerId);
     const axisStart = event.clientX >= host.getBoundingClientRect().right - rightScale.width();
-    if (touches.size !== 1 || axisStart || event.target.closest('#drawing-favs,#drawing-selection,#price-scale-grip') ||
+    if (touches.size !== 1 || axisStart || event.target.closest('#drawing-favs,#drawing-selection,.selection-toolbar,[data-id],#price-scale-grip') ||
         (host.dataset.drawingTool && host.dataset.drawingTool !== 'cursor')) { pricePan = null; return; }
     const margins = rightScale.options().scaleMargins;
     pricePan = { id: event.pointerId, x: event.clientX, y: event.clientY, top: margins.top, bottom: margins.bottom };
@@ -822,6 +823,55 @@ function visibleTimeRange() {
     return Number.isFinite(from) && Number.isFinite(to) ? { from, to } : null;
   } catch { return null; }
 }
+// FAZ 6: restore only the phone's last visible logical range, keyed to the
+// current market/timeframe. Symbols and timeframes still reset on switch.
+const VIEWPORT_KEY = 'alfa-chart-viewport:v1';
+let pendingViewport = isMobile ? readViewport() : null;
+let pendingViewportContext = pendingViewport ? `${symbol}|${interval}` : null;
+let lastChartNavAt = 0, viewportSaveTimer = null, viewportNavKey = null;
+function viewportKey() { return `${VIEWPORT_KEY}:${currentUserKey()}:${symbol}:${interval}`; }
+function readViewport() {
+  try {
+    const vp = JSON.parse(localStorage.getItem(viewportKey()) || 'null');
+    const from = Number(vp?.from), to = Number(vp?.to);
+    return Number.isFinite(from) && Number.isFinite(to) && to > from ? { from, to } : null;
+  } catch { return null; }
+}
+function clearViewport() {
+  pendingViewport = null; pendingViewportContext = null;
+  clearTimeout(viewportSaveTimer); viewportSaveTimer = null;
+  lastChartNavAt = 0; viewportNavKey = null;
+  try { localStorage.removeItem(viewportKey()); } catch {}
+}
+function saveViewport(force = false, key = viewportKey()) {
+  if (!isMobile || replayMode || multiChart?.state?.open) return;
+  if (!force && Date.now() - lastChartNavAt > 900) return;
+  if (key !== viewportKey()) return;
+  try {
+    const range = chart.timeScale().getVisibleLogicalRange();
+    if (!range || !Number.isFinite(range.from) || !Number.isFinite(range.to)) return;
+    localStorage.setItem(key, JSON.stringify({ from: range.from, to: range.to, at: Date.now() }));
+  } catch {}
+  if (force) { clearTimeout(viewportSaveTimer); viewportSaveTimer = null; lastChartNavAt = 0; }
+}
+function applyPendingViewport() {
+  const vp = pendingViewport;
+  if (!vp) return;
+  pendingViewport = null;
+  const context = pendingViewportContext;
+  pendingViewportContext = null;
+  if (!isMobile || replayMode || !history.length || multiChart?.state?.open || context !== `${symbol}|${interval}`) return;
+  const from = Math.max(0, vp.from);
+  const to = Math.max(from + 1, Math.min(vp.to, history.length + 8));
+  withSyncApply(() => { try { chart.timeScale().setVisibleLogicalRange({ from, to }); } catch {} });
+}
+chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
+  if (!isMobile || replayMode || multiChart?.state?.open || Date.now() - lastChartNavAt > 900) return;
+  clearTimeout(viewportSaveTimer);
+  viewportSaveTimer = setTimeout(() => saveViewport(true, viewportNavKey || viewportKey()), 220);
+});
+host.addEventListener('pointermove', () => { lastChartNavAt = Date.now(); viewportNavKey = viewportKey(); }, { passive: true });
+host.addEventListener('wheel', () => { lastChartNavAt = Date.now(); viewportNavKey = viewportKey(); }, { passive: true });
 function applyRangePayload(payload) {
   if (!payload) return;
   const ts = chart.timeScale();
@@ -983,6 +1033,22 @@ function showCandle(c) {
   const ohlc = $('ohlc');
   ohlc.textContent = `O ${priceFormat.format(d.open)}  H ${priceFormat.format(d.high)}  L ${priceFormat.format(d.low)}  C ${priceFormat.format(d.close)}  ${sign}${ch.toFixed(2)}%  V ${fmtVol(c.volume)}`;
   ohlc.style.color = ch >= 0 ? '#26c89c' : '#ef6677';
+}
+// FAZ 6: compact phone readout fed by the same crosshair subscription as #ohlc.
+// It never captures pointer events, so pan/pinch/drawing hit-testing stay intact.
+function showMobileCandle(c) {
+  const node = $('mobile-candle-readout');
+  if (!node || !isMobile) return;
+  if (!c) { node.hidden = true; return; }
+  let d = c;
+  if (type === 'heikin') {
+    const hd = heikinData(history);
+    d = hd.find(x => x.time === c.time) || c;
+  }
+  const ch = d.open ? ((d.close - d.open) / d.open) * 100 : 0;
+  node.textContent = `O ${priceFormat.format(d.open)} H ${priceFormat.format(d.high)} L ${priceFormat.format(d.low)} C ${priceFormat.format(d.close)} · ${ch >= 0 ? '+' : ''}${ch.toFixed(2)}% · V ${fmtVol(c.volume)} · ${chartTimeFormats.dateTime(c.time)}`;
+  node.style.color = ch >= 0 ? '#26c89c' : '#ef6677';
+  node.hidden = false;
 }
 async function loadOlderHistory() {
   if (replayMode) return;
@@ -1261,6 +1327,7 @@ function setData(data, resetView) {
   // A pane can receive parent state before its first candles arrive. Restore the
   // last accepted remote view after the data is in place so sync survives boot.
   reapplyLastSync();
+  applyPendingViewport();
   quote();
   if (pendingStudies) { try { applyStudiesBundle(pendingStudies, studyContext?.owner || currentUserKey(), symbol); } catch {} pendingStudies = null; }
   else { try { indicators.updateAll(history); } catch {} }
@@ -1277,11 +1344,14 @@ chart.subscribeCrosshairMove(param => {
   const bar = param.seriesData.get(activePriceSeries());
   if (!bar || !param.time) {
     showCandle(history.at(-1));
+    showMobileCandle(null);
     queueSync('crosshair', { visible: false });
     notifyMainSync('crosshair', { visible: false });
     return;
   }
-  showCandle(history.find(c => c.time === param.time));
+  const crosshairCandle = history.find(c => c.time === param.time);
+  showCandle(crosshairCandle);
+  showMobileCandle(crosshairCandle);
   const time = Number(param.time);
   if (!Number.isFinite(time)) return;
   const payload = {
@@ -1337,6 +1407,7 @@ function updateUI() {
 }
 async function loadMarket() {
   rememberStudies();
+  clearTimeout(viewportSaveTimer); viewportSaveTimer = null; lastChartNavAt = 0; viewportNavKey = null;
   if(replayMode&&!paper.canLeave()){
     symbol=paper.context.symbol;interval=paper.context.timeframe;updateUI();return;
   }
@@ -2743,7 +2814,10 @@ $('tester-open').addEventListener('click', () => {
 document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', async () => {
   if (!history.length) return;
   const ok = await navigateHistory(b.dataset.range === 'all' ? { all: true } : { duration: Number(b.dataset.range) });
-  if (ok) document.querySelectorAll('[data-range]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  if (ok) {
+    document.querySelectorAll('[data-range]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    saveViewport(true);
+  }
 }));
 function persistViewConfig() {
   try { localStorage.setItem('alfa-chart-view:v1', JSON.stringify(viewConfig)); } catch {}
@@ -2781,7 +2855,7 @@ function resetChartView() {
   setAutoScale(true, false);
   setLogScale(false, false);
   viewConfig = { ...DEFAULT_VIEW_CONFIG };
-  applyViewConfig(); persistViewConfig(); saveLayout();
+  applyViewConfig(); persistViewConfig(); saveLayout(); clearViewport();
   connection('Grafik görünümü sıfırlandı', 'ok');
 }
 function openChartSettingsModal() {
@@ -2859,9 +2933,11 @@ function handleChartAction(action) {
     case 'settings': openChartSettingsModal(); break;
     case 'fit':
       if (history.length) chart.timeScale().fitContent();
+      saveViewport(true);
       connection('Görünüm ekrana sığdırıldı', 'ok'); break;
     case 'realtime':
-      chart.timeScale().scrollToRealTime(); connection('Son muma dönüldü', 'ok'); break;
+      chart.timeScale().scrollToRealTime(); saveViewport(true);
+      connection('Son muma dönüldü', 'ok'); break;
     case 'fullscreen': $('fullscreen').click(); break;
     case 'grid': setViewOption('grid', !viewConfig.grid); break;
     case 'axisLabels': setViewOption('axisLabels', !viewConfig.axisLabels); break;
