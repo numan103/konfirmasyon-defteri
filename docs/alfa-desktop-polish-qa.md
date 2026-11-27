@@ -128,6 +128,26 @@ continue the reported UX work; the earlier publication request still applies.
   `http://127.0.0.1:8787`, report
   `.qa-reports/all-20261127-183248`.
 
+### Publication
+
+- Product commit: `064d4edd9ddb6f7dd8462bd7399441f17b10acd3`, pushed to
+  `origin/feat/mobile-ux-upgrade`.
+- Production target: Cloudflare Pages project `alfa-traders`, branch `main`,
+  `https://alfa-trader.com/alfa-charts.html` (canonical response at
+  `https://alfa-trader.com/alfa-charts`).
+- Deployment: `3920db28-2525-416a-a236-2ef0061c923d`, attached to the product
+  commit with `commit-dirty=false`; preview
+  `https://3920db28.alfa-traders.pages.dev`.
+- Rollback deployment: `32de29be-bd60-43f8-9587-93d03f2f2367` (source commit
+  `5fdb14d`), preview `https://32de29be.alfa-traders.pages.dev`.
+- Anonymous, read-only GET checks: canonical HTML 200; CSS `?v=64`, main JS
+  `?v=106`, chart studies `?v=12`, indicators `?v=10`, public studies `?v=9`,
+  pane labels `?v=4`, market data `?v=4`, watchlist `?v=10` and watchlist model
+  `?v=11` all 200 with the expected version markers. No production smoke suite
+  was run.
+- The four tracked mobile evidence screenshots were refreshed by the passing
+  nightly run and included with this batch.
+
 ### Risks and limits
 
 Watchlist documents, public-study adapters and indicator caption rebinding are
