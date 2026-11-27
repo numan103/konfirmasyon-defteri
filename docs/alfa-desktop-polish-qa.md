@@ -1,7 +1,15 @@
 # Desktop polish QA — 2026-11-27
 
 Release-readiness document remains **BLOCKED / NO-GO**. User explicitly requested
-publishing this UX batch; deployment details are reported separately.
+publishing this UX batch.
+
+- Production target: `alfa-traders / main`, `https://alfa-trader.com/alfa-charts.html`.
+- Product commit: `5fdb14dda77cca5b7d7cd31448c2caa914c97afb`.
+- Git push target: `origin/feat/mobile-ux-upgrade`.
+- Deployment: `32de29be-bd60-43f8-9587-93d03f2f2367`.
+- Rollback: `c1da6f92-6f31-46ef-be0c-78a2c656cc9f`.
+- Read-only production GET checks confirmed HTML CSS v63, JS v105, the
+  persistence guard and pane-label assets. No production smoke suite was run.
 
 ## Findings and fixes
 
@@ -51,7 +59,12 @@ rather than the legend.
   indicator-row 22px/top-edge assertion. Updated to 24px click targets and
   vertical-centre alignment; `alfa-indicator-pane` then PASS on its first run.
   No product code changed after that nightly.
-- Final web runner: **RUNNING**, max attempts 1.
+- Final web runner: **23/24 PASS**, no retries. Workspace timed out at the
+  native mouse crosshair propagation assertion between real embedded frames
+  (`tests/browser/alfa-workspace.browser.mjs:582`).
+- Standalone diagnostic workspace rerun on unchanged product: **25 checks PASS**.
+  This does not erase the failed full run or establish a root cause. Embedded
+  crosshair synchronization remains an unresolved intermittent QA finding.
 - `git diff --check`: PASS.
 - Screenshots: `.qa-reports/desktop-polish/` (ignored).
 
@@ -62,3 +75,6 @@ embedded charts; their nightly suites passed without retries. Automated browser 
 do not prove live exchange feed accuracy, every browser combination or physical
 iOS focus-zoom behavior. No real accounts, credentials or production mutations
 were used. Production smoke was not requested or run.
+
+Do not describe this batch as fully green: the final web runner's embedded
+crosshair timeout remains open despite the subsequent standalone pass.
