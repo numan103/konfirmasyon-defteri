@@ -1,10 +1,10 @@
 import { ResearchStorage } from './alfa-research-storage.mjs?v=1';
-import { ResearchSync } from './alfa-research-sync.mjs?v=5';
-import { SupabaseResearchTransport } from './alfa-research-transport.mjs?v=3';
-import { makePacket,validatePacket,packetBars,researchId,canonical } from './alfa-research-model.mjs?v=3';
+import { ResearchSync } from './alfa-research-sync.mjs?v=6';
+import { SupabaseResearchTransport } from './alfa-research-transport.mjs?v=4';
+import { makePacket,validatePacket,packetBars,researchId,canonical } from './alfa-research-model.mjs?v=4';
 import { PaperTradingEngine } from './alfa-paper-model.mjs?v=1';
 import { candleCloseTime } from './alfa-replay-model.mjs?v=3';
-import { assertEventExtension } from './alfa-research-model.mjs?v=3';
+import { assertEventExtension } from './alfa-research-model.mjs?v=4';
 import { mergeAnalytics } from './alfa-strategy-model.mjs?v=1';
 import { mergeLab } from './alfa-lab-model.mjs?v=1';
 const labels={saved:'Kaydedildi',syncing:'Senkronize ediliyor',offline:'Çevrimdışı',error:'Hata',conflict:'Çakışma'};

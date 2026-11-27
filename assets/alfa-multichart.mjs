@@ -1,7 +1,7 @@
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=5';
-import { TIMEFRAMES, isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=14';
+import { TIMEFRAMES, isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=15';
 import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=2';
-import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=12';
+import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=13';
 import { WorkspacePersistence } from './alfa-workspace-persistence.mjs?v=1';
 
 const $ = id => document.getElementById(id);

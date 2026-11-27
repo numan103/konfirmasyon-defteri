@@ -12,6 +12,7 @@ import { LEGACY_TV_LIST } from '../assets/alfa-watchlist-model.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const quoteResponse = value => ({ ok: true, json: async () => value });
 const SKIPPED_REFS = [
   'CME:BTC1!', 'OKX:USDTTRY', 'CBOE:VIX', 'FX_IDC:XAUTRYG', 'OKX:XAUTUSDT', 'BIST:XU100',
   'CRYPTOCAP:TOTAL', 'CRYPTOCAP:TOTAL2', 'CRYPTOCAP:TOTAL3', 'CRYPTOCAP:BTC.D', 'CRYPTOCAP:USDT.D',
@@ -210,19 +211,58 @@ test('imported refs use the free public data path while keeping the original ref
 
 test('default watchlist quotes never require an authenticated Charts session', async () => {
   const calls = [];
-  const quotes = await fetchMarketQuotes(LEGACY_TV_LIST, undefined, async (url, opts) => {
+  const quotes = await fetchMarketQuotes(LEGACY_TV_LIST, undefined, async (url, opts = {}) => {
     calls.push({ url, opts });
+    if (url.startsWith('https://data-api.binance.vision/api/v3/ticker/24hr')) {
+      const symbols = JSON.parse(new URL(url).searchParams.get('symbols'));
+      return quoteResponse(symbols.map(symbol => ({ symbol, lastPrice: '100', priceChangePercent: '0', closeTime: 1 })));
+    }
+    if (url.startsWith('https://fapi.binance.com/fapi/v1/ticker/24hr')) {
+      return quoteResponse({ symbol: new URL(url).searchParams.get('symbol'), lastPrice: '100', priceChangePercent: '0', closeTime: 1 });
+    }
     const body = JSON.parse(opts.body);
     assert.equal(url, '/api/access');
     assert.equal(body.op, 'chart-market-quotes-free');
     assert.equal(opts.headers.Authorization, undefined);
+    assert.ok(body.refs.every(ref => !ref.startsWith('BINANCE:')), 'Binance refs use the public Binance REST feed');
     const answered = {};
     for (const ref of body.refs) answered[ref] = { price: 1, change: 0, at: 1 };
-    return { ok: true, json: async () => ({ ok: true, quotes: answered }) };
+    return quoteResponse({ ok: true, quotes: answered });
   });
-  assert.equal(calls.length, 1);
+  assert.equal(calls.filter(call => call.url === '/api/access').length, 1);
+  assert.ok(calls.some(call => call.url.includes('data-api.binance.vision')));
+  assert.ok(calls.some(call => call.url.includes('fapi.binance.com')));
   assert.equal(Object.keys(quotes).length, LEGACY_TV_LIST.length);
   for (const ref of LEGACY_TV_LIST) assert.ok(quotes[ref], ref);
+});
+
+test('Binance watchlist quotes use public Binance REST and map back to the original refs', async () => {
+  const refs = ['BINANCE:ETHBTC', 'BINANCE:BTCUSDT.P', 'BINANCE:ETHUSDT', 'BINANCE:BTCUSDT', 'CRYPTOCAP:TOTAL'];
+  const calls = [];
+  const quotes = await fetchMarketQuotes(refs, undefined, async (url, opts = {}) => {
+    calls.push({ url, opts });
+    if (url.startsWith('https://data-api.binance.vision/api/v3/ticker/24hr')) {
+      const symbols = JSON.parse(new URL(url).searchParams.get('symbols'));
+      return quoteResponse(symbols.map(symbol => ({ symbol, lastPrice: symbol === 'ETHBTC' ? '0.028' : '100', priceChangePercent: '1', closeTime: 1795811100000 })));
+    }
+    if (url.startsWith('https://fapi.binance.com/fapi/v1/ticker/24hr')) {
+      return quoteResponse({ symbol: 'BTCUSDT', lastPrice: '60000', priceChangePercent: '-1', closeTime: 1795811100000 });
+    }
+    const body = JSON.parse(opts.body);
+    assert.equal(url, '/api/access');
+    assert.equal(body.op, 'chart-market-quotes-free');
+    assert.equal(opts.headers.Authorization, undefined);
+    assert.deepEqual(body.refs, ['CRYPTOCAP:TOTAL']);
+    return quoteResponse({ ok: true, quotes: { 'CRYPTOCAP:TOTAL': { price: 7, change: 1, at: 1 } } });
+  });
+  assert.equal(calls.filter(call => call.url === '/api/access').length, 1);
+  assert.ok(calls.some(call => call.url.includes('data-api.binance.vision')));
+  assert.ok(calls.some(call => call.url.includes('fapi.binance.com')));
+  assert.equal(quotes['BINANCE:ETHBTC'].price, 0.028);
+  assert.equal(quotes['BINANCE:BTCUSDT.P'].price, 60000);
+  assert.equal(quotes['BINANCE:ETHUSDT'].price, 100);
+  assert.equal(quotes['BINANCE:BTCUSDT'].price, 100);
+  assert.equal(quotes['CRYPTOCAP:TOTAL'].price, 7);
 });
 
 test('chart page uses the vendored open-source library and no TradingView iframe', () => {

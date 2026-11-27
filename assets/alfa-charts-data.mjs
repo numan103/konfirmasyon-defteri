@@ -262,15 +262,75 @@ async function proxyRequest(op, body, signal, fetcher, providedToken) {
   }
   return data;
 }
+function quoteFromTicker(row) {
+  const price = Number(row?.lastPrice);
+  if (!Number.isFinite(price) || price <= 0) return null;
+  const change = Number(row?.priceChangePercent);
+  return { price, change: Number.isFinite(change) ? change : 0, at: Number(row?.closeTime) || Date.now() };
+}
+// Binance's public REST endpoints are CORS-enabled, so the browser reads those
+// quotes directly. The shared /api/access proxy cannot reliably reach Binance
+// from worker egress, which left the default Binance rows priced with "—".
+async function directQuotes(feedSymbols, perp, signal, fetcher) {
+  const quotes = new Map(), rows = [];
+  if (perp) {
+    const responses = await Promise.all(feedSymbols.map(async symbol => {
+      const response = await fetcher(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${encodeURIComponent(symbol)}`, { signal, cache: 'no-store' });
+      if (!response.ok) throw new Error('upstream_http_' + response.status);
+      return response.json();
+    }));
+    rows.push(...responses);
+  } else {
+    let error = null;
+    for (const origin of REST_ORIGINS) try {
+      const response = await fetcher(`${origin}/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(feedSymbols))}`, { signal, cache: 'no-store' });
+      if (!response.ok) { error = new Error('upstream_http_' + response.status); continue; }
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('upstream_empty');
+      rows.push(...data);
+      break;
+    } catch (caught) { error = caught; if (signal?.aborted) throw caught; }
+    if (!rows.length && error) throw error;
+  }
+  for (const row of rows) {
+    const quote = quoteFromTicker(row);
+    if (row?.symbol && quote) quotes.set(row.symbol, quote);
+  }
+  return quotes;
+}
 export async function fetchMarketQuotes(refs, signal, fetcher = fetch, providedToken) {
   const unique = [...new Set(refs.filter(isMarketRef))].slice(0, 60);
   if (!unique.length) return {};
-  const free = unique.filter(isFreeQuoteRef), gated = unique.filter(ref => !isFreeQuoteRef(ref));
   const quotes = {};
   let firstError = null;
+  const binanceSpot = new Map(), binancePerp = [], others = [];
+  for (const ref of unique) {
+    const parsed = parseMarketRef(ref);
+    if (parsed.feed === 'binance') {
+      const mapped = binanceSpot.get(parsed.feedSymbol) || [];
+      mapped.push(ref);
+      binanceSpot.set(parsed.feedSymbol, mapped);
+    } else if (parsed.feed === 'binance-perp') binancePerp.push({ ref, feedSymbol: parsed.feedSymbol });
+    else others.push(ref);
+  }
+  if (binanceSpot.size) try {
+    const direct = await directQuotes([...binanceSpot.keys()], false, signal, fetcher);
+    for (const [symbol, mapped] of binanceSpot) {
+      const quote = direct.get(symbol);
+      if (quote) for (const ref of mapped) quotes[ref] = quote;
+    }
+  } catch (error) { firstError = error; }
+  if (binancePerp.length) try {
+    const direct = await directQuotes([...new Set(binancePerp.map(item => item.feedSymbol))], true, signal, fetcher);
+    for (const { ref, feedSymbol } of binancePerp) {
+      const quote = direct.get(feedSymbol);
+      if (quote) quotes[ref] = quote;
+    }
+  } catch (error) { if (!Object.keys(quotes).length) firstError = error; }
+  const free = others.filter(isFreeQuoteRef), gated = others.filter(ref => !isFreeQuoteRef(ref));
   if (free.length) try {
     Object.assign(quotes, (await proxyRequest(QUOTE_FREE_OP, { refs: free }, signal, fetcher, providedToken)).quotes || {});
-  } catch (error) { firstError = error; }
+  } catch (error) { if (!Object.keys(quotes).length) firstError = error; }
   if (gated.length) try {
     Object.assign(quotes, (await proxyRequest(QUOTE_OP, { refs: gated }, signal, fetcher, providedToken)).quotes || {});
   } catch (error) { if (!Object.keys(quotes).length) firstError = error; }

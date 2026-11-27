@@ -1,4 +1,4 @@
-import { SYMBOLS, isMarketRef, isSpotSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=14';
+import { SYMBOLS, isMarketRef, isSpotSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=15';
 export const WATCHLIST_LIMIT = 200;
 export const IMPORT_LIMIT = 2000;
 export const IMPORT_BYTES = 512 * 1024;

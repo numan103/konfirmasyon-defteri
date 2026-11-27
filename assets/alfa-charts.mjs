@@ -1,10 +1,10 @@
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, BarSeries, HistogramSeries, ColorType, CrosshairMode, PriceScaleMode, TickMarkType } from './vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs';
-import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=14';
+import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, parseKline, mergeCandles, parseMarketRef, setMarketTokenProvider, fetchMarketQuotes } from './alfa-charts-data.mjs?v=15';
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
 import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=21';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=14';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=15';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=12';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=6';
@@ -12,21 +12,21 @@ import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
 import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=15';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=5';
-import { MtfManager } from './alfa-mtf.mjs?v=4';
+import { MtfManager } from './alfa-mtf.mjs?v=5';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
-import { replayRange } from './alfa-replay-data.mjs?v=3';
+import { replayRange } from './alfa-replay-data.mjs?v=4';
 import { DrawingHistory, emptyDocument, TOOLS } from './alfa-drawings-model.mjs?v=8';
-import { PublicStudiesManager } from './alfa-public-studies.mjs?v=10';
-import { initMultiChart } from './alfa-multichart.mjs?v=9';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=11';
+import { initMultiChart } from './alfa-multichart.mjs?v=10';
 import { initRightPanel, runSandboxedScript } from './alfa-right-panel.mjs?v=3';
 import { normalizeChartSnapshot } from './alfa-share-state.mjs?v=1';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
 import { openCloudConflict } from './alfa-cloud-conflict.mjs?v=2';
 import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=3';
-import { PaperTradingPanel } from './alfa-paper.mjs?v=7';
-import { ResearchPanel } from './alfa-research.mjs?v=5';
-import { packetBars,validatePacket } from './alfa-research-model.mjs?v=3';
+import { PaperTradingPanel } from './alfa-paper.mjs?v=8';
+import { ResearchPanel } from './alfa-research.mjs?v=6';
+import { packetBars,validatePacket } from './alfa-research-model.mjs?v=4';
 import { CHART_TIME_ZONES, normalizeChartTimeZone, chartTimeZoneKey, readChartTimeZone, writeChartTimeZone, createChartTimeFormatters } from './alfa-chart-time.mjs?v=1';
 import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=3';
 

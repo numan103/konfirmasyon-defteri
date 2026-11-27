@@ -1,6 +1,6 @@
 import { PaperTradingEngine, createPaperOrder } from './alfa-paper-model.mjs?v=1';
 import { StrategyTester } from './alfa-strategy.mjs?v=2';
-import { StrategyLab } from './alfa-lab.mjs?v=4';
+import { StrategyLab } from './alfa-lab.mjs?v=5';
 import { labSnapshot } from './alfa-lab-store.mjs?v=1';
 const fmt=v=>Number.isFinite(v)?Number(v.toFixed(8)).toLocaleString('en-US',{maximumFractionDigits:8}):'—';
 const sameContext=(a,b)=>['sessionId','symbol','timeframe','exchange','marketType'].every(k=>a?.[k]===b?.[k]);

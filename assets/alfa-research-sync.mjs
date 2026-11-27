@@ -1,5 +1,5 @@
 import { makePacket,validatePacket,packetMetadata,packetBars,canonical,researchId,mergePackets,
-  unionPrices,importResearch,exportResearch,assertEventExtension } from './alfa-research-model.mjs?v=3';
+  unionPrices,importResearch,exportResearch,assertEventExtension } from './alfa-research-model.mjs?v=4';
 import { candleCloseTime } from './alfa-replay-model.mjs?v=3';
 const equal=(a,b)=>canonical(a)===canonical(b);
 function hydrate(metadata,prices){
