@@ -78,7 +78,7 @@ try {
     const foot = first.querySelector('.study-chip-foot').getBoundingClientRect();
     return {
       flexDirection: getComputedStyle(first).flexDirection,
-      inlineActions: Math.abs(head.y - foot.y) <= 3,
+      inlineActions: Math.abs((head.y + head.height / 2) - (foot.y + foot.height / 2)) <= 3,
       heights: chips.map(el => Math.round(el.getBoundingClientRect().height)),
       legendHeight: Math.round(document.getElementById('study-legend').getBoundingClientRect().height),
       chartHeight: Math.round(document.getElementById('chart').getBoundingClientRect().height),
@@ -86,7 +86,7 @@ try {
   });
   assert.equal(compact.flexDirection, 'row', 'TV-style single-line legend rows');
   assert.equal(compact.inlineActions, true, 'legend controls share the compact row');
-  assert.ok(compact.heights.every(h => h <= 22), `legend rows stay one line: ${compact.heights.join(',')}`);
+  assert.ok(compact.heights.every(h => h <= 24), `legend rows stay one line with 24px click targets: ${compact.heights.join(',')}`);
   assert.ok(compact.legendHeight <= 112, `legend never becomes a page: ${compact.legendHeight}px`);
   assert.ok(compact.chartHeight >= chartHeightBefore - 80, `added overlays barely shrink the chart: ${chartHeightBefore} -> ${compact.chartHeight}`);
 

@@ -95,7 +95,7 @@ try {
   assert.equal(initial.fab.display, 'flex', 'the single pencil FAB must stay visible');
   assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.drawing-space')).display), 'none',
     'desktop tool rail must not leak into the phone shell');
-  assert.ok(initial.fabButtons.length >= 2, 'the FAB needs a tool button and a drag grip');
+  assert.equal(initial.fabButtons.length, 1, 'the FAB must have one brush button and no separate drag grip');
   assert.ok(initial.fabButtons.every(b => b.w >= 44 && b.h >= 44), 'FAB controls must be thumb-sized');
   assert.equal(initial.actions.display, 'none', 'edit actions must stay hidden without a selection');
   assert.equal(initial.hint, '');

@@ -7,7 +7,7 @@ import {
   cvdFromFlow, deltaFromFlow, footprintFromFlow, intervalToPeriod,
   PUBLIC_MARKET_SOURCES, PUBLIC_STUDY_DETAILS, FUTURES_STAT_PERIODS
 } from './alfa-market-data-public.mjs?v=3';
-import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=1';
+import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=3';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -119,7 +119,7 @@ export class PublicStudiesManager {
     if (!pane) return;
     try {
       const normal = this.stretchById[id] || .25;
-      if (next) pane.setStretchFactor?.(Math.max(.05, normal * .18));
+      if (next) pane.setStretchFactor?.(Math.max(.01, normal * .1));
       else pane.setStretchFactor?.(normal);
     } catch {}
   }
@@ -271,7 +271,7 @@ export class PublicStudiesManager {
     for (const line of lines) {
       const histogram = line.type === 'histogram';
       const opts = {
-        color: line.color, lineWidth: 1, title: PUBLIC_STUDY_NAMES[id],
+        color: line.color, lineWidth: 1, title: '',
         priceLineVisible: false, lastValueVisible: false, crosshairMarkerRadius: 3,
         priceFormat: { type: 'price', precision: line.precision, minMove: 1 / Math.pow(10, line.precision) }
       };
@@ -295,7 +295,7 @@ export class PublicStudiesManager {
       // when several panes are tucked at once.
       if (firstPane?.setStretchFactor && Number.isFinite(mainStretch) && mainStretch > 0) {
         this.stretchById[id] = mainStretch * .25;
-        firstPane.setStretchFactor(this.collapsed[id] ? Math.max(.05, this.stretchById[id] * .18) : this.stretchById[id]);
+        firstPane.setStretchFactor(this.collapsed[id] ? Math.max(.01, this.stretchById[id] * .1) : this.stretchById[id]);
       } else {
         this.stretchById[id] = .25;
         firstPane?.setHeight?.(this.collapsed[id] ? 30 : Math.max(80, Math.min(150, this.chart.chartElement().clientHeight * .22)));

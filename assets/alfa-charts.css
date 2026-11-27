@@ -595,8 +595,9 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   .install-note{color:#9fc4ff}
   .sheet-actions{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
   .sheet-actions button{flex:1;font-size:11px}
-  .chart-dialog{left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:none!important;max-height:78dvh!important;border-radius:16px 16px 0 0!important;border-bottom:0!important;transform:translateY(0)}
-  .chart-dialog .dialog-content{max-height:78dvh;overflow:auto;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+  .chart-dialog{left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:none!important;max-height:75dvh!important;border-radius:16px 16px 0 0!important;border-bottom:0!important;transform:translateY(0)}
+  .chart-dialog::backdrop{background:#06091280;backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
+  .chart-dialog .dialog-content{max-height:75dvh;overflow:auto;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
   .study-browser{height:auto!important;min-height:50dvh;grid-template-rows:auto minmax(0,1fr)}
   #drawing-manager{bottom:calc(70px + env(safe-area-inset-bottom));z-index:41}
   #watchlist{bottom:calc(64px + env(safe-area-inset-bottom))}
@@ -776,8 +777,8 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   #watchlist{max-height:calc(100dvh - 68px)}
   #drawing-manager{top:calc(36px + env(safe-area-inset-top));max-height:calc(100dvh - 48px)}
   .mobile-swipe-overlay{bottom:calc(60px + env(safe-area-inset-bottom))}
-  .chart-dialog{max-height:88dvh!important}
-  .chart-dialog .dialog-content{max-height:88dvh!important}
+  .chart-dialog{max-height:75dvh!important}
+  .chart-dialog .dialog-content{max-height:75dvh!important}
   .tool-flyout{bottom:calc(66px + env(safe-area-inset-bottom))!important;max-height:70dvh}
   body.focus-mode .chart-panel{grid-template-rows:minmax(0,1fr) 52px}
 }
@@ -786,13 +787,11 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 .mobile-draw-fab,.mobile-draw-actions{display:none}
 .mobile-draw-hint{display:none}
 @media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
-  .mobile-draw-fab{position:absolute;z-index:40;display:flex;align-items:center;width:100px;height:54px;border:1px solid #4b6492;border-radius:22px;background:#18243ada;backdrop-filter:blur(10px);box-shadow:0 8px 26px #000a;touch-action:none}
-  .mobile-draw-fab.toolbar-dragging{border-color:#8db8ff;box-shadow:0 14px 34px #000b}
-  .mobile-draw-fab-button{width:54px;height:54px;display:grid;place-items:center;padding:0;border:0;border-radius:22px;background:var(--accent);color:#fff;box-shadow:0 4px 16px #2962ff66}
-  .mobile-draw-fab-button .ui-icon{width:24px;height:24px}
-  .mobile-draw-fab-button[aria-expanded=true]{background:#1e40af}
-  .mobile-draw-fab-grip{width:44px;height:54px;display:grid;place-items:center;padding:0;border:0;border-left:1px solid #3d5072;background:transparent;color:#8fa3c6;cursor:grab;touch-action:none}
-  .mobile-draw-fab-grip .ui-icon{width:14px;height:20px}
+  .mobile-draw-fab{position:absolute;z-index:40;display:flex;align-items:center;width:56px;height:56px;border:1px solid #d8e0ec;border-radius:18px;background:#fffffff2;box-shadow:0 8px 24px #0008;touch-action:none}
+  .mobile-draw-fab.toolbar-dragging{border-color:#fff;box-shadow:0 14px 34px #000b}
+  .mobile-draw-fab-button{width:56px;height:56px;display:grid;place-items:center;padding:0;border:0;border-radius:18px;background:#fffffff5;color:#2d394d;box-shadow:none;cursor:grab;touch-action:none}
+  .mobile-draw-fab-button .ui-icon{width:23px;height:23px}
+  .mobile-draw-fab-button[aria-expanded=true]{background:#eaf0f8;color:#263449}
   .mobile-draw-actions{position:absolute;left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom));z-index:22;display:flex;align-items:center;gap:4px;overflow-x:auto;overflow-y:hidden;padding:4px;border:1px solid #3a4a68;border-radius:14px;background:#141c2aee;backdrop-filter:blur(10px);box-shadow:0 8px 28px #0009;scrollbar-width:none;touch-action:manipulation}
   .mobile-draw-actions::-webkit-scrollbar{display:none}
   .mobile-draw-actions button{flex:0 0 44px;min-width:44px;width:44px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 2px;border:1px solid transparent;border-radius:10px;background:transparent;color:#b8c9e8;font-size:8px;line-height:1.1;touch-action:manipulation}
@@ -803,9 +802,8 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
   body.focus-mode .mobile-draw-fab,body.focus-mode .mobile-draw-actions,body.focus-mode .mobile-draw-hint{display:none!important}
 }
 @media(max-width:932px) and (max-height:500px) and (orientation:landscape){
-  .mobile-draw-fab{width:90px;height:44px}
-  .mobile-draw-fab-button,.mobile-draw-fab-grip{height:44px}
-  .mobile-draw-fab-button{width:44px;border-radius:16px}
+  .mobile-draw-fab{width:44px;height:44px}
+  .mobile-draw-fab-button{width:44px;height:44px;border-radius:14px}
   .mobile-draw-actions{bottom:calc(58px + env(safe-area-inset-bottom));padding:2px}
   .mobile-draw-hint{bottom:calc(118px + env(safe-area-inset-bottom));padding:3px 8px;font-size:9px}
 }
@@ -917,8 +915,11 @@ footer a{margin-left:auto;font-size:8px;color:#667998;flex-shrink:0}
 body.chart-first .workspace{height:100dvh;min-height:0;overflow:hidden;grid-template-rows:auto minmax(0,1fr)}
 body.chart-first .workarea{height:100%;min-height:0;overflow:hidden;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) 248px}
 body.chart-first .mobile-market-strip{display:none!important}
+body.chart-first #mobile-swipe-overlay{display:none!important}
 body.chart-first.no-list .workarea{grid-template-columns:minmax(0,1fr)}
-body.chart-first .chart-panel{height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr)}
+body.chart-first .chart-panel{height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
+body.chart-first .legend{position:absolute;top:0;left:0;right:0;z-index:10;pointer-events:none;min-height:0;padding:8px 12px 4px;border:0;background:linear-gradient(180deg,#10141ce6,#10141c00)}
+body.chart-first .legend #market-title,body.chart-first .legend #study-legend{pointer-events:auto}
 body.chart-first .multi-chart{grid-column:1;grid-row:1}
 body.chart-first #watchlist{grid-column:2;grid-row:1}
 body.chart-first.no-list .multi-chart{grid-column:1}
@@ -939,7 +940,15 @@ body.chart-first .rail-actions>button{width:34px;height:34px;padding:7px}
 body.chart-first .session-boxes-side{display:none}
 body.chart-first #study-legend{max-height:min(22vh,150px);width:min(100%,520px)}
 body.chart-first .selection-toolbar{z-index:13}
-body.chart-first .study-chip{max-width:100%;padding:1px 5px;border:1px solid #2b3a55;border-radius:8px;background:#151d2cee}
+body.chart-first .study-chip{max-width:100%;min-height:24px;padding:0 3px;border:0;border-radius:4px;background:transparent}
+body.chart-first .study-chip:hover,body.chart-first .study-chip:focus-within{background:#1b2331;border-color:#303b4d}
+body.chart-first .study-chip-meta{display:none}
+body.chart-first .study-chip-head{flex:1;overflow:hidden}
+body.chart-first .study-chip-foot{opacity:1}
+body.chart-first .study-chip button{min-width:24px;min-height:24px;display:grid;place-items:center;padding:3px}
+body.chart-first .study-chip button .ui-icon{width:14px;height:14px}
+body.chart-first .study-chip button:hover,body.chart-first .study-chip button:focus-visible{background:#303c50;color:#fff;border-radius:4px}
+body.chart-first .study-chip.is-hidden .study-chip-name{text-decoration:line-through}
 body.chart-first .study-legend-actions button[data-study-collapse-all],body.chart-first .study-legend-actions button[data-study-expand-all],body.chart-first .study-legend-actions button[data-study-remove-all]{display:none!important}
 body.chart-first #study-legend .study-chip-foot button[data-study-collapse],body.chart-first #study-legend .study-chip-foot button[data-study-remove]{opacity:.45}
 body.chart-first.chart-full #watchlist,body.chart-first.chart-full .toolbar{display:none!important}
@@ -983,4 +992,9 @@ body.chart-first.chart-full .legend{position:absolute;top:0;left:0;right:0;z-ind
 @media(max-width:932px) and (max-height:500px) and (orientation:landscape){
   #mobile-date-label{bottom:calc(120px + env(safe-area-inset-bottom));font-size:10px}
   .mobile-timeframe{min-width:60px;width:auto}
+}
+/* iOS Safari zooms the page when a focused field is smaller than 16px. Keep
+   accessibility zoom enabled and prevent the sticky-zoom by sizing inputs. */
+@media(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px!important}
 }

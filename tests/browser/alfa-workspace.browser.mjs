@@ -255,7 +255,7 @@ try {
   });
   await test('candle palette settings and numeric timeframe shortcuts', async () => {
     const r = await page.locator('#chart').boundingBox();
-    await page.mouse.click(r.x + 200, r.y + 160, { button: 'right' });
+    await page.mouse.click(r.x + r.width * .65, r.y + r.height * .35, { button: 'right' });
     await page.locator('.chart-context-menu button').filter({ hasText: 'Mum ve zemin renkleri' }).click();
     await page.waitForFunction(() => !!document.querySelector('#candle-settings-form'));
     await page.fill('#candle-settings-form input[name=up]', '#00ff88');
@@ -658,15 +658,15 @@ try {
     assert.equal(await state(() => window.__alfaDebug.drawings.history.doc.drawings.length), 2);
     await shot('object-tree');
   });
-  await test('mobile pencil FAB drags and its position survives reload', async () => {
+  await test('mobile pencil FAB drags by the brush and its position survives reload', async () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload(); await ready();
     const position = () => state(() => JSON.parse(localStorage.getItem('alfa-mobile-draw-fab:v1')));
     const before = await position();
-    const grip = await page.locator('#mobile-draw-fab [data-toolbar-grip]').boundingBox();
-    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    const brush = await page.locator('#mobile-draw-fab-button').boundingBox();
+    await page.mouse.move(brush.x + brush.width / 2, brush.y + brush.height / 2);
     await page.mouse.down();
-    await page.mouse.move(grip.x - 120, grip.y - 90, { steps: 8 });
+    await page.mouse.move(brush.x + brush.width / 2 - 120, brush.y + brush.height / 2 - 90, { steps: 8 });
     await page.mouse.up();
     const after = await position();
     assert.notDeepEqual(after, before);

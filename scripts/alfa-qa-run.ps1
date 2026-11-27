@@ -54,6 +54,7 @@ $webSuites = @(
 )
 $mobileSuites = @(
   'alfa-mobile-shell',
+  'alfa-mobile-ux-batch',
   'alfa-mobile-landscape',
   'alfa-drawing-experience',
   'alfa-trust-touch',

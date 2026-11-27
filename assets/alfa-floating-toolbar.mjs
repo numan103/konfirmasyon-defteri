@@ -1,38 +1,62 @@
-// Persist a floating chart toolbar by normalized plot coordinates. The grip is
-// delegated so rebuilding tool buttons never removes its drag listeners.
+// Persist a floating chart toolbar by normalized plot coordinates. The drag
+// handle is configurable so the phone FAB can use its brush button while the
+// desktop rail keeps its separate grip.
 export class FloatingToolbar {
-  constructor({ element, host, getBounds, key }) {
-    Object.assign(this, { element, host, getBounds, key });
+  constructor({ element, host, getBounds, key, dragTarget = '[data-toolbar-grip]', dragThreshold = 6,
+    keyboard = true, resetOnDblClick = true }) {
+    Object.assign(this, { element, host, getBounds, key, dragTarget, dragThreshold, keyboard, resetOnDblClick });
     this.abort = new AbortController();
     try {
       const p = JSON.parse(localStorage.getItem(key) || 'null');
       if (Number.isFinite(p?.x) && Number.isFinite(p?.y)) this.position = { x: Math.max(0, Math.min(1, p.x)), y: Math.max(0, Math.min(1, p.y)) };
     } catch {}
     const opts = { signal: this.abort.signal };
+    this.suppressClick = false;
+    element.addEventListener('click', event => {
+      if (!this.suppressClick) return;
+      this.suppressClick = false;
+      event.preventDefault(); event.stopImmediatePropagation();
+    }, { capture: true, signal: this.abort.signal });
+    const isHandle = e => !!e.target.closest?.(this.dragTarget);
     element.addEventListener('pointerdown', e => {
-      if (e.button !== 0 || !e.target.closest('[data-toolbar-grip]')) return;
-      e.preventDefault(); e.stopPropagation();
+      if (e.button !== 0 || !isHandle(e)) return;
+      // Keep the native click alive for taps; only a real drag is cancelled below.
+      e.stopPropagation();
       const r = element.getBoundingClientRect(), h = host.getBoundingClientRect();
-      this.drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, left: r.left - h.left, top: r.top - h.top, original: this.position };
-      element.setPointerCapture(e.pointerId); element.classList.add('toolbar-dragging');
+      this.drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, left: r.left - h.left, top: r.top - h.top,
+        original: this.position, moved: false };
+      element.setPointerCapture?.(e.pointerId); element.classList.add('toolbar-dragging');
     }, opts);
     element.addEventListener('pointermove', e => {
       if (!this.drag || e.pointerId !== this.drag.pointer) return;
       e.preventDefault(); e.stopPropagation();
-      this.place(this.drag.left + e.clientX - this.drag.x, this.drag.top + e.clientY - this.drag.y);
+      const drag = this.drag;
+      if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) <= this.dragThreshold) return;
+      drag.moved = true;
+      this.place(drag.left + e.clientX - drag.x, drag.top + e.clientY - drag.y);
     }, opts);
     const finish = e => {
       if (!this.drag || e.pointerId !== this.drag.pointer) return;
+      const moved = this.drag.moved;
       if (e.type === 'pointercancel') this.position = this.drag.original;
       this.drag = null; element.classList.remove('toolbar-dragging');
-      if (element.hasPointerCapture(e.pointerId)) element.releasePointerCapture(e.pointerId);
+      if (element.hasPointerCapture?.(e.pointerId)) element.releasePointerCapture(e.pointerId);
       if (e.type !== 'pointercancel') this.save();
       this.apply();
+      if (moved && e.type !== 'pointercancel') {
+        // A real drag must not fall through to the brush button's click action.
+        // Clear promptly when no synthetic click follows, so the next tap works.
+        this.suppressClick = true;
+        clearTimeout(this.suppressTimer);
+        this.suppressTimer = setTimeout(() => { this.suppressClick = false; }, 80);
+      }
     };
     element.addEventListener('pointerup', finish, opts); element.addEventListener('pointercancel', finish, opts);
-    element.addEventListener('dblclick', e => { if (e.target.closest('[data-toolbar-grip]')) { e.preventDefault(); this.position = null; this.save(); this.apply(); } }, opts);
+    element.addEventListener('dblclick', e => {
+      if (this.resetOnDblClick && isHandle(e)) { e.preventDefault(); this.position = null; this.save(); this.apply(); }
+    }, opts);
     element.addEventListener('keydown', e => {
-      if (!e.target.closest('[data-toolbar-grip]')) return;
+      if (!this.keyboard || !isHandle(e)) return;
       const delta = e.shiftKey ? 25 : 10, r = element.getBoundingClientRect(), h = host.getBoundingClientRect();
       const keys = { ArrowLeft: [-delta, 0], ArrowRight: [delta, 0], ArrowUp: [0, -delta], ArrowDown: [0, delta] };
       if (e.key === 'Home') { e.preventDefault(); this.position = null; this.save(); this.apply(); }
@@ -57,5 +81,5 @@ export class FloatingToolbar {
     this.element.style.top = (this.position ? this.position.y * limits.y : Math.min(10, limits.y)) + 'px';
   }
   save() { try { localStorage.setItem(this.key, JSON.stringify(this.position)); } catch {} }
-  dispose() { this.abort.abort(); this.observer.disconnect(); }
+  dispose() { this.abort.abort(); clearTimeout(this.suppressTimer); this.observer.disconnect(); }
 }

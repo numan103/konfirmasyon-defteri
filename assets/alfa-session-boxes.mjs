@@ -147,7 +147,13 @@ export class SessionBoxesManager {
         const text = document.createElementNS(NS, 'text');
         for (const [k, v] of Object.entries({ x: left + 4, y: Math.max(12, top + 12), fill: box.color,
           'font-size': 10, 'paint-order': 'stroke', stroke: '#10141c', 'stroke-width': 3 })) text.setAttribute(k, String(v));
-        text.textContent = box.name;
+        const utcTime = ts => new Date(ts * 1000).toISOString().slice(11, 16);
+        const label = `${box.name} ${utcTime(box.startTs)}–${utcTime(box.endTs)} UTC`;
+        const phone = matchMedia('(max-width:600px),(max-width:932px) and (max-height:500px) and (orientation:landscape)').matches;
+        text.textContent = phone ? box.name : label;
+        const title = document.createElementNS(NS, 'title');
+        title.textContent = label;
+        rect.append(title);
         fragment.append(text);
       }
     }

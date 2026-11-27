@@ -59,7 +59,7 @@ try {
     assert.equal(surface.desktopRail, 'none', 'desktop tool rail must not leak into the phone shell');
     assert.equal(surface.quick, false, 'the old quick bar must stay removed');
     assert.equal(surface.fab, 'flex', 'the single thumb-reachable pencil FAB must be visible');
-    assert.ok(surface.buttonCount >= 2, 'the FAB needs a tool button and a drag grip');
+    assert.equal(surface.buttonCount, 1, 'the FAB must have one brush button; the brush itself is the drag handle');
     assert.ok(surface.groups >= 5, 'the FAB must open every drawing category');
     assert.ok(surface.minHeight >= 44, `FAB targets too small: ${surface.minHeight}`);
 
@@ -173,7 +173,8 @@ try {
         .filter(button => getComputedStyle(button).display !== 'none');
       return {
         underSymbol: legendRect.top >= titleRect.bottom - 4 && legendRect.left >= titleRect.left - 4,
-        aboveChart: legendRect.bottom <= chartRect.top + 4 && legendRect.left >= chartRect.left - 4,
+        overlaysChart: legendRect.top >= chartRect.top && legendRect.bottom < chartRect.bottom &&
+          legendRect.left >= chartRect.left - 4,
         legendText: legend.textContent.trim(),
         heights: chips.map(chip => Math.round(chip.getBoundingClientRect().height)),
         bulkButtons: bulk.length,
@@ -181,7 +182,7 @@ try {
       };
     });
     assert.equal(panel.underSymbol, true, 'overlay indicator chips must sit under the symbol label');
-    assert.equal(panel.aboveChart, true, 'the legend must stay directly above the plot');
+    assert.equal(panel.overlaysChart, true, 'compact legend must overlay the plot instead of shrinking its height');
     assert.equal(panel.legendText.includes('İndikatörler'), false, 'the old legend heading must stay removed');
     assert.ok(panel.heights.length >= 2 && panel.heights.every(h => h <= 24), `indicator rows must stay compact: ${panel.heights}`);
     assert.equal(panel.bulkButtons, 0, 'bulk +/- controls must stay hidden in the legend');

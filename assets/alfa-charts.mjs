@@ -3,11 +3,11 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=18';
+import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=19';
 import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=9';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=6';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=8';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
-import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=4';
+import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=5';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
 import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=9';
@@ -16,7 +16,7 @@ import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument, TOOLS } from './alfa-drawings-model.mjs?v=8';
-import { PublicStudiesManager } from './alfa-public-studies.mjs?v=5';
+import { PublicStudiesManager } from './alfa-public-studies.mjs?v=8';
 import { initMultiChart } from './alfa-multichart.mjs?v=6';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
@@ -26,7 +26,7 @@ import { PaperTradingPanel } from './alfa-paper.mjs?v=6';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
 import { CHART_TIME_ZONES, normalizeChartTimeZone, chartTimeZoneKey, readChartTimeZone, writeChartTimeZone, createChartTimeFormatters } from './alfa-chart-time.mjs?v=1';
-import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=1';
+import { FloatingToolbar } from './alfa-floating-toolbar.mjs?v=3';
 
 const $ = id => document.getElementById(id);
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
@@ -428,6 +428,43 @@ if (isMobile) {
         event.target.closest('#mobile-draw-fab')) return;
     closeSheets();
   }, true);
+  // A downward touch from the sheet body closes it, but only when the content
+  // is already at the top; vertical scrolling inside the sheet still works.
+  const suppressNextClick = element => {
+    const guard = event => { event.preventDefault(); event.stopImmediatePropagation(); };
+    element.addEventListener('click', guard, { capture: true, once: true });
+    setTimeout(() => element.removeEventListener('click', guard, true), 80);
+  };
+  document.querySelectorAll('.mobile-sheet').forEach(sheet => {
+    let swipe = null;
+    // Touch events are required here: a pointermove is cancelled as soon as the
+    // scrollable sheet claims the gesture for native scrolling.
+    sheet.addEventListener('touchstart', event => {
+      if (event.touches.length !== 1 || event.target.closest('.sheet-grip')) return;
+      const touch = event.touches[0];
+      swipe = { x: touch.clientX, y: touch.clientY, atTop: sheet.scrollTop <= 2, moved: false };
+    }, { capture: true, passive: true });
+    sheet.addEventListener('touchmove', event => {
+      if (!swipe || event.touches.length !== 1) return;
+      const touch = event.touches[0], dy = touch.clientY - swipe.y, dx = touch.clientX - swipe.x;
+      const downward = dy > 0 && Math.abs(dx) <= Math.abs(dy);
+      if (swipe.atTop && downward && event.cancelable) event.preventDefault();
+      if (dy <= 8 || !downward) return;
+      swipe.moved = true;
+      sheet.style.transform = `translateY(${Math.min(dy, 120)}px)`;
+    }, { capture: true, passive: false });
+    sheet.addEventListener('touchend', event => {
+      if (!swipe) return;
+      const current = swipe, touch = event.changedTouches[0];
+      swipe = null; sheet.style.transform = '';
+      const dy = touch.clientY - current.y, dx = touch.clientX - current.x;
+      if (current.moved && current.atTop && sheet.scrollTop <= 2 && dy >= 64 && Math.abs(dx) < dy) {
+        suppressNextClick(sheet);
+        closeSheets();
+      }
+    }, { capture: true, passive: true });
+    sheet.addEventListener('touchcancel', () => { swipe = null; sheet.style.transform = ''; }, { capture: true, passive: true });
+  });
 
   const strip = $('mobile-market-strip');
   const wrapIndex = (index, length) => length ? ((index % length) + length) % length : 0;
@@ -666,8 +703,6 @@ if (isMobile) {
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   // Bounded, price-relative touch panning keeps the candles in view.
   let pricePan = null;
-  let holdTimer = null;
-  const cancelHold = () => { clearTimeout(holdTimer); holdTimer = null; };
   const touches = new Set();
   // TradingView-like date chip follows the crosshair during touch pan/hold.
   const showDateAt = clientX => {
@@ -680,7 +715,6 @@ if (isMobile) {
   };
   host.addEventListener('pointerdown', event => {
     if (event.pointerType !== 'touch') return;
-    cancelHold();
     touches.add(event.pointerId);
     const axisStart = event.clientX >= host.getBoundingClientRect().right - rightScale.width();
     if (touches.size !== 1 || axisStart || event.target.closest('#chart-watermark,.pane-study-label,#mobile-swipe-overlay,#drawing-selection,.selection-toolbar,[data-id],#price-scale-grip') ||
@@ -688,24 +722,18 @@ if (isMobile) {
     const margins = rightScale.options().scaleMargins;
     pricePan = { id: event.pointerId, x: event.clientX, y: event.clientY, top: margins.top, bottom: margins.bottom };
     showDateAt(event.clientX);
-    const target = event.target, x = event.clientX, y = event.clientY;
-    holdTimer = setTimeout(() => {
-      pricePan = null;
-      target.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: x, clientY: y }));
-    }, 600);
   }, true);
   host.addEventListener('pointermove', event => {
     if (!pricePan || event.pointerId !== pricePan.id || touches.size !== 1) return;
-    const dy = event.clientY - pricePan.y, dx = event.clientX - pricePan.x;
-    if (Math.hypot(dx, dy) > 8) cancelHold();
     showDateAt(event.clientX);
+    const dy = event.clientY - pricePan.y, dx = event.clientX - pricePan.x;
     if (Math.abs(dy) < 10 || Math.abs(dy) < Math.abs(dx) * 1.2) return;
     const shift = clamp(dy / Math.max(1, host.clientHeight) * .35, -.12, .12);
     rightScale.applyOptions({ autoScale: true, scaleMargins: {
       top: clamp(pricePan.top + shift, .06, .32), bottom: clamp(pricePan.bottom - shift, .06, .32)
     } });
   }, true);
-  const endPricePan = event => { cancelHold(); touches.delete(event.pointerId); pricePan = null; hideMobileDate(1400); };
+  const endPricePan = event => { touches.delete(event.pointerId); pricePan = null; hideMobileDate(1400); };
   host.addEventListener('pointerup', endPricePan, true);
   host.addEventListener('pointercancel', endPricePan, true);
   // Scale the actual visible price range, not the padding around the candles.
@@ -1497,8 +1525,13 @@ async function loadMarket() {
     document.body.classList.remove('replay-mode'); $('live').disabled=false;
     if(liveDrawingState){Object.assign(drawings,liveDrawingState);liveDrawingState=null;}
   }
+  // Removing outgoing series fires indicator onChange/saveLayout callbacks.
+  // During a market transition those empty series are not a user edit and must
+  // never replace the saved study bundle before the incoming data is ready.
+  if (studyContext) studyContext.loaded = false;
   const id = ++generation;
-  if (isChartableRef(symbol)) rememberHistory(symbol, interval, history);
+  // `symbol`/`interval` already describe the incoming market here. Outgoing
+  // bars were cached when received; caching them now corrupts the new key.
   closeTransport(); attempts = 0;
   const cached = cachedHistory(symbol, interval);
   history = []; seriesBars = [];
@@ -2108,8 +2141,12 @@ function initDrawingQuickUX() {
   const panel = $('chart-panel-single'), fabKey = 'alfa-mobile-draw-fab:v1';
   try { if (!localStorage.getItem(fabKey)) localStorage.setItem(fabKey, JSON.stringify({ x: .92, y: .8 })); } catch {}
   if (panel) new FloatingToolbar({ element: fab, host: panel, key: fabKey,
+    dragTarget: '#mobile-draw-fab-button', keyboard: false, resetOnDblClick: false,
     getBounds: () => ({ width: panel.clientWidth, height: panel.clientHeight }) });
-  fabButton.addEventListener('click', () => {
+  // Pointer capture for dragging can retarget a mouse click to the FAB container,
+  // so the toggle listens on the container and accepts both targets.
+  fab.addEventListener('click', event => {
+    if (event.target !== fab && !event.target.closest?.('#mobile-draw-fab-button')) return;
     if (document.body.classList.contains('tools-open')) closeMobileSheets();
     else openMobileSheet('tools-open');
   });
@@ -2153,7 +2190,7 @@ const drawings = new DrawingEngine({ chart, series: candles, host, getBars: () =
   onAlarm: (price, cond) => addQuickAlarm(price, cond), onAlarmManager: () => openAlarmManager(),
   onChartAction: action => handleChartAction(action),
   getChartMenuState: () => ({ ...viewConfig, logScale, fullscreen: !!document.fullscreenElement }),
-  getStudies: () => studiesUI });
+  getStudies: () => studiesUI, isPhone: () => document.body.classList.contains('mobile-shell') });
 // Desktop tool rail: horizontal, grip-draggable and position-persistent.
 if (!isMobile) {
   const rail = document.querySelector('.drawing-space'), work = document.querySelector('.workarea');
@@ -2460,6 +2497,7 @@ if (new URLSearchParams(location.search).has('debug')) {
     sendSync: (type, payload) => syncGate?.send(type, payload, { force: true }) || null,
     applyMainSync, getMainSyncState,
     get replayClock(){return replayEngine?.clock;}, get loadingOlder() { return loadingOlder; }, get history() { return history; },
+    get interval() { return interval; }, get symbol() { return symbol; },
     get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
     get studyContext() { return studyContext ? { ...studyContext } : null; }, rememberStudies, loadStudiesFor,
     resetChartView, openChartSettingsModal, handleChartAction,

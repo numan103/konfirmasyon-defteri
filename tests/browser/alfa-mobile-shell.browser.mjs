@@ -252,11 +252,21 @@ try {
     const debug = window.__alfaDebug;
     debug.chart.timeScale().setVisibleLogicalRange({ from: 0, to: 30 });
   });
-  // A touch hold opens the same context menu as right-click.
+  // A touch hold keeps the date readout but never opens the desktop context menu.
   await page.dispatchEvent('#chart', 'pointerdown', { pointerType: 'touch', pointerId: 82, clientX: 180, clientY: 300 });
-  await page.waitForSelector('.chart-context-menu', { state: 'visible', timeout: 3000 });
+  await page.waitForTimeout(700);
+  const holdState = await page.evaluate(() => ({
+    dateVisible: document.querySelector('#mobile-date-label')?.hidden === false,
+    menus: document.querySelectorAll('.chart-context-menu').length
+  }));
+  assert.equal(holdState.dateVisible, true, 'touch hold must still show the date readout');
+  assert.equal(holdState.menus, 0, 'touch hold must not open the right-click menu');
   await page.dispatchEvent('#chart', 'pointerup', { pointerType: 'touch', pointerId: 82, clientX: 180, clientY: 300 });
-  await page.locator('.chart-context-menu button').filter({ hasText: 'Grafik görünümü sıfırla' }).click();
+  await page.keyboard.press('Alt+R');
+  await page.waitForFunction(() => {
+    const range = window.__alfaDebug.chart.timeScale().getVisibleLogicalRange();
+    return range && range.to >= window.__alfaDebug.history.length - 1;
+  }, null, { timeout: 5000 });
   const reset = await page.evaluate(() => {
     const debug = window.__alfaDebug;
     return { range: debug.chart.timeScale().getVisibleLogicalRange(), length: debug.history.length,

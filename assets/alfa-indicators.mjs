@@ -1,5 +1,5 @@
 import { sma, ema, wma, vwma, rsi, macd, atr, bollinger, vwap, stochastic, stochRsi, adx, supertrend, obv } from './alfa-indicators-model.mjs?v=2';
-import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=1';
+import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=3';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 

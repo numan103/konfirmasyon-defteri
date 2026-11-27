@@ -17,11 +17,11 @@ const toolNames = { cursor: 'İmleç', trend: 'Trend çizgisi', horizontal: 'Yat
   ray: 'Işın', arrow: 'Ok', fibonacci: 'Fibonacci düzeltmesi', rectangle: 'Dikdörtgen', brush: 'Fırça',
   text: 'Metin', label: 'Etiket', long: 'Long pozisyon', short: 'Short pozisyon', ruler: 'Ölçüm cetveli', delete: 'Çizim sil' };
 export class DrawingEngine {
-  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, onChartAction, getChartMenuState, getStudies }) {
-    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, onChartAction, getChartMenuState, getStudies });
+  constructor({ chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, onChartAction, getChartMenuState, getStudies, isPhone = () => false }) {
+    Object.assign(this, { chart, series, host, getBars, getInterval, onAlarm, onAlarmManager, onChartAction, getChartMenuState, getStudies, isPhone });
     this.market = 'BTCUSDT'; this.tool = 'cursor'; this.selected = null; this.history = new DrawingHistory();
     this.magnet = false; this.drawingsVisible = true; this.brushing = false;
-    this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map();
+    this.context = null; this.epoch = 0; this.ready = false; this.histories = new Map(); this.lastTouchAt = 0;
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.svg.classList.add('drawing-overlay'); this.svg.setAttribute('aria-label', 'Fiyat ve zaman koordinatlı çizimler');
     host.append(this.svg);
@@ -35,6 +35,7 @@ export class DrawingEngine {
     this.store.start();
     this.abort = new AbortController();
     const options = { signal: this.abort.signal, capture: true };
+    host.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') this.lastTouchAt = performance.now(); }, options);
     host.addEventListener('pointerdown', e => this.down(e), options);
     host.addEventListener('pointermove', e => this.move(e), options);
     host.addEventListener('pointerup', e => this.up(e), options);
@@ -248,6 +249,10 @@ export class DrawingEngine {
   }
   contextMenu(e) {
     if (!this.ready || !this.inPlot(e)) return;
+    // Phone touch uses the mobile action bar; the right-click menu stays desktop-only.
+    if (this.isPhone() && (e.pointerType === 'touch' || performance.now() - this.lastTouchAt < 1500)) {
+      e.preventDefault(); return;
+    }
     e.preventDefault(); e.stopImmediatePropagation();
     this.closeContextMenu();
     const point = this.unproject(e);
@@ -407,7 +412,7 @@ export class DrawingEngine {
     if (!this.selection.has(id)) this.selected = id; else this.primary = id;
     const d = this.current(); this.refresh();
     // An unmoved left click on a drawing opens the same menu as right-click.
-    this.clickCandidate = { id, target: e.target, x: e.clientX, y: e.clientY, pointer: e.pointerId };
+    this.clickCandidate = { id, target: e.target, x: e.clientX, y: e.clientY, pointer: e.pointerId, pointerType: e.pointerType };
     if (!d || d.locked) return;
     this.drag = { id, start: point, original: clone(d), doc: clone(this.history.doc), ids: [...this.selection],
       handle: this.selection.size === 1 ? e.target.getAttribute('data-handle') : null, pointer: e.pointerId };
@@ -468,8 +473,10 @@ export class DrawingEngine {
       this.clickCandidate = null;
       if (this.host.hasPointerCapture(e.pointerId)) this.host.releasePointerCapture(e.pointerId);
       this.drag = null; this.pending = null;
-      this.contextMenu({ clientX: candidate.x, clientY: candidate.y, target: candidate.target,
-        preventDefault() {}, stopImmediatePropagation() {} });
+      if (candidate.pointerType !== 'touch' || !this.isPhone()) {
+        this.contextMenu({ clientX: candidate.x, clientY: candidate.y, target: candidate.target,
+          preventDefault() {}, stopImmediatePropagation() {} });
+      }
       return;
     }
     if (!this.drag) return;

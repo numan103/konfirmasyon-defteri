@@ -26,6 +26,11 @@ These are the behaviors agents must protect. If a test contradicts this file, de
 - A stationary preview commits after roughly `0.5s`; a quick swipe commits on release.
 - No visible “wait half a second” copy.
 - The FAB and edit actions must not overlap the pair strip and must not block menu/pair hit targets.
+- Phone touch never opens the desktop drawing context menu; the date readout stays visible on touch hold.
+- Phone sheets close on a downward swipe from the sheet body; a stationary tap inside the sheet keeps it open.
+- Dialogs on phones use at most three quarters of the viewport and keep backdrop blur at or below `1px`.
+- Mobile text inputs stay at least `16px` so focusing them does not zoom the page; accessibility zoom remains enabled.
+- Timeframe is global across pairs: `5m`, `15m`, and `30m` survive a pair switch with matching URL and data requests.
 - Landscape keeps the same FAB/tool sheet reachable with thumb-sized targets.
 
 ## Indicators and panes
@@ -67,7 +72,7 @@ Trust-required alarm/study scope text inside dialogs is intentionally kept and m
 
 - Hidden duplicate selectors: always scope to the visible menu/panel.
 - Palette drift came from per-symbol/per-interval storage; keep it global.
-- FAB grip width was too small and intercepted taps; keep controls at least 44px.
-- Cache busting: CSS `?v=59` is current; bump on future CSS edits.
+- The phone FAB brush is its own drag handle; there is no separate grip, and the brush stays at least 44px.
+- Cache busting: CSS `?v=63` is current; bump on future CSS edits.
 - `isEmbed` plus `chart-first` breaks pane height; guard both sides.
 - `window.__alfaDebug` is the source of truth for chart/drawing state assertions.
