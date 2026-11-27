@@ -1,7 +1,7 @@
 // Free market-structure studies for Alfa Charts. All data comes from keyless
 // public Binance REST endpoints; no API key, serverless function or database
 // write is introduced. Non-Binance symbols are never silently converted.
-import { parseMarketRef } from './alfa-charts-data.mjs?v=12';
+import { parseMarketRef } from './alfa-charts-data.mjs?v=14';
 import { candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import {
   fetchOpenInterest, fetchLongShortRatio, fetchKlineFlow, fetchDepthHeatmap,

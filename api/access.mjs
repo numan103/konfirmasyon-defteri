@@ -31,7 +31,7 @@ import { sendTelegram } from '../lib/telegram.mjs';
 import { adminNotifyChatId } from '../lib/admin-notify.mjs';
 import { publicWatchlistURL, fetchPublicWatchlist, allowWatchlistImport } from '../lib/chart-watchlist-import.mjs';
 import { marketHistory, marketQuotes, allowMarketData, allowPublicMarketData } from '../lib/chart-market-data.mjs';
-import { isFreeMarketRef } from '../assets/alfa-charts-data.mjs';
+import { isFreeMarketRef, isFreeQuoteRef } from '../assets/alfa-charts-data.mjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fssrtlpjqbavzomynwmg.supabase.co';
 const PUB = process.env.SUPABASE_PUBLISHABLE || 'sb_publishable_Zo8BS0jA6f0RBY0DIRUmvg_WsXngIx-';
@@ -853,7 +853,7 @@ export default async function handler(req, res) {
       if (!allowPublicMarketData(ip)) return fail(res, 429, 'market_rate_limit');
       try {
         if (op === 'chart-market-quotes-free') {
-          if (!Array.isArray(body.refs) || body.refs.length > 60 || body.refs.some(r => typeof r !== 'string' || r.length > 100 || !isFreeMarketRef(r))) return fail(res, 400, 'bad_market_ref');
+          if (!Array.isArray(body.refs) || body.refs.length > 60 || body.refs.some(r => typeof r !== 'string' || r.length > 100 || !isFreeQuoteRef(r))) return fail(res, 400, 'bad_market_ref');
           return send(res, 200, { ok: true, quotes: await marketQuotes(body.refs) });
         }
         if (typeof body.ref !== 'string' || body.ref.length > 100 || !isFreeMarketRef(body.ref) || body.interval == null) return fail(res, 400, 'bad_market_ref');

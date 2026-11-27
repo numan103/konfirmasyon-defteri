@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { marketHistory, marketQuotes, allowMarketData, allowPublicMarketData } from '../lib/chart-market-data.mjs';
 import handler from '../api/access.mjs';
+import { LEGACY_TV_LIST } from '../assets/alfa-watchlist-model.mjs';
 
 const bar = (ms, open, high, low, close, volume = 5) => [ms, String(open), String(high), String(low), String(close), String(volume)];
 const response = value => ({ ok: true, json: async () => value, text: async () => JSON.stringify(value), headers: { get: () => null } });
@@ -184,5 +185,26 @@ test('anonymous free market ops are allowlisted, private/no-store and rate limit
     const resetAt = Date.now() + 60001;
     assert.equal(allowPublicMarketData(`${tag}-direct`, resetAt), true);
     assert.ok(calls.every(c => !c.url.includes('/rest/v1/') && c.opts.method === 'GET'), 'free ops do not access the database');
+  } finally { globalThis.fetch = saved; }
+});
+
+test('anonymous free quotes cover every default watchlist reference', async () => {
+  const saved = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, opts = {}) => {
+    calls.push({ url, opts });
+    if (url.includes('/ticker/24hr')) return response({ lastPrice: '100', priceChangePercent: '1' });
+    if (url.includes('www.okx.com/api/v5/market/ticker')) return response({ data: [{ last: '100', open24h: '99' }] });
+    if (url.includes('api.bybit.com/v5/market/tickers')) return response({ result: { list: [{ lastPrice: '100', priceChangePercent: '1' }] } });
+    if (url.includes('scanner.tradingview.com')) return response({ close: 100, change: 1 });
+    if (url.includes('query1.finance.yahoo.com')) return response({ chart: { result: [{ timestamp: [1794751200], indicators: { quote: [{ close: [100], open: [99], high: [101], low: [98], volume: [1] }] }, meta: { regularMarketPrice: 100, chartPreviousClose: 99 } }] } });
+    throw new Error('unexpected upstream ' + url);
+  };
+  const res = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end(text) { this.body = JSON.parse(text); } };
+  try {
+    await handler({ method: 'POST', headers: { 'x-forwarded-for': `default-quotes-${Date.now()}` }, body: { op: 'chart-market-quotes-free', refs: [...LEGACY_TV_LIST] } }, res);
+    assert.equal(res.statusCode, 200);
+    assert.equal(Object.keys(res.body.quotes || {}).length, LEGACY_TV_LIST.length);
+    assert.ok(calls.every(c => !c.url.includes('/rest/v1/') && (c.opts.method || 'GET') === 'GET'), 'no database writes');
   } finally { globalThis.fetch = saved; }
 });

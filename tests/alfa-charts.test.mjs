@@ -8,6 +8,7 @@ import {
   candle, parseHistory, parseKline, mergeCandles, fetchHistory,
   parseMarketRef, isMarketRef, isSpotSymbol, isFreeMarketRef, fetchMarketQuotes, setMarketTokenProvider
 } from '../assets/alfa-charts-data.mjs';
+import { LEGACY_TV_LIST } from '../assets/alfa-watchlist-model.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -205,6 +206,23 @@ test('imported refs use the free public data path while keeping the original ref
   assert.equal(partial['CRYPTOCAP:TOTAL'].price, 100);
   assert.equal(partial['OKX:ADAUSDT'], undefined);
   setMarketTokenProvider(async () => '');
+});
+
+test('default watchlist quotes never require an authenticated Charts session', async () => {
+  const calls = [];
+  const quotes = await fetchMarketQuotes(LEGACY_TV_LIST, undefined, async (url, opts) => {
+    calls.push({ url, opts });
+    const body = JSON.parse(opts.body);
+    assert.equal(url, '/api/access');
+    assert.equal(body.op, 'chart-market-quotes-free');
+    assert.equal(opts.headers.Authorization, undefined);
+    const answered = {};
+    for (const ref of body.refs) answered[ref] = { price: 1, change: 0, at: 1 };
+    return { ok: true, json: async () => ({ ok: true, quotes: answered }) };
+  });
+  assert.equal(calls.length, 1);
+  assert.equal(Object.keys(quotes).length, LEGACY_TV_LIST.length);
+  for (const ref of LEGACY_TV_LIST) assert.ok(quotes[ref], ref);
 });
 
 test('chart page uses the vendored open-source library and no TradingView iframe', () => {

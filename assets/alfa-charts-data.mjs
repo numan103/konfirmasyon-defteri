@@ -114,13 +114,20 @@ export const FREE_REF_SEEDS = [
   // Legacy 44-list venues that use the same allowlisted Yahoo/OKX adapters.
   'FX:EURUSD', 'FX:USDJPY', 'FX:AUDUSD', 'FX:USDCAD', 'BYBIT:BTCUSDT', 'BYBIT:ETHUSDT', 'BYBIT:SOLUSDT',
   'OKX:HBARUSDT.P', 'OKX:UNIUSDT.P', 'OKX:TRXUSDT.P', 'OKX:WIFUSDT', 'OKX:BONKUSDT',
-  'OKX:POPCATUSDT.P', 'OKX:RENDERUSDT'
+  'OKX:POPCATUSDT.P', 'OKX:RENDERUSDT', 'OKX:XLMUSDT.P', 'OKX:ADAUSDT.P', 'OKX:BCHUSDT.P', 'OKX:DOTUSDT.P'
 ];
 const FREE_MARKET_REFS = new Set(FREE_REF_SEEDS.map(ref => {
   try { return parseMarketRef(ref).feed === 'binance' ? null : parseMarketRef(ref).key; }
   catch { return null; }
 }).filter(Boolean));
 export const isFreeMarketRef = value => { try { return FREE_MARKET_REFS.has(parseMarketRef(value).key); } catch { return false; } };
+// Binance Spot history stays on the direct public REST feed, but its quotes use
+// the same public proxy as every other allowlisted watchlist reference. Anonymous
+// users must not get a 401 for rows that are already visible in the default list.
+export const isFreeQuoteRef = value => {
+  try { const ref = parseMarketRef(value); return isFreeMarketRef(value) || ref.feed === 'binance'; }
+  catch { return false; }
+};
 
 // The server proxy is required for feeds without CORS (Yahoo, derived gold).
 // These public feeds also allow the browser directly, which keeps the imported
@@ -258,7 +265,7 @@ async function proxyRequest(op, body, signal, fetcher, providedToken) {
 export async function fetchMarketQuotes(refs, signal, fetcher = fetch, providedToken) {
   const unique = [...new Set(refs.filter(isMarketRef))].slice(0, 60);
   if (!unique.length) return {};
-  const free = unique.filter(isFreeMarketRef), gated = unique.filter(ref => !isFreeMarketRef(ref));
+  const free = unique.filter(isFreeQuoteRef), gated = unique.filter(ref => !isFreeQuoteRef(ref));
   const quotes = {};
   let firstError = null;
   if (free.length) try {
