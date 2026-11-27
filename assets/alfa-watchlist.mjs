@@ -2,7 +2,7 @@ import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, f
 import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES,
   LEGACY_TV_LIST, FLAG_COLORS, GROUP_MODES, SORT_MODES, activeList, allWatchlistRefs, classifyWatchlistRef, filteredWatchlistRefs,
   groupWatchlistRefs, legacyWatchlistKeys, mergeLegacyWatchlist, migrateWatchlistDocument, normalizeWatchlistDocument,
-  sortWatchlistRefs, watchlistGroupKey, watchlistKey, watchlistMigrationKey } from './alfa-watchlist-model.mjs?v=11';
+  sortWatchlistRefs, watchlistGroupKey, watchlistKey, watchlistMigrationKey } from './alfa-watchlist-model.mjs?v=12';
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=5';
 const $ = id => document.getElementById(id);
 const CATALOG_KEY = 'alfa-spot-catalog:v1';

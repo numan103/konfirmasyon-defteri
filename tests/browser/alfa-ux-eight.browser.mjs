@@ -109,8 +109,10 @@ try {
     assert.equal(notes.installPresent, false);
     assert.equal(notes.advancedNotes, 0);
     await mobile.screenshot({ path: path.join(shotDir, 'ux-02-mobile-menu-clean.png'), fullPage: false });
-    await mobile.keyboard.press('Escape');
-    await mobile.waitForFunction(() => !document.body.classList.contains('menu-open'));
+    // Use the visible close control; a synthetic Escape can be swallowed by a
+    // focused element after a screenshot and made this assertion flaky.
+    await mobile.click('#mobile-menu-close');
+    await mobile.waitForFunction(() => !document.body.classList.contains('menu-open'), null, { timeout: 5000 });
   });
   await mobileContext.close();
 
