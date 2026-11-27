@@ -132,7 +132,7 @@ try {
     await shot('workspace-with-studies');
   });
   await test('grid, optional axis labels and non-destructive clean mode work', async () => {
-    await page.click('#view-menu summary'); await page.uncheck('#view-grid'); await page.check('#view-axis-labels'); await page.check('#view-clean');
+    await page.click('#view-menu > summary'); await page.uncheck('#view-grid'); await page.check('#view-axis-labels'); await page.check('#view-clean');
     assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 1);
     assert.equal(await state(() => window.__alfaDebug.indicators.items.length), 2);
     assert.equal(await state(() => window.__alfaDebug.fvg.enabled), false);
@@ -213,7 +213,7 @@ try {
       indicators: window.__alfaDebug.indicators.items.length,
     }));
     assert.ok(before.drawings > 0);
-    await page.click('#view-menu summary'); await page.click('#chart-settings');
+    await page.click('#view-menu > summary'); await page.click('#chart-settings');
     await page.waitForFunction(() => !!document.querySelector('#chart-settings-form'));
     await page.uncheck('#chart-settings-form input[name=grid]');
     await page.check('#chart-settings-form input[name=logScale]');
@@ -359,7 +359,7 @@ try {
   await test('view-menu layout buttons open multi-chart view', async () => {
     await page.evaluate(() => window.__alfaDebug.multiChart.setOpen(false));
     assert.equal(await state(() => window.__alfaDebug.multiState.open), false);
-    await page.click('#view-menu summary');
+    await page.click('#view-menu > summary');
     await page.click('.layout-buttons button[data-layout="4"]');
     await page.keyboard.press('Escape');
     assert.equal(await state(() => window.__alfaDebug.multiState.layout), 4);
@@ -384,7 +384,7 @@ try {
       await page.waitForFunction(() => document.body.classList.contains('multi-open') && !document.getElementById('multi-chart').hidden);
       assert.equal(await page.locator('#chart-tabs .chart-tab').count(), 1);
       assert.equal(await state(() => window.__alfaDebug.multiState.open), true);
-      await page.click('#view-menu summary'); await page.click('[data-layout="2"]'); await page.keyboard.press('Escape');
+      await page.click('#view-menu > summary'); await page.click('[data-layout="2"]'); await page.keyboard.press('Escape');
       assert.equal(await state(() => document.getElementById('multi-grid').dataset.layout), '2');
       assert.equal(await page.locator('#multi-grid .multi-cell').count(), 2);
       await page.click('#multi-add');

@@ -48,6 +48,17 @@ const serviceWorkerReady = page => page.waitForFunction(async () => {
   const registrations = await navigator.serviceWorker.getRegistrations();
   return registrations.some(registration => registration.scope === new URL('/', location.origin).href);
 }, null, { timeout: 15000 });
+// Share links are backend-backed. Deterministically stub only that route so the
+// phone capability tests exercise the real UI without a production write.
+const routeChartShare = context => context.route('**/api/edu-shared**', async route => {
+  const url = new URL(route.request().url());
+  if (url.pathname !== '/api/edu-shared' || url.searchParams.get('kind') !== 'chart') return route.continue();
+  if (route.request().method() === 'POST') {
+    return route.fulfill({ status: 200, contentType: 'application/json',
+      body: JSON.stringify({ ok: true, id: 'pwashare01', url: '/alfa-charts.html?share=pwashare01' }) });
+  }
+  return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, found: false, snapshot: null }) });
+});
 
 let step = 'boot';
 let page = null;
@@ -61,6 +72,7 @@ try {
     isMobile: true,
     hasTouch: true
   });
+  await routeChartShare(context);
   // Deterministic clipboard spy: headless Chrome has no native share sheet.
   await context.addInitScript(() => {
     window.__copiedTexts = [];
@@ -106,7 +118,9 @@ try {
   await page.click('#mobile-share-link');
   await page.waitForFunction(() => !document.body.classList.contains('share-open'), null, { timeout: 6000 });
   const copied = await page.evaluate(() => window.__copiedTexts || []);
-  assert.ok(copied.some(text => text.includes('/alfa-charts.html')), `chart link must be copied: ${JSON.stringify(copied)}`);
+  assert.ok(copied.some(text => text.includes('/alfa-charts.html?share=pwashare01')), `backend chart link must be copied: ${JSON.stringify(copied)}`);
+  const fallbackShare = await page.evaluate(() => window.__alfaDebug.share.lastCreated);
+  assert.equal(fallbackShare?.id, 'pwashare01', 'fallback link must come from the share backend');
   assert.equal((await readShare(page)).message.hidden, true, 'successful fallback must not leave an error message');
 
   step = 'download fallback';
@@ -178,6 +192,7 @@ try {
     isMobile: true,
     hasTouch: true
   });
+  await routeChartShare(nativeContext);
   await nativeContext.addInitScript(() => {
     window.__shareCalls = [];
     Object.defineProperty(navigator, 'share', {
@@ -223,6 +238,16 @@ try {
   const imageCall = await nativePage.evaluate(() => window.__shareCalls[0]);
   assert.ok(Array.isArray(imageCall.files) && imageCall.files.length === 1, 'native image share must receive a file');
   assert.equal(imageCall.title, 'ALFA CHARTS');
+  await nativePage.waitForFunction(() => !document.body.classList.contains('share-open'), null, { timeout: 6000 });
+
+  step = 'native link share';
+  await nativePage.click('#mobile-menu-open');
+  await nativePage.click('#menu-share');
+  await nativePage.waitForFunction(() => document.body.classList.contains('share-open'), null, { timeout: 4000 });
+  await nativePage.click('#mobile-share-link');
+  await nativePage.waitForFunction(() => (window.__shareCalls || []).length >= 2, null, { timeout: 8000 });
+  const linkCall = await nativePage.evaluate(() => window.__shareCalls[1]);
+  assert.match(linkCall.url, /share=pwashare01/, 'native share must receive the backend chart link');
   await nativePage.waitForFunction(() => !document.body.classList.contains('share-open'), null, { timeout: 6000 });
 
   step = 'visible share error fallback';
@@ -280,6 +305,7 @@ try {
     installHint,
     native,
     imageCall: { title: imageCall.title, files: imageCall.files.length },
+    linkCall: { title: linkCall.title, url: linkCall.url },
     desktop,
     pageErrors
   }, null, 2));

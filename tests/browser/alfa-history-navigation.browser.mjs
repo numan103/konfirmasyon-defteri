@@ -39,7 +39,7 @@ try {
   await page.waitForFunction(() => window.__alfaDebug.drawings.history.doc.drawings.length === 1);
   const drawing = await page.evaluate(() => structuredClone(window.__alfaDebug.drawings.history.doc));
   // Normal navigation must not start Replay.
-  await page.click('#view-menu summary');
+  await page.click('#view-menu > summary');
   await page.fill('#goto-date', '2026-09-15T12:00');
   await page.click('#goto-date-btn');
   await page.waitForFunction(() => document.getElementById('connection').textContent === 'Tarih aralığı yüklendi');
@@ -52,9 +52,13 @@ try {
     return range.from <= t && range.to >= t;
   }, target));
   const chooseRange = async value => {
-    if (!await page.evaluate(() => document.getElementById('range-menu').open)) await page.click('#range-menu summary');
-    await page.click(`#range-menu [data-range="${value}"]`);
-    await page.waitForFunction(v => document.querySelector(`#range-menu [data-range="${v}"]`).getAttribute('aria-pressed') === 'true', value);
+    if (!await page.evaluate(() => document.getElementById('view-menu').open)) await page.click('#view-menu > summary');
+    const nested = page.locator('#view-menu #range-menu');
+    if (!await nested.evaluate(el => el.open)) await page.click('#view-menu #range-menu > summary');
+    await page.click(`#view-menu #range-menu [data-range="${value}"]`);
+    await page.waitForFunction(v => document.querySelector(`#view-menu #range-menu [data-range="${v}"]`).getAttribute('aria-pressed') === 'true', value);
+    await page.click('#view-menu #range-menu > summary');
+    await page.click('#view-menu > summary');
   };
   for (const duration of [86400, 432000, 2592000, 7776000]) {
     await chooseRange(duration);
@@ -65,7 +69,7 @@ try {
   assert.equal(await page.evaluate(() => window.__alfaDebug.history[0].time), first);
   assert.deepEqual(await page.evaluate(() => window.__alfaDebug.drawings.history.doc), drawing);
   const before = await page.evaluate(() => window.__alfaDebug.chart.timeScale().getVisibleLogicalRange());
-  await page.click('#view-menu summary');
+  await page.click('#view-menu > summary');
   await page.fill('#goto-date', '2025-01-01T00:00');
   await page.click('#goto-date-btn');
   await page.waitForFunction(() => document.getElementById('connection').textContent.includes('görünüm korundu'));

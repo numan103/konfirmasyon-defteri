@@ -13,6 +13,13 @@ export function priceOf(c, source = 'close') {
 
 function closes(candles, source) { return candles.map(c => priceOf(c, source)); }
 
+// One caption source for native oscillator panes; parameters never duplicate a
+// name and collapsed/expanded renders always produce the same label.
+export function paneIndicatorLabel(name, params = {}) {
+  const period = params.period ?? params.fast ?? params.rsiPeriod ?? params.k ?? params.length;
+  return [name, period].filter(value => value !== undefined && value !== null && value !== '').join(' ');
+}
+
 export function sma(candles, period = 20, source = 'close') {
   const p = Math.max(1, Math.floor(period));
   const out = new Array(candles.length).fill(null);
@@ -75,13 +82,14 @@ export function rsi(candles, period = 14, source = 'close') {
     if (d >= 0) gain += d; else loss -= d;
   }
   let avgGain = gain / p, avgLoss = loss / p;
-  out[p] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss);
+  const value = () => avgLoss === 0 ? (avgGain === 0 ? 50 : 100) : 100 - 100 / (1 + avgGain / avgLoss);
+  out[p] = value();
   for (let i = p + 1; i < candles.length; i++) {
     const d = vals[i] - vals[i - 1];
     const g = d > 0 ? d : 0, l = d < 0 ? -d : 0;
     avgGain = (avgGain * (p - 1) + g) / p;
     avgLoss = (avgLoss * (p - 1) + l) / p;
-    out[i] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss);
+    out[i] = value();
   }
   return out;
 }
@@ -108,35 +116,32 @@ export function macd(candles, fast = 12, slow = 26, signal = 9, source = 'close'
   const line = candles.map((_, i) => (eFast[i] == null || eSlow[i] == null) ? null : eFast[i] - eSlow[i]);
   const sig = new Array(candles.length).fill(null);
   const k = 2 / (signal + 1);
-  const validVals = line.filter(v => v != null);
-  let seed = null;
-  if (validVals.length >= signal) {
-    let acc = 0;
-    for (let j = 0; j < signal; j++) acc += validVals[j];
-    seed = acc / signal;
-  }
-  let vi = 0;
-  for (let i = 0; i < candles.length; i++) {
-    if (line[i] == null) { sig[i] = null; continue; }
-    if (seed == null) { sig[i] = null; continue; }
-    if (vi < signal - 1) { vi++; sig[i] = null; if (vi === signal - 1) sig[i] = seed; continue; }
-    if (vi === signal - 1) { sig[i] = seed; vi++; continue; }
-    seed = line[i] * k + seed * (1 - k);
-    sig[i] = seed;
+  const valid = [];
+  for (let i = 0; i < line.length; i++) if (line[i] != null) valid.push(i);
+  if (valid.length >= signal) {
+    let seed = 0;
+    for (let j = 0; j < signal; j++) seed += line[valid[j]];
+    seed /= signal;
+    for (let j = signal - 1; j < valid.length; j++) {
+      const index = valid[j];
+      if (j > signal - 1) seed = line[index] * k + seed * (1 - k);
+      sig[index] = seed;
+    }
   }
   const hist = candles.map((_, i) => (line[i] == null || sig[i] == null) ? null : line[i] - sig[i]);
   return { macd: line, signal: sig, hist };
 }
 
 export function bollinger(candles, period = 20, mult = 2, source = 'close') {
-  const mid = sma(candles, period, source);
+  const p = Math.max(1, Math.floor(period));
+  const mid = sma(candles, p, source);
   const vals = closes(candles, source);
   const upper = new Array(candles.length).fill(null);
   const lower = new Array(candles.length).fill(null);
-  for (let i = period - 1; i < candles.length; i++) {
+  for (let i = p - 1; i < candles.length; i++) {
     let sq = 0;
-    for (let j = 0; j < period; j++) sq += (vals[i - period + 1 + j] - mid[i]) ** 2;
-    const sd = Math.sqrt(sq / period);
+    for (let j = 0; j < p; j++) sq += (vals[i - p + 1 + j] - mid[i]) ** 2;
+    const sd = Math.sqrt(sq / p);
     upper[i] = mid[i] + mult * sd;
     lower[i] = mid[i] - mult * sd;
   }

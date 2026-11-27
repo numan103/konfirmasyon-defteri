@@ -87,11 +87,26 @@ async function create(type, points) {
   assert.equal(await page.locator('#drawing-tools [data-tool=cursor]').getAttribute('aria-pressed'), 'true');
   return lastDrawing();
 }
+// Playwright's boundingBox() is null for zero-height SVG hit lines and can be
+// stale during chart repaints. Drag from the live SVG attributes instead.
+const svgPoint = ({ id, selector, along = .5 }) => debug(({ id, selector, along }) => {
+  const engine = window.__alfaDebug.drawings, svg = engine.svg;
+  const node = document.querySelector(`[data-id="${id}"] ${selector}`);
+  const state = { found: !!node, tool: engine.tool, selection: [...engine.selection],
+    handles: [...(document.querySelector(`[data-id="${id}"]`)?.querySelectorAll('[data-handle]') || [])].map(n => `${n.tagName}:${n.getAttribute('data-handle')}`) };
+  if (!svg || !node) return state;
+  const r = svg.getBoundingClientRect(), sx = r.width / (Number(svg.getAttribute('width')) || r.width),
+    sy = r.height / (Number(svg.getAttribute('height')) || r.height);
+  const rawX = node.tagName === 'circle' ? Number(node.getAttribute('cx'))
+    : Number(node.getAttribute('x1')) + (Number(node.getAttribute('x2')) - Number(node.getAttribute('x1'))) * along;
+  const rawY = node.tagName === 'circle' ? Number(node.getAttribute('cy')) : Number(node.getAttribute('y1'));
+  return { ...state, x: r.left + rawX * sx, y: r.top + rawY * sy, rawX, rawY };
+}, { id, selector, along });
 async function handleDrag(id, handle, dx, dy) {
-  const loc = page.locator(`[data-id="${id}"] circle[data-handle="${handle}"]`);
-  const r = await loc.boundingBox(); assert.ok(r, `${handle} visible`);
-  await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
-  await page.mouse.down(); await page.mouse.move(r.x + r.width / 2 + dx, r.y + r.height / 2 + dy, { steps: 10 }); await page.mouse.up();
+  const p = await svgPoint({ id, selector: `circle[data-handle="${handle}"]` });
+  assert.ok(p?.found && Number.isFinite(p.x) && Number.isFinite(p.y), `${handle} visible: ${JSON.stringify(p)}`);
+  await page.mouse.move(p.x, p.y);
+  await page.mouse.down(); await page.mouse.move(p.x + dx, p.y + dy, { steps: 10 }); await page.mouse.up();
 }
 const test = async (name, fn) => { await fn(); results.push({ name, passed: true }); console.log('PASS', name); };
 try {
@@ -190,15 +205,36 @@ try {
     await handleDrag(long.id, 'entry', 0, 5);
     await handleDrag(long.id, 'target', 0, -10);
     d = await lastDrawing(); assert.notEqual(d.target, long.target); assert.notEqual(d.points[0].price, long.points[0].price);
-    const stopLine = page.locator(`[data-id="${long.id}"] line[data-handle=stop]`), bounds = await stopLine.boundingBox();
+    const stop = await svgPoint({ id: long.id, selector: 'line[data-handle="stop"]', along: .2 });
+    assert.ok(stop?.found && Number.isFinite(stop.x) && Number.isFinite(stop.y),
+      `stop hit line keeps usable SVG geometry: ${JSON.stringify(stop)}`);
     const before = await lastDrawing();
-    const lineY = bounds.y + bounds.height / 2;
-    await page.mouse.move(bounds.x + bounds.width * .2, lineY);
-    await page.mouse.down(); await page.mouse.move(bounds.x + bounds.width * .2, lineY + 10, { steps: 5 }); await page.mouse.up();
+    await page.mouse.move(stop.x, stop.y);
+    await page.mouse.down(); await page.mouse.move(stop.x, stop.y + 10, { steps: 5 }); await page.mouse.up();
     const after = await lastDrawing();
     assert.equal(after.points[0].price, before.points[0].price);
     assert.equal(after.target, before.target);
     assert.notEqual(after.points[1].price, before.points[1].price);
+  });
+  await test('Off-screen position target keeps the drawing editable', async () => {
+    const d = await lastDrawing();
+    await page.evaluate(id => {
+      const engine = window.__alfaDebug.drawings;
+      const item = engine.history.doc.drawings.find(x => x.id === id);
+      item.target = item.points[0].price * 100;
+      engine.render();
+    }, d.id);
+    assert.equal(await page.locator(`[data-id="${d.id}"]`).count(), 1, 'position drawing must stay rendered');
+    for (const handle of ['entry', 'stop', 'target']) {
+      assert.equal(await page.locator(`[data-id="${d.id}"] circle[data-handle="${handle}"]`).count(), 1,
+        `${handle} handle must remain reachable`);
+    }
+    await page.evaluate(({ id, target }) => {
+      const engine = window.__alfaDebug.drawings;
+      const item = engine.history.doc.drawings.find(x => x.id === id);
+      item.target = target;
+      engine.render();
+    }, { id: d.id, target: d.target });
   });
   await test('TradingView-style drawing settings and live position colors', async () => {
     const d = await lastDrawing();
@@ -290,7 +326,7 @@ try {
     });
     assert.ok(checks.every(Boolean));
     // Restore enough recent history for following pointer tests.
-    await page.locator('#view-menu summary').click(); await page.locator('#live').click();
+    await page.locator('#view-menu > summary').click(); await page.locator('#live').click();
   });
   await test('Timeframe, resize and reload preserve coordinates and Fibonacci template', async () => {
     const before = await documentState();

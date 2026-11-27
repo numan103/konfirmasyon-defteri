@@ -1,4 +1,4 @@
-import { chartDialog } from './alfa-chart-ui.mjs?v=3';
+import { chartDialog } from './alfa-chart-ui.mjs?v=5';
 
 export function sameSettings(a, b) {
   const stable = value => value && typeof value === 'object'

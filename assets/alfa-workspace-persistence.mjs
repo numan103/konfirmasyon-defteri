@@ -1,4 +1,4 @@
-import { openCloudConflict, sameSettings } from './alfa-cloud-conflict.mjs?v=1';
+import { openCloudConflict, sameSettings } from './alfa-cloud-conflict.mjs?v=2';
 
 export class WorkspacePersistence {
   constructor({ store, storage = localStorage, normalize, apply, onStatus = () => {}, onConflict = () => {} }) {

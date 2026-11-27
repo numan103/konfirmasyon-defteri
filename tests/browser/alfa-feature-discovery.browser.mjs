@@ -96,7 +96,7 @@ try {
   await page.waitForFunction(() => !!document.querySelector('dialog[open]'), null, { timeout: 4000 });
   const tester = await snapshot();
   assert.match(tester.dialog.text, /Strateji testleri/);
-  assert.match(tester.dialog.text, /Replay başlat/);
+  assert.match(tester.dialog.text, /Backtest'i başlat|Replay başlat/);
   await page.click('#tester-close');
   await page.waitForFunction(() => !document.querySelector('dialog[open]'), null, { timeout: 4000 });
 

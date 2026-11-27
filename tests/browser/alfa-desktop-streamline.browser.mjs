@@ -95,9 +95,22 @@ try {
   await page.locator('#watch-section-save').click();
   await page.waitForSelector('.watch-group-head:has-text("Kripto")');
   await page.screenshot({ path: path.join(shots, '04-custom-section.png') });
+  const otherRow = page.locator('.watch-group:has(.watch-group-head:has-text("Diğer")) .watch-row').first();
+  const dragged = await otherRow.getAttribute('data-symbol');
+  const cryptoGroup = page.locator('.watch-group:has(.watch-group-head:has-text("Kripto"))');
+  await otherRow.dragTo(cryptoGroup);
+  await page.waitForFunction(symbol => {
+    const list = window.__alfaDebug.watchlist.doc.lists.find(l => l.id === window.__alfaDebug.watchlist.doc.activeListId);
+    return list?.sections?.some(section => section.name === 'Kripto' && section.symbols.includes(symbol));
+  }, dragged, { timeout: 5000 });
+  await page.screenshot({ path: path.join(shots, '05-dragged-section.png') });
   await page.reload();
   await page.waitForFunction(() => window.__alfaDebug?.ready);
   assert.ok(await page.locator('.watch-group-head:has-text("Kripto")').count(), 'custom section must survive reload');
+  assert.ok(await page.evaluate(symbol => {
+    const list = window.__alfaDebug.watchlist.doc.lists.find(l => l.id === window.__alfaDebug.watchlist.doc.activeListId);
+    return list?.sections?.some(section => section.name === 'Kripto' && section.symbols.includes(symbol));
+  }, dragged), 'dragged section membership must survive reload');
   await page.waitForFunction(() => window.__alfaDebug.history.length >= 500);
   const historicalCenter = await page.evaluate(() => {
     const d = window.__alfaDebug, bars = d.history;

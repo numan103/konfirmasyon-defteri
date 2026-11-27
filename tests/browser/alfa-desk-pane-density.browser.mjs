@@ -85,7 +85,7 @@ try {
     assert.equal(await page.evaluate(() => window.__alfaDebug.candles.options().visible), type === 'candles');
     assert.ok(await page.locator('#chart canvas').count() > 0);
   }
-  for (const id of ['range-menu', 'lab-menu', 'view-menu']) {
+  for (const id of ['lab-menu', 'view-menu']) {
     await page.locator(`#${id} > summary`).click();
     assert.equal(await page.locator(`#${id}`).evaluate(el => el.open), true);
     const popover = await page.locator(`#${id} .workspace-popover`).boundingBox();
@@ -94,6 +94,10 @@ try {
     `${id} must fit the desktop viewport`);
     await page.locator(`#${id} > summary`).click();
   }
+  await page.locator('#view-menu > summary').click();
+  await page.locator('#view-menu #range-menu > summary').click();
+  assert.equal(await page.locator('#view-menu #range-menu').evaluate(el => el.open), true);
+  await page.locator('#view-menu > summary').click();
   await page.locator('#view-menu > summary').click();
   await page.locator('#view-grid').uncheck();
   assert.equal(await page.evaluate(() => window.__alfaDebug.viewConfig.grid), false);
@@ -104,7 +108,7 @@ try {
   await page.waitForSelector('dialog[open]', { state: 'detached' });
   await page.locator('#screenshot').click();
   await page.waitForSelector('#shot-menu', { state: 'visible' });
-  assert.equal(await page.locator('#shot-menu [data-shot]').count(), 3);
+  assert.equal(await page.locator('#shot-menu [data-shot]').count(), 4);
   await page.keyboard.press('Escape');
   await page.locator('#list-toggle').click();
   assert.equal(await page.locator('#list-toggle').getAttribute('aria-pressed'), 'false');

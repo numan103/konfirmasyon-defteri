@@ -119,7 +119,7 @@ try {
   await page.keyboard.press('Escape');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'chart-timezone');
 
-  await page.locator('#view-menu summary').click();
+  await page.locator('#view-menu > summary').click();
   await page.locator('#chart-settings').click();
   await page.locator('#chart-settings-form select[name=timezone]').selectOption('America/New_York');
   await page.locator('#chart-settings-form button[type=submit]').click();

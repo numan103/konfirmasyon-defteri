@@ -3,7 +3,7 @@ import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, trading
   LEGACY_TV_LIST, FLAG_COLORS, GROUP_MODES, SORT_MODES, activeList, allWatchlistRefs, classifyWatchlistRef, filteredWatchlistRefs,
   groupWatchlistRefs, legacyWatchlistKeys, mergeLegacyWatchlist, migrateWatchlistDocument, normalizeWatchlistDocument,
   sortWatchlistRefs, watchlistGroupKey, watchlistKey, watchlistMigrationKey } from './alfa-watchlist-model.mjs?v=11';
-import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
+import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=5';
 const $ = id => document.getElementById(id);
 const CATALOG_KEY = 'alfa-spot-catalog:v1';
 const readJSON = value => { try { return JSON.parse(value || 'null'); } catch { return null; } };
@@ -20,7 +20,6 @@ export class ChartWatchlist {
     this.markets = SYMBOLS.map(symbol => ({ symbol, base: symbol.replace('USDT', ''), quote: 'USDT', precision: 2 }));
     this.doc = normalizeWatchlistDocument(null, SYMBOLS); this.owner = null; this.migrationGeneration = 0; this.search = '';
     this.catalogState = 'loading'; this.account();
-    $('symbol-search').onclick = () => this.openExplorer();
     $('watch-add').onclick = () => this.openPicker();
     $('watch-import').onclick = () => this.openImport();
     $('watch-export').onclick = () => this.export();
@@ -176,11 +175,26 @@ export class ChartWatchlist {
     if (!Object.keys(flag).length) delete this.doc.flags[ref];
     this.save(); this.render();
   }
+  moveToSection(ref, sectionKey) {
+    const list = activeList(this.doc);
+    if (!list || !this.valid(ref)) return false;
+    const sectionId = String(sectionKey || '').startsWith('section-') ? String(sectionKey).slice(8) : '';
+    const sections = list.sections || (list.sections = []);
+    if (sectionId && !sections.some(section => section.id === sectionId)) return false;
+    for (const section of sections) section.symbols = section.symbols.filter(symbol => symbol !== ref);
+    if (sectionId) {
+      const target = sections.find(section => section.id === sectionId);
+      if (!target.symbols.includes(ref)) target.symbols.push(ref);
+    }
+    this.save(); this.render();
+    this.onStatus?.(`${ref} ${sectionId ? 'seçili bölüme' : 'Diğer bölümüne'} taşındı`, 'ok');
+    return true;
+  }
   rowHTML(ref, selected) {
     const info = this.info(ref), venue = esc(info.venue), kind = esc((info.marketType || '').toUpperCase() || 'Spot');
     const flag = this.doc.flags[ref] || {}, color = FLAG_COLORS.includes(flag.color) ? flag.color : '';
     const quote = this.settings.showQuotes ? `<span class="watch-quote"><span class="watch-price" data-watch-price="${esc(ref)}">—</span><small data-watch-change="${esc(ref)}">—</small></span>` : '';
-    return `<div class="watch-item${this.settings.compact ? ' watch-compact' : ''}"><button type="button" class="watch-row" data-symbol="${esc(ref)}" aria-label="${esc(info.label)}" aria-pressed="${ref === selected}">
+    return `<div class="watch-item${this.settings.compact ? ' watch-compact' : ''}"><button type="button" class="watch-row" draggable="true" data-drag-symbol="${esc(ref)}" data-symbol="${esc(ref)}" aria-label="${esc(info.label)} · bölümlere sürükle" aria-pressed="${ref === selected}">
       <span class="coin-icon"${color ? ` style="--flag-color:${color}"` : ''}>${info.base === 'BTC' ? '₿' : esc(String(info.base || ref).slice(0, 1))}</span><span><strong>${esc(info.base || ref)}</strong><small>${esc(info.quote || info.marketType || '')} · ${venue}</small></span>
       ${quote}</button>
       ${this.settings.showFlags ? `<button type="button" class="watch-flag" data-watch-flag="${esc(ref)}"${color ? ` style="--flag-color:${color}"` : ''} aria-label="${esc(ref)} renk bayrağı" title="Renk bayrağı: ${color || 'yok'}">${icon('list')}</button>` : ''}
@@ -220,7 +234,7 @@ export class ChartWatchlist {
       const key = watchlistGroupKey(group.id), collapsed = !!this.settings.collapsedGroups[key];
       const head = key === 'all' ? '' : `<button type="button" class="watch-group-head" data-watch-group="${esc(key)}" aria-expanded="${!collapsed}">${icon('chevron')}<strong>${esc(group.name)}</strong><small>${group.refs.length}</small></button>`;
       const rows = collapsed ? '' : group.refs.map(ref => this.rowHTML(ref, selected)).join('');
-      return `<section class="watch-group${collapsed ? ' collapsed' : ''}" data-watch-group-section="${esc(key)}">${head}${rows}</section>`;
+      return `<section class="watch-group${collapsed ? ' collapsed' : ''}" data-watch-group-section="${esc(key)}" data-watch-section="${esc(key)}">${head}${rows}</section>`;
     }).join('') || '<p class="watch-empty">Bu listede eşleşen sembol yok.<br>+ ile sembol ekle veya liste içe aktar.</p>';
     $('watch-rows').querySelectorAll('[data-symbol]').forEach(b => {
       b.onclick = () => this.select(b.dataset.symbol);
@@ -235,6 +249,33 @@ export class ChartWatchlist {
       if (this.settings.collapsedGroups[key]) delete this.settings.collapsedGroups[key];
       else this.settings.collapsedGroups[key] = true;
       this.save(); this.render();
+    });
+    $('watch-rows').querySelectorAll('[data-drag-symbol]').forEach(row => {
+      row.addEventListener('dragstart', event => {
+        this.dragSymbol = row.dataset.dragSymbol;
+        event.dataTransfer?.setData('text/plain', this.dragSymbol);
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+        row.classList.add('dragging');
+      });
+      row.addEventListener('dragend', () => {
+        this.dragSymbol = null;
+        row.classList.remove('dragging');
+        $('watch-rows').querySelectorAll('.drag-target').forEach(node => node.classList.remove('drag-target'));
+      });
+    });
+    $('watch-rows').querySelectorAll('[data-watch-section]').forEach(section => {
+      section.addEventListener('dragover', event => {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+        section.classList.add('drag-target');
+      });
+      section.addEventListener('dragleave', () => section.classList.remove('drag-target'));
+      section.addEventListener('drop', event => {
+        event.preventDefault();
+        section.classList.remove('drag-target');
+        const symbol = event.dataTransfer?.getData('text/plain') || this.dragSymbol;
+        if (symbol) this.moveToSection(symbol, section.dataset.watchSection);
+      });
     });
     this.paintQuotes();
   }

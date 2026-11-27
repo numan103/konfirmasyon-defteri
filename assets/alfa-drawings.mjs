@@ -1,8 +1,8 @@
 import { TOOLS, STYLE_FIELDS, EXTENSION_LEVELS, normalizeStyle, clone, emptyDocument, makeDrawing, validDrawing, positionStats, DrawingHistory, timeToLogical, logicalToTime, logicalToPixel, pixelToLogical, translateSelection } from './alfa-drawings-model.mjs?v=9';
 import { renderDrawing } from './alfa-drawings-render.mjs?v=9';
 import { DrawingStore } from './alfa-drawings-store.mjs?v=4';
-import { icon, chartDialog } from './alfa-chart-ui.mjs?v=2';
-import { ObjectTree } from './alfa-object-tree.mjs?v=1';
+import { icon, chartDialog } from './alfa-chart-ui.mjs?v=5';
+import { ObjectTree } from './alfa-object-tree.mjs?v=2';
 const $ = id => document.getElementById(id);
 const onePoint = type => ['horizontal', 'vertical', 'text', 'label'].includes(type);
 const isPosition = d => ['long', 'short'].includes(d.type);
@@ -140,6 +140,7 @@ export class DrawingEngine {
   }
   buildUI() {
     this.renderToolbars();
+    $('drawing-all-tools').onclick = e => this.openToolMenu(Object.keys(TOOLS), 'Tüm çizim araçları', e.currentTarget);
     $('drawing-favorites-edit').onclick = e => this.openToolMenu(Object.keys(TOOLS).filter(t => !['cursor', 'delete'].includes(t)), 'Favori araçlar', e.currentTarget);
     $('drawing-undo').onclick = () => { this.cancel(); if (this.ready && this.history.undo()) this.changed(); };
     $('drawing-redo').onclick = () => { this.cancel(); if (this.ready && this.history.redo()) this.changed(); };

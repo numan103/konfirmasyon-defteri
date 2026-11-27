@@ -64,6 +64,7 @@ test('actual layout loader restores conflict recovery without silently hydrating
     cloudConflicts: new Set(), conflictContext: (...args) => JSON.stringify(args), $: () => status,
     applyChartType: value => { type = value; }, applyViewSettings: value => { view = value; },
     applyStudiesBundle() {}, loadStudiesFor() { return {}; },
+    sharedChartSnapshot: null, sharedStudiesApplied: false, sharedStateApplied: false,
     cloudSettings: { isAuthed: () => true, async load() { throw Error('cloud overwrite forbidden'); } }
   };
   vm.createContext(sandbox);

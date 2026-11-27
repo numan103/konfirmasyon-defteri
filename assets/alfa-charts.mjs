@@ -3,25 +3,27 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=19';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=10';
-import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=10';
+import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=21';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=13';
+import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=12';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
-import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=5';
+import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=6';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=12';
-import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=3';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=15';
+import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=5';
 import { MtfManager } from './alfa-mtf.mjs?v=3';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import { replayRange } from './alfa-replay-data.mjs?v=2';
 import { DrawingHistory, emptyDocument, TOOLS } from './alfa-drawings-model.mjs?v=8';
 import { PublicStudiesManager } from './alfa-public-studies.mjs?v=9';
-import { initMultiChart } from './alfa-multichart.mjs?v=6';
+import { initMultiChart } from './alfa-multichart.mjs?v=8';
+import { initRightPanel, runSandboxedScript } from './alfa-right-panel.mjs?v=3';
+import { normalizeChartSnapshot } from './alfa-share-state.mjs?v=1';
 import { readEnvelope, createMessageGate, quantize } from './alfa-multichart-sync.mjs?v=2';
 import { ChartSettingsStore, readSettingsConflict, preserveSettingsConflict } from './alfa-chart-settings-store.mjs?v=4';
-import { openCloudConflict } from './alfa-cloud-conflict.mjs?v=1';
-import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=1';
+import { openCloudConflict } from './alfa-cloud-conflict.mjs?v=2';
+import { readStudyBundle, resolveStudyBundle, writeStudyBundle } from './alfa-study-persistence.mjs?v=3';
 import { PaperTradingPanel } from './alfa-paper.mjs?v=6';
 import { ResearchPanel } from './alfa-research.mjs?v=4';
 import { packetBars,validatePacket } from './alfa-research-model.mjs?v=2';
@@ -77,7 +79,19 @@ const syncGate = syncSession ? createMessageGate({
   post: envelope => { try { window.parent.postMessage(envelope, location.origin); } catch {} }
 }) : null;
 hydrateIcons();
-let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, pricePrecisionKey = '';
+let studiesUI = null, watchlist = null, publicStudies = null, multiChart = null, rightPanel = null, pricePrecisionKey = '';
+const scriptState = { runs: 0, lastResult: null, error: null };
+const SCRIPT_CODE_KEY = 'alfa-script-code:v1';
+const CHART_SHARE_ENDPOINT = '/api/edu-shared?kind=chart';
+const SHARE_BRANDING = 'A · alfa charts';
+let customScriptSeries = [];
+let scheduleSavedScript = () => {};
+let savedScriptTimer = null;
+let lastChartShare = null;
+let sharedChartSnapshot = null;
+let sharedStudiesApplied = false;
+let sharedStateApplied = false;
+let screenshotMetadata = null;
 let pendingStudies = null, studyContext = null;
 // Mobile-shell hooks. Desktop keeps the no-op defaults; the phone block assigns real painters.
 let syncMobileShell = () => {};
@@ -806,6 +820,24 @@ const volume = chart.addSeries(HistogramSeries, {
   lastValueVisible: false,
 });
 chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+function clearCustomScriptSeries() {
+  for (const series of customScriptSeries) { try { chart.removeSeries(series); } catch {} }
+  customScriptSeries = [];
+}
+function paintCustomScript(result, bars) {
+  clearCustomScriptSeries();
+  if (!result?.plots?.length) return;
+  for (const plot of result.plots) {
+    const series = chart.addSeries(LineSeries, { color: plot.color, lineWidth: 2, priceLineVisible: false,
+      lastValueVisible: false, crosshairMarkerRadius: 3, title: plot.name });
+    const data = [];
+    plot.values.forEach((value, i) => {
+      if (Number.isFinite(value) && bars[i]) data.push({ time: bars[i].time, value });
+    });
+    if (data.length) series.setData(data);
+    customScriptSeries.push(series);
+  }
+}
 function volumeData(bars) {
   return (bars || []).map(c => ({
     time: c.time,
@@ -816,12 +848,14 @@ function volumeData(bars) {
 function lineData(barsArr) { return (barsArr || []).map(c => ({ time: c.time, value: c.close })); }
 function syncSeriesData(barsArr) {
   const d = barsArr || [];
+  clearCustomScriptSeries();
   candles.setData(d);
   bars.setData(d);
   heikin.setData(heikinData(d));
   line.setData(lineData(d));
   area.setData(lineData(d));
   volume.setData(volumeData(d));
+  scheduleSavedScript();
 }
 function syncSeriesUpdate(c, allBars) {
   const d = allBars || history;
@@ -1282,6 +1316,15 @@ async function changeReplayDisplayTimeframe(next) {
     connection('Replay zaman dilimi değişmedi: ' + error.message, 'error');
   } finally { if (replayRequest === request) replayBusy = false; }
 }
+// Start directly from the last 200 confirmed candles so Replay is one click away.
+function startQuickReplay() {
+  if (replayMode || replayBusy) return;
+  if (!drawings.ready || history.length < 2) { connection('Replay için mum geçmişi yükleniyor', 'error'); return; }
+  const index = Math.max(0, history.length - 201);
+  const target = history[index]?.time;
+  if (!Number.isFinite(target)) { connection('Replay başlangıç mumu bulunamadı', 'error'); return; }
+  void enterReplay({ target });
+}
 async function enterReplay({target,session=null,researchPacket=null}={}) {
   if (replayMode) return;
   if(replayBusy || !drawings.ready)return;
@@ -1471,6 +1514,7 @@ function quote() {
   $('quote-change').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}% · ${live ? 'canlı değer' : 'son mum'}`;
   $('quote-change').style.color = change >= 0 ? '#26c89c' : '#ef6677';
   if (!replayMode) watchlist?.updateQuote(symbol, c.close);
+  rightPanel?.update();
   updateQuoteTime();
   showCandle(c);
 }
@@ -1501,8 +1545,14 @@ function setData(data, resetView) {
   }
   displayedMarket = { symbol, interval };
   quote();
-  if (pendingStudies) { try { applyStudiesBundle(pendingStudies, studyContext?.owner || currentUserKey(), symbol); } catch {} pendingStudies = null; }
-  else { try { indicators.updateAll(history); } catch {} }
+  if (pendingStudies) {
+    const bundle = sharedChartSnapshot && !sharedStudiesApplied
+      ? { indicators: sharedChartSnapshot.indicators, overlays: sharedChartSnapshot.studies }
+      : pendingStudies;
+    try { applyStudiesBundle(bundle, studyContext?.owner || currentUserKey(), symbol); } catch {}
+    if (sharedChartSnapshot && !sharedStudiesApplied) sharedStudiesApplied = true;
+    pendingStudies = null;
+  } else { try { indicators.updateAll(history); } catch {} }
   studiesUI?.updateValues();
   try { sessionLevels.render(); } catch {}
   try { marketStructure.render(); } catch {}
@@ -1632,7 +1682,11 @@ async function loadMarket() {
   drawings.openMarket(symbol);
   try { mtf.setSymbol(symbol); } catch {}
   try { indicators.clear(); } catch {}
-  try { pendingStudies = loadStudiesFor(currentUserKey(), symbol); } catch { pendingStudies = null; }
+  try {
+    pendingStudies = sharedChartSnapshot && !sharedStudiesApplied
+      ? { indicators: sharedChartSnapshot.indicators, overlays: sharedChartSnapshot.studies }
+      : loadStudiesFor(currentUserKey(), symbol);
+  } catch { pendingStudies = null; }
   showMessage('');
   if (cached) {
     setData(cached.map(c => ({ ...c })), true);
@@ -2033,6 +2087,24 @@ async function buildChartScreenshotCanvas() {
     finally { URL.revokeObjectURL(url); }
   }
 
+  // Every exported image carries the same bottom-left badge as the toolbar.
+  const pad = Math.max(8, Math.round(canvas.width / 240));
+  const fontSize = Math.max(11, Math.round(canvas.width / 90));
+  ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
+  const textWidth = ctx.measureText(SHARE_BRANDING).width;
+  const badge = Math.round(fontSize * 1.5);
+  const boxW = badge + 8 + textWidth + pad * 2;
+  const boxH = fontSize + pad * 2;
+  ctx.fillStyle = 'rgba(9,13,21,.72)';
+  ctx.fillRect(pad, canvas.height - boxH - pad, boxW, boxH);
+  ctx.fillStyle = '#2962ff';
+  ctx.fillRect(pad, canvas.height - boxH - pad, badge, boxH);
+  ctx.fillStyle = '#ffffff';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('A', pad + badge / 2 - fontSize * 0.31, canvas.height - boxH / 2 - pad);
+  ctx.fillStyle = '#dce8ff';
+  ctx.fillText('alfa charts', pad + badge + 8, canvas.height - boxH / 2 - pad);
+
   return canvas;
 }
 
@@ -2074,17 +2146,147 @@ async function copyChartScreenshot() {
   throw new Error('clipboard-image-unavailable');
 }
 
-async function copyChartLink() {
-  const url = new URL('/alfa-charts.html', location.origin);
-  url.searchParams.set('symbol', symbol);
-  url.searchParams.set('interval', interval);
-  const text = url.toString();
-  if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
-  else {
-    const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+function writeClipboardText(text) {
+  if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  return Promise.resolve();
+}
+
+function shareDialogDefaults() {
+  return screenshotMetadata || {
+    chartName: `${symbol} · ${String(interval).toUpperCase()}`,
+    sharer: 'Misafir',
+    site: location.hostname || 'alfa-trader.com',
+    date: new Date().toISOString().slice(0, 10)
+  };
+}
+
+function chartSharePayload() {
+  let code = '';
+  try { code = rightPanel?.code || localStorage.getItem(SCRIPT_CODE_KEY) || ''; } catch {}
+  const defaults = shareDialogDefaults();
+  try {
+    return normalizeChartSnapshot({
+      symbol,
+      interval,
+      chartType: type,
+      chartName: defaults.chartName,
+      sharer: defaults.sharer,
+      site: defaults.site,
+      date: defaults.date,
+      indicators: indicators.toJSON(),
+      studies: studiesUI?.toJSON() || {},
+      scripts: code.trim() ? [{ name: 'Özel gösterge', code, overlay: true }] : [],
+      view: { ...viewConfig }
+    });
+  } catch (error) {
+    throw new Error('Geçerli grafik paylaşımı oluşturulamadı');
   }
+}
+
+async function createChartShare() {
+  const payload = chartSharePayload();
+  const response = await fetch(CHART_SHARE_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chart: payload })
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.ok || !data?.id) throw new Error(data?.error || 'Bağlantı oluşturulamadı');
+  const url = new URL(String(data.url || `/alfa-charts.html?share=${data.id}`), location.origin).toString();
+  lastChartShare = { id: data.id, url, payload };
+  return lastChartShare;
+}
+
+async function copyChartLink() {
+  const share = await createChartShare();
+  await writeClipboardText(share.url);
   connection('Grafik bağlantısı kopyalandı', 'ok');
+  return share;
+}
+
+function openChartShareDialog() {
+  if (document.querySelector('dialog[open]')) return;
+  const defaults = shareDialogDefaults();
+  const modal = openModal(`<div id="chart-share-dialog">
+    <div class="dialog-header"><div><h3>Grafiği paylaş</h3><p>Görüntü, grafik durumu ve meta veri herkese açık bağlantıya dönüşür.</p></div><button id="share-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <form id="chart-share-form" class="chart-settings-form">
+      <fieldset><legend>META VERİ</legend>
+        <label>Grafik adı<input id="share-chart-name" maxlength="80" value="${escapeHTML(defaults.chartName)}"></label>
+        <label>Paylaşan<input id="share-author" maxlength="60" value="${escapeHTML(defaults.sharer)}"></label>
+        <label>Site<input id="share-site" maxlength="120" value="${escapeHTML(defaults.site)}"></label>
+        <label>Tarih<input id="share-date" type="date" value="${escapeHTML(defaults.date)}"></label>
+      </fieldset>
+      <div class="share-preview"><span aria-hidden="true">A</span><strong>${SHARE_BRANDING}</strong><span>· görüntünün sol alt köşesinde görünür</span></div>
+      <p id="share-error" class="share-error" role="alert"></p>
+      <div class="settings-actions"><button id="share-cancel" type="button">Vazgeç</button><button id="share-create-link" class="apply" type="submit">Bağlantı oluştur ve kopyala</button></div>
+    </form>
+  </div>`, 'share-dialog');
+  const box = modal.box;
+  box.querySelector('#share-close').onclick = modal.close;
+  box.querySelector('#share-cancel').onclick = modal.close;
+  box.querySelector('#chart-share-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    screenshotMetadata = {
+      chartName: box.querySelector('#share-chart-name').value,
+      sharer: box.querySelector('#share-author').value,
+      site: box.querySelector('#share-site').value,
+      date: box.querySelector('#share-date').value
+    };
+    const errorEl = box.querySelector('#share-error');
+    errorEl.textContent = '';
+    const submit = box.querySelector('#share-create-link');
+    submit.disabled = true;
+    try {
+      const share = await createChartShare();
+      await writeClipboardText(share.url);
+      modal.close();
+      connection('Grafik bağlantısı kopyalandı', 'ok');
+    } catch (error) {
+      errorEl.textContent = error.message;
+    } finally { submit.disabled = false; }
+  });
+}
+
+async function restoreSharedChart(id) {
+  try {
+    const url = new URL(CHART_SHARE_ENDPOINT, location.origin);
+    url.searchParams.set('id', id);
+    const response = await fetch(url, { cache: 'no-store' });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.found || !data?.snapshot) throw new Error('chart_share_not_found');
+    const snapshot = normalizeChartSnapshot(data.snapshot);
+    sharedChartSnapshot = snapshot;
+    sharedStudiesApplied = false;
+    sharedStateApplied = false;
+    if (snapshot.symbol) symbol = snapshot.symbol;
+    if (snapshot.interval) interval = snapshot.interval;
+    applyChartType(snapshot.chartType);
+    applyViewSettings(snapshot.view || {});
+    if (snapshot.scripts[0]) {
+      const code = snapshot.scripts[0].code;
+      const editor = $('script-code');
+      if (editor) editor.value = code;
+      try { localStorage.setItem(SCRIPT_CODE_KEY, code); } catch {}
+    }
+    screenshotMetadata = {
+      chartName: snapshot.chartName, sharer: snapshot.sharer, site: snapshot.site, date: snapshot.date
+    };
+    const banner = $('share-banner');
+    if (banner) {
+      const parts = [snapshot.chartName, snapshot.sharer, snapshot.site, snapshot.date].filter(Boolean);
+      banner.textContent = `Paylaşılan grafik · ${parts.join(' · ')}`;
+      banner.hidden = false;
+    }
+    connection('Paylaşılan grafik açıldı', 'ok');
+    return snapshot;
+  } catch (error) {
+    sharedChartSnapshot = null;
+    connection('Paylaşılan grafik açılamadı: ' + error.message, 'error');
+    return null;
+  }
 }
 
 const SHARE_ACTIONS = {
@@ -2092,7 +2294,8 @@ const SHARE_ACTIONS = {
   'share-link': () => shareChartLink(),
   'copy-image': () => copyChartScreenshot(),
   'copy-link': () => copyChartLink(),
-  'download-image': () => downloadChartScreenshot()
+  'download-image': () => downloadChartScreenshot(),
+  'dialog': () => openChartShareDialog()
 };
 
 function detectShareCapabilities() {
@@ -2132,10 +2335,8 @@ async function shareChartImage() {
 }
 
 async function shareChartLink() {
-  const url = new URL('/alfa-charts.html', location.origin);
-  url.searchParams.set('symbol', symbol);
-  url.searchParams.set('interval', interval);
-  const shareData = { title: 'ALFA CHARTS', text: `${symbol} · ${interval}`, url: url.toString() };
+  const share = await createChartShare();
+  const shareData = { title: 'ALFA CHARTS', text: `${symbol} · ${interval}`, url: share.url };
   if (navigator.share) {
     try {
       await navigator.share(shareData);
@@ -2146,7 +2347,8 @@ async function shareChartLink() {
       throw error;
     }
   }
-  await copyChartLink();
+  await writeClipboardText(share.url);
+  connection('Grafik bağlantısı kopyalandı', 'ok');
 }
 
 function closeShotMenu() { const m = $('shot-menu'); if (m) m.hidden = true; }
@@ -2165,6 +2367,7 @@ $('shot-menu').addEventListener('click', async e => {
     if (action === 'download') await downloadChartScreenshot();
     else if (action === 'copy-image') await copyChartScreenshot();
     else if (action === 'copy-link') await copyChartLink();
+    else if (action === 'dialog') openChartShareDialog();
   } catch (err) {
     console.error(err);
     const text = action === 'copy-image'
@@ -2180,6 +2383,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.shot-wrap')) c
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeShotMenu(); });
 $('reset-view').addEventListener('click', () => handleChartAction('reset-view'));
 $('chart-settings').addEventListener('click', () => handleChartAction('settings'));
+$('all-settings')?.addEventListener('click', () => openAllSettingsModal());
 $('chart-timezone').addEventListener('click', openChartTimeZone);
 $('fit').addEventListener('click', () => handleChartAction('fit'));
 $('live').addEventListener('click', () => handleChartAction('realtime'));
@@ -2533,6 +2737,52 @@ studiesUI = new ChartStudies({ indicators, catalog: INDICATOR_CATALOG, managers:
   ...publicStudies.facades,
   volume: { enabled: true, setEnabled(value) { this.enabled = value; volume.applyOptions({ visible: value }); } },
 }, onChange: () => { saveLayout(); drawings.updatePanel(); } });
+async function runUserStudy(code) {
+  const allBars = seriesBars?.length ? seriesBars : history;
+  const bars = allBars.slice(-600);
+  try {
+    const result = await runSandboxedScript({ code, bars, startIndex: Math.max(0, allBars.length - bars.length) });
+    paintCustomScript(result, bars);
+    scriptState.runs += 1;
+    scriptState.lastResult = result;
+    scriptState.error = null;
+    return result;
+  } catch (error) {
+    scriptState.error = error.message;
+    scriptState.lastResult = { ok: false, error: error.message };
+    clearCustomScriptSeries();
+    throw error;
+  }
+}
+rightPanel = initRightPanel({
+  getSymbol: () => symbol,
+  getInterval: () => interval,
+  getBars: () => (seriesBars?.length ? seriesBars : history),
+  getAlarms: () => ensureAlarms(),
+  alarmLabel: alarm => alarmConditionLabel(alarm),
+  openAlarms: () => openAlarmManager(),
+  openObjectTree: () => { drawings.manager.hidden = false; drawings.updatePanel(); },
+  getDrawings: () => drawings.history.doc.drawings || [],
+  runScript: runUserStudy,
+  storageKey: SCRIPT_CODE_KEY
+});
+function openScriptEditor() {
+  if (workspace.classList.contains('no-list')) toggleList(true);
+  rightPanel?.focus();
+  return true;
+}
+// A full data reload removes all user-study series. Re-run the saved sandbox
+// script once new bars settle so market and timeframe switches keep overlays.
+scheduleSavedScript = () => {
+  let code = '';
+  try { code = localStorage.getItem(SCRIPT_CODE_KEY) || ''; } catch {}
+  if (!code || !/function\s+onBar\s*\(/.test(code) || !rightPanel) return;
+  clearTimeout(savedScriptTimer);
+  savedScriptTimer = setTimeout(() => {
+    if (disposed || replayMode || !(seriesBars?.length || history.length)) return;
+    void runUserStudy(code).catch(() => {});
+  }, 120);
+};
 // Double-clicking the plot itself tucks the lower data panes away so the price
 // chart fills the desktop viewport. Drawing objects, the price-scale grip and
 // legend controls keep their own double-click behavior.
@@ -2582,6 +2832,8 @@ window.addEventListener('offline', () => { connection('İnternet bağlantısı y
 // Yalnızca ?debug=1 ile açılan, arayüzü etkilemeyen teşhis kancası.
 if (new URLSearchParams(location.search).has('debug')) {
   window.__alfaDebug = { chart, candles, line, drawings, watchlist, indicators, mtf, sessionLevels, sessionBoxes, marketStructure, fvg, studiesUI, publicStudies, paper, research,
+    scripts: scriptState, rightPanel,
+    get customScriptSeries() { return customScriptSeries.length; },
     get multiChart() { return multiChart; },
     get multiState() { return structuredClone(multiChart?.state || {}); },
     get sync() { return { session: syncSession, paneId: syncPaneId, instance: syncInstance, ready: syncReady, seq: syncGate?.seq || 0, lastAppliedSync }; },
@@ -2594,19 +2846,31 @@ if (new URLSearchParams(location.search).has('debug')) {
     get viewConfig() { return { ...viewConfig }; }, get historyCache() { return marketHistoryCache; },
     get studyContext() { return studyContext ? { ...studyContext } : null; }, rememberStudies, loadStudiesFor,
     resetChartView, openChartSettingsModal, handleChartAction,
-    share: { capabilities: detectShareCapabilities, actions: SHARE_ACTIONS, sync: syncShareCapabilities },
+    share: {
+      capabilities: detectShareCapabilities,
+      actions: SHARE_ACTIONS,
+      sync: syncShareCapabilities,
+      branding: SHARE_BRANDING,
+      get lastCreated() { return lastChartShare ? { id: lastChartShare.id, url: lastChartShare.url } : null; },
+      get snapshot() { return sharedChartSnapshot; },
+      openDialog: openChartShareDialog,
+      create: createChartShare,
+      restore: restoreSharedChart
+    },
     get ready() { return $('connection').dataset.state === 'live'; } };
 }
 $('replay-toggle').addEventListener('click', () => {
   if (replayMode) { exitReplay(); return; }
   const modal=openModal(`<h3>Bar Replay</h3>
-    <p>Seçilen mumun <strong>kapanışından</strong> başlanır. Tarih/saat UTC’dir.</p>
+    <p>Son 200 onaylanmış mumdan doğrudan başlayabilir veya kendi başlangıç mumunu seçebilirsin. Tarih/saat UTC’dir.</p>
+    <button id="replay-quick-start" class="apply">200 mum geriden başlat</button>
     <button id="replay-pick">Grafikten mum seç</button>
     <label>Tarih/saat gir (UTC) <input id="replay-date" type="datetime-local"></label>
     <button id="replay-date-start">Tarihten başlat</button>
     <h4>Kayıtlı oturumlar (bu kullanıcı)</h4><div id="replay-saved"></div>
     <button id="replay-cancel">Kapat</button>`);
   modal.box.querySelector('#replay-cancel').onclick=modal.close;
+  modal.box.querySelector('#replay-quick-start').onclick=()=>{modal.close();startQuickReplay();};
   modal.box.querySelector('#replay-pick').onclick=()=>{
     modal.close();replayPicking=true;drawings.cancel();
     connection('Replay: başlangıç mumuna tıklayın · Escape iptal','replay');
@@ -2887,7 +3151,17 @@ async function loadLayout() {
   // Shared owner + symbol studies win over stale per-interval snapshots. Old
   // layouts are migration sources only; they are never silently overwritten.
   const layouts = [localLayout, cloudLayout].filter(Boolean);
-  applyStudiesBundle(loadStudiesFor(requestOwner, symbol, layouts), requestOwner, symbol);
+  if (sharedChartSnapshot && !sharedStudiesApplied) {
+    applyStudiesBundle({ indicators: sharedChartSnapshot.indicators, overlays: sharedChartSnapshot.studies }, requestOwner, symbol);
+    sharedStudiesApplied = true;
+  } else {
+    applyStudiesBundle(loadStudiesFor(requestOwner, symbol, layouts), requestOwner, symbol);
+  }
+  if (sharedChartSnapshot && !sharedStateApplied) {
+    applyChartType(sharedChartSnapshot.chartType);
+    applyViewSettings(sharedChartSnapshot.view || {});
+    sharedStateApplied = true;
+  }
   if (cloudConflicts.has(conflictContext(requestOwner, symbol, interval))) {
     $('drawing-status').textContent = 'Bulut çakışması · yerel kayıt korundu; bulut yazımı durduruldu';
   }
@@ -3027,7 +3301,7 @@ document.addEventListener('pointerdown', e => {
   });
 });
 document.querySelectorAll('.workspace-menu').forEach(menu => menu.addEventListener('click', e => {
-  if (e.target.closest('button') && !e.target.closest('#session-boxes-tools')) menu.open = false;
+  if (e.target.closest('button') && !e.target.closest('.nested-menu') && !e.target.closest('#session-boxes-tools')) menu.open = false;
 }));
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.workspace-menu[open]').forEach(menu => { menu.open = false; menu.querySelector('summary').focus(); });
@@ -3037,10 +3311,11 @@ document.addEventListener('keydown', e => {
 $('tester-open').addEventListener('click', () => {
   if (replayMode) { paper.filter = 'tester'; paper.root.hidden = false; paper.update(); return; }
   const modal = openModal(`<div class="dialog-header"><div><h3>Strateji testleri</h3><p>Geçmiş veride, geleceği görmeden test et.</p></div><button id="tester-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
-    <p style="line-height:1.8;color:#99aac5">İşlem günlüğü, performans ölçümleri ve strateji laboratuvarı Replay oturumunda kullanılır. Önce grafikte bir başlangıç mumu seç.</p>
-    <div class="settings-actions"><button id="tester-replay" class="apply">Replay başlat</button></div>`);
+    <p style="line-height:1.8;color:#99aac5">İşlem günlüğü, performans ölçümleri ve strateji laboratuvarı Replay oturumunda kullanılır. Son 200 onaylanmış mumla teste başlayabilir veya kendi başlangıç mumunu seçebilirsin.</p>
+    <div class="settings-actions"><button id="tester-replay" class="apply">Backtest'i başlat</button><button id="tester-pick">Mumdan başlat</button></div>`);
   modal.box.querySelector('#tester-close').onclick = modal.close;
-  modal.box.querySelector('#tester-replay').onclick = () => { modal.close(); $('replay-toggle').click(); };
+  modal.box.querySelector('#tester-replay').onclick = () => { modal.close(); startQuickReplay(); };
+  modal.box.querySelector('#tester-pick').onclick = () => { modal.close(); $('replay-toggle').click(); };
 });
 document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', async () => {
   if (!history.length) return;
@@ -3142,6 +3417,77 @@ function openChartSettingsModal() {
     }
   });
 }
+function openAllSettingsModal() {
+  const viewCheck = (key, label) => `<label><input type="checkbox" data-all-view="${key}" ${viewConfig[key] ? 'checked' : ''}>${label}</label>`;
+  const layouts = [1, 2, 3, 4, 6, 9, 12, 16];
+  const modal = openModal(`<div id="settings-all" class="all-settings-dialog">
+    <div class="dialog-header"><div><h3>Tüm ayarlar</h3><p>Grafik, renkler, çalışma alanı, indikatörler ve paylaşım</p></div><button id="settings-all-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    <div class="all-settings-grid">
+      <fieldset><legend>GRAFİK</legend>
+        <p>Mum türü, zaman dilimi, saat dilimi ve ölçek.</p>
+        <button type="button" data-all-action="chart">Grafik ayarlarını aç</button>
+      </fieldset>
+      <fieldset><legend>RENKLER</legend>
+        <p>Mum, zemin ve palet ayarları global olarak saklanır.</p>
+        <button type="button" data-all-action="colors">Mum ve zemin renkleri</button>
+      </fieldset>
+      <fieldset><legend>GÖRÜNÜM</legend>
+        ${viewCheck('grid', 'Izgara çizgileri')}
+        ${viewCheck('axisLabels', 'Fiyat ekseni etiketleri')}
+        ${viewCheck('clean', 'Sade mod')}
+        <label><input type="checkbox" data-all-scale="logScale" ${logScale ? 'checked' : ''}>Logaritmik ölçek</label>
+        <label><input type="checkbox" data-all-scale="autoScale" ${autoScale ? 'checked' : ''}>Otomatik ölçek</label>
+      </fieldset>
+      <fieldset><legend>ÇOKLU GRAFİK</legend>
+        <p>Çalışma alanı düzeni; her panel kendi sembol ve zaman dilimini korur.</p>
+        <div class="all-layouts">${layouts.map(count => `<button type="button" data-all-layout="${count}">${count}</button>`).join('')}</div>
+      </fieldset>
+      <fieldset><legend>İNDİKATÖRLER</legend>
+        <p>Hazır göstergeler, özel script'ler ve panel düzeni.</p>
+        <button type="button" data-all-action="indicators">İndikatörleri yönet</button>
+      </fieldset>
+      <fieldset><legend>ALARMLAR</legend>
+        <p>Fiyat koşulları, ses ve bildirim kanalları.</p>
+        <button type="button" data-all-action="alarms">Alarmları aç</button>
+      </fieldset>
+      <fieldset><legend>REPLAY & TEST</legend>
+        <p>Son 200 onaylanmış mumdan replay veya backtest başlat.</p>
+        <button type="button" data-all-action="replay">Replay başlat</button>
+        <button type="button" data-all-action="tester">Backtest başlat</button>
+      </fieldset>
+      <fieldset><legend>PAYLAŞIM</legend>
+        <p>Görüntü, bağlantı ve grafik meta verisi.</p>
+        <button type="button" data-all-action="share">Fotoğraf / bağlantı</button>
+      </fieldset>
+      <fieldset><legend>SCRIPT EDITOR</legend>
+        <p>Güvenli kum havuzunda JavaScript / benzeri API ile özel gösterge.</p>
+        <button type="button" data-all-action="script">Script düzenleyicisini aç</button>
+      </fieldset>
+    </div>
+    <div class="settings-actions"><button id="settings-all-done" class="apply">Tamam</button></div>
+  </div>`, 'all-settings-dialog');
+  const box = modal.box;
+  const closeThen = action => () => { modal.close(); queueMicrotask(action); };
+  box.querySelector('#settings-all-close').onclick = modal.close;
+  box.querySelector('#settings-all-done').onclick = modal.close;
+  box.querySelector('[data-all-action="chart"]').onclick = closeThen(openChartSettingsModal);
+  box.querySelector('[data-all-action="colors"]').onclick = closeThen(openCandleSettingsModal);
+  box.querySelector('[data-all-action="indicators"]').onclick = closeThen(openIndicatorManager);
+  box.querySelector('[data-all-action="alarms"]').onclick = closeThen(() => $('alarm-toggle')?.click());
+  box.querySelector('[data-all-action="replay"]').onclick = closeThen(startQuickReplay);
+  box.querySelector('[data-all-action="tester"]').onclick = closeThen(startQuickReplay);
+  box.querySelector('[data-all-action="share"]').onclick = closeThen(() => $('screenshot')?.click());
+  box.querySelector('[data-all-action="script"]').onclick = closeThen(() => openScriptEditor?.());
+  box.querySelectorAll('[data-all-view]').forEach(input => input.onchange = () => setViewOption(input.dataset.allView, input.checked));
+  box.querySelectorAll('[data-all-scale]').forEach(input => input.onchange = () => {
+    if (input.dataset.allScale === 'logScale') setLogScale(input.checked);
+    else setAutoScale(input.checked);
+  });
+  box.querySelectorAll('[data-all-layout]').forEach(button => button.onclick = closeThen(() => {
+    const target = document.querySelector(`.layout-buttons [data-layout="${button.dataset.allLayout}"]`);
+    if (target) target.click();
+  }));
+}
 function openCandleSettingsModal() {
   const modal = openModal(`<div class="dialog-header"><div><h3>Mum ve zemin renkleri</h3><p>TradingView tarzı görünüm ayarları · yerel olarak saklanır</p></div><button id="candle-settings-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
     <form id="candle-settings-form" class="chart-settings-form">
@@ -3234,4 +3580,6 @@ if (!isEmbed) {
 }
 if (syncGate) syncGate.send('hello', { symbol, interval }, { force: true });
 $('cloud-conflict')?.addEventListener('click', openSettingsConflict);
-loadMarket();
+const sharedChartId = String(search.get('share') || '').trim();
+if (sharedChartId) void restoreSharedChart(sharedChartId).finally(() => { if (!disposed) loadMarket(); });
+else loadMarket();

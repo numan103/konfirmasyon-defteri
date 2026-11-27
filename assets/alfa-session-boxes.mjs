@@ -1,6 +1,6 @@
 import { computeSessionBoxes, SESSION_BOX_DEFS, parseHM, sessionBoxWindowTs } from './alfa-session-boxes-model.mjs?v=3';
 import { timeToLogical, logicalToPixel } from './alfa-drawings-model.mjs?v=5';
-import { chartDialog } from './alfa-chart-ui.mjs?v=1';
+import { chartDialog } from './alfa-chart-ui.mjs?v=5';
 
 const NS = 'http://www.w3.org/2000/svg';
 const CONFIG_KEY = 'alfa-sb:v1';

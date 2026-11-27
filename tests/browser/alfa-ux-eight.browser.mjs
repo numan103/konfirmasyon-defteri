@@ -190,7 +190,7 @@ try {
   });
 
   await run('Parite arama, öneriler ve borsa sütunu', async () => {
-    await desktop.click('#symbol-search');
+    await desktop.click('#market-title');
     await desktop.waitForFunction(() => !!document.querySelector('dialog[open].pair-explorer-dialog'), null, { timeout: 5000 });
     await desktop.fill('#pair-query', 'EURUSD');
     await desktop.waitForFunction(() => document.querySelectorAll('#pair-results .pair-explorer-row').length > 0, null, { timeout: 5000 });

@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=64">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=68">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -26,7 +26,6 @@
           <option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option>
         </select>
       </label>
-      <button id="symbol-search" class="icon-button" type="button" aria-label="Parite ara veya ekle" title="Parite ara veya ekle"><span data-icon="search"></span></button>
       <nav id="timeframes" aria-label="Zaman dilimi"></nav>
       <select id="chart-type" aria-label="Grafik türü">
         <option value="candles">Mum</option>
@@ -41,17 +40,6 @@
         <button id="mobile-settings-toggle" class="icon-button mobile-settings-toggle" type="button" aria-label="Görünüm ve renk ayarları" aria-expanded="false" aria-controls="mobile-settings-sheet" title="Görünüm ve renkler"><span data-icon="settings"></span></button>
         <button id="indicators-manage" class="primary-tool" type="button" title="Tüm indikatörler ve analiz katmanları" aria-label="İndikatörler"><span data-icon="indicators"></span><span class="button-label">İndikatörler</span><span id="study-count" class="count-badge">1</span></button>
         <button id="alarm-toggle" type="button" title="Fiyat alarmları" aria-label="Fiyat alarmları"><span data-icon="bell"></span><span class="button-label">Alarm</span></button>
-        <details class="workspace-menu" id="range-menu">
-          <summary title="Zaman aralığı" aria-label="Zaman aralığı menüsü"><span data-icon="clock"></span><span class="button-label">Aralık</span><span data-icon="down"></span></summary>
-          <div class="workspace-popover range-popover">
-            <div class="menu-heading">ZAMAN ARALIĞI</div>
-            <button class="range-option" data-range="86400" type="button" aria-pressed="false">1G · Son 1 gün</button>
-            <button class="range-option" data-range="432000" type="button" aria-pressed="false">5G · Son 5 gün</button>
-            <button class="range-option" data-range="2592000" type="button" aria-pressed="false">1A · Son 1 ay</button>
-            <button class="range-option" data-range="7776000" type="button" aria-pressed="false">3A · Son 3 ay</button>
-            <button class="range-option" data-range="all" type="button" aria-pressed="false">Tümü · Tüm geçmiş</button>
-          </div>
-        </details>
         <details class="workspace-menu" id="lab-menu">
           <summary title="Replay, strateji testleri ve araştırma"><span data-icon="lab"></span><span class="button-label">Testler</span><span data-icon="down"></span></summary>
           <div class="workspace-popover lab-popover">
@@ -69,15 +57,20 @@
           <div class="workspace-popover view-popover">
             <div class="menu-heading">GRAFİK GÖRÜNÜMÜ</div>
             <div class="menu-date"><label for="goto-date">Git Tarihe · UTC</label><div><input id="goto-date" type="datetime-local"><button id="goto-date-btn" type="button">Git</button></div></div>
+            <button id="all-settings" type="button"><span data-icon="settings"></span><span><strong>Tüm ayarlar</strong><small>Grafik, renkler, araçlar ve paylaşım</small></span></button>
             <button id="reset-view" type="button"><span data-icon="undo"></span>Grafik görünümü sıfırla</button>
             <button id="chart-settings" type="button"><span data-icon="settings"></span>Grafik ayarları…</button>
+            <details class="workspace-menu nested-menu" id="range-menu">
+              <summary title="Zaman aralığı" aria-label="Zaman aralığı menüsü"><span data-icon="clock"></span><span class="button-label">Zaman aralığı</span><span data-icon="down"></span></summary>
+              <div class="menu-heading">ZAMAN ARALIĞI</div>
+              <button class="range-option" data-range="86400" type="button" aria-pressed="false">1G · Son 1 gün</button>
+              <button class="range-option" data-range="432000" type="button" aria-pressed="false">5G · Son 5 gün</button>
+              <button class="range-option" data-range="2592000" type="button" aria-pressed="false">1A · Son 1 ay</button>
+              <button class="range-option" data-range="7776000" type="button" aria-pressed="false">3A · Son 3 ay</button>
+              <button class="range-option" data-range="all" type="button" aria-pressed="false">Tümü · Tüm geçmiş</button>
+            </details>
             <div class="menu-heading">GRAFİK DÜZENİ</div>
-            <div class="layout-buttons" role="group" aria-label="Grafik düzeni">
-              <button type="button" data-layout="1" aria-pressed="true" title="Tek grafik">1</button>
-              <button type="button" data-layout="2" aria-pressed="false" title="İki grafik">2</button>
-              <button type="button" data-layout="4" aria-pressed="false" title="Dört grafik">4</button>
-              <button type="button" data-layout="6" aria-pressed="false" title="Altı grafik">6</button>
-            </div>
+            <div class="layout-buttons" role="group" aria-label="Grafik düzeni"></div>
             <hr>
             <label><input id="view-grid" type="checkbox" checked> Izgara çizgileri</label>
             <label><input id="view-axis-labels" type="checkbox"> Fiyat ekseni etiketleri</label>
@@ -94,15 +87,17 @@
             <button type="button" data-shot="download">Görüntüyü indir</button>
             <button type="button" data-shot="copy-image">Görüntüyü kopyala</button>
             <button type="button" data-shot="copy-link">Bağlantıyı kopyala</button>
+            <button type="button" data-shot="dialog">Meta veri ile paylaş</button>
           </div>
         </div>
-        <button id="multi-toggle" class="icon-button" type="button" aria-label="Çoklu grafik düzenine geç" title="Çoklu grafik (2/4/6)" aria-pressed="false"><span data-icon="layers"></span></button>
+        <button id="multi-toggle" class="icon-button" type="button" aria-label="Çoklu grafik düzenine geç" title="Çoklu grafik (1–16)" aria-pressed="false"><span data-icon="layers"></span></button>
         <button id="list-toggle" class="icon-button" type="button" aria-label="İzleme listesini aç/kapat" title="İzleme listesi" aria-pressed="true" aria-controls="watchlist"><span data-icon="list"></span></button>
       </div>
     </header>
     <div class="workarea">
       <aside class="drawing-space" aria-label="Çizim araçları">
         <button id="drawing-rail-grip" class="drawing-rail-grip" type="button" data-toolbar-grip aria-label="Araç çubuğunu sürükle" title="Tut ve sürükle · ok tuşlarıyla taşı · Home ile sıfırla"><span data-icon="grip"></span></button>
+        <button id="drawing-all-tools" class="drawing-all-tools" type="button" aria-label="Tüm çizim araçlarını aç" title="Tüm çizim araçları · fırça dahil"><span data-icon="brush"></span></button>
         <nav id="drawing-tools" aria-label="Çizim aracı seç"></nav>
         <div class="rail-actions">
           <button id="drawing-favorites-edit" class="icon-button" type="button" title="Favori çizim araçlarını düzenle" aria-label="Favori çizim araçlarını düzenle"><span data-icon="star"></span></button>
@@ -120,6 +115,7 @@
         </details>
       </aside>
       <section class="chart-panel" id="chart-panel-single" aria-label="Fiyat grafiği">
+        <div id="share-banner" class="share-banner" role="status" hidden></div>
         <div class="legend">
           <div class="market-legend">
             <div class="market-symbol-stack">
@@ -148,7 +144,6 @@
             <button id="mobile-swipe-far-next" class="mobile-swipe-row far" type="button" data-swipe-step="2"></button>
             <small id="mobile-swipe-count"></small>
           </div>
-          <a id="chart-watermark" class="chart-watermark" href="/?page=home" aria-label="Alfa Traders"><span class="brand-mark">A</span><span>ALFA CHARTS</span></a>
           <div id="price-scale-grip" class="price-scale-grip" aria-hidden="true"></div>
         </div>
         <div id="mobile-draw-hint" class="mobile-draw-hint" role="status" aria-live="polite" hidden></div>
@@ -187,12 +182,35 @@
         <div id="multi-grid" class="multi-grid" data-layout="1"></div>
       </section>
       <aside id="watchlist" aria-label="İzleme listesi">
+        <div id="right-panel" class="right-panel">
+        <section id="right-watchlist" class="right-panel-section right-watchlist">
         <div class="watch-head"><h2><span id="watchlist-title">İzleme listesi</span> <small id="watch-count">4</small></h2><div class="watch-head-actions"><button id="watch-mobile-close" class="icon-button" type="button" aria-label="Listeyi kapat" title="Kapat"><span data-icon="close"></span></button><button id="watch-list-add" type="button" title="Yeni liste oluştur">+ Liste</button><button id="watch-settings" class="icon-button" type="button" aria-label="Liste ayarları" title="Liste ayarları ve sınıflandırma"><span data-icon="settings"></span></button><button id="watch-add" class="icon-button" type="button" aria-label="Listeye parite ekle" title="Parite ekle"><span data-icon="plus"></span></button></div></div>
         <div class="watch-lists"><select id="watch-list" aria-label="İzleme listesi seç"></select><label class="watch-filter"><span data-icon="search"></span><input id="watch-filter" type="search" placeholder="Listede ara" aria-label="Listede ara" autocomplete="off"></label></div>
         <div class="watch-actions"><button id="watch-import" type="button" title="Sembol listesini içe aktar"><span data-icon="upload"></span>İçe aktar</button><button id="watch-export" class="icon-button" type="button" aria-label="Listeyi TXT olarak dışa aktar" title="TXT dışa aktar"><span data-icon="download"></span></button><button id="watch-share" class="icon-button" type="button" aria-label="Liste bağlantısını kopyala" title="Liste bağlantısı"><span data-icon="link"></span></button></div>
         <div class="watch-columns"><span>Sembol</span><span>Son fiyat</span></div>
         <div id="watch-rows"></div>
         <div class="quote"><span id="quote-symbol">BTC / USDT</span><strong id="last-price">—</strong><span id="quote-change">Son mum değişimi</span><small id="price-time">Henüz veri yok</small></div>
+        </section>
+        <section id="right-alarms" class="right-panel-section" aria-label="Alarmlar">
+          <header><strong>Alarmlar</strong><button id="right-alarm-open" type="button">Yeni alarm</button></header>
+          <p id="right-alarm-summary" role="status">Bu sembolde alarm yok.</p>
+        </section>
+        <section id="right-objects" class="right-panel-section" aria-label="Nesne ağacı">
+          <header><strong>Nesne ağacı</strong><button id="right-object-open" type="button">Ağacı aç</button></header>
+          <p id="right-object-summary" role="status">Bu sembolde çizim yok.</p>
+        </section>
+        <section id="right-data" class="right-panel-section" aria-label="Veri penceresi">
+          <header><strong>Veri penceresi</strong><span id="right-data-timeframe">—</span></header>
+          <dl><dt>Sembol</dt><dd id="right-data-symbol">—</dd><dt>OHLC</dt><dd id="right-data-ohlc">—</dd><dt>Hacim</dt><dd id="right-data-volume">—</dd></dl>
+        </section>
+        <section id="right-script" class="right-panel-section" aria-label="Script editörü">
+          <header><strong>Script editörü</strong><span class="script-badge">Güvenli kum havuzu</span></header>
+          <p>JavaScript + benzeri study API. Ağ, DOM ve depolama erişimi kapalıdır.</p>
+          <textarea id="script-code" rows="7" spellcheck="false" aria-label="Script kodu"></textarea>
+          <div class="script-actions"><button id="script-run" type="button" class="apply">Grafiğe uygula</button><button id="script-reset" type="button">Örneği geri yükle</button></div>
+          <output id="script-output" role="status">Henüz script çalıştırılmadı.</output>
+        </section>
+        </div>
       </aside>
     </div>
     <aside id="drawing-manager" aria-label="Çizim yönetimi" hidden>
@@ -389,6 +407,6 @@
     <header class="sheet-head"><button id="mobile-tf-back" class="sheet-back" type="button" aria-label="Önceki menü">←</button><strong>Zaman dilimleri</strong><button id="mobile-tf-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=106"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=110"></script>
 </body>
 </html>

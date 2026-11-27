@@ -1,12 +1,16 @@
-import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
+import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=5';
 import { TIMEFRAMES, isMarketSymbol, parseMarketRef } from './alfa-charts-data.mjs?v=12';
 import { readEnvelope, normalizePayload, createEchoLedger, createMessageGate, rememberCommand, isRecentEcho } from './alfa-multichart-sync.mjs?v=2';
 import { watchlistRefsFromDocument } from './alfa-watchlist-model.mjs?v=10';
 import { WorkspacePersistence } from './alfa-workspace-persistence.mjs?v=1';
 
 const $ = id => document.getElementById(id);
-const CAPACITY = { 1: 1, 2: 2, 4: 4, 6: 6 };
-const LAYOUTS = [1, 2, 4, 6];
+const LAYOUTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16];
+const LAYOUT_GRID = {
+  1: [1, 1], 2: [2, 1], 3: [3, 1], 4: [2, 2], 5: [3, 2], 6: [3, 2],
+  7: [4, 2], 8: [4, 2], 9: [3, 3], 10: [4, 3], 12: [4, 3], 14: [4, 4], 16: [4, 4]
+};
+const CAPACITY = Object.fromEntries(LAYOUTS.map(count => [count, count]));
 const validInterval = value => Object.values(TIMEFRAMES).includes(value);
 const syncDefaults = { symbol: false, crosshair: true, range: true, interval: false };
 const AUTH_KEY = 'sb-fssrtlpjqbavzomynwmg-auth-token';
@@ -18,7 +22,7 @@ function initialOwner() { try {
 } catch { return 'guest'; } }
 
 export function normalizeWorkspace(raw) {
-  if (!raw || !CAPACITY[raw.layout] || !Array.isArray(raw.panes) || !raw.panes.length || raw.panes.length > 6) return null;
+  if (!raw || !CAPACITY[raw.layout] || !Array.isArray(raw.panes) || !raw.panes.length || raw.panes.length > 16) return null;
   const ids = new Set(), panes = [];
   for (const pane of raw.panes) {
     if (!Number.isSafeInteger(pane?.id) || pane.id < 1 || pane.id > 1000000 || ids.has(pane.id) || !validInterval(pane.interval)) return null;
@@ -42,7 +46,7 @@ function loadState(STORE) {
     const raw = JSON.parse(localStorage.getItem(STORE) || 'null');
     const panes = Array.isArray(raw?.panes) ? raw.panes.filter(p => p && isMarketSymbol(String(p.symbol || '')).valueOf() === true)
       .map((p, i) => ({ id: Number(p.id) || i + 1, symbol: parseMarketRef(String(p.symbol).toUpperCase()).key,
-        ...(validInterval(p.interval) ? { interval: p.interval } : {}) })).slice(0, 6) : [];
+        ...(validInterval(p.interval) ? { interval: p.interval } : {}) })).slice(0, 16) : [];
     return {
       panes: panes.length ? panes : [],
       active: Number(raw?.active) || panes[0]?.id || 1,
@@ -299,11 +303,11 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     tabs.querySelectorAll('[data-close-pane]').forEach(b => b.onclick = event => {
       event.stopPropagation(); removePane(Number(b.dataset.closePane));
     });
-    document.querySelectorAll('[data-layout]').forEach(b => {
-      const active = Number(b.dataset.layout) === state.layout;
-      b.setAttribute('aria-pressed', String(active));
-    });
+    paintLayoutButtons();
+    const [cols, rows] = LAYOUT_GRID[state.layout] || [1, 1];
     grid.dataset.layout = String(state.layout);
+    grid.style.setProperty('--mc-cols', cols);
+    grid.style.setProperty('--mc-rows', rows);
     if (!force && key === renderedKey) {
       gridActiveClasses();
       return;
@@ -369,8 +373,8 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     const existing = state.panes.find(p => p.symbol === ref.key && p.interval === interval);
     if (existing) { activate(existing.id); return true; }
     if (state.panes.length >= capacity()) {
-      const next = LAYOUTS.find(l => l > state.panes.length) || 6;
-      if (next === state.layout) { onStatus?.('En fazla 6 grafik açılabilir', 'error'); return false; }
+      const next = LAYOUTS.find(l => l > state.panes.length);
+      if (!next) { onStatus?.('En fazla 16 grafik açılabilir', 'error'); return false; }
       state.layout = next;
     }
     const pane = { id: nextId++, symbol: ref.key, interval };
@@ -414,7 +418,7 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     if (button) {
       button.setAttribute('aria-pressed', String(state.open));
       button.setAttribute('aria-label', state.open ? 'Tek grafik düzenine geç' : 'Çoklu grafik düzenine geç');
-      button.setAttribute('title', state.open ? 'Tek grafik (1)' : 'Çoklu grafik (2/4/6)');
+      button.setAttribute('title', state.open ? 'Tek grafik (1)' : 'Çoklu grafik (1–16)');
     }
     if (state.open) renderMulti(true);
     else setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
@@ -523,10 +527,27 @@ export function initMultiChart({ getSymbol, getInterval, setSymbol, onStatus, ap
     } else if (persistence && !persistence.ready) startPersistence(contextHadLocal);
   }
 
-  document.querySelectorAll('.layout-buttons [data-layout]').forEach(b => b.onclick = () => {
-    state.layout = Number(b.dataset.layout) || 1;
+  function paintLayoutButtons() {
+    document.querySelectorAll('.layout-buttons [data-layout]').forEach(b =>
+      b.setAttribute('aria-pressed', String(Number(b.dataset.layout) === state.layout)));
+  }
+  function renderLayoutButtons() {
+    const host = document.querySelector('.layout-buttons');
+    if (!host) return;
+    host.innerHTML = LAYOUTS.map(count => {
+      const [cols, rows] = LAYOUT_GRID[count];
+      return `<button type="button" data-layout="${count}" title="${count} grafik düzeni" aria-label="${count} grafik düzeni" aria-pressed="${count === state.layout}" style="--cols:${cols};--rows:${rows}"><span class="layout-grid" aria-hidden="true">${'<i></i>'.repeat(count)}</span><span class="layout-count">${count}</span></button>`;
+    }).join('');
+    host.querySelectorAll('[data-layout]').forEach(b => b.onclick = () => applyLayout(Number(b.dataset.layout)));
+  }
+  function applyLayout(count) {
+    if (!CAPACITY[count]) return;
+    state.layout = count;
+    paintLayoutButtons();
     setOpen(true);
-  });
+    onStatus?.(`${count} grafik düzeni açıldı`, 'ok');
+  }
+  renderLayoutButtons();
   $('multi-toggle')?.addEventListener('click', () => setOpen(!state.open));
   $('multi-exit')?.addEventListener('click', () => setOpen(false));
   $('multi-add')?.addEventListener('click', () => openAddDialog());

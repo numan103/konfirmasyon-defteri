@@ -1,4 +1,4 @@
-import { icon } from './alfa-chart-ui.mjs?v=2';
+import { icon } from './alfa-chart-ui.mjs?v=5';
 const $ = id => document.getElementById(id);
 export class ObjectTree {
   constructor(engine, names) {

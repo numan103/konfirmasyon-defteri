@@ -1,4 +1,4 @@
-import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=3';
+import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=5';
 import { parseHM, SESSION_BOX_DEFS } from './alfa-session-boxes-model.mjs?v=3';
 import { PUBLIC_STUDY_DETAILS } from './alfa-market-data-public.mjs?v=3';
 
@@ -37,8 +37,12 @@ const labels = { period: 'Periyot', source: 'Fiyat kaynağı', color: 'Çizgi re
   showProtected: 'Korunan seviyeler', maxProtected: 'Maksimum korunan seviye', minGap: 'Minimum fiyat boşluğu', atrFilter: 'ATR filtresi',
   maxRegions: 'Maksimum bölge', showBull: 'Yükseliş bölgeleri', showBear: 'Düşüş bölgeleri', showIfvg: 'IFVG bölgeleri', showMitigated: 'Dolmuş / geçersiz bölgeleri de göster', extend: 'Bölgeleri sağa uzat',
   opacity: 'Dolgu opaklığı', showFvg: 'FVG bölgeleri', showMS: 'Piyasa yapısı', showIFVG: 'IFVG bölgeleri', confirmedOnly: 'Yalnızca kapanmış HTF mumları',
-  period: 'Veri periyodu', market: 'Piyasa', levels: 'Emir defteri seviyesi', refresh: 'Yenileme (sn)',
+  market: 'Piyasa', levels: 'Emir defteri seviyesi', refresh: 'Yenileme (sn)',
   bidColor: 'Alış likiditesi', askColor: 'Satış likiditesi' };
+export function studyFieldLabel(id, key) {
+  if (key === 'period' && ['oi', 'longShort'].includes(id)) return 'Veri periyodu';
+  return labels[key] || (key === 'mode' ? 'Kırılım onayı' : key === 'mitigation' ? 'Bölge dolum ölçütü' : key);
+}
 const periodOptions = [['auto', 'Otomatik · grafiğe uygun'], ['5m', '5 dk'], ['15m', '15 dk'], ['30m', '30 dk'],
   ['1h', '1 sa'], ['2h', '2 sa'], ['4h', '4 sa'], ['6h', '6 sa'], ['12h', '12 sa'], ['1d', '1 gün']];
 const marketOptions = [['auto', 'Grafikteki piyasa'], ['spot', 'Binance Spot'], ['perp', 'Binance Vadeli']];
@@ -243,6 +247,7 @@ export class ChartStudies {
         <div class="study-chip-head">
           <span class="study-dot" style="background:${esc(d.color)}"></span>
           <span class="study-chip-name">${esc(d.name)}</span>
+          ${d.id === 'volume' ? '<span class="volume-brand-badge" title="alfa charts" aria-label="alfa charts">A</span>' : ''}
           ${d.item ? `<small class="study-chip-params">${esc(studyLegendParams(d.item.params))}</small><span class="study-chip-values" data-study-values="${esc(d.id)}"></span>` : ''}
           ${d.subtitle ? `<small class="study-chip-meta">${esc(d.subtitle)}</small>` : ''}
           ${this.statusHTML(d)}
@@ -399,7 +404,7 @@ export class ChartStudies {
       } else if (typeof value === 'boolean') control = `<input data-k="${key}" type="checkbox" ${value ? 'checked' : ''}>`;
       else if (key === 'color') control = `<input data-k="${key}" type="color" value="${esc(value)}">`;
       else control = `<input data-k="${key}" type="number" step="any" min="0" max="${['opacity', 'dispMin'].includes(key) ? 1 : 5000}" value="${esc(value)}" required>`;
-      return `<label class="setting-row"><span>${esc(labels[key] || (key === 'mode' ? 'Kırılım onayı' : 'Bölge dolum ölçütü'))}</span>${control}</label>`;
+      return `<label class="setting-row"><span>${esc(studyFieldLabel(id, key))}</span>${control}</label>`;
     };
     let html = fields.map(input).join('');
     if (schemas[id] && ['oi', 'longShort', 'cvdSpot', 'cvdPerp', 'marketDelta', 'footprint', 'heatmap'].includes(id)) {
