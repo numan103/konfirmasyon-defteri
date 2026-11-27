@@ -13,15 +13,29 @@ const last = Math.floor(Date.now() / 3600000) * 3600, requests = [], errors = []
 let mode = 'ok', socket;
 const ready = () => page.waitForFunction(() => window.__alfaDebug?.ready && window.__alfaDebug.drawings.ready);
 const status = (id, state) => page.waitForFunction(({ id, state }) =>
-  document.querySelector(`#study-legend [data-study-status="${id}"]`)?.dataset.state === state, { id, state });
+  (document.querySelector(`[data-pane-study="${id}"] [data-study-status="${id}"]`) ||
+    document.querySelector(`#study-legend [data-study-status="${id}"]`))?.dataset.state === state, { id, state });
 const close = async () => { await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.querySelector('dialog[open]')); };
+const statusText = id => page.evaluate(key =>
+  (document.querySelector(`[data-pane-study="${key}"] [data-study-status="${key}"]`) ||
+    document.querySelector(`#study-legend [data-study-status="${key}"]`))?.textContent || '', id);
+const statusState = id => page.evaluate(key =>
+  (document.querySelector(`[data-pane-study="${key}"] [data-study-status="${key}"]`) ||
+    document.querySelector(`#study-legend [data-study-status="${key}"]`))?.dataset.state, id);
+const retry = async id => {
+  const pane = page.locator(`[data-pane-study="${id}"] [data-study-retry="${id}"]`);
+  if (await pane.count()) await pane.click();
+  else await page.evaluate(key => document.querySelector(`#study-legend [data-study-retry="${key}"]`)?.click(), id);
+};
 const add = async id => {
   await page.locator('#indicators-manage').click();
   await page.locator(`[data-add="${id}"]`).click();
   await close();
 };
 const settings = async period => {
-  await page.locator('#study-legend [data-study-settings=oi]').click();
+  await page.locator('#indicators-manage').click();
+  await page.locator('[data-cat=active]').click();
+  await page.locator('.studies-dialog [data-study-settings=oi]').click();
   await page.locator('[data-k=period]').selectOption(period);
   await page.locator('#is-apply').click();
   await close();
@@ -99,7 +113,7 @@ try {
   assert.ok(result.height >= 80);
   assert.equal(result.symbol, 'BTCUSDT · 1H', 'Spot chart must not be converted to perpetual');
   assert.match(result.source, /Binance Futures.*1h/);
-  await page.locator('#study-legend [data-study-settings=oi]').click();
+  await page.locator('[data-pane-study=oi] [data-pane-action=settings]').click();
   assert.match(await page.locator('[data-study-scope=oi]').textContent(), /fiyat grafiği Spot kalır/);
   await close();
 
@@ -108,25 +122,25 @@ try {
   await settings('auto'); await status('oi', 'ready');
   mode = 'error';
   await settings('auto'); await status('oi', 'error');
-  assert.match(await page.locator('#study-legend [data-study-status=oi]').textContent(), /HTTP 503.*son veri korunuyor/);
+  assert.match(await statusText('oi'), /HTTP 503.*son veri korunuyor/);
   assert.equal(await page.evaluate(() => window.__alfaDebug.publicStudies.seriesById.oi.length), 1);
   socket.send(JSON.stringify({ e: 'kline', s: 'BTCUSDT', k: {
     s: 'BTCUSDT', i: '1h', t: last * 1000, o: '60000', h: '60300', l: '59800', c: '60100', v: '10'
   } }));
   await page.waitForFunction(() => document.getElementById('connection').textContent.includes('WebSocket'));
-  assert.equal(await page.locator('#study-legend [data-study-status=oi]').getAttribute('data-state'), 'error',
+  assert.equal(await statusState('oi'), 'error',
     'a live price tick must not erase the study error');
   mode = 'ok';
-  await page.locator('#study-legend [data-study-retry=oi]').click(); await status('oi', 'ready');
+  await retry('oi'); await status('oi', 'ready');
 
   mode = 'empty';
   await page.locator('#timeframes [data-interval="1m"]').click(); await ready();
   await add('oi'); await status('oi', 'empty');
   assert.equal(requests.at(-1).period, '5m', '1m charts use the supported minimum statistics period');
   assert.equal(await page.evaluate(() => window.__alfaDebug.publicStudies.seriesById.oi.length), 0);
-  assert.match(await page.locator('#study-legend [data-study-status=oi]').textContent(), /veri yok/);
+  assert.match(await statusText('oi'), /veri yok/);
   mode = 'ok';
-  await page.locator('#study-legend [data-study-retry=oi]').click(); await status('oi', 'ready');
+  await retry('oi'); await status('oi', 'ready');
   await add('longShort'); await status('longShort', 'ready');
   assert.equal(requests.at(-1).period, '5m');
   assert.equal(await page.evaluate(() => window.__alfaDebug.publicStudies.seriesById.longShort[0].data()[0].value), 1.5);

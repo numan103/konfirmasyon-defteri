@@ -43,6 +43,39 @@ function fixture(options = {}) {
   return { manager, added, removed, states };
 }
 
+test('historical OI requests are anchored to the replay clock and never render future samples', async () => {
+  const originalFetch = globalThis.fetch, urls = [];
+  const { manager, added } = fixture();
+  delete manager.load;
+  const clock = 1700003600;
+  globalThis.fetch = async url => {
+    urls.push(new URL(url));
+    return { ok: true, json: async () => [
+      { timestamp: 1700000000000, sumOpenInterest: '1000' },
+      { timestamp: 1700010000000, sumOpenInterest: '2000' }
+    ] };
+  };
+  try {
+    await manager.setReplayClock(clock);
+    assert.equal(urls[0].searchParams.get('endTime'), String(clock * 1000));
+    assert.ok(added.at(-1).values.every(point => point.time <= clock));
+    assert.equal(added.at(-1).values.length, 1);
+  } finally { manager.dispose(); globalThis.fetch = originalFetch; }
+});
+
+test('live depth is removed and marked unavailable during replay, never shown as historical heatmap', async () => {
+  const { manager } = fixture();
+  manager.enabled.heatmap = true;
+  let depthLoads = 0;
+  manager.load = async id => { if (id === 'heatmap') depthLoads++; return []; };
+  try {
+    await manager.setReplayClock(1700000000);
+    assert.equal(depthLoads, 0);
+    assert.equal(manager.statusById.heatmap.state, 'unsupported');
+    assert.match(manager.statusById.heatmap.message, /tarihsel/i);
+  } finally { manager.dispose(); }
+});
+
 test('open interest auto uses 1h on a 1H spot chart and names the futures source', async () => {
   const originalFetch = globalThis.fetch, urls = [];
   const { manager, added } = fixture();

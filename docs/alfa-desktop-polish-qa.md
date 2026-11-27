@@ -78,3 +78,59 @@ were used. Production smoke was not requested or run.
 
 Do not describe this batch as fully green: the final web runner's embedded
 crosshair timeout remains open despite the subsequent standalone pass.
+
+## Second batch — chart-only workspace and replay — 2026-11-27
+
+Release-readiness document remains **BLOCKED / NO-GO**. The user asked to
+continue the reported UX work; the earlier publication request still applies.
+
+| Finding | Surface | Root cause / fix |
+| --- | --- | --- |
+| Pane separators are white | Web | Lightweight Charts defaults were used. Set `layout.panes.separatorColor` and hover colour to the dark chart palette. |
+| Double-click only tucked lower panes into ribbons | Web | The chart-level double-click flipped `collapsed`. It now removes the lower studies entirely; a second double-click restores the same studies. Overlays stay untouched. |
+| Pane study names repeat in the upper legend | Web | Pane studies were rendered in both the overlay legend and their own pane. The upper legend now shows overlays only; every pane keeps its own top-left caption with eye, collapse, settings, remove and data status/retry controls. |
+| Legend rows are verbose and cannot fold to values only | Web | The desktop overlay kept parameter/meta text and had no compact fold. Meta text is hidden, rows are smaller, and the bottom arrow folds names while keeping live numeric values visible. |
+| Phone sheets append a page below the desktop chart | Web | `chart-first` did not hide mobile sheets, their backdrop or dock. They are now `display:none` and the desktop body is height-bound; hiding the watchlist expands the canvas. |
+| Timeframe buttons waste width | Web | Button padding/min-width were too large. Tightened them only in `chart-first`. |
+| Pencil button does not open the desktop drawing rail | Web | The phone toggle had no desktop binding. It now toggles the actual rail and exposes `aria-expanded`. |
+| Pair explorer shows +/star/Aç clutter | Web | Desktop `chart-first` now uses a direct picker: clicking a row adds, stars and opens the symbol in one action. Phone actions remain unchanged. |
+| Watchlist right-click cannot classify pairs | Web | Added a section editor and move-to-section actions to the watchlist context menu. Custom sections are normalized and persisted with the watchlist document; unassigned pairs stay in `Diğer`. |
+| Replay timeframe change returns to live | Shared | Display timeframe and execution timeframe were the same variable. Replay now keeps its engine, clock and paper context; the higher display timeframe renders only candles closed by that clock. |
+| Historical OI/CVD data is missing or future-dated | Shared | Public statistics and kline-flow fetch windows are bounded by the review clock, cached by that clock, filtered before render, and live depth is explicitly marked unavailable instead of substituted. |
+| Surviving oscillator captions vanish after a pane remove/restore cycle | Shared | Native pane rows are reused. Pane labels are re-applied after every indicator render/removal and controls are rebound across several frames. |
+
+### Regression coverage
+
+- `tests/browser/alfa-desktop-streamline.browser.mjs` (new): viewport overflow,
+  dark separator, watchlist width, pencil toggle, direct pair selection,
+  pane hide/restore, compact value-only fold, custom watchlist section reload,
+  historical timeframe view preservation, clock-bounded public studies and no
+  page errors. Screenshots are saved under `.qa-reports/desktop-streamline/`.
+- `tests/browser/alfa-replay.browser.mjs`: display timeframe change preserves
+  replay clock and paper timezone; higher interval exposes no unfinished candle.
+- `tests/alfa-public-studies.test.mjs`: bounded historical OI requests and
+  unavailable live depth during replay.
+- `tests/alfa-watchlist-organizer.test.mjs`: custom sections survive
+  normalization without duplicate or foreign members.
+- Updated stale selectors/contracts in `alfa-desk-pane-density`,
+  `alfa-indicator-pane`, `alfa-workspace`, `alfa-chart-scope`,
+  `alfa-open-interest`, `alfa-ux-eight` and `alfa-mobile-shell` suites.
+
+### Verification
+
+- New desktop streamline suite: PASS, one attempt.
+- Replay suite: PASS with real Binance history, one attempt.
+- Desk-pane density, indicator pane, open interest, workspace and mobile chart
+  interaction suites: PASS on targeted reruns after the caption-rebind fix.
+- Unit suites for public studies and watchlist organizer: PASS.
+- `git diff --check`: PASS.
+- Final full nightly: **35/35 PASS, fail=0, retried=0**, one attempt at
+  `http://127.0.0.1:8787`, report
+  `.qa-reports/all-20261127-183248`.
+
+### Risks and limits
+
+Watchlist documents, public-study adapters and indicator caption rebinding are
+shared code, so mobile and embedded surfaces are covered by the full nightly
+rather than assumed safe. No account, credential or production write was used.
+Production smoke remains opt-in and was not run for this batch.

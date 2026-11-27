@@ -115,12 +115,23 @@ export function normalizeWatchlistDocument(raw, fallback = []) {
     let id = String(item.id || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || `list-${lists.length + 1}`;
     if (ids.has(id)) continue;
     ids.add(id);
+    const members = cleanWatchlist(item.symbols), assigned = new Set(), sectionIds = new Set();
+    const sections = (Array.isArray(item.sections) ? item.sections : []).slice(0, 40).flatMap(section => {
+      if (!section || typeof section !== 'object') return [];
+      const sid = String(section.id || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 40);
+      if (!sid || sectionIds.has(sid)) return [];
+      sectionIds.add(sid);
+      const refs = cleanWatchlist(section.symbols).filter(ref => members.includes(ref) && !assigned.has(ref));
+      refs.forEach(ref => assigned.add(ref));
+      return [{ id: sid, name: text(section.name, 'Bölüm', 60), symbols: refs }];
+    });
     lists.push({
       id,
       name: text(item.name, `Liste ${lists.length + 1}`, 60),
       symbols: cleanWatchlist(item.symbols),
       color: COLOR.test(item.color) ? item.color : DEFAULT_LIST_COLOR,
-      collapsed: !!item.collapsed
+      collapsed: !!item.collapsed,
+      ...(sections.length ? { sections } : {})
     });
   }
   const activeRefs = cleanWatchlist(source?.symbols, fallbackRefs);

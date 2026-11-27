@@ -48,8 +48,10 @@ export function setPaneLabel(pane, key, text, color = '', attempt = 0) {
     found.entries.set(key, label);
   }
   label.textContent = String(text);
+  label.dataset.paneStudy = key;
   if (color) label.style.color = color;
   label.hidden = false;
+  document.dispatchEvent(new CustomEvent('alfa-pane-caption', { detail: { key } }));
   // Native DOM rows are reused while several panes are removed/added in one
   // update. Rebind after layout settles, not only when the first row appears.
   if (attempt < 8 && typeof requestAnimationFrame === 'function') {

@@ -35,19 +35,23 @@ These are the behaviors agents must protect. If a test contradicts this file, de
 
 ## Indicators and panes
 
-- Pane indicator names sit at the top-left of their pane.
+- Pane indicator names and desktop actions sit at the top-left of their own pane; do not repeat pane names in the upper overlay legend.
 - Overlay indicators appear under the symbol label without a visible `İndikatörler` heading.
 - Bulk `+/-` legend controls stay hidden in the compact legend.
 - Embedded panes (`isEmbed`) keep the compact shell; they must never receive desktop `chart-first`, which can create zero-height plots.
-- Desktop `chart-first` keeps the chart host at least 70% of viewport height even with CVD/OI/delta panes. Double-clicking the plot tucks every lower pane to at most 30px and gives the price pane at least 80% of the chart; a second double-click restores lower panes to at least 80px.
+- Desktop `chart-first` keeps the chart host at least 70% of viewport height even with CVD/OI/delta panes. Per the user's revised requirement, double-clicking the plot completely hides every lower pane (no ribbons); a second double-click restores the same studies. Price overlays stay unchanged.
 - Double-clicking a pane-study legend row must resize its real pane, not only flip the stored `collapsed` flag.
+- The desktop overlay legend has a bottom count/arrow control that folds names only, without disabling the indicators.
+- Desktop phone sheets must be `display:none`, not appended below the chart. Hiding the watchlist must actually expand the canvas.
+- Replay display timeframe changes preserve the execution engine, paper journal and replay clock. Render only candles closed by that clock; do not use the selected display timeframe to evaluate paper trades.
+- Historical public statistics requests are bounded by the review/replay clock. Live depth is unavailable in historical mode; never substitute it for historical liquidity.
 
 ## Ranges and explorer
 
 - Range presets are exposed in the range menu with a subheading.
 - Tests must target the visible range menu buttons (`#menu-range-1d`, `#range-menu [data-range=...]`) instead of the first hidden `[data-range]` match.
 - The pair explorer shows the full available list and supports add / favorite / open.
-- The explorer opens from the top-left `BTCUSDT` control.
+- The explorer opens from the top-left `BTCUSDT` control. Desktop rows open directly without separate add/star/open buttons; phone list actions remain available.
 
 ## Copy and trust text
 
@@ -73,6 +77,6 @@ Trust-required alarm/study scope text inside dialogs is intentionally kept and m
 - Hidden duplicate selectors: always scope to the visible menu/panel.
 - Palette drift came from per-symbol/per-interval storage; keep it global.
 - The phone FAB brush is its own drag handle; there is no separate grip, and the brush stays at least 44px.
-- Cache busting: CSS `?v=63` is current; bump on future CSS edits.
+- Cache busting: CSS `?v=64` is current; bump on future CSS edits.
 - `isEmbed` plus `chart-first` breaks pane height; guard both sides.
 - `window.__alfaDebug` is the source of truth for chart/drawing state assertions.

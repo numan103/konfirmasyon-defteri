@@ -102,12 +102,13 @@ try {
     assert.equal(await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'ema').params.period), 50);
     assert.equal(await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'ema').id), ema);
     const rsi = await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'rsi').id);
-    await page.click(`#study-legend [data-study-eye="${rsi}"]`);
+    await page.click(`[data-pane-study="${rsi}"] [data-pane-action="eye"]`);
     assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 2);
-    await page.click(`#study-legend [data-study-eye="${rsi}"]`);
+    await catalogue(); await page.click('[data-cat=active]');
+    await page.click(`.studies-dialog [data-study-eye="${rsi}"]`); await close();
     assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 3);
     const macd = await state(() => window.__alfaDebug.indicators.items.find(i => i.type === 'macd').id);
-    await page.locator(`#study-legend [data-study-remove="${macd}"]`).click();
+    await page.locator(`[data-pane-study="${macd}"] [data-pane-action="remove"]`).click();
     assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 2);
   });
   await test('session UTC editor, overlay settings, capped market structure and pane clipping', async () => {
@@ -248,7 +249,7 @@ try {
       assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 3);
       assert.equal(await state(() => window.__alfaDebug.publicStudies.seriesById.marketDelta[0].data()[0].value), 4);
       assert.equal(await state(() => window.__alfaDebug.publicStudies.facades.marketDelta.enabled), true);
-      await page.click('#study-legend [data-study-remove="marketDelta"]');
+      await page.click('[data-pane-study="marketDelta"] [data-pane-action="remove"]');
       await page.waitForFunction(() => window.__alfaDebug.publicStudies.seriesById.marketDelta.length === 0);
       assert.equal(await state(() => window.__alfaDebug.chart.panes().length), 2);
     } finally { await page.unroute(publicRoute, handler); }

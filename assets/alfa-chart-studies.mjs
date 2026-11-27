@@ -104,6 +104,9 @@ export class ChartStudies {
     this.catalog = [...catalog.map(d => ({ ...d, description: descriptions[d.id] })), ...OVERLAY_CATALOG];
     this.state = defaultStudyState(); this.clean = false;
     this.favorites = storedArray('alfa-ind-fav:v1', ['ema', 'rsi', 'sessions', 'fvg']);
+    this.hiddenLowerPanes = [];
+    this.paneControlFrame = 0;
+    document.addEventListener('alfa-pane-caption', () => this.syncPaneControls());
     managers.sessions.onSettings = () => this.openSettings('sessions');
     managers.sessions.onToggle = id => {
       if (!this.state.sessions.added) managers.sessions.config.enabled = Object.fromEntries(SESSION_BOX_DEFS.map(d => [d.id, d.id === id]));
@@ -112,7 +115,7 @@ export class ChartStudies {
     this.applyVisibility(); this.sync();
   }
   toJSON() { return structuredClone(this.state); }
-  apply(raw) { this.state = normalizeStudyState(raw); this.applyVisibility(); this.sync(); }
+  apply(raw) { this.state = normalizeStudyState(raw); this.applyVisibility(); this.sync(); this.schedulePaneControls(); }
   applyVisibility() {
     this.indicators.setSuppressed(this.clean);
     for (const def of OVERLAY_CATALOG) {
@@ -121,8 +124,18 @@ export class ChartStudies {
     }
     for (const id of PUBLIC_PANE_IDS) this.managers[id]?.setCollapsed?.(!!this.state[id]?.collapsed);
   }
-  setClean(value) { this.clean = !!value; this.applyVisibility(); this.sync(); }
-  persist() { this.sync(); this.onChange?.(); }
+  setClean(value) { this.clean = !!value; this.applyVisibility(); this.sync(); this.schedulePaneControls(); }
+  schedulePaneControls() {
+    if (this.paneControlFrame) cancelAnimationFrame(this.paneControlFrame);
+    let frames = 0;
+    const tick = () => {
+      this.paneControlFrame = 0;
+      this.syncPaneControls();
+      if (++frames < 12) this.paneControlFrame = requestAnimationFrame(tick);
+    };
+    this.paneControlFrame = requestAnimationFrame(tick);
+  }
+  persist() { this.sync(); this.schedulePaneControls(); this.onChange?.(); }
   active() {
     return [
       ...this.indicators.items.map(item => ({ id: item.id, type: item.type, name: item.def.name,
@@ -173,6 +186,53 @@ export class ChartStudies {
     for (const d of panes) this.setCollapsed(d.id, next);
     return next;
   }
+  toggleLowerPanesVisibility() {
+    if (this.hiddenLowerPanes.length) {
+      const restore = this.hiddenLowerPanes; this.hiddenLowerPanes = [];
+      for (const id of restore) if (this.active().some(d => d.id === id && !d.visible)) this.toggle(id);
+      return false;
+    }
+    const panes = this.active().filter(d => isPaneStudy(d) && d.visible);
+    this.hiddenLowerPanes = panes.map(d => d.id);
+    for (const d of panes) this.toggle(d.id);
+    return panes.length > 0;
+  }
+  syncPaneControls() {
+    if (!document.body.classList.contains('chart-first')) return;
+    for (const caption of document.querySelectorAll('[data-pane-study]')) {
+      const d = this.active().find(d => d.id === caption.dataset.paneStudy);
+      if (!d || !isPaneStudy(d)) continue;
+      caption.removeAttribute('aria-hidden');
+      caption.querySelector('.pane-study-controls')?.remove();
+      caption.querySelector('.pane-study-status')?.remove();
+      const controls = document.createElement('span'); controls.className = 'pane-study-controls';
+      for (const [action, glyph, label, handler] of [
+        ['collapse', d.collapsed ? 'expand' : 'minimize', d.collapsed ? 'Genişlet' : 'Küçült', () => this.setCollapsed(d.id, !d.collapsed)],
+        ['eye', 'eye', 'Gizle', () => this.toggle(d.id)],
+        ['settings', 'settings', 'Ayarlar', () => this.openSettings(d.id)],
+        ['remove', 'close', 'Kaldır', () => this.remove(d.id)]
+      ]) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.dataset.paneAction = action;
+        button.setAttribute('aria-label', `${d.name} ${label}`);
+        button.innerHTML = icon(glyph);
+        button.onclick = event => { event.stopPropagation(); handler(); };
+        controls.append(button);
+      }
+      caption.append(controls);
+      const status = this.statusHTML(d);
+      if (status) {
+        const wrap = document.createElement('span'); wrap.className = 'pane-study-status';
+        wrap.innerHTML = status; caption.append(wrap);
+      }
+      caption.ondblclick = event => {
+        if (event.target.closest('button')) return;
+        event.preventDefault(); event.stopPropagation();
+        this.setCollapsed(d.id, !d.collapsed);
+      };
+      this.wireActive(caption);
+    }
+  }
   sync() {
     const active = this.active(), legend = document.getElementById('study-legend');
     const count = document.getElementById('study-count'); if (count) count.textContent = active.length;
@@ -202,8 +262,23 @@ export class ChartStudies {
         <button data-study-remove-all type="button" title="Tümünü kaldır">${icon('close')}</button>
       </div>` : '';
       legend.innerHTML = cards + actions;
+      if (document.body.classList.contains('chart-first')) {
+        const toggle = document.createElement('button');
+        toggle.id = 'study-legend-toggle'; toggle.type = 'button';
+        const folded = legend.classList.contains('legend-folded');
+        const overlays = active.filter(d => !isPaneStudy(d)).length;
+        toggle.setAttribute('aria-expanded', String(!folded));
+        toggle.setAttribute('aria-label', folded ? 'İndikatör adlarını göster' : 'İndikatör adlarını gizle');
+        toggle.innerHTML = `${icon(folded ? 'down' : 'chevron')}<span>${overlays}</span>`;
+        toggle.onclick = () => {
+          legend.classList.toggle('legend-folded');
+          this.sync();
+        };
+        legend.append(toggle);
+      }
       this.wireActive(legend);
       this.updateValues();
+      this.syncPaneControls();
     }
     if (this.modal?.box.querySelector('#ind-list')) this.renderList();
   }

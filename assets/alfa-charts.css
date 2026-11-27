@@ -916,7 +916,10 @@ body.chart-first .workspace{height:100dvh;min-height:0;overflow:hidden;grid-temp
 body.chart-first .workarea{height:100%;min-height:0;overflow:hidden;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) 248px}
 body.chart-first .mobile-market-strip{display:none!important}
 body.chart-first #mobile-swipe-overlay{display:none!important}
+body.chart-first .mobile-sheet,body.chart-first .mobile-sheet-backdrop,body.chart-first .mobile-left-dock{display:none!important}
+body.chart-first{overflow:hidden;height:100dvh}
 body.chart-first.no-list .workarea{grid-template-columns:minmax(0,1fr)}
+body.chart-first .workspace.no-list .workarea{grid-template-columns:minmax(0,1fr)}
 body.chart-first .chart-panel{height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
 body.chart-first .legend{position:absolute;top:0;left:0;right:0;z-index:10;pointer-events:none;min-height:0;padding:8px 12px 4px;border:0;background:linear-gradient(180deg,#10141ce6,#10141c00)}
 body.chart-first .legend #market-title,body.chart-first .legend #study-legend{pointer-events:auto}
@@ -930,6 +933,9 @@ body.chart-first .chart-navigation .range-presets{display:flex;gap:3px}
 body.chart-first .chart-navigation button{min-width:32px;padding:5px 7px;border-radius:7px}
 body.chart-first .drawing-space{position:absolute;left:0;top:0;bottom:auto;z-index:20;width:max-content;max-width:calc(100% - 280px);height:auto;min-height:0;padding:6px;border:1px solid #344158;border-radius:14px;background:#151b26f0;backdrop-filter:blur(10px);display:flex;align-items:center;gap:4px;overflow:visible;box-shadow:0 8px 28px #0008}
 body.chart-first .drawing-space.toolbar-dragging{opacity:.9;box-shadow:0 18px 44px #000b}
+body.chart-first .drawing-space[hidden]{display:none}
+body.chart-first #timeframes{gap:0;padding:0 3px}
+body.chart-first #timeframes button{padding:5px;min-width:28px}
 body.chart-first .drawing-rail-grip{display:flex;align-items:center;justify-content:center;width:30px;height:34px;flex:none;padding:6px;border:0;border-right:1px solid #2c3a52;background:transparent;color:#8fa1bd;cursor:grab;touch-action:none}
 body.chart-first .drawing-rail-grip:active{cursor:grabbing}
 body.chart-first .drawing-rail-grip .ui-icon{width:15px;height:15px}
@@ -949,6 +955,23 @@ body.chart-first .study-chip button{min-width:24px;min-height:24px;display:grid;
 body.chart-first .study-chip button .ui-icon{width:14px;height:14px}
 body.chart-first .study-chip button:hover,body.chart-first .study-chip button:focus-visible{background:#303c50;color:#fff;border-radius:4px}
 body.chart-first .study-chip.is-hidden .study-chip-name{text-decoration:line-through}
+body.chart-first #study-legend .study-chip.is-pane-study{display:none}
+body.chart-first #study-legend .study-chip{min-height:20px;font-size:10px}
+body.chart-first #study-legend .study-chip button{min-width:20px;min-height:20px}
+body.chart-first #study-legend .study-chip-params,body.chart-first #study-legend .study-chip-meta{display:none}
+body.chart-first #study-legend .study-legend-actions{display:none}
+body.chart-first #study-legend.legend-folded .study-chip .study-dot,body.chart-first #study-legend.legend-folded .study-chip .study-chip-name,body.chart-first #study-legend.legend-folded .study-chip .study-chip-params,body.chart-first #study-legend.legend-folded .study-chip .study-chip-meta,body.chart-first #study-legend.legend-folded .study-chip .study-data-status,body.chart-first #study-legend.legend-folded .study-chip .study-chip-foot{display:none}
+body.chart-first #study-legend.legend-folded .study-chip{padding:0 2px;min-height:16px}
+body.chart-first #study-legend-toggle{display:flex;align-items:center;gap:3px;width:max-content;min-height:20px;padding:1px 4px;border:0;background:#151d2c88;color:#8e9eb6;font-size:10px}
+body.chart-first #study-legend-toggle .ui-icon{width:12px;height:12px}
+body.chart-first .pane-study-label{pointer-events:auto;min-height:22px;font-size:10px;border:0;background:#10141ccc;z-index:2147483647}
+body.chart-first .pane-study-controls{display:flex;gap:1px}
+body.chart-first .pane-study-controls button{display:grid;place-items:center;width:22px;height:22px;padding:3px;border:0;background:transparent;color:#8e9eb6}
+body.chart-first .pane-study-controls button:hover{background:#283346;color:#fff}
+body.chart-first .pane-study-controls .ui-icon{width:13px;height:13px}
+body.chart-first .pane-study-status{display:inline-flex;align-items:center;gap:3px;max-width:220px;min-width:0;font-size:9px;color:#91a6c6}
+body.chart-first .pane-study-status .study-data-status{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.chart-first .pane-study-status button{width:18px;height:18px;padding:2px;border:0;background:transparent;color:#91a6c6}
 body.chart-first .study-legend-actions button[data-study-collapse-all],body.chart-first .study-legend-actions button[data-study-expand-all],body.chart-first .study-legend-actions button[data-study-remove-all]{display:none!important}
 body.chart-first #study-legend .study-chip-foot button[data-study-collapse],body.chart-first #study-legend .study-chip-foot button[data-study-remove]{opacity:.45}
 body.chart-first.chart-full #watchlist,body.chart-first.chart-full .toolbar{display:none!important}
@@ -959,6 +982,9 @@ body.chart-first.chart-full .legend{position:absolute;top:0;left:0;right:0;z-ind
 
 /* Pair explorer: TradingView-like search with a dedicated exchange column. */
 .pair-explorer-dialog .dialog-content{min-height:50vh}
+.pair-explorer-dialog.direct-picker .pair-explorer-head,.pair-explorer-dialog.direct-picker .pair-explorer-row{grid-template-columns:minmax(120px,1.5fr) minmax(72px,.8fr) minmax(72px,.8fr)}
+.pair-explorer-dialog.direct-picker .pair-explorer-row{width:100%;text-align:left;border:0;border-bottom:1px solid #1b2331;background:transparent;border-radius:0;cursor:pointer}
+.pair-explorer-dialog.direct-picker .pair-explorer-row:hover,.pair-explorer-dialog.direct-picker .pair-explorer-row:focus-visible{background:#253454}
 .pair-explorer-head,.pair-explorer-row{display:grid;grid-template-columns:minmax(120px,1.5fr) minmax(72px,.8fr) minmax(72px,.8fr) auto auto auto;gap:8px;align-items:center}
 .pair-explorer-head{padding:8px 10px;border-bottom:1px solid var(--line);color:#8fa1bd;font-size:10px;letter-spacing:.6px;text-transform:uppercase}
 .pair-explorer-row{min-height:44px;padding:4px 10px;border-bottom:1px solid #1b2331}

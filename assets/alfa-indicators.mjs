@@ -1,5 +1,7 @@
 import { sma, ema, wma, vwma, rsi, macd, atr, bollinger, vwap, stochastic, stochRsi, adx, supertrend, obv } from './alfa-indicators-model.mjs?v=2';
-import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=3';
+import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=4';
+
+
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 
@@ -73,6 +75,7 @@ export class IndicatorManager {
     const item = this.items[idx];
     this.detach(item);
     this.items.splice(idx, 1);
+    this.refreshPaneLabels();
     this.onChange?.();
   }
   detach(item) {
@@ -101,6 +104,18 @@ export class IndicatorManager {
   }
   clear() { for (const i of [...this.items]) this.remove(i.id); }
   renderAll() { for (const i of this.items) this.render(i); }
+  // Adding or removing one oscillator pane reuses native pane rows. Re-apply
+  // every caption so a surviving study never loses its label or controls.
+  refreshPaneLabels() {
+    for (const item of this.items) {
+      if (item.def.pane !== 'oscillator' || !item.visible || this.suppressed) continue;
+      const pane = item.series[0]?.getPane?.() || item.pane;
+      if (!pane) continue;
+      item.pane = pane;
+      const period = item.params.period || item.params.fast || item.params.rsiPeriod || item.params.k || '';
+      setPaneLabel(pane, item.id, [item.def.name, period].filter(Boolean).join(' '), item.params.color);
+    }
+  }
   compute(item, bars) {
     const p = item.params;
     switch (item.type) {
@@ -178,6 +193,7 @@ export class IndicatorManager {
       const guides = item.type === 'rsi' ? [30, 70] : ['stochastic', 'stochrsi'].includes(item.type) ? [20, 80] : item.type === 'macd' ? [0] : [];
       for (const price of guides) item.series[0].createPriceLine({ price, color: '#53617a66', lineWidth: 1, lineStyle: 2, axisLabelVisible: false, title: '' });
     }
+    this.refreshPaneLabels();
   }
   updateAll(bars) {
     for (const item of this.items) {

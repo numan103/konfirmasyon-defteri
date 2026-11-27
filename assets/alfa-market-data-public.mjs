@@ -47,9 +47,9 @@ function validateStatPeriod(period) {
   if (!FUTURES_STAT_PERIODS.includes(period)) throw new Error('Desteklenmeyen Futures veri periyodu');
 }
 
-export async function fetchOpenInterest(symbol, period = '5m', limit = 500, signal, fetcher = fetch) {
+export async function fetchOpenInterest(symbol, period = '5m', limit = 500, signal, fetcher = fetch, window = {}) {
   validateStatPeriod(period);
-  const url = `${FUTURES}/futures/data/openInterestHist?symbol=${encodeURIComponent(cleanSymbol(symbol))}&period=${encodeURIComponent(period)}&limit=${Math.min(500, Math.max(10, limit))}`;
+  const url = `${FUTURES}/futures/data/openInterestHist?symbol=${encodeURIComponent(cleanSymbol(symbol))}&period=${encodeURIComponent(period)}&limit=${Math.min(500, Math.max(10, limit))}${window.endTime != null ? '&endTime=' + encodeURIComponent(window.endTime) : ''}`;
   const rows = await getJSON(url, signal, fetcher);
   if (!Array.isArray(rows)) throw new Error('open-interest-format');
   return rows.map(row => ({
@@ -59,9 +59,9 @@ export async function fetchOpenInterest(symbol, period = '5m', limit = 500, sign
   })).filter(p => p.time > 0 && p.value > 0).sort((a, b) => a.time - b.time);
 }
 
-export async function fetchLongShortRatio(symbol, period = '5m', limit = 500, signal, fetcher = fetch) {
+export async function fetchLongShortRatio(symbol, period = '5m', limit = 500, signal, fetcher = fetch, window = {}) {
   validateStatPeriod(period);
-  const url = `${FUTURES}/futures/data/globalLongShortAccountRatio?symbol=${encodeURIComponent(cleanSymbol(symbol))}&period=${encodeURIComponent(period)}&limit=${Math.min(500, Math.max(10, limit))}`;
+  const url = `${FUTURES}/futures/data/globalLongShortAccountRatio?symbol=${encodeURIComponent(cleanSymbol(symbol))}&period=${encodeURIComponent(period)}&limit=${Math.min(500, Math.max(10, limit))}${window.endTime != null ? '&endTime=' + encodeURIComponent(window.endTime) : ''}`;
   const rows = await getJSON(url, signal, fetcher);
   if (!Array.isArray(rows)) throw new Error('long-short-format');
   return rows.map(row => ({

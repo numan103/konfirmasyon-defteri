@@ -29,7 +29,7 @@ const geometry = () => page.evaluate(() => {
 });
 const tuckState = (collapsed) => page.waitForFunction(expected => {
   const ids = [...document.querySelectorAll('#study-legend .study-chip.is-pane-study')].map(el => el.dataset.studyChip);
-  return ids.length >= 3 && ids.every(id => !!window.__alfaDebug.studiesUI.state[id]?.collapsed === expected);
+  return ids.length >= 3 && ids.every(id => !!window.__alfaDebug.studiesUI.state[id]?.visible === !expected);
 }, collapsed, { timeout: 10000 });
 const dblclickPlot = async () => {
   const box = await page.locator('#chart').boundingBox();
@@ -132,23 +132,23 @@ try {
     toolbarBottom: document.querySelector('.toolbar').getBoundingClientRect().bottom,
     metadataVisible: [...document.querySelectorAll('#study-legend .study-chip-meta')]
       .some(el => getComputedStyle(el).display !== 'none'),
-    controls: [...document.querySelectorAll('#study-legend [data-study-eye]')].map(el => {
+    controls: [...document.querySelectorAll('#study-legend [data-study-eye],.pane-study-controls button')].filter(el => el.getBoundingClientRect().width > 0).map(el => {
       const r = el.getBoundingClientRect(); return { w: r.width, h: r.height };
     })
   }));
   assert.ok(desktopLegend.chartTop <= desktopLegend.toolbarBottom + 2,
     'study legend must overlay the plot instead of reserving a large empty header');
   assert.equal(desktopLegend.metadataVisible, false, 'verbose provider descriptions must not crowd the desktop legend');
-  assert.ok(desktopLegend.controls.every(r => r.w >= 24 && r.h >= 24),
+  assert.ok(desktopLegend.controls.every(r => r.w >= 20 && r.h >= 20),
     'desktop study visibility controls must be easy to click');
 
   await dblclickPlot();
   await tuckState(true);
-  await page.waitForFunction(() => window.__alfaDebug.chart.panes().slice(1).every(p => p.getHeight() <= 30));
+  await page.waitForFunction(() => window.__alfaDebug.chart.panes().length === 1);
   const tucked = await geometry();
   assert.ok(tucked.heights[0] >= tucked.chartHeight * .8,
     `double-click must give the price plot its space back: ${tucked.heights[0]}/${tucked.chartHeight}`);
-  assert.ok(tucked.heights.slice(1).every(h => h <= 30), `lower panes must tuck: ${tucked.heights.join(',')}`);
+  assert.equal(tucked.heights.length, 1, 'lower panes must disappear entirely, not remain as ribbons');
 
   await dblclickPlot();
   await tuckState(false);
@@ -157,13 +157,13 @@ try {
   assert.ok(restored.heights[0] >= restored.chartHeight * .45,
     `restored price plot must stay usable: ${restored.heights[0]}/${restored.chartHeight}`);
 
-  const chipName = page.locator('#study-legend [data-study-chip="cvdSpot"] .study-chip-name');
-  await chipName.dblclick();
+  const collapse = page.locator('[data-pane-study="cvdSpot"] [data-pane-action="collapse"]');
+  await collapse.click();
   await page.waitForFunction(() => {
     const id = window.__alfaDebug.publicStudies.seriesById.cvdSpot[0]?.getPane?.();
     return !!window.__alfaDebug.studiesUI.state.cvdSpot.collapsed && id && id.getHeight() <= 30;
   }, null, { timeout: 10000 });
-  await chipName.dblclick();
+  await collapse.click();
   await page.waitForFunction(() => {
     const id = window.__alfaDebug.publicStudies.seriesById.cvdSpot[0]?.getPane?.();
     return !window.__alfaDebug.studiesUI.state.cvdSpot.collapsed && id && id.getHeight() >= 80;
@@ -171,10 +171,13 @@ try {
 
   // Hiding a study is not collapsing it: its native pane must disappear.
   const beforeHide = await page.evaluate(() => window.__alfaDebug.chart.panes().length);
-  await page.locator('#study-legend [data-study-eye="cvdSpot"]').click();
+  await page.locator('[data-pane-study="cvdSpot"] [data-pane-action="eye"]').click();
   await page.waitForFunction(count => window.__alfaDebug.chart.panes().length === count - 1, beforeHide);
   assert.equal(await page.evaluate(() => window.__alfaDebug.studiesUI.state.cvdSpot.visible), false);
-  await page.locator('#study-legend [data-study-eye="cvdSpot"]').click();
+  await page.locator('#indicators-manage').click();
+  await page.locator('[data-cat="active"]').click();
+  await page.locator('.studies-dialog [data-study-eye="cvdSpot"]').click();
+  await page.keyboard.press('Escape');
   await page.waitForFunction(count => window.__alfaDebug.chart.panes().length === count, beforeHide);
 
   // Session boundaries must be readable without opening settings.

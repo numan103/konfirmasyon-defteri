@@ -2,7 +2,7 @@ import { SYMBOLS, REST_ORIGINS, isSpotSymbol, isFreeMarketRef, parseMarketRef, f
 import { spotMarkets, cleanWatchlist, parseWatchlistText, importPreview, tradingViewSymbolURL, foreignMarkets, WATCHLIST_LIMIT, IMPORT_BYTES,
   LEGACY_TV_LIST, FLAG_COLORS, GROUP_MODES, SORT_MODES, activeList, allWatchlistRefs, classifyWatchlistRef, filteredWatchlistRefs,
   groupWatchlistRefs, legacyWatchlistKeys, mergeLegacyWatchlist, migrateWatchlistDocument, normalizeWatchlistDocument,
-  sortWatchlistRefs, watchlistGroupKey, watchlistKey, watchlistMigrationKey } from './alfa-watchlist-model.mjs?v=10';
+  sortWatchlistRefs, watchlistGroupKey, watchlistKey, watchlistMigrationKey } from './alfa-watchlist-model.mjs?v=11';
 import { chartDialog, icon, escapeHTML as esc } from './alfa-chart-ui.mjs?v=2';
 const $ = id => document.getElementById(id);
 const CATALOG_KEY = 'alfa-spot-catalog:v1';
@@ -32,9 +32,8 @@ export class ChartWatchlist {
     $('symbol').onchange = e => this.select(e.target.value);
     $('watch-rows').addEventListener('contextmenu', event => {
       const row = event.target.closest?.('[data-symbol]');
-      if (!row) return;
       event.preventDefault();
-      this.openRowMenu(row.dataset.symbol, event.clientX, event.clientY);
+      this.openRowMenu(row?.dataset.symbol || this.getSelected(), event.clientX, event.clientY);
     });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.refreshQuotes(); }, { signal: this.abort.signal });
     this.timer = setInterval(() => { if (!document.hidden) this.refreshQuotes(); }, 60000);
@@ -210,7 +209,13 @@ export class ChartWatchlist {
     const filter = $('watch-filter');
     if (filter && document.activeElement !== filter) filter.value = this.search;
     const visible = sortWatchlistRefs(filteredWatchlistRefs(this.symbols, this.search), this.settings, this.quotes);
-    const groups = this.settings.groupBy === 'none' ? [{ id: 'all', name: '', refs: visible }] : groupWatchlistRefs(visible, this.settings.groupBy);
+    const sections = activeList(this.doc)?.sections || [];
+    const groupedRefs = new Set(sections.flatMap(section => section.symbols));
+    const groups = sections.length ? [
+      ...sections.map(section => ({ id: `section-${section.id}`, name: section.name, refs: visible.filter(ref => section.symbols.includes(ref)) })),
+      { id: 'unassigned', name: 'Diğer', refs: visible.filter(ref => !groupedRefs.has(ref)) }
+    ].filter(group => group.refs.length || group.id !== 'unassigned') :
+      this.settings.groupBy === 'none' ? [{ id: 'all', name: '', refs: visible }] : groupWatchlistRefs(visible, this.settings.groupBy);
     $('watch-rows').innerHTML = groups.map(group => {
       const key = watchlistGroupKey(group.id), collapsed = !!this.settings.collapsedGroups[key];
       const head = key === 'all' ? '' : `<button type="button" class="watch-group-head" data-watch-group="${esc(key)}" aria-expanded="${!collapsed}">${icon('chevron')}<strong>${esc(group.name)}</strong><small>${group.refs.length}</small></button>`;
@@ -283,7 +288,11 @@ export class ChartWatchlist {
     menu.id = 'watch-context-menu';
     menu.className = 'watch-context-menu';
     menu.setAttribute('role', 'menu');
-    menu.innerHTML = `<strong>${esc(ref)} · grafik</strong>
+    const sections = activeList(this.doc)?.sections || [];
+    menu.innerHTML = `<strong>${esc(ref)}</strong>
+      <button type="button" data-watch-action="section-add" role="menuitem">Bölüm ekle…</button>
+      ${sections.map(section => `<button type="button" data-watch-action="section:${esc(section.id)}" role="menuitem">${esc(section.name)} bölümüne taşı</button>`).join('')}
+      ${sections.length ? '<button type="button" data-watch-action="section:none" role="menuitem">Bölümden çıkar</button>' : ''}
       <button type="button" data-watch-action="open" role="menuitem">Bu grafikte aç</button>
       <button type="button" data-watch-action="split" role="menuitem">Yeni panede böl</button>
       <button type="button" data-watch-action="transfer" role="menuitem">Aktif pane aktar</button>`;
@@ -296,6 +305,15 @@ export class ChartWatchlist {
       const action = button.dataset.watchAction;
       this.closeRowMenu();
       if (action === 'open') this.select(ref);
+      else if (action === 'section-add') this.openSectionEditor(ref);
+      else if (action.startsWith('section:')) {
+        const id = action.slice(8);
+        for (const section of activeList(this.doc)?.sections || []) {
+          section.symbols = section.symbols.filter(symbol => symbol !== ref);
+          if (section.id === id) section.symbols.push(ref);
+        }
+        this.save(); this.render();
+      }
       else if (action === 'split') this.onSplit?.(ref);
       else if (action === 'transfer') this.onTransfer?.(ref);
     });
@@ -308,6 +326,24 @@ export class ChartWatchlist {
       document.removeEventListener('keydown', escape);
       menu.remove();
     } };
+  }
+  openSectionEditor(ref) {
+    this.modal?.close();
+    const modal = this.modal = chartDialog(`<h3>Bölüm ekle</h3>
+      <form id="watch-section-form"><label>Bölüm adı <input id="watch-section-name" maxlength="60" required autocomplete="off"></label>
+      <button id="watch-section-save" type="submit">Ekle</button></form>`, 'watch-section-dialog');
+    modal.box.querySelector('form').onsubmit = event => {
+      event.preventDefault();
+      const name = modal.box.querySelector('#watch-section-name').value.trim();
+      if (!name) return;
+      const list = activeList(this.doc);
+      if (!list || (list.sections?.length || 0) >= 40) return;
+      list.sections ||= [];
+      for (const section of list.sections) section.symbols = section.symbols.filter(symbol => symbol !== ref);
+      list.sections.push({ id: `s-${Date.now().toString(36)}`, name, symbols: list.symbols.includes(ref) ? [ref] : [] });
+      this.save(); this.render(); modal.close();
+    };
+    modal.box.querySelector('#watch-section-name').focus();
   }
   openExplorer() {
     this.modal?.close();
@@ -325,14 +361,16 @@ export class ChartWatchlist {
     const foreign = foreignMarkets().map(m => toEntry(m));
     const seeds = FREE_REF_SEEDS.map(ref => { try { return toEntry(parseMarketRef(ref)); } catch { return null; } }).filter(Boolean);
     const all = [...new Map([...spots, ...foreign, ...seeds].filter(m => m?.ref).map(item => [item.ref, item])).values()];
-    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Pariteler</h3><p>Tüm kripto ve Forex pariteleri · arama, ekleme ve favoriler</p></div><button id="pair-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
+    const simple = document.body.classList.contains('chart-first');
+    const modal = this.modal = chartDialog(`<div class="dialog-header"><div><h3>Pariteler</h3>${simple ? '' : '<p>Tüm kripto ve Forex pariteleri · arama, ekleme ve favoriler</p>'}</div><button id="pair-close" class="icon-button" aria-label="Kapat">${icon('close')}</button></div>
       <label class="study-search">${icon('search')}<input id="pair-query" list="pair-suggestions" placeholder="BTC, ETH, EURUSD, XAUUSD…" aria-label="Parite ara"></label>
       <datalist id="pair-suggestions"></datalist>
       <div id="pair-suggestion-chips" class="pair-suggestions"></div>
       <p id="pair-status" class="pair-explorer-status" role="status"></p>
-      <div class="pair-explorer-head"><span>Parite</span><span>Borsa</span><span>Tür</span><span>Ekle</span><span>Favori</span><span>Aç</span></div>
+      <div class="pair-explorer-head"><span>Parite</span><span>Borsa</span><span>Tür</span>${simple ? '' : '<span>Ekle</span><span>Favori</span><span>Aç</span>'}</div>
       <div id="pair-results"></div>`, 'pair-explorer-dialog');
     modal.overlay.setAttribute('aria-label', 'Parite ara ve aç');
+    modal.overlay.classList.toggle('direct-picker', simple);
     modal.box.querySelector('#pair-close').onclick = modal.close;
     const input = modal.box.querySelector('#pair-query');
     const render = () => {
@@ -348,6 +386,9 @@ export class ChartWatchlist {
       modal.box.querySelector('#pair-status').textContent = `${matches.length} parite · kripto ve Forex`;
       modal.box.querySelector('#pair-results').innerHTML = matches.map(m => {
         const ref = esc(m.ref), added = this.allSymbols().includes(m.ref), favorite = !!this.doc.flags?.[m.ref]?.starred;
+        if (simple) return `<button type="button" class="pair-explorer-row" data-pair-row="${ref}" data-open-symbol="${ref}">
+          <strong>${esc(m.base)}<small>${m.quote ? '/' + esc(m.quote) : ''}</small></strong>
+          <small>${esc(m.venue)}</small><small>${esc(m.marketType || 'SPOT')}</small></button>`;
         return `<div class="pair-explorer-row" data-pair-row="${ref}">
           <strong>${esc(m.base)}<small>${m.quote ? '/' + esc(m.quote) : ''}</small></strong>
           <small>${esc(m.venue)}</small><small>${esc(m.marketType || 'SPOT')}</small>

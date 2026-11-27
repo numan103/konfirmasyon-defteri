@@ -88,7 +88,7 @@ try {
   await page.waitForFunction(() => window.__alfaDebug.publicStudies.seriesById.footprint.length === 1);
   assert.equal(await page.evaluate(() => window.__alfaDebug.publicStudies.seriesById.footprint[0].data()[0].value), 4);
   assert.match(await page.locator('[data-study-chip=footprint]').textContent(), /Footprint özeti/);
-  await page.locator('#study-legend [data-study-settings=footprint]').click();
+  await page.locator('[data-pane-study=footprint] [data-pane-action=settings]').click();
   assert.match(await page.locator('[data-study-scope=footprint]').textContent(), /imbalance hücreleri gösterilmez/);
   await close();
 

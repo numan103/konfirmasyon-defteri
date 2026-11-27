@@ -2,12 +2,13 @@
 // public Binance REST endpoints; no API key, serverless function or database
 // write is introduced. Non-Binance symbols are never silently converted.
 import { parseMarketRef } from './alfa-charts-data.mjs?v=12';
+import { candleCloseTime } from './alfa-replay-model.mjs?v=3';
 import {
   fetchOpenInterest, fetchLongShortRatio, fetchKlineFlow, fetchDepthHeatmap,
   cvdFromFlow, deltaFromFlow, footprintFromFlow, intervalToPeriod,
   PUBLIC_MARKET_SOURCES, PUBLIC_STUDY_DETAILS, FUTURES_STAT_PERIODS
-} from './alfa-market-data-public.mjs?v=3';
-import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=3';
+} from './alfa-market-data-public.mjs?v=4';
+import { setPaneLabel, clearPaneLabel } from './alfa-pane-labels.mjs?v=4';
 
 const LWC = await import('./vendor/lightweight-charts-5.0.9/lightweight-charts.standalone.production.mjs');
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -82,6 +83,7 @@ export class PublicStudiesManager {
     this.cache = new Map();
     this.context = { symbol: '', interval: '' };
     this.lastBarCount = 0;
+    this.replayClock = null;
     const self = this;
     this.facades = Object.fromEntries(PUBLIC_STUDY_IDS.map(id => [id, {
       get enabled() { return self.enabled[id]; },
@@ -136,6 +138,17 @@ export class PublicStudiesManager {
     this.lastBarCount = this.getBars().length;
     for (const id of PUBLIC_STUDY_IDS) if (this.enabled[id]) this.refresh(id, true);
   }
+  setReplayClock(value) {
+    const next = Number.isFinite(value) ? Number(value) : null;
+    if (this.replayClock === next) return Promise.resolve();
+    this.replayClock = next;
+    const jobs = [];
+    for (const id of PUBLIC_STUDY_IDS) {
+      this.abort(id); this.clearSeries(id);
+      if (this.enabled[id]) jobs.push(this.refresh(id, false, true));
+    }
+    return Promise.all(jobs);
+  }
   updateBars() {
     const count = this.getBars().length;
     if (!count || count === this.lastBarCount) return;
@@ -189,11 +202,17 @@ export class PublicStudiesManager {
   }
   cacheKey(id, market, cfg) {
     const shape = { id, symbol: market.symbol, market: market.market, interval: this.context.interval };
+    if (this.replayClock != null) shape.end = this.replayClock;
     if (cfg.period) shape.period = cfg.period === 'auto' ? intervalToPeriod(this.context.interval) : cfg.period;
     return JSON.stringify(shape);
   }
   async refresh(id, notify = false, force = false) {
     if (!this.enabled[id] || !this.context.symbol) return;
+    if (id === 'heatmap' && this.replayClock != null) {
+      this.abort(id); this.clearSeries(id);
+      this.setStatus(id, 'unsupported', 'Tarihsel emir defteri verisi yok');
+      return;
+    }
     const controller = new AbortController();
     this.abort(id);
     this.controllers.set(id, controller);
@@ -217,9 +236,13 @@ export class PublicStudiesManager {
         data = await this.load(id, market, cfg, AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]));
         if (controller.signal.aborted) return;
       }
+      if (this.replayClock != null && Array.isArray(data)) {
+        data = data.filter(point => ['oi', 'longShort'].includes(id) ? point.time <= this.replayClock :
+          candleCloseTime(point.time, this.context.interval) <= this.replayClock);
+      }
       const hasData = id === 'heatmap' ? data?.bids?.length || data?.asks?.length : Array.isArray(data) && data.length;
       if (!hasData) {
-        this.setStatus(id, 'empty', 'Bu sembol/periyot için veri yok' + (this.hasSeries(id) ? ' · son veri korunuyor' : ''));
+        this.setStatus(id, 'empty', (this.replayClock != null ? 'Bu tarih için kaynakta veri yok' : 'Bu sembol/periyot için veri yok') + (this.hasSeries(id) ? ' · son veri korunuyor' : ''));
         return;
       }
       // Do not abort our own request before rendering: that used to hide render
@@ -237,7 +260,7 @@ export class PublicStudiesManager {
       this.cache.delete(id);
       const http = String(error?.message || '').match(/^public-market-(\d{3})$/)?.[1];
       const detail = http ? ` (HTTP ${http})` : error?.name === 'TimeoutError' ? ' · zaman aşımı' : '';
-      this.setStatus(id, 'error', 'Veri alınamadı' + detail + (this.hasSeries(id) ? ' · son veri korunuyor' : ''));
+      this.setStatus(id, 'error', (this.replayClock != null ? 'Bu tarih için veri alınamadı' : 'Veri alınamadı') + detail + (this.hasSeries(id) ? ' · son veri korunuyor' : ''));
       if (notify) this.onStatus(`${PUBLIC_STUDY_NAMES[id]} verisi alınamadı`, 'error');
     } finally {
       if (this.controllers.get(id) === controller) {
@@ -257,11 +280,12 @@ export class PublicStudiesManager {
     }, seconds * 1000));
   }
   async load(id, market, cfg, signal) {
-    if (id === 'oi') return fetchOpenInterest(market.symbol, cfg.period === 'auto' ? intervalToPeriod(this.context.interval) : cfg.period, 500, signal);
-    if (id === 'longShort') return fetchLongShortRatio(market.symbol, cfg.period === 'auto' ? intervalToPeriod(this.context.interval) : cfg.period, 500, signal);
+    const window = this.replayClock != null ? { endTime: this.replayClock * 1000 } : {};
+    if (id === 'oi') return fetchOpenInterest(market.symbol, cfg.period === 'auto' ? intervalToPeriod(this.context.interval) : cfg.period, 500, signal, fetch, window);
+    if (id === 'longShort') return fetchLongShortRatio(market.symbol, cfg.period === 'auto' ? intervalToPeriod(this.context.interval) : cfg.period, 500, signal, fetch, window);
     if (id === 'heatmap') return fetchDepthHeatmap({ symbol: market.symbol, market: market.market, levels: cfg.levels, signal });
     const flowMarket = id === 'cvdSpot' ? 'spot' : id === 'cvdPerp' ? 'perp' : market.market;
-    return fetchKlineFlow({ symbol: market.symbol, market: flowMarket, interval: this.context.interval, limit: 500, signal });
+    return fetchKlineFlow({ symbol: market.symbol, market: flowMarket, interval: this.context.interval, limit: 500, signal, ...window });
   }
   render(id, data, cfg) {
     if (id === 'heatmap') { this.renderHeatmap(data, cfg); return this.priceLines.length; }

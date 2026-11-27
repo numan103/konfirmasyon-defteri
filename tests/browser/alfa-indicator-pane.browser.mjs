@@ -94,7 +94,7 @@ try {
   for (const id of ['rsi', 'macd']) await page.locator(`[data-add="${id}"]`).click();
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.querySelectorAll('#study-legend .study-chip[data-study-chip]').length === 5);
-  const geometry = await page.evaluate(() => [...document.querySelectorAll('#study-legend .study-chip[data-study-chip]')]
+  const geometry = await page.evaluate(() => [...document.querySelectorAll('#study-legend .study-chip[data-study-chip]')].filter(el => el.getBoundingClientRect().width > 0)
     .map(el => { const r = el.getBoundingClientRect(); return { x: Math.round(r.x), y: Math.round(r.y) }; }));
   assert.ok(geometry.every((g, i) => i === 0 || (g.x === geometry[0].x && g.y > geometry[i - 1].y)), 'legend rows stack down from top-left');
   const ids = await page.evaluate(() => ({
@@ -116,9 +116,9 @@ try {
   await page.click('#is-apply');
   await page.keyboard.press('Escape');
   const rsiId = await page.evaluate(() => window.__alfaDebug.indicators.items.find(i => i.type === 'rsi').id);
-  const rsiRow = page.locator(`#study-legend [data-study-chip="${rsiId}"]`);
-  assert.match(await rsiRow.getAttribute('class'), /is-pane-study/, 'oscillator row is the double-click target');
-  await rsiRow.locator('.study-chip-name').dblclick();
+  assert.equal(await page.locator(`#study-legend [data-study-chip="${rsiId}"]`).isVisible(), false,
+    'oscillator is managed in its own pane, not repeated in the upper legend');
+  await page.locator(`[data-pane-study="${rsiId}"] [data-pane-action="collapse"]`).click();
   await page.waitForFunction(id => document.querySelector(`[data-study-chip="${id}"]`).classList.contains('is-collapsed'), rsiId);
   assert.equal(await page.evaluate(() => window.__alfaDebug.chart.panes()[1].getHeight()), 30);
   const before = await state(page);
@@ -150,12 +150,12 @@ try {
   assert.deepEqual((await state(page)).indicators, before.indicators, 'reload restores the shared study bundle');
 
   const restoredRsiId = await page.evaluate(() => window.__alfaDebug.indicators.items.find(i => i.type === 'rsi').id);
-  const restoredRsiRow = page.locator(`#study-legend [data-study-chip="${restoredRsiId}"] .study-chip-name`);
-  await restoredRsiRow.dblclick();
+  const restoredRsiControl = page.locator(`[data-pane-study="${restoredRsiId}"] [data-pane-action="collapse"]`);
+  await restoredRsiControl.click();
   await page.waitForFunction(() => window.__alfaDebug.chart.panes()[1]?.getHeight() >= 80);
-  await restoredRsiRow.dblclick();
+  await restoredRsiControl.click();
   await page.waitForFunction(() => window.__alfaDebug.chart.panes()[1]?.getHeight() === 30);
-  assert.deepEqual((await state(page)).indicators, before.indicators, 'double-click tuck keeps saved state');
+  assert.deepEqual((await state(page)).indicators, before.indicators, 'individual pane sizing keeps saved state');
 
   // Display-only time-zone changes are a separate axis and must not touch studies.
   await page.locator('#chart-timezone').click();

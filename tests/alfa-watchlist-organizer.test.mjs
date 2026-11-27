@@ -7,6 +7,19 @@ import {
 } from '../assets/alfa-watchlist-model.mjs';
 import { isFreeMarketRef, parseMarketRef } from '../assets/alfa-charts-data.mjs';
 
+test('custom watchlist sections survive normalization without duplicate or foreign members', () => {
+  const raw = { activeListId: 'main', lists: [{ id: 'main', symbols: ['BTCUSDT', 'ETHUSDT'], sections: [
+    { id: 'crypto', name: 'Kripto', symbols: ['BTCUSDT', 'BTCUSDT', 'SOLUSDT'] },
+    { id: 'other', name: 'Diğer', symbols: ['BTCUSDT', 'ETHUSDT'] }
+  ] }] };
+  const doc = normalizeWatchlistDocument(raw);
+  assert.deepEqual(doc.lists[0].sections, [
+    { id: 'crypto', name: 'Kripto', symbols: ['BTCUSDT'] },
+    { id: 'other', name: 'Diğer', symbols: ['ETHUSDT'] }
+  ]);
+  assert.deepEqual(normalizeWatchlistDocument(doc).lists[0].sections, doc.lists[0].sections);
+});
+
 test('legacy seed restores the exact 44 venue refs without rewriting their identity', () => {
   assert.equal(LEGACY_TV_LIST.length, 44);
   const result = migrateWatchlistDocument({ owner: 'guest', current: null, sources: [] });

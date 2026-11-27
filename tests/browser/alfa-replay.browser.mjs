@@ -56,6 +56,20 @@ try {
   await page.click('#replay-prev');
   assert.equal(await page.evaluate(()=>window.__alfaDebug.history.length),at);
   assert.equal(await page.evaluate(()=>window.__alfaDebug.drawings.context.remote),false);
+  const clockBeforeTimeframe = await page.evaluate(() => window.__alfaDebug.replayClock);
+  await page.locator('#timeframes [data-interval="1h"]').click();
+  await page.waitForFunction(() => window.__alfaDebug.interval === '1h' && !window.__alfaDebug.replayBusy && window.__alfaDebug.history.length > 0);
+  assert.equal(await page.evaluate(() => document.body.classList.contains('replay-mode')), true,
+    'changing replay display timeframe must not return to live');
+  assert.equal(await page.evaluate(() => window.__alfaDebug.replayClock), clockBeforeTimeframe,
+    'timeframe inspection must not advance or rewind the execution clock');
+  assert.equal(await page.evaluate(() => window.__alfaDebug.paper.context.timeframe), '15m',
+    'paper execution must keep the original replay timeframe while viewing another interval');
+  assert.ok(await page.evaluate(() => window.__alfaDebug.history.every(b => b.time + 3600 <= window.__alfaDebug.replayClock)),
+    'higher timeframe must not expose an unfinished future candle');
+  await page.locator('#timeframes [data-interval="15m"]').click();
+  await page.waitForFunction(clock => window.__alfaDebug.interval === '15m' && !window.__alfaDebug.replayBusy && window.__alfaDebug.replayClock === clock,
+    clockBeforeTimeframe);
   await page.click('#indicators-manage'); await page.click('[data-add=mtf]');
   await page.locator('.studies-dialog [data-study-settings=mtf]').click();
   await page.locator('[data-htf="1h"]').check();
