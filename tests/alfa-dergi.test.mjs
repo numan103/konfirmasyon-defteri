@@ -167,7 +167,8 @@ test('weekly cards show the picture and the words together and open an enlarged 
 
 test('section-page photos fit on the page and open the enlarged detail', () => {
   const css = html.slice(html.indexOf('.hmr-sec-item img {'), html.indexOf('@media (max-width:900px)'));
-  assert.match(css, /max-height:/, 'section photos must not push the page below the fold');
+  assert.match(css, /max-height:\s*clamp\(/, 'section photos need a proportional middle size, not a tiny fixed cap');
+  assert.match(css, /(cqh|vh)/, 'section photo height follows the available reading space');
   assert.match(css, /object-fit:\s*contain/, 'section photos must keep their aspect ratio');
   assert.match(css, /cursor:\s*zoom-in/, 'section photos advertise the enlarged detail');
   const section = html.slice(html.indexOf('function hmrBuildSectionPage('), html.indexOf('function hmrBuildOutro('));
