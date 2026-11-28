@@ -29,7 +29,7 @@ async function session(label, access) {
   });
   await page.route('**/api/tg?magPhoto=**', route => route.fulfill({
     contentType: 'image/svg+xml',
-    body: '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900"><rect width="1200" height="900" fill="#2962ff"/></svg>',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="1055" height="1491"><rect width="1055" height="1491" fill="#2962ff"/></svg>',
   }));
   try {
     await page.goto(base + '/?page=home');
@@ -179,6 +179,7 @@ async function session(label, access) {
         maxHeight: cs.maxHeight,
         objectFit: cs.objectFit,
         heightRatio: pr ? ir.height / pr.height : 0,
+        widthRatio: pr ? ir.width / pr.width : 0,
         inside: ir.right <= pr.right + 1 && ir.bottom <= pr.bottom + 1,
       };
     }, sectionTarget);
@@ -186,7 +187,8 @@ async function session(label, access) {
     assert.notEqual(sectionPhoto.maxHeight, 'none', label + ' section photo has a height limit');
     assert.equal(sectionPhoto.objectFit, 'contain', label + ' section photo keeps its aspect ratio');
     assert.ok(sectionPhoto.heightRatio >= 0.25, label + ' section photo is readable, not a thumbnail');
-    assert.ok(sectionPhoto.heightRatio <= 0.5, label + ' section photo never dominates the page');
+    assert.ok(sectionPhoto.widthRatio >= 0.22, label + ' portrait section photo keeps a readable width');
+    assert.ok(sectionPhoto.heightRatio <= 0.6, label + ' section photo never dominates the page');
     assert.equal(sectionPhoto.inside, true, label + ' section photo fits inside the flipbook page');
     await page.locator('#mag-stage .mag-page').nth(sectionTarget).locator('.hmr-sec-item img').first().click();
     assert.equal(await page.locator('#mag-zoom.open').count(), 1, label + ' section photo opens the enlarged detail');

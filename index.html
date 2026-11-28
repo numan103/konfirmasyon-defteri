@@ -709,6 +709,12 @@
   .hmr-section-page.mag-page .mag-pad { padding-top:12px; padding-bottom:8px; }
   .hmr-sec-item img { max-width:100%; max-height:clamp(90px, 32cqh, 260px); width:auto; height:auto; object-fit:contain; border-radius:10px; margin-top:4px; display:block; cursor:zoom-in; }
   .hmr-sec-item img:not(:first-of-type) { max-height:clamp(24px, 6cqh, 64px); max-width:28%; width:auto; display:inline-block; margin:4px 4px 0 0; }
+  @media (min-width:700px) {
+    .hmr-section-page.mag-page .hmr-sec-item.has-photo { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,44%); column-gap:16px; align-items:start; }
+    .hmr-section-page.mag-page .hmr-sec-item.has-photo > .body { grid-column:1; grid-row:1 / span 2; }
+    .hmr-section-page.mag-page .hmr-sec-item.has-photo > img:first-of-type { grid-column:2; grid-row:1; max-height:clamp(140px, 52cqh, 420px); }
+    .hmr-section-page.mag-page .hmr-sec-item.has-photo > img:not(:first-of-type) { grid-column:2; grid-row:2; }
+  }
   @media (max-width:900px) { .hmr-book .mag-viewport { aspect-ratio:4 / 5.2; max-height:82vh; } }
   @media (max-width:600px) { .home-mag-reader { padding:13px 12px; } .hmr-book .mag-viewport { max-height:none; aspect-ratio:3 / 4.6; } .hmr-book .mag-nav.prev { left:4px; } .hmr-book .mag-nav.next { right:4px; } .hmr-book .mag-pad { padding:20px 20px 28px; } }
   .home-teaser { max-width: 980px; margin: 0 auto 18px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
@@ -14828,6 +14834,7 @@ function hmrBuildSectionPage(sec, entries, data, pageNo, opts) {
     const item = document.createElement('div'); item.className = 'hmr-sec-item';
     const bodyText = String(en.body || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || String(en.body || '').trim();
     const imgs = Array.isArray(en.images) ? en.images.filter(Boolean) : [];
+    if (bodyText && imgs.length) item.classList.add('has-photo');
     if (bodyText) { const body = document.createElement('div'); body.className = 'body e-body'; body.textContent = String(en.body || '').trim(); item.appendChild(body); }
     imgs.slice(0, 4).forEach((url, k) => {
       const src = magRenderImage(url, en.sourceMessageId, k);
