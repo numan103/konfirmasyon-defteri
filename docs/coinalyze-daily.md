@@ -1,7 +1,7 @@
 # Coinalyze gunluk BTC turev ozeti
 
 ## Hedef
-- Her gun **Istanbul 11:00** civarinda, Alfa Traders Public grubundaki **website bildirim**
+- Her gun **Istanbul 09:00** civarinda, Alfa Traders Public grubundaki **website bildirim**
   konusuna (`https://t.me/alfatraderspublic/434`) tek bir Telegram mesaji gonderilir.
   Hedef `WEBSITE_NOTIFY_THREAD` (varsayilan `434`) ile yonetilir; `TG_THREAD` (public charts)
   trade bildirimlerinde kalir.
@@ -20,9 +20,14 @@
   `IMAGE_PROCESS_FAILED` ile reddedilir.
 
 ## Zamanlama
-- `vercel.json` cron: `0 8 * * *` UTC = **11:00 TSİ**.
+- `vercel.json` cron: `0 6 * * *` UTC = **09:00 TSİ**.
+- Cloudflare uretim tetikleyicisi: `cron/coinalyze` Worker'i ayni `0 6 * * *`
+  cron'u ile `https://alfa-trader.com/api/ai?coinalyze=1` adresini `x-vercel-cron: 1`
+  basligiyla cagirir. Cloudflare cron'lari UTC calisir; Worker adi
+  `alfa-coinalyze-daily`'dir ve `wrangler deploy --config cron/coinalyze/wrangler.toml`
+  ile guncellenir.
 - Cagri: `GET /api/ai?coinalyze=1`.
-- Zamanlanmis cagri yalnizca Istanbul saati **11** iken gonderir; diger saatlerde
+- Zamanlanmis cagri yalnizca Istanbul saati **09** iken gonderir; diger saatlerde
   `{ ok: true, skipped: "outside_window" }` doner ve veri cekmez.
 - Yonetici cagrilari pencere disinda da calisabilir; `dryRun=1` yalnizca metni
   dondurur, `force=1` ayni gun icin yeniden gonderim denemesine izin verir.
@@ -55,7 +60,7 @@
 ## Mesaj bicimi
 ```
 📊 BTC türev görünümü
-9.11.2026 11:00 TSİ
+9.11.2026 09:00 TSİ
 
 Spot CVD (24s): -759 BTC · -56,1 mn$
 Long/Short: 1,65 · Long %62,3 / Short %37,7

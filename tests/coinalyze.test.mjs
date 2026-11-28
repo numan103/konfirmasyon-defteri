@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 const ENV_KEYS = [
   'COINALYZE_API_KEY', 'COINALYZE_CHAT_ID', 'COINALYZE_THREAD',
@@ -129,7 +130,40 @@ function makeState(now) {
   };
 }
 
-const NOW = Date.UTC(2026, 10, 9, 8, 0, 0); // 11:00 TSİ
+const NOW = Date.UTC(2026, 10, 9, 6, 0, 0); // 09:00 TSİ
+
+test('Coinalyze cronu Istanbul 09:00 (06:00 UTC) icin ayarli', () => {
+  const vercel = JSON.parse(fs.readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const cron = (vercel.crons || []).find(item => String(item.path).includes('coinalyze=1'));
+  assert.ok(cron, 'coinalyze cron must exist');
+  assert.equal(cron.schedule, '0 6 * * *');
+
+  const workerConfig = fs.readFileSync(new URL('../cron/coinalyze/wrangler.toml', import.meta.url), 'utf8');
+  const workerScript = fs.readFileSync(new URL('../cron/coinalyze/index.mjs', import.meta.url), 'utf8');
+  assert.match(workerConfig, /crons\s*=\s*\["0 6 \* \* \*"\]/);
+  assert.match(workerScript, /https:\/\/alfa-trader\.com\/api\/ai\?coinalyze=1/);
+  assert.match(workerScript, /x-vercel-cron/);
+});
+
+test('Cloudflare cron worker Istanbul 09 cagrisini dogru baslikla yapar', async () => {
+  const mod = await import('../cron/coinalyze/index.mjs?case=' + Math.random());
+  const realFetch = globalThis.fetch;
+  let request;
+  globalThis.fetch = async (url, options) => {
+    request = { url, options };
+    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  try {
+    let pending;
+    await mod.default.scheduled({}, {}, { waitUntil(promise) { pending = promise; } });
+    await pending;
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  assert.equal(request.url, 'https://alfa-trader.com/api/ai?coinalyze=1');
+  assert.equal(request.options.method, 'GET');
+  assert.equal(request.options.headers['x-vercel-cron'], '1');
+});
 
 test('Coinalyze metni CVD, long/short ve OI degerlerini Turkce bicimde yazar', async () => {
   const state = makeState(NOW);
@@ -137,7 +171,7 @@ test('Coinalyze metni CVD, long/short ve OI degerlerini Turkce bicimde yazar', a
   const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@charts', TG_THREAD: '434', SITE_ADMIN_EMAILS: 'admin@test.dev', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
   const data = await mod.collectCoinalyzeData(NOW, 'k');
   const text = mod.formatCoinalyzeMessage(data, NOW);
-  assert.match(text, /9\.11\.2026 11:00 TSİ/);
+  assert.match(text, /9\.11\.2026 09:00 TSİ/);
   assert.match(text, /Spot CVD \(24s\): 6 BTC · 420,2 bin\$/);
   assert.match(text, /Long\/Short: 1,73 · Long %63,3 \/ Short %36,7/);
   assert.match(text, /Açık pozisyon: 110,00 mlr\$ · 24s \+10,0%/);
@@ -212,8 +246,8 @@ test('Coinalyze kullanıcıya özel env override kullanmaz', async () => {
   assert.equal(state.calls.some(call => call.body.chat_id === '@traderahmetd'), false);
 });
 
-test('zamanlanmis gonderim Istanbul 11 disinda mesaj atmaz', async () => {
-  const offNow = Date.UTC(2026, 10, 9, 6, 0, 0); // 09:00 TSİ
+test('zamanlanmis gonderim Istanbul 09 disinda mesaj atmaz', async () => {
+  const offNow = Date.UTC(2026, 10, 9, 8, 0, 0); // 11:00 TSİ
   const state = makeState(offNow);
   globalThis.fetch = fetchStub(state, offNow);
   const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@charts', TG_THREAD: '434', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });

@@ -1,0 +1,7 @@
+name = "alfa-coinalyze-daily"
+main = "index.mjs"
+compatibility_date = "2026-11-24"
+
+# Cloudflare cron calismasi her zaman UTC'dir: 06:00 UTC = 09:00 TSİ.
+[triggers]
+crons = ["0 6 * * *"]
