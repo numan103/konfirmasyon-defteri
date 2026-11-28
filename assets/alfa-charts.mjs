@@ -2552,7 +2552,9 @@ function loadAlarms() {
     return Array.isArray(rows) ? rows.map(r => normalizeAlarm(r, r?.symbol || symbol, r?.price)).filter(a => a.symbol) : [];
   } catch { return []; }
 }
-function saveAlarms(list) { try { localStorage.setItem(ALARM_KEY(), JSON.stringify(list)); } catch {} }
+const ALARM_SAVE_ERROR = 'Alarm kaydedilemedi: tarayıcı deposuna yazılamadı';
+function writeAlarmList(list) { localStorage.setItem(ALARM_KEY(), JSON.stringify(list)); }
+function saveAlarms(list) { try { writeAlarmList(list); return true; } catch { return false; } }
 function loadMuted() { try { const r = JSON.parse(localStorage.getItem(ALARM_MUTED_KEY()) || '[]'); return Array.isArray(r) ? r.map(String) : []; } catch { return []; } }
 function saveMuted(list) { try { localStorage.setItem(ALARM_MUTED_KEY(), JSON.stringify(list)); } catch {} }
 function loadAlarmHistory() { try { const r = JSON.parse(localStorage.getItem(ALARM_HISTORY_KEY()) || '[]'); return Array.isArray(r) ? r : []; } catch { return []; } }
@@ -2561,13 +2563,35 @@ function loadAlarmSettings() {
   try { return normalizeAlarmSettings(JSON.parse(localStorage.getItem(ALARM_SETTINGS_KEY()) || 'null') || {}); }
   catch { return normalizeAlarmSettings({}); }
 }
-function saveAlarmSettings(settings) {
+function saveAlarmSettings(settings, strict = false) {
   const next = normalizeAlarmSettings(settings);
-  try { localStorage.setItem(ALARM_SETTINGS_KEY(), JSON.stringify(next)); } catch {}
+  try { localStorage.setItem(ALARM_SETTINGS_KEY(), JSON.stringify(next)); }
+  catch (error) { if (strict) throw error; }
   return next;
 }
 let alarms = null;
 function ensureAlarms() { if (!alarms) alarms = loadAlarms(); return alarms; }
+// Alarm mutations are all-or-nothing: a storage failure rolls back the in-memory
+// list and every touched key, and never reports a saved alarm that does not exist.
+function commitAlarms(mutate, successMessage, extraKeys = []) {
+  const previous = ensureAlarms().map(a => ({ ...a }));
+  const snapshots = [ALARM_KEY(), ...extraKeys].map(key => {
+    try { return [key, localStorage.getItem(key)]; } catch { return [key, null]; }
+  });
+  try {
+    mutate(ensureAlarms());
+    writeAlarmList(alarms);
+  } catch {
+    alarms = previous;
+    for (const [key, value] of snapshots) {
+      try { if (value == null) localStorage.removeItem(key); else localStorage.setItem(key, value); } catch {}
+    }
+    connection(ALARM_SAVE_ERROR, 'error');
+    return false;
+  }
+  if (successMessage) connection(successMessage, 'ok');
+  return true;
+}
 async function sendAlarmTelegram(chatId, message) {
   const token = await marketAccessToken();
   if (!token) { connection('Telegram alarmı için giriş gerekli', 'error'); return; }
@@ -2579,7 +2603,8 @@ async function sendAlarmTelegram(chatId, message) {
   } catch { connection('Telegram alarmına ulaşılamadı', 'error'); }
 }
 async function fireAlarm(a, price) {
-  markAlarmFired(a, price); saveAlarms(alarms);
+  markAlarmFired(a, price);
+  if (!saveAlarms(alarms)) { connection(ALARM_SAVE_ERROR, 'error'); return; }
   const msg = alarmMessage(a, price, priceFormat.format);
   const history = recordAlarmTrigger(loadAlarmHistory(), { id: a.id, symbol: a.symbol, price, level: alarmLevel(a), message: msg, at: new Date().toISOString() });
   saveAlarmHistory(history);
@@ -2599,11 +2624,11 @@ function checkAlarms(price) {
 function addQuickAlarm(price, cond) {
   if (!Number.isFinite(price) || price <= 0) return;
   const settings = loadAlarmSettings();
-  ensureAlarms().push(normalizeAlarm({ ...settings, symbol, price, basePrice: price, cond,
-    note: 'Grafik sağ tık' }, symbol, price));
-  saveAlarms(alarms);
+  const saved = commitAlarms(list => list.push(normalizeAlarm({ ...settings, symbol, price, basePrice: price, cond,
+    note: 'Grafik sağ tık' }, symbol, price)),
+  `Alarm eklendi: ${symbol} ${ALARM_CONDITIONS[cond] || 'Fiyat'} ${priceFormat.format(price)}`);
+  if (!saved) return;
   try { if (Notification.permission === 'default') Notification.requestPermission(); } catch {}
-  connection(`Alarm eklendi: ${symbol} ${ALARM_CONDITIONS[cond] || 'Fiyat'} ${priceFormat.format(price)}`, 'ok');
 }
 function openAlarmManager(editingId = null) {
   let editingAlarmId = editingId;
@@ -2641,6 +2666,7 @@ function openAlarmManager(editingId = null) {
         <label>Webhook (https)<input id="alarm-webhook" type="url" placeholder="https://…" value="${escapeHTML(settings.webhook)}"></label>
       </div><small id="alarm-permission-hint">Tarayıcı bildirimi için izin, Telegram için Alfa Charts oturumu gerekir. Webhook hedefi tarayıcıdan gelen HTTPS isteğine izin vermelidir.</small></fieldset>
       <div class="settings-actions"><button id="alarm-permission" type="button">Bildirim izni ver</button><button id="alarm-add" type="submit">Alarm ekle</button></div>
+      <p id="alarm-save-error" class="form-error" role="alert" hidden style="color:#ef5350;margin:8px 0"></p>
     </form>
     <div id="alarm-list">${rows}</div>
     <div style="display:flex;justify-content:space-between;margin-top:12px;gap:8px;flex-wrap:wrap;">
@@ -2682,40 +2708,53 @@ function openAlarmManager(editingId = null) {
   if (editingAlarmId) { submitBtn.textContent = 'Alarmı güncelle'; }
   box.querySelector('#alarm-form').addEventListener('submit', event => {
     event.preventDefault();
+    const error = box.querySelector('#alarm-save-error');
+    if (error) { error.hidden = true; error.textContent = ''; }
     try {
-    const price = Number(box.querySelector('#alarm-price').value);
-    const cond = box.querySelector('#alarm-cond').value;
-    const pctMode = cond === 'pctUp' || cond === 'pctDown';
-    if ((!pctMode && (!Number.isFinite(price) || price <= 0)) || (pctMode && !(Number(box.querySelector('#alarm-pct').value) > 0))) {
-      connection('Geçerli bir fiyat veya yüzde girin', 'error'); return;
-    }
-    const nextSettings = saveAlarmSettings(currentSettings());
-    const current = Number(history.at(-1)?.close) || price;
-    const payload = { ...nextSettings, symbol, cond,
-      price: pctMode ? current : price, basePrice: current, pct: Number(box.querySelector('#alarm-pct').value),
-      note: box.querySelector('#alarm-note').value.trim() };
-    if (editingAlarmId) {
-      const idx = ensureAlarms().findIndex(a => a.id === editingAlarmId);
-      if (idx >= 0) {
-        const prev = ensureAlarms()[idx];
-        ensureAlarms()[idx] = normalizeAlarm({ ...payload, id: prev.id, enabled: prev.enabled, triggered: prev.triggered,
-          count: prev.count, triggeredAt: prev.triggeredAt, triggerPrice: prev.triggerPrice, createdAt: prev.createdAt,
-          lastAt: prev.lastAt }, symbol, current);
+      const price = Number(box.querySelector('#alarm-price').value);
+      const cond = box.querySelector('#alarm-cond').value;
+      const pctMode = cond === 'pctUp' || cond === 'pctDown';
+      if ((!pctMode && (!Number.isFinite(price) || price <= 0)) || (pctMode && !(Number(box.querySelector('#alarm-pct').value) > 0))) {
+        connection('Geçerli bir fiyat veya yüzde girin', 'error'); return;
       }
-      connection('Alarm güncellendi', 'ok');
-    } else {
-      ensureAlarms().push(normalizeAlarm(payload, symbol, current));
-      connection('Alarm eklendi', 'ok');
+      const nextSettings = saveAlarmSettings(currentSettings(), true);
+      const current = Number(history.at(-1)?.close) || price;
+      const payload = { ...nextSettings, symbol, cond,
+        price: pctMode ? current : price, basePrice: current, pct: Number(box.querySelector('#alarm-pct').value),
+        note: box.querySelector('#alarm-note').value.trim() };
+      const saved = commitAlarms(list => {
+        if (editingAlarmId) {
+          const idx = list.findIndex(a => a.id === editingAlarmId);
+          if (idx >= 0) {
+            const prev = list[idx];
+            list[idx] = normalizeAlarm({ ...payload, id: prev.id, enabled: prev.enabled, triggered: prev.triggered,
+              count: prev.count, triggeredAt: prev.triggeredAt, triggerPrice: prev.triggerPrice, createdAt: prev.createdAt,
+              lastAt: prev.lastAt }, symbol, current);
+          }
+        } else list.push(normalizeAlarm(payload, symbol, current));
+      }, editingAlarmId ? 'Alarm güncellendi' : 'Alarm eklendi', [ALARM_SETTINGS_KEY()]);
+      if (!saved) {
+        if (error) { error.textContent = ALARM_SAVE_ERROR; error.hidden = false; }
+        return;
+      }
+      m.close(); openAlarmManager();
+    } catch (e) {
+      console.error('ALARM SUBMIT ERR', e && e.message);
+      const message = 'Alarm kaydedilemedi: ' + (e && e.message);
+      if (error) { error.textContent = message; error.hidden = false; }
+      connection(message, 'error');
     }
-    saveAlarms(alarms); m.close(); openAlarmManager();
-    } catch (e) { console.error('ALARM SUBMIT ERR', e && e.message); connection('Alarm kaydedilemedi: ' + (e && e.message), 'error'); }
   });
   box.querySelectorAll('[data-test-alarm]').forEach(b => b.onclick = () => {
     const a = ensureAlarms().find(x => x.id === b.dataset.testAlarm);
     if (a) playAlarmSound(a.sound, a.volume);
   });
   box.querySelectorAll('[data-del-alarm]').forEach(b => b.onclick = () => {
-    alarms = ensureAlarms().filter(a => a.id !== b.dataset.delAlarm); saveAlarms(alarms);
+    const saved = commitAlarms(list => {
+      const index = list.findIndex(a => a.id === b.dataset.delAlarm);
+      if (index >= 0) list.splice(index, 1);
+    });
+    if (!saved) return;
     saveMuted(unmuteAlarmIds(loadMuted(), b.dataset.delAlarm));
     m.close(); openAlarmManager();
   });
@@ -2726,8 +2765,11 @@ function openAlarmManager(editingId = null) {
     openAlarmManager(a.id);
   });
   box.querySelectorAll('[data-toggle-alarm]').forEach(b => b.onclick = () => {
-    const a = ensureAlarms().find(x => x.id === b.dataset.toggleAlarm);
-    if (a) { a.enabled = a.enabled === false; saveAlarms(alarms); }
+    const saved = commitAlarms(list => {
+      const a = list.find(x => x.id === b.dataset.toggleAlarm);
+      if (a) a.enabled = a.enabled === false;
+    });
+    if (!saved) return;
     m.close(); openAlarmManager();
   });
   box.querySelectorAll('[data-mute-alarm]').forEach(b => b.onclick = () => {

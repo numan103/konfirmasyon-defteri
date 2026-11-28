@@ -207,6 +207,36 @@ try {
     assert.ok(alarm.basePrice > 0 && alarm.price > 0);
     await close();
   });
+  await test('alarm save failure is reported and never shows false success', async () => {
+    const before = await state(() => JSON.parse(localStorage.getItem('alfa-alarms:v1:guest') || '[]').length);
+    await page.evaluate(() => {
+      const original = Storage.prototype.setItem;
+      window.__restoreAlarmStorage = () => { Storage.prototype.setItem = original; };
+      Storage.prototype.setItem = function (key, value) {
+        if (String(key).startsWith('alfa-alarms:v1:') || String(key).startsWith('alfa-alarm-settings:v1:')) {
+          throw new DOMException('QuotaExceededError', 'QuotaExceededError');
+        }
+        return original.call(this, key, value);
+      };
+    });
+    await page.click('#alarm-toggle');
+    await page.waitForFunction(() => !!document.querySelector('#alarm-form'));
+    await page.fill('#alarm-price', '12345');
+    await page.fill('#alarm-note', 'quota test');
+    await page.click('#alarm-add');
+    await page.waitForFunction(() => {
+      const error = document.getElementById('alarm-save-error');
+      return error && !error.hidden && /kaydedilemedi/i.test(error.textContent);
+    }, null, { timeout: 5000 });
+    assert.equal(await page.locator('#alarm-form').count(), 1);
+    assert.equal(await page.locator('[data-edit-alarm]').count(), before);
+    assert.equal(await state(() => JSON.parse(localStorage.getItem('alfa-alarms:v1:guest') || '[]').length), before);
+    await page.evaluate(() => window.__restoreAlarmStorage());
+    await page.fill('#alarm-note', 'recovered');
+    await page.click('#alarm-add');
+    await page.waitForFunction(n => JSON.parse(localStorage.getItem('alfa-alarms:v1:guest') || '[]').length === n, before + 1);
+    await close();
+  });
   await test('chart settings apply and view reset is non-destructive', async () => {
     const before = await state(() => ({
       drawings: window.__alfaDebug.drawings.history.doc.drawings.length,

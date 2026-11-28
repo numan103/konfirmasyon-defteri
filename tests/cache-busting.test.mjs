@@ -12,7 +12,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 // is how both the anonymous quote fix and the Binance direct-quote fix could
 // keep reaching the broken path.
 const expected = {
-  'alfa-charts.html': { 'alfa-charts.css': 69, 'alfa-charts.mjs': 116 },
+  'alfa-charts.html': { 'alfa-charts.css': 69, 'alfa-charts.mjs': 117 },
   'assets/alfa-charts.mjs': {
     'alfa-charts-data.mjs': 15,
     'alfa-drawings.mjs': 23,
@@ -51,7 +51,7 @@ const expected = {
 };
 
 const stale = [
-  'alfa-charts.mjs?v=115', 'alfa-charts.mjs?v=114', 'alfa-charts.mjs?v=113', 'alfa-charts.mjs?v=112', 'alfa-charts.mjs?v=111',
+  'alfa-charts.mjs?v=116', 'alfa-charts.mjs?v=115', 'alfa-charts.mjs?v=114', 'alfa-charts.mjs?v=113', 'alfa-charts.mjs?v=112', 'alfa-charts.mjs?v=111',
   'alfa-charts.css?v=68',
   'alfa-charts-data.mjs?v=14', 'alfa-charts-data.mjs?v=13', 'alfa-charts-data.mjs?v=12',
   'alfa-drawings.mjs?v=22', 'alfa-drawings.mjs?v=21', 'alfa-drawings.mjs?v=20',
