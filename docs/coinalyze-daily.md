@@ -10,7 +10,12 @@
   - **Long/Short:** BTC perpetual marketlerinin long/short hesap orani ortalamasi.
   - **Acik pozisyon (OI):** BTC perpetual marketlerinin USD cinsinden toplami ve 24s degisimi.
 - Yeni bot, ucretli plan veya ek kanal yoktur; mevcut `TG_BOT_TOKEN` ve
-  `sendTelegram` tasima katmani kullanilir.
+  `sendTelegram` / `sendTelegramPhoto` tasima katmani kullanilir.
+- Mesaja **900x1125 PNG grafik** eklenir: baslik, CVD/Long-Short/OI/fiyat
+  kartlari, CVD ve OI serileri, bias cubugu ve son yon carpi. Gorsel,
+  `lib/coinalyze-worker-image.mjs` icinde saf JS ile uretilir; native `resvg`
+  veya dynamic import kullanilmaz, boylece Cloudflare Pages Function paketine
+  statik olarak girer.
 
 ## Zamanlama
 - `vercel.json` cron: `0 8 * * *` UTC = **11:00 TSİ**.
@@ -60,6 +65,8 @@ Coinalyze agregasyonu.
 - Kaynak listesi, parantezli atif veya Entry/TP/SL/Kaldırac bilgisi yoktur.
 - Mesaj duz metindir; `parse_mode` kullanilmaz. Site onchain sayfasina link eklenir
   ve Telegram link onizlemesi aciktir (site og.png gosterilir).
+- Gorsel `sendPhoto` ile, metin `caption` olarak gonderilir; ayri `sendMessage`
+  atilmaz. 3 MB sinirindaki PNG Worker icinde uretilir ve `FormData` ile yuklenir.
 
 ## Yinelenmeyi onleme
 - Gunluk durum `edu_shared` tablosunda `id = "coinalyze_daily"` satirinda tutulur:
@@ -116,3 +123,9 @@ curl -H "Authorization: Bearer <site.token>" \
   Telegram Bot API kullanci adini ozel sohbet kimligi olarak kabul etmedigi icin
   kullanici istegiyle eski website bildirim konusu `/434` geri yuklendi. Ozel
   hedefe donmek icin sayisal chat ID ve botla baslatilmis sohbet gerekir.
+- **2026-11-28 fotoğraf geri yüklemesi:** Eski gorsel Node-only `@resvg/resvg-js`
+  kullandigi icin Worker paketinde dynamic import ile bulunamadi ve mesaj
+  fotografsiz gitti. Saf JS PNG ureticisine gecildi; `sendPhoto` ve gecerli PNG
+  baytlari unit testlerle sabitlendi. Dogrulama: `node --test
+  tests/coinalyze.test.mjs tests/coinalyze-image-worker.test.mjs` ve Wrangler
+  `pages functions build` paketinde `renderCoinalyzePng` mevcut, `resvg` yok.

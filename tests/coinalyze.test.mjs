@@ -74,8 +74,12 @@ function fetchStub(state, now) {
     }
     if (u.includes('api.telegram.org') && (u.includes('/sendMessage') || u.includes('/sendPhoto'))) {
       let body = {};
+      let photoBytes = 0;
       if (init.body && typeof init.body.get === 'function') {
-        for (const [k, v] of init.body.entries()) body[k] = v;
+        for (const [k, v] of init.body.entries()) {
+          body[k] = v;
+          if (k === 'photo' && v && typeof v.size === 'number') photoBytes = v.size;
+        }
       } else if (init.body && Buffer.isBuffer(init.body)) {
         const text = init.body.toString('utf8');
         const m1 = text.match(/name="chat_id"\r?\n\r?\n([^\r\n]+)/);
@@ -85,8 +89,12 @@ function fetchStub(state, now) {
       } else {
         try { body = JSON.parse(init.body || '{}'); } catch { body = {}; }
       }
-      state.calls.push({ url: u, body });
-      return { ok: true, status: 200, json: async () => ({ ok: true, result: { message_id: 900 } }) };
+      const isPhoto = u.includes('/sendPhoto');
+      state.calls.push({ url: u, body, photoBytes });
+      return { ok: true, status: 200, json: async () => ({
+        ok: true,
+        result: { message_id: 900, ...(isPhoto ? { photo: [{ width: 900, height: 1125 }] } : {}) },
+      }) };
     }
     return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
   };
@@ -162,8 +170,12 @@ test('zamanlanmis gonderim gun icinde tek mesaj atar', async () => {
   assert.equal(first.statusCode, 200);
   assert.equal(first.body.messageId, 900);
   assert.equal(state.calls.length, 1);
+  assert.match(state.calls[0].url, /\/sendPhoto$/);
   assert.equal(state.calls[0].body.chat_id, '@charts');
   assert.equal(Number(state.calls[0].body.message_thread_id), 434);
+  assert.ok(state.calls[0].photoBytes > 1000, 'daily post must include a real PNG attachment');
+  assert.equal(first.body.hasPhoto, true);
+  assert.ok(first.body.imageBytes > 1000);
 
   const second = makeRes();
   await withNow(NOW, () => mod.default(req, second));
