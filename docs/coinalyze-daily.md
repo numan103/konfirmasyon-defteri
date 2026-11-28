@@ -15,7 +15,9 @@
   kartlari, CVD ve OI serileri, bias cubugu ve son yon carpi. Gorsel,
   `lib/coinalyze-worker-image.mjs` icinde saf JS ile uretilir; native `resvg`
   veya dynamic import kullanilmaz, boylece Cloudflare Pages Function paketine
-  statik olarak girer.
+  statik olarak girer. IDAT `node:zlib.deflateRawSync` ile sikistirilir;
+  Telegram stored/uncompressed PNG'i `IMAGE_PROCESS_FAILED` ile reddettigi icin
+  sikistirilmis stream zorunludur.
 
 ## Zamanlama
 - `vercel.json` cron: `0 8 * * *` UTC = **11:00 TSİ**.
@@ -126,6 +128,9 @@ curl -H "Authorization: Bearer <site.token>" \
 - **2026-11-28 fotoğraf geri yüklemesi:** Eski gorsel Node-only `@resvg/resvg-js`
   kullandigi icin Worker paketinde dynamic import ile bulunamadi ve mesaj
   fotografsiz gitti. Saf JS PNG ureticisine gecildi; `sendPhoto` ve gecerli PNG
-  baytlari unit testlerle sabitlendi. Dogrulama: `node --test
-  tests/coinalyze.test.mjs tests/coinalyze-image-worker.test.mjs` ve Wrangler
-  `pages functions build` paketinde `renderCoinalyzePng` mevcut, `resvg` yok.
+  baytlari unit testlerle sabitlendi. Ilk canli denemede Telegram
+  `IMAGE_PROCESS_FAILED` dondu; stored DEFLATE yerine `deflateRawSync` ile
+  sikistirilmis IDAT'a gecildi ve IDAT boyutu regression testine baglandi.
+  Dogrulama: `node --test tests/coinalyze.test.mjs
+  tests/coinalyze-image-worker.test.mjs` ve Wrangler `pages functions build`
+  paketinde `renderCoinalyzePng` mevcut, `resvg` yok.

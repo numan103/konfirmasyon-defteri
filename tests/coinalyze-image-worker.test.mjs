@@ -54,8 +54,10 @@ test('Worker uyumlu Coinalyze PNG gecerli bir gorsel uretir', async () => {
   assert.equal(ihdr.data[9], 2);
 
   const idat = chunks.filter(c => c.type === 'IDAT').map(c => c.data);
+  const compressed = Buffer.concat(idat);
+  assert.ok(compressed.length < 200000, 'Telegram rejects an uncompressed/stored PNG IDAT');
   // PNG IDAT uses raw DEFLATE, not a zlib-wrapped stream.
-  const raw = zlib.inflateRawSync(Buffer.concat(idat));
+  const raw = zlib.inflateRawSync(compressed);
   assert.equal(raw.length, 1125 * (1 + 900 * 3));
 
   const colors = new Set();
