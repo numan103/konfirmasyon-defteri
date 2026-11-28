@@ -56,8 +56,10 @@ test('Worker uyumlu Coinalyze PNG gecerli bir gorsel uretir', async () => {
   const idat = chunks.filter(c => c.type === 'IDAT').map(c => c.data);
   const compressed = Buffer.concat(idat);
   assert.ok(compressed.length < 200000, 'Telegram rejects an uncompressed/stored PNG IDAT');
-  // PNG IDAT uses raw DEFLATE, not a zlib-wrapped stream.
-  const raw = zlib.inflateRawSync(compressed);
+  // PNG IDAT is a zlib stream (RFC1950), not bare DEFLATE. Telegram rejects raw streams.
+  assert.equal(compressed[0], 0x78, 'IDAT must start with a valid zlib CMF byte');
+  assert.equal((compressed.readUInt16BE(0) % 31), 0, 'IDAT zlib header must pass FCHECK');
+  const raw = zlib.inflateSync(compressed);
   assert.equal(raw.length, 1125 * (1 + 900 * 3));
 
   const colors = new Set();

@@ -15,9 +15,9 @@
   kartlari, CVD ve OI serileri, bias cubugu ve son yon carpi. Gorsel,
   `lib/coinalyze-worker-image.mjs` icinde saf JS ile uretilir; native `resvg`
   veya dynamic import kullanilmaz, boylece Cloudflare Pages Function paketine
-  statik olarak girer. IDAT `node:zlib.deflateRawSync` ile sikistirilir;
-  Telegram stored/uncompressed PNG'i `IMAGE_PROCESS_FAILED` ile reddettigi icin
-  sikistirilmis stream zorunludur.
+  statik olarak girer. IDAT `node:zlib.deflateSync` ile sikistirilir; PNG
+  stream'i zlib (RFC1950) olmak zorundadir, raw/stored DEFLATE Telegram tarafindan
+  `IMAGE_PROCESS_FAILED` ile reddedilir.
 
 ## Zamanlama
 - `vercel.json` cron: `0 8 * * *` UTC = **11:00 TSİ**.
@@ -129,8 +129,9 @@ curl -H "Authorization: Bearer <site.token>" \
   kullandigi icin Worker paketinde dynamic import ile bulunamadi ve mesaj
   fotografsiz gitti. Saf JS PNG ureticisine gecildi; `sendPhoto` ve gecerli PNG
   baytlari unit testlerle sabitlendi. Ilk canli denemede Telegram
-  `IMAGE_PROCESS_FAILED` dondu; stored DEFLATE yerine `deflateRawSync` ile
-  sikistirilmis IDAT'a gecildi ve IDAT boyutu regression testine baglandi.
+  `IMAGE_PROCESS_FAILED` dondu; stored DEFLATE ve ardindan raw DEFLATE reddedildi.
+  IDAT `deflateSync` ile zlib formatina alindi; zlib header, FCHECK, boyut ve
+  inflate dogrulamalari regression testine baglandi.
   Dogrulama: `node --test tests/coinalyze.test.mjs
   tests/coinalyze-image-worker.test.mjs` ve Wrangler `pages functions build`
   paketinde `renderCoinalyzePng` mevcut, `resvg` yok.
