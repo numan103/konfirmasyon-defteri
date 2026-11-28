@@ -268,6 +268,11 @@ export class DrawingEngine {
     const id = e.target.closest?.('[data-id]')?.getAttribute('data-id');
     if (id) { if (!this.selection.has(id)) this.selected = id; else this.primary = id; this.refresh(); }
     const d = id ? this.history.doc.drawings.find(x => x.id === id) : null;
+    const targets = d ? this.history.doc.drawings.filter(x => this.selection.has(x.id)) : [];
+    const targetIds = targets.map(x => x.id);
+    const targetLabel = targets.length > 1 ? `${targets.length} seçili çizimi` : 'Çizimi';
+    const anyLocked = targets.some(x => x.locked);
+    const allHidden = targets.length > 0 && targets.every(x => x.hidden);
     const menu = document.createElement('div'); menu.className = 'chart-context-menu';
     menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', 'Grafik menüsü');
     const heading = text => {
@@ -303,16 +308,16 @@ export class DrawingEngine {
     if (this.onAlarmManager) item('Alarm yönetimi…', () => this.onAlarmManager(), { symbol: '🔔' });
     if (d) {
       heading('ÇİZİM');
-      if (d.locked) item('Kilidi aç', () => { this.selected = d.id; this.action('lock'); }, { symbol: '🔒' });
+      if (anyLocked) item(`${targetLabel} kilidini aç`, () => this.action('lock', targetIds), { symbol: '🔒' });
       else {
-        item(this.selection.size > 1 ? `${this.selection.size} seçili çizimi sil` : 'Çizimi sil', () => this.action('remove'), { symbol: '🗑' });
-        item('Seçimi kopyala', () => this.action('copy'), { symbol: '📋' });
+        item(`${targetLabel} sil`, () => this.action('remove', targetIds), { symbol: '🗑' });
+        item(`${targetLabel} kopyala`, () => this.action('copy', targetIds), { symbol: '📋' });
       }
-      item(d.hidden ? 'Göster' : 'Gizle', () => this.action('hide'), { symbol: '👁' });
-      item('Öne getir', () => this.action('front'));
-      item('Arkaya gönder', () => this.action('back'));
-      if (this.selection.size > 1) item('Klasörde grupla…', () => this.groupSelection());
-      item('Çizim ayarları…', () => { this.selected = d.id; this.manager.hidden = false; this.updatePanel(); }, { symbol: '⚙' });
+      item(allHidden ? `${targetLabel} göster` : `${targetLabel} gizle`, () => this.action('hide', targetIds), { symbol: '👁' });
+      item(`${targetLabel} öne getir`, () => this.action('front', targetIds));
+      item(`${targetLabel} arkaya gönder`, () => this.action('back', targetIds));
+      if (targets.length > 1) item('Klasörde grupla…', () => this.groupSelection());
+      item('Çizim ayarları…', () => { this.selectObjects([d.id]); this.manager.hidden = false; this.updatePanel(); }, { symbol: '⚙' });
     }
     if (this.onChartAction) {
       heading('GRAFİK');

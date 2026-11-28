@@ -425,6 +425,35 @@ try {
     assert.equal(after.tool, 'cursor');
     await page.locator('#drawing-undo').click();
   });
+  await test('Right-click actions on a multi-selection match the menu label', async () => {
+    const beforeCount = await count();
+    // Two fresh horizontal lines: their hit spans the full plot at a stable
+    // mid-height y, so the right-click target cannot land on an older drawing.
+    const a = await create('horizontal', [[.3, .34]]);
+    const b = await create('horizontal', [[.3, .66]]);
+    const ids = [a.id, b.id];
+    await debug(targets => window.__alfaDebug.drawings.selectObjects(targets), ids);
+    const selected = await debug(() => [...window.__alfaDebug.drawings.selection]);
+    assert.equal(selected.length, 2, JSON.stringify(selected));
+    // b is rendered last, so it is the topmost [data-id] at its own midpoint.
+    const point = await svgPoint({ id: b.id, selector: 'line.drawing-hit' });
+    assert.ok(point.found && Number.isFinite(point.x) && Number.isFinite(point.y), JSON.stringify(point));
+    await page.mouse.click(point.x, point.y, { button: 'right' });
+    const labels = await page.locator('.chart-context-menu button').allTextContents();
+    assert.ok(labels.some(text => text.includes('2 seçili çizimi gizle')), JSON.stringify(labels));
+    await page.locator('.chart-context-menu button', { hasText: '2 seçili çizimi gizle' }).click();
+    const hidden = await debug(targets => window.__alfaDebug.drawings.history.doc.drawings
+      .filter(d => targets.includes(d.id)).map(d => d.hidden), ids);
+    assert.deepEqual(hidden, [true, true]);
+    await page.keyboard.press('Control+z');
+    const restored = await debug(targets => window.__alfaDebug.drawings.history.doc.drawings
+      .filter(d => targets.includes(d.id)).map(d => d.hidden), ids);
+    assert.deepEqual(restored, [false, false]);
+    // Remove the two seeded drawings so later tests see the original document.
+    await page.keyboard.press('Control+z');
+    await page.keyboard.press('Control+z');
+    assert.equal(await count(), beforeCount);
+  });
   await test('Line chart preserves drawings, crosshair, live data and mobile layout', async () => {
     const before = await documentState();
     await page.locator('#chart-type').selectOption('line');
