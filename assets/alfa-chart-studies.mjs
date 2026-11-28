@@ -239,7 +239,13 @@ export class ChartStudies {
   }
   sync() {
     const active = this.active(), legend = document.getElementById('study-legend');
-    const count = document.getElementById('study-count'); if (count) count.textContent = active.length;
+    const count = document.getElementById('study-count');
+    const paneOpen = active.some(d => (d.id === 'volume' || isPaneStudy(d)) && d.visible && !d.collapsed);
+    if (count) {
+      count.textContent = active.length;
+      count.hidden = paneOpen;
+      count.style.display = paneOpen ? 'none' : '';
+    }
     if (legend) {
       const cards = active.map(d => {
         const hint = isPaneStudy(d) ? ` title="${esc(d.name)} alt panelini çift tıkla: ${d.collapsed ? 'genişlet' : 'göm'}"` : '';
@@ -274,7 +280,12 @@ export class ChartStudies {
         const overlays = active.filter(d => !isPaneStudy(d)).length;
         toggle.setAttribute('aria-expanded', String(!folded));
         toggle.setAttribute('aria-label', folded ? 'İndikatör adlarını göster' : 'İndikatör adlarını gizle');
-        toggle.innerHTML = `${icon(folded ? 'down' : 'chevron')}<span>${overlays}</span>`;
+        // Up tucks the names away; down brings them back. Keep the glyph local
+        // so the shared icon module (and its cache version) stays untouched.
+        const foldGlyph = folded
+          ? '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+          : '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+        toggle.innerHTML = `${foldGlyph}<span>${overlays}</span>`;
         toggle.onclick = () => {
           legend.classList.toggle('legend-folded');
           this.sync();

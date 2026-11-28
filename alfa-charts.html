@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/ios-pwa.css">
-  <link rel="stylesheet" href="/assets/alfa-charts.css?v=68">
+  <link rel="stylesheet" href="/assets/alfa-charts.css?v=69">
 </head>
 <body>
   <a id="chart-home" href="/?page=home" aria-label="Alfa Traders sitesine dön">‹ <span>Siteye dön</span></a>
@@ -26,6 +26,7 @@
           <option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option>
         </select>
       </label>
+      <button id="market-picker" class="market-picker" type="button" aria-label="Parite listesini aç" aria-expanded="false"><span id="market-picker-text">BTCUSDT</span></button>
       <nav id="timeframes" aria-label="Zaman dilimi"></nav>
       <select id="chart-type" aria-label="Grafik türü">
         <option value="candles">Mum</option>
@@ -259,7 +260,7 @@
           <label><input id="fib-prices" type="checkbox" data-edit> Fiyatları göster</label>
           <label>Şablon adı <input id="fib-template-name" maxlength="60" data-edit></label>
           <button id="fib-template-save" type="button" data-edit>Mevcut stili şablon kaydet</button>
-          <small>Önce ayarları uygula. Şablonlar bu hesap/sembolde saklanır.</small>
+          <small>Şablonlar bu hesap/sembolde saklanır.</small>
           <label>Kayıtlı şablon <select id="fib-templates" data-edit></select></label>
           <button id="fib-template-load" type="button">Şablonu uygula</button>
         </fieldset>
@@ -288,7 +289,7 @@
           </fieldset>
           <small>Risk yüzdesi fiyat mesafesidir; hesap bakiyesi riski değildir. Varsayılan hedef 2.5R. Stop/TP değişince RR serbest hesaplanır.</small>
         </fieldset>
-        <button type="submit" data-edit>Ayarları uygula</button>
+        <button type="submit" data-edit>Tamam</button>
         <div class="drawing-buttons">
           <button id="drawing-hide" type="button">Gizle</button>
           <button id="drawing-lock" type="button">Kilitle</button>
@@ -407,6 +408,6 @@
     <header class="sheet-head"><button id="mobile-tf-back" class="sheet-back" type="button" aria-label="Önceki menü">←</button><strong>Zaman dilimleri</strong><button id="mobile-tf-close" class="icon-button" type="button" aria-label="Kapat"><span data-icon="close"></span></button></header>
     <div id="mobile-tf-list" class="mobile-tf-list"></div>
   </section>
-  <script type="module" src="/assets/alfa-charts.mjs?v=113"></script>
+  <script type="module" src="/assets/alfa-charts.mjs?v=114"></script>
 </body>
 </html>

@@ -3,14 +3,14 @@ import { TIMEFRAMES, isMarketSymbol, STREAM_ORIGINS, fetchHistory, streamURL, pa
 import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, normalizeAlarm,
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
-import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=21';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=15';
+import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=22';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=16';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=12';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=6';
 import { MarketStructureManager } from './alfa-market-structure.mjs?v=2';
 import { FvgManager } from './alfa-fvg.mjs?v=2';
-import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=15';
+import { ChartStudies, defaultStudyState } from './alfa-chart-studies.mjs?v=16';
 import { icon, hydrateIcons, chartDialog, escapeHTML } from './alfa-chart-ui.mjs?v=5';
 import { MtfManager } from './alfa-mtf.mjs?v=5';
 import { ReplayEngine, candleCloseTime } from './alfa-replay-model.mjs?v=3';
@@ -50,6 +50,9 @@ const syncMobileShellMode = () => {
   // Embedded multi-chart panes keep their existing compact shell; chart-first
   // is a desktop-only layout and would collapse a small pane's plot.
   document.body.classList.toggle('chart-first', !isMobile && !isEmbed);
+  // The desktop select is a programmatic fallback only; the picker owns clicks.
+  const select = $('symbol');
+  if (select) select.tabIndex = isMobile ? 0 : -1;
 };
 syncMobileShellMode();
 mobileShellQuery.addEventListener('change', event => { isMobile = event.matches; syncMobileShellMode(); });
@@ -1317,15 +1320,15 @@ async function changeReplayDisplayTimeframe(next) {
   } finally { if (replayRequest === request) replayBusy = false; }
 }
 // Start directly from the last 200 confirmed candles so Replay is one click away.
-function startQuickReplay() {
+function startQuickReplay({ tester = false } = {}) {
   if (replayMode || replayBusy) return;
   if (!drawings.ready || history.length < 2) { connection('Replay için mum geçmişi yükleniyor', 'error'); return; }
   const index = Math.max(0, history.length - 201);
   const target = history[index]?.time;
   if (!Number.isFinite(target)) { connection('Replay başlangıç mumu bulunamadı', 'error'); return; }
-  void enterReplay({ target });
+  void enterReplay({ target, tester });
 }
-async function enterReplay({target,session=null,researchPacket=null}={}) {
+async function enterReplay({target,session=null,researchPacket=null,tester=false}={}) {
   if (replayMode) return;
   if(replayBusy || !drawings.ready)return;
   if(session) {
@@ -1419,6 +1422,9 @@ async function enterReplay({target,session=null,researchPacket=null}={}) {
   applyReplaySlice();
   withSyncApply(() => chart.timeScale().setVisibleLogicalRange({from:Math.max(0,replayIndex-100),to:replayIndex+8}));
   drawings.refresh();
+  if (tester) {
+    paper.filter = 'tester'; paper.root.hidden = false; paper.update();
+  }
   if(aligned!==target)connection('REPLAY · en yakın mum açılışı '+new Date(aligned*1000).toISOString(),'replay');
 }
 function exitReplay() {
@@ -1615,6 +1621,8 @@ function updateUI() {
   const name = market && market.venue === 'BINANCE' && market.marketType === 'spot' && market.key === symbol ? symbol : market?.label || symbol;
   $('market-title').textContent = `${name} · ${label}`;
   $('market-title').title = market?.label || symbol;
+  const pickerText = $('market-picker-text');
+  if (pickerText) pickerText.textContent = name;
   const dataInfo = $('data-info');
   if (dataInfo) dataInfo.textContent = `Kaynak: ${market?.venue || 'BINANCE'} · ${market?.marketType === 'perp' ? 'Vadeli' : market?.marketType === 'index' ? 'Endeks' : 'Spot'} · Zaman: ${CHART_TIME_ZONES[chartTimeZone]}`;
   document.querySelectorAll('#timeframes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.interval === interval)));
@@ -1894,6 +1902,13 @@ watchlist = new ChartWatchlist({ getOwner: currentUserKey, getSelected: () => sy
   onStatus: connection });
 // The legend symbol is the primary pair explorer entry on desktop and phone.
 $('market-title')?.addEventListener('click', () => watchlist?.openExplorer());
+$('market-picker')?.addEventListener('click', () => {
+  $('market-picker')?.setAttribute('aria-expanded', 'true');
+  watchlist?.openExplorer();
+});
+document.addEventListener('close', event => {
+  if (event.target?.classList?.contains('pair-explorer-dialog')) $('market-picker')?.setAttribute('aria-expanded', 'false');
+}, true);
 $('market-title')?.addEventListener('keydown', event => {
   if (event.key !== 'Enter' && event.key !== ' ') return;
   event.preventDefault(); watchlist?.openExplorer();
@@ -2483,12 +2498,19 @@ if (!isMobile) {
   const rail = document.querySelector('.drawing-space'), work = document.querySelector('.workarea');
   const pencil = $('mobile-tools-toggle');
   if (rail && pencil) {
-    pencil.setAttribute('aria-expanded', 'true');
+    pencil.setAttribute('aria-expanded', String(!rail.hidden));
     pencil.onclick = () => {
-      rail.hidden = !rail.hidden;
+      // First click hides the rail and opens the full tool list at the top bar
+      // (never the phone bottom sheet); second click restores the rail.
+      const openingMenu = !rail.hidden;
+      rail.hidden = openingMenu;
       pencil.setAttribute('aria-expanded', String(!rail.hidden));
+      if (openingMenu) drawings.openToolMenu(Object.keys(TOOLS), 'Tüm çizim araçları', pencil);
+      else drawings.closeToolMenu();
     };
   }
+  const desktopSettings = $('mobile-settings-toggle');
+  if (desktopSettings) desktopSettings.onclick = () => openAllSettingsModal();
   const railKey = 'alfa-drawing-rail-position:v1';
   if (rail && work) {
     try { if (!localStorage.getItem(railKey)) localStorage.setItem(railKey, JSON.stringify({ x: 0, y: 0.88 })); } catch {}
@@ -3314,7 +3336,7 @@ $('tester-open').addEventListener('click', () => {
     <p style="line-height:1.8;color:#99aac5">İşlem günlüğü, performans ölçümleri ve strateji laboratuvarı Replay oturumunda kullanılır. Son 200 onaylanmış mumla teste başlayabilir veya kendi başlangıç mumunu seçebilirsin.</p>
     <div class="settings-actions"><button id="tester-replay" class="apply">Backtest'i başlat</button><button id="tester-pick">Mumdan başlat</button></div>`);
   modal.box.querySelector('#tester-close').onclick = modal.close;
-  modal.box.querySelector('#tester-replay').onclick = () => { modal.close(); startQuickReplay(); };
+  modal.box.querySelector('#tester-replay').onclick = () => { modal.close(); startQuickReplay({ tester: true }); };
   modal.box.querySelector('#tester-pick').onclick = () => { modal.close(); $('replay-toggle').click(); };
 });
 document.querySelectorAll('[data-range]').forEach(b => b.addEventListener('click', async () => {

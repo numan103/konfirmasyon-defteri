@@ -175,17 +175,37 @@ export class ChartWatchlist {
     if (!Object.keys(flag).length) delete this.doc.flags[ref];
     this.save(); this.render();
   }
-  moveToSection(ref, sectionKey) {
+  moveToSection(ref, sectionKey, { target = '', position = 'before' } = {}) {
     const list = activeList(this.doc);
-    if (!list || !this.valid(ref)) return false;
-    const sectionId = String(sectionKey || '').startsWith('section-') ? String(sectionKey).slice(8) : '';
+    if (!list || !this.valid(ref) || target === ref) return false;
+    const rawKey = String(sectionKey || '');
+    const sectionId = rawKey.startsWith('section-') ? rawKey.slice(8) : '';
     const sections = list.sections || (list.sections = []);
-    if (sectionId && !sections.some(section => section.id === sectionId)) return false;
-    for (const section of sections) section.symbols = section.symbols.filter(symbol => symbol !== ref);
-    if (sectionId) {
-      const target = sections.find(section => section.id === sectionId);
-      if (!target.symbols.includes(ref)) target.symbols.push(ref);
+    const targetSection = sectionId ? sections.find(section => section.id === sectionId) : null;
+    if (sectionId && !targetSection) return false;
+    // The active list is the master order. Section drops reorder that list as
+    // well as the section membership so the sequence survives a reload.
+    const ordered = [...this.symbols];
+    const from = ordered.indexOf(ref);
+    if (from < 0) return false;
+    ordered.splice(from, 1);
+    const targetRef = target && target !== ref ? target : '';
+    let index = targetRef ? ordered.indexOf(targetRef) : -1;
+    if (index < 0 && targetSection) index = ordered.findIndex(symbol => symbol !== ref && targetSection.symbols.includes(symbol));
+    if (index < 0) index = ordered.length;
+    else if (position === 'after') index += 1;
+    ordered.splice(index, 0, ref);
+    for (const section of sections) section.symbols = section.symbols.filter(symbol => symbol !== ref && ordered.includes(symbol));
+    if (targetSection) {
+      if (targetRef && targetSection.symbols.includes(targetRef)) {
+        const at = targetSection.symbols.indexOf(targetRef) + (position === 'after' ? 1 : 0);
+        targetSection.symbols.splice(at, 0, ref);
+      } else targetSection.symbols.unshift(ref);
     }
+    const rank = new Map(ordered.map((symbol, i) => [symbol, i]));
+    for (const section of sections) section.symbols = [...new Set(section.symbols)].sort((a, b) => rank.get(a) - rank.get(b));
+    this.settings.sort = 'custom';
+    this.symbols = ordered;
     this.save(); this.render();
     this.onStatus?.(`${ref} ${sectionId ? 'seçili bölüme' : 'Diğer bölümüne'} taşındı`, 'ok');
     return true;
@@ -274,7 +294,11 @@ export class ChartWatchlist {
         event.preventDefault();
         section.classList.remove('drag-target');
         const symbol = event.dataTransfer?.getData('text/plain') || this.dragSymbol;
-        if (symbol) this.moveToSection(symbol, section.dataset.watchSection);
+        const row = event.target.closest?.('[data-symbol]');
+        const target = row?.dataset.symbol || '';
+        const rect = row?.getBoundingClientRect();
+        const position = rect && event.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
+        if (symbol) this.moveToSection(symbol, section.dataset.watchSection, { target, position });
       });
     });
     this.paintQuotes();

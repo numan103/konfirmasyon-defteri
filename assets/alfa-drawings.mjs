@@ -35,6 +35,14 @@ export class DrawingEngine {
     this.store.start();
     this.abort = new AbortController();
     const options = { signal: this.abort.signal, capture: true };
+    // A chart click commits the open settings panel (the X and Tamam do too).
+    // Stop the same click from starting a new stroke or panning the chart.
+    host.addEventListener('pointerdown', e => {
+      if (!this.manager.hidden && !this.manager.contains(e.target)) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        this.applySettings(); this.manager.hidden = true;
+      }
+    }, options);
     host.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') this.lastTouchAt = performance.now(); }, options);
     host.addEventListener('pointerdown', e => this.down(e), options);
     host.addEventListener('pointermove', e => this.move(e), options);
@@ -145,7 +153,7 @@ export class DrawingEngine {
     $('drawing-undo').onclick = () => { this.cancel(); if (this.ready && this.history.undo()) this.changed(); };
     $('drawing-redo').onclick = () => { this.cancel(); if (this.ready && this.history.redo()) this.changed(); };
     $('drawing-manage').onclick = () => { this.manager.hidden = !this.manager.hidden; this.updatePanel(); };
-    $('drawing-close').onclick = () => { this.manager.hidden = true; };
+    $('drawing-close').onclick = () => { this.applySettings(); this.manager.hidden = true; };
     $('drawing-settings').addEventListener('submit', e => { e.preventDefault(); this.applySettings(); });
     for (const action of ['hide', 'lock', 'copy', 'remove']) $('drawing-' + action).onclick = () => this.action(action);
     $('fib-advanced-toggle').onclick = () => this.toggleAdvancedFibLevels();
@@ -412,7 +420,7 @@ export class DrawingEngine {
     }
     if (!this.selection.has(id)) this.selected = id; else this.primary = id;
     const d = this.current(); this.refresh();
-    // An unmoved left click on a drawing opens the same menu as right-click.
+    // Track an unmoved click so selection does not commit a history snapshot.
     this.clickCandidate = { id, target: e.target, x: e.clientX, y: e.clientY, pointer: e.pointerId, pointerType: e.pointerType };
     if (!d || d.locked) return;
     this.drag = { id, start: point, original: clone(d), doc: clone(this.history.doc), ids: [...this.selection],
@@ -474,10 +482,8 @@ export class DrawingEngine {
       this.clickCandidate = null;
       if (this.host.hasPointerCapture(e.pointerId)) this.host.releasePointerCapture(e.pointerId);
       this.drag = null; this.pending = null;
-      if (candidate.pointerType !== 'touch' || !this.isPhone()) {
-        this.contextMenu({ clientX: candidate.x, clientY: candidate.y, target: candidate.target,
-          preventDefault() {}, stopImmediatePropagation() {} });
-      }
+      // Left-click selects and keeps the selection toolbar reachable. The
+      // action menu is opened only by right-click / long-press.
       return;
     }
     if (!this.drag) return;
@@ -701,7 +707,7 @@ export class DrawingEngine {
     $('position-stats').textContent = parts.join(' · ');
   }
   applySettings() {
-    const next = clone(this.history.doc), d = next.drawings.find(x => x.id === this.selected); if (!d || d.locked) return;
+    const next = clone(this.history.doc), d = next.drawings.find(x => x.id === this.selected); if (!d || d.locked) return false;
     d.color = $('drawing-color').value; d.width = Number($('drawing-width').value);
     d.lineStyle = $('drawing-line-style').value; d.fillColor = $('drawing-fill-color').value;
     d.fillOpacity = Number($('drawing-fill-opacity').value); d.cornerRadius = Number($('drawing-corner-radius').value);
@@ -711,18 +717,18 @@ export class DrawingEngine {
     }
     if (d.type === 'fibonacci') {
       const tokens = $('fib-levels').value.split(',').map(s => s.trim());
-      if (tokens.some(s => !s)) { this.status.textContent = 'Seviyeleri noktalı ondalık ve virgül ile ayırın'; return; }
+      if (tokens.some(s => !s)) { this.status.textContent = 'Seviyeleri noktalı ondalık ve virgül ile ayırın'; return false; }
       d.levels = [...new Set(tokens.map(Number))]; d.reversed = $('fib-reverse').checked; d.showPrices = $('fib-prices').checked;
     }
     if (!$('drawing-coordinate-fields').hidden) {
       const rows = [...$('drawing-anchors').querySelectorAll('[data-anchor]')];
-      if (rows.length !== d.points.length) { this.status.textContent = 'Koordinat satırları eksik'; return; }
+      if (rows.length !== d.points.length) { this.status.textContent = 'Koordinat satırları eksik'; return false; }
       const points = rows.map(row => ({
         time: Number(row.querySelector('[data-time]').value),
         price: Number(row.querySelector('[data-price]').value)
       }));
       if (!points.every(p => Number.isFinite(p.time) && p.time > 0 && Number.isFinite(p.price) && p.price > 0)) {
-        this.status.textContent = 'Koordinatlar için geçerli UTC saniye ve fiyat girin'; return;
+        this.status.textContent = 'Koordinatlar için geçerli UTC saniye ve fiyat girin'; return false;
       }
       d.points = points;
     }
@@ -731,7 +737,7 @@ export class DrawingEngine {
       const sign = d.type === 'long' ? 1 : -1;
       if (!(sign > 0 ? stop < entry && target > entry : stop > entry && target < entry)) {
         this.status.textContent = 'Stop Loss ve Take Profit entry fiyatının doğru tarafında olmalı';
-        return;
+        return false;
       }
       d.points[0].price = entry; d.points[1].price = stop; d.target = target;
       const riskAmount = Number($('position-risk-amount').value);
@@ -743,6 +749,7 @@ export class DrawingEngine {
       d.dynamicColors = $('drawing-dynamic-colors').checked; d.profitColor = $('drawing-profit-color').value; d.lossColor = $('drawing-loss-color').value;
     }
     this.commit(next);
+    return true;
   }
   toggleAdvancedFibLevels() {
     const input = $('fib-levels'), d = this.current();

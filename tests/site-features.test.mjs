@@ -159,7 +159,7 @@ test('Telegram ayarı yoksa sessizce atlanır, gönderim hatasında kayıt yazı
   });
   process.env.TG_BOT_TOKEN = token;
 
-  await withFetch(async (url, opts) => {
+  await withFixedDate(featureNow, () => withFetch(async (url, opts) => {
     const u = String(url);
     if (u.includes('api.telegram.org')) return { ok: false, status: 429, json: async () => ({ ok: false }) };
     if (opts?.method === 'POST') throw new Error('yazılmamalı');
@@ -169,7 +169,7 @@ test('Telegram ayarı yoksa sessizce atlanır, gönderim hatasında kayıt yazı
     await handler({ method: 'POST', query: { kind: 'site-features' }, headers: ADMIN_HEADERS, body: {} }, r);
     assert.equal(r.body.ok, false);
     assert.equal(r.body.error, 'telegram_send_failed');
-  });
+  }));
 });
 
 test('site-features POST yalnız yönetici JWT ile çalışır', async () => {

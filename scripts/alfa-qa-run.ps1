@@ -56,7 +56,8 @@ $webSuites = @(
   'charts-feature-nav',
   'alfa-ux-eight',
   'alfa-feature-discovery',
-  'alfa-watchlist-tv'
+  'alfa-watchlist-tv',
+  'alfa-ux-corrections'
 )
 $mobileSuites = @(
   'alfa-mobile-shell',

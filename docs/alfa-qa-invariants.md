@@ -17,7 +17,7 @@ These are the behaviors agents must protect. If a test contradicts this file, de
 - The mobile FAB opens the full tool sheet; it does not expose only a quick subset.
 - FAB geometry: explicit `width/height`, JS-set `left/top`; never rely on `right/bottom` or it stretches and intercepts clicks.
 - Brush stays armed after finishing a stroke and after a single tap. Other tools return to cursor after completion.
-- Drawing left-click opens the drawing action menu; edits remain reachable with a selection.
+- Drawing left-click only selects the drawing and keeps the selection toolbar reachable; the drawing action menu opens from right-click.
 - Favorites are managed through right-click/star editor from the rail, flyout, or mobile menus.
 
 ## Mobile shell
