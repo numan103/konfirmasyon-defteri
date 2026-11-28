@@ -1,10 +1,12 @@
 # Coinalyze gunluk BTC turev ozeti
 
 ## Hedef
-- Her gun **Istanbul 11:00** civarinda, Alfa Traders Public grubundaki **website bildirim**
-  konusuna (`https://t.me/alfatraderspublic/434`) tek bir Telegram mesaji gonderilir.
-  Hedef `WEBSITE_NOTIFY_THREAD` (varsayilan `434`) ile yonetilir; `TG_THREAD` (public charts)
-  trade bildirimlerinde kalir.
+- Her gun **Istanbul 11:00** civarinda, kullanicinin ozel Telegram sohbetine
+  (`@traderahmetd`) tek bir Telegram mesaji gonderilir. Thread kullanilmaz; mesaj
+  dogrudan DM olarak gelir.
+  Hedef `COINALYZE_CHAT_ID` / `COINALYZE_THREAD` ile degistirilebilir. Varsayilan
+  thread `0`'dir. Diger website bildirimlerinin `WEBSITE_NOTIFY_THREAD` (varsayilan
+  `434`) ve `TG_THREAD` (public charts) hedefleri degismez.
 - Mesaj uc veriyi birlikte verir:
   - **Spot CVD (24s):** BTC spot marketlerinin alim-satim hacim farki (base coin).
   - **Long/Short:** BTC perpetual marketlerinin long/short hesap orani ortalamasi.
@@ -112,3 +114,7 @@ curl -H "Authorization: Bearer <site.token>" \
   temizlendi.
 - **429 notu:** Ayni dakika icinde iki tam kosu (40'ar cagri) limiti asar.
   Ardisik manuel denemeler arasinda en az 60 saniye beklenmelidir.
+- **2026-11-28 hedef degisikligi:** Gunluk ozet artik public `/434` konusuna degil
+  `@traderahmetd` özel sohbetine, thread olmadan gonderilir. Diger website
+  bildirimlerinin hedefi degismedi. `COINALYZE_CHAT_ID` / `COINALYZE_THREAD`
+  ortam degiskenleriyle gerekiirse geri alinabilir.
