@@ -155,7 +155,7 @@ test('yetici dryRun ile veriyi gorur, Telegram mesaji atmaz', async () => {
 test('zamanlanmis gonderim gun icinde tek mesaj atar', async () => {
   const state = makeState(NOW);
   globalThis.fetch = fetchStub(state, NOW);
-  const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@public', TG_THREAD: '4', COINALYZE_CHAT_ID: '@charts', COINALYZE_THREAD: '4', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
+  const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@public', TG_THREAD: '4', WEBSITE_NOTIFY_CHAT_ID: '@charts', WEBSITE_NOTIFY_THREAD: '434', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
   const req = { method: 'GET', url: 'https://x/api/ai?coinalyze=1', headers: { 'x-vercel-cron': '1', 'user-agent': 'vercel-cron/1.0' } };
   const first = makeRes();
   await withNow(NOW, () => mod.default(req, first));
@@ -163,7 +163,7 @@ test('zamanlanmis gonderim gun icinde tek mesaj atar', async () => {
   assert.equal(first.body.messageId, 900);
   assert.equal(state.calls.length, 1);
   assert.equal(state.calls[0].body.chat_id, '@charts');
-  assert.equal(Number(state.calls[0].body.message_thread_id), 4);
+  assert.equal(Number(state.calls[0].body.message_thread_id), 434);
 
   const second = makeRes();
   await withNow(NOW, () => mod.default(req, second));
@@ -172,7 +172,7 @@ test('zamanlanmis gonderim gun icinde tek mesaj atar', async () => {
   assert.equal(state.calls.length, 1);
 });
 
-test('Coinalyze günlük özeti varsayılan olarak yalnızca özel kullanıcıya gider', async () => {
+test('Coinalyze günlük özeti website bildirim konusuna gider', async () => {
   const state = makeState(NOW);
   globalThis.fetch = fetchStub(state, NOW);
   const mod = await loadHandler({ COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@public', TG_THREAD: '4', SUPABASE_SERVICE_ROLE: 'sb_secret_x' });
@@ -180,25 +180,24 @@ test('Coinalyze günlük özeti varsayılan olarak yalnızca özel kullanıcıya
   await withNow(NOW, () => mod.default({ method: 'GET', url: 'https://x/api/ai?coinalyze=1', headers: { 'x-vercel-cron': '1' } }, res));
   assert.equal(res.statusCode, 200);
   assert.equal(state.calls.length, 1);
-  assert.equal(state.calls[0].body.chat_id, '@traderahmetd');
-  assert.equal(state.calls[0].body.message_thread_id, undefined);
+  assert.equal(state.calls[0].body.chat_id, '@public');
+  assert.equal(Number(state.calls[0].body.message_thread_id), 434);
 });
 
-test('Coinalyze özel hedefi thread olmadan gönderir, website bildirim hedefini etkilemez', async () => {
+test('Coinalyze kullanıcıya özel env override kullanmaz', async () => {
   const state = makeState(NOW);
   globalThis.fetch = fetchStub(state, NOW);
   const mod = await loadHandler({
     COINALYZE_API_KEY: 'k', TG_BOT_TOKEN: 't', TG_CHAT_ID: '@public', TG_THREAD: '4',
-    WEBSITE_NOTIFY_CHAT_ID: '@public', WEBSITE_NOTIFY_THREAD: '434',
     COINALYZE_CHAT_ID: '@traderahmetd', COINALYZE_THREAD: '0', SUPABASE_SERVICE_ROLE: 'sb_secret_x',
   });
   const res = makeRes();
   await withNow(NOW, () => mod.default({ method: 'GET', url: 'https://x/api/ai?coinalyze=1', headers: { 'x-vercel-cron': '1' } }, res));
   assert.equal(res.statusCode, 200);
   assert.equal(state.calls.length, 1);
-  assert.equal(state.calls[0].body.chat_id, '@traderahmetd');
-  assert.equal(state.calls[0].body.message_thread_id, undefined);
-  assert.equal(state.calls.some(call => call.body.chat_id === '@public'), false);
+  assert.equal(state.calls[0].body.chat_id, '@public');
+  assert.equal(Number(state.calls[0].body.message_thread_id), 434);
+  assert.equal(state.calls.some(call => call.body.chat_id === '@traderahmetd'), false);
 });
 
 test('zamanlanmis gonderim Istanbul 11 disinda mesaj atmaz', async () => {
