@@ -408,6 +408,23 @@ try {
     await page.keyboard.press('Control+z'); assert.equal(await count(), before);
     await page.keyboard.press('Control+Shift+z'); assert.equal(await count(), before - 1);
   });
+  await test('Escape clears drawing selection and the selection toolbar', async () => {
+    const fresh = await create('horizontal', [[.42, .58]]);
+    const before = await debug(() => ({ ids: [...window.__alfaDebug.drawings.selection],
+      primary: window.__alfaDebug.drawings.primary, toolbarHidden: document.getElementById('drawing-selection')?.hidden }));
+    assert.deepEqual(before.ids, [fresh.id]);
+    assert.equal(before.primary, fresh.id);
+    assert.equal(before.toolbarHidden, false);
+    await page.keyboard.press('Escape');
+    const after = await debug(() => ({ ids: [...window.__alfaDebug.drawings.selection],
+      primary: window.__alfaDebug.drawings.primary, toolbarHidden: document.getElementById('drawing-selection')?.hidden,
+      tool: window.__alfaDebug.drawings.tool }));
+    assert.deepEqual(after.ids, []);
+    assert.equal(after.primary, null);
+    assert.equal(after.toolbarHidden, true);
+    assert.equal(after.tool, 'cursor');
+    await page.locator('#drawing-undo').click();
+  });
   await test('Line chart preserves drawings, crosshair, live data and mobile layout', async () => {
     const before = await documentState();
     await page.locator('#chart-type').selectOption('line');

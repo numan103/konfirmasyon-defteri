@@ -367,14 +367,15 @@ export class DrawingEngine {
       : `${TOOLS[tool][1]} · ${onePoint(tool) ? 'bir' : 'iki'} nokta seçin · Escape: iptal`;
     this.render();
   }
-  cancel() {
+  cancel({ clearSelection = false } = {}) {
     this.closeContextMenu();
     this.closeToolMenu();
+    if (clearSelection) { this.primary = null; this.selection = new Set(); }
     this.draft = null; this.drag = null; this.pending = null; this.brushing = false; this.clickCandidate = null; this.tool = 'cursor';
     this.host.dataset.drawingTool = 'cursor';
     this.toolButtons().forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === 'cursor')));
     if ($('drawing-help')) $('drawing-help').textContent = 'Çizimi seçin/sürükleyin · çift tık: ayarlar';
-    this.render();
+    if (clearSelection) this.refresh(); else this.render();
   }
   get selected() { return this.primary || null; }
   set selected(id) { this.primary = id || null; this.selection = new Set(id ? [id] : []); }
@@ -577,7 +578,7 @@ export class DrawingEngine {
   }
   keydown(e) {
     if (document.querySelector('dialog[open]')) return;
-    if (e.key === 'Escape') { this.closeContextMenu(); this.cancel(); e.preventDefault(); return; }
+    if (e.key === 'Escape') { this.cancel({ clearSelection: true }); e.preventDefault(); return; }
     if (e.target.closest?.('input,textarea,select,[contenteditable=true]')) return;
     const chartFocus = this.host.contains(e.target) || e.target.closest?.('#drawing-objects') || e.target === document.body;
     if ((e.ctrlKey || e.metaKey) && chartFocus && e.key.toLowerCase() === 'a') { e.preventDefault(); e.stopImmediatePropagation(); this.selectAll(); return; }
