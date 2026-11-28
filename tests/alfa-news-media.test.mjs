@@ -41,3 +41,34 @@ test('public AlfaNews projection restores archived Telegram photos without hotli
     assert.ok(!serialized.includes('telesco.pe'), 'expired CDN links must never reach the browser');
   } finally { global.fetch = original; }
 });
+
+test('public AlfaNews projection includes hand-written entries without relabelling them as Telegram posts', async () => {
+  const original = global.fetch;
+  const now = new Date().toISOString();
+  const manualRow = {
+    issueNo: 1,
+    entries: [
+      { id: 'manual_1', title: 'Elle eklenen analiz', body: 'Kendi yazdığın piyasa notu.', publishedAt: now, sourceKind: 'manual', images: ['https://example.com/manual-chart.png'] },
+      { id: 'forum_1', title: 'Forum yanıtı', body: 'Dergiye girmemeli.', publishedAt: now, sourceMessageId: 0, sourceThread: 978 },
+    ],
+  };
+  try {
+    global.fetch = async (url) => String(url).includes('/rest/v1/alfanews') ? json([{ data: manualRow, updated_at: now }]) : json([]);
+    let payload = null;
+    const res = {
+      setHeader() {}, getHeader() { return null; }, writeHead() {}, write() {}, end() {},
+      status(code) { this.statusCode = code; return this; },
+      json(data) { payload = data; return this; },
+    };
+    await handler({ method: 'GET', query: { kind: 'news' }, headers: {}, url: '/api/edu-shared?kind=news' }, res);
+    const entries = new Map((payload.data.entries || []).map(e => [e.id, e]));
+    const manual = entries.get('manual_1');
+    assert.ok(manual, 'a hand-written entry must reach the reader');
+    assert.equal(manual.body, 'Kendi yazdığın piyasa notu.');
+    assert.deepEqual(manual.images, ['https://example.com/manual-chart.png']);
+    assert.equal(manual.sourceKind, 'manual', 'manual provenance must be preserved');
+    assert.equal(manual.sourceThread, 0, 'manual entries must not claim the Telegram thread');
+    assert.equal(manual.sourceMessageId, 0);
+    assert.equal(entries.has('forum_1'), false, 'forum replies must still stay out');
+  } finally { global.fetch = original; }
+});

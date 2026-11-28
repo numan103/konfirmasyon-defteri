@@ -168,6 +168,8 @@ test('analiz (Kanal) paylasimi da public charts hedefine tek bildirim gonderir',
   const entry = state.news.entries[0];
   assert.equal(entry.title, 'Piyasa notu');
   assert.equal(entry.category, 'Teknik Analiz');
+  assert.equal(entry.sourceKind, 'manual', 'analiz paylaşımı dergide elle yazılmış kayıt olarak görünür');
+  assert.ok(entry.publishedAt, 'manual entries need a date so the weekly view keeps them');
   assert.deepEqual(entry.images, ['/api/contrib?store=alfatrading&image=' + res.body.post.id]);
 });
 

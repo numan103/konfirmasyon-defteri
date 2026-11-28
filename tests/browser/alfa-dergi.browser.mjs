@@ -137,6 +137,67 @@ async function session(label, access) {
     assert.equal(weekly.previewSelects, 0, label + ' embedded reader never exposes category picker');
     assert.equal(weekly.stagePages, 9, label + ' section-based flipbook pages');
 
+    const compact = await page.evaluate(() => {
+      const card = document.querySelector('#news-weekly-list .nw-card');
+      const thumb = card?.querySelector('.nw-thumb img');
+      const copy = card?.querySelector('.nw-copy');
+      const cr = card?.getBoundingClientRect(), tr = thumb?.getBoundingClientRect(), xr = copy?.getBoundingClientRect();
+      return {
+        thumb: !!thumb,
+        sameRow: !!(tr && xr && Math.abs(tr.top - xr.top) < 48),
+        insideCard: !!(tr && cr && tr.right <= cr.right + 1 && tr.bottom <= cr.bottom + 1),
+        textVisible: !!(xr && xr.height > 20),
+      };
+    });
+    assert.equal(compact.thumb, true, label + ' weekly card has a picture');
+    assert.equal(compact.sameRow, true, label + ' picture and words sit on the same row');
+    assert.equal(compact.insideCard, true, label + ' picture fits inside the card');
+    assert.equal(compact.textVisible, true, label + ' card text is visible without scrolling');
+    await page.locator('#news-weekly-list .nw-thumb img').first().click();
+    assert.equal(await page.locator('#mag-zoom.open').count(), 1, label + ' picture click opens the enlarged detail');
+    assert.match(await page.locator('#mag-zoom-cap').textContent(), /HTF bias/i, label + ' enlarged detail keeps the article text');
+    await page.locator('#mag-zoom').click({ position: { x: 4, y: 4 } });
+    assert.equal(await page.locator('#mag-zoom.open').count(), 0, label + ' enlarged detail closes');
+
+    // The real flipbook section pages use .hmr-sec-item img, not the single entry renderer.
+    const sectionTarget = await page.evaluate(() => {
+      const pages = [...document.querySelectorAll('#mag-stage .mag-page')];
+      const i = pages.findIndex(p => p.querySelector('.hmr-sec-item img'));
+      if (i >= 0) magGoTo(i);
+      return i;
+    });
+    assert.ok(sectionTarget >= 0, label + ' a section page carries a photo');
+    await page.waitForTimeout(500);
+    const sectionPhoto = await page.evaluate((idx) => {
+      const p = [...document.querySelectorAll('#mag-stage .mag-page')][idx];
+      const img = p?.querySelector('.hmr-sec-item img');
+      if (!img) return { exists: false };
+      const cs = getComputedStyle(img);
+      const pr = p.getBoundingClientRect(), ir = img.getBoundingClientRect();
+      return {
+        exists: true,
+        maxHeight: cs.maxHeight,
+        objectFit: cs.objectFit,
+        inside: ir.right <= pr.right + 1 && ir.bottom <= pr.bottom + 1,
+      };
+    }, sectionTarget);
+    assert.equal(sectionPhoto.exists, true, label + ' section photo is rendered');
+    assert.notEqual(sectionPhoto.maxHeight, 'none', label + ' section photo has a height limit');
+    assert.equal(sectionPhoto.objectFit, 'contain', label + ' section photo keeps its aspect ratio');
+    assert.equal(sectionPhoto.inside, true, label + ' section photo fits inside the flipbook page');
+    await page.locator('#mag-stage .mag-page').nth(sectionTarget).locator('.hmr-sec-item img').first().click();
+    assert.equal(await page.locator('#mag-zoom.open').count(), 1, label + ' section photo opens the enlarged detail');
+    assert.ok((await page.locator('#mag-zoom-cap').textContent() || '').trim().length > 0, label + ' enlarged detail keeps the section text');
+    await page.locator('#mag-zoom').click({ position: { x: 4, y: 4 } });
+    assert.equal(await page.locator('#mag-zoom.open').count(), 0, label + ' section enlarged detail closes');
+
+    if (access.admin) {
+      await page.evaluate(() => document.getElementById('mag-addentry').click());
+      await page.waitForFunction(() => document.querySelectorAll('#news-weekly-list .nw-card').length === 3, null, { timeout: 4000 });
+      const added = await page.evaluate(() => [...document.querySelectorAll('#news-weekly-list .nw-card .nw-title')].some(n => n.textContent === 'Başlıksız analiz'));
+      assert.equal(added, true, label + ' a hand-added entry appears in the weekly magazine');
+    }
+
     // The weekly card sits under the sticky navbar at this scroll position;
     // trigger its own handler rather than testing navbar hit-testing here.
     await page.evaluate(() => document.querySelector('#news-weekly-list .nw-open').click());

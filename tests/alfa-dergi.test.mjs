@@ -112,7 +112,7 @@ test('Telegram entries share one stream with a category badge and safe same-orig
   assert.match(entry, /\[\['', 'Analiz'\]\]\.concat\(MAG_CATS\.map/);
   assert.match(entry, /e-img-missing/);
   assert.match(api, /\['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'\]\.includes\(e && e\.category\)/);
-  assert.match(api, /sourceMessageId: sourceMessageId\(e\)/);
+  assert.match(api, /sourceMessageId: (?:manual \? 0 : )?sourceMessageId\(e\)/, 'numeric Telegram provenance stays in the public projection');
   assert.ok(!/sourceLink: text\(/.test(api), 'public projection must not expose a Telegram link');
   assert.match(api, /publishedAt: text\(e && e\.publishedAt, 40\)/);
   assert.match(api, /'\/api\/tg\?magPhoto=' \+ encodeURIComponent\(id\)/);
@@ -142,4 +142,34 @@ test('complete data URI media survives the public projection; truncated ones are
   assert.ok(html.includes("'/assets/alfa-dergi-cover.svg?v=1'"));
   assert.match(html, /const avBg = magSafeBg\(a\.photo\)/);
   assert.match(html, /const avBg = author && magSafeBg\(author\.photo\)/);
+});
+
+test('an entry added by hand stays in the weekly magazine instead of disappearing', () => {
+  const apply = html.slice(html.indexOf('function magApplyWeek('), html.indexOf('function magKbIsolate('));
+  assert.match(apply, /e\.sourceKind === 'manual'/, 'hand-written entries must survive the weekly projection');
+  assert.match(apply, /grouped\.concat\(manual\)/, 'Telegram grouping must not consume hand-written entries');
+  const add = html.slice(html.indexOf('async function magAddEntry()'), html.indexOf('async function magAddUpdate()'));
+  assert.match(add, /sourceKind: 'manual'/);
+  assert.match(add, /publishedAt: new Date\(\)\.toISOString\(\)/);
+});
+
+test('weekly cards show the picture and the words together and open an enlarged detail', () => {
+  const weekly = html.slice(html.indexOf('function renderNewsWeekly()'), html.indexOf('// Ana sayfa gömülü dergi'));
+  assert.match(weekly, /className = 'nw-thumb'/, 'each card needs a picture area');
+  assert.match(weekly, /className = 'nw-copy'/, 'picture and words share one card row');
+  assert.match(weekly, /magZoom\(/, 'clicking the picture opens the enlarged detail');
+  const css = html.slice(html.indexOf('.nw-card {'), html.indexOf('.mag-cover {'));
+  assert.match(css, /\.nw-thumb\s*\{/);
+  assert.match(css, /grid-template-columns:\s*\d+px minmax\(0, ?1fr\)/, 'picture sits beside the text, not above it');
+  const page = html.slice(html.indexOf('.e-img {'), html.indexOf('.e-img-missing'));
+  assert.match(page, /max-height:/, 'flipbook images fit inside the page');
+});
+
+test('section-page photos fit on the page and open the enlarged detail', () => {
+  const css = html.slice(html.indexOf('.hmr-sec-item img {'), html.indexOf('@media (max-width:900px)'));
+  assert.match(css, /max-height:/, 'section photos must not push the page below the fold');
+  assert.match(css, /object-fit:\s*contain/, 'section photos must keep their aspect ratio');
+  assert.match(css, /cursor:\s*zoom-in/, 'section photos advertise the enlarged detail');
+  const section = html.slice(html.indexOf('function hmrBuildSectionPage('), html.indexOf('function hmrBuildOutro('));
+  assert.match(section, /img\.addEventListener\('click',[\s\S]{0,200}magZoom\(/, 'section photos open the enlarged detail');
 });

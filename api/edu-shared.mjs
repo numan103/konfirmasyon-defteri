@@ -92,41 +92,45 @@ async function alfaNews(req, res) {
       const match = String(e && e.sourceLink || '').match(/^https:\/\/t\.me\/alfakasim\/977\/(\d+)$/);
       return match ? Number(match[1]) : 0;
     };
-    // Only the magazine channel belongs in the reader; forum replies and seeded
-    // undated entries remain stored for the editor, not published as weekly pages.
+    // Magazine-channel posts and entries written by hand both belong in the reader.
+    // Forum replies and undated seeds stay stored for the editor only.
     const channelEntries = (Array.isArray(raw.entries) ? raw.entries : []).filter(e =>
       e && e.type !== 'update' && e.publishedAt &&
-      (Number(e.sourceThread) === 977 || sourceMessageId(e) > 0)
+      ((Number(e.sourceThread) === 977 || sourceMessageId(e) > 0) ||
+        (e.sourceKind === 'manual' && !!(text(e.title).trim() || text(e.body).trim())))
     );
-    const entries = channelEntries.slice(-200).map(e => ({
-      id: text(e && e.id, 80),
-      title: text(e && e.title, 200),
-      body: text(e && e.body, 200000),
-      pdf: cleanPDF(e && e.pdf),
-      type: e && e.type === 'update' ? 'update' : '',
-      relId: text(e && e.relId, 80),
-      result: text(e && e.result, 200),
-      authorId: text(e && e.authorId, 80),
-      images: (function () {
-        const msg = sourceMessageId(e);
-        const legacy = LEGACY_MAGAZINE_MESSAGES.includes(msg);
-        const own = Array.isArray(e && e.images) ? e.images.slice(0, 12)
-          .map((u, i) => media(u, 500000, legacy ? '/api/tg?magPhoto=publicmag_' + msg + '_' + i : ''))
-          .filter(Boolean) : [];
-        const tg = Array.isArray(e && e.photoIds)
-           ? (e.mediaGroupId ? e.photoIds.slice(0, 12) : e.photoIds.slice(-1)).map(id => text(id, 250)).filter(Boolean)
-            .map(id => '/api/tg?magPhoto=' + encodeURIComponent(id))
-          : [];
-        return own.concat(tg).slice(0, 12);
-      })(),
-      beforeImg: media(e && e.beforeImg),
-      afterImg: media(e && e.afterImg),
-      ctaUrl: text(e && e.ctaUrl, 600),
-      category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
-      sourceMessageId: sourceMessageId(e),
-      sourceKind: 'mentorship-magazine', sourceThread: 977,
-      publishedAt: text(e && e.publishedAt, 40),
-    }));
+    const entries = channelEntries.slice(-200).map(e => {
+      const manual = !!(e && e.sourceKind === 'manual');
+      return {
+        id: text(e && e.id, 80),
+        title: text(e && e.title, 200),
+        body: text(e && e.body, 200000),
+        pdf: cleanPDF(e && e.pdf),
+        type: e && e.type === 'update' ? 'update' : '',
+        relId: text(e && e.relId, 80),
+        result: text(e && e.result, 200),
+        authorId: text(e && e.authorId, 80),
+        images: (function () {
+          const msg = sourceMessageId(e);
+          const legacy = LEGACY_MAGAZINE_MESSAGES.includes(msg);
+          const own = Array.isArray(e && e.images) ? e.images.slice(0, 12)
+            .map((u, i) => media(u, 500000, legacy ? '/api/tg?magPhoto=publicmag_' + msg + '_' + i : ''))
+            .filter(Boolean) : [];
+          const tg = Array.isArray(e && e.photoIds)
+            ? (e.mediaGroupId ? e.photoIds.slice(0, 12) : e.photoIds.slice(-1)).map(id => text(id, 250)).filter(Boolean)
+              .map(id => '/api/tg?magPhoto=' + encodeURIComponent(id))
+            : [];
+          return own.concat(tg).slice(0, 12);
+        })(),
+        beforeImg: media(e && e.beforeImg),
+        afterImg: media(e && e.afterImg),
+        ctaUrl: text(e && e.ctaUrl, 600),
+        category: ['Haber', 'BTC Bias', 'Makro', 'Teknik Analiz'].includes(e && e.category) ? e.category : '',
+        sourceMessageId: manual ? 0 : sourceMessageId(e),
+        sourceKind: manual ? 'manual' : 'mentorship-magazine', sourceThread: manual ? 0 : 977,
+        publishedAt: text(e && e.publishedAt, 40),
+      };
+    });
     const publicEntries = await readMagazineSnapshot();
     for (const entry of publicEntries) {
       if (!entries.some(existing => existing.id === entry.id ||

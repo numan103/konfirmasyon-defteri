@@ -347,6 +347,7 @@ async function mirrorAnalysisToNews(post) {
       images: image ? [image] : [],
       photoIds: [],
       category: 'Teknik Analiz',
+      sourceKind: 'manual',
       sourceLink: atClip(atTradeUrl(post.id), 300),
       publishedAt: new Date(Number(post.ts) || Date.now()).toISOString(),
     });
