@@ -4,7 +4,7 @@ import { ALARM_SOUNDS, ALARM_CONDITIONS, ALARM_REPEATS, normalizeAlarmSettings, 
   shouldFire, markAlarmFired, alarmMessage, alarmConditionLabel, alarmPayload, alarmLevel, playAlarmSound, postAlarmWebhook,
   createPriceTracker, isAlarmMuted, muteAlarmIds, unmuteAlarmIds, recordAlarmTrigger } from './alfa-alerts.mjs?v=3';
 import { DrawingEngine, TOOL_GROUPS } from './alfa-drawings.mjs?v=23';
-import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=16';
+import { ChartWatchlist, formatMarketPrice } from './alfa-watchlist.mjs?v=17';
 import { IndicatorManager, INDICATOR_CATALOG } from './alfa-indicators.mjs?v=12';
 import { SessionLevelsManager } from './alfa-session-levels.mjs?v=5';
 import { SessionBoxesManager } from './alfa-session-boxes.mjs?v=6';

@@ -19,6 +19,7 @@ export class ChartWatchlist {
     this.abort = new AbortController(); this.quotes = new Map();
     this.markets = SYMBOLS.map(symbol => ({ symbol, base: symbol.replace('USDT', ''), quote: 'USDT', precision: 2 }));
     this.doc = normalizeWatchlistDocument(null, SYMBOLS); this.owner = null; this.migrationGeneration = 0; this.search = '';
+    this.pickerFilters = { query: '', venue: '', quote: '' };
     this.catalogState = 'loading'; this.account();
     $('watch-add').onclick = () => this.openPicker();
     $('watch-import').onclick = () => this.openImport();
@@ -512,11 +513,14 @@ export class ChartWatchlist {
       b.addEventListener('focus', () => this.onHover?.(b.dataset.openSymbol));
     });
     };
-    modal.box.querySelector('#symbol-query').oninput = this.renderPicker;
-    modal.box.querySelector('#symbol-quote').onchange = this.renderPicker;
-    modal.box.querySelector('#symbol-venue').onchange = this.renderPicker;
+    const query = modal.box.querySelector('#symbol-query'), venue = modal.box.querySelector('#symbol-venue'), quote = modal.box.querySelector('#symbol-quote');
+    query.value = this.pickerFilters.query; venue.value = this.pickerFilters.venue; quote.value = this.pickerFilters.quote;
+    const rememberFilters = () => { this.pickerFilters = { query: query.value, venue: venue.value, quote: quote.value }; };
+    query.oninput = () => { rememberFilters(); this.renderPicker(); };
+    quote.onchange = () => { rememberFilters(); this.renderPicker(); };
+    venue.onchange = () => { rememberFilters(); this.renderPicker(); };
     modal.box.querySelector('#catalog-retry').onclick = async () => { this.catalogState = 'loading'; this.renderPicker(); await this.loadCatalog(true); this.renderPicker(); };
-    this.renderPicker(); modal.box.querySelector('#symbol-query').focus();
+    this.renderPicker(); query.focus();
   }
   openImport(initial = '') {
     this.modal?.close();

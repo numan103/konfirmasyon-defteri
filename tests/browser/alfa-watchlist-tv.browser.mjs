@@ -214,6 +214,26 @@ try {
     assert.equal(snapshot.doc.settings.showQuotes, false);
   });
 
+  await test('symbol picker filters survive close and reopen', async () => {
+    await page.evaluate(() => window.__alfaDebug.watchlist.openPicker());
+    await page.waitForSelector('#symbol-query', { state: 'visible', timeout: 5000 });
+    await page.fill('#symbol-query', 'XAU');
+    await page.selectOption('#symbol-venue', 'FX');
+    await page.selectOption('#symbol-quote', 'TRY');
+    const before = await page.evaluate(() => ({ query: document.getElementById('symbol-query').value,
+      venue: document.getElementById('symbol-venue').value, quote: document.getElementById('symbol-quote').value }));
+    assert.deepEqual(before, { query: 'XAU', venue: 'FX', quote: 'TRY' });
+    await page.click('#symbols-close');
+    await page.waitForFunction(() => !document.querySelector('dialog[open].symbol-dialog'));
+    await page.evaluate(() => window.__alfaDebug.watchlist.openPicker());
+    await page.waitForSelector('#symbol-query', { state: 'visible', timeout: 5000 });
+    const after = await page.evaluate(() => ({ query: document.getElementById('symbol-query').value,
+      venue: document.getElementById('symbol-venue').value, quote: document.getElementById('symbol-quote').value }));
+    assert.deepEqual(after, before);
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.querySelector('dialog[open].symbol-dialog'));
+  });
+
   await test('320/390/768 px layouts keep list controls inside the viewport', async () => {
     for (const width of [320, 390, 768]) {
       await page.setViewportSize({ width, height: 844 });
